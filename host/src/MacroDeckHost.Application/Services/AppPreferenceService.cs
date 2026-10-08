@@ -103,6 +103,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string ExtensionsAskForRatingsKey = "extensions.askForRatings";
 	public const string AnnouncementLastSeenNumberKey = "announcements.lastSeenNumber";
 	public const string WidgetTypeFavoritesKey = "widgets.favoriteTypes";
+	public const string ColorPaletteKey = "colors.palette";
 
 	public const bool DefaultExtensionsStoreEnabled = true;
 	public const bool DefaultExtensionsCheckForUpdates = true;

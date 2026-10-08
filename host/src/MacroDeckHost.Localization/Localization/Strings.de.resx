@@ -2564,6 +2564,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Dein Browser erlaubt dieser Seite nicht, in die Zwischenablage zu kopieren.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Die Palette fasst höchstens {max} Farben.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Das ist keine gültige Farbe.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Der Host ist gesperrt.</value>
   </data>
@@ -3476,6 +3483,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Modifikator hinzufügen</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Zur Palette hinzufügen</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Deckkraft</value>
   </data>
@@ -3490,6 +3500,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Eigene Farbe</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Eigene Farbe {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Standardfarbe</value>
@@ -3568,11 +3582,20 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Keine passenden Variablen</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Nicht gesetzt</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Orange</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Original</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Palette</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Die Farbpalette konnte nicht gespeichert werden.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Pink</value>
@@ -3582,6 +3605,17 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Rot</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>{hex} aus der Palette entfernen</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Farbe aus der Palette entfernen?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Diese Farbe ({name}) wird aus deiner Palette entfernt und in keinem Farbfeld mehr angeboten.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Modifikator entfernen</value>
@@ -14451,6 +14485,30 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Hell</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Die Farben, die jedes Farbfeld anbietet. Entferne beliebige davon, auch die Standardfarben, oder füge eigene hinzu.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Die Palette ist leer. Füge eine Farbe hinzu oder stelle die Standardfarben wieder her.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Farbpalette</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Farben</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Wiederherstellen</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Standardfarben wiederherstellen?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Deine Palette wird durch die Standardfarben von Macro Deck ersetzt. Farben, die du hinzugefügt hast, werden daraus entfernt.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Standardfarben wiederherstellen</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>System</value>
   </data>
@@ -19060,8 +19118,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Beschriftung</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Rahmenfarbe des Textfelds</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Rahmen des Textfelds</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Rahmenbreite des Textfelds (%)</value>
@@ -19072,8 +19130,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Textfarbe</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Konturfarbe</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Kontur</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Konturbreite (%)</value>

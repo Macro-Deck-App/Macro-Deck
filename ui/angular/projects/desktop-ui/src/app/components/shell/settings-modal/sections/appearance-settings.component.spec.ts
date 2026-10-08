@@ -6,13 +6,16 @@ import { ApiService } from '@shared';
 import { SelectComponent } from '../../../forms/select/select.component';
 import { FontService } from '../../../../services/font.service';
 import { AppearanceSettingsComponent } from './appearance-settings.component';
+import { FakeColorPalette, provideColorPaletteTesting } from '../../../../../testing/color-palette-test-support';
 
 describe('AppearanceSettingsComponent', () => {
   let fixture: ComponentFixture<AppearanceSettingsComponent>;
   let api: jasmine.SpyObj<ApiService>;
+  let palette: FakeColorPalette;
 
   beforeEach(async () => {
     localStorage.clear();
+    palette = new FakeColorPalette();
 
     api = jasmine.createSpyObj<ApiService>('ApiService', [
       'getAppearanceSettings',
@@ -33,7 +36,7 @@ describe('AppearanceSettingsComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [AppearanceSettingsComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+      providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(palette), { provide: ApiService, useValue: api }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppearanceSettingsComponent);
@@ -116,10 +119,10 @@ describe('AppearanceSettingsComponent', () => {
     expect(api.updateAppearanceSettings).toHaveBeenCalledWith(jasmine.objectContaining({ fontFamily: 'Inter' }));
   });
 
-  it('offers theme, accent and font, with no interface-scale control', () => {
+  it('offers theme, accent, color palette and font, with no interface-scale control', () => {
     const sections = fixture.nativeElement.querySelectorAll('shared-settings-section');
 
-    expect(sections.length).toBe(3);
+    expect(sections.length).toBe(4);
     expect(fixture.nativeElement.querySelector('shared-slider')).toBeNull();
     expect(fixture.nativeElement.querySelector('.slider-input')).toBeNull();
   });
@@ -133,5 +136,111 @@ describe('AppearanceSettingsComponent', () => {
     fixture.componentInstance.onAccentChange('#ff0000');
     expect(api.updateAppearanceSettings).toHaveBeenCalledWith(
       jasmine.objectContaining({ accentColor: '#ff0000', accentColorSource: '#ff0000' }));
+  });
+
+  describe('color palette', () => {
+    function entries(): string[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('.palette-hex'))
+        .map(entry => (entry as HTMLElement).textContent!.trim());
+    }
+
+    function addTrigger(): HTMLButtonElement {
+      return fixture.nativeElement.querySelector('.palette-add-row shared-button button') as HTMLButtonElement;
+    }
+
+    function addButton(): HTMLButtonElement {
+      return document.querySelector('.palette-add shared-button button') as HTMLButtonElement;
+    }
+
+    it('says so while the palette is empty', () => {
+      expect(fixture.nativeElement.querySelector('shared-empty-state')).toBeTruthy();
+      expect(entries()).toEqual([]);
+    });
+
+    it('lists every custom color and removes one', () => {
+      palette.colors.set(['#3ff4ee', '#ef444480']);
+      fixture.detectChanges();
+
+      expect(entries()).toEqual(['#3ff4ee', '#ef444480']);
+
+      (fixture.nativeElement.querySelector('.palette-card shared-button button') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(palette.removed).toEqual(['#3ff4ee']);
+      expect(entries()).toEqual(['#ef444480']);
+    });
+
+    it('keeps the picker closed until the add button at the end of the list is used', () => {
+      expect(document.querySelector('.palette-add')).toBeNull();
+
+      addTrigger().click();
+      fixture.detectChanges();
+
+      expect(document.querySelector('.palette-add .cp-area')).toBeTruthy();
+      expect(document.querySelector('.palette-add .cp-chip')).toBeNull();
+    });
+
+    it('adds the picked color once, closes the picker and does not offer the same color again', () => {
+      fixture.componentInstance.paletteDraft.set('#123456');
+      addTrigger().click();
+      fixture.detectChanges();
+
+      addButton().click();
+      fixture.detectChanges();
+
+      expect(palette.added).toEqual(['#123456']);
+      expect(entries()).toEqual(['#123456']);
+      expect(document.querySelector('.palette-add')).toBeNull();
+      expect(document.activeElement).toBe(addTrigger());
+
+      addTrigger().click();
+      fixture.detectChanges();
+      expect(addButton().disabled).toBeTrue();
+    });
+
+    it('lists default colours by name and lets them be removed like any other', () => {
+      palette.colors.set(['#ef4444', '#3ff4ee']);
+      fixture.detectChanges();
+
+      const names = Array.from(fixture.nativeElement.querySelectorAll('.palette-name'))
+        .map(entry => (entry as HTMLElement).textContent!.trim());
+      expect(names).toEqual(['Red', 'Custom color #3ff4ee']);
+
+      (fixture.nativeElement.querySelector('.palette-card shared-button button') as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(palette.removed).toEqual(['#ef4444']);
+    });
+
+    it('asks before restoring the default colours and does nothing when cancelled', async () => {
+      const restore = () =>
+        (fixture.nativeElement.querySelector('[settingsSectionAction] button') as HTMLButtonElement).click();
+      const modal = () => document.querySelector('shared-confirmation-modal');
+      const modalButton = (text: string) =>
+        Array.from(modal()!.querySelectorAll<HTMLButtonElement>('button')).find(b => b.textContent!.trim() === text)!;
+      const closed = async () => {
+        for (let attempt = 0; attempt < 40 && modal(); attempt++) {
+          await new Promise(resolve => setTimeout(resolve, 25));
+          fixture.detectChanges();
+        }
+      };
+
+      restore();
+      fixture.detectChanges();
+      expect(modal()).toBeTruthy();
+      expect(palette.restoredDefaults).toBe(0);
+
+      modalButton('Cancel').click();
+      await closed();
+      expect(modal()).toBeNull();
+      expect(palette.restoredDefaults).toBe(0);
+
+      restore();
+      fixture.detectChanges();
+      modalButton('Restore').click();
+      await closed();
+      expect(modal()).toBeNull();
+      expect(palette.restoredDefaults).toBe(1);
+    });
   });
 });

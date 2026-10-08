@@ -2564,6 +2564,13 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Seu navegador não permite que esta página copie para a área de transferência.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Quantidade máxima de cores na paleta: {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Esta não é uma cor válida.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>O host está bloqueado.</value>
   </data>
@@ -3478,6 +3485,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Adicionar modificador</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Adicionar à paleta</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opacidade</value>
   </data>
@@ -3492,6 +3502,10 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Cor personalizada</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Cor personalizada {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Cor padrão</value>
@@ -3570,11 +3584,20 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Nenhuma variável correspondente</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Não definida</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Laranja</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Original</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Paleta</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Não foi possível salvar a paleta de cores.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Rosa</value>
@@ -3584,6 +3607,17 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Vermelho</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Remover {hex} da paleta</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Remover a cor da paleta?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Esta cor ({name}) será removida da paleta e não será mais oferecida em nenhum campo de cor.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Remover modificador</value>
@@ -14454,6 +14488,30 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Claro</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>As cores oferecidas em cada campo de cor. Remova qualquer uma delas, inclusive as padrão, ou adicione outras.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>A paleta está vazia. Adicione uma cor ou restaure as cores padrão.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Paleta de cores</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Cores</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Restaurar</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Restaurar as cores padrão?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>A paleta será substituída pelas cores padrão do Macro Deck. As cores adicionadas serão removidas dela.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Restaurar cores padrão</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Sistema</value>
   </data>
@@ -19081,8 +19139,8 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Rótulo</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Cor da borda da caixa do rótulo</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Borda da caixa do rótulo</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Largura da borda da caixa do rótulo (%)</value>
@@ -19093,8 +19151,8 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Cor do rótulo</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Cor do contorno do rótulo</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Contorno do rótulo</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Largura do contorno do rótulo (%)</value>

@@ -2564,6 +2564,13 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>您的瀏覽器不允許此頁面複製到剪貼簿。</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>調色盤最多可包含 {max} 種顏色。</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>顏色無效。</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>主機已鎖定。</value>
   </data>
@@ -3478,6 +3485,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>新增修飾器</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>新增至調色盤</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>不透明度</value>
   </data>
@@ -3492,6 +3502,10 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>自訂顏色</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>自訂顏色 {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>預設顏色</value>
@@ -3570,11 +3584,20 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>沒有符合的變數</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>未設定</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>橘色</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>原始</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>調色盤</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>無法儲存調色盤。</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>粉紅色</value>
@@ -3584,6 +3607,17 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>紅色</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>從調色盤移除 {hex}</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>要從調色盤移除顏色嗎？</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>此顏色（{name}）將從調色盤移除，不再出現在任何顏色欄位中。</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>移除修飾器</value>
@@ -14454,6 +14488,30 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>淺色</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>每個顏色欄位提供的顏色。可移除其中任何顏色（包括預設顏色），也可新增自訂顏色。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>調色盤是空的。請新增顏色或還原預設顏色。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>調色盤</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>顏色</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>還原</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>要還原預設顏色嗎？</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>調色盤將替換為 Macro Deck 的預設顏色，已新增的顏色會從中移除。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>還原預設顏色</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>系統</value>
   </data>
@@ -19081,8 +19139,8 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>標籤</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>標籤框線顏色</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>標籤框線</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>標籤框線寬度 (%)</value>
@@ -19093,8 +19151,8 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>標籤顏色</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>標籤外框顏色</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>標籤外框</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>標籤外框寬度 (%)</value>

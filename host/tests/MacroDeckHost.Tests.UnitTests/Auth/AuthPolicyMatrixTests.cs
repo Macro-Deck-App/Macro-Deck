@@ -630,6 +630,29 @@ public class AuthPolicyMatrixTests
 	}
 
 	[Test]
+	public async Task The_colour_palette_is_admin_only()
+	{
+		var get = await Send(HttpMethod.Get, "/api/settings/color-palette", _clientToken);
+		var set = await SendJson(HttpMethod.Put,
+			"/api/settings/color-palette",
+			new { color = "#3ff4ee", present = true },
+			_clientToken);
+		var restore = await SendJson(HttpMethod.Post,
+			"/api/settings/color-palette/restore-defaults",
+			new { },
+			_clientToken);
+		var adminGet = await Send(HttpMethod.Get, "/api/settings/color-palette", _adminToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(get.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(set.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(restore.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+			Assert.That(adminGet.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+		});
+	}
+
+	[Test]
 	public async Task The_onboarding_state_is_admin_only()
 	{
 		var get = await Send(HttpMethod.Get, "/api/settings/onboarding", _clientToken);

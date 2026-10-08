@@ -51,6 +51,43 @@ describe('shared-ui-node layout capabilities', () => {
     });
   });
 
+  describe('a hidden caption in a one-line row', () => {
+    function row(withCaptionedSibling: boolean): UiNode {
+      return {
+        id: 'row',
+        type: 'stack',
+        properties: { direction: 'horizontal', wrap: false },
+        children: [
+          withCaptionedSibling
+            ? { id: 'color', type: 'color', properties: { label: 'Outline', value: '#ff0000', rowWeight: 2 } }
+            : { id: 'add', type: 'button', properties: { label: 'Add', icon: 'plus' } },
+          { id: 'width', type: 'number', properties: { label: 'Width', hideLabel: true, value: 1, rowWeight: 1 } },
+        ],
+      };
+    }
+
+    function controlTop(host: HTMLElement, id: string): number {
+      const node = host.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
+      const control = node.querySelector('.config-node-control') ?? node.querySelector('button')!;
+      return control.getBoundingClientRect().top;
+    }
+
+    it('lines its control up with a captioned sibling', async () => {
+      const rendered = await renderTree(row(true));
+      const host = el(rendered);
+
+      expect(host.querySelector('.config-chrome-stack')!.classList).toContain('config-chrome-stack-captioned');
+      expect(Math.abs(controlTop(host, 'width') - controlTop(host, 'color'))).toBeLessThan(1);
+    });
+
+    it('leaves a row of uncaptioned controls, such as a state picker beside its buttons, as it was', async () => {
+      const rendered = await renderTree(row(false));
+      const host = el(rendered);
+
+      expect(host.querySelector('.config-chrome-stack')!.classList).not.toContain('config-chrome-stack-captioned');
+    });
+  });
+
   describe('a segmented option with an icon', () => {
     function alignField(): UiNode {
       return {

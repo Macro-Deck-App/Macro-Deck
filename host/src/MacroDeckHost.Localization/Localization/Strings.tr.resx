@@ -2564,6 +2564,13 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Tarayıcınız bu sayfanın panoya kopyalamasına izin vermiyor.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Paletteki en fazla renk sayısı: {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Bu geçerli bir renk değil.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Ana bilgisayar kilitli.</value>
   </data>
@@ -3478,6 +3485,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Değiştirici ekle</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Palete ekle</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opaklık</value>
   </data>
@@ -3492,6 +3502,10 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Özel renk</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Özel renk {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Varsayılan renk</value>
@@ -3570,11 +3584,20 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Eşleşen değişken yok</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Ayarlanmadı</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Turuncu</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Özgün</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Palet</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Renk paleti kaydedilemedi.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Pembe</value>
@@ -3584,6 +3607,17 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Kırmızı</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>{hex} rengini paletten kaldır</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Renk paletten kaldırılsın mı?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Bu renk ({name}) paletten kaldırılır ve artık hiçbir renk alanında sunulmaz.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Değiştiriciyi çıkar</value>
@@ -14454,6 +14488,30 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Açık</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Her renk alanının sunduğu renkler. Varsayılanlar dahil istediğinizi kaldırın veya kendi renklerinizi ekleyin.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Palet boş. Bir renk ekleyin veya varsayılan renkleri geri yükleyin.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Renk paleti</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Renkler</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Geri yükle</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Varsayılan renkler geri yüklensin mi?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Palet, Macro Deck'in varsayılan renkleriyle değiştirilir. Eklenen renkler paletten kaldırılır.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Varsayılan renkleri geri yükle</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Sistem</value>
   </data>
@@ -19081,8 +19139,8 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Etiket</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Etiket kutusu kenarlık rengi</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Etiket kutusu kenarlığı</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Etiket kutusu kenarlık kalınlığı (%)</value>
@@ -19093,8 +19151,8 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Etiket rengi</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Etiket çerçeve rengi</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Etiket çerçevesi</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Etiket çerçeve kalınlığı (%)</value>

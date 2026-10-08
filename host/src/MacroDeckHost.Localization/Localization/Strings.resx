@@ -2564,6 +2564,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Your browser does not allow this page to copy to the clipboard.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>The palette holds at most {max} colors.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>This is not a valid color.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>The host is locked.</value>
   </data>
@@ -3478,6 +3485,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Add modifier</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Add to palette</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Opacity</value>
   </data>
@@ -3492,6 +3502,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Custom color</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Custom color {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Default color</value>
@@ -3570,11 +3584,20 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>No matching variables</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Not set</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Orange</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Original</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Palette</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Couldn't save the color palette.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Pink</value>
@@ -3584,6 +3607,17 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Red</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Remove {hex} from palette</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Remove color from palette?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>This color ({name}) is removed from your palette and is no longer offered in any color field.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Remove modifier</value>
@@ -14454,6 +14488,30 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Light</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>The colors every color field offers. Remove any of them, including the defaults, or add your own.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>The palette is empty. Add a color or restore the defaults.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Color palette</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Restore default colors?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Your palette is replaced by Macro Deck's default colors. Colors you added are removed from it.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Restore default colors</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>System</value>
   </data>
@@ -19081,8 +19139,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Label</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Label Box Border Color</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Label Box Border</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Label Box Border Width (%)</value>
@@ -19093,8 +19151,8 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Label Color</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Label Outline Color</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Label Outline</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Label Outline Width (%)</value>

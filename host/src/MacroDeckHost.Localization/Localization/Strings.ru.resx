@@ -2564,6 +2564,13 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Ваш браузер не разрешает этой странице копировать в буфер обмена.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Максимальное количество цветов в палитре: {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Это недопустимый цвет.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Хост заблокирован.</value>
   </data>
@@ -3478,6 +3485,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Добавить модификатор</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Добавить в палитру</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Непрозрачность</value>
   </data>
@@ -3492,6 +3502,10 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Пользовательский цвет</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Пользовательский цвет {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Цвет по умолчанию</value>
@@ -3570,11 +3584,20 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Подходящих переменных нет</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Не задан</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Оранжевый</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Исходный</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Палитра</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить палитру цветов.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Розовый</value>
@@ -3584,6 +3607,17 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Красный</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Удалить {hex} из палитры</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Удалить цвет из палитры?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Этот цвет ({name}) будет удалён из палитры и больше не будет предлагаться ни в одном поле цвета.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Удалить модификатор</value>
@@ -14454,6 +14488,30 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Светлая</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Цвета, которые предлагает каждое поле цвета. Удалите любые из них, включая стандартные, или добавьте свои.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Палитра пуста. Добавьте цвет или восстановите стандартные цвета.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Палитра цветов</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Цвета</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Восстановить</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Восстановить стандартные цвета?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Палитра будет заменена стандартными цветами Macro Deck. Добавленные цвета будут из неё удалены.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Восстановить стандартные цвета</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Системная</value>
   </data>
@@ -19081,8 +19139,8 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Подпись</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Цвет рамки подложки подписи</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Рамка подложки подписи</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Толщина рамки подложки подписи (%)</value>
@@ -19093,8 +19151,8 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Цвет подписи</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Цвет контура подписи</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Контур подписи</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Толщина контура подписи (%)</value>

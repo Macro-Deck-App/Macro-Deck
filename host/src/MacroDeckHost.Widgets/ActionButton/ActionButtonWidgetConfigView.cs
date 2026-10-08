@@ -783,7 +783,9 @@ internal static class ActionButtonWidgetConfigView
 			UiObjectInput borderNode,
 			Func<UiIconReference> currentIcon,
 			Func<string> currentBackgroundColor,
-			Func<string> currentIconColor)
+			Func<string> currentIconColor,
+			Func<string> currentLabelOutlineColor,
+			Func<string> currentLabelBoxBorderColor)
 			=> new UiTabs
 			{
 				Key = key,
@@ -937,18 +939,32 @@ internal static class ActionButtonWidgetConfigView
 									},
 								],
 							},
+							new UiBooleanInput
+							{
+								Key = "labelShadow",
+								Label = AppStrings.Widgets.Editor.LabelShadow(),
+								Binding = labelShadowBinding,
+							},
 							new UiColorInput
 							{
 								Key = "labelColor",
 								AllowVariables = true,
 								Label = AppStrings.Widgets.Editor.LabelColor(),
 								Binding = labelColorBinding,
-								// A reset affordance ahead of the swatches (issue #837), returning to unset -
-								// which is the button's own real default (a computed contrast colour), not a
-								// literal one this tree would have to know - see "keep an unset colour unset".
+								// Reset returns to unset, the button's own default (a computed contrast colour),
+								// not a literal one this tree would have to know.
 								SupportsReset = true,
 								DefaultValue = string.Empty,
 							},
+							LabelStroke("label-outline-row",
+								"labelOutlineColor",
+								AppStrings.Widgets.Editor.LabelOutline(),
+								labelOutlineColorBinding,
+								currentLabelOutlineColor,
+								"labelOutlineWidth",
+								AppStrings.Widgets.Editor.LabelOutlineWidth(),
+								labelOutlineWidthBinding,
+								ActionButtonWidgetData.MaxLabelOutlineWidth),
 							new UiColorInput
 							{
 								Key = "labelBoxColor",
@@ -958,22 +974,11 @@ internal static class ActionButtonWidgetConfigView
 								SupportsReset = true,
 								DefaultValue = string.Empty,
 							},
-							new UiBooleanInput
-							{
-								Key = "labelShadow",
-								Label = AppStrings.Widgets.Editor.LabelShadow(),
-								Binding = labelShadowBinding,
-							},
-							.. LabelStroke("labelOutlineColor",
-								AppStrings.Widgets.Editor.LabelOutlineColor(),
-								labelOutlineColorBinding,
-								"labelOutlineWidth",
-								AppStrings.Widgets.Editor.LabelOutlineWidth(),
-								labelOutlineWidthBinding,
-								ActionButtonWidgetData.MaxLabelOutlineWidth),
-							.. LabelStroke("labelBoxBorderColor",
-								AppStrings.Widgets.Editor.LabelBoxBorderColor(),
+							LabelStroke("label-box-border-row",
+								"labelBoxBorderColor",
+								AppStrings.Widgets.Editor.LabelBoxBorder(),
 								labelBoxBorderColorBinding,
+								currentLabelBoxBorderColor,
 								"labelBoxBorderWidth",
 								AppStrings.Widgets.Editor.LabelBoxBorderWidth(),
 								labelBoxBorderWidthBinding,
@@ -1295,7 +1300,13 @@ internal static class ActionButtonWidgetConfigView
 						currentBackgroundColor: () =>
 							ReadAppearanceString(states.Value, stateId, "backgroundColor") ?? string.Empty,
 						currentIconColor: () =>
-							ReadAppearanceString(states.Value, stateId, "iconColor") ?? string.Empty),
+							ReadAppearanceString(states.Value, stateId, "iconColor") ?? string.Empty,
+						currentLabelOutlineColor: () =>
+							OwnOrRoot(ReadAppearanceString(states.Value, stateId, "labelOutlineColor"),
+								labelOutlineColor.Value),
+						currentLabelBoxBorderColor: () =>
+							OwnOrRoot(ReadAppearanceString(states.Value, stateId, "labelBoxBorderColor"),
+								labelBoxBorderColor.Value)),
 				],
 			};
 		}
@@ -1734,7 +1745,9 @@ internal static class ActionButtonWidgetConfigView
 			borderNode: WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
 			currentIcon: () => ToUiIcon(icon.Value)!,
 			currentBackgroundColor: () => backgroundColor.Value,
-			currentIconColor: () => iconColor.Value);
+			currentIconColor: () => iconColor.Value,
+			currentLabelOutlineColor: () => labelOutlineColor.Value,
+			currentLabelBoxBorderColor: () => labelBoxBorderColor.Value);
 
 		// Host-owned keys no control edits: a bound composite is authoritative in the client's draft, and a
 		// sibling value stateMode never takes keeps it out of sight while it is still submitted.
@@ -1904,35 +1917,49 @@ internal static class ActionButtonWidgetConfigView
 			},
 			value => MutateAppearance(states, stateId, appearance => appearance[field] = value));
 
-	private static UiElement[] LabelStroke(
+	private static string OwnOrRoot(string? own, string root) => string.IsNullOrEmpty(own) ? root : own;
+
+	private static UiConfigStack LabelStroke(
+		string rowKey,
 		string colorKey,
 		UiText colorLabel,
 		UiBinding<string> colorBinding,
+		Func<string> currentColor,
 		string widthKey,
 		UiText widthLabel,
 		UiBinding<double> widthBinding,
 		double maxWidth)
-		=>
-		[
-			new UiColorInput
-			{
-				Key = colorKey,
-				AllowVariables = true,
-				Label = colorLabel,
-				Binding = colorBinding,
-				SupportsReset = true,
-				DefaultValue = string.Empty,
-			},
-			new UiNumberInput
-			{
-				Key = widthKey,
-				Label = widthLabel,
-				Binding = widthBinding,
-				Min = 0,
-				Max = maxWidth,
-				Step = 0.5,
-			},
-		];
+		=> new()
+		{
+			Key = rowKey,
+			Direction = "horizontal",
+			Wrap = false,
+			Children =
+			[
+				new UiColorInput
+				{
+					Key = colorKey,
+					AllowVariables = true,
+					Label = colorLabel,
+					Binding = colorBinding,
+					SupportsReset = true,
+					DefaultValue = string.Empty,
+					RowWeight = 2,
+				},
+				new UiNumberInput
+				{
+					Key = widthKey,
+					Label = widthLabel,
+					HideLabel = true,
+					Binding = widthBinding,
+					Min = 0,
+					Max = maxWidth,
+					Step = 0.5,
+					RowWeight = 1,
+					Disabled = UiValue.From(() => string.IsNullOrEmpty(currentColor())),
+				},
+			],
+		};
 
 	private static WidgetIconReference? ReadStateWidgetIcon(IReadOnlyList<ActionButtonStateEntry> states,
 		string stateId)

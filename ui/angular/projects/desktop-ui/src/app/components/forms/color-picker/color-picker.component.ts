@@ -10,6 +10,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   AppStrings,
@@ -28,7 +29,10 @@ import {
   type Variable,
 } from '@macro-deck/runtime';
 import {
+  ColorPaletteService,
   InputComponent,
+  TranslatePipe,
+  MAX_PALETTE_COLORS,
   LocalizationService,
   OverlayPanelComponent,
   SegmentedControlComponent,
@@ -36,6 +40,7 @@ import {
   VariableService,
 } from '@shared';
 import { ColorPickerResultComponent } from './color-picker-result.component';
+import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { SelectComponent, type SelectOption } from '../select/select.component';
 import { ColorPickerChipComponent } from './color-picker-chip.component';
 import { Hsv, hexToHsv, hsvToHex, normalizeHex } from './color-conversion';
@@ -57,11 +62,11 @@ const DEFAULT_PRESET_VALUES: { key: string; value: string }[] = [
 
 export const TRANSPARENT_COLOR = 'transparent';
 
-export function defaultColorPresets(localization: LocalizationService): ColorPreset[] {
-  return DEFAULT_PRESET_VALUES.map(preset => ({
-    label: localization.translateKey(preset.key),
-    value: preset.value,
-  }));
+export function paletteColorLabel(color: string, localization: LocalizationService): string {
+  const named = DEFAULT_PRESET_VALUES.find(preset => preset.value === color.toLowerCase());
+  return named
+    ? localization.translateKey(named.key)
+    : localization.translateKey(AppStrings.Forms.ColorPicker.CustomSwatch, { hex: color });
 }
 
 export function colorVariablesInScope(variables: readonly Variable[], scopeRefId: string | undefined): Variable[] {
@@ -140,7 +145,7 @@ const DEFAULT_AMOUNTS: Record<ColorModifierOp, number> = {
 @Component({
   selector: 'shared-color-picker',
   standalone: true,
-  imports: [OverlayPanelComponent, SegmentedControlComponent, SelectComponent, ColorPickerChipComponent, InputComponent, ColorPickerResultComponent, FormsModule],
+  imports: [OverlayPanelComponent, SegmentedControlComponent, SelectComponent, ColorPickerChipComponent, InputComponent, ColorPickerResultComponent, ConfirmationModalComponent, FormsModule, NgTemplateOutlet, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -155,12 +160,12 @@ const DEFAULT_AMOUNTS: Record<ColorModifierOp, number> = {
 export class ColorPickerComponent implements ControlValueAccessor {
   private readonly localization = inject(LocalizationService);
   private readonly injector = inject(Injector);
+  private readonly palette = inject(ColorPaletteService);
 
   public readonly label = input('');
   public readonly presets = input<ColorPreset[] | undefined>(undefined);
 
-  protected readonly effectivePresets = computed<ColorPreset[]>(() =>
-    this.presets() ?? defaultColorPresets(this.localization));
+  protected readonly effectivePresets = computed<ColorPreset[]>(() => this.presets() ?? []);
 
   protected readonly transparentColor = TRANSPARENT_COLOR;
 
@@ -196,15 +201,23 @@ export class ColorPickerComponent implements ControlValueAccessor {
   public readonly allowAlpha = input(false);
   public readonly allowVariables = input(false);
   public readonly variableScopeRefId = input<string | undefined>(undefined);
+  public readonly resetPlacement = input<'inline' | 'none'>('inline');
+  public readonly disabled = input(false);
+  public readonly inline = input(false);
+  public readonly showPalette = input(true);
 
   public readonly value = signal('');
   public readonly lastCustomColor = signal(CUSTOM_FALLBACK);
 
-  protected readonly isPickerOpen = signal(false);
-  protected readonly isEditorOpen = signal(false);
-  protected readonly editorMaxHeight = signal<number | null>(null);
+  protected readonly isOpen = signal(false);
+  private lastStatic: string | null = null;
+  private lastReference: string | null = null;
+  protected readonly pendingRemoval = signal<string | null>(null);
+  protected readonly popoverMaxHeight = signal<number | null>(null);
+  private readonly disabledByForm = signal(false);
+  protected readonly isDisabled = computed(() => this.disabled() || this.disabledByForm());
   private readonly chip = viewChild(ColorPickerChipComponent);
-  private readonly editor = viewChild<ElementRef<HTMLElement>>('editor');
+  private readonly popover = viewChild<ElementRef<HTMLElement>>('popover');
   protected readonly hsv = signal<Hsv>(CUSTOM_FALLBACK_HSV);
   protected readonly hexText = signal(CUSTOM_FALLBACK);
   protected readonly alpha = signal(255);
@@ -220,19 +233,6 @@ export class ColorPickerComponent implements ControlValueAccessor {
 
   protected readonly showsReset = computed(
     () => this.defaultColor() !== undefined || this.resetValue() !== undefined);
-
-  public readonly isCustom = computed(() => {
-    const current = this.value();
-    if (!current) {
-      return false;
-    }
-
-    if (this.effectiveResetValue() === current) {
-      return false;
-    }
-
-    return !this.effectivePresets().some(preset => preset.value === current);
-  });
 
   public readonly customFill = computed(() => {
     const current = this.value();
@@ -366,15 +366,86 @@ export class ColorPickerComponent implements ControlValueAccessor {
   protected readonly previewColor = computed<string | null>(() =>
     this.reference() ? displayColor(this.value(), this.colorVariables()) : null);
 
+  protected readonly showsInlineReset = computed(() =>
+    this.resetPlacement() === 'inline' && this.showsReset() && this.value() !== this.effectiveResetValue());
+
+  private readonly isSentinel = computed(() => {
+    const reset = this.resetValue();
+    return !!reset && this.value() === reset && !reset.startsWith('#') && reset !== TRANSPARENT_COLOR;
+  });
+
+  private readonly shownLiteral = computed<string | null>(() => {
+    const current = this.value();
+    if (this.reference() || this.isSentinel()) return null;
+    if (current) return current;
+    const fallback = this.defaultColor();
+    return fallback ? fallback : null;
+  });
+
+  protected readonly fieldShowsResetGlyph = computed(() =>
+    !this.reference() && this.shownLiteral() === null);
+
+  protected readonly fieldIsPlaceholder = computed(() => this.fieldShowsResetGlyph());
+
+  protected readonly fieldSwatch = computed<string | null>(() => {
+    if (this.reference()) return this.previewColor();
+    const literal = this.shownLiteral();
+    return literal && (literal === TRANSPARENT_COLOR || parseColor(literal)) ? literal : null;
+  });
+
+  protected readonly fieldText = computed(() => {
+    if (this.reference()) return this.chipLabel();
+    if (this.isSentinel()) return this.defaultColorTitle();
+    const literal = this.shownLiteral();
+    if (literal === null) return this.localization.translateKey(AppStrings.Forms.ColorPicker.NotSet);
+    if (literal === TRANSPARENT_COLOR) {
+      return this.effectivePresets().find(preset => preset.value === TRANSPARENT_COLOR)?.label
+        ?? this.localization.translateKey(AppStrings.Widgets.GridSettings.ColorTransparent);
+    }
+    return literal.startsWith('#') ? literal.slice(1) : literal;
+  });
+
+  protected readonly paletteLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Forms.ColorPicker.PaletteLabel));
+
+  protected readonly paletteColors = computed<string[]>(() => {
+    const presets = new Set(this.effectivePresets().map(preset => preset.value.toLowerCase()));
+    return this.palette.colors().filter(color =>
+      !presets.has(color) && (this.allowAlpha() || !hasAlpha(color)));
+  });
+
+  protected readonly canAddToPalette = computed(() => {
+    const current = this.value().toLowerCase();
+    if (!current.startsWith('#') || !parseColor(current) || this.palette.isFull()) return false;
+    if (this.effectivePresets().some(preset => preset.value.toLowerCase() === current)) return false;
+    return !this.palette.contains(current);
+  });
+
+  protected readonly addToPaletteTitle = computed(() =>
+    this.palette.isFull()
+      ? this.localization.translateKey(AppStrings.Errors.ColorPalette.Full, { max: MAX_PALETTE_COLORS })
+      : this.localization.translateKey(AppStrings.Forms.ColorPicker.AddToPalette));
+
   private _onChange: (value: string) => void = () => { };
   private _onTouched: () => void = () => { };
 
   public writeValue(value: string): void {
+    if ((value ?? '') !== this.value()) {
+      this.lastStatic = null;
+      this.lastReference = null;
+    }
     this.value.set(value ?? '');
+    this.remember(value ?? '');
     this.modeOverride.set(null);
     if (value && value.startsWith('#')) {
       this.lastCustomColor.set(value);
     }
+    if (this.isOpen() || this.inline()) this.syncFromValue();
+  }
+
+  public setDisabledState(isDisabled: boolean): void {
+    this.disabledByForm.set(isDisabled);
+    if (isDisabled) this.isOpen.set(false);
   }
 
   public registerOnChange(fn: (value: string) => void): void {
@@ -386,7 +457,20 @@ export class ColorPickerComponent implements ControlValueAccessor {
   }
 
   public select(color: string): void {
+    this.applySelection(color);
+    if (this.mode() === 'static') this.syncFromValue();
+  }
+
+  public reset(): void {
+    const value = this.effectiveResetValue();
+    if (value === undefined) return;
+    this.modeOverride.set(null);
+    this.select(value);
+  }
+
+  private applySelection(color: string): void {
     this.value.set(color);
+    this.remember(color);
     if (color.startsWith('#')) {
       this.lastCustomColor.set(color);
     }
@@ -395,57 +479,97 @@ export class ColorPickerComponent implements ControlValueAccessor {
     this._onTouched();
   }
 
+  protected customSwatchLabel(color: string): string {
+    return paletteColorLabel(color, this.localization);
+  }
+
+  protected removeFromPaletteLabel(color: string): string {
+    return this.localization.translateKey(AppStrings.Forms.ColorPicker.RemoveFromPalette, { hex: color });
+  }
+
+  protected addToPalette(): void {
+    if (this.canAddToPalette()) void this.palette.add(this.value());
+  }
+
+  protected removeFromPalette(color: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.pendingRemoval.set(color);
+  }
+
+  protected confirmRemoval(): void {
+    const color = this.pendingRemoval();
+    this.cancelRemoval();
+    if (color) void this.palette.remove(color);
+  }
+
+  protected cancelRemoval(): void {
+    this.pendingRemoval.set(null);
+    requestAnimationFrame(() =>
+      this.popover()?.nativeElement.querySelector<HTMLElement>('.cp-palette button:not([disabled])')?.focus());
+  }
+
+  protected removalMessage(color: string): string {
+    return this.localization.translateKey(AppStrings.Forms.ColorPicker.RemoveFromPaletteConfirmMessage,
+      { name: paletteColorLabel(color, this.localization) });
+  }
+
   protected setMode(mode: string): void {
     if (mode === this.mode()) return;
     if (mode === 'variable') {
       this.modeOverride.set('variable');
       const first = this.colorVariables()[0];
-      if (first) this.emitReference({ variable: first.name, modifiers: [] });
-      requestAnimationFrame(() => this.openEditor());
+      if (this.lastReference) this.applySelection(this.lastReference);
+      else if (first) this.emitReference({ variable: first.name, modifiers: [] });
       return;
     }
 
     const snapshot = this.previewColor();
-    this.isEditorOpen.set(false);
     this.modeOverride.set('static');
-    this.select(snapshot ?? this.effectiveResetValue() ?? '');
+    this.select(this.lastStatic ?? snapshot ?? this.effectiveResetValue() ?? '');
     this.modeOverride.set(null);
   }
 
-  protected toggleEditor(): void {
-    if (this.isEditorOpen()) this.closeEditor();
-    else this.openEditor();
+  private remember(value: string): void {
+    if (parseColorReference(value)) this.lastReference = value;
+    else if (!isUnsupportedColorTemplate(value)) this.lastStatic = value;
   }
 
-  // A select or colour popover inside the editor is its own overlay; a click or Escape meant for it must not close this one.
-  protected onEditorDismissed(): void {
-    const editor = this.editor()?.nativeElement;
-    if (editor && OverlayPanelComponent.isAnyOpenWithin(editor)) return;
-    this.closeEditor();
+  protected toggle(): void {
+    if (this.isOpen()) this.close();
+    else this.open();
   }
 
-  protected onEditorKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Tab') return;
-    const focusable = Array.from(this.editor()?.nativeElement.querySelectorAll<HTMLElement>(
+  // A select or colour popover inside this one is its own overlay; a click or Escape meant for it must not close this one.
+  protected onPopoverDismissed(): void {
+    const popover = this.popover()?.nativeElement;
+    if (this.pendingRemoval() || (popover && OverlayPanelComponent.isAnyOpenWithin(popover))) return;
+    this.close();
+  }
+
+  protected onPopoverKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab' || !this.isOpen()) return;
+    const focusable = Array.from(this.popover()?.nativeElement.querySelectorAll<HTMLElement>(
       'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])
       .filter(element => element.getClientRects().length > 0);
     const edge = event.shiftKey ? focusable[0] : focusable[focusable.length - 1];
     if (edge && document.activeElement === edge) {
       event.preventDefault();
-      this.closeEditor();
+      this.close();
     }
   }
 
-  private openEditor(): void {
-    if (this.mode() !== 'variable' || this.isEditorOpen()) return;
-    this.editorMaxHeight.set(Math.max(window.innerHeight - 32, 240));
-    this.isEditorOpen.set(true);
-    requestAnimationFrame(() => this.editor()?.nativeElement.querySelector<HTMLElement>('button, input')?.focus());
+  private open(): void {
+    if (this.isOpen() || this.isDisabled()) return;
+    this.syncFromValue();
+    this.popoverMaxHeight.set(Math.max(window.innerHeight - 32, 240));
+    this.isOpen.set(true);
+    requestAnimationFrame(() => this.popover()?.nativeElement.querySelector<HTMLElement>('button, input')?.focus());
   }
 
-  private closeEditor(): void {
-    if (!this.isEditorOpen()) return;
-    this.isEditorOpen.set(false);
+  private close(): void {
+    if (!this.isOpen()) return;
+    this.isOpen.set(false);
     this.chip()?.focus();
   }
 
@@ -534,7 +658,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
 
   private emitReference(reference: ColorReference): void {
     const text = serializeColorReference(reference);
-    if (text !== null) this.select(text);
+    if (text !== null) this.applySelection(text);
   }
 
   private withMissing(options: SelectOption[], name: string | undefined): SelectOption[] {
@@ -546,23 +670,18 @@ export class ColorPickerComponent implements ControlValueAccessor {
     }];
   }
 
-  protected togglePicker(): void {
-    if (this.isPickerOpen()) {
-      this.closePicker();
-      return;
-    }
-
+  private syncFromValue(): void {
     const fill = parseColor(this.customFill());
     const opaqueFill = fill ? formatColor({ ...fill, a: 255 }) : this.customFill();
     const start = hexToHsv(opaqueFill) ?? CUSTOM_FALLBACK_HSV;
-    this.hsv.set(start);
+    const previous = this.hsv();
+    this.hsv.set({
+      h: start.s === 0 ? previous.h : start.h,
+      s: start.v === 0 ? previous.s : start.s,
+      v: start.v,
+    });
     this.alpha.set(this.allowAlpha() && fill ? fill.a : 255);
     this.hexText.set(this.composeHex(hsvToHex(start)));
-    this.isPickerOpen.set(true);
-  }
-
-  protected closePicker(): void {
-    this.isPickerOpen.set(false);
   }
 
   protected onAreaPointerDown(event: PointerEvent): void {
@@ -615,7 +734,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
     this.alpha.set(Math.min(255, Math.max(0, Math.round((percent / 100) * 255))));
     const hex = this.composeHex(hsvToHex(this.hsv()));
     this.hexText.set(hex);
-    this.select(hex);
+    this.applySelection(hex);
   }
 
   protected onHexInput(event: Event): void {
@@ -641,7 +760,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
       v: typed.v,
     });
     this.alpha.set(255);
-    this.select(hex);
+    this.applySelection(hex);
   }
 
   protected onHexBlur(): void {
@@ -662,7 +781,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
       v: typed.v,
     });
     this.alpha.set(color.a);
-    this.select(formatColor(color));
+    this.applySelection(formatColor(color));
     return true;
   }
 
@@ -695,7 +814,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
     this.hsv.set(hsv);
     const withAlpha = this.composeHex(hex);
     this.hexText.set(withAlpha);
-    this.select(withAlpha);
+    this.applySelection(withAlpha);
   }
 
   private applyAreaPosition(event: PointerEvent, area: HTMLElement): void {
@@ -721,13 +840,18 @@ export class ColorPickerComponent implements ControlValueAccessor {
     this.hsv.set(clamped);
     const hex = this.composeHex(hsvToHex(clamped));
     this.hexText.set(hex);
-    this.select(hex);
+    this.applySelection(hex);
   }
 }
 
 function clampAmount(op: ColorModifierOp, amount: number): number {
   const [min, max] = op === 'hue' ? [-360, 360] : [0, 100];
   return Math.min(max, Math.max(min, amount));
+}
+
+function hasAlpha(color: string): boolean {
+  const parsed = parseColor(color);
+  return !!parsed && parsed.a < 255;
 }
 
 function clamp01(value: number): number {

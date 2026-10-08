@@ -41,19 +41,28 @@ describe('shared-ui-node every configuration primitive', () => {
   }
 
   it('offers a transparent swatch after the default colours only for a colour input that allows it', async () => {
-    const plain = el(await renderTree({ id: 'n', type: 'color', properties: { value: '' } }));
+    const popoverSwatches = () =>
+      Array.from(document.querySelectorAll<HTMLButtonElement>('.cp-popover .cp-swatch:not(.cp-palette-swatch)'));
+    const plainRendered = await renderTree({ id: 'n', type: 'color', properties: { value: '' } });
+    el(plainRendered).querySelector<HTMLButtonElement>('.cp-chip')!.click();
+    await tick(plainRendered);
+    const plainSwatches = popoverSwatches();
+    el(plainRendered).querySelector<HTMLButtonElement>('.cp-chip')!.click();
+    await tick(plainRendered);
+
     const rendered = await renderTree({
       id: 'bg',
       type: 'color',
       properties: { value: '', allowTransparent: true, events: ['change'] },
     });
-    const host = el(rendered);
-    const swatches = Array.from(host.querySelectorAll<HTMLButtonElement>('.cp-swatch'));
+    el(rendered).querySelector<HTMLButtonElement>('.cp-chip')!.click();
+    await tick(rendered);
+    const swatches = popoverSwatches();
 
-    expect(plain.querySelectorAll('.cp-transparent').length).toBe(0);
-    expect(swatches.length).toBe(plain.querySelectorAll('.cp-swatch').length + 1);
+    expect(plainSwatches.some(swatch => swatch.classList.contains('cp-transparent'))).toBeFalse();
+    expect(swatches.length).toBe(plainSwatches.length + 1);
     expect(swatches[swatches.length - 1].classList).toContain('cp-transparent');
-    expect(host.querySelector('.cp-custom')).not.toBeNull();
+    expect(document.querySelector('.cp-popover .cp-area')).not.toBeNull();
 
     swatches[swatches.length - 1].click();
     await tick(rendered);
@@ -461,5 +470,60 @@ describe('shared-ui-node every configuration primitive', () => {
 
     expect(host.querySelector('shared-reorderable-list')).toBeNull();
     expect(host.querySelector('shared-multi-select')).not.toBeNull();
+  });
+
+  it('puts the reset of a colour that has a caption at the end of that caption', async () => {
+    const rendered = await renderTree({
+      id: 'c',
+      type: 'color',
+      properties: { label: 'Outline', value: '#ff0000', supportsReset: true, defaultValue: '', events: ['change'] },
+    });
+    const host = el(rendered);
+    const labelRow = host.querySelector('.config-node-label-row')!;
+
+    expect(labelRow.querySelector('.config-node-label')!.textContent).toContain('Outline');
+    expect(host.querySelector('.cp-reset')).toBeNull();
+
+    labelRow.querySelector<HTMLButtonElement>('.config-node-label-reset')!.click();
+    await tick(rendered);
+
+    expect(rendered.events).toEqual([{ nodeId: 'c', name: 'change', data: '' }]);
+  });
+
+  it('offers no reset for a colour already at its default', async () => {
+    const host = el(await renderTree({
+      id: 'c',
+      type: 'color',
+      properties: { label: 'Outline', value: '', supportsReset: true, defaultValue: '' },
+    }));
+
+    expect(host.querySelector('.config-node-label-reset')).toBeNull();
+    expect(host.querySelector('.cp-reset')).toBeNull();
+    expect(host.querySelector('.cp-chip-label')!.textContent!.trim()).toBe('Not set');
+  });
+
+  it('keeps the reset next to the field when the colour hides its caption', async () => {
+    const host = el(await renderTree({
+      id: 'c',
+      type: 'color',
+      properties: { label: 'Outline', hideLabel: true, value: '#ff0000', supportsReset: true, defaultValue: '' },
+    }));
+
+    expect(host.querySelector('.config-node-label-row')).toBeNull();
+    expect(host.querySelector('.cp-reset')).not.toBeNull();
+  });
+
+  it('greys out a disabled colour so its popover cannot open', async () => {
+    const rendered = await renderTree({
+      id: 'c',
+      type: 'color',
+      properties: { label: 'Outline', value: '#ff0000', disabled: true },
+    });
+    const field = el(rendered).querySelector<HTMLButtonElement>('.cp-chip')!;
+
+    expect(field.disabled).toBeTrue();
+    field.click();
+    await tick(rendered);
+    expect(document.querySelector('.cp-popover')).toBeNull();
   });
 });

@@ -2564,6 +2564,13 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>このページからクリップボードにコピーすることは、ブラウザーで許可されていません。</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>パレットに追加できる色は最大 {max} 色です。</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>有効な色ではありません。</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>ホストはロックされています。</value>
   </data>
@@ -3478,6 +3485,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>修飾子を追加</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>パレットに追加</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>不透明度</value>
   </data>
@@ -3492,6 +3502,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>カスタムカラー</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>カスタムカラー {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>既定の色</value>
@@ -3570,11 +3584,20 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>一致する変数はありません</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>未設定</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>オレンジ</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>元の色</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>パレット</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>カラーパレットを保存できませんでした。</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>ピンク</value>
@@ -3584,6 +3607,17 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>赤</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>{hex} をパレットから削除</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>パレットから色を削除しますか？</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>この色（{name}）はパレットから削除され、どのカラー欄にも表示されなくなります。</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>修飾子を取り除く</value>
@@ -14454,6 +14488,30 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>ライト</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>すべてのカラー欄に表示される色です。既定の色を含めてどの色も削除でき、独自の色を追加することもできます。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>パレットは空です。色を追加するか、既定の色を復元してください。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>カラーパレット</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>色</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>復元</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>既定の色を復元しますか？</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>パレットが Macro Deck の既定の色に置き換えられます。追加した色はパレットから削除されます。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>既定の色を復元</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>システム</value>
   </data>
@@ -19081,8 +19139,8 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>ラベル</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>ラベルボックスの枠線の色</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>ラベルボックスの枠線</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>ラベルボックスの枠線の幅 (%)</value>
@@ -19093,8 +19151,8 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>ラベルの色</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>ラベルの輪郭の色</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>ラベルの輪郭</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>ラベルの輪郭の幅 (%)</value>

@@ -31,6 +31,10 @@ export interface AppearanceChangedEvent {
   fontFamily?: string;
 }
 
+export interface ColorPaletteChangedEvent {
+  colors: string[];
+}
+
 export interface GetLoggingSettingsResponse {
   minimumLevel: LogEntryLevel;
   defaultMinimumLevel: LogEntryLevel;

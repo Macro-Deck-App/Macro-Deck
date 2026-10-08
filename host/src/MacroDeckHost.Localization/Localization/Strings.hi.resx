@@ -2564,6 +2564,13 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>आपका ब्राउज़र इस पेज को क्लिपबोर्ड पर कॉपी करने की अनुमति नहीं देता।</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>पैलेट में अधिकतम रंग: {max}।</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>यह मान्य रंग नहीं है।</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>होस्ट लॉक है।</value>
   </data>
@@ -3478,6 +3485,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>मॉडिफ़ायर जोड़ें</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>पैलेट में जोड़ें</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>अपारदर्शिता</value>
   </data>
@@ -3492,6 +3502,10 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>कस्टम रंग</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>कस्टम रंग {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>डिफ़ॉल्ट रंग</value>
@@ -3570,11 +3584,20 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>कोई मेल खाने वाला वेरिएबल नहीं</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>सेट नहीं है</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>नारंगी</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>मूल</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>पैलेट</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>रंग पैलेट सहेजा नहीं जा सका।</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>गुलाबी</value>
@@ -3584,6 +3607,17 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>लाल</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>{hex} को पैलेट से हटाएँ</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>पैलेट से रंग हटाएँ?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>यह रंग ({name}) आपके पैलेट से हटा दिया जाएगा और अब किसी भी रंग फ़ील्ड में नहीं दिखेगा।</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>मॉडिफ़ायर हटाएं</value>
@@ -14454,6 +14488,30 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>लाइट</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>वे रंग जो हर रंग फ़ील्ड में मिलते हैं। डिफ़ॉल्ट रंगों सहित इनमें से कोई भी हटाएँ, या अपने रंग जोड़ें।</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>पैलेट खाली है। कोई रंग जोड़ें या डिफ़ॉल्ट रंग पुनर्स्थापित करें।</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>रंग पैलेट</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>रंग</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>पुनर्स्थापित करें</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>डिफ़ॉल्ट रंग पुनर्स्थापित करें?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>आपका पैलेट Macro Deck के डिफ़ॉल्ट रंगों से बदल दिया जाएगा। आपके जोड़े गए रंग उससे हटा दिए जाएँगे।</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>डिफ़ॉल्ट रंग पुनर्स्थापित करें</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>सिस्टम</value>
   </data>
@@ -19081,8 +19139,8 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>लेबल</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>लेबल बॉक्स बॉर्डर रंग</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>लेबल बॉक्स बॉर्डर</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>लेबल बॉक्स बॉर्डर चौड़ाई (%)</value>
@@ -19093,8 +19151,8 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>लेबल रंग</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>लेबल आउटलाइन रंग</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>लेबल आउटलाइन</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>लेबल आउटलाइन चौड़ाई (%)</value>

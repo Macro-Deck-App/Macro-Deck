@@ -1116,6 +1116,7 @@ export {
   type AdbDeviceState,
   type AdbStateChangedEvent,
   type AppearanceChangedEvent,
+  type ColorPaletteChangedEvent,
   type CompleteOnboardingRequest,
   type CompleteOnboardingResponse,
   type ConnectAdbDeviceRequest,
