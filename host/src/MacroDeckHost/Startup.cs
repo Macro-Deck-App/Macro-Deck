@@ -39,6 +39,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Licensing;
@@ -336,9 +337,11 @@ public class Startup
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerDevicePickerUiProvider>();
 		services.AddHttpClient(TwitchChatImageCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddHttpClient(StreamThumbnailCache.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
+			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
 		services.AddSingleton<TwitchChatImageCache>();
 		services.AddSingleton<ITwitchChatImages>(provider => provider.GetRequiredService<TwitchChatImageCache>());
@@ -487,6 +490,7 @@ public class Startup
 		// the client timeout is off and the relay bounds header and idle time itself.
 		services.AddHttpClient(VideoStreamRelay.HttpClientName)
 			.ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
+			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
 			{
 				UseProxy = false,
@@ -830,6 +834,9 @@ public class Startup
 		services.AddSingleton<IBuildEnvironment, BuildEnvironment>();
 		services.AddScoped<IAppPreferenceRepository, AppPreferenceRepository>();
 		services.AddScoped<IAppPreferenceService, AppPreferenceService>();
+		services.AddSingleton<HttpUserAgentState>();
+		services.AddSingleton<IHttpUserAgentSource>(provider => provider.GetRequiredService<HttpUserAgentState>());
+		services.AddScoped<IHttpSettingsService, HttpSettingsService>();
 		services.AddSingleton(Integrations.Native.SystemHourCycleReaderFactory.Create());
 		services.AddScoped<TimeFormatResolver>();
 		services.AddSingleton(AutostartRegistrarFactory.Create());

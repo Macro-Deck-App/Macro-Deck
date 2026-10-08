@@ -4,6 +4,7 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Meld.Protocol;
 
@@ -258,7 +259,7 @@ internal sealed class QWebChannelClient : IQWebChannelClient
 
 	private static async Task<WebSocket> ConnectClientWebSocketAsync(Uri uri, CancellationToken cancellationToken)
 	{
-		var socket = new ClientWebSocket();
+		var socket = IntegrationHttp.CreateWebSocket();
 		try
 		{
 			await socket.ConnectAsync(uri, cancellationToken).ConfigureAwait(false);

@@ -1,3 +1,4 @@
+using MacroDeckHost.Integrations.Http;
 using SpotifyAPI.Web.Http;
 
 namespace MacroDeckHost.Integrations.Spotify;
@@ -19,8 +20,5 @@ internal static class SpotifyHttpClients
 		=> new NetHttpClient(CreatePooled(timeout));
 
 	internal static HttpClient CreatePooled(TimeSpan timeout)
-		=> new(new SocketsHttpHandler { PooledConnectionLifetime = _pooledConnectionLifetime })
-		{
-			Timeout = timeout
-		};
+		=> IntegrationHttp.CreateClient(timeout, handler => handler.PooledConnectionLifetime = _pooledConnectionLifetime);
 }

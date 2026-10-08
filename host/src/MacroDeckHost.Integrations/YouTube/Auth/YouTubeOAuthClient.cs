@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube.Auth;
 
@@ -8,7 +9,7 @@ internal sealed class YouTubeOAuthClient : IYouTubeOAuthClient
 {
 	private const string RateLimitExceeded = "rate_limit_exceeded";
 
-	private static readonly HttpClient _shared = CreateClient(new SocketsHttpHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;

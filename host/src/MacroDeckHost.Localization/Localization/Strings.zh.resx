@@ -2724,6 +2724,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>该文件夹视图不可用。</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>请输入有效的 User-Agent：最多 {maxLength} 个可打印 ASCII 字符，格式如 Product/1.0。</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>导出失败</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>更新</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck 内置集成发出的 HTTP 请求和连接的设置。</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>无法加载 HTTP 设置。</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>无法保存 HTTP 设置。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>默认值：{userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>自定义内置集成在 HTTP 请求中发送的 User-Agent。这有助于解决与反向代理和反机器人防护系统的兼容性问题。第三方插件不受影响，需要自行配置 User-Agent。更改对新请求和新连接生效；已打开的连接在重新连接前仍使用原值。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>恢复默认值</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>立即应用于所有已连接的客户端。</value>

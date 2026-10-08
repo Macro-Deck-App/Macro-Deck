@@ -6,12 +6,12 @@ using System.Text.Json;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 
+using MacroDeckHost.Integrations.Http;
+
 namespace MacroDeckHost.Integrations.Delegation.Protocol;
 
 internal sealed class DelegateClient : IDelegateClient
 {
-	private const string UserAgent = "Macro-Deck-Delegate/1.0";
-
 	private static readonly Lazy<HttpClient> _shared = new(CreateClient);
 
 	private readonly HttpClient _http;
@@ -338,19 +338,12 @@ internal sealed class DelegateClient : IDelegateClient
 
 	private static HttpClient CreateClient()
 	{
-		var handler = new SocketsHttpHandler
+		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan, handler =>
 		{
-			ConnectTimeout = TimeSpan.FromSeconds(10),
-			PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-			UseCookies = false
-		};
-
-		var client = new HttpClient(handler)
-		{
-			Timeout = Timeout.InfiniteTimeSpan
-		};
-		client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-		return client;
+			handler.ConnectTimeout = TimeSpan.FromSeconds(10);
+			handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
+			handler.UseCookies = false;
+		});
 	}
 
 	public void Dispose()

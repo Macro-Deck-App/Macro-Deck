@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord.Webhooks;
 
@@ -18,7 +19,7 @@ internal sealed class DiscordWebhookClient : IDiscordWebhookClient
 	private static readonly ILogger _logger =
 		IntegrationLog.For<DiscordWebhookClient>(DiscordIntegration.IntegrationId);
 
-	private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(15) };
+	private static readonly HttpClient _http = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(15));
 
 	private static readonly JsonSerializerOptions _json = new()
 	{

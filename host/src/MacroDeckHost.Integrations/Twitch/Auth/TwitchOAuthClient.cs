@@ -2,12 +2,13 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Twitch.Auth;
 
 internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 {
-	private static readonly HttpClient _shared = CreateClient(new SocketsHttpHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;

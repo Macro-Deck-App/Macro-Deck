@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
@@ -252,11 +253,7 @@ internal sealed class SinusBotClient : ISinusBotClient
 
 	private static HttpClient CreateHttpClient()
 	{
-		var client = new HttpClient
-		{
-			Timeout = TimeSpan.FromSeconds(10)
-		};
-		client.DefaultRequestHeaders.UserAgent.ParseAdd("Macro-Deck-SinusBot/1.0");
+		var client = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(10));
 		client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 		return client;
 	}

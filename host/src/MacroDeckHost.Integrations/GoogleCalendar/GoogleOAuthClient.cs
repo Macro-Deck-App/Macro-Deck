@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.GoogleCalendar;
 
@@ -93,7 +94,7 @@ internal sealed class GoogleOAuthRejectedException : Exception
 
 internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 {
-	private static readonly HttpClient _shared = CreateClient(new SocketsHttpHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;

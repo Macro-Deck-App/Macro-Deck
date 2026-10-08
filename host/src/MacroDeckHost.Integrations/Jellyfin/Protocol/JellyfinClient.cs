@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin.Protocol;
 
@@ -23,7 +24,7 @@ internal sealed class JellyfinClient : IJellyfinClient
 
 	private static readonly ILogger _logger = IntegrationLog.For<JellyfinClient>(JellyfinIntegration.IntegrationId);
 
-	private static readonly HttpClient _sharedHttp = new() { Timeout = TimeSpan.FromSeconds(15) };
+	private static readonly HttpClient _sharedHttp = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(15));
 
 	internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -422,7 +423,7 @@ internal sealed class JellyfinClient : IJellyfinClient
 		string authorization,
 		CancellationToken cancellationToken)
 	{
-		var socket = new ClientWebSocket();
+		var socket = IntegrationHttp.CreateWebSocket();
 		socket.Options.SetRequestHeader("Authorization", authorization);
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		timeout.CancelAfter(TimeSpan.FromSeconds(10));

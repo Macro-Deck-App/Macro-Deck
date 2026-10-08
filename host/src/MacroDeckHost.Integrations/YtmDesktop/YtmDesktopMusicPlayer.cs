@@ -7,12 +7,13 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 
 internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 {
-	private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(10) };
+	private static readonly HttpClient _http = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(10));
 
 	private static readonly ILogger _logger =
 		IntegrationLog.For<YtmDesktopMusicPlayer>(YtmDesktopIntegration.IntegrationId);

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MacroDeck.Sdk.Weather;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 
@@ -60,8 +61,7 @@ internal sealed class OpenMeteoClient : IOpenMeteoClient
 
 	private static HttpClient CreateHttpClient()
 	{
-		var client = new HttpClient();
-		client.DefaultRequestHeaders.UserAgent.ParseAdd("Macro-Deck-Weather/1.0");
+		var client = IntegrationHttp.CreateClient();
 		client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 		return client;
 	}
