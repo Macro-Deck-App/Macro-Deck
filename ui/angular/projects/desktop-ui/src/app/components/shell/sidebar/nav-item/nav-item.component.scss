@@ -16,7 +16,7 @@
   color: var(--color-text-secondary);
   font-family: inherit;
   font-size: inherit;
-  text-align: left;
+  text-align: start;
   text-decoration: none;
   cursor: pointer;
   transition: background-color var(--transition-normal), color var(--transition-normal);
@@ -88,7 +88,7 @@
 }
 
 .nav-badge {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0.0625rem 0.3125rem;
   border-radius: 999px;
   background-color: var(--color-bg-tertiary);
@@ -155,4 +155,9 @@
     border-color: var(--color-accent);
     opacity: 0.5;
   }
+}
+
+:host-context([dir='rtl']) .nav-item.active::before {
+  left: auto;
+  right: 0;
 }

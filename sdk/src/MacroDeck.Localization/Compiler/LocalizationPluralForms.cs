@@ -14,11 +14,12 @@ namespace MacroDeck.Localization.Compiler;
 /// hand-maintained and kept byte-identical against <c>Intl.PluralRules</c> in the browser and a third
 /// implementation in the bootstrapper. Three hand-written copies of a large rule set is a worse failure
 /// mode than a small one that is obviously the same everywhere. It is exactly correct for English,
-/// German, Italian, Spanish and French, which all select on <c>n == 1</c>. Czech and Polish do not - both
-/// need <c>few</c>/<c>many</c> forms this model has no room for - so their <c>Other</c> translations are a
-/// deliberate approximation: phrased to avoid noun-count agreement (a count-agnostic label rather than a
-/// declined noun) so the same text stays grammatical across every count, instead of only being correct for
-/// one CLDR bucket. A language that cannot be phrased this way needs this model extended first, which is
+/// German, Italian, Spanish, French, Dutch and Turkish, which all select on <c>n == 1</c>, and Chinese,
+/// Japanese, Korean and Indonesian have no plural forms. Czech, Polish, Russian, Ukrainian and Arabic need
+/// <c>few</c>/<c>many</c> forms this model has no room for, and Brazilian Portuguese and Hindi count
+/// <c>0</c> as singular, so their <c>Other</c> translations are a deliberate approximation: phrased to
+/// avoid noun-count agreement (a count-agnostic label rather than a declined noun) so the same text stays
+/// grammatical across every count, instead of only being correct for one CLDR bucket. A language that cannot be phrased this way needs this model extended first, which is
 /// why the form names are a closed set checked at build time rather than free text.
 /// </para>
 /// </remarks>

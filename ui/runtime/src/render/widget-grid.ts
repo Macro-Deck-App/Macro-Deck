@@ -116,6 +116,7 @@ export function renderWidgetGrid(
 
   const surface = document.createElement('div');
   surface.className = 'deck-grid';
+  surface.setAttribute('dir', 'ltr');
   surface.style.background = background === null ? '' : background;
   disableContextMenu(surface);
   container.appendChild(surface);

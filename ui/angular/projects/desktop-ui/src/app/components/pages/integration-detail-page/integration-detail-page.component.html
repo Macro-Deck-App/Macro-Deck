@@ -155,7 +155,7 @@
                 @if (canSetUp()) {
                   <shared-button variant="primary" (click)="onConfigure()">
                     <span>{{ setUpLabel() }}</span>
-                    <span class="icon icon-arrow-right icon-xs"></span>
+                    <span class="icon icon-arrow-right rtl-mirror icon-xs"></span>
                   </shared-button>
                 }
                 @if (!integration.allowsMultipleConfigurations && configEntries().length > 0) {

@@ -58,6 +58,7 @@ pub struct HostErrorReport {
 #[derive(Debug, Clone, Default)]
 pub struct HostErrorTexts {
     pub lang: String,
+    pub dir: String,
     pub title: String,
     pub heading: String,
     pub notice: Option<String>,
@@ -307,7 +308,8 @@ fn texts_with_damage(
     };
 
     HostErrorTexts {
-        lang: localization::culture(),
+        lang: localization::served_culture(),
+        dir: localization::direction().to_owned(),
         title: localization::t(keys::HOST_ERROR_WINDOW_TITLE),
         heading,
         notice: relaunch_failed.then(|| localization::t(keys::HOST_ERROR_RESTART_FAILED)),
@@ -355,6 +357,7 @@ pub fn render(texts: &HostErrorTexts) -> String {
         let name = &rest[start + 2..start + length];
         let value = match name {
             "lang" => escape(&texts.lang),
+            "dir" => escape(&texts.dir),
             "title" => escape(&texts.title),
             "heading" => escape(&texts.heading),
             "notice" => paragraph("notice", &texts.notice),
@@ -418,6 +421,7 @@ mod tests {
     fn sample_texts() -> HostErrorTexts {
         HostErrorTexts {
             lang: "en".into(),
+            dir: "ltr".into(),
             title: "Macro Deck stopped".into(),
             heading: "Macro Deck could not keep its host running".into(),
             attempts: Some("Macro Deck tried 3 restarts".into()),

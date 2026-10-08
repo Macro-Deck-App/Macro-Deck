@@ -22,7 +22,7 @@ export interface ColorPickerResultStep {
           <span class="cpr-hex">{{ original()?.toUpperCase() ?? '-' }}</span>
         </div>
       </div>
-      <span class="icon icon-sm icon-arrow-right cpr-arrow" aria-hidden="true"></span>
+      <span class="icon icon-sm icon-arrow-right rtl-mirror cpr-arrow" aria-hidden="true"></span>
       <div class="cpr-item">
         <span class="cpr-label">{{ resultLabel() }}</span>
         <div class="cpr-value">

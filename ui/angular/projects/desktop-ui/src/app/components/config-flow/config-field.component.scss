@@ -14,7 +14,7 @@
 
 .cf-required {
   color: var(--color-danger);
-  margin-left: 0.125rem;
+  margin-inline-start: 0.125rem;
 }
 
 .cf-input {
@@ -29,7 +29,7 @@
 }
 
 .cf-secret-input {
-  padding-right: 2.25rem;
+  padding-inline-end: 2.25rem;
 }
 
 .cf-reveal {
@@ -64,4 +64,9 @@
   margin: 0;
   font-size: var(--text-xs);
   color: var(--color-danger);
+}
+
+:host-context([dir='rtl']) .cf-reveal {
+  right: auto;
+  left: 0.1875rem;
 }
