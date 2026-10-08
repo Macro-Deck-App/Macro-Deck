@@ -7959,6 +7959,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Questa è una sessione Wayland, quindi l'input del mouse passa attraverso XWayland. Clic, trascinamento e scorrimento funzionano, ma il compositor potrebbe ignorare il posizionamento assoluto del puntatore: in tal caso uno spostamento verso una coordinata fissa finisce altrove o non ha effetto.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Lettore musicale</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Colore dell'album</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Legge in una variabile se un filtro sorgente è attivo</value>
   </data>

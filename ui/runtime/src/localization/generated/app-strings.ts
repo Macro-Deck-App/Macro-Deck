@@ -3377,6 +3377,12 @@ export const AppStrings = {
 				WaylandDegradedReason: 'macrodeck.app:Integrations.Mouse.Issues.WaylandDegradedReason',
 			},
 		},
+		MusicPlayer: {
+			Name: 'macrodeck.app:Integrations.MusicPlayer.Name',
+			Variables: {
+				AlbumColorDisplayName: 'macrodeck.app:Integrations.MusicPlayer.Variables.AlbumColorDisplayName',
+			},
+		},
 		Obs: {
 			Actions: {
 				CreateRecordChapter: {
@@ -11474,6 +11480,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Mouse.Issues.UnsupportedDescription': 'Native mouse input isn\'t available on this platform or session (for example a Wayland session with no X server, where synthetic input is rejected).',
 	'macrodeck.app:Integrations.Mouse.Issues.UnsupportedTitle': 'Mouse simulation unavailable',
 	'macrodeck.app:Integrations.Mouse.Issues.WaylandDegradedReason': 'This is a Wayland session, so mouse input runs through XWayland. Clicking, dragging and scrolling work, but the compositor may ignore absolute pointer positioning, in which case a move to a fixed coordinate lands somewhere else or does nothing.',
+	'macrodeck.app:Integrations.MusicPlayer.Name': 'Music Player',
+	'macrodeck.app:Integrations.MusicPlayer.Variables.AlbumColorDisplayName': 'Album color',
 	'macrodeck.app:Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription': 'Optional. Leave empty to let OBS name the chapter.',
 	'macrodeck.app:Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel': 'Chapter name',
 	'macrodeck.app:Integrations.Obs.Actions.CreateRecordChapter.Description': 'Adds a chapter marker to the file being recorded. OBS supports this only for the Hybrid MP4 format.',

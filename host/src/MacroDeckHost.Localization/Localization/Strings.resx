@@ -7960,6 +7960,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>This is a Wayland session, so mouse input runs through XWayland. Clicking, dragging and scrolling work, but the compositor may ignore absolute pointer positioning, in which case a move to a fixed coordinate lands somewhere else or does nothing.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Music Player</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Album color</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Reads whether a source filter is enabled into a variable</value>
   </data>

@@ -87,6 +87,24 @@ If you go back to an older Macro Deck version after creating a Color variable, t
 variables and starts without any of your user variables. Delete your Color variables before you go back.
 :::
 
+## Colors from the playing album
+
+The **Music Player** integration offers an **Album color** Color variable for every music player you have set
+up, for example Spotify or each SinusBot you added. Its value is the average color of the cover of that
+player's current song. Choose it as the **Color variable** of a widget's background, then use **Add
+modifier** to derive text and icon colors that stay readable, for example **Darken** or **Brighten** the album
+color, or **Mix** it with white.
+
+- Each player has its own variable, so a widget follows exactly the player you pick. A player you add later
+  gets its variable as soon as it appears.
+- The variable keeps the last cover color when the player is paused, stops or disconnects, and changes when
+  the next cover shows up. It only has no value until the player has shown a cover once since Macro Deck
+  started; then fields that use it show the theme's color. A field that follows a variable does not remember
+  the color you picked before, so set it again if you stop using the variable.
+- The colors of icons and text do not adjust on their own to the album color; pick modifiers that suit your
+  covers.
+- If you turn the **Music Player** integration off under **Integrations**, the variables are unavailable too.
+
 ## Finding a widget type
 
 When you add a widget, type in the search field to filter by name, description or integration. Widgets

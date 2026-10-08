@@ -147,5 +147,5 @@ internal sealed class StubArtworkService : IMusicPlayerArtworkService
 
 internal sealed class StubPaletteExtractor : IArtworkPaletteExtractor
 {
-	public ArtworkPalette? Extract(byte[] image) => new("#aabbcc", "#112233");
+	public ArtworkPalette? Extract(byte[] image) => new("#aabbcc", "#112233", "#445566");
 }

@@ -2,7 +2,8 @@ namespace MacroDeckHost.Application.MusicPlayer;
 
 /// <param name="Accent">A brightened tint of the artwork's average colour, as <c>#rrggbb</c>.</param>
 /// <param name="Background">A darkened tint of the same average, as <c>#rrggbb</c>.</param>
-public sealed record ArtworkPalette(string Accent, string Background);
+/// <param name="Average">The artwork's average colour itself, as <c>#rrggbb</c>.</param>
+public sealed record ArtworkPalette(string Accent, string Background, string Average);
 
 /// <summary>
 /// Derives the two colours a Music Player widget paints itself in from the cover it is showing.

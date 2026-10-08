@@ -3,6 +3,7 @@ using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
+using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
@@ -64,6 +65,7 @@ public sealed class IntegrationInitializer
 	private readonly IStreamPlatformServices? _streamPlatforms;
 	private readonly CalendarHostServices? _calendarServices;
 	private readonly IAdGuardHomeSink? _adGuardHomeSink;
+	private readonly IMusicPlayerAlbumColor? _albumColor;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -101,9 +103,11 @@ public sealed class IntegrationInitializer
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		IStreamPlatformServices? streamPlatforms = null,
 		CalendarHostServices? calendarServices = null,
-		IAdGuardHomeSink? adGuardHomeSink = null)
+		IAdGuardHomeSink? adGuardHomeSink = null,
+		IMusicPlayerAlbumColor? albumColor = null)
 	{
 		_adGuardHomeSink = adGuardHomeSink;
+		_albumColor = albumColor;
 		_streamPlatforms = streamPlatforms;
 		_calendarServices = calendarServices;
 		_messageBroker = messageBroker;
@@ -146,7 +150,8 @@ public sealed class IntegrationInitializer
 			_pollingInvalidation,
 			_streamPlatforms,
 			_calendarServices,
-			_adGuardHomeSink);
+			_adGuardHomeSink,
+			_albumColor);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,

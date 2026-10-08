@@ -936,6 +936,7 @@ public class Startup
 		services.AddSingleton<IArtworkProcessor, ImageSharpArtworkProcessor>();
 		services.AddSingleton<IArtworkPaletteExtractor, ImageSharpArtworkPaletteExtractor>();
 		services.AddSingleton<IMusicPlayerArtworkService, MusicPlayerArtworkService>();
+		services.AddSingleton<IMusicPlayerAlbumColor, MusicPlayerAlbumColor>();
 		services.AddSingleton<IActionInteractions, ActionInteractions>();
 		services.AddSingleton<IIconPackStore, JsonIconPackStore>();
 		services.AddSingleton<IIconImportBatchStore, JsonIconImportBatchStore>();

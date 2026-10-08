@@ -7959,6 +7959,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>To sesja Wayland, więc sterowanie myszą przechodzi przez XWayland. Klikanie, przeciąganie i przewijanie działają, ale kompozytor może ignorować bezwzględne pozycjonowanie wskaźnika — w takim przypadku przesunięcie do ustalonej współrzędnej trafia w inne miejsce albo nic nie robi.</value>
   </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Odtwarzacz muzyki</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Kolor albumu</value>
+  </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Odczytuje, czy filtr źródła jest włączony, do zmiennej</value>
   </data>
