@@ -59,6 +59,9 @@ export function paintTextCommon<TState>(
   ctx.setStyle(element, 'margin-top', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
   ctx.setStyle(element, 'margin-bottom', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
   ctx.setStyle(element, 'max-height', outline === null ? null : `calc(100% + 0.4em + ${px(2 * outline)})`);
+  // A hugging parent is sized to the text alone, since the outline padding is cancelled by the margins.
+  // Capping the padded box at 100% of that took the outline out of the text's own line and wrapped it.
+  ctx.setStyle(element, 'max-width', outline === null ? null : `calc(100% + ${px(2 * outline)})`);
   ctx.setStyle(element, 'font-weight', String(textFontWeight(node)));
   ctx.setStyle(element, 'color', textFillColor(node));
   ctx.setStyle(element, 'text-align', textAlign(node));
