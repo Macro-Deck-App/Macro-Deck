@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 

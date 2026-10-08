@@ -43,7 +43,7 @@
                       [attr.aria-describedby]="'notices-meta-' + row.key"
                       (click)="toggle(row.key)">
                       <span
-                        class="icon icon-chevron-right icon-sm notices__chevron"
+                        class="icon icon-chevron-right rtl-mirror icon-sm notices__chevron"
                         [class.notices__chevron--open]="isExpanded(row.key)"
                         aria-hidden="true"></span>
                       <span class="notices__name">{{ row.component.name }}</span>

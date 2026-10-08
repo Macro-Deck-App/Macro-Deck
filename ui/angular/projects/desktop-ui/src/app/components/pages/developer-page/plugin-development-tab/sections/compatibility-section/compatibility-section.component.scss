@@ -148,7 +148,7 @@
 }
 
 .compatibility-findings th {
-  text-align: left;
+  text-align: start;
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
@@ -185,9 +185,9 @@
 
 // Left border echoes the finding-level severity - independent of the report's overall state badge,
 // since a report can bundle findings of different severities.
-tr.finding-severity-error { border-left: 3px solid var(--color-danger); }
-tr.finding-severity-warning { border-left: 3px solid var(--color-warning); }
-tr.finding-severity-info { border-left: 3px solid var(--color-accent); }
+tr.finding-severity-error { border-inline-start: 3px solid var(--color-danger); }
+tr.finding-severity-warning { border-inline-start: 3px solid var(--color-warning); }
+tr.finding-severity-info { border-inline-start: 3px solid var(--color-accent); }
 
 // Evidence per finding (confirmed/negotiated/inferred/unknown) - kept visually distinct from the
 // report-level evidence line so a reader never mistakes an inferred row for a confirmed one.
@@ -227,7 +227,7 @@ tr.finding-severity-info { border-left: 3px solid var(--color-accent); }
 
 .finding-migration-link {
   display: inline-flex;
-  margin-left: var(--space-2);
+  margin-inline-start: var(--space-2);
   background: transparent;
   border: none;
   padding: 0;

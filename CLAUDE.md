@@ -49,7 +49,8 @@ tooltips, aria-labels, placeholders, dialog and toast text, validation and error
 status text, integration action and parameter names, native menu and dialog text) comes from a
 localization resource, and ships with a translation in **every** language the app already carries. English
 is the default and the fallback; a new key missing a value in any other shipped language (German, Italian,
-Czech, Polish, Spanish, French, Simplified Chinese) is an incomplete change, not a follow-up.
+Czech, Polish, Spanish, French, Simplified Chinese, Traditional Chinese, Japanese, Korean, Russian, Ukrainian,
+Brazilian Portuguese, Arabic, Hindi, Turkish, Dutch, Indonesian) is an incomplete change, not a follow-up.
 
 Internal strings are exempt and stay as they are: `ILogger` messages, exception text that is only ever
 diagnostic, protocol and enum values, error *codes*, identifiers, config keys, routes, storage keys, CSS
@@ -78,13 +79,25 @@ across the whole catalog:
   rather than direct `ty` address, matching each language's own desktop-software convention.
 - Simplified Chinese (`Strings.zh.resx`): no pronoun where it can be avoided, `你` where it cannot,
   mainland desktop-software terminology, and `One` and `Other` forms with the same wording.
+- Traditional Chinese (`Strings.zh-TW.resx`): Taiwan desktop-software terminology (`檔案`, `設定`,
+  `資料夾`), no pronoun where it can be avoided, `您` where it cannot, same wording for `One` and `Other`.
+- Japanese, Korean: polite sentences (`です`/`ます`, `하세요`/`합니다`), short noun phrases for labels and
+  buttons, same wording for `One` and `Other`.
+- Russian, Ukrainian: polite plural imperatives (`Выберите`, `Виберіть`), impersonal statuses and errors.
+- Brazilian Portuguese: imperatives without a pronoun (`Selecione`), `você` only when unavoidable.
+- Arabic: Modern Standard Arabic, imperatives for actions; Latin names, identifiers and placeholders stay
+  as they are.
+- Hindi: Devanagari with polite `आप` forms (`चुनें`).
+- Turkish: polite imperatives (`Seçin`). Dutch: informal `je`, imperatives without a pronoun (`Kies`).
+- Indonesian: no pronoun where it can be avoided, `Anda` where it cannot, same wording for `One` and
+  `Other`.
 
-Czech and Polish also need a plural-form adjustment the other languages don't: the localization compiler
-only distinguishes `count == 1` from every other count (see
+Czech, Polish, Russian, Ukrainian, Arabic, Brazilian Portuguese and Hindi also need a plural-form
+adjustment: the localization compiler only distinguishes `count == 1` from every other count (see
 [the localization guide](docs/src/content/docs/features/localization.md#only-one-and-other)), which is
-grammatically exact for German/Italian/Spanish/French but not for Czech/Polish's `few`/`many` forms. Phrase
-a Czech or Polish `Other` form to avoid noun-count agreement (a count-agnostic label rather than a declined
-noun) so it stays grammatical for every count.
+grammatically exact for German/Italian/Spanish/French/Dutch/Turkish but not for languages with
+`few`/`many` forms or with `0` counted as singular. Phrase their `Other` form to avoid noun-count agreement
+(a count-agnostic label rather than a declined noun) so it stays grammatical for every count.
 
 After changing a resource, regenerate the checked-in TypeScript and Rust catalogs:
 

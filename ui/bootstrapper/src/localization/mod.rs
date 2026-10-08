@@ -77,17 +77,8 @@ fn plural_form(count: i64) -> &'static str {
 /// Walks the culture chain for `key`: the active culture, its neutral culture, then the default. A
 /// plural family is stored as its forms, so a form falls back to `Other` before moving on.
 fn template(key: &str, form: Option<&str>) -> Option<&'static str> {
-    let active = culture();
-    let neutral = neutral_of(&active);
-
-    let mut candidates: Vec<&str> = vec![active.as_str()];
-    if let Some(neutral) = neutral.as_deref() {
-        candidates.push(neutral);
-    }
-    candidates.push(generated::DEFAULT_CULTURE);
-
-    for candidate in candidates {
-        let Some(templates) = templates_of(candidate) else {
+    for candidate in candidates(&culture()) {
+        let Some(templates) = templates_of(&candidate) else {
             continue;
         };
 
@@ -108,6 +99,82 @@ fn template(key: &str, form: Option<&str>) -> Option<&'static str> {
     }
 
     None
+}
+
+fn candidates(active: &str) -> Vec<String> {
+    let mut candidates = vec![active.to_owned()];
+    if is_traditional_chinese(active) {
+        candidates.push("zh-Hant".to_owned());
+        candidates.push("zh-TW".to_owned());
+    }
+    if let Some(neutral) = neutral_of(active) {
+        candidates.push(neutral);
+    }
+    candidates.push(generated::DEFAULT_CULTURE.to_owned());
+
+    let mut unique: Vec<String> = Vec::with_capacity(candidates.len());
+    for candidate in candidates {
+        if !unique
+            .iter()
+            .any(|seen| seen.eq_ignore_ascii_case(&candidate))
+        {
+            unique.push(candidate);
+        }
+    }
+    unique
+}
+
+pub fn served_culture() -> String {
+    candidates(&culture())
+        .into_iter()
+        .find_map(|candidate| {
+            generated::CATALOG
+                .iter()
+                .find(|(name, _)| name.eq_ignore_ascii_case(&candidate))
+                .map(|(name, _)| (*name).to_owned())
+        })
+        .unwrap_or_else(|| generated::DEFAULT_CULTURE.to_owned())
+}
+
+pub fn direction() -> &'static str {
+    direction_of(&served_culture())
+}
+
+fn direction_of(culture: &str) -> &'static str {
+    const RIGHT_TO_LEFT: [&str; 10] = ["ar", "he", "fa", "ur", "ps", "sd", "ug", "yi", "dv", "ckb"];
+    let language = culture.split('-').next().unwrap_or_default();
+    let script_is_rtl = culture
+        .split('-')
+        .skip(1)
+        .any(|part| part.eq_ignore_ascii_case("Arab") || part.eq_ignore_ascii_case("Hebr"));
+
+    if script_is_rtl
+        || RIGHT_TO_LEFT
+            .iter()
+            .any(|rtl| rtl.eq_ignore_ascii_case(language))
+    {
+        "rtl"
+    } else {
+        "ltr"
+    }
+}
+
+fn is_traditional_chinese(culture: &str) -> bool {
+    let mut parts = culture.split('-');
+    if !parts
+        .next()
+        .is_some_and(|language| language.eq_ignore_ascii_case("zh"))
+    {
+        return false;
+    }
+
+    match parts.next() {
+        Some(script) if script.len() == 4 => script.eq_ignore_ascii_case("Hant"),
+        Some(region) => ["TW", "HK", "MO"]
+            .iter()
+            .any(|traditional| traditional.eq_ignore_ascii_case(region)),
+        None => false,
+    }
 }
 
 fn templates_of(culture: &str) -> Option<&'static [(&'static str, &'static str)]> {
@@ -246,6 +313,41 @@ mod tests {
         assert!(!is_placeholder_name(""));
         assert!(is_placeholder_name("userName"));
         assert!(!is_placeholder_name("1st"));
+    }
+
+    #[test]
+    fn a_traditional_chinese_culture_tries_the_taiwan_catalog_before_the_simplified_one() {
+        assert_eq!(
+            candidates("zh-HK"),
+            ["zh-HK", "zh-Hant", "zh-TW", "zh", "en"]
+        );
+        assert_eq!(
+            candidates("zh-Hant-TW"),
+            ["zh-Hant-TW", "zh-Hant", "zh-TW", "zh", "en"]
+        );
+        assert_eq!(candidates("zh-CN"), ["zh-CN", "zh", "en"]);
+        assert_eq!(candidates("zh-Hans-TW"), ["zh-Hans-TW", "zh", "en"]);
+    }
+
+    #[test]
+    fn only_right_to_left_languages_render_right_to_left() {
+        assert_eq!(direction_of("ar"), "rtl");
+        assert_eq!(direction_of("ar-EG"), "rtl");
+        assert_eq!(direction_of("he-IL"), "rtl");
+        assert_eq!(direction_of("de-DE"), "ltr");
+        assert_eq!(direction_of("zh-TW"), "ltr");
+    }
+
+    #[test]
+    fn every_shipped_culture_is_served_by_its_own_name() {
+        for (culture, _) in generated::CATALOG {
+            let served = candidates(culture).into_iter().find(|candidate| {
+                generated::CATALOG
+                    .iter()
+                    .any(|(name, _)| name.eq_ignore_ascii_case(candidate))
+            });
+            assert_eq!(served.as_deref(), Some(*culture));
+        }
     }
 
     /// The catalog is looked up with a binary search, which is only correct if the emitter sorted it.

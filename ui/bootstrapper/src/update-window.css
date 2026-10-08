@@ -44,6 +44,31 @@ body {
   margin: 0;
 }
 
+html[lang|="ja"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, 'Noto Sans CJK JP', Roboto, sans-serif;
+}
+
+html[lang|="ko"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', Roboto, sans-serif;
+}
+
+html[lang|="zh"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans CJK SC', Roboto, sans-serif;
+}
+
+html[lang="zh-TW"] body,
+html[lang|="zh-Hant"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei UI', 'Noto Sans CJK TC', Roboto, sans-serif;
+}
+
+html[lang|="ar"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Geeza Pro', 'Noto Sans Arabic', Tahoma, Roboto, sans-serif;
+}
+
+html[lang|="hi"] body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Kohinoor Devanagari', 'Nirmala UI', 'Noto Sans Devanagari', Roboto, sans-serif;
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -122,6 +147,16 @@ body {
 .update__changelog ul {
   margin: 0;
   padding-left: 20px;
+}
+
+[dir="rtl"] .update__changelog {
+  padding-right: 0;
+  padding-left: 8px;
+}
+
+[dir="rtl"] .update__changelog ul {
+  padding-left: 0;
+  padding-right: 20px;
 }
 
 .update__changelog li + li {

@@ -57,7 +57,7 @@
 .kce-record {
   @include ds.control-base;
   @include ds.control-interactive;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 

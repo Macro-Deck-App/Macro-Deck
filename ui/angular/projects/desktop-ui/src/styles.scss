@@ -24,3 +24,22 @@ body {
   background: url("../public/images/logo.png") no-repeat center center / contain;
   border-radius: var(--radius-md);
 }
+
+[dir='rtl'] {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea {
+    unicode-bidi: plaintext;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .rtl-mirror {
+    scale: -1 1;
+  }
+}

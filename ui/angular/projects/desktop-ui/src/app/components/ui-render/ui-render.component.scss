@@ -99,7 +99,7 @@
 
 .config-chrome-instructions {
   margin: 0;
-  padding-left: var(--space-5);
+  padding-inline-start: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -191,7 +191,7 @@
   color: var(--color-text-secondary);
   font-family: inherit;
   font-size: var(--text-base);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast);
 
@@ -294,7 +294,7 @@
 
 .config-node-required {
   color: var(--color-danger);
-  margin-left: 0.125rem;
+  margin-inline-start: 0.125rem;
 }
 
 .config-node-description {
@@ -385,7 +385,7 @@
   flex-direction: column;
   gap: 0.1875rem;
   padding: 0.5rem var(--space-3);
-  text-align: left;
+  text-align: start;
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);

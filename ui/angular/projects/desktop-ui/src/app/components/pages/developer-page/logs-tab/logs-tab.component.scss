@@ -289,7 +289,7 @@
 
 .log-exception {
   padding: var(--space-2);
-  border-left: 2px solid var(--color-danger);
+  border-inline-start: 2px solid var(--color-danger);
   background-color: var(--color-bg-primary);
   overflow-x: auto;
 }

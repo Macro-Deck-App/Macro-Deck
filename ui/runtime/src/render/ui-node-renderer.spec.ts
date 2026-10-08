@@ -63,6 +63,17 @@ describe('widget node renderer', () => {
     return slider;
   };
 
+  it('lays a widget tree out left to right inside a right-to-left app', () => {
+    document.documentElement.setAttribute('dir', 'rtl');
+    try {
+      mount(node('ui.stack'), 200, 100);
+
+      expect(container.getAttribute('dir')).toBe('ltr');
+    } finally {
+      document.documentElement.removeAttribute('dir');
+    }
+  });
+
   it('renders a stack as a flex column sized to its box', () => {
     mount(node('ui.stack'), 200, 100);
     const stack = container.querySelector('.widget-stack') as HTMLElement;

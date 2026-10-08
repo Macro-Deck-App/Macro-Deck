@@ -20,7 +20,7 @@
 
   @if (hasChildren) {
     <button class="expand-btn" (click)="onToggleExpand($event)">
-      <span class="icon icon-chevron-right icon-xs" [class.rotated]="folder.isExpanded"></span>
+      <span class="icon icon-chevron-right rtl-mirror icon-xs" [class.rotated]="folder.isExpanded"></span>
     </button>
   } @else {
     <div class="expand-placeholder"></div>

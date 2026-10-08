@@ -104,7 +104,7 @@ shared-rail-page {
   padding: var(--space-2) var(--space-3);
   background: none;
   border: 1px solid transparent;
-  text-align: left;
+  text-align: start;
   color: var(--color-text-primary);
 
   &.active {
@@ -209,7 +209,7 @@ shared-rail-page {
   margin: 0;
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-warning);
+  border-inline-start: 3px solid var(--color-warning);
   border-radius: var(--radius-md);
   background-color: var(--color-bg-primary);
   font-size: var(--text-sm);
@@ -257,16 +257,16 @@ shared-rail-page {
 .trigger-result {
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-left-width: 3px;
+  border-inline-start-width: 3px;
   border-radius: var(--radius-md);
   background-color: var(--color-bg-primary);
 
   &.success {
-    border-left-color: var(--color-success);
+    border-inline-start-color: var(--color-success);
   }
 
   &.failed {
-    border-left-color: var(--color-danger);
+    border-inline-start-color: var(--color-danger);
   }
 }
 
@@ -303,7 +303,7 @@ shared-rail-page {
 
 .trigger-result-code {
   display: inline-block;
-  margin-right: var(--space-2);
+  margin-inline-end: var(--space-2);
   padding: 0.0625rem var(--space-2);
   border-radius: var(--radius-sm);
   background-color: var(--color-danger-muted);
