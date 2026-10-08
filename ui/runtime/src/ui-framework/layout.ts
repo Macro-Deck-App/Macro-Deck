@@ -1,18 +1,12 @@
 import { nodeBoolean } from './node-properties.util';
 import { UiNode } from './ui-node.interface';
-import { nodeLength, resolveLength } from './length';
+import { boxExtent, LengthScope, nodeLength, resolveLength } from './length';
 import { UiComponentProperties } from '../ui-components/component-properties';
 import type { UiComponentRegistry } from './component-registry';
 
 export interface UiComponentBox {
   width: number | null;
   height: number | null;
-}
-
-export interface UiComponentStackChild {
-  child: UiNode;
-  box: UiComponentBox;
-  crossExtent: number | null;
 }
 
 // renderer.css paints these numbers and the intrinsic height below adds them up - a field whose
@@ -24,19 +18,33 @@ export const WIDGET_FIELD_PADDING_EM = 0.4;
 
 export const WIDGET_FIELD_BORDER_PX = 1;
 
-export interface UiIntrinsicMetrics {
-  basis: number;
+export interface UiComponentStackChild {
+  child: UiNode;
+  box: UiComponentBox;
   crossExtent: number | null;
-  horizontal: boolean;
-  ofChild(child: UiNode): number;
+  container: number | null;
 }
 
-function metricsFor(basis: number, crossExtent: number | null, horizontal: boolean, registry: UiComponentRegistry): UiIntrinsicMetrics {
+export interface UiIntrinsicMetrics extends LengthScope {
+  horizontal: boolean;
+  ofChild(child: UiNode): number;
+  nested(): UiIntrinsicMetrics;
+}
+
+function metricsFor(
+  basis: number,
+  crossExtent: number | null,
+  container: number | null,
+  horizontal: boolean,
+  registry: UiComponentRegistry,
+): UiIntrinsicMetrics {
   const m: UiIntrinsicMetrics = {
     basis,
     crossExtent,
+    container,
     horizontal,
     ofChild: child => intrinsicMainPx(child, m, registry),
+    nested: () => metricsFor(basis, crossExtent, null, horizontal, registry),
   };
   return m;
 }
@@ -46,7 +54,7 @@ export function intrinsicMainPx(
   m: UiIntrinsicMetrics,
   registry: UiComponentRegistry,
 ): number {
-  const declared = resolveLength(nodeLength(node, UiComponentProperties.MainSize), m.basis, m.crossExtent);
+  const declared = resolveLength(nodeLength(node, UiComponentProperties.MainSize), m);
   if (declared !== undefined) return declared;
 
   const definition = registry.get(node.type);
@@ -68,11 +76,12 @@ export function layoutStackChildren(
   const contentHeight = inner(box.height);
   const mainTotal = horizontal ? contentWidth : contentHeight;
   const crossTotal = horizontal ? contentHeight : contentWidth;
-  const m = metricsFor(basis, crossTotal, horizontal, registry);
+  const container = boxExtent(contentWidth, contentHeight);
+  const m = metricsFor(basis, crossTotal, container, horizontal, registry);
 
   const children = node.children ?? [];
   const specs = children.map(child => {
-    const mainSize = resolveLength(nodeLength(child, UiComponentProperties.MainSize), basis, crossTotal);
+    const mainSize = resolveLength(nodeLength(child, UiComponentProperties.MainSize), m);
     const fill = !natural && mainSize === undefined && nodeBoolean(child, UiComponentProperties.Fill) === true;
     const intrinsic = mainSize === undefined && !fill
       ? intrinsicMainPx(child, m, registry)
@@ -92,6 +101,6 @@ export function layoutStackChildren(
     const childBox: UiComponentBox = horizontal
       ? { width: mainDim, height: crossTotal }
       : { width: crossTotal, height: mainDim };
-    return { child: spec.child, box: childBox, crossExtent: crossTotal };
+    return { child: spec.child, box: childBox, crossExtent: crossTotal, container };
   });
 }

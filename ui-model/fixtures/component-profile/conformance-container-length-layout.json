@@ -1,0 +1,115 @@
+{
+  "note": "Hand-derived from the rules, never produced by running a renderer. Containing box = min(w,h) of the box the parent lays the node out within. container.open has an open height: largest column count with cells >= minCellSize (0.25 x basis), rows as tall as a column is wide. container.rings has a definite height: the column count that makes the smaller cell edge largest, fewer columns on a tie. container.fallback.text sits in a stack child with neither mainSize nor fill, so it has no definite containing box and resolves basis x 0.05 instead.",
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "container.open.c0": {
+          "cell": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 60.0,
+            "height": 60.0
+          },
+          "fontSize": 18.0
+        },
+        "container.open.c5": {
+          "cell": {
+            "left": 60.0,
+            "top": 60.0,
+            "width": 60.0,
+            "height": 60.0
+          },
+          "fontSize": 18.0
+        },
+        "container.fallback.text": {
+          "fontSize": 12.0
+        },
+        "container.rings.r0": {
+          "cell": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 80.0,
+            "height": 54.0
+          }
+        },
+        "container.rings.r5": {
+          "cell": {
+            "left": 160.0,
+            "top": 54.0,
+            "width": 80.0,
+            "height": 54.0
+          }
+        },
+        "container.rings.r0.gauge": {
+          "arcStrokeWidth": 5.4
+        },
+        "container.rings.r0.icon": {
+          "glyphEdge": 21.6
+        },
+        "container.rings.r0.percent": {
+          "fontSize": 10.8
+        }
+      }
+    },
+    {
+      "basis": 240,
+      "tile": {
+        "width": 480,
+        "height": 240
+      },
+      "nodes": {
+        "container.open.c0": {
+          "cell": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 80.0,
+            "height": 80.0
+          },
+          "fontSize": 24.0
+        },
+        "container.open.c5": {
+          "cell": {
+            "left": 400.0,
+            "top": 0.0,
+            "width": 80.0,
+            "height": 80.0
+          },
+          "fontSize": 24.0
+        },
+        "container.fallback.text": {
+          "fontSize": 12.0
+        },
+        "container.rings.r0": {
+          "cell": {
+            "left": 0.0,
+            "top": 0.0,
+            "width": 80.0,
+            "height": 148.0
+          }
+        },
+        "container.rings.r5": {
+          "cell": {
+            "left": 400.0,
+            "top": 0.0,
+            "width": 80.0,
+            "height": 148.0
+          }
+        },
+        "container.rings.r0.gauge": {
+          "arcStrokeWidth": 8.0
+        },
+        "container.rings.r0.icon": {
+          "glyphEdge": 32.0
+        },
+        "container.rings.r0.percent": {
+          "fontSize": 16.0
+        }
+      }
+    }
+  ]
+}

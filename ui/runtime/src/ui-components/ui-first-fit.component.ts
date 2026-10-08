@@ -87,6 +87,6 @@ export const uiFirstFitComponent: UiComponentDefinition<UiFirstFitState> = {
 
   intrinsicMainPx(node, m) {
     const children = node.children ?? [];
-    return children.length === 0 ? 0 : m.ofChild(children[children.length - 1]);
+    return children.length === 0 ? 0 : m.nested().ofChild(children[children.length - 1]);
   },
 };

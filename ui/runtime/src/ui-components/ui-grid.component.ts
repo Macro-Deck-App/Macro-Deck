@@ -1,7 +1,9 @@
 import { UiComponents } from './ui-component-types';
 import type { UiComponentDefinition } from '../ui-framework/component-registry';
 import { nodeGapPx, nodePaddingPx } from './style';
-import { gridIntrinsicHeight, layoutGridCells } from './grid-layout';
+import { chooseColumns, gridIntrinsicHeight, layoutGridCells } from './grid-layout';
+import { nodeLength, resolveLength } from '../ui-framework/length';
+import { UiComponentProperties } from './component-properties';
 import { px } from './px.util';
 import { bindPressGesture, createPressGestureState, PressGestureState, releasePressGesture } from './press-gesture';
 
@@ -29,12 +31,14 @@ export const uiGridComponent: UiComponentDefinition<UiGridState> = {
   paint(node, ctx) {
     const element = ctx.element as HTMLElement;
     ctx.setClassName(element, 'widget-grid');
-    const padding = nodePaddingPx(node, ctx.basis, ctx.crossExtent);
-    const gap = nodeGapPx(node, ctx.basis, ctx.crossExtent);
+    const padding = nodePaddingPx(node, ctx);
+    const gap = nodeGapPx(node, ctx);
+    const minCell = resolveLength(nodeLength(node, UiComponentProperties.MinCellSize), ctx);
+    const columns = chooseColumns(node, ctx.box.width, ctx.box.height, padding, gap, minCell);
     ctx.sizeTo(element, ctx.box.height === null && ctx.box.width !== null
-      ? { width: ctx.box.width, height: gridIntrinsicHeight(node, ctx.box.width, padding, gap) }
+      ? { width: ctx.box.width, height: gridIntrinsicHeight(node, ctx.box.width, padding, gap, columns) }
       : ctx.box);
-    const cells = layoutGridCells(node, ctx.box.width, ctx.box.height, padding, gap);
+    const cells = layoutGridCells(node, ctx.box.width, ctx.box.height, padding, gap, columns);
     ctx.syncChildren(element, cells.map(cell => ({
       child: cell.child,
       box: { width: cell.width, height: cell.height },
@@ -56,7 +60,9 @@ export const uiGridComponent: UiComponentDefinition<UiGridState> = {
 
   intrinsicMainPx(node, m) {
     if (m.horizontal || m.crossExtent === null) return 0;
-    return gridIntrinsicHeight(node, m.crossExtent, nodePaddingPx(node, m.basis, m.crossExtent),
-      nodeGapPx(node, m.basis, m.crossExtent));
+    const padding = nodePaddingPx(node, m);
+    const gap = nodeGapPx(node, m);
+    const minCell = resolveLength(nodeLength(node, UiComponentProperties.MinCellSize), m);
+    return gridIntrinsicHeight(node, m.crossExtent, padding, gap, chooseColumns(node, m.crossExtent, null, padding, gap, minCell));
   },
 };

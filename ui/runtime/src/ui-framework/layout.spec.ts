@@ -21,10 +21,11 @@ function node(type: string, properties: Record<string, unknown> = {}, children?:
 const box = (width: number | null, height: number | null): UiComponentBox => ({ width, height });
 const len = (basis: number, extra: Record<string, number> = {}) => ({ basis, ...extra });
 
-function metrics(basis: number, crossExtent: number | null, horizontal: boolean): UiIntrinsicMetrics {
+function metrics(basis: number, crossExtent: number | null, horizontal: boolean, container: number | null = null): UiIntrinsicMetrics {
   const m: UiIntrinsicMetrics = {
-    basis, crossExtent, horizontal,
+    basis, crossExtent, container, horizontal,
     ofChild: child => intrinsicMainPx(child, m, DEFAULT_UI_COMPONENT_REGISTRY),
+    nested: () => metrics(basis, crossExtent, horizontal, null),
   };
   return m;
 }

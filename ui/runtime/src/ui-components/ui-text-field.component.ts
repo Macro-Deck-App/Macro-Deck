@@ -110,7 +110,7 @@ export const uiTextFieldComponent: UiComponentDefinition<UiTextFieldState> = {
 
     ctx.setStyle(element, 'width', px(ctx.box.width));
     ctx.setStyle(element, 'font-size', px(
-      resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent)));
+      resolveLength(nodeLength(node, UiComponentProperties.Size), ctx)));
 
     // Never while the field has focus - the producer is authoritative for the value, but a filtering
     // producer echoes the query back on every keystroke, and applying that as a patch would move the
@@ -125,7 +125,7 @@ export const uiTextFieldComponent: UiComponentDefinition<UiTextFieldState> = {
 
   intrinsicMainPx(node, m) {
     if (m.horizontal) return 0;
-    const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent);
+    const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m);
     return (size ?? 0) * (WIDGET_FIELD_LINE_HEIGHT + 2 * WIDGET_FIELD_PADDING_EM) + 2 * WIDGET_FIELD_BORDER_PX;
   },
 };

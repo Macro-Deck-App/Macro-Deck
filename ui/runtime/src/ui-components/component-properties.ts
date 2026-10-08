@@ -59,6 +59,7 @@ export const UiComponentProperties = {
   Icon: 'icon',
   Columns: 'columns',
   Rows: 'rows',
+  MinCellSize: 'minCellSize',
   ColumnSpan: 'columnSpan',
   RowSpan: 'rowSpan',
   StartAngle: 'startAngle',

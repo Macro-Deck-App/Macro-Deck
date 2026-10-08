@@ -36,6 +36,25 @@ new UiGauge { Key = "battery", Level = 0.4, StartAngle = 0, EndAngle = 360, Thic
 Angles are degrees clockwise from twelve o'clock. The sweep is `EndAngle - StartAngle`, so an end before the
 start runs counterclockwise; its size is clamped to one full turn.
 
+## A ring that scales with its cell
+
+```csharp
+new UiLayer
+{
+    Key = "ring",
+    Children =
+    [
+        new UiGauge { Key = "level", Level = 0.8, StartAngle = 0, EndAngle = 360, Thickness = UiLength.OfParent(0.085, 0.01) },
+        new UiTextRun { Key = "percent", Text = "80 %", Size = UiLength.OfParent(0.18, 0.03) },
+    ],
+}
+```
+
+`Thickness` is a fraction of the widget, so a ring in a grid cell keeps the stroke of the whole widget. A
+length relative to the containing box keeps it a fraction of the ring's own cell; put the rings in a
+[grid](/ui/components/grid/#choosing-the-columns) with `MinCellSize` and one tree fits any widget shape. See
+[Sizing](/ui/concepts/sizing/#relative-to-the-containing-box).
+
 ## Track colour
 
 The unfilled track follows the theme unless you set `TrackColor`, for a ring on a custom background:

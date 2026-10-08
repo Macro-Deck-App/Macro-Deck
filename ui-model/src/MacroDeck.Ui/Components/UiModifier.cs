@@ -457,7 +457,8 @@ internal static class UiModifierValidation
 
 	internal static UiLength? NonNegative(UiLength? length, string name)
 		=> length is null ||
-			(length.Basis >= 0 && length.MaxOfCross is null or >= 0 && length.MaxOfCell is null or >= 0)
+			(length.Basis >= 0 && length.MaxOfCross is null or >= 0 && length.MaxOfCell is null or >= 0
+				&& length.ParentFraction is null or >= 0)
 				? length
 				: throw new ArgumentOutOfRangeException(name, length, "A length must not be negative.");
 

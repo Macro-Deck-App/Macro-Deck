@@ -59,7 +59,7 @@ public class UiComponentVocabularyTests
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "interaction", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
-		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
+		"strokeWidth", "path", "icon", "columns", "rows", "minCellSize", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
 		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream", "shadow",
 		"trackColor",
@@ -556,6 +556,7 @@ public class UiComponentVocabularyTests
 					Key = "grid",
 					Columns = 3,
 					Rows = 2,
+					MinCellSize = 0.2,
 					Gap = 0.02,
 					Padding = 0.03,
 					Children =

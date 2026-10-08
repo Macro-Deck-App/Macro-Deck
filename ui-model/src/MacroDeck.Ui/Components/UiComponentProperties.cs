@@ -261,6 +261,10 @@ public static class UiComponentProperties
 	/// <summary>A <see cref="UiGrid" />'s row count. Absent means as many as its children need.</summary>
 	public const string Rows = "rows";
 
+	/// <summary>A <see cref="UiGrid" />'s minimum cell size, as a <see cref="UiLength" />. Present means the
+	/// reader chooses the column count.</summary>
+	public const string MinCellSize = "minCellSize";
+
 	/// <summary>How many columns a child of a <see cref="UiGrid" /> spans. Ignored under any other
 	/// parent.</summary>
 	public const string ColumnSpan = "columnSpan";
@@ -336,7 +340,7 @@ public static class UiComponentProperties
 		Opacity, Brightness, Saturation, Tint, Start, End, StartColor, EndColor, Marker, Thickness, Value,
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
-		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
+		StrokeWidth, Path, Icon, Columns, Rows, MinCellSize, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
 		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream, Shadow,
 		TrackColor,
 	];

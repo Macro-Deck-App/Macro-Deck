@@ -1,7 +1,14 @@
 import { WidgetBorder, WidgetData, WidgetType } from '../domain/widget.interface';
 import { nodeBoolean, nodeNumber, nodeRaw, nodeString } from '../ui-framework/node-properties.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
-import { nodeBackgroundColor, nodeHexColor, nodeLength, resolveLength, TRANSPARENT_BACKGROUND } from '../ui-framework/length';
+import {
+  LengthScope,
+  nodeBackgroundColor,
+  nodeHexColor,
+  nodeLength,
+  resolveLength,
+  TRANSPARENT_BACKGROUND,
+} from '../ui-framework/length';
 import { UiComponentBox } from '../ui-framework/layout';
 import { effectiveTreeRoot } from '../ui-framework/responsive';
 import {
@@ -61,20 +68,20 @@ export function nodeAlign(node: UiNode): string {
   }
 }
 
-function lengthPx(node: UiNode, key: string, basis: number, crossExtent: number | null): number {
-  return resolveLength(nodeLength(node, key), basis, crossExtent) ?? 0;
+function lengthPx(node: UiNode, key: string, scope: LengthScope): number {
+  return resolveLength(nodeLength(node, key), scope) ?? 0;
 }
 
-export function nodePaddingPx(node: UiNode, basis: number, crossExtent: number | null): number {
-  return lengthPx(node, UiComponentProperties.Padding, basis, crossExtent);
+export function nodePaddingPx(node: UiNode, scope: LengthScope): number {
+  return lengthPx(node, UiComponentProperties.Padding, scope);
 }
 
-export function nodeGapPx(node: UiNode, basis: number, crossExtent: number | null): number {
-  return lengthPx(node, UiComponentProperties.Gap, basis, crossExtent);
+export function nodeGapPx(node: UiNode, scope: LengthScope): number {
+  return lengthPx(node, UiComponentProperties.Gap, scope);
 }
 
-export function nodeThicknessPx(node: UiNode, basis: number, crossExtent: number | null): number {
-  return lengthPx(node, UiComponentProperties.Thickness, basis, crossExtent);
+export function nodeThicknessPx(node: UiNode, scope: LengthScope): number {
+  return lengthPx(node, UiComponentProperties.Thickness, scope);
 }
 
 export function stackBackground(node: UiNode): string | undefined {
