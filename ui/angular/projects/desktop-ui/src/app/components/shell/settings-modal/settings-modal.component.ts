@@ -21,6 +21,7 @@ import { ExtensionsSettingsComponent } from './sections/extensions-settings.comp
 import { DevicesSettingsComponent } from './sections/devices-settings.component';
 import { LanguageSettingsComponent } from './sections/language-settings.component';
 import { CompanionAppSettingsComponent } from './sections/companion-app-settings.component';
+import { HttpSettingsComponent } from './sections/http-settings.component';
 import { LoggingSettingsComponent } from './sections/logging-settings.component';
 import { MigrationSettingsComponent } from './sections/migration-settings.component';
 import { NetworkSettingsComponent } from './sections/network-settings.component';
@@ -70,7 +71,7 @@ const PINNED_CATEGORY_LABEL_KEYS: Partial<Record<SettingsCategory, string>> = {
     UsbSettingsComponent,
     CompanionAppSettingsComponent,
     BackupsSettingsComponent, MigrationSettingsComponent,
-    LoggingSettingsComponent, DeveloperSettingsComponent, ExperimentsSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
+    HttpSettingsComponent, LoggingSettingsComponent, DeveloperSettingsComponent, ExperimentsSettingsComponent, ExtensionsSettingsComponent, AboutSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings-modal.component.html',
   styleUrls: ['./settings-modal.component.scss'],
@@ -138,6 +139,7 @@ export class SettingsModalComponent {
         label: text(Strings.Settings.Advanced),
         items: [
           { id: 'adb', label: text(Strings.Settings.Adb), icon: 'device-phone' },
+          { id: 'http', label: text(AppStrings.Settings.Http.Heading), icon: 'globe' },
           { id: 'logging', label: text(Strings.Settings.Logging), icon: 'file-text' },
           { id: 'developer', label: text(Strings.Settings.Developer), icon: 'code' },
           ...experiments,

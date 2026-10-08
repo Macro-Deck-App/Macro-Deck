@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube.Protocol;
 
@@ -14,7 +15,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 
 	private const string BroadcastParts = "id,snippet,contentDetails,status";
 
-	private static readonly HttpClient _shared = CreateClient(new SocketsHttpHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
 
 	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
 	{

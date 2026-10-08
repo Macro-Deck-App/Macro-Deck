@@ -2724,6 +2724,10 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Tampilan folder tersebut tidak tersedia.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Masukkan User-Agent yang valid: maksimal {maxLength} karakter ASCII yang dapat dicetak dengan format Product/1.0.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Ekspor gagal</value>
   </data>
@@ -15162,6 +15166,31 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Pembaruan</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Pengaturan untuk permintaan dan koneksi HTTP yang dilakukan integrasi bawaan Macro Deck.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>Pengaturan HTTP tidak dapat dimuat.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>Pengaturan HTTP tidak dapat disimpan.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Default: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Sesuaikan User-Agent yang dikirim integrasi bawaan bersama permintaan HTTP. Ini dapat membantu mengatasi masalah kompatibilitas dengan reverse proxy dan sistem perlindungan anti-bot. Plugin pihak ketiga tidak terpengaruh dan harus mengatur User-Agent sendiri. Perubahan berlaku untuk permintaan dan koneksi baru; koneksi yang sudah terbuka tetap memakai nilai sebelumnya sampai tersambung ulang.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Pulihkan default</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Langsung berlaku untuk setiap klien yang terhubung.</value>

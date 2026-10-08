@@ -2724,6 +2724,10 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Die mapweergave is niet beschikbaar.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Voer een geldige User-Agent in: maximaal {maxLength} afdrukbare ASCII-tekens in de vorm Product/1.0.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Exporteren is mislukt</value>
   </data>
@@ -15162,6 +15166,31 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Updates</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Instellingen voor de HTTP-verzoeken en verbindingen van de ingebouwde integraties van Macro Deck.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>De HTTP-instellingen konden niet worden geladen.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>De HTTP-instellingen konden niet worden opgeslagen.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Standaard: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Pas de User-Agent aan die de ingebouwde integraties met HTTP-verzoeken meesturen. Dat kan compatibiliteitsproblemen met reverse proxies en antibotbeveiligingen oplossen. Plug-ins van derden worden niet beïnvloed en moeten hun eigen User-Agent instellen. Een wijziging geldt voor nieuwe verzoeken en nieuwe verbindingen; al geopende verbindingen houden de vorige waarde tot ze opnieuw verbinden.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Standaard herstellen</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Wordt meteen op elke verbonden client toegepast.</value>

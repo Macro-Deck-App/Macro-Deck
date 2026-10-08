@@ -157,6 +157,7 @@ import {
   GetLocalizationResponse,
   GetLocalizationSettingsResponse,
   GetLockScreenSettingsResponse,
+  GetHttpSettingsResponse,
   GetLoggingSettingsResponse,
   GetLogSourcesResponse,
   GetLogsRequest,
@@ -352,6 +353,8 @@ import {
   UpdateLocalizationSettingsResponse,
   UpdateLockScreenSettingsRequest,
   UpdateLockScreenSettingsResponse,
+  UpdateHttpSettingsRequest,
+  UpdateHttpSettingsResponse,
   UpdateLoggingSettingsRequest,
   UpdateLoggingSettingsResponse,
   UpdateNetworkSettingsRequest,
@@ -1224,6 +1227,14 @@ export class ApiService {
     request: UpdateAppearanceSettingsRequest
   ): Promise<UpdateAppearanceSettingsResponse> {
     return this.http('PUT', '/api/settings/appearance', request);
+  }
+
+  getHttpSettings(): Promise<GetHttpSettingsResponse> {
+    return this.http('GET', '/api/settings/http');
+  }
+
+  updateHttpSettings(request: UpdateHttpSettingsRequest): Promise<UpdateHttpSettingsResponse> {
+    return this.http('PUT', '/api/settings/http', request);
   }
 
   getLoggingSettings(): Promise<GetLoggingSettingsResponse> {

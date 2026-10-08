@@ -14,6 +14,7 @@ export type SettingsCategory =
   | 'usb'
   | 'backups'
   | 'migration'
+  | 'http'
   | 'logging'
   | 'developer'
   | 'experiments'

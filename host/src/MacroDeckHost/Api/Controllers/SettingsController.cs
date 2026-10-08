@@ -22,6 +22,10 @@ public class SettingsController : ControllerBase
 	private readonly IUiTransportMessageHandler<UpdateAutostartSettingsRequest, UpdateAutostartSettingsResponse>
 		_updateAutostart;
 
+	private readonly IUiTransportMessageHandler<GetHttpSettingsRequest, GetHttpSettingsResponse> _getHttp;
+
+	private readonly IUiTransportMessageHandler<UpdateHttpSettingsRequest, UpdateHttpSettingsResponse> _updateHttp;
+
 	private readonly IUiTransportMessageHandler<GetLoggingSettingsRequest, GetLoggingSettingsResponse>
 		_getLogging;
 
@@ -103,6 +107,8 @@ public class SettingsController : ControllerBase
 		IUiTransportMessageHandler<UpdateAppearanceSettingsRequest, UpdateAppearanceSettingsResponse> updateAppearance,
 		IUiTransportMessageHandler<GetAutostartSettingsRequest, GetAutostartSettingsResponse> getAutostart,
 		IUiTransportMessageHandler<UpdateAutostartSettingsRequest, UpdateAutostartSettingsResponse> updateAutostart,
+		IUiTransportMessageHandler<GetHttpSettingsRequest, GetHttpSettingsResponse> getHttp,
+		IUiTransportMessageHandler<UpdateHttpSettingsRequest, UpdateHttpSettingsResponse> updateHttp,
 		IUiTransportMessageHandler<GetLoggingSettingsRequest, GetLoggingSettingsResponse> getLogging,
 		IUiTransportMessageHandler<UpdateLoggingSettingsRequest, UpdateLoggingSettingsResponse> updateLogging,
 		IUiTransportMessageHandler<GetNetworkSettingsRequest, GetNetworkSettingsResponse> getNetwork,
@@ -144,6 +150,8 @@ public class SettingsController : ControllerBase
 		_updateAppearance = updateAppearance;
 		_getAutostart = getAutostart;
 		_updateAutostart = updateAutostart;
+		_getHttp = getHttp;
+		_updateHttp = updateHttp;
 		_getLogging = getLogging;
 		_updateLogging = updateLogging;
 		_getNetwork = getNetwork;
@@ -213,6 +221,14 @@ public class SettingsController : ControllerBase
 	[HttpPost("network/tls/certificate-authority/regenerate")]
 	public Task<UpdateNetworkSettingsResponse> RegenerateTlsCertificateAuthority(CancellationToken ct)
 		=> _regenerateTlsCertificateAuthority.Handle(new RegenerateTlsCertificateAuthorityRequest(), ct).AsTask();
+
+	[HttpGet("http")]
+	public Task<GetHttpSettingsResponse> GetHttp(CancellationToken ct)
+		=> _getHttp.Handle(new GetHttpSettingsRequest(), ct).AsTask();
+
+	[HttpPut("http")]
+	public Task<UpdateHttpSettingsResponse> UpdateHttp(UpdateHttpSettingsRequest body, CancellationToken ct)
+		=> _updateHttp.Handle(body, ct).AsTask();
 
 	[HttpGet("logging")]
 	public Task<GetLoggingSettingsResponse> GetLogging(CancellationToken ct)

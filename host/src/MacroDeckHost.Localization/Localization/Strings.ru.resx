@@ -2724,6 +2724,10 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Это представление папки недоступно.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Введите допустимый User-Agent: не более {maxLength} печатаемых символов ASCII в формате Product/1.0.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Не удалось экспортировать</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Обновления</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Настройки HTTP-запросов и соединений, которые выполняют встроенные интеграции Macro Deck.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>Не удалось загрузить настройки HTTP.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки HTTP.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>По умолчанию: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Измените User-Agent, который встроенные интеграции отправляют в HTTP-запросах. Это может помочь решить проблемы совместимости с обратными прокси и системами защиты от ботов. Плагины сторонних разработчиков не затрагиваются и должны задавать собственный User-Agent. Изменение применяется к новым запросам и новым соединениям; уже открытые соединения сохраняют прежнее значение до повторного подключения.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Вернуть значение по умолчанию</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Применяется сразу ко всем подключённым клиентам.</value>

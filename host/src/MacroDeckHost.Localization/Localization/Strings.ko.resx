@@ -2724,6 +2724,10 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>해당 폴더 보기를 사용할 수 없습니다.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>올바른 User-Agent를 입력하세요. 출력 가능한 ASCII 문자 {maxLength}자 이내의 Product/1.0 형식이어야 합니다.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>내보내기에 실패했습니다</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>업데이트</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck 내장 연동이 보내는 HTTP 요청과 연결에 대한 설정입니다.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>HTTP 설정을 불러오지 못했습니다.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>HTTP 설정을 저장하지 못했습니다.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>기본값: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>내장 연동이 HTTP 요청과 함께 보내는 User-Agent를 변경합니다. 리버스 프록시나 봇 차단 시스템과의 호환성 문제를 해결하는 데 도움이 될 수 있습니다. 타사 플러그인은 영향을 받지 않으며 각자 User-Agent를 설정해야 합니다. 변경 사항은 새 요청과 새 연결에 적용되며, 이미 열려 있는 연결은 다시 연결될 때까지 이전 값을 유지합니다.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>기본값 복원</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>연결된 모든 클라이언트에 즉시 적용됩니다.</value>

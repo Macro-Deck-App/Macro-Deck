@@ -2725,6 +2725,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Toto zobrazení složky není k dispozici.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Zadejte platný User-Agent: nejvýše {maxLength} tisknutelných znaků ASCII ve tvaru Produkt/1.0.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export se nezdařil</value>
   </data>
@@ -15161,6 +15165,31 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Aktualizace</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Nastavení požadavků a spojení HTTP, která vytvářejí vestavěné integrace Macro Decku.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>Nastavení HTTP se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>Nastavení HTTP se nepodařilo uložit.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Výchozí: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Upravte User-Agent, který vestavěné integrace odesílají s požadavky HTTP. Může pomoci vyřešit potíže s kompatibilitou se zpětnými proxy servery a systémy ochrany proti botům. Pluginy třetích stran to neovlivní a musí si nastavit vlastní User-Agent. Změna platí pro nové požadavky a nová spojení; už otevřená spojení si ponechají původní hodnotu do opětovného připojení.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Obnovit výchozí</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Použije se okamžitě u všech připojených klientů.</value>

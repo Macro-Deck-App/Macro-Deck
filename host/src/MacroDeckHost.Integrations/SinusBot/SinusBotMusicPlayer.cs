@@ -4,12 +4,13 @@ using System.Text;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
 internal sealed class SinusBotMusicPlayer : ICatalogMusicPlayer
 {
-	private static readonly HttpClient _http = new();
+	private static readonly HttpClient _http = IntegrationHttp.CreateClient();
 
 	private static readonly ILogger _logger =
 		IntegrationLog.For<SinusBotMusicPlayer>(SinusBotIntegration.IntegrationId);

@@ -2725,6 +2725,10 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Questa vista cartella non è disponibile.</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Inserisci uno User-Agent valido: fino a {maxLength} caratteri ASCII stampabili nel formato Prodotto/1.0.</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Esportazione non riuscita</value>
   </data>
@@ -15161,6 +15165,31 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Aggiornamenti</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Impostazioni per le richieste e le connessioni HTTP effettuate dalle integrazioni incluse di Macro Deck.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>Impossibile caricare le impostazioni HTTP.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>Impossibile salvare le impostazioni HTTP.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Predefinito: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Personalizza lo User-Agent inviato dalle integrazioni incluse con le richieste HTTP. Può aiutare a risolvere problemi di compatibilità con reverse proxy e sistemi di protezione anti-bot. I plugin di terze parti non sono interessati e devono configurare il proprio User-Agent. Una modifica vale per le nuove richieste e le nuove connessioni; le connessioni già aperte mantengono il valore precedente finché non si riconnettono.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Ripristina predefinito</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Si applica immediatamente a ogni client connesso.</value>

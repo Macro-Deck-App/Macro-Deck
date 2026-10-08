@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Paths;
@@ -256,6 +257,8 @@ public static class Program
 				.Build();
 
 			await SeedLogLevelAsync(host, logLevelState);
+			await SeedHttpUserAgentAsync(host);
+			Integrations.Http.IntegrationHttp.Use(host.Services.GetRequiredService<IHttpUserAgentSource>());
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat
@@ -348,6 +351,19 @@ public static class Program
 		Log.Logger.Fatal(e.ExceptionObject as Exception,
 			"Unhandled exception {Terminating}",
 			e.IsTerminating ? "Terminating" : "Not terminating");
+	}
+
+	private static async Task SeedHttpUserAgentAsync(IHost host)
+	{
+		try
+		{
+			await using var scope = host.Services.CreateAsyncScope();
+			await scope.ServiceProvider.GetRequiredService<IHttpSettingsService>().Seed();
+		}
+		catch (Exception e)
+		{
+			Log.Warning(e, "Could not seed the HTTP User-Agent; keeping the default");
+		}
 	}
 
 	// Apply the persisted minimum log level to the live pipeline before the host serves traffic.

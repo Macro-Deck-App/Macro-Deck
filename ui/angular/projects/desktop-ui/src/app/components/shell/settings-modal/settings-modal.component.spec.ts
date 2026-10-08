@@ -192,7 +192,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(15);
+    expect(railButtons.length).toBe(16);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -320,7 +320,7 @@ describe('SettingsModalComponent', () => {
         ['Network', 'Devices', 'USB connections', 'Companion App'],
         ['Security'],
         ['Backups', 'Migration'],
-        ['ADB', 'Logging', 'Developer'],
+        ['ADB', 'HTTP', 'Logging', 'Developer'],
         ['About'],
       ]);
 
@@ -379,13 +379,13 @@ describe('SettingsModalComponent', () => {
     it('is hidden from Advanced while Developer mode is off', async () => {
       await createWithDeveloperMode(false);
 
-      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer']);
+      expect(advancedItems()).toEqual(['ADB', 'HTTP', 'Logging', 'Developer']);
     });
 
     it('is listed last in Advanced while Developer mode is on and shows the Car Thing card', async () => {
       await createWithDeveloperMode(true);
 
-      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer', 'Experiments']);
+      expect(advancedItems()).toEqual(['ADB', 'HTTP', 'Logging', 'Developer', 'Experiments']);
 
       component.selectCategory('experiments');
       fixture.detectChanges();
@@ -621,7 +621,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(15);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(16);
 
     component.selectAccount();
     fixture.detectChanges();

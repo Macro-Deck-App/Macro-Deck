@@ -194,6 +194,20 @@ anything signed with that certificate. Wait for an update signed with a new cert
 plugin if you no longer trust it. Installing or updating it from the Store fails with the message that
 Macro Deck could not verify who published the package.
 
+## A reverse proxy or firewall blocks a connection to a service
+
+Some reverse proxies and anti-bot protections reject requests they take for automated traffic, so an
+integration such as Home Assistant behind a proxy cannot connect. Macro Deck identifies itself to the
+services its built-in integrations talk to with a `User-Agent` of `MacroDeck/` followed by the running
+version. If your proxy blocks it, open **Settings > Advanced > HTTP** and enter a value the proxy accepts
+under **HTTP User-Agent**. **Restore default** puts the standard value back.
+
+- A change applies to new requests and new connections. A connection that is already open, such as a
+  Home Assistant WebSocket, keeps the old value until it reconnects.
+- The setting covers the built-in integrations only. Plugins from the Store set their own `User-Agent`.
+- The integrations for OBS Studio and the Twitch API do not send this header, so the setting has no effect
+  on them.
+
 ## Discord cannot be connected
 
 If the Discord setup says that only a Discord Rich Presence service was found, or Discord stays

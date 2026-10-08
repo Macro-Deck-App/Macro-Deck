@@ -4,6 +4,7 @@ using System.Security.Authentication;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.HomeAssistant.Protocol;
 
@@ -218,7 +219,7 @@ internal sealed class HomeAssistantClient : IHomeAssistantClient
 
 	private static async Task<WebSocket> ConnectClientWebSocketAsync(Uri uri, CancellationToken cancellationToken)
 	{
-		var socket = new ClientWebSocket();
+		var socket = IntegrationHttp.CreateWebSocket();
 		try
 		{
 			await socket.ConnectAsync(uri, cancellationToken).ConfigureAwait(false);

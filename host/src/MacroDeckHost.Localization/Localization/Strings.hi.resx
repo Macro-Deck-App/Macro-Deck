@@ -2724,6 +2724,10 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>वह फ़ोल्डर व्यू उपलब्ध नहीं है।</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>मान्य User-Agent दर्ज करें: Product/1.0 प्रारूप में अधिकतम {maxLength} प्रिंट होने योग्य ASCII वर्ण।</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>निर्यात विफल रहा</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>अपडेट</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck के अंतर्निहित एकीकरणों द्वारा किए जाने वाले HTTP अनुरोधों और कनेक्शनों की सेटिंग।</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>HTTP सेटिंग लोड नहीं हो सकीं।</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>HTTP सेटिंग सहेजी नहीं जा सकीं।</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>डिफ़ॉल्ट: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>अंतर्निहित एकीकरण HTTP अनुरोधों के साथ जो User-Agent भेजते हैं, उसे अपनी ज़रूरत के अनुसार बदलें। इससे रिवर्स प्रॉक्सी और बॉट-सुरक्षा प्रणालियों के साथ संगतता की समस्याएँ हल हो सकती हैं। तृतीय-पक्ष प्लगइन प्रभावित नहीं होते और उन्हें अपना User-Agent स्वयं सेट करना होता है। बदलाव नए अनुरोधों और नए कनेक्शनों पर लागू होता है; पहले से खुले कनेक्शन दोबारा जुड़ने तक पुराना मान रखते हैं।</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>डिफ़ॉल्ट पर लौटाएँ</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>हर कनेक्टेड क्लाइंट पर तुरंत लागू होती है।</value>

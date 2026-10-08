@@ -2724,6 +2724,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>そのフォルダービューは利用できません。</value>
   </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>有効な User-Agent を入力してください。ASCII の印字可能文字で {maxLength} 文字までの、Product/1.0 の形式です。</value>
+    <comment>[maxLength:int]</comment>
+  </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>エクスポートに失敗しました</value>
   </data>
@@ -15162,6 +15166,31 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>更新</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck の内蔵連携が行う HTTP リクエストと接続の設定です。</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>HTTP 設定を読み込めませんでした。</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>HTTP 設定を保存できませんでした。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>既定値: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>内蔵連携が HTTP リクエストで送信する User-Agent をカスタマイズします。リバースプロキシやボット対策システムとの互換性の問題を解決できる場合があります。サードパーティ製プラグインは対象外で、各自で User-Agent を設定する必要があります。変更は新しいリクエストと新しい接続に適用され、すでに開いている接続は再接続するまで以前の値のままです。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>既定値に戻す</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>接続中のすべてのクライアントにすぐ適用されます。</value>
