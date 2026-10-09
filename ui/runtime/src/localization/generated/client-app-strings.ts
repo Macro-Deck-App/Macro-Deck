@@ -8,10 +8,14 @@ export const ClientAppStringsScope = 'macrodeck.app' as const;
 export const ClientAppStrings = {
 	Auth: {
 		ForgotPasswordHint: 'macrodeck.app:Auth.ForgotPasswordHint',
+		PairingCode: 'macrodeck.app:Auth.PairingCode',
+		PairingCodeHint: 'macrodeck.app:Auth.PairingCodeHint',
+		PairingCodeInvalid: 'macrodeck.app:Auth.PairingCodeInvalid',
 		Password: 'macrodeck.app:Auth.Password',
 		SignIn: 'macrodeck.app:Auth.SignIn',
 		SignInFailed: 'macrodeck.app:Auth.SignInFailed',
 		SignInSubtitle: 'macrodeck.app:Auth.SignInSubtitle',
+		TooManyAttempts: 'macrodeck.app:Auth.TooManyAttempts',
 		Username: 'macrodeck.app:Auth.Username',
 	},
 	Deck: {
@@ -420,10 +424,14 @@ type LocalizationKeyLeaves<T> = T extends string ? T
 /** The default-language text of every key, as the fallback before the host answers. */
 export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Auth.ForgotPasswordHint': 'Forgot your password? Reset it on the computer running Macro Deck, under Settings > Security.',
+	'macrodeck.app:Auth.PairingCode': 'Pairing code',
+	'macrodeck.app:Auth.PairingCodeHint': 'On the computer running Macro Deck, open the Network panel with the Wi-Fi icon at the top right and enter the pairing code shown there.',
+	'macrodeck.app:Auth.PairingCodeInvalid': 'That code is wrong or has expired. Check the pairing code in the Network panel and try again.',
 	'macrodeck.app:Auth.Password': 'Password',
 	'macrodeck.app:Auth.SignIn': 'Sign in',
 	'macrodeck.app:Auth.SignInFailed': 'Login failed',
 	'macrodeck.app:Auth.SignInSubtitle': 'Sign in to continue',
+	'macrodeck.app:Auth.TooManyAttempts': 'Too many failed attempts. Wait a moment and try again.',
 	'macrodeck.app:Auth.Username': 'Username',
 	'macrodeck.app:Deck.FolderView.ChangeView': 'Change folder view',
 	'macrodeck.app:Deck.FolderView.Configuration': 'Configuration',

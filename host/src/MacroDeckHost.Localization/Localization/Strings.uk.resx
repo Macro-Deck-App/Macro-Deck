@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Забули пароль? Скиньте його на комп'ютері, на якому працює Macro Deck, у розділі Налаштування &gt; Безпека.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Код сполучення</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>На комп'ютері, на якому працює Macro Deck, відкрийте панель «Мережа» значком Wi-Fi у правому верхньому куті та введіть показаний там код сполучення.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Код неправильний або термін його дії минув. Перевірте код сполучення на панелі «Мережа» та спробуйте ще раз.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Пароль</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Увійдіть, щоб продовжити</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Забагато невдалих спроб. Зачекайте трохи та спробуйте ще раз.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Ім'я користувача</value>

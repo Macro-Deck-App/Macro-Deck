@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Parolanızı mı unuttunuz? Macro Deck'in çalıştığı bilgisayarda Ayarlar &gt; Güvenlik bölümünden sıfırlayın.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Eşleştirme kodu</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Macro Deck'in çalıştığı bilgisayarda sağ üstteki Wi-Fi simgesiyle Ağ panelini açın ve orada gösterilen eşleştirme kodunu girin.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Kod yanlış veya süresi dolmuş. Ağ panelindeki eşleştirme kodunu kontrol edip tekrar deneyin.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Parola</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Devam etmek için oturum açın</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Çok fazla başarısız deneme. Biraz bekleyip tekrar deneyin.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Kullanıcı adı</value>

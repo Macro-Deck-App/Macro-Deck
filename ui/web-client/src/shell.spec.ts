@@ -150,22 +150,28 @@ describe('Shell', () => {
     expect(root.textContent).toContain(text(ClientAppStrings.WebClient.Setup.Body));
   });
 
-  it('offers a sign-in form once setup is done, not a dead end', () => {
+  it('offers a pairing-code sign-in once setup is done, and says where to find the code', () => {
     mount();
     client.app.set({ probed: true });
 
-    // The client could not be signed into at all until this form existed.
     expect(root.querySelector('.wc-login')).not.toBeNull();
-    expect(root.querySelectorAll('input[type="password"]').length).toBe(1);
-    expect(root.querySelectorAll('input:not([type="password"])').length).toBe(1);
+    expect(root.querySelectorAll('input[name="pairing-code"]').length).toBe(1);
+    expect(root.querySelectorAll('input[type="password"]').length).toBe(0);
+    expect(root.querySelector('.wc-login-hint')?.textContent).toBe(text(ClientAppStrings.Auth.PairingCodeHint));
   });
 
-  it('tells someone who forgot the password where to reset it', () => {
+  it('switches to username and password, where it says how to reset a forgotten password', () => {
     mount();
     client.app.set({ probed: true });
 
-    expect(root.querySelector('.wc-login-hint')?.textContent)
-      .toBe(text(ClientAppStrings.Auth.ForgotPasswordHint));
+    const toggle = Array.prototype.slice.call(root.querySelectorAll('.wc-login .wc-seg-option'))
+      .filter((button: HTMLButtonElement) => button.textContent === text(ClientAppStrings.Auth.Password))[0] as HTMLButtonElement;
+    toggle.click();
+
+    expect(root.querySelectorAll('input[type="password"]').length).toBe(1);
+    expect(root.querySelectorAll('input[name="username"]').length).toBe(1);
+    expect(root.querySelectorAll('input[name="pairing-code"]').length).toBe(0);
+    expect(root.querySelector('.wc-login-hint')?.textContent).toBe(text(ClientAppStrings.Auth.ForgotPasswordHint));
   });
 
   it('does not leave a dialog standing over the screen that replaced it', () => {

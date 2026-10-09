@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>पासवर्ड भूल गए? इसे उस कंप्यूटर पर रीसेट करें जिस पर Macro Deck चल रहा है, सेटिंग्स &gt; सुरक्षा में।</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>पेयरिंग कोड</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>जिस कंप्यूटर पर Macro Deck चल रहा है, उस पर ऊपर दाईं ओर Wi-Fi आइकन से नेटवर्क पैनल खोलें और वहाँ दिखाया गया पेयरिंग कोड दर्ज करें।</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>यह कोड गलत है या इसकी समय-सीमा समाप्त हो गई है। नेटवर्क पैनल में पेयरिंग कोड जाँचें और फिर से कोशिश करें।</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>पासवर्ड</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>जारी रखने के लिए साइन इन करें</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>बहुत अधिक असफल प्रयास। थोड़ी देर प्रतीक्षा करें और फिर से कोशिश करें।</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>उपयोगकर्ता नाम</value>

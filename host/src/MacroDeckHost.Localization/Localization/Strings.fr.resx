@@ -517,6 +517,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Mot de passe oublié ? Réinitialise-le sur l'ordinateur où Macro Deck est lancé, dans Paramètres &gt; Sécurité.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Code d’appairage</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Sur l'ordinateur où Macro Deck est lancé, ouvre le panneau Réseau avec l'icône Wi-Fi en haut à droite et saisis le code d’appairage affiché.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Ce code est incorrect ou a expiré. Vérifie le code d’appairage dans le panneau Réseau et réessaie.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Mot de passe</value>
   </data>
@@ -528,6 +537,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Connecte-toi pour continuer</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Trop de tentatives échouées. Patiente un instant et réessaie.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Nom d'utilisateur</value>

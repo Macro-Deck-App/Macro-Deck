@@ -42,6 +42,7 @@ import {
   store,
   type ThemeMode,
   type TokenResponse,
+  TransportError,
   type DeviceScreenSaverChangedEvent,
   type DeviceClientSettingsChangedEvent,
   type GetDeviceClientSettingsResponse,
@@ -427,25 +428,66 @@ export class Client {
     let response: TokenResponse;
     try {
       response = await this.authRequest<TokenResponse>('/api/auth/login', request);
-    } catch {
+    } catch (error) {
       // The host's own problem text is not localized, so the catalogue answers instead.
-      return { ok: false, message: this.translate(ClientAppStrings.Auth.SignInFailed) };
+      return this.signInFailure(error, ClientAppStrings.Auth.SignInFailed);
     }
 
-    if (typeof response.accessToken !== 'string') {
-      return { ok: false, message: this.translate(ClientAppStrings.Auth.SignInFailed) };
+    return this.completeSignIn(response);
+  }
+
+  async signInWithPairingCode(code: string): Promise<SignInResult> {
+    const request: RedeemDeviceEnrollmentRequest = {
+      token: code,
+      device: this.deviceLoginInfo(),
+    };
+
+    let response: TokenResponse;
+    try {
+      response = await this.authRequest<TokenResponse>('/api/auth/device-enrollment/redeem', request);
+    } catch (error) {
+      return this.signInFailure(error, ClientAppStrings.Auth.PairingCodeInvalid);
     }
+
+    return this.completeSignIn(response);
+  }
+
+  private signInFailure(error: unknown, refusedKey: string): SignInResult {
+    if (error instanceof TransportError && error.status === 429) {
+      return { ok: false, message: this.translate(ClientAppStrings.Auth.TooManyAttempts) };
+    }
+    if (error instanceof TransportError && error.status === 401) {
+      return { ok: false, message: this.translate(refusedKey) };
+    }
+    return { ok: false, message: this.translate(ClientAppStrings.Auth.SignInFailed) };
+  }
+
+  private async completeSignIn(response: TokenResponse): Promise<SignInResult> {
+    if (!this.adoptSession(response)) {
+      return {
+        ok: false,
+        message: this.translate(typeof response?.accessToken === 'string'
+          ? ClientAppStrings.Errors.Auth.NotAuthorized
+          : ClientAppStrings.Auth.SignInFailed),
+      };
+    }
+
+    this.app.set({ authenticated: true });
+    await this.start();
+    return { ok: true };
+  }
+
+  private adoptSession(response: TokenResponse): boolean {
+    if (typeof response?.accessToken !== 'string') return false;
 
     this.applySession(response);
     if (!this.hasSufficientScope()) {
       this.clearSession();
-      return { ok: false, message: this.translate(ClientAppStrings.Errors.Auth.NotAuthorized) };
+      return false;
     }
 
     this.adoptDevice(response.device);
-    this.app.set({ authenticated: true });
-    await this.start();
-    return { ok: true };
+    return true;
   }
 
   async signOut(): Promise<void> {
@@ -1012,16 +1054,8 @@ export class Client {
       // whatever this device is actually entitled to.
       return false;
     }
-    if (typeof response.accessToken !== 'string') return false;
 
-    this.applySession(response);
-    if (!this.hasSufficientScope()) {
-      this.clearSession();
-      return false;
-    }
-
-    this.adoptDevice(response.device);
-    return true;
+    return this.adoptSession(response);
   }
 
   private deviceLoginInfo(): DeviceLoginInfo {

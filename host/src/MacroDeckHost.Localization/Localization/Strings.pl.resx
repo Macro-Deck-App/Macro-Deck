@@ -517,6 +517,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Zapomniane hasło? Można je zresetować na komputerze, na którym działa Macro Deck, w Ustawienia &gt; Bezpieczeństwo.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Kod parowania</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Na komputerze, na którym działa Macro Deck, otwórz panel Sieć ikoną Wi-Fi w prawym górnym rogu i wpisz wyświetlony tam kod parowania.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Kod jest nieprawidłowy lub wygasł. Sprawdź kod parowania w panelu Sieć i spróbuj ponownie.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Hasło</value>
   </data>
@@ -528,6 +537,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Zaloguj się, aby kontynuować</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Zbyt wiele nieudanych prób. Odczekaj chwilę i spróbuj ponownie.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Nazwa użytkownika</value>

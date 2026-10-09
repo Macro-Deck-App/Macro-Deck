@@ -48,6 +48,7 @@ class FakeHost {
   loginAnswer: TokenAnswer | null = token();
   loginStatus = 200;
   enrollmentAnswer: TokenAnswer | null = null;
+  enrollmentStatus = 200;
   profiles: {
     id: string; name: string; order: number;
     defaultColumns?: number; defaultRows?: number;
@@ -130,6 +131,7 @@ class FakeHost {
     }
     if (path === '/api/ui-websocket/tickets') return respond(200, { value: 'ticket-1' });
     if (path === '/api/auth/device-enrollment/redeem') {
+      if (this.enrollmentStatus !== 200) return respond(this.enrollmentStatus, { title: 'No.' });
       return this.enrollmentAnswer === null
         ? respond(401, { title: 'Spent.' })
         : respond(200, this.enrollmentAnswer);
@@ -325,6 +327,66 @@ describe('Client', () => {
       await client.signIn('owner', 'secret');
 
       expect(host.bearerFor('/api/folders')).toBe('access-42');
+    });
+  });
+
+  describe('signing in with a pairing code', () => {
+    it('spends the code at the host and reaches the deck', async () => {
+      twoProfiles();
+      host.enrollmentAnswer = token({ scope: 'client' });
+      const client = build();
+      await client.probe();
+
+      const result = await client.signInWithPairingCode('123456');
+      client.connection.state.set('connected');
+
+      expect(result.ok).toBe(true);
+      expect(host.bodyOf('/api/auth/device-enrollment/redeem')).toEqual(jasmine.objectContaining({
+        token: '123456', device: jasmine.objectContaining({ clientType: 'web-client' }),
+      }));
+      expect(client.app.screen.get()).toBe('deck');
+    });
+
+    it('says the code is wrong or expired when the host refuses it, and stays signed out', async () => {
+      const client = build();
+      await client.probe();
+
+      const result = await client.signInWithPairingCode('000000');
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toBe(ClientAppStringsDefaults[ClientAppStrings.Auth.PairingCodeInvalid]);
+      expect(client.app.screen.get()).toBe('signedOut');
+    });
+
+    it('asks to wait when the host is throttling attempts', async () => {
+      host.enrollmentStatus = 429;
+      const client = build();
+      await client.probe();
+
+      const result = await client.signInWithPairingCode('123456');
+
+      expect(result.message).toBe(ClientAppStringsDefaults[ClientAppStrings.Auth.TooManyAttempts]);
+    });
+
+    it('does not blame the code when the host cannot be reached', async () => {
+      const client = build();
+      await client.probe();
+      host.offline = true;
+
+      const result = await client.signInWithPairingCode('123456');
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toBe(ClientAppStringsDefaults[ClientAppStrings.Auth.SignInFailed]);
+    });
+
+    it('asks to wait when password sign-in is throttled too', async () => {
+      host.loginStatus = 429;
+      const client = build();
+      await client.probe();
+
+      const result = await client.signIn('owner', 'secret');
+
+      expect(result.message).toBe(ClientAppStringsDefaults[ClientAppStrings.Auth.TooManyAttempts]);
     });
   });
 

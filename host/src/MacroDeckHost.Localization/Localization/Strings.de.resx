@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Passwort vergessen? Setze es auf dem Computer, auf dem Macro Deck läuft, unter Einstellungen &gt; Sicherheit zurück.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Kopplungscode</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Öffne auf dem Computer, auf dem Macro Deck läuft, mit dem WLAN-Symbol oben rechts das Panel Netzwerk und gib den dort angezeigten Kopplungscode ein.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Der Code ist falsch oder abgelaufen. Prüfe den Kopplungscode im Panel Netzwerk und versuche es erneut.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Passwort</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Zum Fortfahren anmelden</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Zu viele fehlgeschlagene Versuche. Warte einen Moment und versuche es erneut.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Benutzername</value>
