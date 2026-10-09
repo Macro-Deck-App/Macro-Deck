@@ -3914,6 +3914,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>Добавить оформление</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>Своё оформление…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>Не удалось добавить оформление.</value>
   </data>
@@ -3927,6 +3930,27 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>Ещё оформлений: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>Выбрать изображение…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>Используйте латинские буквы и цифры. Названия в других алфавитах пока не поддерживаются.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>Введите название хотя бы с одной латинской буквой.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>Название</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>Контурное</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>Будет показано как «{label}»</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>Своё оформление</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>По умолчанию</value>
@@ -3960,6 +3984,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>Светлое, статичное</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>Статичное</value>

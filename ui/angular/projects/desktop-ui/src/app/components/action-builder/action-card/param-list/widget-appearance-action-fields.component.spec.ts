@@ -35,7 +35,8 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
   beforeEach(async () => {
     ownerId = undefined;
     updateParam = jasmine.createSpy('updateParam');
-    options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['getOptions']);
+    options = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['getOptions', 'loadLabeledOptions']);
+    options.loadLabeledOptions.and.resolveTo({ options: [] });
     options.getOptions.and.resolveTo({ options: [], allowsCustomValue: false });
 
     const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification']);
@@ -206,29 +207,66 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('does not support this appearance setting');
   });
 
-  it('offers the icon appearances of Set Icon Appearance and writes the chosen one', async () => {
+  const appearanceRequests = (appearances: Array<{ value: string; label: string }> | 'failed') => {
     options.getOptions.and.resolveTo({
       options: [{ value: 'button', metadata: { appearanceProperties: 'Icon,IconColor,IconAppearance' } }],
       allowsCustomValue: false,
     });
-    const appearanceBlock = block('set-icon-appearance', 'button');
-    appearanceBlock.parameters = [...appearanceBlock.parameters!, {
-      name: 'iconAppearance', type: 'choice', label: 'Appearance', value: WIDGET_APPEARANCE_RESET,
+    options.loadLabeledOptions.and.resolveTo(appearances === 'failed' ? { options: [], error: 'failed' } : { options: appearances });
+  };
+
+  const appearanceBlock = (value: string) => {
+    const result = block('set-icon-appearance', 'button');
+    result.parameters = [...result.parameters!, {
+      name: 'iconAppearance', type: 'choice', label: 'Appearance', value,
       options: [{ value: WIDGET_APPEARANCE_RESET, label: 'Automatic' }, { value: 'colorScheme=dark', label: 'Dark' }],
     }];
-    fixture.componentRef.setInput('block', appearanceBlock);
+    return result;
+  };
+
+  const renderAppearanceBlock = async (value: string) => {
+    fixture.componentRef.setInput('block', appearanceBlock(value));
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+    return fixture.debugElement.query(By.directive(SelectComponent));
+  };
 
-    const select = fixture.debugElement.query(By.directive(SelectComponent));
+  it('offers the icon appearances the host lists, custom ones included, and writes the chosen one', async () => {
+    appearanceRequests([
+      { value: WIDGET_APPEARANCE_RESET, label: 'Automatic' },
+      { value: 'colorScheme=dark', label: 'Dark' },
+      { value: 'variant=outlined', label: 'Outlined' },
+    ]);
+
+    const select = await renderAppearanceBlock(WIDGET_APPEARANCE_RESET);
+
     expect(select).not.toBeNull();
     expect((select.componentInstance as SelectComponent).options.map(option => option.value))
-      .toEqual([WIDGET_APPEARANCE_RESET, 'colorScheme=dark']);
+      .toEqual([WIDGET_APPEARANCE_RESET, 'colorScheme=dark', 'variant=outlined']);
     expect(fixture.nativeElement.textContent).toContain('Appearance');
 
-    select.triggerEventHandler('ngModelChange', 'colorScheme=dark');
-    expect(updateParam.calls.mostRecent().args).toEqual(['action-1', 'iconAppearance', 'colorScheme=dark']);
+    select.triggerEventHandler('ngModelChange', 'variant=outlined');
+    expect(updateParam.calls.mostRecent().args).toEqual(['action-1', 'iconAppearance', 'variant=outlined']);
+  });
+
+  it('keeps a stored custom appearance selectable after no icon offers it any more', async () => {
+    appearanceRequests([{ value: WIDGET_APPEARANCE_RESET, label: 'Automatic' }]);
+
+    const select = await renderAppearanceBlock('variant=duoTone');
+
+    const choices = (select.componentInstance as SelectComponent).options;
+    expect(choices.map(option => option.value)).toEqual(['variant=duoTone', WIDGET_APPEARANCE_RESET]);
+    expect(choices[0].label).toBe('Duo tone');
+  });
+
+  it('falls back to the action parameter options when the host list cannot be loaded', async () => {
+    appearanceRequests('failed');
+
+    const select = await renderAppearanceBlock(WIDGET_APPEARANCE_RESET);
+
+    expect((select.componentInstance as SelectComponent).options.map(option => option.value))
+      .toEqual([WIDGET_APPEARANCE_RESET, 'colorScheme=dark']);
   });
 
   it('hides Set Icon Appearance for a widget whose icon cannot be pinned', async () => {

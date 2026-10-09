@@ -140,11 +140,63 @@ describe('IconAppearancesDialogComponent', () => {
     button(root, '.add').click();
     fixture.detectChanges();
     expect(menuLabels()).not.toContain(translate(AppStrings.IconPacks.Appearances.Kind.Dark));
-    expect(menuLabels().length).toBe(7);
+    expect(menuLabels().length).toBe(8);
+    expect(menuLabels()).toContain(translate(AppStrings.IconPacks.Appearances.AddCustom));
     menuItem(translate(AppStrings.IconPacks.Appearances.Kind.Static)).click();
     await pickFile(root, file);
 
     expect(iconPacks.addAppearance).toHaveBeenCalledWith('logo', 'motion=static', file);
+  });
+
+  function typeName(name: string): void {
+    const input = document.querySelector('shared-input input') as HTMLInputElement;
+    input.value = name;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
+  it('adds a custom appearance under the name the user types, showing how it will read', async () => {
+    const root = render();
+    const file = new File(['png'], 'outlined.png');
+
+    button(root, '.add').click();
+    fixture.detectChanges();
+    menuItem(translate(AppStrings.IconPacks.Appearances.AddCustom)).click();
+    await settle();
+    typeName('Duo-tone');
+    expect(document.querySelector('.preview')?.textContent).toContain('Duo tone');
+    button(document, '.confirm-name').click();
+    await pickFile(root, file);
+
+    expect(iconPacks.addAppearance).toHaveBeenCalledWith('logo', 'variant=duoTone', file);
+  });
+
+  it('refuses a custom name that cannot become a key', async () => {
+    const root = render();
+
+    button(root, '.add').click();
+    fixture.detectChanges();
+    menuItem(translate(AppStrings.IconPacks.Appearances.AddCustom)).click();
+    await settle();
+    typeName('填充');
+
+    expect(document.querySelector('.error')).not.toBeNull();
+    expect(button(document, '.confirm-name').disabled).toBeTrue();
+  });
+
+  it('lists a custom appearance by its name and lets it be replaced like any other', async () => {
+    const outlined: IconAppearanceModel = { ...dark, id: 'asset-outlined', key: 'variant=outlined', traits: { variant: 'outlined' } };
+    fixture.componentRef.setInput('icon', icon('logo', { appearances: [dark, outlined] }));
+    fixture.componentRef.setInput('pack', pack());
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const file = new File(['png'], 'outlined-v2.png');
+
+    expect(root.querySelector('[data-appearance="variant=outlined"] .label')?.textContent?.trim()).toBe('Outlined');
+    button(root.querySelector('[data-appearance="variant=outlined"]')!, '.replace').click();
+    await pickFile(root, file);
+
+    expect(iconPacks.addAppearance).toHaveBeenCalledWith('logo', 'variant=outlined', file);
   });
 
   it('replaces an appearance by uploading a new file under the same kind', async () => {
@@ -185,6 +237,23 @@ describe('IconAppearancesDialogComponent', () => {
     await fixture.whenStable();
 
     expect(iconPacks.mergeAppearance).toHaveBeenCalledWith('logo', 'logo-static', 'colorScheme=light');
+  });
+
+  it('merges another icon as a custom appearance under the typed name', async () => {
+    const root = render();
+
+    button(root, '.merge').click();
+    await settle();
+    const select = fixture.debugElement.query(By.css('.merge-form shared-select'));
+    select.triggerEventHandler('ngModelChange', 'custom');
+    await settle();
+    typeName('Red');
+    document.querySelectorAll<HTMLElement>('.merge-grid .tile')[0].click();
+    fixture.detectChanges();
+    button(document, '.confirm-merge').click();
+    await fixture.whenStable();
+
+    expect(iconPacks.mergeAppearance).toHaveBeenCalledWith('logo', 'logo-static', 'variant=red');
   });
 
   it('tells the user when the host refuses a change', async () => {

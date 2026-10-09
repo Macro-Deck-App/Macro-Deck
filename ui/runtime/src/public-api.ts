@@ -70,9 +70,12 @@ export {
 } from './domain/backup-component-groups';
 export {
   ICON_APPEARANCE_KINDS,
+  humanizeIconAppearanceVariant,
   type IconAppearanceKind,
   iconAppearanceKindLabel,
   type IconAppearanceKindLabel,
+  iconAppearanceVariantKey,
+  iconAppearanceVariantName,
 } from './domain/icon-appearance-kind';
 export {
   createPendingStateLabelVariable,

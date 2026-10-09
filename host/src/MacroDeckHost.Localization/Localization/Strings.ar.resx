@@ -3914,6 +3914,9 @@
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>إضافة مظهر</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>مظهر مخصّص…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>تعذّرت إضافة المظهر.</value>
   </data>
@@ -3927,6 +3930,27 @@
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>المظاهر الإضافية: {count}</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>اختيار صورة…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>استخدم أحرفًا لاتينية وأرقامًا. الأسماء بالأبجديات الأخرى غير مدعومة بعد.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>أدخل اسمًا يحتوي على حرف لاتيني واحد على الأقل.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>محدّد</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>يظهر باسم “{label}”</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>مظهر مخصّص</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>الافتراضي</value>
@@ -3960,6 +3984,9 @@
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>فاتح، ثابت</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>ثابت</value>

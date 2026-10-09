@@ -48,11 +48,11 @@ public sealed record WidgetAppearancePatch
 
 	/// <summary>
 	/// Which appearance of the icon to show, overriding automatic selection: a canonical appearance key
-	/// such as <c>colorScheme=dark</c> or <c>colorScheme=dark;motion=static</c>, or <c>default</c> for the
-	/// icon's own image. An empty string, or clearing <see cref="WidgetAppearanceProperty.IconAppearance" />,
-	/// returns to automatic selection. A key that is not a valid appearance key is rejected; one naming an
-	/// appearance the icon lacks falls back to automatic selection. A host that predates this property
-	/// ignores it.
+	/// such as <c>colorScheme=dark</c>, <c>colorScheme=dark;motion=static</c> or a user-named
+	/// <c>variant=outlined</c>, or <c>default</c> for the icon's own image. An empty string, or clearing
+	/// <see cref="WidgetAppearanceProperty.IconAppearance" />, returns to automatic selection. A key that is
+	/// not a valid appearance key is rejected; one naming an appearance the icon lacks falls back to
+	/// automatic selection. A host that predates this property ignores it.
 	/// </summary>
 	public string? IconAppearance { get; init; }
 

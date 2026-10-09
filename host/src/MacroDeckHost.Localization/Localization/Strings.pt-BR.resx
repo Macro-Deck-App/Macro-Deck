@@ -3914,6 +3914,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>Adicionar aparência</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>Aparência personalizada…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>Não foi possível adicionar a aparência.</value>
   </data>
@@ -3927,6 +3930,27 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>mais {count} aparências</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>Escolher imagem…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>Use letras latinas e números. Nomes em outros alfabetos ainda não são aceitos.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>Informe um nome com pelo menos uma letra latina.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>Contorno</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>Exibida como “{label}”</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>Aparência personalizada</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>Padrão</value>
@@ -3960,6 +3984,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>Clara, estática</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>Estática</value>

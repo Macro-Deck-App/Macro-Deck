@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Integrations.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -311,6 +312,7 @@ public class WidgetActionTargetTests
 	}
 
 	[TestCase("colorScheme=dark;motion=static")]
+	[TestCase("variant=outlined")]
 	[TestCase("default")]
 	public async Task ChosenAppearance_OnSetIconAppearance_PinsIt(string appearance)
 	{
@@ -350,21 +352,18 @@ public class WidgetActionTargetTests
 	}
 
 	[Test]
-	public void SetIconAppearance_OffersAutomaticDefaultAndEveryKnownKind_StartingAtAutomatic()
+	public void SetIconAppearance_PicksFromTheIconAppearanceOptionsSource_StartingAtAutomatic()
 	{
 		var parameter = _integration.Actions.Single(a => a.Id == "set-icon-appearance")
 			.Parameters.Single(p => p.Name == "iconAppearance");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(parameter.Type, Is.EqualTo(ActionParameterType.Choice));
+			Assert.That(parameter.Type, Is.EqualTo(ActionParameterType.DynamicChoice));
+			Assert.That(parameter.OptionsSourceId, Is.EqualTo(IconOptionsSourceIds.Appearances));
 			Assert.That(parameter.DefaultValue, Is.EqualTo(WidgetAppearanceValues.Reset));
-			Assert.That(parameter.Options!.Select(option => option.Value), Is.EqualTo(new[]
-			{
-				WidgetAppearanceValues.Reset, "default", "colorScheme=light", "colorScheme=dark", "motion=static",
-				"motion=animated", "colorScheme=light;motion=static", "colorScheme=light;motion=animated",
-				"colorScheme=dark;motion=static", "colorScheme=dark;motion=animated"
-			}));
+			Assert.That(parameter.Options!.Select(option => option.Value).First(), Is.EqualTo(WidgetAppearanceValues.Reset));
+			Assert.That(parameter.Options!.Select(option => option.Value), Does.Contain("colorScheme=dark;motion=static"));
 		});
 	}
 

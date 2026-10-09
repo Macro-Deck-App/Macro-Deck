@@ -16,7 +16,7 @@ In Macro Deck, open **Icon packs**, open the pack's menu and select **Export pac
 
 Icons keep their [appearances](/guide/concepts/#icon-appearances) in the export, so one icon can ship light,
 dark, animated and static versions. In `pack.json` each appearance is nested under its icon's entry, in
-`appearances`, with its `traits` (for example `{"colorScheme": "dark"}`), and its master is a file of its own
+`appearances`, with its `traits` (for example `{"colorScheme": "dark"}`, or `{"variant": "outlined"}` for a style the user named), and its master is a file of its own
 in `files`. A Macro Deck without appearances imports the pack and shows the default images.
 
 Before you export, open the pack's menu, select **Edit pack** and set **AI-created icons**. The setting is

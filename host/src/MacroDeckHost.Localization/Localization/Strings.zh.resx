@@ -3914,6 +3914,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>添加外观</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>自定义外观…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>无法添加外观。</value>
   </data>
@@ -3927,6 +3930,27 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>另有 {count} 个外观</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>选择图片…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>请使用拉丁字母和数字。暂不支持其他文字的名称。</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>请输入至少包含一个拉丁字母的名称。</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>线性</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>显示为“{label}”</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>自定义外观</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>默认</value>
@@ -3960,6 +3984,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>浅色，静态</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>静态</value>

@@ -70,6 +70,24 @@ internal sealed class IconAppearancePinTests
 	}
 
 	[Test]
+	public async Task A_custom_variant_is_offered_for_pinning_by_its_key_and_name()
+	{
+		await _harness.AddReadyAppearance(_lamp, "variant=duoTone", [3]);
+		var host = RenderButton(new { icon = Icon(_lamp, "variant=duoTone") });
+
+		var options = host.ById("icon.appearance").Property(UiConfigProperties.Options)!.Value
+			.EnumerateArray()
+			.ToDictionary(option => option.GetProperty("value").GetString()!, option => option.GetRawText());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(options.Keys, Does.Contain("variant=duoTone"));
+			Assert.That(options["variant=duoTone"], Does.Contain("Duo tone"));
+			Assert.That(host.ById("icon.appearance").Text(UiConfigProperties.Value), Is.EqualTo("variant=duoTone"));
+		});
+	}
+
+	[Test]
 	public void A_pin_survives_a_label_edit_and_picking_the_same_icon_again_and_goes_with_a_different_icon()
 	{
 		var host = RenderButton(new { label = "Lamp", icon = Icon(_lamp, "colorScheme=dark") });
