@@ -238,6 +238,11 @@
   max-height: none;
 }
 
+.widget-stack.widget-stack-clip-start > .widget-text {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 .widget-text-span-image {
   display: inline-block;
   width: 1em;
