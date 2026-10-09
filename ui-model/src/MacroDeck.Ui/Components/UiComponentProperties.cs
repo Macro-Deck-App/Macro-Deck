@@ -67,9 +67,10 @@ public static class UiComponentProperties
 	/// present.</summary>
 	public const string Role = "role";
 
-	/// <summary>A text's literal colour, as <c>#rrggbb</c>, overriding its <see cref="Role" />. For a colour
-	/// the <i>user</i> chose rather than one the theme owns: a theme change must not repaint it, which is the
-	/// same split <see cref="StartColor" /> makes. Absent means the role decides.</summary>
+	/// <summary>A text's literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one,
+	/// overriding its <see cref="Role" />. For a colour the <i>user</i> chose rather than one the theme owns:
+	/// a theme change must not repaint it, which is the same split <see cref="StartColor" /> makes. Absent
+	/// means the role decides.</summary>
 	public const string Color = "color";
 
 	/// <summary>How many lines a text may occupy before it ellipsizes. Absent means one.</summary>
@@ -190,6 +191,10 @@ public static class UiComponentProperties
 	/// colour.</summary>
 	public const string LevelColor = "levelColor";
 
+	/// <summary>A gauge's unfilled track colour, as <c>#rrggbb</c>. Absent means the reader's tertiary
+	/// surface colour, which is also what a reader that does not implement the key draws.</summary>
+	public const string TrackColor = "trackColor";
+
 	/// <summary>How a pointer on a slider maps to its level - see <see cref="UiComponentSliderInteractions" />.
 	/// Absent means absolute: the level jumps to the pointer. A reader that does not implement the key
 	/// ignores it and keeps that absolute behaviour, which still leaves a working slider.</summary>
@@ -255,6 +260,10 @@ public static class UiComponentProperties
 
 	/// <summary>A <see cref="UiGrid" />'s row count. Absent means as many as its children need.</summary>
 	public const string Rows = "rows";
+
+	/// <summary>A <see cref="UiGrid" />'s minimum cell size, as a <see cref="UiLength" />. Present means the
+	/// reader chooses the column count.</summary>
+	public const string MinCellSize = "minCellSize";
 
 	/// <summary>How many columns a child of a <see cref="UiGrid" /> spans. Ignored under any other
 	/// parent.</summary>
@@ -331,7 +340,8 @@ public static class UiComponentProperties
 		Opacity, Brightness, Saturation, Tint, Start, End, StartColor, EndColor, Marker, Thickness, Value,
 		Format, Seconds, Level, Step, LevelColor, Interaction, BorderStyle, BorderColor, Corner, Points, PlotTop,
 		Digits, Answer, Placeholder, Rotation, OriginX, OriginY, Shape, CornerRadius, StrokeColor,
-		StrokeWidth, Path, Icon, Columns, Rows, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
+		StrokeWidth, Path, Icon, Columns, Rows, MinCellSize, ColumnSpan, RowSpan, StartAngle, EndAngle, On, Selected,
 		Modifiers, Frame, Clip, Mask, Variants, Spans, Overflow, Anchor, Stream, Shadow,
+		TrackColor,
 	];
 }

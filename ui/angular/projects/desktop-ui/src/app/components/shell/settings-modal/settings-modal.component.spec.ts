@@ -5,6 +5,7 @@ import { DeveloperSettingsChangedEvent, LogEntryLevel } from '@macro-deck/runtim
 import { ApiService, LocalizationService } from '@shared';
 import { SettingsModalService } from '../../../services/settings-modal.service';
 import { SETTINGS_RAIL_COLLAPSED_KEY, SettingsModalComponent } from './settings-modal.component';
+import { provideColorPaletteTesting } from '../../../../testing/color-palette-test-support';
 
 const TLS_DEFAULTS = {
   tlsEnabled: false,
@@ -179,7 +180,7 @@ describe('SettingsModalComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [SettingsModalComponent],
-      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+      providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(), { provide: ApiService, useValue: api }],
     }).compileComponents();
 
     service = TestBed.inject(SettingsModalService);
@@ -192,7 +193,7 @@ describe('SettingsModalComponent', () => {
 
   it('renders the category rail and the appearance section by default', () => {
     const railButtons = fixture.nativeElement.querySelectorAll('.settings-nav__item');
-    expect(railButtons.length).toBe(15);
+    expect(railButtons.length).toBe(16);
     expect(fixture.nativeElement.querySelector('app-appearance-settings')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.settings-modal__title')?.textContent).toContain('Appearance');
   });
@@ -320,7 +321,7 @@ describe('SettingsModalComponent', () => {
         ['Network', 'Devices', 'USB connections', 'Companion App'],
         ['Security'],
         ['Backups', 'Migration'],
-        ['ADB', 'Logging', 'Developer'],
+        ['ADB', 'HTTP', 'Logging', 'Developer'],
         ['About'],
       ]);
 
@@ -367,7 +368,7 @@ describe('SettingsModalComponent', () => {
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
         imports: [SettingsModalComponent],
-        providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: api }],
+        providers: [provideZonelessChangeDetection(), ...provideColorPaletteTesting(), { provide: ApiService, useValue: api }],
       }).compileComponents();
       service = TestBed.inject(SettingsModalService);
       service.open('appearance');
@@ -379,13 +380,13 @@ describe('SettingsModalComponent', () => {
     it('is hidden from Advanced while Developer mode is off', async () => {
       await createWithDeveloperMode(false);
 
-      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer']);
+      expect(advancedItems()).toEqual(['ADB', 'HTTP', 'Logging', 'Developer']);
     });
 
     it('is listed last in Advanced while Developer mode is on and shows the Car Thing card', async () => {
       await createWithDeveloperMode(true);
 
-      expect(advancedItems()).toEqual(['ADB', 'Logging', 'Developer', 'Experiments']);
+      expect(advancedItems()).toEqual(['ADB', 'HTTP', 'Logging', 'Developer', 'Experiments']);
 
       component.selectCategory('experiments');
       fixture.detectChanges();
@@ -429,6 +430,41 @@ describe('SettingsModalComponent', () => {
   it('clears open state when the modal signals close (escape/backdrop)', () => {
     component.onModalClose();
     expect(service.isOpen()).toBeFalse();
+  });
+
+  async function expectEscapeClosesOnlyTheOverlayFirst(triggerSelector: string): Promise<void> {
+    await fixture.whenStable();
+    fixture.detectChanges();
+    jasmine.clock().install();
+    try {
+      const trigger = fixture.nativeElement.querySelector(triggerSelector) as HTMLButtonElement;
+      const pressEscape = () => trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      trigger.click();
+      fixture.detectChanges();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+      pressEscape();
+      fixture.detectChanges();
+      jasmine.clock().tick(150);
+
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(service.isOpen()).toBeTrue();
+
+      pressEscape();
+      jasmine.clock().tick(150);
+
+      expect(service.isOpen()).toBeFalse();
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  }
+
+  it('closes only the open font family select on Escape, and the dialog on the next Escape', async () => {
+    await expectEscapeClosesOnlyTheOverlayFirst('.font-select button.control');
+  });
+
+  it('closes only the open accent colour popover on Escape, and the dialog on the next Escape', async () => {
+    await expectEscapeClosesOnlyTheOverlayFirst('app-appearance-settings .cp-chip');
   });
 
   it('plays the exit animation before closing from the custom close button', () => {
@@ -586,7 +622,7 @@ describe('SettingsModalComponent', () => {
   });
 
   it('switches to the account pane and labels it, without adding it to the category rail', () => {
-    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(15);
+    expect(fixture.nativeElement.querySelectorAll('.settings-nav__item').length).toBe(16);
 
     component.selectAccount();
     fixture.detectChanges();

@@ -2,7 +2,7 @@ import { UiComponents } from './ui-component-types';
 import { UiComponentProperties } from './component-properties';
 import { UiComponentClips } from './component-modifiers';
 import { nodeNumber, nodeRaw, nodeString } from '../ui-framework/node-properties.util';
-import { nodeLength, resolveLength } from '../ui-framework/length';
+import { boxExtent, LengthScope, nodeLength, resolveLength } from '../ui-framework/length';
 import { resolveFrame } from '../ui-framework/frame';
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { gradientCss, UiModifierInputs } from '../render/node-modifiers';
@@ -16,8 +16,8 @@ export interface UiModifierState {
 
 const CAPSULE_RADIUS = '9999px';
 
-function paddingPx(node: UiNode, basis: number, crossExtent: number | null): number {
-  return resolveLength(nodeLength(node, UiComponentProperties.Padding), basis, crossExtent) ?? 0;
+function paddingPx(node: UiNode, scope: LengthScope): number {
+  return resolveLength(nodeLength(node, UiComponentProperties.Padding), scope) ?? 0;
 }
 
 function maskCss(node: UiNode): string | undefined {
@@ -54,7 +54,7 @@ export const uiModifierComponent: UiComponentDefinition<UiModifierState> = {
 
   paint(node, ctx) {
     const element = ctx.element as HTMLElement;
-    const frame = resolveFrame(node, ctx.box, ctx.basis, ctx.crossExtent);
+    const frame = resolveFrame(node, ctx.box, ctx);
     const face = frame.box;
     ctx.setClassName(element, 'widget-modifier'
       + (face.width === null ? ' widget-modifier-fill-width' : '')
@@ -65,7 +65,7 @@ export const uiModifierComponent: UiComponentDefinition<UiModifierState> = {
     ctx.setStyle(element, 'min-height', face.height === null ? px(frame.minHeight) : null);
     ctx.setStyle(element, 'max-height', face.height === null ? px(frame.maxHeight) : null);
 
-    const padding = paddingPx(node, ctx.basis, ctx.crossExtent);
+    const padding = paddingPx(node, ctx);
     ctx.setStyle(element, 'padding', padding > 0 ? px(padding) : null);
 
     const clip = nodeString(node, UiComponentProperties.Clip);
@@ -93,12 +93,12 @@ export const uiModifierComponent: UiComponentDefinition<UiModifierState> = {
 
   intrinsicMainPx(node, m) {
     const box = m.horizontal ? { width: null, height: m.crossExtent } : { width: m.crossExtent, height: null };
-    const frame = resolveFrame(node, box, m.basis, m.crossExtent);
+    const frame = resolveFrame(node, box, m);
     const fixed = m.horizontal ? frame.box.width : frame.box.height;
     if (fixed !== null) return fixed;
 
     const child = node.children?.[0];
-    let main = (child === undefined ? 0 : m.ofChild(child)) + 2 * paddingPx(node, m.basis, m.crossExtent);
+    let main = (child === undefined ? 0 : m.nested().ofChild(child)) + 2 * paddingPx(node, m);
     const max = m.horizontal ? frame.maxWidth : frame.maxHeight;
     const min = m.horizontal ? frame.minWidth : frame.minHeight;
     if (max !== undefined) main = Math.min(main, max);

@@ -1,4 +1,5 @@
 import { UiComponentBox } from '../ui-framework/layout';
+import { boxExtent } from '../ui-framework/length';
 import {
   nodeClaimsGesture,
   nodeDeclaresGesture,
@@ -31,7 +32,7 @@ import { UiComponents } from '../ui-components/ui-component-types';
 export interface UiNodeRenderHandle {
   element(): Element | null;
 
-  update(node: UiNode, box: UiComponentBox | null, crossExtent: number | null, basis?: number): void;
+  update(node: UiNode, box: UiComponentBox | null, crossExtent: number | null, basis?: number, container?: number | null): void;
   destroy(): void;
 }
 
@@ -66,9 +67,11 @@ export function renderUiNode(
 ): UiNodeRenderHandle {
   const registry = options?.registry ?? DEFAULT_UI_COMPONENT_REGISTRY;
   const timers = options?.timers ?? REAL_TIMERS;
+  // Widget trees keep their authored left-to-right layout inside a right-to-left app.
+  container.setAttribute('dir', 'ltr');
   return renderInScope(
-    container, node, box, crossExtent, initialBasis, host, registry, timers, createTextFitScope(), () => false, () => false,
-    undefined);
+    container, node, box, crossExtent, initialBasis, box === null ? initialBasis : boxExtent(box.width, box.height),
+    host, registry, timers, createTextFitScope(), () => false, () => false, undefined);
 }
 
 function renderInScope(
@@ -77,6 +80,7 @@ function renderInScope(
   box: UiComponentBox | null,
   crossExtent: number | null,
   initialBasis: number,
+  initialContainer: number | null,
   host: UiRenderHost,
   registry: UiComponentRegistry,
   timers: UiRenderTimers,
@@ -102,6 +106,7 @@ function renderInScope(
   }
 
   let basis = initialBasis;
+  let containerExtent = initialContainer;
   let currentType: string | null = null;
   let activeDefinition: UiComponentDefinition<unknown> | undefined;
   let componentState: unknown;
@@ -208,9 +213,13 @@ function renderInScope(
     delete parts[name];
   }
 
+  function containerOf(entry: { box: UiComponentBox; container?: number | null }): number | null {
+    return entry.container === undefined ? boxExtent(entry.box.width, entry.box.height) : entry.container;
+  }
+
   function syncChildren(
     parent: Element,
-    entries: Array<{ child: UiNode; box: UiComponentBox; crossExtent: number | null }>,
+    entries: Array<{ child: UiNode; box: UiComponentBox; crossExtent: number | null; container?: number | null }>,
   ): void {
     const keys: string[] = [];
     for (let index = 0; index < entries.length; index++) {
@@ -257,13 +266,13 @@ function renderInScope(
 
       if (existing !== undefined) {
         delete reusable[keys[index]];
-        existing.update(entry.child, entry.box, entry.crossExtent, basis);
+        existing.update(entry.child, entry.box, entry.crossExtent, basis, containerOf(entry));
         next.push(existing);
         continue;
       }
 
       next.push(renderInScope(
-        parent, entry.child, entry.box, entry.crossExtent, basis, host, registry, timers, scope, isDisabled,
+        parent, entry.child, entry.box, entry.crossExtent, basis, containerOf(entry), host, registry, timers, scope, isDisabled,
         insideButton, activeDefinition?.transparentRoot ? isTreeRoot : undefined));
     }
 
@@ -344,6 +353,7 @@ function renderInScope(
     get element() { return root!; },
     host,
     get basis() { return basis; },
+    get container() { return containerExtent; },
     get crossExtent() { return lastCross; },
     get box() { return resolved; },
     get givenBox() { return lastBox; },
@@ -434,8 +444,12 @@ function renderInScope(
       nextBox: UiComponentBox | null,
       nextCross: number | null,
       nextBasis?: number,
+      nextContainer?: number | null,
     ): void {
       if (nextBasis !== undefined && nextBasis !== basis) basis = nextBasis;
+      containerExtent = nextContainer !== undefined
+        ? nextContainer
+        : nextBox === null ? basis : boxExtent(nextBox.width, nextBox.height);
       render(nextNode, nextBox, nextCross);
     },
 

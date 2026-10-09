@@ -36,8 +36,9 @@ connections** shows **Ready on port …**.
 
 ## Connect the app
 
-Open the Macro Deck app on the phone. It finds Macro Deck through the cable by itself. Sign in with
-your Macro Deck account, just like over Wi-Fi.
+Open the Macro Deck app on the phone. It finds Macro Deck through the cable by itself. Sign in with the
+pairing code from Macro Deck's network panel or with your Macro Deck account, just like over Wi-Fi; see
+[Sign in](/guide/companion-app/setup/#sign-in).
 
 ## Use the web client instead
 
@@ -66,7 +67,8 @@ Macro Deck leaves the ADB server running when it exits, unless you turn on **Sto
 Macro Deck exits** under **Status**. Macro Deck then stops the server when it exits, restarts or
 installs an update, but only a server Macro Deck started itself; one that was already running is left
 alone. Other programs using that server, such as Android Studio, lose their connection. If you turn
-off **Enable ADB** before quitting, the server keeps running.
+off **Enable ADB** before quitting, the server keeps running. When Windows shuts down or you sign
+out, Macro Deck does not stop the server itself; Windows ends it with the session.
 
 ## Plugins and ADB
 

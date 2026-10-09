@@ -20,7 +20,6 @@ import { ButtonComponent, LocalizationService, TranslatePipe, VariableService } 
 import {
   ColorPickerComponent,
   colorVariablesInScope,
-  defaultColorPresets,
   displayColor,
 } from '../color-picker/color-picker.component';
 
@@ -75,7 +74,6 @@ export class ThresholdEditorComponent {
   private readonly injector = inject(Injector);
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
 
-  protected readonly colorPresets = computed(() => defaultColorPresets(this.localization));
   private readonly colorVariables = computed(() =>
     this.allowVariables()
       ? colorVariablesInScope(this.injector.get(VariableService).variables(), this.variableScopeRefId())

@@ -59,9 +59,10 @@ public class UiComponentVocabularyTests
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "interaction", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
-		"strokeWidth", "path", "icon", "columns", "rows", "columnSpan", "rowSpan", "startAngle", "endAngle",
+		"strokeWidth", "path", "icon", "columns", "rows", "minCellSize", "columnSpan", "rowSpan", "startAngle", "endAngle",
 		"on", "selected",
 		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream", "shadow",
+		"trackColor",
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -555,6 +556,7 @@ public class UiComponentVocabularyTests
 					Key = "grid",
 					Columns = 3,
 					Rows = 2,
+					MinCellSize = 0.2,
 					Gap = 0.02,
 					Padding = 0.03,
 					Children =
@@ -600,6 +602,7 @@ public class UiComponentVocabularyTests
 					StartAngle = -120,
 					EndAngle = 120,
 					LevelColor = "#ff9500",
+					TrackColor = "#3A3A3C",
 					Thickness = 0.06,
 				},
 				new UiToggle
@@ -764,6 +767,30 @@ public class UiComponentVocabularyTests
 		{
 			Assert.That(lists["plain"].Properties.ContainsKey("direction"), Is.False);
 			Assert.That(lists["row"].Properties["direction"].GetString(), Is.EqualTo("horizontal"));
+		});
+	}
+
+	[Test]
+	public void A_gauge_emits_its_track_colour_only_when_one_is_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiGauge { Key = "themed", Level = 0.85, LevelColor = "#FFFFFF" },
+					new UiGauge { Key = "custom", Level = 0.85, LevelColor = "#FFFFFF", TrackColor = "#3A3A3C" },
+				],
+			});
+
+		var gauges = Walk(tree.Root).Where(node => node.Type == "ui.gauge")
+			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(gauges["themed"].Properties.ContainsKey("trackColor"), Is.False);
+			Assert.That(gauges["custom"].Properties["trackColor"].GetString(), Is.EqualTo("#3A3A3C"));
 		});
 	}
 

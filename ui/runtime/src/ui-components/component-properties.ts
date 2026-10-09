@@ -59,6 +59,7 @@ export const UiComponentProperties = {
   Icon: 'icon',
   Columns: 'columns',
   Rows: 'rows',
+  MinCellSize: 'minCellSize',
   ColumnSpan: 'columnSpan',
   RowSpan: 'rowSpan',
   StartAngle: 'startAngle',
@@ -75,6 +76,7 @@ export const UiComponentProperties = {
   Anchor: 'anchor',
   Stream: 'stream',
   Shadow: 'shadow',
+  TrackColor: 'trackColor',
 } as const;
 
 export const UI_COMPONENT_PROPERTIES_WELL_KNOWN: readonly string[] =

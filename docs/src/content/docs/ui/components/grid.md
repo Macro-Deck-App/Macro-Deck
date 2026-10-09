@@ -62,7 +62,8 @@ in those rows is not drawn.
 | Property | Values | Default (absent) | Meaning |
 |---|---|---|---|
 | `Columns` (`columns`) | `int` | `1` | The column count; below `1` means `1`. |
-| `Rows` (`rows`) | `int` | As many as needed | The row count; children that do not fit are not drawn. |
+| `Rows` (`rows`) | `int` | As many as needed | The row count; children that do not fit are not drawn. Ignored when `MinCellSize` is set. |
+| `MinCellSize` (`minCellSize`) | length | `Columns` and `Rows` decide | Lets the reader choose the column count - see [Choosing the columns](#choosing-the-columns). Resolved against the grid's containing box. |
 | `Gap` (`gap`) | length | No gap | The gap between columns and between rows. |
 | `Padding` (`padding`) | length | No padding | Inner padding on every edge. |
 | `MainSize` (`mainSize`), `Fill` (`fill`), `Answer` (`answer`) | - | - | Shared with every container - see [Stack and layer](/ui/components/stack-and-layer/). |
@@ -73,6 +74,33 @@ On a grid's children:
 |---|---|---|---|
 | `ColumnSpan` (`columnSpan`) | `int` | `1` | How many columns the child covers; clamped to `Columns`. |
 | `RowSpan` (`rowSpan`) | `int` | `1` | How many rows the child covers. |
+
+## Choosing the columns
+
+```csharp
+new UiGrid
+{
+    Key = "rings",
+    Columns = 4,
+    MinCellSize = UiLength.OfBasis(0.25),
+    Children = rings,
+}
+```
+
+With `MinCellSize` the reader picks the column count from the box it is given, so one tree arranges itself
+at any widget size and shape. It tries every count from one up to the number of children (at most 64):
+
+- **With a definite height**, it takes the count that makes the smaller edge of a cell largest, the fewer
+  columns on a tie, and draws every child. `MinCellSize` has no effect here - it cannot hide children or
+  shrink the cells. Fifteen rings in a 1x1 tile are 4 by 4, in a 2x1 tile 5 by 3, in a 1x2 tile 3 by 5.
+- **Where the height is open** - a grid in a vertical list, or in a stack child with neither `MainSize`
+  nor `Fill` - rows are as tall as a column is wide, and it takes the largest count whose cells are still at
+  least `MinCellSize` wide, or one column when none is. A grid that must stay inside its widget needs
+  `Fill` or `MainSize`.
+
+`Rows` is ignored and every child is placed. A `MinCellSize` that is zero, negative or unresolvable counts
+as absent. A reader that does not know the property draws `Columns` by `Rows` and hides the children that do
+not fit, so set both to the arrangement it should draw; with `Columns` absent that is one column.
 
 ## Events
 
@@ -86,8 +114,9 @@ Any element, any number.
 
 The content box minus padding is divided into equal column and row tracks separated by `gap`, and each child
 is drawn across its block. A child's `mainSize` and `fill` mean nothing here, because the grid decides the
-block. Lengths inside a child keep resolving against the widget basis, not the cell, so text is the same
-size in a grid as anywhere else. On its own parent's main axis a grid has no content extent: give it
+block. Lengths inside a child resolve against the widget basis, so text is the same size in a grid as
+anywhere else, unless the length is relative to its containing box - the child's block - as in
+[Sizing](/ui/concepts/sizing/#relative-to-the-containing-box). On its own parent's main axis a grid has no content extent: give it
 `MainSize` or `Fill`. See [Sizing](/ui/concepts/sizing/).
 
 ## Reader behaviour
@@ -96,7 +125,11 @@ size in a grid as anywhere else. On its own parent's main axis a grid has no con
   `columns`.
 - Place children with the dense row-major rule above; with `rows` present, skip a child whose block does
   not fit and keep placing the ones after it.
-- Draw each child across its block, ignoring its `mainSize` and `fill`; keep the widget basis unchanged.
+- Draw each child across its block, ignoring its `mainSize` and `fill`. The widget basis stays unchanged; a
+  length relative to the containing box resolves against the block.
+- With a positive `minCellSize`, choose the column count by the rule in
+  [Choosing the columns](#choosing-the-columns), from the box the grid was given (an open height stays open
+  when measuring), and ignore `rows`.
 - Hold `columns`, `rows`, `columnSpan` and `rowSpan` to at most 64.
 - Where the parent leaves the grid's height open - inside a vertical [list](/ui/components/list/) - make
   every row as tall as a column is wide, and the grid as tall as its rows need.

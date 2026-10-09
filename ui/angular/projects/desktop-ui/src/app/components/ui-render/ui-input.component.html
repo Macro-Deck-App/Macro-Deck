@@ -2,13 +2,42 @@
   class="config-node-field"
   [class.is-invalid]="invalid()"
   [class.is-toggle]="toggleRow()"
+  [class.is-label-hidden]="hideLabel()"
   [attr.role]="hideLabel() && label() ? 'group' : null"
   [attr.aria-label]="hideLabel() ? label() : null">
   @if (visibleLabel(); as text) {
-    <label class="config-node-label" [attr.for]="node().id">
-      {{ text }}
-      @if (required()) { <span class="config-node-required" aria-hidden="true">*</span> }
-    </label>
+    @if (labelRowReset()) {
+      <div class="config-node-label-row">
+        <label class="config-node-label" [attr.for]="node().id">
+          {{ text }}
+          @if (required()) { <span class="config-node-required" aria-hidden="true">*</span> }
+        </label>
+        <button
+          class="config-node-label-reset"
+          type="button"
+          [disabled]="disabled()"
+          [title]="colorResetLabel()"
+          [attr.aria-label]="colorResetLabel()"
+          (click)="onChange(colorDefaultValue())">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+            <path d="M21 3v5h-5" />
+          </svg>
+        </button>
+      </div>
+    } @else {
+      <label class="config-node-label" [attr.for]="node().id">
+        {{ text }}
+        @if (required()) { <span class="config-node-required" aria-hidden="true">*</span> }
+      </label>
+    }
   }
 
   <div class="config-node-control">
@@ -267,6 +296,8 @@
           [allowVariables]="colorAllowsVariables()"
           [allowAlpha]="colorAllowsVariables()"
           [variableScopeRefId]="variableScopeRefId()"
+          [resetPlacement]="visibleLabel() ? 'none' : 'inline'"
+          [disabled]="disabled()"
           [ngModel]="stringValue()"
           (ngModelChange)="onChange($event)" />
       }

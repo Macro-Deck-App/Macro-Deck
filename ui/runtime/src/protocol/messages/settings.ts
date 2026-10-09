@@ -1,3 +1,4 @@
+import { LocalizedText } from '../../localization/localized-text';
 import { LogEntryLevel } from './logs';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -30,6 +31,10 @@ export interface AppearanceChangedEvent {
   fontFamily?: string;
 }
 
+export interface ColorPaletteChangedEvent {
+  colors: string[];
+}
+
 export interface GetLoggingSettingsResponse {
   minimumLevel: LogEntryLevel;
   defaultMinimumLevel: LogEntryLevel;
@@ -42,6 +47,24 @@ export interface UpdateLoggingSettingsRequest {
 export interface UpdateLoggingSettingsResponse {
   minimumLevel: LogEntryLevel;
   defaultMinimumLevel: LogEntryLevel;
+}
+
+export interface GetHttpSettingsResponse {
+  customUserAgent?: string | null;
+  effectiveUserAgent: string;
+  defaultUserAgent: string;
+}
+
+export interface UpdateHttpSettingsRequest {
+  userAgent?: string | null;
+}
+
+export interface UpdateHttpSettingsResponse {
+  success: boolean;
+  error?: { code: string; message?: LocalizedText };
+  customUserAgent?: string | null;
+  effectiveUserAgent: string;
+  defaultUserAgent: string;
 }
 
 export interface GetAutostartSettingsResponse {

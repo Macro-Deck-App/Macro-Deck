@@ -27,18 +27,27 @@ Unlock the deck to edit it, lock it to press buttons.
   Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player,
   Twitch Chat and YouTube Chat all have one.
   **Reset** returns to the default look; on a Music Player that is the album art's color.
-- **Let the folder background show through:** choose the checkered **Transparent** swatch. The tile loses
-  its own background and shadow, the border stays.
+- **Let the folder background show through:** open the color field and choose the checkered
+  **Transparent** swatch. The tile loses its own background and shadow, the border stays.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
 - **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
-  outline with **Label Outline Color** and its width, or frame it with **Label Box Border Color** and its
-  width. Each state can have its own. Hardware devices and the Companion app keep the default label look for
-  now.
+  outline with **Label Outline** and the width next to it, or frame it with **Label Box Border** and its
+  width. A width can be changed once its color is set. Each state can have its own. Hardware devices and
+  the Companion app keep the default label look for now.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
   While you edit the deck, hidden empty cells show a dashed outline, so you can still place widgets. The setting
   does not apply to hardware devices.
+
+## Your color palette
+
+Every color field opens a popover with a color picker and your color palette, which starts with Macro
+Deck's default colors. Pick a color and select **+** to add it, and it shows up in every color field from
+then on, including those of plugins. To remove one, hover over it and select its **×**, or focus it and
+press Delete; this works for the default colors too. **Settings > Appearance > Color palette** lists every
+color, lets you add and remove them, and **Restore default colors** brings the defaults back. The palette
+holds up to 24 colors. A field that cannot be translucent only shows the palette's opaque colors.
 
 ## Colors from a variable
 
@@ -47,9 +56,9 @@ Keep your colors in **Color** variables and change a whole deck at once. Create 
 `#rrggbbaa` for a translucent color; the **Opacity** slider sets the last two digits.
 
 Every color picker of a widget, a color threshold band, a folder's or profile's grid **Background**, the
-**Accent** color in **Settings > Appearance** and the color of an action such as **Set Background Color** can
-switch from **Color** to **Variable**. Choose a **Color variable**, then **Add modifier** to derive a shade
-from it:
+**Accent** color in **Settings > Appearance** and the color of an action such as **Set Background Color**
+opens a popover when you select it; switch its tab from **Color** to **Variable**. Choose a
+**Color variable**, then **Add modifier** to derive a shade from it:
 
 | Modifier | Does |
 | --- | --- |
@@ -86,6 +95,24 @@ folder and the accent color that use it update right away.
 If you go back to an older Macro Deck version after creating a Color variable, that version cannot read your
 variables and starts without any of your user variables. Delete your Color variables before you go back.
 :::
+
+## Colors from the playing album
+
+The **Music Player** integration offers an **Album color** Color variable for every music player you have set
+up, for example Spotify or each SinusBot you added. Its value is the average color of the cover of that
+player's current song. Choose it as the **Color variable** of a widget's background, then use **Add
+modifier** to derive text and icon colors that stay readable, for example **Darken** or **Brighten** the album
+color, or **Mix** it with white.
+
+- Each player has its own variable, so a widget follows exactly the player you pick. A player you add later
+  gets its variable as soon as it appears.
+- The variable keeps the last cover color when the player is paused, stops or disconnects, and changes when
+  the next cover shows up. It only has no value until the player has shown a cover once since Macro Deck
+  started; then fields that use it show the theme's color. A field that follows a variable does not remember
+  the color you picked before, so set it again if you stop using the variable.
+- The colors of icons and text do not adjust on their own to the album color; pick modifiers that suit your
+  covers.
+- If you turn the **Music Player** integration off under **Integrations**, the variables are unavailable too.
 
 ## Finding a widget type
 
@@ -144,3 +171,14 @@ to store a new random number in a variable each time the action runs.
 ## Test automations
 
 **Developer Tools > Trigger event** fires an event for real. Every automation listening to it runs.
+
+## Language
+
+**Settings > Language** switches every connected client at once, without a restart. Macro Deck is
+available in English, German, French, Spanish, Italian, Dutch, Brazilian Portuguese, Czech, Polish,
+Russian, Ukrainian, Turkish, Arabic, Hindi, Indonesian, Japanese, Korean, Simplified Chinese and
+Traditional Chinese. **System** follows the operating system's language and uses English when Macro Deck
+does not have it.
+
+In Arabic the app reads right to left. Your deck keeps its layout: buttons stay where you placed them in
+every language.

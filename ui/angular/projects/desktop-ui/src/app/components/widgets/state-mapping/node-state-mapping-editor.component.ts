@@ -30,7 +30,7 @@ export interface StateMappingValue {
           {{ 'macrodeck:Common.None' | translate }}
         }
       </span>
-      <span class="icon icon-chevron-right icon-xs state-mapping-chevron" aria-hidden="true"></span>
+      <span class="icon icon-chevron-right rtl-mirror icon-xs state-mapping-chevron" aria-hidden="true"></span>
     </button>
 
     @if (isOpen()) {
@@ -57,7 +57,7 @@ export interface StateMappingValue {
       min-width: 0;
       color: var(--color-text-primary);
       font-size: var(--text-sm);
-      text-align: left;
+      text-align: start;
       cursor: pointer;
 
       &:hover {

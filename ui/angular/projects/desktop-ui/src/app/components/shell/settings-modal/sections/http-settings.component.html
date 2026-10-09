@@ -1,0 +1,43 @@
+<div class="http">
+  <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Http.Heading' | translate"
+    [description]="'macrodeck.app:Settings.Http.Description' | translate">
+    @if (error(); as message) {
+      <shared-error-banner [message]="message" (dismiss)="dismissError()" />
+    }
+
+    <shared-settings-row
+      [label]="'macrodeck.app:Settings.Http.UserAgent.Label' | translate"
+      [description]="'macrodeck.app:Settings.Http.UserAgent.Description' | translate">
+      <div class="http__field">
+        <shared-input
+          name="httpUserAgent"
+          [inputMaxlength]="maxLength"
+          [ariaLabel]="'macrodeck.app:Settings.Http.UserAgent.Label' | translate"
+          [disabled]="!loaded() || saving()"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)">
+        </shared-input>
+        <shared-button
+          variant="primary"
+          [disabled]="!canSave()"
+          [loading]="saving()"
+          (click)="save()">
+          {{ 'macrodeck:Common.Save' | translate }}
+        </shared-button>
+        <shared-button
+          variant="secondary"
+          [disabled]="!canRestore()"
+          (click)="restoreDefault()">
+          {{ 'macrodeck.app:Settings.Http.UserAgent.Restore' | translate }}
+        </shared-button>
+      </div>
+    </shared-settings-row>
+
+    @if (loaded() && defaultUserAgent()) {
+      <p class="http__hint">
+        {{ 'macrodeck.app:Settings.Http.UserAgent.Default' | translate:{ userAgent: defaultUserAgent() } }}
+      </p>
+    }
+  </shared-settings-section>
+</div>

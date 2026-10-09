@@ -25,6 +25,6 @@ export const uiResponsiveComponent: UiComponentDefinition = {
     const chosen = responsiveChild(node, m.horizontal
       ? { width: null, height: cross }
       : { width: cross, height: null });
-    return chosen === null ? 0 : m.ofChild(chosen);
+    return chosen === null ? 0 : m.nested().ofChild(chosen);
   },
 };

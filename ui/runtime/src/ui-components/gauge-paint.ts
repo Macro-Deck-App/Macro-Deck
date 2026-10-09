@@ -5,14 +5,19 @@ import { nodeThicknessPx } from './style';
 import { sliderLevelColor } from './bar';
 import { SVG_NS } from './render-constants';
 
-export function paintGaugeArc<TState>(node: UiNode, ctx: UiComponentContext<TState>, level: number): ArcMetrics {
+export function paintGaugeArc<TState>(
+  node: UiNode,
+  ctx: UiComponentContext<TState>,
+  level: number,
+  trackColor?: string,
+): ArcMetrics {
   const element = ctx.element as SVGElement;
   const width = ctx.box.width ?? ctx.basis;
   const height = ctx.box.height ?? ctx.basis;
   ctx.setAttribute(element, 'width', String(width));
   ctx.setAttribute(element, 'height', String(height));
 
-  const thickness = nodeThicknessPx(node, ctx.basis, ctx.crossExtent);
+  const thickness = nodeThicknessPx(node, ctx);
   const metrics = arcMetrics(width, height, thickness);
   const sweep = arcSweep(node);
 
@@ -20,6 +25,7 @@ export function paintGaugeArc<TState>(node: UiNode, ctx: UiComponentContext<TSta
   ctx.setClassName(track, 'widget-gauge-track');
   ctx.setAttribute(track, 'd', arcPath(metrics, sweep.start, sweep.sweep));
   ctx.setAttribute(track, 'stroke-width', String(thickness));
+  ctx.setStyle(track, 'stroke', trackColor ?? null);
 
   if (level > 0) {
     const fill = ctx.part('gaugeFill', 'path', SVG_NS);

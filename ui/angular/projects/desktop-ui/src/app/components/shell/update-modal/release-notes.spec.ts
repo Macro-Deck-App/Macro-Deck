@@ -1,4 +1,22 @@
+import { MarkdownInline } from '../../../util/markdown';
 import { releaseNoteSections } from './release-notes';
+
+function written(runs: MarkdownInline[]): string {
+  return runs.map(run => {
+    switch (run.kind) {
+      case 'text':
+        return run.text;
+      case 'link':
+        return `[${written(run.children)}](${run.href})`;
+      case 'strong':
+      case 'em':
+      case 'del':
+        return written(run.children);
+      default:
+        return '';
+    }
+  }).join('');
+}
 
 function shape(text: string): string[][] {
   return releaseNoteSections(text).map(section => section.map(block => block.kind));
@@ -39,33 +57,12 @@ describe('releaseNoteSections', () => {
       '* See [the docs](https://macro-deck.app/docs) and https://macro-deck.app',
     ].join('\n'));
 
-    expect(list.kind === 'list' ? list.items : []).toEqual([
-      [
-        { kind: 'text', text: 'Fix by ' },
-        { kind: 'link', text: '@manuelmayer-dev', href: 'https://github.com/manuelmayer-dev' },
-        { kind: 'text', text: ' in ' },
-        { kind: 'link', text: '#697', href: 'https://github.com/Macro-Deck-App/Macro-Deck/pull/697', bare: true },
-      ],
-      [
-        { kind: 'text', text: 'Port of ' },
-        { kind: 'link', text: 'Other/Repo#12', href: 'https://github.com/Other/Repo/issues/12', bare: true },
-        { kind: 'text', text: ', mail a@b.example' },
-      ],
-      [
-        { kind: 'text', text: 'Range ' },
-        {
-          kind: 'link',
-          text: 'v3.0.0-beta.2...v3.0.0-beta.3',
-          href: 'https://github.com/Macro-Deck-App/Macro-Deck/compare/v3.0.0-beta.2...v3.0.0-beta.3',
-          bare: true,
-        },
-      ],
-      [
-        { kind: 'text', text: 'See ' },
-        { kind: 'link', text: 'the docs', href: 'https://macro-deck.app/docs' },
-        { kind: 'text', text: ' and ' },
-        { kind: 'link', text: 'https://macro-deck.app', href: 'https://macro-deck.app/', bare: true },
-      ],
+    const items = list.kind === 'list' ? list.items.map(item => item.blocks.flatMap(block => block.kind === 'paragraph' ? [written(block.inlines)] : [])) : [];
+    expect(items).toEqual([
+      ['Fix by [@manuelmayer-dev](https://github.com/manuelmayer-dev) in [#697](https://github.com/Macro-Deck-App/Macro-Deck/pull/697)'],
+      ['Port of [Other/Repo#12](https://github.com/Other/Repo/issues/12), mail a@b.example'],
+      ['Range [v3.0.0-beta.2...v3.0.0-beta.3](https://github.com/Macro-Deck-App/Macro-Deck/compare/v3.0.0-beta.2...v3.0.0-beta.3)'],
+      ['See [the docs](https://macro-deck.app/docs) and [https://macro-deck.app](https://macro-deck.app/)'],
     ]);
   });
 

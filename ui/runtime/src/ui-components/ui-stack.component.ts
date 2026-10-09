@@ -42,9 +42,10 @@ export const uiStackComponent: UiComponentDefinition<UiStackState> = {
 
     const ownHorizontal =
       nodeString(node, UiComponentProperties.Direction) === UiComponentDirections.Horizontal;
-    const padding = resolveLength(nodeLength(node, UiComponentProperties.Padding), m.basis, m.crossExtent) ?? 0;
-    const gap = resolveLength(nodeLength(node, UiComponentProperties.Gap), m.basis, m.crossExtent) ?? 0;
-    const extents = children.map(child => m.ofChild(child));
+    const padding = resolveLength(nodeLength(node, UiComponentProperties.Padding), m) ?? 0;
+    const gap = resolveLength(nodeLength(node, UiComponentProperties.Gap), m) ?? 0;
+    const measured = m.nested();
+    const extents = children.map(child => measured.ofChild(child));
 
     const inner = ownHorizontal === m.horizontal
       ? extents.reduce((a, b) => a + b, 0) + Math.max(0, children.length - 1) * gap

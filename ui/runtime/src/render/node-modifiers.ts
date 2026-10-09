@@ -1,5 +1,5 @@
 import { asLocalizedRef, LocalizationTranslator } from '../localization/localized-text';
-import { asHexColor, asUiLength, resolveLength } from '../ui-framework/length';
+import { asHexColor, asUiLength, LengthScope, resolveLength } from '../ui-framework/length';
 import { nodeClaimsGesture, nodeDeclaresGesture, ownsItsPointer } from '../ui-framework/node-gestures';
 import { nodeRecord } from '../ui-framework/node-properties.util';
 import { UiNode } from '../ui-framework/ui-node.interface';
@@ -43,9 +43,7 @@ export function ownsPointerAt(target: EventTarget | null, boundary: Node | null)
   return false;
 }
 
-export interface UiModifierScope {
-  readonly basis: number;
-  readonly crossExtent: number | null;
+export interface UiModifierScope extends LengthScope {
   readonly isTreeRoot: boolean;
   isDisabled(): boolean;
 }
@@ -121,7 +119,7 @@ function backgroundOf(modifiers: Record<string, unknown>): string | undefined {
 
 function radiusOf(modifiers: Record<string, unknown>, scope: UiModifierScope): number | undefined {
   if (scope.isTreeRoot) return undefined;
-  return resolveLength(asUiLength(modifiers[UiComponentModifiers.Radius]), scope.basis, scope.crossExtent);
+  return resolveLength(asUiLength(modifiers[UiComponentModifiers.Radius]), scope);
 }
 
 function textOf(raw: unknown, localization: LocalizationTranslator): string | undefined {
@@ -167,7 +165,7 @@ export function planNodeModifiers(
   if (background !== undefined) plan.styles['background'] = background;
 
   const borderWidth = resolveLength(
-    asUiLength(modifiers[UiComponentModifiers.BorderWidth]), scope.basis, scope.crossExtent);
+    asUiLength(modifiers[UiComponentModifiers.BorderWidth]), scope);
   if (borderWidth !== undefined && borderWidth > 0) {
     const requested = modifiers[UiComponentModifiers.BorderLine];
     const line = typeof requested === 'string' && UI_COMPONENT_BORDER_LINES_WELL_KNOWN.includes(requested)

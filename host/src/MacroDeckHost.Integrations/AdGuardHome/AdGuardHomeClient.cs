@@ -5,14 +5,13 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Application.AdGuardHome;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
 internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 {
 	public static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
-
-	private const string UserAgent = "Macro-Deck-AdGuardHome/1.0";
 
 	private static readonly ConcurrentDictionary<bool, HttpClient> _clients = new();
 
@@ -213,23 +212,19 @@ internal sealed class AdGuardHomeClient : IAdGuardHomeClient
 
 	private static HttpClient CreateClient(bool acceptUntrustedCertificate)
 	{
-		var handler = new SocketsHttpHandler
+		return IntegrationHttp.CreateClient(Timeout.InfiniteTimeSpan, handler =>
 		{
-			AllowAutoRedirect = false,
-			AutomaticDecompression = DecompressionMethods.All,
-			ConnectTimeout = RequestTimeout,
-			PooledConnectionLifetime = TimeSpan.FromMinutes(5)
-		};
+			handler.AllowAutoRedirect = false;
+			handler.AutomaticDecompression = DecompressionMethods.All;
+			handler.ConnectTimeout = RequestTimeout;
+			handler.PooledConnectionLifetime = TimeSpan.FromMinutes(5);
 
-		if (acceptUntrustedCertificate)
-		{
+			if (acceptUntrustedCertificate)
+			{
 #pragma warning disable CA5359 // Opt-in per instance for self-signed certificates on home servers.
-			handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+				handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
 #pragma warning restore CA5359
-		}
-
-		var client = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-		return client;
+			}
+		});
 	}
 }

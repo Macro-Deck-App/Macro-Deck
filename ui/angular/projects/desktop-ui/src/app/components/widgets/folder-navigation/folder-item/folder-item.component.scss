@@ -3,7 +3,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px;
-  padding-right: 12px;
+  padding-inline-end: 12px;
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
@@ -119,5 +119,5 @@
 }
 
 .children {
-  margin-left: 0;
+  margin-inline-start: 0;
 }

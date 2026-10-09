@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
+using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.StreamStats;
@@ -9,6 +10,7 @@ using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Calendar;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Integrations.HomeAssistant;
+using MacroDeckHost.Integrations.MusicPlayer;
 using MacroDeckHost.Integrations.System;
 using MacroDeck.Sdk;
 
@@ -25,8 +27,14 @@ internal static class IntegrationGatewayBinder
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		IStreamPlatformServices? streamPlatforms = null,
 		CalendarHostServices? calendarServices = null,
-		IAdGuardHomeSink? adGuardHomeSink = null)
+		IAdGuardHomeSink? adGuardHomeSink = null,
+		IMusicPlayerAlbumColor? albumColor = null)
 	{
+		if (albumColor is not null && integration is IMusicPlayerAlbumColorConsumer albumColorConsumer)
+		{
+			albumColorConsumer.UseAlbumColor(albumColor);
+		}
+
 		if (adGuardHomeSink is not null && integration is IAdGuardHomeSinkConsumer adGuardHomeConsumer)
 		{
 			adGuardHomeConsumer.UseAdGuardHomeSink(adGuardHomeSink);

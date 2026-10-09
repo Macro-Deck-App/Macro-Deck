@@ -66,6 +66,29 @@ internal static class LocalizationCultureName
 		return separator > 0 ? culture.Substring(0, separator) : null;
 	}
 
+	public static bool IsTraditionalChinese(string? culture)
+	{
+		if (string.IsNullOrEmpty(culture))
+		{
+			return false;
+		}
+
+		var parts = culture!.Split('-');
+		if (parts.Length < 2 || !string.Equals(parts[0], "zh", StringComparison.OrdinalIgnoreCase))
+		{
+			return false;
+		}
+
+		if (parts[1].Length == 4)
+		{
+			return string.Equals(parts[1], "Hant", StringComparison.OrdinalIgnoreCase);
+		}
+
+		return parts[1].Equals("TW", StringComparison.OrdinalIgnoreCase)
+			|| parts[1].Equals("HK", StringComparison.OrdinalIgnoreCase)
+			|| parts[1].Equals("MO", StringComparison.OrdinalIgnoreCase);
+	}
+
 	private static bool IsAlpha(string value)
 	{
 		if (value.Length == 0)

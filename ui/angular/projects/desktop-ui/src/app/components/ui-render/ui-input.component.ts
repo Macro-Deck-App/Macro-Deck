@@ -9,7 +9,7 @@ import { SelectComponent, SelectOption } from '../forms/select/select.component'
 import { ComboboxComponent, ComboboxOption } from '../forms/combobox/combobox.component';
 import { MultiSelectComponent, MultiSelectOption } from '../forms/multi-select/multi-select.component';
 import { ReorderableListComponent } from '../forms/reorderable-list/reorderable-list.component';
-import { ColorPickerComponent, ColorPreset, TRANSPARENT_COLOR, defaultColorPresets } from '../forms/color-picker/color-picker.component';
+import { ColorPickerComponent, ColorPreset, TRANSPARENT_COLOR } from '../forms/color-picker/color-picker.component';
 import { FilePathInputComponent, FilePathKind } from '../forms/file-path-input/file-path-input.component';
 import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
 import { DurationInputComponent } from '../forms/duration-input/duration-input.component';
@@ -157,10 +157,16 @@ export class UiInputComponent {
   protected readonly colorDefaultValue = computed(() =>
     this.supportsReset() ? (nodeString(this.node(), Properties.DefaultValue) ?? '') : undefined,
   );
+  protected readonly labelRowReset = computed(() => {
+    const fallback = this.colorDefaultValue();
+    return this.node().type === UiConfigPrimitives.Color && fallback !== undefined
+      && this.stringValue() !== fallback;
+  });
+  protected readonly colorResetLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Forms.ColorPicker.ResetAriaLabel));
   protected readonly colorPresets = computed<ColorPreset[] | undefined>(() =>
     nodeBoolean(this.node(), Properties.AllowTransparent) === true
       ? [
-          ...defaultColorPresets(this.localization),
           {
             label: this.localization.translateKey(AppStrings.Widgets.GridSettings.ColorTransparent),
             value: TRANSPARENT_COLOR,

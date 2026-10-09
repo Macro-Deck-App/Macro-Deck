@@ -15,6 +15,7 @@ import {
   CancelRestoreResponse,
   ChangePasswordRequest,
   ChangeUsernameRequest,
+  ColorPaletteChangedEvent,
   ConnectAdbDeviceRequest,
   ConnectAdbDeviceResponse,
   ConnectNativeUsbDeviceRequest,
@@ -157,6 +158,7 @@ import {
   GetLocalizationResponse,
   GetLocalizationSettingsResponse,
   GetLockScreenSettingsResponse,
+  GetHttpSettingsResponse,
   GetLoggingSettingsResponse,
   GetLogSourcesResponse,
   GetLogsRequest,
@@ -352,6 +354,8 @@ import {
   UpdateLocalizationSettingsResponse,
   UpdateLockScreenSettingsRequest,
   UpdateLockScreenSettingsResponse,
+  UpdateHttpSettingsRequest,
+  UpdateHttpSettingsResponse,
   UpdateLoggingSettingsRequest,
   UpdateLoggingSettingsResponse,
   UpdateNetworkSettingsRequest,
@@ -406,6 +410,12 @@ export interface WidgetTypeFavoritesResponse {
   success: boolean;
   error?: ApiError;
   typeIds: string[];
+}
+
+export interface ColorPaletteResponse {
+  success: boolean;
+  error?: ApiError;
+  colors: string[];
 }
 
 const UI_SOCKET_PATH = '/ws/ui';
@@ -1226,6 +1236,14 @@ export class ApiService {
     return this.http('PUT', '/api/settings/appearance', request);
   }
 
+  getHttpSettings(): Promise<GetHttpSettingsResponse> {
+    return this.http('GET', '/api/settings/http');
+  }
+
+  updateHttpSettings(request: UpdateHttpSettingsRequest): Promise<UpdateHttpSettingsResponse> {
+    return this.http('PUT', '/api/settings/http', request);
+  }
+
   getLoggingSettings(): Promise<GetLoggingSettingsResponse> {
     return this.http('GET', '/api/settings/logging');
   }
@@ -1806,6 +1824,18 @@ export class ApiService {
     return this.http('PUT', '/api/widgets/types/favorites', { widgetTypeId, favorite });
   }
 
+  getColorPalette(): Promise<ColorPaletteResponse> {
+    return this.http('GET', '/api/settings/color-palette');
+  }
+
+  setColorPaletteEntry(color: string, present: boolean): Promise<ColorPaletteResponse> {
+    return this.http('PUT', '/api/settings/color-palette', { color, present });
+  }
+
+  restoreDefaultColorPalette(): Promise<ColorPaletteResponse> {
+    return this.http('POST', '/api/settings/color-palette/restore-defaults', {});
+  }
+
   getActions(): Promise<GetActionsResponse> {
     return this.http('GET', '/api/actions');
   }
@@ -1968,6 +1998,10 @@ export class ApiService {
 
   onWidgetTypeFavoritesChanged(): Observable<WidgetTypeFavoritesChangedEvent> {
     return this.onNotification<WidgetTypeFavoritesChangedEvent>('WidgetTypeFavoritesChangedEvent');
+  }
+
+  onColorPaletteChanged(): Observable<ColorPaletteChangedEvent> {
+    return this.onNotification<ColorPaletteChangedEvent>('ColorPaletteChangedEvent');
   }
 
   attachUiSession(sessionId: string): Promise<UiAttachSessionResponse | null> {

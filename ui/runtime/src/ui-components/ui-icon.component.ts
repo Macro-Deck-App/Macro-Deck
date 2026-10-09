@@ -28,7 +28,7 @@ export const uiIconComponent: UiComponentDefinition = {
     // A stack leaves an axis open for a child that declares no main size of its own; the icon then takes
     // its own square there, as the contract draws it, rather than the whole basis.
     const known = [ctx.box.width, ctx.box.height].filter((value): value is number => value !== null);
-    const edge = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent)
+    const edge = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx)
       ?? (known.length > 0 ? Math.min(...known) : ctx.basis);
     const width = ctx.box.width ?? edge;
     const height = ctx.box.height ?? edge;
@@ -50,6 +50,6 @@ export const uiIconComponent: UiComponentDefinition = {
   },
 
   intrinsicMainPx(node, m) {
-    return resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent) ?? 0;
+    return resolveLength(nodeLength(node, UiComponentProperties.Size), m) ?? 0;
   },
 };

@@ -7,7 +7,25 @@ const GITHUB_COMPARE = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/compare\/([^/?
 const MENTION = /(^|[^\w@/.])@([A-Za-z0-9][A-Za-z0-9-]{0,38})/g;
 
 function plainText(inlines: MarkdownInline[]): string {
-  return inlines.map(run => run.text).join('').trim();
+  return inlines.map(runText).join('').trim();
+}
+
+function runText(run: MarkdownInline): string {
+  switch (run.kind) {
+    case 'text':
+    case 'code':
+      return run.text;
+    case 'strong':
+    case 'em':
+    case 'del':
+    case 'link':
+      return run.children.map(runText).join('');
+    case 'image':
+    case 'video':
+      return run.alt;
+    case 'br':
+      return ' ';
+  }
 }
 
 function shortLabel(text: string, href: string): string {
@@ -26,7 +44,7 @@ function linkMentions(text: string): MarkdownInline[] {
     if (start > last) {
       runs.push({ kind: 'text', text: text.slice(last, start) });
     }
-    runs.push({ kind: 'link', text: `@${match[2]}`, href: `https://github.com/${match[2]}` });
+    runs.push({ kind: 'link', href: `https://github.com/${match[2]}`, title: null, children: [{ kind: 'text', text: `@${match[2]}` }] });
     last = start + match[2].length + 1;
   }
   if (last < text.length) {
@@ -36,11 +54,19 @@ function linkMentions(text: string): MarkdownInline[] {
 }
 
 function githubInlines(inlines: MarkdownInline[]): MarkdownInline[] {
-  return inlines.flatMap(run => {
-    if (run.kind === 'link' && run.bare) {
-      return [{ ...run, text: shortLabel(run.text, run.href) }];
+  return inlines.flatMap((run): MarkdownInline[] => {
+    switch (run.kind) {
+      case 'link':
+        return run.bare ? [{ ...run, children: [{ kind: 'text', text: shortLabel(plainText(run.children), run.href) }] }] : [run];
+      case 'text':
+        return linkMentions(run.text);
+      case 'strong':
+      case 'em':
+      case 'del':
+        return [{ ...run, children: githubInlines(run.children) }];
+      default:
+        return [run];
     }
-    return run.kind === 'text' ? linkMentions(run.text) : [run];
   });
 }
 
@@ -48,10 +74,11 @@ function githubBlock(block: MarkdownBlock): MarkdownBlock {
   switch (block.kind) {
     case 'heading':
     case 'paragraph':
-    case 'quote':
       return { ...block, inlines: githubInlines(block.inlines) };
+    case 'quote':
+      return { ...block, blocks: block.blocks.map(githubBlock) };
     case 'list':
-      return { ...block, items: block.items.map(githubInlines) };
+      return { ...block, items: block.items.map(item => ({ ...item, blocks: item.blocks.map(githubBlock) })) };
     default:
       return block;
   }

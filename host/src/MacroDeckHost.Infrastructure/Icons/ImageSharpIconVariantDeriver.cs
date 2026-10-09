@@ -106,7 +106,7 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 		try
 		{
 			// Masters come from imported archives, so the decoded size of every frame is bounded before decoding.
-			var info = Image.Identify(master);
+			var info = Image.Identify(ImageSharpDecoding.Options, master);
 			var framePixels = (long)info.Width * info.Height;
 			var frames = Math.Max(1, info.FrameMetadataCollection.Count);
 			if (Math.Max(info.Width, info.Height) <= size || framePixels * frames > _maxDecodedPixels)
@@ -114,7 +114,7 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 				return Refuse(key, DerivedVariant.NotApplicable, retryAfter: null);
 			}
 
-			using var image = Image.Load(new DecoderOptions { MaxFrames = (uint)(_maxDecodedPixels / framePixels) }, master);
+			using var image = Image.Load(new DecoderOptions { Configuration = ImageSharpDecoding.Configuration, MaxFrames = (uint)(_maxDecodedPixels / framePixels) }, master);
 			var encoder = IconWebpEncoding.For(isAnimated: image.Frames.Count > 1);
 			image.Mutate(ctx => ctx.Resize(new ResizeOptions { Mode = ResizeMode.Max, Size = new Size(size, size) }));
 			var bytes = await IconWebpEncoding.EncodeToBytes(image, encoder, CancellationToken.None);

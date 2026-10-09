@@ -2565,6 +2565,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>Prohlížeč této stránce neumožňuje kopírovat do schránky.</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>Maximální počet barev v paletě: {max}.</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>Neplatná barva.</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>Hostitel je uzamčen.</value>
   </data>
@@ -2724,6 +2731,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>Toto zobrazení složky není k dispozici.</value>
+  </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>Zadejte platný User-Agent: nejvýše {maxLength} tisknutelných znaků ASCII ve tvaru Produkt/1.0.</value>
+    <comment>[maxLength:int]</comment>
   </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>Export se nezdařil</value>
@@ -3473,6 +3484,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>Přidat modifikátor</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>Přidat do palety</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>Neprůhlednost</value>
   </data>
@@ -3487,6 +3501,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>Vlastní barva</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>Vlastní barva {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>Výchozí barva</value>
@@ -3565,11 +3583,20 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>Žádné odpovídající proměnné</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>Nenastaveno</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>Oranžová</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>Původní</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>Paleta</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>Paletu barev se nepodařilo uložit.</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>Růžová</value>
@@ -3579,6 +3606,17 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>Červená</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>Odebrat {hex} z palety</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>Odebrat barvu z palety?</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>Tato barva ({name}) bude odebrána z palety a už nebude nabízena v žádném poli barvy.</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>Odebrat modifikátor</value>
@@ -7985,6 +8023,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>Toto je sezení Wayland, takže vstup z myši prochází přes XWayland. Klikání, tažení a rolování fungují, ale kompozitor může ignorovat absolutní polohování kurzoru – přesun na pevnou souřadnici pak skončí jinde nebo se neprovede vůbec.</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>Přehrávač hudby</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>Barva alba</value>
   </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>Načte, zda je filtr zdroje zapnutý, do proměnné</value>
@@ -14470,6 +14514,30 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>Světlý</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>Barvy nabízené v každém poli barvy. Libovolnou z nich lze odebrat, včetně výchozích, nebo přidat vlastní.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>Paleta je prázdná. Přidejte barvu nebo obnovte výchozí barvy.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>Paleta barev</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>Barvy</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>Obnovit</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>Obnovit výchozí barvy?</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>Paleta bude nahrazena výchozími barvami Macro Deck. Přidané barvy z ní budou odebrány.</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>Obnovit výchozí barvy</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>Systém</value>
   </data>
@@ -15188,6 +15256,31 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>Aktualizace</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Nastavení požadavků a spojení HTTP, která vytvářejí vestavěné integrace Macro Decku.</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>Nastavení HTTP se nepodařilo načíst.</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>Nastavení HTTP se nepodařilo uložit.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>Výchozí: {userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>Upravte User-Agent, který vestavěné integrace odesílají s požadavky HTTP. Může pomoci vyřešit potíže s kompatibilitou se zpětnými proxy servery a systémy ochrany proti botům. Pluginy třetích stran to neovlivní a musí si nastavit vlastní User-Agent. Změna platí pro nové požadavky a nová spojení; už otevřená spojení si ponechají původní hodnotu do opětovného připojení.</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>Obnovit výchozí</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>Použije se okamžitě u všech připojených klientů.</value>
@@ -19054,8 +19147,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>Popisek</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>Barva okraje pozadí popisku</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>Okraj pozadí popisku</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>Šířka okraje pozadí popisku (%)</value>
@@ -19066,8 +19159,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>Barva popisku</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>Barva obrysu popisku</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>Obrys popisku</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>Šířka obrysu (%)</value>

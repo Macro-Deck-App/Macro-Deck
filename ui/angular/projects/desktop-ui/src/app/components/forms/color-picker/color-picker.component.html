@@ -28,150 +28,32 @@
       <code class="cp-unsupported-value">{{ value() }}</code>
     </div>
   </div>
+} @else if (inline()) {
+  <ng-container *ngTemplateOutlet="body" />
 } @else {
-  @if (showsModeToggle()) {
-    <shared-segmented-control
-      class="cp-mode"
-      [options]="modeOptions()"
-      [value]="mode()"
-      [ariaLabel]="modeAriaLabel()"
-      (valueChange)="setMode($event)" />
-  }
-
-  @if (showsModeToggle() && mode() === 'variable') {
+  <div class="cp-field-row">
     <shared-color-picker-chip
       #chip
-      [swatch]="previewColor()"
-      [label]="chipLabel()"
+      class="cp-field"
+      [swatch]="fieldSwatch()"
+      [label]="fieldText()"
+      [placeholder]="fieldIsPlaceholder()"
+      [resetGlyph]="fieldShowsResetGlyph()"
       [missing]="missingVariableText() !== null"
       [count]="modifierCount()"
       [countText]="modifierCountText()"
-      [expanded]="isEditorOpen()"
-      (activate)="toggleEditor()" />
+      [expanded]="isOpen()"
+      [disabled]="isDisabled()"
+      (activate)="toggle()" />
 
-    <shared-overlay-panel
-      [anchor]="chip.button().nativeElement"
-      [isOpen]="isEditorOpen()"
-      [maxHeight]="editorMaxHeight()"
-      (dismissed)="onEditorDismissed()">
-      <div #editor class="cp-variable cp-editor" role="dialog" [attr.aria-label]="variableLabel()" (keydown)="onEditorKeydown($event)">
-        <shared-select
-          class="cp-variable-select"
-          [options]="variableOptions()"
-          [placeholder]="variablePlaceholder()"
-          [searchable]="true"
-          [fitContent]="true"
-          [showTitle]="true"
-          [searchPlaceholder]="searchVariablesPlaceholder()"
-          [emptyText]="noColorVariablesText()"
-          [noMatchesText]="noMatchingVariablesText()"
-          [ngModel]="reference()?.variable ?? null"
-          (ngModelChange)="pickVariable($event)" />
-
-        @if (colorVariables().length === 0 && !reference()) {
-          <span class="cp-hint">{{ noColorVariablesText() }}</span>
-        }
-
-        @if (missingVariableText(); as missing) {
-          <span class="cp-hint cp-hint-warning">{{ missing }}</span>
-        }
-
-        @if (reference()) {
-          @if (steps().length > 0) {
-            <ol class="cp-chain">
-              @for (step of steps(); track $index; let i = $index) {
-                <li class="cp-step">
-                  <span class="cp-step-index" aria-hidden="true">{{ i + 1 }}</span>
-                  <div class="cp-step-body">
-                    <div class="cp-step-row" [class.cp-step-row-split]="step.modifier.op !== 'mix'">
-                      <shared-select
-                        class="cp-grow cp-step-lead"
-                        [options]="modifierOptions()"
-                        [fitContent]="true"
-                        [ngModel]="step.modifier.op"
-                        (ngModelChange)="changeModifierOp(i, $event)" />
-                      @if (step.modifier.op !== 'mix') {
-                        <span class="cp-amount">
-                          <shared-input
-                            type="number"
-                            [min]="step.min"
-                            [max]="step.max"
-                            [step]="1"
-                            [ariaLabel]="amountLabel()"
-                            [ngModel]="step.modifier.amount"
-                            (ngModelChange)="setModifierAmount(i, $event)" />
-                          <span class="cp-amount-unit" aria-hidden="true">{{ step.unit }}</span>
-                        </span>
-                      }
-                      <button
-                        class="cp-icon-button cp-remove"
-                        type="button"
-                        [title]="removeModifierLabel()"
-                        [attr.aria-label]="removeModifierLabel()"
-                        (click)="removeModifier(i)">
-                        <span class="icon icon-sm icon-x" aria-hidden="true"></span>
-                      </button>
-                    </div>
-                    @if (step.modifier.op === 'mix') {
-                      <div class="cp-step-row cp-step-row-split" role="group" [attr.aria-label]="mixWithLabel()">
-                        <shared-select
-                          class="cp-grow cp-step-lead"
-                          [options]="mixTargetOptionsFor(step.modifier)"
-                          [fitContent]="true"
-                          [showTitle]="true"
-                          [ngModel]="mixTargetValue(step.modifier)"
-                          (ngModelChange)="changeMixTarget(i, $event)" />
-                        <span class="cp-amount">
-                          <shared-input
-                            type="number"
-                            [min]="step.min"
-                            [max]="step.max"
-                            [step]="1"
-                            [ariaLabel]="amountLabel()"
-                            [ngModel]="step.modifier.amount"
-                            (ngModelChange)="setModifierAmount(i, $event)" />
-                          <span class="cp-amount-unit" aria-hidden="true">{{ step.unit }}</span>
-                        </span>
-                      </div>
-                      @if (step.modifier.mix?.kind !== 'variable') {
-                        <shared-color-picker
-                          [allowAlpha]="true"
-                          [ngModel]="mixLiteral(step.modifier)"
-                          (ngModelChange)="changeMixColor(i, $event)" />
-                      }
-                    }
-                  </div>
-                </li>
-              }
-            </ol>
-          }
-
-          <button class="cp-add" type="button" [disabled]="!canAddModifier()" (click)="addModifier()">
-            <span class="icon icon-sm icon-plus" aria-hidden="true"></span>
-            <span>{{ addModifierLabel() }}</span>
-          </button>
-
-          @if (steps().length > 0) {
-            <shared-color-picker-result
-              [original]="originalColor()"
-              [result]="previewColor()"
-              [originalLabel]="originalLabel()"
-              [resultLabel]="resultLabel()"
-              [steps]="steps()" />
-          }
-        }
-      </div>
-    </shared-overlay-panel>
-  } @else {
-
-  <div class="cp-track" role="group" [attr.aria-label]="pickerAriaLabel()">
-    @if (showsReset()) {
+    @if (showsInlineReset()) {
       <button
-        class="cp-cell cp-reset"
+        class="cp-reset"
         type="button"
-        [title]="defaultColorTitle()"
+        [disabled]="isDisabled()"
+        [title]="resetAriaLabel()"
         [attr.aria-label]="resetAriaLabel()"
-        (click)="select(effectiveResetValue()!)">
+        (click)="reset()">
         <svg
           class="cp-icon"
           viewBox="0 0 24 24"
@@ -186,65 +68,145 @@
         </svg>
       </button>
     }
+  </div>
 
-    @for (preset of effectivePresets(); track preset.value) {
-      <button
-        class="cp-cell cp-swatch"
-        type="button"
-        [class.cp-transparent]="preset.value === transparentColor"
-        [class.cp-selected]="value() === preset.value"
-        [style.--cp-fill]="preset.value"
-        [title]="preset.label"
-        [attr.aria-pressed]="value() === preset.value"
-        [attr.aria-label]="preset.label"
-        (click)="select(preset.value)">
-        @if (value() === preset.value) {
-          <svg class="cp-check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M20 6 9 17l-5-5"
-              stroke="currentColor"
-              stroke-width="3"
-              stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        }
-      </button>
-    }
+  <shared-overlay-panel
+    [anchor]="chip.button().nativeElement"
+    [isOpen]="isOpen() && !pendingRemoval()"
+    [maxHeight]="popoverMaxHeight()"
+    (dismissed)="onPopoverDismissed()">
+    <ng-container *ngTemplateOutlet="body" />
+  </shared-overlay-panel>
+}
 
-    @if (allowCustom()) {
-      <button
-        #customTrigger
-        class="cp-cell cp-custom"
-        type="button"
-        aria-haspopup="dialog"
-        [class.cp-selected]="isCustom()"
-        [title]="customColorTitle()"
-        [attr.aria-label]="customColorTitle()"
-        [attr.aria-expanded]="isPickerOpen()"
-        [style.--cp-fill]="isCustom() ? customFill() : null"
-        (click)="togglePicker()">
-        @if (!isCustom()) {
-          <svg
-            class="cp-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true">
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-        }
-      </button>
+<ng-template #body>
+    <div
+      #popover
+      class="cp-popover"
+      [class.cp-inline]="inline()"
+      [attr.role]="inline() ? 'group' : 'dialog'"
+      [class.cp-popover-wide]="showsModeToggle() && mode() === 'variable'"
+      [attr.aria-label]="pickerAriaLabel()"
+      (keydown)="onPopoverKeydown($event)">
+      @if (showsModeToggle()) {
+        <shared-segmented-control
+          class="cp-mode"
+          [options]="modeOptions()"
+          [value]="mode()"
+          [ariaLabel]="modeAriaLabel()"
+          (valueChange)="setMode($event)" />
+      }
 
-      <shared-overlay-panel
-        [anchor]="customTrigger"
-        [isOpen]="isPickerOpen()"
-        [maxHeight]="null"
-        (dismissed)="closePicker()">
-        <div class="cp-popover" role="dialog" [attr.aria-label]="customColorTitle()">
+      @if (showsModeToggle() && mode() === 'variable') {
+        <div class="cp-variable" role="group" [attr.aria-label]="variableLabel()">
+          <shared-select
+            class="cp-variable-select"
+            [options]="variableOptions()"
+            [placeholder]="variablePlaceholder()"
+            [searchable]="true"
+            [fitContent]="true"
+            [showTitle]="true"
+            [searchPlaceholder]="searchVariablesPlaceholder()"
+            [emptyText]="noColorVariablesText()"
+            [noMatchesText]="noMatchingVariablesText()"
+            [ngModel]="reference()?.variable ?? null"
+            (ngModelChange)="pickVariable($event)" />
+
+          @if (colorVariables().length === 0 && !reference()) {
+            <span class="cp-hint">{{ noColorVariablesText() }}</span>
+          }
+
+          @if (missingVariableText(); as missing) {
+            <span class="cp-hint cp-hint-warning">{{ missing }}</span>
+          }
+
+          @if (reference()) {
+            @if (steps().length > 0) {
+              <ol class="cp-chain">
+                @for (step of steps(); track $index; let i = $index) {
+                  <li class="cp-step">
+                    <span class="cp-step-index" aria-hidden="true">{{ i + 1 }}</span>
+                    <div class="cp-step-body">
+                      <div class="cp-step-row" [class.cp-step-row-split]="step.modifier.op !== 'mix'">
+                        <shared-select
+                          class="cp-grow cp-step-lead"
+                          [options]="modifierOptions()"
+                          [fitContent]="true"
+                          [ngModel]="step.modifier.op"
+                          (ngModelChange)="changeModifierOp(i, $event)" />
+                        @if (step.modifier.op !== 'mix') {
+                          <span class="cp-amount">
+                            <shared-input
+                              type="number"
+                              [min]="step.min"
+                              [max]="step.max"
+                              [step]="1"
+                              [ariaLabel]="amountLabel()"
+                              [ngModel]="step.modifier.amount"
+                              (ngModelChange)="setModifierAmount(i, $event)" />
+                            <span class="cp-amount-unit" aria-hidden="true">{{ step.unit }}</span>
+                          </span>
+                        }
+                        <button
+                          class="cp-icon-button cp-remove"
+                          type="button"
+                          [title]="removeModifierLabel()"
+                          [attr.aria-label]="removeModifierLabel()"
+                          (click)="removeModifier(i)">
+                          <span class="icon icon-sm icon-x" aria-hidden="true"></span>
+                        </button>
+                      </div>
+                      @if (step.modifier.op === 'mix') {
+                        <div class="cp-step-row cp-step-row-split" role="group" [attr.aria-label]="mixWithLabel()">
+                          <shared-select
+                            class="cp-grow cp-step-lead"
+                            [options]="mixTargetOptionsFor(step.modifier)"
+                            [fitContent]="true"
+                            [showTitle]="true"
+                            [ngModel]="mixTargetValue(step.modifier)"
+                            (ngModelChange)="changeMixTarget(i, $event)" />
+                          <span class="cp-amount">
+                            <shared-input
+                              type="number"
+                              [min]="step.min"
+                              [max]="step.max"
+                              [step]="1"
+                              [ariaLabel]="amountLabel()"
+                              [ngModel]="step.modifier.amount"
+                              (ngModelChange)="setModifierAmount(i, $event)" />
+                            <span class="cp-amount-unit" aria-hidden="true">{{ step.unit }}</span>
+                          </span>
+                        </div>
+                        @if (step.modifier.mix?.kind !== 'variable') {
+                          <shared-color-picker
+                            [allowAlpha]="true"
+                            [ngModel]="mixLiteral(step.modifier)"
+                            (ngModelChange)="changeMixColor(i, $event)" />
+                        }
+                      }
+                    </div>
+                  </li>
+                }
+              </ol>
+            }
+
+            <button class="cp-add" type="button" [disabled]="!canAddModifier()" (click)="addModifier()">
+              <span class="icon icon-sm icon-plus" aria-hidden="true"></span>
+              <span>{{ addModifierLabel() }}</span>
+            </button>
+
+            @if (steps().length > 0) {
+              <shared-color-picker-result
+                [original]="originalColor()"
+                [result]="previewColor()"
+                [originalLabel]="originalLabel()"
+                [resultLabel]="resultLabel()"
+                [steps]="steps()" />
+            }
+          }
+        </div>
+      } @else {
+        @if (allowCustom()) {
           <div
             class="cp-area"
             tabindex="0"
@@ -323,9 +285,104 @@
               </button>
             }
           </div>
+        }
+
+        @if (showPalette()) {
+        <div class="cp-palette" role="group" [attr.aria-label]="paletteLabel()">
+          @for (preset of effectivePresets(); track preset.value) {
+            <button
+              class="cp-cell cp-swatch"
+              type="button"
+              [class.cp-transparent]="preset.value === transparentColor"
+              [class.cp-selected]="value() === preset.value"
+              [style.--cp-fill]="preset.value"
+              [title]="preset.label"
+              [attr.aria-pressed]="value() === preset.value"
+              [attr.aria-label]="preset.label"
+              (click)="select(preset.value)">
+              @if (value() === preset.value) {
+                <svg class="cp-check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M20 6 9 17l-5-5"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              }
+            </button>
+          }
+
+          @for (color of paletteColors(); track color) {
+            <span class="cp-custom-entry">
+              <button
+                class="cp-cell cp-swatch cp-palette-swatch"
+                type="button"
+                [class.cp-selected]="value() === color"
+                [style.--cp-fill]="color"
+                [title]="customSwatchLabel(color)"
+                [attr.aria-pressed]="value() === color"
+                [attr.aria-label]="customSwatchLabel(color)"
+                (click)="select(color)"
+                (keydown.delete)="removeFromPalette(color, $event)"
+                (keydown.backspace)="removeFromPalette(color, $event)">
+                @if (value() === color) {
+                  <svg class="cp-check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M20 6 9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                }
+              </button>
+              <button
+                class="cp-palette-remove"
+                type="button"
+                [title]="removeFromPaletteLabel(color)"
+                [attr.aria-label]="removeFromPaletteLabel(color)"
+                (click)="removeFromPalette(color, $event)">
+                <span class="icon icon-xs icon-x" aria-hidden="true"></span>
+              </button>
+            </span>
+          }
+
+          @if (allowCustom()) {
+            <button
+              class="cp-cell cp-add-palette"
+              type="button"
+              [disabled]="!canAddToPalette()"
+              [title]="addToPaletteTitle()"
+              [attr.aria-label]="addToPaletteTitle()"
+              (click)="addToPalette()">
+              <svg
+                class="cp-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+            </button>
+          }
         </div>
-      </shared-overlay-panel>
-    }
-  </div>
-  }
+        }
+      }
+    </div>
+</ng-template>
+
+@if (pendingRemoval(); as color) {
+  <shared-confirmation-modal
+    [danger]="true"
+    [heading]="'macrodeck.app:Forms.ColorPicker.RemoveFromPaletteConfirmHeading' | translate"
+    [message]="removalMessage(color)"
+    [confirmText]="'macrodeck:Common.Remove' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="confirmRemoval()"
+    (cancel)="cancelRemoval()" />
 }

@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Add" xml:space="preserve">
+    <value>追加</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>戻る</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="Common.Continue" xml:space="preserve">
+    <value>続行</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>コピー</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>作成</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>無効</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>完了</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>エクスポート</value>
+  </data>
+  <data name="Common.Import" xml:space="preserve">
+    <value>インポート</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>読み込み中…</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>次へ</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>いいえ</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="Common.Refresh" xml:space="preserve">
+    <value>再読み込み</value>
+  </data>
+  <data name="Common.Remove" xml:space="preserve">
+    <value>取り除く</value>
+  </data>
+  <data name="Common.Rename" xml:space="preserve">
+    <value>名前の変更</value>
+  </data>
+  <data name="Common.Retry" xml:space="preserve">
+    <value>再試行</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>選択…</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="ConfigFlow.SetUpIntegration" xml:space="preserve">
+    <value>連携を設定</value>
+  </data>
+  <data name="Connection.Connected" xml:space="preserve">
+    <value>接続済み</value>
+  </data>
+  <data name="Connection.Connecting" xml:space="preserve">
+    <value>接続中…</value>
+  </data>
+  <data name="Connection.Disconnected" xml:space="preserve">
+    <value>切断</value>
+  </data>
+  <data name="Connection.Reconnecting" xml:space="preserve">
+    <value>再接続中…</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="Settings.Adb" xml:space="preserve">
+    <value>ADB</value>
+  </data>
+  <data name="Settings.Advanced" xml:space="preserve">
+    <value>詳細設定</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>外観</value>
+  </data>
+  <data name="Settings.BackupAndData" xml:space="preserve">
+    <value>バックアップとデータ</value>
+  </data>
+  <data name="Settings.Backups" xml:space="preserve">
+    <value>バックアップ</value>
+  </data>
+  <data name="Settings.Connectivity" xml:space="preserve">
+    <value>接続</value>
+  </data>
+  <data name="Settings.DataAndPrivacy" xml:space="preserve">
+    <value>データとプライバシー</value>
+  </data>
+  <data name="Settings.Developer" xml:space="preserve">
+    <value>開発者</value>
+  </data>
+  <data name="Settings.Devices" xml:space="preserve">
+    <value>デバイス</value>
+  </data>
+  <data name="Settings.General" xml:space="preserve">
+    <value>全般</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="Settings.Logging" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="Settings.Network" xml:space="preserve">
+    <value>ネットワーク</value>
+  </data>
+  <data name="Settings.PrivacyAndSecurity" xml:space="preserve">
+    <value>プライバシーとセキュリティ</value>
+  </data>
+  <data name="Settings.Security" xml:space="preserve">
+    <value>セキュリティ</value>
+  </data>
+  <data name="Settings.Startup" xml:space="preserve">
+    <value>起動</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="States.Active" xml:space="preserve">
+    <value>有効</value>
+  </data>
+  <data name="States.Hidden" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="States.Inactive" xml:space="preserve">
+    <value>無効</value>
+  </data>
+  <data name="States.InPlaylist" xml:space="preserve">
+    <value>プレイリストに追加済み</value>
+  </data>
+  <data name="States.Liked" xml:space="preserve">
+    <value>高評価</value>
+  </data>
+  <data name="States.Monitoring" xml:space="preserve">
+    <value>監視中</value>
+  </data>
+  <data name="States.Muted" xml:space="preserve">
+    <value>ミュート</value>
+  </data>
+  <data name="States.NotInPlaylist" xml:space="preserve">
+    <value>プレイリストに未追加</value>
+  </data>
+  <data name="States.NotLiked" xml:space="preserve">
+    <value>高評価なし</value>
+  </data>
+  <data name="States.NotMonitoring" xml:space="preserve">
+    <value>監視オフ</value>
+  </data>
+  <data name="States.NotRecording" xml:space="preserve">
+    <value>録画していません</value>
+  </data>
+  <data name="States.NotStreaming" xml:space="preserve">
+    <value>配信していません</value>
+  </data>
+  <data name="States.Off" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="States.On" xml:space="preserve">
+    <value>オン</value>
+  </data>
+  <data name="States.Paused" xml:space="preserve">
+    <value>一時停止中</value>
+  </data>
+  <data name="States.Playing" xml:space="preserve">
+    <value>再生中</value>
+  </data>
+  <data name="States.PushToTalk" xml:space="preserve">
+    <value>プッシュトゥトーク</value>
+  </data>
+  <data name="States.Recording" xml:space="preserve">
+    <value>録画中</value>
+  </data>
+  <data name="States.RecordingPaused" xml:space="preserve">
+    <value>録画一時停止中</value>
+  </data>
+  <data name="States.RepeatContext" xml:space="preserve">
+    <value>全曲リピート</value>
+  </data>
+  <data name="States.RepeatOff" xml:space="preserve">
+    <value>リピートオフ</value>
+  </data>
+  <data name="States.RepeatTrack" xml:space="preserve">
+    <value>1曲リピート</value>
+  </data>
+  <data name="States.Stopped" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="States.Streaming" xml:space="preserve">
+    <value>配信中</value>
+  </data>
+  <data name="States.Unavailable" xml:space="preserve">
+    <value>利用不可</value>
+  </data>
+  <data name="States.Unmuted" xml:space="preserve">
+    <value>ミュート解除</value>
+  </data>
+  <data name="States.Visible" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="States.VoiceActivity" xml:space="preserve">
+    <value>音声検出</value>
+  </data>
+  <data name="Validation.AtLeast" xml:space="preserve">
+    <value>{field} は {minimum}以上である必要があります</value>
+    <comment>[minimum:double]</comment>
+  </data>
+  <data name="Validation.AtMost" xml:space="preserve">
+    <value>{field} は {maximum}以下である必要があります</value>
+    <comment>[maximum:double]</comment>
+  </data>
+  <data name="Validation.InvalidIpAddress" xml:space="preserve">
+    <value>{field} は有効な IP アドレスではありません</value>
+  </data>
+  <data name="Validation.InvalidJson" xml:space="preserve">
+    <value>{field} は有効な JSON ではありません</value>
+  </data>
+  <data name="Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} は有効な URL ではありません</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>{field} の値が無効です</value>
+  </data>
+  <data name="Validation.PatternMismatch" xml:space="preserve">
+    <value>{field} は想定された形式と一致しません</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{field} は必須です</value>
+    <comment>Shown under an empty required field. {field} is the field's own label.</comment>
+  </data>
+  <data name="Validation.TooLong" xml:space="preserve">
+    <value>{field} は {limit} 文字を超えています</value>
+    <comment>[limit:int] Character limit, not byte length.</comment>
+  </data>
+  <data name="Widgets.Appearance.Heading" xml:space="preserve">
+    <value>外観</value>
+    <comment>Heading above a widget's standard appearance fields.</comment>
+  </data>
+  <data name="Widgets.Appearance.BackgroundColor" xml:space="preserve">
+    <value>背景色</value>
+  </data>
+  <data name="Widgets.Appearance.Label" xml:space="preserve">
+    <value>ラベル</value>
+    <comment>The text a widget shows as its caption.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelColor" xml:space="preserve">
+    <value>ラベルの色</value>
+  </data>
+  <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
+    <value>アクセントカラー</value>
+  </data>
+  <data name="Widgets.Appearance.Font" xml:space="preserve">
+    <value>フォント</value>
+  </data>
+  <data name="Widgets.Appearance.FontSize" xml:space="preserve">
+    <value>サイズ (%)</value>
+    <comment>Label size as a percentage.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlign" xml:space="preserve">
+    <value>配置</value>
+    <comment>Horizontal alignment of the label.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlignLeft" xml:space="preserve">
+    <value>左</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignCenter" xml:space="preserve">
+    <value>中央</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignRight" xml:space="preserve">
+    <value>右</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPosition" xml:space="preserve">
+    <value>位置</value>
+    <comment>Vertical position of the label on the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionTop" xml:space="preserve">
+    <value>上</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionCenter" xml:space="preserve">
+    <value>中央</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionBottom" xml:space="preserve">
+    <value>下</value>
+  </data>
+  <data name="Widgets.Appearance.Border" xml:space="preserve">
+    <value>枠線</value>
+  </data>
+  <data name="Widgets.Appearance.BorderStyle" xml:space="preserve">
+    <value>スタイル</value>
+    <comment>Animation style of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderColor" xml:space="preserve">
+    <value>色</value>
+    <comment>Colour of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderOff" xml:space="preserve">
+    <value>オフ</value>
+    <comment>Border style: no border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderStatic" xml:space="preserve">
+    <value>静止</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHeartbeat" xml:space="preserve">
+    <value>ハートビート</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBreathing" xml:space="preserve">
+    <value>呼吸</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBlink" xml:space="preserve">
+    <value>点滅</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderComet" xml:space="preserve">
+    <value>彗星</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderMarchingAnts" xml:space="preserve">
+    <value>点線の流れ</value>
+    <comment>Border style: a dashed line moving around the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHueShift" xml:space="preserve">
+    <value>色相シフト</value>
+    <comment>Border style: the colour cycles through the hues.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderRgb" xml:space="preserve">
+    <value>RGB</value>
+    <comment>Border style: rainbow colours.</comment>
+  </data>
+</root>

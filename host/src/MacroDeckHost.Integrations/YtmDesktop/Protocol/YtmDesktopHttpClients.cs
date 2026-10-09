@@ -1,3 +1,5 @@
+using MacroDeckHost.Integrations.Http;
+
 namespace MacroDeckHost.Integrations.YtmDesktop.Protocol;
 
 internal static class YtmDesktopHttpClients
@@ -11,8 +13,7 @@ internal static class YtmDesktopHttpClients
 
 	private static HttpClient CreateHttpClient(TimeSpan timeout)
 	{
-		var client = new HttpClient { Timeout = timeout };
-		client.DefaultRequestHeaders.UserAgent.ParseAdd("Macro-Deck-YtmDesktop/1.0");
+		var client = IntegrationHttp.CreateClient(timeout);
 		client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 		return client;
 	}

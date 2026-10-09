@@ -2,7 +2,7 @@ import { UiNode } from '../ui-framework/ui-node.interface';
 import { UiComponents, UiComponentShapes } from './ui-component-types';
 import { UiComponentProperties } from './component-properties';
 import { nodeString } from '../ui-framework/node-properties.util';
-import { nodeHexColor, nodeLength, resolveLength } from '../ui-framework/length';
+import { LengthScope, nodeHexColor, nodeLength, resolveLength, withoutCross } from '../ui-framework/length';
 import type { UiComponentDefinition } from '../ui-framework/component-registry';
 import { SVG_NS } from './render-constants';
 
@@ -38,13 +38,13 @@ function roundedRect(width: number, height: number, radius: number): string {
     + `A ${r} ${r} 0 0 1 ${r} 0 Z`;
 }
 
-export function shapeOutline(node: UiNode, width: number, height: number, basis: number): string | null {
+export function shapeOutline(node: UiNode, width: number, height: number, scope: LengthScope): string | null {
   const shape = nodeString(node, UiComponentProperties.Shape) ?? UiComponentShapes.Rectangle;
   switch (shape) {
     case UiComponentShapes.Rectangle:
       return roundedRect(width, height, 0);
     case UiComponentShapes.RoundedRectangle:
-      return roundedRect(width, height, resolveLength(nodeLength(node, UiComponentProperties.CornerRadius), basis, null) ?? 0);
+      return roundedRect(width, height, resolveLength(nodeLength(node, UiComponentProperties.CornerRadius), withoutCross(scope)) ?? 0);
     case UiComponentShapes.Capsule:
       return roundedRect(width, height, Math.min(width, height) / 2);
     case UiComponentShapes.Circle: {
@@ -77,7 +77,7 @@ export const uiShapeComponent: UiComponentDefinition = {
     const data = nodeString(node, UiComponentProperties.Path);
     const d = isPath
       ? (data !== undefined && isShapePathData(data) ? data : null)
-      : shapeOutline(node, width, height, ctx.basis);
+      : shapeOutline(node, width, height, ctx);
     if (d === null) {
       ctx.dropPart('shapePath');
       return;
@@ -90,7 +90,7 @@ export const uiShapeComponent: UiComponentDefinition = {
     ctx.setAttribute(path, 'fill', nodeHexColor(node, UiComponentProperties.Color) ?? 'none');
 
     const stroke = nodeHexColor(node, UiComponentProperties.StrokeColor);
-    const strokeWidth = resolveLength(nodeLength(node, UiComponentProperties.StrokeWidth), ctx.basis, null);
+    const strokeWidth = resolveLength(nodeLength(node, UiComponentProperties.StrokeWidth), withoutCross(ctx));
     const stroked = stroke !== undefined && strokeWidth !== undefined && strokeWidth > 0;
     ctx.setAttribute(path, 'stroke', stroked ? stroke! : null);
     ctx.setAttribute(path, 'stroke-width', stroked ? String(strokeWidth) : null);

@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Twitch.Protocol;
 
@@ -124,7 +125,7 @@ internal sealed class TwitchEventSubClient : ITwitchEventSubClient
 
 	private static async Task<WebSocket> ConnectClientWebSocketAsync(Uri uri, CancellationToken cancellationToken)
 	{
-		var socket = new ClientWebSocket();
+		var socket = IntegrationHttp.CreateWebSocket();
 
 		socket.Options.KeepAliveInterval = TimeSpan.Zero;
 

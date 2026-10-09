@@ -54,7 +54,8 @@ public class HostControllerTests
 		string? shellExecutable = "/Applications/Macro Deck.app",
 		FakeApplicationService? applicationService = null,
 		TestPaths? paths = null,
-		IShellNotificationBridge? shellNotifications = null)
+		IShellNotificationBridge? shellNotifications = null,
+		UserSessionEnd? sessionEnd = null)
 	{
 		var httpContext = new DefaultHttpContext
 		{
@@ -81,7 +82,8 @@ public class HostControllerTests
 			new GetDataDirectoryRequestMessageHandler(macroDeckPaths),
 			new OpenDataDirectoryRequestMessageHandler(macroDeckPaths, reveal),
 			new GetHostSessionRequestMessageHandler(new HostSession()),
-			shellNotifications ?? new ShellNotificationBridge(TimeProvider.System))
+			shellNotifications ?? new ShellNotificationBridge(TimeProvider.System),
+			sessionEnd ?? new UserSessionEnd())
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};
@@ -164,6 +166,50 @@ public class HostControllerTests
 			Assert.That(result, Is.InstanceOf<OkResult>());
 			Assert.That(lifetime.StopRequested, Is.True);
 		});
+	}
+
+	[Test]
+	public void Shutdown_for_a_session_end_records_that_the_user_session_is_ending()
+	{
+		var lifetime = new FakeLifetime();
+		var sessionEnd = new UserSessionEnd();
+		var controller = CreateController(lifetime, TestListenerPorts.Loopback, IPAddress.Loopback,
+			sessionEnd: sessionEnd);
+
+		var result = controller.Shutdown("session-end");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result, Is.InstanceOf<OkResult>());
+			Assert.That(lifetime.StopRequested, Is.True);
+			Assert.That(sessionEnd.IsEnding, Is.True);
+		});
+	}
+
+	[TestCase("update")]
+	[TestCase("quit")]
+	[TestCase(null)]
+	public void Shutdown_for_any_other_reason_leaves_the_user_session_running(string? reason)
+	{
+		var sessionEnd = new UserSessionEnd();
+		var controller = CreateController(new FakeLifetime(), TestListenerPorts.Loopback, IPAddress.Loopback,
+			sessionEnd: sessionEnd);
+
+		controller.Shutdown(reason);
+
+		Assert.That(sessionEnd.IsEnding, Is.False);
+	}
+
+	[Test]
+	public void An_untrusted_session_end_request_records_nothing()
+	{
+		var sessionEnd = new UserSessionEnd();
+		var controller = CreateController(new FakeLifetime(), HostEndpoints.PublicPort, IPAddress.Loopback,
+			sessionEnd: sessionEnd);
+
+		controller.Shutdown("session-end");
+
+		Assert.That(sessionEnd.IsEnding, Is.False);
 	}
 
 	[Test]

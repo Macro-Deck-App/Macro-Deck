@@ -50,6 +50,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-picker-tree.json";
 		yield return "conformance-gauge-tree.json";
 		yield return "conformance-building-blocks-tree.json";
+		yield return "conformance-container-length-tree.json";
 		yield return "conformance-modifier-tree.json";
 		yield return "conformance-responsive-tree.json";
 		yield return "conformance-first-fit-tree.json";

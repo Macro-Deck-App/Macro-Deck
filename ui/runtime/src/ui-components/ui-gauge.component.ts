@@ -1,6 +1,8 @@
 import { UiComponents } from './ui-component-types';
 import type { UiComponentDefinition } from '../ui-framework/component-registry';
+import { nodeHexColor } from '../ui-framework/length';
 import { sliderLevel } from './bar';
+import { UiComponentProperties } from './component-properties';
 import { paintGaugeArc } from './gauge-paint';
 import { SVG_NS } from './render-constants';
 
@@ -13,6 +15,6 @@ export const uiGaugeComponent: UiComponentDefinition = {
 
   paint(node, ctx) {
     ctx.setClassName(ctx.element, 'widget-gauge');
-    paintGaugeArc(node, ctx, sliderLevel(node));
+    paintGaugeArc(node, ctx, sliderLevel(node), nodeHexColor(node, UiComponentProperties.TrackColor));
   },
 };

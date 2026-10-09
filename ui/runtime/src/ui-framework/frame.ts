@@ -1,5 +1,5 @@
 import { UiComponentBox } from './layout';
-import { asUiLength, resolveLength } from './length';
+import { asUiLength, LengthScope, resolveLength } from './length';
 import { nodeRecord } from './node-properties.util';
 import { UiNode } from './ui-node.interface';
 import { UiComponentProperties } from '../ui-components/component-properties';
@@ -23,11 +23,10 @@ function clamp(value: number | null, min: number | undefined, max: number | unde
 export function resolveFrame(
   node: UiNode,
   box: UiComponentBox,
-  basis: number,
-  crossExtent: number | null,
+  scope: LengthScope,
 ): UiResolvedFrame {
   const frame = nodeRecord(node, UiComponentProperties.Frame) ?? {};
-  const length = (key: string) => resolveLength(asUiLength(frame[key]), basis, crossExtent);
+  const length = (key: string) => resolveLength(asUiLength(frame[key]), scope);
 
   const minWidth = length('minWidth');
   const maxWidth = length('maxWidth');

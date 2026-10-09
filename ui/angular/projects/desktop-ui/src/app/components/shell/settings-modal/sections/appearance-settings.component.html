@@ -29,6 +29,72 @@
   </shared-settings-section>
 
   <shared-settings-section
+    [heading]="'macrodeck.app:Settings.Appearance.PaletteHeading' | translate"
+    [description]="'macrodeck.app:Settings.Appearance.PaletteDescription' | translate">
+    <shared-button
+      settingsSectionAction
+      variant="secondary"
+      size="compact"
+      (click)="restorePromptOpen.set(true)">
+      {{ 'macrodeck.app:Settings.Appearance.PaletteRestoreDefaults' | translate }}
+    </shared-button>
+
+    @if (paletteColors().length === 0) {
+      <shared-empty-state compact icon="droplets" [message]="'macrodeck.app:Settings.Appearance.PaletteEmpty' | translate" />
+    } @else {
+      <ul class="palette-list" [attr.aria-label]="'macrodeck.app:Settings.Appearance.PaletteLabel' | translate">
+        @for (color of paletteColors(); track color) {
+          <li class="palette-card">
+            <span class="palette-swatch" aria-hidden="true" [style.--palette-fill]="color"></span>
+            <span class="palette-text">
+              <span class="palette-name">{{ colorLabel(color) }}</span>
+              <span class="palette-hex">{{ color }}</span>
+            </span>
+            <shared-button
+              variant="ghost"
+              size="icon-compact"
+              [ariaLabel]="removeLabel(color)"
+              [title]="removeLabel(color)"
+              (click)="remove(color)">
+              <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+            </shared-button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="palette-add-row">
+      <span #addAnchor class="palette-add-anchor">
+        <shared-button
+          variant="add"
+          [disabled]="paletteFull()"
+          [title]="addTitle()"
+          (click)="toggleAdding()">
+          <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+          {{ 'macrodeck.app:Forms.ColorPicker.AddToPalette' | translate }}
+        </shared-button>
+      </span>
+      <shared-overlay-panel
+        [anchor]="addAnchor"
+        [isOpen]="isAdding()"
+        [maxHeight]="null"
+        (dismissed)="closeAdding()">
+        <div #addDialog class="palette-add" role="dialog" [attr.aria-label]="addTitle()">
+          <shared-color-picker
+            [inline]="true"
+            [showPalette]="false"
+            [allowAlpha]="true"
+            [ngModel]="paletteDraft()"
+            (ngModelChange)="paletteDraft.set($event)" />
+          <shared-button variant="primary" fill [disabled]="!canAddDraft()" (click)="addDraft()">
+            {{ 'macrodeck.app:Forms.ColorPicker.AddToPalette' | translate }}
+          </shared-button>
+        </div>
+      </shared-overlay-panel>
+    </div>
+  </shared-settings-section>
+
+  <shared-settings-section
     [heading]="'macrodeck.app:Settings.Appearance.FontHeading' | translate"
     [description]="'macrodeck.app:Settings.Appearance.FontDescription' | translate">
     <shared-settings-row [label]="'macrodeck.app:Settings.Appearance.FontLabel' | translate">
@@ -40,3 +106,13 @@
     </shared-settings-row>
   </shared-settings-section>
 </div>
+
+@if (restorePromptOpen()) {
+  <shared-confirmation-modal
+    [heading]="'macrodeck.app:Settings.Appearance.PaletteRestoreConfirmHeading' | translate"
+    [message]="'macrodeck.app:Settings.Appearance.PaletteRestoreConfirmMessage' | translate"
+    [confirmText]="'macrodeck.app:Settings.Appearance.PaletteRestoreConfirmButton' | translate"
+    [cancelText]="'macrodeck:Common.Cancel' | translate"
+    (confirm)="restoreDefaults()"
+    (cancel)="restorePromptOpen.set(false)" />
+}

@@ -26,6 +26,26 @@ See [License and trial](/guide/companion-app/license/).
 | Home screen | Rotation of the Connections screen: automatic, portrait or landscape. |
 | Deck | Rotation of every deck, unless a connection sets its own **Deck rotation**. |
 
+## Language
+
+The app has no language setting of its own. It follows the language of your device and speaks the same
+languages as Macro Deck: Arabic, Brazilian Portuguese, Czech, Dutch, English, French, German, Hindi,
+Indonesian, Italian, Japanese, Korean, Polish, Russian, Simplified Chinese, Spanish, Traditional Chinese,
+Turkish and Ukrainian. Traditional Chinese is used for Taiwan, Hong Kong and Macau. For any other device
+language the app is in English.
+
+To use the app in another language than the device:
+
+- **Android 13 or later:** open the system settings, **System**, **Languages**, **App languages** and choose Macro Deck.
+- **iPhone and iPad:** open the system **Settings**, scroll down to Macro Deck and choose **Language**.
+- **Older Android versions:** the app follows the device language.
+
+In Arabic the app's screens read from right to left. Your decks never change direction: widgets stay
+where you placed them, in every language.
+
+The text inside a deck, such as the labels of widgets and plugins, comes from Macro Deck itself and
+follows the language set there.
+
 ## Deck
 
 | Setting | Does |

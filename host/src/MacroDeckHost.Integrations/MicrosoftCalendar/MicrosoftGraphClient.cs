@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Calendar;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.MicrosoftCalendar;
 
@@ -36,7 +37,7 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 	private static readonly TimeSpan _maxRetryAfter = TimeSpan.FromMinutes(10);
 
 	private static readonly HttpClient _shared = CreateClient(
-		new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(10) },
+		IntegrationHttp.CreateHandler(handler => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(10)),
 		disposeHandler: true);
 
 	private readonly HttpClient _http;

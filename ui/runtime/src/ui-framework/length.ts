@@ -5,12 +5,32 @@ export const UI_COMPONENT_CELL = 120;
 
 export interface UiLength {
   basis: number;
+  ofParent?: number;
   maxOfCross?: number;
   maxOfCell?: number;
 }
 
+export interface LengthScope {
+  readonly basis: number;
+  readonly crossExtent: number | null;
+  readonly container: number | null;
+}
+
+export function withoutCross(scope: LengthScope): LengthScope {
+  return { basis: scope.basis, crossExtent: null, container: scope.container };
+}
+
+export function boxExtent(width: number | null, height: number | null): number | null {
+  return width === null || height === null ? null : Math.min(width, height);
+}
+
 function fraction(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function nonNegativeFraction(value: unknown): number | undefined {
+  const parsed = fraction(value);
+  return parsed !== undefined && parsed >= 0 ? parsed : undefined;
 }
 
 export function nodeLength(
@@ -23,10 +43,12 @@ export function nodeLength(
 export function asUiLength(raw: unknown): UiLength | undefined {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return undefined;
 
-  const candidate = raw as { basis?: unknown; maxOfCross?: unknown; maxOfCell?: unknown };
+  const candidate = raw as { basis?: unknown; ofParent?: unknown; maxOfCross?: unknown; maxOfCell?: unknown };
   if (typeof candidate.basis !== 'number' || !Number.isFinite(candidate.basis)) return undefined;
 
   const length: UiLength = { basis: candidate.basis };
+  const ofParent = nonNegativeFraction(candidate.ofParent);
+  if (ofParent !== undefined) length.ofParent = ofParent;
   const maxOfCross = fraction(candidate.maxOfCross);
   if (maxOfCross !== undefined) length.maxOfCross = maxOfCross;
   const maxOfCell = fraction(candidate.maxOfCell);
@@ -35,17 +57,23 @@ export function asUiLength(raw: unknown): UiLength | undefined {
   return length;
 }
 
-export function resolveLength(
-  length: UiLength | undefined,
-  basis: number,
-  crossExtent: number | null,
-): number | undefined {
+function parentExtent(length: UiLength, scope: LengthScope): number | null {
+  const container = scope.container;
+  return length.ofParent !== undefined && container !== null && Number.isFinite(container) ? container : null;
+}
+
+export function lengthReference(length: UiLength | undefined, scope: LengthScope): number {
+  return (length === undefined ? null : parentExtent(length, scope)) ?? scope.basis;
+}
+
+export function resolveLength(length: UiLength | undefined, scope: LengthScope): number | undefined {
   if (!length) return undefined;
 
-  let resolved = length.basis * basis;
+  const parent = parentExtent(length, scope);
+  let resolved = parent !== null ? length.ofParent! * parent : length.basis * scope.basis;
 
-  if (length.maxOfCross !== undefined && crossExtent !== null && Number.isFinite(crossExtent)) {
-    resolved = Math.min(resolved, length.maxOfCross * crossExtent);
+  if (length.maxOfCross !== undefined && scope.crossExtent !== null && Number.isFinite(scope.crossExtent)) {
+    resolved = Math.min(resolved, length.maxOfCross * scope.crossExtent);
   }
 
   if (length.maxOfCell !== undefined) {

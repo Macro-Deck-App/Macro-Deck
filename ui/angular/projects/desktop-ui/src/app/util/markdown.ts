@@ -1,35 +1,49 @@
-// A deliberately incomplete Markdown parser for third-party registry content (issue #517): extension
-// descriptions and changelogs come off the network, so they never go through innerHTML or a
-// DomSanitizer escape hatch. This parses into a typed model a template renders with plain Angular
-// control flow, so there is never a string of HTML to trust. Raw HTML degrades to literal text.
+import { Lexer, type Token, type Tokens } from 'marked';
+
+// Markdown here is third-party (registry descriptions, changelogs, release notes): it becomes a typed
+// model that templates render with Angular control flow, so there is never a string of HTML to trust.
 export type MarkdownInline =
   | { kind: 'text'; text: string }
-  | { kind: 'strong'; text: string }
-  | { kind: 'em'; text: string }
+  | { kind: 'strong' | 'em' | 'del'; children: MarkdownInline[] }
   | { kind: 'code'; text: string }
-  | { kind: 'link'; text: string; href: string; bare?: true };
+  | { kind: 'br' }
+  | { kind: 'link'; href: string; title: string | null; children: MarkdownInline[]; bare?: true }
+  | { kind: 'image' | 'video'; src: string; alt: string; width?: number; height?: number };
+
+export interface MarkdownListItem {
+  task: boolean;
+  checked: boolean;
+  blocks: MarkdownBlock[];
+}
 
 export type MarkdownBlock =
-  | { kind: 'heading'; level: 1 | 2 | 3; inlines: MarkdownInline[] }
+  | { kind: 'heading'; level: 1 | 2 | 3 | 4 | 5 | 6; inlines: MarkdownInline[] }
   | { kind: 'paragraph'; inlines: MarkdownInline[] }
-  | { kind: 'list'; ordered: boolean; items: MarkdownInline[][] }
   | { kind: 'code'; text: string; language: string | null }
-  | { kind: 'quote'; inlines: MarkdownInline[] }
+  | { kind: 'quote'; blocks: MarkdownBlock[] }
+  | { kind: 'list'; ordered: boolean; start: number; items: MarkdownListItem[] }
+  | {
+    kind: 'table';
+    align: ('left' | 'center' | 'right' | null)[];
+    header: MarkdownInline[][];
+    rows: MarkdownInline[][][];
+  }
   | { kind: 'rule' };
 
-const ATX_HEADING = /^(#{1,3})\s+(.*)$/;
-const UNORDERED_ITEM = /^[-*]\s+(.*)$/;
-const ORDERED_ITEM = /^\d+\.\s+(.*)$/;
-const QUOTE_LINE = /^>\s?(.*)$/;
-const FENCE = /^```\s*(\S*)\s*$/;
-const RULE = /^([-*_])(?:\s*\1){2,}$/;
-const COMMENT_OPEN = /^ {0,3}<!--/;
-const TRAILING_PUNCTUATION = /[.,:;!?'"*_~]+$/;
+export interface MarkdownOptions {
+  media: (url: URL) => 'image' | 'video' | null;
+  href: (raw: string) => string | null;
+  hideComments: boolean;
+}
 
-function safeHref(rawHref: string): string | null {
-  const href = rawHref.trim();
+const COMMENT = /<!--[\s\S]*?(?:-->|$)/g;
+const IMG_TAG = /<img(?=[\s/>])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+const TAG_ATTRIBUTE = /([^\s=/"'<>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+const MAX_DIMENSION = 10000;
+
+function httpsHref(raw: string): string | null {
   try {
-    const url = new URL(href);
+    const url = new URL(raw.trim());
     if (url.protocol === 'https:') {
       return url.toString();
     }
@@ -42,160 +56,213 @@ function safeHref(rawHref: string): string | null {
   }
 }
 
-const INLINE_TOKEN = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]*)\]\(([^)\s]*)\))|(https?:\/\/[^\s<>()[\]]+)/;
+// Creator text shows any https image, as GitHub does, so opening a page contacts that image's host.
+// Video stays reserved for text Macro Deck itself publishes.
+const CREATOR_TEXT: MarkdownOptions = { media: () => 'image', href: httpsHref, hideComments: true };
 
-function parseInline(source: string): MarkdownInline[] {
-  const inlines: MarkdownInline[] = [];
-  let remaining = source;
-
-  while (remaining.length > 0) {
-    const match = INLINE_TOKEN.exec(remaining);
-    if (!match) {
-      inlines.push({ kind: 'text', text: remaining });
-      break;
-    }
-
-    if (match.index > 0) {
-      inlines.push({ kind: 'text', text: remaining.slice(0, match.index) });
-    }
-
-    let consumed = match[0].length;
-    if (match[1] !== undefined) {
-      inlines.push({ kind: 'strong', text: match[2] });
-    } else if (match[3] !== undefined) {
-      inlines.push({ kind: 'em', text: match[4] });
-    } else if (match[5] !== undefined) {
-      inlines.push({ kind: 'code', text: match[6] });
-    } else if (match[7] !== undefined) {
-      const href = safeHref(match[9]);
-      if (href) {
-        inlines.push({ kind: 'link', text: match[8], href });
-      } else {
-        inlines.push({ kind: 'text', text: match[0] });
-      }
-    } else {
-      const url = match[10].replace(TRAILING_PUNCTUATION, '');
-      const href = safeHref(url);
-      inlines.push(href ? { kind: 'link', text: url, href, bare: true } : { kind: 'text', text: url });
-      consumed = url.length;
-    }
-
-    remaining = remaining.slice(match.index + consumed);
-  }
-
-  return inlines;
+export function parseMarkdown(source: string, options: MarkdownOptions = CREATOR_TEXT): MarkdownBlock[] {
+  return new MarkdownWalker(options).blocks(new Lexer({ gfm: true, breaks: false }).lex(source));
 }
 
-export function parseMarkdown(source: string): MarkdownBlock[] {
-  const blocks: MarkdownBlock[] = [];
-  const lines = source.replace(/\r\n/g, '\n').split('\n');
+class MarkdownWalker {
+  constructor(private readonly options: MarkdownOptions) {}
 
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-
-    if (line.trim() === '') {
-      i++;
-      continue;
-    }
-
-    const fenceMatch = FENCE.exec(line);
-    if (fenceMatch) {
-      const language = fenceMatch[1] || null;
-      const codeLines: string[] = [];
-      i++;
-      while (i < lines.length && !FENCE.test(lines[i])) {
-        codeLines.push(lines[i]);
-        i++;
-      }
-      i++; // skip closing fence (or EOF)
-      blocks.push({ kind: 'code', text: codeLines.join('\n'), language });
-      continue;
-    }
-
-    if (COMMENT_OPEN.test(line)) {
-      let end = line.indexOf('-->', line.indexOf('<!--') + 4);
-      while (end < 0 && ++i < lines.length) {
-        end = lines[i].indexOf('-->');
-      }
-      if (i >= lines.length) {
-        break;
-      }
-      const rest = lines[i].slice(end + 3).trimStart();
-      if (rest === '') {
-        i++;
-      } else {
-        lines[i] = rest;
-      }
-      continue;
-    }
-
-    if (RULE.test(line.trim())) {
-      blocks.push({ kind: 'rule' });
-      i++;
-      continue;
-    }
-
-    const headingMatch = ATX_HEADING.exec(line);
-    if (headingMatch) {
-      const level = headingMatch[1].length as 1 | 2 | 3;
-      blocks.push({ kind: 'heading', level, inlines: parseInline(headingMatch[2].trim()) });
-      i++;
-      continue;
-    }
-
-    const unorderedMatch = UNORDERED_ITEM.exec(line);
-    const orderedMatch = ORDERED_ITEM.exec(line);
-    if (unorderedMatch || orderedMatch) {
-      const ordered = !!orderedMatch;
-      const itemPattern = ordered ? ORDERED_ITEM : UNORDERED_ITEM;
-      const items: MarkdownInline[][] = [];
-      while (i < lines.length) {
-        const itemMatch = itemPattern.exec(lines[i]);
-        if (!itemMatch) {
-          break;
-        }
-        items.push(parseInline(itemMatch[1]));
-        i++;
-      }
-      blocks.push({ kind: 'list', ordered, items });
-      continue;
-    }
-
-    const quoteMatch = QUOTE_LINE.exec(line);
-    if (quoteMatch) {
-      const quoteLines: string[] = [quoteMatch[1]];
-      i++;
-      while (i < lines.length) {
-        const nextQuote = QUOTE_LINE.exec(lines[i]);
-        if (!nextQuote) {
-          break;
-        }
-        quoteLines.push(nextQuote[1]);
-        i++;
-      }
-      blocks.push({ kind: 'quote', inlines: parseInline(quoteLines.join(' ')) });
-      continue;
-    }
-
-    const paragraphLines: string[] = [line];
-    i++;
-    while (
-      i < lines.length &&
-      lines[i].trim() !== '' &&
-      !ATX_HEADING.test(lines[i]) &&
-      !FENCE.test(lines[i]) &&
-      !UNORDERED_ITEM.test(lines[i]) &&
-      !ORDERED_ITEM.test(lines[i]) &&
-      !QUOTE_LINE.test(lines[i]) &&
-      !COMMENT_OPEN.test(lines[i]) &&
-      !RULE.test(lines[i].trim())
-    ) {
-      paragraphLines.push(lines[i]);
-      i++;
-    }
-    blocks.push({ kind: 'paragraph', inlines: parseInline(paragraphLines.join(' ')) });
+  blocks(tokens: Token[]): MarkdownBlock[] {
+    return tokens.flatMap(token => this.block(token));
   }
 
-  return blocks;
+  private block(token: Token): MarkdownBlock[] {
+    switch (token.type) {
+      case 'heading': {
+        const heading = token as Tokens.Heading;
+        const level = Math.min(Math.max(heading.depth, 1), 6) as 1 | 2 | 3 | 4 | 5 | 6;
+        return [{ kind: 'heading', level, inlines: this.inlines(heading.tokens) }];
+      }
+      case 'paragraph':
+        return [{ kind: 'paragraph', inlines: this.inlines((token as Tokens.Paragraph).tokens) }];
+      case 'text': {
+        const text = token as Tokens.Text;
+        return [{ kind: 'paragraph', inlines: text.tokens ? this.inlines(text.tokens) : plain(text.text) }];
+      }
+      case 'code': {
+        const code = token as Tokens.Code;
+        return [{ kind: 'code', text: code.text, language: (code.lang ?? '').trim().split(/\s+/)[0] || null }];
+      }
+      case 'blockquote':
+        return [{ kind: 'quote', blocks: this.blocks((token as Tokens.Blockquote).tokens) }];
+      case 'list': {
+        const list = token as Tokens.List;
+        return [{
+          kind: 'list',
+          ordered: list.ordered,
+          start: typeof list.start === 'number' ? list.start : 1,
+          items: list.items.map(item => ({
+            task: item.task,
+            checked: !!item.checked,
+            blocks: this.blocks(item.tokens.filter(child => child.type !== 'checkbox')),
+          })),
+        }];
+      }
+      case 'table': {
+        const table = token as Tokens.Table;
+        return [{
+          kind: 'table',
+          align: table.align,
+          header: table.header.map(cell => this.inlines(cell.tokens)),
+          rows: table.rows.map(row => row.map(cell => this.inlines(cell.tokens))),
+        }];
+      }
+      case 'hr':
+        return [{ kind: 'rule' }];
+      case 'html':
+        return this.html((token as Tokens.HTML).text);
+      case 'space':
+      case 'def':
+      case 'checkbox':
+        return [];
+      default:
+        return 'raw' in token && typeof token.raw === 'string' && token.raw.trim()
+          ? [{ kind: 'paragraph', inlines: [{ kind: 'text', text: token.raw }] }]
+          : [];
+    }
+  }
+
+  private html(text: string): MarkdownBlock[] {
+    const rest = this.options.hideComments ? text.replace(COMMENT, '') : text;
+    if (rest !== text) {
+      return rest.trim() ? parseMarkdown(rest.trim(), this.options) : [];
+    }
+    const inlines = this.rawHtml(text.trim());
+    return inlines.every(run => run.kind === 'text' && run.text === '') ? [] : [{ kind: 'paragraph', inlines }];
+  }
+
+  private rawHtml(text: string): MarkdownInline[] {
+    const runs: MarkdownInline[] = [];
+    let last = 0;
+    for (const match of text.matchAll(IMG_TAG)) {
+      if (match.index > last) {
+        runs.push({ kind: 'text', text: text.slice(last, match.index) });
+      }
+      runs.push(this.imgTag(match[1]));
+      last = match.index + match[0].length;
+    }
+    if (runs.length === 0) {
+      return [{ kind: 'text', text }];
+    }
+    if (last < text.length) {
+      runs.push({ kind: 'text', text: text.slice(last) });
+    }
+    return runs.filter(run => run.kind !== 'text' || run.text !== '');
+  }
+
+  private imgTag(attributes: string): MarkdownInline {
+    const values = new Map<string, string>();
+    for (const match of attributes.matchAll(TAG_ATTRIBUTE)) {
+      const name = match[1].toLowerCase();
+      if (!values.has(name)) {
+        values.set(name, decodeEntities(match[2] ?? match[3] ?? match[4] ?? ''));
+      }
+    }
+    return this.media(values.get('src') ?? '', values.get('alt') ?? '', dimension(values.get('width')), dimension(values.get('height')));
+  }
+
+  private inlines(tokens: Token[] | undefined): MarkdownInline[] {
+    const runs: MarkdownInline[] = [];
+    for (const run of (tokens ?? []).flatMap(token => this.inline(token))) {
+      const previous = runs[runs.length - 1];
+      if (run.kind === 'text' && previous?.kind === 'text') {
+        runs[runs.length - 1] = { kind: 'text', text: previous.text + run.text };
+      } else {
+        runs.push(run);
+      }
+    }
+    return runs;
+  }
+
+  private inline(token: Token): MarkdownInline[] {
+    switch (token.type) {
+      case 'text': {
+        const text = token as Tokens.Text;
+        return text.tokens ? this.inlines(text.tokens) : plain(text.text);
+      }
+      case 'escape':
+        return [{ kind: 'text', text: (token as Tokens.Escape).text }];
+      case 'strong':
+      case 'em':
+      case 'del':
+        return [{ kind: token.type, children: this.inlines((token as Tokens.Strong).tokens) }];
+      case 'codespan':
+        return [{ kind: 'code', text: (token as Tokens.Codespan).text }];
+      case 'br':
+        return [{ kind: 'br' }];
+      case 'link': {
+        const link = token as Tokens.Link;
+        const href = this.options.href(link.href);
+        let children = this.inlines(link.tokens);
+        if (href === null) {
+          return children;
+        }
+        children = children.map(child => (child.kind === 'image' && !child.alt.trim() ? { ...child, alt: href } : child));
+        if (children.every(child => child.kind === 'text' && child.text.trim() === '')) {
+          children = [{ kind: 'text', text: href }];
+        }
+        const title = link.title ? decodeEntities(link.title) : null;
+        return [link.autolink ? { kind: 'link', href, title, children, bare: true } : { kind: 'link', href, title, children }];
+      }
+      case 'image':
+        return [this.media((token as Tokens.Image).href, decodeEntities((token as Tokens.Image).text))];
+      case 'html':
+      case 'tag':
+        return this.rawHtml((token as Tokens.Tag).text);
+      case 'checkbox':
+        return [];
+      default:
+        return 'raw' in token && typeof token.raw === 'string' ? [{ kind: 'text', text: token.raw }] : [];
+    }
+  }
+
+  private media(src: string, alt: string, width?: number, height?: number): MarkdownInline {
+    let url: URL;
+    try {
+      url = new URL(src.trim());
+    } catch {
+      return { kind: 'text', text: alt };
+    }
+    const kind = url.protocol === 'https:' ? this.options.media(url) : null;
+    if (!kind) {
+      return { kind: 'text', text: alt };
+    }
+    return {
+      kind,
+      src: url.href,
+      alt,
+      ...(width === undefined ? {} : { width }),
+      ...(height === undefined ? {} : { height }),
+    };
+  }
+}
+
+function dimension(value: string | undefined): number | undefined {
+  if (value === undefined || !/^\d+$/.test(value.trim())) {
+    return undefined;
+  }
+  const size = Number(value.trim());
+  return size > 0 && size <= MAX_DIMENSION ? size : undefined;
+}
+
+function plain(text: string): MarkdownInline[] {
+  return [{ kind: 'text', text: decodeEntities(text) }];
+}
+
+let decoder: HTMLTextAreaElement | null = null;
+
+function decodeEntities(text: string): string {
+  if (!text.includes('&')) {
+    return text;
+  }
+  // A textarea parses its content as RCDATA: character references are decoded, markup never becomes
+  // elements, and the detached element never loads anything. The result is only ever interpolated.
+  decoder ??= document.createElement('textarea');
+  decoder.innerHTML = text;
+  return decoder.value;
 }

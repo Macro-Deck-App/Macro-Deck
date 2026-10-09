@@ -2564,6 +2564,13 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Clipboard.Unsupported" xml:space="preserve">
     <value>你的浏览器不允许此页面复制到剪贴板。</value>
   </data>
+  <data name="Errors.ColorPalette.Full" xml:space="preserve">
+    <value>调色板最多可包含 {max} 种颜色。</value>
+    <comment>[max:int]</comment>
+  </data>
+  <data name="Errors.ColorPalette.InvalidColor" xml:space="preserve">
+    <value>颜色无效。</value>
+  </data>
   <data name="Errors.Common.HostLocked" xml:space="preserve">
     <value>主机已锁定。</value>
   </data>
@@ -2723,6 +2730,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Folders.UnknownFolderView" xml:space="preserve">
     <value>该文件夹视图不可用。</value>
+  </data>
+  <data name="Errors.Http.InvalidUserAgent" xml:space="preserve">
+    <value>请输入有效的 User-Agent：最多 {maxLength} 个可打印 ASCII 字符，格式如 Product/1.0。</value>
+    <comment>[maxLength:int]</comment>
   </data>
   <data name="Errors.IconPack.ExportFailed" xml:space="preserve">
     <value>导出失败</value>
@@ -3474,6 +3485,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.ColorPicker.AddModifier" xml:space="preserve">
     <value>添加修饰符</value>
   </data>
+  <data name="Forms.ColorPicker.AddToPalette" xml:space="preserve">
+    <value>添加到调色板</value>
+  </data>
   <data name="Forms.ColorPicker.AlphaLabel" xml:space="preserve">
     <value>不透明度</value>
   </data>
@@ -3488,6 +3502,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Forms.ColorPicker.CustomColorTitle" xml:space="preserve">
     <value>自定义颜色</value>
+  </data>
+  <data name="Forms.ColorPicker.CustomSwatch" xml:space="preserve">
+    <value>自定义颜色 {hex}</value>
+    <comment>[hex:string]</comment>
   </data>
   <data name="Forms.ColorPicker.DefaultColorTitle" xml:space="preserve">
     <value>默认颜色</value>
@@ -3566,11 +3584,20 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Forms.ColorPicker.NoMatchingVariables" xml:space="preserve">
     <value>没有匹配的变量</value>
   </data>
+  <data name="Forms.ColorPicker.NotSet" xml:space="preserve">
+    <value>未设置</value>
+  </data>
   <data name="Forms.ColorPicker.Orange" xml:space="preserve">
     <value>橙色</value>
   </data>
   <data name="Forms.ColorPicker.OriginalLabel" xml:space="preserve">
     <value>原始颜色</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteLabel" xml:space="preserve">
+    <value>调色板</value>
+  </data>
+  <data name="Forms.ColorPicker.PaletteSaveFailed" xml:space="preserve">
+    <value>无法保存调色板。</value>
   </data>
   <data name="Forms.ColorPicker.Pink" xml:space="preserve">
     <value>粉色</value>
@@ -3580,6 +3607,17 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Forms.ColorPicker.Red" xml:space="preserve">
     <value>红色</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPalette" xml:space="preserve">
+    <value>从调色板中移除 {hex}</value>
+    <comment>[hex:string]</comment>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmHeading" xml:space="preserve">
+    <value>从调色板中移除颜色？</value>
+  </data>
+  <data name="Forms.ColorPicker.RemoveFromPaletteConfirmMessage" xml:space="preserve">
+    <value>此颜色（{name}）将从调色板中移除，不再出现在任何颜色字段中。</value>
+    <comment>[name:string]</comment>
   </data>
   <data name="Forms.ColorPicker.RemoveModifierAriaLabel" xml:space="preserve">
     <value>移除修饰符</value>
@@ -7986,6 +8024,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Mouse.Issues.WaylandDegradedReason" xml:space="preserve">
     <value>这是 Wayland 会话，因此鼠标输入经由 XWayland 运行。点击、拖动和滚动可以正常使用，但合成器可能会忽略绝对指针定位，此时移动到固定坐标会落到别处或毫无反应。</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Name" xml:space="preserve">
+    <value>音乐播放器</value>
+  </data>
+  <data name="Integrations.MusicPlayer.Variables.AlbumColorDisplayName" xml:space="preserve">
+    <value>专辑颜色</value>
   </data>
   <data name="Integrations.Obs.Actions.GetFilterState.Description" xml:space="preserve">
     <value>将来源滤镜是否启用读取到变量中</value>
@@ -14471,6 +14515,30 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Appearance.Light" xml:space="preserve">
     <value>浅色</value>
   </data>
+  <data name="Settings.Appearance.PaletteDescription" xml:space="preserve">
+    <value>每个颜色字段提供的颜色。可以移除其中任意颜色（包括默认颜色），也可以添加自定义颜色。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteEmpty" xml:space="preserve">
+    <value>调色板为空。请添加颜色或恢复默认颜色。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteHeading" xml:space="preserve">
+    <value>调色板</value>
+  </data>
+  <data name="Settings.Appearance.PaletteLabel" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmButton" xml:space="preserve">
+    <value>恢复</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmHeading" xml:space="preserve">
+    <value>恢复默认颜色？</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreConfirmMessage" xml:space="preserve">
+    <value>调色板将替换为 Macro Deck 的默认颜色，已添加的颜色会从中移除。</value>
+  </data>
+  <data name="Settings.Appearance.PaletteRestoreDefaults" xml:space="preserve">
+    <value>恢复默认颜色</value>
+  </data>
   <data name="Settings.Appearance.System" xml:space="preserve">
     <value>跟随系统</value>
   </data>
@@ -15189,6 +15257,31 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Extensions.UpdatesSection" xml:space="preserve">
     <value>更新</value>
+  </data>
+  <data name="Settings.Http.Description" xml:space="preserve">
+    <value>Macro Deck 内置集成发出的 HTTP 请求和连接的设置。</value>
+  </data>
+  <data name="Settings.Http.Heading" xml:space="preserve">
+    <value>HTTP</value>
+  </data>
+  <data name="Settings.Http.LoadFailed" xml:space="preserve">
+    <value>无法加载 HTTP 设置。</value>
+  </data>
+  <data name="Settings.Http.SaveFailed" xml:space="preserve">
+    <value>无法保存 HTTP 设置。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Default" xml:space="preserve">
+    <value>默认值：{userAgent}</value>
+    <comment>[userAgent:string]</comment>
+  </data>
+  <data name="Settings.Http.UserAgent.Description" xml:space="preserve">
+    <value>自定义内置集成在 HTTP 请求中发送的 User-Agent。这有助于解决与反向代理和反机器人防护系统的兼容性问题。第三方插件不受影响，需要自行配置 User-Agent。更改对新请求和新连接生效；已打开的连接在重新连接前仍使用原值。</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Label" xml:space="preserve">
+    <value>HTTP User-Agent</value>
+  </data>
+  <data name="Settings.Http.UserAgent.Restore" xml:space="preserve">
+    <value>恢复默认值</value>
   </data>
   <data name="Settings.Language.ActiveDescription" xml:space="preserve">
     <value>立即应用于所有已连接的客户端。</value>
@@ -19055,8 +19148,8 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Editor.Label" xml:space="preserve">
     <value>标签</value>
   </data>
-  <data name="Widgets.Editor.LabelBoxBorderColor" xml:space="preserve">
-    <value>标签框边框颜色</value>
+  <data name="Widgets.Editor.LabelBoxBorder" xml:space="preserve">
+    <value>标签框边框</value>
   </data>
   <data name="Widgets.Editor.LabelBoxBorderWidth" xml:space="preserve">
     <value>标签框边框宽度 (%)</value>
@@ -19067,8 +19160,8 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Editor.LabelColor" xml:space="preserve">
     <value>标签颜色</value>
   </data>
-  <data name="Widgets.Editor.LabelOutlineColor" xml:space="preserve">
-    <value>标签描边颜色</value>
+  <data name="Widgets.Editor.LabelOutline" xml:space="preserve">
+    <value>标签描边</value>
   </data>
   <data name="Widgets.Editor.LabelOutlineWidth" xml:space="preserve">
     <value>描边宽度 (%)</value>

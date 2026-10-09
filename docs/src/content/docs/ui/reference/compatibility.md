@@ -43,6 +43,7 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `confirmTitle`, `confirmMessage`, `confirmLabel`, `confirmDanger`, `promptValue` on `button` | Properties | Raises `activate` at once, without asking and without a payload. |
 | `interaction` on `ui.slider` (`relative`) | A property | Ignores it and keeps the absolute drag: a press jumps the level to the pointer, and a tap sends `change`. |
 | `ui.modifier` (padding, opacity, clip, mask, frame), component version 1 | A type | Draws the node's explicit `fallback`; without one, none of the wrapped content (Macro Deck's renderer shows a faint placeholder box). No fallback is invented for you. |
+| `trackColor` on `ui.gauge` | A property | Ignores it and draws the theme's track colour, so the ring still reads. |
 | `shadow`, `strokeColor` and `strokeWidth` on `ui.text` | Properties | Ignores them: keeps its own legibility shadow and draws no outline, so the text still reads. |
 | `spans` on `ui.text` | A property | Ignores it and draws `text`, which the producer keeps the plain equivalent of the spans: the same words, each image as its alt text, on one font and colour. |
 | `overflow` on `ui.stack` (`clip-start`), component version 2 | A property, gated by a component version | Draws the node's `fallback`, because a producer using `clip-start` asks for version 2. Without that ask a version 1 reader ignores the key and shrinks every child into the box. |
@@ -54,6 +55,8 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `allowTransparent` on `color` | A property | Ignores it and offers no Transparent swatch; a stored `transparent` still shows as the input's value. |
 | `thresholds` (`UiThresholdsInput`) and its `unit`, `fixedCount`, `fixedColors` and `maxCount` properties | A configuration type | Declines it and draws the node's `fallback`, or shows the field as unsupported. |
 | `allowVariables` on `color` and `thresholds` | A property | Ignores it and offers fixed colours only. |
+| `ofParent` on a length (`UiLength.OfParent`) | A member of an existing value | Ignores it and resolves `basis` against the widget, which is why `basis` is always sent. Pass the fallback you want as the second argument. See [Sizing](/ui/concepts/sizing/#relative-to-the-containing-box). |
+| `minCellSize` on `ui.grid` | A property | Ignores it and draws `columns` by `rows`, hiding the children that do not fit those rows. Set both to the arrangement an older reader should draw. See [Grid](/ui/components/grid/#choosing-the-columns). |
 | `#rrggbbaa` wherever a `#rrggbb` colour is accepted | A value | Rejects it like any other unknown spelling: the property counts as omitted and the theme colour is drawn. |
 
 See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md)

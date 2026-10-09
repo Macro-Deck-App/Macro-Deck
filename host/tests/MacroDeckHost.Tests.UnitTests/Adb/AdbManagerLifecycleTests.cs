@@ -352,6 +352,39 @@ public class AdbManagerLifecycleTests
 		Assert.That(killCalls, Is.EqualTo(1), "only the restart's own kill-server ran; exit gave up on the held gate");
 	}
 
+	[Test]
+	public async Task A_shutdown_the_user_cancels_keeps_the_devices_and_the_server_Macro_Deck_owns()
+	{
+		using var harness = ConnectedDevice(devicesStandardError: DaemonStartedOutput);
+		EnableStopOnExit(harness);
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+		var changes = new List<AdbDeviceChange>();
+		harness.Manager.DeviceChanged += (_, change) => changes.Add(change);
+		var refused = new AdbProcessResult(false, -1, string.Empty, string.Empty, false);
+		harness.Runner.Override = argv =>
+		{
+			if (argv.Contains("version"))
+			{
+				harness.SessionShuttingDown = true;
+			}
+
+			return harness.SessionShuttingDown ? refused : null;
+		};
+
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+		harness.SessionShuttingDown = false;
+		harness.Runner.Override = null;
+		await harness.Manager.ShutdownAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changes, Is.Empty, "a pass racing the session end must not report devices gone");
+			Assert.That(harness.Manager.Status.ServerReachable, Is.True);
+			Assert.That(harness.Manager.Devices.Select(device => device.Serial), Does.Contain(Serial));
+			Assert.That(KilledServer(harness), Is.True, "Macro Deck still owns the server it started");
+		});
+	}
+
 	private static AdbManagerHarness StopOnExitHarness(Func<AdbProcessResult> devices, bool stopServerOnExit = true)
 	{
 		var harness = new AdbManagerHarness();

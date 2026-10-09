@@ -51,18 +51,18 @@
                         [class.cp-interface-lock-off]="!endpoint.ssl"
                         [attr.aria-label]="sslLabelKey(endpoint) | translate"></span>
                       <span class="cp-interface-url">{{ key(endpoint) }}</span>
-                      <span class="icon icon-chevron-right icon-xs cp-interface-chevron"></span>
+                      <span class="icon icon-chevron-right rtl-mirror icon-xs cp-interface-chevron"></span>
                     </button>
 
                     @if (expanded() === key(endpoint)) {
                       <div class="cp-targets">
                         <button type="button" class="cp-target" (click)="open(endpoint, 'config')">
                           <span class="cp-target-name">{{ appStrings.Shell.ConnectionPanel.ConfigurationUi | translate }}</span>
-                          <span class="icon icon-arrow-right icon-xs"></span>
+                          <span class="icon icon-arrow-right rtl-mirror icon-xs"></span>
                         </button>
                         <button type="button" class="cp-target" (click)="open(endpoint, 'client')">
                           <span class="cp-target-name">{{ appStrings.Shell.ConnectionPanel.WebClient | translate }}</span>
-                          <span class="icon icon-arrow-right icon-xs"></span>
+                          <span class="icon icon-arrow-right rtl-mirror icon-xs"></span>
                         </button>
                       </div>
                     }

@@ -93,7 +93,7 @@ export const macrodeckClockDialComponent: UiComponentDefinition = {
   },
 
   intrinsicMainPx(node, m) {
-    return resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent) ?? 0;
+    return resolveLength(nodeLength(node, UiComponentProperties.Size), m) ?? 0;
   },
 
   tickPeriodMs(node) {

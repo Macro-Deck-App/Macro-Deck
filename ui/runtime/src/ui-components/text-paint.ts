@@ -1,6 +1,6 @@
 import { UiNode } from '../ui-framework/ui-node.interface';
 import { nodeBoolean, nodeNumber, nodeString } from '../ui-framework/node-properties.util';
-import { nodeHexColor, nodeLength, resolveLength } from '../ui-framework/length';
+import { LengthScope, lengthReference, nodeHexColor, nodeLength, resolveLength, withoutCross } from '../ui-framework/length';
 import { UiComponentProperties } from './component-properties';
 import {
   textAlign,
@@ -32,9 +32,10 @@ export function paintTextCommon<TState>(
   const digits = textDigits(node);
 
   const outlineColor = nodeHexColor(node, UiComponentProperties.StrokeColor);
-  const outlineWidth = resolveLength(nodeLength(node, UiComponentProperties.StrokeWidth), ctx.basis, null);
+  const outlineLength = nodeLength(node, UiComponentProperties.StrokeWidth);
+  const outlineWidth = resolveLength(outlineLength, withoutCross(ctx));
   const outline = outlineColor !== undefined && outlineWidth !== undefined && outlineWidth > 0 && isFinite(outlineWidth)
-    ? Math.min(outlineWidth, ctx.basis * MAX_OUTLINE_OF_BASIS)
+    ? Math.min(outlineWidth, lengthReference(outlineLength, ctx) * MAX_OUTLINE_OF_BASIS)
     : null;
   const shadowOff = nodeBoolean(node, UiComponentProperties.Shadow) === false;
 
@@ -58,6 +59,8 @@ export function paintTextCommon<TState>(
   ctx.setStyle(element, 'margin-top', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
   ctx.setStyle(element, 'margin-bottom', outline === null ? null : `calc(-0.2em - ${px(outline)})`);
   ctx.setStyle(element, 'max-height', outline === null ? null : `calc(100% + 0.4em + ${px(2 * outline)})`);
+  // A hugging parent sizes to the margin box, so the cap has to leave room for the outline padding.
+  ctx.setStyle(element, 'max-width', outline === null ? null : `calc(100% + ${px(2 * outline)})`);
   ctx.setStyle(element, 'font-weight', String(textFontWeight(node)));
   ctx.setStyle(element, 'color', textFillColor(node));
   ctx.setStyle(element, 'text-align', textAlign(node));
@@ -80,8 +83,8 @@ export function paintTextCommon<TState>(
     if (forgetTextSpans(element) || element.textContent !== painted) element.textContent = painted;
   }
 
-  const size = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx.basis, ctx.crossExtent);
-  const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx.basis, ctx.crossExtent);
+  const size = resolveLength(nodeLength(node, UiComponentProperties.Size), ctx);
+  const minSize = resolveLength(nodeLength(node, UiComponentProperties.MinSize), ctx);
   const fontReady = faceId ? ctx.host.fontReady(faceId) : true;
   const font = faceId ? `${faceId}|${fontReady}` : `|${ctx.host.uiFontKey?.() ?? ''}`;
   ctx.keepFit(element, textFit(element, size, minSize), `${size}|${minSize}|${content}|${font}`);
@@ -89,8 +92,8 @@ export function paintTextCommon<TState>(
 
 export function textIntrinsicMainPx(
   node: UiNode,
-  m: { basis: number; crossExtent: number | null; horizontal: boolean },
+  m: LengthScope & { horizontal: boolean },
 ): number {
-  const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m.basis, m.crossExtent);
+  const size = resolveLength(nodeLength(node, UiComponentProperties.Size), m);
   return m.horizontal ? 0 : (size ?? 0) * Math.max(1, nodeNumber(node, UiComponentProperties.MaxLines) ?? 1);
 }

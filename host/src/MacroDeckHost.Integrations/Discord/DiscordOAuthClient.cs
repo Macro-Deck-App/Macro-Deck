@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord;
 
@@ -29,7 +30,7 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 	private const string TokenEndpoint = "https://discord.com/api/oauth2/token";
 
 	private static readonly ILogger _logger = IntegrationLog.For<DiscordOAuthClient>(DiscordIntegration.IntegrationId);
-	private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(20) };
+	private static readonly HttpClient _http = IntegrationHttp.CreateClient(TimeSpan.FromSeconds(20));
 
 	public Task<DiscordTokens> ExchangeCodeAsync(
 		string clientId,

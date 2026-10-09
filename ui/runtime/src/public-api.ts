@@ -441,10 +441,14 @@ export {
 } from './ui-framework/ui-resource';
 export { UI_COMPONENT_EVENTS_WELL_KNOWN, UiComponentEvents } from './ui-components/component-events';
 export {
+  boxExtent,
+  lengthReference,
   nodeHexColor,
   nodeLength,
   resolveLength,
   UI_COMPONENT_CELL,
+  withoutCross,
+  type LengthScope,
   type UiLength,
 } from './ui-framework/length';
 export {
@@ -575,7 +579,7 @@ export {
   type ArcMetrics,
   type ArcSweep,
 } from './ui-components/arc';
-export { layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
+export { chooseColumns, layoutGridCells, placeGridChildren, type UiGridCell, type UiGridPlacement } from './ui-components/grid-layout';
 export { isShapePathData, shapeOutline } from './ui-components/ui-shape.component';
 export {
   dialAngles,
@@ -1115,6 +1119,7 @@ export {
   type AdbDeviceState,
   type AdbStateChangedEvent,
   type AppearanceChangedEvent,
+  type ColorPaletteChangedEvent,
   type CompleteOnboardingRequest,
   type CompleteOnboardingResponse,
   type ConnectAdbDeviceRequest,
@@ -1148,6 +1153,7 @@ export {
   type UpdateExtensionSettingsRequest,
   type UpdateExtensionSettingsResponse,
   type GetLockScreenSettingsResponse,
+  type GetHttpSettingsResponse,
   type GetLoggingSettingsResponse,
   type GetNativeUsbSettingsResponse,
   type GetNetworkSettingsResponse,
@@ -1175,6 +1181,8 @@ export {
   type UpdateDeveloperSettingsResponse,
   type UpdateLockScreenSettingsRequest,
   type UpdateLockScreenSettingsResponse,
+  type UpdateHttpSettingsRequest,
+  type UpdateHttpSettingsResponse,
   type UpdateLoggingSettingsRequest,
   type UpdateLoggingSettingsResponse,
   type UpdateNativeUsbSettingsRequest,
@@ -1471,6 +1479,8 @@ export {
   resolveLocalizedText,
 } from './localization/localized-text';
 export { pluralForm } from './localization/plural-form.util';
+export { cultureChain, effectiveCulture, textDirection } from './localization/text-direction.util';
+export type { TextDirection } from './localization/text-direction.util';
 
 // Normalized client input
 export { type ClientInputEvent } from './client-input/client-input-event';

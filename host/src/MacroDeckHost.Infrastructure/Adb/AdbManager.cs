@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Usb;
@@ -53,6 +54,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	private readonly AdbOwnershipMarker _ownershipMarker;
 	private readonly AdbTunnelCoordinator _tunnelCoordinator;
 	private readonly TimeProvider _timeProvider;
+	private readonly UserSessionEnd _sessionEnd;
 	private readonly ILogger _logger;
 
 	private readonly SemaphoreSlim _gate = new(1, 1);
@@ -89,11 +91,13 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		IHostListenerState listenerState,
 		TimeProvider timeProvider,
 		ILogger logger,
+		UserSessionEnd sessionEnd,
 		INativeUsbSerials? nativeUsb = null)
 	{
 		_scopeFactory = scopeFactory;
 		_processRunner = processRunner;
 		_timeProvider = timeProvider;
+		_sessionEnd = sessionEnd;
 		_logger = logger.ForContext<AdbManager>();
 
 		_ownershipMarker = new AdbOwnershipMarker(paths, logger);
@@ -688,6 +692,12 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 	private async Task ReconcileCoreAsync(CancellationToken cancellationToken)
 	{
+		// Spawns are refused while the session ends; a refused pass must not read as a missing server.
+		if (_sessionEnd.IsEnding)
+		{
+			return;
+		}
+
 		_currentSettings ??= await LoadSettingsAsync();
 		var settings = _currentSettings;
 
@@ -739,6 +749,11 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			await _tunnelCoordinator.RemoveOwnedTunnelsAsync(_staleSweepPerDeviceTimeout,
 				_staleSweepTotalBudget,
 				cancellationToken);
+			if (_sessionEnd.IsEnding)
+			{
+				return;
+			}
+
 			_ownershipMarker.Delete();
 			_pendingStaleSweep = false;
 		}
@@ -751,6 +766,11 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 		var devicesResult
 			= await _processRunner.RunAsync(resolvedPath, ["devices", "-l"], _devicesListTimeout, cancellationToken);
+		if (_sessionEnd.IsEnding)
+		{
+			return;
+		}
+
 		var serverReachable = devicesResult is { Started: true, TimedOut: false, ExitCode: 0 };
 		if (serverReachable && StartedDaemon(devicesResult))
 		{
@@ -839,7 +859,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	private async Task ProbePropertiesCoreAsync(CancellationToken cancellationToken)
 	{
 		var status = Status;
-		if (!status.Enabled || status.ResolvedExecutablePath is null)
+		if (!status.Enabled || status.ResolvedExecutablePath is null || _sessionEnd.IsEnding)
 		{
 			return;
 		}

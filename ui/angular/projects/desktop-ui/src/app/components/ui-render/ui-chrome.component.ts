@@ -7,6 +7,7 @@ import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confir
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { CopyValueComponent } from '../copy-value/copy-value.component';
 import { UiRenderContext } from './ui-render-context';
+import { UI_CHROME_TYPES } from './ui-chrome-types.util';
 import { UiNodeComponent } from './ui-node.component';
 import { ExternalLinkService } from '../../services/external-link.service';
 
@@ -56,7 +57,8 @@ function isExternalUrl(url: string): boolean {
         <div
           class="config-chrome-stack"
           [class.config-chrome-stack-row]="direction() === 'horizontal'"
-          [class.config-chrome-stack-nowrap]="!wrap()">
+          [class.config-chrome-stack-nowrap]="!wrap()"
+          [class.config-chrome-stack-captioned]="!wrap() && hasCaptionedInput()">
           @for (child of children(); track child.id) {
             <shared-ui-node [node]="child" [style.flex]="childFlex(child)" />
           }
@@ -274,6 +276,9 @@ export class UiChromeComponent {
   protected readonly severity = computed(() => nodeString(this.node(), Properties.Severity));
   protected readonly direction = computed(() => nodeString(this.node(), Properties.Direction));
   protected readonly wrap = computed(() => nodeBoolean(this.node(), Properties.Wrap) !== false);
+  protected readonly hasCaptionedInput = computed(() => this.children().some(child =>
+    !UI_CHROME_TYPES.has(child.type) && !!nodeRaw(child, Properties.Label)
+    && nodeBoolean(child, Properties.HideLabel) !== true));
 
   protected childFlex(child: UiNode): string | null {
     if (this.wrap()) return null;

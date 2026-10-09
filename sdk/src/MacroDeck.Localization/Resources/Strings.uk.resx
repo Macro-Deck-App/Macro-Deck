@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Common.Add" xml:space="preserve">
+    <value>Додати</value>
+  </data>
+  <data name="Common.Back" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+  <data name="Common.Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Common.Close" xml:space="preserve">
+    <value>Закрити</value>
+  </data>
+  <data name="Common.Confirm" xml:space="preserve">
+    <value>Підтвердити</value>
+  </data>
+  <data name="Common.Continue" xml:space="preserve">
+    <value>Продовжити</value>
+  </data>
+  <data name="Common.Copy" xml:space="preserve">
+    <value>Копіювати</value>
+  </data>
+  <data name="Common.Create" xml:space="preserve">
+    <value>Створити</value>
+  </data>
+  <data name="Common.Delete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="Common.Disabled" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="Common.Done" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Common.Edit" xml:space="preserve">
+    <value>Редагувати</value>
+  </data>
+  <data name="Common.Enabled" xml:space="preserve">
+    <value>Увімкнено</value>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Експорт</value>
+  </data>
+  <data name="Common.Import" xml:space="preserve">
+    <value>Імпорт</value>
+  </data>
+  <data name="Common.Loading" xml:space="preserve">
+    <value>Завантаження…</value>
+  </data>
+  <data name="Common.Next" xml:space="preserve">
+    <value>Далі</value>
+  </data>
+  <data name="Common.No" xml:space="preserve">
+    <value>Ні</value>
+  </data>
+  <data name="Common.None" xml:space="preserve">
+    <value>Немає</value>
+  </data>
+  <data name="Common.Refresh" xml:space="preserve">
+    <value>Оновити</value>
+  </data>
+  <data name="Common.Remove" xml:space="preserve">
+    <value>Вилучити</value>
+  </data>
+  <data name="Common.Rename" xml:space="preserve">
+    <value>Перейменувати</value>
+  </data>
+  <data name="Common.Retry" xml:space="preserve">
+    <value>Повторити</value>
+  </data>
+  <data name="Common.Save" xml:space="preserve">
+    <value>Зберегти</value>
+  </data>
+  <data name="Common.Select" xml:space="preserve">
+    <value>Вибрати…</value>
+  </data>
+  <data name="Common.Yes" xml:space="preserve">
+    <value>Так</value>
+  </data>
+  <data name="ConfigFlow.SetUpIntegration" xml:space="preserve">
+    <value>Налаштувати інтеграцію</value>
+  </data>
+  <data name="Connection.Connected" xml:space="preserve">
+    <value>Під'єднано</value>
+  </data>
+  <data name="Connection.Connecting" xml:space="preserve">
+    <value>Під'єднання…</value>
+  </data>
+  <data name="Connection.Disconnected" xml:space="preserve">
+    <value>Від'єднано</value>
+  </data>
+  <data name="Connection.Reconnecting" xml:space="preserve">
+    <value>Повторне під'єднання…</value>
+  </data>
+  <data name="Settings.About" xml:space="preserve">
+    <value>Про програму</value>
+  </data>
+  <data name="Settings.Adb" xml:space="preserve">
+    <value>ADB</value>
+  </data>
+  <data name="Settings.Advanced" xml:space="preserve">
+    <value>Додатково</value>
+  </data>
+  <data name="Settings.Appearance" xml:space="preserve">
+    <value>Оформлення</value>
+  </data>
+  <data name="Settings.BackupAndData" xml:space="preserve">
+    <value>Резервні копії та дані</value>
+  </data>
+  <data name="Settings.Backups" xml:space="preserve">
+    <value>Резервні копії</value>
+  </data>
+  <data name="Settings.Connectivity" xml:space="preserve">
+    <value>Підключення</value>
+  </data>
+  <data name="Settings.DataAndPrivacy" xml:space="preserve">
+    <value>Дані та конфіденційність</value>
+  </data>
+  <data name="Settings.Developer" xml:space="preserve">
+    <value>Розробник</value>
+  </data>
+  <data name="Settings.Devices" xml:space="preserve">
+    <value>Пристрої</value>
+  </data>
+  <data name="Settings.General" xml:space="preserve">
+    <value>Загальні</value>
+  </data>
+  <data name="Settings.Language" xml:space="preserve">
+    <value>Мова</value>
+  </data>
+  <data name="Settings.Logging" xml:space="preserve">
+    <value>Журнал</value>
+  </data>
+  <data name="Settings.Network" xml:space="preserve">
+    <value>Мережа</value>
+  </data>
+  <data name="Settings.PrivacyAndSecurity" xml:space="preserve">
+    <value>Конфіденційність і безпека</value>
+  </data>
+  <data name="Settings.Security" xml:space="preserve">
+    <value>Безпека</value>
+  </data>
+  <data name="Settings.Startup" xml:space="preserve">
+    <value>Запуск</value>
+  </data>
+  <data name="Settings.Title" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="States.Active" xml:space="preserve">
+    <value>Активно</value>
+  </data>
+  <data name="States.Hidden" xml:space="preserve">
+    <value>Приховано</value>
+  </data>
+  <data name="States.Inactive" xml:space="preserve">
+    <value>Неактивно</value>
+  </data>
+  <data name="States.InPlaylist" xml:space="preserve">
+    <value>У плейлисті</value>
+  </data>
+  <data name="States.Liked" xml:space="preserve">
+    <value>Вподобано</value>
+  </data>
+  <data name="States.Monitoring" xml:space="preserve">
+    <value>Моніторинг увімкнено</value>
+  </data>
+  <data name="States.Muted" xml:space="preserve">
+    <value>Вимкнено звук</value>
+  </data>
+  <data name="States.NotInPlaylist" xml:space="preserve">
+    <value>Немає в плейлисті</value>
+  </data>
+  <data name="States.NotLiked" xml:space="preserve">
+    <value>Не вподобано</value>
+  </data>
+  <data name="States.NotMonitoring" xml:space="preserve">
+    <value>Моніторинг вимкнено</value>
+  </data>
+  <data name="States.NotRecording" xml:space="preserve">
+    <value>Не записується</value>
+  </data>
+  <data name="States.NotStreaming" xml:space="preserve">
+    <value>Не транслюється</value>
+  </data>
+  <data name="States.Off" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="States.On" xml:space="preserve">
+    <value>Увімкнено</value>
+  </data>
+  <data name="States.Paused" xml:space="preserve">
+    <value>Призупинено</value>
+  </data>
+  <data name="States.Playing" xml:space="preserve">
+    <value>Відтворюється</value>
+  </data>
+  <data name="States.PushToTalk" xml:space="preserve">
+    <value>Натисніть, щоб говорити</value>
+  </data>
+  <data name="States.Recording" xml:space="preserve">
+    <value>Записується</value>
+  </data>
+  <data name="States.RecordingPaused" xml:space="preserve">
+    <value>Запис призупинено</value>
+  </data>
+  <data name="States.RepeatContext" xml:space="preserve">
+    <value>Повторити все</value>
+  </data>
+  <data name="States.RepeatOff" xml:space="preserve">
+    <value>Повтор вимкнено</value>
+  </data>
+  <data name="States.RepeatTrack" xml:space="preserve">
+    <value>Повторити трек</value>
+  </data>
+  <data name="States.Stopped" xml:space="preserve">
+    <value>Зупинено</value>
+  </data>
+  <data name="States.Streaming" xml:space="preserve">
+    <value>Транслюється</value>
+  </data>
+  <data name="States.Unavailable" xml:space="preserve">
+    <value>Недоступно</value>
+  </data>
+  <data name="States.Unmuted" xml:space="preserve">
+    <value>Звук увімкнено</value>
+  </data>
+  <data name="States.Visible" xml:space="preserve">
+    <value>Видно</value>
+  </data>
+  <data name="States.VoiceActivity" xml:space="preserve">
+    <value>Голосова активність</value>
+  </data>
+  <data name="Validation.AtLeast" xml:space="preserve">
+    <value>{field} має бути не менше {minimum}</value>
+    <comment>[minimum:double]</comment>
+  </data>
+  <data name="Validation.AtMost" xml:space="preserve">
+    <value>{field} має бути не більше {maximum}</value>
+    <comment>[maximum:double]</comment>
+  </data>
+  <data name="Validation.InvalidIpAddress" xml:space="preserve">
+    <value>{field} не є дійсною IP-адресою</value>
+  </data>
+  <data name="Validation.InvalidJson" xml:space="preserve">
+    <value>{field} не є дійсним JSON</value>
+  </data>
+  <data name="Validation.InvalidUrl" xml:space="preserve">
+    <value>{field} не є дійсною URL-адресою</value>
+  </data>
+  <data name="Validation.InvalidValue" xml:space="preserve">
+    <value>{field} має недійсне значення</value>
+  </data>
+  <data name="Validation.PatternMismatch" xml:space="preserve">
+    <value>{field} не відповідає очікуваному формату</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{field} є обов'язковим</value>
+    <comment>Shown under an empty required field. {field} is the field's own label.</comment>
+  </data>
+  <data name="Validation.TooLong" xml:space="preserve">
+    <value>{field} перевищує {limit} символів</value>
+    <comment>[limit:int] Character limit, not byte length.</comment>
+  </data>
+  <data name="Widgets.Appearance.Heading" xml:space="preserve">
+    <value>Оформлення</value>
+    <comment>Heading above a widget's standard appearance fields.</comment>
+  </data>
+  <data name="Widgets.Appearance.BackgroundColor" xml:space="preserve">
+    <value>Колір фону</value>
+  </data>
+  <data name="Widgets.Appearance.Label" xml:space="preserve">
+    <value>Мітка</value>
+    <comment>The text a widget shows as its caption.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelColor" xml:space="preserve">
+    <value>Колір мітки</value>
+  </data>
+  <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
+    <value>Акцентний колір</value>
+  </data>
+  <data name="Widgets.Appearance.Font" xml:space="preserve">
+    <value>Шрифт</value>
+  </data>
+  <data name="Widgets.Appearance.FontSize" xml:space="preserve">
+    <value>Розмір (%)</value>
+    <comment>Label size as a percentage.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlign" xml:space="preserve">
+    <value>Вирівнювання</value>
+    <comment>Horizontal alignment of the label.</comment>
+  </data>
+  <data name="Widgets.Appearance.TextAlignLeft" xml:space="preserve">
+    <value>Ліворуч</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignCenter" xml:space="preserve">
+    <value>По центру</value>
+  </data>
+  <data name="Widgets.Appearance.TextAlignRight" xml:space="preserve">
+    <value>Праворуч</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPosition" xml:space="preserve">
+    <value>Розташування</value>
+    <comment>Vertical position of the label on the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionTop" xml:space="preserve">
+    <value>Угорі</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionCenter" xml:space="preserve">
+    <value>По центру</value>
+  </data>
+  <data name="Widgets.Appearance.LabelPositionBottom" xml:space="preserve">
+    <value>Внизу</value>
+  </data>
+  <data name="Widgets.Appearance.Border" xml:space="preserve">
+    <value>Рамка</value>
+  </data>
+  <data name="Widgets.Appearance.BorderStyle" xml:space="preserve">
+    <value>Стиль</value>
+    <comment>Animation style of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderColor" xml:space="preserve">
+    <value>Колір</value>
+    <comment>Colour of a widget's border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderOff" xml:space="preserve">
+    <value>Вимкнено</value>
+    <comment>Border style: no border.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderStatic" xml:space="preserve">
+    <value>Статичний</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHeartbeat" xml:space="preserve">
+    <value>Пульсація</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBreathing" xml:space="preserve">
+    <value>Дихання</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderBlink" xml:space="preserve">
+    <value>Блимання</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderComet" xml:space="preserve">
+    <value>Комета</value>
+    <comment>Border style.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderMarchingAnts" xml:space="preserve">
+    <value>Бігучий пунктир</value>
+    <comment>Border style: a dashed line moving around the widget.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderHueShift" xml:space="preserve">
+    <value>Зміна відтінку</value>
+    <comment>Border style: the colour cycles through the hues.</comment>
+  </data>
+  <data name="Widgets.Appearance.BorderRgb" xml:space="preserve">
+    <value>RGB</value>
+    <comment>Border style: rainbow colours.</comment>
+  </data>
+</root>

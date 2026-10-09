@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 
@@ -181,7 +182,7 @@ internal sealed class StreamlabsJsonRpcClient : IStreamlabsClient
 
 	private static async Task<WebSocket> ConnectClientWebSocketAsync(Uri uri, CancellationToken cancellationToken)
 	{
-		var socket = new ClientWebSocket();
+		var socket = IntegrationHttp.CreateWebSocket();
 		try
 		{
 			socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(30);

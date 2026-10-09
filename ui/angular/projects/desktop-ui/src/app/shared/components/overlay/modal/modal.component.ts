@@ -14,6 +14,7 @@ import {
 import { Strings } from '@macro-deck/runtime';
 
 import { LocalizationService } from '../../../localization';
+import { OverlayPanelComponent } from '../overlay-panel/overlay-panel.component';
 
 @Component({
   selector: 'shared-modal',
@@ -80,12 +81,14 @@ export class ModalComponent implements OnInit, OnDestroy {
   private closeTimer?: ReturnType<typeof setTimeout>;
 
   private openedAt = 0;
+  private openOrder = 0;
   private pressStartedOnOverlay = false;
 
   ngOnInit(): void {
     ModalComponent.stack.push(this);
     ModalComponent.openCountSignal.set(ModalComponent.stack.length);
     this.openedAt = Date.now();
+    this.openOrder = OverlayPanelComponent.nextOpenOrder();
   }
 
   ngOnDestroy(): void {
@@ -151,6 +154,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   onEscapeKey(event: Event): void {
     if (!this.isTopmost()) return;
     if (!this.closeOnOverlay) return;
+    if (OverlayPanelComponent.isAnyOpenSince(this.openOrder)) return;
     event.stopImmediatePropagation();
     this.requestClose();
   }

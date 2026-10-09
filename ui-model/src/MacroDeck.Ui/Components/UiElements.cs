@@ -198,11 +198,13 @@ public sealed record UiTextRun : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal colour, as <c>#rrggbb</c>, overriding <see cref="Role" />. For a colour the
-	/// <i>user</i> chose rather than one the theme owns - what they picked must not change with the reader's
-	/// theme, which is the same split <see cref="UiRangeBar.StartColor" /> makes. Absent means the role
-	/// decides. A reader rejects any other spelling rather than passing it through to its styling
-	/// layer.</summary>
+	/// <summary>A literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, overriding
+	/// <see cref="Role" />. For a colour the <i>user</i> chose rather than one the theme owns - what they
+	/// picked must not change with the reader's theme, which is the same split
+	/// <see cref="UiRangeBar.StartColor" /> makes. A translucent colour is drawn over whatever is behind the
+	/// run, so a fainter shade of the user's colour needs no knowledge of the backdrop. Absent means the role
+	/// decides. A reader rejects any other spelling rather than passing it through to its styling layer, and
+	/// a reader that predates eight digits draws the role's colour instead.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <summary>Alignment within the run's own box - see <see cref="UiComponentAlignments" />. Absent means
@@ -492,10 +494,10 @@ public sealed record UiDynamicText : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal run colour, as <c>#rrggbb</c>, for the reason <see cref="UiTextRun.Color" />
-	/// gives. Absent means the <see cref="Role" /> colour. The seconds keep their own muted treatment
-	/// either way: they are the one part of a time run whose colour is normative rather than
-	/// chosen.</summary>
+	/// <summary>A literal run colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, for the
+	/// reason <see cref="UiTextRun.Color" /> gives. Absent means the <see cref="Role" /> colour. The seconds
+	/// keep their own muted treatment either way: they are the one part of a time run whose colour is
+	/// normative rather than chosen.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <summary>Alignment within the run's own box - see <see cref="UiComponentAlignments" />. Absent means
@@ -1486,7 +1488,8 @@ public sealed record UiIcon : UiComponentLeaf
 	/// <see cref="UiComponentTextRoles.Primary" />. Ignored when <see cref="Color" /> is present.</summary>
 	public UiValue<string> Role { get; init; }
 
-	/// <summary>A literal colour, as <c>#rrggbb</c>, overriding <see cref="Role" />.</summary>
+	/// <summary>A literal colour, as <c>#rrggbb</c>, or <c>#rrggbbaa</c> for a translucent one, overriding
+	/// <see cref="Role" />.</summary>
 	public UiValue<string> Color { get; init; }
 
 	/// <inheritdoc />
@@ -1516,9 +1519,10 @@ public sealed record UiIcon : UiComponentLeaf
 /// <see cref="UiComponentLeaf.ColumnSpan" /> by <see cref="UiComponentLeaf.RowSpan" /> block is free. A span
 /// below <c>1</c> counts as <c>1</c> and a column span is clamped to <see cref="Columns" />. Every count - columns,
 /// rows and both spans - is held to at most <c>64</c>, so no single value can make a reader's placement unbounded. A child is drawn
-/// across its block; its lengths keep resolving against the widget basis, and its <c>mainSize</c> and
-/// <c>fill</c> mean nothing here. Where the parent leaves the grid's height open - inside a vertical
-/// <see cref="UiList" /> - rows are as tall as a column is wide, and the grid is as tall as its rows need.
+/// across its block; its lengths resolve against the widget basis unless they are relative to the containing
+/// box - the block, for a child of a grid - and its <c>mainSize</c> and <c>fill</c> mean nothing here. Where the
+/// parent leaves the grid's height open - inside a vertical <see cref="UiList" /> - rows are as tall as a column
+/// is wide, and the grid is as tall as its rows need.
 /// </para>
 ///
 /// <para>
@@ -1534,6 +1538,28 @@ public sealed record UiGrid : UiComponentContainer
 	/// <summary>The row count. Absent means as many as the children need; present means children that do not
 	/// fit are not drawn.</summary>
 	public UiValue<int> Rows { get; init; }
+
+	/// <summary>
+	/// Lets the reader choose the column count from the box it is given, so one tree arranges itself at any
+	/// widget size and shape. Resolved against the grid's containing box. Absent, or not above zero, means
+	/// <see cref="Columns" /> and <see cref="Rows" /> decide.
+	///
+	/// <para>
+	/// <b>The rule is normative.</b> The reader tries every column count from <c>1</c> to the number of
+	/// children (at most <c>64</c>). With a <b>definite height</b> it takes the count that makes the smaller
+	/// edge of a cell largest, the fewer columns on a tie, and every child is drawn: this length has no
+	/// effect there. Where the height is <b>open</b> - inside a vertical <see cref="UiList" />, or in a stack
+	/// child that has neither <c>mainSize</c> nor <c>fill</c> - rows are as tall as a column is wide, and it
+	/// takes the largest count whose cells are still at least this wide, or one column when none is.
+	/// <see cref="Rows" /> is ignored and every child is placed.
+	/// </para>
+	///
+	/// <para>
+	/// A reader too old to know this property draws <see cref="Columns" /> by <see cref="Rows" />, and hides
+	/// the children that do not fit those rows: set both to the arrangement it should draw.
+	/// </para>
+	/// </summary>
+	public UiSize MinCellSize { get; init; }
 
 	/// <summary>The gap between columns and between rows. Absent means none.</summary>
 	public UiSize Gap { get; init; }
@@ -1553,6 +1579,7 @@ public sealed record UiGrid : UiComponentContainer
 
 		properties.Set(UiComponentProperties.Columns, Columns);
 		properties.Set(UiComponentProperties.Rows, Rows);
+		properties.Set(UiComponentProperties.MinCellSize, MinCellSize.Value);
 		properties.Set(UiComponentProperties.Gap, Gap.Value);
 		properties.Set(UiComponentProperties.Padding, Padding.Value);
 	}
@@ -1571,9 +1598,10 @@ public sealed record UiGrid : UiComponentContainer
 /// <c>360</c>.</item>
 /// <item>The arc is centred in the box, <see cref="Thickness" /> wide, with a centreline radius of
 /// <c>(min(width, height) - thickness) / 2</c> and fully rounded caps.</item>
-/// <item>The track covers the whole sweep in the reader's tertiary surface colour. The filled arc runs from
-/// the start over <see cref="Level" /> of the sweep in <see cref="LevelColor" />, or the reader's accent
-/// colour when that is absent. A level of <c>0</c> paints no filled arc.</item>
+/// <item>The track covers the whole sweep in <see cref="TrackColor" />, or the reader's tertiary surface
+/// colour when that is absent. The filled arc runs from the start over <see cref="Level" /> of the sweep in
+/// <see cref="LevelColor" />, or the reader's accent colour when that is absent. A level of <c>0</c> paints
+/// no filled arc.</item>
 /// </list>
 ///
 /// <para>
@@ -1596,6 +1624,10 @@ public sealed record UiGauge : UiComponentLeaf
 	/// colour.</summary>
 	public UiValue<string> LevelColor { get; init; }
 
+	/// <summary>The unfilled track's colour, as <c>#rrggbb</c>. Absent means the reader's tertiary surface
+	/// colour. A reader from before the key draws that colour whatever is set.</summary>
+	public UiValue<string> TrackColor { get; init; }
+
 	/// <summary>The arc's width.</summary>
 	public UiSize Thickness { get; init; }
 
@@ -1613,6 +1645,7 @@ public sealed record UiGauge : UiComponentLeaf
 		properties.Set(UiComponentProperties.StartAngle, StartAngle);
 		properties.Set(UiComponentProperties.EndAngle, EndAngle);
 		properties.Set(UiComponentProperties.LevelColor, LevelColor);
+		properties.Set(UiComponentProperties.TrackColor, TrackColor);
 		properties.Set(UiComponentProperties.Thickness, Thickness.Value);
 	}
 }

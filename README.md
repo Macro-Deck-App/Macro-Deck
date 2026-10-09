@@ -6,6 +6,9 @@
 
 [![CI](https://github.com/Macro-Deck-App/Macro-Deck/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Macro-Deck-App/Macro-Deck/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/Macro-Deck-App/Macro-Deck)](LICENSE)
+[![OpenSSF Baseline](https://www.bestpractices.dev/projects/15331/baseline)](https://www.bestpractices.dev/projects/15331)
+[![Discord Chat](https://badgen.net/discord/online-members/FNndKDN8py)](https://discord.gg/FNndKDN8py)
+![Platforms](https://badgen.net/static/platforms/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux)
 
 Macro Deck is the open-source macro pad for Windows, macOS and Linux that lets you create fully customizable control surfaces for your workflows. Organize your setup into profiles and folders, then fill them with interactive widgets such as action buttons, sliders, media controls, weather displays and more.
 

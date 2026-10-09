@@ -273,8 +273,8 @@ export const uiListComponent: UiComponentDefinition<UiListState> = {
       if (!state.pinned) anchor = captureAnchor(element, state.jump);
     }
 
-    const padding = nodePaddingPx(node, ctx.basis, ctx.crossExtent);
-    const gap = nodeGapPx(node, ctx.basis, ctx.crossExtent);
+    const padding = nodePaddingPx(node, ctx);
+    const gap = nodeGapPx(node, ctx);
 
     const horizontal = nodeIsHorizontal(node);
 

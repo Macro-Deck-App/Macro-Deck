@@ -63,6 +63,63 @@ The cap unit is `UiLength.Cell` (`120`): one deck cell in the reference space a 
 It is a definition, not a measurement - a reader lays the widget out in that space and scales the result to
 the real cell - so it only has to agree across the wire, never with any device's pixels.
 
+## Relative to the containing box
+
+A fraction of the widget cannot size a part of a widget whose box depends on the widget's shape: a ring in a
+grid of rings, whose stroke, icon and percentage have to scale with the ring. `UiLength.OfParent` is a
+fraction of the **containing box** instead - the smaller side of the box the node's parent lays it out
+within.
+
+```csharp
+new UiGrid
+{
+    Key = "rings",
+    Columns = 4,                              // what a reader that cannot choose draws
+    MinCellSize = UiLength.OfBasis(0.25),     // the reader chooses the columns
+    Children = devices.Select(device => new UiLayer
+    {
+        Key = $"ring.{device.Id}",
+        Children =
+        [
+            new UiGauge { Key = $"gauge.{device.Id}", Level = device.Level, Thickness = UiLength.OfParent(0.085, 0.01) },
+            new UiIcon { Key = $"icon.{device.Id}", Icon = "battery", Size = UiLength.OfParent(0.3, 0.05) },
+            new UiTextRun { Key = $"percent.{device.Id}", Text = $"{device.Percent} %", Size = UiLength.OfParent(0.18, 0.03) },
+        ],
+    }).ToArray(),
+}
+```
+
+One tree draws the same rings at any widget size and shape, each device once: the plugin never learns the
+size, and a resize costs no round-trip.
+
+The containing box is, per parent:
+
+| Parent | Containing box of its child |
+|---|---|
+| Grid | The cells the child spans, with the gaps between them |
+| Layer, transform, responsive, first fit | The parent's own box |
+| Stack | The stack's content box: its box minus its padding |
+| Modifier | The modifier's frame box minus its padding |
+| List | None - the scroll axis is open |
+
+A length is `ParentFraction x min(width, height)` of that box in place of the `Basis` term, and
+`MaxOfCross` and `MaxOfCell` still clamp the result. At the root of a view, a missing box counts as the
+basis square.
+
+**When the box is not definite.** Both sides of the containing box must be known. A child of a stack that
+has neither `MainSize` nor `Fill` sits in an open main extent, so its children have no definite box; the
+same goes for a list's children, and a grid under such a child. There the length resolves from `Basis`
+against the widget instead, in measuring and in drawing alike. Give the node `MainSize` or `Fill` when a
+length relative to its box is to work inside it.
+
+**What older readers draw.** A reader that does not know `ofParent` ignores it and resolves `Basis` against
+the widget, so pass the value that reads acceptably there as the second argument of
+`UiLength.OfParent(fraction, fallbackBasis)`. The one-argument form uses the fraction itself, which on a part
+of a small cell is far too large. There is no way to ask a reader whether it knows the member; for a real
+older-reader picture, give the node a `Fallback` with a component version, as
+[stack overflow](/ui/components/stack-and-layer/) does. When a helper copies a length, use `with` rather than
+rebuilding it member by member, or the member is dropped.
+
 ## Sharing a row: `Fill` and `MainSize`
 
 ```csharp
@@ -132,6 +189,7 @@ switches when the box changes. To choose by what the text needs rather than by t
 | `0.2` / `UiSize.FromBasis(0.2)` / `UiLength.OfBasis(0.2)` | `0.2 x basis` |
 | `UiSize.FromBasis(0.2, 0.5)` | `min(0.2 x basis, 0.5 x containing stack's cross extent)` |
 | `UiSize.Capped(0.2, 20)` | `min(0.2 x basis, 20 reference units)` - `MaxOfCell = 20 / UiLength.Cell` |
+| `UiLength.OfParent(0.1, 0.01)` / `UiSize.FromParent(0.1, 0.01)` | `0.1 x` the smaller side of the containing box; `0.01 x basis` where that box is not definite or the reader does not know the member |
 | `UiSize.From(() => ...)` / `UiSize.Optional(...)` | computed each evaluation / may be absent |
 
 | Property | On | Meaning |
@@ -147,6 +205,8 @@ Reader rules:
 
 - A reader that cannot determine the containing stack's cross extent ignores `MaxOfCross` rather than
   guessing.
+- A reader that cannot determine a definite containing box, or whose parent is a list, resolves `ParentFraction`
+  from `Basis` against the widget, and does so in measuring as well as in drawing.
 - `MaxOfCell` only means something where a deck cell grid exists. A reader laying a view out on anything
   else - a folder view, a browser window, a dialog - ignores it.
 - `MainSize` and `Fill` mean nothing on a [layer](/ui/components/stack-and-layer/)'s children: each gets the

@@ -31,6 +31,13 @@
     <!-- Transitive pin: Microsoft.EntityFrameworkCore.Sqlite still floors this at a version vulnerable to GHSA-2m69-gcr7-jv3q -->
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <!-- Only 4.1.2 is patched and 4 needs a build license key. Histogram equalization and TIFF encoding are unused and TIFF -->
+    <!-- decoding is disabled (ImageSharpDecoding); the ICC CLUT advisory stays open until the move to 4. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-gwg2-r3hj-4w44" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j3p4-wp97-rph4" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-j9gm-c75j-xc9q" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-jjfr-hcj7-qf5w" />
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-wmxv-xphr-5c9g" />
     <PackageVersion Include="SkiaSharp" Version="3.119.4" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.4" />
     <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="3.119.4" />

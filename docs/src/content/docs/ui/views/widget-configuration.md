@@ -268,9 +268,49 @@ appearance actions to reach them.
   [widget types](/ui/views/widget-types/#standard-appearance)). `All` does not include it, and on its own it
   builds nothing.
 - Colour variables are opt-in too. Add `UiWidgetAppearanceFields.ColorVariables` and every colour field of
-  the section offers the **Color** | **Variable** switch described in
+  the section offers the **Color** | **Variable** tabs described in
   [Offering a colour variable](#offering-a-colour-variable). `All` does not include it, and on its own it
   builds nothing.
+
+## How a colour input looks
+
+The desktop editor draws a `UiColorInput` as one compact field: a swatch with the value next to it (the hex
+code, the variable's name, **Transparent**, or **Not set**). Selecting it opens a popover with a colour
+picker (saturation and brightness, hue, an opacity slider where the value may be translucent, hex input)
+and the user's colour palette: Macro Deck's default colours until the user changes them in **Settings >
+Appearance**, plus whatever they add with **+**. The palette is shared by every colour field in Macro
+Deck, your plugin's included, and may even be empty. A field that cannot store opacity only offers the
+palette colours that are fully opaque. With `SupportsReset` the reset control sits at the right of the
+field's caption, or next to the field when `HideLabel` is set. `Disabled` greys the field out and keeps
+the popover closed.
+
+Nothing of this changes the value your binding receives. The palette lives in the user's settings, not in
+your tree, so there is nothing to declare for it.
+
+To put a colour and the number that belongs to it on one line, as the Action Button does for its label
+outline and its width, use a horizontal stack that does not wrap and hide the number's caption. Its
+control then lines up with the colour field:
+
+```csharp
+new UiConfigStack
+{
+    Key = "outline-row",
+    Direction = "horizontal",
+    Wrap = false,
+    Children =
+    [
+        new UiColorInput { Key = "outlineColor", Label = Strings.Outline(), Binding = Bind.To(color), RowWeight = 2 },
+        new UiNumberInput
+        {
+            Key = "outlineWidth",
+            Label = Strings.OutlineWidth(), // still the accessible name
+            HideLabel = true,
+            Binding = Bind.To(width),
+            RowWeight = 1,
+        },
+    ],
+}
+```
 
 ## Offering a transparent colour
 
@@ -286,8 +326,8 @@ new UiColorInput
 }
 ```
 
-`AllowTransparent` puts a **Transparent** swatch after the picker's colours. Choosing it stores the literal
-`transparent` instead of a `#rrggbb` value. Set it only for a value your widget knows how to read: a stack or
+`AllowTransparent` puts a **Transparent** swatch in the picker's popover, ahead of the user's palette.
+Choosing it stores the literal `transparent` instead of a `#rrggbb` value. Set it only for a value your widget knows how to read: a stack or
 button `background` accepts it, a modifier's does not. Without the flag, or on a Macro Deck release that
 does not know it, the picker offers colours only and the node is serialised exactly as before.
 
@@ -298,8 +338,8 @@ new UiColorInput { Key = "accentColor", Binding = Bind.To(accent), AllowVariable
 new UiThresholdsInput { Key = "thresholds", Binding = Bind.To(thresholds), AllowVariables = true }
 ```
 
-`AllowVariables` adds a **Color** | **Variable** switch to the picker, or to each band's colour, so the user
-can follow a [Color variable](/features/variables/#color-variables) with modifiers instead of a fixed colour.
+`AllowVariables` adds **Color** | **Variable** tabs to the picker's popover, or to each band's colour, so the
+user can follow a [Color variable](/features/variables/#color-variables) with modifiers instead of a fixed colour.
 The stored value is then a reference string, not a colour:
 
 ```text
