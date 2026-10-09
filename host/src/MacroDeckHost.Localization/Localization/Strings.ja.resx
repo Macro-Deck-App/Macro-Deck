@@ -3902,6 +3902,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>外観を追加</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>カスタム外観…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>外観を追加できませんでした。</value>
   </data>
@@ -3915,6 +3918,27 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>さらに {count} 件の外観</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>画像を選択…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>ラテン文字と数字を使用してください。ほかの文字体系の名前にはまだ対応していません。</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>ラテン文字を1文字以上含む名前を入力してください。</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>アウトライン</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>「{label}」と表示されます</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>カスタム外観</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>既定</value>
@@ -3948,6 +3972,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>ライト、静的</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>静的</value>
