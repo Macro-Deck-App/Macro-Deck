@@ -262,7 +262,7 @@
         },
         "appearance": {
           "type": "string",
-          "description": "A pinned appearance of an icon-pack icon: a canonical trait key such as 'colorScheme=dark', or 'default' for the icon's own image. Absent, the appearance is selected automatically."
+          "description": "A pinned appearance of an icon-pack icon: a canonical trait key such as 'colorScheme=dark' or 'variant=outlined', or 'default' for the icon's own image. Absent, the appearance is selected automatically."
         }
       },
       "required": ["type", "reference"]

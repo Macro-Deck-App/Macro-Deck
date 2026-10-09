@@ -131,6 +131,28 @@ internal sealed class IconPackAppearanceFormatTests
 	}
 
 	[Test]
+	public async Task Custom_variant_appearances_survive_an_export_and_restore_next_to_built_in_ones()
+	{
+		var source = await _harness.CreatePack("Material");
+		var home = await _harness.AddReadyIcon(source.Id, "home", Bytes("home"));
+		await _harness.AddReadyAppearance(home, "variant=outlined", Bytes("home-outlined"));
+		await _harness.AddReadyAppearance(home, "variant=duoTone", Bytes("home-duo"));
+		await _harness.AddReadyAppearance(home, "colorScheme=dark", Bytes("home-dark"));
+		var archive = await Export(source.Id);
+
+		var result = await _harness.RestoreService.RestoreAsNewPack("Material.macroDeckIconPack",
+			new MemoryStream(archive),
+			CancellationToken.None);
+
+		var icon = _harness.Cache.GetIconsByPackId(result.Data!.Id).Single();
+		var keys = _harness.Cache.GetAppearances(icon.Id)
+			.Select(appearance => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!))
+			.Order(StringComparer.Ordinal)
+			.ToList();
+		Assert.That(keys, Is.EqualTo(new[] { "colorScheme=dark", "variant=duoTone", "variant=outlined" }));
+	}
+
+	[Test]
 	public async Task A_restore_keeps_unknown_traits_and_drops_invalid_repeated_and_excess_appearances()
 	{
 		var parentId = Guid.NewGuid();

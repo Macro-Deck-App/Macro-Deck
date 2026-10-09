@@ -77,7 +77,7 @@
         <shared-button
           class="add"
           variant="secondary"
-          [disabled]="busy() || missingKinds().length === 0"
+          [disabled]="busy()"
           (click)="openAddMenu($event)">
           <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
           {{ 'macrodeck.app:IconPacks.Appearances.Add' | translate }}
@@ -85,7 +85,7 @@
         <shared-button
           class="merge"
           variant="secondary"
-          [disabled]="busy() || missingKinds().length === 0"
+          [disabled]="busy()"
           (click)="openMerge()">
           <span class="icon icon-layers icon-sm" aria-hidden="true"></span>
           {{ 'macrodeck.app:IconPacks.Appearances.Merge' | translate }}
@@ -106,6 +106,44 @@
   [items]="addMenuItems()"
   (itemClick)="onAddMenuAction($event)"
   (closed)="addMenu.set(null)" />
+
+<ng-template #nameField>
+  <label class="field">
+    <span class="field-label">{{ 'macrodeck.app:IconPacks.Appearances.CustomName.Label' | translate }}</span>
+    <shared-input
+      [ngModel]="customName()"
+      (ngModelChange)="customName.set($event)"
+      [placeholder]="'macrodeck.app:IconPacks.Appearances.CustomName.Placeholder' | translate"
+      [ariaLabel]="'macrodeck.app:IconPacks.Appearances.CustomName.Label' | translate"
+      [invalid]="customInvalid()"
+      [inputMaxlength]="48"
+      [autofocus]="true" />
+  </label>
+  <p class="hint">{{ 'macrodeck.app:IconPacks.Appearances.CustomName.Hint' | translate }}</p>
+  @if (customInvalid()) {
+    <p class="error" role="alert">{{ 'macrodeck.app:IconPacks.Appearances.CustomName.Invalid' | translate }}</p>
+  } @else if (customPreview(); as preview) {
+    <p class="hint preview">{{ preview }}</p>
+  }
+</ng-template>
+
+@if (naming()) {
+  <shared-modal [heading]="'macrodeck.app:IconPacks.Appearances.CustomName.Title' | translate" size="medium" [showFooter]="false" (close)="naming.set(false)">
+    <div class="merge-form">
+      <ng-container [ngTemplateOutlet]="nameField" />
+      <shared-button-group class="actions">
+        <shared-button variant="secondary" (click)="naming.set(false)">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+        <shared-button
+          class="confirm-name"
+          variant="primary"
+          [disabled]="customKey() === null"
+          (click)="confirmName()">
+          {{ 'macrodeck.app:IconPacks.Appearances.CustomName.Continue' | translate }}
+        </shared-button>
+      </shared-button-group>
+    </div>
+  </shared-modal>
+}
 
 @if (pendingRemoval(); as appearance) {
   <shared-confirmation-modal
@@ -129,6 +167,9 @@
           (ngModelChange)="mergeKey.set($event)"
           name="mergeKind" />
       </label>
+      @if (mergeNeedsName()) {
+        <ng-container [ngTemplateOutlet]="nameField" />
+      }
       <div class="merge-grid">
         @if (mergeCandidates().length === 0) {
           <p class="empty">{{ 'macrodeck.app:IconPacks.NoMatchingIconsHeading' | translate }}</p>
@@ -146,7 +187,7 @@
         <shared-button
           class="confirm-merge"
           variant="primary"
-          [disabled]="busy() || !mergeSourceId() || !mergeKey()"
+          [disabled]="busy() || !mergeSourceId() || !mergeResolvedKey()"
           (click)="confirmMerge()">
           {{ 'macrodeck.app:IconPacks.Appearances.MergeConfirm' | translate }}
         </shared-button>

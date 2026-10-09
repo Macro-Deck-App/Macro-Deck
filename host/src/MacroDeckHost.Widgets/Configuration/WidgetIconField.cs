@@ -128,6 +128,7 @@ internal static class WidgetIconField
 			"colorScheme=light;motion=animated" => AppStrings.IconPacks.Appearances.Kind.LightAnimated(),
 			"colorScheme=dark;motion=static" => AppStrings.IconPacks.Appearances.Kind.DarkStatic(),
 			"colorScheme=dark;motion=animated" => AppStrings.IconPacks.Appearances.Kind.DarkAnimated(),
+			_ when IconAppearanceTraits.TryGetVariantName(key, out var name) => AppStrings.IconPacks.Appearances.Kind.Named(name),
 			_ => AppStrings.IconPacks.Appearances.Kind.Custom(key)
 		};
 }

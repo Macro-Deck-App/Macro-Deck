@@ -3864,6 +3864,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.Appearances.Add" xml:space="preserve">
     <value>Add appearance</value>
   </data>
+  <data name="IconPacks.Appearances.AddCustom" xml:space="preserve">
+    <value>Custom appearance…</value>
+  </data>
   <data name="IconPacks.Appearances.AddFailed" xml:space="preserve">
     <value>The appearance could not be added.</value>
   </data>
@@ -3877,6 +3880,27 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="IconPacks.Appearances.Badge.Other" xml:space="preserve">
     <value>{count} more appearances</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Continue" xml:space="preserve">
+    <value>Choose image…</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Hint" xml:space="preserve">
+    <value>Use Latin letters and digits. Names in other scripts are not supported yet.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Invalid" xml:space="preserve">
+    <value>Enter a name with at least one Latin letter.</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Placeholder" xml:space="preserve">
+    <value>Outlined</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Preview" xml:space="preserve">
+    <value>Shown as “{label}”</value>
+  </data>
+  <data name="IconPacks.Appearances.CustomName.Title" xml:space="preserve">
+    <value>Custom appearance</value>
   </data>
   <data name="IconPacks.Appearances.Default" xml:space="preserve">
     <value>Default</value>
@@ -3910,6 +3934,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="IconPacks.Appearances.Kind.LightStatic" xml:space="preserve">
     <value>Light, static</value>
+  </data>
+  <data name="IconPacks.Appearances.Kind.Named" xml:space="preserve">
+    <value>{name}</value>
   </data>
   <data name="IconPacks.Appearances.Kind.Static" xml:space="preserve">
     <value>Static</value>

@@ -1024,6 +1024,7 @@ public class Startup
 		services.AddSingleton<IHostOptionsSource, DevicesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, WidgetsOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, FontsOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, IconAppearancesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, AdbDevicesOptionsSource>();
 
 		services.AddDbContext<DatabaseContext>();

@@ -27,3 +27,8 @@ public static class AdbOptionsSourceIds
 {
 	public const string Devices = "macrodeck.adb-devices";
 }
+
+public static class IconOptionsSourceIds
+{
+	public const string Appearances = "macrodeck.icon-appearances";
+}

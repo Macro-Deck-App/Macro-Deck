@@ -363,6 +363,13 @@ existing icon from the same pack as an appearance. That icon then disappears fro
 actions that used it switch to the icon it became part of. Appearances of icons in Store and plugin packs come
 with the pack and can't be changed.
 
+Besides these, you can name appearances yourself, for example **Filled**, **Outlined**, **Monochrome** or
+**Red**. In the **Appearances…** dialog choose **Add appearance > Custom appearance…**, type a name and pick
+the image. Macro Deck never switches to a custom appearance by itself: you pick it on a button or slider, or
+with the **Set Icon Appearance** action. Use Latin letters and digits for the name; letters with accents are
+shown without them (Gefüllt becomes Gefullt), and names in other scripts are not supported yet. An icon holds at
+most eight appearances in total.
+
 To always show one appearance on a button or slider, pick it under **Icon appearance** next to the icon.
 **Automatic** goes back to choosing by theme and motion. A flow can switch it with the **Set Icon Appearance**
 action.

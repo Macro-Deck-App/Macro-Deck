@@ -2,6 +2,8 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Actions.Options;
+using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Localization;
 
@@ -30,27 +32,6 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		new() { Value = WidgetActionParameters.Unchanged, Label = AppStrings.Integrations.Widgets.Actions.Unchanged() },
 		new() { Value = "contain", Label = AppStrings.Integrations.Widgets.Actions.IconFitContain() },
 		new() { Value = "cover", Label = AppStrings.Integrations.Widgets.Actions.IconFitCover() }
-	];
-
-	private static readonly IReadOnlyList<ActionParameterOption> _iconAppearances =
-	[
-		new()
-		{
-			Value = WidgetAppearanceValues.Reset,
-			Label = AppStrings.Widgets.Appearance.Icon.AppearanceAutomatic()
-		},
-		new() { Value = WidgetIconReference.DefaultAppearance, Label = AppStrings.IconPacks.Appearances.Default() },
-		new() { Value = "colorScheme=light", Label = AppStrings.IconPacks.Appearances.Kind.Light() },
-		new() { Value = "colorScheme=dark", Label = AppStrings.IconPacks.Appearances.Kind.Dark() },
-		new() { Value = "motion=static", Label = AppStrings.IconPacks.Appearances.Kind.Static() },
-		new() { Value = "motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.Animated() },
-		new() { Value = "colorScheme=light;motion=static", Label = AppStrings.IconPacks.Appearances.Kind.LightStatic() },
-		new()
-		{
-			Value = "colorScheme=light;motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.LightAnimated()
-		},
-		new() { Value = "colorScheme=dark;motion=static", Label = AppStrings.IconPacks.Appearances.Kind.DarkStatic() },
-		new() { Value = "colorScheme=dark;motion=animated", Label = AppStrings.IconPacks.Appearances.Kind.DarkAnimated() }
 	];
 
 	private static readonly IReadOnlyList<ActionParameterOption> _textAlignments =
@@ -197,11 +178,17 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetIconAppearanceDescription(),
 			WidgetAppearanceProperty.IconAppearance,
 			[
-				ActionParameter.Choice("iconAppearance",
-					_iconAppearances,
-					label: AppStrings.Integrations.Widgets.Actions.IconAppearanceLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.IconAppearanceDescription(),
-					defaultValue: WidgetAppearanceValues.Reset)
+				new ActionParameter
+				{
+					Name = "iconAppearance",
+					Type = ActionParameterType.DynamicChoice,
+					OptionsSourceId = IconOptionsSourceIds.Appearances,
+					Options = IconAppearanceOptions.BuiltIn(),
+					Label = AppStrings.Integrations.Widgets.Actions.IconAppearanceLabel(),
+					Description = AppStrings.Integrations.Widgets.Actions.IconAppearanceDescription(),
+					Placeholder = AppStrings.Widgets.Appearance.Icon.AppearanceAutomatic(),
+					DefaultValue = WidgetAppearanceValues.Reset
+				}
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch

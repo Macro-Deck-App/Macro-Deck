@@ -43,6 +43,15 @@ URLs get context parameters, so a plain icon keeps its URL, `v` and ETag, and to
 only icons that can change. The version of an icon with appearances folds in every appearance's hash and
 traits, so replacing one appearance invalidates every cached URL of the icon.
 
+**A user can name appearances of their own.** A custom appearance carries the single trait `variant=<token>`,
+for example `variant=outlined`, and is not matched by any viewer context, so it is only ever shown when a use of
+the icon pins it. The user types a name and the UI reduces it to the token: diacritics folded, words joined in
+camel case, ASCII letters and digits only, at most 32 characters. The label shown is the token spelled out
+again ("Duo tone"), because the name itself is not stored. Names in other scripts are therefore refused for
+now; storing a display label is a persisted-format change and is left to a follow-up. The pin dropdown, the Icon
+Library and the Set Icon Appearance action list the appearances that exist, so a custom one is selectable
+wherever a built-in one is. The limit of eight appearances per icon covers both kinds.
+
 **A use of an icon can pin an appearance.** A widget icon reference may carry `appearance` (a trait set,
 or `default`). Absent means automatic. A pin that no longer matches an appearance falls back to automatic.
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, WIDGET_APPEARANCE_RESET, WIDGET_TARGET_SELF, WidgetBorder, WidgetIconDisplay, WidgetIconRef, iconPackRef, iconPackReferenceOf } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, WIDGET_APPEARANCE_RESET, WIDGET_TARGET_SELF, WidgetBorder, WidgetIconDisplay, WidgetIconRef, iconAppearanceVariantName, iconPackRef, iconPackReferenceOf } from '@macro-deck/runtime';
 import { TranslatePipe } from '@shared';
 import { ActionOptionsService } from '../../../../services/action-options.service';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
@@ -92,6 +92,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
   protected readonly store = inject(ActionFlowStore);
   private readonly options = inject(ActionOptionsService);
   protected readonly supportedProperties = signal<Set<string> | null>(null);
+  private readonly loadedAppearanceOptions = signal<SelectOption[] | null>(null);
   protected readonly resetValue = WIDGET_APPEARANCE_RESET;
   private capabilityRequest = 0;
 
@@ -115,7 +116,11 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
   }
 
   protected get iconAppearanceOptions(): SelectOption[] {
-    return (this.parameter('iconAppearance')?.options ?? []).map(option => ({ value: `${option.value}`, label: option.label }));
+    const options = this.loadedAppearanceOptions()
+      ?? (this.parameter('iconAppearance')?.options ?? []).map(option => ({ value: `${option.value}`, label: option.label }));
+    const current = this.stringValue('iconAppearance');
+    if (current === '' || options.some(option => option.value === current)) return options;
+    return [{ value: current, label: iconAppearanceVariantName(current) ?? current }, ...options];
   }
 
   protected get framingReset(): boolean {
@@ -124,6 +129,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
 
   ngOnInit(): void {
     void this.resolveCapabilities();
+    if (this.kind === 'iconAppearance') void this.loadAppearanceOptions();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -203,6 +209,13 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
 
   protected parameter(name: string): ActionBlockParameter | undefined {
     return this.block.parameters?.find(parameter => parameter.name === name);
+  }
+
+  private async loadAppearanceOptions(): Promise<void> {
+    const response = await this.options.loadLabeledOptions({
+      integrationId: 'app.macro-deck.widget', actionId: this.block.actionId ?? '', parameterName: 'iconAppearance',
+    });
+    this.loadedAppearanceOptions.set(response.error ? null : response.options.map(({ value, label }) => ({ value, label })));
   }
 
   private async resolveCapabilities(): Promise<void> {
