@@ -60,7 +60,7 @@ function isExternalUrl(url: string): boolean {
           [class.config-chrome-stack-nowrap]="!wrap()"
           [class.config-chrome-stack-captioned]="!wrap() && hasCaptionedInput()">
           @for (child of children(); track child.id) {
-            <shared-ui-node [node]="child" [style.flex]="childFlex(child)" />
+            <shared-ui-node [node]="child" [style.flex]="childFlex(child)" [weighted]="direction() === 'horizontal' && childFlex(child) !== null" />
           }
         </div>
       }

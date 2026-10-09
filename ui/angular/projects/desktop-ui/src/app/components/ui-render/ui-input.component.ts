@@ -86,6 +86,7 @@ const HOST_RESOLVED_OPTION_SOURCES: readonly string[] = ['macrodeck.fonts'];
 })
 export class UiInputComponent {
   readonly node = input.required<UiNode>();
+  readonly weighted = input(false);
 
   protected readonly types = Primitives;
   protected readonly context = inject(UiRenderContext);

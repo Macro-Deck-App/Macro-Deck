@@ -183,6 +183,7 @@
             [options]="segmentedOptions()"
             [value]="stringValue()"
             [ariaLabel]="label() ?? ''"
+            [stretch]="weighted()"
             (valueChange)="onChange($event)" />
         } @else if (fontPreview()) {
           <shared-combobox

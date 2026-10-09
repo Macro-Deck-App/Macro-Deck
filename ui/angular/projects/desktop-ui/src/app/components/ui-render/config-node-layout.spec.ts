@@ -127,6 +127,70 @@ describe('shared-ui-node layout capabilities', () => {
     });
   });
 
+  describe('a segmented choice sharing a one-line row', () => {
+    function segmentedChoice(id: string, rowWeight?: number): UiNode {
+      return {
+        id,
+        type: 'choice',
+        properties: {
+          label: id,
+          segmented: true,
+          value: 'a',
+          ...(rowWeight === undefined ? {} : { rowWeight }),
+          options: [
+            { value: 'a', label: 'A', icon: 'align-left' },
+            { value: 'b', label: 'B', icon: 'align-center' },
+            { value: 'c', label: 'C', icon: 'align-right' },
+          ],
+        },
+      };
+    }
+
+    async function renderAtWidth(root: UiNode): Promise<HTMLElement> {
+      const rendered = await renderTree(root);
+      const host = el(rendered);
+      host.style.display = 'block';
+      host.style.width = '400px';
+      await tick(rendered);
+      return host;
+    }
+
+    function rect(host: HTMLElement, selector: string): DOMRect {
+      return (host.querySelector(selector) as HTMLElement).getBoundingClientRect();
+    }
+
+    it('fills its weighted share of the row, so neighbouring controls sit one row gap apart', async () => {
+      const host = await renderAtWidth({
+        id: 'row',
+        type: 'stack',
+        properties: { direction: 'horizontal', wrap: false },
+        children: [segmentedChoice('align', 1), segmentedChoice('position', 1)],
+      });
+
+      for (const id of ['align', 'position']) {
+        const column = rect(host, `[data-node-id="${id}"]`);
+        const control = rect(host, `[data-node-id="${id}"] shared-segmented-control`);
+        expect(Math.abs(control.left - column.left)).toBeLessThan(1);
+        expect(Math.abs(control.right - column.right)).toBeLessThan(1);
+      }
+      const row = rect(host, '.config-chrome-stack');
+      expect(Math.abs(rect(host, '[data-node-id="position"] shared-segmented-control').right - row.right))
+        .toBeLessThan(1);
+    });
+
+    it('keeps its own width in a non-wrapping vertical stack even when it declares a weight', async () => {
+      const host = await renderAtWidth({
+        id: 'column',
+        type: 'stack',
+        properties: { wrap: false },
+        children: [segmentedChoice('align', 1)],
+      });
+
+      expect(rect(host, '[data-node-id="align"] shared-segmented-control').width)
+        .toBeLessThan(rect(host, '.config-chrome-stack').width / 2);
+    });
+  });
+
   describe('a label-suppressed input', () => {
     it('renders its control with no visible caption while staying accessible through a named group', async () => {
       const root: UiNode = {
