@@ -36,8 +36,9 @@ connections** shows **Ready on port …**.
 
 ## Connect the app
 
-Open the Macro Deck app on the phone. It finds Macro Deck through the cable by itself. Sign in with
-your Macro Deck account, just like over Wi-Fi.
+Open the Macro Deck app on the phone. It finds Macro Deck through the cable by itself. Sign in with the
+pairing code from Macro Deck's network panel or with your Macro Deck account, just like over Wi-Fi; see
+[Sign in](/guide/companion-app/setup/#sign-in).
 
 ## Use the web client instead
 
