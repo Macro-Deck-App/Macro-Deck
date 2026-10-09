@@ -5,6 +5,35 @@ import mermaid from 'astro-mermaid';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
+import { copyFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+// Starlight's bundled sitemap integration only writes sitemap-index.xml, but crawlers
+// look for /sitemap.xml, so serve the same index there. Its hook must run after the
+// sitemap one, and Starlight appends that integration at its own setup, so this one
+// registers itself from a later config:setup to land behind it.
+const sitemapXmlAlias = {
+	name: 'sitemap-xml-alias',
+	hooks: {
+		'astro:config:setup': ({ updateConfig }) => {
+			updateConfig({
+				integrations: [
+					{
+						name: 'sitemap-xml-alias-writer',
+						hooks: {
+							'astro:build:done': async ({ dir }) => {
+								await copyFile(
+									fileURLToPath(new URL('sitemap-index.xml', dir)),
+									fileURLToPath(new URL('sitemap.xml', dir)),
+								);
+							},
+						},
+					},
+				],
+			});
+		},
+	},
+};
 
 // Where this documentation and the code it describes actually live. Used for
 // "Edit this page" and for every link into a source file.
@@ -312,5 +341,6 @@ export default defineConfig({
 				),
 			],
 		}),
+		sitemapXmlAlias,
 	],
 });
