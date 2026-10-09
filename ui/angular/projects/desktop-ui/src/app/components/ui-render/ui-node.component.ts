@@ -64,7 +64,7 @@ const RENDER_CAPABILITIES: Readonly<Record<string, UiComponentRange>> = Object.f
       } @else if (isChrome()) {
         <shared-ui-chrome [node]="resolvedNode()!" />
       } @else {
-        <shared-ui-input [node]="resolvedNode()!" />
+        <shared-ui-input [node]="resolvedNode()!" [weighted]="weighted()" />
       }
     }
   `,
@@ -74,6 +74,7 @@ export class UiNodeComponent {
   readonly node = input.required<UiNode>();
   readonly box = input<UiComponentBox | null>(null);
   readonly crossExtent = input<number | null>(null);
+  readonly weighted = input(false);
 
   protected readonly context = inject(UiRenderContext);
 
