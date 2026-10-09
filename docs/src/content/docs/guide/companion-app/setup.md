@@ -57,11 +57,25 @@ shows a **USB connection** row by itself. See [Connect over USB](/guide/usb-conn
 
 ## Sign in
 
-A computer added by address or from the network asks you to sign in with the account you created in
-Macro Deck on the computer. Turn on **Stay signed in** so the app does not ask again. If you forgot the
-password, reset it on the computer under **Settings > Security**.
+A computer added by address or from the network asks you to sign in. The sign-in form opens on
+**Pairing code**:
 
-![The sign-in sheet in the Android app](../../../../assets/guide/companion/android-sign-in.png)
+1. In Macro Deck on the computer, open the network panel with the network icon at the top right. It shows
+   the pairing code next to the QR code.
+2. Type the six digits into the boxes. The app signs in as soon as the sixth digit is in; **Sign in** is
+   there for another try. Pasting the code, or the code your keyboard suggests, works too.
+
+A code is valid for 15 minutes and works once. If the app says **That code is wrong or has expired**, check
+the code in the network panel and type it again. After five wrong codes Macro Deck stops accepting codes for
+a while and shows a new one; the app says **Too many failed attempts**, so wait a moment before trying again.
+
+To sign in with your account instead, choose **Password** and enter the user name and password you created in
+Macro Deck on the computer. If you forgot the password, reset it on the computer under
+**Settings > Security**.
+
+![The sign-in sheet in the Android app, with the pairing code boxes and the hint where to find the code](../../../../assets/guide/companion/android-sign-in.png)
+
+![The sign-in sheet on iPhone, with the choice between Pairing Code and Password](../../../../assets/guide/companion/ios-sign-in.png)
 
 A device signed out in Macro Deck under **Settings > Devices** shows **Sign in again**.
 
