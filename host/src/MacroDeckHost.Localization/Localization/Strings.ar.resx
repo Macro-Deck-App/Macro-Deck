@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>نسيت كلمة المرور؟ أعد تعيينها على الكمبيوتر الذي يعمل عليه Macro Deck، من الإعدادات &gt; الأمان.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>رمز الإقران</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>على الكمبيوتر الذي يعمل عليه Macro Deck، افتح لوحة «الشبكة» من أيقونة Wi-Fi وأدخل رمز الإقران المعروض فيها.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>الرمز غير صحيح أو انتهت صلاحيته. تحقق من رمز الإقران في لوحة «الشبكة» وحاول مرة أخرى.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>كلمة المرور</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>سجّل الدخول للمتابعة</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>محاولات فاشلة كثيرة جدًا. انتظر قليلًا وحاول مرة أخرى.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>اسم المستخدم</value>

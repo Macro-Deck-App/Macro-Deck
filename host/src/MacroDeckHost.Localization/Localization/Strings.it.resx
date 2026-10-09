@@ -517,6 +517,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Hai dimenticato la password? Reimpostala sul computer su cui è in esecuzione Macro Deck, in Impostazioni &gt; Sicurezza.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Codice di abbinamento</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Sul computer su cui è in esecuzione Macro Deck, apri il pannello Rete con l'icona Wi-Fi in alto a destra e inserisci il codice di abbinamento mostrato lì.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Il codice è errato o scaduto. Controlla il codice di abbinamento nel pannello Rete e riprova.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Password</value>
   </data>
@@ -528,6 +537,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Accedi per continuare</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Troppi tentativi non riusciti. Attendi un momento e riprova.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Nome utente</value>

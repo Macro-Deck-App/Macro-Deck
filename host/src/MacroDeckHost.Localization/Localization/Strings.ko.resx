@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>비밀번호를 잊으셨나요? Macro Deck이 실행 중인 컴퓨터에서 설정 &gt; 보안 메뉴로 이동해 재설정하세요.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>페어링 코드</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Macro Deck이 실행 중인 컴퓨터에서 오른쪽 위의 Wi-Fi 아이콘으로 네트워크 패널을 열고 표시된 페어링 코드를 입력하세요.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>코드가 잘못되었거나 만료되었습니다. 네트워크 패널에서 페어링 코드를 확인한 후 다시 시도하세요.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>비밀번호</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>계속하려면 로그인하세요</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>실패한 시도가 너무 많습니다. 잠시 후 다시 시도하세요.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>사용자 이름</value>

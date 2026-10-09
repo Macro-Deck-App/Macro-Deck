@@ -517,6 +517,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Zapomenuté heslo? Lze ho obnovit na počítači, na kterém běží Macro Deck, v Nastavení &gt; Zabezpečení.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Párovací kód</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Na počítači, na kterém běží Macro Deck, otevřete ikonou Wi-Fi vpravo nahoře panel Síť a zadejte párovací kód, který se tam zobrazuje.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Kód je nesprávný nebo vypršel. Zkontrolujte párovací kód v panelu Síť a zkuste to znovu.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Heslo</value>
   </data>
@@ -528,6 +537,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Pro pokračování se přihlaste</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Příliš mnoho neúspěšných pokusů. Chvíli počkejte a zkuste to znovu.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Uživatelské jméno</value>

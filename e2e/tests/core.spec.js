@@ -118,9 +118,10 @@ async function loginWebClient(page) {
 // waiting on it carries on while the sign-in is still in flight.
 async function signInWebClient(page) {
   await expect(page.getByText('Sign in to continue')).toBeVisible();
-  await page.getByLabel('Username').fill(USERNAME);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('button', { name: 'Password', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Username' }).fill(USERNAME);
+  await page.locator('input[name="password"]').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.locator('.wc-deck')).toBeVisible();
 }
 
@@ -249,6 +250,24 @@ test.describe('Macro Deck core E2E', () => {
     await page.getByRole('button', { name: 'Sign out' }).click();
 
     await signInWebClient(page);
+
+    assertNoUnexpectedFailures();
+    await context.close();
+  });
+
+  test('@smoke signs into the Web Client with the pairing code the desktop shows', async ({ browser, request }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const assertNoUnexpectedFailures = watchForUnexpectedFailures(page);
+
+    const pairing = await request.get(`${LOOPBACK_URL}/api/auth/pairing-code`, { headers: loopbackHeaders() });
+    expect(pairing.ok()).toBe(true);
+    const { code } = await pairing.json();
+
+    await page.goto(PUBLIC_URL);
+    await expect(page.getByText('Sign in to continue')).toBeVisible();
+    await page.getByRole('textbox', { name: 'Pairing code' }).fill(`${code.slice(0, 3)} ${code.slice(3)}`);
+    await expect(page.locator('.wc-deck')).toBeVisible();
 
     assertNoUnexpectedFailures();
     await context.close();

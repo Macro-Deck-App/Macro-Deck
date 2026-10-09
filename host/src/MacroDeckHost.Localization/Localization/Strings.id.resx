@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Lupa kata sandi? Atur ulang di komputer yang menjalankan Macro Deck, di Pengaturan &gt; Keamanan.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Kode pemasangan</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Di komputer yang menjalankan Macro Deck, buka panel Jaringan melalui ikon Wi-Fi di kanan atas, lalu masukkan kode pemasangan yang ditampilkan di sana.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Kode salah atau sudah kedaluwarsa. Periksa kode pemasangan di panel Jaringan, lalu coba lagi.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Kata sandi</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Masuk untuk melanjutkan</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Terlalu banyak percobaan yang gagal. Tunggu sebentar, lalu coba lagi.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Nama pengguna</value>

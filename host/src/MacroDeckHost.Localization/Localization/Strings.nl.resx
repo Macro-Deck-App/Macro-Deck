@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Wachtwoord vergeten? Stel het opnieuw in op de computer waarop Macro Deck draait, onder Instellingen &gt; Beveiliging.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Koppelcode</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>Open op de computer waarop Macro Deck draait het paneel Netwerk met het wifi-pictogram rechtsboven en voer de koppelcode in die daar staat.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>Die code is onjuist of verlopen. Controleer de koppelcode in het paneel Netwerk en probeer het opnieuw.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Wachtwoord</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Meld je aan om door te gaan</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Te veel mislukte pogingen. Wacht even en probeer het opnieuw.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Gebruikersnaam</value>

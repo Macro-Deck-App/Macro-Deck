@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>忘记密码？请在运行 Macro Deck 的电脑上，前往“设置 &gt; 安全”重置。</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>配对码</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>在运行 Macro Deck 的电脑上，点击右上角的 Wi-Fi 图标打开“网络”面板，然后输入其中显示的配对码。</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>配对码错误或已过期。请检查“网络”面板中的配对码，然后重试。</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>密码</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>登录以继续</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>失败次数过多。请稍候再试。</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>用户名</value>

@@ -516,6 +516,15 @@
   <data name="Auth.ForgotPasswordHint" xml:space="preserve">
     <value>Esqueceu a senha? Redefina-a no computador que executa o Macro Deck, em Configurações &gt; Segurança.</value>
   </data>
+  <data name="Auth.PairingCode" xml:space="preserve">
+    <value>Código de pareamento</value>
+  </data>
+  <data name="Auth.PairingCodeHint" xml:space="preserve">
+    <value>No computador que executa o Macro Deck, abra o painel Rede pelo ícone de Wi-Fi no canto superior direito e digite o código de pareamento mostrado ali.</value>
+  </data>
+  <data name="Auth.PairingCodeInvalid" xml:space="preserve">
+    <value>O código está incorreto ou expirou. Confira o código de pareamento no painel Rede e tente novamente.</value>
+  </data>
   <data name="Auth.Password" xml:space="preserve">
     <value>Senha</value>
   </data>
@@ -527,6 +536,9 @@
   </data>
   <data name="Auth.SignInSubtitle" xml:space="preserve">
     <value>Entre para continuar</value>
+  </data>
+  <data name="Auth.TooManyAttempts" xml:space="preserve">
+    <value>Muitas tentativas sem sucesso. Aguarde um momento e tente novamente.</value>
   </data>
   <data name="Auth.Username" xml:space="preserve">
     <value>Nome de usuário</value>

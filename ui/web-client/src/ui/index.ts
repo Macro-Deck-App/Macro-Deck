@@ -2,6 +2,7 @@ export { createButton, type ButtonHandle, type ButtonOptions, type ButtonVariant
 export { createCheckbox, type CheckboxHandle, type CheckboxOptions } from './checkbox';
 export { createErrorBanner, type ErrorBannerHandle, type ErrorBannerOptions } from './error-banner';
 export { createInput, type InputHandle, type InputOptions, type InputType } from './input';
+export { createOtpInput, type OtpInputHandle, type OtpInputOptions } from './otp-input';
 export {
   createSegmentedControl,
   type SegmentedControlHandle,
