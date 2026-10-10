@@ -156,6 +156,7 @@ plugins use the same contracts through `MacroDeck.Plugin.Hosting`.
 | Configuration flows | `MacroDeck.Sdk.ConfigFlow` |
 | Variables | `MacroDeck.Sdk.Variables` |
 | Events | `MacroDeck.Sdk.Events` |
+| Keyboard keys | `MacroDeck.Sdk.Input` - `KeyCode`, `KeyNames` and `NativeKeys` translate native key codes from a keyboard hook into the key and modifier names of a `KeyboardCombo`, see [Keyboard combos](/features/events/#from-a-native-keyboard-hook) |
 | Profiles and deck navigation | `MacroDeck.Sdk.Profiles`, `MacroDeck.Sdk.Decks` |
 | Widgets | `MacroDeck.Sdk.Widgets` - states addressed by stable id; `WidgetStateSelector` is deprecated, see [migrations](/policies/migrations/) |
 | Music and weather providers | `MacroDeck.Sdk.MusicPlayer`, `MacroDeck.Sdk.Weather` |

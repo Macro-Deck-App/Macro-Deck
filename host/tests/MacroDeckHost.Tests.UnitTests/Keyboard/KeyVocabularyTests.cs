@@ -11,40 +11,6 @@ public class KeyVocabularyTests
 		KeyCode.IntlBackslash
 	];
 
-	[TestCase("-", KeyCode.Minus)]
-	[TestCase("minus", KeyCode.Minus)]
-	[TestCase("[", KeyCode.BracketLeft)]
-	[TestCase("IntlBackslash", KeyCode.IntlBackslash)]
-	[TestCase("Esc", KeyCode.Escape)]
-	[TestCase("7", KeyCode.D7)]
-	[TestCase(" Return ", KeyCode.Enter)]
-	public void Every_spelling_the_editor_or_a_plugin_has_stored_resolves_to_one_key(string name, KeyCode expected)
-	{
-		Assert.That(KeyNames.TryParseKey(name, out var key), Is.True);
-		Assert.That(key, Is.EqualTo(expected));
-	}
-
-	[TestCase("_")]
-	[TestCase("SS")]
-	[TestCase("Ü")]
-	[TestCase("<")]
-	[TestCase("")]
-	public void Characters_that_only_name_a_key_on_one_layout_do_not_resolve(string name)
-		=> Assert.That(KeyNames.TryParseKey(name, out _), Is.False);
-
-	[TestCase("Cmd", KeyModifier.Meta)]
-	[TestCase("Win", KeyModifier.Meta)]
-	[TestCase("Super", KeyModifier.Meta)]
-	[TestCase("Option", KeyModifier.Alt)]
-	[TestCase("AltGr", KeyModifier.Alt)]
-	[TestCase("Control", KeyModifier.Control)]
-	[TestCase("RightCtrl", KeyModifier.RightControl)]
-	public void Modifier_aliases_resolve_to_one_modifier(string name, KeyModifier expected)
-	{
-		Assert.That(KeyNames.TryParseModifier(name, out var modifier), Is.True);
-		Assert.That(modifier, Is.EqualTo(expected));
-	}
-
 	[Test]
 	public void Every_positional_key_has_a_position_on_every_platform()
 	{
@@ -79,6 +45,19 @@ public class KeyVocabularyTests
 		{
 			Assert.That(actualScan, Is.EqualTo(scan));
 			Assert.That(actualMac, Is.EqualTo(macKeyCode));
+		});
+	}
+
+	[Test]
+	public void The_sdk_names_every_position_the_host_presses_by_scan_code()
+	{
+		Assert.Multiple(() =>
+		{
+			foreach (var key in Enum.GetValues<KeyCode>().Where(key => PhysicalKeys.TryGetScanCode(key, out _)))
+			{
+				PhysicalKeys.TryGetScanCode(key, out var scan);
+				Assert.That(NativeKeys.FromLinux(scan), Is.EqualTo(key), key.ToString());
+			}
 		});
 	}
 

@@ -26,7 +26,7 @@ AltGr+8), so a character cannot name a key that every layout has.
   `Semicolon`, `Quote`, `Comma`, `Period`, `Slash`, `Backquote`) and `IntlBackslash` name a physical
   position, spelled like `KeyboardEvent.code`. On macOS the position is the key code WebKit reports, so
   ISO Apple keyboards keep WebKit's naming of key codes 10 and 50.
-- Every older spelling stays accepted through one alias table (`KeyNames` in `MacroDeckHost.Domain`),
+- Every older spelling stays accepted through one alias table (`KeyNames` in `MacroDeck.Sdk.Input`),
   which trigger matching uses as well. Unknown names keep their literal, case-insensitive meaning.
 
 ## Consequences
@@ -47,3 +47,4 @@ AltGr+8), so a character cannot name a key that every layout has.
 
 - [Keyboard combos](../../docs/src/content/docs/features/events.md#keyboard-combos)
 - Issues #1278, #1279, #1280
+- [ADR 0105](0105-the-sdk-translates-native-key-codes-with-guarded-platform-interop.md): plugins reach the same vocabulary from native key codes

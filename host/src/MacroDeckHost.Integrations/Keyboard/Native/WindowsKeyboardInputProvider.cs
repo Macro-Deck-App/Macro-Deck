@@ -142,7 +142,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	private static void Send(IReadOnlyCollection<Input> inputs) => Win32Input.Send(inputs);
 
-	private static bool IsExtendedKey(KeyCode key) => key is
+	internal static bool IsExtendedKey(KeyCode key) => key is
 		KeyCode.Insert
 		or KeyCode.Delete
 		or KeyCode.Home

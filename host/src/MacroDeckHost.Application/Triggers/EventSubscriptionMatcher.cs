@@ -1,7 +1,7 @@
 using System.Text.Json;
 using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Domain.Keyboard;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Input;
 
 namespace MacroDeckHost.Application.Triggers;
 
@@ -145,7 +145,7 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 				}
 
 				var name = property.Value.GetString()!;
-				key = KeyNames.TryParseKey(name, out var code) ? code.ToString() : name.ToUpperInvariant();
+				key = KeyNames.TryParse(name, out var code) ? code.ToString() : name.ToUpperInvariant();
 			}
 			else if (string.Equals(property.Name, "modifiers", StringComparison.OrdinalIgnoreCase))
 			{

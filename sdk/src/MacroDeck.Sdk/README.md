@@ -1,8 +1,8 @@
 # MacroDeck.Sdk
 
 Capability contracts for [Macro Deck](https://github.com/Macro-Deck-App/Macro-Deck) integrations and
-plugins. This package holds the interfaces and records you implement, and nothing else: it has no
-dependency on the host and no runtime of its own.
+plugins. This package holds the interfaces and records you implement, plus the small `MacroDeck.Sdk.Input`
+helpers that read the operating system's active keyboard layout. It has no dependency on the host.
 
 What is in here:
 
@@ -11,6 +11,8 @@ What is in here:
   calendars, virtual profiles, icons and issues.
 - `MacroDeck.Sdk.Identity` - `MacroDeckId` and `QualifiedId`, the id rules every owner and capability
   is validated against.
+- `MacroDeck.Sdk.Input` - `KeyCode`, `KeyNames` and `NativeKeys`, which translate the key codes of a
+  native keyboard hook into the names a `KeyboardCombo` stores.
 
 To build an out-of-process plugin, reference [`MacroDeck.Plugin.Hosting`](https://www.nuget.org/packages/MacroDeck.Plugin.Hosting)
 as well; it brings this package with it.

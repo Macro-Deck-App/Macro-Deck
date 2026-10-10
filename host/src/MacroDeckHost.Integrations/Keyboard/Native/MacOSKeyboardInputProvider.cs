@@ -184,7 +184,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 		return flag != 0;
 	}
 
-	private static bool TryGetKeyCode(MacOsKeyboardLayout layout, KeyCode key, out ushort virtualKey)
+	internal static bool TryGetKeyCode(MacOsKeyboardLayout layout, KeyCode key, out ushort virtualKey)
 	{
 		if (key is >= KeyCode.A and <= KeyCode.Z && layout.TryGetLetterKeyCode(key, out virtualKey))
 		{

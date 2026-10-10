@@ -1,5 +1,9 @@
-namespace MacroDeckHost.Domain.Keyboard;
+namespace MacroDeck.Sdk.Input;
 
+/// <summary>
+/// A keyboard key. Persist and compare keys by name through <see cref="KeyNames" />, never by number: new members
+/// are only ever appended, but the numbers carry no meaning outside one version of this package.
+/// </summary>
 public enum KeyCode
 {
 	None = 0,
