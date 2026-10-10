@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Focus;
 using MacroDeckHost.Integrations.System.Notifications;
+using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;

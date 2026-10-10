@@ -60,3 +60,35 @@ public class DismissAllUserNotificationsRequestMessageHandler
 		return ValueTask.FromResult(response);
 	}
 }
+
+public class MarkUserNotificationReadRequestMessageHandler
+	: IUiTransportMessageHandler<MarkUserNotificationReadRequest, MarkUserNotificationReadResponse>
+{
+	private readonly IUserNotificationStore _store;
+
+	public MarkUserNotificationReadRequestMessageHandler(IUserNotificationStore store)
+	{
+		_store = store;
+	}
+
+	public ValueTask<MarkUserNotificationReadResponse> Handle(
+		MarkUserNotificationReadRequest request,
+		CancellationToken cancellationToken)
+		=> ValueTask.FromResult(new MarkUserNotificationReadResponse { Success = _store.MarkRead(request.Id) });
+}
+
+public class MarkAllUserNotificationsReadRequestMessageHandler
+	: IUiTransportMessageHandler<MarkAllUserNotificationsReadRequest, MarkAllUserNotificationsReadResponse>
+{
+	private readonly IUserNotificationStore _store;
+
+	public MarkAllUserNotificationsReadRequestMessageHandler(IUserNotificationStore store)
+	{
+		_store = store;
+	}
+
+	public ValueTask<MarkAllUserNotificationsReadResponse> Handle(
+		MarkAllUserNotificationsReadRequest request,
+		CancellationToken cancellationToken)
+		=> ValueTask.FromResult(new MarkAllUserNotificationsReadResponse { Success = _store.MarkAllRead() });
+}

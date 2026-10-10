@@ -4,6 +4,7 @@ using MacroDeckHost.Integrations.System.Focus;
 using MacroDeckHost.Integrations.System.Lock;
 using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Notifications;
+using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -22,7 +23,7 @@ public class SystemIntegrationTests
 	[
 		"launch-application", "open-website", "open-file", "open-folder", "kill-application",
 		"increase-volume", "decrease-volume", "mute-volume", "set-volume",
-		"send-notification", "run-command",
+		"send-notification", "show-notification", "run-command",
 		"lock-computer", "sleep", "hibernate", "restart", "shut-down"
 	];
 

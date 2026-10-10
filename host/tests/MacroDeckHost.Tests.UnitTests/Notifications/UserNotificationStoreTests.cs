@@ -499,4 +499,79 @@ public class UserNotificationStoreTests
 
 		Assert.That(store.RaiseIfAbsent(Draft("straggler", dedupeKey: "key-1")), Is.Null);
 	}
+
+	[Test]
+	public void A_new_entry_is_unread_and_can_be_marked_read_singly_or_all_at_once()
+	{
+		var store = new UserNotificationStore(10);
+		var first = store.Raise(Draft("first"))!;
+		var second = store.Raise(Draft("second"))!;
+		var third = store.Raise(Draft("third"))!;
+
+		var markedOne = store.MarkRead(first.Id);
+		var markedAgain = store.MarkRead(first.Id);
+		var markedAll = store.MarkAllRead();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Read, Is.False);
+			Assert.That(markedOne, Is.True);
+			Assert.That(markedAgain, Is.False);
+			Assert.That(markedAll, Is.True);
+			Assert.That(store.Snapshot().All(entry => entry.Read), Is.True);
+			Assert.That(store.MarkAllRead(), Is.False);
+			Assert.That(new[] { second.Id, third.Id }.All(id => store.Snapshot().Any(entry => entry.Id == id)), Is.True);
+		});
+	}
+
+	[Test]
+	public void An_entry_replaced_under_its_key_is_unread_again()
+	{
+		var store = new UserNotificationStore(10);
+		var original = store.Raise(Draft("update available", dedupeKey: "update"))!;
+		store.MarkRead(original.Id);
+
+		var replaced = store.Raise(Draft("update downloaded", dedupeKey: "update"))!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(replaced.Id, Is.EqualTo(original.Id));
+			Assert.That(replaced.Read, Is.False);
+		});
+	}
+
+	[Test]
+	public void A_draft_can_carry_the_id_of_the_popup_it_belongs_to()
+	{
+		var store = new UserNotificationStore(10);
+
+		var entry = store.Raise(Draft("from a popup") with { Id = "popup-1", SourceCategory = NotificationSourceCategory.Plugin })!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(entry.Id, Is.EqualTo("popup-1"));
+			Assert.That(entry.SourceCategory, Is.EqualTo(NotificationSourceCategory.Plugin));
+		});
+	}
+
+	[Test]
+	public void Over_capacity_the_oldest_read_entry_goes_first_and_a_running_entry_is_kept()
+	{
+		var store = new UserNotificationStore(3);
+		var running = store.Raise(DraftWithProgress("importing", "import", new UserNotificationProgress(1, 10)))!;
+		var read = store.Raise(Draft("read already"))!;
+		var unread = store.Raise(Draft("still unread"))!;
+		store.MarkRead(read.Id);
+
+		store.Raise(Draft("newest"));
+
+		var ids = store.Snapshot().Select(entry => entry.Id).ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(ids, Does.Contain(running.Id));
+			Assert.That(ids, Does.Contain(unread.Id));
+			Assert.That(ids, Does.Not.Contain(read.Id));
+			Assert.That(ids, Has.Count.EqualTo(3));
+		});
+	}
 }

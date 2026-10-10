@@ -86,7 +86,8 @@ internal static class HostInvokeDispatcher
 				HostApis.Scripts => await ScriptsAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Widgets => await WidgetsAsync(context, payload, negotiatedVersion, cancellationToken)
 					.ConfigureAwait(false),
-				HostApis.Notifications => Notifications(context, payload),
+				HostApis.Notifications => await NotificationsAsync(context, payload, cancellationToken)
+					.ConfigureAwait(false),
 				HostApis.ActionInteractions => ActionInteractions(interactions, payload),
 				HostApis.Devices => await DevicesAsync(context, payload, cancellationToken)
 					.ConfigureAwait(false),
@@ -945,16 +946,51 @@ internal static class HostInvokeDispatcher
 			IconAppearance = dto.IconAppearance
 		};
 
-	private static HostInvokeOutcome Notifications(FakeIntegrationContext context, HostInvokePayload payload)
+	private static async Task<HostInvokeOutcome> NotificationsAsync(FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
 	{
-		if (string.Equals(payload.Operation, HostOperations.Notifications.Notify, StringComparison.Ordinal))
+		switch (payload.Operation)
 		{
-			context.Notifications.Notify(Require<Sdk.Notifications.UserNotificationRequest>(payload));
-		}
-		else
-		{
-			var arguments = Require<NotificationsDismissArguments>(payload);
-			context.Notifications.Dismiss(arguments.Key);
+			case HostOperations.Notifications.Notify:
+				context.Notifications.Notify(Require<Sdk.Notifications.UserNotificationRequest>(payload));
+				break;
+
+			case HostOperations.Notifications.Dismiss:
+				context.Notifications.Dismiss(Require<NotificationsDismissArguments>(payload).Key);
+				break;
+
+			case HostOperations.Notifications.Show:
+			{
+				var handle = await context.NotificationService
+					.ShowAsync(NotificationsWireMapper.ToOptions(Require<NotificationsShowArguments>(payload)),
+						cancellationToken)
+					.ConfigureAwait(false);
+				return HostInvokeOutcome.Ok(new NotificationsShowResult { Id = handle.Id });
+			}
+
+			case HostOperations.Notifications.Update:
+			{
+				var arguments = Require<NotificationsUpdateArguments>(payload);
+				var handle = context.NotificationService.Shown.FirstOrDefault(n => n.Id == arguments.Id && n.IsOpen);
+				if (handle is null)
+				{
+					return HostInvokeOutcome.Failed(ProtocolErrorCodes.CorrelationUnknown,
+						"The notification is not open.");
+				}
+
+				await handle.UpdateAsync(NotificationsWireMapper.ToUpdate(arguments), cancellationToken)
+					.ConfigureAwait(false);
+				break;
+			}
+
+			default:
+			{
+				var arguments = Require<NotificationsCloseArguments>(payload);
+				context.NotificationService.Shown.FirstOrDefault(n => n.Id == arguments.Id)?.Close(
+					Sdk.Notifications.NotificationCloseReason.Programmatic);
+				break;
+			}
 		}
 
 		return HostInvokeOutcome.Ok((JsonElement?)null);

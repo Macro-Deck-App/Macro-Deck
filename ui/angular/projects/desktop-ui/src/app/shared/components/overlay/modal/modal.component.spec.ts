@@ -40,6 +40,27 @@ describe('ModalComponent closing animation', () => {
     expect(closeSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('closes on an overlay click unless closeOnOverlayClick is turned off', () => {
+    spyOn(component, 'isWithinOpenGrace').and.returnValue(false);
+    const closeSpy = jasmine.createSpy('close');
+    component.close.subscribe(closeSpy);
+    const pressOverlay = () => {
+      overlay().dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      overlay().click();
+      jasmine.clock().tick(150);
+    };
+
+    fixture.componentRef.setInput('closeOnOverlayClick', false);
+    fixture.detectChanges();
+    pressOverlay();
+    expect(closeSpy).not.toHaveBeenCalled();
+
+    fixture.componentRef.setInput('closeOnOverlayClick', true);
+    fixture.detectChanges();
+    pressOverlay();
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('dismiss() plays the exit animation, then runs the action without emitting close', () => {
     const closeSpy = jasmine.createSpy('close');
     const action = jasmine.createSpy('action');

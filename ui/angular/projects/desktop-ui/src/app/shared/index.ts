@@ -43,6 +43,7 @@ export { LoginFormComponent } from './components/auth/login-form/login-form.comp
 export { ButtonGroupComponent } from './components/button/button-group.component';
 export { ButtonComponent } from './components/button/button.component';
 export { ErrorBannerComponent } from './components/feedback/error-banner/error-banner.component';
+export { NotificationDialogHostComponent } from './components/feedback/notification-dialog-host/notification-dialog-host.component';
 export { ToastHostComponent } from './components/feedback/toast-host/toast-host.component';
 export { FolderViewHostComponent } from './components/folder-view/folder-view-host.component';
 export { CheckboxComponent } from './components/forms/checkbox/checkbox.component';

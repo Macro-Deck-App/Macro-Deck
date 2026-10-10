@@ -173,6 +173,7 @@ export default defineConfig({
 										{ label: 'Folder views', link: '/ui/views/folder-views/' },
 										{ label: 'Screensavers', link: '/ui/views/screensavers/' },
 										'features/integration-issues',
+										'features/notifications',
 										'features/settings-migrations',
 										'features/localization',
 										{ label: 'Logging', slug: 'features/logging' },

@@ -7,6 +7,7 @@ import {
   UserNotificationAction,
   UserNotificationActionKind,
   UserNotificationSeverity,
+  UserNotificationSourceCategory,
 } from '@macro-deck/runtime';
 import {
   ButtonComponent,
@@ -16,14 +17,22 @@ import {
 
 const SEVERITY_ICON: Record<UserNotificationSeverity, string> = {
   Info: 'icon-info',
+  Success: 'icon-check',
   Warning: 'icon-alert-triangle',
   Error: 'icon-alert-triangle',
 };
 
 const SEVERITY_CLASS: Record<UserNotificationSeverity, string> = {
   Info: 'issue-badge-info',
+  Success: 'issue-badge-success',
   Warning: 'issue-badge-warning',
   Error: 'issue-badge-error',
+};
+
+const SOURCE_CATEGORY_LABEL: Record<UserNotificationSourceCategory, string> = {
+  System: AppStrings.Feedback.Notification.Source.System,
+  BuiltInIntegration: AppStrings.Feedback.Notification.Source.BuiltInIntegration,
+  Plugin: AppStrings.Feedback.Notification.Source.Plugin,
 };
 
 const ACTION_LABEL: Record<Exclude<UserNotificationActionKind, 'None'>, string> = {
@@ -63,6 +72,7 @@ export class NotificationItemComponent {
 
   @Output() action = new EventEmitter<NotificationActionEvent>();
   @Output() dismissed = new EventEmitter<string>();
+  @Output() markRead = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<UserNotification>();
 
   protected get severityIcon(): string {
@@ -71,6 +81,20 @@ export class NotificationItemComponent {
 
   protected get severityClass(): string {
     return SEVERITY_CLASS[this.notification.severity];
+  }
+
+  protected get isUnread(): boolean {
+    return this.notification.read === false;
+  }
+
+  protected get sourceCategoryLabel(): string | null {
+    const category = this.notification.sourceCategory;
+    return category ? this.localization.translateKey(SOURCE_CATEGORY_LABEL[category] ?? SOURCE_CATEGORY_LABEL.Plugin) : null;
+  }
+
+  protected get sourceName(): string | null {
+    const { sourceCategory, sourceName } = this.notification;
+    return sourceCategory && sourceCategory !== 'System' && sourceName ? sourceName : null;
   }
 
   protected get actionList(): UserNotificationAction[] {
@@ -123,6 +147,11 @@ export class NotificationItemComponent {
   onDismiss(event: MouseEvent): void {
     event.stopPropagation();
     this.dismissed.emit(this.notification.id);
+  }
+
+  onMarkRead(event: MouseEvent): void {
+    event.stopPropagation();
+    this.markRead.emit(this.notification.id);
   }
 
   onCancel(event: MouseEvent): void {

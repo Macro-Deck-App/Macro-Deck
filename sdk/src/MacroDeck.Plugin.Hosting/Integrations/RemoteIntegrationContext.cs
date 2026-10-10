@@ -32,7 +32,8 @@ internal sealed class RemoteIntegrationContext(
 	RemoteUserNotifier notifications,
 	RemoteMessageChannel messages,
 	RemoteUiResourceRegistry uiResources,
-	RemoteColorApi colors) : IIntegrationContext
+	RemoteColorApi colors,
+	RemoteNotificationService notificationService) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -55,4 +56,6 @@ internal sealed class RemoteIntegrationContext(
 	public IUiResourceRegistry UiResources { get; } = uiResources;
 
 	public IColorApi Colors { get; } = colors.Lifecycle;
+
+	public INotificationService NotificationService { get; } = notificationService;
 }

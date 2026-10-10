@@ -142,6 +142,8 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 
 	public List<UiModalResultArguments> ModalResults { get; } = [];
 
+	public List<UiNotificationResultArguments> NotificationResults { get; } = [];
+
 	/// <summary>Answers a snapshot request, typically by pushing raw bytes back through the link.</summary>
 	public Func<string, Task>? OnSnapshotRequested { get; set; }
 
@@ -230,6 +232,17 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 				if (arguments is not null)
 				{
 					ModalResults.Add(arguments);
+				}
+
+				return CapabilityInvocationResult.Ok();
+			}
+
+			case CapabilityOperations.Ui.NotificationResult:
+			{
+				var arguments = Read<UiNotificationResultArguments>(invocation);
+				if (arguments is not null)
+				{
+					NotificationResults.Add(arguments);
 				}
 
 				return CapabilityInvocationResult.Ok();

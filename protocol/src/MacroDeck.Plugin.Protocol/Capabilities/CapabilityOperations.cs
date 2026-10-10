@@ -229,8 +229,16 @@ public static class CapabilityOperations
 		/// </summary>
 		public const string ModalResult = "modal.result";
 
+		/// <summary>
+		/// Delivers how a notification the plugin showed through
+		/// <c>HostOperations.Notifications.Show</c> ended. Host-to-plugin for the same reason as
+		/// <see cref="ModalResult" />. Exactly one is sent per notification, and a result that could not be
+		/// delivered while the plugin was detached is sent after it reattaches.
+		/// </summary>
+		public const string NotificationResult = "notification.result";
+
 		public static readonly IReadOnlyList<string> All =
-			[Describe, SessionOpen, SessionClose, SessionSnapshot, SessionEvent, ModalResult];
+			[Describe, SessionOpen, SessionClose, SessionSnapshot, SessionEvent, ModalResult, NotificationResult];
 	}
 
 	/// <summary>

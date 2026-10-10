@@ -48,6 +48,9 @@ import {
   type GetDeviceClientSettingsResponse,
   type SetDeviceClientSettingsRequest,
   type SetDeviceClientSettingsResponse,
+  type ActiveNotification,
+  type ActiveNotificationsEvent,
+  type NotificationClosedEvent,
   type UiModalOpenedEvent,
   widgetFromWire,
   WidgetType,
@@ -58,6 +61,7 @@ import {
 } from '@macro-deck/runtime';
 import { AppState } from './app-state';
 import { ExecutionFeedback } from './execution-feedback';
+import { NotificationFeed } from './notification-feed';
 import { HostLock } from './host-lock';
 import { WidgetSessions } from './widget-sessions';
 
@@ -164,6 +168,7 @@ export class Client {
   readonly http: HttpClient;
   readonly connection: UiConnection;
   readonly modal: WritableStore<UiModalOpenedEvent | null> = store<UiModalOpenedEvent | null>(null);
+  readonly notifications = new NotificationFeed((type, payload) => this.connection.request(type, payload));
   private readonly reopenableSessionStore: WritableStore<{ sessionId: string } | null> =
     store<{ sessionId: string } | null>(null);
   readonly reopenableSessions: ReadableStore<{ sessionId: string } | null> = this.reopenableSessionStore;
@@ -1030,6 +1035,9 @@ export class Client {
     this.hasConnected = false;
     this.deckLoaded = false;
     this.reconnectedAfterRefresh = false;
+    // A popup belongs to the session that was shown it, and one left over a sign-in form would
+    // swallow every press on it.
+    this.notifications.clear();
     this.clearRefreshTimer();
     this.clearLocalizationRetryTimer();
     this.clearSessionRetryTimer();
@@ -1198,6 +1206,18 @@ export class Client {
         if (typeof body['modalId'] === 'string') {
           this.modal.set({ modalId: body['modalId'], title: body['title'] as never });
         }
+        break;
+      case 'NotificationShownEvent':
+        if (body['notification']) this.notifications.shown(body['notification'] as ActiveNotification);
+        break;
+      case 'NotificationUpdatedEvent':
+        if (body['notification']) this.notifications.updated(body['notification'] as ActiveNotification);
+        break;
+      case 'NotificationClosedEvent':
+        if (typeof body['id'] === 'string') this.notifications.closed(body as unknown as NotificationClosedEvent);
+        break;
+      case 'ActiveNotificationsEvent':
+        this.notifications.snapshot(body as unknown as ActiveNotificationsEvent);
         break;
       case 'AppearanceChangedEvent':
         // Pushed to every client the moment someone changes it, so a deck on a wall follows the

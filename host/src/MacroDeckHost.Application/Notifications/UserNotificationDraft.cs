@@ -23,4 +23,8 @@ public sealed record UserNotificationDraft
 	public string? CancelKey { get; init; }
 
 	public string? DedupeKey { get; init; }
+
+	public string? Id { get; init; }
+
+	public NotificationSourceCategory SourceCategory { get; init; } = NotificationSourceCategory.System;
 }

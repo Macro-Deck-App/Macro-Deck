@@ -1,11 +1,32 @@
+import { createButton, type ButtonVariant } from './button';
 import { dismissButton, element, strokeIcon } from './dom';
 
-export type ToastKind = 'success' | 'error';
+export type ToastKind = 'success' | 'error' | 'info' | 'warning';
+
+export interface ToastSource {
+  kind: string;
+  name: string;
+}
+
+export interface ToastProgress {
+  processed: number;
+  total: number | null;
+}
+
+export interface ToastAction {
+  label: string;
+  variant: ButtonVariant;
+  onPress(): void;
+}
 
 export interface ToastOptions {
   detail?: string;
   kind?: ToastKind;
   durationMs?: number;
+  source?: ToastSource;
+  progress?: ToastProgress;
+  actions?: ToastAction[];
+  dismissible?: boolean;
 }
 
 export interface ToastHostOptions {
@@ -16,6 +37,12 @@ const DEFAULT_DURATION_MS = 5000;
 
 const CHECK = ['M20 6 9 17l-5-5'];
 const ALERT = ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 8v4', 'M12 16h.01'];
+const INFO = ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20', 'M12 16v-4', 'M12 8h.01'];
+const WARNING = [
+  'm21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3',
+  'M12 9v4',
+  'M12 17h.01',
+];
 
 interface Shown {
   id: number;
@@ -44,15 +71,70 @@ export function mountToastHost(root: HTMLElement, options: ToastHostOptions): vo
   root.appendChild(host());
 }
 
-export function showToast(message: string, options?: ToastOptions): number {
-  const settings = options === undefined ? {} : options;
-  const kind: ToastKind = settings.kind === undefined ? 'success' : settings.kind;
-  const id = nextId++;
+export function toastLayer(): HTMLElement {
+  return host();
+}
 
-  const toast = element('div', kind === 'error' ? 'wc-toast wc-toast-error' : 'wc-toast');
-  toast.appendChild(strokeIcon('wc-toast-icon', kind === 'error' ? ALERT : CHECK));
+export function severityIconPaths(kind: ToastKind): string[] {
+  switch (kind) {
+    case 'error':
+      return ALERT;
+    case 'info':
+      return INFO;
+    case 'warning':
+      return WARNING;
+    default:
+      return CHECK;
+  }
+}
+
+function classFor(kind: ToastKind): string {
+  return kind === 'success' ? 'wc-toast' : 'wc-toast wc-toast-' + kind;
+}
+
+export function createProgressBar(progress: ToastProgress, label: string): HTMLElement {
+  const track = element('div', 'wc-progress');
+  track.setAttribute('role', 'progressbar');
+  track.setAttribute('aria-label', label);
+
+  const fill = element('div', 'wc-progress-fill');
+  const total = progress.total;
+
+  if (total !== null && total > 0) {
+    const ratio = Math.max(0, Math.min(1, progress.processed / total));
+    track.setAttribute('aria-valuemin', '0');
+    track.setAttribute('aria-valuemax', String(total));
+    track.setAttribute('aria-valuenow', String(Math.min(progress.processed, total)));
+    fill.style.width = Math.round(ratio * 100) + '%';
+  } else {
+    track.className += ' wc-progress-indeterminate';
+  }
+
+  track.appendChild(fill);
+  return track;
+}
+
+export function createToast(message: string, settings: ToastOptions, close: () => void): HTMLElement {
+  const kind: ToastKind = settings.kind === undefined ? 'success' : settings.kind;
+
+  const toast = element('div', classFor(kind));
+  toast.appendChild(strokeIcon('wc-toast-icon', severityIconPaths(kind)));
 
   const text = element('div', 'wc-toast-text');
+
+  if (settings.source !== undefined) {
+    const source = element('span', 'wc-toast-source');
+    const category = element('span', 'wc-toast-source-kind');
+    category.textContent = settings.source.kind;
+    source.appendChild(category);
+    if (settings.source.name !== '') {
+      const name = element('span', 'wc-toast-source-name');
+      name.textContent = settings.source.name;
+      source.appendChild(name);
+    }
+    text.appendChild(source);
+  }
+
   const line = element('span', 'wc-toast-message');
   line.textContent = message;
   text.appendChild(line);
@@ -61,12 +143,37 @@ export function showToast(message: string, options?: ToastOptions): number {
     detail.textContent = settings.detail;
     text.appendChild(detail);
   }
+
+  if (settings.progress !== undefined) text.appendChild(createProgressBar(settings.progress, message));
+
+  if (settings.actions !== undefined && settings.actions.length > 0) {
+    const actions = element('div', 'wc-toast-actions');
+    for (let index = 0; index < settings.actions.length; index++) {
+      const action = settings.actions[index];
+      actions.appendChild(createButton({
+        label: action.label,
+        variant: action.variant,
+        onClick: action.onPress,
+      }).element);
+    }
+    text.appendChild(actions);
+  }
   toast.appendChild(text);
 
-  const close = dismissButton('wc-toast-dismiss', 'wc-toast-dismiss-icon', dismissLabel);
-  close.addEventListener('click', () => dismissToast(id));
-  toast.appendChild(close);
+  if (settings.dismissible !== false) {
+    const dismiss = dismissButton('wc-toast-dismiss', 'wc-toast-dismiss-icon', dismissLabel);
+    dismiss.addEventListener('click', close);
+    toast.appendChild(dismiss);
+  }
 
+  return toast;
+}
+
+export function showToast(message: string, options?: ToastOptions): number {
+  const settings = options === undefined ? {} : options;
+  const id = nextId++;
+
+  const toast = createToast(message, settings, () => dismissToast(id));
   host().appendChild(toast);
 
   const duration = settings.durationMs === undefined ? DEFAULT_DURATION_MS : settings.durationMs;

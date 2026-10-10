@@ -490,6 +490,8 @@ public sealed class PluginHostBuilder
 			=> provider.GetRequiredService<VideoStreamProviderRegistry>().ContextFor(null));
 		Services.TryAddSingleton<IWidgetTypeProviderContext, RemoteWidgetTypeProviderContext>();
 		Services.TryAddSingleton<ModalResultStore>();
+		Services.TryAddSingleton<NotificationResultStore>();
+		Services.TryAddSingleton<RemoteNotificationService>();
 		Services.TryAddSingleton<IIntegrationContext, RemoteIntegrationContext>();
 		Services.TryAddSingleton<IAndroidDeviceManager, RemoteAndroidDeviceManager>();
 		Services.TryAddSingleton<RemoteMessageChannel>();

@@ -17,6 +17,8 @@ import { FolderView } from './folder-view';
 import { IdleTimer, type IdleTimerClock } from './idle-timer';
 import { ScreenSaver } from './screensaver';
 import { ModalHost } from './modal';
+import { NotificationDialogs } from './notification-dialogs';
+import { NotificationToasts } from './notification-toasts';
 import { RenderingModeStore } from './rendering-mode';
 import { IconResolutionStore } from './icon-resolution';
 import { ServerClock } from './server-clock';
@@ -65,6 +67,8 @@ export class Shell {
   private grid: WidgetGridHandle | null = null;
   private deckHost: HTMLElement | null = null;
   private readonly modals: ModalHost;
+  private readonly notificationToasts: NotificationToasts;
+  private readonly notificationDialogs: NotificationDialogs;
   private readonly deckInput: DeckInput;
   private readonly deviceSetup: DeviceSetupService;
   private folderView: FolderView | null = null;
@@ -94,6 +98,8 @@ export class Shell {
     mountToastHost(this.root, {
       dismissLabel: client.translate(ClientAppStrings.Feedback.Dismiss),
     });
+    this.notificationToasts = new NotificationToasts(client.notifications, client.localization);
+    this.notificationDialogs = new NotificationDialogs(this.root, client.notifications, host);
 
     this.deckInput = new DeckInput(
       {
@@ -105,6 +111,7 @@ export class Shell {
         },
         goBack: () => this.client.deck.back(),
         modalOpen: () => this.modals.isOpen()
+          || this.notificationDialogs.isOpen()
           || (this.sidebar ? this.sidebar.isOpen() : false)
           || (this.settings ? this.settings.isOpen() : false),
         focusChanged: widgetId => {
@@ -261,6 +268,7 @@ export class Shell {
       || this.client.hostLock.showLockScreen()
       || this.reconnectingPanel !== null
       || this.modals.isOpen()
+      || this.notificationDialogs.isOpen()
       || (this.wizard !== null && this.wizard.element.parentNode !== null)
       || (this.settings !== null && this.settings.isOpen())
       || (this.sidebar !== null && this.sidebar.isOpen());
@@ -274,6 +282,8 @@ export class Shell {
     this.paintDeck();
     this.paintOverlays();
     this.modals.repaint();
+    this.notificationToasts.repaint();
+    this.notificationDialogs.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {

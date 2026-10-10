@@ -1,10 +1,15 @@
-<div class="ni-row">
+<div class="ni-row" [class.ni-unread]="isUnread">
   <span class="ni-severity {{ severityClass }}">
     <span class="icon {{ severityIcon }} icon-md"></span>
   </span>
 
   <div class="ni-body">
-    <span class="ni-title">{{ notification.title }}</span>
+    <span class="ni-title">
+      @if (isUnread) {
+        <span class="ni-unread-dot" role="img" [attr.aria-label]="appStrings.Shell.Notifications.Unread | translate"></span>
+      }
+      {{ notification.title }}
+    </span>
     @if (notification.message) {
       <span class="ni-message">{{ notification.message }}</span>
     }
@@ -23,7 +28,12 @@
       <span class="ni-progress-label">{{ progressLabel }}</span>
     }
 
-    <span class="ni-time">{{ relativeTime }}</span>
+    <span class="ni-time">
+      {{ relativeTime }}
+      @if (sourceCategoryLabel; as category) {
+        <span class="ni-source">{{ category }}@if (sourceName; as name) {<span class="ni-source-name">{{ name }}</span>}</span>
+      }
+    </span>
 
     <div class="ni-actions">
       @for (item of actionList; track item.kind) {
@@ -38,6 +48,17 @@
       }
     </div>
   </div>
+
+  @if (isUnread) {
+    <shared-button
+      class="ni-mark-read"
+      variant="ghost"
+      iconOnly
+      [ariaLabel]="appStrings.Shell.Notifications.MarkRead | translate"
+      (click)="onMarkRead($event)">
+      <span class="icon icon-check icon-sm" aria-hidden="true"></span>
+    </shared-button>
+  }
 
   <!-- Running work has no dismiss: it goes away by finishing. Cancel above is how you stop it. -->
   @if (!notification.progress) {

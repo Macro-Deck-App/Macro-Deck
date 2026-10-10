@@ -60,6 +60,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	private readonly IPluginInstallationCatalog _installationCatalog;
 	private readonly IPluginManifestReader _manifestReader;
 	private readonly IUserNotificationStore _userNotificationStore;
+	private readonly INotificationManager? _notificationManager;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly ILocalizationCatalogRegistry _localizationCatalogs;
 	private readonly IPluginDeviceRegistry _deviceRegistry;
@@ -100,8 +101,10 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		ILogger logger,
 		RemoteVariableSubscriptions? variableSubscriptions = null,
 		VideoStreamProviderRegistry? videoStreamProviders = null,
-		IVideoStreamSessionBroker? videoStreamSessions = null)
+		IVideoStreamSessionBroker? videoStreamSessions = null,
+		INotificationManager? notificationManager = null)
 	{
+		_notificationManager = notificationManager;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
 		_sessionRegistry = sessionRegistry;
@@ -287,6 +290,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		await _layoutRegistry.UnregisterAll(pluginId, cancellationToken).ConfigureAwait(false);
 		_videoStreamSessions?.CloseOwner(pluginId, VideoStreamSessionReason.ProviderRemoved, notifyProvider: true);
 		_videoStreamProviders?.RemoveOwner(pluginId);
+		_notificationManager?.CloseOwner(pluginId);
 
 		await _integrationRegistry.UnregisterAsync(pluginId).ConfigureAwait(false);
 	}
@@ -1010,6 +1014,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		{
 			return;
 		}
+
+		_notificationManager?.CloseOwner(e.PluginId);
 
 		// PluginSessionRegistry.Create raises this same event for the record a new session replaces, and
 		// by the time it does, the new session is already registered under this plugin id. Keying on

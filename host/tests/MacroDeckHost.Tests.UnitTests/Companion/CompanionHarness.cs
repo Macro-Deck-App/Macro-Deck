@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Variables.Templates;
 using System.Text.Json;
@@ -97,7 +98,8 @@ internal sealed class CompanionHarness
 			Events,
 			null!,
 			null!,
-			null!);
+			null!,
+			UnavailableNotificationService.Instance);
 
 		if (register)
 		{

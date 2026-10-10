@@ -270,6 +270,7 @@ export const DOM_API_EXCEPTIONS = {
     'Guarded on `typeof ResizeObserver`, and supplied by polyfills.legacy.js on the floor.',
   'runtime/src/ui-components/ui-first-fit.component.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
+  'web-client/src/notification-dialogs.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/ui-components/ui-list.component.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/video-streams/video-stream-view.ts:IntersectionObserver':
     'Read off the window and checked with `typeof` before it is constructed.',

@@ -30,6 +30,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @Input() showFooter = true;
   @Input() showClose = true;
   @Input() closeOnOverlay = true;
+  @Input() closeOnOverlayClick = true;
   @Input() maxWidth = '450px';
   @Input() size: 'small' | 'medium' | 'large' | 'full' | null = null;
   @Input() flush = false;
@@ -145,7 +146,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     if (this.isWithinOpenGrace()) return;
     if (!startedOnOverlay) return;
 
-    if (this.closeOnOverlay && this.isTopmost()) {
+    if (this.closeOnOverlay && this.closeOnOverlayClick && this.isTopmost()) {
       this.requestClose();
     }
   }

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.MusicPlayer;
@@ -247,13 +248,14 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: new RunningLifetime(),
 			transport: Transport,
-			webSocketTransport: null!,
+			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: cutoff,
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 
 	private sealed class RunningLifetime : IHostApplicationLifetime
@@ -309,13 +311,14 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: null!,
 			transport: Transport,
-			webSocketTransport: null!,
+			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 
 	private UiWebSocketDispatcher DispatcherFor(
@@ -358,13 +361,14 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			modalUiSessions: null!,
 			lifetime: null!,
 			transport: null!,
-			webSocketTransport: null!,
+			webSocketTransport: new MacroDeckHost.Ui.WebSocketUiTransport(),
 			companions: null!,
 			licenses: null!,
 			accessTokenCutoff: new AccessTokenCutoff(),
 			deviceSessionGuard: GuardFor(claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 
 	/// <summary>Stands in for the real catalog handler: this test asserts the route exists, not what the

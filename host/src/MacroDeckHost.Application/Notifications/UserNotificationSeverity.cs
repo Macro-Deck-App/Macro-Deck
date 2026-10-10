@@ -7,5 +7,6 @@ public enum UserNotificationSeverity
 {
 	Info,
 	Warning,
-	Error
+	Error,
+	Success
 }

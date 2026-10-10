@@ -90,6 +90,7 @@ public sealed class SystemIntegration
 	private readonly IPowerService _power;
 	private readonly ILockStateReader _lock;
 	private readonly VariableApiAccessor _variableAccessor = new();
+	private readonly NotificationServiceAccessor _notificationServiceAccessor = new();
 
 	private Channel<FocusedAppInfo?>? _focusChannel;
 	private Task? _focusWriterLoop;
@@ -151,6 +152,7 @@ public sealed class SystemIntegration
 			new MuteVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new SetVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new SendNotificationActionDefinition(_notifications),
+			new ShowNotificationActionDefinition(_notificationServiceAccessor),
 			new RunCommandActionDefinition(_variableAccessor),
 			new LockComputerActionDefinition(_power),
 			new SleepActionDefinition(_power),
@@ -320,6 +322,7 @@ public sealed class SystemIntegration
 
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
+		_notificationServiceAccessor.Current = context.NotificationService;
 
 		_volume.Changed -= OnVolumeChanged;
 		_volume.Changed += OnVolumeChanged;

@@ -550,6 +550,12 @@ internal sealed class ReplayablePluginSessionRegistry : IPluginSessionRegistry
 
 	public event EventHandler<PluginSessionEndedEventArgs>? SessionEnded;
 
+	public event EventHandler<PluginSessionAttachedEventArgs>? SessionAttached
+	{
+		add { }
+		remove { }
+	}
+
 	public void RaiseSessionEnded(string pluginId, string sessionId, PluginSessionEndReason reason)
 		=> SessionEnded?.Invoke(this,
 			new PluginSessionEndedEventArgs { PluginId = pluginId, SessionId = sessionId, Reason = reason });

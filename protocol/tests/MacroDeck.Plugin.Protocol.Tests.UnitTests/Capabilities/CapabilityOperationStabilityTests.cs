@@ -32,7 +32,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.Ui] =
 			[
 				"describe", "session.open", "session.close", "session.snapshot", "session.event",
-				"modal.result",
+				"modal.result", "notification.result",
 			],
 			[CapabilityKinds.Localization] = ["describe", "catalog"],
 			[CapabilityKinds.DeviceProvider] =

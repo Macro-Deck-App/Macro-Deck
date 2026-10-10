@@ -44,7 +44,7 @@ public class HostApiStabilityTests
 			[HostApis.Deck] = ["change-folder", "change-profile", "parent", "back"],
 			[HostApis.Scripts] = ["run"],
 			[HostApis.Widgets] = ["apply", "invalidate-icon"],
-			[HostApis.Notifications] = ["notify", "dismiss"],
+			[HostApis.Notifications] = ["notify", "dismiss", "show", "update", "close"],
 			[HostApis.ActionInteractions] = ["request-item-picker", "request-device-picker", "show-modal"],
 			[HostApis.Ui] = ["snapshot", "patch", "fault", "reload", "register-resource", "remove-resource", "register-music-player-artwork"],
 			[HostApis.Devices] =

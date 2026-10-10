@@ -19,9 +19,16 @@ export {
   dismissAllToasts,
   dismissToast,
   mountToastHost,
+  createProgressBar,
+  createToast,
+  severityIconPaths,
   showToast,
+  toastLayer,
+  type ToastAction,
   type ToastHostOptions,
   type ToastKind,
   type ToastOptions,
+  type ToastProgress,
+  type ToastSource,
 } from './toast';
 export { createToggle, type ToggleHandle, type ToggleOptions } from './toggle';

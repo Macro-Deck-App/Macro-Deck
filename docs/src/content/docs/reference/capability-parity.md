@@ -20,6 +20,7 @@ A plugin implements the same SDK contracts as an in-process integration, but the
 | Action ids | Yes | Differs | A plugin owns one integration namespace, so action local ids must be unique across the whole plugin process. |
 | Action interactions | Yes | Differs | Interaction callbacks such as pickers work only while their action execution is live. |
 | Action modals | Yes | Differs | Opening answers at once with a modal id, and the answer arrives later - see [Action modals](#action-modals). |
+| Notifications | Yes | Differs | `ShowAsync` answers at once with the id and the outcome arrives later as a `ui`/`notification.result` invoke; a result is held while the plugin is detached, and a lost session ends pending ones as `HostUnavailable` - see [Notifications](/features/notifications/). |
 | Variables | Yes | Differs | Eager half snapshot-backed, catalog half live, scalar wire types only - see [Snapshot-backed state](#snapshot-backed-state). |
 | Events | Yes | Differs | Catalog, options and publication work; the catalog is snapshot-backed, and `GetBindings()` serves the last `event-bindings` push, so it is empty until the host has pushed once. |
 | Integration icon | Yes | Differs | Uploaded and cached as an asset instead of read synchronously, so a replacement shows after a new asset commit. |

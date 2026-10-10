@@ -145,6 +145,12 @@ public class IntegrationUserNotifierTests
 
 		public bool DismissByKey(string dedupeKey) => throw new InvalidOperationException("boom");
 
+		public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+
+		public bool MarkRead(string id) => false;
+
+		public bool MarkAllRead() => false;
+
 		public bool DismissAll() => throw new InvalidOperationException("boom");
 
 		public bool Retire(string dedupeKey) => throw new InvalidOperationException("boom");

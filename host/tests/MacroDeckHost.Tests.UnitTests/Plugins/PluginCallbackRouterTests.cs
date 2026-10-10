@@ -14,6 +14,7 @@ using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.IconPacks;
@@ -75,7 +76,8 @@ public class PluginCallbackRouterTests
 		VideoStreamCallbackThrottle? videoStreamThrottle = null,
 		IMusicPlayerArtworkService? musicPlayerArtwork = null,
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
-		TimeSpan? musicPlayerArtworkTimeout = null)
+		TimeSpan? musicPlayerArtworkTimeout = null,
+		INotificationManager? notificationManager = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -113,7 +115,8 @@ public class PluginCallbackRouterTests
 			videoStreamThrottle: videoStreamThrottle,
 			musicPlayerArtwork: musicPlayerArtwork,
 			musicPlayerArtworkThrottle: musicPlayerArtworkThrottle,
-			musicPlayerArtworkTimeout: musicPlayerArtworkTimeout);
+			musicPlayerArtworkTimeout: musicPlayerArtworkTimeout,
+			notificationManager: notificationManager);
 	}
 
 	[SetUp]
@@ -1773,6 +1776,12 @@ public class PluginCallbackRouterTests
 
 		public bool Retire(string dedupeKey) => false;
 
+		public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+
+		public bool MarkRead(string id) => false;
+
+		public bool MarkAllRead() => false;
+
 		public bool DismissAll() => false;
 
 		public event Action? Changed
@@ -1998,6 +2007,182 @@ public class PluginCallbackRouterTests
 
 		public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
 			=> throw new NotSupportedException();
+	}
+
+	private (PluginCallbackRouter Router, NotificationManager Manager) NotificationRouter()
+	{
+		var manager = new NotificationManager(new UserNotificationStore(),
+			TestLocalization.Resolver,
+			TestLocalization.ScopeFactory,
+			TimeProvider.System,
+			Serilog.Core.Logger.None);
+
+		return (Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 100, refillPerSecond: 100),
+			notificationManager: manager), manager);
+	}
+
+	private static HostInvokePayload Notification(string operation, object arguments)
+		=> new() { Api = HostApis.Notifications, Operation = operation, Arguments = Arg(arguments) };
+
+	[Test]
+	public async Task A_plugin_shows_a_notification_as_itself_whatever_the_payload_claims()
+	{
+		var (router, manager) = NotificationRouter();
+
+		var result = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Macro Deck", Popup = NotificationsWire.Popup.Toast }),
+			CancellationToken.None);
+
+		var id = result.Data!.Value.GetProperty("id").GetGuid();
+		var shown = manager.Find(id)!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(shown.Owner.Category, Is.EqualTo(NotificationSourceCategory.Plugin));
+			Assert.That(shown.Owner.Id, Is.EqualTo("plugin.a"));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_cannot_update_or_close_another_plugins_notification()
+	{
+		var (router, manager) = NotificationRouter();
+		var shown = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Mine", Popup = NotificationsWire.Popup.Toast }),
+			CancellationToken.None);
+		var id = shown.Data!.Value.GetProperty("id").GetGuid();
+
+		var update = await router.RouteAsync("plugin.b",
+			"c2",
+			Notification(HostOperations.Notifications.Update,
+				new NotificationsUpdateArguments { Id = id, Title = "Hijacked" }),
+			CancellationToken.None);
+		var close = await router.RouteAsync("plugin.b",
+			"c3",
+			Notification(HostOperations.Notifications.Close, new NotificationsCloseArguments { Id = id }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Error, Is.Not.Null);
+			Assert.That(close.Error, Is.Not.Null);
+			Assert.That(manager.Find(id), Is.Not.Null);
+			Assert.That(manager.Find(id)!.Title.Literal, Is.EqualTo("Mine"));
+		});
+	}
+
+	[Test]
+	public async Task The_owner_can_update_and_close_its_notification()
+	{
+		var (router, manager) = NotificationRouter();
+		var shown = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Sync", Popup = NotificationsWire.Popup.Toast }),
+			CancellationToken.None);
+		var id = shown.Data!.Value.GetProperty("id").GetGuid();
+
+		var update = await router.RouteAsync("plugin.a",
+			"c2",
+			Notification(HostOperations.Notifications.Update,
+				new NotificationsUpdateArguments
+				{
+					Id = id, Progress = new NotificationsProgressDto { Processed = 2, Total = 5 }
+				}),
+			CancellationToken.None);
+		var progress = manager.Find(id)!.Progress;
+		var close = await router.RouteAsync("plugin.a",
+			"c3",
+			Notification(HostOperations.Notifications.Close, new NotificationsCloseArguments { Id = id }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(update.Error, Is.Null);
+			Assert.That(progress!.Processed, Is.EqualTo(2));
+			Assert.That(close.Error, Is.Null);
+			Assert.That(manager.Find(id), Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task An_invalid_notification_is_an_invalid_payload_and_a_limit_is_rate_limited()
+	{
+		var (router, _) = NotificationRouter();
+
+		var invalid = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Nowhere", Popup = NotificationsWire.Popup.None }),
+			CancellationToken.None);
+		var unknownKind = await router.RouteAsync("plugin.a",
+			"c2",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Odd", Popup = "banner" }),
+			CancellationToken.None);
+		var tooLong = await router.RouteAsync("plugin.a",
+			"c3",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = new string('x', 500) }),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(invalid.Error!.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(unknownKind.Error!.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(tooLong.Error!.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+		});
+	}
+
+	[Test]
+	public async Task A_huge_duration_or_a_content_that_is_not_a_tree_is_an_invalid_payload_not_a_crash()
+	{
+		var (router, _) = NotificationRouter();
+
+		var duration = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments { Title = "Long", DurationMs = long.MaxValue }),
+			CancellationToken.None);
+		var content = await router.RouteAsync("plugin.a",
+			"c2",
+			Notification(HostOperations.Notifications.Show,
+				new NotificationsShowArguments
+				{
+					Title = "Odd",
+					Popup = NotificationsWire.Popup.Dialog,
+					Content = JsonSerializer.SerializeToElement("not a tree")
+				}),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(duration.Error, Is.Null);
+			Assert.That(content.Error!.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+		});
+	}
+
+	[Test]
+	public async Task A_host_without_a_notification_manager_answers_unsupported()
+	{
+		var router = Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, 100, refillPerSecond: 100));
+
+		var result = await router.RouteAsync("plugin.a",
+			"c1",
+			Notification(HostOperations.Notifications.Show, new NotificationsShowArguments { Title = "Hello" }),
+			CancellationToken.None);
+
+		Assert.That(result.Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
 	}
 }
 

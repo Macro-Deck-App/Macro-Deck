@@ -203,9 +203,9 @@
   white-space: nowrap;
 }
 
-/// Info/warning/error colour variants for an issue-count badge (integrations overview and the
+/// Info/success/warning/error colour variants for an issue-count badge (integrations overview and the
 /// integration detail page), so the colours are only ever defined once. Include inside the block that
-/// declares the badge's base class - `&-error`/`&-warning`/`&-info` resolve against that selector.
+/// declares the badge's base class - `&-error`/`&-warning`/`&-success`/`&-info` resolve against that selector.
 @mixin issue-badge-severities {
   &-error {
     color: var(--color-danger);
@@ -217,6 +217,12 @@
     color: var(--color-warning);
     background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
     border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  }
+
+  &-success {
+    color: var(--color-success);
+    background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
   }
 
   &-info {

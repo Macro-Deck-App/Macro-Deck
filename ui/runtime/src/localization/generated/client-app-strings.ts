@@ -93,6 +93,15 @@ export const ClientAppStrings = {
 	},
 	Feedback: {
 		Dismiss: 'macrodeck.app:Feedback.Dismiss',
+		Notification: {
+			Ok: 'macrodeck.app:Feedback.Notification.Ok',
+			Rejected: 'macrodeck.app:Feedback.Notification.Rejected',
+			Source: {
+				BuiltInIntegration: 'macrodeck.app:Feedback.Notification.Source.BuiltInIntegration',
+				Plugin: 'macrodeck.app:Feedback.Notification.Source.Plugin',
+				System: 'macrodeck.app:Feedback.Notification.Source.System',
+			},
+		},
 	},
 	KeyRing: {
 		Unlock: {
@@ -489,6 +498,11 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.VideoStream.UnknownSession': 'This video session is no longer open.',
 	'macrodeck.app:Errors.VideoStream.UnknownStream': 'This video stream no longer exists.',
 	'macrodeck.app:Feedback.Dismiss': 'Dismiss',
+	'macrodeck.app:Feedback.Notification.Ok': 'OK',
+	'macrodeck.app:Feedback.Notification.Rejected': 'This answer was not accepted. Check your input and try again.',
+	'macrodeck.app:Feedback.Notification.Source.BuiltInIntegration': 'Integration',
+	'macrodeck.app:Feedback.Notification.Source.Plugin': 'Plugin',
+	'macrodeck.app:Feedback.Notification.Source.System': 'Macro Deck',
 	'macrodeck.app:KeyRing.Unlock.Description': 'Macro Deck cannot reach the key that unlocks your stored secrets. Enter your backup recovery key to restore it.',
 	'macrodeck.app:KeyRing.Unlock.Reason.EscrowMissing': 'The recovery file that would restore the key is missing, so the stored secrets cannot be recovered.',
 	'macrodeck.app:KeyRing.Unlock.Reason.KeystoreEntryMissing': 'The key is no longer in this computer\'s secret storage.',

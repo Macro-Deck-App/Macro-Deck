@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, OnInit, OnDestroy, ChangeDetection
 
 import { RouterOutlet } from '@angular/router';
 import { AppStrings } from '@macro-deck/runtime';
-import { ApiService, AuthService, KeyRingService, LoginFormComponent, LocalizationService, ThemeService, ToastHostComponent, VariableService, UiModalHostComponent } from '@shared';
+import { ApiService, AuthService, KeyRingService, LoginFormComponent, LocalizationService, NotificationDialogHostComponent, ThemeService, ToastHostComponent, VariableService, UiModalHostComponent } from '@shared';
 import { PluginPairingDialogComponent } from './components/overlay/plugin-pairing-dialog/plugin-pairing-dialog.component';
 import { PluginAdbConsentDialogComponent } from './components/overlay/plugin-adb-consent-dialog/plugin-adb-consent-dialog.component';
 import { HostSessionService } from './services/host-session.service';
@@ -24,7 +24,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
   imports: [
     RouterOutlet, SplashComponent, FirstRunWizardComponent,
     KeyRingUnlockGateComponent, LoginFormComponent, ToastHostComponent, PluginPairingDialogComponent, PluginAdbConsentDialogComponent,
-    UiModalHostComponent, OnboardingWizardComponent, MigrationOfferModalComponent, MigrationWizardComponent,
+    UiModalHostComponent, NotificationDialogHostComponent, OnboardingWizardComponent, MigrationOfferModalComponent, MigrationWizardComponent,
   ],
   template: `
     @if (keyRing.locked()) {
@@ -60,6 +60,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
     <!-- Mounted at the shell, not on the deck page: an action can be run from the editor or a script
          page too, and its modal has to appear wherever the user set it going. -->
     <shared-ui-modal-host></shared-ui-modal-host>
+    <shared-notification-dialog-host></shared-notification-dialog-host>
     <!-- Both self-gating, like shared-plugin-pairing-dialog above - see their class docs for when
          they present themselves. The migration offer waits for the onboarding wizard to be done. -->
     <app-onboarding-wizard></app-onboarding-wizard>

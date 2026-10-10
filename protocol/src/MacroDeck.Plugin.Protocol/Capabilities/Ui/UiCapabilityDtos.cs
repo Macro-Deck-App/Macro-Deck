@@ -125,3 +125,24 @@ public sealed record UiModalResultArguments
 	/// <summary>What the completion carried. Absent when <see cref="Cancelled" />.</summary>
 	public JsonElement? Value { get; init; }
 }
+
+/// <summary>
+/// Arguments for <c>notification.result</c>: how a notification shown through
+/// <c>HostOperations.Notifications.Show</c> ended. Sent exactly once per notification.
+/// </summary>
+public sealed record UiNotificationResultArguments
+{
+	public required Guid NotificationId { get; init; }
+
+	/// <summary><c>action</c>, <c>dismissed</c>, <c>timeout</c>, <c>programmatic</c>, <c>owner-gone</c> or
+	/// <c>host-unavailable</c>. A plugin treats an unknown value as dismissed.</summary>
+	public required string CloseReason { get; init; }
+
+	public string? ActionId { get; init; }
+
+	/// <summary>The authenticated responder: a device id, or the literal <c>admin</c>.</summary>
+	public string? ClientId { get; init; }
+
+	/// <summary>The validated values of the content's inputs, keyed by node id.</summary>
+	public IReadOnlyDictionary<string, JsonElement>? Values { get; init; }
+}

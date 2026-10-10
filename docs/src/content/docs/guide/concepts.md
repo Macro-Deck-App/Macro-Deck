@@ -582,6 +582,39 @@ every meeting can open a link from a stranger. Limit such a trigger to the **Cal
 meetings are in, or add a condition, for example on `{{ event.title }}`, so it joins only the meetings
 you expect.
 
+## Notifications
+
+Macro Deck tells you about things that need your attention in three ways.
+
+- **Short messages** appear for a few seconds on top of the screen and go away on their own. Up to three show at
+  once, the rest wait their turn.
+- **Dialogs** wait until somebody answers. They can carry buttons and, when an integration needs more from you,
+  a small form. Whatever you press on one screen closes the dialog on every other screen too, and the
+  integration gets your answer once.
+- **The notifications list** in the desktop app keeps what happened: login problems, available updates,
+  results of imports and whatever integrations report. Entries you have not looked at are marked as unread.
+  Use **Mark as read** on an entry, or **Mark all as read**. Closing a short message or a dialog never removes its
+  entry from the list, and removing an entry never closes a message that is still showing.
+
+Short messages and dialogs appear in the desktop app, in the web client and in the Companion app. A screen that
+connects while a dialog is open shows it right away. Each message says where it comes from: Macro Deck itself,
+a built-in integration or a plugin, with its name.
+
+### Show a notification from a button
+
+The action **Show Macro Deck notification** (System integration) puts a message on your screens whenever a
+button, automation or flow runs it.
+
+| Setting | What it does |
+| --- | --- |
+| **Title** and **Message** | The text. Both accept [template variables](#template-variables). |
+| **Severity** | Info, Success, Warning or Error. It sets the colour and icon. |
+| **Show as** | Short message, dialog, or neither, each optionally also in the notifications list. |
+| **Timeout** | How long a short message stays. Leave it empty for the default of six seconds. A dialog without a timeout has an **OK** button. |
+
+This is different from **Send Notification**, which shows a notification of your operating system instead
+of one inside Macro Deck.
+
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,

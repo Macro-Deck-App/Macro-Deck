@@ -7,6 +7,7 @@ public sealed class IntegrationUserNotifier : IUserNotifier
 {
 	private readonly string _integrationId;
 	private readonly string _integrationName;
+	private readonly NotificationSourceCategory _category;
 	private readonly IUserNotificationStore _store;
 	private readonly ILogger _logger;
 
@@ -14,8 +15,10 @@ public sealed class IntegrationUserNotifier : IUserNotifier
 		string integrationId,
 		string integrationName,
 		IUserNotificationStore store,
-		ILogger logger)
+		ILogger logger,
+		NotificationSourceCategory category = NotificationSourceCategory.BuiltInIntegration)
 	{
+		_category = category;
 		_integrationId = integrationId;
 		_integrationName = integrationName;
 		_store = store;
@@ -39,6 +42,7 @@ public sealed class IntegrationUserNotifier : IUserNotifier
 				Message = notification.Message,
 				SourceId = _integrationId,
 				SourceName = _integrationName,
+				SourceCategory = _category,
 				// The SDK deliberately exposes no action model - an integration cannot name a
 				// client route - so the action is always "open this integration".
 				Action = new UserNotificationAction(UserNotificationActionKind.OpenIntegration, _integrationId),

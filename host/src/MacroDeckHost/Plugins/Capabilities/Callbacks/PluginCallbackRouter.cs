@@ -100,6 +100,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IPluginIconUiResources? _pluginIconResources;
 	private readonly IPluginIconResolver? _pluginIconResolver;
 	private readonly PluginColorWatches? _colorWatches;
+	private readonly INotificationManager? _notificationManager;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -149,8 +150,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IMusicPlayerArtworkService? musicPlayerArtwork = null,
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
 		TimeSpan? musicPlayerArtworkTimeout = null,
-		PluginColorWatches? colorWatches = null)
+		PluginColorWatches? colorWatches = null,
+		INotificationManager? notificationManager = null)
 	{
+		_notificationManager = notificationManager;
 		_colorWatches = colorWatches;
 		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
@@ -234,7 +237,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Deck => await RouteDeckAsync(payload, cancellationToken),
 				HostApis.Scripts => await RouteScriptsAsync(payload, cancellationToken),
 				HostApis.Widgets => await RouteWidgetsAsync(pluginId, payload, cancellationToken),
-				HostApis.Notifications => RouteNotifications(pluginId, payload),
+				HostApis.Notifications => await RouteNotificationsAsync(pluginId, payload, cancellationToken),
 				HostApis.ActionInteractions => RouteActionInteractions(pluginId, correlationId, payload),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await RouteMusicPlayerArtworkAsync(pluginId, sessionId, payload, cancellationToken),
@@ -639,13 +642,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return HostCallbackResult.Ok(applied);
 	}
 
-	private HostCallbackResult RouteNotifications(string pluginId, HostInvokePayload payload)
+	private async Task<HostCallbackResult> RouteNotificationsAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
 	{
 		var displayName = DisplayNameOf(pluginId);
 		var notifier = new IntegrationUserNotifier(pluginId,
 			displayName,
 			_notificationStore,
-			Serilog.Log.Logger);
+			Serilog.Log.Logger,
+			NotificationSourceCategory.Plugin);
 
 		switch (payload.Operation)
 		{
@@ -673,8 +679,85 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Ok();
 			}
 
+			case HostOperations.Notifications.Show or HostOperations.Notifications.Update
+				or HostOperations.Notifications.Close:
+				return await RouteInteractiveNotificationAsync(pluginId, displayName, payload, cancellationToken);
+
 			default:
 				return UnknownOperation(payload);
+		}
+	}
+
+	private async Task<HostCallbackResult> RouteInteractiveNotificationAsync(string pluginId,
+		string displayName,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (_notificationManager is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				"This host cannot show notifications.");
+		}
+
+		var owner = new NotificationOwner(NotificationSourceCategory.Plugin, pluginId, displayName);
+
+		try
+		{
+			switch (payload.Operation)
+			{
+				case HostOperations.Notifications.Show:
+				{
+					var arguments = Deserialize<NotificationsShowArguments>(payload.Arguments);
+					if (arguments is null)
+					{
+						return MissingArguments();
+					}
+
+					var outcome = await _notificationManager.ShowAsync(owner,
+						NotificationWireMapper.ToOptions(arguments),
+						cancellationToken);
+					return HostCallbackResult.Ok(new NotificationsShowResult { Id = outcome.Id });
+				}
+
+				case HostOperations.Notifications.Update:
+				{
+					var arguments = Deserialize<NotificationsUpdateArguments>(payload.Arguments);
+					if (arguments is null)
+					{
+						return MissingArguments();
+					}
+
+					await _notificationManager.UpdateAsync(owner,
+						arguments.Id,
+						NotificationWireMapper.ToUpdate(arguments),
+						cancellationToken);
+					return HostCallbackResult.Ok();
+				}
+
+				default:
+				{
+					var arguments = Deserialize<NotificationsCloseArguments>(payload.Arguments);
+					if (arguments is null)
+					{
+						return MissingArguments();
+					}
+
+					_notificationManager.Close(owner, arguments.Id);
+					return HostCallbackResult.Ok();
+				}
+			}
+		}
+		catch (NotificationException exception)
+		{
+			return exception.ErrorCode switch
+			{
+				NotificationErrorCode.LimitExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+					exception.Message,
+					retryable: false),
+				NotificationErrorCode.NotFound => HostCallbackResult.Fail(ProtocolErrorCodes.CorrelationUnknown,
+					exception.Message),
+				_ => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message)
+			};
 		}
 	}
 

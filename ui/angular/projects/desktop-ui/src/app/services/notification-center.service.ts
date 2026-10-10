@@ -21,6 +21,8 @@ export class NotificationCenterService {
 
   readonly hasActiveProgress = computed(() => this._notifications().some(n => !!n.progress));
 
+  readonly hasUnread = computed(() => this._notifications().some(n => n.read === false));
+
   readonly hasDismissable = computed(() => this._notifications().some(n => !n.progress));
 
   readonly badgeText = computed(() => {
@@ -59,6 +61,32 @@ export class NotificationCenterService {
 
   dismissAll(): void {
     void this.api.dismissAllNotifications();
+  }
+
+  markRead(id: string): void {
+    this.setRead(n => n.id === id);
+    void this.confirm(this.api.markNotificationRead(id));
+  }
+
+  markAllRead(): void {
+    this.setRead(() => true);
+    void this.confirm(this.api.markAllNotificationsRead());
+  }
+
+  private async confirm(request: Promise<{ success: boolean }>): Promise<void> {
+    try {
+      if (!(await request).success) {
+        await this.load();
+      }
+    } catch {
+      await this.load();
+    }
+  }
+
+  private setRead(matches: (notification: UserNotification) => boolean): void {
+    this.generation++;
+    this._notifications.update(list =>
+      list.map(n => (n.read === false && matches(n) ? { ...n, read: true } : n)));
   }
 
   private async fetch(): Promise<void> {
