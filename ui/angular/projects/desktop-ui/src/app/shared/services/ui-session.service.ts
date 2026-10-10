@@ -41,6 +41,10 @@ export interface UiSessionHandle {
   close(): void;
 }
 
+export interface UiSessionOpenOptions {
+  notifyFault?: boolean;
+}
+
 export interface UiSessionRejection {
   code?: string;
   message?: string;
@@ -56,7 +60,7 @@ export class UiSessionService {
   private readonly toast = inject(ToastService);
   private readonly localization = inject(LocalizationService);
 
-  open(source: UiSessionOpenRequestSource): UiSessionHandle {
+  open(source: UiSessionOpenRequestSource, options: UiSessionOpenOptions = {}): UiSessionHandle {
     const request = typeof source === 'function' ? untracked(source) : source;
     if (request.kind === 'config' && isNegotiableVersion(request.configUiModelVersion)
       && !supportsUiModelVersion(request.configUiModelVersion)) {
@@ -67,7 +71,7 @@ export class UiSessionService {
     }
 
     return new LiveUiSessionHandle(this.api, this.toast, this.localization, request,
-      typeof source === 'function' ? source : null);
+      typeof source === 'function' ? source : null, options.notifyFault ?? true);
   }
 }
 
@@ -110,6 +114,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
     private readonly localization: LocalizationService,
     private request: UiSessionOpenRequest,
     private readonly nextRequest: (() => UiSessionOpenRequest) | null,
+    private readonly notifyFault: boolean,
   ) {
     // Subscribed before the first realtime request goes out, so no notification for this session can arrive
     // and be missed while sessionId is still unknown.
@@ -251,7 +256,7 @@ class LiveUiSessionHandle implements UiSessionHandle {
     this.root.set(null);
     if (!this.hadTree) this.rejection.set(rejection);
 
-    if (wasShowingTree && this.request.kind === 'config') {
+    if (wasShowingTree && this.request.kind === 'config' && this.notifyFault) {
       this.toast.show(this.localization.translateKey(AppStrings.ConfigUi.ViewUnavailable), { variant: 'error' });
     }
   }

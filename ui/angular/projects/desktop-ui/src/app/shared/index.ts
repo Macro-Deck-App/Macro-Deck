@@ -25,6 +25,7 @@ export { DEFAULT_ACCENT_COLOR, ThemeService, UiFontService } from './services/th
 export { ToastService } from './services/toast.service';
 export {
   type UiSessionHandle,
+  type UiSessionOpenOptions,
   type UiSessionOpenRequest,
   type UiSessionOpenRequestSource,
   type UiSessionRejection,

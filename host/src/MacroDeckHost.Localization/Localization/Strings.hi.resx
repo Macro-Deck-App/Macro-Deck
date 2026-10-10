@@ -19124,6 +19124,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>इस विजेट का कॉन्फ़िगरेशन अस्थायी रूप से उपलब्ध नहीं है। इसे संपादित करने के लिए JSON मोड पर जाएं।</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>यह कॉन्फ़िगरेशन विज़ुअल एडिटर के लिए बहुत बड़ा हो गया है। अंतिम काम करने वाला संस्करण पुनर्स्थापित करें, या JSON मोड में कुछ एक्शन या इवेंट हटाएँ।</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>यह कॉन्फ़िगरेशन विज़ुअल एडिटर के लिए बहुत बड़ा है। इसे यहाँ फिर से संपादित करने के लिए JSON मोड में कुछ एक्शन या इवेंट हटाएँ।</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>अंतिम काम करने वाला संस्करण पुनर्स्थापित करें</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>स्थिति मैपिंग कॉन्फ़िगर करें</value>
   </data>

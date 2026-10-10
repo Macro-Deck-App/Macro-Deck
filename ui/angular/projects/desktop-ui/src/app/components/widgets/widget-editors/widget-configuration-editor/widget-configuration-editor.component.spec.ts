@@ -6,7 +6,8 @@ import {
   WidgetData, WidgetType,
 } from '@macro-deck/runtime';
 import {
-  ApiService, UiNodeEventBus, UiSessionHandle, UiSessionOpenRequest, UiSessionOpenRequestSource, UiSessionRejection,
+  ApiService, UiNodeEventBus, UiSessionHandle, UiSessionOpenOptions, UiSessionOpenRequest, UiSessionOpenRequestSource,
+  UiSessionRejection,
   UiSessionService, WidgetTypeCatalogService, WidgetTypeInfo,
 } from '@shared';
 import { provideLocalizationTesting } from '../../../../../testing/localization-test-support';
@@ -17,6 +18,7 @@ class FakeUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
   readonly revision = signal(0);
   readonly rejection = signal<UiSessionRejection | null>(null);
+  readonly fault = signal<UiSessionRejection | null>(null);
   readonly generation = signal(0);
   readonly sent: UiNodeEvent[] = [];
   readonly requests: UiSessionOpenRequest[] = [];
@@ -93,6 +95,7 @@ function typeInfo(overrides: Partial<WidgetTypeInfo> = {}): WidgetTypeInfo {
 
 describe('WidgetConfigurationEditorComponent', () => {
   let opens: UiSessionOpenRequest[];
+  let openOptions: (UiSessionOpenOptions | undefined)[];
   let handles: FakeUiSessionHandle[];
   let infoFor: jasmine.Spy;
   let api: ApiService;
@@ -137,13 +140,15 @@ describe('WidgetConfigurationEditorComponent', () => {
 
   beforeEach(() => {
     opens = [];
+    openOptions = [];
     handles = [];
     infoFor = jasmine.createSpy('infoFor').and.resolveTo(null);
 
     const fakeUiSessions: Pick<UiSessionService, 'open'> = {
-      open: (source: UiSessionOpenRequestSource): UiSessionHandle => {
+      open: (source: UiSessionOpenRequestSource, options?: UiSessionOpenOptions): UiSessionHandle => {
         const handle = new FakeUiSessionHandle(source);
         opens.push(handle.requests[0]);
+        openOptions.push(options);
         handles.push(handle);
         return handle;
       },
@@ -901,6 +906,123 @@ describe('WidgetConfigurationEditorComponent', () => {
     const rejected = fixture.nativeElement.querySelector('.widget-config-rejected');
     expect(rejected).toBeTruthy();
     expect(rejected.textContent).toContain('temporarily unavailable');
+  });
+
+  describe('when the host can no longer serve the visual editor', () => {
+    const tooLarge = { code: 'PAYLOAD_TOO_LARGE' };
+
+    function labelTree(label: string): UiNode {
+      return configRoot([propertiesRegion([stringField('label', label)])]);
+    }
+
+    function configOpens(): UiSessionOpenRequest[] {
+      return opens.filter(request => request.kind === 'config');
+    }
+
+    function restoreButton(fixture: ComponentFixture<WidgetConfigurationEditorComponent>): HTMLButtonElement | null {
+      return fixture.nativeElement.querySelector('.widget-config-rejected button');
+    }
+
+    async function editLabel(fixture: ComponentFixture<WidgetConfigurationEditorComponent>, label: string): Promise<void> {
+      const node = configHandle().root()!.children![0].children![0];
+      fixture.debugElement.injector.get(UiNodeEventBus).emit(node, UiConfigEvents.Change, label);
+      await settle(fixture);
+    }
+
+    it('shows a message instead of loading forever when the session ends after a tree was shown', async () => {
+      const fixture = await createFixture();
+      configHandle().root.set(labelTree('Before'));
+      await settle(fixture);
+
+      configHandle().root.set(null);
+      configHandle().fault.set({ code: 'PROVIDER_FAULTED' });
+      await settle(fixture);
+
+      expect(fixture.componentInstance.ready()).toBeTrue();
+      expect(fixture.nativeElement.querySelector('.widget-config-rejected').textContent).toContain('temporarily unavailable');
+      expect(fixture.componentInstance.valid()).toBeTrue();
+    });
+
+    it('offers the last working version when an edit made the configuration too large, and blocks saving it', async () => {
+      const w = widget({ data: { label: 'Before' } as WidgetData });
+      const fixture = await createFixture(w);
+      configHandle().root.set(labelTree('Before'));
+      await settle(fixture);
+      await editLabel(fixture, 'Too much');
+
+      configHandle().root.set(null);
+      configHandle().fault.set(tooLarge);
+      await settle(fixture);
+
+      expect(fixture.componentInstance.valid()).toBeFalse();
+      expect(fixture.nativeElement.querySelector('.widget-config-rejected').textContent).toContain('too large');
+      restoreButton(fixture)!.click();
+      await settle(fixture);
+
+      expect(fixture.componentInstance.widget.data).toEqual({ label: 'Before' } as WidgetData);
+      expect(configOpens().at(-1)).toEqual(jasmine.objectContaining({ widgetData: JSON.stringify({ label: 'Before' }) }));
+    });
+
+    it('offers the last working version when a draft applied from outside is too large to reopen', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      configHandle().root.set(labelTree('Before'));
+      await settle(fixture);
+
+      fixture.componentRef.setInput('widget', widget({ data: { label: 'Too much' } as WidgetData }));
+      fixture.componentInstance.reload();
+      await settle(fixture);
+      configHandle2().rejection.set(tooLarge);
+      await settle(fixture);
+
+      restoreButton(fixture)!.click();
+      await settle(fixture);
+
+      expect(fixture.componentInstance.widget.data).toEqual({ label: 'Before' } as WidgetData);
+      expect(configOpens().length).toBe(3);
+      expect(configOpens()[2]).toEqual(jasmine.objectContaining({ widgetData: JSON.stringify({ label: 'Before' }) }));
+    });
+
+    it('falls back to the version the editor opened with when the last version shown is too large to open again', async () => {
+      const fixture = await createFixture(widget({ data: { label: 'Before' } as WidgetData }));
+      configHandle().root.set(labelTree('Before'));
+      await settle(fixture);
+      await editLabel(fixture, 'Middle');
+      configHandle().root.set(labelTree('Middle'));
+      await settle(fixture);
+      await editLabel(fixture, 'Too much');
+      configHandle().root.set(null);
+      configHandle().fault.set(tooLarge);
+      await settle(fixture);
+
+      restoreButton(fixture)!.click();
+      await settle(fixture);
+      expect(fixture.componentInstance.widget.data).toEqual({ label: 'Middle' } as WidgetData);
+
+      handles.at(-1)!.rejection.set(tooLarge);
+      await settle(fixture);
+      restoreButton(fixture)!.click();
+      await settle(fixture);
+
+      expect(fixture.componentInstance.widget.data).toEqual({ label: 'Before' } as WidgetData);
+      expect(configOpens().at(-1)).toEqual(jasmine.objectContaining({ widgetData: JSON.stringify({ label: 'Before' }) }));
+    });
+
+    it('points to JSON mode when the configuration was already too large when the editor opened', async () => {
+      const fixture = await createFixture();
+      configHandle().rejection.set(tooLarge);
+      await settle(fixture);
+
+      expect(fixture.componentInstance.ready()).toBeTrue();
+      expect(fixture.componentInstance.valid()).toBeFalse();
+      expect(restoreButton(fixture)).toBeNull();
+      expect(fixture.nativeElement.querySelector('.widget-config-rejected').textContent).toContain('JSON mode');
+    });
+
+    it('explains the end itself rather than also raising the generic unavailable toast', async () => {
+      await createFixture();
+
+      expect(openOptions[opens.findIndex(request => request.kind === 'config')]).toEqual({ notifyFault: false });
+    });
   });
 
   it('never writes to the host: driving several change events issues zero widget update calls', async () => {

@@ -19124,6 +19124,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>De configuratie van dit widget is tijdelijk niet beschikbaar. Schakel over naar de JSON-modus om het te bewerken.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Deze configuratie is te groot geworden voor de visuele editor. Zet de laatste werkende versie terug of verwijder acties of gebeurtenissen in de JSON-modus.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Deze configuratie is te groot voor de visuele editor. Verwijder acties of gebeurtenissen in de JSON-modus om haar hier weer te bewerken.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Laatste werkende versie terugzetten</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Statuskoppeling instellen</value>
   </data>

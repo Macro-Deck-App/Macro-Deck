@@ -19124,6 +19124,15 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Konfigurasi widget ini sedang tidak tersedia. Beralih ke mode JSON untuk mengeditnya.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Konfigurasi ini sudah terlalu besar untuk editor visual. Pulihkan versi terakhir yang berfungsi, atau hapus aksi atau peristiwa di mode JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Konfigurasi ini terlalu besar untuk editor visual. Hapus aksi atau peristiwa di mode JSON agar dapat diedit lagi di sini.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Pulihkan versi terakhir yang berfungsi</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Atur pemetaan status</value>
   </data>

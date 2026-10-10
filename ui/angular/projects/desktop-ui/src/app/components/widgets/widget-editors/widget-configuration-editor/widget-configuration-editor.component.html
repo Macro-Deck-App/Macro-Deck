@@ -31,9 +31,18 @@
   }
 </ng-template>
 
-@if (rejection()) {
+@if (sessionEnd()) {
   <div class="widget-config-rejected" role="alert">
-    {{ 'macrodeck.app:Widgets.Editor.ConfigUnavailableMessage' | translate }}
+    @if (!tooLarge()) {
+      <p>{{ 'macrodeck.app:Widgets.Editor.ConfigUnavailableMessage' | translate }}</p>
+    } @else if (canRestore()) {
+      <p>{{ 'macrodeck.app:Widgets.Editor.ConfigTooLargeMessage' | translate }}</p>
+      <shared-button variant="primary" (click)="restoreLastShownDraft()">
+        {{ 'macrodeck.app:Widgets.Editor.RestoreLastWorkingAction' | translate }}
+      </shared-button>
+    } @else {
+      <p>{{ 'macrodeck.app:Widgets.Editor.ConfigTooLargeNoRestoreMessage' | translate }}</p>
+    }
   </div>
 } @else if (editorRegion(); as editorNode) {
   <app-widget-editor-shell>

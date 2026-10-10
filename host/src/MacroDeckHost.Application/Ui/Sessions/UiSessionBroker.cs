@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
@@ -73,6 +74,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		{
 			SessionId = sessionId,
 			Provider = provider,
+			MaxTreeBytes = MaxTreeBytesFor(provider, surface),
 			PluginSessionId = CurrentPluginSessionId(providerId),
 			Outbound = new UiSessionWorkPump(sessionId, _logger),
 			ProviderPump = new UiSessionWorkPump(sessionId, _logger)
@@ -325,7 +327,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		var maxResourceBytes = context.Provider is InProcessUiSessionProvider
 			? HostUiResourceLimits.MaxHostIconResourceBytes
 			: ProtocolLimits.MaxUiResourceBytes;
-		var scan = UiPayloadValidator.Scan(payload.Utf8.Span, shape, maxResourceBytes);
+		var scan = UiPayloadValidator.Scan(payload.Utf8.Span, shape, maxResourceBytes, context.MaxTreeBytes);
 		var decision = shape == UiPayloadShape.Tree
 			? _registry.EvaluateSnapshot(sessionId, scan)
 			: _registry.EvaluatePatch(sessionId, scan);
@@ -621,6 +623,22 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		}
 	}
 
+	private static int MaxTreeBytesFor(IUiSessionProvider provider, UiSurface surface)
+		=> provider is InProcessUiSessionProvider && IsWidgetOwnSurface(surface)
+			? HostUiResourceLimits.MaxHostWidgetTreeBytes
+			: ProtocolLimits.MaxUiTreeBytes;
+
+	private static bool IsWidgetOwnSurface(UiSurface surface)
+		=> surface.Kind switch
+		{
+			UiSurfaceKinds.Widget or UiSurfaceKinds.Preview => true,
+			UiSurfaceKinds.Config => surface.Attributes.TryGetValue(UiConfigSurfaceAttributes.EntryPoint,
+					out var entryPoint) &&
+				entryPoint.ValueKind == JsonValueKind.String &&
+				entryPoint.GetString() == UiConfigEntryPoints.WidgetConfig,
+			_ => false
+		};
+
 	private string? CurrentPluginSessionId(string providerId)
 		=> _pluginSessions.Snapshot()
 			.FirstOrDefault(session => string.Equals(session.PluginId, providerId, StringComparison.Ordinal))
@@ -754,6 +772,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		public required string SessionId { get; init; }
 
 		public required IUiSessionProvider Provider { get; init; }
+
+		public required int MaxTreeBytes { get; init; }
 
 		// The plugin session this UI session was opened under, or null for an in-process provider.
 		public required string? PluginSessionId { get; init; }

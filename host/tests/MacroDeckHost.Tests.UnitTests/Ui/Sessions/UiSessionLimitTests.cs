@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Model.Nodes;
+using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -403,6 +404,95 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 	}
 
 	[Test]
+	public async Task A_widget_configuration_view_may_serve_a_tree_larger_than_a_plugin_may()
+	{
+		AddInProcessProvider(() => PaddedTree(1, 400 * 1024));
+		var ticket = await Broker.OpenAsync(ProviderId, WidgetConfigSurface(), DeviceA, CancellationToken.None);
+
+		Attach(ticket.SessionId, "c1");
+		await WaitForAsync(() => MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 1,
+			"A large widget configuration never reached the client.");
+		await SettleAsync();
+
+		Assert.That(MessagesFor<UiSessionInvalidatedEvent>("c1"), Is.Empty);
+	}
+
+	[TestCase(UiSurfaceKinds.Widget)]
+	[TestCase(UiSurfaceKinds.Preview)]
+	public async Task A_widget_tile_may_serve_a_tree_larger_than_a_plugin_may(string kind)
+	{
+		AddInProcessProvider(() => PaddedTree(1, 400 * 1024));
+		var ticket = await Broker.OpenAsync(ProviderId, Surface(kind: kind), DeviceA, CancellationToken.None);
+		var ready = await ticket.Ready;
+
+		Assert.That(ready.Accepted, Is.True);
+	}
+
+	[TestCase(UiSurfaceKinds.Folder)]
+	[TestCase(UiSurfaceKinds.Dialog)]
+	[TestCase(UiSurfaceKinds.Config)]
+	public async Task Other_Macro_Deck_views_keep_the_plugin_tree_limit(string kind)
+	{
+		AddInProcessProvider(() => PaddedTree(1, ProtocolLimits.MaxUiTreeBytes + 1024));
+		var ticket = await Broker.OpenAsync(ProviderId, Surface(kind: kind), DeviceA, CancellationToken.None);
+		var ready = await ticket.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ready.Accepted, Is.False);
+			Assert.That(ready.Code, Is.EqualTo(UiSessionErrorCodes.PayloadTooLarge));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_widget_configuration_keeps_the_plugin_tree_limit()
+	{
+		var provider = AddProvider();
+		provider.Snapshot = () => UiPayloads.TreeOfExactBytes(1, ProtocolLimits.MaxUiTreeBytes + 1);
+		var ticket = await Broker.OpenAsync(ProviderId, WidgetConfigSurface(), DeviceA, CancellationToken.None);
+		var ready = await ticket.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ready.Accepted, Is.False);
+			Assert.That(ready.Code, Is.EqualTo(UiSessionErrorCodes.PayloadTooLarge));
+		});
+	}
+
+	[Test]
+	public async Task A_widget_configuration_over_the_host_limit_is_never_served()
+	{
+		AddInProcessProvider(() => PaddedTree(1, HostUiResourceLimits.MaxHostWidgetTreeBytes + 1024));
+		var ticket = await Broker.OpenAsync(ProviderId, WidgetConfigSurface(), DeviceA, CancellationToken.None);
+		var ready = await ticket.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ready.Accepted, Is.False);
+			Assert.That(ready.Code, Is.EqualTo(UiSessionErrorCodes.PayloadTooLarge));
+		});
+	}
+
+	[Test]
+	public async Task A_client_attaching_after_its_view_was_refused_as_too_large_learns_why()
+	{
+		AddInProcessProvider(() => PaddedTree(1, HostUiResourceLimits.MaxHostWidgetTreeBytes + 1024));
+		var ticket = Broker.Open(ProviderId, WidgetConfigSurface(), DeviceA);
+		await ticket.Ready;
+
+		var owner = Attach(ticket.SessionId, "c1");
+		var stranger = Attach(ticket.SessionId, "c2", DeviceB);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(owner.Accepted, Is.False);
+			Assert.That(owner.Code, Is.EqualTo(UiSessionErrorCodes.PayloadTooLarge));
+			Assert.That(stranger.Accepted, Is.False);
+			Assert.That(stranger.Code, Is.EqualTo(UiSessionErrorCodes.SessionNotFound));
+		});
+	}
+
+	[Test]
 	public async Task An_oversize_declared_resource_inside_a_patch_insert_is_never_delivered()
 	{
 		var provider = AddProvider();
@@ -497,6 +587,31 @@ internal sealed class UiSessionLimitTests : UiSessionFixture
 		return UiPayloads.Patch(fromRevision,
 			toRevision,
 			"{\"op\":\"set-properties\",\"nodeId\":\"root\",\"properties\":{\"pad\":\"" + padding + "\"}}");
+	}
+
+	private static UiSurface WidgetConfigSurface()
+		=> Surface() with
+		{
+			Attributes = new Dictionary<string, JsonElement>
+			{
+				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig)
+			}
+		};
+
+	private static UiTree PaddedTree(int revision, int approximateBytes)
+	{
+		var tree = TreeAt(revision);
+		var padding = new UiNode
+		{
+			Id = "padding",
+			Type = "text",
+			Properties = new Dictionary<string, JsonElement>
+			{
+				["value"] = JsonSerializer.SerializeToElement(new string('a', approximateBytes))
+			}
+		};
+
+		return tree with { Root = tree.Root with { Children = [padding] } };
 	}
 
 	private static UiTree TreeWithIcon(int revision, long byteLength)

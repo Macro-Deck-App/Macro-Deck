@@ -36,6 +36,7 @@ import {
   WIDGET_REFERENCE_GAP,
 } from '@macro-deck/runtime';
 import {
+  ButtonComponent,
   IWidgetEditorComponent,
   TranslatePipe,
   UiNodeEventBus,
@@ -58,6 +59,8 @@ const DRAFT_EVENT_NAMES: ReadonlySet<string> = new Set([
 
 const FOLLOW_CONFIRM_MS = 2000;
 
+const PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE';
+
 type Draft = Record<string, unknown>;
 
 const PREVIEW_SHORT_SIDE_PX = 100;
@@ -67,6 +70,7 @@ const PREVIEW_LONG_SIDE_MAX_PX = 220;
   selector: 'app-widget-configuration-editor',
   standalone: true,
   imports: [
+    ButtonComponent,
     NgTemplateOutlet,
     TranslatePipe,
     // Deferred like `UiNodeComponent`'s own mutual references to `UiChromeComponent`/`UiInputComponent`
@@ -122,11 +126,16 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   protected readonly root = computed<UiNode | null>(() => this.handle()?.root() ?? null);
   protected readonly rejection = computed(() => this.handle()?.rejection() ?? null);
 
+  protected readonly sessionEnd = computed(() => this.handle()?.fault?.() ?? this.rejection());
+  protected readonly tooLarge = computed(() => this.sessionEnd()?.code === PAYLOAD_TOO_LARGE);
+
   private readonly noConfiguration = signal(false);
 
   /** Until the host answers with a tree there is only the preview to paint, and the single-pane
    * fallback below would show it alone before the real split layout replaced it. */
-  readonly ready = computed(() => this.root() !== null || this.rejection() !== null || this.noConfiguration());
+  readonly ready = computed(() => this.root() !== null || this.sessionEnd() !== null || this.noConfiguration());
+
+  readonly valid = computed(() => !this.tooLarge());
 
   protected readonly propertiesRegion = computed<UiNode | null>(
     () => findRegion(this.root(), UiConfigPrimitives.WidgetProperties));
@@ -147,6 +156,8 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
   private previousRoot: UiNode | null = null;
   private retainedRoot: UiNode | null = null;
   private openedWith: WidgetData | null = null;
+  private lastShownDraft: WidgetData | null = null;
+  private lastOpenedDraft: WidgetData | null = null;
 
   private treeDraft: WidgetData | null = null;
 
@@ -188,6 +199,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
       if (!this.seenTree) {
         this.seenTree = true;
         if (!deepEqual(this.widget.data, this.openedWith)) untracked(() => this.reopen());
+        else this.lastOpenedDraft = this.rememberShownDraft();
         return;
       }
 
@@ -266,6 +278,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     const follow = this.pendingFollow;
     if (!follow) {
       this.applyDraft(composeConfigDraft(root, data));
+      this.rememberShownDraft();
       return;
     }
 
@@ -277,6 +290,30 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
 
     this.settleFollow();
     this.applyDraft(previous ? foldChanges(composeConfigDraft(previous, data), composed, data) : data);
+    this.rememberShownDraft();
+  }
+
+  protected canRestore(): boolean {
+    return this.tooLarge() && this.restoreTarget() !== null;
+  }
+
+  protected restoreLastShownDraft(): void {
+    const target = this.restoreTarget();
+    if (!target) return;
+    this.applyDraft(structuredClone(target) as unknown as Record<string, unknown>);
+    this.reopen();
+  }
+
+  // A tree revised within a session still echoes the data the session was opened with, so the last
+  // revision shown can be too large to open again; the last draft a session opened with never is.
+  private restoreTarget(): WidgetData | null {
+    return [this.lastShownDraft, this.lastOpenedDraft]
+      .find(draft => draft !== null && !deepEqual(draft, this.widget.data)) ?? null;
+  }
+
+  private rememberShownDraft(): WidgetData {
+    this.lastShownDraft = structuredClone(this.widget.data);
+    return this.lastShownDraft;
   }
 
   private settleFollow(): void {
@@ -308,7 +345,7 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
         // that answer is not cached yet.
         configUiModelVersion: info?.configUiModelVersion ?? 0,
       };
-    }));
+    }, { notifyFault: false }));
   }
 
   protected onNodeEvent(event: UiNodeEvent): void {

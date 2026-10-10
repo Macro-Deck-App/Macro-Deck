@@ -117,6 +117,21 @@ not left waiting.
 If it keeps happening, report it with the error code and your [logs](#where-to-find-the-logs). The log
 records which dialog was refused and why.
 
+## The visual editor says a configuration is too large
+
+A widget's editor shows its settings in **Visual** mode for as long as the configuration fits. A button
+with a very large number of actions across its triggers and events can outgrow it. The editor then says
+the configuration is too large instead of showing the settings, and **Save** stays off in **Visual**
+mode.
+
+- If an edit you just made caused it, choose **Restore last working version**. The editor goes back to
+  the last configuration it could show, and you can continue there.
+- If the configuration was already that large when you opened it, switch to **JSON** mode and remove
+  some actions or events.
+
+To keep a button small, put a long list of actions into a [script](/guide/concepts/#scripts-and-automations)
+and run it from the button with **Run Script**.
+
 ## The Companion app stays unlicensed after a purchase
 
 When a Companion app that was bought connects, Macro Deck exchanges the purchase for a license with the

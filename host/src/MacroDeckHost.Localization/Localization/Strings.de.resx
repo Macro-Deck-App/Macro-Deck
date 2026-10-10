@@ -19103,6 +19103,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Die Konfiguration dieses Widgets ist vorübergehend nicht verfügbar. Wechsle in den JSON-Modus, um es zu bearbeiten.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Diese Konfiguration ist zu groß für den visuellen Editor geworden. Stelle die letzte funktionierende Version wieder her oder entferne Aktionen oder Ereignisse im JSON-Modus.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Diese Konfiguration ist zu groß für den visuellen Editor. Entferne Aktionen oder Ereignisse im JSON-Modus, um sie hier wieder zu bearbeiten.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Letzte funktionierende Version wiederherstellen</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Statuszuordnung konfigurieren</value>
   </data>
