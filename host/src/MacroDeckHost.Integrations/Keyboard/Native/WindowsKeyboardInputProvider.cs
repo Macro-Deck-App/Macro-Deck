@@ -16,6 +16,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	private const uint KeyEventFUnicode = 0x0004;
 	private const uint KeyEventFScanCode = 0x0008;
 	private const uint MapVkVkToVsc = 0;
+	private const uint MapVkVscToVkEx = 3;
 
 	public string PlatformName => "Windows (SendInput)";
 
@@ -92,12 +93,11 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	private static void SendKey(KeyCode key, bool isUp)
 	{
-		if (key == KeyCode.None || !TryGetVirtualKey(key, out var vk))
+		if (!TryMapKey(key, LayoutOf(Win32Windows.GetForegroundWindow()), out var vk, out var scan))
 		{
 			return;
 		}
 
-		var scan = IsMediaKey(key) ? (ushort)0 : (ushort)MapVirtualKey(vk, MapVkVkToVsc);
 		var flags = KeyEventFScanCode | (isUp ? KeyEventFKeyUp : 0);
 		if (IsExtendedKey(key))
 		{
@@ -238,8 +238,58 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 		return vk != 0;
 	}
 
+	internal static bool TryMapKey(KeyCode key, IntPtr layout, out ushort vk, out ushort scan)
+	{
+		vk = 0;
+		scan = 0;
+		if (key == KeyCode.None)
+		{
+			return false;
+		}
+
+		if (PhysicalKeys.IsPositional(key) && PhysicalKeys.TryGetScanCode(key, out scan))
+		{
+			vk = (ushort)MapVirtualKeyEx(scan, MapVkVscToVkEx, layout);
+			if (vk == 0)
+			{
+				_ = TryGetVirtualKey(key, out vk);
+			}
+
+			return true;
+		}
+
+		if (!TryGetVirtualKey(key, out vk))
+		{
+			return false;
+		}
+
+		if (!IsMediaKey(key))
+		{
+			scan = (ushort)MapVirtualKeyEx(vk, MapVkVkToVsc, layout);
+			if (scan == 0)
+			{
+				scan = (ushort)MapVirtualKey(vk, MapVkVkToVsc);
+			}
+		}
+
+		return true;
+	}
+
+	private static IntPtr LayoutOf(IntPtr window)
+	{
+		var thread = window == IntPtr.Zero ? 0 : Win32Windows.GetWindowThreadProcessId(window, out _);
+		var layout = thread == 0 ? IntPtr.Zero : GetKeyboardLayout(thread);
+		return layout == IntPtr.Zero ? GetKeyboardLayout(0) : layout;
+	}
+
 	[DllImport("user32.dll")]
 	private static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+	[DllImport("user32.dll")]
+	private static extern uint MapVirtualKeyEx(uint uCode, uint uMapType, IntPtr dwhkl);
+
+	[DllImport("user32.dll")]
+	private static extern IntPtr GetKeyboardLayout(uint idThread);
 
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
@@ -301,17 +351,13 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 		private void Post(KeyCode key, bool isUp)
 		{
-			if (key == KeyCode.None || !TryGetVirtualKey(key, out var vk))
-			{
-				return;
-			}
-
-			var scan = (ushort)MapVirtualKey(vk, MapVkVkToVsc);
-			var lParam = BuildLParam(scan, IsExtendedKey(key), isUp);
 			var message = isUp ? WmKeyUp : WmKeyDown;
 			foreach (var window in _windows)
 			{
-				_ = PostMessage(window, message, vk, lParam);
+				if (TryMapKey(key, LayoutOf(window), out var vk, out var scan) && vk != 0)
+				{
+					_ = PostMessage(window, message, vk, BuildLParam(scan, IsExtendedKey(key), isUp));
+				}
 			}
 		}
 

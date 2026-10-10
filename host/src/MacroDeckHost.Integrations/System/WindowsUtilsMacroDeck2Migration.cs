@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Migration;
@@ -18,6 +20,18 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 
 	private const string KeyboardIntegrationId = "app.macro-deck.keyboard";
 
+	private readonly Func<ushort, ushort>? _virtualKeyToScanCode;
+
+	public WindowsUtilsMacroDeck2Migration()
+		: this(OperatingSystem.IsWindows() ? WindowsVirtualKeyToScanCode : null)
+	{
+	}
+
+	internal WindowsUtilsMacroDeck2Migration(Func<ushort, ushort>? virtualKeyToScanCode)
+	{
+		_virtualKeyToScanCode = virtualKeyToScanCode;
+	}
+
 	// The plugin's csproj sets no AssemblyName, so the SDK defaults it to the project file name ("Windows
 	// Utils.csproj"), also the "dll" field of its ExtensionManifest.json minus the extension - confirmed
 	// against a real profile, whose $type strings read "..., Windows Utils".
@@ -35,7 +49,7 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 		CancellationToken cancellationToken)
 		=> Task.FromResult(MigrateConfiguration(settings));
 
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
+	private ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
 		"SuchByte.WindowsUtils.Actions.HotkeyAction" => MigrateHotkey(action),
 		"SuchByte.WindowsUtils.Actions.WriteTextAction" => MigrateWriteText(action),
@@ -70,7 +84,7 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	private static ActionMigrationResult NoParameterAction(ForeignAction action, string actionId, string fallbackLabel)
 		=> new(SystemIntegration.IntegrationId, actionId, action.DisplayName ?? fallbackLabel, Parameters());
 
-	private static ActionMigrationResult? MigrateHotkey(ForeignAction action)
+	private ActionMigrationResult? MigrateHotkey(ForeignAction action)
 	{
 		if (!TryParseObject(action.Configuration, out var config))
 		{
@@ -252,11 +266,44 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	/// launch keys, gamepad input, IME keys, mouse buttons) has no counterpart and is left unmapped so the
 	/// caller can fall back to a placeholder rather than binding the wrong key.
 	/// </summary>
-	private static bool TryMapKey(string virtualKeyCode, out string key)
+	private bool TryMapKey(string virtualKeyCode, out string key)
 	{
+		// OEM virtual keys depend on the keyboard layout, so they map to a position only through one.
+		if (_oemVirtualKeys.TryGetValue(virtualKeyCode, out var oem) &&
+			_virtualKeyToScanCode?.Invoke(oem) is { } scan && scan != 0 &&
+			PhysicalKeys.TryFromScanCode(scan, out var physical) &&
+			PhysicalKeys.IsPositional(physical))
+		{
+			key = physical.ToString();
+			return true;
+		}
+
 		key = _keyMap.GetValueOrDefault(virtualKeyCode, string.Empty);
 		return key.Length > 0;
 	}
+
+	private static readonly Dictionary<string, ushort> _oemVirtualKeys = new(StringComparer.Ordinal)
+	{
+		["OEM_1"] = 0xBA,
+		["OEM_PLUS"] = 0xBB,
+		["OEM_COMMA"] = 0xBC,
+		["OEM_MINUS"] = 0xBD,
+		["OEM_PERIOD"] = 0xBE,
+		["OEM_2"] = 0xBF,
+		["OEM_3"] = 0xC0,
+		["OEM_4"] = 0xDB,
+		["OEM_5"] = 0xDC,
+		["OEM_6"] = 0xDD,
+		["OEM_7"] = 0xDE,
+		["OEM_8"] = 0xDF,
+		["OEM_102"] = 0xE2
+	};
+
+	[SupportedOSPlatform("windows")]
+	private static ushort WindowsVirtualKeyToScanCode(ushort virtualKey) => (ushort)MapVirtualKey(virtualKey, 0);
+
+	[DllImport("user32.dll")]
+	private static extern uint MapVirtualKey(uint uCode, uint uMapType);
 
 	private static readonly Dictionary<string, string> _keyMap = BuildKeyMap();
 
@@ -335,6 +382,7 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 		map["OEM_5"] = "Backslash";
 		map["OEM_6"] = "BracketRight";
 		map["OEM_7"] = "Quote";
+		map["OEM_102"] = "IntlBackslash";
 		map["MEDIA_PLAY_PAUSE"] = "MediaPlayPause";
 		map["MEDIA_STOP"] = "MediaStop";
 		map["MEDIA_NEXT_TRACK"] = "MediaTrackNext";

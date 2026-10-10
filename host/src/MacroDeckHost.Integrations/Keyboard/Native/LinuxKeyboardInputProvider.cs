@@ -163,12 +163,12 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	private void SendKey(KeyCode key, bool isPress)
 	{
-		if (_display == IntPtr.Zero || !TryGetKeysym(key, out var keysym))
+		if (_display == IntPtr.Zero)
 		{
 			return;
 		}
 
-		var keycode = XKeysymToKeycode(_display, keysym);
+		var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
 		if (keycode == 0)
 		{
 			return;
@@ -191,6 +191,29 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		{
 			return IntPtr.Zero;
 		}
+	}
+
+	internal static uint ResolveKeycode(KeyCode key, Func<nuint, uint> keysymToKeycode)
+	{
+		// X servers on the evdev/libinput driver (Xorg and XWayland) number keys as evdev code plus 8.
+		const uint EvdevOffset = 8;
+		if (PhysicalKeys.IsPositional(key))
+		{
+			return PhysicalKeys.TryGetScanCode(key, out var position) ? position + EvdevOffset : 0;
+		}
+
+		if (!TryGetKeysym(key, out var keysym))
+		{
+			return 0;
+		}
+
+		var keycode = keysymToKeycode(keysym);
+		if (keycode == 0 && key is >= KeyCode.A and <= KeyCode.Z && PhysicalKeys.TryGetScanCode(key, out var letter))
+		{
+			return letter + EvdevOffset;
+		}
+
+		return keycode;
 	}
 
 	private static bool TryGetKeysym(KeyCode key, out nuint keysym)
@@ -236,17 +259,6 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			KeyCode.NumpadDivide => 0xFFAF,
 			KeyCode.NumpadDecimal => 0xFFAE,
 			KeyCode.NumpadEnter => 0xFF8D,
-			KeyCode.Semicolon => 0x003B,
-			KeyCode.Equal => 0x003D,
-			KeyCode.Comma => 0x002C,
-			KeyCode.Minus => 0x002D,
-			KeyCode.Period => 0x002E,
-			KeyCode.Slash => 0x002F,
-			KeyCode.Backquote => 0x0060,
-			KeyCode.BracketLeft => 0x005B,
-			KeyCode.Backslash => 0x005C,
-			KeyCode.BracketRight => 0x005D,
-			KeyCode.Quote => 0x0027,
 			KeyCode.MediaPlayPause => 0x1008FF14, // XF86AudioPlay (play/pause toggle)
 			KeyCode.MediaStop => 0x1008FF15, // XF86AudioStop
 			KeyCode.MediaTrackNext => 0x1008FF17, // XF86AudioNext
@@ -443,7 +455,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 		private void Send(KeyCode key, bool press)
 		{
-			if (!TryGetKeysym(key, out var keysym))
+			var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
+			if (keycode == 0)
 			{
 				return;
 			}
@@ -458,12 +471,6 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 				{
 					_state &= ~mask;
 				}
-			}
-
-			var keycode = XKeysymToKeycode(_display, keysym);
-			if (keycode == 0)
-			{
-				return;
 			}
 
 			foreach (var window in _windows)

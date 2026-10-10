@@ -73,6 +73,38 @@ describe('keyFromEvent', () => {
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'NumpadEnter' }))).toBe('NumpadEnter');
   });
 
+  it('records punctuation by its key position, whatever Shift or the layout makes it type', () => {
+    const record = (init: KeyboardEventInit) => keyFromEvent(new KeyboardEvent('keydown', init));
+    expect(record({ key: '-', code: 'Minus' })).toBe('Minus');
+    expect(record({ key: '_', code: 'Minus', shiftKey: true })).toBe('Minus');
+    expect(record({ key: 'ß', code: 'Minus' })).toBe('Minus');
+    expect(record({ key: 'ü', code: 'BracketLeft' })).toBe('BracketLeft');
+    expect(record({ key: 'ö', code: 'Semicolon' })).toBe('Semicolon');
+    expect(record({ key: '{', code: 'BracketLeft', shiftKey: true })).toBe('BracketLeft');
+    expect(record({ key: '~', code: 'BracketRight', ctrlKey: true, altKey: true })).toBe('BracketRight');
+  });
+
+  it('records the ISO key next to left Shift', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: '<', code: 'IntlBackslash' }))).toBe('IntlBackslash');
+  });
+
+  it('records dead keys by their position instead of "Dead"', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Dead', code: 'Backquote' }))).toBe('Backquote');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Dead', code: 'Equal' }))).toBe('Equal');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Dead', code: 'BracketLeft' }))).toBe('BracketLeft');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Dead', code: 'KeyE', altKey: true }))).toBe('E');
+  });
+
+  it('records the layout letter when Option or AltGr makes a moved letter type something else', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Ω', code: 'KeyY', altKey: true, keyCode: 90 }))).toBe('Z');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'æ', code: 'KeyQ', altKey: true, keyCode: 65 }))).toBe('A');
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'Dead', code: 'KeyE', altKey: true, keyCode: 69 }))).toBe('E');
+  });
+
+  it('keeps the layout letter when a letter sits on a punctuation position', () => {
+    expect(keyFromEvent(new KeyboardEvent('keydown', { key: 'm', code: 'Semicolon' }))).toBe('M');
+  });
+
   it('falls back to the produced character for numpad keys the host has no name for', () => {
     expect(keyFromEvent(new KeyboardEvent('keydown', { key: '=', code: 'NumpadEqual' }))).toBe('=');
   });
@@ -91,6 +123,16 @@ describe('supportedKeyGroups', () => {
       'AudioVolumeDown',
       'AudioVolumeMute',
     ]);
+  });
+});
+
+describe('supportedKeyGroups symbols', () => {
+  it('offers exactly the names Record mode stores for every symbol key', () => {
+    const symbols = supportedKeyGroups(t).find(group => group.keys.some(key => key.value === 'Minus'))!;
+    for (const { value } of symbols.keys) {
+      expect(keyFromEvent(new KeyboardEvent('keydown', { key: '\u00a7', code: value }))).toBe(value);
+    }
+    expect(symbols.keys.map(key => key.value)).toContain('IntlBackslash');
   });
 });
 

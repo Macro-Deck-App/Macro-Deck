@@ -22,6 +22,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 	private const string LibObjC = "/usr/lib/libobjc.dylib";
 	private const nuint NSApplicationActivateIgnoringOtherApps = 2;
 
+	private readonly MacOsKeyboardLayout _layout = new();
 	private ulong _activeFlags;
 
 	public string PlatformName => "macOS (Quartz CGEvent)";
@@ -91,7 +92,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			process.Dispose();
 		}
 
-		return new MacTargetWindow(pid);
+		return new MacTargetWindow(pid, _layout);
 	}
 
 	private static bool TryActivatePid(int pid)
@@ -124,7 +125,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 	private void PostKey(KeyCode key, bool keyDown)
 	{
-		if (!TryGetKeyCode(key, out var virtualKey))
+		if (!TryGetKeyCode(_layout, key, out var virtualKey))
 		{
 			return;
 		}
@@ -183,24 +184,20 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 		return flag != 0;
 	}
 
-	private static bool TryGetKeyCode(KeyCode key, out ushort virtualKey)
+	private static bool TryGetKeyCode(MacOsKeyboardLayout layout, KeyCode key, out ushort virtualKey)
 	{
+		if (key is >= KeyCode.A and <= KeyCode.Z && layout.TryGetLetterKeyCode(key, out virtualKey))
+		{
+			return true;
+		}
+
+		if (PhysicalKeys.TryGetMacKeyCode(key, out virtualKey))
+		{
+			return true;
+		}
+
 		virtualKey = key switch
 		{
-			KeyCode.A => 0, KeyCode.S => 1, KeyCode.D => 2, KeyCode.F => 3, KeyCode.H => 4,
-			KeyCode.G => 5, KeyCode.Z => 6, KeyCode.X => 7, KeyCode.C => 8, KeyCode.V => 9,
-			KeyCode.B => 11, KeyCode.Q => 12, KeyCode.W => 13, KeyCode.E => 14, KeyCode.R => 15,
-			KeyCode.Y => 16, KeyCode.T => 17, KeyCode.O => 31, KeyCode.U => 32, KeyCode.I => 34,
-			KeyCode.P => 35, KeyCode.L => 37, KeyCode.J => 38, KeyCode.K => 40, KeyCode.N => 45,
-			KeyCode.M => 46,
-
-			KeyCode.D1 => 18, KeyCode.D2 => 19, KeyCode.D3 => 20, KeyCode.D4 => 21, KeyCode.D5 => 23,
-			KeyCode.D6 => 22, KeyCode.D7 => 26, KeyCode.D8 => 28, KeyCode.D9 => 25, KeyCode.D0 => 29,
-
-			KeyCode.Equal => 24, KeyCode.Minus => 27, KeyCode.BracketRight => 30, KeyCode.BracketLeft => 33,
-			KeyCode.Quote => 39, KeyCode.Semicolon => 41, KeyCode.Backslash => 42, KeyCode.Comma => 43,
-			KeyCode.Slash => 44, KeyCode.Period => 47, KeyCode.Backquote => 50,
-
 			KeyCode.Enter => 36, KeyCode.Tab => 48, KeyCode.Space => 49, KeyCode.Backspace => 51,
 			KeyCode.Escape => 53, KeyCode.CapsLock => 57,
 
@@ -268,11 +265,13 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 	private sealed class MacTargetWindow : IKeyboardTargetWindow
 	{
 		private readonly int _pid;
+		private readonly MacOsKeyboardLayout _layout;
 		private ulong _activeFlags;
 
-		public MacTargetWindow(int pid)
+		public MacTargetWindow(int pid, MacOsKeyboardLayout layout)
 		{
 			_pid = pid;
+			_layout = layout;
 		}
 
 		public IDisposable? Focus()
@@ -323,7 +322,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 		private void PostToPid(KeyCode key, bool keyDown)
 		{
-			if (!TryGetKeyCode(key, out var virtualKey))
+			if (!TryGetKeyCode(_layout, key, out var virtualKey))
 			{
 				return;
 			}

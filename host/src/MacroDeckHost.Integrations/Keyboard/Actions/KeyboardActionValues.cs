@@ -1,12 +1,15 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Keyboard.Actions;
 
 internal static class KeyboardActionValues
 {
+	private static readonly Serilog.ILogger _logger = IntegrationLog.For(KeyboardInputIntegration.IntegrationId);
+
 	private static readonly JsonSerializerOptions _jsonOptions = new()
 	{
 		PropertyNameCaseInsensitive = true
@@ -27,6 +30,16 @@ internal static class KeyboardActionValues
 			string json when json.TrimStart().StartsWith('{') => FromJson(json),
 			_ => ([], string.Empty)
 		};
+	}
+
+	public static KeyCode ResolveKey(IKeyboardLayoutService layout, string keyName)
+	{
+		if (!layout.TryResolveKey(keyName, out var key) && !string.IsNullOrWhiteSpace(keyName))
+		{
+			_logger.Warning("Could not resolve key '{Key}' in keyboard action", keyName);
+		}
+
+		return key;
 	}
 
 	public static string ReadString(IReadOnlyDictionary<string, object> parameters, string name)

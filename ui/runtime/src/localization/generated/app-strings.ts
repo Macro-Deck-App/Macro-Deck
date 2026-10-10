@@ -5668,6 +5668,10 @@ export const AppStrings = {
 			Symbols: 'macrodeck.app:Keyboard.Group.Symbols',
 			System: 'macrodeck.app:Keyboard.Group.System',
 		},
+		Key: {
+			IntlBackslash: 'macrodeck.app:Keyboard.Key.IntlBackslash',
+			UsPosition: 'macrodeck.app:Keyboard.Key.UsPosition',
+		},
 		Media: {
 			Mute: 'macrodeck.app:Keyboard.Media.Mute',
 			NextTrack: 'macrodeck.app:Keyboard.Media.NextTrack',
@@ -13418,6 +13422,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Keyboard.Group.Numpad': 'Numpad',
 	'macrodeck.app:Keyboard.Group.Symbols': 'Symbols',
 	'macrodeck.app:Keyboard.Group.System': 'System',
+	'macrodeck.app:Keyboard.Key.IntlBackslash': 'ISO extra key (IntlBackslash)',
+	'macrodeck.app:Keyboard.Key.UsPosition': '{key} key (US layout)',
 	'macrodeck.app:Keyboard.Media.Mute': 'Mute',
 	'macrodeck.app:Keyboard.Media.NextTrack': 'Next Track',
 	'macrodeck.app:Keyboard.Media.PlayPause': 'Play / Pause',

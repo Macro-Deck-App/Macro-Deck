@@ -12977,6 +12977,13 @@
     <value>{modifier} الأيمن</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>مفتاح ISO الإضافي (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>مفتاح {key} (تخطيط US)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>أدخل مفتاح فك التشفير</value>
   </data>

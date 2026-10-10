@@ -12977,6 +12977,13 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Rechter {modifier}</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>Extra ISO-toets (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>Toets {key} (Amerikaanse indeling)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Voer de decoderingssleutel in</value>
   </data>

@@ -12977,6 +12977,13 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>दायाँ {modifier}</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>ISO अतिरिक्त कुंजी (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>{key} कुंजी (US लेआउट)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>डिक्रिप्शन कुंजी दर्ज करें</value>
   </data>

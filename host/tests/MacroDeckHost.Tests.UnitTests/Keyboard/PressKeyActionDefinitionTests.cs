@@ -57,6 +57,29 @@ public class PressKeyActionDefinitionTests
 		});
 	}
 
+	[TestCase("Cmd", "-", "combo:Meta+Minusx1")]
+	[TestCase("Win", "Esc", "combo:Meta+Escapex1")]
+	[TestCase("Option", "[", "combo:Alt+BracketLeftx1")]
+	[TestCase("Ctrl", "IntlBackslash", "combo:Control+IntlBackslashx1")]
+	public async Task A_saved_combo_spelled_with_aliases_presses_the_same_key_as_its_canonical_name(
+		string modifier,
+		string key,
+		string expected)
+	{
+		var input = new FakeKeyboardInputService();
+		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
+
+		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
+		{
+			Parameters = new Dictionary<string, object>
+			{
+				["combo"] = new Dictionary<string, object?> { ["modifiers"] = new List<object?> { modifier }, ["key"] = key }
+			}
+		});
+
+		Assert.That(input.Calls, Does.Contain(expected));
+	}
+
 	[Test]
 	public async Task An_only_when_focused_target_that_is_not_focused_is_a_legitimate_no_op()
 	{

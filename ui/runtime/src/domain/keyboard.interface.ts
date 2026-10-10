@@ -143,19 +143,10 @@ export function supportedKeyGroups(t: KeyboardTranslator): KeyGroup[] {
   },
   {
     label: t(G.Symbols),
-    keys: [
-      { value: 'Minus', label: '- Minus' },
-      { value: 'Equal', label: '= Equal' },
-      { value: 'BracketLeft', label: '[ Bracket Left' },
-      { value: 'BracketRight', label: '] Bracket Right' },
-      { value: 'Backslash', label: '\\ Backslash' },
-      { value: 'Semicolon', label: '; Semicolon' },
-      { value: 'Quote', label: "' Quote" },
-      { value: 'Comma', label: ', Comma' },
-      { value: 'Period', label: '. Period' },
-      { value: 'Slash', label: '/ Slash' },
-      { value: 'Backquote', label: '` Backquote' },
-    ],
+    keys: POSITIONAL_KEYS.map(({ value, usKey }) => ({
+      value,
+      label: usKey ? t(AppStrings.Keyboard.Key.UsPosition, { key: usKey }) : t(AppStrings.Keyboard.Key.IntlBackslash),
+    })),
   },
   { label: t(G.Numpad), keys: range([...NUMPAD_KEY_NAMES]) },
   {
@@ -172,6 +163,23 @@ export function supportedKeyGroups(t: KeyboardTranslator): KeyGroup[] {
   },
   ];
 }
+
+const POSITIONAL_KEYS: readonly { value: string; usKey?: string }[] = [
+  { value: 'Minus', usKey: '-' },
+  { value: 'Equal', usKey: '=' },
+  { value: 'BracketLeft', usKey: '[' },
+  { value: 'BracketRight', usKey: ']' },
+  { value: 'Backslash', usKey: '\\' },
+  { value: 'Semicolon', usKey: ';' },
+  { value: 'Quote', usKey: "'" },
+  { value: 'Comma', usKey: ',' },
+  { value: 'Period', usKey: '.' },
+  { value: 'Slash', usKey: '/' },
+  { value: 'Backquote', usKey: '`' },
+  { value: 'IntlBackslash' },
+];
+
+const POSITIONAL_KEY_NAMES = new Set(POSITIONAL_KEYS.map(key => key.value));
 
 const NUMPAD_KEY_NAMES = new Set([
   'Numpad0', 'Numpad1', 'Numpad2', 'Numpad3', 'Numpad4',
@@ -192,17 +200,26 @@ const MEDIA_KEY_NAMES = new Set([
 const LETTER_OR_DIGIT = /^[A-Z0-9]$/;
 const LETTER_OR_DIGIT_CODE = /^(?:Key([A-Z])|Digit([0-9]))$/;
 
+const KEYS_WITHOUT_CHARACTER = new Set(['Dead', 'Unidentified', 'Process']);
+
+// keyCode is deprecated, but it is the only field that names the layout's letter when a modifier
+// changed what the key types: WebKit fills it from the unmodified characters, Chromium from the layout VK.
+function layoutLetter(event: KeyboardEvent): string | null {
+  return event.keyCode >= 65 && event.keyCode <= 90 ? String.fromCharCode(event.keyCode) : null;
+}
+
 export function keyFromEvent(event: KeyboardEvent): string {
   if (event.code === 'Space' || event.key === ' ') return 'Space';
   if (MEDIA_KEY_NAMES.has(event.code)) return event.code;
   if (MEDIA_KEY_NAMES.has(event.key)) return event.key;
   if (NUMPAD_KEY_NAMES.has(event.code)) return event.code;
-  if (event.key.length === 1) {
-    const key = event.key.toUpperCase();
-    if (LETTER_OR_DIGIT.test(key)) return key;
+  const produced = event.key.length === 1 ? event.key.toUpperCase() : null;
+  if (produced && LETTER_OR_DIGIT.test(produced)) return produced;
+  if (POSITIONAL_KEY_NAMES.has(event.code)) return event.code;
+  if (produced || KEYS_WITHOUT_CHARACTER.has(event.key)) {
     const physical = LETTER_OR_DIGIT_CODE.exec(event.code);
-    if (physical) return physical[1] ?? physical[2];
-    return key;
+    if (physical?.[1]) return layoutLetter(event) ?? physical[1];
+    if (physical) return physical[2];
   }
-  return event.key;
+  return produced ?? event.key;
 }

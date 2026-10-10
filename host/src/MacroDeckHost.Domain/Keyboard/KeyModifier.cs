@@ -1,4 +1,4 @@
-namespace MacroDeckHost.Integrations.Keyboard;
+namespace MacroDeckHost.Domain.Keyboard;
 
 [Flags]
 public enum KeyModifier
