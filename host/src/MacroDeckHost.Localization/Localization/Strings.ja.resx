@@ -19131,6 +19131,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>このウィジェットの設定は一時的に利用できません。編集するには JSON モードに切り替えてください。</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>この設定はビジュアルエディターで扱える大きさを超えました。最後に動作していたバージョンを復元するか、JSON モードでアクションやイベントを削除してください。</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>この設定はビジュアルエディターで扱える大きさを超えています。ここで再び編集するには、JSON モードでアクションやイベントを削除してください。</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>最後に動作していたバージョンを復元</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>状態のマッピングを設定</value>
   </data>

@@ -19131,6 +19131,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>이 위젯의 설정을 일시적으로 사용할 수 없습니다. 편집하려면 JSON 모드로 전환하세요.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>이 설정이 시각적 편집기에서 다루기에는 너무 커졌습니다. 마지막으로 작동하던 버전을 복원하거나 JSON 모드에서 액션 또는 이벤트를 삭제하세요.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>이 설정은 시각적 편집기에서 다루기에는 너무 큽니다. 여기에서 다시 편집하려면 JSON 모드에서 액션 또는 이벤트를 삭제하세요.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>마지막으로 작동하던 버전 복원</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>상태 매핑 설정</value>
   </data>

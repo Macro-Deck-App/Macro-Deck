@@ -9,7 +9,7 @@ public static class UiWebSocketProtocol
 	public const int Version = 1;
 	public const string Path = "/ws/ui";
 	public const string SubProtocol = "macrodeck.ui.v1";
-	public const int MaxMessageBytes = 256 * 1024;
+	public const int MaxMessageBytes = 1024 * 1024;
 
 	public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
 	{

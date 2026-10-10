@@ -19131,6 +19131,15 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>此小工具的設定暫時無法使用。請切換為 JSON 模式進行編輯。</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>此設定對視覺化編輯器來說過大。請還原上一個可用版本，或在 JSON 模式中移除部分動作或事件。</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>此設定對視覺化編輯器來說過大。請在 JSON 模式中移除部分動作或事件，以便再次在此處編輯。</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>還原上一個可用版本</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>設定狀態對應</value>
   </data>

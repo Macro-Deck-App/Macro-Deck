@@ -19112,6 +19112,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>La configuration de ce widget est temporairement indisponible. Passe en mode JSON pour le modifier.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Cette configuration est devenue trop volumineuse pour l'éditeur visuel. Restaure la dernière version fonctionnelle ou supprime des actions ou des événements en mode JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Cette configuration est trop volumineuse pour l'éditeur visuel. Supprime des actions ou des événements en mode JSON pour la modifier à nouveau ici.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Restaurer la dernière version fonctionnelle</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Configurer la correspondance des états</value>
   </data>

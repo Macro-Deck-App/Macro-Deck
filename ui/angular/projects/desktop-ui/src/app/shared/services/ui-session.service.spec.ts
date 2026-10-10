@@ -435,6 +435,19 @@ describe('UiSessionService sessions that end before or while they are shown', ()
     expect(toast.show).not.toHaveBeenCalled();
   });
 
+  it('leaves the end of a shown view to a caller that explains it itself', async () => {
+    const handle = TestBed.inject(UiSessionService).open(request, { notifyFault: false });
+    await settle();
+    showTree(latestSessionId);
+
+    end(latestSessionId, false);
+    await settle();
+
+    expect(handle.root()).toBeNull();
+    expect(handle.fault?.()).not.toBeNull();
+    expect(toast.show).not.toHaveBeenCalled();
+  });
+
   it('reports a lost view once, and no rejection, when a refused re-attach is followed by the end of the session', async () => {
     const handle = TestBed.inject(UiSessionService).open(request);
     await settle();

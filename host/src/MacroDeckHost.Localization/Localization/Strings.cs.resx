@@ -19112,6 +19112,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Konfigurace tohoto widgetu je dočasně nedostupná. Přepněte do režimu JSON a upravte ho.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Tato konfigurace je pro vizuální editor příliš velká. Obnovte poslední funkční verzi nebo odeberte akce či události v režimu JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Tato konfigurace je pro vizuální editor příliš velká. Pro další úpravy zde odeberte akce či události v režimu JSON.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Obnovit poslední funkční verzi</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Nastavit mapování stavů</value>
   </data>

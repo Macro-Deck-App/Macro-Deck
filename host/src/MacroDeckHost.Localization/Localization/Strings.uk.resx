@@ -19131,6 +19131,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Налаштування цього віджета тимчасово недоступні. Перейдіть у режим JSON, щоб їх редагувати.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Ця конфігурація стала завеликою для візуального редактора. Відновіть останню робочу версію або видаліть дії чи події в режимі JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Ця конфігурація завелика для візуального редактора. Видаліть дії чи події в режимі JSON, щоб знову редагувати її тут.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Відновити останню робочу версію</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Налаштувати відповідність станів</value>
   </data>

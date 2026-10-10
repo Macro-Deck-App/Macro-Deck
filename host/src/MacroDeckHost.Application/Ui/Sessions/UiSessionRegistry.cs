@@ -138,6 +138,7 @@ public sealed class UiSessionRegistry : IDisposable
 	private readonly Dictionary<string, UiSessionRecord> _bySessionId = new(StringComparer.Ordinal);
 	private readonly Queue<string> _endedOrder = new();
 	private readonly HashSet<string> _ended = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, UnseenEnd> _unseenEnds = new(StringComparer.Ordinal);
 
 	public UiSessionRegistry(TimeProvider timeProvider)
 	{
@@ -245,7 +246,12 @@ public sealed class UiSessionRegistry : IDisposable
 		{
 			if (!_bySessionId.TryGetValue(sessionId!, out var record))
 			{
-				return Rejected(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
+				// A session can end before its client attaches, and then the attach is the client's only
+				// way to learn why. Only the principal it belonged to is told.
+				return _unseenEnds.TryGetValue(sessionId!, out var end) &&
+					string.Equals(end.OwnerPrincipal, principal, StringComparison.Ordinal)
+						? Rejected(end.Code, end.Message)
+						: Rejected(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
 			}
 
 			// The owning principal is the control that keeps one device's half-filled dialog off another
@@ -546,6 +552,11 @@ public sealed class UiSessionRegistry : IDisposable
 			record.State = UiSessionState.Invalidated;
 			projected = Project(record);
 			Remove(record);
+
+			if (!retryable && !record.EverAttached)
+			{
+				_unseenEnds[record.SessionId] = new UnseenEnd(record.OwnerPrincipal, code, message);
+			}
 		}
 
 		Ended?.Invoke(this,
@@ -642,6 +653,8 @@ public sealed class UiSessionRegistry : IDisposable
 
 	private static bool IsTerminal(UiSessionRecord record)
 		=> record.State is UiSessionState.Closed or UiSessionState.Invalidated;
+
+	private sealed record UnseenEnd(string OwnerPrincipal, string Code, string Message);
 
 	private static UiSessionAttachOutcome Rejected(string code, string message)
 		=> new()
@@ -742,7 +755,9 @@ public sealed class UiSessionRegistry : IDisposable
 
 		while (_endedOrder.Count > MaxTombstones)
 		{
-			_ended.Remove(_endedOrder.Dequeue());
+			var evicted = _endedOrder.Dequeue();
+			_ended.Remove(evicted);
+			_unseenEnds.Remove(evicted);
 		}
 	}
 

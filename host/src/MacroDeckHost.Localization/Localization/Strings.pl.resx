@@ -19112,6 +19112,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Konfiguracja tego widżetu jest tymczasowo niedostępna. Przełącz się na tryb JSON, aby go edytować.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Ta konfiguracja stała się zbyt duża dla edytora wizualnego. Przywróć ostatnią działającą wersję lub usuń akcje albo zdarzenia w trybie JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Ta konfiguracja jest zbyt duża dla edytora wizualnego. Usuń akcje albo zdarzenia w trybie JSON, aby ponownie edytować ją tutaj.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Przywróć ostatnią działającą wersję</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Konfiguruj mapowanie stanów</value>
   </data>

@@ -19131,6 +19131,15 @@
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>إعدادات هذه الأداة غير متاحة مؤقتاً. انتقل إلى وضع JSON لتعديلها.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>أصبح هذا الإعداد أكبر من أن يتعامل معه المحرر المرئي. استعد آخر إصدار عامل، أو احذف إجراءات أو أحداثًا في وضع JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>هذا الإعداد أكبر من أن يتعامل معه المحرر المرئي. احذف إجراءات أو أحداثًا في وضع JSON لتتمكن من تحريره هنا مجددًا.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>استعادة آخر إصدار عامل</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>ضبط ربط الحالات</value>
   </data>

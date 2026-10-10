@@ -67,10 +67,11 @@ public static class UiPayloadValidator
 
 	public static UiPayloadScan Scan(ReadOnlySpan<byte> utf8,
 		UiPayloadShape shape,
-		int maxResourceBytes = ProtocolLimits.MaxUiResourceBytes)
+		int maxResourceBytes = ProtocolLimits.MaxUiResourceBytes,
+		int maxTreeBytes = ProtocolLimits.MaxUiTreeBytes)
 	{
 		var sizeLimit = shape == UiPayloadShape.Tree
-			? ProtocolLimits.MaxUiTreeBytes
+			? maxTreeBytes
 			: ProtocolLimits.MaxUiPatchBytes;
 
 		// Checked before a single token is read: parsing an oversized body is the risk being bounded.

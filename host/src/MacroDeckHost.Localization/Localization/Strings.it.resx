@@ -19112,6 +19112,15 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>La configurazione di questo widget non è temporaneamente disponibile. Passa alla modalità JSON per modificarlo.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Questa configurazione è diventata troppo grande per l'editor visivo. Ripristina l'ultima versione funzionante oppure rimuovi azioni o eventi in modalità JSON.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Questa configurazione è troppo grande per l'editor visivo. Rimuovi azioni o eventi in modalità JSON per modificarla di nuovo qui.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Ripristina l'ultima versione funzionante</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Configura mappatura degli stati</value>
   </data>

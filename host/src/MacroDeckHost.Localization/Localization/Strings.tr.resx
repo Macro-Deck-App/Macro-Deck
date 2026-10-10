@@ -19131,6 +19131,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.Editor.ConfigUnavailableMessage" xml:space="preserve">
     <value>Bu widget'ın yapılandırması geçici olarak kullanılamıyor. Düzenlemek için JSON moduna geçin.</value>
   </data>
+  <data name="Widgets.Editor.ConfigTooLargeMessage" xml:space="preserve">
+    <value>Bu yapılandırma görsel düzenleyici için fazla büyüdü. Son çalışan sürümü geri yükleyin veya JSON modunda eylem ya da olayları kaldırın.</value>
+  </data>
+  <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
+    <value>Bu yapılandırma görsel düzenleyici için fazla büyük. Burada yeniden düzenlemek için JSON modunda eylem ya da olayları kaldırın.</value>
+  </data>
+  <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
+    <value>Son çalışan sürümü geri yükle</value>
+  </data>
   <data name="Widgets.Editor.ConfigureStateMapping" xml:space="preserve">
     <value>Durum eşlemesini yapılandır</value>
   </data>

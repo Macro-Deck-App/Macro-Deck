@@ -1,6 +1,10 @@
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Ui.Sessions;
+using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
+using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 using MacroDeckHost.Ui;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui;
@@ -110,6 +114,35 @@ public sealed class UiWebSocketOversizedMessageTests
 			Assert.That(socket.Sent.Select(Read).Select(envelope => envelope.Type), Is.EqualTo(new[] { "Notice" }));
 			Assert.That(socket.ClosedWith, Is.Null);
 			Assert.That(socket.Aborted, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_widget_tree_at_the_host_limit_still_fits_one_pushed_message()
+	{
+		var socket = new RecordingWebSocket();
+		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
+		using var cancellation = new CancellationTokenSource();
+		channel.Writer.TryWrite(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			"message",
+			"UiSessionTreeUpdatedEvent",
+			null,
+			null,
+			new UiSessionTreeUpdatedEvent
+			{
+				SessionId = new string('s', 32),
+				Revision = int.MaxValue,
+				Tree = new UiRawJson(UiPayloads.TreeOfExactBytes(1, HostUiResourceLimits.MaxHostWidgetTreeBytes))
+			},
+			null));
+		channel.Writer.TryComplete();
+
+		await UiWebSocketEndpoint.WriteAsync(socket, channel.Reader, cancellation, TimeProvider.System);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(socket.Sent, Has.Count.EqualTo(1));
+			Assert.That(socket.ClosedWith, Is.Null);
 		});
 	}
 
