@@ -3485,6 +3485,21 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>खारिज करें</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>ठीक है</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>यह उत्तर स्वीकार नहीं किया गया। अपनी जानकारी जाँचें और फिर कोशिश करें।</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>इंटीग्रेशन</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>प्लगइन</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>विजेट एक ग्रिड पर, जिसे आप स्वयं व्यवस्थित करते हैं।</value>
   </data>
@@ -10003,6 +10018,63 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>शीर्षक</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>Macro Deck सूचना दिखाएँ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>जुड़े हुए डिवाइस और ऐप्स पर Macro Deck में एक संदेश दिखाता है, छोटे संदेश या डायलॉग के रूप में, और चाहें तो उसे सूचना सूची में रखता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>शीर्षक</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>संदेश</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>गंभीरता</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>इस रूप में दिखाएँ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>छोटा संदेश स्क्रीन पर कितनी देर रहता है। डिफ़ॉल्ट के लिए खाली छोड़ें।</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>जानकारी</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>सफलता</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>चेतावनी</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>त्रुटि</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>छोटा संदेश</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>छोटा संदेश और सूचना सूची</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>डायलॉग</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>डायलॉग और सूचना सूची</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>केवल सूचना सूची</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>सूचनाएँ अभी उपलब्ध नहीं हैं।</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>सूचना दिखाई नहीं जा सकी।</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>चुने गए ऑडियो डिवाइस का वॉल्यूम एक निश्चित स्तर पर सेट करता है।</value>
   </data>
@@ -16385,6 +16457,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>सब साफ़ करें</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>पढ़ा हुआ चिह्नित करें</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>सभी को पढ़ा हुआ चिह्नित करें</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>अपठित</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>सूचनाएँ बंद करें</value>

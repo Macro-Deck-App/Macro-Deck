@@ -991,7 +991,32 @@ export {
   type UserNotificationProgress,
   type UserNotificationsChangedEvent,
   type UserNotificationSeverity,
+  type UserNotificationSourceCategory,
 } from './protocol/messages/notification-center';
+export {
+  type ActiveNotification,
+  type ActiveNotificationsEvent,
+  type NotificationActionDto,
+  type NotificationActionStyle,
+  type NotificationClosedEvent,
+  type NotificationCloseReason,
+  type NotificationPopupKind,
+  type NotificationProgressDto,
+  type NotificationSeverity,
+  type NotificationShownEvent,
+  type NotificationSourceCategory,
+  type NotificationUpdatedEvent,
+  type RespondToNotificationRequest,
+  type RespondToNotificationResponse,
+  type RespondToNotificationStatus,
+} from './protocol/messages/notifications';
+export { NotificationPopupStore } from './notifications/notification-popup-store';
+export {
+  applyNotificationDraftEvent,
+  createNotificationDraft,
+  overlayNotificationDraft,
+  type NotificationDraft,
+} from './notifications/notification-form';
 export {
   type CompatibilityFinding,
   type CompatibilityFindingSource,

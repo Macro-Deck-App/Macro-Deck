@@ -49,6 +49,14 @@ export class NotificationPanelComponent {
     this.notificationCenter.dismiss(id);
   }
 
+  onMarkRead(id: string): void {
+    this.notificationCenter.markRead(id);
+  }
+
+  onMarkAllRead(): void {
+    this.notificationCenter.markAllRead();
+  }
+
   onAction(event: NotificationActionEvent): void {
     const { notification, action } = event;
 

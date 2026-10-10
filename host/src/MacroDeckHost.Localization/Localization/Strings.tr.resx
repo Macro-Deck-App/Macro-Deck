@@ -3485,6 +3485,21 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>Kapat</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>Tamam</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>Bu yanıt kabul edilmedi. Girdiğiniz bilgileri kontrol edin ve tekrar deneyin.</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>Entegrasyon</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>Eklenti</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>Kendiniz düzenlediğiniz bir ızgaradaki widget'lar.</value>
   </data>
@@ -10003,6 +10018,63 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>Başlık</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>Macro Deck bildirimi göster</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>Bağlı cihazlarda ve uygulamalarda Macro Deck içinde kısa bir mesaj veya iletişim kutusu olarak bir mesaj gösterir ve istenirse bildirim listesinde saklar.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>Başlık</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>Önem</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>Şu şekilde göster</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>Zaman aşımı</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>Kısa bir mesajın ekranda ne kadar kalacağını belirtin. Varsayılan için boş bırakın.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>Bilgi</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>Başarılı</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>Uyarı</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>Hata</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>Kısa mesaj</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>Kısa mesaj ve bildirim listesi</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>İletişim kutusu</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>İletişim kutusu ve bildirim listesi</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>Yalnızca bildirim listesi</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>Bildirimler henüz kullanılamıyor.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>Bildirim gösterilemedi.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Seçili ses aygıtının ses düzeyini belirli bir seviyeye ayarlar.</value>
   </data>
@@ -16385,6 +16457,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>Tümünü temizle</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>Okundu olarak işaretle</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>Tümünü okundu olarak işaretle</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>Okunmadı</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>Bildirimleri kapat</value>

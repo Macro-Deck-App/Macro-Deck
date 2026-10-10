@@ -43,7 +43,10 @@ public sealed class UserNotificationStore : IUserNotificationStore
 
 	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => RaiseCore(draft, onlyIfAbsent: true);
 
-	private UserNotification? RaiseCore(UserNotificationDraft draft, bool onlyIfAbsent)
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+		=> RaiseCore(draft, onlyIfAbsent: false, onlyIfPresent: true);
+
+	private UserNotification? RaiseCore(UserNotificationDraft draft, bool onlyIfAbsent, bool onlyIfPresent = false)
 	{
 		if (draft is null || string.IsNullOrWhiteSpace(draft.Title))
 		{
@@ -72,6 +75,11 @@ public sealed class UserNotificationStore : IUserNotificationStore
 				(_idByDedupeKey.ContainsKey(dedupeKey) || _retiredKeys.ContainsKey(dedupeKey));
 
 			if (onlyIfAbsent && hasExisting)
+			{
+				return null;
+			}
+
+			if (onlyIfPresent && (string.IsNullOrEmpty(dedupeKey) || !_idByDedupeKey.ContainsKey(dedupeKey)))
 			{
 				return null;
 			}
@@ -105,14 +113,15 @@ public sealed class UserNotificationStore : IUserNotificationStore
 					Action = action,
 					Actions = actions,
 					Progress = draft.Progress,
-					CancelKey = draft.CancelKey
+					CancelKey = draft.CancelKey,
+					SourceCategory = draft.SourceCategory
 				};
 			}
 			else
 			{
 				entry = new UserNotification
 				{
-					Id = Guid.NewGuid().ToString(),
+					Id = string.IsNullOrWhiteSpace(draft.Id) ? Guid.NewGuid().ToString() : draft.Id,
 					Sequence = ++_sequence,
 					Timestamp = now,
 					Severity = draft.Severity,
@@ -124,7 +133,8 @@ public sealed class UserNotificationStore : IUserNotificationStore
 					Action = action,
 					Actions = actions,
 					Progress = draft.Progress,
-					CancelKey = draft.CancelKey
+					CancelKey = draft.CancelKey,
+					SourceCategory = draft.SourceCategory
 				};
 			}
 
@@ -257,6 +267,50 @@ public sealed class UserNotificationStore : IUserNotificationStore
 		return removedAny;
 	}
 
+	public bool MarkRead(string id)
+	{
+		bool changed;
+		lock (_lock)
+		{
+			var index = _entries.FindIndex(e => e.Id == id);
+			changed = index >= 0 && !_entries[index].Read;
+			if (changed)
+			{
+				_entries[index] = _entries[index] with { Read = true };
+			}
+		}
+
+		if (changed)
+		{
+			RaiseChanged();
+		}
+
+		return changed;
+	}
+
+	public bool MarkAllRead()
+	{
+		bool changed;
+		lock (_lock)
+		{
+			changed = _entries.Any(e => !e.Read);
+			if (changed)
+			{
+				for (var i = 0; i < _entries.Count; i++)
+				{
+					_entries[i] = _entries[i] with { Read = true };
+				}
+			}
+		}
+
+		if (changed)
+		{
+			RaiseChanged();
+		}
+
+		return changed;
+	}
+
 	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
 	{
 		bool changed;
@@ -304,9 +358,20 @@ public sealed class UserNotificationStore : IUserNotificationStore
 	{
 		while (_entries.Count > _capacity)
 		{
-			var last = _entries[^1];
-			_entries.RemoveAt(_entries.Count - 1);
-			RemoveDedupeMapping(last.Id);
+			var index = _entries.FindLastIndex(e => e.Read && e.Progress is null);
+			if (index < 0)
+			{
+				index = _entries.FindLastIndex(e => e.Progress is null);
+			}
+
+			if (index < 0)
+			{
+				index = _entries.Count - 1;
+			}
+
+			var dropped = _entries[index];
+			_entries.RemoveAt(index);
+			RemoveDedupeMapping(dropped.Id);
 		}
 	}
 

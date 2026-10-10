@@ -23,7 +23,8 @@ public class IntegrationContext : IIntegrationContext
 		IEventPublisher events,
 		IUserNotifier notifications,
 		IMessageChannel messages,
-		IColorApi colors)
+		IColorApi colors,
+		INotificationService notificationService)
 	{
 		Colors = colors;
 		Variables = variables;
@@ -35,6 +36,7 @@ public class IntegrationContext : IIntegrationContext
 		Events = events;
 		Notifications = notifications;
 		Messages = messages;
+		NotificationService = notificationService;
 	}
 
 	public IVariableApi Variables { get; }
@@ -56,4 +58,6 @@ public class IntegrationContext : IIntegrationContext
 	public IMessageChannel Messages { get; }
 
 	public IColorApi Colors { get; }
+
+	public INotificationService NotificationService { get; }
 }

@@ -229,5 +229,6 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			deviceSessionGuard: new DeviceSessionGuard(),
 			videoStreams: _world.Broker,
 			videoStreamProviders: _world.Registry,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 }

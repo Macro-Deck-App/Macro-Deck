@@ -3485,6 +3485,21 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>Dismiss</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>This answer was not accepted. Check your input and try again.</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>Integration</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>Plugin</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>Widgets on a grid you arrange yourself.</value>
   </data>
@@ -10003,6 +10018,63 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>Title</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>Show Macro Deck notification</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>Shows a message in Macro Deck on the connected devices and apps, as a short message or a dialog, and optionally keeps it in the notifications list.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>Severity</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>Show as</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>Timeout</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>How long a short message stays on screen. Leave empty for the default.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>Short message</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>Short message and notifications list</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>Dialog</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>Dialog and notifications list</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>Notifications list only</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>Notifications are not available yet.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>The notification could not be shown.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Sets the volume of the selected audio device to a specific level.</value>
   </data>
@@ -16385,6 +16457,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>Clear all</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>Mark as read</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>Unread</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>Close notifications</value>

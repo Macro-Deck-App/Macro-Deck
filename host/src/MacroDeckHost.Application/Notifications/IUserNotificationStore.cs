@@ -8,6 +8,8 @@ public interface IUserNotificationStore
 
 	UserNotification? RaiseIfAbsent(UserNotificationDraft draft);
 
+	UserNotification? RaiseIfPresent(UserNotificationDraft draft);
+
 	IReadOnlyList<UserNotification> Snapshot();
 
 	bool UpdateProgress(string dedupeKey, UserNotificationProgress progress);
@@ -19,6 +21,10 @@ public interface IUserNotificationStore
 	bool Retire(string dedupeKey);
 
 	bool DismissAll();
+
+	bool MarkRead(string id);
+
+	bool MarkAllRead();
 
 	event Action? Changed;
 }

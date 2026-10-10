@@ -427,6 +427,8 @@ public class Startup
 		services.AddHostedService<AutostartRefreshBackgroundService>();
 		services.AddHostedService<LogTailBackgroundService>();
 		services.AddHostedService<UserNotificationBroadcastBackgroundService>();
+		services.AddHostedService<NotificationBroadcastBackgroundService>();
+		services.AddHostedService<PluginNotificationResultDelivery>();
 		services.AddHostedService<DevicePresenceBackgroundService>();
 		services.AddHostedService<ApplicationFocusBackgroundService>();
 		services.AddHostedService<HostLockStateBackgroundService>();
@@ -434,7 +436,10 @@ public class Startup
 		services.AddSingleton<StartupReadiness>();
 		services.AddSingleton<LogStreamSubscriptionTracker>();
 		services.AddSingleton<ILogFileReader, LogFileReader>();
-		services.AddSingleton<IUserNotificationStore, UserNotificationStore>();
+		services.AddSingleton<UserNotificationStore>();
+		services.AddSingleton<NotificationManager>();
+		services.AddSingleton<INotificationManager>(provider => provider.GetRequiredService<NotificationManager>());
+		services.AddSingleton<IUserNotificationStore>(provider => provider.GetRequiredService<NotificationManager>());
 		services.AddSingleton<IPersistenceRecoveryReporter, PersistenceRecoveryNotifier>();
 		services.AddScoped<INetworkRestartNotifier, NetworkRestartNotifier>();
 		services.AddScoped<IPublicListenerUnavailableNotifier, PublicListenerUnavailableNotifier>();

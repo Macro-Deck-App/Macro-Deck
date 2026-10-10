@@ -85,7 +85,7 @@ x-macrodeck-host-operations:
   deck: [change-folder, change-profile, parent, back]
   scripts: [run]
   widgets: [apply, invalidate-icon]
-  notifications: [notify, dismiss]
+  notifications: [notify, dismiss, show, update, close]
   action-interactions: [request-item-picker, request-device-picker, show-modal]
   ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork]
   devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]

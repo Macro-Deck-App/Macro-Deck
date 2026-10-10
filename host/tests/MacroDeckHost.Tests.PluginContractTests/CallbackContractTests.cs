@@ -154,7 +154,8 @@ internal sealed class CallbackContractTests
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
 			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()),
-			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None));
+			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None),
+			new RemoteNotificationService(_hostInvoker, _state, new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()));
 	}
 
 	[TearDown]

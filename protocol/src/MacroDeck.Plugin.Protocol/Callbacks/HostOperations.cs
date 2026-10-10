@@ -82,7 +82,19 @@ public static class HostOperations
 
 		public const string Dismiss = "dismiss";
 
-		public static readonly IReadOnlyList<string> All = [Notify, Dismiss];
+		/// <summary>
+		/// Shows a notification on the targeted clients and returns as soon as it is open, never when a
+		/// user answers: <c>host.invoke</c> carries a fixed request deadline. How the notification ends
+		/// arrives separately, as a <c>ui</c>/<c>notification.result</c> capability invoke. Additive - a
+		/// host that predates it answers an unsupported capability.
+		/// </summary>
+		public const string Show = "show";
+
+		public const string Update = "update";
+
+		public const string Close = "close";
+
+		public static readonly IReadOnlyList<string> All = [Notify, Dismiss, Show, Update, Close];
 	}
 
 	public static class ActionInteractions

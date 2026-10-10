@@ -53,7 +53,8 @@ public class RemoteIntegrationContextTests
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
 			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()),
-			new RemoteColorApi(_invoker, new PluginConnectionState(), stateCache, Serilog.Core.Logger.None));
+			new RemoteColorApi(_invoker, new PluginConnectionState(), stateCache, Serilog.Core.Logger.None),
+			new RemoteNotificationService(_invoker, new PluginConnectionState(), new NotificationResultStore()));
 	}
 
 	[TearDown]
@@ -459,6 +460,10 @@ public class RemoteIntegrationContextTests
 		var covered = ApiOperationCases()
 			.Select(data => ((string)data.Arguments[0]!, (string)data.Arguments[1]!))
 			.ToHashSet();
+
+		covered.Add((HostApis.Notifications, HostOperations.Notifications.Show));
+		covered.Add((HostApis.Notifications, HostOperations.Notifications.Update));
+		covered.Add((HostApis.Notifications, HostOperations.Notifications.Close));
 
 		// action-interactions is covered by Action_interactions_send_the_declared_Api_Operation_pair
 		// instead - its members are not reachable through IIntegrationContext, so it has no place in

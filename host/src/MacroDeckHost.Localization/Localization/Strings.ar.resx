@@ -3485,6 +3485,21 @@
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>تجاهل</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>حسنًا</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>لم يتم قبول هذه الإجابة. تحقق من المدخلات وحاول مرة أخرى.</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>تكامل</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>مكوّن إضافي</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>أدوات على شبكة ترتّبها بنفسك.</value>
   </data>
@@ -10003,6 +10018,63 @@
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>العنوان</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>عرض إشعار Macro Deck</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>يعرض رسالة في Macro Deck على الأجهزة والتطبيقات المتصلة، كرسالة قصيرة أو مربع حوار، ويحتفظ بها اختياريًا في قائمة الإشعارات.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>الرسالة</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>درجة الخطورة</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>اعرض كـ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>المهلة</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>مدة بقاء الرسالة القصيرة على الشاشة. اتركه فارغًا لاستخدام القيمة الافتراضية.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>معلومات</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>نجاح</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>تحذير</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>خطأ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>رسالة قصيرة</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>رسالة قصيرة وقائمة الإشعارات</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>مربع حوار</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>مربع حوار وقائمة الإشعارات</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>قائمة الإشعارات فقط</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>الإشعارات غير متاحة بعد.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>تعذّر عرض الإشعار.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>يضبط مستوى صوت جهاز الصوت المحدد على مستوى معين.</value>
   </data>
@@ -16385,6 +16457,15 @@
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>مسح الكل</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>تحديد كمقروء</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>تحديد الكل كمقروء</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>غير مقروء</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>إغلاق الإشعارات</value>

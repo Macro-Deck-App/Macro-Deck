@@ -18,6 +18,8 @@ using MacroDeckHost.Application.Ui.Transport.Messages.FolderViews;
 using MacroDeckHost.Application.Ui.Transport.Messages.ScreenSavers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiPreviews;
+using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Ui.Transport.Messages.VideoStreams;
@@ -106,6 +108,7 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	private readonly DeviceSessionGuard _deviceSessionGuard;
 	private readonly IVideoStreamSessionBroker _videoStreams;
 	private readonly VideoStreamProviderRegistry _videoStreamProviders;
+	private readonly INotificationManager _notifications;
 	private readonly SemaphoreSlim _dispatch = new(1, 1);
 
 	public UiWebSocketDispatcher(
@@ -158,8 +161,10 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		DeviceSessionGuard deviceSessionGuard,
 		IVideoStreamSessionBroker videoStreams,
 		VideoStreamProviderRegistry videoStreamProviders,
+		INotificationManager notifications,
 		CancellationToken connectionCancellation)
 	{
+		_notifications = notifications;
 		_connectionId = connectionId;
 		_principal = principal;
 		_connectionCancellation = connectionCancellation;
@@ -321,6 +326,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					OwnerPrincipal()),
 				"CompleteUiModal" => _modalUiSessions.Complete(Arg<CompleteUiModalRequest>(payload, 0),
 					OwnerPrincipal()),
+				"RespondToNotification" => RespondToNotification(Arg<RespondToNotificationRequest>(payload, 0)),
+				"GetActiveNotifications" => ActiveNotifications(),
 				"DetachUiSession" => DetachUiSession(Arg<string>(payload, 0)),
 				"CloseUiSession" => _uiSessions.CloseOwned(Arg<string>(payload, 0),
 					OwnerPrincipal(),
@@ -418,8 +425,42 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			await _webSocketTransport.SendNotification(_connectionId, name, payload, cancellationToken);
 		}
 
+		await _webSocketTransport.SendNotification(_connectionId,
+			nameof(ActiveNotificationsEvent),
+			ActiveNotifications(),
+			cancellationToken);
+
 		return null;
 	}
+
+	private ActiveNotificationsEvent ActiveNotifications()
+		=> new()
+		{
+			Notifications = [.. _notifications.Snapshot(PrincipalForNotifications()).Select(n => ActiveNotificationDto.From(n, TimeProvider.System.GetUtcNow()))]
+		};
+
+	private RespondToNotificationResponse RespondToNotification(RespondToNotificationRequest request)
+	{
+		var outcome = _notifications.Respond(PrincipalForNotifications(),
+			request.Id,
+			request.ActionId,
+			request.Values);
+
+		return new RespondToNotificationResponse
+		{
+			Status = outcome.Status switch
+			{
+				NotificationRespondStatus.Accepted => "accepted",
+				NotificationRespondStatus.AlreadyClosed => "already-closed",
+				NotificationRespondStatus.Forbidden => "forbidden",
+				NotificationRespondStatus.Invalid => "invalid",
+				_ => "not-found"
+			},
+			Message = outcome.Message
+		};
+	}
+
+	private NotificationPrincipal PrincipalForNotifications() => new(IsAdmin, DeviceId());
 
 	private async Task<object?> SubscribeLogs(GetLogsRequest? filter,
 		string? tailAnchor,

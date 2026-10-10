@@ -3485,6 +3485,21 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>닫기</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>이 응답이 받아들여지지 않았습니다. 입력한 내용을 확인한 후 다시 시도하세요.</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>통합</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>플러그인</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>직접 배치하는 그리드의 위젯입니다.</value>
   </data>
@@ -10003,6 +10018,63 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>제목</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>Macro Deck 알림 표시</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>연결된 기기와 앱의 Macro Deck에 메시지를 짧은 메시지 또는 대화 상자로 표시하고, 원하면 알림 목록에도 남깁니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>제목</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>메시지</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>심각도</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>표시 방식</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>제한 시간</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>짧은 메시지가 화면에 표시되는 시간입니다. 비워 두면 기본값을 사용합니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>정보</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>성공</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>경고</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>짧은 메시지</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>짧은 메시지와 알림 목록</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>대화 상자</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>대화 상자와 알림 목록</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>알림 목록만</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>알림을 아직 사용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>알림을 표시할 수 없습니다.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>선택한 오디오 장치의 볼륨을 특정 수준으로 설정합니다.</value>
   </data>
@@ -16385,6 +16457,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>모두 지우기</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>읽음으로 표시</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>모두 읽음으로 표시</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>읽지 않음</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>알림 닫기</value>

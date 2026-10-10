@@ -84,6 +84,8 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   const appearance = new Appearance();
   const client = new Client(hostBaseUrl, clientId(), { appearance });
   const clock = new ServerClock(client.http);
+  // Expiry is stated in the host's time, so a device whose clock is off still drops a popup on time.
+  client.notifications.useClock(() => clock.now());
   const fonts = new FontLoader(hostBaseUrl());
   const uiFont = new UiFont();
   appearance.useUiFont(

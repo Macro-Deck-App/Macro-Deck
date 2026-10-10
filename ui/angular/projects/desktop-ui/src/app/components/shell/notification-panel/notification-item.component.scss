@@ -43,8 +43,30 @@
 }
 
 .ni-time {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+}
+
+.ni-source::before {
+  content: '\00b7';
+  margin-inline-end: var(--space-2);
+}
+
+.ni-source-name::before {
+  content: '\00b7';
+  margin-inline: var(--space-1);
+}
+
+.ni-unread-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline-end: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-accent);
 }
 
 // Same visual language as shared/components/import-progress: 4px bar, accent fill, indeterminate
@@ -112,6 +134,7 @@
   max-width: 100%;
 }
 
+.ni-mark-read,
 .ni-dismiss {
   flex-shrink: 0;
   margin-block: calc(-1 * var(--space-2));

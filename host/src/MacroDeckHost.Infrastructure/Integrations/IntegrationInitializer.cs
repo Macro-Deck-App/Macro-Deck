@@ -66,6 +66,7 @@ public sealed class IntegrationInitializer
 	private readonly CalendarHostServices? _calendarServices;
 	private readonly IAdGuardHomeSink? _adGuardHomeSink;
 	private readonly IMusicPlayerAlbumColor? _albumColor;
+	private readonly INotificationManager? _notificationManager;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -104,8 +105,10 @@ public sealed class IntegrationInitializer
 		IStreamPlatformServices? streamPlatforms = null,
 		CalendarHostServices? calendarServices = null,
 		IAdGuardHomeSink? adGuardHomeSink = null,
-		IMusicPlayerAlbumColor? albumColor = null)
+		IMusicPlayerAlbumColor? albumColor = null,
+		INotificationManager? notificationManager = null)
 	{
+		_notificationManager = notificationManager;
 		_adGuardHomeSink = adGuardHomeSink;
 		_albumColor = albumColor;
 		_streamPlatforms = streamPlatforms;
@@ -177,7 +180,12 @@ public sealed class IntegrationInitializer
 			events,
 			new IntegrationUserNotifier(integration.Id, integrationName, _userNotificationStore, _logger),
 			await RenewMessageChannelAsync(integration.Id),
-			await RenewColorApiAsync(integration.Id));
+			await RenewColorApiAsync(integration.Id),
+			_notificationManager is null
+				? UnavailableNotificationService.Instance
+				: new OwnedNotificationService(
+					new NotificationOwner(NotificationSourceCategory.BuiltInIntegration, integration.Id, integrationName),
+					_notificationManager));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -250,6 +258,8 @@ public sealed class IntegrationInitializer
 
 	public async Task ReleaseMessagingAsync(string integrationId)
 	{
+		_notificationManager?.CloseOwner(integrationId);
+
 		if (_messageChannels.TryRemove(integrationId, out var channel))
 		{
 			await channel.DisposeAsync();

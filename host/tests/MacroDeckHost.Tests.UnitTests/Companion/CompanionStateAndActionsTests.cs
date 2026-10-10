@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Ui.Transport;
@@ -238,5 +239,6 @@ internal sealed class CompanionStateAndActionsTests
 			deviceSessionGuard: GuardFor(principal.Claims),
 			videoStreams: null!,
 			videoStreamProviders: null!,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 }

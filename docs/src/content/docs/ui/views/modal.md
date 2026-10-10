@@ -139,3 +139,5 @@ client can only show a few modals at once. Do not hold a modal open as a substit
 - [List](/ui/components/list/)
 - [Button](/ui/components/button/)
 - [Events](/ui/concepts/events/)
+
+To ask something of every client at once, or to show a message that is not tied to a running action, see [Notifications](/features/notifications/).

@@ -18,6 +18,13 @@ public enum PluginSessionEndReason
 	Pruned
 }
 
+public sealed class PluginSessionAttachedEventArgs : EventArgs
+{
+	public required string PluginId { get; init; }
+
+	public required string SessionId { get; init; }
+}
+
 public sealed class PluginSessionEndedEventArgs : EventArgs
 {
 	public required string PluginId { get; init; }
@@ -161,6 +168,8 @@ public interface IPluginSessionRegistry
 		IReadOnlyList<DeclaredCapability> declaredCapabilities);
 
 	event EventHandler<PluginSessionEndedEventArgs>? SessionEnded;
+
+	event EventHandler<PluginSessionAttachedEventArgs>? SessionAttached;
 }
 
 public class PluginSessionRegistry : IPluginSessionRegistry
@@ -184,6 +193,8 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	}
 
 	public event EventHandler<PluginSessionEndedEventArgs>? SessionEnded;
+
+	public event EventHandler<PluginSessionAttachedEventArgs>? SessionAttached;
 
 	public async Task Create(PluginSessionRecord record)
 	{
@@ -223,6 +234,7 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 	{
 		Prune();
 
+		string pluginId;
 		lock (_gate)
 		{
 			if (!_bySessionId.TryGetValue(sessionId, out var record))
@@ -235,8 +247,12 @@ public class PluginSessionRegistry : IPluginSessionRegistry
 			record.State = PluginSessionState.Connected;
 			record.ConnectedAt = _timeProvider.GetUtcNow();
 			record.DroppedAt = null;
-			return true;
+			pluginId = record.PluginId;
 		}
+
+		SessionAttached?.Invoke(this,
+			new PluginSessionAttachedEventArgs { PluginId = pluginId, SessionId = sessionId });
+		return true;
 	}
 
 	public void Detach(string sessionId, DateTimeOffset at)

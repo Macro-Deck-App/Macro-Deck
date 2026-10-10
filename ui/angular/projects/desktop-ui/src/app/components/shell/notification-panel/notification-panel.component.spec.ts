@@ -28,6 +28,8 @@ describe('NotificationPanelComponent', () => {
   let notifications: ReturnType<typeof signal<UserNotification[]>>;
   let dismissAllSpy: jasmine.Spy;
   let dismissSpy: jasmine.Spy;
+  let markReadSpy: jasmine.Spy;
+  let markAllReadSpy: jasmine.Spy;
   let navigateSpy: jasmine.Spy;
   let settingsOpenSpy: jasmine.Spy;
   let cancelBatchSpy: jasmine.Spy;
@@ -68,6 +70,8 @@ describe('NotificationPanelComponent', () => {
     restartRequired = signal(true);
     dismissAllSpy = jasmine.createSpy('dismissAll');
     dismissSpy = jasmine.createSpy('dismiss');
+    markReadSpy = jasmine.createSpy('markRead');
+    markAllReadSpy = jasmine.createSpy('markAllRead');
     navigateSpy = jasmine.createSpy('navigate').and.resolveTo(true);
     settingsOpenSpy = jasmine.createSpy('open');
     cancelBatchSpy = jasmine.createSpy('cancelBatch').and.resolveTo(true);
@@ -91,9 +95,12 @@ describe('NotificationPanelComponent', () => {
             hasNotifications: computed(() => notifications().length > 0),
             hasActiveProgress: computed(() => notifications().some(n => !!n.progress)),
             hasDismissable: computed(() => notifications().some(n => !n.progress)),
+            hasUnread: computed(() => notifications().some(n => n.read === false)),
             badgeText: computed(() => `${notifications().length}`),
             dismissAll: dismissAllSpy,
             dismiss: dismissSpy,
+            markRead: markReadSpy,
+            markAllRead: markAllReadSpy,
           },
         },
         { provide: Router, useValue: { navigate: navigateSpy } },
@@ -182,6 +189,41 @@ describe('NotificationPanelComponent', () => {
     (fixture.nativeElement.querySelector('.np-header-btn') as HTMLButtonElement).click();
 
     expect(dismissAllSpy).toHaveBeenCalled();
+  });
+
+  it('offers mark-all-as-read only while something is unread', async () => {
+    notifications.set([notification({ read: true })]);
+    await open();
+    const labels = () => Array.from(fixture.nativeElement.querySelectorAll('.np-header-btn'))
+      .map(button => (button as HTMLElement).textContent?.trim());
+
+    expect(labels()).not.toContain('Mark all as read');
+
+    notifications.set([notification({ read: false })]);
+    fixture.detectChanges();
+
+    expect(labels()).toContain('Mark all as read');
+  });
+
+  it('marks everything read from the header', async () => {
+    notifications.set([notification({ id: 'a', read: false }), notification({ id: 'b', read: false })]);
+    await open();
+
+    (fixture.nativeElement.querySelector('.np-header-btn button') as HTMLButtonElement).click();
+
+    expect(markAllReadSpy).toHaveBeenCalled();
+  });
+
+  it('marks one entry read from its own button and leaves read entries without one', async () => {
+    notifications.set([notification({ id: 'a', read: false }), notification({ id: 'b', read: true })]);
+    await open();
+
+    const buttons = fixture.nativeElement.querySelectorAll('.ni-mark-read button') as NodeListOf<HTMLButtonElement>;
+    expect(buttons.length).toBe(1);
+
+    buttons[0].click();
+
+    expect(markReadSpy).toHaveBeenCalledOnceWith('a');
   });
 
   it('closes on the close button', async () => {

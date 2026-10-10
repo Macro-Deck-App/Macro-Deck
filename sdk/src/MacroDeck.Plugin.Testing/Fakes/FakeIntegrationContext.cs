@@ -38,6 +38,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		UserVariables = new FakeUserVariableApi(Widgets.Exists);
 		Events = new FakeEventPublisher();
 		Notifications = new FakeUserNotifier();
+		NotificationService = new FakeNotificationService();
 		Interactions = new FakeActionInteractions();
 		Devices = new FakeDeviceProviderContext();
 		VariableValues = new FakeVariableSink();
@@ -76,6 +77,9 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	/// Notifications raised into the host's notification center - see <see cref="FakeUserNotifier" />.
 	/// </summary>
 	public FakeUserNotifier Notifications { get; }
+
+	/// <summary>Toasts and dialogs the plugin shows - see <see cref="FakeNotificationService" />.</summary>
+	public FakeNotificationService NotificationService { get; }
 
 	/// <summary>
 	/// The action-interactions fake for this context. Not part of <see cref="IIntegrationContext" />
@@ -177,4 +181,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	/// <inheritdoc />
 	IUserNotifier IIntegrationContext.Notifications => Notifications;
+
+	/// <inheritdoc />
+	INotificationService IIntegrationContext.NotificationService => NotificationService;
 }

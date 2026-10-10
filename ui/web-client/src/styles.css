@@ -812,9 +812,271 @@ body,
   height: 0.6875rem;
 }
 
+.wc-toast-info {
+  border-left-color: var(--color-accent);
+}
+
+.wc-toast-info .wc-toast-icon {
+  color: var(--color-accent);
+}
+
+.wc-toast-warning {
+  border-left-color: var(--color-warning);
+}
+
+.wc-toast-warning .wc-toast-icon {
+  color: var(--color-warning);
+}
+
+.wc-toast-source,
+.wc-notification-source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.wc-toast-source-kind,
+.wc-notification-source-kind {
+  font-weight: var(--font-semibold);
+}
+
+.wc-toast-source-name,
+.wc-notification-source-name {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.wc-toast-actions,
+.wc-notification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.wc-toast-actions {
+  margin-top: var(--space-1);
+}
+
+.wc-toast-actions .wc-btn {
+  min-height: 1.75rem;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.wc-progress {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 0.25rem;
+  margin-top: var(--space-1);
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+.wc-progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.wc-progress-indeterminate .wc-progress-fill {
+  width: 40%;
+  animation: wc-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes wc-progress-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wc-toast {
     animation: none;
+  }
+
+  .wc-progress-indeterminate .wc-progress-fill {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.wc-notification-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1195;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-scrim);
+}
+
+.wc-notification-backdrop[hidden],
+.wc-notification-dialog [hidden] {
+  display: none;
+}
+
+.wc-notification-dialog {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 28rem;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-elevated);
+  border-top: 3px solid var(--color-success);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-dialog);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  outline: none;
+}
+
+.wc-notification-info {
+  border-top-color: var(--color-accent);
+}
+
+.wc-notification-warning {
+  border-top-color: var(--color-warning);
+}
+
+.wc-notification-error {
+  border-top-color: var(--color-danger);
+}
+
+.wc-notification-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5) var(--space-2);
+}
+
+.wc-notification-icon {
+  flex: none;
+  display: flex;
+  margin-top: 0.125rem;
+  color: var(--color-success);
+}
+
+.wc-notification-info .wc-notification-icon {
+  color: var(--color-accent);
+}
+
+.wc-notification-warning .wc-notification-icon {
+  color: var(--color-warning);
+}
+
+.wc-notification-error .wc-notification-icon {
+  color: var(--color-danger);
+}
+
+.wc-notification-icon-svg {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.wc-notification-titles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.wc-notification-title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  overflow-wrap: break-word;
+}
+
+.wc-notification-close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.wc-notification-close:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.wc-notification-close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.wc-notification-close-icon {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.wc-notification-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  padding: var(--space-2) var(--space-5) var(--space-4);
+  overflow-y: auto;
+}
+
+.wc-notification-message {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-md);
+  overflow-wrap: break-word;
+  white-space: pre-line;
+}
+
+.wc-notification-content {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  height: 12rem;
+  overflow: hidden;
+}
+
+.wc-notification-progress .wc-progress {
+  margin-top: 0;
+}
+
+.wc-notification-problem {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--text-base);
+}
+
+.wc-notification-actions {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 1024px), (max-height: 600px) {
+  .wc-notification-backdrop {
+    padding: var(--space-3);
   }
 }
 

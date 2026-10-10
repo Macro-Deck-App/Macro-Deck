@@ -328,6 +328,12 @@ internal sealed class CallbackFakeNotificationStore : IUserNotificationStore
 
 	public bool Retire(string dedupeKey) => false;
 
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+
+	public bool MarkRead(string id) => false;
+
+	public bool MarkAllRead() => false;
+
 	public bool DismissAll() => false;
 
 	public event Action? Changed

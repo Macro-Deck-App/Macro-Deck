@@ -3485,6 +3485,21 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Feedback.Dismiss" xml:space="preserve">
     <value>閉じる</value>
   </data>
+  <data name="Feedback.Notification.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Feedback.Notification.Rejected" xml:space="preserve">
+    <value>この回答は受け付けられませんでした。入力内容を確認して、もう一度お試しください。</value>
+  </data>
+  <data name="Feedback.Notification.Source.System" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Feedback.Notification.Source.BuiltInIntegration" xml:space="preserve">
+    <value>連携</value>
+  </data>
+  <data name="Feedback.Notification.Source.Plugin" xml:space="preserve">
+    <value>プラグイン</value>
+  </data>
   <data name="FolderViews.WidgetGrid.Description" xml:space="preserve">
     <value>自分で配置するグリッド上のウィジェットです。</value>
   </data>
@@ -10003,6 +10018,63 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.System.Actions.SendNotification.TitleLabel" xml:space="preserve">
     <value>タイトル</value>
   </data>
+  <data name="Integrations.System.Actions.ShowNotification.Name" xml:space="preserve">
+    <value>Macro Deck の通知を表示</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Description" xml:space="preserve">
+    <value>接続中のデバイスとアプリの Macro Deck にメッセージをトースト通知またはダイアログで表示し、必要に応じて通知リストにも残します。</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TitleLabel" xml:space="preserve">
+    <value>タイトル</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.MessageLabel" xml:space="preserve">
+    <value>メッセージ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityLabel" xml:space="preserve">
+    <value>重要度</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationLabel" xml:space="preserve">
+    <value>表示方法</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutLabel" xml:space="preserve">
+    <value>タイムアウト</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.TimeoutDescription" xml:space="preserve">
+    <value>短いメッセージを画面に表示する時間です。空にすると既定値を使用します。</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityInfo" xml:space="preserve">
+    <value>情報</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeveritySuccess" xml:space="preserve">
+    <value>成功</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityWarning" xml:space="preserve">
+    <value>警告</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.SeverityError" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToast" xml:space="preserve">
+    <value>短いメッセージ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationToastInbox" xml:space="preserve">
+    <value>短いメッセージと通知リスト</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialog" xml:space="preserve">
+    <value>ダイアログ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationDialogInbox" xml:space="preserve">
+    <value>ダイアログと通知リスト</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.PresentationInbox" xml:space="preserve">
+    <value>通知リストのみ</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.NotInitialized" xml:space="preserve">
+    <value>通知はまだ利用できません。</value>
+  </data>
+  <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
+    <value>通知を表示できませんでした。</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>選択した音声デバイスの音量を指定したレベルに設定します。</value>
   </data>
@@ -16385,6 +16457,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Shell.Notifications.ClearAll" xml:space="preserve">
     <value>すべてクリア</value>
+  </data>
+  <data name="Shell.Notifications.MarkRead" xml:space="preserve">
+    <value>既読にする</value>
+  </data>
+  <data name="Shell.Notifications.MarkAllRead" xml:space="preserve">
+    <value>すべて既読にする</value>
+  </data>
+  <data name="Shell.Notifications.Unread" xml:space="preserve">
+    <value>未読</value>
   </data>
   <data name="Shell.Notifications.Close" xml:space="preserve">
     <value>通知を閉じる</value>

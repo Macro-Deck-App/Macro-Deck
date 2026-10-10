@@ -60,4 +60,12 @@ public interface IIntegrationContext
 	/// delivers a watch's value once.
 	/// </summary>
 	IColorApi Colors => LocalColorApi.Instance;
+
+	/// <summary>
+	/// Shows toasts and dialogs on connected clients and keeps Inbox entries, and returns what the user
+	/// answered. A context from a Macro Deck without this service, and any implementation that does not
+	/// override this member, throws <see cref="NotificationException" /> with
+	/// <see cref="NotificationErrorCode.Unsupported" />.
+	/// </summary>
+	INotificationService NotificationService => UnsupportedNotificationService.Instance;
 }

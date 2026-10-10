@@ -1,4 +1,6 @@
-export type UserNotificationSeverity = 'Info' | 'Warning' | 'Error';
+export type UserNotificationSeverity = 'Info' | 'Warning' | 'Error' | 'Success';
+
+export type UserNotificationSourceCategory = 'System' | 'BuiltInIntegration' | 'Plugin';
 
 export type UserNotificationKind =
   | 'Error'
@@ -47,6 +49,8 @@ export interface UserNotification {
   actions?: UserNotificationAction[];
   progress?: UserNotificationProgress | null;
   cancelKey?: string | null;
+  sourceCategory?: UserNotificationSourceCategory;
+  read?: boolean;
 }
 
 export interface GetUserNotificationsResponse {

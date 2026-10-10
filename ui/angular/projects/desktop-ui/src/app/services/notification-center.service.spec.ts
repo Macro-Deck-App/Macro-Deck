@@ -50,6 +50,8 @@ describe('NotificationCenterService', () => {
         'getNotifications',
         'dismissNotification',
         'dismissAllNotifications',
+        'markNotificationRead',
+        'markAllNotificationsRead',
       ],
     );
     Object.defineProperty(apiSpy, 'connectionState$', { value: connectionState.asObservable() });
@@ -61,6 +63,8 @@ describe('NotificationCenterService', () => {
     apiSpy.getNotifications.and.resolveTo(snapshot([]));
     apiSpy.dismissNotification.and.resolveTo(undefined);
     apiSpy.dismissAllNotifications.and.resolveTo(undefined);
+    apiSpy.markNotificationRead.and.resolveTo({ success: true });
+    apiSpy.markAllNotificationsRead.and.resolveTo({ success: true });
   });
 
   it('loads the current snapshot on construction, covering the first connect', async () => {
@@ -170,5 +174,41 @@ describe('NotificationCenterService', () => {
 
     expect(apiSpy.dismissAllNotifications).toHaveBeenCalled();
     expect(service.notifications().map(n => n.id)).toEqual(['1']);
+  });
+
+  it('marks one entry read at once and asks the host to remember it', async () => {
+    const service = createService();
+    await flush();
+    changed.next({ notifications: [{ ...notification('1'), read: false }, { ...notification('2'), read: false }] });
+
+    service.markRead('1');
+
+    expect(service.notifications().map(n => n.read)).toEqual([true, false]);
+    expect(service.hasUnread()).toBeTrue();
+    expect(apiSpy.markNotificationRead).toHaveBeenCalledOnceWith('1');
+  });
+
+  it('marks everything read at once', async () => {
+    const service = createService();
+    await flush();
+    changed.next({ notifications: [{ ...notification('1'), read: false }, { ...notification('2'), read: false }] });
+
+    service.markAllRead();
+
+    expect(service.hasUnread()).toBeFalse();
+    expect(apiSpy.markAllNotificationsRead).toHaveBeenCalled();
+  });
+
+  it('takes the host list back when it refuses to mark an entry read', async () => {
+    const service = createService();
+    await flush();
+    changed.next({ notifications: [{ ...notification('1'), read: false }] });
+    apiSpy.markNotificationRead.and.resolveTo({ success: false });
+    apiSpy.getNotifications.and.resolveTo(snapshot([{ ...notification('1'), read: false }]));
+
+    service.markRead('1');
+    await flush();
+
+    expect(service.notifications()[0].read).toBeFalse();
   });
 });

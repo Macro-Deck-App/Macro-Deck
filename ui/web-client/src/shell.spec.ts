@@ -4,6 +4,7 @@ import {
 } from '@macro-deck/runtime';
 import { Appearance } from './appearance';
 import { Client } from './client';
+import { notification } from './notification-fixtures';
 import { RenderingModeStore } from './rendering-mode';
 import { ServerClock } from './server-clock';
 import { Shell, type ShellServices } from './shell';
@@ -1399,6 +1400,35 @@ describe('Shell', () => {
         expect(sidebar()).toBeNull();
         expect(triggers).toContain('onShortPress');
       });
+    });
+  });
+
+  describe('host notifications', () => {
+    const deliver = (type: string, payload: unknown) =>
+      (client as unknown as { onNotification(type: string, payload: unknown): void }).onNotification(type, payload);
+
+    afterEach(() => client.notifications.clear());
+
+    it('puts a pushed toast and a pushed dialog on screen and takes them off with the snapshot', () => {
+      mount();
+      deliver('NotificationShownEvent', { notification: notification({ id: 't', popup: 'toast', title: 'Toast' }) });
+      deliver('NotificationShownEvent', { notification: notification({ id: 'd', popup: 'dialog', title: 'Dialog' }) });
+
+      expect(root.querySelector('.wc-toast-message')!.textContent).toBe('Toast');
+      expect(root.querySelector('.wc-notification-title')!.textContent).toBe('Dialog');
+      expect(root.querySelector('.wc-notification-backdrop')!.hasAttribute('hidden')).toBeFalse();
+
+      deliver('ActiveNotificationsEvent', { notifications: [] });
+
+      expect(root.querySelector('.wc-toast-message')).toBeNull();
+      expect(root.querySelector('.wc-notification-backdrop')!.hasAttribute('hidden')).toBeTrue();
+    });
+
+    it('stays out of the way of a host that never sends one', () => {
+      mount();
+
+      expect(root.querySelector('.wc-toast')).toBeNull();
+      expect(root.querySelector('.wc-notification-backdrop')!.hasAttribute('hidden')).toBeTrue();
     });
   });
 });

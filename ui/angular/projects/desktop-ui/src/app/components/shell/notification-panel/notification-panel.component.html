@@ -3,6 +3,12 @@
   [heading]="appStrings.Nav.Notifications | translate"
   [closeLabel]="appStrings.Shell.Notifications.Close | translate"
   (closed)="closed.emit()">
+  @if (notificationCenter.hasUnread()) {
+    <shared-button sidePanelActions class="np-header-btn" variant="ghost" size="compact" (click)="onMarkAllRead()">
+      <span>{{ appStrings.Shell.Notifications.MarkAllRead | translate }}</span>
+    </shared-button>
+  }
+
   @if (notificationCenter.hasDismissable()) {
     <shared-button sidePanelActions class="np-header-btn" variant="ghost" size="compact" (click)="onClearAll()">
       <span>{{ appStrings.Shell.Notifications.ClearAll | translate }}</span>
@@ -23,6 +29,7 @@
             [notification]="notification"
             (action)="onAction($event)"
             (dismissed)="onDismiss($event)"
+            (markRead)="onMarkRead($event)"
             (cancel)="onCancel($event)" />
         }
       </div>

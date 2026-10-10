@@ -2,6 +2,7 @@ import { Injectable, Signal, inject, signal } from '@angular/core';
 import { BehaviorSubject, Subject, Observable, filter, map } from 'rxjs';
 import { HOST_URL_RESOLVER } from './host-url';
 import {
+  ActiveNotificationsEvent,
   AdbStateChangedEvent,
   AdvanceWebClientTargetProvisioningRequest,
   ApiError,
@@ -191,6 +192,11 @@ import {
   ImportUserFontsResponse,
   DeleteUserFontResponse,
   GetUserNotificationsResponse,
+  NotificationClosedEvent,
+  NotificationShownEvent,
+  NotificationUpdatedEvent,
+  RespondToNotificationRequest,
+  RespondToNotificationResponse,
   GetVariablesRequest,
   GetVariablesResponse,
   GetVersionResponse,
@@ -2293,6 +2299,38 @@ export class ApiService {
 
   dismissAllNotifications(): Promise<void> {
     return this.http('DELETE', '/api/notifications');
+  }
+
+  markNotificationRead(id: string): Promise<{ success: boolean }> {
+    return this.http('PUT', `/api/notifications/${encodeURIComponent(id)}/read`);
+  }
+
+  markAllNotificationsRead(): Promise<{ success: boolean }> {
+    return this.http('PUT', '/api/notifications/read');
+  }
+
+  getActiveNotifications(): Promise<ActiveNotificationsEvent | null> {
+    return this.invokeResult<ActiveNotificationsEvent>('GetActiveNotifications');
+  }
+
+  respondToNotification(request: RespondToNotificationRequest): Promise<RespondToNotificationResponse | null> {
+    return this.invokeResult<RespondToNotificationResponse>('RespondToNotification', request);
+  }
+
+  onNotificationShown(): Observable<NotificationShownEvent> {
+    return this.onNotification<NotificationShownEvent>('NotificationShownEvent');
+  }
+
+  onNotificationUpdated(): Observable<NotificationUpdatedEvent> {
+    return this.onNotification<NotificationUpdatedEvent>('NotificationUpdatedEvent');
+  }
+
+  onNotificationClosed(): Observable<NotificationClosedEvent> {
+    return this.onNotification<NotificationClosedEvent>('NotificationClosedEvent');
+  }
+
+  onActiveNotifications(): Observable<ActiveNotificationsEvent> {
+    return this.onNotification<ActiveNotificationsEvent>('ActiveNotificationsEvent');
   }
 
   getVariables(request: GetVariablesRequest = {}): Promise<GetVariablesResponse> {

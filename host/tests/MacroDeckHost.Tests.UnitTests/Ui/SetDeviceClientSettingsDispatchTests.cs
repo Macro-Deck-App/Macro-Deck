@@ -223,5 +223,6 @@ public class SetDeviceClientSettingsDispatchTests
 			deviceSessionGuard: new DeviceSessionGuard(),
 			videoStreams: null!,
 			videoStreamProviders: null!,
+			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
 }

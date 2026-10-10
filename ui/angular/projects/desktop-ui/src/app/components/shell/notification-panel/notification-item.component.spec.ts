@@ -56,6 +56,50 @@ describe('NotificationItemComponent', () => {
     }
   });
 
+  it('styles a Success notification as success', () => {
+    fixture.componentRef.setInput('notification', notification({ severity: 'Success' }));
+    fixture.detectChanges();
+
+    const badge = fixture.nativeElement.querySelector('.ni-severity') as HTMLElement;
+    expect(badge.classList).toContain('issue-badge-success');
+    expect(badge.querySelector('.icon-check')).not.toBeNull();
+  });
+
+  it('marks an unread entry and offers to mark it read, but only that one', () => {
+    const marked: string[] = [];
+    fixture.componentInstance.markRead.subscribe(id => marked.push(id));
+
+    fixture.componentRef.setInput('notification', notification({ read: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ni-unread-dot')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.ni-mark-read')).toBeNull();
+
+    fixture.componentRef.setInput('notification', notification({ read: false }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ni-unread-dot')?.getAttribute('aria-label')).toBe('Unread');
+
+    (fixture.nativeElement.querySelector('.ni-mark-read button') as HTMLButtonElement).click();
+    expect(marked).toEqual(['n1']);
+  });
+
+  it('names where a notification came from, with the source name unless it is the system', () => {
+    fixture.componentRef.setInput(
+      'notification',
+      notification({ sourceCategory: 'Plugin', sourceName: 'Lights' }),
+    );
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('.ni-source') as HTMLElement).textContent).toContain('Plugin');
+    expect((fixture.nativeElement.querySelector('.ni-source') as HTMLElement).textContent).toContain('Lights');
+
+    fixture.componentRef.setInput(
+      'notification',
+      notification({ sourceCategory: 'System', sourceName: 'Macro Deck' }),
+    );
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ni-source-name')).toBeNull();
+    expect((fixture.nativeElement.querySelector('.ni-source') as HTMLElement).textContent).toContain('Macro Deck');
+  });
+
   it('renders no action button for the None kind', () => {
     fixture.componentRef.setInput('notification', notification({ action: { kind: 'None' } }));
     fixture.detectChanges();

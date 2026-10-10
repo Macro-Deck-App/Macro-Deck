@@ -27,4 +27,8 @@ public sealed record UserNotification
 	public UserNotificationProgress? Progress { get; init; }
 
 	public string? CancelKey { get; init; }
+
+	public NotificationSourceCategory SourceCategory { get; init; } = NotificationSourceCategory.System;
+
+	public bool Read { get; init; }
 }

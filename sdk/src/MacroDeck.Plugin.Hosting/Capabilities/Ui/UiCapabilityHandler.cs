@@ -51,6 +51,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 	private readonly PluginConfigFlowSessions _configFlowSessions;
 	private readonly UiSessionStore _sessions;
 	private readonly ModalResultStore _modalResults;
+	private readonly NotificationResultStore _notificationResults;
 
 	public UiCapabilityHandler(
 		IEnumerable<IPluginIntegration> integrations,
@@ -58,7 +59,8 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		ILogger logger,
 		PluginConfigFlowSessions configFlowSessions,
 		ModalResultStore modalResults,
-		IPluginCatalogNotifier? catalogNotifier = null)
+		IPluginCatalogNotifier? catalogNotifier = null,
+		NotificationResultStore? notificationResults = null)
 	{
 		var integrationList = integrations as IReadOnlyCollection<IPluginIntegration> ?? [.. integrations];
 
@@ -75,6 +77,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		_configFlowSessions = configFlowSessions;
 		_sessions = new UiSessionStore(hostInvoker, logger);
 		_modalResults = modalResults;
+		_notificationResults = notificationResults ?? new NotificationResultStore();
 
 		// Lazy and metadata-only: declaring previews must not run a scenario, and a plugin nobody ever
 		// asks for previews never pays for the scan at all.
@@ -139,6 +142,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 			CapabilityOperations.Ui.SessionSnapshot => Task.FromResult(Snapshot(invocation)),
 			CapabilityOperations.Ui.SessionEvent => Task.FromResult(Event(invocation)),
 			CapabilityOperations.Ui.ModalResult => Task.FromResult(ModalResult(invocation)),
+			CapabilityOperations.Ui.NotificationResult => Task.FromResult(NotificationResult(invocation)),
 			_ => Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 				$"The ui capability has no operation '{invocation.Operation}'."))
 		};
@@ -155,6 +159,19 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 		// Accepted even when nothing is waiting: the host sends exactly one result per modal, and one that
 		// arrives after its wait was cancelled is late, not a protocol error to report back.
 		_modalResults.Complete(arguments);
+
+		return CapabilityInvocationResult.Ok();
+	}
+
+	private CapabilityInvocationResult NotificationResult(CapabilityInvocation invocation)
+	{
+		if (Read<UiNotificationResultArguments>(invocation) is not { } arguments)
+		{
+			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
+				"A notification result needs a notification id.");
+		}
+
+		_notificationResults.Complete(arguments);
 
 		return CapabilityInvocationResult.Ok();
 	}
