@@ -32,6 +32,7 @@
     <ItemGroup>
         <Using Include="NUnit.Framework" />
         <Using Include="MacroDeckHost.Domain.Keyboard" />
+        <Using Include="MacroDeck.Sdk.Input" />
     </ItemGroup>
 
 </Project>

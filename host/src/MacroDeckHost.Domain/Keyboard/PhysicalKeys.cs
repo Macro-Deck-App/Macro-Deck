@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Input;
+
 namespace MacroDeckHost.Domain.Keyboard;
 
 public static class PhysicalKeys

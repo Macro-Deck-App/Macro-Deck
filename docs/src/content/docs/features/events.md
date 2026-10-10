@@ -175,16 +175,47 @@ does not know is compared as text, so two plugins can still agree on a key Macro
 Only configuration parameters of type `KeyboardCombo` or `Hotkey` match this way. A trigger filter or a
 flow condition on `$event` compares the published JSON text, as described above.
 
-From a native keyboard hook:
+### From a native keyboard hook
 
-- **Windows**: map the scan code to the position name for punctuation and the ISO key, and the virtual-key
-  code to the letter for `A` to `Z`.
-- **Linux**: the evdev code is the position; letters follow the X keysym table, which on a multi-layout
-  setup uses the first layout that has the letter.
-- **macOS**: key code 10 is `IntlBackslash` and 50 is `Backquote`, as Safari and the combo editor report
-  them. On ISO Apple keyboards those two codes are swapped relative to the key's position, so on a German
-  Mac `IntlBackslash` is the `^` key left of `1`. Letters need the active input source: key code 6 types `y`
-  on German.
+`MacroDeck.Sdk.Input` turns the codes a keyboard hook delivers into the names above, so a plugin needs no
+table of its own:
+
+```csharp
+using MacroDeck.Sdk.Input;
+
+KeyCode key = NativeKeys.FromWindows(virtualKey, scanCode, isExtended); // or FromMacOS(code), FromLinux(code)
+
+if (KeyNames.TryGetModifier(key, out var modifier))
+{
+    held = isKeyDown ? held | modifier : held & ~modifier;   // track the modifier keys yourself
+    return;
+}
+
+if (isKeyDown && key != KeyCode.None)
+{
+    events.Publish("hotkey-pressed", new Dictionary<string, object?>
+    {
+        ["combo"] = new { modifiers = KeyNames.ToModifierNames(held), key = KeyNames.ToName(key) }
+    });
+}
+```
+
+`KeyNames.ToName` returns the one name the editor stores, and `KeyNames.TryParse` and `TryParseModifier` accept
+every older spelling listed above. A key without a `KeyCode`, or a number that is no key code, comes back as
+`KeyCode.None`: do not publish it. The methods never throw and can be called from any thread.
+
+`ToModifierNames` names a modifier `Ctrl` when the left key is held, alone or together with the right one, and
+`RightCtrl` only when just the right key is held, like the editor records it. Trigger matching compares the two
+as different modifiers, so a trigger bound as `Ctrl` does not fire for `RightCtrl`.
+
+| Platform | Method | Notes |
+| --- | --- | --- |
+| Windows | `NativeKeys.FromWindows(virtualKey, scanCode, isExtended)` | Pass the extended flag: it tells `NumpadEnter` from `Enter` and a navigation key from the numpad key that reports the same virtual key while NumLock is off. The scan code (without the extended prefix) names a punctuation key's position exactly. The overload without it reads the foreground window's layout instead. |
+| macOS | `NativeKeys.FromMacOS(keyCode)` | Letters are resolved through the active input source, so key code 6 is `Y` on German. A letter position whose key types no Latin letter (Cyrillic) keeps its US letter. Key code 10 is `IntlBackslash` and 50 is `Backquote`, as Safari and the combo editor report them; on ISO Apple keyboards those two are swapped relative to the key's position. Function keys above `F20`, the Fn key and media keys have no key code and return `None`. |
+| Linux | `NativeKeys.FromLinux(evdevCode)` | An evdev code is a position, so letters follow US positions on every layout: the Z-labeled key of a German layout is `Y`. |
+
+`FromMacOS` reads the input source with the Text Input Sources API, which Apple documents for the main thread. It
+has been exercised from a thread-pool thread, not from an event tap callback.
 
 `GetBindings()` returns values exactly as the editor stored them, so a hook that swallows bound combos has
 to accept the older spellings too, not only the names in the table.

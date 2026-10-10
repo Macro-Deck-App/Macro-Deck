@@ -1,5 +1,6 @@
-namespace MacroDeckHost.Domain.Keyboard;
+namespace MacroDeck.Sdk.Input;
 
+/// <summary>The modifier keys of a key combination. The <c>Right</c> members mean the right-hand key specifically.</summary>
 [Flags]
 public enum KeyModifier
 {

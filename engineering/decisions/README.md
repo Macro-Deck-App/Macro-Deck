@@ -62,6 +62,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0099 - Video streams are host-brokered sessions with transport-neutral descriptions](0099-video-streams-are-host-brokered-sessions-with-transport-neutral-descriptions.md) (partially superseded by 0101)
 - [0101 - The host relays video stream media, and clients play only HLS and MJPEG](0101-the-host-relays-video-stream-media-and-clients-play-hls-and-mjpeg.md)
 - [0102 - The plugin CLI renders previews with an embedded runtime and a local browser](0102-the-plugin-cli-renders-previews-with-an-embedded-runtime-and-a-local-browser.md)
+- [0105 - The SDK translates native key codes with guarded platform interop](0105-the-sdk-translates-native-key-codes-with-guarded-platform-interop.md)
 
 ## Macro Deck UI
 

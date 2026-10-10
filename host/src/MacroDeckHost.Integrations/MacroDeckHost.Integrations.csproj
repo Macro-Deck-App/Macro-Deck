@@ -24,6 +24,7 @@
 
     <ItemGroup>
         <Using Include="MacroDeckHost.Domain.Keyboard" />
+        <Using Include="MacroDeck.Sdk.Input" />
     </ItemGroup>
 
     <ItemGroup>
