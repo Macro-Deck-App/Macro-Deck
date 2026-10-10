@@ -12977,6 +12977,13 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>{modifier} direita</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>Tecla extra ISO (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>Tecla {key} (layout dos EUA)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Digite a chave de descriptografia</value>
   </data>

@@ -12977,6 +12977,13 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>右{modifier}</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>ISO 附加键 (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>{key} 键（美式布局）</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>输入解密密钥</value>
   </data>

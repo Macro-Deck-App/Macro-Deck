@@ -12977,6 +12977,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Right {modifier}</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>ISO extra key (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>{key} key (US layout)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Enter the decryption key</value>
   </data>

@@ -238,6 +238,63 @@ public class EventSubscriptionMatcherTests
 		});
 	}
 
+	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl"],"key":"-"}""")]
+	[TestCase("""{"modifiers":["Ctrl"],"key":"-"}""", """{"modifiers":["Ctrl"],"key":"Minus"}""")]
+	[TestCase("""{"modifiers":["Meta"],"key":"F3"}""", """{"modifiers":["Cmd"],"key":"F3"}""")]
+	[TestCase("""{"modifiers":["Win"],"key":"F3"}""", """{"modifiers":["Command"],"key":"F3"}""")]
+	[TestCase("""{"modifiers":["Alt"],"key":"Escape"}""", """{"modifiers":["Option"],"key":"Esc"}""")]
+	[TestCase("""{"modifiers":["Ctrl","Shift"],"key":"Enter"}""", """{"modifiers":["shift","Control"],"key":"Return"}""")]
+	[TestCase("""{"modifiers":["AltGr"],"key":"q"}""", """{"modifiers":["Alt"],"key":"Q"}""")]
+	[TestCase("""{"modifiers":["Ctrl"],"key":"5"}""", """{"modifiers":["Ctrl"],"key":"D5"}""")]
+	[TestCase("""{"modifiers":["Hyper"],"key":"LaunchMail"}""", """{"modifiers":["hyper"],"key":"launchmail"}""")]
+	public void A_combo_trigger_matches_the_same_combo_spelled_with_equivalent_names(string configured, string published)
+		=> Assert.That(ComboMatches(configured, published), Is.True);
+
+	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl"],"key":"="}""")]
+	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["RightCtrl"],"key":"-"}""")]
+	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl","Hyper"],"key":"Minus"}""")]
+	[TestCase("""{"modifiers":["Hyper"],"key":"LaunchMail"}""", """{"modifiers":["Hyper"],"key":"LaunchApp1"}""")]
+	public void A_combo_trigger_does_not_match_a_different_key_behind_a_known_name(string configured, string published)
+		=> Assert.That(ComboMatches(configured, published), Is.False);
+
+	[Test]
+	public void A_not_equal_combo_trigger_treats_equivalent_names_as_the_same_combo()
+		=> Assert.That(
+			ComboMatches("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl"],"key":"-"}""", "!="),
+			Is.False);
+
+	[Test]
+	public void A_hotkey_trigger_matches_the_same_hotkey_spelled_with_equivalent_names()
+	{
+		var hotkey = new EventDefinitionDescriptor(QualifiedId.Parse("hotkey::held"),
+			"hotkey",
+			"Hotkey",
+			true,
+			new EventDefinition
+			{
+				Id = "held",
+				Name = "Hotkey Held",
+				ConfigurationParameters = [ActionParameter.Hotkey("hotkey", "Hotkey")],
+				PayloadParameters = [ActionParameter.Hotkey("hotkey", "Hotkey")]
+			});
+		var subscription = new EventSubscription(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+			"t1",
+			"hotkey::held",
+			new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
+			{
+				["hotkey"] = Config("""{"modifiers":["Ctrl"],"key":"Minus","code":"Minus"}""")
+			},
+			null);
+
+		Assert.That(Matcher().Matches(subscription,
+				hotkey,
+				Context(new Dictionary<string, object?>(StringComparer.Ordinal)
+				{
+					["hotkey"] = """{"modifiers":["Control"],"key":"-"}"""
+				})),
+			Is.True);
+	}
+
 	[Test]
 	public void A_text_parameter_holding_combo_json_is_still_compared_verbatim()
 	{

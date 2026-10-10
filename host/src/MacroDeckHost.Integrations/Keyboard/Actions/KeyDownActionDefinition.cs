@@ -45,7 +45,7 @@ internal sealed class KeyDownActionDefinition : IActionDefinition
 		{
 			var (modifierNames, keyName) = KeyboardActionValues.ReadHotkey(context.Parameters, "keys");
 			var modifiers = _layout.ResolveModifiers(modifierNames);
-			_layout.TryResolveKey(keyName, out var key);
+			var key = KeyboardActionValues.ResolveKey(_layout, keyName);
 			if (key == KeyCode.None && modifiers == KeyModifier.None)
 			{
 				return ActionResult.Success();

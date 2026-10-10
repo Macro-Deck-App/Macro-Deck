@@ -12974,6 +12974,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{modifier} rechts</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>ISO-Zusatztaste (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>Taste {key} (US-Layout)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Entschlüsselungsschlüssel eingeben</value>
   </data>

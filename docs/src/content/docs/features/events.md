@@ -148,6 +148,47 @@ events that carry nothing:
 _events.Publish("connected");
 ```
 
+## Keyboard combos
+
+A `KeyboardCombo` or `Hotkey` value is an object with a `key` name and a `modifiers` list:
+`{"modifiers":["Ctrl","Shift"],"key":"Minus"}`. The combo editor stores these names, and Press Key,
+Key Down and Key Up read them. Publish the same names from a keyboard hook and every trigger the user
+set up in the editor matches.
+
+| Key | Name | Means |
+| --- | --- | --- |
+| Letters | `A` to `Z` | The key labeled with that letter on the active layout: `Z` is the Z key on QWERTZ too. |
+| Digits | `0` to `9` | The key in the digit row, also on AZERTY where it types `&`, `é` and so on without Shift. |
+| Punctuation | `Minus`, `Equal`, `BracketLeft`, `BracketRight`, `Backslash`, `Semicolon`, `Quote`, `Comma`, `Period`, `Slash`, `Backquote` | A physical position, named after the key at that position on a US keyboard, like the browser's `KeyboardEvent.code`. On German, `Minus` is the `ß` key and `BracketLeft` the `ü` key. |
+| ISO key | `IntlBackslash` | The extra key that ISO keyboards have next to left Shift (`<` on German). |
+| Other keys | `F1` to `F24`, `Enter`, `Escape`, `Tab`, `Space`, `Backspace`, `Delete`, `Insert`, `CapsLock`, `Home`, `End`, `PageUp`, `PageDown`, `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`, `PrintScreen`, `ScrollLock`, `Pause`, `NumLock`, `Numpad0` to `Numpad9`, `NumpadAdd`, `NumpadSubtract`, `NumpadMultiply`, `NumpadDivide`, `NumpadDecimal`, `NumpadEnter`, `MediaPlayPause`, `MediaStop`, `MediaTrackNext`, `MediaTrackPrevious`, `AudioVolumeUp`, `AudioVolumeDown`, `AudioVolumeMute` | The same key on every layout. |
+
+Modifiers are `Ctrl`, `Shift`, `Alt` and `Meta` (Command on macOS, Windows key on Windows), plus
+`RightCtrl`, `RightShift`, `RightAlt` and `RightMeta` when only the right-hand key counts.
+
+The host also accepts older spellings, and trigger matching treats them as the name they stand for:
+`-` for `Minus` (and the other unshifted US characters), `Esc`, `Return`, `Del`, `Ins`, `PgUp`, `PgDn`,
+`Up`/`Down`/`Left`/`Right` and `5` as well as `D5` for keys, `Control`, `Cmd`, `Command`, `Win`, `Super`,
+`Option` and `AltGr` (which counts as `Alt`) for modifiers. Names are case-insensitive. A name the host
+does not know is compared as text, so two plugins can still agree on a key Macro Deck has no name for.
+
+Only configuration parameters of type `KeyboardCombo` or `Hotkey` match this way. A trigger filter or a
+flow condition on `$event` compares the published JSON text, as described above.
+
+From a native keyboard hook:
+
+- **Windows**: map the scan code to the position name for punctuation and the ISO key, and the virtual-key
+  code to the letter for `A` to `Z`.
+- **Linux**: the evdev code is the position; letters follow the X keysym table, which on a multi-layout
+  setup uses the first layout that has the letter.
+- **macOS**: key code 10 is `IntlBackslash` and 50 is `Backquote`, as Safari and the combo editor report
+  them. On ISO Apple keyboards those two codes are swapped relative to the key's position, so on a German
+  Mac `IntlBackslash` is the `^` key left of `1`. Letters need the active input source: key code 6 types `y`
+  on German.
+
+`GetBindings()` returns values exactly as the editor stored them, so a hook that swallows bound combos has
+to accept the older spellings too, not only the names in the table.
+
 ## Reading what is bound
 
 A hotkey plugin that wants to swallow a bound combo, or an integration that only subscribes upstream to

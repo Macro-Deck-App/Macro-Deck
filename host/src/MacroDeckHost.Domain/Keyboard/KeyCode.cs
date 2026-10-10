@@ -1,4 +1,4 @@
-namespace MacroDeckHost.Integrations.Keyboard;
+namespace MacroDeckHost.Domain.Keyboard;
 
 public enum KeyCode
 {
@@ -133,5 +133,7 @@ public enum KeyCode
 	MediaTrackPrevious,
 	AudioVolumeUp,
 	AudioVolumeDown,
-	AudioVolumeMute
+	AudioVolumeMute,
+
+	IntlBackslash
 }

@@ -44,7 +44,7 @@ internal sealed class KeyUpActionDefinition : IActionDefinition
 		{
 			var (modifierNames, keyName) = KeyboardActionValues.ReadHotkey(context.Parameters, "keys");
 			var modifiers = _layout.ResolveModifiers(modifierNames);
-			_layout.TryResolveKey(keyName, out var key);
+			var key = KeyboardActionValues.ResolveKey(_layout, keyName);
 			await _input.KeyUpAsync(modifiers, key, context.CancellationToken);
 			return ActionResult.Success();
 		}

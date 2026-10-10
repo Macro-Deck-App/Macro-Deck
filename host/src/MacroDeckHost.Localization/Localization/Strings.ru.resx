@@ -12977,6 +12977,13 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>{modifier} (справа)</value>
     <comment>[modifier:string]</comment>
   </data>
+  <data name="Keyboard.Key.IntlBackslash" xml:space="preserve">
+    <value>Дополнительная клавиша ISO (IntlBackslash)</value>
+  </data>
+  <data name="Keyboard.Key.UsPosition" xml:space="preserve">
+    <value>Клавиша {key} (раскладка US)</value>
+    <comment>[key:string]</comment>
+  </data>
   <data name="Migration.CredentialChoice.EnterKeyButton" xml:space="preserve">
     <value>Ввести ключ расшифровки</value>
   </data>

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Keyboard;
 using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Application.Triggers;
@@ -100,7 +101,7 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 		=> ActionConditionEvaluator.EvaluateOperator(actual, @operator, expected);
 
 	private static bool Holds(ActionParameterType type, object? actual, string @operator, object? expected)
-		=> type == ActionParameterType.KeyboardCombo &&
+		=> type is ActionParameterType.KeyboardCombo or ActionParameterType.Hotkey &&
 			@operator is "==" or "!=" &&
 			TryReadCombo(actual, out var actualCombo) &&
 			TryReadCombo(expected, out var expectedCombo)
@@ -132,7 +133,8 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 		}
 
 		string? key = null;
-		var modifiers = new SortedSet<string>(StringComparer.Ordinal);
+		var modifiers = KeyModifier.None;
+		var unknownModifiers = new SortedSet<string>(StringComparer.Ordinal);
 		foreach (var property in element.EnumerateObject())
 		{
 			if (string.Equals(property.Name, "key", StringComparison.OrdinalIgnoreCase))
@@ -142,7 +144,8 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 					return false;
 				}
 
-				key = property.Value.GetString()!.ToUpperInvariant();
+				var name = property.Value.GetString()!;
+				key = KeyNames.TryParseKey(name, out var code) ? code.ToString() : name.ToUpperInvariant();
 			}
 			else if (string.Equals(property.Name, "modifiers", StringComparison.OrdinalIgnoreCase))
 			{
@@ -158,7 +161,15 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 						return false;
 					}
 
-					modifiers.Add(modifier.GetString()!.ToUpperInvariant());
+					var name = modifier.GetString()!;
+					if (KeyNames.TryParseModifier(name, out var resolved))
+					{
+						modifiers |= resolved;
+					}
+					else
+					{
+						unknownModifiers.Add(name.ToUpperInvariant());
+					}
 				}
 			}
 		}
@@ -168,7 +179,7 @@ public sealed class EventSubscriptionMatcher : IEventSubscriptionMatcher
 			return false;
 		}
 
-		combo = (key, string.Join('+', modifiers));
+		combo = (key, $"{modifiers}+{string.Join('+', unknownModifiers)}");
 		return true;
 	}
 
