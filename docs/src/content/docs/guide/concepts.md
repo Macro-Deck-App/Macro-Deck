@@ -401,6 +401,13 @@ read as unavailable until it is back. Macro Deck remembers up to 64 devices; aft
 unplugged device makes room. The volume actions can control the default output, the default
 input or one specific device.
 
+The default devices have their own pair: `system_volume_percent` and `system_muted` for the output,
+`system_input_volume_percent` and `system_input_muted` for the input. You can set any of these volume
+and mute variables with **Set Variable**, or on the Variables page with **Edit value** for a volume and
+**Toggle value** for a mute variable. A volume takes a percentage, and a mute variable mutes the device
+when set to `true` and unmutes it when set to `false`. To switch between muted and unmuted with one button, use the **Mute / Unmute** action, because
+**Set Variable** cannot toggle a variable that belongs to an integration.
+
 Every disk gets numbered variables too: `system_disk_0_*` is the system disk (the drive Windows runs
 from, or `/` on macOS and Linux), and the others follow, up to eight. Each disk has:
 
