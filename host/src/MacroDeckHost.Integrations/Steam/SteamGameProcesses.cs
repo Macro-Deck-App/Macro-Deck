@@ -18,7 +18,7 @@ internal static class SteamGameProcesses
 			return false;
 		}
 
-		var root = directory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+		var root = directory.TrimEnd('/', '\\');
 		var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
 		return root.Length > 0 &&
