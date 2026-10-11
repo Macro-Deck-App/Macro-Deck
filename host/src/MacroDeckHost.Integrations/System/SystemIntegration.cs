@@ -191,7 +191,8 @@ public sealed class SystemIntegration
 		VariableDefinition.Eager("system_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
 			with
 			{
-				DisplayName = AppStrings.Integrations.System.Variables.Muted()
+				DisplayName = AppStrings.Integrations.System.Variables.Muted(),
+				Write = new VariableWriteCapability()
 			},
 		VariableDefinition.Eager("system_input_volume_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
 			with
@@ -204,7 +205,8 @@ public sealed class SystemIntegration
 		VariableDefinition.Eager("system_input_muted", VariableType.Boolean, refreshInterval: TimeSpan.FromSeconds(2))
 			with
 			{
-				DisplayName = AppStrings.Integrations.System.Variables.InputMuted()
+				DisplayName = AppStrings.Integrations.System.Variables.InputMuted(),
+				Write = new VariableWriteCapability()
 			},
 		VariableDefinition.Eager("system_cpu_usage_percent", VariableType.Numeric, 0, TimeSpan.FromSeconds(2))
 			with
@@ -731,15 +733,18 @@ public sealed class SystemIntegration
 		CancellationToken cancellationToken = default)
 	{
 		AudioTarget? target;
-		if (localId == VolumePercentId)
+		bool isVolume;
+		if (localId is VolumePercentId or MutedId)
 		{
 			target = AudioTarget.DefaultOutput;
+			isVolume = localId == VolumePercentId;
 		}
-		else if (localId == InputVolumePercentId)
+		else if (localId is InputVolumePercentId or InputMutedId)
 		{
 			target = AudioTarget.DefaultInput;
+			isVolume = localId == InputVolumePercentId;
 		}
-		else if (AudioDeviceVariables.TryParseId(localId, out var flow, out var key, out var isVolume) && isVolume)
+		else if (AudioDeviceVariables.TryParseId(localId, out var flow, out var key, out isVolume))
 		{
 			target = ResolveKnownTarget(flow, key);
 		}
@@ -753,18 +758,47 @@ public sealed class SystemIntegration
 			return VariableWriteResult.Unavailable();
 		}
 
-		if (!TryReadNumber(value, out var percent))
+		bool applied;
+		if (isVolume)
 		{
-			return VariableWriteResult.InvalidValue();
+			if (!TryReadNumber(value, out var percent))
+			{
+				return VariableWriteResult.InvalidValue();
+			}
+
+			applied = await _volume
+				.SetVolumeAsync(resolved,
+					(float)(Math.Clamp(percent, MinVolumePercent, MaxVolumePercent) / 100),
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		else
+		{
+			if (!TryReadBoolean(value, out var mute))
+			{
+				return VariableWriteResult.InvalidValue();
+			}
+
+			applied = await _volume.SetMuteAsync(resolved, mute, cancellationToken).ConfigureAwait(false);
 		}
 
-		var applied = await _volume
-			.SetVolumeAsync(resolved,
-				(float)(Math.Clamp(percent, MinVolumePercent, MaxVolumePercent) / 100),
-				cancellationToken)
-			.ConfigureAwait(false);
-
 		return applied ? VariableWriteResult.Applied() : VariableWriteResult.Unavailable();
+	}
+
+	private static bool TryReadBoolean(object? value, out bool result)
+	{
+		switch (value)
+		{
+			case bool flag:
+				result = flag;
+				return true;
+			case string text when bool.TryParse(text.Trim(), out var parsed):
+				result = parsed;
+				return true;
+			default:
+				result = false;
+				return false;
+		}
 	}
 
 	private static bool TryReadNumber(object? value, out double number)
