@@ -22408,4 +22408,220 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
     <value>Esta cuenta no está disponible</value>
   </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Name" xml:space="preserve">
+    <value>Cerrar juego de Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Description" xml:space="preserve">
+    <value>Cierra el juego de Steam que se está ejecutando en este equipo.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Force" xml:space="preserve">
+    <value>Forzar cierre</value>
+  </data>
+  <data name="Integrations.Steam.Params.ForceDescription" xml:space="preserve">
+    <value>Finaliza el juego si no se ha cerrado tras 10 segundos. Puede perderse el progreso no guardado.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Account" xml:space="preserve">
+    <value>Cuenta</value>
+  </data>
+  <data name="Integrations.Steam.Params.Friend" xml:space="preserve">
+    <value>Amigo</value>
+  </data>
+  <data name="Integrations.Steam.Params.FriendName" xml:space="preserve">
+    <value>Nombre del amigo</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameId" xml:space="preserve">
+    <value>ID del juego</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameName" xml:space="preserve">
+    <value>Nombre del juego</value>
+  </data>
+  <data name="Integrations.Steam.Params.DurationSeconds" xml:space="preserve">
+    <value>Duración en segundos</value>
+  </data>
+  <data name="Integrations.Steam.Params.Status" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="Integrations.Steam.Params.PreviousStatus" xml:space="preserve">
+    <value>Estado anterior</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NoGameRunning" xml:space="preserve">
+    <value>No se está ejecutando ningún juego de Steam en este equipo.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseFailed" xml:space="preserve">
+    <value>El juego no se cerró.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseNotSupported" xml:space="preserve">
+    <value>Cerrar juegos no es compatible con este sistema operativo.</value>
+  </data>
+  <data name="Integrations.Steam.Events.Category" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Name" xml:space="preserve">
+    <value>Juego iniciado</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Description" xml:space="preserve">
+    <value>Se inició un juego de Steam en este equipo o, con una clave de API web, en otro dispositivo.</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Name" xml:space="preserve">
+    <value>Juego cerrado</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Description" xml:space="preserve">
+    <value>Se cerró un juego de Steam. El evento incluye cuánto tiempo estuvo en ejecución.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Name" xml:space="preserve">
+    <value>Amigo conectado</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Description" xml:space="preserve">
+    <value>Un amigo de Steam se conectó.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Name" xml:space="preserve">
+    <value>Amigo desconectado</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Description" xml:space="preserve">
+    <value>Un amigo de Steam se desconectó.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Name" xml:space="preserve">
+    <value>Un amigo empezó a jugar</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Description" xml:space="preserve">
+    <value>Un amigo de Steam empezó a jugar a un juego.</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Name" xml:space="preserve">
+    <value>Cambio de estado en línea</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Description" xml:space="preserve">
+    <value>El estado en línea de tu cuenta de Steam cambió, por ejemplo a Ausente.</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesOwned" xml:space="preserve">
+    <value>Juegos en propiedad</value>
+  </data>
+  <data name="Integrations.Steam.Variables.TotalPlaytimeHours" xml:space="preserve">
+    <value>Tiempo de juego total en horas</value>
+  </data>
+  <data name="Integrations.Steam.Variables.RecentPlaytimeHours" xml:space="preserve">
+    <value>Tiempo de juego de las últimas dos semanas en horas</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Title" xml:space="preserve">
+    <value>Los detalles de juegos de Steam son privados</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Description" xml:space="preserve">
+    <value>Steam no comparte los juegos de {account} porque sus detalles de juegos son privados. Para ver los juegos en propiedad y el tiempo de juego, pon Detalles de juegos en Público en tu configuración de privacidad de Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Name" xml:space="preserve">
+    <value>Amigos de Steam</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Description" xml:space="preserve">
+    <value>Muestra cuántos de tus amigos de Steam están conectados y jugando y, en tamaños más grandes, quiénes son.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Name" xml:space="preserve">
+    <value>Biblioteca de Steam</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Description" xml:space="preserve">
+    <value>Muestra tu tiempo de juego, cuántos juegos tienes y los juegos a los que has jugado recientemente.</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceFavorites" xml:space="preserve">
+    <value>Favoritos</value>
+  </data>
+  <data name="Widgets.Steam.Config.Favorites" xml:space="preserve">
+    <value>Juegos favoritos</value>
+  </data>
+  <data name="Widgets.Steam.Config.FavoritesDescription" xml:space="preserve">
+    <value>Los juegos que se muestran, en este orden. Se muestran hasta 6.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FriendsAccountDescription" xml:space="preserve">
+    <value>La cuenta cuyos amigos se muestran. Déjalo vacío para usar la primera cuenta con una clave de API web.</value>
+  </data>
+  <data name="Widgets.Steam.Config.LibraryAccountDescription" xml:space="preserve">
+    <value>La cuenta cuya biblioteca se muestra. Déjalo vacío para usar la primera cuenta con una clave de API web o, si no hay ninguna, los juegos de este equipo.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FirstAccount" xml:space="preserve">
+    <value>Primera cuenta con clave</value>
+  </data>
+  <data name="Widgets.Steam.NoFavorites" xml:space="preserve">
+    <value>Elige tus juegos favoritos en los ajustes del widget.</value>
+  </data>
+  <data name="Widgets.Steam.NeedsWebApi" xml:space="preserve">
+    <value>Añade una cuenta de Steam con una clave de API web para ver a tus amigos.</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPrivate" xml:space="preserve">
+    <value>La lista de amigos de esta cuenta es privada.</value>
+  </data>
+  <data name="Widgets.Steam.GamesPrivate" xml:space="preserve">
+    <value>Los detalles de juegos de esta cuenta son privados.</value>
+  </data>
+  <data name="Widgets.Steam.NoFriendsOnline" xml:space="preserve">
+    <value>Ningún amigo conectado</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.NowPlaying" xml:space="preserve">
+    <value>JUGANDO AHORA</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Friends" xml:space="preserve">
+    <value>AMIGOS</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Library" xml:space="preserve">
+    <value>BIBLIOTECA</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Online" xml:space="preserve">
+    <value>Conectado</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Busy" xml:space="preserve">
+    <value>Ocupado</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Away" xml:space="preserve">
+    <value>Ausente</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Snooze" xml:space="preserve">
+    <value>Durmiendo</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToTrade" xml:space="preserve">
+    <value>Buscando intercambio</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToPlay" xml:space="preserve">
+    <value>Buscando partida</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Offline" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.One" xml:space="preserve">
+    <value>{count} jugando</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.Other" xml:space="preserve">
+    <value>{count} jugando</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.One" xml:space="preserve">
+    <value>{count} conectado</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.Other" xml:space="preserve">
+    <value>{count} conectados</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.One" xml:space="preserve">
+    <value>{count} juego</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.Other" xml:space="preserve">
+    <value>{count} juegos</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.HoursPlayed" xml:space="preserve">
+    <value>Horas jugadas</value>
+  </data>
+  <data name="Widgets.Steam.Installed" xml:space="preserve">
+    <value>Instalados</value>
+  </data>
+  <data name="Widgets.Steam.LastTwoWeeks" xml:space="preserve">
+    <value>Últimas 2 semanas</value>
+  </data>
+  <data name="Widgets.Steam.HoursValue" xml:space="preserve">
+    <value>{hours} h</value>
+  </data>
+  <data name="Widgets.Steam.RecentPlaytime" xml:space="preserve">
+    <value>{hours} h en las últimas 2 semanas</value>
+  </data>
+  <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
+    <value>{hours} h en total</value>
+  </data>
 </root>

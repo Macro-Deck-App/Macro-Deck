@@ -22430,4 +22430,220 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
     <value>यह खाता उपलब्ध नहीं है</value>
   </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Name" xml:space="preserve">
+    <value>Steam गेम बंद करें</value>
+  </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Description" xml:space="preserve">
+    <value>इस कंप्यूटर पर चल रहा Steam गेम बंद करता है।</value>
+  </data>
+  <data name="Integrations.Steam.Params.Force" xml:space="preserve">
+    <value>ज़बरदस्ती बंद करें</value>
+  </data>
+  <data name="Integrations.Steam.Params.ForceDescription" xml:space="preserve">
+    <value>अगर गेम 10 सेकंड बाद भी बंद नहीं हुआ है, तो उसे समाप्त कर देता है। बिना सहेजी गई प्रगति खो सकती है।</value>
+  </data>
+  <data name="Integrations.Steam.Params.Account" xml:space="preserve">
+    <value>खाता</value>
+  </data>
+  <data name="Integrations.Steam.Params.Friend" xml:space="preserve">
+    <value>दोस्त</value>
+  </data>
+  <data name="Integrations.Steam.Params.FriendName" xml:space="preserve">
+    <value>दोस्त का नाम</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameId" xml:space="preserve">
+    <value>गेम की आईडी</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameName" xml:space="preserve">
+    <value>गेम का नाम</value>
+  </data>
+  <data name="Integrations.Steam.Params.DurationSeconds" xml:space="preserve">
+    <value>अवधि (सेकंड में)</value>
+  </data>
+  <data name="Integrations.Steam.Params.Status" xml:space="preserve">
+    <value>स्थिति</value>
+  </data>
+  <data name="Integrations.Steam.Params.PreviousStatus" xml:space="preserve">
+    <value>पिछली स्थिति</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NoGameRunning" xml:space="preserve">
+    <value>इस कंप्यूटर पर कोई Steam गेम नहीं चल रहा है।</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseFailed" xml:space="preserve">
+    <value>गेम बंद नहीं हुआ।</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseNotSupported" xml:space="preserve">
+    <value>इस ऑपरेटिंग सिस्टम पर गेम बंद करना समर्थित नहीं है।</value>
+  </data>
+  <data name="Integrations.Steam.Events.Category" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Name" xml:space="preserve">
+    <value>गेम शुरू हुआ</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Description" xml:space="preserve">
+    <value>इस कंप्यूटर पर या, Web API कुंजी होने पर, किसी दूसरे डिवाइस पर Steam गेम शुरू हुआ।</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Name" xml:space="preserve">
+    <value>गेम बंद हुआ</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Description" xml:space="preserve">
+    <value>Steam गेम बंद हुआ। इवेंट में यह शामिल है कि वह कितनी देर चला।</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Name" xml:space="preserve">
+    <value>दोस्त ऑनलाइन आए</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Description" xml:space="preserve">
+    <value>एक Steam दोस्त ऑनलाइन आए।</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Name" xml:space="preserve">
+    <value>दोस्त ऑफ़लाइन हुए</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Description" xml:space="preserve">
+    <value>एक Steam दोस्त ऑफ़लाइन हुए।</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Name" xml:space="preserve">
+    <value>दोस्त ने गेम शुरू किया</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Description" xml:space="preserve">
+    <value>एक Steam दोस्त ने गेम खेलना शुरू किया।</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Name" xml:space="preserve">
+    <value>ऑनलाइन स्थिति बदली</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Description" xml:space="preserve">
+    <value>आपके Steam खाते की ऑनलाइन स्थिति बदल गई, उदाहरण के लिए दूर।</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesOwned" xml:space="preserve">
+    <value>स्वामित्व वाले गेम</value>
+  </data>
+  <data name="Integrations.Steam.Variables.TotalPlaytimeHours" xml:space="preserve">
+    <value>कुल खेलने का समय (घंटों में)</value>
+  </data>
+  <data name="Integrations.Steam.Variables.RecentPlaytimeHours" xml:space="preserve">
+    <value>पिछले दो हफ़्तों में खेलने का समय (घंटों में)</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Title" xml:space="preserve">
+    <value>Steam गेम विवरण निजी हैं</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Description" xml:space="preserve">
+    <value>Steam {account} के गेम साझा नहीं करता, क्योंकि उसके गेम विवरण निजी हैं। स्वामित्व वाले गेम और खेलने का समय देखने के लिए अपनी Steam गोपनीयता सेटिंग्स में गेम विवरण को सार्वजनिक पर सेट करें।</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Name" xml:space="preserve">
+    <value>Steam दोस्त</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Description" xml:space="preserve">
+    <value>दिखाता है कि आपके कितने Steam दोस्त ऑनलाइन हैं और खेल रहे हैं, और बड़े आकारों में यह भी कि वे कौन हैं।</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Name" xml:space="preserve">
+    <value>Steam लाइब्रेरी</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Description" xml:space="preserve">
+    <value>आपके खेलने का समय, आपके पास कितने गेम हैं और हाल ही में खेले गए गेम दिखाता है।</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceFavorites" xml:space="preserve">
+    <value>पसंदीदा</value>
+  </data>
+  <data name="Widgets.Steam.Config.Favorites" xml:space="preserve">
+    <value>पसंदीदा गेम</value>
+  </data>
+  <data name="Widgets.Steam.Config.FavoritesDescription" xml:space="preserve">
+    <value>दिखाए जाने वाले गेम, इसी क्रम में। अधिकतम 6 दिखाए जाते हैं।</value>
+  </data>
+  <data name="Widgets.Steam.Config.FriendsAccountDescription" xml:space="preserve">
+    <value>वह खाता जिसके दोस्त दिखाए जाते हैं। Web API कुंजी वाले पहले खाते का इस्तेमाल करने के लिए खाली छोड़ें।</value>
+  </data>
+  <data name="Widgets.Steam.Config.LibraryAccountDescription" xml:space="preserve">
+    <value>वह खाता जिसकी लाइब्रेरी दिखाई जाती है। Web API कुंजी वाले पहले खाते का इस्तेमाल करने के लिए खाली छोड़ें; ऐसा कोई खाता न हो तो इस कंप्यूटर के गेम दिखाए जाते हैं।</value>
+  </data>
+  <data name="Widgets.Steam.Config.FirstAccount" xml:space="preserve">
+    <value>कुंजी वाला पहला खाता</value>
+  </data>
+  <data name="Widgets.Steam.NoFavorites" xml:space="preserve">
+    <value>विजेट सेटिंग्स में अपने पसंदीदा गेम चुनें।</value>
+  </data>
+  <data name="Widgets.Steam.NeedsWebApi" xml:space="preserve">
+    <value>अपने दोस्त देखने के लिए Web API कुंजी वाला Steam खाता जोड़ें।</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPrivate" xml:space="preserve">
+    <value>इस खाते की दोस्तों की सूची निजी है।</value>
+  </data>
+  <data name="Widgets.Steam.GamesPrivate" xml:space="preserve">
+    <value>इस खाते के गेम विवरण निजी हैं।</value>
+  </data>
+  <data name="Widgets.Steam.NoFriendsOnline" xml:space="preserve">
+    <value>कोई दोस्त ऑनलाइन नहीं</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.NowPlaying" xml:space="preserve">
+    <value>अभी खेल रहे हैं</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Friends" xml:space="preserve">
+    <value>दोस्त</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Library" xml:space="preserve">
+    <value>लाइब्रेरी</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Online" xml:space="preserve">
+    <value>ऑनलाइन</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Busy" xml:space="preserve">
+    <value>व्यस्त</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Away" xml:space="preserve">
+    <value>दूर</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Snooze" xml:space="preserve">
+    <value>झपकी</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToTrade" xml:space="preserve">
+    <value>ट्रेड करना चाहते हैं</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToPlay" xml:space="preserve">
+    <value>खेलना चाहते हैं</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Offline" xml:space="preserve">
+    <value>ऑफ़लाइन</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.One" xml:space="preserve">
+    <value>खेल रहे हैं: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.Other" xml:space="preserve">
+    <value>खेल रहे हैं: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.One" xml:space="preserve">
+    <value>ऑनलाइन: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.Other" xml:space="preserve">
+    <value>ऑनलाइन: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.One" xml:space="preserve">
+    <value>{count} गेम</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.Other" xml:space="preserve">
+    <value>गेम: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.HoursPlayed" xml:space="preserve">
+    <value>खेले गए घंटे</value>
+  </data>
+  <data name="Widgets.Steam.Installed" xml:space="preserve">
+    <value>इंस्टॉल किए गए</value>
+  </data>
+  <data name="Widgets.Steam.LastTwoWeeks" xml:space="preserve">
+    <value>पिछले 2 हफ़्ते</value>
+  </data>
+  <data name="Widgets.Steam.HoursValue" xml:space="preserve">
+    <value>{hours} घं.</value>
+  </data>
+  <data name="Widgets.Steam.RecentPlaytime" xml:space="preserve">
+    <value>पिछले 2 हफ़्तों में {hours} घं.</value>
+  </data>
+  <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
+    <value>कुल {hours} घं.</value>
+  </data>
 </root>

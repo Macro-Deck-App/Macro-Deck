@@ -22412,4 +22412,220 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
     <value>此账户不可用</value>
   </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Name" xml:space="preserve">
+    <value>关闭 Steam 游戏</value>
+  </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Description" xml:space="preserve">
+    <value>关闭此电脑上正在运行的 Steam 游戏。</value>
+  </data>
+  <data name="Integrations.Steam.Params.Force" xml:space="preserve">
+    <value>强制退出</value>
+  </data>
+  <data name="Integrations.Steam.Params.ForceDescription" xml:space="preserve">
+    <value>如果游戏在 10 秒后仍未关闭，则强制结束。未保存的进度可能会丢失。</value>
+  </data>
+  <data name="Integrations.Steam.Params.Account" xml:space="preserve">
+    <value>账户</value>
+  </data>
+  <data name="Integrations.Steam.Params.Friend" xml:space="preserve">
+    <value>好友</value>
+  </data>
+  <data name="Integrations.Steam.Params.FriendName" xml:space="preserve">
+    <value>好友名称</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameId" xml:space="preserve">
+    <value>游戏 ID</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameName" xml:space="preserve">
+    <value>游戏名称</value>
+  </data>
+  <data name="Integrations.Steam.Params.DurationSeconds" xml:space="preserve">
+    <value>时长（秒）</value>
+  </data>
+  <data name="Integrations.Steam.Params.Status" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Integrations.Steam.Params.PreviousStatus" xml:space="preserve">
+    <value>之前的状态</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NoGameRunning" xml:space="preserve">
+    <value>此电脑上没有正在运行的 Steam 游戏。</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseFailed" xml:space="preserve">
+    <value>游戏未关闭。</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseNotSupported" xml:space="preserve">
+    <value>此操作系统不支持关闭游戏。</value>
+  </data>
+  <data name="Integrations.Steam.Events.Category" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Name" xml:space="preserve">
+    <value>游戏已启动</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Description" xml:space="preserve">
+    <value>Steam 游戏已在此电脑上启动，或在配置了 Web API 密钥时在其他设备上启动。</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Name" xml:space="preserve">
+    <value>游戏已关闭</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Description" xml:space="preserve">
+    <value>Steam 游戏已关闭。事件中包含其运行时长。</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Name" xml:space="preserve">
+    <value>好友上线</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Description" xml:space="preserve">
+    <value>一位 Steam 好友上线了。</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Name" xml:space="preserve">
+    <value>好友下线</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Description" xml:space="preserve">
+    <value>一位 Steam 好友下线了。</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Name" xml:space="preserve">
+    <value>好友开始游戏</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Description" xml:space="preserve">
+    <value>一位 Steam 好友开始玩游戏。</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Name" xml:space="preserve">
+    <value>在线状态已更改</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Description" xml:space="preserve">
+    <value>你的 Steam 账户的在线状态已更改，例如变为“离开”。</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesOwned" xml:space="preserve">
+    <value>拥有的游戏</value>
+  </data>
+  <data name="Integrations.Steam.Variables.TotalPlaytimeHours" xml:space="preserve">
+    <value>总游戏时间（小时）</value>
+  </data>
+  <data name="Integrations.Steam.Variables.RecentPlaytimeHours" xml:space="preserve">
+    <value>过去两周的游戏时间（小时）</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Title" xml:space="preserve">
+    <value>Steam 游戏详情为私密</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Description" xml:space="preserve">
+    <value>由于 {account} 的游戏详情为私密，Steam 不会提供其游戏。要查看拥有的游戏和游戏时间，请在 Steam 隐私设置中将“游戏详情”设为公开。</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Name" xml:space="preserve">
+    <value>Steam 好友</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Description" xml:space="preserve">
+    <value>显示有多少 Steam 好友在线和正在玩游戏，较大尺寸时还会显示具体是谁。</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Name" xml:space="preserve">
+    <value>Steam 库</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Description" xml:space="preserve">
+    <value>显示游戏时间、拥有的游戏数量以及最近玩过的游戏。</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceFavorites" xml:space="preserve">
+    <value>收藏</value>
+  </data>
+  <data name="Widgets.Steam.Config.Favorites" xml:space="preserve">
+    <value>收藏的游戏</value>
+  </data>
+  <data name="Widgets.Steam.Config.FavoritesDescription" xml:space="preserve">
+    <value>要显示的游戏，按此顺序排列。最多显示 6 款。</value>
+  </data>
+  <data name="Widgets.Steam.Config.FriendsAccountDescription" xml:space="preserve">
+    <value>显示其好友的账户。留空则使用第一个有 Web API 密钥的账户。</value>
+  </data>
+  <data name="Widgets.Steam.Config.LibraryAccountDescription" xml:space="preserve">
+    <value>显示其库的账户。留空则使用第一个有 Web API 密钥的账户；如果没有，则使用此电脑上的游戏。</value>
+  </data>
+  <data name="Widgets.Steam.Config.FirstAccount" xml:space="preserve">
+    <value>第一个有密钥的账户</value>
+  </data>
+  <data name="Widgets.Steam.NoFavorites" xml:space="preserve">
+    <value>请在组件设置中选择收藏的游戏。</value>
+  </data>
+  <data name="Widgets.Steam.NeedsWebApi" xml:space="preserve">
+    <value>添加带有 Web API 密钥的 Steam 账户即可查看好友。</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPrivate" xml:space="preserve">
+    <value>此账户的好友列表为私密。</value>
+  </data>
+  <data name="Widgets.Steam.GamesPrivate" xml:space="preserve">
+    <value>此账户的游戏详情为私密。</value>
+  </data>
+  <data name="Widgets.Steam.NoFriendsOnline" xml:space="preserve">
+    <value>没有在线好友</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.NowPlaying" xml:space="preserve">
+    <value>正在玩</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Friends" xml:space="preserve">
+    <value>好友</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Library" xml:space="preserve">
+    <value>库</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Online" xml:space="preserve">
+    <value>在线</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Busy" xml:space="preserve">
+    <value>忙碌</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Away" xml:space="preserve">
+    <value>离开</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Snooze" xml:space="preserve">
+    <value>打盹</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToTrade" xml:space="preserve">
+    <value>想交易</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToPlay" xml:space="preserve">
+    <value>想玩游戏</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Offline" xml:space="preserve">
+    <value>离线</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.One" xml:space="preserve">
+    <value>{count} 人在玩</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.Other" xml:space="preserve">
+    <value>{count} 人在玩</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.One" xml:space="preserve">
+    <value>{count} 人在线</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.Other" xml:space="preserve">
+    <value>{count} 人在线</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.One" xml:space="preserve">
+    <value>{count} 款游戏</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.Other" xml:space="preserve">
+    <value>{count} 款游戏</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.HoursPlayed" xml:space="preserve">
+    <value>游戏时数</value>
+  </data>
+  <data name="Widgets.Steam.Installed" xml:space="preserve">
+    <value>已安装</value>
+  </data>
+  <data name="Widgets.Steam.LastTwoWeeks" xml:space="preserve">
+    <value>过去 2 周</value>
+  </data>
+  <data name="Widgets.Steam.HoursValue" xml:space="preserve">
+    <value>{hours} 小时</value>
+  </data>
+  <data name="Widgets.Steam.RecentPlaytime" xml:space="preserve">
+    <value>过去 2 周 {hours} 小时</value>
+  </data>
+  <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
+    <value>总计 {hours} 小时</value>
+  </data>
 </root>

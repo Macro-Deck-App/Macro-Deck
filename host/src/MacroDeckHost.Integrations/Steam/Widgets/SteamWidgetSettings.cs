@@ -1,11 +1,15 @@
-using System.Globalization;
 using System.Text.Json;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal sealed record SteamPlayingOptions(bool ShowSessionTime, string? AccountId = null);
 
-internal sealed record SteamLauncherOptions(string Source, int? GameAppId, int Count);
+internal sealed record SteamLauncherOptions(string Source, int? GameAppId, int Count, IReadOnlyList<int>? Favorites = null)
+{
+	public IReadOnlyList<int> FavoriteAppIds => Favorites ?? [];
+}
+
+internal sealed record SteamAccountOptions(string? AccountId);
 
 internal static class SteamWidgetSettings
 {
@@ -23,14 +27,21 @@ internal static class SteamWidgetSettings
 			source is not null && SteamWidgetType.Sources.Contains(source, StringComparer.Ordinal)
 				? source
 				: SteamWidgetType.RecentSource,
-			game is { Length: > 0 and <= 10 } && game.All(char.IsAsciiDigit) &&
-			int.TryParse(game, NumberStyles.None, CultureInfo.InvariantCulture, out var appId) && appId > 0
-				? appId
-				: null,
+			SteamLauncher.ParseAppId(game),
 			count is { } value
 				? (int)Math.Clamp(Math.Round(value), SteamWidgetType.MinimumCount, SteamWidgetType.MaximumCount)
-				: SteamWidgetType.DefaultCount);
+				: SteamWidgetType.DefaultCount,
+			[
+				.. SteamSurfaces.ReadStrings(data, SteamWidgetType.FavoritesKey)
+					.Select(SteamLauncher.ParseAppId)
+					.OfType<int>()
+					.Distinct()
+					.Take(SteamWidgetType.MaximumCount)
+			]);
 	}
+
+	public static SteamAccountOptions ParseAccount(JsonElement data)
+		=> new(SteamSurfaces.ReadString(data, SteamWidgetType.AccountKey) is { Length: > 0 } account ? account : null);
 
 	public static string? BackgroundColor(JsonElement data)
 		=> SteamSurfaces.NormalizeBackground(SteamSurfaces.ReadString(data, SteamWidgetType.BackgroundColorKey));

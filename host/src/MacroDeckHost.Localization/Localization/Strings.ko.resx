@@ -22430,4 +22430,220 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
     <value>이 계정을 사용할 수 없습니다</value>
   </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Name" xml:space="preserve">
+    <value>Steam 게임 종료</value>
+  </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Description" xml:space="preserve">
+    <value>이 컴퓨터에서 실행 중인 Steam 게임을 종료합니다.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Force" xml:space="preserve">
+    <value>강제 종료</value>
+  </data>
+  <data name="Integrations.Steam.Params.ForceDescription" xml:space="preserve">
+    <value>10초 후에도 게임이 종료되지 않으면 강제로 종료합니다. 저장하지 않은 진행 상황이 사라질 수 있습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Account" xml:space="preserve">
+    <value>계정</value>
+  </data>
+  <data name="Integrations.Steam.Params.Friend" xml:space="preserve">
+    <value>친구</value>
+  </data>
+  <data name="Integrations.Steam.Params.FriendName" xml:space="preserve">
+    <value>친구 이름</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameId" xml:space="preserve">
+    <value>게임 ID</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameName" xml:space="preserve">
+    <value>게임 이름</value>
+  </data>
+  <data name="Integrations.Steam.Params.DurationSeconds" xml:space="preserve">
+    <value>시간(초)</value>
+  </data>
+  <data name="Integrations.Steam.Params.Status" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="Integrations.Steam.Params.PreviousStatus" xml:space="preserve">
+    <value>이전 상태</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NoGameRunning" xml:space="preserve">
+    <value>이 컴퓨터에서 실행 중인 Steam 게임이 없습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseFailed" xml:space="preserve">
+    <value>게임이 종료되지 않았습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseNotSupported" xml:space="preserve">
+    <value>이 운영 체제에서는 게임 종료를 지원하지 않습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.Category" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Name" xml:space="preserve">
+    <value>게임 시작됨</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Description" xml:space="preserve">
+    <value>이 컴퓨터에서, 또는 Web API 키가 있으면 다른 기기에서 Steam 게임이 시작되었습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Name" xml:space="preserve">
+    <value>게임 종료됨</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Description" xml:space="preserve">
+    <value>Steam 게임이 종료되었습니다. 이벤트에는 실행 시간이 포함됩니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Name" xml:space="preserve">
+    <value>친구 온라인</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Description" xml:space="preserve">
+    <value>Steam 친구가 온라인 상태가 되었습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Name" xml:space="preserve">
+    <value>친구 오프라인</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Description" xml:space="preserve">
+    <value>Steam 친구가 오프라인 상태가 되었습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Name" xml:space="preserve">
+    <value>친구가 게임 시작</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Description" xml:space="preserve">
+    <value>Steam 친구가 게임을 플레이하기 시작했습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Name" xml:space="preserve">
+    <value>온라인 상태 변경됨</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Description" xml:space="preserve">
+    <value>Steam 계정의 온라인 상태가 자리 비움 등으로 변경되었습니다.</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesOwned" xml:space="preserve">
+    <value>보유 게임</value>
+  </data>
+  <data name="Integrations.Steam.Variables.TotalPlaytimeHours" xml:space="preserve">
+    <value>총 플레이 시간(시간)</value>
+  </data>
+  <data name="Integrations.Steam.Variables.RecentPlaytimeHours" xml:space="preserve">
+    <value>최근 2주 플레이 시간(시간)</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Title" xml:space="preserve">
+    <value>Steam 게임 세부 정보가 비공개입니다</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Description" xml:space="preserve">
+    <value>{account}의 게임 세부 정보가 비공개이므로 Steam에서 게임을 공유하지 않습니다. 보유 게임과 플레이 시간을 보려면 Steam 개인정보 설정에서 게임 세부 정보를 공개로 설정하세요.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Name" xml:space="preserve">
+    <value>Steam 친구</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Description" xml:space="preserve">
+    <value>온라인 상태이거나 플레이 중인 Steam 친구 수를 표시하고, 큰 크기에서는 누구인지도 표시합니다.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Name" xml:space="preserve">
+    <value>Steam 라이브러리</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Description" xml:space="preserve">
+    <value>플레이 시간, 보유 게임 수, 최근 플레이한 게임을 표시합니다.</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceFavorites" xml:space="preserve">
+    <value>즐겨찾기</value>
+  </data>
+  <data name="Widgets.Steam.Config.Favorites" xml:space="preserve">
+    <value>즐겨찾는 게임</value>
+  </data>
+  <data name="Widgets.Steam.Config.FavoritesDescription" xml:space="preserve">
+    <value>표시할 게임과 순서입니다. 최대 6개가 표시됩니다.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FriendsAccountDescription" xml:space="preserve">
+    <value>친구를 표시할 계정입니다. 비워 두면 Web API 키가 있는 첫 번째 계정을 사용합니다.</value>
+  </data>
+  <data name="Widgets.Steam.Config.LibraryAccountDescription" xml:space="preserve">
+    <value>라이브러리를 표시할 계정입니다. 비워 두면 Web API 키가 있는 첫 번째 계정을 사용하고, 그런 계정이 없으면 이 컴퓨터의 게임을 사용합니다.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FirstAccount" xml:space="preserve">
+    <value>키가 있는 첫 번째 계정</value>
+  </data>
+  <data name="Widgets.Steam.NoFavorites" xml:space="preserve">
+    <value>위젯 설정에서 즐겨찾는 게임을 선택하세요.</value>
+  </data>
+  <data name="Widgets.Steam.NeedsWebApi" xml:space="preserve">
+    <value>친구를 보려면 Web API 키가 있는 Steam 계정을 추가하세요.</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPrivate" xml:space="preserve">
+    <value>이 계정의 친구 목록은 비공개입니다.</value>
+  </data>
+  <data name="Widgets.Steam.GamesPrivate" xml:space="preserve">
+    <value>이 계정의 게임 세부 정보는 비공개입니다.</value>
+  </data>
+  <data name="Widgets.Steam.NoFriendsOnline" xml:space="preserve">
+    <value>온라인 친구 없음</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.NowPlaying" xml:space="preserve">
+    <value>플레이 중</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Friends" xml:space="preserve">
+    <value>친구</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Library" xml:space="preserve">
+    <value>라이브러리</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Busy" xml:space="preserve">
+    <value>다른 용무 중</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Away" xml:space="preserve">
+    <value>자리 비움</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Snooze" xml:space="preserve">
+    <value>수면 중</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToTrade" xml:space="preserve">
+    <value>거래 희망</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToPlay" xml:space="preserve">
+    <value>게임 희망</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Offline" xml:space="preserve">
+    <value>오프라인</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.One" xml:space="preserve">
+    <value>{count}명 플레이 중</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.Other" xml:space="preserve">
+    <value>{count}명 플레이 중</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.One" xml:space="preserve">
+    <value>{count}명 온라인</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.Other" xml:space="preserve">
+    <value>{count}명 온라인</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.One" xml:space="preserve">
+    <value>게임 {count}개</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.Other" xml:space="preserve">
+    <value>게임 {count}개</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.HoursPlayed" xml:space="preserve">
+    <value>플레이 시간</value>
+  </data>
+  <data name="Widgets.Steam.Installed" xml:space="preserve">
+    <value>설치됨</value>
+  </data>
+  <data name="Widgets.Steam.LastTwoWeeks" xml:space="preserve">
+    <value>최근 2주</value>
+  </data>
+  <data name="Widgets.Steam.HoursValue" xml:space="preserve">
+    <value>{hours}시간</value>
+  </data>
+  <data name="Widgets.Steam.RecentPlaytime" xml:space="preserve">
+    <value>최근 2주간 {hours}시간</value>
+  </data>
+  <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
+    <value>총 {hours}시간</value>
+  </data>
 </root>

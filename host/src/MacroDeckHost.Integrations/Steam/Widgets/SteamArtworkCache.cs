@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
@@ -7,9 +8,17 @@ using Serilog;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 
-internal sealed class SteamArtworkCache : IDisposable
+internal sealed partial class SteamArtworkCache : IDisposable
 {
 	public const string AllowedHost = "cdn.cloudflare.steamstatic.com";
+
+	internal static readonly IReadOnlyList<string> AvatarHosts =
+	[
+		"avatars.steamstatic.com",
+		"avatars.fastly.steamstatic.com",
+		"avatars.cloudflare.steamstatic.com",
+		"avatars.akamai.steamstatic.com"
+	];
 
 	internal const int MaxImageBytes = 1024 * 1024;
 
@@ -27,7 +36,7 @@ internal sealed class SteamArtworkCache : IDisposable
 	private readonly IUiResourceRegistry _resources;
 	private readonly TimeProvider _time;
 	private readonly Lock _sync = new();
-	private readonly Dictionary<int, Entry> _entries = [];
+	private readonly Dictionary<string, Entry> _entries = new(StringComparer.Ordinal);
 	private readonly CancellationTokenSource _disposing = new();
 
 	private bool _disposed;
@@ -46,23 +55,38 @@ internal sealed class SteamArtworkCache : IDisposable
 
 	public event EventHandler? Changed;
 
-	public UiResource? Find(int appId)
-	{
-		lock (_sync)
-		{
-			return _entries.TryGetValue(appId, out var entry) ? entry.Resource : null;
-		}
-	}
+	public UiResource? Find(int appId) => Find(CoverName(appId));
+
+	public UiResource? FindAvatar(string? url) => AvatarName(url) is { } name ? Find(name) : null;
 
 	public void Track(int appId)
 	{
-		if (appId <= 0)
+		if (appId > 0 && UriFor(appId) is { } uri)
 		{
-			return;
+			Track(CoverName(appId), uri);
 		}
+	}
 
+	public void TrackAvatar(string? url)
+	{
+		if (AvatarName(url) is { } name)
+		{
+			Track(name, new Uri(url!));
+		}
+	}
+
+	private UiResource? Find(string name)
+	{
+		lock (_sync)
+		{
+			return _entries.TryGetValue(name, out var entry) ? entry.Resource : null;
+		}
+	}
+
+	private void Track(string name, Uri uri)
+	{
 		var now = _time.GetUtcNow();
-		List<int> evicted;
+		List<string> evicted;
 
 		lock (_sync)
 		{
@@ -71,7 +95,7 @@ internal sealed class SteamArtworkCache : IDisposable
 				return;
 			}
 
-			var known = _entries.TryGetValue(appId, out var entry);
+			var known = _entries.TryGetValue(name, out var entry);
 			if (known && entry!.InFlight)
 			{
 				return;
@@ -79,25 +103,25 @@ internal sealed class SteamArtworkCache : IDisposable
 
 			if (known && now - entry!.FetchedAt < (entry.Resource is null ? RetryInterval : RefreshInterval))
 			{
-				_entries[appId] = entry with { LastUsed = now };
+				_entries[name] = entry with { LastUsed = now };
 				return;
 			}
 
-			_entries[appId] = (entry ?? new Entry()) with { InFlight = true, LastUsed = now };
-			evicted = Evict(appId);
+			_entries[name] = (entry ?? new Entry()) with { InFlight = true, LastUsed = now };
+			evicted = Evict(name);
 		}
 
-		foreach (var evictedAppId in evicted)
+		foreach (var evictedName in evicted)
 		{
-			_ = RemoveAsync(evictedAppId);
+			_ = RemoveAsync(evictedName);
 		}
 
-		_ = FetchAsync(appId, _disposing.Token);
+		_ = FetchAsync(name, uri, _disposing.Token);
 	}
 
 	public void Dispose()
 	{
-		List<int> registered;
+		List<string> registered;
 
 		lock (_sync)
 		{
@@ -114,9 +138,9 @@ internal sealed class SteamArtworkCache : IDisposable
 		_disposing.Cancel();
 		_disposing.Dispose();
 
-		foreach (var appId in registered)
+		foreach (var name in registered)
 		{
-			_ = RemoveAsync(appId);
+			_ = RemoveAsync(name);
 		}
 
 		_http.Dispose();
@@ -143,21 +167,36 @@ internal sealed class SteamArtworkCache : IDisposable
 			string.Equals(uri.Host, AllowedHost, StringComparison.OrdinalIgnoreCase) &&
 			uri.AbsolutePath.StartsWith("/steam/apps/", StringComparison.Ordinal);
 
+	internal static bool IsAllowedAvatar(Uri uri)
+		=> uri.Scheme == Uri.UriSchemeHttps &&
+			uri.IsDefaultPort &&
+			string.IsNullOrEmpty(uri.UserInfo) &&
+			string.IsNullOrEmpty(uri.Query) &&
+			AvatarHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase) &&
+			AvatarPath().IsMatch(uri.AbsolutePath);
+
+	internal static string? AvatarName(string? url)
+		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) && IsAllowedAvatar(uri)
+			? $"avatar-{uri.AbsolutePath[1..41].ToLowerInvariant()}"
+			: null;
+
 	internal static bool IsJpeg(byte[] bytes)
 		=> bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
 
-	private static string NameOf(int appId) => $"cover-{appId.ToString(CultureInfo.InvariantCulture)}";
+	private static string CoverName(int appId) => $"cover-{appId.ToString(CultureInfo.InvariantCulture)}";
 
-	private List<int> Evict(int keep)
+	[GeneratedRegex("^/[0-9a-fA-F]{40}_medium\\.jpg$", RegexOptions.CultureInvariant)]
+	private static partial Regex AvatarPath();
+
+	private List<string> Evict(string keep)
 	{
-		var removed = new List<int>();
+		var removed = new List<string>();
 
 		while (_entries.Count > MaxEntries || _entries.Values.Sum(entry => (long)entry.Size) > MaxTotalBytes)
 		{
 			var victim = _entries.Where(pair => pair.Key != keep && !pair.Value.InFlight)
 				.OrderBy(pair => pair.Value.LastUsed)
 				.Select(pair => pair.Key)
-				.Cast<int?>()
 				.FirstOrDefault();
 
 			if (victim is not { } evictedId)
@@ -174,11 +213,11 @@ internal sealed class SteamArtworkCache : IDisposable
 		return removed;
 	}
 
-	private async Task RemoveAsync(int appId)
+	private async Task RemoveAsync(string name)
 	{
 		try
 		{
-			await _resources.RemoveAsync(NameOf(appId));
+			await _resources.RemoveAsync(name);
 		}
 		catch (Exception exception) when (exception is UiResourceException or OperationCanceledException)
 		{
@@ -186,20 +225,16 @@ internal sealed class SteamArtworkCache : IDisposable
 		}
 	}
 
-	private async Task FetchAsync(int appId, CancellationToken cancellationToken)
+	private async Task FetchAsync(string name, Uri uri, CancellationToken cancellationToken)
 	{
-		byte[]? bytes = null;
-		if (UriFor(appId) is { } uri)
-		{
-			bytes = await DownloadAsync(uri, cancellationToken).ConfigureAwait(false);
-		}
+		var bytes = await DownloadAsync(uri, cancellationToken).ConfigureAwait(false);
 
 		UiResource? registered = null;
 		if (bytes is not null && IsJpeg(bytes))
 		{
 			try
 			{
-				registered = await _resources.RegisterAsync(NameOf(appId), bytes, "image/jpeg", cancellationToken)
+				registered = await _resources.RegisterAsync(name, bytes, "image/jpeg", cancellationToken)
 					.ConfigureAwait(false);
 			}
 			catch (Exception exception) when (exception is UiResourceException or OperationCanceledException)
@@ -212,13 +247,13 @@ internal sealed class SteamArtworkCache : IDisposable
 
 		lock (_sync)
 		{
-			if (_disposed || !_entries.TryGetValue(appId, out var entry))
+			if (_disposed || !_entries.TryGetValue(name, out var entry))
 			{
 				orphaned = registered is not null;
 			}
 			else
 			{
-				_entries[appId] = entry with
+				_entries[name] = entry with
 				{
 					InFlight = false,
 					FetchedAt = _time.GetUtcNow(),
@@ -230,7 +265,7 @@ internal sealed class SteamArtworkCache : IDisposable
 
 		if (orphaned)
 		{
-			await RemoveAsync(appId).ConfigureAwait(false);
+			await RemoveAsync(name).ConfigureAwait(false);
 			return;
 		}
 

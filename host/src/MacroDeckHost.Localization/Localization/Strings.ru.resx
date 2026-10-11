@@ -22430,4 +22430,220 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
     <value>Этот аккаунт недоступен</value>
   </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Name" xml:space="preserve">
+    <value>Закрыть игру Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.CloseGame.Description" xml:space="preserve">
+    <value>Закрывает игру Steam, запущенную на этом компьютере.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Force" xml:space="preserve">
+    <value>Принудительное завершение</value>
+  </data>
+  <data name="Integrations.Steam.Params.ForceDescription" xml:space="preserve">
+    <value>Завершает игру, если она не закрылась через 10 секунд. Несохранённый прогресс может быть потерян.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Account" xml:space="preserve">
+    <value>Аккаунт</value>
+  </data>
+  <data name="Integrations.Steam.Params.Friend" xml:space="preserve">
+    <value>Друг</value>
+  </data>
+  <data name="Integrations.Steam.Params.FriendName" xml:space="preserve">
+    <value>Имя друга</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameId" xml:space="preserve">
+    <value>ID игры</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameName" xml:space="preserve">
+    <value>Название игры</value>
+  </data>
+  <data name="Integrations.Steam.Params.DurationSeconds" xml:space="preserve">
+    <value>Длительность в секундах</value>
+  </data>
+  <data name="Integrations.Steam.Params.Status" xml:space="preserve">
+    <value>Статус</value>
+  </data>
+  <data name="Integrations.Steam.Params.PreviousStatus" xml:space="preserve">
+    <value>Предыдущий статус</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NoGameRunning" xml:space="preserve">
+    <value>На этом компьютере не запущена ни одна игра Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseFailed" xml:space="preserve">
+    <value>Игра не закрылась.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.CloseNotSupported" xml:space="preserve">
+    <value>Закрытие игр не поддерживается в этой операционной системе.</value>
+  </data>
+  <data name="Integrations.Steam.Events.Category" xml:space="preserve">
+    <value>Steam</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Name" xml:space="preserve">
+    <value>Игра запущена</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStarted.Description" xml:space="preserve">
+    <value>Игра Steam запущена на этом компьютере или, при наличии ключа Web API, на другом устройстве.</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Name" xml:space="preserve">
+    <value>Игра закрыта</value>
+  </data>
+  <data name="Integrations.Steam.Events.GameStopped.Description" xml:space="preserve">
+    <value>Игра Steam закрыта. Событие содержит, сколько времени она работала.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Name" xml:space="preserve">
+    <value>Друг в сети</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOnline.Description" xml:space="preserve">
+    <value>Друг в Steam появился в сети.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Name" xml:space="preserve">
+    <value>Друг вышел из сети</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendOffline.Description" xml:space="preserve">
+    <value>Друг в Steam вышел из сети.</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Name" xml:space="preserve">
+    <value>Друг запустил игру</value>
+  </data>
+  <data name="Integrations.Steam.Events.FriendStartedGame.Description" xml:space="preserve">
+    <value>Друг в Steam начал играть в игру.</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Name" xml:space="preserve">
+    <value>Сетевой статус изменён</value>
+  </data>
+  <data name="Integrations.Steam.Events.PersonaChanged.Description" xml:space="preserve">
+    <value>Сетевой статус вашего аккаунта Steam изменился, например на «Нет на месте».</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesOwned" xml:space="preserve">
+    <value>Игры в библиотеке</value>
+  </data>
+  <data name="Integrations.Steam.Variables.TotalPlaytimeHours" xml:space="preserve">
+    <value>Общее время в играх в часах</value>
+  </data>
+  <data name="Integrations.Steam.Variables.RecentPlaytimeHours" xml:space="preserve">
+    <value>Время в играх за последние две недели в часах</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Title" xml:space="preserve">
+    <value>Игровая информация в Steam скрыта</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateGames.Description" xml:space="preserve">
+    <value>Steam не передаёт игры аккаунта {account}, потому что его игровая информация скрыта. Чтобы видеть игры в библиотеке и время в играх, сделайте игровую информацию общедоступной в настройках приватности Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Name" xml:space="preserve">
+    <value>Друзья в Steam</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Friends.Description" xml:space="preserve">
+    <value>Показывает, сколько ваших друзей в Steam в сети и играют, а на больших размерах — кто именно.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Name" xml:space="preserve">
+    <value>Библиотека Steam</value>
+  </data>
+  <data name="Integrations.Steam.Widget.Library.Description" xml:space="preserve">
+    <value>Показывает ваше время в играх, количество игр в библиотеке и недавно запущенные игры.</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceFavorites" xml:space="preserve">
+    <value>Избранное</value>
+  </data>
+  <data name="Widgets.Steam.Config.Favorites" xml:space="preserve">
+    <value>Избранные игры</value>
+  </data>
+  <data name="Widgets.Steam.Config.FavoritesDescription" xml:space="preserve">
+    <value>Игры для показа в этом порядке. Показывается не более 6.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FriendsAccountDescription" xml:space="preserve">
+    <value>Аккаунт, друзья которого показываются. Оставьте пустым, чтобы использовать первый аккаунт с ключом Web API.</value>
+  </data>
+  <data name="Widgets.Steam.Config.LibraryAccountDescription" xml:space="preserve">
+    <value>Аккаунт, библиотека которого показывается. Оставьте пустым, чтобы использовать первый аккаунт с ключом Web API или, если такого нет, игры на этом компьютере.</value>
+  </data>
+  <data name="Widgets.Steam.Config.FirstAccount" xml:space="preserve">
+    <value>Первый аккаунт с ключом</value>
+  </data>
+  <data name="Widgets.Steam.NoFavorites" xml:space="preserve">
+    <value>Выберите избранные игры в настройках виджета.</value>
+  </data>
+  <data name="Widgets.Steam.NeedsWebApi" xml:space="preserve">
+    <value>Добавьте аккаунт Steam с ключом Web API, чтобы видеть друзей.</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPrivate" xml:space="preserve">
+    <value>Список друзей этого аккаунта скрыт.</value>
+  </data>
+  <data name="Widgets.Steam.GamesPrivate" xml:space="preserve">
+    <value>Игровая информация этого аккаунта скрыта.</value>
+  </data>
+  <data name="Widgets.Steam.NoFriendsOnline" xml:space="preserve">
+    <value>Нет друзей в сети</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.NowPlaying" xml:space="preserve">
+    <value>СЕЙЧАС В ИГРЕ</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Friends" xml:space="preserve">
+    <value>ДРУЗЬЯ</value>
+  </data>
+  <data name="Widgets.Steam.Eyebrow.Library" xml:space="preserve">
+    <value>БИБЛИОТЕКА</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Online" xml:space="preserve">
+    <value>В сети</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Busy" xml:space="preserve">
+    <value>Не беспокоить</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Away" xml:space="preserve">
+    <value>Нет на месте</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Snooze" xml:space="preserve">
+    <value>Спит</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToTrade" xml:space="preserve">
+    <value>Хочет обменяться</value>
+  </data>
+  <data name="Widgets.Steam.Persona.LookingToPlay" xml:space="preserve">
+    <value>Хочет поиграть</value>
+  </data>
+  <data name="Widgets.Steam.Persona.Offline" xml:space="preserve">
+    <value>Не в сети</value>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.One" xml:space="preserve">
+    <value>В игре: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsPlaying.Other" xml:space="preserve">
+    <value>В игре: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.One" xml:space="preserve">
+    <value>В сети: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.FriendsOnline.Other" xml:space="preserve">
+    <value>В сети: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.One" xml:space="preserve">
+    <value>{count} игра</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.GamesCount.Other" xml:space="preserve">
+    <value>Игры: {count}</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Widgets.Steam.HoursPlayed" xml:space="preserve">
+    <value>Часы в играх</value>
+  </data>
+  <data name="Widgets.Steam.Installed" xml:space="preserve">
+    <value>Установлено</value>
+  </data>
+  <data name="Widgets.Steam.LastTwoWeeks" xml:space="preserve">
+    <value>Последние 2 недели</value>
+  </data>
+  <data name="Widgets.Steam.HoursValue" xml:space="preserve">
+    <value>{hours} ч</value>
+  </data>
+  <data name="Widgets.Steam.RecentPlaytime" xml:space="preserve">
+    <value>{hours} ч за последние 2 недели</value>
+  </data>
+  <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
+    <value>Всего {hours} ч</value>
+  </data>
 </root>

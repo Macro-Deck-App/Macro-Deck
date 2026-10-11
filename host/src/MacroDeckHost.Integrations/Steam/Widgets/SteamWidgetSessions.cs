@@ -3,6 +3,7 @@ using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
+using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 
@@ -34,6 +35,18 @@ internal static class SteamWidgetSessions
 			{
 				return new SteamViewSession(new UiView(surface,
 					SteamWidgetConfigViews.Playing(data, source?.Snapshot.Accounts ?? [])));
+			}
+
+			if (SteamSurfaces.IsConfigFor(surface, SteamWidgetType.FriendsQualifiedId))
+			{
+				return new SteamViewSession(new UiView(surface,
+					SteamWidgetConfigViews.Friends(data, source?.Snapshot.Accounts ?? [])));
+			}
+
+			if (SteamSurfaces.IsConfigFor(surface, SteamWidgetType.LibraryQualifiedId))
+			{
+				return new SteamViewSession(new UiView(surface,
+					SteamWidgetConfigViews.Library(data, source?.Snapshot.Accounts ?? [])));
 			}
 
 			return SteamSurfaces.IsConfigFor(surface, SteamWidgetType.GameLauncherQualifiedId)
@@ -90,6 +103,52 @@ internal static class SteamWidgetSessions
 					glyph,
 					time,
 					(state, launch) => SteamLauncherView.Build(state, launch, radius, background));
+
+			case SteamWidgetType.FriendsQualifiedId:
+				if (SteamSurfaces.IsSampleRequested(surface))
+				{
+					var sample = new UiState<SteamFriendsWidgetState>(new SteamFriendsWidgetState(SteamWidgetStatus.Ready,
+						3,
+						1,
+						[
+							new SteamFriendRow("friend-1", "Gordon", "Half-Life 2", SteamStyle.InGame, null, "G"),
+							new SteamFriendRow("friend-2", "Alyx", Strings.Persona.Online(), SteamStyle.Online, null, "A"),
+							new SteamFriendRow("friend-3", "Barney", Strings.Persona.Away(), SteamStyle.Away, null, "B"),
+						],
+						glyph));
+					return new SteamViewSession(new UiView(surface, SteamFriendsView.Build(sample, radius, background)));
+				}
+
+				var friendsOptions = SteamWidgetSettings.ParseAccount(widgetData);
+				return new SteamStateSession<SteamFriendsWidgetState>(surface,
+					source,
+					artwork,
+					() => SteamAccountWidgetStates.Friends(source, friendsOptions, artwork, glyph),
+					state => SteamFriendsView.Build(state, radius, background));
+
+			case SteamWidgetType.LibraryQualifiedId:
+				if (SteamSurfaces.IsSampleRequested(surface))
+				{
+					var sample = new UiState<SteamLibraryWidgetState>(new SteamLibraryWidgetState(SteamWidgetStatus.Ready,
+						true,
+						128,
+						"1248",
+						"12.5",
+						[
+							new SteamLibraryGame("game-220", 220, "Half-Life 2", null,
+								Strings.RecentPlaytime(hours: "12.5")),
+							new SteamLibraryGame("game-620", 620, "Portal 2", null, Strings.TotalPlaytime(hours: "38")),
+						],
+						glyph));
+					return new SteamViewSession(new UiView(surface, SteamLibraryView.Build(sample, radius, background)));
+				}
+
+				var libraryOptions = SteamWidgetSettings.ParseAccount(widgetData);
+				return new SteamStateSession<SteamLibraryWidgetState>(surface,
+					source,
+					artwork,
+					() => SteamAccountWidgetStates.Library(source, libraryOptions, artwork, glyph),
+					state => SteamLibraryView.Build(state, radius, background));
 
 			default:
 				return null;

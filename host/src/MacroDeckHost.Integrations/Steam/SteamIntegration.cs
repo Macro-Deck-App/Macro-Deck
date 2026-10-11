@@ -3,6 +3,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Ui;
@@ -14,13 +15,14 @@ using MacroDeckHost.Integrations.Steam.Actions;
 using MacroDeckHost.Integrations.System.Application;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam;
+using WidgetStrings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
 
 namespace MacroDeckHost.Integrations.Steam;
 
 [MacroDeckIntegration(EnabledByDefault = false)]
 public sealed partial class SteamIntegration
 	: IIntegration, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IWidgetTypeProvider,
-		IIntegrationIssueProvider, IUiProvider, ISteamSource, IDisposable
+		IIntegrationIssueProvider, IUiProvider, ISteamSource, IEventProvider, IDynamicEventOptionsProvider, IDisposable
 {
 	public const string IntegrationId = SteamWidgetType.OwnerId;
 
@@ -28,6 +30,7 @@ public sealed partial class SteamIntegration
 	private static readonly TimeSpan _undetectedInterval = TimeSpan.FromSeconds(60);
 	private static readonly TimeSpan _selfInterval = TimeSpan.FromSeconds(30);
 	private static readonly TimeSpan _friendsInterval = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _ownedGamesInterval = TimeSpan.FromMinutes(1);
 
 	private static readonly ILogger _logger = IntegrationLog.For<SteamIntegration>(IntegrationId);
 
@@ -38,6 +41,7 @@ public sealed partial class SteamIntegration
 	private readonly ISteamPlatform _platform;
 	private readonly Func<string, ISteamWebApiClient> _clientFactory;
 	private readonly SteamLauncher _launcher;
+	private readonly SteamGameCloser _closer;
 	private readonly TimeProvider _time;
 
 	private SteamSnapshot _published = SteamSnapshot.Empty;
@@ -65,6 +69,7 @@ public sealed partial class SteamIntegration
 		_platform = platform;
 		_clientFactory = clientFactory;
 		_launcher = new SteamLauncher(applications);
+		_closer = new SteamGameCloser(platform, time);
 		_time = time;
 		Actions = SteamActions.Create(this);
 	}
@@ -82,6 +87,8 @@ public sealed partial class SteamIntegration
 	public event EventHandler? Changed;
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
+
+	public IReadOnlyList<EventDefinition> EventDefinitions => SteamEventDefinitions.All;
 
 	public string IconMimeType => "image/svg+xml";
 
@@ -144,7 +151,12 @@ public sealed partial class SteamIntegration
 		_accounts = accounts;
 		_artwork ??= new SteamArtworkCache(context.UiResources, _time);
 		_logo = await RegisterLogoAsync(context.UiResources);
-		var tracker = new SteamTracker(_platform, accounts, [.. folders.Distinct(StringComparer.Ordinal)], _time, Publish);
+		var tracker = new SteamTracker(_platform,
+			accounts,
+			[.. folders.Distinct(StringComparer.Ordinal)],
+			_time,
+			Publish,
+			item => context.Events.Publish(item.Id, item.Payload));
 		_tracker = tracker;
 
 		PollLocalSafely(tracker);
@@ -159,6 +171,9 @@ public sealed partial class SteamIntegration
 				token));
 			loops.Add(Task.Run(
 				() => WebLoopAsync(tracker, _friendsInterval, static (t, ct) => t.PollFriendsAsync(ct), token),
+				token));
+			loops.Add(Task.Run(
+				() => WebLoopAsync(tracker, _ownedGamesInterval, static (t, ct) => t.PollOwnedGamesAsync(ct), token),
 				token));
 		}
 
@@ -198,13 +213,40 @@ public sealed partial class SteamIntegration
 		}
 	}
 
-	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes() => [CurrentlyPlayingType(), GameLauncherType()];
+	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+		=> [CurrentlyPlayingType(), GameLauncherType(), FriendsType(), LibraryType()];
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(SteamVariables.Read(localId, Snapshot, _time.GetUtcNow()));
 
 	public Task<SteamCommandOutcome> ExecuteAsync(SteamCommand command, CancellationToken cancellationToken)
-		=> _launcher.ExecuteAsync(command, cancellationToken);
+		=> command.Kind == SteamCommandKind.CloseGame
+			? CloseGameAsync(command.Force, cancellationToken)
+			: _launcher.ExecuteAsync(command, cancellationToken);
+
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context, CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(context);
+
+		var snapshot = Snapshot;
+		IReadOnlyList<ActionParameterOption> options = context.ParameterName switch
+		{
+			SteamEventPayload.Configuration =>
+			[
+				.. IsGameEvent(context.EventId)
+					? [new ActionParameterOption { Value = SteamEventPayload.ThisComputer, Label = WidgetStrings.ThisComputer() }]
+					: Array.Empty<ActionParameterOption>(),
+				.. _accounts.Where(account => account.HasWebApi)
+					.Select(account => new ActionParameterOption { Value = account.EntryId, Label = account.Title })
+			],
+			SteamEventPayload.FriendId => FriendOptions(snapshot,
+				context.CurrentParameters.GetValueOrDefault(SteamEventPayload.Configuration) as string,
+				context.Filter?.Trim()),
+			_ => []
+		};
+
+		return Task.FromResult(new DynamicOptionsResult { Options = options, CacheSeconds = 0 });
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
 	{
@@ -228,6 +270,17 @@ public sealed partial class SteamIntegration
 					Id = $"friends-private:{account.EntryId}",
 					Title = Strings.Issues.PrivateFriends.Title(),
 					Description = Strings.Issues.PrivateFriends.Description(account: account.Title),
+					Severity = IntegrationIssueSeverity.Warning
+				});
+			}
+
+			if (account.Web == SteamWebState.Connected && account.Owned == SteamOwnedState.Private)
+			{
+				issues.Add(new IntegrationIssue
+				{
+					Id = $"games-private:{account.EntryId}",
+					Title = Strings.Issues.PrivateGames.Title(),
+					Description = Strings.Issues.PrivateGames.Description(account: account.Title),
 					Severity = IntegrationIssueSeverity.Warning
 				});
 			}
@@ -289,6 +342,59 @@ public sealed partial class SteamIntegration
 						minimum = SteamWidgetType.MinimumCount,
 						maximum = SteamWidgetType.MaximumCount
 					},
+					[SteamWidgetType.FavoritesKey] = new { type = "array", items = new { type = "string" } },
+					[SteamWidgetType.BackgroundColorKey] = new
+					{
+						type = _nullableString, description = "#rrggbb or transparent"
+					}
+				}
+			}),
+			HasConfiguration: true)
+		{
+			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor]
+		};
+
+	private Task<SteamCommandOutcome> CloseGameAsync(bool force, CancellationToken cancellationToken)
+		=> _tracker is { } tracker
+			? _closer.CloseAsync(tracker.Snapshot, force, cancellationToken)
+			: Task.FromResult(SteamCommandOutcome.NotAvailable);
+
+	private static bool IsGameEvent(string eventId)
+		=> eventId is SteamEventIds.GameStarted or SteamEventIds.GameStopped;
+
+	private static List<ActionParameterOption> FriendOptions(SteamSnapshot snapshot, string? accountId, string? filter)
+		=>
+		[
+			.. snapshot.Accounts
+				.Where(account => string.IsNullOrEmpty(accountId) || account.EntryId == accountId)
+				.SelectMany(account => account.FriendList)
+				.DistinctBy(friend => friend.SteamId)
+				.Where(friend => string.IsNullOrEmpty(filter) ||
+					friend.Name.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+				.OrderBy(friend => friend.Name, StringComparer.CurrentCultureIgnoreCase)
+				.Select(friend => new ActionParameterOption { Value = friend.SteamId, Label = friend.Name })
+		];
+
+	internal static WidgetTypeDescriptor FriendsType()
+		=> AccountWidgetType(SteamWidgetType.FriendsLocalId, Strings.Widget.Friends.Name(), Strings.Widget.Friends.Description());
+
+	internal static WidgetTypeDescriptor LibraryType()
+		=> AccountWidgetType(SteamWidgetType.LibraryLocalId, Strings.Widget.Library.Name(), Strings.Widget.Library.Description());
+
+	private static WidgetTypeDescriptor AccountWidgetType(string localId, LocalizedText name, LocalizedText description)
+		=> new(localId,
+			name,
+			description,
+			DefaultData: JsonSerializer.Serialize(new Dictionary<string, object>
+			{
+				[SteamWidgetType.AccountKey] = string.Empty
+			}),
+			DataSchema: JsonSerializer.Serialize(new Dictionary<string, object>
+			{
+				["type"] = "object",
+				["properties"] = new Dictionary<string, object>
+				{
+					[SteamWidgetType.AccountKey] = new { type = "string" },
 					[SteamWidgetType.BackgroundColorKey] = new
 					{
 						type = _nullableString, description = "#rrggbb or transparent"

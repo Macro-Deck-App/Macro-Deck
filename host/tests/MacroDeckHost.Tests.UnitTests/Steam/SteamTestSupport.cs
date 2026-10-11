@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeck.Sdk.Events;
 using MacroDeckHost.Integrations.Steam;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;
@@ -26,6 +27,51 @@ internal sealed class FakeSteamPlatform : ISteamPlatform
 	public bool IsSteamProcessRunning() => SteamProcessRunning;
 
 	public IReadOnlyList<int> FindLaunchedAppIds() => LaunchedAppIds;
+
+	public bool CanCloseGames { get; set; } = true;
+
+	public List<SteamGameProcess> GameProcesses { get; } = [];
+
+	public HashSet<int> IgnoresCloseRequests { get; } = [];
+
+	public HashSet<int> WithoutWindow { get; } = [];
+
+	public List<(int AppId, string? InstallDirectory)> ProcessQueries { get; } = [];
+
+	public List<int> CloseRequests { get; } = [];
+
+	public List<int> Killed { get; } = [];
+
+	public IReadOnlyList<SteamGameProcess> FindGameProcesses(int appId, string? installDirectory)
+	{
+		ProcessQueries.Add((appId, installDirectory));
+		return [.. GameProcesses];
+	}
+
+	public bool RequestClose(SteamGameProcess process)
+	{
+		CloseRequests.Add(process.Id);
+		if (WithoutWindow.Contains(process.Id))
+		{
+			return false;
+		}
+
+		if (!IgnoresCloseRequests.Contains(process.Id))
+		{
+			GameProcesses.Remove(process);
+		}
+
+		return true;
+	}
+
+	public bool Kill(SteamGameProcess process)
+	{
+		Killed.Add(process.Id);
+		GameProcesses.Remove(process);
+		return true;
+	}
+
+	public bool IsRunning(SteamGameProcess process) => GameProcesses.Contains(process);
 }
 
 internal sealed class SteamFolders : IDisposable
@@ -50,7 +96,8 @@ internal sealed class SteamFolders : IDisposable
 		int appId,
 		string name,
 		int stateFlags = 4,
-		long? lastPlayed = null)
+		long? lastPlayed = null,
+		string? installDir = null)
 	{
 		var text = $$"""
 			"AppState"
@@ -59,6 +106,7 @@ internal sealed class SteamFolders : IDisposable
 				"name"		"{{name}}"
 				"StateFlags"		"{{stateFlags.ToString(CultureInfo.InvariantCulture)}}"
 				"LastPlayed"		"{{(lastPlayed ?? 0).ToString(CultureInfo.InvariantCulture)}}"
+				"installdir"		"{{installDir ?? string.Empty}}"
 			}
 			""";
 		File.WriteAllText(Path.Combine(library, "steamapps", $"appmanifest_{appId}.acf"), text);
@@ -99,4 +147,63 @@ internal sealed class SteamFolders : IDisposable
 		{
 		}
 	}
+}
+
+internal sealed class RecordingEventPublisher : IEventPublisher
+{
+	private readonly Lock _sync = new();
+	private readonly List<(string EventId, IReadOnlyDictionary<string, object?> Payload)> _published = [];
+
+	public IReadOnlyList<(string EventId, IReadOnlyDictionary<string, object?> Payload)> Published
+	{
+		get
+		{
+			lock (_sync)
+			{
+				return [.. _published];
+			}
+		}
+	}
+
+	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
+	{
+		lock (_sync)
+		{
+			_published.Add((eventId, parameters ?? new Dictionary<string, object?>()));
+		}
+	}
+}
+
+internal sealed class ScriptedWebApi : ISteamWebApiClient
+{
+	public SteamPlayerSummary? Self { get; set; }
+
+	public SteamWebFailure? SelfFailure { get; set; }
+
+	public IReadOnlyList<SteamPlayerSummary> Friends { get; set; } = [];
+
+	public SteamWebFailure? FriendsFailure { get; set; }
+
+	public Task<SteamPlayerSummary?> GetPlayerSummaryAsync(string steamId, CancellationToken cancellationToken)
+		=> SelfFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(Self);
+
+	public Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
+		IReadOnlyList<string> steamIds,
+		CancellationToken cancellationToken)
+		=> Task.FromResult(Friends);
+
+	public Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken)
+		=> FriendsFailure is { } failure
+			? throw new SteamWebApiException(failure)
+			: Task.FromResult<IReadOnlyList<string>?>([.. Friends.Select(friend => friend.SteamId)]);
+
+	public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
+		=> Task.FromResult<string?>(null);
+
+	public IReadOnlyList<SteamOwnedGame>? OwnedGames { get; set; } = [];
+
+	public SteamWebFailure? OwnedFailure { get; set; }
+
+	public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
+		=> OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
 }

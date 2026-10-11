@@ -11,15 +11,11 @@ internal static class SteamPlayingView
 {
 	public const string Root = "steamPlaying";
 
-	private const string ArtworkPlaceholder = "#1b2838";
+	private const double BackdropBrightness = 0.5;
+	private const double BackdropSaturation = 1.2;
 
-	private static readonly UiLength _title = UiLength.Capped(0.12, 16);
-	private static readonly UiLength _detail = UiLength.Capped(0.09, 12);
-	private static readonly UiLength _notice = UiLength.Capped(0.09, 12);
-	private static readonly UiLength _glyph = UiLength.Capped(0.2, 28);
-	private static readonly UiLength _smallArtwork = UiLength.Capped(0.46, 56);
-	private static readonly UiLength _gap = UiLength.Capped(0.04, 5);
-	private static readonly UiLength _rowGap = UiLength.Capped(0.06, 8);
+	private static readonly SteamInk _onArtwork = new(OnFace: true);
+	private static readonly UiLength _coverWidth = UiLength.OfBasis(0.64);
 
 	public static UiElement Build(
 		UiState<SteamPlayingState> state,
@@ -28,186 +24,214 @@ internal static class SteamPlayingView
 	{
 		ArgumentNullException.ThrowIfNull(state);
 
-		return new UiStack
+		var ink = SteamInk.For(backgroundColor);
+
+		return SteamStyle.Root(Root, backgroundColor, new UiStack
 		{
-			Key = Root,
+			Key = "content",
 			Direction = UiComponentDirections.Vertical,
-			Padding = SteamSurfaces.SafeArea(cornerRadius),
-			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
+			Fill = true,
 			Children =
 			[
-				Gate(state, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
-				Gate(state, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
-				Gate(state, "accountUnavailable", SteamWidgetStatus.AccountUnavailable, Strings.AccountUnavailable()),
-				Gate(state, "idle", SteamWidgetStatus.Idle, Strings.NotPlaying()),
+				Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
+				Gate(state, ink, cornerRadius, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
+				Gate(state, ink, cornerRadius, "accountUnavailable", SteamWidgetStatus.AccountUnavailable,
+					Strings.AccountUnavailable()),
+				Gate(state, ink, cornerRadius, "idle", SteamWidgetStatus.Idle, Strings.NotPlaying()),
 				new UiWhen
 				{
 					Key = "readyGate",
 					Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
-					Content = () => Layout(state),
+					Content = () => Layout(state, ink, cornerRadius),
 				},
 			],
-		};
+		});
 	}
 
-	private static UiWhen Gate(UiState<SteamPlayingState> state, string key, SteamWidgetStatus status,
+	private static UiWhen Gate(
+		UiState<SteamPlayingState> state,
+		SteamInk ink,
+		int cornerRadius,
+		string key,
+		SteamWidgetStatus status,
 		LocalizedText text)
 		=> new()
 		{
 			Key = key + "Gate",
 			Condition = () => state.Value.Status == status,
-			Content = () => Notice(state, key, text),
+			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius),
 		};
 
-	private static UiStack Notice(UiState<SteamPlayingState> state, string key, LocalizedText text)
-		=> new()
-		{
-			Key = key,
-			Direction = UiComponentDirections.Vertical,
-			Align = UiComponentAlignments.Center,
-			Justify = UiComponentJustify.Center,
-			Gap = _gap,
-			Fill = true,
-			Children =
-			[
-				new UiImage
-				{
-					Key = "glyph",
-					Size = _glyph,
-					MainSize = _glyph,
-					Source = UiValue.Optional(() => state.Value.Glyph is { } glyph
-						? UiValue.Of(glyph)
-						: UiValue.None<UiResource>()),
-				},
-				new UiTextRun
-				{
-					Key = "text",
-					Text = text,
-					Size = _notice,
-					Role = UiComponentTextRoles.Secondary,
-					Align = UiComponentAlignments.Center,
-					Wrap = true,
-					MaxLines = 3,
-				},
-			],
-		};
-
-	private static UiResponsive Layout(UiState<SteamPlayingState> state)
+	private static UiResponsive Layout(UiState<SteamPlayingState> state, SteamInk ink, int cornerRadius)
 		=> new()
 		{
 			Key = "layout",
 			Fill = true,
-			Default = Small(state),
-			Variants = [new UiResponsiveVariant { MinWidth = 1.5, Content = SideBySide(state) }],
+			Default = Hero(state, ink, cornerRadius),
+			Variants = [new UiResponsiveVariant { MinWidth = 1.5, Content = Wide(state, ink, cornerRadius) }],
 		};
 
-	private static UiStack Small(UiState<SteamPlayingState> state)
+	private static UiStack Hero(UiState<SteamPlayingState> state, SteamInk ink, int cornerRadius)
 		=> new()
 		{
 			Key = "small",
-			Direction = UiComponentDirections.Vertical,
-			Justify = UiComponentJustify.SpaceBetween,
-			Children = [Artwork(state, "artwork", _smallArtwork), Texts(state, "text", lines: 2)],
-		};
-
-	private static UiStack SideBySide(UiState<SteamPlayingState> state)
-		=> new()
-		{
-			Key = "wide",
-			Direction = UiComponentDirections.Horizontal,
-			Gap = _rowGap,
-			Children =
-			[
-				Artwork(state, "artwork", UiLength.OfBasis(1)),
-				new UiStack
-				{
-					Key = "details",
-					Direction = UiComponentDirections.Vertical,
-					Justify = UiComponentJustify.End,
-					Fill = true,
-					Children = [Texts(state, "text", lines: 3)],
-				},
-			],
-		};
-
-	private static UiStack Texts(UiState<SteamPlayingState> state, string key, int lines)
-		=> new()
-		{
-			Key = key,
-			Direction = UiComponentDirections.Vertical,
-			Children =
-			[
-				new UiTextRun
-				{
-					Key = "title",
-					Text = UiText.From(() => state.Value.Title),
-					Size = _title,
-					Weight = UiComponentTextWeights.SemiBold,
-					Role = UiComponentTextRoles.Primary,
-					Wrap = lines > 1,
-					MaxLines = lines,
-				},
-				new UiWhen
-				{
-					Key = "elapsedGate",
-					Condition = () => state.Value.Elapsed.Length > 0,
-					Content = () => new UiTextRun
-					{
-						Key = "elapsed",
-						Text = UiText.FromLocalized(() => Strings.PlayingFor(time: state.Value.Elapsed)),
-						Size = _detail,
-						Role = UiComponentTextRoles.Secondary,
-						MaxLines = 1,
-					},
-				},
-			],
-		};
-
-	private static UiStack Artwork(UiState<SteamPlayingState> state, string key, UiLength size)
-		=> new()
-		{
-			Key = key + "Box",
-			MainSize = size,
 			Children =
 			[
 				new UiWhen
 				{
-					Key = "imageGate",
+					Key = "coverGate",
 					Condition = () => state.Value.Cover is not null,
-					Content = () => new UiImage
+					Content = () => new UiLayer
 					{
-						Key = key,
-						Size = size,
-						Transition = UiComponentImageTransitions.Crossfade,
-						Source = UiValue.Optional(() => state.Value.Cover is { } cover
-							? UiValue.Of(cover)
-							: UiValue.None<UiResource>()),
+						Key = "hero",
+						Fill = true,
+						Children =
+						[
+							Backdrop(state, "artwork", brightness: 1, saturation: 1),
+							SteamStyle.Scrim("scrim"),
+							SteamStyle.Padded("text", cornerRadius, Spacer(), Details(state, _onArtwork, titleLines: 2)),
+						],
 					},
 				},
 				new UiWhen
 				{
 					Key = "placeholderGate",
 					Condition = () => state.Value.Cover is null,
-					Content = () => new UiStack
+					Content = () => new UiLayer
 					{
-						Key = key + "Placeholder",
-						MainSize = size,
-						Align = UiComponentAlignments.Center,
-						Justify = UiComponentJustify.Center,
-						Background = ArtworkPlaceholder,
+						Key = "placeholder",
+						Fill = true,
 						Children =
 						[
-							new UiImage
-							{
-								Key = "glyph",
-								Size = UiLength.OfBasis(size.Basis * 0.4),
-								Source = UiValue.Optional(() => state.Value.Glyph is { } glyph
-									? UiValue.Of(glyph)
-									: UiValue.None<UiResource>()),
-							},
+							SteamStyle.Padded("text", cornerRadius,
+								SteamStyle.Badge("badge", () => state.Value.Glyph),
+								Spacer(),
+								Details(state, ink, titleLines: 2)),
 						],
 					},
 				},
 			],
 		};
+
+	private static UiStack Wide(UiState<SteamPlayingState> state, SteamInk ink, int cornerRadius)
+		=> new()
+		{
+			Key = "wide",
+			Children =
+			[
+				new UiWhen
+				{
+					Key = "coverGate",
+					Condition = () => state.Value.Cover is not null,
+					Content = () => new UiLayer
+					{
+						Key = "backdrop",
+						Fill = true,
+						Children =
+						[
+							Backdrop(state, "ambient", BackdropBrightness, BackdropSaturation),
+							SteamStyle.BackdropScrim("scrim"),
+							Row(state, _onArtwork, cornerRadius),
+						],
+					},
+				},
+				new UiWhen
+				{
+					Key = "placeholderGate",
+					Condition = () => state.Value.Cover is null,
+					Content = () => Row(state, ink, cornerRadius),
+				},
+			],
+		};
+
+	private static UiStack Row(UiState<SteamPlayingState> state, SteamInk ink, int cornerRadius)
+		=> new()
+		{
+			Key = "row",
+			Direction = UiComponentDirections.Horizontal,
+			Fill = true,
+			Padding = SteamSurfaces.SafeArea(cornerRadius),
+			Gap = UiLength.Capped(0.08, 10),
+			Children =
+			[
+				SteamStyle.Rounded("artworkBox", SteamStyle.ArtworkRadius, new UiStack
+				{
+					Key = "artwork",
+					Children =
+					[
+						new UiWhen
+						{
+							Key = "imageGate",
+							Condition = () => state.Value.Cover is not null,
+							Content = () => new UiButton
+							{
+								Key = "cover",
+								Fill = true,
+								Background = "#000000",
+								Fit = UiComponentImageFits.Cover,
+								Transition = UiComponentImageTransitions.Crossfade,
+								Source = Cover(state),
+							},
+						},
+						new UiWhen
+						{
+							Key = "placeholderGate",
+							Condition = () => state.Value.Cover is null,
+							Content = () => SteamStyle.GlyphTile("placeholder", UiLength.OfBasis(0.26),
+								() => state.Value.Glyph),
+						},
+					],
+				}, _coverWidth),
+				new UiStack
+				{
+					Key = "details",
+					Direction = UiComponentDirections.Vertical,
+					Justify = UiComponentJustify.End,
+					Fill = true,
+					Children = [Details(state, ink, titleLines: 3)],
+				},
+			],
+		};
+
+	private static UiStack Details(UiState<SteamPlayingState> state, SteamInk ink, int titleLines)
+		=> new()
+		{
+			Key = "texts",
+			Direction = UiComponentDirections.Vertical,
+			Gap = SteamStyle.SmallGap,
+			Children =
+			[
+				SteamStyle.StatusLabel("eyebrow", Strings.Eyebrow.NowPlaying(), SteamStyle.InGame),
+				SteamStyle.Text("title", UiText.From(() => state.Value.Title), SteamStyle.Title, ink,
+					weight: UiComponentTextWeights.SemiBold, maxLines: titleLines),
+				new UiWhen
+				{
+					Key = "elapsedGate",
+					Condition = () => state.Value.Elapsed.Length > 0,
+					Content = () => SteamStyle.Text("elapsed",
+						UiText.FromLocalized(() => Strings.PlayingFor(time: state.Value.Elapsed)),
+						SteamStyle.Body, ink, SteamTone.Secondary),
+				},
+			],
+		};
+
+	private static UiButton Backdrop(UiState<SteamPlayingState> state, string key, double brightness, double saturation)
+		=> new()
+		{
+			Key = key,
+			Fill = true,
+			Corner = UiComponentButtonCorners.Tile,
+			Background = "#000000",
+			Fit = UiComponentImageFits.Cover,
+			Brightness = brightness,
+			Saturation = saturation,
+			Transition = UiComponentImageTransitions.Crossfade,
+			Source = Cover(state),
+		};
+
+	private static UiStack Spacer() => new() { Key = "spacer", Fill = true };
+
+	private static UiValue<UiResource> Cover(UiState<SteamPlayingState> state)
+		=> UiValue.Optional(() => state.Value.Cover is { } cover ? UiValue.Of(cover) : UiValue.None<UiResource>());
+
 }

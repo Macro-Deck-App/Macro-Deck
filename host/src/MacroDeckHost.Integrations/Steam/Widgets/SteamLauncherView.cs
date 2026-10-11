@@ -12,14 +12,12 @@ internal static class SteamLauncherView
 {
 	public const string Root = "steamLauncher";
 
-	private const string TilePlaceholder = "#1b2838";
-	private const string FailureColor = "#e5534b";
 	private const int RowSize = 3;
 
-	private static readonly UiLength _name = UiLength.Capped(0.08, 11);
-	private static readonly UiLength _notice = UiLength.Capped(0.09, 12);
-	private static readonly UiLength _glyph = UiLength.Capped(0.2, 28);
-	private static readonly UiLength _gap = UiLength.Capped(0.035, 4);
+	private static readonly SteamInk _onArtwork = new(OnFace: true);
+	private static readonly UiLength _name = UiLength.Capped(0.09, 12);
+	private static readonly UiLength _tileRadius = UiLength.Capped(0.06, 8);
+	private static readonly UiLength _gap = UiLength.Capped(0.045, 6);
 
 	public static UiElement Build(
 		UiState<SteamLauncherState> state,
@@ -30,116 +28,145 @@ internal static class SteamLauncherView
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(launch);
 
-		return new UiStack
+		var ink = SteamInk.For(backgroundColor);
+
+		return SteamStyle.Root(Root, backgroundColor, new UiLayer
 		{
-			Key = Root,
-			Direction = UiComponentDirections.Vertical,
-			Padding = SteamSurfaces.SafeArea(cornerRadius),
-			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
-			Gap = _gap,
+			Key = "content",
+			Fill = true,
 			Children =
 			[
-				Gate(state, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
-				Gate(state, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
-				Gate(state, "noGameSelected", SteamWidgetStatus.NoGameSelected, Strings.NoGameSelected()),
-				Gate(state, "noGames", SteamWidgetStatus.NoGames, Strings.NoGames()),
-				new UiWhen
+				new UiStack
 				{
-					Key = "readyGate",
-					Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
-					Content = () => Layout(state, launch),
+					Key = "body",
+					Fill = true,
+					Children =
+					[
+						Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
+						Gate(state, ink, cornerRadius, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
+						Gate(state, ink, cornerRadius, "noGameSelected", SteamWidgetStatus.NoGameSelected,
+							Strings.NoGameSelected()),
+						Gate(state, ink, cornerRadius, "noGames", SteamWidgetStatus.NoGames, Strings.NoGames()),
+						Gate(state, ink, cornerRadius, "noFavorites", SteamWidgetStatus.NoFavorites, Strings.NoFavorites()),
+						new UiWhen
+						{
+							Key = "readyGate",
+							Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
+							Content = () => Layout(state, launch, cornerRadius),
+						},
+					],
 				},
-				new UiWhen
-				{
-					Key = "failureGate",
-					Condition = () => !state.Value.Failure.IsEmpty,
-					Content = () => new UiTextRun
-					{
-						Key = "failure",
-						Text = UiText.Optional(() => state.Value.Failure),
-						Size = _name,
-						Color = FailureColor,
-						MaxLines = 2,
-					},
-				},
+				Failure(state, cornerRadius),
 			],
-		};
+		});
 	}
 
-	private static UiWhen Gate(UiState<SteamLauncherState> state, string key, SteamWidgetStatus status,
+	private static UiWhen Gate(
+		UiState<SteamLauncherState> state,
+		SteamInk ink,
+		int cornerRadius,
+		string key,
+		SteamWidgetStatus status,
 		LocalizedText text)
 		=> new()
 		{
 			Key = key + "Gate",
 			Condition = () => state.Value.Status == status,
-			Content = () => new UiStack
-			{
-				Key = key,
-				Direction = UiComponentDirections.Vertical,
-				Align = UiComponentAlignments.Center,
-				Justify = UiComponentJustify.Center,
-				Gap = _gap,
-				Fill = true,
-				Children =
-				[
-					new UiImage
-					{
-						Key = "glyph",
-						Size = _glyph,
-						MainSize = _glyph,
-						Source = UiValue.Optional(() => state.Value.Glyph is { } glyph
-							? UiValue.Of(glyph)
-							: UiValue.None<UiResource>()),
-					},
-					new UiTextRun
-					{
-						Key = "text",
-						Text = text,
-						Size = _notice,
-						Role = UiComponentTextRoles.Secondary,
-						Align = UiComponentAlignments.Center,
-						Wrap = true,
-						MaxLines = 3,
-					},
-				],
-			},
+			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius),
 		};
 
-	private static UiResponsive Layout(UiState<SteamLauncherState> state, Func<int, UiEventOutcome> launch)
+	private static UiStack Failure(UiState<SteamLauncherState> state, int cornerRadius)
+		=> new()
+		{
+			Key = "failureLayer",
+			Fill = true,
+			Justify = UiComponentJustify.End,
+			Align = UiComponentAlignments.Center,
+			Padding = SteamSurfaces.SafeArea(cornerRadius),
+			Children =
+			[
+				new UiWhen
+				{
+					Key = "failureGate",
+					Condition = () => !state.Value.Failure.IsEmpty,
+					Content = () => new UiModifier
+					{
+						Key = "failurePill",
+						Background = "#000000cc",
+						Radius = UiLength.Capped(0.1, 12),
+						Padding = UiLength.Capped(0.04, 5),
+						Child = new UiTextRun
+						{
+							Key = "failure",
+							Text = UiText.Optional(() => state.Value.Failure),
+							Size = _name,
+							Color = SteamStyle.Failure,
+							Align = UiComponentAlignments.Center,
+							Wrap = true,
+							MaxLines = 2,
+						},
+					},
+				},
+			],
+		};
+
+	private static UiResponsive Layout(
+		UiState<SteamLauncherState> state,
+		Func<int, UiEventOutcome> launch,
+		int cornerRadius)
 		=> new()
 		{
 			Key = "layout",
 			Fill = true,
-			Default = Row(state, launch, "single", 0, 1, UiComponentDirections.Horizontal, fill: false),
+			Default = new UiStack
+			{
+				Key = "single",
+				Children =
+				[
+					new UiRepeat<SteamLauncherTile>
+					{
+						Key = "singleTiles",
+						Items = UiValue.From(() => state.Value.Row(0, 1)),
+						KeySelector = tile => tile.Key,
+						Template = (tile, _) => Tile(tile, launch) with { Fill = true, Corner = UiComponentButtonCorners.Tile },
+					},
+				],
+			},
 			Variants =
 			[
 				new UiResponsiveVariant
 				{
 					MinWidth = 1.5,
 					MinHeight = 1.5,
-					Content = new UiStack
-					{
-						Key = "grid",
-						Direction = UiComponentDirections.Vertical,
-						Gap = _gap,
-						Children =
-						[
-							Row(state, launch, "first", 0, RowSize, UiComponentDirections.Horizontal, fill: true),
-							Row(state, launch, "second", RowSize, RowSize, UiComponentDirections.Horizontal, fill: true),
-						],
-					},
+					Content = Padded("grid", cornerRadius, UiComponentDirections.Vertical,
+					[
+						Row(state, launch, "first", 0, UiComponentDirections.Horizontal),
+						Row(state, launch, "second", RowSize, UiComponentDirections.Horizontal),
+					]),
 				},
 				new UiResponsiveVariant
 				{
 					MinHeight = 1.5,
-					Content = Row(state, launch, "tall", 0, RowSize, UiComponentDirections.Vertical, fill: false),
+					Content = Padded("tallBox", cornerRadius, UiComponentDirections.Vertical,
+						[Row(state, launch, "tall", 0, UiComponentDirections.Vertical)]),
 				},
 				new UiResponsiveVariant
 				{
 					MinWidth = 1.5,
-					Content = Row(state, launch, "wide", 0, RowSize, UiComponentDirections.Horizontal, fill: false),
+					Content = Padded("wideBox", cornerRadius, UiComponentDirections.Horizontal,
+						[Row(state, launch, "wide", 0, UiComponentDirections.Horizontal)]),
 				},
 			],
+		};
+
+	private static UiStack Padded(string key, int cornerRadius, string direction, IReadOnlyList<UiElement> children)
+		=> new()
+		{
+			Key = key,
+			Direction = direction,
+			Padding = SteamSurfaces.SafeArea(cornerRadius),
+			Gap = _gap,
+			Children = children,
 		};
 
 	private static UiStack Row(
@@ -147,60 +174,46 @@ internal static class SteamLauncherView
 		Func<int, UiEventOutcome> launch,
 		string key,
 		int skip,
-		int take,
-		string direction,
-		bool fill)
-	{
-		var row = new UiStack
+		string direction)
+		=> new()
 		{
 			Key = key,
 			Direction = direction,
+			Fill = true,
 			Gap = _gap,
 			Children =
 			[
 				new UiRepeat<SteamLauncherTile>
 				{
 					Key = key + "Tiles",
-					Items = UiValue.From(() => state.Value.Row(skip, take)),
+					Items = UiValue.From(() => state.Value.Row(skip, RowSize)),
 					KeySelector = tile => tile.Key,
-					Template = (tile, _) => Tile(tile, launch),
+					Template = (tile, _) => RoundedTile(tile, launch),
 				},
 			],
 		};
 
-		return fill ? row with { Fill = true } : row;
-	}
+	private static UiModifier RoundedTile(SteamLauncherTile tile, Func<int, UiEventOutcome> launch)
+		=> new() { Key = "tile-" + tile.Key, Radius = _tileRadius, Child = Tile(tile, launch) with { Fill = true } };
 
 	private static UiButton Tile(SteamLauncherTile tile, Func<int, UiEventOutcome> launch)
 		=> new()
 		{
 			Key = tile.Key,
-			Fill = true,
 			Align = UiComponentAlignments.Center,
-			Justify = UiComponentJustify.End,
-			Background = TilePlaceholder,
+			Justify = UiComponentJustify.Center,
+			Padding = UiLength.Capped(0.05, 6),
+			Background = SteamStyle.Placeholder,
+			Fit = UiComponentImageFits.Cover,
+			Transition = UiComponentImageTransitions.Crossfade,
+			Source = tile.Cover is { } cover ? UiValue.Of(cover) : UiValue.None<UiResource>(),
 			Events = [UiEventHandler.On(UiComponentEvents.Press, _ => launch(tile.AppId))],
-			Children =
-			[
-				tile.Cover is { } cover
-					? new UiImage
-					{
-						Key = "cover",
-						Size = UiLength.OfBasis(1),
-						Fill = true,
-						Transition = UiComponentImageTransitions.Crossfade,
-						Source = cover,
-					}
-					: new UiTextRun
-					{
-						Key = "name",
-						Text = tile.Name,
-						Size = _name,
-						Role = UiComponentTextRoles.Primary,
-						Align = UiComponentAlignments.Center,
-						Wrap = true,
-						MaxLines = 3,
-					},
-			],
+			Children = tile.Cover is null
+				?
+				[
+					SteamStyle.Text("name", tile.Name, _name, _onArtwork, weight: UiComponentTextWeights.SemiBold,
+						maxLines: 3, align: UiComponentAlignments.Center),
+				]
+				: [],
 		};
 }
