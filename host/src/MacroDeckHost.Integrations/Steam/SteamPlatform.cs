@@ -31,6 +31,16 @@ internal interface ISteamPlatform
 	bool IsSteamProcessRunning();
 
 	IReadOnlyList<int> FindLaunchedAppIds();
+
+	bool CanCloseGames { get; }
+
+	IReadOnlyList<SteamGameProcess> FindGameProcesses(int appId, string? installDirectory);
+
+	bool RequestClose(SteamGameProcess process);
+
+	bool Kill(SteamGameProcess process);
+
+	bool IsRunning(SteamGameProcess process);
 }
 
 internal sealed class SystemSteamPlatform : ISteamPlatform
@@ -97,6 +107,20 @@ internal sealed class SystemSteamPlatform : ISteamPlatform
 			return false;
 		}
 	}
+
+	public bool CanCloseGames => OperatingSystem.IsWindows();
+
+	public IReadOnlyList<SteamGameProcess> FindGameProcesses(int appId, string? installDirectory)
+		=> OperatingSystem.IsWindows() && installDirectory is not null
+			? SteamGameProcesses.FindOnWindows(installDirectory)
+			: [];
+
+	public bool RequestClose(SteamGameProcess process)
+		=> OperatingSystem.IsWindows() && SteamGameProcesses.RequestClose(process);
+
+	public bool Kill(SteamGameProcess process) => OperatingSystem.IsWindows() && SteamGameProcesses.Kill(process);
+
+	public bool IsRunning(SteamGameProcess process) => SteamGameProcesses.IsRunning(process);
 
 	public IReadOnlyList<int> FindLaunchedAppIds()
 	{

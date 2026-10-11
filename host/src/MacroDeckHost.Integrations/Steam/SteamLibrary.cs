@@ -210,8 +210,25 @@ internal sealed class SteamLibrary
 				? DateTimeOffset.FromUnixTimeSeconds(seconds)
 				: null;
 
-		return new SteamGame(appId, name, lastPlayed);
+		return new SteamGame(appId, name, lastPlayed, InstallDirectory(path, state["installdir"]?.Value));
 	}
+
+	internal static string? InstallDirectory(string manifestPath, string? installDir)
+	{
+		if (!IsPlainFolderName(installDir) || Path.GetDirectoryName(manifestPath) is not { Length: > 0 } apps)
+		{
+			return null;
+		}
+
+		return Path.Combine(apps, "common", installDir!);
+	}
+
+	internal static bool IsPlainFolderName(string? name)
+		=> !string.IsNullOrWhiteSpace(name) &&
+			name is not ("." or "..") &&
+			name.IndexOfAny(['/', '\\', ':']) < 0 &&
+			!Path.IsPathRooted(name) &&
+			name.Trim() == name;
 
 	internal static string? ReadFile(string path)
 	{

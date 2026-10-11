@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -25,7 +26,8 @@ internal sealed record SteamPlayerSummary(
 	string? Name,
 	int PersonaState,
 	int? GameId,
-	string? GameName);
+	string? GameName,
+	string? AvatarUrl = null);
 
 internal interface ISteamWebApiClient
 {
@@ -38,6 +40,8 @@ internal interface ISteamWebApiClient
 	Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken);
 
 	Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken);
+
+	Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken);
 }
 
 internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
@@ -86,7 +90,8 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 				player.PersonaName,
 				player.PersonaState,
 				int.TryParse(player.GameId, out var gameId) && gameId > 0 ? gameId : null,
-				player.GameExtraInfo)));
+				player.GameExtraInfo,
+				player.AvatarMedium)));
 		}
 
 		return players;
@@ -120,6 +125,33 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 			cancellationToken);
 
 		return response?.Response is { Success: 1, SteamId: { Length: > 0 } id } ? id : null;
+	}
+
+	public async Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(
+		string steamId,
+		CancellationToken cancellationToken)
+	{
+		var response = await GetAsync<OwnedGamesEnvelope>(
+			"IPlayerService/GetOwnedGames/v1/",
+			$"steamid={Uri.EscapeDataString(steamId)}&include_appinfo=1&include_played_free_games=1",
+			cancellationToken);
+
+		// Steam answers a private game list with an empty response object, so only game_count tells it apart from
+		// an empty library.
+		if (response?.Response is not { GameCount: not null } body)
+		{
+			return null;
+		}
+
+		return
+		[
+			.. (body.Games ?? []).Where(game => game.AppId > 0).Select(game => new SteamOwnedGame(
+				game.AppId,
+				string.IsNullOrWhiteSpace(game.Name) ? game.AppId.ToString(CultureInfo.InvariantCulture) : game.Name,
+				Math.Max(0, game.PlaytimeForever),
+				Math.Max(0, game.Playtime2Weeks),
+				game.LastPlayed is > 0 and < 253402300799 ? DateTimeOffset.FromUnixTimeSeconds(game.LastPlayed) : null))
+		];
 	}
 
 	public void Dispose() => _http.Dispose();
@@ -165,7 +197,8 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 		[property: JsonPropertyName("personaname")] string? PersonaName,
 		[property: JsonPropertyName("personastate")] int PersonaState,
 		[property: JsonPropertyName("gameid")] string? GameId,
-		[property: JsonPropertyName("gameextrainfo")] string? GameExtraInfo);
+		[property: JsonPropertyName("gameextrainfo")] string? GameExtraInfo,
+		[property: JsonPropertyName("avatarmedium")] string? AvatarMedium);
 
 	private sealed record FriendListEnvelope(
 		[property: JsonPropertyName("friendslist")] FriendListBody? FriendsList);
@@ -173,6 +206,19 @@ internal sealed class SteamWebApiClient : ISteamWebApiClient, IDisposable
 	private sealed record FriendListBody(List<FriendDto>? Friends);
 
 	private sealed record FriendDto([property: JsonPropertyName("steamid")] string? SteamId);
+
+	private sealed record OwnedGamesEnvelope(OwnedGamesBody? Response);
+
+	private sealed record OwnedGamesBody(
+		[property: JsonPropertyName("game_count")] int? GameCount,
+		[property: JsonPropertyName("games")] List<OwnedGameDto>? Games);
+
+	private sealed record OwnedGameDto(
+		[property: JsonPropertyName("appid")] int AppId,
+		[property: JsonPropertyName("name")] string? Name,
+		[property: JsonPropertyName("playtime_forever")] int PlaytimeForever,
+		[property: JsonPropertyName("playtime_2weeks")] int Playtime2Weeks,
+		[property: JsonPropertyName("rtime_last_played")] long LastPlayed);
 
 	private sealed record VanityEnvelope(VanityBody? Response);
 

@@ -23,10 +23,19 @@ internal static class SteamVariables
 
 	public const string FriendsInGame = "friends_ingame";
 
+	public const string GamesOwned = "games_owned";
+
+	public const string TotalPlaytimeHours = "total_playtime_hours";
+
+	public const string RecentPlaytimeHours = "recent_playtime_hours";
+
 	private static readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(3);
 
 	public static IReadOnlyList<string> Names { get; } =
-		[IsPlaying, CurrentGameName, CurrentGameId, CurrentGamePlaytimeSeconds, GamesInstalled, FriendsOnline, FriendsInGame];
+		[
+			IsPlaying, CurrentGameName, CurrentGameId, CurrentGamePlaytimeSeconds, GamesInstalled, FriendsOnline, FriendsInGame,
+			GamesOwned, TotalPlaytimeHours, RecentPlaytimeHours
+		];
 
 	public static string NameOf(string variableKey, string name) => $"{Prefix}{variableKey}_{name}";
 
@@ -44,7 +53,12 @@ internal static class SteamVariables
 			Define(variableKey, FriendsOnline, VariableType.Numeric, Strings.FriendsOnline(), configuration,
 				decimalPlaces: 0),
 			Define(variableKey, FriendsInGame, VariableType.Numeric, Strings.FriendsInGame(), configuration,
-				decimalPlaces: 0)
+				decimalPlaces: 0),
+			Define(variableKey, GamesOwned, VariableType.Numeric, Strings.GamesOwned(), configuration, decimalPlaces: 0),
+			Define(variableKey, TotalPlaytimeHours, VariableType.Numeric, Strings.TotalPlaytimeHours(), configuration,
+				decimalPlaces: 1, unit: "h"),
+			Define(variableKey, RecentPlaytimeHours, VariableType.Numeric, Strings.RecentPlaytimeHours(), configuration,
+				decimalPlaces: 1, unit: "h")
 		];
 
 	public static VariableReading Read(string localId, SteamSnapshot snapshot, DateTimeOffset now)
@@ -139,6 +153,9 @@ internal static class SteamVariables
 			GamesInstalled => snapshot.SteamFound ? VariableReading.Of(snapshot.Games.Count) : VariableReading.Unavailable,
 			FriendsOnline => Friends(account, candidate => candidate.FriendsOnline),
 			FriendsInGame => Friends(account, candidate => candidate.FriendsInGame),
+			GamesOwned => Owned(account, games => games.Count),
+			TotalPlaytimeHours => Owned(account, games => Hours(games.Sum(game => (long)game.PlaytimeMinutes))),
+			RecentPlaytimeHours => Owned(account, games => Hours(games.Sum(game => (long)game.RecentMinutes))),
 			_ => VariableReading.Unavailable
 		};
 	}
@@ -147,6 +164,13 @@ internal static class SteamVariables
 		=> account is { Web: SteamWebState.Connected, Friends: SteamFriendsState.Available }
 			? VariableReading.Of(select(account))
 			: VariableReading.Unavailable;
+
+	private static VariableReading Owned(SteamAccountSnapshot account, Func<IReadOnlyList<SteamOwnedGame>, double> select)
+		=> account is { Web: SteamWebState.Connected, Owned: SteamOwnedState.Available }
+			? VariableReading.Of(select(account.OwnedGames))
+			: VariableReading.Unavailable;
+
+	internal static double Hours(long minutes) => Math.Round(minutes / 60d, 1, MidpointRounding.AwayFromZero);
 
 	private static VariableDefinition Define(
 		string variableKey,

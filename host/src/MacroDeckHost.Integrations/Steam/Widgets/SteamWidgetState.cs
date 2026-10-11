@@ -14,6 +14,12 @@ internal enum SteamWidgetStatus
 
 	NoGames,
 
+	NoFavorites,
+
+	NeedsWebApi,
+
+	Private,
+
 	AccountUnavailable,
 
 	Idle,
@@ -129,6 +135,21 @@ internal static class SteamWidgetStates
 
 			var name = snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name ?? appId.ToString(CultureInfo.InvariantCulture);
 			return new SteamLauncherState(SteamWidgetStatus.Ready, [Tile(appId, name, artwork)], glyph, failure);
+		}
+
+		if (options.Source == SteamWidgetType.FavoritesSource)
+		{
+			var favorites = options.FavoriteAppIds
+				.Select(appId => Tile(appId,
+					snapshot.Games.FirstOrDefault(game => game.AppId == appId)?.Name ??
+					appId.ToString(CultureInfo.InvariantCulture),
+					artwork))
+				.ToList();
+
+			return new SteamLauncherState(favorites.Count == 0 ? SteamWidgetStatus.NoFavorites : SteamWidgetStatus.Ready,
+				favorites,
+				glyph,
+				failure);
 		}
 
 		if (!snapshot.SteamFound)

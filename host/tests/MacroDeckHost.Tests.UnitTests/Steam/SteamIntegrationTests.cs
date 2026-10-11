@@ -147,7 +147,8 @@ internal sealed class SteamIntegrationTests
 			Assert.That(names, Does.Contain("steam_main_is_playing"));
 			Assert.That(names, Does.Not.Contain("steam_is_playing"), "there is no variable without an account name");
 			Assert.That(names, Does.Contain("steam_alt_current_game_name"));
-			Assert.That(names, Has.Count.EqualTo(2 * 7));
+			Assert.That(names, Does.Contain("steam_alt_total_playtime_hours"));
+			Assert.That(names, Has.Count.EqualTo(2 * 10));
 		});
 
 		await integration.ShutdownAsync();
@@ -294,6 +295,30 @@ internal sealed class SteamIntegrationTests
 	}
 
 	[Test]
+	public async Task Closing_a_game_asks_the_game_running_here_to_close_from_its_install_folder()
+	{
+		var steam = Path.Combine(_folders.Root, "Steam");
+		SteamFolders.WriteManifest(steam, 730, "Counter-Strike 2", installDir: "Counter-Strike Global Offensive");
+		_platform.RegistryRunningAppId = 730;
+		_platform.GameProcesses.Add(new SteamGameProcess(42, DateTime.UnixEpoch));
+		var integration = Integration();
+		await integration.InitializeAsync(new FakeContext());
+
+		var outcome = await integration.ExecuteAsync(new SteamCommand(SteamCommandKind.CloseGame), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(SteamCommandOutcome.Succeeded));
+			Assert.That(_platform.ProcessQueries.Single(),
+				Is.EqualTo((730, (string?)Path.Combine(steam, "steamapps", "common", "Counter-Strike Global Offensive"))));
+			Assert.That(_platform.CloseRequests, Is.EqualTo(new[] { 42 }));
+			Assert.That(_applications.OpenedUris, Is.Empty, "closing goes to the game, not through a steam:// link");
+		});
+
+		await integration.ShutdownAsync();
+	}
+
+	[Test]
 	public async Task Reconfiguring_keeps_the_artwork_cache_that_open_widgets_already_hold()
 	{
 		var integration = Integration();
@@ -348,7 +373,7 @@ internal sealed class SteamIntegrationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(types.Select(type => type.Id), Is.EqualTo(new[] { "steam-currently-playing", "steam-game-launcher" }));
+			Assert.That(types.Select(type => type.Id), Is.EqualTo(new[] { "steam-currently-playing", "steam-game-launcher", "steam-friends", "steam-library" }));
 			Assert.That(types.All(type => type.DataSchema is not null && type.HasConfiguration), Is.True);
 		});
 	}
@@ -378,6 +403,9 @@ internal sealed class SteamIntegrationTests
 
 		public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
 			=> Task.FromResult<string?>(null);
+
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
+			=> Task.FromResult<IReadOnlyList<SteamOwnedGame>?>([]);
 	}
 
 	private sealed class FakeContext : IIntegrationContext, IIntegrationConfig
@@ -392,7 +420,8 @@ internal sealed class SteamIntegrationTests
 		public IDeckNavigator Deck => throw new NotSupportedException();
 		public IScriptApi Scripts => throw new NotSupportedException();
 		public IWidgetApi Widgets => throw new NotSupportedException();
-		public IEventPublisher Events => throw new NotSupportedException();
+		public RecordingEventPublisher Published { get; } = new();
+		public IEventPublisher Events => Published;
 		public IUserNotifier Notifications => throw new NotSupportedException();
 		public IUiResourceRegistry UiResources { get; } =
 			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore());

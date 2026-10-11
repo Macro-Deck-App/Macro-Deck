@@ -18,16 +18,20 @@ internal sealed class SteamTracker
 
 	private static readonly TimeSpan _rateLimitBackoff = TimeSpan.FromMinutes(2);
 
+	private static readonly TimeSpan _ownedGamesRefresh = TimeSpan.FromMinutes(10);
+
 	private readonly ISteamPlatform _platform;
 	private readonly SteamLibrary _library;
 	private readonly IReadOnlyList<AccountState> _accounts;
 	private readonly IReadOnlyList<string> _extraFolders;
 	private readonly TimeProvider _time;
 	private readonly Action<SteamSnapshot> _publish;
+	private readonly Action<SteamEvent>? _events;
 	private readonly Lock _sync = new();
 
 	private string? _steamRoot;
 	private SteamLocalState _local = SteamLocalState.None;
+	private bool _localObserved;
 	private int? _trackedAppId;
 	private DateTimeOffset _trackedSince;
 	private SteamSnapshot _snapshot = SteamSnapshot.Empty;
@@ -37,7 +41,8 @@ internal sealed class SteamTracker
 		IReadOnlyList<SteamAccountConfig> accounts,
 		IReadOnlyList<string> extraFolders,
 		TimeProvider time,
-		Action<SteamSnapshot> publish)
+		Action<SteamSnapshot> publish,
+		Action<SteamEvent>? events = null)
 	{
 		_platform = platform;
 		_library = new SteamLibrary(time);
@@ -45,6 +50,7 @@ internal sealed class SteamTracker
 		_extraFolders = extraFolders;
 		_time = time;
 		_publish = publish;
+		_events = events;
 	}
 
 	public SteamSnapshot Snapshot
@@ -84,7 +90,7 @@ internal sealed class SteamTracker
 		{
 			_steamRoot = root;
 			_local = local;
-		});
+		}, localPoll: true);
 	}
 
 	public async Task PollSelfAsync(CancellationToken cancellationToken)
@@ -128,6 +134,7 @@ internal sealed class SteamTracker
 				if (state == SteamWebState.InvalidKey)
 				{
 					account.Friends = SteamFriendsState.Unavailable;
+					account.Owned = SteamOwnedState.Unavailable;
 				}
 
 				if (account.Self?.GameId != account.StaleWebAppId)
@@ -142,22 +149,13 @@ internal sealed class SteamTracker
 	{
 		foreach (var account in _accounts.Where(account => account.Config.HasWebApi))
 		{
-			if (IsBackingOff(account))
+			if (IsBackingOff(account) || !IsReachable(account))
 			{
 				continue;
 			}
 
-			lock (_sync)
-			{
-				if (account.Web is not (SteamWebState.Connected or SteamWebState.Connecting))
-				{
-					continue;
-				}
-			}
-
 			var friendsState = SteamFriendsState.Unavailable;
-			var online = 0;
-			var inGame = 0;
+			IReadOnlyList<SteamFriend> friends = [];
 			var failure = default(SteamWebFailure?);
 
 			try
@@ -168,9 +166,8 @@ internal sealed class SteamTracker
 				}
 				else
 				{
-					var friends = await account.Config.Client.GetPlayerSummariesAsync(ids, cancellationToken);
-					online = friends.Count(friend => friend.PersonaState != 0);
-					inGame = friends.Count(friend => friend.GameId is not null);
+					var summaries = await account.Config.Client.GetPlayerSummariesAsync(ids, cancellationToken);
+					friends = Sort(summaries.Select(ToFriend));
 					friendsState = SteamFriendsState.Available;
 				}
 			}
@@ -189,29 +186,211 @@ internal sealed class SteamTracker
 					}
 
 					account.Friends = SteamFriendsState.Unavailable;
+					account.FriendList = [];
 				}
 				else
 				{
 					account.Friends = friendsState;
-					account.Online = online;
-					account.InGame = inGame;
+					account.FriendList = friends;
 				}
 			});
 		}
 	}
 
-	private void Commit(Action mutate)
+	public async Task PollOwnedGamesAsync(CancellationToken cancellationToken)
+	{
+		foreach (var account in _accounts.Where(account => account.Config.HasWebApi))
+		{
+			if (IsBackingOff(account) || !IsReachable(account) || !IsOwnedGamesDue(account))
+			{
+				continue;
+			}
+
+			IReadOnlyList<SteamOwnedGame>? games = null;
+			var failure = default(SteamWebFailure?);
+
+			try
+			{
+				games = await account.Config.Client!.GetOwnedGamesAsync(account.Config.SteamId!, cancellationToken);
+			}
+			catch (SteamWebApiException exception)
+			{
+				failure = exception.Failure;
+			}
+
+			Commit(() =>
+			{
+				if (failure is { } reason)
+				{
+					if (FailureState(account, reason) == SteamWebState.InvalidKey)
+					{
+						account.Web = SteamWebState.InvalidKey;
+						account.Owned = SteamOwnedState.Unavailable;
+						account.OwnedGames = [];
+					}
+
+					return;
+				}
+
+				account.OwnedFetchedAt = _time.GetUtcNow();
+				account.Owned = games is null ? SteamOwnedState.Private : SteamOwnedState.Available;
+				account.OwnedGames = games is null
+					? []
+					:
+					[
+						.. games.OrderByDescending(game => game.LastPlayed ?? DateTimeOffset.MinValue)
+							.ThenByDescending(game => game.PlaytimeMinutes)
+							.ThenBy(game => game.AppId)
+					];
+			});
+		}
+	}
+
+	private static SteamFriend ToFriend(SteamPlayerSummary summary)
+		=> new(summary.SteamId,
+			string.IsNullOrWhiteSpace(summary.Name) ? summary.SteamId : summary.Name,
+			summary.PersonaState,
+			summary.GameId,
+			summary.GameId is not null && !string.IsNullOrWhiteSpace(summary.GameName) ? summary.GameName : null,
+			summary.AvatarUrl);
+
+	private static IReadOnlyList<SteamFriend> Sort(IEnumerable<SteamFriend> friends)
+		=>
+		[
+			.. friends.OrderBy(friend => friend.IsInGame ? 0 : friend.IsOnline ? 1 : 2)
+				.ThenBy(friend => friend.PersonaState is SteamPersona.Online or SteamPersona.LookingToPlay
+					or SteamPersona.LookingToTrade ? 0 : 1)
+				.ThenBy(friend => friend.Name, StringComparer.CurrentCultureIgnoreCase)
+				.ThenBy(friend => friend.SteamId, StringComparer.Ordinal)
+		];
+
+	private bool IsOwnedGamesDue(AccountState account)
+	{
+		lock (_sync)
+		{
+			return account.Owned == SteamOwnedState.Unavailable ||
+				_time.GetUtcNow() - account.OwnedFetchedAt >= _ownedGamesRefresh;
+		}
+	}
+
+	private bool IsReachable(AccountState account)
+	{
+		lock (_sync)
+		{
+			return account.Web is SteamWebState.Connected or SteamWebState.Connecting;
+		}
+	}
+
+	private void Commit(Action mutate, bool localPoll = false)
 	{
 		SteamSnapshot? changed;
 		lock (_sync)
 		{
+			var previous = _snapshot;
+			var localKnown = _localObserved;
 			mutate();
+			_localObserved |= localPoll;
 			changed = Rebuild();
+
+			// Events leave in commit order: the polls commit from several threads, and a diff taken outside the
+			// lock could run backwards. The sink only queues, so holding the lock while it runs is safe.
+			if (_events is not null)
+			{
+				foreach (var item in Diff(previous, _snapshot, localKnown))
+				{
+					_events(item);
+				}
+			}
 		}
 
 		if (changed is not null)
 		{
 			_publish(changed);
+		}
+	}
+
+	private List<SteamEvent> Diff(SteamSnapshot previous, SteamSnapshot current, bool localKnown)
+	{
+		var events = new List<SteamEvent>();
+		var now = _time.GetUtcNow();
+
+		if (localKnown && previous.CurrentGame?.AppId != current.CurrentGame?.AppId)
+		{
+			if (previous.CurrentGame is { } stopped)
+			{
+				events.Add(SteamEventFactory.GameStopped(SteamEventPayload.ThisComputer, stopped.AppId, stopped.Name,
+					now - stopped.StartedAt));
+			}
+
+			if (current.CurrentGame is { } started)
+			{
+				events.Add(SteamEventFactory.GameStarted(SteamEventPayload.ThisComputer, started.AppId, started.Name));
+			}
+		}
+
+		foreach (var account in _accounts)
+		{
+			var entryId = account.Config.EntryId;
+			var before = previous.Accounts.FirstOrDefault(candidate => candidate.EntryId == entryId);
+			var after = current.Accounts.FirstOrDefault(candidate => candidate.EntryId == entryId);
+
+			DiffRemoteGame(account, current.CurrentGame?.AppId, now, events);
+
+			if (before is null || after is null)
+			{
+				continue;
+			}
+
+			if (before.Persona is { } oldPersona && after.Persona is { } newPersona && oldPersona != newPersona)
+			{
+				events.Add(SteamEventFactory.PersonaChanged(entryId, oldPersona, newPersona));
+			}
+
+			if (before.Friends == SteamFriendsState.Available && after.Friends == SteamFriendsState.Available)
+			{
+				events.AddRange(SteamEventFactory.FriendChanges(entryId, before.FriendList, after.FriendList));
+			}
+		}
+
+		return events;
+	}
+
+	private void DiffRemoteGame(AccountState account, int? localAppId, DateTimeOffset now, List<SteamEvent> events)
+	{
+		if (account.Web != SteamWebState.Connected)
+		{
+			account.RemoteObserved = false;
+			return;
+		}
+
+		var webAppId = account.Self?.GameId;
+		if (webAppId is not null && (webAppId == localAppId || webAppId == account.StaleWebAppId))
+		{
+			return;
+		}
+
+		if (!account.RemoteObserved)
+		{
+			account.RemoteObserved = true;
+			account.RemoteGame = webAppId is { } first ? new SteamCurrentGame(first, NameOf(first, account.Self), now) : null;
+			return;
+		}
+
+		if (account.RemoteGame?.AppId == webAppId)
+		{
+			return;
+		}
+
+		if (account.RemoteGame is { } stopped)
+		{
+			events.Add(SteamEventFactory.GameStopped(account.Config.EntryId, stopped.AppId, stopped.Name,
+				now - stopped.StartedAt));
+		}
+
+		account.RemoteGame = webAppId is { } appId ? new SteamCurrentGame(appId, NameOf(appId, account.Self), now) : null;
+		if (account.RemoteGame is { } started)
+		{
+			events.Add(SteamEventFactory.GameStarted(account.Config.EntryId, started.AppId, started.Name));
 		}
 	}
 
@@ -288,12 +467,21 @@ internal sealed class SteamTracker
 			account.TrackedAppId = null;
 		}
 
+		var connected = account.Web == SteamWebState.Connected;
+		var friends = connected ? account.Friends : SteamFriendsState.Unavailable;
+		var friendList = friends == SteamFriendsState.Available ? account.FriendList : [];
+		var owned = connected ? account.Owned : SteamOwnedState.Unavailable;
+
 		return new SteamAccountSnapshot(account.Config.EntryId, account.Config.Title, account.Config.VariableKey)
 		{
 			Web = account.Web,
-			Friends = account.Web == SteamWebState.Connected ? account.Friends : SteamFriendsState.Unavailable,
-			FriendsOnline = account.Online,
-			FriendsInGame = account.InGame,
+			Friends = friends,
+			FriendsOnline = friendList.Count(friend => friend.IsOnline),
+			FriendsInGame = friendList.Count(friend => friend.IsInGame),
+			FriendList = friendList,
+			Persona = connected ? account.Self?.PersonaState : null,
+			Owned = owned,
+			OwnedGames = owned == SteamOwnedState.Available ? account.OwnedGames : [],
 			CurrentGame = game
 		};
 	}
@@ -336,9 +524,13 @@ internal sealed class SteamTracker
 
 		public SteamFriendsState Friends { get; set; }
 
-		public int Online { get; set; }
+		public IReadOnlyList<SteamFriend> FriendList { get; set; } = [];
 
-		public int InGame { get; set; }
+		public SteamOwnedState Owned { get; set; }
+
+		public IReadOnlyList<SteamOwnedGame> OwnedGames { get; set; } = [];
+
+		public DateTimeOffset OwnedFetchedAt { get; set; }
 
 		public DateTimeOffset BackoffUntil { get; set; }
 
@@ -351,6 +543,10 @@ internal sealed class SteamTracker
 		public int? LastLocalAppId { get; set; }
 
 		public int? StaleWebAppId { get; set; }
+
+		public bool RemoteObserved { get; set; }
+
+		public SteamCurrentGame? RemoteGame { get; set; }
 	}
 
 	private sealed record SteamLocalState(bool Found, IReadOnlyList<SteamGame> Games, int? RunningAppId)

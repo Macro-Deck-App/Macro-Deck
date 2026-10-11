@@ -446,7 +446,7 @@ internal sealed class SteamTrackerTests
 	}
 
 	[Test]
-	public void Every_account_declares_all_seven_variables_under_its_own_prefix()
+	public void Every_account_declares_all_its_variables_under_its_own_prefix()
 	{
 		var definitions = SteamVariables.Declare("main", null);
 
@@ -459,7 +459,10 @@ internal sealed class SteamTrackerTests
 				"steam_main_current_game_playtime_seconds",
 				"steam_main_games_installed",
 				"steam_main_friends_online",
-				"steam_main_friends_ingame"
+				"steam_main_friends_ingame",
+				"steam_main_games_owned",
+				"steam_main_total_playtime_hours",
+				"steam_main_recent_playtime_hours"
 			}));
 	}
 
@@ -494,6 +497,10 @@ internal sealed class SteamTrackerTests
 
 	private sealed class FakeWebApi : ISteamWebApiClient
 	{
+		public IReadOnlyList<SteamOwnedGame>? OwnedGames { get; set; }
+
+		public SteamWebFailure? OwnedFailure { get; set; }
+
 		public SteamPlayerSummary? Self { get; set; }
 
 		public SteamWebFailure? SelfFailure { get; set; }
@@ -522,5 +529,8 @@ internal sealed class SteamTrackerTests
 
 		public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
 			=> Task.FromResult<string?>(null);
+
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
+			=> OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
 	}
 }

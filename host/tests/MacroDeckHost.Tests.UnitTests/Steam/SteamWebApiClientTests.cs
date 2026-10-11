@@ -29,6 +29,51 @@ internal sealed class SteamWebApiClientTests
 	}
 
 	[Test]
+	public async Task A_player_summary_carries_the_medium_avatar()
+	{
+		var handler = new StubHandler(_ => Json("""
+			{"response":{"players":[{"steamid":"76561198000000001","personaname":"Ann","personastate":1,"avatar":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426.jpg","avatarmedium":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg","avatarfull":"https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg"}]}}
+			"""));
+
+		var summary = await Client(handler).GetPlayerSummaryAsync(SteamId, CancellationToken.None);
+
+		Assert.That(summary!.AvatarUrl,
+			Is.EqualTo("https://avatars.fastly.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg"));
+	}
+
+	[Test]
+	public async Task Owned_games_carry_their_playtime_and_when_they_were_last_played()
+	{
+		var handler = new StubHandler(_ => Json("""
+			{"response":{"game_count":2,"games":[{"appid":730,"name":"Counter-Strike 2","playtime_forever":6000,"playtime_2weeks":90,"rtime_last_played":1700000000},{"appid":220,"name":"Half-Life 2","playtime_forever":0,"rtime_last_played":0}]}}
+			"""));
+
+		var games = await Client(handler).GetOwnedGamesAsync(SteamId, CancellationToken.None);
+
+		Assert.That(games, Is.EqualTo(new[]
+		{
+			new SteamOwnedGame(730, "Counter-Strike 2", 6000, 90, DateTimeOffset.FromUnixTimeSeconds(1700000000)),
+			new SteamOwnedGame(220, "Half-Life 2", 0, 0, null)
+		}));
+		Assert.That(handler.Requests.Single().Uri.AbsoluteUri, Does.Contain("IPlayerService/GetOwnedGames/v1/"));
+	}
+
+	[Test]
+	public async Task Private_game_details_are_told_apart_from_an_empty_library()
+	{
+		var privateGames = await Client(new StubHandler(_ => Json("""{"response":{}}""")))
+			.GetOwnedGamesAsync(SteamId, CancellationToken.None);
+		var noGames = await Client(new StubHandler(_ => Json("""{"response":{"game_count":0}}""")))
+			.GetOwnedGamesAsync(SteamId, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(privateGames, Is.Null);
+			Assert.That(noGames, Is.Empty);
+		});
+	}
+
+	[Test]
 	public async Task A_player_who_hides_the_game_has_no_game()
 	{
 		var handler = new StubHandler(_ => Json("""

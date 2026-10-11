@@ -312,5 +312,8 @@ internal sealed class SteamConfigFlowTests
 				? throw new SteamWebApiException(failure)
 				: Task.FromResult(Vanity.GetValueOrDefault(vanityName));
 		}
+
+		public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
+			=> Task.FromResult<IReadOnlyList<SteamOwnedGame>?>(null);
 	}
 }

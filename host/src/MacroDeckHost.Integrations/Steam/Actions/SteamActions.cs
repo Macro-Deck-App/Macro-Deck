@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using ActionStrings = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Actions;
@@ -11,26 +12,38 @@ internal static class SteamActions
 {
 	public const string GameParameter = "game";
 
+	public const string ForceParameter = "force";
+
 	public static IReadOnlyList<IActionDefinition> Create(ISteamSource target) =>
 	[
 		new SteamAction("launch-game", ActionStrings.LaunchGame.Name(), ActionStrings.LaunchGame.Description(), target,
-			SteamCommandKind.LaunchGame, withGame: true),
+			SteamCommandKind.LaunchGame),
 		new SteamAction("launch-steam", ActionStrings.LaunchSteam.Name(), ActionStrings.LaunchSteam.Description(),
-			target, SteamCommandKind.LaunchSteam, withGame: false),
+			target, SteamCommandKind.LaunchSteam),
 		new SteamAction("open-store-page", ActionStrings.OpenStorePage.Name(), ActionStrings.OpenStorePage.Description(),
-			target, SteamCommandKind.OpenStorePage, withGame: true),
+			target, SteamCommandKind.OpenStorePage),
 		new SteamAction("open-library-page", ActionStrings.OpenLibraryPage.Name(),
-			ActionStrings.OpenLibraryPage.Description(), target, SteamCommandKind.OpenLibraryPage, withGame: true)
+			ActionStrings.OpenLibraryPage.Description(), target, SteamCommandKind.OpenLibraryPage),
+		new SteamAction("close-game", ActionStrings.CloseGame.Name(), ActionStrings.CloseGame.Description(), target,
+			SteamCommandKind.CloseGame)
 	];
 
-	internal static ActionResult ToResult(SteamCommandOutcome outcome)
+	internal static bool TakesGame(SteamCommandKind kind)
+		=> kind is not (SteamCommandKind.LaunchSteam or SteamCommandKind.CloseGame);
+
+	internal static ActionResult ToResult(SteamCommandOutcome outcome, SteamCommandKind kind = SteamCommandKind.LaunchGame)
 		=> outcome switch
 		{
 			SteamCommandOutcome.Succeeded => ActionResult.Success(),
 			SteamCommandOutcome.InvalidAppId => ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 				Errors.InvalidGame()),
+			SteamCommandOutcome.NotAvailable when kind == SteamCommandKind.CloseGame => ActionResult.Failed(
+				ActionErrorCodes.Unavailable, Errors.CloseNotSupported()),
 			SteamCommandOutcome.NotAvailable => ActionResult.Failed(ActionErrorCodes.Unavailable,
 				Errors.NotAvailable()),
+			SteamCommandOutcome.NotRunning => ActionResult.Failed(ActionErrorCodes.Unavailable, Errors.NoGameRunning()),
+			_ when kind == SteamCommandKind.CloseGame => ActionResult.Failed(ActionErrorCodes.ProviderError,
+				Errors.CloseFailed()),
 			_ => ActionResult.Failed(ActionErrorCodes.ProviderError, Errors.LaunchFailed())
 		};
 }
@@ -45,24 +58,31 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 		LocalizedText name,
 		LocalizedText description,
 		ISteamSource target,
-		SteamCommandKind kind,
-		bool withGame)
+		SteamCommandKind kind)
 	{
 		Id = id;
 		Name = name;
 		Description = description;
 		_target = target;
 		_kind = kind;
-		Parameters = withGame
-			?
+		Parameters = kind switch
+		{
+			SteamCommandKind.CloseGame =>
+			[
+				ActionParameter.Toggle(SteamActions.ForceParameter,
+					label: Params.Force(),
+					description: Params.ForceDescription())
+			],
+			_ when SteamActions.TakesGame(kind) =>
 			[
 				ActionParameter.Autocomplete(SteamActions.GameParameter,
 					label: Params.Game(),
 					description: Params.GameDescription(),
 					placeholder: Params.GamePlaceholder(),
 					required: true)
-			]
-			: [];
+			],
+			_ => []
+		};
 	}
 
 	public string Id { get; }
@@ -98,25 +118,38 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 		});
 	}
 
+	private static bool ReadFlag(object? value)
+		=> value switch
+		{
+			bool flag => flag,
+			JsonElement { ValueKind: JsonValueKind.True } => true,
+			string text => bool.TryParse(text.Trim(), out var parsed) && parsed,
+			_ => false
+		};
+
 	private sealed class Executor(SteamAction action) : IActionExecutor
 	{
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
 			var appId = 0;
-			if (action._kind != SteamCommandKind.LaunchSteam)
+			if (SteamActions.TakesGame(action._kind))
 			{
 				var text = Convert.ToString(context.Parameters.GetValueOrDefault(SteamActions.GameParameter),
 					CultureInfo.InvariantCulture)?.Trim();
 				if (SteamLauncher.ParseAppId(text) is not { } parsed)
 				{
-					return SteamActions.ToResult(SteamCommandOutcome.InvalidAppId);
+					return SteamActions.ToResult(SteamCommandOutcome.InvalidAppId, action._kind);
 				}
 
 				appId = parsed;
 			}
 
-			return SteamActions.ToResult(await action._target.ExecuteAsync(new SteamCommand(action._kind, appId),
-				context.CancellationToken));
+			var force = action._kind == SteamCommandKind.CloseGame &&
+				ReadFlag(context.Parameters.GetValueOrDefault(SteamActions.ForceParameter));
+
+			return SteamActions.ToResult(
+				await action._target.ExecuteAsync(new SteamCommand(action._kind, appId, force), context.CancellationToken),
+				action._kind);
 		}
 	}
 }

@@ -67,6 +67,13 @@ internal static partial class SteamSurfaces
 				? value.GetString()
 				: null;
 
+	public static IReadOnlyList<string> ReadStrings(JsonElement data, string name)
+		=> data.ValueKind == JsonValueKind.Object &&
+			data.TryGetProperty(name, out var value) &&
+			value.ValueKind == JsonValueKind.Array
+				? [.. value.EnumerateArray().Where(item => item.ValueKind == JsonValueKind.String).Select(item => item.GetString()!)]
+				: [];
+
 	public static bool? ReadBool(JsonElement data, string name)
 		=> data.ValueKind == JsonValueKind.Object &&
 			data.TryGetProperty(name, out var value) &&
