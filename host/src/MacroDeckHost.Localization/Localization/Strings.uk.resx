@@ -22223,4 +22223,211 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
     <value>Вимк.</value>
   </data>
+  <data name="Integrations.Steam.Variables.IsPlaying" xml:space="preserve">
+    <value>Грає в гру</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameName" xml:space="preserve">
+    <value>Поточна гра</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameId" xml:space="preserve">
+    <value>ID поточної гри</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGamePlaytimeSeconds" xml:space="preserve">
+    <value>Тривалість поточного сеансу</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesInstalled" xml:space="preserve">
+    <value>Встановлені ігри</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsOnline" xml:space="preserve">
+    <value>Друзі в мережі</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsInGame" xml:space="preserve">
+    <value>Друзі в грі</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Name" xml:space="preserve">
+    <value>Запустити гру Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Description" xml:space="preserve">
+    <value>Запускає встановлену гру Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Name" xml:space="preserve">
+    <value>Запустити Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Description" xml:space="preserve">
+    <value>Відкриває клієнт Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Name" xml:space="preserve">
+    <value>Відкрити сторінку магазину Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Description" xml:space="preserve">
+    <value>Відкриває сторінку гри в магазині Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Name" xml:space="preserve">
+    <value>Відкрити сторінку бібліотеки Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Description" xml:space="preserve">
+    <value>Відкриває сторінку гри у вашій бібліотеці Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Game" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameDescription" xml:space="preserve">
+    <value>Виберіть встановлену гру або введіть ID застосунку Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Params.GamePlaceholder" xml:space="preserve">
+    <value>Гра або ID застосунку</value>
+  </data>
+  <data name="Integrations.Steam.Errors.InvalidGame" xml:space="preserve">
+    <value>Виберіть гру або введіть чинний ID застосунку Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NotAvailable" xml:space="preserve">
+    <value>Steam недоступний. Спочатку увімкніть інтеграцію Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.LaunchFailed" xml:space="preserve">
+    <value>Не вдалося відкрити Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Config.Title" xml:space="preserve">
+    <value>Налаштування Steam</value>
+  </data>
+  <data name="Integrations.Steam.Config.Description" xml:space="preserve">
+    <value>Встановлені ігри знаходяться без жодного налаштування. Додайте SteamID і ключ Web API, щоб також показувати статус і друзів акаунта. Можна додати кілька акаунтів.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
+    <value>Увійдіть у Steam, відкрийте сторінку ключів API та зареєструйте ключ. Сторінка запитує доменне ім&apos;я; підійде будь-яке значення. Обмежені облікові записи не можуть отримати ключ.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
+    <value>Введіть свій 17-значний SteamID64, посилання на профіль або власну назву профілю. Для власної назви потрібен ключ.</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
+    <value>Відкрити сторінку ключів Steam Web API</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdLabel" xml:space="preserve">
+    <value>SteamID</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
+    <value>Залиште порожнім, щоб використовувати лише встановлені ігри.</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
+    <value>SteamID64 або посилання на профіль</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLabel" xml:space="preserve">
+    <value>Ключ Web API</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
+    <value>Зберігається на цьому комп&apos;ютері й використовується лише для запитів до Steam про ваш профіль.</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
+    <value>Додаткові теки бібліотеки</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersDescription" xml:space="preserve">
+    <value>Теки з іграми Steam, які Macro Deck не знаходить сам. Теки бібліотеки Steam знаходяться автоматично.</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування.</value>
+  </data>
+  <data name="Integrations.Steam.Config.FolderMustBeAbsolute" xml:space="preserve">
+    <value>Введіть повні шляхи до тек.</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
+    <value>Введіть ключ Web API для цього профілю.</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
+    <value>Введіть SteamID, що відповідає цьому ключу.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
+    <value>Введіть 17-значний SteamID64, посилання на профіль або власну назву профілю.</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownProfile" xml:space="preserve">
+    <value>Steam не знає цього профілю.</value>
+  </data>
+  <data name="Integrations.Steam.Config.RejectedApiKey" xml:space="preserve">
+    <value>Steam відхилив цей ключ. Переконайтеся, що його введено повністю.</value>
+  </data>
+  <data name="Integrations.Steam.Config.ServiceUnavailable" xml:space="preserve">
+    <value>Не вдалося зв&apos;язатися зі Steam. Повторіть спробу за хвилину.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Name" xml:space="preserve">
+    <value>Steam: зараз грає</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Description" xml:space="preserve">
+    <value>Показує гру, в яку ви граєте, з обкладинкою та тривалістю сеансу.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Name" xml:space="preserve">
+    <value>Запуск ігор Steam</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Description" xml:space="preserve">
+    <value>Запускає встановлену гру Steam одним дотиком.</value>
+  </data>
+  <data name="Widgets.Steam.Config.ShowSessionTime" xml:space="preserve">
+    <value>Показувати тривалість сеансу</value>
+  </data>
+  <data name="Widgets.Steam.Config.Source" xml:space="preserve">
+    <value>Ігри</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceGame" xml:space="preserve">
+    <value>Одна гра</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceRecent" xml:space="preserve">
+    <value>Нещодавно запущені</value>
+  </data>
+  <data name="Widgets.Steam.Config.Game" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Widgets.Steam.Config.GameDescription" xml:space="preserve">
+    <value>Виберіть встановлену гру.</value>
+  </data>
+  <data name="Widgets.Steam.Config.Count" xml:space="preserve">
+    <value>Кількість ігор</value>
+  </data>
+  <data name="Widgets.Steam.Config.CountDescription" xml:space="preserve">
+    <value>Скільки нещодавно запущених ігор показувати.</value>
+  </data>
+  <data name="Widgets.Steam.NotPlaying" xml:space="preserve">
+    <value>Не грає</value>
+  </data>
+  <data name="Widgets.Steam.NotFound" xml:space="preserve">
+    <value>Steam не знайдено на цьому комп&apos;ютері</value>
+  </data>
+  <data name="Widgets.Steam.Unavailable" xml:space="preserve">
+    <value>Steam недоступний</value>
+  </data>
+  <data name="Widgets.Steam.NoGames" xml:space="preserve">
+    <value>Встановлених ігор не знайдено</value>
+  </data>
+  <data name="Widgets.Steam.NoGameSelected" xml:space="preserve">
+    <value>Гру не вибрано</value>
+  </data>
+  <data name="Widgets.Steam.PlayingFor" xml:space="preserve">
+    <value>Грає вже {time}</value>
+  </data>
+  <data name="Integrations.Steam.Config.NamePlaceholder" xml:space="preserve">
+    <value>Основний акаунт</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFolderLabel" xml:space="preserve">
+    <value>Тека бібліотеки</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Title" xml:space="preserve">
+    <value>Steam відхилив ключ Web API</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Description" xml:space="preserve">
+    <value>Ключ акаунта {account} відхилено. Відкрийте його налаштування та введіть чинний ключ.</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Title" xml:space="preserve">
+    <value>Список друзів приховано</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Description" xml:space="preserve">
+    <value>Steam не передає друзів акаунта {account}. У Steam відкрийте «Редагувати профіль» &gt; «Налаштування приватності» та зробіть список друзів загальнодоступним.</value>
+  </data>
+  <data name="Widgets.Steam.Config.Account" xml:space="preserve">
+    <value>Акаунт</value>
+  </data>
+  <data name="Widgets.Steam.Config.AccountDescription" xml:space="preserve">
+    <value>Чию гру показувати. Цей комп&apos;ютер показує гру, запущену тут.</value>
+  </data>
+  <data name="Widgets.Steam.ThisComputer" xml:space="preserve">
+    <value>Цей комп&apos;ютер</value>
+  </data>
+  <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
+    <value>Цей акаунт недоступний</value>
+  </data>
 </root>

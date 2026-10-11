@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Application;
 
-internal abstract class ApplicationServiceBase : IApplicationService
+internal abstract partial class ApplicationServiceBase : IApplicationService
 {
 	protected static readonly ILogger Logger = IntegrationLog.For<IApplicationService>(SystemIntegration.IntegrationId);
 
@@ -77,6 +78,16 @@ internal abstract class ApplicationServiceBase : IApplicationService
 		}
 	}
 
+	public void OpenUri(string uri)
+	{
+		if (!IsSteamUri(uri))
+		{
+			throw new NotSupportedException($"{uri} is not a steam:// URI.");
+		}
+
+		StartWebsite(uri);
+	}
+
 	protected virtual void StartFile(string path)
 		=> Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
 
@@ -86,6 +97,12 @@ internal abstract class ApplicationServiceBase : IApplicationService
 	internal static bool IsWebsiteUrl(string url)
 		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
 			(uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+	internal static bool IsSteamUri(string? uri)
+		=> uri is not null && SteamUriPattern().IsMatch(uri);
+
+	[GeneratedRegex(@"^steam://[A-Za-z0-9/_.\-]+$", RegexOptions.CultureInvariant)]
+	private static partial Regex SteamUriPattern();
 
 	public abstract void OpenFolder(string path);
 

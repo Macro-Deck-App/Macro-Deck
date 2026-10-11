@@ -22223,4 +22223,211 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
     <value>Uit</value>
   </data>
+  <data name="Integrations.Steam.Variables.IsPlaying" xml:space="preserve">
+    <value>Speelt een spel</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameName" xml:space="preserve">
+    <value>Huidig spel</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameId" xml:space="preserve">
+    <value>ID van huidig spel</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGamePlaytimeSeconds" xml:space="preserve">
+    <value>Duur van huidige sessie</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesInstalled" xml:space="preserve">
+    <value>Geïnstalleerde spellen</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsOnline" xml:space="preserve">
+    <value>Vrienden online</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsInGame" xml:space="preserve">
+    <value>Vrienden in een spel</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Name" xml:space="preserve">
+    <value>Steam-spel starten</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Description" xml:space="preserve">
+    <value>Start een geïnstalleerd Steam-spel.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Name" xml:space="preserve">
+    <value>Steam starten</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Description" xml:space="preserve">
+    <value>Opent de Steam-client.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Name" xml:space="preserve">
+    <value>Steam-winkelpagina openen</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Description" xml:space="preserve">
+    <value>Opent de winkelpagina van een spel in Steam.</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Name" xml:space="preserve">
+    <value>Steam-bibliotheekpagina openen</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Description" xml:space="preserve">
+    <value>Opent de pagina van een spel in je Steam-bibliotheek.</value>
+  </data>
+  <data name="Integrations.Steam.Params.Game" xml:space="preserve">
+    <value>Spel</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameDescription" xml:space="preserve">
+    <value>Kies een geïnstalleerd spel of voer een Steam-app-ID in.</value>
+  </data>
+  <data name="Integrations.Steam.Params.GamePlaceholder" xml:space="preserve">
+    <value>Spel of app-ID</value>
+  </data>
+  <data name="Integrations.Steam.Errors.InvalidGame" xml:space="preserve">
+    <value>Kies een spel of voer een geldig Steam-app-ID in.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NotAvailable" xml:space="preserve">
+    <value>Steam is niet beschikbaar. Schakel eerst de Steam-integratie in.</value>
+  </data>
+  <data name="Integrations.Steam.Errors.LaunchFailed" xml:space="preserve">
+    <value>Steam kon niet worden geopend.</value>
+  </data>
+  <data name="Integrations.Steam.Config.Title" xml:space="preserve">
+    <value>Steam instellen</value>
+  </data>
+  <data name="Integrations.Steam.Config.Description" xml:space="preserve">
+    <value>Geïnstalleerde spellen worden zonder instellingen gevonden. Voeg een SteamID en een Web API-sleutel toe om ook de status en vrienden van een account te tonen. Je kunt meerdere accounts toevoegen.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
+    <value>Meld je aan bij Steam, open de pagina voor API-sleutels en registreer een sleutel. De pagina vraagt om een domeinnaam; elke waarde werkt. Beperkte accounts kunnen geen sleutel krijgen.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
+    <value>Voer je 17-cijferige SteamID64, je profielkoppeling of je aangepaste profielnaam in. Een aangepaste naam heeft de sleutel nodig.</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
+    <value>Pagina voor Steam Web API-sleutels openen</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdLabel" xml:space="preserve">
+    <value>SteamID</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
+    <value>Laat leeg om alleen de geïnstalleerde spellen te gebruiken.</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
+    <value>SteamID64 of profielkoppeling</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLabel" xml:space="preserve">
+    <value>Web API-sleutel</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
+    <value>Opgeslagen op deze computer en alleen gebruikt om Steam naar je profiel te vragen.</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
+    <value>Extra bibliotheekmappen</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersDescription" xml:space="preserve">
+    <value>Mappen met Steam-spellen die Macro Deck niet zelf vindt. De bibliotheekmappen van Steam worden automatisch gevonden.</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownStep" xml:space="preserve">
+    <value>Onbekende installatiestap.</value>
+  </data>
+  <data name="Integrations.Steam.Config.FolderMustBeAbsolute" xml:space="preserve">
+    <value>Voer volledige mappaden in.</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
+    <value>Voer de Web API-sleutel voor dit profiel in.</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
+    <value>Voer de SteamID in die bij deze sleutel hoort.</value>
+  </data>
+  <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
+    <value>Voer een 17-cijferige SteamID64, een profielkoppeling of een aangepaste profielnaam in.</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownProfile" xml:space="preserve">
+    <value>Steam kent dit profiel niet.</value>
+  </data>
+  <data name="Integrations.Steam.Config.RejectedApiKey" xml:space="preserve">
+    <value>Steam heeft deze sleutel geweigerd. Controleer of hij volledig is.</value>
+  </data>
+  <data name="Integrations.Steam.Config.ServiceUnavailable" xml:space="preserve">
+    <value>Steam is niet bereikbaar. Probeer het zo meteen opnieuw.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Name" xml:space="preserve">
+    <value>Steam: nu aan het spelen</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Description" xml:space="preserve">
+    <value>Toont het spel dat je speelt met de cover en de sessieduur.</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Name" xml:space="preserve">
+    <value>Steam-spelstarter</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Description" xml:space="preserve">
+    <value>Start een geïnstalleerd Steam-spel met één tik.</value>
+  </data>
+  <data name="Widgets.Steam.Config.ShowSessionTime" xml:space="preserve">
+    <value>Sessieduur tonen</value>
+  </data>
+  <data name="Widgets.Steam.Config.Source" xml:space="preserve">
+    <value>Spellen</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceGame" xml:space="preserve">
+    <value>Eén spel</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceRecent" xml:space="preserve">
+    <value>Onlangs gespeeld</value>
+  </data>
+  <data name="Widgets.Steam.Config.Game" xml:space="preserve">
+    <value>Spel</value>
+  </data>
+  <data name="Widgets.Steam.Config.GameDescription" xml:space="preserve">
+    <value>Kies een geïnstalleerd spel.</value>
+  </data>
+  <data name="Widgets.Steam.Config.Count" xml:space="preserve">
+    <value>Aantal spellen</value>
+  </data>
+  <data name="Widgets.Steam.Config.CountDescription" xml:space="preserve">
+    <value>Hoeveel onlangs gespeelde spellen worden getoond.</value>
+  </data>
+  <data name="Widgets.Steam.NotPlaying" xml:space="preserve">
+    <value>Speelt niet</value>
+  </data>
+  <data name="Widgets.Steam.NotFound" xml:space="preserve">
+    <value>Steam is niet gevonden op deze computer</value>
+  </data>
+  <data name="Widgets.Steam.Unavailable" xml:space="preserve">
+    <value>Steam is niet beschikbaar</value>
+  </data>
+  <data name="Widgets.Steam.NoGames" xml:space="preserve">
+    <value>Geen geïnstalleerde spellen gevonden</value>
+  </data>
+  <data name="Widgets.Steam.NoGameSelected" xml:space="preserve">
+    <value>Geen spel geselecteerd</value>
+  </data>
+  <data name="Widgets.Steam.PlayingFor" xml:space="preserve">
+    <value>Speelt al {time}</value>
+  </data>
+  <data name="Integrations.Steam.Config.NamePlaceholder" xml:space="preserve">
+    <value>Hoofdaccount</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFolderLabel" xml:space="preserve">
+    <value>Bibliotheekmap</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Title" xml:space="preserve">
+    <value>Steam heeft de Web API-sleutel geweigerd</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Description" xml:space="preserve">
+    <value>De sleutel van {account} is geweigerd. Open de configuratie en voer een geldige sleutel in.</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Title" xml:space="preserve">
+    <value>Vriendenlijst is privé</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Description" xml:space="preserve">
+    <value>Steam deelt de vrienden van {account} niet. Open in Steam Profiel bewerken &gt; Privacyinstellingen en zet de vriendenlijst op Openbaar.</value>
+  </data>
+  <data name="Widgets.Steam.Config.Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Widgets.Steam.Config.AccountDescription" xml:space="preserve">
+    <value>Van wie het spel wordt getoond. Deze computer toont het spel dat hier draait.</value>
+  </data>
+  <data name="Widgets.Steam.ThisComputer" xml:space="preserve">
+    <value>Deze computer</value>
+  </data>
+  <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
+    <value>Dit account is niet beschikbaar</value>
+  </data>
 </root>

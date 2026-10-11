@@ -22223,4 +22223,211 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
     <value>關閉</value>
   </data>
+  <data name="Integrations.Steam.Variables.IsPlaying" xml:space="preserve">
+    <value>正在玩遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameName" xml:space="preserve">
+    <value>目前的遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameId" xml:space="preserve">
+    <value>目前的遊戲 ID</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGamePlaytimeSeconds" xml:space="preserve">
+    <value>目前的工作階段時長</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesInstalled" xml:space="preserve">
+    <value>已安裝的遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsOnline" xml:space="preserve">
+    <value>線上好友</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsInGame" xml:space="preserve">
+    <value>遊戲中的好友</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Name" xml:space="preserve">
+    <value>啟動 Steam 遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Description" xml:space="preserve">
+    <value>啟動已安裝的 Steam 遊戲。</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Name" xml:space="preserve">
+    <value>啟動 Steam</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Description" xml:space="preserve">
+    <value>開啟 Steam 用戶端。</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Name" xml:space="preserve">
+    <value>開啟 Steam 商店頁面</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Description" xml:space="preserve">
+    <value>在 Steam 中開啟遊戲的商店頁面。</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Name" xml:space="preserve">
+    <value>開啟 Steam 遊戲庫頁面</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Description" xml:space="preserve">
+    <value>在您的 Steam 遊戲庫中開啟遊戲的頁面。</value>
+  </data>
+  <data name="Integrations.Steam.Params.Game" xml:space="preserve">
+    <value>遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameDescription" xml:space="preserve">
+    <value>選擇已安裝的遊戲，或輸入 Steam 應用程式 ID。</value>
+  </data>
+  <data name="Integrations.Steam.Params.GamePlaceholder" xml:space="preserve">
+    <value>遊戲或應用程式 ID</value>
+  </data>
+  <data name="Integrations.Steam.Errors.InvalidGame" xml:space="preserve">
+    <value>選擇遊戲，或輸入有效的 Steam 應用程式 ID。</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NotAvailable" xml:space="preserve">
+    <value>Steam 無法使用。請先開啟 Steam 整合。</value>
+  </data>
+  <data name="Integrations.Steam.Errors.LaunchFailed" xml:space="preserve">
+    <value>無法開啟 Steam。</value>
+  </data>
+  <data name="Integrations.Steam.Config.Title" xml:space="preserve">
+    <value>設定 Steam</value>
+  </data>
+  <data name="Integrations.Steam.Config.Description" xml:space="preserve">
+    <value>不需任何設定即可找到已安裝的遊戲。新增 SteamID 與 Web API 金鑰後，還能顯示帳號的狀態與好友。可以新增多個帳號。</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
+    <value>登入 Steam，開啟 API 金鑰頁面並註冊一組金鑰。頁面會要求填寫網域名稱，填入任意值即可。受限制的帳號無法取得金鑰。</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
+    <value>輸入 17 位數的 SteamID64、個人檔案連結或自訂個人檔案名稱。自訂名稱需要金鑰。</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
+    <value>開啟 Steam Web API 金鑰頁面</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdLabel" xml:space="preserve">
+    <value>SteamID</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
+    <value>留空則僅使用已安裝的遊戲。</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
+    <value>SteamID64 或個人檔案連結</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLabel" xml:space="preserve">
+    <value>Web API 金鑰</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
+    <value>儲存在此電腦上，僅用於向 Steam 查詢您的個人檔案。</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
+    <value>其他遊戲庫資料夾</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersDescription" xml:space="preserve">
+    <value>Macro Deck 無法自行找到的 Steam 遊戲所在資料夾。Steam 本身的遊戲庫資料夾會自動找到。</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownStep" xml:space="preserve">
+    <value>未知的設定步驟。</value>
+  </data>
+  <data name="Integrations.Steam.Config.FolderMustBeAbsolute" xml:space="preserve">
+    <value>請輸入完整的資料夾路徑。</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
+    <value>輸入此個人檔案的 Web API 金鑰。</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
+    <value>輸入與此金鑰對應的 SteamID。</value>
+  </data>
+  <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
+    <value>輸入 17 位數的 SteamID64、個人檔案連結或自訂個人檔案名稱。</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownProfile" xml:space="preserve">
+    <value>Steam 無法辨識此個人檔案。</value>
+  </data>
+  <data name="Integrations.Steam.Config.RejectedApiKey" xml:space="preserve">
+    <value>Steam 拒絕了此金鑰。請檢查金鑰是否完整。</value>
+  </data>
+  <data name="Integrations.Steam.Config.ServiceUnavailable" xml:space="preserve">
+    <value>無法連線至 Steam。請稍後再試。</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Name" xml:space="preserve">
+    <value>Steam 目前遊戲</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Description" xml:space="preserve">
+    <value>顯示您正在玩的遊戲，包含封面與工作階段時長。</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Name" xml:space="preserve">
+    <value>Steam 遊戲啟動器</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Description" xml:space="preserve">
+    <value>輕點一下即可啟動已安裝的 Steam 遊戲。</value>
+  </data>
+  <data name="Widgets.Steam.Config.ShowSessionTime" xml:space="preserve">
+    <value>顯示工作階段時長</value>
+  </data>
+  <data name="Widgets.Steam.Config.Source" xml:space="preserve">
+    <value>遊戲</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceGame" xml:space="preserve">
+    <value>單一遊戲</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceRecent" xml:space="preserve">
+    <value>最近玩過</value>
+  </data>
+  <data name="Widgets.Steam.Config.Game" xml:space="preserve">
+    <value>遊戲</value>
+  </data>
+  <data name="Widgets.Steam.Config.GameDescription" xml:space="preserve">
+    <value>選擇已安裝的遊戲。</value>
+  </data>
+  <data name="Widgets.Steam.Config.Count" xml:space="preserve">
+    <value>遊戲數量</value>
+  </data>
+  <data name="Widgets.Steam.Config.CountDescription" xml:space="preserve">
+    <value>要顯示幾款最近玩過的遊戲。</value>
+  </data>
+  <data name="Widgets.Steam.NotPlaying" xml:space="preserve">
+    <value>未在玩遊戲</value>
+  </data>
+  <data name="Widgets.Steam.NotFound" xml:space="preserve">
+    <value>在此電腦上找不到 Steam</value>
+  </data>
+  <data name="Widgets.Steam.Unavailable" xml:space="preserve">
+    <value>Steam 無法使用</value>
+  </data>
+  <data name="Widgets.Steam.NoGames" xml:space="preserve">
+    <value>找不到已安裝的遊戲</value>
+  </data>
+  <data name="Widgets.Steam.NoGameSelected" xml:space="preserve">
+    <value>未選擇遊戲</value>
+  </data>
+  <data name="Widgets.Steam.PlayingFor" xml:space="preserve">
+    <value>已玩 {time}</value>
+  </data>
+  <data name="Integrations.Steam.Config.NamePlaceholder" xml:space="preserve">
+    <value>主要帳號</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFolderLabel" xml:space="preserve">
+    <value>遊戲庫資料夾</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Title" xml:space="preserve">
+    <value>Steam 拒絕了 Web API 金鑰</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Description" xml:space="preserve">
+    <value>{account} 的金鑰遭到拒絕。請開啟其設定並輸入有效的金鑰。</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Title" xml:space="preserve">
+    <value>好友清單為私人</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Description" xml:space="preserve">
+    <value>Steam 不會提供 {account} 的好友。請在 Steam 中開啟「編輯個人檔案」&gt;「隱私設定」，並將好友清單設為公開。</value>
+  </data>
+  <data name="Widgets.Steam.Config.Account" xml:space="preserve">
+    <value>帳號</value>
+  </data>
+  <data name="Widgets.Steam.Config.AccountDescription" xml:space="preserve">
+    <value>要顯示誰的遊戲。此電腦會顯示在這裡執行的遊戲。</value>
+  </data>
+  <data name="Widgets.Steam.ThisComputer" xml:space="preserve">
+    <value>此電腦</value>
+  </data>
+  <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
+    <value>此帳號無法使用</value>
+  </data>
 </root>

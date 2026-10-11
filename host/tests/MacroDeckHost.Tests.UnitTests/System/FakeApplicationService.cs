@@ -15,6 +15,10 @@ internal sealed class FakeApplicationService : IApplicationService
 
 	public List<string> OpenedFolders { get; } = [];
 
+	public List<string> OpenedUris { get; } = [];
+
+	public Exception? OpenUriException { get; set; }
+
 	public List<bool> FolderExistedWhenOpened { get; } = [];
 
 	public Exception? OpenFolderException { get; set; }
@@ -36,6 +40,16 @@ internal sealed class FakeApplicationService : IApplicationService
 	public void OpenFile(string path) => OpenedFiles.Add(path);
 
 	public void OpenWebsite(string url) => OpenedWebsites.Add(url);
+
+	public void OpenUri(string uri)
+	{
+		if (OpenUriException is not null)
+		{
+			throw OpenUriException;
+		}
+
+		OpenedUris.Add(uri);
+	}
 
 	public void OpenFolder(string path)
 	{

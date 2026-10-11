@@ -22223,4 +22223,211 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.AdGuardHome.Off" xml:space="preserve">
     <value>बंद</value>
   </data>
+  <data name="Integrations.Steam.Variables.IsPlaying" xml:space="preserve">
+    <value>गेम खेल रहे हैं</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameName" xml:space="preserve">
+    <value>मौजूदा गेम</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGameId" xml:space="preserve">
+    <value>मौजूदा गेम की आईडी</value>
+  </data>
+  <data name="Integrations.Steam.Variables.CurrentGamePlaytimeSeconds" xml:space="preserve">
+    <value>मौजूदा सत्र की अवधि</value>
+  </data>
+  <data name="Integrations.Steam.Variables.GamesInstalled" xml:space="preserve">
+    <value>इंस्टॉल किए गए गेम</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsOnline" xml:space="preserve">
+    <value>ऑनलाइन दोस्त</value>
+  </data>
+  <data name="Integrations.Steam.Variables.FriendsInGame" xml:space="preserve">
+    <value>गेम में दोस्त</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Name" xml:space="preserve">
+    <value>Steam गेम लॉन्च करें</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchGame.Description" xml:space="preserve">
+    <value>इंस्टॉल किया गया Steam गेम शुरू करता है।</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Name" xml:space="preserve">
+    <value>Steam लॉन्च करें</value>
+  </data>
+  <data name="Integrations.Steam.Actions.LaunchSteam.Description" xml:space="preserve">
+    <value>Steam क्लाइंट खोलता है।</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Name" xml:space="preserve">
+    <value>Steam स्टोर पेज खोलें</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenStorePage.Description" xml:space="preserve">
+    <value>Steam में किसी गेम का स्टोर पेज खोलता है।</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Name" xml:space="preserve">
+    <value>Steam लाइब्रेरी पेज खोलें</value>
+  </data>
+  <data name="Integrations.Steam.Actions.OpenLibraryPage.Description" xml:space="preserve">
+    <value>आपकी Steam लाइब्रेरी में किसी गेम का पेज खोलता है।</value>
+  </data>
+  <data name="Integrations.Steam.Params.Game" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Integrations.Steam.Params.GameDescription" xml:space="preserve">
+    <value>इंस्टॉल किया गया गेम चुनें या Steam ऐप आईडी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Params.GamePlaceholder" xml:space="preserve">
+    <value>गेम या ऐप आईडी</value>
+  </data>
+  <data name="Integrations.Steam.Errors.InvalidGame" xml:space="preserve">
+    <value>कोई गेम चुनें या मान्य Steam ऐप आईडी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Errors.NotAvailable" xml:space="preserve">
+    <value>Steam उपलब्ध नहीं है। पहले Steam इंटीग्रेशन चालू करें।</value>
+  </data>
+  <data name="Integrations.Steam.Errors.LaunchFailed" xml:space="preserve">
+    <value>Steam खोला नहीं जा सका।</value>
+  </data>
+  <data name="Integrations.Steam.Config.Title" xml:space="preserve">
+    <value>Steam सेट अप करें</value>
+  </data>
+  <data name="Integrations.Steam.Config.Description" xml:space="preserve">
+    <value>इंस्टॉल किए गए गेम बिना किसी सेटअप के मिल जाते हैं। किसी खाते की स्थिति और दोस्त भी दिखाने के लिए SteamID और Web API कुंजी जोड़ें। आप कई खाते जोड़ सकते हैं।</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionKey" xml:space="preserve">
+    <value>Steam में साइन इन करें, API कुंजी वाला पेज खोलें और एक कुंजी पंजीकृत करें। पेज डोमेन नाम माँगता है; कोई भी मान चलेगा। सीमित खाते कुंजी नहीं पा सकते।</value>
+  </data>
+  <data name="Integrations.Steam.Config.InstructionSteamId" xml:space="preserve">
+    <value>अपना 17 अंकों का SteamID64, प्रोफ़ाइल लिंक या कस्टम प्रोफ़ाइल नाम दर्ज करें। कस्टम नाम के लिए कुंजी ज़रूरी है।</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLinkLabel" xml:space="preserve">
+    <value>Steam Web API कुंजी का पेज खोलें</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdLabel" xml:space="preserve">
+    <value>SteamID</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdDescription" xml:space="preserve">
+    <value>केवल इंस्टॉल किए गए गेम इस्तेमाल करने के लिए खाली छोड़ें।</value>
+  </data>
+  <data name="Integrations.Steam.Config.SteamIdPlaceholder" xml:space="preserve">
+    <value>SteamID64 या प्रोफ़ाइल लिंक</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyLabel" xml:space="preserve">
+    <value>Web API कुंजी</value>
+  </data>
+  <data name="Integrations.Steam.Config.ApiKeyDescription" xml:space="preserve">
+    <value>इस कंप्यूटर पर सहेजी जाती है और केवल Steam से आपकी प्रोफ़ाइल के बारे में पूछने के लिए इस्तेमाल होती है।</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersLabel" xml:space="preserve">
+    <value>अतिरिक्त लाइब्रेरी फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFoldersDescription" xml:space="preserve">
+    <value>Steam गेम वाले फ़ोल्डर जिन्हें Macro Deck खुद नहीं ढूँढ पाता। Steam के अपने लाइब्रेरी फ़ोल्डर अपने-आप मिल जाते हैं।</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.Steam.Config.FolderMustBeAbsolute" xml:space="preserve">
+    <value>पूरे फ़ोल्डर पथ दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterApiKey" xml:space="preserve">
+    <value>इस प्रोफ़ाइल की Web API कुंजी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Config.EnterSteamId" xml:space="preserve">
+    <value>इस कुंजी से जुड़ा SteamID दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Config.InvalidSteamId" xml:space="preserve">
+    <value>17 अंकों का SteamID64, प्रोफ़ाइल लिंक या कस्टम प्रोफ़ाइल नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Config.UnknownProfile" xml:space="preserve">
+    <value>Steam इस प्रोफ़ाइल को नहीं पहचानता।</value>
+  </data>
+  <data name="Integrations.Steam.Config.RejectedApiKey" xml:space="preserve">
+    <value>Steam ने इस कुंजी को अस्वीकार कर दिया। जाँचें कि वह पूरी है।</value>
+  </data>
+  <data name="Integrations.Steam.Config.ServiceUnavailable" xml:space="preserve">
+    <value>Steam से संपर्क नहीं हो सका। थोड़ी देर बाद फिर कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Name" xml:space="preserve">
+    <value>Steam: अभी खेल रहे हैं</value>
+  </data>
+  <data name="Integrations.Steam.Widget.CurrentlyPlaying.Description" xml:space="preserve">
+    <value>आप जो गेम खेल रहे हैं उसे कवर और सत्र की अवधि के साथ दिखाता है।</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Name" xml:space="preserve">
+    <value>Steam गेम लॉन्चर</value>
+  </data>
+  <data name="Integrations.Steam.Widget.GameLauncher.Description" xml:space="preserve">
+    <value>इंस्टॉल किए गए Steam गेम को एक टैप से शुरू करता है।</value>
+  </data>
+  <data name="Widgets.Steam.Config.ShowSessionTime" xml:space="preserve">
+    <value>सत्र की अवधि दिखाएँ</value>
+  </data>
+  <data name="Widgets.Steam.Config.Source" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceGame" xml:space="preserve">
+    <value>एक गेम</value>
+  </data>
+  <data name="Widgets.Steam.Config.SourceRecent" xml:space="preserve">
+    <value>हाल ही में खेले गए</value>
+  </data>
+  <data name="Widgets.Steam.Config.Game" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Widgets.Steam.Config.GameDescription" xml:space="preserve">
+    <value>इंस्टॉल किया गया गेम चुनें।</value>
+  </data>
+  <data name="Widgets.Steam.Config.Count" xml:space="preserve">
+    <value>गेम की संख्या</value>
+  </data>
+  <data name="Widgets.Steam.Config.CountDescription" xml:space="preserve">
+    <value>हाल ही में खेले गए कितने गेम दिखाने हैं।</value>
+  </data>
+  <data name="Widgets.Steam.NotPlaying" xml:space="preserve">
+    <value>नहीं खेल रहे</value>
+  </data>
+  <data name="Widgets.Steam.NotFound" xml:space="preserve">
+    <value>इस कंप्यूटर पर Steam नहीं मिला</value>
+  </data>
+  <data name="Widgets.Steam.Unavailable" xml:space="preserve">
+    <value>Steam उपलब्ध नहीं है</value>
+  </data>
+  <data name="Widgets.Steam.NoGames" xml:space="preserve">
+    <value>इंस्टॉल किया गया कोई गेम नहीं मिला</value>
+  </data>
+  <data name="Widgets.Steam.NoGameSelected" xml:space="preserve">
+    <value>कोई गेम नहीं चुना गया</value>
+  </data>
+  <data name="Widgets.Steam.PlayingFor" xml:space="preserve">
+    <value>{time} से खेल रहे हैं</value>
+  </data>
+  <data name="Integrations.Steam.Config.NamePlaceholder" xml:space="preserve">
+    <value>मुख्य खाता</value>
+  </data>
+  <data name="Integrations.Steam.Config.LibraryFolderLabel" xml:space="preserve">
+    <value>लाइब्रेरी फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Title" xml:space="preserve">
+    <value>Steam ने Web API कुंजी अस्वीकार कर दी</value>
+  </data>
+  <data name="Integrations.Steam.Issues.InvalidKey.Description" xml:space="preserve">
+    <value>{account} की कुंजी अस्वीकार कर दी गई। उसका कॉन्फ़िगरेशन खोलें और मान्य कुंजी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Title" xml:space="preserve">
+    <value>दोस्तों की सूची निजी है</value>
+  </data>
+  <data name="Integrations.Steam.Issues.PrivateFriends.Description" xml:space="preserve">
+    <value>Steam {account} के दोस्तों को साझा नहीं करता। Steam में प्रोफ़ाइल संपादित करें &gt; गोपनीयता सेटिंग खोलें और दोस्तों की सूची को सार्वजनिक करें।</value>
+  </data>
+  <data name="Widgets.Steam.Config.Account" xml:space="preserve">
+    <value>खाता</value>
+  </data>
+  <data name="Widgets.Steam.Config.AccountDescription" xml:space="preserve">
+    <value>किसका गेम दिखाना है। यह कंप्यूटर यहाँ चल रहा गेम दिखाता है।</value>
+  </data>
+  <data name="Widgets.Steam.ThisComputer" xml:space="preserve">
+    <value>यह कंप्यूटर</value>
+  </data>
+  <data name="Widgets.Steam.AccountUnavailable" xml:space="preserve">
+    <value>यह खाता उपलब्ध नहीं है</value>
+  </data>
 </root>

@@ -6,8 +6,10 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeck.Ui.Model.Resources;
 
 namespace MacroDeckHost.Infrastructure;
 
@@ -24,7 +26,8 @@ public class IntegrationContext : IIntegrationContext
 		IUserNotifier notifications,
 		IMessageChannel messages,
 		IColorApi colors,
-		INotificationService notificationService)
+		INotificationService notificationService,
+		IUiResourceRegistry? uiResources = null)
 	{
 		Colors = colors;
 		Variables = variables;
@@ -37,6 +40,7 @@ public class IntegrationContext : IIntegrationContext
 		Notifications = notifications;
 		Messages = messages;
 		NotificationService = notificationService;
+		UiResources = uiResources ?? NoUiResources.Instance;
 	}
 
 	public IVariableApi Variables { get; }
@@ -60,4 +64,23 @@ public class IntegrationContext : IIntegrationContext
 	public IColorApi Colors { get; }
 
 	public INotificationService NotificationService { get; }
+
+	public IUiResourceRegistry UiResources { get; }
+
+	private sealed class NoUiResources : IUiResourceRegistry
+	{
+		public static readonly NoUiResources Instance = new();
+
+		public Task<UiResource> RegisterAsync(string name,
+			ReadOnlyMemory<byte> content,
+			string mediaType,
+			CancellationToken cancellationToken = default)
+			=> Task.FromException<UiResource>(Unsupported());
+
+		public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
+			=> Task.FromException(Unsupported());
+
+		private static UiResourceException Unsupported()
+			=> new(UiResourceErrorCode.Unsupported, "This context cannot register UI resources.");
+	}
 }

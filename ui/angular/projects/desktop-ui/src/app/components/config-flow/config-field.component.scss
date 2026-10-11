@@ -70,3 +70,33 @@
   right: auto;
   left: 0.1875rem;
 }
+
+.cf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+  align-items: flex-start;
+}
+
+.cf-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  align-self: stretch;
+}
+
+.cf-list-item > .cf-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.cf-list-item > shared-button {
+  flex: 0 0 auto;
+}
+
+.cf-path {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: stretch;
+}
