@@ -25,6 +25,8 @@ public interface IApplicationService
 
 	void OpenWebsite(string url);
 
+	void OpenUri(string uri);
+
 	void OpenFolder(string path);
 
 	void Kill(string processName, bool graceful);

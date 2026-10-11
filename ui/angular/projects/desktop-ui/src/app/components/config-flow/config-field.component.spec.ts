@@ -225,4 +225,64 @@ describe('ConfigFieldComponent', () => {
     expect(emitted).toBe('w1');
   });
 
+  describe('a list of folders', () => {
+    function folderList(value: unknown): unknown[] {
+      component.field = field(ActionParameterType.Array, {
+        itemTemplate: field(ActionParameterType.Folder, { name: 'folder', label: 'Library folder' }),
+      });
+      component.value = value;
+      const emitted: unknown[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+      fixture.detectChanges();
+      return emitted;
+    }
+
+    it('shows one folder control with its own browse dialog per entry', () => {
+      folderList(['C:\\Games', 'D:\\Library']);
+
+      expect(fixture.nativeElement.querySelectorAll('shared-file-path-input').length).toBe(2);
+      expect(fixture.nativeElement.querySelector('input.cf-input')).toBeNull();
+    });
+
+    it('adds an empty entry to the end without touching the others', () => {
+      const emitted = folderList(['C:\\Games']);
+
+      const add = fixture.nativeElement.querySelector('.cf-list > shared-button button') as HTMLButtonElement;
+      add.click();
+
+      expect(emitted).toEqual([['C:\\Games', '']]);
+    });
+
+    it('removes only the entry whose remove button was pressed', () => {
+      const emitted = folderList(['C:\\Games', 'D:\\Library']);
+
+      const remove = fixture.nativeElement.querySelector('.cf-list-item > shared-button button') as HTMLButtonElement;
+      remove.click();
+
+      expect(emitted).toEqual([['D:\\Library']]);
+    });
+
+    it('submits the whole list when a path is picked or typed', () => {
+      const emitted = folderList(['C:\\Games', 'D:\\Library']);
+
+      const inputs = fixture.debugElement.queryAll(By.css('shared-file-path-input'));
+      inputs[1].componentInstance.valueChange.emit('E:\\Other');
+
+      expect(emitted).toEqual([['C:\\Games', 'E:\\Other']]);
+    });
+
+    it('treats a missing value as an empty list', () => {
+      folderList(undefined);
+
+      expect(fixture.nativeElement.querySelectorAll('shared-file-path-input').length).toBe(0);
+    });
+  });
+
+  it('gives a single folder field the folder dialog instead of a plain text box', () => {
+    component.field = field(ActionParameterType.Folder);
+    component.value = 'C:\\Games';
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('shared-file-path-input')).not.toBeNull();
+  });
 });

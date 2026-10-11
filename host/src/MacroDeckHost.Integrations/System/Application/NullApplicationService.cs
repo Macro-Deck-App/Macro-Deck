@@ -20,6 +20,8 @@ internal sealed class NullApplicationService : IApplicationService
 	{
 	}
 
+	public void OpenUri(string uri) => throw new NotSupportedException();
+
 	public void OpenFolder(string path)
 	{
 	}

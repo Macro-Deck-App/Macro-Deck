@@ -20,6 +20,7 @@ import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorde
 import { KeyboardComboEditorComponent } from '../forms/keyboard-combo-editor/keyboard-combo-editor.component';
 import { KeyboardSequenceEditorComponent } from '../forms/keyboard-sequence-editor/keyboard-sequence-editor.component';
 import { ComboboxOption } from '../forms/combobox/combobox.component';
+import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 
 @Component({
@@ -36,6 +37,7 @@ import { ActionOptionsService } from '../../services/action-options.service';
     HotkeyRecorderComponent,
     KeyboardComboEditorComponent,
     KeyboardSequenceEditorComponent,
+    FilePathInputComponent,
     LocalizedTextPipe,
     TranslatePipe,
   ],
@@ -119,6 +121,66 @@ import { ActionOptionsService } from '../../services/action-options.service';
             [value]="arrayValue"
             (valueChange)="emit($event)" />
         }
+        @case ('folder') {
+          <div class="cf-path">
+            <shared-file-path-input
+              kind="folder"
+              [value]="stringValue"
+              [placeholder]="(field.placeholder | localizedText)"
+              (valueChange)="emit($event)" />
+          </div>
+        }
+        @case ('folder-list') {
+          <div class="cf-list">
+            @for (item of arrayValue; track $index) {
+              <div class="cf-list-item">
+                <div class="cf-path">
+                  <shared-file-path-input
+                    kind="folder"
+                    [value]="item"
+                    [placeholder]="(field.itemTemplate?.label | localizedText)"
+                    (valueChange)="setListItem($index, $event)" />
+                </div>
+                <shared-button
+                  variant="ghost"
+                  size="icon"
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.Param.RemoveItem' | translate"
+                  (click)="removeListItem($index)">
+                  <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+                </shared-button>
+              </div>
+            }
+            <shared-button variant="add" (click)="addListItem()">
+              <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck:Common.Add' | translate }}
+            </shared-button>
+          </div>
+        }
+        @case ('text-list') {
+          <div class="cf-list">
+            @for (item of arrayValue; track $index) {
+              <div class="cf-list-item">
+                <input
+                  class="cf-input"
+                  type="text"
+                  [placeholder]="(field.itemTemplate?.label | localizedText)"
+                  [ngModel]="item"
+                  (ngModelChange)="setListItem($index, $event)">
+                <shared-button
+                  variant="ghost"
+                  size="icon"
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.Param.RemoveItem' | translate"
+                  (click)="removeListItem($index)">
+                  <span class="icon icon-x icon-sm" aria-hidden="true"></span>
+                </shared-button>
+              </div>
+            }
+            <shared-button variant="add" (click)="addListItem()">
+              <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+              {{ 'macrodeck:Common.Add' | translate }}
+            </shared-button>
+          </div>
+        }
         @case ('number') {
           <input
             class="cf-input"
@@ -191,7 +253,7 @@ export class ConfigFieldComponent {
   protected readonly clearStoredSecretLabel = computed(() =>
     this.localization.translateKey(AppStrings.ConfigFlow.ClearStoredSecret));
 
-  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey'
+  get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey' | 'folder' | 'folder-list' | 'text-list'
     | 'keyboard-combo' | 'keyboard-sequence' | 'text' {
     switch (this.field.type) {
       case ActionParameterType.Password:
@@ -213,6 +275,10 @@ export class ConfigFieldComponent {
         return 'keyboard-combo';
       case ActionParameterType.KeyboardSequence:
         return 'keyboard-sequence';
+      case ActionParameterType.Folder:
+        return 'folder';
+      case ActionParameterType.Array:
+        return this.field.itemTemplate?.type === ActionParameterType.Folder ? 'folder-list' : 'text-list';
       default:
         return 'text';
     }
@@ -244,6 +310,18 @@ export class ConfigFieldComponent {
 
   get arrayValue(): string[] {
     return Array.isArray(this.value) ? this.value : [];
+  }
+
+  setListItem(index: number, value: string): void {
+    this.emit(this.arrayValue.map((item, position) => (position === index ? value : item)));
+  }
+
+  removeListItem(index: number): void {
+    this.emit(this.arrayValue.filter((_, position) => position !== index));
+  }
+
+  addListItem(): void {
+    this.emit([...this.arrayValue, '']);
   }
 
   get hotkeyValue(): HotkeyValue | null {
