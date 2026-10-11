@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -42,6 +43,7 @@ internal sealed class IntegrationLifecycleTests
 	private FakePluginConnection _connection = null!;
 	private IntegrationLifecycle _lifecycle = null!;
 	private VideoStreamWorld _videoStreams = null!;
+	private UiResourceStore _uiResources = null!;
 
 	[SetUp]
 	public async Task SetUp()
@@ -55,6 +57,7 @@ internal sealed class IntegrationLifecycleTests
 		_registry = new IntegrationRegistry(scopeFactory, new FakeIntegrationStateStore(), Serilog.Log.Logger);
 		_pluginSessionRegistry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_videoStreams = new VideoStreamWorld();
+		_uiResources = new UiResourceStore();
 
 		var initializer = new IntegrationInitializer(scopeFactory,
 			new FakeDeckNavigator(),
@@ -79,7 +82,8 @@ internal sealed class IntegrationLifecycleTests
 			TimeProvider.System,
 			Serilog.Log.Logger,
 			new MessageBroker(Serilog.Log.Logger),
-			TestColors.Watches);
+			TestColors.Watches,
+			uiResourceStore: _uiResources);
 
 		_lifecycle = new IntegrationLifecycle(_registry,
 			scopeFactory,
@@ -179,6 +183,67 @@ internal sealed class IntegrationLifecycleTests
 			Assert.That(_videoStreams.Registry.GetProviders().Select(entry => entry.QualifiedId),
 				Is.EqualTo(new[] { "com.example.cameras::front" }));
 		});
+	}
+
+	[Test]
+	public async Task A_built_in_integrations_ui_resources_survive_re_initialization()
+	{
+		var integration = new ResourceIntegration();
+		await _registry.RegisterAsync(integration);
+		await _lifecycle.ReinitializeAsync(integration.Id);
+		var registered = integration.Registered!;
+
+		await _lifecycle.ReinitializeAsync(integration.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(integration.InitializeCount, Is.EqualTo(2));
+			Assert.That(_uiResources.TryGet(registered.ResourceId, out _), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task Disabling_a_built_in_integration_releases_its_ui_resources()
+	{
+		var integration = new ResourceIntegration();
+		await _registry.RegisterAsync(integration);
+		await _lifecycle.ReinitializeAsync(integration.Id);
+		var registered = integration.Registered!;
+
+		_registry.SetEnabled(integration.Id, false);
+		await _lifecycle.ShutdownAsync(integration.Id);
+
+		Assert.That(_uiResources.TryGet(registered.ResourceId, out _), Is.False);
+	}
+
+	private sealed class ResourceIntegration : IIntegration
+	{
+		public string Id => "app.macro-deck.resources";
+
+		public LocalizedText Name => "Resources";
+
+		public string Version => "1.0.0";
+
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public bool IsInitialized { get; private set; }
+
+		public int InitializeCount { get; private set; }
+
+		public MacroDeck.Ui.Model.Resources.UiResource? Registered { get; private set; }
+
+		public async Task InitializeAsync(IIntegrationContext context)
+		{
+			InitializeCount++;
+			Registered ??= await context.UiResources.RegisterAsync("logo", new byte[] { 1, 2, 3 }, "image/png");
+			IsInitialized = true;
+		}
+
+		public Task ShutdownAsync()
+		{
+			IsInitialized = false;
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class VideoIntegration(string id, IVideoStreamProvider provider) : IIntegration, IVideoStreamIntegration

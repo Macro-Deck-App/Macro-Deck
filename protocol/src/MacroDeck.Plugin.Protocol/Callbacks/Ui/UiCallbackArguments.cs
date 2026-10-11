@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 
 namespace MacroDeck.Plugin.Protocol.Callbacks.Ui;
 
@@ -85,6 +86,12 @@ public sealed record UiRegisterMusicPlayerArtworkArguments
 	public required string InstanceId { get; init; }
 
 	public required string ArtworkId { get; init; }
+
+	/// <summary>Optional. The size in pixels the cover is shown at: the host registers the smallest copy it
+	/// keeps that is at least this large on its longer side, or the full-size cover when it keeps none.
+	/// Absent, the full-size cover. A host that predates the field ignores it and registers the full-size
+	/// cover.</summary>
+	public int? MaxSize { get; init; }
 }
 
 /// <summary>Result of <c>host.invoke ui/register-music-player-artwork</c>. <see cref="Resource" /> is absent when
@@ -98,4 +105,56 @@ public sealed record UiRegisterMusicPlayerArtworkResult
 public sealed record UiRemoveResourceArguments
 {
 	public required string Name { get; init; }
+}
+
+/// <summary>Arguments for <c>host.invoke ui/origin.report-failure</c>: a provider reporting that what the
+/// client asked for through an event did not work. The host shows <see cref="Message" /> on that client the
+/// way it shows a failed action, and only while the client is attached to the session, which must be one of
+/// the calling plugin's.</summary>
+public sealed record UiOriginReportFailureArguments
+{
+	public required string SessionId { get; init; }
+
+	/// <summary>The client that raised the event, as <c>ui/session.event</c> carried it.</summary>
+	public required string ClientId { get; init; }
+
+	/// <summary>The name of the event that failed, for the client's own feedback. Optional.</summary>
+	public string? EventName { get; init; }
+
+	public required LocalizedText Message { get; init; }
+}
+
+/// <summary>Result of <c>host.invoke ui/origin.report-failure</c>. <see cref="Delivered" /> is false when
+/// the client is no longer attached to the session.</summary>
+public sealed record UiOriginReportFailureResult
+{
+	public required bool Delivered { get; init; }
+}
+
+/// <summary>Arguments for <c>host.invoke ui/origin.show-modal</c>: opens one of the calling plugin's dialogs
+/// on the client that raised an event in one of its sessions. Opened only while that client is attached to
+/// the session. The answer arrives as a <c>ui</c>/<c>modal.result</c> capability invoke when
+/// <see cref="AwaitResult" /> is set, exactly as for <c>action-interactions/show-modal</c>.</summary>
+public sealed record UiOriginShowModalArguments
+{
+	public required string SessionId { get; init; }
+
+	public required string ClientId { get; init; }
+
+	public required string ViewId { get; init; }
+
+	public LocalizedText? Title { get; init; }
+
+	public IReadOnlyDictionary<string, JsonElement>? Data { get; init; }
+
+	public bool AwaitResult { get; init; }
+}
+
+/// <summary>Result of <c>host.invoke ui/origin.show-modal</c>.</summary>
+public sealed record UiOriginShowModalResult
+{
+	public required bool Opened { get; init; }
+
+	/// <summary>The id a later <c>modal.result</c> names. Empty when <see cref="Opened" /> is false.</summary>
+	public string ModalId { get; init; } = string.Empty;
 }

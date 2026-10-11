@@ -16,12 +16,23 @@ public sealed class IntegrationWidgetApi : IWidgetApi, IWidgetAppearanceOutcomeA
 	private readonly string _integrationId;
 	private readonly IWidgetApi _inner;
 	private readonly IWidgetIconInvalidator _iconInvalidator;
+	private readonly IWidgetDataReader? _data;
 
-	public IntegrationWidgetApi(string integrationId, IWidgetApi inner, IWidgetIconInvalidator iconInvalidator)
+	public IntegrationWidgetApi(string integrationId,
+		IWidgetApi inner,
+		IWidgetIconInvalidator iconInvalidator,
+		IWidgetDataReader? data = null)
 	{
 		_integrationId = integrationId;
 		_inner = inner;
 		_iconInvalidator = iconInvalidator;
+		_data = data;
+	}
+
+	public Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId, CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		return Task.FromResult(_data?.Read(_integrationId, widgetId));
 	}
 
 	public IReadOnlyList<WidgetTargetInfo> GetWidgets() => _inner.GetWidgets();

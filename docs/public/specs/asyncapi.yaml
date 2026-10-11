@@ -79,15 +79,15 @@ x-macrodeck-backpressure-exempt-types:
 # operation values a host.invoke may carry. A host that predates an api or operation answers
 # CAPABILITY_UNSUPPORTED.
 x-macrodeck-host-operations:
-  variables: [list, get, create, set, delete]
+  variables: [list, get, create, set, delete, refresh, history.open, history.read, history.close]
   user-variables: [apply, create]
   config: [entries, get-string, get-secret, set-string, set-secret]
   deck: [change-folder, change-profile, parent, back]
   scripts: [run]
-  widgets: [apply, invalidate-icon]
+  widgets: [apply, invalidate-icon, get-data]
   notifications: [notify, dismiss, show, update, close]
   action-interactions: [request-item-picker, request-device-picker, show-modal]
-  ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork]
+  ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork, origin.report-failure, origin.show-modal]
   devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]
   variable-values: [value, invalidate]
   layouts: [register, unregister]

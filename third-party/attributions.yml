@@ -52,15 +52,15 @@ assets:
       client, the music player and AdGuard Home widgets, the integration icons and the Included icon pack the
       host ships, some recoloured or placed in a badge.
     paths:
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/blocked.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/blocked-percentage.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/dns-queries.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/parental.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/processing-time.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/protected.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/safe-browsing.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/safe-search.svg
-      - host/src/MacroDeckHost.Widgets/AdGuardHome/Icons/unprotected.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/blocked.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/blocked-percentage.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/dns-queries.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/parental.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/processing-time.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/protected.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/safe-browsing.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/safe-search.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/unprotected.svg
       - ui/runtime/styles/icons/action-button-type.svg
       - ui/runtime/styles/icons/alert-triangle.svg
       - ui/runtime/styles/icons/align-center.svg
@@ -222,15 +222,15 @@ assets:
       Home, Jellyfin and Steam logos' inline styles were rewritten as presentation attributes, and the Outlook Calendar logo is
       microsoft-outlook.svg with its CSS converted to presentation attributes.
     paths:
-      - host/src/MacroDeckHost.Integrations/AdGuardHome/adguard-home-icon.svg
+      - host/src/MacroDeckHost.Integrations/AdGuardHome/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/Discord/discord-icon.svg
       - host/src/MacroDeckHost.Integrations/HomeAssistant/home-assistant-icon.svg
-      - host/src/MacroDeckHost.Integrations/Jellyfin/jellyfin-icon.svg
+      - host/src/MacroDeckHost.Integrations/Jellyfin/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/MicrosoftCalendar/outlook-calendar-icon.svg
       - host/src/MacroDeckHost.Integrations/Spotify/spotify-icon.svg
-      - host/src/MacroDeckHost.Integrations/Steam/steam-icon.svg
-      - host/src/MacroDeckHost.Integrations/Twitch/twitch-icon.svg
-      - host/src/MacroDeckHost.Integrations/YouTube/youtube-icon.svg
+      - host/src/MacroDeckHost.Integrations/Steam/Icons/widget/logo.svg
+      - host/src/MacroDeckHost.Integrations/Twitch/Icons/widget/logo.svg
+      - host/src/MacroDeckHost.Integrations/YouTube/Icons/widget/logo.svg
       - host/src/MacroDeckHost.Integrations/YtmDesktop/ytmdesktop-icon.svg
       - ui/runtime/styles/icons/windows.svg
 
@@ -293,6 +293,7 @@ assets:
     note: Weather widget icons, embedded in the host. Artwork (c) ammap.com.
     paths:
       - host/src/MacroDeckHost.Widgets/Weather/Icons/**/*.svg
+      - host/src/MacroDeckHost.Integrations/Weather/Icons/**/*.svg
 
   - name: WebNowPlaying icon
     url: https://github.com/keifufu/WebNowPlaying

@@ -3,21 +3,11 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
-using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube;
-using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Streaming;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
-using MacroDeckHost.Widgets.HistoryGraph;
-using MacroDeckHost.Widgets.StreamChat;
-using MacroDeckHost.Widgets.StreamStats;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using Serilog.Core;
-using DomainEnums = MacroDeckHost.Domain.Enums;
 
 namespace MacroDeckHost.Tests.UnitTests.YouTube;
 
@@ -27,11 +17,10 @@ internal sealed class YouTubeStreamWidgetsTests
 	[Test]
 	public void The_youtube_platform_belongs_to_the_integration_and_has_its_own_widgets()
 	{
-		var youtube = StreamPlatforms.YouTube;
+		var youtube = YouTubeStreamPlatform.Platform;
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(StreamPlatforms.All, Has.Member(youtube));
 			Assert.That(youtube.OwnerId, Is.EqualTo(YouTubeIntegration.IntegrationId));
 			Assert.That(youtube.ChatWidgetTypeId, Is.EqualTo("app.macro-deck.youtube::chat"));
 			Assert.That(youtube.StatsWidgetTypeId, Is.EqualTo("app.macro-deck.youtube::stats"));
@@ -49,7 +38,7 @@ internal sealed class YouTubeStreamWidgetsTests
 	[TestCase("https://i.ytimg.com/vi/abc/maxresdefault.jpg", "UC/../x", false)]
 	public void Thumbnails_come_only_from_youtubes_image_host(string url, string channelId, bool allowed)
 	{
-		var rule = StreamPlatforms.YouTube.Thumbnails!;
+		var rule = YouTubeStreamPlatform.Platform.Thumbnails!;
 		var uri = new Uri(url);
 
 		var accepted = string.Equals(uri.Host, rule.AllowedHost, StringComparison.OrdinalIgnoreCase) &&
@@ -60,18 +49,22 @@ internal sealed class YouTubeStreamWidgetsTests
 	}
 
 	[Test]
-	public void The_stats_widget_reads_the_youtube_variables_of_the_channel()
+	public void The_stats_widget_reads_the_youtube_values_of_the_channel()
 	{
-		var variables = new VariableRegistry();
+		var values = new Dictionary<string, object?>(StringComparer.Ordinal)
+		{
+			["is_live"] = true,
+			["viewer_count"] = 1234L,
+			["like_count"] = 318L,
+			["subscriber_count"] = 12400L,
+			["stream_title"] = "Speedrun night",
+			["uptime_seconds"] = 3600L,
+		};
 		var account = new StreamStatsAccount("UCmine", "My Channel", "youtube_mine_");
-		Set(variables, "youtube_mine_is_live", "true");
-		Set(variables, "youtube_mine_viewer_count", "1234");
-		Set(variables, "youtube_mine_like_count", "318");
-		Set(variables, "youtube_mine_subscriber_count", "12400");
-		Set(variables, "youtube_mine_stream_title", "Speedrun night");
-		Set(variables, "youtube_mine_uptime_seconds", "3600");
+		var source = new StreamStatsSource((candidate, name)
+			=> candidate.AccountId == "UCmine" ? values.GetValueOrDefault(name) : null);
 
-		var state = StreamStatsResolver.Resolve(StreamPlatforms.YouTube, variables, account, [],
+		var state = StreamStatsResolver.Resolve(YouTubeStreamPlatform.Platform, source, account, [],
 			new NoStreamThumbnails());
 
 		Assert.Multiple(() =>
@@ -88,37 +81,15 @@ internal sealed class YouTubeStreamWidgetsTests
 	[Test]
 	public async Task The_youtube_chat_configuration_lists_only_youtube_channels()
 	{
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch),
-			StreamPlatformTestSupport.Set(StreamPlatforms.YouTube));
-		var twitch = services.Find(StreamPlatforms.Twitch.OwnerId)!;
-		var youtube = services.Find(StreamPlatforms.YouTube.OwnerId)!;
-		twitch.ChatSink.SetAccounts([new ChatAccount("111", "Twitch streamer")]);
-		youtube.ChatSink.SetAccounts([new ChatAccount("UCmine", "My Channel")]);
-		var resources = new UiResourceStore();
-		var provider = new StreamChatWidgetUiProvider(youtube.Platform,
-			youtube.ChatFeed,
-			youtube.ChatImages,
-			TestLocalization.SampleText,
-			new FakeIntegrationRegistry(),
-			resources,
-			new RecordingUiInteractions(),
-			new FakeFolderCache(),
-			new FakeHostLockState(),
-			Logger.None,
-			new StreamStatsWidgetUiProvider(youtube.Platform,
-				youtube.StatsAccounts,
-				youtube.Thumbnails,
-				new VariableRegistry(),
-				new EmptyHistory(),
-				new VariableChangeNotifier(),
-				TestLocalization.SampleText,
-				new FakeIntegrationRegistry(),
-				resources));
+		using var twitch = new StreamChatHub(TimeProvider.System, Logger.None);
+		using var youtube = new StreamChatHub(TimeProvider.System, Logger.None);
+		twitch.SetAccounts([new ChatAccount("111", "Twitch streamer")]);
+		youtube.SetAccounts([new ChatAccount("UCmine", "My Channel")]);
+		var provider = StreamPlatformTestSupport.Provider(YouTubeStreamPlatform.Platform, youtube);
 
 		await using var session = (await provider.CreateSessionAsync(new UiSessionRequest
 		{
-			Surface = ConfigSurface(StreamPlatforms.YouTube.ChatWidgetTypeId),
+			Surface = ConfigSurface(YouTubeStreamPlatform.Platform.ChatWidgetTypeId),
 			UiModelVersion = 1
 		}, CancellationToken.None))!;
 
@@ -130,19 +101,6 @@ internal sealed class YouTubeStreamWidgetsTests
 
 		Assert.That(values, Is.EqualTo(new[] { "UCmine" }));
 	}
-
-	private static void Set(VariableRegistry variables, string name, string value)
-		=> variables.Upsert(new VariableEntity
-		{
-			Id = Guid.NewGuid(),
-			Name = name,
-			Scope = DomainEnums.VariableScope.Global,
-			Type = DomainEnums.VariableType.Text,
-			Classification = DomainEnums.VariableClassification.Integration,
-			OwnerIntegrationId = YouTubeIntegration.IntegrationId,
-			Value = value,
-			UpdatedAt = DateTime.UtcNow,
-		});
 
 	private static UiSurface ConfigSurface(string widgetType)
 		=> new()
@@ -166,11 +124,5 @@ internal sealed class YouTubeStreamWidgetsTests
 		{
 			yield return child;
 		}
-	}
-
-	private sealed class EmptyHistory : IVariableHistory
-	{
-		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
-			=> EmptyVariableHistoryWindow.Instance;
 	}
 }

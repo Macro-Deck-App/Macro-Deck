@@ -1,7 +1,10 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
@@ -17,6 +20,8 @@ public class WidgetDefaultShortPressTests
 	private const string WeatherIntegrationId = WeatherIntegration.IntegrationId;
 	private const string Station = "app.macro-deck.weather::home";
 	private const string PluginId = "com.example.lights";
+	private const string WeatherPluginId = "com.example.rooftop";
+	private const string PluginStation = "com.example.rooftop::roof";
 
 	private WidgetTypeRegistry _widgetTypes = null!;
 	private FakeIntegrationRegistry _integrations = null!;
@@ -30,7 +35,10 @@ public class WidgetDefaultShortPressTests
 		_integrations = new FakeIntegrationRegistry();
 		_weather = new WeatherIntegration(new FakeOpenMeteoClient());
 		_integrations.Add(_weather);
-		_defaults = new WidgetDefaultShortPress(() => _widgetTypes, _integrations, TestLocalization.Resolver);
+		_defaults = new WidgetDefaultShortPress(() => _widgetTypes,
+			_integrations,
+			new WeatherRegistry(_integrations, Serilog.Core.Logger.None),
+			TestLocalization.Resolver);
 	}
 
 	[TearDown]
@@ -48,6 +56,27 @@ public class WidgetDefaultShortPressTests
 		var flow = flows[0];
 		Assert.That(flow.GetProperty("triggerType").GetString(), Is.EqualTo("onShortPress"));
 		return flow.GetProperty("children")[0].Clone();
+	}
+
+	private static string WithStation(string data, string station = Station)
+	{
+		var root = JsonNode.Parse(data)!.AsObject();
+		root["instanceId"] = station;
+		return root.ToJsonString();
+	}
+
+	private FakeWeatherProviderIntegration RooftopPlugin(bool declaresDetails)
+	{
+		var plugin = new FakeWeatherProviderIntegration(WeatherPluginId, "Rooftop", "roof")
+		{
+			Actions =
+			[
+				new CapturingActionDefinition { Id = "open-station", Parameters = [ActionParameter.Text("station")] }
+			],
+			DetailsAction = declaresDetails ? new WeatherDetailsAction("open-station", "station") : null
+		};
+		_integrations.Add(plugin);
+		return plugin;
 	}
 
 	private static string? ParameterValue(JsonElement block, string name)
@@ -72,19 +101,57 @@ public class WidgetDefaultShortPressTests
 	}
 
 	[Test]
-	public void A_weather_widget_without_a_station_leaves_the_station_unset()
+	public void A_plugin_station_opens_the_details_action_its_own_provider_declares()
 	{
+		RooftopPlugin(declaresDetails: true);
+
+		var widget = Widget(WidgetTypeIds.Weather, WithStation("{}", PluginStation));
+
+		var block = SingleBlock(_defaults.FlowsSourceFor(widget, fromDevice: false));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo(WeatherPluginId));
+			Assert.That(block.GetProperty("actionId").GetString(), Is.EqualTo("open-station"));
+			Assert.That(ParameterValue(block, "station"), Is.EqualTo(PluginStation));
+		});
+	}
+
+	[Test]
+	public void A_plugin_station_whose_provider_declares_no_details_action_has_no_default_press()
+	{
+		RooftopPlugin(declaresDetails: false);
+
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}", PluginStation)),
+			fromDevice: false), Is.Null);
+	}
+
+	[Test]
+	public void A_weather_widget_without_a_station_opens_the_details_of_the_station_it_shows()
+	{
+		RooftopPlugin(declaresDetails: true);
+
 		var block = SingleBlock(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: false));
 
-		Assert.That(ParameterValue(block, "instanceId"), Is.Empty);
+		Assert.Multiple(() =>
+		{
+			Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo(WeatherPluginId),
+				"the widget shows the first station of all providers, which is the plugin's here");
+			Assert.That(ParameterValue(block, "station"), Is.EqualTo(PluginStation));
+		});
 	}
+
+	[Test]
+	public void A_weather_widget_without_any_station_to_show_has_no_default_press()
+		=> Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: false), Is.Null);
 
 	[Test]
 	public void A_short_press_action_the_user_configured_wins_over_the_default()
 	{
 		var data = """{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""";
 
-		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, data), fromDevice: false), Is.Null);
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), fromDevice: false),
+			Is.Null);
 	}
 
 	[TestCase("""{"flows":[{"triggerType":"onShortPress","children":[]}]}""")]
@@ -92,14 +159,16 @@ public class WidgetDefaultShortPressTests
 	[TestCase("""{"flows":"[{\"triggerType\":\"onLongPress\",\"children\":[{\"type\":\"action\"}]}]"}""")]
 	[TestCase("""{"flows":[{"triggerType":"onShortPress","children":[]},{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""")]
 	public void A_short_press_flow_that_would_run_nothing_leaves_the_default_in_place(string data)
-		=> Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, data), fromDevice: false), Is.Not.Null);
+		=> Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation(data)), fromDevice: false),
+			Is.Not.Null);
 
 	[Test]
 	public void Nothing_runs_while_the_integration_behind_the_default_is_disabled()
 	{
 		_integrations.SetEnabled(WeatherIntegrationId, false);
 
-		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: false), Is.Null);
+		Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), fromDevice: false),
+			Is.Null);
 	}
 
 	[Test]
@@ -107,7 +176,8 @@ public class WidgetDefaultShortPressTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, "{}"), fromDevice: true), Is.Null);
+			Assert.That(_defaults.FlowsSourceFor(Widget(WidgetTypeIds.Weather, WithStation("{}")), fromDevice: true),
+				Is.Null);
 			Assert.That(_defaults.RunsOnDevices(WidgetTypeIds.Weather), Is.False);
 		});
 	}

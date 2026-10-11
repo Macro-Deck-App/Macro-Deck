@@ -54,6 +54,8 @@ public sealed record RemotePluginCapabilitySnapshot
 
 	public IReadOnlyList<WeatherStationInstance> WeatherInstances { get; init; } = [];
 
+	public WeatherDetailsAction? WeatherDetailsAction { get; init; }
+
 	public string CalendarProviderName { get; init; } = string.Empty;
 
 	public IReadOnlyList<CalendarAccount> CalendarAccounts { get; init; } = [];

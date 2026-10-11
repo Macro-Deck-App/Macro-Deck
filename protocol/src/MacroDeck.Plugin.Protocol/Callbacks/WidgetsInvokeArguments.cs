@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace MacroDeck.Plugin.Protocol.Callbacks;
 
 /// <summary>
@@ -144,4 +146,22 @@ public sealed record WidgetStateInfoDto
 	public required string Id { get; init; }
 
 	public required string Label { get; init; }
+}
+
+/// <summary>Arguments for <c>get-data</c> on <see cref="HostApis.Widgets" />.</summary>
+public sealed record WidgetsGetDataArguments
+{
+	public required string WidgetId { get; init; }
+}
+
+/// <summary>Result of <c>get-data</c>: the stored data of a widget whose type the calling plugin
+/// registered. Any other widget answers no result.</summary>
+public sealed record WidgetDataDto
+{
+	public required string WidgetId { get; init; }
+
+	public required string WidgetTypeId { get; init; }
+
+	/// <summary>The stored data, always a JSON object.</summary>
+	public required JsonElement Data { get; init; }
 }

@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `battery-provider`/`batteries`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -211,6 +211,35 @@ What did **not** need a major:
   non-fatally and the plugin's other capabilities keep working, and a plugin that does not implement
   `ICalendarProvider` never declares it. The host's calendar widget types and the `calendar` trigger
   provider are host-owned additions, not protocol changes.
+- [Configuration entries](/features/setup-flows/#taking-part-in-storing-an-entry) added the
+  `IConfigEntryLifecycle` interface, every member with a default, and the capability kind `config-entries`
+  at capability version `1`, within major `3`. An older host rejects the kind non-fatally and stores entries
+  as before, and a plugin that does not implement the interface never declares it.
+- [Event origins](/ui/views/sessions/#answering-the-client-that-acted) added `IUiEventOrigin` and an
+  `IUiSession.Dispatch(UiEvent, IUiEventOrigin)` overload whose default forwards to `Dispatch(UiEvent)`, so a
+  session compiled before it keeps receiving every event. The `ui` host API gained `origin.report-failure`
+  and `origin.show-modal`; against an older host they answer `false` or a cancellation.
+- `IVariableApi` gained `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync`, both defaulting to a
+  no-op, and the `variables` host API gained `refresh`; an older host makes the request a no-op.
+  `NotifyDeclarationsChangedAsync` uses the existing `state.update`.
+- `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin` rose from 16 MiB and 256 to 48 MiB and 1024.
+  The host advertises them in the protocol descriptor; a plugin built against an older SDK keeps its
+  own, lower quota, which a newer host still accepts.
+- `MacroDeck.Ui` added `UiWidgetSafeArea` and `UiWidgetSurface` in `MacroDeck.Ui.Widgets`.
+- `IWidgetApi` gained `GetWidgetDataAsync`, defaulting to `null`, and the `widgets` host API gained
+  `get-data`; an older host answers no data. `IVariableApi` gained `OpenHistoryAsync`, whose default throws a
+  `VariableHistoryException` with `Unsupported`, and the `variables` host API gained `history.open`,
+  `history.read` and `history.close`; against an older host the SDK reports the history as unsupported.
+- `UiWidgetSurfaceAttributes` gained `culture`, with the reader `UiWidgetSurface.Culture`. A provider that
+  ignores it, or reads a surface from an older host without it, draws its own text in its default language.
+- While the host is locked, a client's events to a plugin's `widget` or `dialog` session are refused with
+  `HOST_LOCKED`, except `reveal`. A plugin never received a guarantee that such events arrive while
+  locked, and the hardware path already refused them.
+- A Weather widget's default press now runs the details action its station's provider declares through
+  `IWeatherProvider.DetailsAction`, instead of always running the built-in Weather integration's **Weather
+  details** action. A weather plugin built against an older SDK declares none, so its stations get no default
+  press; a flow the user added still runs. See
+  [Pressing the widget](/features/weather/#pressing-the-widget).
 - Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
   optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
 - [Batteries](/features/batteries/) added a capability kind, `battery-provider`, at capability version

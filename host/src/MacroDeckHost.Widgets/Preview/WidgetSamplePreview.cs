@@ -1,6 +1,6 @@
-using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeck.Ui.Widgets;
 using MacroDeckHost.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,14 +15,7 @@ namespace MacroDeckHost.Widgets.Preview;
 public static class WidgetSamplePreview
 {
 	/// <summary>Whether this surface asks for the sample rather than live state.</summary>
-	public static bool IsRequested(UiSurface surface)
-	{
-		ArgumentNullException.ThrowIfNull(surface);
-
-		return surface.Kind == UiSurfaceKinds.Preview &&
-			surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample) &&
-			sample.ValueKind == JsonValueKind.True;
-	}
+	public static bool IsRequested(UiSurface surface) => UiWidgetSurface.IsSampleRequested(surface);
 }
 
 /// <summary>

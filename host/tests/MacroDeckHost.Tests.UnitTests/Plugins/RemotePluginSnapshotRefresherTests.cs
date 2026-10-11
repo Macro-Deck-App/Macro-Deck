@@ -159,6 +159,46 @@ public class RemotePluginSnapshotRefresherTests
 	}
 
 	[Test]
+	public async Task A_plugin_weather_provider_declares_its_details_action_in_describe()
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = new WeatherDescribePayload
+			{
+				ProviderName = "Rooftop",
+				Instances = [new WeatherStationInstanceDto { Id = "roof", DisplayName = "Roof" }],
+				DetailsAction = new WeatherDetailsActionDto { ActionId = "open-station", StationParameter = "station" }
+			}
+		};
+		var refresher = new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore());
+
+		var result = await refresher.RefreshAsync(PluginId, [CapabilityKinds.Weather], CancellationToken.None);
+
+		Assert.That(result.Snapshot.WeatherDetailsAction,
+			Is.EqualTo(new MacroDeck.Sdk.Weather.WeatherDetailsAction("open-station", "station")));
+	}
+
+	[Test]
+	public async Task A_plugin_built_before_details_actions_declares_none()
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = JsonDocument.Parse(
+					"""{"providerName":"Rooftop","instances":[{"id":"roof","displayName":"Roof"}]}""")
+				.RootElement
+		};
+		var refresher = new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore());
+
+		var result = await refresher.RefreshAsync(PluginId, [CapabilityKinds.Weather], CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Snapshot.WeatherInstances.Single().Id, Is.EqualTo("roof"));
+			Assert.That(result.Snapshot.WeatherDetailsAction, Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task
 		RefreshKindAsync_for_virtual_profiles_sends_the_profiles_operation_and_preserves_the_provider_name()
 	{

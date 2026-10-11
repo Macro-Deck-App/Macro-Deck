@@ -57,9 +57,9 @@ internal sealed class CompanionConfigurationMutationAdapter : IIntegrationConfig
 		if (current is null || preparation.TitleChanged)
 		{
 			identity = null;
-			for (var attempt = 0; attempt < ObsConfigurationIdentityAllocator.MaximumAttempts; attempt++)
+			for (var attempt = 0; attempt < ConfigurationIdentityAllocator.MaximumAttempts; attempt++)
 			{
-				var candidate = ObsConfigurationIdentityAllocator.Allocate(preparation.Title,
+				var candidate = ConfigurationIdentityAllocator.Allocate(preparation.Title,
 					occupied,
 					preparation.TitleChanged ? current?.Key : null,
 					_suffixFactory);
@@ -68,13 +68,13 @@ internal sealed class CompanionConfigurationMutationAdapter : IIntegrationConfig
 					break;
 				}
 
-				if (TryReserve(preparation.EntryId, candidate.Key))
+				if (TryReserve(preparation.EntryId, candidate))
 				{
-					identity = candidate;
+					identity = new ObsConfigurationIdentity(preparation.Title, candidate);
 					break;
 				}
 
-				occupied.Add(candidate.Key);
+				occupied.Add(candidate);
 			}
 		}
 		else if (!TryReserve(preparation.EntryId, current.Key))

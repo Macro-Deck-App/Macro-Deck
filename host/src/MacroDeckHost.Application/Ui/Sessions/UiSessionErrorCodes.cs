@@ -39,4 +39,6 @@ public static class UiSessionErrorCodes
 	/// configuration into its tree, so the tree can only be brought up to date by building a new one.
 	/// Always retryable: reopening is exactly what is being asked for.</summary>
 	public const string WidgetReconfigured = "WIDGET_RECONFIGURED";
+
+	public const string HostLocked = "HOST_LOCKED";
 }

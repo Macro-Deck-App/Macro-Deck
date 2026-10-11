@@ -358,6 +358,8 @@ internal sealed class TestWeatherIntegration : IPluginIntegration, IWeatherProvi
 		=> [.. _stations.Keys.Select(id => new WeatherStationInstance(id, id))];
 
 	public IWeatherStation? GetStation(string instanceId) => _stations.GetValueOrDefault(instanceId);
+
+	public WeatherDetailsAction? DetailsAction { get; init; }
 }
 
 /// <summary>An integration exposing whatever <see cref="IProfileProvider"/> shape a virtual-profiles

@@ -764,6 +764,45 @@ internal sealed class WidgetUiSessionTests
 		});
 	}
 
+	[Test]
+	public async Task A_widget_and_its_preview_carry_the_language_macro_deck_is_set_to()
+	{
+		var culture = new FixedUiCulture("de");
+		var opener = new WidgetUiSessionOpener(_folders,
+			new EmptyProfileCache(),
+			new WidgetDataSchemaProvider(_widgetTypes),
+			_widgetTypes,
+			_registry,
+			_broker,
+			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			_recovery,
+			TestColors.None,
+			culture);
+		var widget = AddWidget(WidgetTypeIds.Weather, "{}");
+		using var draft = JsonDocument.Parse("{}");
+
+		var live = opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, DeviceA, false);
+		await new HostUiCultureChangedHandler(culture).Handle(
+			new MacroDeckHost.Application.Events.LocalizationCultureChangedNotification("pt-BR", "en"),
+			CancellationToken.None);
+		var sample = opener.Open(new OpenWidgetUiSessionRequest
+			{
+				WidgetType = WidgetTypeIds.Weather, Data = draft.RootElement, Sample = true
+			},
+			DeviceA,
+			isAdmin: true);
+		await live.Ready;
+		await sample.Ready;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.Find(live.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Culture]
+				.GetString(), Is.EqualTo("de"));
+			Assert.That(_registry.Find(sample.SessionId)!.Surface.Attributes[UiWidgetSurfaceAttributes.Culture]
+				.GetString(), Is.EqualTo("pt-BR"));
+		});
+	}
+
 	private WidgetEntity AddWidget(string type, string? data)
 	{
 		var widget = new WidgetEntity { Id = Guid.NewGuid(), Type = type, Data = data };
@@ -849,5 +888,12 @@ internal sealed class WidgetUiSessionTests
 		public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
 		{
 		}
+	}
+
+	private sealed class FixedUiCulture(string culture) : IHostUiCulture
+	{
+		public string Current { get; private set; } = culture;
+
+		public void Use(string culture) => Current = culture;
 	}
 }

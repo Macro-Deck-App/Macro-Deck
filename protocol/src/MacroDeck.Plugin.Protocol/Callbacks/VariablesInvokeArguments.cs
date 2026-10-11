@@ -36,3 +36,34 @@ public sealed record VariablesDeleteArguments
 {
 	public required Guid VariableId { get; init; }
 }
+
+/// <summary>Arguments for <c>history.open</c> on <see cref="HostApis.Variables" />.</summary>
+public sealed record VariablesHistoryOpenArguments
+{
+	/// <summary>The canonical name of one of the calling plugin's own global variables.</summary>
+	public required string Name { get; init; }
+
+	/// <summary>How many samples to keep. The host clamps it to its own bounds.</summary>
+	public required int Capacity { get; init; }
+}
+
+/// <summary>Result of <c>history.open</c>.</summary>
+public sealed record VariablesHistoryOpenResult
+{
+	/// <summary>The window, for <c>history.read</c> and <c>history.close</c>. Only valid on the connection
+	/// that opened it.</summary>
+	public required string WindowId { get; init; }
+}
+
+/// <summary>Arguments for <c>history.read</c> and <c>history.close</c> on <see cref="HostApis.Variables" />.</summary>
+public sealed record VariablesHistoryWindowArguments
+{
+	public required string WindowId { get; init; }
+}
+
+/// <summary>Result of <c>history.read</c>: the samples, oldest first. A window the host no longer knows
+/// answers no result.</summary>
+public sealed record VariablesHistoryReadResult
+{
+	public IReadOnlyList<double?> Values { get; init; } = [];
+}

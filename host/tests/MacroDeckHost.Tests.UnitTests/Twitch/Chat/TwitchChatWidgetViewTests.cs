@@ -1,19 +1,18 @@
 using System.Text.Json;
-using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Limits;
-using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.StreamChat;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
+using MacroDeckHost.Tests.UnitTests.Streaming;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog.Core;
+using MacroDeckHost.Integrations.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 
@@ -25,7 +24,7 @@ internal sealed class TwitchChatWidgetViewTests
 	private UiResourceStore _store = null!;
 	private FakeTwitchChatImages _images = null!;
 	private StreamChatHub _hub = null!;
-	private StreamChatWidgetUiProvider _provider = null!;
+	private StreamWidgetsUiProvider _provider = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -33,11 +32,10 @@ internal sealed class TwitchChatWidgetViewTests
 		_store = new UiResourceStore();
 		_images = new FakeTwitchChatImages(_store);
 		_hub = new StreamChatHub(new FakeTimeProvider(), Logger.None);
-		var integrations = new FakeIntegrationRegistry();
-		integrations.Add(new IconIntegration());
-		_provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch, _hub, _images, TestLocalization.SampleText,
-			integrations, _store,
-			new RecordingUiInteractions(), new FakeFolderCache(), new FakeHostLockState(), Logger.None);
+		_provider = StreamPlatformTestSupport.Provider(TwitchStreamPlatform.Platform,
+			_hub,
+			_images,
+			context: new FakeStreamingContext(TwitchIntegration.IntegrationId, typeof(TwitchIntegration), _store));
 	}
 
 	[TearDown]
@@ -242,7 +240,7 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task A_message_shows_the_name_in_its_colour_and_the_emote_as_its_image()
 	{
 		Connect();
-		var emote = _images.Resolve(TwitchChatImage.Emote("25"));
+		var emote = _images.Resolve(StreamChatImage.Emote("25"));
 		await using var session = await OpenAsync();
 
 		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1", emoteId: "25")));
@@ -366,26 +364,45 @@ internal sealed class TwitchChatWidgetViewTests
 	}
 
 	[Test]
-	public async Task A_french_host_separates_name_and_message_the_french_way()
+	public async Task A_widget_drawn_in_french_separates_name_and_message_the_french_way()
 	{
-		var preferences = (FakeLocalizationPreferences)TestLocalization.Preferences;
-		var previous = preferences.Culture;
-		preferences.Culture = "fr";
+		Connect();
+		await using var session = (await _provider.CreateSessionAsync(
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget, culture: "fr"), UiModelVersion = 1 },
+			CancellationToken.None))!;
+		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
+		_hub.Tick();
 
-		try
-		{
-			Connect();
-			await using var session = await OpenAsync();
-			_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1")));
-			_hub.Tick();
+		var spans = MessageNodes(session.BuildTree().Root).Single().Properties[UiComponentProperties.Spans];
+		Assert.That(spans[1].GetProperty("text").GetString(), Is.EqualTo(" : "));
+	}
 
-			var spans = MessageNodes(session.BuildTree().Root).Single().Properties[UiComponentProperties.Spans];
-			Assert.That(spans[1].GetProperty("text").GetString(), Is.EqualTo(" : "));
-		}
-		finally
+	[Test]
+	public async Task The_picker_sample_is_written_in_the_language_the_surface_names()
+	{
+		await using var english = (await _provider.CreateSessionAsync(
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Preview, sample: true), UiModelVersion = 1 },
+			CancellationToken.None))!;
+		await using var german = (await _provider.CreateSessionAsync(
+			new UiSessionRequest
+			{
+				Surface = Surface(UiSurfaceKinds.Preview, sample: true, culture: "de"), UiModelVersion = 1
+			},
+			CancellationToken.None))!;
+
+		var englishText = MessageNodes(english.BuildTree().Root).First().Properties[UiComponentProperties.Text]
+			.GetString();
+		var germanText = MessageNodes(german.BuildTree().Root).First().Properties[UiComponentProperties.Text]
+			.GetString();
+
+		Assert.Multiple(() =>
 		{
-			preferences.Culture = previous;
-		}
+			Assert.That(englishText, Does.Contain(TestLocalization.Resolve(
+				MacroDeckHost.Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(), "en")));
+			Assert.That(germanText, Does.Contain(TestLocalization.Resolve(
+				MacroDeckHost.Localization.AppStrings.Integrations.StreamChat.Widget.SampleMessage1(), "de")));
+			Assert.That(germanText, Is.Not.EqualTo(englishText));
+		});
 	}
 
 	[Test]
@@ -406,7 +423,7 @@ internal sealed class TwitchChatWidgetViewTests
 		for (var index = 0; index < 20; index++)
 		{
 			var emoteId = ("emotesv2_" + id.Replace('-', '_') + "_" + index).PadRight(64, 'x');
-			_images.Resolve(TwitchChatImage.Emote(emoteId));
+			_images.Resolve(StreamChatImage.Emote(emoteId));
 			fragments.Add(new ChatFragment(ChatFragmentKind.Text, "😀漢字テスト "));
 			fragments.Add(new ChatFragment(ChatFragmentKind.Emote, "PogChamp", emoteId));
 		}
@@ -442,8 +459,8 @@ internal sealed class TwitchChatWidgetViewTests
 	public async Task Badges_are_spaced_apart_and_from_the_name()
 	{
 		Connect();
-		_images.Resolve(TwitchChatImage.Badge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"));
-		_images.Resolve(TwitchChatImage.Badge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"));
+		_images.Resolve(StreamChatImage.Badge("broadcaster", "1", "https://static-cdn.jtvnw.net/badges/v1/b/2"));
+		_images.Resolve(StreamChatImage.Badge("subscriber", "12", "https://static-cdn.jtvnw.net/badges/v1/s/2"));
 		await using var session = await OpenAsync();
 
 		_hub.Post(new ChatMessageReceived(Streamer, TwitchChatHubTests.Message("m1") with
@@ -469,27 +486,6 @@ internal sealed class TwitchChatWidgetViewTests
 		});
 	}
 
-	private sealed class IconIntegration : IIntegration, IIntegrationIconProvider
-	{
-		public string Id => StreamPlatforms.Twitch.OwnerId;
-
-		public LocalizedText Name => "Twitch";
-
-		public string Version => "1.0.0";
-
-		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
-
-		public bool IsInitialized => true;
-
-		public string IconMimeType => "image/svg+xml";
-
-		public byte[] GetIcon() => "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"u8.ToArray();
-
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-		public Task ShutdownAsync() => Task.CompletedTask;
-	}
-
 	private void Connect()
 	{
 		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
@@ -502,18 +498,23 @@ internal sealed class TwitchChatWidgetViewTests
 			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget, data: data), UiModelVersion = 1 },
 			CancellationToken.None))!;
 
-	private static UiSurface Surface(string kind, bool sample = false, object? data = null)
+	private static UiSurface Surface(string kind, bool sample = false, object? data = null, string? culture = null)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType]
-				= JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.ChatWidgetTypeId),
+				= JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
 		};
 
 		if (sample)
 		{
 			attributes[UiWidgetSurfaceAttributes.Sample] = JsonSerializer.SerializeToElement(true);
+		}
+
+		if (culture is not null)
+		{
+			attributes[UiWidgetSurfaceAttributes.Culture] = JsonSerializer.SerializeToElement(culture);
 		}
 
 		return new UiSurface { Kind = kind, SessionMode = UiSessionModes.Shared, Attributes = attributes };

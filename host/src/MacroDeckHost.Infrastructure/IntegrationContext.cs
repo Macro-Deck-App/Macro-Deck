@@ -33,6 +33,7 @@ public class IntegrationContext : IIntegrationContext
 		IBatteryApi? batteries = null,
 		IAndroidDeviceManager? androidDevices = null)
 	{
+		UiResources = uiResources ?? NoUiResources.Instance;
 		Colors = colors;
 		Batteries = batteries ?? UnsupportedBatteryApi.Instance;
 		AndroidDevices = androidDevices ?? UnsupportedAndroidDeviceManager.Instance;

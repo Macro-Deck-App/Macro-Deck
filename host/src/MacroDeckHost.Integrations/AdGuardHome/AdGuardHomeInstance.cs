@@ -1,5 +1,4 @@
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Application.AdGuardHome;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;

@@ -412,7 +412,7 @@ the whole catalog, each device's name, kind, level, charge state and connection,
 No permission covers publishing or reading, and the ADB devices are not filtered by **Allow plugins to use
 ADB** or `host:adb`: a battery level is not access to the device, and gating it would leave other plugins'
 widgets blank. This is a deliberate decision, recorded in
-[ADR 0108](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0108-battery-devices-are-a-host-brokered-catalog-every-plugin-may-read.md).
+[ADR 0109](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0109-battery-devices-are-a-host-brokered-catalog-every-plugin-may-read.md).
 
 - **Ids carry no hardware identifiers.** The ADB integration publishes a phone under an HMAC of its
   serial, keyed with a secret of this install, so the serial never leaves Macro Deck's ADB service, is

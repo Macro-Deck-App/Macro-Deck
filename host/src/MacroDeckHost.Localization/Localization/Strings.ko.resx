@@ -20310,6 +20310,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Config.TitleRequired" xml:space="preserve">
     <value>구성 이름을 입력하세요.</value>
   </data>
+  <data name="Errors.Config.VariableNamesUnavailable" xml:space="preserve">
+    <value>고유한 변수 이름을 만들 수 없습니다. 구성 이름을 바꾼 뒤 다시 시도하세요.</value>
+  </data>
   <data name="Integrations.Obs.Config.VariableIdentityExhausted" xml:space="preserve">
     <value>고유한 변수 이름을 만들 수 없습니다. 구성 이름을 바꾼 뒤 다시 시도하세요.</value>
   </data>

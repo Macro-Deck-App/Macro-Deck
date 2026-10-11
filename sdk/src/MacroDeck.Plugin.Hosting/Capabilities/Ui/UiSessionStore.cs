@@ -23,13 +23,15 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Ui;
 internal sealed class UiSessionStore : IAsyncDisposable
 {
 	private readonly IHostInvoker _hostInvoker;
+	private readonly ModalResultStore? _modalResults;
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.Ordinal);
 
-	public UiSessionStore(IHostInvoker hostInvoker, ILogger logger)
+	public UiSessionStore(IHostInvoker hostInvoker, ILogger logger, ModalResultStore? modalResults = null)
 	{
 		_hostInvoker = hostInvoker;
+		_modalResults = modalResults;
 		_logger = logger.ForContext<UiSessionStore>();
 	}
 
@@ -130,7 +132,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		private readonly IUiSession _session;
 		private readonly string _surfaceKind;
 
-		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event)> _work = new();
+		private readonly UiReplaceableWork<(WorkKind Kind, UiEvent? Event, string? ClientId)> _work = new();
 
 		private Task? _pump;
 		private int _drainQueued;
@@ -151,17 +153,18 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null));
+		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null, null));
 
 		public void Dispatch(UiEvent uiEvent, string? clientId)
 		{
 			if (string.Equals(uiEvent.Name, UiComponentEvents.PointerMove, StringComparison.Ordinal))
 			{
-				_work.WriteReplaceable((clientId ?? string.Empty) + "\n" + uiEvent.NodeId, (WorkKind.Event, uiEvent));
+				_work.WriteReplaceable((clientId ?? string.Empty) + "\n" + uiEvent.NodeId,
+					(WorkKind.Event, uiEvent, clientId));
 			}
 			else
 			{
-				_work.Write((WorkKind.Event, uiEvent));
+				_work.Write((WorkKind.Event, uiEvent, clientId));
 			}
 		}
 
@@ -169,7 +172,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			if (_session is IRebuildableUiSession)
 			{
-				_work.Write((WorkKind.Rebuild, null));
+				_work.Write((WorkKind.Rebuild, null, null));
 				return;
 			}
 
@@ -177,7 +180,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// the code it was opened with.
 			if (!string.Equals(_surfaceKind, UiSurfaceKinds.Dialog, StringComparison.Ordinal))
 			{
-				_work.Write((WorkKind.Reload, null));
+				_work.Write((WorkKind.Reload, null, null));
 			}
 		}
 
@@ -210,7 +213,7 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			// would either lose patches or drain an empty session.
 			if (Interlocked.Exchange(ref _drainQueued, 1) == 0)
 			{
-				_work.Write((WorkKind.Drain, null));
+				_work.Write((WorkKind.Drain, null, null));
 			}
 		}
 
@@ -221,9 +224,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		{
 			try
 			{
-				await foreach (var (kind, uiEvent) in _work.ReadAllAsync().ConfigureAwait(false))
+				await foreach (var (kind, uiEvent, clientId) in _work.ReadAllAsync().ConfigureAwait(false))
 				{
-					await HandleAsync(kind, uiEvent).ConfigureAwait(false);
+					await HandleAsync(kind, uiEvent, clientId).ConfigureAwait(false);
 				}
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -233,11 +236,11 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			}
 		}
 
-		private Task HandleAsync(WorkKind kind, UiEvent? uiEvent) => kind switch
+		private Task HandleAsync(WorkKind kind, UiEvent? uiEvent, string? clientId) => kind switch
 		{
 			WorkKind.Drain => DrainAsync(),
 			WorkKind.Snapshot => PublishSnapshotAsync(),
-			WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent),
+			WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent, clientId),
 			WorkKind.Rebuild => RebuildAsync(),
 			WorkKind.Reload => ReloadAsync(),
 			_ => Task.CompletedTask
@@ -347,11 +350,17 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			}
 		}
 
-		private async Task DispatchAsync(UiEvent uiEvent)
+		private async Task DispatchAsync(UiEvent uiEvent, string? clientId)
 		{
 			try
 			{
-				_session.Dispatch(uiEvent);
+				_session.Dispatch(uiEvent,
+					new RemoteUiEventOrigin(_owner._hostInvoker,
+						_owner._modalResults,
+						_owner._logger,
+						_sessionId,
+						clientId,
+						uiEvent.Name));
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)
 			{

@@ -60,9 +60,11 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
   plugin, the same rule as for icons a plugin supplies. PNG and JPEG are the safe choice for photos.
 - **Size.** One resource is at most `maxUiResourceBytes` (2 MiB). That limit is deliberate and applies per
   resource: downscale camera photos before registering them. All of a plugin's resources together are at
-  most `maxUiResourceBytesPerPlugin` (16 MiB) and `maxUiResourcesPerPlugin` (256). Over the quota,
-  registration throws `UiResourceException` with `QuotaExceeded` and the name keeps what it had. Free room
-  with `RemoveAsync`; removing a name that holds nothing is not an error.
+  most `maxUiResourceBytesPerPlugin` (48 MiB) and `maxUiResourcesPerPlugin` (1024); Macro Deck holds them in
+  memory, so a plugin at its quota costs up to 48 MiB. Older Macro Deck versions allowed 16 MiB and 256, so
+  read the quota from the protocol descriptor instead of assuming it. Over the quota, registration throws
+  `UiResourceException` with `QuotaExceeded` and the name keeps what it had. Free room with `RemoveAsync`;
+  removing a name that holds nothing is not an error.
 - **Lifetime.** Macro Deck keeps resources in memory, never on disk, for as long as the plugin session
   lasts: through a reconnect that resumes it and through re-initialisation after a configuration change.
   They are released when the session ends and are gone after Macro Deck restarts, when your integration is
@@ -76,7 +78,10 @@ one you build yourself: it carries the `contentHash` that makes clients fetch ne
 A music player plugin can register its own player's cover in one call with
 [`GetArtworkAsUiResourceAsync`](/features/music-players/#showing-the-cover-in-your-own-ui), and the cover of
 any other player with
-[`RegisterMusicPlayerArtworkAsync`](/features/music-players/#showing-another-players-cover).
+[`RegisterMusicPlayerArtworkAsync`](/features/music-players/#showing-another-players-cover). Give that call
+the size the cover is shown at (`maxSize`) and Macro Deck registers its 128 or 256 pixel copy instead of the
+full-size cover, which saves quota; a Macro Deck that predates `maxSize` ignores it and registers the
+full-size cover, at most 640 pixels on its longer side.
 
 In tests, `FakeIntegrationContext.UiResources` is a `FakeUiResourceRegistry` that applies the same rules and
 exposes what was registered, and `MacroDeckTestHost` answers registrations over the wire.
@@ -91,7 +96,9 @@ UiResource logo = await context.UiResources.GetPluginIconAsync("logos", "spotify
 var image = new UiImage { Key = "logo", Source = UiValue.Of(logo), Size = 0.2 };
 ```
 
-The first argument is the pack's key in the manifest, the second the icon's name inside that pack.
+The first argument is the pack's key in the manifest, the second the icon's name inside that pack. (A
+built-in integration of Macro Deck answers the same call from the `Icons/<key>/<name>` files in its own
+folder; see [Capability parity](/reference/capability-parity/).)
 
 - **No upload, no quota.** The handle points into Macro Deck's icon store. Nothing is sent from the
   plugin, nothing is held in memory for the session, and nothing counts against

@@ -7,19 +7,19 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.Jellyfin;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Jellyfin.Actions;
 using MacroDeckHost.Integrations.Jellyfin.Protocol;
+using MacroDeckHost.Integrations.Jellyfin.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin;
 
 namespace MacroDeckHost.Integrations.Jellyfin;
 
 [MacroDeckIntegration]
-public sealed class JellyfinIntegration
+public sealed partial class JellyfinIntegration
 	: IIntegration,
 		IConfigFlowProvider,
 		IVariableProvider,
@@ -29,8 +29,8 @@ public sealed class JellyfinIntegration
 		IIntegrationIconProvider,
 		IIntegrationIssueProvider,
 		IWidgetTypeProvider,
-		IVariableRefreshSignalConsumer,
-		IVariablePollingInvalidationConsumer,
+		IUiProvider,
+		IConfigEntryLifecycle,
 		IJellyfinSessionSource,
 		IDisposable
 {
@@ -47,12 +47,12 @@ public sealed class JellyfinIntegration
 	private readonly Func<JellyfinServerSettings, IJellyfinClient> _clientFactory;
 	private readonly TimeProvider _time;
 	private readonly JellyfinConnectionTimings? _timings;
+	private readonly Func<int>? _suffixFactory;
 	private readonly SemaphoreSlim _reloadGate = new(1, 1);
 	private readonly Lock _deviceKeys = new();
+	private readonly JellyfinSessionsUiProvider _ui;
 
 	private IIntegrationContext? _context;
-	private IVariableRefreshSignal? _refreshSignal;
-	private IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private JellyfinRuntime[] _runtimes = [];
 
 	public JellyfinIntegration()
@@ -63,11 +63,14 @@ public sealed class JellyfinIntegration
 	internal JellyfinIntegration(
 		Func<JellyfinServerSettings, IJellyfinClient> clientFactory,
 		TimeProvider? time = null,
-		JellyfinConnectionTimings? timings = null)
+		JellyfinConnectionTimings? timings = null,
+		Func<int>? suffixFactory = null)
 	{
 		_clientFactory = clientFactory;
 		_time = time ?? TimeProvider.System;
 		_timings = timings;
+		_suffixFactory = suffixFactory;
+		_ui = new JellyfinSessionsUiProvider(this, () => _context?.UiResources, _time);
 		Actions =
 		[
 			.. MusicPlayerActions.Common(ResolvePlayer, GetInstances),
@@ -128,14 +131,14 @@ public sealed class JellyfinIntegration
 	public IReadOnlyList<VariableDefinition> DeclaredVariables
 		=> Variables is { Count: > 0 } provided ? provided : JellyfinVariables.Templates;
 
+	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
+
 	public byte[] GetIcon() => _icon;
 
 	public IConfigFlow CreateConfigFlow() => new JellyfinConfigFlow(_clientFactory);
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
-	public void UseVariablePollingInvalidation(IVariablePollingInvalidationSignal signal)
-		=> _pollingInvalidation = signal;
+	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		=> _ui.CreateSessionAsync(request, cancellationToken);
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -223,7 +226,7 @@ public sealed class JellyfinIntegration
 				runtime.Connection.Start();
 			}
 
-			_pollingInvalidation?.MarkStale(IntegrationId);
+			NotifyDeclarationsChanged();
 			SessionsChanged?.Invoke(this, EventArgs.Empty);
 		}
 		finally
@@ -563,7 +566,7 @@ public sealed class JellyfinIntegration
 			}
 		];
 
-	public IReadOnlyList<JellyfinServerSummary> GetServers()
+	IReadOnlyList<JellyfinServerSummary> IJellyfinSessionSource.GetServers()
 	{
 		var now = _time.GetUtcNow();
 		return
@@ -618,7 +621,7 @@ public sealed class JellyfinIntegration
 		if (devicesChanged)
 		{
 			_ = PersistDevicesAsync(runtime);
-			_pollingInvalidation?.MarkStale(IntegrationId);
+			NotifyDeclarationsChanged();
 		}
 
 		var context = _context;
@@ -630,8 +633,24 @@ public sealed class JellyfinIntegration
 			}
 		}
 
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
+		RequestVariableRefresh();
 		SessionsChanged?.Invoke(this, EventArgs.Empty);
+	}
+
+	private void RequestVariableRefresh()
+	{
+		if (_context is { } context)
+		{
+			_ = context.Variables.RequestRefreshAsync();
+		}
+	}
+
+	private void NotifyDeclarationsChanged()
+	{
+		if (_context is { } context)
+		{
+			_ = context.Variables.NotifyDeclarationsChangedAsync();
+		}
 	}
 
 	private bool IsDeviceKeyTaken(JellyfinRuntime runtime, string deviceKey)
@@ -715,7 +734,8 @@ public sealed class JellyfinIntegration
 					.ConfigureAwait(false);
 			}
 
-			var key = await config.GetStringAsync(entry.Id, VariableKeyConfigKey, cancellationToken).ConfigureAwait(false);
+			var key = await config.GetStringAsync(entry.Id, VariableKeyConfigKey, cancellationToken)
+				.ConfigureAwait(false);
 			if (string.IsNullOrEmpty(key) || !usedKeys.Add(key))
 			{
 				key = FallbackKey(entry.Title, usedKeys);
@@ -754,9 +774,8 @@ public sealed class JellyfinIntegration
 	private static byte[] LoadIcon()
 	{
 		var assembly = typeof(JellyfinIntegration).Assembly;
-		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("jellyfin-icon.svg", StringComparison.Ordinal));
-		using var stream = assembly.GetManifestResourceStream(name)!;
+		using var stream = assembly.GetManifestResourceStream(
+			$"{typeof(JellyfinIntegration).Namespace}.Icons.{JellyfinSessionsUiProvider.IconFolder}.{JellyfinSessionsUiProvider.GlyphIcon}.svg")!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

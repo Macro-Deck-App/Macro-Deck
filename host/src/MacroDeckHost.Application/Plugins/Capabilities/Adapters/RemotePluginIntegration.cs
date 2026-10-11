@@ -40,7 +40,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Migration;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters;
 
-public abstract class RemotePluginIntegration :
+public abstract partial class RemotePluginIntegration :
 	IIntegration,
 	IDeclaredCapabilityKinds,
 	IVariableProvider,
@@ -395,6 +395,8 @@ public abstract class RemotePluginIntegration :
 	string IWeatherProvider.ProviderName => Snapshot.WeatherProviderName;
 
 	IReadOnlyList<WeatherStationInstance> IWeatherProvider.GetInstances() => Snapshot.WeatherInstances;
+
+	WeatherDetailsAction? IWeatherProvider.DetailsAction => Snapshot.WeatherDetailsAction;
 
 	public IWeatherStation? GetStation(string instanceId)
 		=> Snapshot.WeatherInstances.Any(instance => string.Equals(instance.Id, instanceId, StringComparison.Ordinal))

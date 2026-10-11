@@ -49,6 +49,28 @@ Things to know:
 - **Instance ids are local** (`"rooftop"`). The host qualifies them as `integrationId::rooftop` and saves
   them in widgets, so keep them stable.
 
+## Pressing the widget
+
+A Weather widget without a flow of its own opens details when pressed, if the station it shows comes
+from a provider that names a details action. Declare one of your own actions as `DetailsAction`:
+
+```csharp
+public WeatherDetailsAction? DetailsAction { get; } = new("show-station", StationParameter: "station");
+```
+
+- The host resolves the station the widget shows: the station saved in the widget, or, when none is saved,
+  the same first station the widget draws. It then runs that station's provider's action on the pressing
+  client, with the station's qualified id (`integrationId::rooftop`) in `StationParameter`.
+- Leave `DetailsAction` at its default `null` and pressing the widget runs nothing until the user adds a
+  flow. The built-in Weather integration declares its **Weather details** action, which opens a dialog
+  for its own locations.
+- Only clients with a screen run it; a hardware deck does not. A flow the user added to the widget always
+  wins.
+- An action that shows a dialog opens it with `context.Ui.ShowModalAsync` and serves it from your own
+  [`IUiProvider`](/ui/views/modal/), as the built-in Weather integration does.
+- Out of process the action travels in the `weather` capability's `describe` result. A host older than
+  this member ignores it, and a plugin built against an older SDK declares no details action.
+
 ## Implementing the station
 
 ```csharp

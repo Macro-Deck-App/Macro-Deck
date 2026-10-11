@@ -5,8 +5,10 @@ using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Integrations.Jellyfin;
 using MacroDeckHost.Integrations.Jellyfin.Protocol;
 
@@ -123,11 +125,16 @@ internal sealed class JellyfinTestContext : IIntegrationContext
 
 	public RecordingEventPublisher Published { get; } = new();
 
+	public JellyfinTestVariables OwnVariables { get; } = new();
+
+	public IUiResourceRegistry UiResources { get; init; } =
+		new BuiltInUiResources(JellyfinIntegration.IntegrationId, new UiResourceStore(), typeof(JellyfinIntegration));
+
 	public IIntegrationConfig Config => ConfigStore;
 
 	public IEventPublisher Events => Published;
 
-	public IVariableApi Variables => throw new NotSupportedException();
+	public IVariableApi Variables => OwnVariables;
 	public IUserVariableApi UserVariables => throw new NotSupportedException();
 	public IDeckNavigator Deck => throw new NotSupportedException();
 	public IScriptApi Scripts => throw new NotSupportedException();
@@ -146,6 +153,85 @@ internal sealed class JellyfinTestContext : IIntegrationContext
 				[JellyfinConfigKeys.Devices] = devices
 			},
 			new Dictionary<string, string> { [JellyfinConfigKeys.ApiKey] = apiKey });
+}
+
+internal sealed class JellyfinTestVariables : IVariableApi
+{
+	private readonly Lock _gate = new();
+	private readonly List<VariableHandle> _variables = [];
+	private int _refreshRequests;
+	private int _declarationChanges;
+
+	public int RefreshRequests => Volatile.Read(ref _refreshRequests);
+
+	public int DeclarationChanges => Volatile.Read(ref _declarationChanges);
+
+	public IReadOnlyList<VariableHandle> All
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _variables];
+			}
+		}
+	}
+
+	public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => Task.FromResult(All);
+
+	public Task<VariableHandle?> GetByNameAsync(string name)
+		=> Task.FromResult(All.FirstOrDefault(variable => variable.Name == name));
+
+	public Task<VariableHandle> CreateAsync(string name,
+		VariableType type,
+		object? initialValue = null,
+		int? decimalPlaces = null,
+		string? definitionId = null)
+	{
+		lock (_gate)
+		{
+			var existing = _variables.FindIndex(variable => definitionId is not null && variable.DefinitionId == definitionId);
+			var handle = new VariableHandle(existing >= 0 ? _variables[existing].Id : Guid.NewGuid(),
+				name,
+				type,
+				initialValue,
+				decimalPlaces) { DefinitionId = definitionId };
+			if (existing >= 0)
+			{
+				_variables[existing] = handle;
+			}
+			else
+			{
+				_variables.Add(handle);
+			}
+
+			return Task.FromResult(handle);
+		}
+	}
+
+	public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+
+	public Task DeleteAsync(Guid variableId)
+	{
+		lock (_gate)
+		{
+			_variables.RemoveAll(variable => variable.Id == variableId);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
+	{
+		Interlocked.Increment(ref _refreshRequests);
+		return Task.CompletedTask;
+	}
+
+	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
+	{
+		Interlocked.Increment(ref _declarationChanges);
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class RecordingEventPublisher : IEventPublisher

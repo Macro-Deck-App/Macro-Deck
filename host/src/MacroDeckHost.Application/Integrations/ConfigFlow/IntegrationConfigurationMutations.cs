@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Localization;
@@ -122,7 +123,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 	private readonly IVariablePollingInvalidationSignal _variableInvalidation;
 	private readonly Dictionary<string, IIntegrationConfigMutationAdapter> _adapters;
 	private readonly ILogger _logger;
+	private readonly VariableRegistry? _variableRegistry;
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _gates = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<Guid, Guid> _lifecycleReservations = new();
 
 	public IntegrationConfigMutationCoordinator(
 		IServiceScopeFactory scopeFactory,
@@ -131,8 +134,10 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		IMediator mediator,
 		IVariablePollingInvalidationSignal variableInvalidation,
 		IEnumerable<IIntegrationConfigMutationAdapter> adapters,
-		ILogger logger)
+		ILogger logger,
+		VariableRegistry? variableRegistry = null)
 	{
+		_variableRegistry = variableRegistry;
 		_scopeFactory = scopeFactory;
 		_lifecycle = lifecycle;
 		_registry = registry;
@@ -182,13 +187,14 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 
 				var siblings = await LoadRecords(store, integrationId);
-				var prepared = Prepare(integrationId,
+				var prepared = await PrepareAsync(integrationId,
 					entryId,
 					title,
 					values,
 					existing,
 					siblings.Where(entry => entry.Id != entryId).ToList(),
-					false);
+					false,
+					cancellationToken);
 				if (!prepared.Success)
 				{
 					return new IntegrationConfigMutationOutcome(false, Error: prepared.Error);
@@ -213,7 +219,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 				finally
 				{
-					ReleasePreparation(integrationId, entryId);
+					await ReleasePreparationAsync(integrationId, entryId, cancellationToken);
 				}
 			},
 			cancellationToken);
@@ -234,7 +240,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 
 				// A title-only mutation must never promote legacy configuration data into the
 				// current schema. Only completing the configuration flow may do that.
-				if (!IsUsable(integrationId, existing!))
+				if (!await IsUsableAsync(integrationId, existing!, cancellationToken))
 				{
 					if (!await store.Rename(entryId, title, existing!.Values))
 					{
@@ -249,13 +255,14 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 
 				var siblings = await LoadRecords(store, integrationId);
-				var prepared = Prepare(integrationId,
+				var prepared = await PrepareAsync(integrationId,
 					entryId,
 					title,
 					existing!.Values,
 					existing,
 					siblings.Where(entry => entry.Id != entryId).ToList(),
-					!string.Equals(title, existing.Title, StringComparison.Ordinal));
+					!string.Equals(title, existing.Title, StringComparison.Ordinal),
+					cancellationToken);
 				if (!prepared.Success)
 				{
 					return new IntegrationConfigMutationOutcome(false, Error: prepared.Error);
@@ -276,7 +283,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 				finally
 				{
-					ReleasePreparation(integrationId, entryId);
+					await ReleasePreparationAsync(integrationId, entryId, cancellationToken);
 				}
 			},
 			cancellationToken);
@@ -322,7 +329,8 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				await store.Delete(entryId);
 				var remaining = await LoadRecords(store, integrationId);
 				await SynchronizeVariables(integrationId, remaining, cancellationToken);
-				if (RequiresConfiguration(integrationId) && !remaining.Any(entry => IsUsable(integrationId, entry)))
+				if (RequiresConfiguration(integrationId) &&
+					!await AnyUsableAsync(integrationId, remaining, cancellationToken))
 				{
 					if (storeDisabled)
 					{
@@ -357,12 +365,26 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var store = scope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>();
 		var entries = await LoadRecords(store, integrationId);
-		return entries.Select(entry => new IntegrationConfigEntryDescription(entry.Id,
+
+		// A plugin answers each of these over the wire; asked one after another, a stalled plugin would cost
+		// one timeout per question and entry instead of one in total.
+		return await Task.WhenAll(entries.Select(entry => DescribeAsync(integrationId, entry, cancellationToken)));
+	}
+
+	private async Task<IntegrationConfigEntryDescription> DescribeAsync(string integrationId,
+		ConfigEntryRecord entry,
+		CancellationToken cancellationToken)
+	{
+		var status = StatusAsync(integrationId, entry, cancellationToken);
+		var usable = IsUsableAsync(integrationId, entry, cancellationToken);
+		await Task.WhenAll(status, usable);
+
+		return new IntegrationConfigEntryDescription(entry.Id,
 			entry.IntegrationId,
 			entry.Title,
 			entry.CreatedAt,
-			Status(integrationId, entry),
-			IsUsable(integrationId, entry))).ToList();
+			await status,
+			await usable);
 	}
 
 	private async Task<IntegrationConfigMutationOutcome> Serialized(
@@ -383,52 +405,58 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		}
 	}
 
-	private IntegrationConfigMutationPreparationResult Prepare(
+	private IConfigEntryBinding? Binding(string integrationId)
+	{
+		if (_adapters.TryGetValue(integrationId, out var adapter))
+		{
+			return new AdapterConfigEntryBinding(adapter);
+		}
+
+		return _registry.Integrations.FirstOrDefault(candidate =>
+				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is IConfigEntryLifecycle lifecycle
+			? new LifecycleConfigEntryBinding(integrationId, lifecycle, _variableRegistry, _lifecycleReservations)
+			: null;
+	}
+
+	private Task<IntegrationConfigMutationPreparationResult> PrepareAsync(
 		string integrationId,
 		Guid entryId,
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values,
 		ConfigEntryRecord? existing,
 		IReadOnlyList<ConfigEntryRecord> siblings,
-		bool titleChanged)
-		=> _adapters.TryGetValue(integrationId, out var adapter)
-			? adapter.Prepare(new IntegrationConfigMutationPreparation(integrationId,
-				entryId,
-				title,
-				values,
-				existing,
-				siblings,
-				titleChanged))
-			: new IntegrationConfigMutationPreparationResult(true, values);
+		bool titleChanged,
+		CancellationToken cancellationToken)
+		=> Binding(integrationId) is { } binding
+			? binding.PrepareAsync(new IntegrationConfigMutationPreparation(integrationId,
+					entryId,
+					title,
+					values,
+					existing,
+					siblings,
+					titleChanged),
+				cancellationToken)
+			: Task.FromResult(new IntegrationConfigMutationPreparationResult(true, values));
 
 	private Task SynchronizeVariables(
 		string integrationId,
 		IReadOnlyList<ConfigEntryRecord> entries,
 		CancellationToken cancellationToken)
-		=> _adapters.TryGetValue(integrationId, out var adapter)
-			? adapter.SynchronizeVariablesAsync(entries, cancellationToken)
-			: Task.CompletedTask;
+		=> Binding(integrationId)?.SynchronizeAsync(entries, cancellationToken) ?? Task.CompletedTask;
 
-	private void ReleasePreparation(string integrationId, Guid entryId)
-	{
-		if (_adapters.TryGetValue(integrationId, out var adapter))
-		{
-			adapter.ReleasePreparation(entryId);
-		}
-	}
+	private Task ReleasePreparationAsync(string integrationId, Guid entryId, CancellationToken cancellationToken)
+		=> Binding(integrationId)?.ReleasePreparationAsync(entryId, cancellationToken) ?? Task.CompletedTask;
 
 	private async Task ReloadAndPublish(string integrationId, CancellationToken cancellationToken)
 	{
 		var reloaded = false;
 		var integration = _registry.Integrations.FirstOrDefault(candidate =>
 			string.Equals(candidate.Id, integrationId, StringComparison.Ordinal));
-		if (integration is { IsInitialized: true } &&
-			_adapters.TryGetValue(integrationId, out var adapter))
+		if (integration is { IsInitialized: true } && Binding(integrationId) is { } binding)
 		{
 			try
 			{
-				await adapter.ReloadAsync(cancellationToken);
-				reloaded = true;
+				reloaded = await binding.ReloadAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -446,18 +474,34 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		await _mediator.Publish(new IntegrationStateChangedNotification(integrationId), cancellationToken);
 	}
 
-	private IntegrationConfigEntryStatus Status(string integrationId, ConfigEntryRecord entry)
-		=> _adapters.TryGetValue(integrationId, out var adapter)
-			? adapter.GetStatus(entry)
-			: IntegrationConfigEntryStatus.Ready;
+	private Task<IntegrationConfigEntryStatus> StatusAsync(string integrationId,
+		ConfigEntryRecord entry,
+		CancellationToken cancellationToken)
+		=> Binding(integrationId)?.GetStatusAsync(entry, cancellationToken) ??
+			Task.FromResult(IntegrationConfigEntryStatus.Ready);
 
 	private bool RequiresConfiguration(string integrationId)
 		=> _registry.Integrations.FirstOrDefault(candidate =>
 				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is not { } integration ||
 			integration.RequiresConfiguration();
 
-	private bool IsUsable(string integrationId, ConfigEntryRecord entry)
-		=> !_adapters.TryGetValue(integrationId, out var adapter) || adapter.IsUsable(entry);
+	private Task<bool> IsUsableAsync(string integrationId, ConfigEntryRecord entry, CancellationToken cancellationToken)
+		=> Binding(integrationId)?.IsUsableAsync(entry, cancellationToken) ?? Task.FromResult(true);
+
+	private async Task<bool> AnyUsableAsync(string integrationId,
+		IReadOnlyList<ConfigEntryRecord> entries,
+		CancellationToken cancellationToken)
+	{
+		foreach (var entry in entries)
+		{
+			if (await IsUsableAsync(integrationId, entry, cancellationToken))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	private static async Task<IReadOnlyList<ConfigEntryRecord>> LoadRecords(
 		IIntegrationConfigStore store,

@@ -149,8 +149,16 @@ public sealed partial class SteamIntegration
 		}
 
 		_accounts = accounts;
-		_artwork ??= new SteamArtworkCache(context.UiResources, _time);
-		_logo = await RegisterLogoAsync(context.UiResources);
+		if (_artwork is null)
+		{
+			_artwork = new SteamArtworkCache(context.UiResources, _time);
+		}
+		else
+		{
+			_artwork.UseResources(context.UiResources);
+		}
+
+		_logo = await LogoAsync(context.UiResources);
 		var tracker = new SteamTracker(_platform,
 			accounts,
 			[.. folders.Distinct(StringComparer.Ordinal)],
@@ -509,9 +517,8 @@ public sealed partial class SteamIntegration
 	private static byte[] LoadIcon()
 	{
 		var assembly = typeof(SteamIntegration).Assembly;
-		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("steam-icon.svg", StringComparison.Ordinal));
-		using var stream = assembly.GetManifestResourceStream(name)!;
+		using var stream = assembly.GetManifestResourceStream(
+			$"{typeof(SteamIntegration).Namespace}.Icons.{SteamWidgetSessions.IconFolder}.{SteamWidgetSessions.LogoIcon}.svg")!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

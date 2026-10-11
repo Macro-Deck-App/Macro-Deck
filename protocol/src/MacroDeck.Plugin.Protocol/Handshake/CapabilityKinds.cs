@@ -1,6 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The twenty-one capability kinds a plugin can declare.</summary>
+/// <summary>The twenty-two capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -59,6 +59,13 @@ public static class CapabilityKinds
 	public const string Calendar = "calendar";
 
 	/// <summary>
+	/// Takes part in how the host stores this plugin's configuration entries: prepares an entry before it is
+	/// stored, reports each entry's status and applies a stored change. Declared at
+	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string ConfigEntries = "config-entries";
+
+	/// <summary>
 	/// Publishes battery levels of devices through the <c>batteries</c> host api. Declared at
 	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
 	/// </summary>
@@ -68,7 +75,7 @@ public static class CapabilityKinds
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
-		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar, BatteryProvider,
+		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar, ConfigEntries, BatteryProvider,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

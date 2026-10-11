@@ -1,20 +1,14 @@
 using System.Text.Json;
-using MacroDeck.Localization;
-using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
-using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Tests.UnitTests.Delegation;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.StreamStats;
-using DomainEnums = MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Tests.UnitTests.Streaming;
+using Serilog.Core;
+using MacroDeckHost.Integrations.Streaming.Widgets;
+using MacroDeckHost.Integrations.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Stats;
 
@@ -24,39 +18,39 @@ internal sealed class TwitchStatsWidgetTests
 	private const string UserId = "111";
 	private const string Key = "streamer";
 
-	private UiResourceStore _store = null!;
-	private VariableRegistry _variables = null!;
-	private VariableChangeNotifier _notifier = null!;
-	private StreamStatsAccountsHub _accounts = null!;
+	private readonly Dictionary<string, object?> _state = new(StringComparer.Ordinal);
+	private FakeTimeProvider _time = null!;
+	private StreamChatHub _chat = null!;
+	private StreamStatsSource _accounts = null!;
 	private FakeThumbnails _thumbnails = null!;
-	private FakeHistory _history = null!;
-	private StreamStatsWidgetUiProvider _provider = null!;
+	private FakeStreamingContext _context = null!;
+	private StreamWidgetsUiProvider _provider = null!;
 	private CultureScope _culture = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_culture = new CultureScope("en-US");
-		_store = new UiResourceStore();
-		_variables = new VariableRegistry();
-		_notifier = new VariableChangeNotifier();
-		_accounts = new StreamStatsAccountsHub();
+		_state.Clear();
+		_time = new FakeTimeProvider();
+		_chat = new StreamChatHub(_time, Logger.None);
+		_accounts = new StreamStatsSource((_, name) => _state.GetValueOrDefault(name));
 		_thumbnails = new FakeThumbnails();
-		_history = new FakeHistory();
-		var integrations = new FakeIntegrationRegistry();
-		integrations.Add(new IconIntegration());
-		_provider = new StreamStatsWidgetUiProvider(StreamPlatforms.Twitch, _accounts,
-			_thumbnails,
-			_variables,
-			_history,
-			_notifier,
-			TestLocalization.SampleText,
-			integrations,
-			_store);
+		_context = new FakeStreamingContext(TwitchIntegration.IntegrationId, typeof(TwitchIntegration));
+		_provider = StreamPlatformTestSupport.Provider(TwitchStreamPlatform.Platform,
+			_chat,
+			stats: _accounts,
+			thumbnails: _thumbnails,
+			context: _context,
+			time: _time);
 	}
 
 	[TearDown]
-	public void TearDown() => _culture.Dispose();
+	public void TearDown()
+	{
+		_chat.Dispose();
+		_culture.Dispose();
+	}
 
 	[TestCase("1234", "1,234")]
 	[TestCase("9999", "9,999")]
@@ -152,8 +146,9 @@ internal sealed class TwitchStatsWidgetTests
 		SetLive();
 
 		await using var session = await OpenAsync(new { account = "", style = "valueGraph", metric = "followers" });
+		await WaitForAsync(() => _context.OwnVariables.Opened.Count > 0);
 
-		Assert.That(_history.Opened, Is.EqualTo(new[] { $"twitch_{Key}_follower_count" }));
+		Assert.That(_context.OwnVariables.Opened, Is.EqualTo(new[] { $"twitch_{Key}_follower_count" }));
 	}
 
 	[Test]
@@ -163,8 +158,9 @@ internal sealed class TwitchStatsWidgetTests
 		SetLive();
 
 		await using var session = await OpenAsync(new { account = "", style = "value" });
+		await Task.Delay(50);
 
-		Assert.That(_history.Opened, Is.Empty);
+		Assert.That(_context.OwnVariables.Opened, Is.Empty);
 	}
 
 	[Test]
@@ -190,12 +186,11 @@ internal sealed class TwitchStatsWidgetTests
 	}
 
 	[Test]
-	public async Task Subscribers_read_as_a_dash_while_their_variable_is_unavailable()
+	public async Task Subscribers_read_as_a_dash_while_their_count_is_not_known()
 	{
 		Connect();
 		SetLive();
-		_variables.SetAvailable(_variables.FindByName(DomainEnums.VariableScope.Global, null,
-			$"twitch_{Key}_subscriber_count")!.Id, false);
+		_state["subscriber_count"] = null;
 
 		await using var session = await OpenAsync(new { account = "", style = "value", metric = "subscribers" });
 
@@ -203,14 +198,14 @@ internal sealed class TwitchStatsWidgetTests
 	}
 
 	[Test]
-	public async Task The_widget_follows_a_variable_change()
+	public async Task The_widget_follows_a_change_of_the_accounts_state()
 	{
 		Connect();
 		SetLive();
 		await using var session = await OpenAsync();
 
-		Set("viewer_count", "77");
-		_notifier.Publish($"twitch_{Key}_viewer_count");
+		Set("viewer_count", 77);
+		_time.Advance(StreamStatsWidgetSession.RefreshInterval);
 
 		Assert.That(Texts(session.BuildTree().Root), Has.Some.Contains("77"));
 	}
@@ -220,7 +215,7 @@ internal sealed class TwitchStatsWidgetTests
 	{
 		Connect();
 		SetLive();
-		Set("is_live", "false");
+		Set("is_live", false);
 
 		await using var session = await OpenAsync(new
 		{
@@ -249,8 +244,8 @@ internal sealed class TwitchStatsWidgetTests
 
 		Assert.That(_thumbnails.Tracked[^1], Is.EqualTo((UserId, "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg")));
 
-		Set("is_live", "false");
-		_notifier.Publish($"twitch_{Key}_is_live");
+		Set("is_live", false);
+		_time.Advance(StreamStatsWidgetSession.RefreshInterval);
 
 		Assert.That(_thumbnails.Tracked[^1], Is.EqualTo((UserId, (string?)null)));
 	}
@@ -284,56 +279,73 @@ internal sealed class TwitchStatsWidgetTests
 		SetLive();
 
 		await using var empty = await OpenAsync(new { account = "", style = "valueGraph" });
+		await WaitForAsync(() => _context.OwnVariables.Opened.Count > 0);
 
 		Assert.That(Flatten(empty.BuildTree().Root).Any(node => node.Type == UiComponents.Chart), Is.False);
 
-		_history.Values = [10, 20];
-		_history.Raise();
+		_context.OwnVariables.Sample($"twitch_{Key}_viewer_count", 10);
+		_context.OwnVariables.Sample($"twitch_{Key}_viewer_count", 20);
 
-		Assert.That(Flatten(empty.BuildTree().Root).Any(node => node.Type == UiComponents.Chart), Is.True);
+		await WaitForAsync(() => Flatten(empty.BuildTree().Root).Any(node => node.Type == UiComponents.Chart));
 	}
 
 	[Test]
-	public void The_stats_widget_is_served_for_its_own_surfaces_only()
-		=> Assert.Multiple(() =>
+	public async Task The_stats_widget_is_served_for_its_own_surfaces_only()
+	{
+		await using var widget = await _provider.CreateSessionAsync(
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Widget), UiModelVersion = 1 },
+			CancellationToken.None);
+		var dialog = await _provider.CreateSessionAsync(
+			new UiSessionRequest { Surface = Surface(UiSurfaceKinds.Dialog), UiModelVersion = 1 },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
 		{
-			Assert.That(_provider.Serves(Surface(UiSurfaceKinds.Widget)), Is.True);
-			Assert.That(_provider.Serves(Surface(UiSurfaceKinds.Dialog)), Is.False);
+			Assert.That(widget, Is.Not.Null);
+			Assert.That(dialog, Is.Null);
 		});
+	}
+
+	[Test]
+	public async Task The_widget_shows_the_integrations_own_logo()
+	{
+		Connect();
+		SetLive();
+
+		await using var session = await OpenAsync();
+		var logo = Flatten(session.BuildTree().Root).First(node => node.Type == UiComponents.Image &&
+			node.Properties.ContainsKey(UiComponentProperties.Source));
+		var resourceId = logo.Properties[UiComponentProperties.Source].GetProperty("resourceId").GetString()!;
+
+		Assert.That(_context.Store.TryGet(resourceId, out var content) && content.MediaType == "image/svg+xml", Is.True);
+	}
 
 	private void Connect() => _accounts.SetAccounts([new StreamStatsAccount(UserId, "Streamer", $"twitch_{Key}_")]);
 
 	private void SetLive()
 	{
-		Set("is_live", "true");
-		Set("viewer_count", "1234");
-		Set("chatter_count", "256");
-		Set("follower_count", "12400");
-		Set("subscriber_count", "842");
+		Set("is_live", true);
+		Set("viewer_count", 1234);
+		Set("chatter_count", 256);
+		Set("follower_count", 12400);
+		Set("subscriber_count", 842);
 		Set("stream_title", "Exploring Night City");
 		Set("stream_category", "Cyberpunk 2077");
-		Set("uptime_seconds", "8066");
+		Set("uptime_seconds", 8066);
 		Set("stream_thumbnail_url", "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer-440x248.jpg");
 	}
 
-	private void Set(string name, string value)
-	{
-		var full = $"twitch_{Key}_{name}";
-		var existing = _variables.FindByName(DomainEnums.VariableScope.Global, null, full);
+	private void Set(string name, object? value) => _state[name] = value;
 
-		_variables.Upsert(existing is null
-			? new VariableEntity
-			{
-				Id = Guid.NewGuid(),
-				Name = full,
-				Scope = DomainEnums.VariableScope.Global,
-				Type = DomainEnums.VariableType.Text,
-				Classification = DomainEnums.VariableClassification.Integration,
-				OwnerIntegrationId = StreamPlatforms.Twitch.OwnerId,
-				Value = value,
-				UpdatedAt = DateTime.UtcNow,
-			}
-			: existing.CopyWithValue(value));
+	private static async Task WaitForAsync(Func<bool> condition)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(5);
+
+		while (!condition())
+		{
+			Assert.That(DateTime.UtcNow, Is.LessThan(deadline), "the widget never reached the expected state");
+			await Task.Delay(10);
+		}
 	}
 
 	private async Task<IUiSession> OpenAsync(object? data = null)
@@ -345,7 +357,7 @@ internal sealed class TwitchStatsWidgetTests
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.StatsWidgetTypeId),
+			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.StatsWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data ?? new { account = "" }),
 		};
 
@@ -393,67 +405,5 @@ internal sealed class TwitchStatsWidgetTests
 		public MacroDeck.Ui.Model.Resources.UiResource? Find(string userId) => null;
 
 		public void Track(string userId, string? url) => Tracked.Add((userId, url));
-	}
-
-	private sealed class FakeHistory : IVariableHistory
-	{
-		private readonly List<Window> _windows = [];
-
-		public List<string> Opened { get; } = [];
-
-		public IReadOnlyList<double> Values { get; set; } = [];
-
-		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
-		{
-			Opened.Add(variableName);
-			var window = new Window(this);
-			_windows.Add(window);
-
-			return window;
-		}
-
-		public void Raise()
-		{
-			foreach (var window in _windows)
-			{
-				window.Raise();
-			}
-		}
-
-		private sealed class Window(FakeHistory owner) : IVariableHistoryWindow
-		{
-			public string? ScopeRefId => null;
-
-			public IReadOnlyList<double> Values => owner.Values;
-
-			public event EventHandler? Changed;
-
-			public void Raise() => Changed?.Invoke(this, EventArgs.Empty);
-
-			public void Dispose()
-			{
-			}
-		}
-	}
-
-	private sealed class IconIntegration : IIntegration, IIntegrationIconProvider
-	{
-		public string Id => StreamPlatforms.Twitch.OwnerId;
-
-		public LocalizedText Name => "Twitch";
-
-		public string Version => "1.0.0";
-
-		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
-
-		public bool IsInitialized => true;
-
-		public string IconMimeType => "image/svg+xml";
-
-		public byte[] GetIcon() => "<svg xmlns=\"http://www.w3.org/2000/svg\"/>"u8.ToArray();
-
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 }

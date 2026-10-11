@@ -2,11 +2,11 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
+using MacroDeckHost.Integrations.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 
@@ -26,7 +26,8 @@ internal sealed class TwitchChatImageCacheTests
 		_time = new FakeTimeProvider();
 		_store = new UiResourceStore();
 		_handler = new ImageHandler();
-		_cache = new TwitchChatImageCache(_handler, _store, _time, Logger.None);
+		var resources = new BuiltInUiResources(TwitchIntegration.IntegrationId, _store, typeof(TwitchIntegration));
+		_cache = new TwitchChatImageCache(new HttpClient(_handler, disposeHandler: false), () => resources, _time, Logger.None);
 	}
 
 	[TearDown]
@@ -39,17 +40,17 @@ internal sealed class TwitchChatImageCacheTests
 	[Test]
 	public async Task An_emote_is_fetched_from_twitch_and_served_as_a_ui_resource()
 	{
-		var resolved = new List<TwitchChatImage>();
+		var resolved = new List<StreamChatImage>();
 		_cache.Resolved += (_, image) => resolved.Add(image);
 
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
-		var resource = _cache.Find(TwitchChatImage.Emote("25"));
+		var resource = _cache.Find(StreamChatImage.Emote("25"));
 		Assert.Multiple(() =>
 		{
 			Assert.That(_handler.Requested.Single().ToString(),
 				Is.EqualTo("https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0"));
-			Assert.That(resolved, Is.EqualTo(new[] { TwitchChatImage.Emote("25") }));
+			Assert.That(resolved, Is.EqualTo(new[] { StreamChatImage.Emote("25") }));
 			Assert.That(resource, Is.Not.Null);
 			Assert.That(_store.TryGet(resource!.ResourceId, out var content), Is.True);
 			Assert.That(content.MediaType, Is.EqualTo("image/png"));
@@ -63,12 +64,12 @@ internal sealed class TwitchChatImageCacheTests
 	[TestCase("https://static-cdn.jtvnw.net:8443/badges/v1/abc/2")]
 	public async Task Nothing_outside_twitchs_image_host_is_ever_requested(string url)
 	{
-		await FetchAsync(TwitchChatImage.Badge("subscriber", "12", url));
+		await FetchAsync(StreamChatImage.Badge("subscriber", "12", url));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_handler.Requested, Is.Empty);
-			Assert.That(_cache.Find(TwitchChatImage.Badge("subscriber", "12", url)), Is.Null);
+			Assert.That(_cache.Find(StreamChatImage.Badge("subscriber", "12", url)), Is.Null);
 		});
 	}
 
@@ -77,7 +78,7 @@ internal sealed class TwitchChatImageCacheTests
 	[TestCase("")]
 	public async Task A_malformed_emote_id_is_never_requested(string emoteId)
 	{
-		await FetchAsync(TwitchChatImage.Emote(emoteId));
+		await FetchAsync(StreamChatImage.Emote(emoteId));
 
 		Assert.That(_handler.Requested, Is.Empty);
 	}
@@ -85,7 +86,7 @@ internal sealed class TwitchChatImageCacheTests
 	[Test]
 	public async Task An_overlong_emote_id_is_never_requested()
 	{
-		await FetchAsync(TwitchChatImage.Emote(new string('a', 65)));
+		await FetchAsync(StreamChatImage.Emote(new string('a', 65)));
 
 		Assert.That(_handler.Requested, Is.Empty);
 	}
@@ -100,12 +101,12 @@ internal sealed class TwitchChatImageCacheTests
 			return response;
 		};
 
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_handler.Requested, Has.Count.EqualTo(1));
-			Assert.That(_cache.Find(TwitchChatImage.Emote("25")), Is.Null);
+			Assert.That(_cache.Find(StreamChatImage.Emote("25")), Is.Null);
 		});
 	}
 
@@ -117,9 +118,9 @@ internal sealed class TwitchChatImageCacheTests
 		_png.CopyTo(oversized, 0);
 		_handler.Respond = _ => Ok(oversized, declaresLength);
 
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
-		Assert.That(_cache.Find(TwitchChatImage.Emote("25")), Is.Null);
+		Assert.That(_cache.Find(StreamChatImage.Emote("25")), Is.Null);
 	}
 
 	[Test]
@@ -132,22 +133,22 @@ internal sealed class TwitchChatImageCacheTests
 			return response;
 		};
 
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
-		Assert.That(_cache.Find(TwitchChatImage.Emote("25")), Is.Null);
+		Assert.That(_cache.Find(StreamChatImage.Emote("25")), Is.Null);
 	}
 
 	[Test]
 	public async Task A_failed_image_is_not_asked_for_again_for_ten_minutes()
 	{
 		_handler.Respond = _ => new HttpResponseMessage(HttpStatusCode.NotFound);
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 		var withinWindow = _handler.Requested.Count;
 
 		_time.Advance(TimeSpan.FromMinutes(10) + TimeSpan.FromSeconds(1));
-		await FetchAsync(TwitchChatImage.Emote("25"));
+		await FetchAsync(StreamChatImage.Emote("25"));
 
 		Assert.Multiple(() =>
 		{
@@ -159,13 +160,13 @@ internal sealed class TwitchChatImageCacheTests
 	[Test]
 	public async Task The_least_recently_used_image_is_evicted_and_removed_from_the_resource_store()
 	{
-		var first = TwitchChatImage.Emote("e0");
+		var first = StreamChatImage.Emote("e0");
 		await FetchAsync(first);
 		var firstId = _cache.Find(first)!.ResourceId;
 
 		for (var index = 1; index <= TwitchChatImageCache.MaxEntries; index++)
 		{
-			_cache.Request(TwitchChatImage.Emote("e" + index));
+			_cache.Request(StreamChatImage.Emote("e" + index));
 		}
 
 		await IdleAsync();
@@ -181,15 +182,15 @@ internal sealed class TwitchChatImageCacheTests
 	[Test]
 	public async Task An_image_still_shown_in_chat_is_never_evicted()
 	{
-		var shown = TwitchChatImage.Emote("e0");
-		var notShown = TwitchChatImage.Emote("e1");
+		var shown = StreamChatImage.Emote("e0");
+		var notShown = StreamChatImage.Emote("e1");
 		await FetchAsync(shown);
 		await FetchAsync(notShown);
 		_cache.Pin([shown]);
 
 		for (var index = 2; index <= TwitchChatImageCache.MaxEntries; index++)
 		{
-			_cache.Request(TwitchChatImage.Emote("e" + index));
+			_cache.Request(StreamChatImage.Emote("e" + index));
 		}
 
 		await IdleAsync();
@@ -204,11 +205,11 @@ internal sealed class TwitchChatImageCacheTests
 	[Test]
 	public async Task When_everything_cached_is_on_screen_new_images_are_not_fetched()
 	{
-		var shown = new List<TwitchChatImage>();
+		var shown = new List<StreamChatImage>();
 
 		for (var index = 0; index < TwitchChatImageCache.MaxEntries; index++)
 		{
-			shown.Add(TwitchChatImage.Emote("e" + index));
+			shown.Add(StreamChatImage.Emote("e" + index));
 			_cache.Request(shown[^1]);
 		}
 
@@ -216,17 +217,37 @@ internal sealed class TwitchChatImageCacheTests
 		_cache.Pin(shown);
 		var before = _handler.Requested.Count;
 
-		await FetchAsync(TwitchChatImage.Emote("extra"));
+		await FetchAsync(StreamChatImage.Emote("extra"));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_handler.Requested, Has.Count.EqualTo(before));
-			Assert.That(_cache.Find(TwitchChatImage.Emote("extra")), Is.Null);
+			Assert.That(_cache.Find(StreamChatImage.Emote("extra")), Is.Null);
 			Assert.That(shown.All(image => _cache.Find(image) is not null), Is.True);
 		});
 	}
 
-	private async Task FetchAsync(TwitchChatImage image)
+	[Test]
+	public async Task A_full_cache_stays_within_the_integrations_ui_resource_quota()
+	{
+		for (var index = 0; index <= TwitchChatImageCache.MaxEntries + 10; index++)
+		{
+			_cache.Request(StreamChatImage.Emote("e" + index));
+		}
+
+		await IdleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_cache.Count, Is.EqualTo(TwitchChatImageCache.MaxEntries));
+			Assert.That(TwitchChatImageCache.MaxEntries,
+				Is.LessThan(MacroDeck.Plugin.Protocol.Limits.ProtocolLimits.MaxUiResourcesPerPlugin));
+			Assert.That(TwitchChatImageCache.MaxCachedBytes,
+				Is.LessThan(MacroDeck.Plugin.Protocol.Limits.ProtocolLimits.MaxUiResourceBytesPerPlugin));
+		});
+	}
+
+	private async Task FetchAsync(StreamChatImage image)
 	{
 		_cache.Request(image);
 		await IdleAsync();

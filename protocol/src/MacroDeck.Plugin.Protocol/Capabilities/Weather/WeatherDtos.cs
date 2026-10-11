@@ -15,6 +15,19 @@ public sealed record WeatherDescribePayload
 	public required string ProviderName { get; init; }
 
 	public required IReadOnlyList<WeatherStationInstanceDto> Instances { get; init; }
+
+	/// <summary>Mirrors the SDK's <c>IWeatherProvider.DetailsAction</c>. Optional: absent from a plugin built
+	/// against an SDK that predates it, which then declares no default press, and ignored by a host that
+	/// predates it.</summary>
+	public WeatherDetailsActionDto? DetailsAction { get; init; }
+}
+
+/// <summary>Mirrors the SDK's <c>WeatherDetailsAction</c>.</summary>
+public sealed record WeatherDetailsActionDto
+{
+	public required string ActionId { get; init; }
+
+	public required string StationParameter { get; init; }
 }
 
 /// <summary>

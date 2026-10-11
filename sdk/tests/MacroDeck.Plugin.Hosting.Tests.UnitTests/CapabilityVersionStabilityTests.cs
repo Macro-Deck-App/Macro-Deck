@@ -59,6 +59,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.Messaging] = (1, 1),
 			[CapabilityKinds.VideoStreamProvider] = (1, 1),
 			[CapabilityKinds.Calendar] = (1, 1),
+			[CapabilityKinds.ConfigEntries] = (1, 1),
 			[CapabilityKinds.BatteryProvider] = (1, 1),
 		};
 
@@ -77,6 +78,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.Messaging,
 		CapabilityKinds.VideoStreamProvider,
 		CapabilityKinds.Calendar,
+		CapabilityKinds.ConfigEntries,
 		CapabilityKinds.BatteryProvider,
 	];
 
@@ -100,6 +102,20 @@ public class CapabilityVersionStabilityTests
 					$"version range for '{kind}'");
 			}
 		});
+	}
+
+	[Test]
+	public void A_plugin_without_a_config_entry_lifecycle_declares_no_config_entries_capability()
+	{
+		using var plugin = MacroDeckPlugin.CreatePlugin()
+			.RegisterIntegration(_ => new TestIntegration(new TestAction("do-something")))
+			.Build();
+
+		var kinds = plugin.Services.GetServices<ICapabilityHandler>()
+			.SelectMany(handler => handler.DeclareCapabilities())
+			.Select(capability => capability.Kind);
+
+		Assert.That(kinds, Does.Not.Contain(CapabilityKinds.ConfigEntries));
 	}
 
 	[Test]
@@ -128,6 +144,7 @@ public class CapabilityVersionStabilityTests
 			.RegisterIntegration(_ => new TestIssueIntegration(() =>
 				[new IntegrationIssue { Id = "i", Title = "Issue" }]))
 			.RegisterIntegration(_ => new TestVideoIntegration())
+			.RegisterIntegration(_ => new TestConfigEntriesIntegration())
 			.RegisterIntegration(_ => new TestBatteryIntegration());
 
 		if (withCalendar)

@@ -100,6 +100,13 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 		finally
 		{
 			await _initializer.ReleaseMessagingAsync(integrationId);
+
+			// A shutdown that precedes a re-initialisation keeps the integration's UI resources, as a plugin's
+			// survive one; only an integration left disabled releases them.
+			if (!_registry.IsEnabled(integrationId))
+			{
+				_initializer.ReleaseUiResources(integrationId);
+			}
 		}
 	}
 

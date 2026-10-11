@@ -1,6 +1,5 @@
 using System.Net;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Integrations.Steam.Widgets;
@@ -23,7 +22,7 @@ internal sealed class SteamArtworkCacheTests
 		_resources = new UiResourceStore();
 		_time = new FakeTimeProvider();
 		_handler = new StubHandler();
-		_cache = new SteamArtworkCache(new HttpClient(_handler), new BuiltInUiResourceRegistry("app.macro-deck.steam", _resources), _time);
+		_cache = new SteamArtworkCache(new HttpClient(_handler), new BuiltInUiResources("app.macro-deck.steam", _resources), _time);
 	}
 
 	[TearDown]
@@ -48,6 +47,24 @@ internal sealed class SteamArtworkCacheTests
 			Assert.That(_resources.TryGet(_cache.Find(730)!.ResourceId, out var content), Is.True);
 			Assert.That(content.MediaType, Is.EqualTo("image/jpeg"));
 		});
+	}
+
+	[Test]
+	public async Task After_the_integration_is_reenabled_with_a_new_registry_the_covers_are_registered_there()
+	{
+		_handler.Respond = _ => Ok(Jpeg);
+		var first = new BuiltInUiResources("app.macro-deck.steam", _resources);
+		using var cache = new SteamArtworkCache(new HttpClient(_handler, disposeHandler: false), first, _time);
+		cache.Track(730);
+		await CalendarTree.WaitForAsync(() => cache.Find(730) is not null, "no cover was fetched");
+
+		first.Release();
+		var second = new BuiltInUiResources("app.macro-deck.steam", _resources);
+		cache.UseResources(second);
+		cache.Track(730);
+
+		await CalendarTree.WaitForAsync(() => cache.Find(730) is not null, "the cover was not fetched again");
+		Assert.That(_resources.TryGet(cache.Find(730)!.ResourceId, out _), Is.True);
 	}
 
 	[Test]

@@ -7,7 +7,7 @@ namespace MacroDeckHost.Widgets.Weather;
 
 internal static class WeatherWidgetIcons
 {
-	internal const string OwnerId = "app.macro-deck.weather";
+	internal const string OwnerId = "app.macro-deck.widget-weather";
 
 	private static readonly string[] _iconNames =
 	[

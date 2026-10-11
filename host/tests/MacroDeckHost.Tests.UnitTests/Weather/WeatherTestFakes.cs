@@ -47,7 +47,9 @@ internal sealed class FakeWeatherProviderIntegration : IIntegration, IWeatherPro
 	public string Version => "1.0.0";
 	public string ProviderName { get; }
 	public bool IsInitialized => true;
-	public IReadOnlyList<IActionDefinition> Actions => [];
+	public IReadOnlyList<IActionDefinition> Actions { get; init; } = [];
+
+	public WeatherDetailsAction? DetailsAction { get; init; }
 
 	public string IconMimeType => "image/svg+xml";
 	public byte[] GetIcon() => [1, 2, 3];

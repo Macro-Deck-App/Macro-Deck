@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -6,11 +7,11 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.AdGuardHome;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.AdGuardHome.Actions;
+using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome;
 
@@ -19,7 +20,7 @@ namespace MacroDeckHost.Integrations.AdGuardHome;
 [MacroDeckIntegration]
 public sealed partial class AdGuardHomeIntegration
 	: IIntegration, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IWidgetTypeProvider,
-		IVariableRefreshSignalConsumer, IAdGuardHomeSinkConsumer, IAdGuardHomeActionTarget
+		IUiProvider, IConfigEntryLifecycle, IAdGuardHomeActionTarget
 {
 	public const string IntegrationId = AdGuardHomeWidgetType.OwnerId;
 
@@ -35,9 +36,11 @@ public sealed partial class AdGuardHomeIntegration
 	private readonly Func<AdGuardHomeConnectionSettings, IAdGuardHomeClient> _clientFactory;
 	private readonly TimeProvider _time;
 
+	private readonly AdGuardHomeHub _hub = new();
+	private readonly AdGuardHomeUiProvider _ui;
+	private readonly ConcurrentDictionary<Guid, string> _pendingKeys = new();
+
 	private IIntegrationContext? _context;
-	private IAdGuardHomeSink? _sink;
-	private IVariableRefreshSignal? _refreshSignal;
 	private volatile IReadOnlyList<AdGuardHomeInstance> _instances = [];
 
 	public AdGuardHomeIntegration()
@@ -50,6 +53,7 @@ public sealed partial class AdGuardHomeIntegration
 	{
 		_clientFactory = clientFactory;
 		_time = time;
+		_ui = new AdGuardHomeUiProvider(_hub, () => _context?.UiResources, time);
 		Actions = AdGuardHomeActions.Create(this);
 	}
 
@@ -82,26 +86,30 @@ public sealed partial class AdGuardHomeIntegration
 
 	public IReadOnlyList<AdGuardHomeSnapshot> Snapshots => [.. _instances.Select(instance => instance.Snapshot)];
 
+	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
+
+	internal IAdGuardHomeInstances Instances => _hub;
+
 	public byte[] GetIcon() => _icon;
 
 	public IConfigFlow CreateConfigFlow() => new AdGuardHomeConfigFlow(_clientFactory);
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
-	public void UseAdGuardHomeSink(IAdGuardHomeSink sink) => _sink = sink;
+	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		=> _ui.CreateSessionAsync(request, cancellationToken);
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		_context = context;
-		_sink?.UseExecutor(ExecuteAsync);
+		_hub.UseExecutor(ExecuteAsync);
 		await ReloadConfigurationsAsync(CancellationToken.None);
 		IsInitialized = true;
+		_hub.Announce();
 	}
 
 	public async Task ShutdownAsync()
 	{
 		IsInitialized = false;
-		_sink?.UseExecutor(null);
+		_hub.UseExecutor(null);
 		await ReplaceInstancesAsync([]);
 	}
 
@@ -311,15 +319,15 @@ public sealed partial class AdGuardHomeIntegration
 			return;
 		}
 
-		_sink?.Update(snapshot);
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
+		_hub.Update(snapshot);
+		RequestVariableRefresh();
 	}
 
 	private async Task ReplaceInstancesAsync(IReadOnlyList<AdGuardHomeInstance> instances)
 	{
 		var previous = _instances;
 		_instances = instances;
-		_sink?.Replace([.. instances.Select(instance => instance.Snapshot)]);
+		_hub.Replace([.. instances.Select(instance => instance.Snapshot)]);
 
 		foreach (var instance in previous.Where(instance => !instances.Contains(instance)))
 		{
@@ -331,7 +339,15 @@ public sealed partial class AdGuardHomeIntegration
 			instance.Start();
 		}
 
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
+		RequestVariableRefresh();
+	}
+
+	private void RequestVariableRefresh()
+	{
+		if (_context is { } context)
+		{
+			_ = context.Variables.RequestRefreshAsync();
+		}
 	}
 
 	private static async Task<AdGuardHomeConnectionSettings?> ReadSettingsAsync(
@@ -410,9 +426,8 @@ public sealed partial class AdGuardHomeIntegration
 	private static byte[] LoadIcon()
 	{
 		var assembly = typeof(AdGuardHomeIntegration).Assembly;
-		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("adguard-home-icon.svg", StringComparison.Ordinal));
-		using var stream = assembly.GetManifestResourceStream(name)!;
+		using var stream = assembly.GetManifestResourceStream(
+			$"{typeof(AdGuardHomeIntegration).Namespace}.Icons.{AdGuardHomeWidgetIcons.IconFolder}.logo.svg")!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

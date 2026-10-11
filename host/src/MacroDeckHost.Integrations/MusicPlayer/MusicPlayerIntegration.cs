@@ -16,7 +16,7 @@ public interface IMusicPlayerAlbumColorConsumer
 
 [MacroDeckIntegration]
 public sealed partial class MusicPlayerIntegration
-	: IIntegration, IVariableProvider, IMusicPlayerAlbumColorConsumer
+	: IIntegration, ISystemIntegration, IVariableProvider, IMusicPlayerAlbumColorConsumer
 {
 	public const string IntegrationId = "app.macro-deck.music-player";
 
@@ -39,6 +39,8 @@ public sealed partial class MusicPlayerIntegration
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
 	public bool IsInitialized => true;
+
+	public bool IsActive => true;
 
 	public bool VariablesDependOnConfiguration => true;
 

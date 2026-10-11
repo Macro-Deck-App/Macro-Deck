@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 
 namespace MacroDeckHost.Integrations.Twitch;
 

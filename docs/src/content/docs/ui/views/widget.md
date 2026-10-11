@@ -84,6 +84,7 @@ registration, the picker card and configuration. The same vocabulary also draws 
 | `data` | Its stored configuration, as JSON. |
 | `cornerRadius` | The tile's corner radius. |
 | `sample` | `true` when the picker asks for a representative sample. |
+| `culture` | The language Macro Deck is set to, for example `de` or `pt-BR`. Absent on a Macro Deck that predates it. |
 | `ghost` | `true` when drawing the drag ghost of a widget that is also drawn live. |
 
 The surface carries no size: a widget is resized on the deck without asking you. To lay a 2x1 or 1x2 tile
@@ -97,13 +98,45 @@ did.
 For a type that declares [standard appearance](/ui/views/widget-types/#standard-appearance),
 `UiWidgetAppearance.Read(data)` returns the background, label, colours and font the user or an action set.
 
+`UiWidgetSurface` in `MacroDeck.Ui.Widgets` reads these leniently, so a missing or malformed attribute
+reads as absent rather than throwing:
+
+| Member | Answers |
+| --- | --- |
+| `IsFor(surface, widgetType)` | Whether a `widget` or `preview` surface draws your widget type. |
+| `IsConfigurationFor(surface, widgetType)` | Whether a `config` surface is the `widget-config` entry point of your widget type. |
+| `Data(surface)` | The stored configuration (`data`, or `widgetData` on a configuration surface); an empty object when absent. |
+| `WidgetId(surface)` | The stored widget, or `null` for a preview or an unsaved widget. |
+| `IsSampleRequested(surface)` | Whether a `preview` asks for a picker sample. |
+| `Culture(surface)` | The language to write the widget's own text in, or `null` when the surface names none. |
+
+Labels and other localized text in your tree need no culture: each client resolves them in its reader's
+language. `culture` is for text the widget draws as content, such as the names and messages of a picker
+sample, which travel as literal text. Resolve those with your own catalog in that culture and fall back to
+your default language when it is absent.
+
+## Keeping content clear of the corner
+
+A tile is a rounded rectangle, and content laid out to its edge runs under the curve.
+`UiWidgetSafeArea.For(surface)` is the padding a tile keeps: what the tile's `cornerRadius` intrudes on its
+diagonal, but never less than `BreathingRoom`, the default gap between two tiles. A surface without a
+corner radius, such as a preview, uses `DefaultCornerRadius`. `LengthFor(cornerRadius)` returns the same
+inset as a `UiLength` for a gap or a size.
+
+```csharp
+var root = new UiStack
+{
+    Key = "root",
+    Padding = UiWidgetSafeArea.For(request.Surface),
+    Children = [/* ... */],
+};
+```
+
 ## Previews, samples and ghosts
 
 ```csharp
-var attributes = request.Surface.Attributes;
-var isSample = attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample)
-    && sample.ValueKind == JsonValueKind.True;
-var isGhost = attributes.TryGetValue(UiWidgetSurfaceAttributes.Ghost, out var ghost)
+var isSample = UiWidgetSurface.IsSampleRequested(request.Surface);
+var isGhost = request.Surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Ghost, out var ghost)
     && ghost.ValueKind == JsonValueKind.True;
 ```
 

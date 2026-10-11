@@ -2,6 +2,7 @@ using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Capabilities.BatteryProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
+using MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.FolderViewProvider;
@@ -160,6 +161,11 @@ internal static class MacroDeckServiceCollectionExtensions
 		if (typeof(IEventProvider).IsAssignableFrom(typeof(TIntegration)))
 		{
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, EventsCapabilityHandler>());
+		}
+
+		if (typeof(IConfigEntryLifecycle).IsAssignableFrom(typeof(TIntegration)))
+		{
+			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, ConfigEntriesCapabilityHandler>());
 		}
 
 		if (typeof(IIntegrationIssueProvider).IsAssignableFrom(typeof(TIntegration)))

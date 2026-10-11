@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Integrations.AdGuardHome;
 
 namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;

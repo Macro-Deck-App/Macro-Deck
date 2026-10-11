@@ -1,5 +1,5 @@
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
+using MacroDeckHost.Integrations.Streaming;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using MacroDeckHost.Integrations.Twitch.Actions;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeck.Localization;
@@ -10,6 +10,7 @@ using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
@@ -28,9 +29,7 @@ public sealed class TwitchIntegration
 		IIntegrationIssueProvider,
 		IMigrationProvider,
 		IWidgetTypeProvider,
-		IStreamChatSinkConsumer,
-		IStreamStatsSinkConsumer,
-		IStreamChatModerator,
+		IUiProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.twitch";
@@ -43,9 +42,13 @@ public sealed class TwitchIntegration
 
 	private readonly TwitchAccountManager _accounts;
 	private readonly TwitchChatModerator _moderator;
+	private readonly StreamPump _pump;
+	private readonly StreamStatsSource _stats;
+	private readonly StreamThumbnailCache _thumbnails;
+	private readonly TwitchChatImageCache? _ownedImages;
+	private readonly StreamWidgetsUiProvider _ui;
 
-	private IStreamChatSink? _chatSink;
-	private IStreamStatsSink? _statsSink;
+	private IIntegrationContext? _context;
 	private IVariableApi? _variables;
 	private IUserVariableApi? _userVariables;
 
@@ -54,10 +57,29 @@ public sealed class TwitchIntegration
 	{
 	}
 
-	internal TwitchIntegration(TwitchAccountManager accounts)
+	internal TwitchIntegration(TwitchAccountManager accounts,
+		IStreamChatImages? images = null,
+		TimeProvider? time = null)
 	{
+		var clock = time ?? TimeProvider.System;
+
 		_accounts = accounts;
 		_moderator = new TwitchChatModerator(() => _accounts);
+		_ownedImages = images is null ? new TwitchChatImageCache(() => _context?.UiResources, clock, _logger) : null;
+		Chat = new StreamChatHub(clock, _logger, images ?? _ownedImages);
+		_pump = new StreamPump(Chat);
+		_stats = new StreamStatsSource(ReadStats);
+		_thumbnails = new StreamThumbnailCache(TwitchStreamPlatform.Platform, () => _context?.UiResources, clock, _logger);
+		_ui = new StreamWidgetsUiProvider(TwitchStreamPlatform.Platform,
+			Chat,
+			images ?? _ownedImages,
+			_stats,
+			_thumbnails,
+			() => _context,
+			() => IsInitialized ? _moderator : null,
+			clock,
+			_logger);
+		_accounts.UseChatSink(Chat);
 		Actions = TwitchActions.Create(() => _accounts, () => _variables, userVariables: () => _userVariables);
 	}
 
@@ -100,21 +122,33 @@ public sealed class TwitchIntegration
 
 	internal TwitchAccountManager AccountManager => _accounts;
 
+	internal StreamChatHub Chat { get; }
+
+	internal IStreamStatsSource Stats => _stats;
+
+	internal IStreamChatModerator Moderator => _moderator;
+
+	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
+
 	public byte[] GetIcon() => _icon;
 
 	public IConfigFlow CreateConfigFlow() => new TwitchConfigFlow();
+
+	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		=> _ui.CreateSessionAsync(request, cancellationToken);
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		// Captured so an action built in the constructor can write its result variable later;
 		// ActionExecutionContext deliberately exposes no variable API.
+		_context = context;
 		_variables = context.Variables;
 		_userVariables = context.UserVariables;
 
-		_accounts.UseChatSink(_chatSink);
+		_pump.Start();
 		await _accounts.ReloadAsync(context.Config, new TwitchEventEmitter(context.Events));
-		_chatSink?.SetAccounts(_accounts.ChatAccounts());
-		_statsSink?.SetAccounts(_accounts.StatsAccounts());
+		Chat.SetAccounts(_accounts.ChatAccounts());
+		_stats.SetAccounts(_accounts.StatsAccounts());
 		_accounts.StartAll();
 		IsInitialized = true;
 	}
@@ -124,20 +158,13 @@ public sealed class TwitchIntegration
 		// Drains a token rotation that is still in flight. Losing it would leave the stored refresh
 		// token permanently dead, because Twitch already invalidated it when it issued the new one.
 		IsInitialized = false;
-		_chatSink?.SetAccounts([]);
-		_statsSink?.SetAccounts([]);
+		Chat.SetAccounts([]);
+		_stats.SetAccounts([]);
 		await _accounts.ShutdownAsync();
+		await _pump.StopAsync();
+		_ownedImages?.Clear();
+		_thumbnails.Clear();
 	}
-
-	public void UseStreamChatSink(IStreamChatSink sink) => _chatSink = sink;
-
-	public void UseStreamStatsSink(IStreamStatsSink sink) => _statsSink = sink;
-
-	public Task<ChatModerationResult> ModerateAsync(
-		string accountId,
-		ChatModerationRequest request,
-		CancellationToken cancellationToken)
-		=> _moderator.ModerateAsync(accountId, request, cancellationToken);
 
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
@@ -202,11 +229,26 @@ public sealed class TwitchIntegration
 					IssueResolutionFollowUp.StartConfigFlow)
 				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
 
-	public void Dispose() => _accounts.Dispose();
+	public void Dispose()
+	{
+		_accounts.Dispose();
+		_pump.Dispose();
+		Chat.Dispose();
+		_ownedImages?.Dispose();
+		_thumbnails.Dispose();
+	}
 
-	private static WidgetTypeDescriptor ChatWidgetType() => StreamPlatforms.Twitch.ChatWidgetDescriptor();
+	private static WidgetTypeDescriptor ChatWidgetType() => TwitchStreamPlatform.Platform.ChatWidgetDescriptor();
 
-	private static WidgetTypeDescriptor StatsWidgetType() => StreamPlatforms.Twitch.StatsWidgetDescriptor();
+	private static WidgetTypeDescriptor StatsWidgetType() => TwitchStreamPlatform.Platform.StatsWidgetDescriptor();
+
+	private object? ReadStats(StreamStatsAccount account, string name)
+	{
+		var connection = _accounts.Connections.FirstOrDefault(candidate =>
+			string.Equals(candidate.Account.UserId, account.AccountId, StringComparison.Ordinal));
+
+		return connection is null ? null : TwitchVariables.Read(connection.Account, connection.State, name);
+	}
 
 	private IReadOnlyList<ActionParameterOption> RewardOptions(string? accountId)
 	{
@@ -220,9 +262,8 @@ public sealed class TwitchIntegration
 	private static byte[] LoadIcon()
 	{
 		var assembly = typeof(TwitchIntegration).Assembly;
-		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("twitch-icon.svg", StringComparison.Ordinal));
-		using var stream = assembly.GetManifestResourceStream(name)!;
+		using var stream = assembly.GetManifestResourceStream(
+			$"{typeof(TwitchIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

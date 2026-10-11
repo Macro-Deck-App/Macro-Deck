@@ -1,9 +1,6 @@
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
@@ -25,9 +22,7 @@ internal static class IntegrationGatewayBinder
 		IVariableRefreshSignal refreshSignal,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		IStreamPlatformServices? streamPlatforms = null,
 		CalendarHostServices? calendarServices = null,
-		IAdGuardHomeSink? adGuardHomeSink = null,
 		IMusicPlayerAlbumColor? albumColor = null)
 	{
 		if (albumColor is not null && integration is IMusicPlayerAlbumColorConsumer albumColorConsumer)
@@ -35,26 +30,9 @@ internal static class IntegrationGatewayBinder
 			albumColorConsumer.UseAlbumColor(albumColor);
 		}
 
-		if (adGuardHomeSink is not null && integration is IAdGuardHomeSinkConsumer adGuardHomeConsumer)
-		{
-			adGuardHomeConsumer.UseAdGuardHomeSink(adGuardHomeSink);
-		}
-
 		if (calendarServices is not null && integration is ICalendarHostServicesConsumer calendarConsumer)
 		{
 			calendarConsumer.UseCalendarServices(calendarServices);
-		}
-
-		var platform = streamPlatforms?.Find(integration.Id);
-
-		if (platform is not null && integration is IStreamStatsSinkConsumer statsConsumer)
-		{
-			statsConsumer.UseStreamStatsSink(platform.StatsSink);
-		}
-
-		if (platform is not null && integration is IStreamChatSinkConsumer chatConsumer)
-		{
-			chatConsumer.UseStreamChatSink(platform.ChatSink);
 		}
 
 		if (knownAudioDevices is not null && integration is IKnownAudioDeviceStoreConsumer audioDeviceConsumer)

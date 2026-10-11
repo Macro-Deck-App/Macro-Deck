@@ -1,5 +1,5 @@
 using System.Globalization;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
@@ -130,7 +130,7 @@ internal sealed class TwitchChatModeratorTests
 	}
 
 	private Task<ChatModerationResult> Moderate(string accountId, ChatModerationRequest request)
-		=> ((IStreamChatModerator)_integration).ModerateAsync(accountId, request, CancellationToken.None);
+		=> _integration.Moderator.ModerateAsync(accountId, request, CancellationToken.None);
 
 	private void AddAccount(string userId, string login)
 		=> _config.AddEntry($"Twitch ({login})",

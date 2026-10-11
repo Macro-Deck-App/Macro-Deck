@@ -80,6 +80,7 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 		ScreenSaverProvider = new ScreenSaverProviderTestClient(this);
 		VideoStreamProvider = new VideoStreamProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
+		ConfigEntries = new ConfigEntriesTestClient(this);
 	}
 
 	/// <summary>The plugin's own service provider - the escape hatch for anything else this type does not surface.</summary>
@@ -145,6 +146,9 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 
 	/// <summary>The <c>issues</c> capability.</summary>
 	public IssuesTestClient Issues { get; }
+
+	/// <summary>The <c>config-entries</c> capability.</summary>
+	public ConfigEntriesTestClient ConfigEntries { get; }
 
 	/// <summary>
 	/// Builds a plugin with <paramref name="configure" />, substituting <see cref="Clock" /> and

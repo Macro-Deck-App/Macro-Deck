@@ -28,6 +28,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	private readonly IWidgetProviderAvailability _availability;
 	private readonly UnavailableWidgetSessionRecovery _recovery;
 	private readonly IColorReferenceResolver _colors;
+	private readonly IHostUiCulture? _culture;
 
 	public WidgetUiSessionOpener(
 		IFolderCache folderCache,
@@ -38,9 +39,11 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		IUiSessionBroker broker,
 		IWidgetProviderAvailability availability,
 		UnavailableWidgetSessionRecovery recovery,
-		IColorReferenceResolver colors)
+		IColorReferenceResolver colors,
+		IHostUiCulture? culture = null)
 	{
 		_colors = colors;
+		_culture = culture;
 		_availability = availability;
 		_recovery = recovery;
 		_folderCache = folderCache;
@@ -315,6 +318,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			[UiWidgetSurfaceAttributes.CornerRadius] = JsonSerializer.SerializeToElement(CornerRadiusOf(folder))
 		};
 
+		AddCulture(attributes);
+
 		if (ghost)
 		{
 			attributes[UiWidgetSurfaceAttributes.Ghost] = JsonSerializer.SerializeToElement(true);
@@ -354,6 +359,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			[UiWidgetSurfaceAttributes.Data] = _colors.ResolveData(data, variableScopeWidgetId)
 		};
 
+		AddCulture(attributes);
+
 		if (variableScopeWidgetId is { } scope)
 		{
 			attributes[UiWidgetSurfaceAttributes.VariableScopeWidgetId]
@@ -366,6 +373,14 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		}
 
 		return attributes;
+	}
+
+	private void AddCulture(Dictionary<string, JsonElement> attributes)
+	{
+		if (_culture?.Current is { Length: > 0 } culture)
+		{
+			attributes[UiWidgetSurfaceAttributes.Culture] = JsonSerializer.SerializeToElement(culture);
+		}
 	}
 
 	private static JsonElement ParseStoredData(string? json)

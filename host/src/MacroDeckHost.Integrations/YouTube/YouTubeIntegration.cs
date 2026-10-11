@@ -5,10 +5,11 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
+using MacroDeckHost.Integrations.Streaming;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using MacroDeckHost.Integrations.YouTube.Actions;
 using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Localization;
@@ -26,9 +27,7 @@ public sealed class YouTubeIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IWidgetTypeProvider,
-		IStreamChatSinkConsumer,
-		IStreamStatsSinkConsumer,
-		IStreamChatModerator,
+		IUiProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.youtube";
@@ -43,9 +42,12 @@ public sealed class YouTubeIntegration
 	private readonly YouTubeChatModerator _moderator;
 	private readonly Func<IConfigFlow> _configFlowFactory;
 	private readonly TimeProvider _time;
+	private readonly StreamPump _pump;
+	private readonly StreamStatsSource _stats;
+	private readonly StreamThumbnailCache _thumbnails;
+	private readonly StreamWidgetsUiProvider _ui;
 
-	private IStreamChatSink? _chatSink;
-	private IStreamStatsSink? _statsSink;
+	private IIntegrationContext? _context;
 
 	public YouTubeIntegration()
 		: this(new YouTubeAccountManager(() => new YouTubeOAuthClient(), _logger),
@@ -63,6 +65,20 @@ public sealed class YouTubeIntegration
 		_configFlowFactory = configFlowFactory ?? (() => new YouTubeConfigFlow());
 		_time = time ?? TimeProvider.System;
 		_moderator = new YouTubeChatModerator(() => _accounts);
+		Chat = new StreamChatHub(_time, _logger);
+		_pump = new StreamPump(Chat);
+		_stats = new StreamStatsSource(ReadStats);
+		_thumbnails = new StreamThumbnailCache(YouTubeStreamPlatform.Platform, () => _context?.UiResources, _time, _logger);
+		_ui = new StreamWidgetsUiProvider(YouTubeStreamPlatform.Platform,
+			Chat,
+			null,
+			_stats,
+			_thumbnails,
+			() => _context,
+			() => IsInitialized ? _moderator : null,
+			_time,
+			_logger);
+		_accounts.UseChatSink(Chat);
 		Actions = YouTubeActions.Create(() => _accounts);
 	}
 
@@ -103,16 +119,26 @@ public sealed class YouTubeIntegration
 
 	internal YouTubeAccountManager AccountManager => _accounts;
 
+	internal StreamChatHub Chat { get; }
+
+	internal IStreamStatsSource Stats => _stats;
+
+	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
+
 	public byte[] GetIcon() => _icon;
 
 	public IConfigFlow CreateConfigFlow() => _configFlowFactory();
 
+	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		=> _ui.CreateSessionAsync(request, cancellationToken);
+
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
-		_accounts.UseChatSink(_chatSink);
+		_context = context;
+		_pump.Start();
 		await _accounts.ReloadAsync(context.Config, new YouTubeEventEmitter(context.Events));
-		_chatSink?.SetAccounts(_accounts.ChatAccounts());
-		_statsSink?.SetAccounts(_accounts.StatsAccounts());
+		Chat.SetAccounts(_accounts.ChatAccounts());
+		_stats.SetAccounts(_accounts.StatsAccounts());
 		_accounts.StartAll();
 		IsInitialized = true;
 	}
@@ -120,20 +146,12 @@ public sealed class YouTubeIntegration
 	public async Task ShutdownAsync()
 	{
 		IsInitialized = false;
-		_chatSink?.SetAccounts([]);
-		_statsSink?.SetAccounts([]);
+		Chat.SetAccounts([]);
+		_stats.SetAccounts([]);
 		await _accounts.ShutdownAsync();
+		await _pump.StopAsync();
+		_thumbnails.Clear();
 	}
-
-	public void UseStreamChatSink(IStreamChatSink sink) => _chatSink = sink;
-
-	public void UseStreamStatsSink(IStreamStatsSink sink) => _statsSink = sink;
-
-	public Task<ChatModerationResult> ModerateAsync(
-		string accountId,
-		ChatModerationRequest request,
-		CancellationToken cancellationToken)
-		=> _moderator.ModerateAsync(accountId, request, cancellationToken);
 
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
@@ -148,7 +166,11 @@ public sealed class YouTubeIntegration
 	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
 		=> _accounts.Connections.Count == 0
 			? []
-			: [StreamPlatforms.YouTube.ChatWidgetDescriptor(), StreamPlatforms.YouTube.StatsWidgetDescriptor()];
+			:
+			[
+				YouTubeStreamPlatform.Platform.ChatWidgetDescriptor(),
+				YouTubeStreamPlatform.Platform.StatsWidgetDescriptor()
+			];
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -195,14 +217,29 @@ public sealed class YouTubeIntegration
 				IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
 
-	public void Dispose() => _accounts.Dispose();
+	public void Dispose()
+	{
+		_accounts.Dispose();
+		_pump.Dispose();
+		Chat.Dispose();
+		_thumbnails.Dispose();
+	}
+
+	private object? ReadStats(StreamStatsAccount account, string name)
+	{
+		var connection = _accounts.Connections.FirstOrDefault(candidate =>
+			string.Equals(candidate.Account.ChannelId, account.AccountId, StringComparison.Ordinal));
+
+		return connection is null
+			? null
+			: YouTubeVariables.Read(connection.Account, connection.State, name, _time.GetUtcNow());
+	}
 
 	private static byte[] LoadIcon()
 	{
 		var assembly = typeof(YouTubeIntegration).Assembly;
-		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith(".YouTube.youtube-icon.svg", StringComparison.Ordinal));
-		using var stream = assembly.GetManifestResourceStream(name)!;
+		using var stream = assembly.GetManifestResourceStream(
+			$"{typeof(YouTubeIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
+using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk.Widgets;
 
@@ -44,6 +45,31 @@ internal sealed class RemoteWidgetApi(
 			HostOperations.Widgets.InvalidateIcon,
 			new WidgetsInvalidateIconArguments { ActionId = actionId },
 			cancellationToken);
+
+	public async Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(widgetId);
+
+		JsonElement? result;
+		try
+		{
+			result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Widgets,
+					HostOperations.Widgets.GetData,
+					new WidgetsGetDataArguments { WidgetId = widgetId },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception) when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+		{
+			// A Macro Deck that predates the operation: the documented answer is "not known".
+			return null;
+		}
+
+		return result?.Deserialize<WidgetDataDto?>(PluginProtocolJson.Options) is { } data
+			? new WidgetDataSnapshot(data.WidgetId, data.WidgetTypeId, data.Data.Clone())
+			: null;
+	}
 
 	private static WidgetsApplyArgumentsV1 ToV1(WidgetAppearanceRequest request)
 		=> new()

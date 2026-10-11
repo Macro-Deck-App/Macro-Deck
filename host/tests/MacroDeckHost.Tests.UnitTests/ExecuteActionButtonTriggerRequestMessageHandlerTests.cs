@@ -338,7 +338,10 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			integrations.Add(new FakeIntegration { Id = ProviderId, Actions = [providerAction] });
 		}
 
-		var defaults = new WidgetDefaultShortPress(() => registry, integrations, TestLocalization.Resolver);
+		var defaults = new WidgetDefaultShortPress(() => registry,
+			integrations,
+			new MacroDeckHost.Application.Weather.WeatherRegistry(integrations, Serilog.Core.Logger.None),
+			TestLocalization.Resolver);
 		var triggers = CreateTriggerService(_coordinator, new NoOpActionButtonStateService(), defaults);
 
 		return new ExecuteActionButtonTriggerRequestMessageHandler(_folders,

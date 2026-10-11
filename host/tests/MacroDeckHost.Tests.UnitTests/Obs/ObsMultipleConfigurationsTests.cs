@@ -146,27 +146,27 @@ internal sealed class ObsMultipleConfigurationsTests
 	[Test]
 	public void Variable_identities_are_collision_safe_and_definitions_survive_rename()
 	{
-		var main = ObsConfigurationIdentityAllocator.Allocate("Main OBS",
+		var main = ConfigurationIdentityAllocator.Allocate("Main OBS",
 			new HashSet<string>(),
 			suffixFactory: () => 1234)!;
-		var collision = ObsConfigurationIdentityAllocator.Allocate("main_obs",
-			new HashSet<string> { main.Key },
+		var collision = ConfigurationIdentityAllocator.Allocate("main_obs",
+			new HashSet<string> { main },
 			suffixFactory: () => 5678)!;
-		var empty = ObsConfigurationIdentityAllocator.Allocate("📺", new HashSet<string>(), suffixFactory: () => 2468)!;
-		var renamed = ObsConfigurationIdentityAllocator.Allocate("Home!",
+		var empty = ConfigurationIdentityAllocator.Allocate("📺", new HashSet<string>(), suffixFactory: () => 2468)!;
+		var renamed = ConfigurationIdentityAllocator.Allocate("Home!",
 			new HashSet<string>(),
-			main.Key,
+			main,
 			suffixFactory: () => 1357)!;
 		var entryId = Guid.NewGuid();
-		var before = ObsVariables.Declare(main.Key, entryId);
-		var after = ObsVariables.Declare(renamed.Key, entryId);
+		var before = ObsVariables.Declare(main, entryId);
+		var after = ObsVariables.Declare(renamed, entryId);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(collision.Key, Is.Not.EqualTo(main.Key));
-			Assert.That(collision.Key, Does.StartWith("main_obs_"));
-			Assert.That(empty.Key, Does.StartWith("configuration_"));
-			Assert.That(renamed.Key, Is.Not.EqualTo(main.Key));
+			Assert.That(collision, Is.Not.EqualTo(main));
+			Assert.That(collision, Does.StartWith("main_obs_"));
+			Assert.That(empty, Does.StartWith("configuration_"));
+			Assert.That(renamed, Is.Not.EqualTo(main));
 			Assert.That(before, Has.Count.EqualTo(24));
 			Assert.That(before.Select(variable => variable.Name), Is.Unique);
 			Assert.That(after.Select(variable => variable.Id),

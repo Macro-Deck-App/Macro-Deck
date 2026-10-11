@@ -75,7 +75,7 @@ internal sealed class UiCapabilityHandler : ICapabilityHandler, IAsyncDisposable
 				ServesConfigUiTree: true
 			};
 		_configFlowSessions = configFlowSessions;
-		_sessions = new UiSessionStore(hostInvoker, logger);
+		_sessions = new UiSessionStore(hostInvoker, logger, modalResults);
 		_modalResults = modalResults;
 		_notificationResults = notificationResults ?? new NotificationResultStore();
 

@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The twenty-one `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `battery-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The twenty-two `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -256,6 +256,22 @@ An account id the plugin does not know is `CAPABILITY_UNAVAILABLE`, and a failed
 
 The reply caps are fixed in `ProtocolLimits` rather than advertised, and `MacroDeck.Plugin.Hosting` applies them for you: `maxCalendarReplyBytes` (192 KiB) bounds an `events` or `event` reply, and an `events` reply that would exceed it drops its latest events and sets `truncated`. Titles, calendar names and participant names and emails are cut to `maxCalendarTitleLength` (256), a location to `maxCalendarLocationLength` (512) and a description to `maxCalendarDescriptionLength` (16 KiB); a meeting URL longer than `maxCalendarMeetingUrlLength` (2048) is dropped, because a cut URL would not work, and an event carries at most `maxCalendarParticipants` (100) participants. See [Calendars](/features/calendars/) and `MacroDeck.Plugin.Protocol.Capabilities.Calendar`.
 
+#### `config-entries`
+
+Provider-shaped: one capability at the local id `provider`. The host invokes it while it stores the plugin's configuration entries, one change at a time: `prepare`, then after storing `reload` and `synchronize`, and `release` last whether or not the entry was stored. An entry travels as `id`, `title`, `createdAt` and `values`; a secret field holds the reference to the encrypted value.
+
+| Operation | Arguments | Result | Meaning |
+| --- | --- | --- | --- |
+| `describe` | none | none | Confirms the provider exists. |
+| `prepare` | `entryId`, `title`, `values`, `existing` (nullable), `siblings`, `titleChanged` | `success`, `values` (nullable), `error`, `reservedVariables` | Checks and adjusts an entry about to be stored. `values` replaces the stored values when present. `reservedVariables` (`name`, `definitionId`, `type`) are global variable names the host holds for the entry until `release`; a name another integration's variable or preparation holds refuses the entry. |
+| `status` | `entry` | `status` | A `ConfigEntryStatus` member name; a name the host does not know reads as `Ready`. |
+| `usable` | `entry` | `usable` | Whether the entry can be used as stored. |
+| `reload` | none | `reloaded` | Applies the stored change in the running plugin. `false` makes the host re-initialize the integration. |
+| `synchronize` | `entries` | none | Every stored entry, after each change. |
+| `release` | `entryId` | none | The change the preparation was for has ended. |
+
+A failed or timed-out invoke counts as the default: the entry is stored as the flow completed it, the entry reads `Ready` and usable, and the integration is re-initialized. See [Taking part in storing an entry](/features/setup-flows/#taking-part-in-storing-an-entry) and `MacroDeck.Plugin.Protocol.Capabilities.ConfigEntries`.
+
 ### Host callbacks
 
 ```json
@@ -287,8 +303,9 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | --- | --- |
 | `action-interactions` | `show-modal` answers with a modal id as soon as the modal opens; the user's answer arrives later as a `ui`/`modal.result` `capability.invoke` naming that modal. Exactly one result per modal. |
 | `notifications` | `show` answers with the notification id as soon as it is open; how it ended arrives later as a `ui`/`notification.result` `capability.invoke` (`notificationId`, `closeReason`, `actionId`, `clientId`, `values`), exactly once per notification. `update` and `close` name the id and only reach the plugin's own notifications. A result the plugin could not take while detached is sent after it reattaches. `notify` and `dismiss` are unchanged - see [Notifications](/features/notifications/). |
-| `widgets` | Payload differs by protocol major - see below. |
-| `ui` | Not charged to the per-plugin callback throttle. `snapshot`, `patch` and `fault` are bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`; `reload` ends its session, and one for a session that already ended is ignored; `register-resource`, `remove-resource` and `register-music-player-artwork` have their own per-plugin rate limit, and `register-music-player-artwork` a tighter one on top. |
+| `widgets` | The `apply` payload differs by protocol major - see below. `get-data` (`widgetId`) answers `widgetId`, `widgetTypeId` and the stored `data` of a widget whose type the plugin registered, and no result for any other widget. |
+| `ui` | Not charged to the per-plugin callback throttle, except `origin.report-failure` and `origin.show-modal`, which put something on a user's screen. `snapshot`, `patch` and `fault` are bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`; `reload` ends its session, and one for a session that already ended is ignored; `register-resource`, `remove-resource` and `register-music-player-artwork` have their own per-plugin rate limit, and `register-music-player-artwork` a tighter one on top. |
+| `variables` | `refresh` takes no arguments and makes the host read every declared variable of the plugin on its next poll; requests that arrive while one is pending are merged. A host that predates it answers `CAPABILITY_UNSUPPORTED`, which the SDK treats as a no-op. `history.open` (`name`, `capacity`) opens a window on one of the plugin's own global variables and answers its `windowId`; a name that is not the plugin's own answers `INVALID_PAYLOAD`, and too many open windows `CAPABILITY_UNAVAILABLE`. `history.read` (`windowId`) answers the `values`, oldest first, and is not charged to the per-plugin callback throttle; `history.close` (`windowId`) closes it. A plugin's windows end with its connection. |
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
 | `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
@@ -322,13 +339,15 @@ For a major `1` session the host translates rather than refuses: `off`/`on` map 
 | `reload` | `sessionId` | Your code for this session changed during development. The host ends the session without reporting a fault, and every client showing it opens it again, which asks your provider for a new session. The SDK sends it when .NET Hot Reload updates the plugin. A host that predates it answers `CAPABILITY_UNSUPPORTED`; the SDK then sends `fault` instead, which also makes clients reopen. |
 | `register-resource` | `name`, `contentHash`, `mediaType` | Registers bytes as a UI resource under a plugin-chosen name and answers a `resource` (`resourceId`, `contentHash`, `mediaType`, `byteLength`), or `uploadRequired: true` when the host does not hold those bytes for this plugin yet. |
 | `remove-resource` | `name` | Removes the named resource. An unknown name is not an error. |
-| `register-music-player-artwork` | `name`, `instanceId`, `artworkId` | Registers the artwork of any music player, named by its qualified instance id (`integrationId::instanceId`) and artwork id, as a UI resource under a plugin-chosen name. Needs no upload. Answers a `resource` like `register-resource`, or an empty result with no `resource` when the host knows no such player or artwork. |
+| `register-music-player-artwork` | `name`, `instanceId`, `artworkId`, optional `maxSize` | Registers the artwork of any music player, named by its qualified instance id (`integrationId::instanceId`) and artwork id, as a UI resource under a plugin-chosen name. With `maxSize`, the smallest copy the host keeps that is at least that many pixels on its longer side (128 or 256), or the full-size cover when none is. Needs no upload. Answers a `resource` like `register-resource`, or an empty result with no `resource` when the host knows no such player or artwork. |
+| `origin.report-failure` | `sessionId`, `clientId`, `eventName`, `message` | Shows `message` (localized text) on the client that raised an event in the session, as a failed action is shown. Answers `delivered`, `false` when the session is not the plugin's or the client is no longer attached to it. |
+| `origin.show-modal` | `sessionId`, `clientId`, `viewId`, `title`, `data`, `awaitResult` | Opens one of the plugin's dialogs on that client, under the same condition. Answers `opened` and `modalId`; with `awaitResult` the answer arrives later as a `ui`/`modal.result` `capability.invoke`, exactly as for `action-interactions`/`show-modal`. |
 
 `tree` and `patch` are opaque JSON: bounded, then forwarded byte-for-byte (unknown members, member order, number formatting survive). A refused snapshot or patch is an error on its own `host.result`: `PAYLOAD_TOO_LARGE`, `RATE_LIMITED`, `INVALID_PAYLOAD`, `SESSION_NOT_FOUND`. See [Serving a view](/ui/views/sessions/).
 
 To register a resource, call `register-resource` first. On `uploadRequired`, send the bytes as an `asset.*` upload of kind `ui-resource` with the same media type, then call `register-resource` once more; a second `uploadRequired` means the upload was lost, not that you should loop. Registering a name again replaces its bytes: the `resourceId` stays, the `contentHash` changes. Registering unchanged bytes under the same name answers the existing handle without an upload. Resources belong to the plugin session: they survive a resumed session, are released when the session ends or is replaced, and are gone after the host restarts. A refused registration is `INVALID_PAYLOAD` (name, media type, or a type that differs from the upload's), `UI_RESOURCE_QUOTA_EXCEEDED` (`maxUiResourceBytesPerPlugin` or `maxUiResourcesPerPlugin`; what the name held is unchanged), `RATE_LIMITED`, or `SESSION_NOT_FOUND` from a session that has been replaced. A host that predates the operations answers `CAPABILITY_UNSUPPORTED` before any bytes are sent. See [Resources](/ui/reference/resources/#registering-your-own-images).
 
-`register-music-player-artwork` registers the artwork with the same rules as `register-resource`: the resource belongs to the plugin session, counts against `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin`, and registering a name again replaces it. The host may re-encode the image, so `mediaType` can differ from the player's. A refusal is `INVALID_PAYLOAD` (name, an `instanceId` or `artworkId` empty or over 512 characters, or artwork of a media type a UI resource cannot have; not retryable), `ASSET_TOO_LARGE` (artwork over `maxUiResourceBytes`), `UI_RESOURCE_QUOTA_EXCEEDED`, `RATE_LIMITED` (also when the plugin already waits on four lookups), `TIMEOUT` (the player did not answer within 20 seconds; retryable) or `SESSION_NOT_FOUND`. The host answers it off the session's dispatch loop, so the plugin's other callbacks are served while a slow player is asked. A host that predates the operation answers `CAPABILITY_UNSUPPORTED`.
+`register-music-player-artwork` registers the artwork with the same rules as `register-resource`: the resource belongs to the plugin session, counts against `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin`, and registering a name again replaces it. The host may re-encode the image, so `mediaType` can differ from the player's. A refusal is `INVALID_PAYLOAD` (name, an `instanceId` or `artworkId` empty or over 512 characters, a `maxSize` that is not positive, or artwork of a media type a UI resource cannot have; not retryable), `ASSET_TOO_LARGE` (artwork over `maxUiResourceBytes`), `UI_RESOURCE_QUOTA_EXCEEDED`, `RATE_LIMITED` (also when the plugin already waits on four lookups), `TIMEOUT` (the player did not answer within 20 seconds; retryable) or `SESSION_NOT_FOUND`. The host answers it off the session's dispatch loop, so the plugin's other callbacks are served while a slow player is asked. A host that predates the operation answers `CAPABILITY_UNSUPPORTED`; one that predates `maxSize` ignores it and registers the full-size cover, at most 640 pixels on its longer side.
 
 #### `icon-packs`
 
@@ -836,7 +855,7 @@ Advertised at runtime in the protocol descriptor and again in the session respon
 | `maxUiNodesPerTree` | 2000 |
 | `maxUiUpdatesPerSecond` / `maxUiUpdateBurst` | 30 / 90 |
 | `maxUiResourceBytes` | 2 MiB |
-| `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | 16 MiB / 256 |
+| `maxUiResourceBytesPerPlugin` / `maxUiResourcesPerPlugin` | 48 MiB / 1024 |
 | `maxUiAttachmentsPerSession` | 16 |
 | `maxUiSessionsPerProvider` | 8 |
 
