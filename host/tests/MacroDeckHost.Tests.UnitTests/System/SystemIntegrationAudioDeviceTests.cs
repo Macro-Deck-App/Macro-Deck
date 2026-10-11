@@ -136,6 +136,137 @@ public class SystemIntegrationAudioDeviceTests
 	}
 
 	[Test]
+	public async Task Every_mute_variable_accepts_writes()
+	{
+		var integration = await StartAsync(VolumeWith(_speakers, _microphone));
+
+		var mutes = integration.Variables
+			.Where(variable => variable.Name is "system_muted" or "system_input_muted" ||
+				variable.Name is { } name &&
+				name.StartsWith("system_audio_", StringComparison.Ordinal) &&
+				name.EndsWith("_muted", StringComparison.Ordinal))
+			.ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(mutes.Select(variable => variable.Name),
+				Is.EquivalentTo(new[]
+				{
+					"system_muted",
+					"system_input_muted",
+					"system_audio_output_macbook_pro_speakers_muted",
+					"system_audio_input_macbook_pro_microphone_muted"
+				}));
+			Assert.That(mutes.Select(variable => variable.Write), Has.All.Not.Null);
+		});
+	}
+
+	[Test]
+	public async Task Writing_the_default_mute_variables_mutes_and_unmutes_the_default_devices()
+	{
+		var volume = VolumeWith(_speakers, _microphone);
+		volume.Set(AudioTarget.DefaultOutput, 0.5f, false);
+		volume.Set(AudioTarget.DefaultInput, 0.5f, true);
+		var integration = await StartAsync(volume);
+
+		var output = await integration.SetValueAsync("system-muted", true);
+		var input = await integration.SetValueAsync("system-input-muted", false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(output.Status, Is.EqualTo(VariableWriteStatus.Applied));
+			Assert.That(input.Status, Is.EqualTo(VariableWriteStatus.Applied));
+			Assert.That(volume.MutedOf(AudioTarget.DefaultOutput), Is.True);
+			Assert.That(volume.MutedOf(AudioTarget.DefaultInput), Is.False);
+			Assert.That(volume.VolumeOf(AudioTarget.DefaultOutput), Is.EqualTo(0.5f));
+		});
+	}
+
+	[Test]
+	public async Task Writing_a_device_mute_variable_mutes_that_device_only()
+	{
+		var volume = VolumeWith(_speakers, _headset);
+		var headset = new AudioTarget(AudioFlow.Output, _headset.Id);
+		var speakers = new AudioTarget(AudioFlow.Output, _speakers.Id);
+		volume.Set(AudioTarget.DefaultOutput, 0.5f, false);
+		volume.Set(speakers, 0.5f, false);
+		volume.Set(headset, 0.5f, false);
+		var integration = await StartAsync(volume);
+
+		var result = await integration.SetValueAsync(IdOf(integration, "system_audio_output_arctis_7_muted"), "True");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Applied));
+			Assert.That(volume.MutedOf(headset), Is.True);
+			Assert.That(volume.MutedOf(speakers), Is.False);
+			Assert.That(volume.MutedOf(AudioTarget.DefaultOutput), Is.False);
+			Assert.That(volume.VolumeOf(headset), Is.EqualTo(0.5f));
+		});
+	}
+
+	[Test]
+	public async Task Writing_a_device_volume_leaves_its_mute_alone()
+	{
+		var volume = VolumeWith(_microphone);
+		var microphone = new AudioTarget(AudioFlow.Input, _microphone.Id);
+		volume.Set(microphone, 0.5f, true);
+		var integration = await StartAsync(volume);
+
+		var result = await integration.SetValueAsync(
+			IdOf(integration, "system_audio_input_macbook_pro_microphone_volume_percent"),
+			20);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Applied));
+			Assert.That(volume.VolumeOf(microphone)!.Value, Is.EqualTo(0.2f).Within(0.0001));
+			Assert.That(volume.MutedOf(microphone), Is.True);
+		});
+	}
+
+	[TestCase("yes")]
+	[TestCase("1")]
+	[TestCase(1)]
+	[TestCase(null)]
+	public async Task A_mute_write_that_is_not_true_or_false_is_refused(object? value)
+	{
+		var volume = VolumeWith(_microphone);
+		volume.Set(AudioTarget.DefaultInput, 0.5f, true);
+		var integration = await StartAsync(volume);
+
+		var result = await integration.SetValueAsync("system-input-muted", value);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.InvalidValue));
+			Assert.That(volume.MutedOf(AudioTarget.DefaultInput), Is.True);
+		});
+	}
+
+	[Test]
+	public async Task A_mute_write_the_system_cannot_apply_is_unavailable()
+	{
+		var volume = VolumeWith(_speakers);
+		volume.SetsSucceed = false;
+		var integration = await StartAsync(volume);
+
+		var result = await integration.SetValueAsync("system-muted", true);
+
+		Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
+	}
+
+	[Test]
+	public async Task A_mute_write_without_volume_support_is_unavailable()
+	{
+		var integration = await StartAsync(new FakeVolumeService(supported: false));
+
+		var result = await integration.SetValueAsync("system-muted", true);
+
+		Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
+	}
+
+	[Test]
 	public async Task The_existing_default_output_variables_are_unchanged()
 	{
 		var volume = VolumeWith(_speakers);
@@ -209,12 +340,14 @@ public class SystemIntegrationAudioDeviceTests
 
 		var reading = await integration.ReadAsync(id);
 		var write = await integration.SetValueAsync(id, 50);
+		var muteWrite = await integration.SetValueAsync(IdOf(integration, "system_audio_output_arctis_7_muted"), true);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(integration.Variables.Select(v => v.ResolvedId), Does.Contain(id));
 			Assert.That(reading.Value, Is.Null);
 			Assert.That(write.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
+			Assert.That(muteWrite.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
 		});
 	}
 

@@ -55,7 +55,8 @@ internal static partial class AudioDeviceVariables
 				Id = MutedId(device),
 				DisplayName = output
 					? AppStrings.Integrations.System.Variables.DeviceOutputMuted(device: device.Name)
-					: AppStrings.Integrations.System.Variables.DeviceInputMuted(device: device.Name)
+					: AppStrings.Integrations.System.Variables.DeviceInputMuted(device: device.Name),
+				Write = new VariableWriteCapability()
 			};
 	}
 
