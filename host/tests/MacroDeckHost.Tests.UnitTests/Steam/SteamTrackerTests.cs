@@ -1,5 +1,4 @@
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Steam;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 

@@ -84,7 +84,6 @@ using MacroDeckHost.Infrastructure.Twitch;
 using MacroDeckHost.Widgets.AdGuardHome;
 using MacroDeckHost.Widgets.Calendar;
 using MacroDeckHost.Widgets.Jellyfin;
-using MacroDeckHost.Widgets.Steam;
 using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
@@ -372,11 +371,6 @@ public class Startup
 		services.AddSingleton<IAdGuardHomeInstances>(sp => sp.GetRequiredService<AdGuardHomeHub>());
 		services.AddSingleton<IAdGuardHomeSink>(sp => sp.GetRequiredService<AdGuardHomeHub>());
 		services.AddSingleton<IBuiltInIntegrationUiProvider, AdGuardHomeUiProvider>();
-		services.AddSingleton(provider => new SteamArtworkCache(provider.GetRequiredService<IHttpUserAgentSource>(),
-			provider.GetRequiredService<IUiResourceStore>(),
-			provider.GetRequiredService<TimeProvider>(),
-			provider.GetRequiredService<Serilog.ILogger>()));
-		services.AddSingleton<IBuiltInIntegrationUiProvider, SteamUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());

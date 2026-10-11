@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
@@ -185,7 +186,10 @@ public sealed class IntegrationInitializer
 				? UnavailableNotificationService.Instance
 				: new OwnedNotificationService(
 					new NotificationOwner(NotificationSourceCategory.BuiltInIntegration, integration.Id, integrationName),
-					_notificationManager));
+					_notificationManager),
+			scope.ServiceProvider.GetService<IUiResourceStore>() is { } resourceStore
+				? new BuiltInUiResourceRegistry(integration.Id, resourceStore)
+				: null);
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a

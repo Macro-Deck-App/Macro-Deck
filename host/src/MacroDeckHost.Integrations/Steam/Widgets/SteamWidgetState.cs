@@ -1,9 +1,8 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Application.Steam;
 
-namespace MacroDeckHost.Widgets.Steam;
+namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal enum SteamWidgetStatus
 {

@@ -5,10 +5,11 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.Steam;
-using MacroDeckHost.Application.Variables;
+using MacroDeck.Ui.Model.Resources;
+using MacroDeckHost.Integrations.Steam.Widgets;
 using MacroDeckHost.Integrations.Steam.Actions;
 using MacroDeckHost.Integrations.System.Application;
 using Serilog;
@@ -17,9 +18,9 @@ using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam;
 namespace MacroDeckHost.Integrations.Steam;
 
 [MacroDeckIntegration(EnabledByDefault = false)]
-public sealed class SteamIntegration
+public sealed partial class SteamIntegration
 	: IIntegration, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IWidgetTypeProvider,
-		IVariableRefreshSignalConsumer, IIntegrationIssueProvider, ISteamSource, IDisposable
+		IIntegrationIssueProvider, IUiProvider, ISteamSource, IDisposable
 {
 	public const string IntegrationId = SteamWidgetType.OwnerId;
 
@@ -39,9 +40,10 @@ public sealed class SteamIntegration
 	private readonly SteamLauncher _launcher;
 	private readonly TimeProvider _time;
 
-	private IVariableRefreshSignal? _refreshSignal;
 	private SteamSnapshot _published = SteamSnapshot.Empty;
 	private SteamTracker? _tracker;
+	private SteamArtworkCache? _artwork;
+	private UiResource? _logo;
 	private List<SteamAccountConfig> _accounts = [];
 	private CancellationTokenSource? _cts;
 	private Task[] _loops = [];
@@ -100,11 +102,11 @@ public sealed class SteamIntegration
 
 	public SteamSnapshot Snapshot => _tracker?.Snapshot ?? SteamSnapshot.Empty;
 
+	internal SteamArtworkCache? Artwork => _artwork;
+
 	public byte[] GetIcon() => _icon;
 
 	public IConfigFlow CreateConfigFlow() => new SteamConfigFlow(_clientFactory);
-
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -140,6 +142,8 @@ public sealed class SteamIntegration
 		}
 
 		_accounts = accounts;
+		_artwork ??= new SteamArtworkCache(context.UiResources, _time);
+		_logo = await RegisterLogoAsync(context.UiResources);
 		var tracker = new SteamTracker(_platform, accounts, [.. folders.Distinct(StringComparer.Ordinal)], _time, Publish);
 		_tracker = tracker;
 
@@ -169,6 +173,7 @@ public sealed class SteamIntegration
 	{
 		_cts?.Dispose();
 		DisposeClients();
+		_artwork?.Dispose();
 	}
 
 	public async Task ShutdownAsync()
@@ -176,7 +181,6 @@ public sealed class SteamIntegration
 		IsInitialized = false;
 		await StopAsync();
 		Changed?.Invoke(this, EventArgs.Empty);
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
 	}
 
 	public Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
@@ -312,7 +316,6 @@ public sealed class SteamIntegration
 		}
 
 		Changed?.Invoke(this, EventArgs.Empty);
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
 	}
 
 	private async Task StopAsync()

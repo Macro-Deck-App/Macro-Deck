@@ -1,7 +1,6 @@
 using System.Text;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Steam;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Variables;
 
 namespace MacroDeckHost.Integrations.Steam;
@@ -24,7 +23,7 @@ internal static class SteamVariables
 
 	public const string FriendsInGame = "friends_ingame";
 
-	private static readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(3);
 
 	public static IReadOnlyList<string> Names { get; } =
 		[IsPlaying, CurrentGameName, CurrentGameId, CurrentGamePlaytimeSeconds, GamesInstalled, FriendsOnline, FriendsInGame];

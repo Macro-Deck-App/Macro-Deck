@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Steam;
 
 namespace MacroDeckHost.Integrations.Steam;
 

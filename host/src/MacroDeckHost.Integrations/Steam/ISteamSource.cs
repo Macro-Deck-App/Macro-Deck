@@ -1,4 +1,4 @@
-namespace MacroDeckHost.Application.Steam;
+namespace MacroDeckHost.Integrations.Steam;
 
 public interface ISteamSource
 {

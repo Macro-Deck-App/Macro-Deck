@@ -1,5 +1,4 @@
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Application.Steam;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Integrations.Steam.Actions;
 using MacroDeckHost.Integrations.System.Application;

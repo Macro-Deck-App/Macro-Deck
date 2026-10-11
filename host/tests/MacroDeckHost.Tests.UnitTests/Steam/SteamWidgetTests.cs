@@ -1,17 +1,14 @@
 using System.Net;
 using System.Text.Json;
-using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.Steam;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.Steam;
-using Serilog;
+using MacroDeckHost.Integrations.Steam;
+using MacroDeckHost.Integrations.Steam.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;
 
@@ -19,24 +16,17 @@ namespace MacroDeckHost.Tests.UnitTests.Steam;
 internal sealed class SteamWidgetTests
 {
 	private FakeSource _source = null!;
-	private FakeIntegrationRegistry _registry = null!;
-	private FakeHostLockState _lock = null!;
-	private RecordingUiTransport _transport = null!;
 	private FakeTimeProvider _time = null!;
 	private SteamArtworkCache _artwork = null!;
-	private SteamUiProvider _provider = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_source = new FakeSource();
-		_registry = new FakeIntegrationRegistry();
-		_registry.Add(_source);
-		_lock = new FakeHostLockState();
-		_transport = new RecordingUiTransport();
 		_time = new FakeTimeProvider();
-		_artwork = new SteamArtworkCache(new NotFoundHandler(), new UiResourceStore(), _time, Log.Logger);
-		_provider = new SteamUiProvider(_registry, _artwork, new UiResourceStore(), _lock, _transport, _time);
+		_artwork = new SteamArtworkCache(new HttpClient(new NotFoundHandler()),
+			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore()),
+			_time);
 	}
 
 	[TearDown]
@@ -235,19 +225,6 @@ internal sealed class SteamWidgetTests
 	}
 
 	[Test]
-	public async Task A_locked_host_does_not_launch_anything()
-	{
-		_lock.IsLocked = true;
-		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", DateTimeOffset.FromUnixTimeSeconds(1)));
-		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "recent" });
-
-		CalendarTree.Press(session, Tiles(session).First());
-
-		await Task.Delay(100);
-		Assert.That(_source.Commands, Is.Empty);
-	}
-
-	[Test]
 	public async Task A_failed_launch_is_shown_on_the_widget()
 	{
 		_source.Outcome = SteamCommandOutcome.Failed;
@@ -266,7 +243,7 @@ internal sealed class SteamWidgetTests
 	{
 		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", null));
 
-		await using var session = (await _provider.CreateSessionAsync(new UiSessionRequest
+		await using var session = SteamWidgetSessions.Create(new UiSessionRequest
 		{
 			Surface = new UiSurface
 			{
@@ -281,7 +258,7 @@ internal sealed class SteamWidgetTests
 				},
 			},
 			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+		}, _source, _artwork, null, _time)!;
 
 		Assert.That(JsonSerializer.Serialize(session.BuildTree().Root), Does.Contain("Counter-Strike 2"));
 	}
@@ -311,7 +288,7 @@ internal sealed class SteamWidgetTests
 	private static List<UiNode> WideTiles(IUiSession session)
 		=> [.. Tiles(session).Where(node => node.Id.Contains(".wide", StringComparison.Ordinal))];
 
-	private async Task<IUiSession> OpenAsync(string widgetType, object data)
+	private Task<IUiSession> OpenAsync(string widgetType, object data)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
@@ -319,11 +296,11 @@ internal sealed class SteamWidgetTests
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
 		};
 
-		return (await _provider.CreateSessionAsync(new UiSessionRequest
+		return Task.FromResult(SteamWidgetSessions.Create(new UiSessionRequest
 		{
 			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
 			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+		}, _source, _artwork, null, _time)!);
 	}
 
 	private sealed class NotFoundHandler : HttpMessageHandler
@@ -334,19 +311,9 @@ internal sealed class SteamWidgetTests
 	}
 
 
-	private sealed class FakeSource : IIntegration, ISteamSource
+	private sealed class FakeSource : ISteamSource
 	{
 		public event EventHandler? Changed;
-
-		public string Id => SteamWidgetType.OwnerId;
-
-		public MacroDeck.Localization.LocalizedText Name => "Steam";
-
-		public string Version => "1";
-
-		public bool IsInitialized => true;
-
-		public IReadOnlyList<IActionDefinition> Actions => [];
 
 		public bool IsAvailable { get; set; } = true;
 
@@ -355,10 +322,6 @@ internal sealed class SteamWidgetTests
 		public SteamCommandOutcome Outcome { get; set; } = SteamCommandOutcome.Succeeded;
 
 		public List<SteamCommand> Commands { get; } = [];
-
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-		public Task ShutdownAsync() => Task.CompletedTask;
 
 		public void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
 

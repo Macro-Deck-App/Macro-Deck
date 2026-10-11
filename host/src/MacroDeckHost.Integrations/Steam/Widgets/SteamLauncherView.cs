@@ -6,7 +6,7 @@ using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
 
-namespace MacroDeckHost.Widgets.Steam;
+namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal static class SteamLauncherView
 {
@@ -24,7 +24,7 @@ internal static class SteamLauncherView
 	public static UiElement Build(
 		UiState<SteamLauncherState> state,
 		Func<int, UiEventOutcome> launch,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		int cornerRadius = SteamSurfaces.DefaultCornerRadius,
 		string? backgroundColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
@@ -34,7 +34,7 @@ internal static class SteamLauncherView
 		{
 			Key = Root,
 			Direction = UiComponentDirections.Vertical,
-			Padding = WidgetSafeArea.For(cornerRadius),
+			Padding = SteamSurfaces.SafeArea(cornerRadius),
 			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
 			Gap = _gap,
 			Children =

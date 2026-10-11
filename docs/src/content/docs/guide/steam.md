@@ -88,7 +88,7 @@ Starts a game with one tap. Choose in its settings:
 - **Number of games**: how many recently played games to show, from 1 to 6.
 
 A widget one cell wide shows one game. A wider or taller widget shows up to three, and a widget at least two
-cells wide and two tall shows up to six. Tapping a game does nothing while your computer is locked.
+cells wide and two tall shows up to six.
 
 Covers come from Steam's own servers. A game without a cover shows its name instead.
 

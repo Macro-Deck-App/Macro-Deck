@@ -1,10 +1,9 @@
 using System.Net;
-using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
-using MacroDeckHost.Widgets.Steam;
-using Serilog;
+using MacroDeckHost.Integrations.Steam.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;
 
@@ -24,7 +23,7 @@ internal sealed class SteamArtworkCacheTests
 		_resources = new UiResourceStore();
 		_time = new FakeTimeProvider();
 		_handler = new StubHandler();
-		_cache = new SteamArtworkCache(_handler, _resources, _time, Log.Logger);
+		_cache = new SteamArtworkCache(new HttpClient(_handler), new BuiltInUiResourceRegistry("app.macro-deck.steam", _resources), _time);
 	}
 
 	[TearDown]
@@ -85,10 +84,11 @@ internal sealed class SteamArtworkCacheTests
 	[Test]
 	public void The_production_client_is_built_with_redirects_turned_off()
 	{
-		using var handler = SteamArtworkCache.CreateHandler(new HttpUserAgentState());
+		using var handler = new SocketsHttpHandler();
 
-		var inner = (SocketsHttpHandler)((DelegatingHandler)handler).InnerHandler!;
-		Assert.That(inner.AllowAutoRedirect, Is.False);
+		SteamArtworkCache.PinToTheCdn(handler);
+
+		Assert.That(handler.AllowAutoRedirect, Is.False);
 	}
 
 	[Test]

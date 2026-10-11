@@ -9,8 +9,8 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Application.Steam;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Tests.UnitTests.Calendar;
@@ -18,7 +18,7 @@ using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Integrations;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.Steam;
+using MacroDeckHost.Integrations.Steam.Widgets;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -294,23 +294,32 @@ internal sealed class SteamIntegrationTests
 	}
 
 	[Test]
-	public async Task The_widgets_find_the_running_integration_through_the_registry_and_follow_it()
+	public async Task Reconfiguring_keeps_the_artwork_cache_that_open_widgets_already_hold()
+	{
+		var integration = Integration();
+		await integration.InitializeAsync(new FakeContext());
+		var before = integration.Artwork;
+
+		await integration.ShutdownAsync();
+		await integration.InitializeAsync(new FakeContext());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before, Is.Not.Null);
+			Assert.That(integration.Artwork, Is.SameAs(before));
+		});
+
+		await integration.ShutdownAsync();
+	}
+
+	[Test]
+	public async Task The_integration_serves_its_own_widget_ui_and_follows_its_own_state()
 	{
 		_platform.RegistryRunningAppId = 730;
 		var integration = Integration();
 		await integration.InitializeAsync(new FakeContext());
-		var registry = new FakeIntegrationRegistry();
-		registry.Add(integration);
-		var time = new FakeTimeProvider();
-		using var artwork = new SteamArtworkCache(new NotFoundHandler(), new UiResourceStore(), time, Log.Logger);
-		var provider = new SteamUiProvider(registry,
-			artwork,
-			new UiResourceStore(),
-			new FakeHostLockState(),
-			new RecordingUiTransport(),
-			time);
 
-		await using var session = (await provider.CreateSessionAsync(new UiSessionRequest
+		await using var session = (await integration.CreateSessionAsync(new UiSessionRequest
 		{
 			Surface = new UiSurface
 			{
@@ -330,13 +339,6 @@ internal sealed class SteamIntegrationTests
 
 		await integration.ShutdownAsync();
 		Assert.That(CalendarTree.Texts(session.BuildTree().Root), Does.Contain("Steam is not available"));
-	}
-
-	private sealed class NotFoundHandler : HttpMessageHandler
-	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-			CancellationToken cancellationToken)
-			=> Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
 	}
 
 	[Test]
@@ -392,6 +394,8 @@ internal sealed class SteamIntegrationTests
 		public IWidgetApi Widgets => throw new NotSupportedException();
 		public IEventPublisher Events => throw new NotSupportedException();
 		public IUserNotifier Notifications => throw new NotSupportedException();
+		public IUiResourceRegistry UiResources { get; } =
+			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore());
 
 		public void Add(IReadOnlyDictionary<string, string?> values, string? secret, string title = "Steam")
 		{

@@ -6,9 +6,8 @@ using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
-using MacroDeckHost.Application.Steam;
 
-namespace MacroDeckHost.Widgets.Steam;
+namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal sealed class SteamPlayingSession : IUiSession
 {

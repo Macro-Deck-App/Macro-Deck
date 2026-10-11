@@ -1,9 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
-using MacroDeckHost.Application.Steam;
-using MacroDeckHost.Widgets.Configuration;
 
-namespace MacroDeckHost.Widgets.Steam;
+namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal sealed record SteamPlayingOptions(bool ShowSessionTime, string? AccountId = null);
 
@@ -12,14 +10,14 @@ internal sealed record SteamLauncherOptions(string Source, int? GameAppId, int C
 internal static class SteamWidgetSettings
 {
 	public static SteamPlayingOptions ParsePlaying(JsonElement data)
-		=> new(WidgetConfigJson.ReadBool(data, SteamWidgetType.ShowSessionTimeKey) ?? true,
-			WidgetConfigJson.ReadString(data, SteamWidgetType.AccountKey) is { Length: > 0 } account ? account : null);
+		=> new(SteamSurfaces.ReadBool(data, SteamWidgetType.ShowSessionTimeKey) ?? true,
+			SteamSurfaces.ReadString(data, SteamWidgetType.AccountKey) is { Length: > 0 } account ? account : null);
 
 	public static SteamLauncherOptions ParseLauncher(JsonElement data)
 	{
-		var source = WidgetConfigJson.ReadString(data, SteamWidgetType.SourceKey);
-		var game = WidgetConfigJson.ReadString(data, SteamWidgetType.GameKey);
-		var count = WidgetConfigJson.ReadDouble(data, SteamWidgetType.CountKey);
+		var source = SteamSurfaces.ReadString(data, SteamWidgetType.SourceKey);
+		var game = SteamSurfaces.ReadString(data, SteamWidgetType.GameKey);
+		var count = SteamSurfaces.ReadDouble(data, SteamWidgetType.CountKey);
 
 		return new SteamLauncherOptions(
 			source is not null && SteamWidgetType.Sources.Contains(source, StringComparer.Ordinal)
@@ -35,5 +33,5 @@ internal static class SteamWidgetSettings
 	}
 
 	public static string? BackgroundColor(JsonElement data)
-		=> WidgetColor.NormalizeBackground(WidgetConfigJson.ReadString(data, SteamWidgetType.BackgroundColorKey));
+		=> SteamSurfaces.NormalizeBackground(SteamSurfaces.ReadString(data, SteamWidgetType.BackgroundColorKey));
 }

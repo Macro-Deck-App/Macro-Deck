@@ -1,13 +1,13 @@
 using System.Globalization;
+using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Application.Network.Http;
-using MacroDeckHost.Application.Steam;
-using MacroDeckHost.Application.Ui.Resources;
-using ILogger = Serilog.ILogger;
+using MacroDeckHost.Integrations.Http;
+using Serilog;
 
-namespace MacroDeckHost.Widgets.Steam;
+namespace MacroDeckHost.Integrations.Steam.Widgets;
 
-public sealed class SteamArtworkCache : IDisposable
+internal sealed class SteamArtworkCache : IDisposable
 {
 	public const string AllowedHost = "cdn.cloudflare.steamstatic.com";
 
@@ -21,32 +21,27 @@ public sealed class SteamArtworkCache : IDisposable
 
 	internal static readonly TimeSpan RetryInterval = TimeSpan.FromMinutes(15);
 
+	private static readonly ILogger _logger = IntegrationLog.For<SteamArtworkCache>(SteamIntegration.IntegrationId);
+
 	private readonly HttpClient _http;
-	private readonly IUiResourceStore _resources;
+	private readonly IUiResourceRegistry _resources;
 	private readonly TimeProvider _time;
-	private readonly ILogger _logger;
 	private readonly Lock _sync = new();
 	private readonly Dictionary<int, Entry> _entries = [];
 	private readonly CancellationTokenSource _disposing = new();
 
 	private bool _disposed;
 
-	public SteamArtworkCache(
-		IHttpUserAgentSource userAgent,
-		IUiResourceStore resources,
-		TimeProvider time,
-		ILogger logger)
-		: this(CreateHandler(userAgent), resources, time, logger)
+	public SteamArtworkCache(IUiResourceRegistry resources, TimeProvider time)
+		: this(CreateClient(), resources, time)
 	{
 	}
 
-	internal SteamArtworkCache(HttpMessageHandler handler, IUiResourceStore resources, TimeProvider time,
-		ILogger logger)
+	internal SteamArtworkCache(HttpClient http, IUiResourceRegistry resources, TimeProvider time)
 	{
-		_http = new HttpClient(handler, disposeHandler: true) { Timeout = TimeSpan.FromSeconds(15) };
+		_http = http;
 		_resources = resources;
 		_time = time;
-		_logger = logger.ForContext<SteamArtworkCache>();
 	}
 
 	public event EventHandler? Changed;
@@ -67,7 +62,7 @@ public sealed class SteamArtworkCache : IDisposable
 		}
 
 		var now = _time.GetUtcNow();
-		List<UiResource> evicted;
+		List<int> evicted;
 
 		lock (_sync)
 		{
@@ -92,9 +87,9 @@ public sealed class SteamArtworkCache : IDisposable
 			evicted = Evict(appId);
 		}
 
-		foreach (var resource in evicted)
+		foreach (var evictedAppId in evicted)
 		{
-			_resources.Remove(resource.ResourceId);
+			_ = RemoveAsync(evictedAppId);
 		}
 
 		_ = FetchAsync(appId, _disposing.Token);
@@ -102,7 +97,7 @@ public sealed class SteamArtworkCache : IDisposable
 
 	public void Dispose()
 	{
-		List<Entry> entries;
+		List<int> registered;
 
 		lock (_sync)
 		{
@@ -112,26 +107,26 @@ public sealed class SteamArtworkCache : IDisposable
 			}
 
 			_disposed = true;
-			entries = [.. _entries.Values];
+			registered = [.. _entries.Where(pair => pair.Value.Resource is not null).Select(pair => pair.Key)];
 			_entries.Clear();
 		}
 
 		_disposing.Cancel();
 		_disposing.Dispose();
 
-		foreach (var entry in entries.Where(entry => entry.Resource is not null))
+		foreach (var appId in registered)
 		{
-			_resources.Remove(entry.Resource!.ResourceId);
+			_ = RemoveAsync(appId);
 		}
 
 		_http.Dispose();
 	}
 
-	internal static HttpMessageHandler CreateHandler(IHttpUserAgentSource userAgent)
-	{
-		// Redirects stay off so a response can never move the request away from the pinned CDN host.
-		return new UserAgentHandler(userAgent, new SocketsHttpHandler { AllowAutoRedirect = false });
-	}
+	internal static HttpClient CreateClient()
+		=> IntegrationHttp.CreateClient(TimeSpan.FromSeconds(15), PinToTheCdn);
+
+	// Redirects stay off so a response can never move the request away from the pinned CDN host.
+	internal static void PinToTheCdn(SocketsHttpHandler handler) => handler.AllowAutoRedirect = false;
 
 	internal static Uri? UriFor(int appId)
 	{
@@ -151,9 +146,11 @@ public sealed class SteamArtworkCache : IDisposable
 	internal static bool IsJpeg(byte[] bytes)
 		=> bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
 
-	private List<UiResource> Evict(int keep)
+	private static string NameOf(int appId) => $"cover-{appId.ToString(CultureInfo.InvariantCulture)}";
+
+	private List<int> Evict(int keep)
 	{
-		var removed = new List<UiResource>();
+		var removed = new List<int>();
 
 		while (_entries.Count > MaxEntries || _entries.Values.Sum(entry => (long)entry.Size) > MaxTotalBytes)
 		{
@@ -170,11 +167,23 @@ public sealed class SteamArtworkCache : IDisposable
 
 			if (_entries.Remove(evictedId, out var entry) && entry.Resource is not null)
 			{
-				removed.Add(entry.Resource);
+				removed.Add(evictedId);
 			}
 		}
 
 		return removed;
+	}
+
+	private async Task RemoveAsync(int appId)
+	{
+		try
+		{
+			await _resources.RemoveAsync(NameOf(appId));
+		}
+		catch (Exception exception) when (exception is UiResourceException or OperationCanceledException)
+		{
+			_logger.Debug(exception, "A Steam cover could not be released");
+		}
 	}
 
 	private async Task FetchAsync(int appId, CancellationToken cancellationToken)
@@ -185,40 +194,44 @@ public sealed class SteamArtworkCache : IDisposable
 			bytes = await DownloadAsync(uri, cancellationToken).ConfigureAwait(false);
 		}
 
-		UiResource? replaced = null;
 		UiResource? registered = null;
+		if (bytes is not null && IsJpeg(bytes))
+		{
+			try
+			{
+				registered = await _resources.RegisterAsync(NameOf(appId), bytes, "image/jpeg", cancellationToken)
+					.ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is UiResourceException or OperationCanceledException)
+			{
+				_logger.Debug(exception, "A Steam cover could not be registered");
+			}
+		}
+
+		var orphaned = false;
 
 		lock (_sync)
 		{
 			if (_disposed || !_entries.TryGetValue(appId, out var entry))
 			{
-				return;
+				orphaned = registered is not null;
 			}
-
-			if (bytes is not null && IsJpeg(bytes))
+			else
 			{
-				registered = _resources.Register(new UiResourceRegistration
+				_entries[appId] = entry with
 				{
-					OwnerId = SteamWidgetType.OwnerId,
-					Name = $"cover-{appId.ToString(CultureInfo.InvariantCulture)}",
-					MediaType = "image/jpeg",
-					Content = bytes,
-				});
-				replaced = entry.Resource;
+					InFlight = false,
+					FetchedAt = _time.GetUtcNow(),
+					Resource = registered ?? entry.Resource,
+					Size = registered is not null ? bytes!.Length : entry.Size
+				};
 			}
-
-			_entries[appId] = entry with
-			{
-				InFlight = false,
-				FetchedAt = _time.GetUtcNow(),
-				Resource = registered ?? entry.Resource,
-				Size = registered is not null ? bytes!.Length : entry.Size
-			};
 		}
 
-		if (replaced is not null && replaced.ResourceId != registered?.ResourceId)
+		if (orphaned)
 		{
-			_resources.Remove(replaced.ResourceId);
+			await RemoveAsync(appId).ConfigureAwait(false);
+			return;
 		}
 
 		if (registered is not null)
