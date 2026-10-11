@@ -29,7 +29,7 @@ The host separates Domain, Application, Infrastructure, and Host responsibilitie
 - Infrastructure implements persistence and external technical concerns.
 - Host contains startup, REST/JSON WebSocket transports, and process integration.
 
-Built-in integrations live in `MacroDeckHost.Integrations`. Code depends on narrow SDK capabilities or explicit ports rather than concrete integration implementations.
+Built-in integrations live in `MacroDeckHost.Integrations`. Code depends on narrow SDK capabilities or explicit ports rather than concrete integration implementations. Each integration is built so that it could become an out-of-process plugin without much effort ([ADR 0107](decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 
 ## Transports
 

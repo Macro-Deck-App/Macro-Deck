@@ -236,8 +236,8 @@ More on the test setup and commands is in [building and testing](https://github.
 
 Every integration contribution has to satisfy these constraints, all enforced by review:
 
-- Location. New integrations live in `MacroDeckHost.Integrations`, in their own folder. Do not add integration logic to the host, application, or infrastructure projects.
-- No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck) and the SDK provider interfaces. Do not reach into host internals or persistence directly.
+- Location. New integrations live in `MacroDeckHost.Integrations`, in their own folder, including their widget and dialog UI. Do not add integration logic to the host, application, infrastructure, or widgets projects.
+- No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck) and the SDK provider interfaces. Do not reach into host internals or persistence directly. If the SDK lacks something, it gains it for plugins too; the integration has to stay extractable into an out-of-process plugin ([ADR 0107](../decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 - Cross-platform. Macro Deck 3 runs on Linux, Windows, and macOS. Guard any OS-specific code (paths, process APIs, native calls) behind a platform check and use `Path.Combine` rather than hardcoded separators. The `System` integration's per-OS parsers and their tests are the reference for this.
 - Resource-conscious. The host is a long-lived background process. Prefer event-driven work over busy-polling, justify any timer interval, and dispose every timer, subscription, and background loop in `ShutdownAsync`. `WeatherIntegration` is the model: a single long-interval `PeriodicTimer` driven loop, a `CancellationTokenSource` that is cancelled and awaited on shutdown, and `IDisposable` cleanup.
 
