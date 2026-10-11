@@ -1,5 +1,8 @@
 using MacroDeck.Plugin.Testing.Fakes;
+using MacroDeck.Plugin.Testing.Tests.UnitTests.Support;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
@@ -100,6 +103,37 @@ public class A28_AndroidDeviceFakeTests
 			Assert.That(android.FindDevice("192.168.1.20:5555"), Is.SameAs(device));
 			Assert.That(device.State, Is.EqualTo(AndroidDeviceState.Online));
 			Assert.That(android.ConnectedAddresses, Is.EqualTo(_connectedAddress));
+		});
+	}
+
+	[Test]
+	public void A_stable_id_set_later_replaces_only_that_part_of_the_device_info()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var device = manager.AddDevice("192.168.1.20:5555", info: new AndroidDeviceInfo("Pixel 8", "Google", "shiba"));
+
+		device.StableId = "3fa9c2d1e0b4a756";
+
+		Assert.That(manager.FindDevice("192.168.1.20:5555")!.Info,
+			Is.EqualTo(new AndroidDeviceInfo("Pixel 8", "Google", "shiba") { StableId = "3fa9c2d1e0b4a756" }));
+	}
+
+	[Test]
+	public async Task In_the_harness_the_context_and_dependency_injection_hand_out_the_same_manager()
+	{
+		await using var harness = PluginTestHarness.Create(builder => builder.RegisterIntegration(_ => new TestIntegration("test.a28")));
+		var own = new FakeAndroidDeviceManager();
+		await using var withOwn = PluginTestHarness.Create(builder => builder
+			.RegisterIntegration(_ => new TestIntegration("test.a28.own"))
+			.ConfigureServices((_, services) => services.AddSingleton<IAndroidDeviceManager>(own)));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(((IIntegrationContext)harness.Context).AndroidDevices, Is.SameAs(harness.Context.AndroidDevices));
+			Assert.That(harness.Services.GetRequiredService<IAndroidDeviceManager>(), Is.SameAs(harness.Context.AndroidDevices));
+			Assert.That(harness.Context.AndroidDevices.Access, Is.EqualTo(AndroidDeviceAccess.Unsupported));
+			Assert.That(((IIntegrationContext)withOwn.Context).AndroidDevices, Is.SameAs(own));
+			Assert.That(withOwn.Services.GetRequiredService<IAndroidDeviceManager>(), Is.SameAs(own));
 		});
 	}
 }

@@ -22646,4 +22646,133 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
     <value>Toplam {hours} sa</value>
   </data>
+  <data name="Integrations.Batteries.Variables.Level" xml:space="preserve">
+    <value>{device} pil seviyesi</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Charging" xml:space="preserve">
+    <value>{device} şarj oluyor</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Connected" xml:space="preserve">
+    <value>{device} bağlı</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.State" xml:space="preserve">
+    <value>{device} şarj durumu</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeRemaining" xml:space="preserve">
+    <value>{device} kalan kullanım süresi (dakika)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeToFull" xml:space="preserve">
+    <value>{device} tam şarj olma süresi (dakika)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Health" xml:space="preserve">
+    <value>{device} pil sağlığı</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Name" xml:space="preserve">
+    <value>Pil</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Description" xml:space="preserve">
+    <value>Telefonlarınızın, kulaklıklarınızın ve diğer cihazlarınızın pil seviyeleri halka veya çubuk olarak</value>
+  </data>
+  <data name="Widgets.Battery.Devices" xml:space="preserve">
+    <value>Cihazlar</value>
+  </data>
+  <data name="Widgets.Battery.DevicesOne" xml:space="preserve">
+    <value>Tek cihaz</value>
+  </data>
+  <data name="Widgets.Battery.DevicesAll" xml:space="preserve">
+    <value>Tüm cihazlar</value>
+  </data>
+  <data name="Widgets.Battery.DevicesSelection" xml:space="preserve">
+    <value>Seçili cihazlar</value>
+  </data>
+  <data name="Widgets.Battery.Device" xml:space="preserve">
+    <value>Cihaz</value>
+  </data>
+  <data name="Widgets.Battery.DeviceOption" xml:space="preserve">
+    <value>{device} - {provider}</value>
+  </data>
+  <data name="Widgets.Battery.DeviceUnavailable" xml:space="preserve">
+    <value>{device} (kullanılamıyor)</value>
+  </data>
+  <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
+    <value>Henüz hiçbir cihaz pil bildirmiyor. ADB entegrasyonunu açıp bir telefon bağlayın veya pil sağlayan bir eklenti yükleyin.</value>
+  </data>
+  <data name="Widgets.Battery.StyleBar" xml:space="preserve">
+    <value>Çubuk</value>
+  </data>
+  <data name="Widgets.Battery.ShowPercentage" xml:space="preserve">
+    <value>Yüzdeyi göster</value>
+  </data>
+  <data name="Widgets.Battery.ShowName" xml:space="preserve">
+    <value>Cihaz adını göster</value>
+  </data>
+  <data name="Widgets.Battery.ShowChargingBadge" xml:space="preserve">
+    <value>Şarj göstergesini göster</value>
+  </data>
+  <data name="Widgets.Battery.ColorMode" xml:space="preserve">
+    <value>Renk</value>
+  </data>
+  <data name="Widgets.Battery.ColorByLevel" xml:space="preserve">
+    <value>Pil seviyesine göre</value>
+  </data>
+  <data name="Widgets.Battery.ColorSingle" xml:space="preserve">
+    <value>Tek renk</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColor" xml:space="preserve">
+    <value>Şarj rengi</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColorHint" xml:space="preserve">
+    <value>Şarj olan bir cihazı seviye rengi yerine camgöbeği renkte gösterir.</value>
+  </data>
+  <data name="Widgets.Battery.CustomColor" xml:space="preserve">
+    <value>Pil rengi</value>
+  </data>
+  <data name="Widgets.Battery.State.Charging" xml:space="preserve">
+    <value>Şarj ediliyor</value>
+  </data>
+  <data name="Widgets.Battery.State.Full" xml:space="preserve">
+    <value>Tamamen şarj oldu</value>
+  </data>
+  <data name="Widgets.Battery.State.NotCharging" xml:space="preserve">
+    <value>Şarj olmuyor</value>
+  </data>
+  <data name="Widgets.Battery.State.NotConnected" xml:space="preserve">
+    <value>Bağlı değil</value>
+  </data>
+  <data name="Widgets.Battery.State.NotAvailable" xml:space="preserve">
+    <value>Kullanılamıyor</value>
+  </data>
+  <data name="Widgets.Battery.State.HoursLeft" xml:space="preserve">
+    <value>{hours} sa {minutes} dk kaldı</value>
+  </data>
+  <data name="Widgets.Battery.State.MinutesLeft" xml:space="preserve">
+    <value>{minutes} dk kaldı</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInHours" xml:space="preserve">
+    <value>{hours} sa {minutes} dk içinde dolacak</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInMinutes" xml:space="preserve">
+    <value>{minutes} dk içinde dolacak</value>
+  </data>
+  <data name="Widgets.Battery.EmptyHint" xml:space="preserve">
+    <value>Pilli cihaz yok</value>
+  </data>
+  <data name="Widgets.Battery.PickDeviceHint" xml:space="preserve">
+    <value>Widget ayarlarından bir cihaz seçin.</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryPhone" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryHeadphones" xml:space="preserve">
+    <value>Kulaklık</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryWatch" xml:space="preserve">
+    <value>Saat</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryController" xml:space="preserve">
+    <value>Kumanda</value>
+  </data>
+  <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
+    <value>Piller</value>
+  </data>
 </root>

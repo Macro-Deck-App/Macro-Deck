@@ -389,7 +389,8 @@ public class VariableService : IVariableService
 		int? decimalPlaces,
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
-		VariableUpdateMode updateMode = VariableUpdateMode.Polled)
+		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+		bool publishedByHost = false)
 	{
 		if (string.IsNullOrWhiteSpace(integrationId))
 		{
@@ -416,7 +417,10 @@ public class VariableService : IVariableService
 			declaration);
 		if (reused is not null)
 		{
-			return reused;
+			return publishedByHost && reused is { Success: true, Data.PublishedByHost: false }
+				? Result.Fail<VariableEntity, VariableError>(VariableError.AlreadyExists,
+					$"Integration '{integrationId}' already owns a variable named '{canonicalName}'")
+				: reused;
 		}
 
 		return await CreateInternal(name,
@@ -429,7 +433,8 @@ public class VariableService : IVariableService
 			integrationId,
 			resolvedDefinitionId,
 			declaration,
-			updateMode);
+			updateMode,
+			publishedByHost: publishedByHost);
 	}
 
 	public async Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
@@ -705,7 +710,8 @@ public class VariableService : IVariableService
 		VariableDeclaration? declaration = null,
 		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
 		VariableFileSource? fileSource = null,
-		VariableTemplateSource? templateSource = null)
+		VariableTemplateSource? templateSource = null,
+		bool publishedByHost = false)
 	{
 		if (fileSource is not null && templateSource is not null)
 		{
@@ -754,6 +760,7 @@ public class VariableService : IVariableService
 			definitionId,
 			declaration,
 			updateMode);
+		entity.PublishedByHost = publishedByHost;
 		var available = true;
 		if (fileSource is not null)
 		{

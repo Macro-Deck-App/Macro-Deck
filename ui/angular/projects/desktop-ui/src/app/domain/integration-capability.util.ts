@@ -12,6 +12,7 @@ const CAPABILITY_ICONS: Record<string, string> = {
   weather: 'weather-type',
   calendar: 'clock-type',
   'virtual-profiles': 'layers',
+  'battery-provider': 'battery',
 };
 
 export function integrationCapabilityIcon(kind: string): string {

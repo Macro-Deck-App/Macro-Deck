@@ -1,4 +1,6 @@
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -27,9 +29,13 @@ public class IntegrationContext : IIntegrationContext
 		IMessageChannel messages,
 		IColorApi colors,
 		INotificationService notificationService,
-		IUiResourceRegistry? uiResources = null)
+		IUiResourceRegistry? uiResources = null,
+		IBatteryApi? batteries = null,
+		IAndroidDeviceManager? androidDevices = null)
 	{
 		Colors = colors;
+		Batteries = batteries ?? UnsupportedBatteryApi.Instance;
+		AndroidDevices = androidDevices ?? UnsupportedAndroidDeviceManager.Instance;
 		Variables = variables;
 		UserVariables = userVariables;
 		Config = config;
@@ -83,4 +89,8 @@ public class IntegrationContext : IIntegrationContext
 		private static UiResourceException Unsupported()
 			=> new(UiResourceErrorCode.Unsupported, "This context cannot register UI resources.");
 	}
+
+	public IBatteryApi Batteries { get; }
+
+	public IAndroidDeviceManager AndroidDevices { get; }
 }

@@ -22646,4 +22646,133 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
     <value>{hours} h no total</value>
   </data>
+  <data name="Integrations.Batteries.Variables.Level" xml:space="preserve">
+    <value>Nível de bateria de {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Charging" xml:space="preserve">
+    <value>{device} carregando</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Connected" xml:space="preserve">
+    <value>{device} conectado</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.State" xml:space="preserve">
+    <value>Estado de carga de {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeRemaining" xml:space="preserve">
+    <value>Tempo restante de bateria de {device} (minutos)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeToFull" xml:space="preserve">
+    <value>Tempo até a carga completa de {device} (minutos)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Health" xml:space="preserve">
+    <value>Saúde da bateria de {device}</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Name" xml:space="preserve">
+    <value>Bateria</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Description" xml:space="preserve">
+    <value>Níveis de bateria de celulares, fones de ouvido e outros dispositivos como anéis ou barras</value>
+  </data>
+  <data name="Widgets.Battery.Devices" xml:space="preserve">
+    <value>Dispositivos</value>
+  </data>
+  <data name="Widgets.Battery.DevicesOne" xml:space="preserve">
+    <value>Um dispositivo</value>
+  </data>
+  <data name="Widgets.Battery.DevicesAll" xml:space="preserve">
+    <value>Todos os dispositivos</value>
+  </data>
+  <data name="Widgets.Battery.DevicesSelection" xml:space="preserve">
+    <value>Dispositivos selecionados</value>
+  </data>
+  <data name="Widgets.Battery.Device" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Widgets.Battery.DeviceOption" xml:space="preserve">
+    <value>{device} - {provider}</value>
+  </data>
+  <data name="Widgets.Battery.DeviceUnavailable" xml:space="preserve">
+    <value>{device} (indisponível)</value>
+  </data>
+  <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
+    <value>Nenhum dispositivo informa uma bateria ainda. Ative a integração ADB e conecte um celular ou instale um plugin que forneça baterias.</value>
+  </data>
+  <data name="Widgets.Battery.StyleBar" xml:space="preserve">
+    <value>Barra</value>
+  </data>
+  <data name="Widgets.Battery.ShowPercentage" xml:space="preserve">
+    <value>Mostrar porcentagem</value>
+  </data>
+  <data name="Widgets.Battery.ShowName" xml:space="preserve">
+    <value>Mostrar nome do dispositivo</value>
+  </data>
+  <data name="Widgets.Battery.ShowChargingBadge" xml:space="preserve">
+    <value>Mostrar indicador de carga</value>
+  </data>
+  <data name="Widgets.Battery.ColorMode" xml:space="preserve">
+    <value>Cor</value>
+  </data>
+  <data name="Widgets.Battery.ColorByLevel" xml:space="preserve">
+    <value>Pelo nível da bateria</value>
+  </data>
+  <data name="Widgets.Battery.ColorSingle" xml:space="preserve">
+    <value>Cor única</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColor" xml:space="preserve">
+    <value>Cor ao carregar</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColorHint" xml:space="preserve">
+    <value>Mostra um dispositivo carregando em ciano em vez da cor do nível.</value>
+  </data>
+  <data name="Widgets.Battery.CustomColor" xml:space="preserve">
+    <value>Cor da bateria</value>
+  </data>
+  <data name="Widgets.Battery.State.Charging" xml:space="preserve">
+    <value>Carregando</value>
+  </data>
+  <data name="Widgets.Battery.State.Full" xml:space="preserve">
+    <value>Carga completa</value>
+  </data>
+  <data name="Widgets.Battery.State.NotCharging" xml:space="preserve">
+    <value>Não está carregando</value>
+  </data>
+  <data name="Widgets.Battery.State.NotConnected" xml:space="preserve">
+    <value>Não conectado</value>
+  </data>
+  <data name="Widgets.Battery.State.NotAvailable" xml:space="preserve">
+    <value>Indisponível</value>
+  </data>
+  <data name="Widgets.Battery.State.HoursLeft" xml:space="preserve">
+    <value>Restam {hours} h {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.MinutesLeft" xml:space="preserve">
+    <value>Restam {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInHours" xml:space="preserve">
+    <value>Carga completa em {hours} h {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInMinutes" xml:space="preserve">
+    <value>Carga completa em {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.EmptyHint" xml:space="preserve">
+    <value>Nenhum dispositivo com bateria</value>
+  </data>
+  <data name="Widgets.Battery.PickDeviceHint" xml:space="preserve">
+    <value>Selecione um dispositivo nas configurações do widget.</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryPhone" xml:space="preserve">
+    <value>Celular</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryHeadphones" xml:space="preserve">
+    <value>Fones de ouvido</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryWatch" xml:space="preserve">
+    <value>Relógio</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryController" xml:space="preserve">
+    <value>Controle</value>
+  </data>
+  <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
+    <value>Baterias</value>
+  </data>
 </root>

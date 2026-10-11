@@ -408,6 +408,17 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Describe, Accounts, Calendars, Events, Event];
 	}
 
+	/// <summary>
+	/// A battery provider publishes through the <c>batteries</c> host api and resends its whole set itself
+	/// after a resumed reconnect, so the host-to-provider direction only describes the provider.
+	/// </summary>
+	public static class BatteryProvider
+	{
+		public const string Describe = "describe";
+
+		public static readonly IReadOnlyList<string> All = [Describe];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -431,6 +442,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.Messaging] = Messaging.All,
 			[Handshake.CapabilityKinds.VideoStreamProvider] = VideoStreamProvider.All,
 			[Handshake.CapabilityKinds.Calendar] = Calendar.All,
+			[Handshake.CapabilityKinds.BatteryProvider] = BatteryProvider.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

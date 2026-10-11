@@ -22646,4 +22646,133 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
     <value>{hours} u in totaal</value>
   </data>
+  <data name="Integrations.Batteries.Variables.Level" xml:space="preserve">
+    <value>Batterijniveau {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Charging" xml:space="preserve">
+    <value>{device} laadt op</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Connected" xml:space="preserve">
+    <value>{device} verbonden</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.State" xml:space="preserve">
+    <value>Laadstatus {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeRemaining" xml:space="preserve">
+    <value>Resterende gebruiksduur {device} (minuten)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeToFull" xml:space="preserve">
+    <value>Tijd tot volledig opgeladen {device} (minuten)</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Health" xml:space="preserve">
+    <value>Batterijconditie {device}</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Name" xml:space="preserve">
+    <value>Batterij</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Description" xml:space="preserve">
+    <value>Batterijniveaus van je telefoons, koptelefoons en andere apparaten als ringen of balken</value>
+  </data>
+  <data name="Widgets.Battery.Devices" xml:space="preserve">
+    <value>Apparaten</value>
+  </data>
+  <data name="Widgets.Battery.DevicesOne" xml:space="preserve">
+    <value>Eén apparaat</value>
+  </data>
+  <data name="Widgets.Battery.DevicesAll" xml:space="preserve">
+    <value>Alle apparaten</value>
+  </data>
+  <data name="Widgets.Battery.DevicesSelection" xml:space="preserve">
+    <value>Geselecteerde apparaten</value>
+  </data>
+  <data name="Widgets.Battery.Device" xml:space="preserve">
+    <value>Apparaat</value>
+  </data>
+  <data name="Widgets.Battery.DeviceOption" xml:space="preserve">
+    <value>{device} - {provider}</value>
+  </data>
+  <data name="Widgets.Battery.DeviceUnavailable" xml:space="preserve">
+    <value>{device} (niet beschikbaar)</value>
+  </data>
+  <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
+    <value>Nog geen apparaat meldt een batterij. Zet de ADB-integratie aan en sluit een telefoon aan, of installeer een plug-in die batterijen levert.</value>
+  </data>
+  <data name="Widgets.Battery.StyleBar" xml:space="preserve">
+    <value>Balk</value>
+  </data>
+  <data name="Widgets.Battery.ShowPercentage" xml:space="preserve">
+    <value>Percentage tonen</value>
+  </data>
+  <data name="Widgets.Battery.ShowName" xml:space="preserve">
+    <value>Apparaatnaam tonen</value>
+  </data>
+  <data name="Widgets.Battery.ShowChargingBadge" xml:space="preserve">
+    <value>Oplaadindicator tonen</value>
+  </data>
+  <data name="Widgets.Battery.ColorMode" xml:space="preserve">
+    <value>Kleur</value>
+  </data>
+  <data name="Widgets.Battery.ColorByLevel" xml:space="preserve">
+    <value>Op batterijniveau</value>
+  </data>
+  <data name="Widgets.Battery.ColorSingle" xml:space="preserve">
+    <value>Eén kleur</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColor" xml:space="preserve">
+    <value>Oplaadkleur</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColorHint" xml:space="preserve">
+    <value>Toont een apparaat dat oplaadt in cyaan in plaats van in de kleur van zijn niveau.</value>
+  </data>
+  <data name="Widgets.Battery.CustomColor" xml:space="preserve">
+    <value>Batterijkleur</value>
+  </data>
+  <data name="Widgets.Battery.State.Charging" xml:space="preserve">
+    <value>Opladen</value>
+  </data>
+  <data name="Widgets.Battery.State.Full" xml:space="preserve">
+    <value>Volledig opgeladen</value>
+  </data>
+  <data name="Widgets.Battery.State.NotCharging" xml:space="preserve">
+    <value>Laadt niet op</value>
+  </data>
+  <data name="Widgets.Battery.State.NotConnected" xml:space="preserve">
+    <value>Niet verbonden</value>
+  </data>
+  <data name="Widgets.Battery.State.NotAvailable" xml:space="preserve">
+    <value>Niet beschikbaar</value>
+  </data>
+  <data name="Widgets.Battery.State.HoursLeft" xml:space="preserve">
+    <value>Nog {hours} u {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.MinutesLeft" xml:space="preserve">
+    <value>Nog {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInHours" xml:space="preserve">
+    <value>Vol over {hours} u {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInMinutes" xml:space="preserve">
+    <value>Vol over {minutes} min</value>
+  </data>
+  <data name="Widgets.Battery.EmptyHint" xml:space="preserve">
+    <value>Geen apparaten met batterij</value>
+  </data>
+  <data name="Widgets.Battery.PickDeviceHint" xml:space="preserve">
+    <value>Kies een apparaat in de widgetinstellingen.</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryPhone" xml:space="preserve">
+    <value>Telefoon</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryHeadphones" xml:space="preserve">
+    <value>Koptelefoon</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryWatch" xml:space="preserve">
+    <value>Horloge</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryController" xml:space="preserve">
+    <value>Controller</value>
+  </data>
+  <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
+    <value>Batterijen</value>
+  </data>
 </root>

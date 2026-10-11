@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Batteries;
+
 namespace MacroDeck.Plugin.Protocol.Limits;
 
 /// <summary>
@@ -198,4 +200,16 @@ public static class ProtocolLimits
 	/// <summary>Bounds the participants an <c>event</c> reply carries. Further participants are
 	/// dropped.</summary>
 	public const int MaxCalendarParticipants = 100;
+
+	/// <summary>The most battery devices one plugin may have published at a time.</summary>
+	public const int MaxBatteryDevicesPerProvider = BatteryLimits.MaxDevicesPerProvider;
+
+	/// <summary>Bounds a battery device's provider-local id.</summary>
+	public const int MaxBatteryDeviceIdLength = BatteryLimits.MaxIdLength;
+
+	/// <summary>Bounds a battery device's name.</summary>
+	public const int MaxBatteryDeviceNameLength = BatteryLimits.MaxNameLength;
+
+	/// <summary>Bounds a battery device's kind.</summary>
+	public const int MaxBatteryDeviceKindLength = BatteryLimits.MaxKindLength;
 }

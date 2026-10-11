@@ -22628,4 +22628,133 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
     <value>总计 {hours} 小时</value>
   </data>
+  <data name="Integrations.Batteries.Variables.Level" xml:space="preserve">
+    <value>{device} 电量</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Charging" xml:space="preserve">
+    <value>{device} 正在充电</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Connected" xml:space="preserve">
+    <value>{device} 已连接</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.State" xml:space="preserve">
+    <value>{device} 充电状态</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeRemaining" xml:space="preserve">
+    <value>{device} 剩余使用时间（分钟）</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeToFull" xml:space="preserve">
+    <value>{device} 充满所需时间（分钟）</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Health" xml:space="preserve">
+    <value>{device} 电池健康</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Name" xml:space="preserve">
+    <value>电池</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Description" xml:space="preserve">
+    <value>以圆环或条形显示手机、耳机和其他设备的电量</value>
+  </data>
+  <data name="Widgets.Battery.Devices" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="Widgets.Battery.DevicesOne" xml:space="preserve">
+    <value>单个设备</value>
+  </data>
+  <data name="Widgets.Battery.DevicesAll" xml:space="preserve">
+    <value>所有设备</value>
+  </data>
+  <data name="Widgets.Battery.DevicesSelection" xml:space="preserve">
+    <value>所选设备</value>
+  </data>
+  <data name="Widgets.Battery.Device" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="Widgets.Battery.DeviceOption" xml:space="preserve">
+    <value>{device} - {provider}</value>
+  </data>
+  <data name="Widgets.Battery.DeviceUnavailable" xml:space="preserve">
+    <value>{device}（不可用）</value>
+  </data>
+  <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
+    <value>暂无设备报告电池信息。请开启 ADB 集成并连接手机，或安装提供电池信息的插件。</value>
+  </data>
+  <data name="Widgets.Battery.StyleBar" xml:space="preserve">
+    <value>条形</value>
+  </data>
+  <data name="Widgets.Battery.ShowPercentage" xml:space="preserve">
+    <value>显示百分比</value>
+  </data>
+  <data name="Widgets.Battery.ShowName" xml:space="preserve">
+    <value>显示设备名称</value>
+  </data>
+  <data name="Widgets.Battery.ShowChargingBadge" xml:space="preserve">
+    <value>显示充电指示</value>
+  </data>
+  <data name="Widgets.Battery.ColorMode" xml:space="preserve">
+    <value>颜色</value>
+  </data>
+  <data name="Widgets.Battery.ColorByLevel" xml:space="preserve">
+    <value>按电量</value>
+  </data>
+  <data name="Widgets.Battery.ColorSingle" xml:space="preserve">
+    <value>单一颜色</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColor" xml:space="preserve">
+    <value>充电颜色</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColorHint" xml:space="preserve">
+    <value>充电中的设备以青色显示，而不是按电量着色。</value>
+  </data>
+  <data name="Widgets.Battery.CustomColor" xml:space="preserve">
+    <value>电池颜色</value>
+  </data>
+  <data name="Widgets.Battery.State.Charging" xml:space="preserve">
+    <value>正在充电</value>
+  </data>
+  <data name="Widgets.Battery.State.Full" xml:space="preserve">
+    <value>已充满</value>
+  </data>
+  <data name="Widgets.Battery.State.NotCharging" xml:space="preserve">
+    <value>未在充电</value>
+  </data>
+  <data name="Widgets.Battery.State.NotConnected" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="Widgets.Battery.State.NotAvailable" xml:space="preserve">
+    <value>不可用</value>
+  </data>
+  <data name="Widgets.Battery.State.HoursLeft" xml:space="preserve">
+    <value>剩余 {hours} 小时 {minutes} 分钟</value>
+  </data>
+  <data name="Widgets.Battery.State.MinutesLeft" xml:space="preserve">
+    <value>剩余 {minutes} 分钟</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInHours" xml:space="preserve">
+    <value>{hours} 小时 {minutes} 分钟后充满</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInMinutes" xml:space="preserve">
+    <value>{minutes} 分钟后充满</value>
+  </data>
+  <data name="Widgets.Battery.EmptyHint" xml:space="preserve">
+    <value>没有电池设备</value>
+  </data>
+  <data name="Widgets.Battery.PickDeviceHint" xml:space="preserve">
+    <value>请在小组件设置中选择设备。</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryPhone" xml:space="preserve">
+    <value>手机</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryHeadphones" xml:space="preserve">
+    <value>耳机</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryWatch" xml:space="preserve">
+    <value>手表</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryController" xml:space="preserve">
+    <value>手柄</value>
+  </data>
+  <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
+    <value>电池</value>
+  </data>
 </root>

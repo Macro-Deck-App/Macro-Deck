@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Widgets.Clock;
+using MacroDeckHost.Widgets.Battery;
 using MacroDeckHost.Widgets.Gauges;
 using MacroDeckHost.Widgets.HistoryGraph;
 using MacroDeckHost.Widgets.MusicPlayer;
@@ -524,6 +525,8 @@ public class WidgetAppearanceJsonTests
 	[TestCase(WidgetTypeIds.Stopwatch, "transparent")]
 	[TestCase(WidgetTypeIds.Gauges, "#123456")]
 	[TestCase(WidgetTypeIds.Gauges, "transparent")]
+	[TestCase(WidgetTypeIds.Battery, "#123456")]
+	[TestCase(WidgetTypeIds.Battery, "transparent")]
 	public void BackgroundColor_IsStoredWhereTheWidgetPaintsItFrom(string type, string color)
 	{
 		var data = Parse("""{"border":{"style":"static"}}""");
@@ -547,6 +550,7 @@ public class WidgetAppearanceJsonTests
 	[TestCase(WidgetTypeIds.Countdown)]
 	[TestCase(WidgetTypeIds.Stopwatch)]
 	[TestCase(WidgetTypeIds.Gauges)]
+	[TestCase(WidgetTypeIds.Battery)]
 	public void ResettingTheBackgroundColor_ReturnsTheWidgetToItsDefault(string type)
 	{
 		var data = Parse("""{"backgroundColor":"transparent","border":{"style":"static"}}""");
@@ -769,6 +773,7 @@ public class WidgetAppearanceJsonTests
 			WidgetTypeIds.MusicPlayer => MusicPlayerWidgetData.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch => TimerWidgetSettings.Parse(Element(data)).BackgroundColor,
 			WidgetTypeIds.Gauges => GaugesWidgetData.Parse(Element(data)).BackgroundColor,
+			WidgetTypeIds.Battery => BatteryWidgetData.Parse(Element(data)).BackgroundColor,
 			_ => throw new ArgumentOutOfRangeException(nameof(type)),
 		};
 }

@@ -29,6 +29,10 @@ internal sealed class FakeAdbPreferenceService : IAppPreferenceService
 
 	public Task<Guid> GetInstallationId() => throw new NotSupportedException();
 
+	public byte[] DeviceIdKey { get; set; } = [.. Enumerable.Range(1, 32).Select(value => (byte)value)];
+
+	public Task<byte[]> GetAdbDeviceIdKey() => Task.FromResult(DeviceIdKey);
+
 	public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
 
 	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel) => throw new NotSupportedException();

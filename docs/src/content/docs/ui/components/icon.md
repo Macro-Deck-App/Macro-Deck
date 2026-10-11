@@ -37,20 +37,28 @@ Color = "#34c759",
 ## Names and versions
 
 A reader draws a glyph only for a name it carries. Names are published in groups: group 1 is
-`UiIcons.Version1` below, and every later name arrives in a new group that raises `ui.icon`'s maximum
-component version. A name is never removed or renamed, and it keeps its meaning: the drawing of a name may be
+`UiIcons.Version1` and group 2 is `UiIcons.Version2`, both below, and every later name arrives in a new group
+that raises `ui.icon`'s maximum component version. A name is never removed or renamed, and it keeps its meaning: the drawing of a name may be
 restyled, for example when Macro Deck's icons moved to the Lucide set, but it always denotes the same concept.
 
 Use the `UiIcons` constants rather than string literals. For a name above group 1, ask for its version and
-carry a fallback, so an older reader draws the fallback instead of an empty box:
+carry a fallback, so an older reader draws the fallback instead of an empty box. The fallback can be a
+group 1 icon close in meaning:
 
 ```csharp
-RequiredComponentVersion = UiIcons.VersionOf(name),
-Fallback = new UiTextRun { Key = "label", Text = "Wi-Fi" },
+new UiIcon
+{
+    Key = "device",
+    Icon = UiIcons.DeviceLaptop,
+    RequiredComponentVersion = UiIcons.VersionOf(UiIcons.DeviceLaptop),
+    Fallback = new UiIcon { Key = "deviceFallback", Icon = UiIcons.DeviceDesktop },
+}
 ```
 
-`UiIcons.VersionOf` returns `1` for every name listed here and `null` for a name no version draws. A
-`RequiredComponentVersion` of `1` or `null` asks for nothing beyond knowing the type.
+`UiIcons.VersionOf` returns the group a name was published in, `1` or `2` for the names listed here, and
+`null` for a name no version draws. A `RequiredComponentVersion` of `1` or `null` asks for nothing beyond
+knowing the type. A reader that carries only group 1 advertises `ui.icon` version 1 and draws the fallback
+for a node that asks for 2.
 
 ## Published names
 
@@ -65,6 +73,11 @@ Component version 1 draws these 76 names:
 `moon`, `music-note`, `music-player-type`, `pause`, `pencil`, `pin`, `pin-off`, `play`, `plus`, `power`,
 `puzzle`, `refresh`, `scissors`, `search`, `settings`, `sidebar`, `sliders`, `star`, `store`, `sun`,
 `trash`, `undo`, `unlock`, `upload`, `user`, `weather-type`, `wifi`, `x`, `zap`.
+
+Component version 2 adds these 9 device and battery names:
+
+`device-laptop`, `device-watch`, `device-headphones`, `device-gamepad`, `device-mouse`, `device-keyboard`,
+`device-speaker`, `battery`, `battery-charging`.
 
 The C# constant is the name in PascalCase - `UiIcons.AlertTriangle` is `alert-triangle`. The list is
 [`UiIcons`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/ui-model/src/MacroDeck.Ui/Components/UiComponentValues.cs);

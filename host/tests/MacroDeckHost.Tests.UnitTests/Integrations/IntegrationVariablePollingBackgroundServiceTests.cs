@@ -375,7 +375,8 @@ internal sealed class IntegrationVariablePollingBackgroundServiceTests
 			int? decimalPlaces,
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
-			VariableUpdateMode updateMode = VariableUpdateMode.Polled)
+			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+			bool publishedByHost = false)
 		{
 			if (!_registeredByIntegration.TryGetValue(integrationId, out var names))
 			{

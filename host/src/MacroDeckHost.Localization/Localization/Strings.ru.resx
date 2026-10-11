@@ -22646,4 +22646,133 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Steam.TotalPlaytime" xml:space="preserve">
     <value>Всего {hours} ч</value>
   </data>
+  <data name="Integrations.Batteries.Variables.Level" xml:space="preserve">
+    <value>Заряд батареи: {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Charging" xml:space="preserve">
+    <value>Зарядка: {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Connected" xml:space="preserve">
+    <value>Подключение: {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.State" xml:space="preserve">
+    <value>Состояние зарядки: {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeRemaining" xml:space="preserve">
+    <value>Оставшееся время работы (мин): {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.TimeToFull" xml:space="preserve">
+    <value>Время до полной зарядки (мин): {device}</value>
+  </data>
+  <data name="Integrations.Batteries.Variables.Health" xml:space="preserve">
+    <value>Здоровье батареи: {device}</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Name" xml:space="preserve">
+    <value>Батарея</value>
+  </data>
+  <data name="WebClient.Widgets.Battery.Description" xml:space="preserve">
+    <value>Заряд телефонов, наушников и других устройств в виде колец или полос</value>
+  </data>
+  <data name="Widgets.Battery.Devices" xml:space="preserve">
+    <value>Устройства</value>
+  </data>
+  <data name="Widgets.Battery.DevicesOne" xml:space="preserve">
+    <value>Одно устройство</value>
+  </data>
+  <data name="Widgets.Battery.DevicesAll" xml:space="preserve">
+    <value>Все устройства</value>
+  </data>
+  <data name="Widgets.Battery.DevicesSelection" xml:space="preserve">
+    <value>Выбранные устройства</value>
+  </data>
+  <data name="Widgets.Battery.Device" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="Widgets.Battery.DeviceOption" xml:space="preserve">
+    <value>{device} - {provider}</value>
+  </data>
+  <data name="Widgets.Battery.DeviceUnavailable" xml:space="preserve">
+    <value>{device} (недоступно)</value>
+  </data>
+  <data name="Widgets.Battery.NoDevicesHint" xml:space="preserve">
+    <value>Пока ни одно устройство не сообщает о батарее. Включите интеграцию ADB и подключите телефон или установите плагин, предоставляющий данные о батареях.</value>
+  </data>
+  <data name="Widgets.Battery.StyleBar" xml:space="preserve">
+    <value>Полоса</value>
+  </data>
+  <data name="Widgets.Battery.ShowPercentage" xml:space="preserve">
+    <value>Показывать проценты</value>
+  </data>
+  <data name="Widgets.Battery.ShowName" xml:space="preserve">
+    <value>Показывать имя устройства</value>
+  </data>
+  <data name="Widgets.Battery.ShowChargingBadge" xml:space="preserve">
+    <value>Показывать индикатор зарядки</value>
+  </data>
+  <data name="Widgets.Battery.ColorMode" xml:space="preserve">
+    <value>Цвет</value>
+  </data>
+  <data name="Widgets.Battery.ColorByLevel" xml:space="preserve">
+    <value>По уровню заряда</value>
+  </data>
+  <data name="Widgets.Battery.ColorSingle" xml:space="preserve">
+    <value>Один цвет</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColor" xml:space="preserve">
+    <value>Цвет зарядки</value>
+  </data>
+  <data name="Widgets.Battery.ChargingColorHint" xml:space="preserve">
+    <value>Заряжающееся устройство отображается голубым вместо цвета уровня заряда.</value>
+  </data>
+  <data name="Widgets.Battery.CustomColor" xml:space="preserve">
+    <value>Цвет батареи</value>
+  </data>
+  <data name="Widgets.Battery.State.Charging" xml:space="preserve">
+    <value>Зарядка</value>
+  </data>
+  <data name="Widgets.Battery.State.Full" xml:space="preserve">
+    <value>Полностью заряжено</value>
+  </data>
+  <data name="Widgets.Battery.State.NotCharging" xml:space="preserve">
+    <value>Не заряжается</value>
+  </data>
+  <data name="Widgets.Battery.State.NotConnected" xml:space="preserve">
+    <value>Не подключено</value>
+  </data>
+  <data name="Widgets.Battery.State.NotAvailable" xml:space="preserve">
+    <value>Недоступно</value>
+  </data>
+  <data name="Widgets.Battery.State.HoursLeft" xml:space="preserve">
+    <value>Осталось: {hours} ч {minutes} мин</value>
+  </data>
+  <data name="Widgets.Battery.State.MinutesLeft" xml:space="preserve">
+    <value>Осталось: {minutes} мин</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInHours" xml:space="preserve">
+    <value>До полной зарядки: {hours} ч {minutes} мин</value>
+  </data>
+  <data name="Widgets.Battery.State.FullInMinutes" xml:space="preserve">
+    <value>До полной зарядки: {minutes} мин</value>
+  </data>
+  <data name="Widgets.Battery.EmptyHint" xml:space="preserve">
+    <value>Нет устройств с батареей</value>
+  </data>
+  <data name="Widgets.Battery.PickDeviceHint" xml:space="preserve">
+    <value>Выберите устройство в настройках виджета.</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryPhone" xml:space="preserve">
+    <value>Телефон</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryHeadphones" xml:space="preserve">
+    <value>Наушники</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryWatch" xml:space="preserve">
+    <value>Часы</value>
+  </data>
+  <data name="Widgets.SamplePreview.BatteryController" xml:space="preserve">
+    <value>Контроллер</value>
+  </data>
+  <data name="Integrations.Capability.BatteryProvider" xml:space="preserve">
+    <value>Аккумуляторы</value>
+  </data>
 </root>

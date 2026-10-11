@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.Events;
@@ -63,6 +64,8 @@ public static class ProvidedCapabilityCatalog
 			integration => integration is IScreenSaverProvider),
 		(CapabilityKinds.VideoStreamProvider, AppStrings.Integrations.Capability.VideoStreamProvider(),
 			integration => integration is IVideoStreamIntegration),
+		(CapabilityKinds.BatteryProvider, AppStrings.Integrations.Capability.BatteryProvider(),
+			integration => integration is IBatteryProvider),
 
 		// The only row that asks for more than the interface: every remote adapter implements
 		// IMigrationProvider unconditionally, and a built-in that declares no migration has nothing to

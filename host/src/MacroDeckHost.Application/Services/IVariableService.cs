@@ -64,7 +64,8 @@ public interface IVariableService
 		int? decimalPlaces,
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
-		VariableUpdateMode updateMode = VariableUpdateMode.Polled);
+		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+		bool publishedByHost = false);
 
 	/// <summary>
 	/// Registers the variable a catalog binding stands for. Unlike

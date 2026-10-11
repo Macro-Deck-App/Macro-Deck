@@ -79,6 +79,12 @@ public class UiComponentVocabularyTests
 		"trash", "undo", "unlock", "upload", "user", "weather-type", "wifi", "x", "zap",
 	];
 
+	private static readonly string[] _expectedIconsVersion2 =
+	[
+		"device-laptop", "device-watch", "device-headphones", "device-gamepad", "device-mouse",
+		"device-keyboard", "device-speaker", "battery", "battery-charging",
+	];
+
 	private static readonly string[] _expectedShapes = ["rectangle", "rounded-rectangle", "circle", "capsule", "path"];
 
 	private static readonly string[] _expectedTimeFormats =
@@ -703,12 +709,26 @@ public class UiComponentVocabularyTests
 	}
 
 	[Test]
+	public void The_second_icon_group_is_frozen_and_adds_only_new_names()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiIcons.Version2, Is.EqualTo(_expectedIconsVersion2).AsCollection);
+			Assert.That(UiIcons.Version2, Has.None.AnyOf(UiIcons.Version1.ToArray()));
+			Assert.That(UiIcons.WellKnown, Is.EquivalentTo(UiIcons.Version1.Concat(UiIcons.Version2)));
+		});
+	}
+
+	[Test]
 	public void An_icon_name_reports_the_component_version_that_draws_it()
 	{
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiIcons.VersionOf("play"), Is.EqualTo(1));
 			Assert.That(UiIcons.VersionOf("wifi"), Is.EqualTo(1));
+			Assert.That(UiIcons.VersionOf("device-phone"), Is.EqualTo(1));
+			Assert.That(UiIcons.VersionOf("device-laptop"), Is.EqualTo(2));
+			Assert.That(UiIcons.VersionOf("battery-charging"), Is.EqualTo(2));
 			Assert.That(UiIcons.VersionOf("xs"), Is.Null);
 			Assert.That(UiIcons.VersionOf("not-an-icon"), Is.Null);
 		});

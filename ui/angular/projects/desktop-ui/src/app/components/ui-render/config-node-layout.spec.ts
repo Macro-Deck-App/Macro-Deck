@@ -230,4 +230,24 @@ describe('shared-ui-node layout capabilities', () => {
       expect(host.querySelector('.config-node-field')?.getAttribute('role')).toBeNull();
     });
   });
+
+  describe('a dynamic choice with nothing picked yet', () => {
+    it('fills its row instead of shrinking to its empty value', async () => {
+      const rendered = await renderTree({
+        id: 'device',
+        type: 'dynamic-choice',
+        properties: { label: 'Device' },
+      });
+      const host = el(rendered);
+      host.style.display = 'block';
+      host.style.width = '400px';
+      await tick(rendered);
+
+      const row = (host.querySelector('.config-node-slider-row') as HTMLElement).getBoundingClientRect();
+      const select = (host.querySelector('.config-node-slider-row > shared-select') as HTMLElement)
+        .getBoundingClientRect();
+      expect(row.width).toBeGreaterThan(300);
+      expect(select.width).toBeGreaterThan(row.width * 0.75);
+    });
+  });
 });

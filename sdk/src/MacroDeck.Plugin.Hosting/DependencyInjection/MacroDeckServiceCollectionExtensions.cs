@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
+using MacroDeck.Plugin.Hosting.Capabilities.BatteryProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
@@ -17,6 +18,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.VirtualProfiles;
 using MacroDeck.Plugin.Hosting.Capabilities.Migration;
 using MacroDeck.Plugin.Hosting.Capabilities.Weather;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
@@ -195,6 +197,12 @@ internal static class MacroDeckServiceCollectionExtensions
 		{
 			services.TryAddEnumerable(
 				ServiceDescriptor.Singleton<ICapabilityHandler, DeviceProviderCapabilityHandler>());
+		}
+
+		if (typeof(IBatteryProvider).IsAssignableFrom(typeof(TIntegration)))
+		{
+			services.TryAddEnumerable(
+				ServiceDescriptor.Singleton<ICapabilityHandler, BatteryProviderCapabilityHandler>());
 		}
 
 		if (typeof(ILayoutProvider).IsAssignableFrom(typeof(TIntegration)))

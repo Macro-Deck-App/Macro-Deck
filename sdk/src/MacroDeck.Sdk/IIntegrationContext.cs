@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -68,4 +70,21 @@ public interface IIntegrationContext
 	/// <see cref="NotificationErrorCode.Unsupported" />.
 	/// </summary>
 	INotificationService NotificationService => UnsupportedNotificationService.Instance;
+
+	/// <summary>
+	/// Reads the battery devices every provider published, including other plugins'. Handlers of
+	/// <see cref="IBatteryApi.Changed" /> subscribed here are released when the integration is shut down or
+	/// initialized again. A context from a Macro Deck without battery devices, and any implementation that
+	/// does not override this member, reports no devices and never raises the event.
+	/// </summary>
+	IBatteryApi Batteries => UnsupportedBatteryApi.Instance;
+
+	/// <summary>
+	/// The Android devices Macro Deck's own adb sees. In a plugin it is the same manager dependency injection
+	/// resolves, with the same access rules; an integration built into Macro Deck needs only ADB to be
+	/// enabled. A context from a Macro Deck that does not offer ADB to integrations, and any implementation
+	/// that does not override this member, reports
+	/// <see cref="AndroidDeviceAccess.Unsupported" />, no devices, and never raises an event.
+	/// </summary>
+	IAndroidDeviceManager AndroidDevices => UnsupportedAndroidDeviceManager.Instance;
 }

@@ -11,6 +11,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
@@ -44,6 +45,7 @@ using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.MusicPlayer;
@@ -101,6 +103,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IPluginIconResolver? _pluginIconResolver;
 	private readonly PluginColorWatches? _colorWatches;
 	private readonly INotificationManager? _notificationManager;
+	private readonly IBatteryRegistry? _batteries;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -151,10 +154,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
 		TimeSpan? musicPlayerArtworkTimeout = null,
 		PluginColorWatches? colorWatches = null,
-		INotificationManager? notificationManager = null)
+		INotificationManager? notificationManager = null,
+		IBatteryRegistry? batteries = null)
 	{
 		_notificationManager = notificationManager;
 		_colorWatches = colorWatches;
+		_batteries = batteries;
 		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
@@ -251,6 +256,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.IconPacks => await RouteIconPacksAsync(pluginId, sessionId, payload, cancellationToken),
 				HostApis.VideoStreams => RouteVideoStreams(pluginId, sessionId, connection, payload),
 				HostApis.Colors => RouteColors(pluginId, payload),
+				HostApis.Batteries => RouteBatteries(pluginId, sessionId, payload),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -2111,6 +2117,108 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return UnknownOperation(payload);
 		}
 	}
+
+	private HostCallbackResult RouteBatteries(string pluginId, string? sessionId, HostInvokePayload payload)
+	{
+		if (_batteries is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities ||
+			!capabilities.TryGetValue(CapabilityKinds.BatteryProvider, out var negotiated) ||
+			!negotiated.Accepted)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"Publishing battery devices requires the battery-provider capability.");
+		}
+
+		// The owner is the authenticated plugin, never anything the payload claims.
+		try
+		{
+			switch (payload.Operation)
+			{
+				case HostOperations.Batteries.Publish:
+				{
+					var arguments = Deserialize<BatteriesPublishArguments>(payload.Arguments);
+					if (arguments?.Devices is null)
+					{
+						return MissingArguments();
+					}
+
+					_batteries.Publish(pluginId, sessionId, ToBatteryDevices(arguments.Devices));
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.Batteries.Remove:
+				{
+					var arguments = Deserialize<BatteriesRemoveArguments>(payload.Arguments);
+					if (arguments?.DeviceIds is null)
+					{
+						return MissingArguments();
+					}
+
+					if (arguments.DeviceIds.Count > ProtocolLimits.MaxBatteryDevicesPerProvider)
+					{
+						return TooManyBatteryDevices();
+					}
+
+					_batteries.Remove(pluginId, arguments.DeviceIds);
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.Batteries.Sync:
+				{
+					var arguments = Deserialize<BatteriesSyncArguments>(payload.Arguments);
+					if (arguments?.Devices is null)
+					{
+						return MissingArguments();
+					}
+
+					_batteries.Sync(pluginId, sessionId, ToBatteryDevices(arguments.Devices));
+					return HostCallbackResult.Ok();
+				}
+
+				case HostOperations.Batteries.Withdraw:
+				{
+					// Scoped to the calling session so a late withdraw from an ended session cannot hide the
+					// devices its successor already published.
+					if (sessionId is null)
+					{
+						_batteries.RemoveAll(pluginId);
+					}
+					else
+					{
+						_batteries.RemoveSession(pluginId, sessionId);
+					}
+
+					return HostCallbackResult.Ok();
+				}
+
+				default:
+					return UnknownOperation(payload);
+			}
+		}
+		catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message);
+		}
+	}
+
+	private static List<BatteryDevice> ToBatteryDevices(IReadOnlyList<BatteryDeviceDto> devices)
+	{
+		if (devices.Count > ProtocolLimits.MaxBatteryDevicesPerProvider)
+		{
+			throw new InvalidOperationException(
+				$"A battery provider can publish at most {ProtocolLimits.MaxBatteryDevicesPerProvider} devices.");
+		}
+
+		return [.. devices.Select(BatteryWire.ToDevice)];
+	}
+
+	private static HostCallbackResult TooManyBatteryDevices()
+		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+			$"A battery provider can publish at most {ProtocolLimits.MaxBatteryDevicesPerProvider} devices.");
 
 	private static HostCallbackResult MissingArguments()
 		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.");

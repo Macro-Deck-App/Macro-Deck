@@ -75,6 +75,10 @@ x-macrodeck-limits:
   maxCalendarMeetingUrlLength: 2048
   maxCalendarDescriptionLength: 16384
   maxCalendarParticipants: 100
+  maxBatteryDevicesPerProvider: 64
+  maxBatteryDeviceIdLength: 128
+  maxBatteryDeviceNameLength: 128
+  maxBatteryDeviceKindLength: 32
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Limits.ProtocolTimeouts (camelCase + Ms suffix, whole milliseconds)
 x-macrodeck-timeouts:
@@ -109,6 +113,7 @@ x-macrodeck-capability-kinds:
   - messaging
   - video-stream-provider
   - calendar
+  - battery-provider
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

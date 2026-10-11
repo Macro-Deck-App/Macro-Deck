@@ -140,7 +140,8 @@ internal sealed class RemoteAndroidDeviceManager : IAndroidDeviceManager
 				}
 
 				var previousState = device.State;
-				device.Update(new AndroidDeviceInfo(dto.Model, dto.Manufacturer, dto.Product), ToState(dto.State));
+				device.Update(new AndroidDeviceInfo(dto.Model, dto.Manufacturer, dto.Product) { StableId = dto.StableId },
+					ToState(dto.State));
 				current.Add(device);
 
 				if (!before.Remove(dto.Serial))

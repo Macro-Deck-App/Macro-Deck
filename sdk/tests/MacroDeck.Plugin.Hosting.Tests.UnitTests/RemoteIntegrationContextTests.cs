@@ -554,6 +554,11 @@ public class RemoteIntegrationContextTests
 
 		covered.Add((HostApis.Colors, HostOperations.Colors.Watches));
 
+		foreach (var operation in HostOperations.Batteries.All)
+		{
+			covered.Add((HostApis.Batteries, operation));
+		}
+
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));
 
 		Assert.That(declared, Is.SubsetOf(covered));

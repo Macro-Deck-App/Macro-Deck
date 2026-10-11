@@ -1,11 +1,14 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
+using MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 
@@ -58,6 +61,33 @@ public class RemoteAndroidDeviceManagerTests
 			Assert.That(_manager.FindDevice("B2")!.State, Is.EqualTo(AndroidDeviceState.Unauthorized));
 			Assert.That(_events, Is.EqualTo(new[] { "access", "connected:A1", "connected:B2" }));
 		});
+	}
+
+	[Test]
+	public void The_stable_id_the_host_reports_is_part_of_the_device_info()
+	{
+		Push(1,
+			AdbAccessStates.Available,
+			Device("192.168.1.20:5555", AdbDeviceStates.Online, "Pixel 8") with { StableId = "3fa9c2d1e0b4a756" },
+			Device("B2", AdbDeviceStates.Online, "Pixel 7"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_manager.FindDevice("192.168.1.20:5555")!.Info,
+				Is.EqualTo(new AndroidDeviceInfo("Pixel 8", "Google", "shiba") { StableId = "3fa9c2d1e0b4a756" }));
+			Assert.That(_manager.FindDevice("B2")!.Info.StableId, Is.Null);
+		});
+	}
+
+	[Test]
+	public void The_integration_context_of_a_built_plugin_hands_out_the_same_manager_as_dependency_injection()
+	{
+		using var plugin = MacroDeckPlugin.CreatePlugin()
+			.RegisterIntegration(_ => new TestIntegration())
+			.Build();
+
+		Assert.That(plugin.Services.GetRequiredService<IIntegrationContext>().AndroidDevices,
+			Is.SameAs(plugin.Services.GetRequiredService<IAndroidDeviceManager>()));
 	}
 
 	[Test]

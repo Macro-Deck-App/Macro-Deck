@@ -70,6 +70,8 @@ assets:
       - ui/runtime/styles/icons/arrow-left.svg
       - ui/runtime/styles/icons/arrow-right.svg
       - ui/runtime/styles/icons/arrow-up.svg
+      - ui/runtime/styles/icons/battery-charging.svg
+      - ui/runtime/styles/icons/battery.svg
       - ui/runtime/styles/icons/bell.svg
       - ui/runtime/styles/icons/blend.svg
       - ui/runtime/styles/icons/braces-x.svg
@@ -88,8 +90,15 @@ assets:
       - ui/runtime/styles/icons/crosshair.svg
       - ui/runtime/styles/icons/device-desktop.svg
       - ui/runtime/styles/icons/device-floppy.svg
+      - ui/runtime/styles/icons/device-gamepad.svg
+      - ui/runtime/styles/icons/device-headphones.svg
+      - ui/runtime/styles/icons/device-keyboard.svg
+      - ui/runtime/styles/icons/device-laptop.svg
+      - ui/runtime/styles/icons/device-mouse.svg
       - ui/runtime/styles/icons/device-phone.svg
+      - ui/runtime/styles/icons/device-speaker.svg
       - ui/runtime/styles/icons/device-tablet.svg
+      - ui/runtime/styles/icons/device-watch.svg
       - ui/runtime/styles/icons/disc.svg
       - ui/runtime/styles/icons/dots-vertical.svg
       - ui/runtime/styles/icons/download.svg

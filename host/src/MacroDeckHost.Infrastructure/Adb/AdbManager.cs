@@ -60,6 +60,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly SemaphoreSlim _wake = new(0, 1);
 	private readonly ConcurrentDictionary<string, string?> _manufacturerCache = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, string> _stableIdCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, AdbDeviceProperties> _propertiesCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, DateTimeOffset> _propertiesRequestedAt = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, (DateTimeOffset At, AdbBatteryReading Reading)> _batteryCache
@@ -75,6 +76,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	/// </summary>
 	private readonly ConcurrentDictionary<string, byte> _propertiesUnavailable = new(StringComparer.Ordinal);
 
+	private byte[]? _deviceIdKey;
 	private Snapshot _snapshot = new(AdbStatus.Disabled, []);
 	private Dictionary<string, AdbDevice> _knownDevices = new(StringComparer.Ordinal);
 	private AdbSettings? _currentSettings;
@@ -706,6 +708,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			await ReleaseOwnedTunnelsAsync(cancellationToken);
 			_tunnelCoordinator.SetExecutablePath(null);
 			_serverStartedByMacroDeck = false;
+			_stableIdCache.Clear();
 			SetSnapshot(AdbStatus.Disabled, []);
 			return;
 		}
@@ -804,7 +807,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			if (device.State == AdbDeviceState.Device)
 			{
 				var manufacturer = await GetOrFetchManufacturerAsync(resolvedPath, device.Serial, cancellationToken);
-				enriched.Add(device with { Manufacturer = manufacturer });
+				var stableId = await GetOrFetchStableIdAsync(resolvedPath, device.Serial, cancellationToken);
+				enriched.Add(device with { Manufacturer = manufacturer, StableId = stableId });
 			}
 			else
 			{
@@ -812,6 +816,7 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			}
 		}
 
+		ForgetStableIdsOfDetached(parsed);
 		var merged = MergeWithRetained(enriched, now);
 
 		if (settings.UsbConnectionsEnabled)
@@ -959,6 +964,58 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return manufacturer;
 	}
 
+	private async Task<string?> GetOrFetchStableIdAsync(string executablePath,
+		string serial,
+		CancellationToken cancellationToken)
+	{
+		if (_stableIdCache.TryGetValue(serial, out var cached))
+		{
+			return cached;
+		}
+
+		var serialNumber = await RunPropertyQueryAsync(executablePath,
+			new AdbSerialNumberCommand(serial),
+			cancellationToken);
+		if (!serialNumber.Answered)
+		{
+			return null;
+		}
+
+		var key = _deviceIdKey ??= await LoadDeviceIdKeyAsync();
+		var stableId = AdbStableId.Compute(key, serialNumber.Value, serial);
+		_stableIdCache[serial] = stableId;
+		return stableId;
+	}
+
+	// A serial can be reused by other hardware once it has gone, for example a Wi-Fi address.
+	private void ForgetStableIdsOfDetached(IReadOnlyList<AdbDevice> attached)
+	{
+		var serials = attached.Select(device => device.Serial).ToHashSet(StringComparer.Ordinal);
+		foreach (var serial in _stableIdCache.Keys.Where(serial => !serials.Contains(serial)))
+		{
+			_stableIdCache.TryRemove(serial, out _);
+		}
+	}
+
+	private async Task<(bool Answered, string? Value)> RunPropertyQueryAsync(string executablePath,
+		AdbQueryCommand command,
+		CancellationToken cancellationToken)
+	{
+		var built = AdbCommandBuilder.Build(command);
+		if (!built.Success)
+		{
+			return (false, null);
+		}
+
+		var result = await _processRunner.RunAsync(executablePath,
+			built.Data!,
+			_propertyProbeTimeout,
+			cancellationToken);
+		return result is { Started: true, TimedOut: false }
+			? (true, result.ExitCode == 0 ? AdbPropertyParsers.ParseSingleLineProperty(result.StandardOutput) : null)
+			: (false, null);
+	}
+
 	private List<AdbDevice> MergeWithRetained(IReadOnlyList<AdbDevice> current, DateTimeOffset now)
 	{
 		var currentSerials = current.Select(device => device.Serial).ToHashSet(StringComparer.Ordinal);
@@ -1064,6 +1121,13 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		}
 	}
 
+	private async Task<byte[]> LoadDeviceIdKeyAsync()
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var preferenceService = scope.ServiceProvider.GetRequiredService<IAppPreferenceService>();
+		return await preferenceService.GetAdbDeviceIdKey();
+	}
+
 	private async Task<AdbSettings> LoadSettingsAsync()
 	{
 		using var scope = _scopeFactory.CreateScope();
@@ -1096,7 +1160,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			new[] { $"{snapshot.Status.Enabled}|{snapshot.Status.Supported}" }.Concat(snapshot.Devices
 				.Where(device => device.State != AdbDeviceState.Disconnected)
 				.OrderBy(device => device.Serial, StringComparer.Ordinal)
-				.Select(device => $"{device.Serial}|{device.State}|{device.Model}|{device.Manufacturer}|{device.Product}")));
+				.Select(device =>
+					$"{device.Serial}|{device.State}|{device.Model}|{device.Manufacturer}|{device.Product}|{device.StableId}")));
 
 	private (AdbFailureCode Code, string Message)? PreflightForPlugin(string serial, out string executablePath)
 	{

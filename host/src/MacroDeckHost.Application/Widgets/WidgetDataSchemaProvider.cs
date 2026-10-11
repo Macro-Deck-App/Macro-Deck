@@ -19,7 +19,8 @@ public sealed class WidgetDataSchemaProvider : IWidgetDataSchemaProvider
 		[WidgetTypeIds.Clock] = "widget-data-clock-v1.schema.json",
 		[WidgetTypeIds.Countdown] = "widget-data-countdown-v1.schema.json",
 		[WidgetTypeIds.Stopwatch] = "widget-data-stopwatch-v1.schema.json",
-		[WidgetTypeIds.Gauges] = "widget-data-gauges-v1.schema.json"
+		[WidgetTypeIds.Gauges] = "widget-data-gauges-v1.schema.json",
+		[WidgetTypeIds.Battery] = "widget-data-battery-v1.schema.json"
 	};
 
 	private static readonly Lazy<IReadOnlyDictionary<string, JsonSchema>> _schemas = new(LoadSchemas);

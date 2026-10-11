@@ -81,6 +81,19 @@ keeps loading when members are added.
 - Real devices still cannot be exercised in CI (ADR 0030); validation, access, the in-flight cap, lock
   behaviour, cancellation and truncation are tested against fakes.
 
+## Clarification (2026-10-11)
+
+In-process integrations now get `IAndroidDeviceManager` too, through `IIntegrationContext.AndroidDevices`,
+because [ADR 0107](0107-built-in-integrations-are-built-as-extractable-plugins.md) has built-in integrations
+reach the host only through the SDK. The Consequences entry above that says they get none is superseded. For
+an in-process integration, access needs only ADB to be enabled: the user's **Allow plugins to use ADB** and
+the `host:adb` declaration are the plugin path's consent gate and do not apply. The locked-host refusals and
+the shell output budget are one host-side policy that both paths share. The SDK reports each device's
+`StableId`, a per-install keyed hash of its hardware serial, in `AndroidDeviceInfo` and in the `adb` state
+push; the hardware serial itself still never leaves the ADB manager. An ADB integration extracted into a
+plugin would need `host:adb` and **Allow plugins to use ADB** like any other plugin; without them its battery
+devices disappear.
+
 ## Alternatives considered
 
 - **Expose `IAdbManager` directly.** It is a host-internal contract shaped for the built-in integration's

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
@@ -179,6 +180,122 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 			Assert.That(variable.Type, Is.EqualTo("numeric"));
 			Assert.That(variable.Value, Is.EqualTo("42.5"));
 			Assert.That(variable.ValueAvailable, Is.True);
+		});
+	}
+
+	[TestCase(false, CapabilityAvailability.Ready, "64")]
+	[TestCase(true, CapabilityAvailability.IntegrationDisabled, null)]
+	public async Task Battery_variables_the_host_wrote_for_an_integration_are_listed_with_it(
+		bool disabled,
+		CapabilityAvailability expected,
+		string? expectedValue)
+	{
+		var integration = new FakeVariableProviderIntegration { Id = "com.example.headsets", IsInitialized = true };
+		var registry = new ConfigurableIntegrationRegistry([integration], disabled: disabled ? [integration.Id] : []);
+		var variableRegistry = new VariableRegistry();
+		foreach (var (name, owner, value) in new[]
+		{
+			("battery_arctis_headset_d15c7416_level", integration.Id, "64"),
+			("battery_pixel_8_3f9a1c2e_level", "app.macro-deck.adb", "80"),
+			("headset_mode", integration.Id, "1"),
+		})
+		{
+			variableRegistry.Upsert(new VariableEntity
+			{
+				Id = Guid.NewGuid(),
+				Name = name,
+				Scope = DomainEnums.VariableScope.Global,
+				Type = DomainEnums.VariableType.Numeric,
+				Classification = DomainEnums.VariableClassification.Integration,
+				OwnerIntegrationId = owner,
+				Value = value,
+				UpdateMode = DomainEnums.VariableUpdateMode.Pushed,
+				PublishedByHost = name.StartsWith("battery_", StringComparison.Ordinal),
+				UpdatedAt = DateTime.UtcNow
+			});
+		}
+
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore(), variableRegistry);
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		var variable = response.Variables.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(variable.Name, Is.EqualTo("battery_arctis_headset_d15c7416_level"));
+			Assert.That(variable.Availability, Is.EqualTo(expected));
+			Assert.That(variable.Value, Is.EqualTo(expectedValue));
+		});
+	}
+
+	[Test]
+	public async Task A_variable_the_integration_wrote_itself_is_not_taken_for_a_host_published_one()
+	{
+		var integration = new FakeVariableProviderIntegration { Id = "com.example.headsets", IsInitialized = true };
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var variableRegistry = new VariableRegistry();
+		variableRegistry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "battery_arctis_headset_d15c7416_level",
+			Scope = DomainEnums.VariableScope.Global,
+			Type = DomainEnums.VariableType.Numeric,
+			Classification = DomainEnums.VariableClassification.Integration,
+			OwnerIntegrationId = integration.Id,
+			Value = "64",
+			UpdatedAt = DateTime.UtcNow
+		});
+		var handler = CreateHandler(registry, new FakeIntegrationConfigStore(), variableRegistry);
+
+		var response = await handler.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		Assert.That(response.Variables, Is.Empty);
+	}
+
+	[Test]
+	public async Task The_overview_counts_the_same_variables_the_detail_lists()
+	{
+		var integration = new FakeVariableProviderIntegration
+		{
+			Id = "com.example.headsets",
+			IsInitialized = true,
+			Variables = [VariableDefinition.Eager("headset_mode", VariableType.Numeric)]
+		};
+		var registry = new ConfigurableIntegrationRegistry([integration]);
+		var variableRegistry = new VariableRegistry();
+		foreach (var name in new[] { "headset_mode", "battery_arctis_headset_d15c7416_level", "battery_arctis_headset_d15c7416_charging" })
+		{
+			variableRegistry.Upsert(new VariableEntity
+			{
+				Id = Guid.NewGuid(),
+				Name = name,
+				Scope = DomainEnums.VariableScope.Global,
+				Type = DomainEnums.VariableType.Numeric,
+				Classification = DomainEnums.VariableClassification.Integration,
+				OwnerIntegrationId = integration.Id,
+				Value = "1",
+				UpdateMode = DomainEnums.VariableUpdateMode.Pushed,
+				PublishedByHost = name.StartsWith("battery_", StringComparison.Ordinal),
+				UpdatedAt = DateTime.UtcNow
+			});
+		}
+
+		var overview = new GetIntegrationsRequestMessageHandler(registry,
+			new FakeIntegrationConfigStore(),
+			new IntegrationIssueService(registry, new FakeIntegrationHostIssueStore(), new FakeIntegrationLifecycle()),
+			variables: variableRegistry);
+		var detail = CreateHandler(registry, new FakeIntegrationConfigStore(), variableRegistry);
+
+		var listed = await overview.Handle(new GetIntegrationsRequest(), CancellationToken.None);
+		var capabilities = await detail.Handle(new GetIntegrationCapabilitiesRequest { IntegrationId = integration.Id },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(capabilities.Variables, Has.Count.EqualTo(3));
+			Assert.That(listed.Integrations.Single().VariableCount, Is.EqualTo(capabilities.Variables.Count));
 		});
 	}
 

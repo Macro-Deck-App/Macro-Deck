@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The twenty `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The twenty-one `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `battery-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -275,7 +275,7 @@ The reply caps are fixed in `ProtocolLimits` rather than advertised, and `MacroD
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, `batteries`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -296,6 +296,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `messaging` | Needs the `messaging` capability kind; own rate limit instead of the per-plugin callback throttle; `send` and `request` run off the session's dispatch loop - see [`messaging`](#messaging). |
 | `video-streams` | Only for sessions the host opened on the calling plugin's own providers; own rate limit instead of the per-plugin callback throttle - see [`video-streams`](#video-streams). |
 | `colors` | `resolve` takes `value` and an optional `widgetId` and answers `color`, absent for no colour; only Color variables resolve. `watches` replaces the plugin's whole table of `{watchId, value, widgetId?}`, at most `maxColorWatches`, and the host pushes a `host.state` for `colors` with `revision` and every watch's `{watchId, color?}` after each table change and each change of a watched colour; a push at or below the last applied `revision` is stale. A host without the api answers `CAPABILITY_UNSUPPORTED`. See [Resolving colours yourself](/features/variables/#resolving-colours-yourself). |
+| `batteries` | Needs the `battery-provider` capability kind to publish; the `host.state` push goes to every plugin - see [`batteries`](#batteries). |
 
 #### `widgets` by major
 
@@ -419,12 +420,17 @@ device list changes. Its shape is
 
 ```json
 {"type":"host.state","id":"<uuid-v7>","payload":{"api":"adb","data":{"access":"available","revision":7,
- "devices":[{"serial":"R58M123","state":"online","model":"SM-G991B","manufacturer":"samsung","product":"o1s"}]}}}
+ "devices":[{"serial":"R58M123","state":"online","model":"SM-G991B","manufacturer":"samsung","product":"o1s",
+   "stableId":"3fa9c2d1e0b4a756"}]}}}
 ```
 
 `access` is `available`, `adb-not-enabled` or `adb-not-allowed`; `devices` is empty unless it is
 `available`, and a device that left is simply absent. A device's `state` is `online`, `connecting`,
-`offline` or `unauthorized`. `revision` follows the same rule as the `deck` push: apply a push only when
+`offline` or `unauthorized`. The optional `stableId` is a keyed hash of the device's hardware serial,
+specific to this installation of Macro Deck and the same over USB and Wi-Fi; it is also the local id the
+built-in ADB battery provider publishes the device under, so a plugin with `host:adb` can match an adb
+device with its [`batteries`](#batteries) entry. It is absent from older hosts and until the host has read
+the serial, and the serial itself is never sent. `revision` follows the same rule as the `deck` push: apply a push only when
 its revision is higher than the last one applied in this session. A host without this api never pushes it
 and answers every `adb` invoke with `CAPABILITY_UNSUPPORTED`.
 
@@ -601,6 +607,64 @@ with `CAPABILITY_UNAVAILABLE` and one of these reasons in `details.reason`; a fa
 | `video_stream_transport_not_accepted` | `TransportNotAccepted` | no |
 | `video_stream_capacity_reached` | `CapacityReached` | yes |
 | `video_stream_busy` | `Busy` | yes |
+
+#### `batteries`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"api":"batteries","operation":"publish",
+   "arguments":{"devices":[{"id":"pad-1","name":"Headset","kind":"headphones","levelPercent":80,
+     "chargeState":"discharging","isConnected":true,"health":"good"}]}}}
+```
+
+A battery provider publishes its devices; the host keeps one catalog of every provider's devices and
+pushes it to every plugin. Argument shapes are in
+[`BatteriesInvokeArguments.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/BatteriesInvokeArguments.cs),
+the pushed state in
+[`BatteryStateDto.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/BatteryStateDto.cs).
+The SDK side is [Batteries](/features/batteries/).
+
+| Operation | Arguments | Result `data` | Meaning |
+| --- | --- | --- | --- |
+| `publish` | `devices` | none | Adds or replaces devices of the calling plugin, keyed by `id`. |
+| `remove` | `deviceIds` | none | Removes devices for good; readers see their ids in `removedIds`. Unknown ids are ignored. |
+| `sync` | `devices` | none | Replaces the calling plugin's whole set. Devices left out count as removed. The SDK sends it after a resumed reconnect. |
+| `withdraw` | none | none | Withdraws every device the calling session published: they leave the catalog without being listed in `removedIds`. The SDK sends it before it initializes a provider again within the same session, for example after a configuration change. |
+
+- **The owner is the calling plugin.** Nothing in the payload names it. A plugin that did not get the
+  `battery-provider` capability accepted is refused with `CAPABILITY_UNAVAILABLE`.
+- **All or nothing.** A device that fails validation, a duplicate id, or a set that would leave the plugin
+  with more than `maxBatteryDevicesPerProvider` (64) devices refuses the whole call with `INVALID_PAYLOAD`,
+  and nothing is applied. An `id` or `name` is at most 128 characters, a `kind` at most 32, and
+  `levelPercent` is 0 to 100 or absent.
+- **Open vocabularies.** `kind` is one of `phone`, `tablet`, `laptop`, `headphones`, `watch`, `controller`,
+  `mouse`, `keyboard`, `speaker`, `other`; `chargeState` one of `unknown`, `discharging`, `charging`,
+  `full`, `not-charging`; `health` one of `unknown`, `good`, `overheat`, `dead`, `over-voltage`, `cold`,
+  `failure`. A reader maps a value it does not know to `other` or `unknown`. Time estimates travel as
+  whole seconds, `timeRemainingSeconds` and `timeToFullSeconds`.
+- **The calls count toward the per-plugin callback throttle.** Beyond it is `RATE_LIMITED`.
+- **Devices go with the session.** When a plugin session ends, the host withdraws the devices that session
+  published: they leave the catalog without being listed in `removedIds`. `withdraw` does the same while
+  the session stays connected, and only for the calling session, so a late call from an ended session
+  never hides what its successor published. The SDK ignores a refused `withdraw`; the devices then stay
+  until the session ends.
+
+**`host.state` for `batteries`** is sent to every connected plugin, whether or not it declared
+`battery-provider`, on registration and after each change of the catalog. `data` carries `revision`,
+`devices` and `removedIds`. Each device has the published fields plus `id`, qualified as
+`<provider id>:<local id>`, `localId`, `providerId`, `providerName` and `updatedAt`. A push at or below the
+last applied `revision` in the same session is stale. `removedIds` lists the devices removed for good since
+the previous revision; a device absent from `devices` without being listed there was withdrawn and may
+return. A plugin that missed a revision may miss its removals, but `devices` is always complete.
+
+A host without this api answers every `batteries` invoke with `CAPABILITY_UNSUPPORTED`, sends no
+`batteries` state, and does not list `battery-provider` in the descriptor's `capabilityKinds`.
+
+##### The `battery-provider` capability kind
+
+Version 1, declared at local id `provider`. Its one operation is `describe`, which answers `providerName`;
+empty means the plugin's manifest name. DTOs are in
+[`BatteryProviderDtos.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Capabilities/BatteryProvider/BatteryProviderDtos.cs).
 
 ### Events, logs and state
 

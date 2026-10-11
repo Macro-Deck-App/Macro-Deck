@@ -19,6 +19,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
@@ -50,6 +51,7 @@ public abstract class RemotePluginIntegration :
 	IProfileProvider,
 	IMigrationProvider,
 	IDeviceProvider,
+	IBatteryProvider,
 	ILayoutProvider,
 	IFolderViewProvider,
 	IScreenSaverProvider,
@@ -431,6 +433,13 @@ public abstract class RemotePluginIntegration :
 		=> Task.CompletedTask;
 
 	Task IDeviceProvider.ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+	string IBatteryProvider.ProviderName => Snapshot.BatteryProviderName;
+
+	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
+		=> Task.CompletedTask;
+
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
 	// Same reasoning as IDeviceProvider above: a plugin owns its own layout discovery, and registrations
 	// arrive as host.invoke callbacks (see RemotePluginIntegrationRegistrar.RegisterProviderLayoutsAsync)

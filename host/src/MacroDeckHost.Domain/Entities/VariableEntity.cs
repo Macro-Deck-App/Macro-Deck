@@ -30,6 +30,11 @@ public class VariableEntity : BaseEntity
 	// variable has no cadence to fall behind, so applying it would expire a value that is simply stable.
 	public VariableUpdateMode UpdateMode { get; set; } = VariableUpdateMode.Polled;
 
+	// Written by the host on the owning integration's behalf rather than by the integration itself, so it is
+	// listed with that integration without being one of its declared variables.
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+	public bool PublishedByHost { get; set; }
+
 	public int? DecimalPlaces { get; set; }
 
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

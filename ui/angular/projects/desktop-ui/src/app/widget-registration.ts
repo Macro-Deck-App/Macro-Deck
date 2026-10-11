@@ -53,6 +53,11 @@ function registerWidgets(registry: WidgetRegistryService): () => void {
       type: WidgetType.Gauges,
       component: UiTreeWidgetComponent,
     });
+
+    registry.register({
+      type: WidgetType.Battery,
+      component: UiTreeWidgetComponent,
+    });
   };
 }
 

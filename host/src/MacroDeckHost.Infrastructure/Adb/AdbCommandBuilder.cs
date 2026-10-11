@@ -40,6 +40,7 @@ internal static partial class AdbCommandBuilder
 			AdbListServicesCommand listServices => BuildListServices(listServices),
 			AdbDirectoryExistsCommand directoryExists => BuildDirectoryExists(directoryExists),
 			AdbSdkLevelCommand sdkLevel => Shell(sdkLevel.Serial, "getprop ro.build.version.sdk"),
+			AdbSerialNumberCommand serialNumber => Shell(serialNumber.Serial, "getprop ro.serialno"),
 			AdbPackageInfoCommand packageInfo => BuildPackageInfo(packageInfo),
 			AdbPackageRunningCommand packageRunning => BuildPackageRunning(packageRunning),
 			AdbRemountRootWritableCommand remount => BuildRemountRootWritable(remount),

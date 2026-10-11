@@ -63,6 +63,8 @@ public sealed record AdbDirectoryExistsCommand(string Serial, string DevicePath)
 
 public sealed record AdbSdkLevelCommand(string Serial) : AdbQueryCommand(Serial);
 
+public sealed record AdbSerialNumberCommand(string Serial) : AdbQueryCommand(Serial);
+
 public sealed record AdbPackageInfoCommand(string Serial, string Package) : AdbQueryCommand(Serial);
 
 public sealed record AdbPackageRunningCommand(string Serial, string Package) : AdbQueryCommand(Serial);

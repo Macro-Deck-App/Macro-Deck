@@ -3,6 +3,8 @@ using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
@@ -19,6 +21,7 @@ public sealed class AdbIntegration
 		IIntegrationIconProvider,
 		IIntegrationIssueProvider,
 		IAdbGatewayConsumer,
+		IBatteryProvider,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.adb";
@@ -33,15 +36,18 @@ public sealed class AdbIntegration
 
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly AdbHealthTracker _health = new();
+	private readonly AdbBatteryProvider _batteries;
 
 	private IAdbGateway? _gateway;
 	private AdbEventEmitter? _eventEmitter;
 	private IVariableApi? _variables;
+	private IAndroidDeviceManager? _androidDevices;
 	private bool _subscribed;
 
 	public AdbIntegration()
 	{
 		Actions = AdbActions.Create(() => _gateway, _health, _variableAccessor);
+		_batteries = new AdbBatteryProvider(() => _androidDevices, TimeProvider.System);
 	}
 
 	public string Id => IntegrationId;
@@ -69,6 +75,15 @@ public sealed class AdbIntegration
 
 	public void UseGateway(IAdbGateway gateway) => _gateway = gateway;
 
+	// Empty so battery readers show the integration's localized name instead of the variable provider's ADB label.
+	string IBatteryProvider.ProviderName => string.Empty;
+
+	Task IBatteryProvider.InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken)
+		=> _batteries.InitializeAsync(context, cancellationToken);
+
+	Task IBatteryProvider.ShutdownAsync(CancellationToken cancellationToken)
+		=> _batteries.ShutdownAsync(cancellationToken);
+
 	public byte[] GetIcon() => _icon;
 
 	public Task InitializeAsync(IIntegrationContext context)
@@ -77,6 +92,7 @@ public sealed class AdbIntegration
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_eventEmitter = new AdbEventEmitter(context.Events);
+		_androidDevices = context.AndroidDevices;
 
 		if (_gateway is { } gateway)
 		{
@@ -99,6 +115,7 @@ public sealed class AdbIntegration
 		_subscribed = false;
 		_eventEmitter = null;
 		_variables = null;
+		_androidDevices = null;
 		_variableAccessor.Current = null;
 		_variableAccessor.UserVariables = null;
 		IsInitialized = false;
@@ -112,6 +129,8 @@ public sealed class AdbIntegration
 			gateway.DeviceChanged -= OnDeviceChanged;
 			_subscribed = false;
 		}
+
+		_batteries.Dispose();
 	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)

@@ -3,10 +3,12 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Adb;
+using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Triggers;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Widgets;
@@ -24,7 +26,8 @@ public sealed class HostStatePusher(
 	DeckClientTracker deckClients,
 	IAdbManager adbManager,
 	IPluginAdbAccessPolicy adbAccessPolicy,
-	ILogger logger) :
+	ILogger logger,
+	IBatteryRegistry? batteries = null) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
 	INotificationHandler<FolderDeletedNotification>,
@@ -53,12 +56,19 @@ public sealed class HostStatePusher(
 	private readonly SemaphoreSlim _adbPush = new(1, 1);
 	private readonly SemaphoreSlim _catalogWidgetsPush = new(1, 1);
 	private long _adbRevision;
+	private readonly SemaphoreSlim _batteriesPush = new(1, 1);
+	private long _batteriesRevision;
 
 	public void Dispose()
 	{
 		_eventBindingsPush.Dispose();
 		_adbPush.Dispose();
 		_catalogWidgetsPush.Dispose();
+		_batteriesPush.Dispose();
+		if (batteries is not null && Volatile.Read(ref _subscribedToBindings) == 1)
+		{
+			batteries.Changed -= OnBatteriesChanged;
+		}
 	}
 
 	public Task PushAllAsync(string pluginId, CancellationToken cancellationToken = default)
@@ -69,13 +79,18 @@ public sealed class HostStatePusher(
 			bindingTracker.Subscribe(PushEventBindingsIfConnectedAsync);
 			deckClients.StateChanged += OnDeckClientsChanged;
 			adbManager.SnapshotChanged += OnAdbSnapshotChanged;
+			if (batteries is not null)
+			{
+				batteries.Changed += OnBatteriesChanged;
+			}
 		}
 
 		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
 			PushScriptsAsync(pluginId, cancellationToken),
 			PushWidgetsAsync(pluginId, cancellationToken),
 			PushEventBindingsAsync(pluginId, cancellationToken),
-			PushAdbAsync(pluginId, cancellationToken));
+			PushAdbAsync(pluginId, cancellationToken),
+			PushBatteriesAsync(pluginId, [], cancellationToken));
 	}
 
 	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
@@ -328,8 +343,73 @@ public sealed class HostStatePusher(
 			},
 			Model = device.Model,
 			Manufacturer = device.Manufacturer,
-			Product = device.Product
+			Product = device.Product,
+			StableId = device.StableId
 		};
+
+	private void OnBatteriesChanged(object? sender, BatteryDevicesChangedEventArgs e)
+		=> _ = PushBatteriesChangeAsync(e.RemovedIds);
+
+	// Every connected plugin gets every provider's devices, ADB phones included: reading battery devices
+	// is deliberately unrestricted (see the batteries ADR), so there is no per-plugin filter here.
+	private async Task PushBatteriesChangeAsync(IReadOnlyList<string> removedIds)
+	{
+		List<string> pluginIds;
+		try
+		{
+			pluginIds = sessionRegistry.Snapshot()
+				.Where(session => session.State == PluginSessionState.Connected)
+				.Select(session => session.PluginId)
+				.Distinct(StringComparer.Ordinal)
+				.ToList();
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push battery devices to plugins");
+			return;
+		}
+
+		foreach (var pluginId in pluginIds)
+		{
+			try
+			{
+				await PushBatteriesAsync(pluginId, removedIds, CancellationToken.None);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				logger.ForContext<HostStatePusher>()
+					.Error(exception, "Failed to push battery devices to plugin {PluginId}", pluginId);
+			}
+		}
+	}
+
+	// Serialized like the adb push, so a push built from an older device list never carries the higher revision.
+	private async Task<bool> PushBatteriesAsync(string pluginId,
+		IReadOnlyList<string> removedIds,
+		CancellationToken cancellationToken)
+	{
+		if (batteries is null)
+		{
+			return false;
+		}
+
+		await _batteriesPush.WaitAsync(cancellationToken);
+		try
+		{
+			var state = new BatteryStateDto
+			{
+				Devices = [.. batteries.Devices.Select(BatteryWire.ToDto)],
+				RemovedIds = removedIds,
+				Revision = ++_batteriesRevision
+			};
+
+			return await sessionRegistry.SendToPlugin(pluginId, BuildEnvelope(HostApis.Batteries, state), cancellationToken);
+		}
+		finally
+		{
+			_batteriesPush.Release();
+		}
+	}
 
 	private async Task PushWidgetsAfterCatalogChangeAsync()
 	{

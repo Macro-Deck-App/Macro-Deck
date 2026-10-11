@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
+using MacroDeck.Plugin.Protocol.Capabilities.BatteryProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeck.Plugin.Protocol.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Protocol.Capabilities.Events;
@@ -51,6 +52,7 @@ public sealed class RemotePluginSnapshotRefresher
 				[CapabilityKinds.MusicPlayer] = ApplyMusicPlayerDescribe,
 				[CapabilityKinds.Weather] = ApplyWeatherDescribe,
 				[CapabilityKinds.Calendar] = ApplyCalendarDescribe,
+				[CapabilityKinds.BatteryProvider] = ApplyBatteryProviderDescribe,
 				[CapabilityKinds.VirtualProfiles] = ApplyVirtualProfilesDescribe,
 				[CapabilityKinds.ConfigFlow] = ApplyConfigFlowDescribe,
 				[CapabilityKinds.Icons] = ApplyIconsDescribe,
@@ -283,6 +285,14 @@ public sealed class RemotePluginSnapshotRefresher
 			.ToList();
 
 		return snapshot with { Migrations = migrations };
+	}
+
+	private static RemotePluginCapabilitySnapshot ApplyBatteryProviderDescribe(
+		RemotePluginCapabilitySnapshot snapshot,
+		JsonElement? data)
+	{
+		var payload = data?.Deserialize<BatteryProviderDescribePayload>(PluginProtocolJson.Options);
+		return payload is null ? snapshot : snapshot with { BatteryProviderName = payload.ProviderName };
 	}
 
 	private static RemotePluginCapabilitySnapshot ApplyWeatherDescribe(

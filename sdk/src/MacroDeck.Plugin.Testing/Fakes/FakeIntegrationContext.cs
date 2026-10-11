@@ -1,4 +1,6 @@
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -26,6 +28,8 @@ namespace MacroDeck.Plugin.Testing.Fakes;
 /// </summary>
 public sealed class FakeIntegrationContext : IIntegrationContext
 {
+	private IAndroidDeviceManager? _registeredAndroidDevices;
+
 	/// <summary>Creates a fresh, empty instance of every fake.</summary>
 	public FakeIntegrationContext()
 	{
@@ -50,6 +54,9 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		Messages = new FakeMessageChannel();
 		UiResources = new FakeUiResourceRegistry();
 		Colors = new FakeColorApi();
+		Batteries = new FakeBatteryApi();
+		BatteryProvider = new FakeBatteryProviderContext();
+		AndroidDevices = new FakeAndroidDeviceManager();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -154,6 +161,35 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	/// <inheritdoc />
 	IColorApi IIntegrationContext.Colors => Colors;
+
+	/// <summary>The battery devices of every provider, as a reader sees them - see <see cref="FakeBatteryApi" />.</summary>
+	public FakeBatteryApi Batteries { get; }
+
+	/// <inheritdoc />
+	IBatteryApi IIntegrationContext.Batteries => Batteries;
+
+	/// <summary>
+	/// The battery catalog fake a battery provider publishes into. Not part of <see cref="IIntegrationContext" />
+	/// for the same reason <see cref="Devices" /> is not: a battery provider is handed its own
+	/// <c>IBatteryProviderContext</c>, and an out-of-process provider reaches the host over the wire, answered
+	/// by <c>Internal.HostInvokeDispatcher</c>'s handling of the batteries <c>host.invoke</c> API.
+	/// </summary>
+	public FakeBatteryProviderContext BatteryProvider { get; }
+
+	/// <summary>
+	/// The Android devices - see <see cref="FakeAndroidDeviceManager" />. <see cref="PluginTestHarness" /> also
+	/// registers it as the plugin's <see cref="IAndroidDeviceManager" />, with access
+	/// <see cref="AndroidDeviceAccess.Unsupported" /> until the test calls
+	/// <see cref="FakeAndroidDeviceManager.SetAccess" />. A plugin that registers its own manager keeps it, and
+	/// <see cref="IIntegrationContext.AndroidDevices" /> then returns that one, as on a real host.
+	/// </summary>
+	public FakeAndroidDeviceManager AndroidDevices { get; }
+
+	/// <inheritdoc />
+	IAndroidDeviceManager IIntegrationContext.AndroidDevices => _registeredAndroidDevices ?? AndroidDevices;
+
+	internal void UseRegisteredAndroidDevices(IAndroidDeviceManager androidDevices)
+		=> _registeredAndroidDevices = ReferenceEquals(androidDevices, AndroidDevices) ? null : androidDevices;
 
 	/// <inheritdoc />
 	IUiResourceRegistry IIntegrationContext.UiResources => UiResources;

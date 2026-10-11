@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.macro-deck.app/widget-data-battery-v1.schema.json",
+  "title": "Macro Deck Battery widget data (v1)",
+  "description": "Describes the JSON stored in WidgetEntity.Data for a Battery widget (WidgetType.Battery).",
+  "$comment": "No top-level 'required' and additionalProperties left unset on every object, for the same reasons as the other widget schemas: a fresh widget's data is near-empty, and older or newer clients may write keys this schema does not know. Device ids are the host's qualified battery ids ('<provider>:<device>'); the widget draws at most eight devices.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "enum": [
+        "one",
+        "all",
+        "selection",
+        null
+      ],
+      "description": "Which devices the widget shows: the one in 'device', every device the host knows (default), or the ones in 'selection'."
+    },
+    "device": {
+      "$ref": "#/$defs/deviceReference",
+      "description": "The device shown while 'mode' is 'one'."
+    },
+    "selection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "The devices shown while 'mode' is 'selection'.",
+      "properties": {
+        "devices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/deviceReference"
+          },
+          "description": "The picked devices, in display order. Only the first eight are drawn."
+        }
+      }
+    },
+    "style": {
+      "enum": [
+        "ring",
+        "bar",
+        null
+      ],
+      "description": "How each level is drawn: a full ring around the device icon (default) or a horizontal bar."
+    },
+    "showPercentage": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the level is written as a percentage. Absent or null means true."
+    },
+    "showName": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether the device name is written. Absent or null means true."
+    },
+    "showChargingBadge": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether a charging device shows a lightning bolt. Absent or null means true."
+    },
+    "colorMode": {
+      "enum": [
+        "level",
+        "single",
+        null
+      ],
+      "description": "How the level is colored: by 'thresholds' (default) or with the single 'color'."
+    },
+    "thresholds": {
+      "$ref": "#/$defs/colorThresholds",
+      "description": "The level bands used while 'colorMode' is 'level'. Absent or null uses red below 20, orange below 40, yellow below 60 and green from 60 percent."
+    },
+    "chargingColor": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Whether a charging device is drawn in cyan instead of its level color while 'colorMode' is 'level'. Absent or null means true."
+    },
+    "color": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The level color as #rrggbb while 'colorMode' is 'single'; the accent color when absent or null."
+    },
+    "backgroundColor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Widget background color, as #rrggbb or transparent. Absent or null keeps the widget's default background; transparent also removes the deck's tile behind the widget."
+    },
+    "border": {
+      "$ref": "#/$defs/widgetBorder",
+      "description": "Outline drawn along the widget edge."
+    },
+    "flows": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actionFlow"
+          }
+        }
+      ],
+      "description": "Press-trigger action flows, stored the same way as an Action Button's. Stored on the wire as a nested JSON string; the editor may show it inlined as an array. Both forms are accepted here."
+    }
+  },
+  "$defs": {
+    "deviceReference": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A battery device as the widget stores it, so a device that is not reporting can still be named.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The host's qualified battery device id."
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The device name when it was picked."
+        },
+        "kind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The device kind when it was picked, such as phone, headphones or watch; picks the icon."
+        }
+      }
+    },
+    "colorThresholds": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "A numeric range divided into colored bands, the value a thresholds editor writes. Each band runs from its 'from' up to the next band's; the first band has no 'from' and covers everything below the second.",
+      "properties": {
+        "bands": {
+          "type": "array",
+          "description": "One to 64 bands, lowest first.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable, non-empty key, unique within the value."
+              },
+              "color": {
+                "type": "string",
+                "description": "The band color, as #rgb, #rrggbb or #rrggbbaa, or a Color variable reference such as {{ vars.primary | color }}, which the host resolves before a widget reads it."
+              },
+              "from": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Where the band starts; strictly increasing, absent on the first band."
+              }
+            },
+            "required": [
+              "id",
+              "color"
+            ]
+          }
+        }
+      },
+      "required": [
+        "bands"
+      ]
+    },
+    "widgetBorder": {
+      "type": "object",
+      "description": "Outline drawn along the inner edge of the widget.",
+      "properties": {
+        "style": {
+          "enum": [
+            "off",
+            "static",
+            "heartbeat",
+            "breathing",
+            "blink",
+            "comet",
+            "ants",
+            "hue-shift",
+            "rgb",
+            null
+          ],
+          "description": "Visual style; absent, null or 'off' means no border. The color-tinted styles are static, heartbeat, breathing, blink, comet and ants; hue-shift and rgb ignore color."
+        },
+        "color": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Ring color for the color-tinted styles. Falls back to a default color when absent or null; ignored by hue-shift and rgb."
+        }
+      }
+    },
+    "actionFlow": {
+      "type": "object",
+      "description": "One action-flow entry (a trigger and its action blocks). Its internal structure is deliberately not validated here - deep flow validation is out of scope for this schema."
+    }
+  }
+}

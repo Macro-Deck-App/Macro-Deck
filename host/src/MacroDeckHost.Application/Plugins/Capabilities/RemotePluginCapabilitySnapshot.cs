@@ -60,6 +60,8 @@ public sealed record RemotePluginCapabilitySnapshot
 
 	public string ProfileProviderName { get; init; } = string.Empty;
 
+	public string BatteryProviderName { get; init; } = string.Empty;
+
 	public IReadOnlyList<VirtualProfileDescriptor> Profiles { get; init; } = [];
 
 	public bool AllowsMultipleConfigurations { get; init; } = true;

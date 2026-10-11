@@ -101,8 +101,10 @@ export function findIconContractProblems(root = process.cwd()) {
 
 	const values = readFileSync(join(root, SDK_VALUES), 'utf8');
 	const constants = new Map([...values.matchAll(/public const string (\w+) = "([^"]+)";/g)].map(m => [m[1], m[2]]));
-	const version1 = values.match(/Version1\s*=\s*\[([\s\S]*?)\];/);
-	const sdkVersion1 = version1 ? version1[1].split(',').map(n => n.trim()).filter(Boolean).map(n => constants.get(n) ?? n) : [];
+	const sdkGroups = [];
+	for (const m of values.matchAll(/Version(\d+)\s*=\s*\[([\s\S]*?)\];/g)) {
+		sdkGroups[Number(m[1]) - 1] = m[2].split(',').map(n => n.trim()).filter(Boolean).map(n => constants.get(n) ?? n);
+	}
 
 	const problems = [];
 	if (groups.length === 0) problems.push(`${RUNTIME_TYPES}: no UI_ICON_VERSIONS groups found`);
@@ -113,9 +115,12 @@ export function findIconContractProblems(root = process.cwd()) {
 			else if (!existsSync(join(root, ICON_DIR, glyphs.get(name)))) problems.push(`group ${index + 1}: "${name}" has no SVG`);
 		}
 	});
-	const runtimeVersion1 = groups[0] ?? [];
-	if (JSON.stringify([...sdkVersion1].sort()) !== JSON.stringify([...runtimeVersion1].sort())) {
-		problems.push(`${SDK_VALUES} UiIcons.Version1 and ${RUNTIME_TYPES} group 1 differ`);
+	for (let index = 0; index < Math.max(groups.length, sdkGroups.length); index++) {
+		const sdk = [...(sdkGroups[index] ?? [])].sort();
+		const runtime = [...(groups[index] ?? [])].sort();
+		if (JSON.stringify(sdk) !== JSON.stringify(runtime)) {
+			problems.push(`${SDK_VALUES} UiIcons.Version${index + 1} and ${RUNTIME_TYPES} group ${index + 1} differ`);
+		}
 	}
 	const icon = readFileSync(join(root, RUNTIME_ICON), 'utf8');
 	if (!/maximum:\s*UI_ICON_VERSIONS\.length/.test(icon)) {

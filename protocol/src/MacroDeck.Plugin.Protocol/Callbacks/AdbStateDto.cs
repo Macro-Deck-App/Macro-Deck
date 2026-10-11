@@ -30,6 +30,11 @@ public sealed record AdbDeviceStateDto
 	public string? Manufacturer { get; init; }
 
 	public string? Product { get; init; }
+
+	/// <summary>A per-installation keyed hash of the device's hardware serial, the same over USB and Wi-Fi, and the
+	/// local id the built-in ADB battery provider publishes the device under. Absent from older hosts and until
+	/// the host has read it. The hardware serial itself is never sent.</summary>
+	public string? StableId { get; init; }
 }
 
 public static class AdbAccessStates

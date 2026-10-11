@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
+using MacroDeckHost.Application.Variables;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Variables;
@@ -16,13 +17,16 @@ public class GetIntegrationsRequestMessageHandler
 	private readonly IIntegrationConfigStore _configStore;
 	private readonly IIntegrationIssueService _issueService;
 	private readonly IIntegrationConfigMutationCoordinator? _mutations;
+	private readonly VariableRegistry? _variables;
 
 	public GetIntegrationsRequestMessageHandler(
 		IIntegrationRegistry integrationRegistry,
 		IIntegrationConfigStore configStore,
 		IIntegrationIssueService issueService,
-		IIntegrationConfigMutationCoordinator? mutations = null)
+		IIntegrationConfigMutationCoordinator? mutations = null,
+		VariableRegistry? variables = null)
 	{
+		_variables = variables;
 		_integrationRegistry = integrationRegistry;
 		_configStore = configStore;
 		_issueService = issueService;
@@ -61,7 +65,7 @@ public class GetIntegrationsRequestMessageHandler
 				Enabled = _integrationRegistry.IsEnabled(integration.Id),
 				IsInitialized = integration.IsInitialized,
 				ActionCount = integration.Actions.Count(a => a.RunsHere()),
-				VariableCount = variableProvider?.DeclaredVariables.Count ?? 0,
+				VariableCount = VariableCountOf(integration.Id, variableProvider),
 				VariablesDependOnConfiguration = variableProvider?.VariablesDependOnConfiguration ?? false,
 				SupportsConfigFlow = supportsConfigFlow,
 				AllowsMultipleConfigurations = configProvider?.AllowsMultipleConfigurations ?? true,
@@ -78,5 +82,16 @@ public class GetIntegrationsRequestMessageHandler
 		}
 
 		return response;
+	}
+
+	private int VariableCountOf(string integrationId, IVariableProvider? variableProvider)
+	{
+		var declared = (variableProvider?.DeclaredVariables ?? [])
+			.Select(variable => variable.Name ?? variable.ResolvedId ?? string.Empty)
+			.ToHashSet(StringComparer.Ordinal);
+
+		return (variableProvider?.DeclaredVariables.Count ?? 0) + (_variables is null
+			? 0
+			: HostPublishedIntegrationVariables.Of(_variables, integrationId, declared).Count);
 	}
 }

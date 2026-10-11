@@ -48,6 +48,7 @@ public class CapabilityOperationStabilityTests
 				"session.close",
 			],
 			[CapabilityKinds.Calendar] = ["describe", "accounts", "calendars", "events", "event"],
+			[CapabilityKinds.BatteryProvider] = ["describe"],
 		};
 
 	[Test]

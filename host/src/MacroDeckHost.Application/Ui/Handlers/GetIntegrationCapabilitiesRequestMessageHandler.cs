@@ -118,6 +118,8 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 			}
 		}
 
+		AddHostPublishedVariables(response, integration.Id, enabled, requiresSetup);
+
 		return response;
 	}
 
@@ -175,6 +177,35 @@ public class GetIntegrationCapabilitiesRequestMessageHandler
 		var mapped = ActionParameterDefMapper.Map(parameter);
 		var label = mapped.Label.IsEmpty ? mapped.Name : _localization.Resolve(mapped.Label, culture);
 		return $"{label} ({mapped.Type})";
+	}
+
+	private void AddHostPublishedVariables(GetIntegrationCapabilitiesResponse response,
+		string integrationId,
+		bool enabled,
+		bool requiresSetup)
+	{
+		var declared = response.Variables.Select(variable => variable.Name).ToHashSet(StringComparer.Ordinal);
+		foreach (var entity in HostPublishedIntegrationVariables.Of(_registry, integrationId, declared))
+		{
+			var (availability, reason) = requiresSetup
+				? (CapabilityAvailability.SetupRequired, "Setup required")
+				: !enabled
+					? (CapabilityAvailability.IntegrationDisabled, "Integration disabled")
+					: _registry.IsAvailable(entity.Id)
+						? (CapabilityAvailability.Ready, "Ready")
+						: (CapabilityAvailability.Unavailable, "Unavailable");
+			var available = availability == CapabilityAvailability.Ready;
+			response.Variables.Add(new IntegrationVariableCapability
+			{
+				Name = entity.Name,
+				Type = VariableDtoMapper.TypeToWire(entity.Type),
+				DecimalPlaces = entity.DecimalPlaces,
+				Availability = availability,
+				AvailabilityReason = reason,
+				Value = available ? entity.Value : null,
+				ValueAvailable = available
+			});
+		}
 	}
 
 	private IntegrationVariableCapability BuildVariableCapability(

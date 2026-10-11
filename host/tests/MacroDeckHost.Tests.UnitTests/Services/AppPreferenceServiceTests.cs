@@ -184,6 +184,28 @@ public class AppPreferenceServiceTests
 	}
 
 	[Test]
+	public async Task The_adb_device_id_key_is_a_random_32_byte_key_kept_across_restarts()
+	{
+		var repository = new FakeAppPreferenceRepository();
+		var other = await CreateService().GetAdbDeviceIdKey();
+
+		var first = await CreateService(repository).GetAdbDeviceIdKey();
+		var afterRestart = await CreateService(repository).GetAdbDeviceIdKey();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first, Has.Length.EqualTo(32));
+			Assert.That(afterRestart, Is.EqualTo(first));
+			Assert.That(other, Is.Not.EqualTo(first), "another installation must not share the key");
+		});
+	}
+
+	[Test]
+	public void A_backup_restores_the_adb_device_id_key_with_the_other_preferences()
+		=> Assert.That(MacroDeckHost.Application.Backups.BackupComponentGroups.IsRestorablePreferenceKey(
+			AppPreferenceService.AdbDeviceIdKeyKey), Is.True);
+
+	[Test]
 	public async Task GetInstallationId_replaces_invalid_stored_value()
 	{
 		var repository = new FakeAppPreferenceRepository();

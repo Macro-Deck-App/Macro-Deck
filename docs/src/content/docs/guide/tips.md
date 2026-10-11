@@ -24,8 +24,8 @@ Unlock the deck to edit it, lock it to press buttons.
 ## Backgrounds
 
 - **Color a widget's background:** open the widget and pick a **Background Color**.
-  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Music Player,
-  Twitch Chat and YouTube Chat all have one.
+  Action Button, Slider, Clock, Countdown, Stopwatch, Weather, History Graph, Gauges, Battery, Music
+  Player, Twitch Chat and YouTube Chat all have one.
   **Reset** returns to the default look; on a Music Player that is the album art's color.
 - **Let the folder background show through:** open the color field and choose the checkered
   **Transparent** swatch. The tile loses its own background and shadow, the border stays.
@@ -125,6 +125,16 @@ edits this Macro Deck, and switch between tiles and a compact list next to the s
 
 Pin a widget to show it in **every folder of the profile**, or in **a folder and its subfolders**.
 Good for a clock or a **Go Back** button.
+
+## Battery levels
+
+- **Your phone's battery on the deck:** under **Settings > ADB** turn on **Enable ADB**, turn on the
+  **ADB / Android Debug Bridge** integration under **Integrations**, connect the phone once and allow USB
+  debugging, then add a **Battery** widget. See [Battery](/guide/concepts/#battery).
+- **Headsets, controllers and more** appear in the same widget when a plugin reports them.
+- **React to a low battery:** every device has a `battery_..._level` variable, so an automation on
+  **Variable Changed** with an **If / Else** can warn you or change a button's color when it drops. See
+  [Battery variables](/guide/concepts/#battery-variables).
 
 ## Variables in text
 

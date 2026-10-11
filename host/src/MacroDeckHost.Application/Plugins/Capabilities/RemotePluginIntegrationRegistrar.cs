@@ -14,6 +14,7 @@ using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
@@ -73,6 +74,7 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	private readonly RemoteVariableSubscriptions? _variableSubscriptions;
 	private readonly VideoStreamProviderRegistry? _videoStreamProviders;
 	private readonly IVideoStreamSessionBroker? _videoStreamSessions;
+	private readonly IBatteryRegistry? _batteries;
 
 	private readonly ConcurrentDictionary<(string PluginId, string ContentHash), TaskCompletionSource<byte[]>>
 		_iconWaiters
@@ -102,9 +104,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		RemoteVariableSubscriptions? variableSubscriptions = null,
 		VideoStreamProviderRegistry? videoStreamProviders = null,
 		IVideoStreamSessionBroker? videoStreamSessions = null,
-		INotificationManager? notificationManager = null)
+		INotificationManager? notificationManager = null,
+		IBatteryRegistry? batteries = null)
 	{
 		_notificationManager = notificationManager;
+		_batteries = batteries;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
 		_sessionRegistry = sessionRegistry;
@@ -205,6 +209,12 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		}
 
 		await PublishStateChangedAsync(pluginId, cancellationToken).ConfigureAwait(false);
+
+		if (acceptedKinds.Contains(CapabilityKinds.BatteryProvider))
+		{
+			_batteries?.SetProviderName(pluginId,
+				string.IsNullOrWhiteSpace(snapshot.BatteryProviderName) ? displayName : snapshot.BatteryProviderName);
+		}
 
 		if (acceptedKinds.Contains(CapabilityKinds.Localization))
 		{
@@ -1151,8 +1161,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			.ConfigureAwait(false);
 	}
 
+	// Battery devices go only here, not in UnregisterAsync: that also runs on every capability re-declare
+	// and session prune, where a session's devices are withdrawn by session instead.
 	private async Task UnregisterForGoodAsync(string pluginId, CancellationToken cancellationToken)
 	{
+		_batteries?.RemoveAll(pluginId);
 		await UnregisterAsync(pluginId, cancellationToken).ConfigureAwait(false);
 		await PublishCatalogChangedAsync(pluginId, cancellationToken).ConfigureAwait(false);
 	}
