@@ -20310,6 +20310,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Config.TitleRequired" xml:space="preserve">
     <value>Enter a configuration name.</value>
   </data>
+  <data name="Errors.Config.VariableNamesUnavailable" xml:space="preserve">
+    <value>A unique variable name could not be created. Rename the configuration and try again.</value>
+  </data>
   <data name="Integrations.Obs.Config.VariableIdentityExhausted" xml:space="preserve">
     <value>A unique variable name could not be created. Rename the configuration and try again.</value>
   </data>

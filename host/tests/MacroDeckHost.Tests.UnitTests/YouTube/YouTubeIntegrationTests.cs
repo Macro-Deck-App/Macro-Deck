@@ -8,7 +8,7 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -30,7 +30,7 @@ internal sealed class YouTubeIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(integration.Id, Is.EqualTo("app.macro-deck.youtube"));
-			Assert.That(integration.Id, Is.EqualTo(StreamPlatforms.YouTube.OwnerId));
+			Assert.That(integration.Id, Is.EqualTo(YouTubeStreamPlatform.Platform.OwnerId));
 			Assert.That(TestLocalization.Resolve(integration.Name), Is.EqualTo("YouTube"));
 			Assert.That(integration.AllowsMultipleConfigurations, Is.True);
 			Assert.That(discovered, Has.Exactly(1).Items);
@@ -76,9 +76,9 @@ internal sealed class YouTubeIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(types.Select(type => type.Id), Is.EqualTo(new[] { "chat", "stats" }));
-			Assert.That(types[0].DefaultData, Is.EqualTo(StreamPlatforms.YouTube.ChatWidgetDescriptor().DefaultData));
-			Assert.That(types[1].DefaultData, Is.EqualTo(StreamPlatforms.YouTube.StatsWidgetDescriptor().DefaultData));
-			Assert.That(types[1].DataSchema, Is.EqualTo(StreamPlatforms.YouTube.StatsWidgetDescriptor().DataSchema));
+			Assert.That(types[0].DefaultData, Is.EqualTo(YouTubeStreamPlatform.Platform.ChatWidgetDescriptor().DefaultData));
+			Assert.That(types[1].DefaultData, Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DefaultData));
+			Assert.That(types[1].DataSchema, Is.EqualTo(YouTubeStreamPlatform.Platform.StatsWidgetDescriptor().DataSchema));
 			Assert.That(TestLocalization.Resolve(types[0].Name), Is.EqualTo("YouTube Chat"));
 		});
 	}
@@ -143,22 +143,21 @@ internal sealed class YouTubeIntegrationTests
 	[Test]
 	public async Task Initializing_hands_the_channels_to_the_youtube_chat_and_stats()
 	{
-		var chat = new RecordingYouTubeChatSink();
-		var stats = new RecordingStatsSink();
 		var config = new RecordingIntegrationConfig();
 		YouTubeTestSupport.AddChannel(config, "UCmine", "My Channel", "@mychannel");
 		using var integration = new YouTubeIntegration(YouTubeTestSupport.Manager(_ => new FakeYouTubeApiClient()));
-		integration.UseStreamChatSink(chat);
-		integration.UseStreamStatsSink(stats);
 
 		await integration.InitializeAsync(new Context(config));
+		var chatAccounts = integration.Chat.Accounts;
+		var statsAccounts = integration.Stats.Accounts;
 		await integration.ShutdownAsync();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(chat.AccountLists[0].Select(account => account.AccountId), Is.EqualTo(new[] { "UCmine" }));
-			Assert.That(stats.Lists[0].Single().VariablePrefix, Is.EqualTo("youtube_mychannel_"));
-			Assert.That(chat.AccountLists[^1], Is.Empty, "shutting down hands the accounts back");
+			Assert.That(chatAccounts.Select(account => account.AccountId), Is.EqualTo(new[] { "UCmine" }));
+			Assert.That(statsAccounts.Single().VariablePrefix, Is.EqualTo("youtube_mychannel_"));
+			Assert.That(integration.Chat.Accounts, Is.Empty, "shutting down hands the accounts back");
+			Assert.That(integration.Stats.Accounts, Is.Empty);
 		});
 	}
 
@@ -173,14 +172,6 @@ internal sealed class YouTubeIntegrationTests
 
 	private static EventOptionsContext Options(string parameterName)
 		=> new() { EventId = "super-chat", ParameterName = parameterName };
-
-	private sealed class RecordingStatsSink : MacroDeckHost.Application.StreamStats.IStreamStatsSink
-	{
-		public List<IReadOnlyList<MacroDeckHost.Application.StreamStats.StreamStatsAccount>> Lists { get; } = [];
-
-		public void SetAccounts(IReadOnlyList<MacroDeckHost.Application.StreamStats.StreamStatsAccount> accounts)
-			=> Lists.Add(accounts);
-	}
 
 	private sealed class Context(RecordingIntegrationConfig config) : IIntegrationContext
 	{

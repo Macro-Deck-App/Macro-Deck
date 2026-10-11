@@ -98,6 +98,69 @@ depend on a live connection. Declaring a surface does not commit you to every se
 `null` from `CreateSessionAsync` to decline one. The kind vocabulary is open (see
 [Views and surfaces](/ui/views/)), so declining a kind you do not recognise is correct, not an error.
 
+## Answering the client that acted
+
+Macro Deck calls `Dispatch(UiEvent, IUiEventOrigin)` for every client event. The default forwards to
+`Dispatch(UiEvent)`, so a session that does not care who acted implements only that. The origin names the
+client (`ClientId`) and acts on it:
+
+| Member | What the client sees |
+| --- | --- |
+| `ReportFailureAsync(message)` | A failure, shown the way a failed action is shown, for example as a toast. |
+| `ShowModalAsync(modal)` | One of your provider's `dialog` views, opened as a [modal](/ui/views/modal/); returns once it is open. |
+| `ShowModalAsync<T>(modal)` | The same, waiting for the user's answer. |
+
+An origin stays usable after your handler returned, so work that finishes later - a request to a device or
+a server - can still report its failure on the client that pressed. It acts only while that client is still
+attached to the session: once it closed the view or disconnected, the calls answer `false` or a cancellation
+and never throw for that. An event Macro Deck raised itself has no client, and its origin reaches nobody.
+
+With the DSL, keep the origin in a field before handing the event to the view. `Dispatch` is never called
+concurrently for one session, so the handler that runs during `_view.Dispatch` reads the right one:
+
+```csharp
+public sealed class ViewSession : IUiSession
+{
+    private IUiEventOrigin? _origin;
+
+    // Other members as in the example above.
+
+    public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+
+    public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+    {
+        _origin = origin;
+        _view.Dispatch(uiEvent);
+    }
+
+    private async Task ToggleAsync()
+    {
+        var origin = _origin;
+        if (!await _client.TryToggleAsync())
+        {
+            await origin!.ReportFailureAsync(Strings.Widget.ToggleFailed());
+        }
+    }
+}
+```
+
+Capture the origin into a local before the first `await`, as `ToggleAsync` does: the field holds the
+origin of the latest event, which may be a different client's by the time the work resumes.
+
+A plugin talking to a Macro Deck that predates origins still receives every event through this overload;
+its origins answer `false` or a cancellation. In tests, pass a `FakeUiEventOrigin` from
+`MacroDeck.Plugin.Testing` to `Dispatch` and read what the session showed from `ReportedFailures` and
+`OpenedModals`.
+
+## While Macro Deck is locked
+
+While the computer running Macro Deck is locked, a client's events to a `widget` or `dialog` session of a
+plugin, or of an integration served the same way, never reach the provider - the same rule that keeps
+hardware presses and actions from running then. The client's request is refused with `HOST_LOCKED`, and a
+press, long press, double press, tap, change, adjust, swipe or end of a drag shows the client the same
+"locked" failure a refused action shows. `reveal` is still delivered, so a widget can keep its content up to
+date. You do not need a lock check of your own.
+
 ## The lifecycle every surface shares
 
 | Step | What happens | Your side |
@@ -160,11 +223,15 @@ Like the other provider-shaped capabilities, `ui` declares the single local id `
 | `session.open` (config) | A `config` surface names its entry point in its surface attributes - `integration-config` with the config flow session, `action-config` with the action id and the instance's stored parameters, `folder-view-config` with the folder and its view, or `widget-config` with the widget id, type and stored configuration. `MacroDeck.Plugin.Hosting` routes `integration-config` and `action-config` to `IUiConfigFlow`/`IUiConfigurableActionDefinition` before it consults `IUiProvider`. |
 | `session.open` (developer preview) | A `developer-preview` surface names one registered scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
 | `session.snapshot` | Produce the current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so a first attach and a resync share one delivery path. A provider may also send `ui/snapshot` unasked to replace its whole tree, at any revision; later patches continue from that tree's revision. |
-| `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. A `pointer-move` still waiting to be sent is replaced by a newer one for the same node from the same client, and one the plugin could not take because it was busy or slow is dropped; see [Pointer streams and taps](/ui/components/modifier/#pointer-streams-and-taps). |
+| `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. `MacroDeck.Plugin.Hosting` hands it to your session as the event's origin. A `pointer-move` still waiting to be sent is replaced by a newer one for the same node from the same client, and one the plugin could not take because it was busy or slow is dropped; see [Pointer streams and taps](/ui/components/modifier/#pointer-streams-and-taps). |
 | `session.close` | The host is ending this session. |
 | `modal.result` | How a modal this plugin opened ended. Host-to-plugin because a person, not a timeout, bounds the wait - see [Modal views](/ui/views/modal/). |
 
-Trees, patches and faults travel the other way through the [`ui` host api](/reference/websocket/#host-callbacks).
+Trees, patches and faults travel the other way through the [`ui` host api](/reference/websocket/#host-callbacks),
+and so do an origin's calls: `origin.report-failure` and `origin.show-modal` name the session and the
+`clientId` the event carried. The host acts on them only for a session the plugin serves and a client still
+attached to it, and answers `delivered: false` or `opened: false` otherwise. A host that predates them
+answers `CAPABILITY_UNSUPPORTED`, which the SDK turns into `false` or a cancellation.
 
 ## See also
 

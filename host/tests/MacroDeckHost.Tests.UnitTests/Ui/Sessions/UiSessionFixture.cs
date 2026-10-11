@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 
@@ -41,6 +42,14 @@ internal abstract class UiSessionFixture
 
 	protected RecordingCapabilityInvoker Invoker { get; private set; } = null!;
 
+	protected FakeHostLockState HostLock { get; private set; } = null!;
+
+	protected List<IBuiltInIntegrationUiProvider> BuiltInIntegrationProviders { get; } = [];
+
+	protected RecordingUiInteractionsFactory Interactions { get; private set; } = null!;
+
+	protected UiEventOrigins Origins { get; private set; } = null!;
+
 	[SetUp]
 	public void UiSessionSetUp()
 	{
@@ -50,6 +59,8 @@ internal abstract class UiSessionFixture
 		Resolver = new StubUiSessionProviderResolver();
 		Integrations = new StubIntegrationRegistry();
 		PluginSessions = new ReplayablePluginSessionRegistry(Time);
+		HostLock = new FakeHostLockState();
+		BuiltInIntegrationProviders.Clear();
 
 		Broker = new UiSessionBroker(Resolver,
 			Transport,
@@ -57,16 +68,19 @@ internal abstract class UiSessionFixture
 			PluginSessions,
 			Integrations,
 			Time,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			HostLock);
 
 		Invoker = new RecordingCapabilityInvoker();
+		Interactions = new RecordingUiInteractionsFactory();
+		Origins = new UiEventOrigins(Broker, Transport, Interactions);
 		Resolver.Fallback = new UiSessionProviderResolver(
 			new RemoteUiProviderRegistry(new EmptyRemotePluginSnapshotStore(), Invoker),
-			new UiProviderRegistry(Integrations, () => Broker, Serilog.Core.Logger.None),
+			new UiProviderRegistry(Integrations, () => Broker, Serilog.Core.Logger.None, () => Origins),
 			new ConfigFlowUiProviderRegistry(() => Broker, Serilog.Core.Logger.None),
 			new ActionConfigUiProviderRegistry(Integrations, () => Broker, Serilog.Core.Logger.None),
 			new WidgetUiProviderRegistry(new EmptyFolderCache(), [], () => Broker, Serilog.Core.Logger.None),
-			new IntegrationUiProviderRegistry([], () => Broker, Serilog.Core.Logger.None),
+			new IntegrationUiProviderRegistry(BuiltInIntegrationProviders, () => Broker, Serilog.Core.Logger.None),
 			new UiPreviewProviderRegistry([], () => Broker, Serilog.Core.Logger.None));
 	}
 

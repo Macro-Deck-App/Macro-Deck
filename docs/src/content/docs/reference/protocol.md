@@ -160,7 +160,7 @@ are listed in the descriptor's `capabilityKinds`:
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
 `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`,
-`video-stream-provider`, `calendar`.
+`video-stream-provider`, `calendar`, `config-entries`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
@@ -180,6 +180,10 @@ are listed in the descriptor's `capabilityKinds`:
 - `calendar` was added as a new kind at capability version `1`, additively in major `3`. A host that
   predates it rejects the declaration non-fatally (`accepted: false`) and the session goes on without it.
   Its operations and reply limits are in the [WebSocket reference](/reference/websocket/#calendar).
+- `config-entries` was added as a new kind at capability version `1`, additively in major `3`, for a
+  plugin taking part in how the host stores its configuration entries. A host that predates it rejects the
+  declaration non-fatally and stores entries as it always did. See the
+  [WebSocket reference](/reference/websocket/#config-entries).
 
 See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 
@@ -197,6 +201,11 @@ Plugins call host-owned APIs with `host.invoke` and cancel with `host.cancel`. `
 maps these to `IIntegrationContext`. Some synchronous-looking SDK state is served from the last
 `host.state` snapshot, so check [Capability parity](/reference/capability-parity/) before assuming
 in-process timing.
+
+`variables` gained `refresh`, `history.open`, `history.read` and `history.close`, `widgets` gained
+`get-data`, and `ui` gained `origin.report-failure` and `origin.show-modal`, additively in major `3`. A host
+that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into a no-op,
+`false`, no widget data, an unsupported variable history or a cancellation.
 
 The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `clients` is one
 connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`

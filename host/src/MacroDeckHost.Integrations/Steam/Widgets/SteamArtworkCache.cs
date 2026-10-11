@@ -33,7 +33,7 @@ internal sealed partial class SteamArtworkCache : IDisposable
 	private static readonly ILogger _logger = IntegrationLog.For<SteamArtworkCache>(SteamIntegration.IntegrationId);
 
 	private readonly HttpClient _http;
-	private readonly IUiResourceRegistry _resources;
+	private IUiResourceRegistry _resources;
 	private readonly TimeProvider _time;
 	private readonly Lock _sync = new();
 	private readonly Dictionary<string, Entry> _entries = new(StringComparer.Ordinal);
@@ -117,6 +117,24 @@ internal sealed partial class SteamArtworkCache : IDisposable
 		}
 
 		_ = FetchAsync(name, uri, _disposing.Token);
+	}
+
+	// A registry handed over after the integration was disabled replaces a released one, whose covers
+	// are gone, so every cover is fetched again into the new one.
+	public void UseResources(IUiResourceRegistry resources)
+	{
+		lock (_sync)
+		{
+			if (_disposed || ReferenceEquals(_resources, resources))
+			{
+				return;
+			}
+
+			_resources = resources;
+			_entries.Clear();
+		}
+
+		Changed?.Invoke(this, EventArgs.Empty);
 	}
 
 	public void Dispose()

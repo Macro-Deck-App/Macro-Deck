@@ -58,8 +58,8 @@ x-macrodeck-limits:
   maxUiUpdatesPerSecond: 30
   maxUiUpdateBurst: 90
   maxUiResourceBytes: 2097152
-  maxUiResourceBytesPerPlugin: 16777216
-  maxUiResourcesPerPlugin: 256
+  maxUiResourceBytesPerPlugin: 50331648
+  maxUiResourcesPerPlugin: 1024
   maxUiAttachmentsPerSession: 16
   maxUiSessionsPerProvider: 8
   maxUiWidgetSessionsPerProvider: 128
@@ -109,6 +109,7 @@ x-macrodeck-capability-kinds:
   - messaging
   - video-stream-provider
   - calendar
+  - config-entries
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

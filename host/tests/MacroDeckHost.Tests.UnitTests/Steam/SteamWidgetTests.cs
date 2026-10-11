@@ -1,10 +1,12 @@
 using System.Net;
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
+using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Integrations.Steam;
@@ -25,7 +27,7 @@ internal sealed class SteamWidgetTests
 		_source = new FakeSource();
 		_time = new FakeTimeProvider();
 		_artwork = new SteamArtworkCache(new HttpClient(new NotFoundHandler()),
-			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore()),
+			new BuiltInUiResources(SteamWidgetType.OwnerId, new UiResourceStore(), typeof(SteamIntegration)),
 			_time);
 	}
 
@@ -239,6 +241,33 @@ internal sealed class SteamWidgetTests
 	}
 
 	[Test]
+	public async Task A_failed_launch_is_reported_to_the_client_that_pressed()
+	{
+		_source.Outcome = SteamCommandOutcome.InvalidAppId;
+		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", DateTimeOffset.FromUnixTimeSeconds(1)));
+		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "recent" });
+		var origin = new RecordingOrigin();
+
+		session.Dispatch(new UiEvent { NodeId = Tiles(session).First().Id, Name = UiComponentEvents.Press }, origin);
+
+		await CalendarTree.WaitForAsync(() => origin.Failures.Count == 1, "the failure was not reported to the client");
+		Assert.That(CalendarTree.Resolve(origin.Failures.Single()), Does.Contain("valid Steam app ID"));
+	}
+
+	[Test]
+	public async Task A_successful_launch_reports_nothing_to_the_client()
+	{
+		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", DateTimeOffset.FromUnixTimeSeconds(1)));
+		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId, new { source = "recent" });
+		var origin = new RecordingOrigin();
+
+		session.Dispatch(new UiEvent { NodeId = Tiles(session).First().Id, Name = UiComponentEvents.Press }, origin);
+
+		await CalendarTree.WaitForAsync(() => _source.Commands.Count == 1, "no command was sent");
+		Assert.That(origin.Failures, Is.Empty);
+	}
+
+	[Test]
 	public async Task The_config_surface_offers_the_installed_games()
 	{
 		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", null));
@@ -330,5 +359,40 @@ internal sealed class SteamWidgetTests
 			Commands.Add(command);
 			return Task.FromResult(Outcome);
 		}
+	}
+
+	private sealed class RecordingOrigin : IUiEventOrigin
+	{
+		private readonly Lock _gate = new();
+		private readonly List<LocalizedText> _failures = [];
+
+		public string? ClientId => "client-1";
+
+		public IReadOnlyList<LocalizedText> Failures
+		{
+			get
+			{
+				lock (_gate)
+				{
+					return [.. _failures];
+				}
+			}
+		}
+
+		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
+		{
+			lock (_gate)
+			{
+				_failures.Add(message);
+			}
+
+			return Task.FromResult(true);
+		}
+
+		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
+			=> Task.FromResult(false);
+
+		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default)
+			=> Task.FromResult(ModalResult.FromCancellation<T>());
 	}
 }

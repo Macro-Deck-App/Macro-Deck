@@ -72,6 +72,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 			// decides how long the process is allowed to remain alive.
 			await ShutdownIntegrationsAsync(_registry, _logger, _initializer.AttemptedIds, _timeProvider);
 			await _initializer.ReleaseAllMessagingAsync();
+			_initializer.ReleaseAllUiResources();
 		}
 	}
 

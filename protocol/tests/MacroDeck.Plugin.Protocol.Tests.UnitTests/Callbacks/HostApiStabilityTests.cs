@@ -38,15 +38,20 @@ public class HostApiStabilityTests
 	private static readonly IReadOnlyDictionary<string, string[]> _expectedOperations
 		= new Dictionary<string, string[]>(StringComparer.Ordinal)
 		{
-			[HostApis.Variables] = ["list", "get", "create", "set", "delete"],
+			[HostApis.Variables] =
+				["list", "get", "create", "set", "delete", "refresh", "history.open", "history.read", "history.close"],
 			[HostApis.UserVariables] = ["apply", "create"],
 			[HostApis.Config] = ["entries", "get-string", "get-secret", "set-string", "set-secret"],
 			[HostApis.Deck] = ["change-folder", "change-profile", "parent", "back"],
 			[HostApis.Scripts] = ["run"],
-			[HostApis.Widgets] = ["apply", "invalidate-icon"],
+			[HostApis.Widgets] = ["apply", "invalidate-icon", "get-data"],
 			[HostApis.Notifications] = ["notify", "dismiss", "show", "update", "close"],
 			[HostApis.ActionInteractions] = ["request-item-picker", "request-device-picker", "show-modal"],
-			[HostApis.Ui] = ["snapshot", "patch", "fault", "reload", "register-resource", "remove-resource", "register-music-player-artwork"],
+			[HostApis.Ui] =
+			[
+				"snapshot", "patch", "fault", "reload", "register-resource", "remove-resource",
+				"register-music-player-artwork", "origin.report-failure", "origin.show-modal"
+			],
 			[HostApis.Devices] =
 				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],
 			[HostApis.VariableValues] = ["value", "invalidate"],

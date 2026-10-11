@@ -101,6 +101,11 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IPluginIconResolver? _pluginIconResolver;
 	private readonly PluginColorWatches? _colorWatches;
 	private readonly INotificationManager? _notificationManager;
+	private readonly IVariableRefreshSignal? _variableRefresh;
+	private readonly UiEventOrigins? _eventOrigins;
+	private readonly IWidgetDataReader? _widgetData;
+	private readonly PluginVariableHistoryWindows? _variableHistory;
+	private readonly VariableHistoryReadThrottle _variableHistoryReadThrottle;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -151,9 +156,19 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
 		TimeSpan? musicPlayerArtworkTimeout = null,
 		PluginColorWatches? colorWatches = null,
-		INotificationManager? notificationManager = null)
+		INotificationManager? notificationManager = null,
+		IVariableRefreshSignal? variableRefresh = null,
+		UiEventOrigins? eventOrigins = null,
+		IWidgetDataReader? widgetData = null,
+		PluginVariableHistoryWindows? variableHistory = null,
+		VariableHistoryReadThrottle? variableHistoryReadThrottle = null)
 	{
+		_widgetData = widgetData;
+		_variableHistory = variableHistory;
+		_variableHistoryReadThrottle = variableHistoryReadThrottle ?? new VariableHistoryReadThrottle(TimeProvider.System);
 		_notificationManager = notificationManager;
+		_variableRefresh = variableRefresh;
+		_eventOrigins = eventOrigins;
 		_colorWatches = colorWatches;
 		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
@@ -241,6 +256,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.ActionInteractions => RouteActionInteractions(pluginId, correlationId, payload),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await RouteMusicPlayerArtworkAsync(pluginId, sessionId, payload, cancellationToken),
+				HostApis.Ui when payload.Operation is HostOperations.Ui.OriginReportFailure or
+						HostOperations.Ui.OriginShowModal
+					=> await RouteUiOriginAsync(pluginId, payload, cancellationToken),
 				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
 				HostApis.VariableValues => RouteVariableValues(pluginId, payload),
@@ -292,6 +310,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					retryable: true);
 		}
 
+		// History windows are polled every second, so their reads get a bucket sized by the plugin's open
+		// windows instead of draining the budget of its other callbacks.
+		if (string.Equals(payload.Api, HostApis.Variables, StringComparison.Ordinal) &&
+			payload.Operation == HostOperations.Variables.HistoryRead)
+		{
+			return _variableHistoryReadThrottle.TryConsume(pluginId, _variableHistory?.OpenCount(pluginId) ?? 0)
+				? null
+				: CallingTooQuickly();
+		}
+
 		// The ui api is deliberately exempt. Its traffic is a per-session tree and patch stream whose rate
 		// is already bounded, per session, by ProtocolLimits.MaxUiUpdatesPerSecond and the session's own
 		// token bucket. Charging it to the shared per-plugin bucket as well would let one busy view
@@ -299,13 +327,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		// cannot ask for the resync the session limiter asks for.
 		if (!string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) && !_throttle.TryConsume(pluginId))
 		{
-			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
-				"This plugin is calling back into the host too quickly.",
-				retryable: true);
+			return CallingTooQuickly();
 		}
 
 		return null;
 	}
+
+	private static HostCallbackResult CallingTooQuickly()
+		=> HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+			"This plugin is calling back into the host too quickly.",
+			retryable: true);
 
 	private async Task<HostCallbackResult> RouteVariablesAsync(string pluginId,
 		HostInvokePayload payload,
@@ -377,9 +408,69 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Ok();
 			}
 
+			case HostOperations.Variables.Refresh:
+				_variableRefresh?.RequestEagerRefresh(pluginId);
+				return HostCallbackResult.Ok();
+
+			case HostOperations.Variables.HistoryOpen:
+			case HostOperations.Variables.HistoryRead:
+			case HostOperations.Variables.HistoryClose:
+				return await RouteVariableHistoryAsync(pluginId, payload);
+
 			default:
 				return UnknownOperation(payload);
 		}
+	}
+
+	private async Task<HostCallbackResult> RouteVariableHistoryAsync(string pluginId, HostInvokePayload payload)
+	{
+		if (_variableHistory is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (payload.Operation == HostOperations.Variables.HistoryOpen)
+		{
+			var open = Deserialize<VariablesHistoryOpenArguments>(payload.Arguments);
+			if (open is null)
+			{
+				return MissingArguments();
+			}
+
+			try
+			{
+				return HostCallbackResult.Ok(new VariablesHistoryOpenResult
+				{
+					WindowId = _variableHistory.Open(pluginId, open.Name, open.Capacity)
+				});
+			}
+			catch (VariableHistoryException exception) when (exception.ErrorCode == VariableHistoryErrorCode.NotOwned)
+			{
+				return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+					"That name is not one of this plugin's own variables.");
+			}
+			catch (VariableHistoryException exception) when (exception.ErrorCode == VariableHistoryErrorCode.LimitExceeded)
+			{
+				return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+					"This plugin holds as many variable history windows as Macro Deck allows.");
+			}
+		}
+
+		var window = Deserialize<VariablesHistoryWindowArguments>(payload.Arguments);
+		if (window is null)
+		{
+			return MissingArguments();
+		}
+
+		if (payload.Operation == HostOperations.Variables.HistoryRead)
+		{
+			return _variableHistory.Read(pluginId, window.WindowId) is { } values
+				? HostCallbackResult.Ok(new VariablesHistoryReadResult { Values = values })
+				: HostCallbackResult.Ok();
+		}
+
+		await _variableHistory.CloseAsync(pluginId, window.WindowId);
+		return HostCallbackResult.Ok();
 	}
 
 	private async Task<HostCallbackResult> RouteUserVariablesAsync(string pluginId,
@@ -602,6 +693,28 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			// invalidate its own actions.
 			_widgetIconInvalidator.Invalidate(pluginId, invalidateArguments.ActionId);
 			return HostCallbackResult.Ok();
+		}
+
+		if (payload.Operation == HostOperations.Widgets.GetData)
+		{
+			var getData = Deserialize<WidgetsGetDataArguments>(payload.Arguments);
+			if (getData is null)
+			{
+				return MissingArguments();
+			}
+
+			if (_widgetData is null)
+			{
+				return UnknownOperation(payload);
+			}
+
+			// pluginId comes from the connection, so a plugin only ever reads widgets of its own types.
+			return _widgetData.Read(pluginId, getData.WidgetId) is { } data
+				? HostCallbackResult.Ok(new WidgetDataDto
+				{
+					WidgetId = data.WidgetId, WidgetTypeId = data.WidgetTypeId, Data = data.Data
+				})
+				: HostCallbackResult.Ok();
 		}
 
 		if (payload.Operation != HostOperations.Widgets.Apply)
@@ -1595,6 +1708,69 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return null;
 	}
 
+	// The ui api is exempt from the per-plugin throttle for its tree traffic; an origin call puts something
+	// on a user's screen, so it is charged like any other callback.
+	private async Task<HostCallbackResult> RouteUiOriginAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (_eventOrigins is null)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (!_throttle.TryConsume(pluginId))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+				"This plugin is calling back into the host too quickly.",
+				retryable: true);
+		}
+
+		if (payload.Operation == HostOperations.Ui.OriginReportFailure)
+		{
+			var report = Deserialize<UiOriginReportFailureArguments>(payload.Arguments);
+			if (report is null || string.IsNullOrEmpty(report.SessionId) || report.Message.IsEmpty)
+			{
+				return MissingArguments();
+			}
+
+			var delivered = await _eventOrigins.ReportFailureAsync(pluginId,
+					report.SessionId,
+					ClientOrigin(report.ClientId),
+					report.EventName,
+					report.Message,
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			return HostCallbackResult.Ok(new UiOriginReportFailureResult { Delivered = delivered });
+		}
+
+		var modal = Deserialize<UiOriginShowModalArguments>(payload.Arguments);
+		if (modal is null || string.IsNullOrEmpty(modal.SessionId) || string.IsNullOrEmpty(modal.ViewId))
+		{
+			return MissingArguments();
+		}
+
+		var clientId = ClientOrigin(modal.ClientId);
+		if (!_eventOrigins.IsClientAttached(pluginId, modal.SessionId, clientId))
+		{
+			return HostCallbackResult.Ok(new UiOriginShowModalResult { Opened = false });
+		}
+
+		var opened = ShowModal(pluginId,
+			new ActionInteractionsShowModalArguments
+			{
+				ExecuteCorrelationId = string.Empty,
+				OriginClientId = clientId,
+				ViewId = modal.ViewId,
+				Title = modal.Title,
+				Data = modal.Data,
+				AwaitResult = modal.AwaitResult
+			});
+
+		return HostCallbackResult.Ok(new UiOriginShowModalResult { Opened = opened.Opened, ModalId = opened.ModalId });
+	}
+
 	private HostCallbackResult RouteUi(string pluginId, string? sessionId, HostInvokePayload payload)
 	{
 		switch (payload.Operation)
@@ -1781,6 +1957,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				$"A music player instance id and an artwork id are 1 to {MaxMusicPlayerArtworkIdLength} characters.");
 		}
 
+		if (arguments.MaxSize is <= 0)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				"A music player artwork size is a positive number of pixels.");
+		}
+
 		if (!UiResourceRules.IsValidName(arguments.Name))
 		{
 			return FromUiResource(new PluginUiResourceResult(PluginUiResourceOutcome.InvalidName));
@@ -1800,7 +1982,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 			try
 			{
-				image = await _musicPlayerArtwork.GetImage(arguments.InstanceId, arguments.ArtworkId, null, lookup.Token);
+				image = await _musicPlayerArtwork.GetImage(arguments.InstanceId,
+					arguments.ArtworkId,
+					arguments.MaxSize,
+					lookup.Token);
 			}
 			catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 			{

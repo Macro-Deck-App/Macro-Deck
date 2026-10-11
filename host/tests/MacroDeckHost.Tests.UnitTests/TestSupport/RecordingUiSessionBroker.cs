@@ -8,8 +8,13 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 /// exist. <see cref="InvalidatedWidgets" /> records the one member a test does assert on.</summary>
 internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 {
+	public UiSurface? LastOpenedSurface { get; private set; }
+
 	public UiSessionOpenTicket Open(string providerId, UiSurface surface, string ownerPrincipal)
-		=> UiSessionOpenTicket.Rejected("not_supported", "not supported in this fake");
+	{
+		LastOpenedSurface = surface;
+		return UiSessionOpenTicket.Rejected("not_supported", "not supported in this fake");
+	}
 
 	public Task<UiSessionOpenTicket> OpenAsync(string providerId,
 		UiSurface surface,

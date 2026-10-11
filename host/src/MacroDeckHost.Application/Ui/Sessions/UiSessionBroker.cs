@@ -4,17 +4,20 @@ using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Model.Versioning;
+using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
+using MacroDeckHost.Localization;
 using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Sessions;
 
-public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
+public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, IDisposable
 {
 	private const string ProviderFaultMessage = "The provider of this view stopped responding.";
 
@@ -28,7 +31,20 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 	private readonly IPluginSessionRegistry _pluginSessions;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly TimeProvider _timeProvider;
+	private readonly IHostLockState? _lockState;
 	private readonly ILogger _logger;
+
+	private static readonly HashSet<string> _discreteEvents = new(StringComparer.Ordinal)
+	{
+		UiComponentEvents.Press,
+		UiComponentEvents.LongPress,
+		UiComponentEvents.DoublePress,
+		UiComponentEvents.Tap,
+		UiComponentEvents.Change,
+		UiComponentEvents.Adjust,
+		UiComponentEvents.Swipe,
+		UiComponentEvents.DragEnd,
+	};
 
 	private readonly ConcurrentDictionary<string, SessionContext> _contexts = new(StringComparer.Ordinal);
 
@@ -39,8 +55,10 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		IPluginSessionRegistry pluginSessions,
 		IIntegrationRegistry integrations,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		IHostLockState? lockState = null)
 	{
+		_lockState = lockState;
 		_resolver = resolver;
 		_transport = transport;
 		_registry = registry;
@@ -177,6 +195,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		{
 			context.PendingAttachments.Remove(connectionId);
 			context.EstablishedAttachments.Remove(connectionId);
+			context.ClientsByConnection.Remove(connectionId);
 		}
 
 		var group = UiSessionGroups.For(sessionId!);
@@ -213,6 +232,20 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 			return Refused(UiSessionErrorCodes.SessionNotFound, "There is no session with that id.");
 		}
 
+		if (!string.IsNullOrEmpty(actingClientId))
+		{
+			lock (context.Gate)
+			{
+				context.ClientsByConnection[connectionId] = actingClientId;
+			}
+		}
+
+		if (IsRefusedWhileLocked(context, session.Surface, request.Name))
+		{
+			ReportLocked(session.Surface, request.Name, actingClientId);
+			return Refused(UiSessionErrorCodes.HostLocked, "The host is locked.");
+		}
+
 		var command = new UiSessionEventCommand
 		{
 			NodeId = request.NodeId,
@@ -236,6 +269,52 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 
 		return new UiSendEventResponse { Accepted = true };
 	}
+
+	private bool IsRefusedWhileLocked(SessionContext context, UiSurface surface, string eventName)
+		=> _lockState?.IsLocked == true &&
+			context.Provider.GatedByHostLock &&
+			surface.Kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Dialog &&
+			!string.Equals(eventName, UiComponentEvents.Reveal, StringComparison.Ordinal);
+
+	private void ReportLocked(UiSurface surface, string eventName, string? actingClientId)
+	{
+		if (string.IsNullOrEmpty(actingClientId) || !_discreteEvents.Contains(eventName))
+		{
+			return;
+		}
+
+		var evt = UiEventFeedback.Failed(ActionExecutionErrorCodes.HostLocked,
+			AppStrings.Errors.Common.HostLocked(),
+			surface,
+			eventName);
+
+		_ = _transport.SendToGroup(UiClientGroups.For(actingClientId), evt);
+	}
+
+	public bool IsClientAttached(string providerId, string sessionId, string clientId)
+	{
+		if (string.IsNullOrEmpty(clientId) ||
+			!Owns(providerId, sessionId) ||
+			!_contexts.TryGetValue(sessionId, out var context))
+		{
+			return false;
+		}
+
+		string[] connections;
+		lock (context.Gate)
+		{
+			connections =
+			[
+				.. context.ClientsByConnection
+					.Where(pair => string.Equals(pair.Value, clientId, StringComparison.Ordinal))
+					.Select(pair => pair.Key)
+			];
+		}
+
+		return connections.Any(connectionId => _registry.IsAttached(sessionId, connectionId));
+	}
+
+	public UiSurface? SurfaceOf(string sessionId) => _registry.Find(sessionId)?.Surface;
 
 	public async Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken)
 	{
@@ -789,6 +868,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IDisposable
 		public List<string> PendingAttachments { get; } = [];
 
 		public HashSet<string> EstablishedAttachments { get; } = new(StringComparer.Ordinal);
+
+		public Dictionary<string, string> ClientsByConnection { get; } = new(StringComparer.Ordinal);
 
 		public bool ResyncRequested { get; set; }
 

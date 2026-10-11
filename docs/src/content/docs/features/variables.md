@@ -207,13 +207,49 @@ seek bar's maximum is the current track's length.
 ## Variables that depend on configuration
 
 `Variables` may change with configuration. After the configuration changed, tell the host to read it
-again with `CatalogChanged(CapabilityKinds.Variables)` on an injected `IPluginCatalogNotifier` - the
-[weather sample](/introduction/samples-and-template/) does this after its config flow.
+again with `context.Variables.NotifyDeclarationsChangedAsync()`. For a plugin this sends the same
+`state.update` for the `variables` kind that `CatalogChanged(CapabilityKinds.Variables)` on an injected
+`IPluginCatalogNotifier` sends, so it works with every Macro Deck version - the
+[weather sample](/introduction/samples-and-template/) does this after its config flow. It is about the
+declared eager set only; a catalog announces a changed set of resources with `InvalidateCatalogAsync`
+(see [Push instead of poll](#push-instead-of-poll)).
+
+## Reading again now
+
+Macro Deck reads each eager variable at its `RefreshInterval`. When something changed what `ReadAsync`
+would answer - a connection came up, a device reported new state - ask for every declared variable to be
+read on the next poll instead:
+
+```csharp
+await context.Variables.RequestRefreshAsync(cancellationToken);
+```
+
+Requests made while one is still on its way are merged into one, so calling it from every callback of an
+event stream is fine. It is best effort: it never throws because the request could not be delivered, and a
+Macro Deck that predates it treats it as a no-op, so the variables are still read at their interval.
+Pushed catalog resources are unaffected; publish those through the sink.
 
 `DeclaredVariables` is what the host shows for an integration that is not configured yet. It defaults to
 `Variables`; override it only when `Variables` is empty until something is configured, and set
 `VariablesDependOnConfiguration` when its names contain a `VariableNameTemplate` placeholder for a
 per-instance segment.
+
+## History of your own variables
+
+```csharp
+await using var window = await context.Variables.OpenHistoryAsync("weather_berlin_temperature", 40, cancellationToken);
+window.Changed += (_, _) => Redraw(window.Values);
+```
+
+`OpenHistoryAsync` opens a rolling window on one of your own global numeric variables, for example to draw a
+graph in a widget. Macro Deck samples the variable once per second while a window on it is open, so the
+values are evenly spaced and the graph advances whether the value changes or not. `Values` holds at most the
+requested number of samples, oldest first, and is empty until the variable first reads as a number. The
+window may be opened before the variable exists. Dispose it when the graph is no longer shown.
+
+A name that belongs to someone else throws a `VariableHistoryException` with `NotOwned`, and too many open
+windows `LimitExceeded`. A Macro Deck that predates variable history, or an `IVariableApi` that does not
+implement it, throws `Unsupported`; catch it and draw without a graph.
 
 ## Testing
 
@@ -233,6 +269,10 @@ Assert.That(written!.Status, Is.EqualTo("Applied"));
 
 `GetAsync` and `SetAsync` take the local id, not the name. The
 [sample plugins](/introduction/samples-and-template/) test every variable they declare this way.
+
+`FakeIntegrationContext.Variables` counts `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync` calls in
+`RefreshRequests` and `DeclarationChanges`. `RecordSample` adds a sample to every history window open on a
+name, and `OpenHistoryWindows` counts the windows that are not disposed yet.
 
 ## Templates
 
@@ -382,7 +422,10 @@ without re-binding once it can be resolved and read again.
 Each **eager** variable is declared as one capability, like an action. Catalog ids are never declared -
 they travel in the operation arguments, which keeps a large catalog under `MaxDeclaredCapabilities`. See
 [the WebSocket reference](/reference/websocket/#capabilities) for the
-`describe`/`get`/`set`/`discover`/`resolve`/`subscribe` operations and the `variable-values` host API.
+`describe`/`get`/`set`/`discover`/`resolve`/`subscribe` operations, the `variables`/`refresh` host operation
+behind `RequestRefreshAsync`, the `variables`/`history.open`, `history.read` and `history.close` operations
+behind `OpenHistoryAsync` (a plugin's window reads its samples once per second and ends with the
+connection), and the `variable-values` host API.
 Declare `host:variable-values` in [`manifest.json`](/reference/manifest/) when you use it.
 `MacroDeckTestHost` drives all six operations; see [conformance](/reference/conformance/) for MDC0311, MDC0314
 and MDC0315.

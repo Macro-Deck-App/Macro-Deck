@@ -33,6 +33,14 @@ public interface IUiSession : IAsyncDisposable
 	/// <summary>Delivers a client event. Never called concurrently for one session. Rejecting an event is
 	/// expressed by producing no patch, not by throwing - a throw faults the session.</summary>
 	void Dispatch(UiEvent uiEvent);
+
+	/// <summary>
+	/// Delivers a client event together with the client it came from. Macro Deck always calls this
+	/// overload; the default forwards to <see cref="Dispatch(UiEvent)" />, so a session that does not need
+	/// the origin implements only that one. Never called concurrently for one session, so a session may
+	/// keep <paramref name="origin" /> in a field while its own handlers run and read it from there.
+	/// </summary>
+	void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Dispatch(uiEvent);
 }
 
 /// <summary>Why a session can no longer be served.</summary>

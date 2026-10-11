@@ -59,6 +59,8 @@ internal static class ConformanceCheckSupport
 			CapabilityOperations.VideoStreamProvider.Describe,
 		_ when string.Equals(kind, CapabilityKinds.Calendar, StringComparison.Ordinal) => CapabilityOperations.Calendar
 			.Describe,
+		_ when string.Equals(kind, CapabilityKinds.ConfigEntries, StringComparison.Ordinal) =>
+			CapabilityOperations.ConfigEntries.Describe,
 		_ => null
 	};
 

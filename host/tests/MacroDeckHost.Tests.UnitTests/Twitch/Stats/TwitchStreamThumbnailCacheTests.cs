@@ -1,9 +1,9 @@
 using System.Net;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Infrastructure.StreamStats;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
+using MacroDeckHost.Integrations.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Stats;
 
@@ -25,7 +25,8 @@ internal sealed class TwitchStreamThumbnailCacheTests
 		_time = new FakeTimeProvider();
 		_store = new UiResourceStore();
 		_handler = new Handler();
-		_cache = new StreamThumbnailCache(StreamPlatforms.Twitch, _handler, _store, _time, Logger.None);
+		var resources = new BuiltInUiResources(TwitchIntegration.IntegrationId, _store, typeof(TwitchIntegration));
+		_cache = new StreamThumbnailCache(TwitchStreamPlatform.Platform, new HttpClient(_handler, disposeHandler: false), () => resources, _time, Logger.None);
 	}
 
 	[TearDown]

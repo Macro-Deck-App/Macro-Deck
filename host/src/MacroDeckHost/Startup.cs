@@ -20,7 +20,6 @@ using MacroDeck.Plugin.Protocol;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Applications;
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Configuration;
@@ -77,15 +76,7 @@ using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Application.Weather;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
-using MacroDeckHost.Infrastructure.StreamStats;
-using MacroDeckHost.Infrastructure.Twitch;
-using MacroDeckHost.Widgets.AdGuardHome;
 using MacroDeckHost.Widgets.Calendar;
-using MacroDeckHost.Widgets.Jellyfin;
-using MacroDeckHost.Widgets.StreamChat;
-using MacroDeckHost.Widgets.StreamStats;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Icons.Included;
 using MacroDeckHost.Application.Icons.Ownership;
@@ -279,7 +270,8 @@ public class Startup
 		services.AddSingleton<ActionProviderProbe>();
 		services.AddSingleton(provider => new UiProviderRegistry(provider.GetRequiredService<IIntegrationRegistry>(),
 			provider.GetRequiredService<IUiSessionSink>,
-			provider.GetRequiredService<Serilog.ILogger>()));
+			provider.GetRequiredService<Serilog.ILogger>(),
+			provider.GetRequiredService<UiEventOrigins>));
 		services.AddSingleton(provider => new ConfigFlowUiProviderRegistry(provider.GetRequiredService<IUiSessionSink>,
 			provider.GetRequiredService<Serilog.ILogger>()));
 		services.AddSingleton(provider => new ActionConfigUiProviderRegistry(
@@ -299,6 +291,7 @@ public class Startup
 		services.AddSingleton<IWidgetDefaultShortPress>(provider => new WidgetDefaultShortPress(
 			provider.GetRequiredService<IWidgetTypeRegistry>,
 			provider.GetRequiredService<IIntegrationRegistry>(),
+			provider.GetRequiredService<IWeatherRegistry>(),
 			provider.GetRequiredService<ILocalizationResolver>()));
 		services.AddSingleton<IWidgetTriggerService, WidgetTriggerService>();
 		services.AddSingleton<IBuiltInWidgetUiProvider, ActionButtonWidgetUiProvider>();
@@ -323,6 +316,8 @@ public class Startup
 		services.AddSingleton<IWidgetProviderAvailability, WidgetProviderAvailability>();
 		services.AddSingleton<UnavailableWidgetSessionRecovery>();
 		services.AddSingleton<IUiPreviewSource, WidgetUiPreviewSource>();
+		services.AddSingleton<IUiPreviewSource>(
+			new IntegrationUiPreviewSource(typeof(IntegrationDiscovery).Assembly));
 		services.AddSingleton(provider => new UiPreviewProviderRegistry(
 			provider.GetRequiredService<IEnumerable<IUiPreviewSource>>(),
 			provider.GetRequiredService<IUiSessionSink>,
@@ -333,44 +328,9 @@ public class Startup
 			provider.GetRequiredService<IEnumerable<IBuiltInIntegrationUiProvider>>(),
 			provider.GetRequiredService<IUiSessionSink>,
 			provider.GetRequiredService<Serilog.ILogger>()));
-		services.AddSingleton<IBuiltInIntegrationUiProvider, WeatherDetailsUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerPickerUiProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider, MusicPlayerDevicePickerUiProvider>();
-		services.AddHttpClient(TwitchChatImageCache.HttpClientName)
-			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
-			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
-			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
-		services.AddHttpClient(StreamThumbnailCache.HttpClientName)
-			.ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(15))
-			.AddHttpMessageHandler(provider => new UserAgentHandler(provider.GetRequiredService<IHttpUserAgentSource>()))
-			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });
-		services.AddSingleton<TwitchChatImageCache>();
-		services.AddSingleton<ITwitchChatImages>(provider => provider.GetRequiredService<TwitchChatImageCache>());
-		services.AddSingleton(provider => new StreamPlatformServices(StreamPlatforms.All.Select(platform =>
-			StreamPlatformServiceSet.Create(platform,
-				new StreamChatHub(provider.GetRequiredService<TimeProvider>(),
-					provider.GetRequiredService<Serilog.ILogger>(),
-					ChatImagesFor(provider, platform)),
-				new StreamStatsAccountsHub(),
-				new StreamThumbnailCache(platform,
-					provider.GetRequiredService<IHttpClientFactory>(),
-					provider.GetRequiredService<IUiResourceStore>(),
-					provider.GetRequiredService<TimeProvider>(),
-					provider.GetRequiredService<Serilog.ILogger>()),
-				ChatImagesFor(provider, platform)))));
-		services.AddSingleton<IStreamPlatformServices>(provider =>
-			provider.GetRequiredService<StreamPlatformServices>());
-
-		foreach (var platform in StreamPlatforms.All)
-		{
-			services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => StreamChatProvider(provider, platform));
-		}
 		services.AddSingleton<IBuiltInIntegrationUiProvider, CalendarUiProvider>();
-		services.AddSingleton<IBuiltInIntegrationUiProvider, JellyfinSessionsUiProvider>();
-		services.AddSingleton<AdGuardHomeHub>();
-		services.AddSingleton<IAdGuardHomeInstances>(sp => sp.GetRequiredService<AdGuardHomeHub>());
-		services.AddSingleton<IAdGuardHomeSink>(sp => sp.GetRequiredService<AdGuardHomeHub>());
-		services.AddSingleton<IBuiltInIntegrationUiProvider, AdGuardHomeUiProvider>();
 
 		services.AddSingleton<BuiltInScreenSaverProvider>();
 		services.AddSingleton<IBuiltInIntegrationUiProvider>(provider => provider.GetRequiredService<BuiltInScreenSaverProvider>());
@@ -378,7 +338,10 @@ public class Startup
 		services.AddSingleton<UiSessionBroker>();
 		services.AddSingleton<IUiSessionBroker>(provider => provider.GetRequiredService<UiSessionBroker>());
 		services.AddSingleton<IUiSessionSink>(provider => provider.GetRequiredService<UiSessionBroker>());
+		services.AddSingleton<IUiEventOriginTracker>(provider => provider.GetRequiredService<UiSessionBroker>());
+		services.AddSingleton<UiEventOrigins>();
 		services.AddSingleton<IConfigUiSessionOpener, ConfigUiSessionOpener>();
+		services.AddSingleton<IHostUiCulture, HostUiCulture>();
 		services.AddSingleton<IWidgetUiSessionOpener, WidgetUiSessionOpener>();
 		services.AddSingleton<IFolderUiSessionOpener, FolderUiSessionOpener>();
 		services.AddSingleton<IModalInteractionCoordinator, ModalInteractionCoordinator>();
@@ -386,7 +349,6 @@ public class Startup
 		services.AddSingleton<IModalUiSessionOpener, ModalUiSessionOpener>();
 		services.AddHostedService<UiSessionDrainBackgroundService>();
 		services.AddHostedService<ModalSessionWatcher>();
-		services.AddHostedService<StreamChatPumpBackgroundService>();
 		services.AddHostedService<LoopbackPortFileService>();
 		services.AddMediator();
 
@@ -456,6 +418,9 @@ public class Startup
 		services.AddSingleton<IVariableChangeNotifier, VariableChangeNotifier>();
 		services.AddSingleton<VariableHistory>();
 		services.AddSingleton<IVariableHistory>(provider => provider.GetRequiredService<VariableHistory>());
+		services.AddSingleton<OwnedVariableHistory>();
+		services.AddSingleton<PluginVariableHistoryWindows>();
+		services.AddSingleton<IWidgetDataReader, WidgetDataReader>();
 		services.AddSingleton<VariableInterestTracker>();
 		services.AddSingleton<VariableBroadcaster>();
 		services.AddSingleton<WidgetDerivedStateStore>();
@@ -622,6 +587,7 @@ public class Startup
 		services.AddSingleton<IPluginUiResources, PluginUiResources>();
 		services.AddSingleton<UiResourceCallbackThrottle>();
 		services.AddSingleton<MusicPlayerArtworkCallbackThrottle>();
+		services.AddSingleton<VariableHistoryReadThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
 		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();
@@ -859,9 +825,7 @@ public class Startup
 		services.AddSingleton<IOAuthCallbackCoordinator, OAuthCallbackCoordinator>();
 		services.AddSingleton<IConfigFlowManager, ConfigFlowManager>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
-		services.AddSingleton<IIntegrationConfigMutationAdapter, JellyfinConfigurationMutationAdapter>();
 		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
-		services.AddSingleton<IIntegrationConfigMutationAdapter, AdGuardHomeConfigurationMutationAdapter>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
 			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
 		services.AddSingleton<CompanionCommandRequests>();
@@ -1072,34 +1036,6 @@ public class Startup
 		{
 			FreezeBackgroundWork(services);
 		}
-	}
-
-	private static ITwitchChatImages? ChatImagesFor(IServiceProvider provider, StreamPlatform platform)
-		=> platform == StreamPlatforms.Twitch ? provider.GetRequiredService<ITwitchChatImages>() : null;
-
-	private static StreamChatWidgetUiProvider StreamChatProvider(IServiceProvider provider, StreamPlatform platform)
-	{
-		var services = provider.GetRequiredService<IStreamPlatformServices>().Find(platform.OwnerId)!;
-
-		return new StreamChatWidgetUiProvider(platform,
-			services.ChatFeed,
-			services.ChatImages,
-			provider.GetRequiredService<IWidgetSampleTextResolver>(),
-			provider.GetRequiredService<IIntegrationRegistry>(),
-			provider.GetRequiredService<IUiResourceStore>(),
-			provider.GetRequiredService<IUiInteractionsFactory>(),
-			provider.GetRequiredService<IFolderCache>(),
-			provider.GetRequiredService<IHostLockState>(),
-			provider.GetRequiredService<Serilog.ILogger>(),
-			new StreamStatsWidgetUiProvider(platform,
-				services.StatsAccounts,
-				services.Thumbnails,
-				provider.GetRequiredService<VariableRegistry>(),
-				provider.GetRequiredService<IVariableHistory>(),
-				provider.GetRequiredService<IVariableChangeNotifier>(),
-				provider.GetRequiredService<IWidgetSampleTextResolver>(),
-				provider.GetRequiredService<IIntegrationRegistry>(),
-				provider.GetRequiredService<IUiResourceStore>()));
 	}
 
 	/// <summary>

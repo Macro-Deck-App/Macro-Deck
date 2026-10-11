@@ -1,24 +1,19 @@
 using System.Text.Json;
-using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Serialization;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.Ui.Modals;
-using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Application.Ui.Sessions.InProcess;
-using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Tests.UnitTests.Streaming;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.StreamChat;
 using MacroDeckHost.Tests.UnitTests.Delegation;
+using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using Serilog.Core;
+using MacroDeckHost.Integrations.Twitch;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 
@@ -29,40 +24,26 @@ internal sealed class TwitchChatDialogTests
 	private const string Client = "client-1";
 
 	private StreamChatHub _hub = null!;
-	private FakeFolderCache _folders = null!;
-	private FakeHostLockState _hostLock = null!;
-	private FakeIntegrationRegistry _integrations = null!;
+	private FakeStreamingContext _context = null!;
 	private RecordingModerator _moderator = null!;
-	private RecordingUiInteractions _interactions = null!;
-	private StreamChatWidgetUiProvider _provider = null!;
-	private WidgetEntity _widget = null!;
+	private bool _moderatorAvailable;
+	private RecordingEventOrigins _origins = null!;
+	private StreamWidgetsUiProvider _provider = null!;
+	private Guid _widgetId;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_hub = new StreamChatHub(new FakeTimeProvider(), Logger.None);
-		_folders = new FakeFolderCache();
-		_hostLock = new FakeHostLockState();
-		_integrations = new FakeIntegrationRegistry();
+		_context = new FakeStreamingContext(TwitchIntegration.IntegrationId, typeof(TwitchIntegration));
 		_moderator = new RecordingModerator();
-		_integrations.Add(_moderator);
-		_interactions = new RecordingUiInteractions();
+		_moderatorAvailable = true;
+		_origins = new RecordingEventOrigins();
+		_widgetId = Guid.NewGuid();
+		StoreWidget("""{"account":""}""");
 
-		_widget = new WidgetEntity
-		{
-			Id = Guid.NewGuid(), Type = StreamPlatforms.Twitch.ChatWidgetTypeId, Data = """{"account":""}""",
-		};
-		_folders.AddWidget(_widget);
-
-		_provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch, _hub,
-			new FakeTwitchChatImages(),
-			TestLocalization.SampleText,
-			_integrations,
-			new UiResourceStore(),
-			_interactions,
-			_folders,
-			_hostLock,
-			Logger.None);
+		_provider = Provider(TwitchStreamPlatform.Platform, new FakeTwitchChatImages(),
+			() => _moderatorAvailable ? _moderator : null);
 
 		_hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
 		_hub.Post(new ChatConnectionChanged(Streamer, true));
@@ -80,14 +61,14 @@ internal sealed class TwitchChatDialogTests
 
 		Press(widget, widget.BuildTree().Root, Client);
 
-		var (client, modal) = await _interactions.Opened.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		var (client, modal) = await _origins.Opened.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(client, Is.EqualTo(Client));
-			Assert.That(modal.ViewId, Is.EqualTo(StreamPlatforms.Twitch.DialogViewId));
+			Assert.That(modal.ViewId, Is.EqualTo(TwitchStreamPlatform.Platform.DialogViewId));
 			Assert.That(modal.Data![StreamChatWidgetType.AccountKey].GetString(), Is.EqualTo(Streamer));
-			Assert.That(modal.Data!["widgetId"].GetString(), Is.EqualTo(_widget.Id.ToString()));
+			Assert.That(modal.Data!["widgetId"].GetString(), Is.EqualTo(_widgetId.ToString()));
 		});
 	}
 
@@ -99,7 +80,7 @@ internal sealed class TwitchChatDialogTests
 		Press(widget, widget.BuildTree().Root, null);
 		await Task.Delay(50);
 
-		Assert.That(_interactions.Opened.Task.IsCompleted, Is.False);
+		Assert.That(_origins.Opened.Task.IsCompleted, Is.False);
 	}
 
 	[Test]
@@ -269,22 +250,9 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	[Test]
-	public async Task Nothing_is_moderated_while_the_host_is_locked()
-	{
-		await using var dialog = await OpenDialogAsync();
-		_hostLock.IsLocked = true;
-
-		SelectMessage(dialog);
-		PressButton(dialog, "DeleteMessage");
-		await WaitForAsync(() => Texts(dialog.BuildTree().Root).Any(text => text.Contains("Errors.Common.HostLocked")));
-
-		Assert.That(_moderator.Requests, Is.Empty);
-	}
-
-	[Test]
 	public async Task With_moderation_turned_off_the_dialog_only_shows_the_chat()
 	{
-		_widget.Data = """{"account":"","allowModeration":false}""";
+		StoreWidget("""{"account":"","allowModeration":false}""");
 
 		await using var dialog = await OpenDialogAsync();
 
@@ -301,7 +269,7 @@ internal sealed class TwitchChatDialogTests
 		await using var dialog = await OpenDialogAsync();
 		SelectMessage(dialog);
 
-		_widget.Data = """{"account":"","allowModeration":false}""";
+		StoreWidget("""{"account":"","allowModeration":false}""");
 		PressButton(dialog, "DeleteMessage");
 		await WaitForAsync(() =>
 			Texts(dialog.BuildTree().Root).Any(text => text.Contains("StreamChat.Dialog.ModerationUnavailable")));
@@ -315,7 +283,7 @@ internal sealed class TwitchChatDialogTests
 		await using var dialog = await OpenDialogAsync();
 		SelectMessage(dialog);
 
-		_widget.Data = """{"account":"222"}""";
+		StoreWidget("""{"account":"222"}""");
 		PressButton(dialog, "DeleteMessage");
 		await WaitForAsync(() =>
 			Texts(dialog.BuildTree().Root).Any(text => text.Contains("ChatDialog.AccountChanged")));
@@ -326,7 +294,7 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task A_deleted_widget_gets_no_moderation()
 	{
-		_folders.RemoveWidget(Guid.Empty, _widget.Id);
+		_context.OwnWidgets.Remove(_widgetId);
 
 		await using var dialog = await OpenDialogAsync();
 
@@ -359,9 +327,9 @@ internal sealed class TwitchChatDialogTests
 	}
 
 	[Test]
-	public async Task A_disabled_twitch_integration_cannot_moderate()
+	public async Task A_twitch_integration_that_is_not_running_cannot_moderate()
 	{
-		_integrations.SetEnabled(StreamPlatforms.Twitch.OwnerId, false);
+		_moderatorAvailable = false;
 		await using var dialog = await OpenDialogAsync();
 
 		SelectMessage(dialog);
@@ -375,20 +343,11 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task Moderation_reaches_only_the_integration_that_owns_the_platform()
 	{
-		var otherPlatform = new RecordingModerator(StreamPlatformTestSupport.TestPlatform.OwnerId);
-		var integrations = new FakeIntegrationRegistry();
-		integrations.Add(otherPlatform);
-		integrations.Add(_moderator);
-		var provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch,
-			_hub,
-			new FakeTwitchChatImages(),
-			TestLocalization.SampleText,
-			integrations,
-			new UiResourceStore(),
-			_interactions,
-			_folders,
-			_hostLock,
-			Logger.None);
+		var otherPlatform = new RecordingModerator();
+		await using var otherDialog = (await Provider(StreamPlatformTestSupport.TestPlatform, null, () => otherPlatform)
+			.CreateSessionAsync(new UiSessionRequest { Surface = DialogSurface(), UiModelVersion = 1 },
+				CancellationToken.None))!;
+		var provider = Provider(TwitchStreamPlatform.Platform, new FakeTwitchChatImages(), () => _moderator);
 		await using var dialog = (await provider.CreateSessionAsync(
 			new UiSessionRequest { Surface = DialogSurface(), UiModelVersion = 1 },
 			CancellationToken.None))!;
@@ -407,19 +366,9 @@ internal sealed class TwitchChatDialogTests
 	[Test]
 	public async Task Another_platforms_moderator_does_not_stand_in_for_a_missing_twitch_integration()
 	{
-		var otherPlatform = new RecordingModerator(StreamPlatformTestSupport.TestPlatform.OwnerId);
-		var integrations = new FakeIntegrationRegistry();
-		integrations.Add(otherPlatform);
-		var provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch,
-			_hub,
-			new FakeTwitchChatImages(),
-			TestLocalization.SampleText,
-			integrations,
-			new UiResourceStore(),
-			_interactions,
-			_folders,
-			_hostLock,
-			Logger.None);
+		var otherPlatform = new RecordingModerator();
+		_ = Provider(StreamPlatformTestSupport.TestPlatform, null, () => otherPlatform);
+		var provider = Provider(TwitchStreamPlatform.Platform, new FakeTwitchChatImages(), () => null);
 		await using var dialog = (await provider.CreateSessionAsync(
 			new UiSessionRequest { Surface = DialogSurface(), UiModelVersion = 1 },
 			CancellationToken.None))!;
@@ -449,9 +398,7 @@ internal sealed class TwitchChatDialogTests
 	public async Task A_full_history_of_heavy_messages_stays_within_the_tree_limit()
 	{
 		var images = new FakeTwitchChatImages(new UiResourceStore());
-		var provider = new StreamChatWidgetUiProvider(StreamPlatforms.Twitch, _hub, images, TestLocalization.SampleText,
-			_integrations,
-			new UiResourceStore(), _interactions, _folders, _hostLock, Logger.None);
+		var provider = Provider(TwitchStreamPlatform.Platform, images, () => _moderator);
 
 		for (var index = 0; index < 120; index++)
 		{
@@ -460,7 +407,7 @@ internal sealed class TwitchChatDialogTests
 			for (var emote = 0; emote < 20; emote++)
 			{
 				var emoteId = $"emotesv2_{index}_{emote}".PadRight(64, 'x');
-				images.Resolve(TwitchChatImage.Emote(emoteId));
+				images.Resolve(StreamChatImage.Emote(emoteId));
 				fragments.Add(new ChatFragment(ChatFragmentKind.Text, "😀漢字テスト "));
 				fragments.Add(new ChatFragment(ChatFragmentKind.Emote, "PogChamp", emoteId));
 			}
@@ -535,6 +482,22 @@ internal sealed class TwitchChatDialogTests
 
 	private Task<IUiSession> OpenDialogAsync() => OpenAsync(DialogSurface());
 
+	private StreamWidgetsUiProvider Provider(StreamPlatform platform,
+		IStreamChatImages? images,
+		Func<IStreamChatModerator?> moderator)
+		=> new(platform,
+			_hub,
+			images,
+			new StreamStatsSource((_, _) => null),
+			new NoStreamThumbnails(),
+			() => _context,
+			moderator,
+			TimeProvider.System,
+			Logger.None);
+
+	private void StoreWidget(string json)
+		=> _context.OwnWidgets.Store(_widgetId, TwitchStreamPlatform.Platform.ChatWidgetTypeId, json);
+
 	private UiSurface DialogSurface()
 		=> new()
 		{
@@ -543,10 +506,10 @@ internal sealed class TwitchChatDialogTests
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiDialogSurfaceAttributes.ModalId] = JsonSerializer.SerializeToElement("modal-1"),
-				[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.DialogViewId),
+				[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.DialogViewId),
 				[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
 				{
-					["account"] = Streamer, ["widgetId"] = _widget.Id.ToString(),
+					["account"] = Streamer, ["widgetId"] = _widgetId.ToString(),
 				}),
 			},
 		};
@@ -555,13 +518,13 @@ internal sealed class TwitchChatDialogTests
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(StreamPlatforms.Twitch.ChatWidgetTypeId),
+			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
 			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
 		};
 
 		if (kind == UiSurfaceKinds.Widget)
 		{
-			attributes[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widget.Id.ToString());
+			attributes[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widgetId.ToString());
 		}
 
 		if (sample)
@@ -572,9 +535,19 @@ internal sealed class TwitchChatDialogTests
 		return new UiSurface { Kind = kind, SessionMode = UiSessionModes.Shared, Attributes = attributes };
 	}
 
-	private static void Press(IUiSession session, UiNode node, string? client)
-		=> ((IOriginAwareUiSession)session).Dispatch(new UiEvent { NodeId = node.Id, Name = UiComponentEvents.Press },
-			client);
+	private void Press(IUiSession session, UiNode node, string? client)
+	{
+		var press = new UiEvent { NodeId = node.Id, Name = UiComponentEvents.Press };
+
+		if (client is null)
+		{
+			session.Dispatch(press);
+		}
+		else
+		{
+			session.Dispatch(press, _origins.For(client));
+		}
+	}
 
 	private static void SelectMessage(IUiSession session, int index = 0)
 	{
@@ -629,27 +602,13 @@ internal sealed class TwitchChatDialogTests
 			.Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
 			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
 
-	private sealed class RecordingModerator(string? id = null) : IIntegration, IStreamChatModerator
+	private sealed class RecordingModerator : IStreamChatModerator
 	{
 		public List<(string AccountId, ChatModerationRequest Request)> Requests { get; } = [];
 
 		public ChatModerationResult Result { get; set; } = ChatModerationResult.Succeeded;
 
 		public Task<ChatModerationResult>? Pending { get; set; }
-
-		public string Id => id ?? StreamPlatforms.Twitch.OwnerId;
-
-		public LocalizedText Name => "Twitch";
-
-		public string Version => "1.0.0";
-
-		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
-
-		public bool IsInitialized => true;
-
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-		public Task ShutdownAsync() => Task.CompletedTask;
 
 		public Task<ChatModerationResult> ModerateAsync(
 			string accountId,

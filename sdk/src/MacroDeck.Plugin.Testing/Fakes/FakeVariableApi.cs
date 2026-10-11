@@ -19,6 +19,11 @@ public sealed class FakeVariableApi : IVariableApi
 	private readonly Lock _gate = new();
 	private readonly Dictionary<Guid, VariableHandle> _variables = new();
 	private readonly List<VariableHandle> _created = [];
+	private readonly Dictionary<string, List<double?>> _samples = new(StringComparer.Ordinal);
+	private readonly List<HistoryWindow> _historyWindows = [];
+	private readonly Dictionary<string, IVariableHistoryWindow> _wireWindows = new(StringComparer.Ordinal);
+	private int _refreshRequests;
+	private int _declarationChanges;
 
 	/// <summary>Every variable this fake has created, in call order, exactly as it was at creation time.</summary>
 	public IReadOnlyList<VariableHandle> Created
@@ -116,5 +121,156 @@ public sealed class FakeVariableApi : IVariableApi
 		}
 
 		return Task.CompletedTask;
+	}
+
+	/// <summary>How many times the integration asked for its declared variables to be read again through
+	/// <see cref="RequestRefreshAsync" />.</summary>
+	public int RefreshRequests => Volatile.Read(ref _refreshRequests);
+
+	/// <summary>How many times the integration reported a changed set of declared variables through
+	/// <see cref="NotifyDeclarationsChangedAsync" />.</summary>
+	public int DeclarationChanges => Volatile.Read(ref _declarationChanges);
+
+	/// <inheritdoc />
+	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		Interlocked.Increment(ref _refreshRequests);
+		return Task.CompletedTask;
+	}
+
+	/// <inheritdoc />
+	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		Interlocked.Increment(ref _declarationChanges);
+		return Task.CompletedTask;
+	}
+
+	/// <summary>How many history windows opened with <see cref="OpenHistoryAsync" /> are still open.</summary>
+	public int OpenHistoryWindows
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _historyWindows.Count;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Records one sample of <paramref name="name" />, as Macro Deck's once-per-second sampling would, and
+	/// raises <see cref="IVariableHistoryWindow.Changed" /> on every window open on that name.
+	/// </summary>
+	public void RecordSample(string name, double? value)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(name);
+
+		List<HistoryWindow> windows;
+		lock (_gate)
+		{
+			if (!_samples.TryGetValue(name, out var samples))
+			{
+				samples = [];
+				_samples[name] = samples;
+			}
+
+			samples.Add(value);
+			windows = [.. _historyWindows.Where(window => string.Equals(window.Name, name, StringComparison.Ordinal))];
+		}
+
+		foreach (var window in windows)
+		{
+			window.RaiseChanged();
+		}
+	}
+
+	/// <summary>
+	/// Opens a window on the samples recorded with <see cref="RecordSample" /> for <paramref name="name" />,
+	/// keeping the last <paramref name="capacity" /> of them. Every name counts as the integration's own here.
+	/// </summary>
+	public Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+		int capacity,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(name);
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(capacity);
+		cancellationToken.ThrowIfCancellationRequested();
+
+		var window = new HistoryWindow(this, name, capacity);
+		lock (_gate)
+		{
+			_historyWindows.Add(window);
+		}
+
+		return Task.FromResult<IVariableHistoryWindow>(window);
+	}
+
+	internal async Task<string> OpenWireHistoryAsync(string name, int capacity)
+	{
+		var window = await OpenHistoryAsync(name, capacity).ConfigureAwait(false);
+		var id = Guid.NewGuid().ToString("N");
+		lock (_gate)
+		{
+			_wireWindows[id] = window;
+		}
+
+		return id;
+	}
+
+	internal IReadOnlyList<double?>? ReadWireHistory(string windowId)
+	{
+		lock (_gate)
+		{
+			return _wireWindows.TryGetValue(windowId, out var window) ? window.Values : null;
+		}
+	}
+
+	internal async Task CloseWireHistoryAsync(string windowId)
+	{
+		IVariableHistoryWindow? window;
+		lock (_gate)
+		{
+			_wireWindows.Remove(windowId, out window);
+		}
+
+		if (window is not null)
+		{
+			await window.DisposeAsync().ConfigureAwait(false);
+		}
+	}
+
+	private IReadOnlyList<double?> Samples(string name, int capacity)
+	{
+		lock (_gate)
+		{
+			return _samples.TryGetValue(name, out var samples) ? [.. samples.TakeLast(capacity)] : [];
+		}
+	}
+
+	private void Close(HistoryWindow window)
+	{
+		lock (_gate)
+		{
+			_historyWindows.Remove(window);
+		}
+	}
+
+	private sealed class HistoryWindow(FakeVariableApi owner, string name, int capacity) : IVariableHistoryWindow
+	{
+		public string Name => name;
+
+		public IReadOnlyList<double?> Values => owner.Samples(name, capacity);
+
+		public event EventHandler? Changed;
+
+		public void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
+
+		public ValueTask DisposeAsync()
+		{
+			owner.Close(this);
+			return ValueTask.CompletedTask;
+		}
 	}
 }

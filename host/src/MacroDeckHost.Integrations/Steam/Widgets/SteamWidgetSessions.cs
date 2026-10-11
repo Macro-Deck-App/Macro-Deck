@@ -9,6 +9,10 @@ namespace MacroDeckHost.Integrations.Steam.Widgets;
 
 internal static class SteamWidgetSessions
 {
+	public const string IconFolder = "widget";
+
+	public const string LogoIcon = "logo";
+
 	public static IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
 		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },

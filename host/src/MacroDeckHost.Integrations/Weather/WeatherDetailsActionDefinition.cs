@@ -4,6 +4,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Weather;
+using MacroDeckHost.Integrations.Weather.Details;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Weather;
@@ -21,8 +22,7 @@ internal sealed class WeatherDetailsActionDefinition : IDynamicOptionsActionDefi
 {
 	internal const string InstanceParameter = "instanceId";
 
-	/// <summary>Must match <c>WeatherDetailsUiProvider.DetailsViewId</c>, which serves the dialog.</summary>
-	private const string DetailsViewId = "weather-details";
+	internal const string ActionId = "show-details";
 
 	private readonly Func<IReadOnlyList<WeatherStationInstance>> _instances;
 
@@ -31,7 +31,7 @@ internal sealed class WeatherDetailsActionDefinition : IDynamicOptionsActionDefi
 		_instances = instances;
 	}
 
-	public string Id => "show-details";
+	public string Id => ActionId;
 
 	public LocalizedText Name => AppStrings.Integrations.Weather.Details.ActionName();
 
@@ -96,7 +96,7 @@ internal sealed class WeatherDetailsActionDefinition : IDynamicOptionsActionDefi
 			await context.Ui.ShowModalAsync(context.OriginClientId,
 					new ModalDefinition
 					{
-						ViewId = DetailsViewId,
+						ViewId = WeatherDetailsUiProvider.DetailsViewId,
 						Title = AppStrings.Integrations.Weather.Details.Title(),
 						Data = data
 					},

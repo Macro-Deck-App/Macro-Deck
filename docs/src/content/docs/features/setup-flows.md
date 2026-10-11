@@ -329,6 +329,74 @@ With `RequiresConfiguration` set to `false`:
 to 3.0.0-beta.14 ignore it and treat every flow as required, so on those the integration still waits for
 the flow to be completed once.
 
+## Taking part in storing an entry
+
+A flow decides what an entry holds. To also decide whether it may be stored, report how each stored entry
+is doing, or apply a change without being initialized again, implement `IConfigEntryLifecycle` on the
+integration. Every member has a default, so override only what you need:
+
+```csharp
+public sealed class ServersIntegration : IPluginIntegration, IConfigFlowProvider, IConfigEntryLifecycle
+{
+	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+		CancellationToken cancellationToken = default)
+	{
+		var key = KeyFor(preparation.Title, preparation.Siblings);
+		if (key is null)
+		{
+			return Task.FromResult(ConfigEntryPreparationResult.Refuse(Strings.Setup.NameTaken()));
+		}
+
+		var values = new Dictionary<string, JsonElement>(preparation.Values)
+		{
+			["key"] = JsonSerializer.SerializeToElement(key)
+		};
+		return Task.FromResult(ConfigEntryPreparationResult.Accept(values,
+			[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]));
+	}
+
+	public Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+		CancellationToken cancellationToken = default)
+		=> Task.FromResult(_connections.TryGetValue(entry.Id, out var connection) && connection.IsOpen
+			? ConfigEntryStatus.Connected
+			: ConfigEntryStatus.Disconnected);
+
+	public async Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default)
+	{
+		await ReconnectChangedEntriesAsync(cancellationToken);
+		return true;
+	}
+
+	// Other members omitted.
+}
+```
+
+Macro Deck handles one change at a time per integration, in this order:
+
+1. **`PrepareEntryAsync`** sees the entry about to be stored: its id, title and values, the stored entry when
+   it is an edit, the other entries, and whether the title changed. Return the values to store, or refuse
+   with a message the user sees. `ReservedVariables` names the global variables the entry will create:
+   Macro Deck holds those names until the change ends and refuses the entry with its own message when
+   another integration's variable or another entry's preparation already has one. A variable your
+   integration already owns under the same id and type is not a conflict, so saving an entry again works.
+2. The entry is stored.
+3. **`ReloadEntriesAsync`** applies the change in the running integration. Return `true` when you did;
+   `false`, the default, makes Macro Deck shut the integration down and initialize it again.
+4. **`SynchronizeEntriesAsync`** receives every stored entry, for example to create the variables of a new
+   entry and delete those of a removed one.
+5. **`ReleasePreparationAsync`** ends the preparation, whether or not the entry was stored.
+
+`GetEntryStatusAsync` is what the integration page shows next to each entry, and `IsEntryUsableAsync` says
+whether an entry can be used as it is. An integration whose flow is required is turned off when none of its
+entries is usable, and renaming an unusable entry stores the new title without running `PrepareEntryAsync`.
+A secret field of a `StoredConfigEntry` holds the reference to the encrypted value, not the value; read it
+with `GetSecretAsync`.
+
+A plugin that implements the interface declares the `config-entries` capability. A Macro Deck that predates
+it rejects the declaration and never calls these members, and a plugin that cannot be reached while an entry
+is stored gets the defaults: the entry is stored as the flow completed it and the integration is
+initialized again.
+
 ## Rendering the flow as a UI tree
 
 Implement `IUiConfigFlowProvider` on the integration and `IUiConfigFlow` on the flow to draw the flow as a
@@ -346,6 +414,10 @@ Its `describe` result carries `allowsMultipleConfigurations`, `servesConfigUiTre
 plaintext before `flow.submit`, and forwards OAuth state and `EntryTitle`. `PluginTestHarness.ConfigFlow`
 drives the same operations in tests - see [Testing](/features/testing/) and
 [the WebSocket reference](/reference/websocket/#capabilities).
+
+`IConfigEntryLifecycle` is the separate `config-entries` capability, driven by `prepare`, `status`,
+`usable`, `reload`, `synchronize` and `release`. The first integration of the plugin that implements it
+answers them. `PluginTestHarness.ConfigEntries` drives the same operations in tests.
 
 ## See also
 

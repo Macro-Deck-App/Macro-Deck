@@ -1,5 +1,4 @@
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Integrations.AdGuardHome;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 

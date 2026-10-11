@@ -298,7 +298,8 @@ public sealed class RemotePluginSnapshotRefresher
 		return snapshot with
 		{
 			WeatherProviderName = payload.ProviderName,
-			WeatherInstances = [.. payload.Instances.Select(WeatherCatalogMapper.ToDomain)]
+			WeatherInstances = [.. payload.Instances.Select(WeatherCatalogMapper.ToDomain)],
+			WeatherDetailsAction = WeatherCatalogMapper.ToDomain(payload.DetailsAction)
 		};
 	}
 

@@ -86,6 +86,52 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
 
+	[Test]
+	public async Task A_registry_written_before_the_artwork_size_existed_registers_the_full_size_cover_for_a_sized_request()
+	{
+		var written = new RegistryWrittenBeforeTheArtworkSize();
+		IUiResourceRegistry registry = written;
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1", 256);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(handle!.ResourceId, Is.EqualTo("test.cover"));
+			Assert.That(written.Requests, Is.EqualTo(new[] { ("cover", "net.example.jukebox::default", "cover-1") }));
+		});
+	}
+
+	[Test]
+	public void A_sized_artwork_request_with_a_size_that_is_not_positive_is_refused()
+	{
+		IUiResourceRegistry registry = new RegistryWrittenBeforeTheArtworkSize();
+
+		Assert.Throws<ArgumentOutOfRangeException>(() =>
+			_ = registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1", 0));
+	}
+
+	private sealed class RegistryWrittenBeforeTheArtworkSize : IUiResourceRegistry
+	{
+		public List<(string Name, string InstanceId, string ArtworkId)> Requests { get; } = [];
+
+		public Task<UiResource> RegisterAsync(string name,
+			ReadOnlyMemory<byte> content,
+			string mediaType,
+			CancellationToken cancellationToken = default)
+			=> Task.FromResult(new UiResource { ResourceId = "test." + name });
+
+		public Task RemoveAsync(string name, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+		public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+			string instanceId,
+			string artworkId,
+			CancellationToken cancellationToken = default)
+		{
+			Requests.Add((name, instanceId, artworkId));
+			return Task.FromResult<UiResource?>(new UiResource { ResourceId = "test." + name });
+		}
+	}
+
 	private sealed class RegistryWrittenBeforeBundledIcons : IUiResourceRegistry
 	{
 		public Task<UiResource> RegisterAsync(string name,

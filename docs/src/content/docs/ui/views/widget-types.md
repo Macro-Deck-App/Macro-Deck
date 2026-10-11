@@ -103,7 +103,7 @@ true**. There is no icon: the picker draws a live sample instead.
 
 One session is opened per widget per viewer, so each tile sees only its own `data`. Push patches on the
 session to update it; events its tree declares come back to that same session. Saved and draft data
-arrive the same way, because you cannot read Macro Deck's stored widgets. By default a press runs nothing on
+arrive the same way, so a provider never has to look a widget up to draw it. By default a press runs nothing on
 the host - a tile whose tree declares no events does nothing when pressed - unless the type
 [runs the user's actions](#running-the-users-actions) or has a
 [default Short Press action](#a-default-short-press-action).
@@ -116,7 +116,21 @@ UiSurfaceKinds.Preview // with attributes["sample"] == true
 
 A picker card is a live `preview` surface with `sample: true`: draw a representative sample without
 reading anything live. Serving it is optional - declining gets a card naming the type, and the type stays
-pickable either way.
+pickable either way. Write the sample's own words in the language `UiWidgetSurface.Culture(surface)` names,
+see [Deck widget views](/ui/views/widget/#what-the-surface-carries).
+
+## Reading a stored widget
+
+```csharp
+var widget = await context.Widgets.GetWidgetDataAsync(widgetId, cancellationToken);
+var allowed = widget?.Data.TryGetProperty("allowModeration", out var value) == true && value.GetBoolean();
+```
+
+A dialog or an action outlives the press that started it, and the user may change the widget meanwhile.
+`GetWidgetDataAsync` reads the widget's stored data at that moment, for a widget of one of your own types.
+It answers `null` for a widget that does not exist, for another provider's or a built-in widget, and on a
+Macro Deck that predates it, so treat `null` as "not known" and do the safe thing. The data is the saved
+configuration as stored, never a draft and without resolved colour references.
 
 ## Configuration
 
@@ -328,7 +342,8 @@ Registering and withdrawing a type travels the other way as the `widget-types` h
 | `unregister` | Withdraws a widget type. Widgets already using it keep their stored type and data and wait for it to return. |
 
 The widgets themselves are drawn, previewed and configured over the `ui` capability, like every other
-Macro Deck UI surface.
+Macro Deck UI surface. `GetWidgetDataAsync` crosses as the `widgets` host API's `get-data` operation; the host
+takes the owner from the connection, never from the request.
 
 ## See also
 

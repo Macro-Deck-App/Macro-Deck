@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Components;
+using MacroDeck.Ui.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Widgets;
 
@@ -139,5 +140,15 @@ public class WidgetSafeAreaTests
 		};
 
 		Assert.That(WidgetSafeArea.RadiusOf(surface), Is.EqualTo(WidgetSafeArea.DefaultCornerRadius));
+	}
+
+	[Test]
+	public void ThePublicSafeAreaDrawsWithTheDecksOwnDefaults()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(UiWidgetSafeArea.DefaultCornerRadius, Is.EqualTo(GridDefaults.WidgetBorderRadius));
+			Assert.That(UiWidgetSafeArea.BreathingRoom, Is.EqualTo(GridDefaults.WidgetSpacing));
+		});
 	}
 }

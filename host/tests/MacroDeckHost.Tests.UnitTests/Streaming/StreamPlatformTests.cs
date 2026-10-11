@@ -1,25 +1,14 @@
 using System.Text.Json;
-using MacroDeck.Localization;
-using MacroDeck.Sdk;
-using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
-using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Infrastructure.Integrations;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch;
-using MacroDeckHost.Tests.UnitTests.Delegation;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
-using MacroDeckHost.Tests.UnitTests.Variables;
-using MacroDeckHost.Widgets.HistoryGraph;
-using MacroDeckHost.Widgets.StreamChat;
-using MacroDeckHost.Widgets.StreamStats;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Streaming;
@@ -32,7 +21,7 @@ internal sealed class StreamPlatformTests
 	[Test]
 	public void Twitch_widgets_keep_the_ids_and_data_stored_widgets_were_saved_with()
 	{
-		var twitch = StreamPlatforms.Twitch;
+		var twitch = TwitchStreamPlatform.Platform;
 
 		Assert.Multiple(() =>
 		{
@@ -53,11 +42,10 @@ internal sealed class StreamPlatformTests
 	[Test]
 	public void The_same_account_id_on_two_platforms_keeps_two_separate_chats()
 	{
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch),
-			StreamPlatformTestSupport.Set(StreamPlatformTestSupport.TestPlatform));
-		var twitch = (StreamChatHub)services.Find(StreamPlatforms.Twitch.OwnerId)!.ChatFeed;
-		var other = (StreamChatHub)services.Find(StreamPlatformTestSupport.TestPlatform.OwnerId)!.ChatFeed;
+		using var twitchIntegration = new TwitchIntegration();
+		using var youTubeIntegration = new YouTubeIntegration();
+		var twitch = twitchIntegration.Chat;
+		var other = youTubeIntegration.Chat;
 
 		twitch.SetAccounts([new ChatAccount(SharedAccountId, "On Twitch")]);
 		other.SetAccounts([new ChatAccount(SharedAccountId, "Elsewhere")]);
@@ -82,71 +70,57 @@ internal sealed class StreamPlatformTests
 	[Test]
 	public void Replacing_one_platforms_stats_accounts_leaves_the_others_untouched()
 	{
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch),
-			StreamPlatformTestSupport.Set(StreamPlatformTestSupport.TestPlatform));
-		var twitch = services.Find(StreamPlatforms.Twitch.OwnerId)!;
-		var other = services.Find(StreamPlatformTestSupport.TestPlatform.OwnerId)!;
+		var twitch = new StreamStatsSource((_, _) => null);
+		var other = new StreamStatsSource((_, _) => null);
 
-		twitch.StatsSink.SetAccounts([new StreamStatsAccount(SharedAccountId, "On Twitch", "twitch_streamer_")]);
-		other.StatsSink.SetAccounts([new StreamStatsAccount(SharedAccountId, "Elsewhere", "other_streamer_")]);
-		twitch.StatsSink.SetAccounts([]);
+		twitch.SetAccounts([new StreamStatsAccount(SharedAccountId, "On Twitch", "twitch_streamer_")]);
+		other.SetAccounts([new StreamStatsAccount(SharedAccountId, "Elsewhere", "other_streamer_")]);
+		twitch.SetAccounts([]);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(twitch.StatsAccounts.Accounts, Is.Empty);
-			Assert.That(other.StatsAccounts.Accounts.Select(account => account.Label),
-				Is.EqualTo(new[] { "Elsewhere" }));
+			Assert.That(twitch.Accounts, Is.Empty);
+			Assert.That(other.Accounts.Select(account => account.Label), Is.EqualTo(new[] { "Elsewhere" }));
 		});
 	}
 
 	[Test]
-	public void Each_integration_receives_only_the_sinks_of_the_platform_it_owns()
+	public async Task Each_integration_serves_only_the_widgets_of_the_platform_it_owns()
 	{
-		var twitchChat = new RecordingTwitchChatSink();
-		var otherChat = new RecordingTwitchChatSink();
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch, chatSink: twitchChat),
-			StreamPlatformTestSupport.Set(StreamPlatformTestSupport.TestPlatform, chatSink: otherChat));
-		var twitch = new SinkConsumer(StreamPlatforms.Twitch.OwnerId);
-		var other = new SinkConsumer(StreamPlatformTestSupport.TestPlatform.OwnerId);
-		var unrelated = new SinkConsumer("app.macro-deck.unrelated");
+		using var twitch = new TwitchIntegration();
+		using var youTube = new YouTubeIntegration();
 
-		foreach (var integration in new[] { twitch, other, unrelated })
-		{
-			IntegrationGatewayBinder.Bind(integration,
-				null!,
-				null!,
-				new InMemoryVariableBindingStore(),
-				new VariableRefreshSignal(),
-				streamPlatforms: services);
-		}
+		var twitchServesYouTube = await twitch.CreateSessionAsync(
+			Request(WidgetSurface(YouTubeStreamPlatform.Platform.ChatWidgetTypeId)),
+			CancellationToken.None);
+		var youTubeServesTwitch = await youTube.CreateSessionAsync(
+			Request(WidgetSurface(TwitchStreamPlatform.Platform.StatsWidgetTypeId)),
+			CancellationToken.None);
+		await using var own = await twitch.CreateSessionAsync(
+			Request(WidgetSurface(TwitchStreamPlatform.Platform.ChatWidgetTypeId)),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(twitch.ChatSink, Is.SameAs(twitchChat));
-			Assert.That(twitch.StatsSink, Is.SameAs(services.Find(StreamPlatforms.Twitch.OwnerId)!.StatsSink));
-			Assert.That(other.ChatSink, Is.SameAs(otherChat));
-			Assert.That(other.StatsSink,
-				Is.SameAs(services.Find(StreamPlatformTestSupport.TestPlatform.OwnerId)!.StatsSink));
-			Assert.That(unrelated.ChatSink, Is.Null);
-			Assert.That(unrelated.StatsSink, Is.Null);
+			Assert.That(twitchServesYouTube, Is.Null);
+			Assert.That(youTubeServesTwitch, Is.Null);
+			Assert.That(own, Is.Not.Null);
 		});
 	}
 
 	[Test]
 	public async Task A_second_platforms_chat_and_stats_configuration_lists_only_its_own_accounts()
 	{
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch),
-			StreamPlatformTestSupport.Set(StreamPlatformTestSupport.TestPlatform));
-		var twitch = services.Find(StreamPlatforms.Twitch.OwnerId)!;
-		var other = services.Find(StreamPlatformTestSupport.TestPlatform.OwnerId)!;
-		twitch.ChatSink.SetAccounts([new ChatAccount("111", "Twitch streamer")]);
-		twitch.StatsSink.SetAccounts([new StreamStatsAccount("111", "Twitch streamer", "twitch_streamer_")]);
-		other.ChatSink.SetAccounts([new ChatAccount("222", "Other streamer")]);
-		other.StatsSink.SetAccounts([new StreamStatsAccount("222", "Other streamer", "other_streamer_")]);
-		var provider = Provider(other, new FakeIntegrationRegistry());
+		using var twitchChat = new StreamChatHub(TimeProvider.System, Logger.None);
+		using var otherChat = new StreamChatHub(TimeProvider.System, Logger.None);
+		var twitchStats = new StreamStatsSource((_, _) => null);
+		var otherStats = new StreamStatsSource((_, _) => null);
+		twitchChat.SetAccounts([new ChatAccount("111", "Twitch streamer")]);
+		twitchStats.SetAccounts([new StreamStatsAccount("111", "Twitch streamer", "twitch_streamer_")]);
+		otherChat.SetAccounts([new ChatAccount("222", "Other streamer")]);
+		otherStats.SetAccounts([new StreamStatsAccount("222", "Other streamer", "other_streamer_")]);
+		var provider = StreamPlatformTestSupport.Provider(StreamPlatformTestSupport.TestPlatform, otherChat,
+			stats: otherStats);
 
 		await using var chat = await OpenAsync(provider,
 			ConfigSurface(StreamPlatformTestSupport.TestPlatform.ChatWidgetTypeId));
@@ -163,20 +137,16 @@ internal sealed class StreamPlatformTests
 	[Test]
 	public async Task A_platform_ignores_the_widgets_and_dialogs_of_another_platform()
 	{
-		using var services = StreamPlatformTestSupport.Services(
-			StreamPlatformTestSupport.Set(StreamPlatforms.Twitch),
-			StreamPlatformTestSupport.Set(StreamPlatformTestSupport.TestPlatform));
-		var provider = Provider(services.Find(StreamPlatformTestSupport.TestPlatform.OwnerId)!,
-			new FakeIntegrationRegistry());
+		using var chat = new StreamChatHub(TimeProvider.System, Logger.None);
+		var provider = StreamPlatformTestSupport.Provider(StreamPlatformTestSupport.TestPlatform, chat);
 
-		var chatWidget = await provider.CreateSessionAsync(Request(WidgetSurface(StreamPlatforms.Twitch.ChatWidgetTypeId)),
+		var chatWidget = await provider.CreateSessionAsync(Request(WidgetSurface(TwitchStreamPlatform.Platform.ChatWidgetTypeId)),
 			CancellationToken.None);
-		var statsConfig = await provider.CreateSessionAsync(Request(ConfigSurface(StreamPlatforms.Twitch.StatsWidgetTypeId)),
+		var statsConfig = await provider.CreateSessionAsync(Request(ConfigSurface(TwitchStreamPlatform.Platform.StatsWidgetTypeId)),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(provider.IntegrationId, Is.EqualTo(StreamPlatformTestSupport.TestPlatform.OwnerId));
 			Assert.That(chatWidget, Is.Null);
 			Assert.That(statsConfig, Is.Null);
 		});
@@ -185,9 +155,7 @@ internal sealed class StreamPlatformTests
 	[Test]
 	public async Task A_stored_twitch_chat_widget_without_an_account_shows_the_first_twitch_account()
 	{
-		using var services = StreamPlatformTestSupport.Services(StreamPlatformTestSupport.Set(StreamPlatforms.Twitch));
-		var twitch = services.Find(StreamPlatforms.Twitch.OwnerId)!;
-		var hub = (StreamChatHub)twitch.ChatFeed;
+		using var hub = new StreamChatHub(TimeProvider.System, Logger.None);
 		hub.SetAccounts([new ChatAccount("111", "First"), new ChatAccount("222", "Second")]);
 		hub.Post(new ChatConnectionChanged("111", true));
 		hub.Post(new ChatConnectionChanged("222", true));
@@ -201,7 +169,7 @@ internal sealed class StreamPlatformTests
 		}));
 		hub.Tick();
 
-		await using var session = await OpenAsync(Provider(twitch, new FakeIntegrationRegistry()),
+		await using var session = await OpenAsync(StreamPlatformTestSupport.Provider(TwitchStreamPlatform.Platform, hub),
 			WidgetSurface("app.macro-deck.twitch::chat"));
 		var texts = Texts(session.BuildTree().Root);
 
@@ -212,34 +180,7 @@ internal sealed class StreamPlatformTests
 		});
 	}
 
-	private static StreamChatWidgetUiProvider Provider(
-		StreamPlatformServiceSet set,
-		FakeIntegrationRegistry integrations)
-	{
-		var resources = new UiResourceStore();
-
-		return new StreamChatWidgetUiProvider(set.Platform,
-			set.ChatFeed,
-			set.ChatImages,
-			TestLocalization.SampleText,
-			integrations,
-			resources,
-			new RecordingUiInteractions(),
-			new FakeFolderCache(),
-			new FakeHostLockState(),
-			Logger.None,
-			new StreamStatsWidgetUiProvider(set.Platform,
-				set.StatsAccounts,
-				set.Thumbnails,
-				new VariableRegistry(),
-				new FakeVariableHistory(),
-				new VariableChangeNotifier(),
-				TestLocalization.SampleText,
-				integrations,
-				resources));
-	}
-
-	private static async Task<IUiSession> OpenAsync(StreamChatWidgetUiProvider provider, UiSurface surface)
+	private static async Task<IUiSession> OpenAsync(StreamWidgetsUiProvider provider, UiSurface surface)
 		=> (await provider.CreateSessionAsync(Request(surface), CancellationToken.None))!;
 
 	private static UiSessionRequest Request(UiSurface surface) => new() { Surface = surface, UiModelVersion = 1 };
@@ -295,35 +236,4 @@ internal sealed class StreamPlatformTests
 	private static List<string> Texts(UiNode root)
 		=> [.. Flatten(root).Where(node => node.Properties.ContainsKey(UiComponentProperties.Text))
 			.Select(node => node.Properties[UiComponentProperties.Text].GetRawText())];
-
-	private sealed class SinkConsumer(string id) : IIntegration, IStreamChatSinkConsumer, IStreamStatsSinkConsumer
-	{
-		public IStreamChatSink? ChatSink { get; private set; }
-
-		public IStreamStatsSink? StatsSink { get; private set; }
-
-		public string Id => id;
-
-		public LocalizedText Name => "Platform";
-
-		public string Version => "1.0.0";
-
-		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
-
-		public bool IsInitialized => true;
-
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-
-		public Task ShutdownAsync() => Task.CompletedTask;
-
-		public void UseStreamChatSink(IStreamChatSink sink) => ChatSink = sink;
-
-		public void UseStreamStatsSink(IStreamStatsSink sink) => StatsSink = sink;
-	}
-
-	private sealed class FakeVariableHistory : IVariableHistory
-	{
-		public IVariableHistoryWindow Open(string variableName, int capacity, string? scopeRefId = null)
-			=> EmptyVariableHistoryWindow.Instance;
-	}
 }

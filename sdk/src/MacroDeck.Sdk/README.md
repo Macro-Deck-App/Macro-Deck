@@ -7,8 +7,8 @@ helpers that read the operating system's active keyboard layout. It has no depen
 What is in here:
 
 - `IIntegration` and `IIntegrationContext` - the base contract and the host services handed to it.
-- Capability interfaces - actions, config flow, variables, events, music players, weather stations,
-  calendars, virtual profiles, icons and issues.
+- Capability interfaces - actions, config flow and configuration entries, variables, events, music players,
+  weather stations, calendars, virtual profiles, icons and issues.
 - `MacroDeck.Sdk.Identity` - `MacroDeckId` and `QualifiedId`, the id rules every owner and capability
   is validated against.
 - `MacroDeck.Sdk.Input` - `KeyCode`, `KeyNames` and `NativeKeys`, which translate the key codes of a

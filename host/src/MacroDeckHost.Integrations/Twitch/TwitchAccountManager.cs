@@ -1,6 +1,5 @@
 using System.Globalization;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Sdk.Actions;

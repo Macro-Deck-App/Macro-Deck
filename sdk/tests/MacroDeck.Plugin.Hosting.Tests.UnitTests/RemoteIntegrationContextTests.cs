@@ -116,6 +116,9 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.Variables,
 			HostOperations.Variables.Delete,
 			(context, invoker) => context.Variables.DeleteAsync(Guid.NewGuid()));
+		yield return Case(HostApis.Variables,
+			HostOperations.Variables.Refresh,
+			(context, invoker) => context.Variables.RequestRefreshAsync());
 
 		yield return Case(HostApis.UserVariables,
 			HostOperations.UserVariables.Apply,
@@ -169,6 +172,9 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.Widgets,
 			HostOperations.Widgets.InvalidateIcon,
 			(context, invoker) => context.Widgets.InvalidateIconAsync("current-track"));
+		yield return Case(HostApis.Widgets,
+			HostOperations.Widgets.GetData,
+			(context, invoker) => context.Widgets.GetWidgetDataAsync("w1"));
 
 		yield return Case(HostApis.Notifications,
 			HostOperations.Notifications.Notify,
@@ -487,6 +493,13 @@ public class RemoteIntegrationContextTests
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterResource));
 		covered.Add((HostApis.Ui, HostOperations.Ui.RemoveResource));
 		covered.Add((HostApis.Ui, HostOperations.Ui.RegisterMusicPlayerArtwork));
+
+		covered.Add((HostApis.Ui, HostOperations.Ui.OriginReportFailure));
+		covered.Add((HostApis.Ui, HostOperations.Ui.OriginShowModal));
+
+		covered.Add((HostApis.Variables, HostOperations.Variables.HistoryOpen));
+		covered.Add((HostApis.Variables, HostOperations.Variables.HistoryRead));
+		covered.Add((HostApis.Variables, HostOperations.Variables.HistoryClose));
 
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIconResource));
 		covered.Add((HostApis.IconPacks, HostOperations.IconPacks.GetIcon));

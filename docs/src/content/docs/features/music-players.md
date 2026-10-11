@@ -218,12 +218,18 @@ UiResource? cover = await context.UiResources.RegisterMusicPlayerArtworkAsync(
   bytes yourself: it counts against the [quota](/ui/reference/resources/#registering-your-own-images), is
   released with the session, and registering the name again replaces it. Macro Deck may re-encode the image,
   so the media type can differ from the player's. Use one fixed name per place the cover is shown.
+- **Size.** Pass `maxSize`, the size in pixels the cover is shown at, to get a smaller image:
+  `RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, maxSize: 256, cancellationToken)`. Macro
+  Deck keeps every cover at full size, at most 640 pixels on its longer side, and as 128 and 256 pixel
+  copies when it is larger than those, and registers the smallest copy at least `maxSize` pixels, or the
+  full-size cover when no copy is. Without `maxSize`, and on a Macro Deck that predates it, you get the
+  full-size cover, so a smaller image is a saving, never a requirement.
 - **`null`** when Macro Deck knows no such player or the player has no artwork for that id. Nothing is
   registered or removed then, so the name keeps its previous picture.
-- **Errors.** `ArgumentException` for an invalid name, before anything is sent. `UiResourceException` with
+- **Errors.** `ArgumentException` for an invalid name and `ArgumentOutOfRangeException` for a `maxSize` that
+  is not positive, before anything is sent. `UiResourceException` with
   `QuotaExceeded`; `RateLimited`, because this call has a tighter budget than other registrations and at most
-  four run at once; `Unsupported` on a Macro Deck that predates it or an
-  [in-process integration](/reference/capability-parity/); or `Failed`. `Failed` covers a player that does
+  four run at once; `Unsupported` on a Macro Deck that predates it; or `Failed`. `Failed` covers a player that does
   not answer within 20 seconds, where retrying can succeed, and artwork larger than `maxUiResourceBytes` or
   of a media type Macro Deck does not accept, where it cannot.
 - Any plugin can ask for the artwork of any player, the same images the deck shows to every client. Listing

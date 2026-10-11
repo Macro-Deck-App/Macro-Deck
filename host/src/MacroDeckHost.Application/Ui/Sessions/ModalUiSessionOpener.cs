@@ -24,12 +24,17 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 	private readonly IModalInteractionCoordinator _coordinator;
 	private readonly IUiSessionBroker _broker;
 	private readonly ILogger _logger;
+	private readonly IHostUiCulture? _culture;
 
-	public ModalUiSessionOpener(IModalInteractionCoordinator coordinator, IUiSessionBroker broker, ILogger logger)
+	public ModalUiSessionOpener(IModalInteractionCoordinator coordinator,
+		IUiSessionBroker broker,
+		ILogger logger,
+		IHostUiCulture? culture = null)
 	{
 		_coordinator = coordinator;
 		_broker = broker;
 		_logger = logger.ForContext<ModalUiSessionOpener>();
+		_culture = culture;
 	}
 
 	public OpenModalUiSessionResponse Open(OpenModalUiSessionRequest request, string ownerPrincipal)
@@ -124,7 +129,7 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 		return new CompleteUiModalResponse { Accepted = settled };
 	}
 
-	private static Dictionary<string, JsonElement> BuildAttributes(PendingModal modal)
+	private Dictionary<string, JsonElement> BuildAttributes(PendingModal modal)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
@@ -135,6 +140,16 @@ public sealed class ModalUiSessionOpener : IModalUiSessionOpener
 		attributes[UiDialogSurfaceAttributes.Data] = modal.Data is null
 			? JsonDocument.Parse("{}").RootElement
 			: JsonSerializer.SerializeToElement(modal.Data);
+
+		if (_culture?.Current is { Length: > 0 } culture)
+		{
+			attributes[UiDialogSurfaceAttributes.Culture] = JsonSerializer.SerializeToElement(culture);
+		}
+
+		if (_culture?.HourCycle is { Length: > 0 } hourCycle)
+		{
+			attributes[UiDialogSurfaceAttributes.HourCycle] = JsonSerializer.SerializeToElement(hourCycle);
+		}
 
 		return attributes;
 	}

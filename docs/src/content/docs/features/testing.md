@@ -210,6 +210,29 @@ Results are what the host receives: `events` returns summaries without descripti
 the reply limits applied, and an account id the plugin does not know is a failed outcome. See
 [Calendars](/features/calendars/#testing).
 
+## Testing configuration entries
+
+```csharp
+var outcome = await harness.ConfigEntries.PrepareAsync(new ConfigEntryPrepareArguments
+{
+	EntryId = Guid.NewGuid(), Title = "Home", Values = new Dictionary<string, JsonElement>()
+});
+
+Assert.That(outcome.DataAs<ConfigEntryPrepareResult>()!.Success, Is.True);
+```
+
+`harness.ConfigEntries`, a `ConfigEntriesTestClient`, drives the `config-entries` capability the way the host
+does while it stores an entry, with `PrepareAsync`, `GetStatusAsync`, `IsUsableAsync`, `ReloadAsync`,
+`SynchronizeAsync` and `ReleaseAsync`. See
+[Taking part in storing an entry](/features/setup-flows/#taking-part-in-storing-an-entry).
+
+## Testing what a session shows on the pressing client
+
+Pass a `FakeUiEventOrigin` to your session's `Dispatch(UiEvent, IUiEventOrigin)` and read `ReportedFailures`
+and `OpenedModals`. Set `IsAttached = false` to test what happens once the client left, and `ModalAnswer` to
+answer a dialog. `MacroDeckTestHost` has no clients, so over the wire it answers an origin's calls as Macro
+Deck answers them for a client that is no longer attached.
+
 ## Testing previews
 
 `session.Ui`, a `UiTestClient` on the session `MacroDeckTestHost` returns, lists the plugin's

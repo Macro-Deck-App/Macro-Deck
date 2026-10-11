@@ -1,5 +1,4 @@
 using MacroDeck.Localization;
-using MacroDeckHost.Application.AdGuardHome;
 using Errors = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Errors;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;

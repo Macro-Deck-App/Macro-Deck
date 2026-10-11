@@ -69,4 +69,12 @@ public static class UiWidgetSurfaceAttributes
 	/// configured yet at the moment somebody is choosing a widget type. Absent means the ordinary
 	/// reading, so a provider that ignores this key keeps behaving exactly as it did.</summary>
 	public const string Sample = "sample";
+
+	/// <summary>The BCP 47 culture the person using Macro Deck reads it in, for example <c>de</c> or
+	/// <c>pt-BR</c>, so a provider can resolve text it draws as widget content rather than as a label - the
+	/// words of a sample, a placeholder message - into that language. Labels and other
+	/// <c>LocalizedText</c> in the tree need no help: the reader resolves those itself. Absent when the host
+	/// has not said, so a provider that ignores this key, or reads it from an older host, falls back to its
+	/// own default.</summary>
+	public const string Culture = "culture";
 }

@@ -1,4 +1,4 @@
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 
 namespace MacroDeckHost.Integrations.YouTube;

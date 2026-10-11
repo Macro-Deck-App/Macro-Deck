@@ -25,7 +25,7 @@ internal sealed class SteamNewWidgetTests
 		_source = new Source();
 		_time = new FakeTimeProvider();
 		_artwork = new SteamArtworkCache(new HttpClient(new NotFoundHandler()),
-			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore()),
+			new BuiltInUiResources(SteamWidgetType.OwnerId, new UiResourceStore()),
 			_time);
 	}
 

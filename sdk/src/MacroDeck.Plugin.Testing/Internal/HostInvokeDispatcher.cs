@@ -113,6 +113,10 @@ internal static class HostInvokeDispatcher
 						HostOperations.Ui.Snapshot or HostOperations.Ui.Patch or HostOperations.Ui.Fault
 						or HostOperations.Ui.Reload
 					=> uiPreviews.Dispatch(payload),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginReportFailure
+					=> HostInvokeOutcome.Ok(new UiOriginReportFailureResult { Delivered = false }),
+				HostApis.Ui when payload.Operation == HostOperations.Ui.OriginShowModal
+					=> HostInvokeOutcome.Ok(new UiOriginShowModalResult { Opened = false }),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await MusicPlayerArtworkAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Ui when uiResourceUploads is not null &&
@@ -738,6 +742,33 @@ internal static class HostInvokeDispatcher
 				return HostInvokeOutcome.Ok((JsonElement?)null);
 			}
 
+			case HostOperations.Variables.Refresh:
+				await context.Variables.RequestRefreshAsync().ConfigureAwait(false);
+				return HostInvokeOutcome.Ok((JsonElement?)null);
+
+			case HostOperations.Variables.HistoryOpen:
+			{
+				var arguments = Require<VariablesHistoryOpenArguments>(payload);
+				var windowId = await context.Variables.OpenWireHistoryAsync(arguments.Name, Math.Max(1, arguments.Capacity))
+					.ConfigureAwait(false);
+				return HostInvokeOutcome.Ok(new VariablesHistoryOpenResult { WindowId = windowId });
+			}
+
+			case HostOperations.Variables.HistoryRead:
+			{
+				var arguments = Require<VariablesHistoryWindowArguments>(payload);
+				return context.Variables.ReadWireHistory(arguments.WindowId) is { } values
+					? HostInvokeOutcome.Ok(new VariablesHistoryReadResult { Values = values })
+					: HostInvokeOutcome.Ok((JsonElement?)null);
+			}
+
+			case HostOperations.Variables.HistoryClose:
+			{
+				var arguments = Require<VariablesHistoryWindowArguments>(payload);
+				await context.Variables.CloseWireHistoryAsync(arguments.WindowId).ConfigureAwait(false);
+				return HostInvokeOutcome.Ok((JsonElement?)null);
+			}
+
 			default:
 			{
 				var arguments = Require<VariablesDeleteArguments>(payload);
@@ -893,6 +924,19 @@ internal static class HostInvokeDispatcher
 		int negotiatedVersion,
 		CancellationToken cancellationToken)
 	{
+		if (payload.Operation == HostOperations.Widgets.GetData)
+		{
+			var arguments = Require<WidgetsGetDataArguments>(payload);
+			var data = await context.Widgets.GetWidgetDataAsync(arguments.WidgetId, cancellationToken)
+				.ConfigureAwait(false);
+			return data is null
+				? HostInvokeOutcome.Ok((JsonElement?)null)
+				: HostInvokeOutcome.Ok(new WidgetDataDto
+				{
+					WidgetId = data.WidgetId, WidgetTypeId = data.WidgetTypeId, Data = data.Data
+				});
+		}
+
 		var request = negotiatedVersion >= 2
 			? FromWire(Require<WidgetsApplyArgumentsV2>(payload))
 			: FromWire(Require<WidgetsApplyArgumentsV1>(payload));

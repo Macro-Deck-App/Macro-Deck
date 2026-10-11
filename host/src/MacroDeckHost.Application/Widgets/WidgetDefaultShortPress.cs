@@ -1,10 +1,13 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Identity;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
@@ -20,14 +23,11 @@ public interface IWidgetDefaultShortPress
 
 public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 {
-	private const string WeatherIntegrationId = "app.macro-deck.weather";
-
-	private const string WeatherDetailsActionId = "show-details";
-
 	private const string WeatherInstanceKey = "instanceId";
 
 	private readonly Func<IWidgetTypeRegistry> _widgetTypes;
 	private readonly IIntegrationRegistry _integrations;
+	private readonly IWeatherRegistry _weather;
 	private readonly ILocalizationResolver _localization;
 
 	// The registry is resolved on use: it depends on the built-in widget providers, which depend on
@@ -35,10 +35,12 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 	public WidgetDefaultShortPress(
 		Func<IWidgetTypeRegistry> widgetTypes,
 		IIntegrationRegistry integrations,
+		IWeatherRegistry weather,
 		ILocalizationResolver localization)
 	{
 		_widgetTypes = widgetTypes;
 		_integrations = integrations;
+		_weather = weather;
 		_localization = localization;
 	}
 
@@ -81,14 +83,7 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 	{
 		if (widget.Type == WidgetTypeIds.Weather)
 		{
-			var instanceId = ReadString(widget.Data, WeatherInstanceKey);
-			return new DeclaredDefault(WeatherIntegrationId,
-				new WidgetDefaultAction(WeatherDetailsActionId,
-					string.IsNullOrEmpty(instanceId)
-						? null
-						: new Dictionary<string, string> { [WeatherInstanceKey] = instanceId }),
-				SupportsFlows: true,
-				NeedsScreen: true);
+			return WeatherDetailsDefault(widget);
 		}
 
 		// Not DefaultShortPressAction: that one also runs on hardware decks, which have no screen for the dialog.
@@ -106,6 +101,30 @@ public sealed class WidgetDefaultShortPress : IWidgetDefaultShortPress
 				? new DeclaredDefault(entry.ProviderId, providerDefault, entry.Descriptor.SupportsFlows, NeedsScreen: false)
 				: null;
 	}
+
+	private DeclaredDefault? WeatherDetailsDefault(WidgetEntity widget)
+	{
+		var stationId = ReadString(widget.Data, WeatherInstanceKey) is { Length: > 0 } stored
+			? stored
+			: _weather.GetInstances() is [var first, ..] ? first.InstanceId : null;
+
+		if (stationId is null ||
+			!QualifiedId.TryParse(stationId, out var station) ||
+			ProviderOf(station.OwnerId) is not { DetailsAction: { } details })
+		{
+			return null;
+		}
+
+		return new DeclaredDefault(station.OwnerId,
+			new WidgetDefaultAction(details.ActionId,
+				new Dictionary<string, string> { [details.StationParameter] = stationId }),
+			SupportsFlows: true,
+			NeedsScreen: true);
+	}
+
+	private IWeatherProvider? ProviderOf(string integrationId)
+		=> _integrations.Integrations.FirstOrDefault(integration =>
+			string.Equals(integration.Id, integrationId, StringComparison.Ordinal)) as IWeatherProvider;
 
 	private static string? ReadString(string? data, string key)
 	{

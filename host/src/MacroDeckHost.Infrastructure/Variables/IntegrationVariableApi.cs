@@ -5,6 +5,7 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk.Variables;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
+using SdkHistoryWindow = MacroDeck.Sdk.Variables.IVariableHistoryWindow;
 
 namespace MacroDeckHost.Infrastructure.Variables;
 
@@ -12,11 +13,48 @@ public sealed class IntegrationVariableApi : IVariableApi
 {
 	private readonly string _integrationId;
 	private readonly IVariableService _service;
+	private readonly IVariableRefreshSignal? _refresh;
+	private readonly IVariablePollingInvalidationSignal? _declarations;
+	private readonly OwnedVariableHistory? _history;
 
-	public IntegrationVariableApi(string integrationId, IVariableService service)
+	public IntegrationVariableApi(string integrationId,
+		IVariableService service,
+		IVariableRefreshSignal? refresh = null,
+		IVariablePollingInvalidationSignal? declarations = null,
+		OwnedVariableHistory? history = null)
 	{
 		_integrationId = integrationId;
 		_service = service;
+		_refresh = refresh;
+		_declarations = declarations;
+		_history = history;
+	}
+
+	public Task<SdkHistoryWindow> OpenHistoryAsync(string name,
+		int capacity,
+		CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+
+		return _history is null
+			? Task.FromException<SdkHistoryWindow>(new VariableHistoryException(
+				VariableHistoryErrorCode.Unsupported,
+				"This context keeps no variable history."))
+			: Task.FromResult(_history.Open(_integrationId, name, capacity));
+	}
+
+	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		_refresh?.RequestEagerRefresh(_integrationId);
+		return Task.CompletedTask;
+	}
+
+	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+		_declarations?.MarkStale(_integrationId);
+		return Task.CompletedTask;
 	}
 
 	public async Task<IReadOnlyList<VariableHandle>> GetAllAsync()

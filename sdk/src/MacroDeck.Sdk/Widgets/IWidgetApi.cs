@@ -54,6 +54,20 @@ public interface IWidgetApi
 	/// </para>
 	/// </summary>
 	Task InvalidateIconAsync(string actionId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	/// <summary>
+	/// Reads the stored data of a widget whose type the calling integration registered, for example to
+	/// re-check a setting before acting on a press in a dialog the widget opened. The host checks ownership,
+	/// so an integration can never read the data of another provider's or a built-in widget.
+	///
+	/// <para>
+	/// Answers <c>null</c> when the widget does not exist, when its type belongs to someone else, and when
+	/// the host cannot answer: the default implementation, and a Macro Deck that predates this operation,
+	/// answer <c>null</c> for every widget. Treat <c>null</c> as "not known" rather than as an error.
+	/// </para>
+	/// </summary>
+	Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId, CancellationToken cancellationToken = default)
+		=> Task.FromResult<WidgetDataSnapshot?>(null);
 }
 
 /// <summary>A widget exposed to integration pickers.</summary>

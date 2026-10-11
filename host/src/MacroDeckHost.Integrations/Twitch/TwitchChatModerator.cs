@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog;
 using TwitchLib.Api.Core.Exceptions;

@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Rendering;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;

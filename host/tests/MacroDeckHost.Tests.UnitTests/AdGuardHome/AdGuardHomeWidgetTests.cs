@@ -1,15 +1,15 @@
 using System.Text.Json;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Components;
+using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.AdGuardHome;
-using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Ui.Resources;
-using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
+using MacroDeckHost.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Widgets.AdGuardHome;
 
 namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;
 
@@ -20,9 +20,8 @@ internal sealed class AdGuardHomeWidgetTests
 	private const string OfficeId = "6a4c0d2e-0000-0000-0000-000000000002";
 
 	private AdGuardHomeHub _hub = null!;
-	private FakeHostLockState _lock = null!;
-	private RecordingUiTransport _transport = null!;
 	private FakeTimeProvider _time = null!;
+	private BuiltInUiResources _resources = null!;
 	private List<(string EntryId, AdGuardHomeCommand Command)> _commands = null!;
 	private AdGuardHomeCommandOutcome _outcome;
 	private AdGuardHomeUiProvider _provider = null!;
@@ -34,8 +33,6 @@ internal sealed class AdGuardHomeWidgetTests
 		_culture = global::System.Globalization.CultureInfo.CurrentCulture;
 		global::System.Globalization.CultureInfo.CurrentCulture = new global::System.Globalization.CultureInfo("en-US");
 		_hub = new AdGuardHomeHub();
-		_lock = new FakeHostLockState();
-		_transport = new RecordingUiTransport();
 		_time = new FakeTimeProvider();
 		_commands = [];
 		_outcome = AdGuardHomeCommandOutcome.Succeeded;
@@ -44,12 +41,10 @@ internal sealed class AdGuardHomeWidgetTests
 			_commands.Add((entryId, command));
 			return Task.FromResult(_outcome);
 		});
-		_provider = new AdGuardHomeUiProvider(_hub,
-			_lock,
-			_transport,
+		_resources = new BuiltInUiResources(AdGuardHomeIntegration.IntegrationId,
 			new UiResourceStore(),
-			new FakeIntegrationRegistry(),
-			_time);
+			typeof(AdGuardHomeIntegration));
+		_provider = new AdGuardHomeUiProvider(_hub, () => _resources, _time);
 	}
 
 	[TearDown]
@@ -143,25 +138,33 @@ internal sealed class AdGuardHomeWidgetTests
 	}
 
 	[Test]
-	public async Task A_locked_host_refuses_a_press_and_tells_the_client()
+	public async Task A_failed_command_is_reported_to_the_client_that_pressed()
 	{
 		_hub.Replace([Connected(HomeId, "Home")]);
-		_lock.IsLocked = true;
-		await using var session = await OpenAsync(new { instance = HomeId, durations = new[] { "5m" } }, widgetId: Guid.NewGuid());
+		_outcome = AdGuardHomeCommandOutcome.Timeout;
+		await using var session = await OpenAsync(new { instance = HomeId, durations = new[] { "5m" } });
+		var origin = new RecordingOrigin();
 
-		((MacroDeckHost.Application.Ui.Sessions.InProcess.IOriginAwareUiSession)session).Dispatch(
-			new MacroDeck.Ui.Model.Events.UiEvent
-			{
-				NodeId = Button(session, "pause-5m").Id,
-				Name = MacroDeck.Ui.Components.UiComponentEvents.Press
-			},
-			"client-1");
+		session.Dispatch(new UiEvent { NodeId = Button(session, "pause-5m").Id, Name = UiComponentEvents.Press }, origin);
+
+		await CalendarTree.WaitForAsync(() => origin.Failures.Count == 1, "the failure was not reported to the client");
+		Assert.That(CalendarTree.Resolve(origin.Failures.Single()), Does.Contain("did not answer in time"));
+	}
+
+	[Test]
+	public async Task The_widget_shows_its_bundled_icons()
+	{
+		_hub.Replace([Connected(HomeId, "Home")]);
+
+		await using var session = await OpenAsync(new { instance = HomeId, view = "statistics" });
+		var json = JsonSerializer.Serialize(session.BuildTree().Root);
+		var logo = await _resources.GetPluginIconAsync("widget", "logo");
+		var queries = await _resources.GetPluginIconAsync("widget", "dns-queries");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_commands, Is.Empty);
-			Assert.That(_transport.GroupMessages.Select(message => message.Message).OfType<ActionExecutionStatusEvent>()
-				.Single().Error!.Code, Is.EqualTo(ActionExecutionErrorCodes.HostLocked));
+			Assert.That(json, Does.Contain(logo.ResourceId));
+			Assert.That(json, Does.Contain(queries.ResourceId));
 		});
 	}
 
@@ -215,6 +218,41 @@ internal sealed class AdGuardHomeWidgetTests
 			Version = "v0.107.57",
 			Statistics = new AdGuardHomeStatistics(queries, queries / 4, 1, 2, 3, 4.2),
 		};
+
+	private sealed class RecordingOrigin : IUiEventOrigin
+	{
+		private readonly Lock _gate = new();
+		private readonly List<LocalizedText> _failures = [];
+
+		public string? ClientId => "client-1";
+
+		public IReadOnlyList<LocalizedText> Failures
+		{
+			get
+			{
+				lock (_gate)
+				{
+					return [.. _failures];
+				}
+			}
+		}
+
+		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
+		{
+			lock (_gate)
+			{
+				_failures.Add(message);
+			}
+
+			return Task.FromResult(true);
+		}
+
+		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
+			=> Task.FromResult(false);
+
+		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default)
+			=> Task.FromResult(ModalResult.FromCancellation<T>());
+	}
 
 	private async Task<IUiSession> OpenAsync(object data, Guid? widgetId = null)
 	{

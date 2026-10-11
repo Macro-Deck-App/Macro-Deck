@@ -408,6 +408,33 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Describe, Accounts, Calendars, Events, Event];
 	}
 
+	/// <summary>
+	/// How the host stores a plugin's configuration entries: it asks the plugin to prepare an entry before
+	/// storing it, for each entry's status and usability, to apply a stored change and to synchronize after
+	/// one. Addressed to the <c>provider</c> local id; the entry travels inside the arguments.
+	/// </summary>
+	public static class ConfigEntries
+	{
+		public const string Describe = "describe";
+
+		public const string Prepare = "prepare";
+
+		public const string Status = "status";
+
+		public const string Usable = "usable";
+
+		/// <summary>Applies a stored change in the running plugin. Answers whether it did; when it did not,
+		/// the host re-initializes the plugin's integration.</summary>
+		public const string Reload = "reload";
+
+		public const string Synchronize = "synchronize";
+
+		public const string Release = "release";
+
+		public static readonly IReadOnlyList<string> All =
+			[Describe, Prepare, Status, Usable, Reload, Synchronize, Release];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -431,6 +458,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.Messaging] = Messaging.All,
 			[Handshake.CapabilityKinds.VideoStreamProvider] = VideoStreamProvider.All,
 			[Handshake.CapabilityKinds.Calendar] = Calendar.All,
+			[Handshake.CapabilityKinds.ConfigEntries] = ConfigEntries.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

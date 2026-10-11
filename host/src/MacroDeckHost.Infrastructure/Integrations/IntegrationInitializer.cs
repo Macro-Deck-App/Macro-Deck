@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
@@ -8,7 +7,6 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Application.StreamChat;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Variables;
@@ -17,6 +15,7 @@ using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Variables.Colors;
+using MacroDeckHost.Application.Widgets;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
@@ -63,11 +62,14 @@ public sealed class IntegrationInitializer
 	private readonly ILogger _logger;
 	private readonly IKnownAudioDeviceStore? _knownAudioDevices;
 	private readonly IVariablePollingInvalidationSignal? _pollingInvalidation;
-	private readonly IStreamPlatformServices? _streamPlatforms;
 	private readonly CalendarHostServices? _calendarServices;
-	private readonly IAdGuardHomeSink? _adGuardHomeSink;
 	private readonly IMusicPlayerAlbumColor? _albumColor;
 	private readonly INotificationManager? _notificationManager;
+	private readonly IUiResourceStore? _uiResourceStore;
+	private readonly IMusicPlayerArtworkService? _musicPlayerArtwork;
+	private readonly IWidgetDataReader? _widgetData;
+	private readonly OwnedVariableHistory? _variableHistory;
+	private readonly ConcurrentDictionary<string, BuiltInUiResources> _uiResources = new(StringComparer.Ordinal);
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -103,16 +105,20 @@ public sealed class IntegrationInitializer
 		PluginColorWatches colorWatches,
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
-		IStreamPlatformServices? streamPlatforms = null,
 		CalendarHostServices? calendarServices = null,
-		IAdGuardHomeSink? adGuardHomeSink = null,
 		IMusicPlayerAlbumColor? albumColor = null,
-		INotificationManager? notificationManager = null)
+		INotificationManager? notificationManager = null,
+		IUiResourceStore? uiResourceStore = null,
+		IMusicPlayerArtworkService? musicPlayerArtwork = null,
+		IWidgetDataReader? widgetData = null,
+		OwnedVariableHistory? variableHistory = null)
 	{
+		_widgetData = widgetData;
+		_variableHistory = variableHistory;
 		_notificationManager = notificationManager;
-		_adGuardHomeSink = adGuardHomeSink;
+		_uiResourceStore = uiResourceStore;
+		_musicPlayerArtwork = musicPlayerArtwork;
 		_albumColor = albumColor;
-		_streamPlatforms = streamPlatforms;
 		_calendarServices = calendarServices;
 		_messageBroker = messageBroker;
 		_colorWatches = colorWatches;
@@ -152,9 +158,7 @@ public sealed class IntegrationInitializer
 			_refreshSignal,
 			_knownAudioDevices,
 			_pollingInvalidation,
-			_streamPlatforms,
 			_calendarServices,
-			_adGuardHomeSink,
 			_albumColor);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
@@ -165,8 +169,12 @@ public sealed class IntegrationInitializer
 		var scope = _serviceScopeFactory.CreateAsyncScope();
 		var variableService = scope.ServiceProvider.GetRequiredService<IVariableService>();
 
-		var variableApi = new IntegrationVariableApi(integration.Id, variableService);
-		var widgetApi = new IntegrationWidgetApi(integration.Id, _widgetApi, _widgetIconInvalidator);
+		var variableApi = new IntegrationVariableApi(integration.Id,
+			variableService,
+			_refreshSignal,
+			_pollingInvalidation,
+			_variableHistory);
+		var widgetApi = new IntegrationWidgetApi(integration.Id, _widgetApi, _widgetIconInvalidator, _widgetData);
 		var config = new IntegrationConfig(integration.Id, _serviceScopeFactory);
 
 		var events = _eventPublishers.GetOrAdd(integration.Id,
@@ -187,9 +195,7 @@ public sealed class IntegrationInitializer
 				: new OwnedNotificationService(
 					new NotificationOwner(NotificationSourceCategory.BuiltInIntegration, integration.Id, integrationName),
 					_notificationManager),
-			scope.ServiceProvider.GetService<IUiResourceStore>() is { } resourceStore
-				? new BuiltInUiResourceRegistry(integration.Id, resourceStore)
-				: null);
+			UiResourcesFor(integration));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -274,6 +280,28 @@ public sealed class IntegrationInitializer
 			await colors.DisposeAsync();
 		}
 	}
+
+	public void ReleaseUiResources(string integrationId)
+	{
+		if (_uiResources.TryRemove(integrationId, out var resources))
+		{
+			resources.Release();
+		}
+	}
+
+	public void ReleaseAllUiResources()
+	{
+		foreach (var integrationId in _uiResources.Keys)
+		{
+			ReleaseUiResources(integrationId);
+		}
+	}
+
+	private BuiltInUiResources? UiResourcesFor(IIntegration integration)
+		=> _uiResourceStore is null
+			? null
+			: _uiResources.GetOrAdd(integration.Id,
+				id => new BuiltInUiResources(id, _uiResourceStore, integration.GetType(), _musicPlayerArtwork));
 
 	public async Task ReleaseAllMessagingAsync()
 	{

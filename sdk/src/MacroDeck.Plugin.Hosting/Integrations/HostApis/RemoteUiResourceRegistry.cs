@@ -133,10 +133,29 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 				$"Macro Deck answered the lookup of icon '{iconId}' without a resource.");
 	}
 
-	public async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
 		string instanceId,
 		string artworkId,
 		CancellationToken cancellationToken = default)
+		=> RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, null, cancellationToken);
+
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		int maxSize,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxSize);
+		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, (int?)maxSize, cancellationToken);
+	}
+
+	public void Dispose() => _gate.Dispose();
+
+	private async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		int? maxSize,
+		CancellationToken cancellationToken)
 	{
 		ThrowIfInvalidName(name);
 		ArgumentException.ThrowIfNullOrEmpty(instanceId);
@@ -152,7 +171,7 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 						HostOperations.Ui.RegisterMusicPlayerArtwork,
 						new UiRegisterMusicPlayerArtworkArguments
 						{
-							Name = name, InstanceId = instanceId, ArtworkId = artworkId
+							Name = name, InstanceId = instanceId, ArtworkId = artworkId, MaxSize = maxSize
 						},
 						cancellationToken)
 					.ConfigureAwait(false);
@@ -173,8 +192,6 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			_gate.Release();
 		}
 	}
-
-	public void Dispose() => _gate.Dispose();
 
 	private static UiResource ToResource(UiResourceHandleDto handle)
 		=> new()

@@ -10,6 +10,9 @@ public interface IUiSessionProvider
 	// Integration id for an in-process provider, plugin id for a remote one.
 	string ProviderId { get; }
 
+	// Host widgets and system integrations stay ungated: they keep their own lock policy.
+	bool GatedByHostLock => false;
+
 	Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command, CancellationToken cancellationToken);
 
 	Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken);

@@ -21,4 +21,17 @@ public interface IWeatherProvider
 
 	/// <summary>Resolves a station by its provider-local instance id, or <c>null</c> if unknown.</summary>
 	IWeatherStation? GetStation(string instanceId);
+
+	/// <summary>
+	/// The action a press on a Weather widget runs when the widget has no flow of its own, or <c>null</c>
+	/// (the default) for no such press.
+	/// </summary>
+	/// <remarks>
+	/// Only a client with a screen runs it, never a hardware deck. The host resolves the station the widget
+	/// shows, which is its configured station or, without one, the first station of all providers, and runs
+	/// this action of the station's own provider with that station in
+	/// <see cref="WeatherDetailsAction.StationParameter" />.
+	/// A host that predates this member never runs it.
+	/// </remarks>
+	WeatherDetailsAction? DetailsAction => null;
 }

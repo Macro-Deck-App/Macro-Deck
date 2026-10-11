@@ -279,6 +279,50 @@ public class RemoteUiResourceRegistryTests
 	}
 
 	[Test]
+	public async Task Artwork_asked_for_at_a_size_sends_the_size_to_the_host()
+	{
+		var host = new FakeArtworkHost { Answer = new UiRegisterMusicPlayerArtworkResult() };
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1", 256);
+
+		Assert.That(host.LastArguments,
+			Is.EqualTo(new UiRegisterMusicPlayerArtworkArguments
+			{
+				Name = "cover", InstanceId = "net.example.jukebox::default", ArtworkId = "cover-1", MaxSize = 256
+			}));
+	}
+
+	[Test]
+	public async Task A_host_that_predates_the_size_answers_the_full_size_cover()
+	{
+		var host = new HostBeforeTheArtworkSize();
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover",
+			"net.example.jukebox::default",
+			"cover-1",
+			256);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.Requested, Is.EqualTo(("cover", "net.example.jukebox::default", "cover-1")));
+			Assert.That(handle!.ByteLength, Is.EqualTo(HostBeforeTheArtworkSize.FullSizeLength));
+		});
+	}
+
+	[Test]
+	public void An_artwork_size_that_is_not_positive_is_refused_before_anything_is_sent()
+	{
+		var host = new FakeArtworkHost { Answer = new UiRegisterMusicPlayerArtworkResult() };
+		var registry = new RemoteUiResourceRegistry(host, new FakeResourceHost());
+
+		Assert.Throws<ArgumentOutOfRangeException>(() =>
+			_ = registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1", 0));
+		Assert.That(host.Calls, Is.Empty);
+	}
+
+	[Test]
 	public async Task Artwork_the_host_does_not_have_is_answered_as_null()
 	{
 		var registry = new RemoteUiResourceRegistry(
@@ -327,6 +371,46 @@ public class RemoteUiResourceRegistryTests
 			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
+	}
+
+	private sealed class HostBeforeTheArtworkSize : IHostInvoker
+	{
+		public const int FullSizeLength = 640;
+
+		public (string Name, string InstanceId, string ArtworkId)? Requested { get; private set; }
+
+		public Task<JsonElement?> InvokeAsync(string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
+		{
+			var wire = JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options);
+			var request = wire.Deserialize<ArtworkArgumentsBeforeTheSize>(PluginProtocolJson.Options)!;
+			Requested = (request.Name, request.InstanceId, request.ArtworkId);
+
+			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(new UiRegisterMusicPlayerArtworkResult
+				{
+					Resource = new UiResourceHandleDto
+					{
+						ResourceId = "plugin-x.cover",
+						ContentHash = "full",
+						MediaType = "image/webp",
+						ByteLength = FullSizeLength,
+					}
+				},
+				PluginProtocolJson.Options));
+		}
+
+		public bool TryComplete(ProtocolEnvelope result) => false;
+	}
+
+	private sealed record ArtworkArgumentsBeforeTheSize
+	{
+		public required string Name { get; init; }
+
+		public required string InstanceId { get; init; }
+
+		public required string ArtworkId { get; init; }
 	}
 
 	private sealed class FakeArtworkHost : IHostInvoker
