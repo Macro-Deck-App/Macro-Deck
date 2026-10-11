@@ -1,0 +1,150 @@
+host MacroDeckHost.Api.Controllers.CompanionScreenshotsController uses Companion
+host MacroDeckHost.Api.Controllers.HostController uses System
+host MacroDeckHost.Api.Controllers.ShellNotificationsResponse uses System
+host MacroDeckHost.CompanionApp.CompanionAppService uses Companion
+host MacroDeckHost.Infrastructure.Adb.AdbGateway uses Adb
+host MacroDeckHost.Infrastructure.Adb.AdbServiceCollectionExtensions uses Adb
+host MacroDeckHost.Infrastructure.Applications.ApplicationPathResolver uses System
+host MacroDeckHost.Infrastructure.Applications.ExternalUrlOpener uses System
+host MacroDeckHost.Infrastructure.Applications.FolderRevealService uses System
+host MacroDeckHost.Infrastructure.BackgroundServices.HostLockStateBackgroundService uses System
+host MacroDeckHost.Infrastructure.Deck.FocusedApplicationWatcher uses System
+host MacroDeckHost.Infrastructure.Icons.AppIcons.AppIconExtractor uses System
+host MacroDeckHost.Infrastructure.Integrations.IntegrationGatewayBinder uses Adb
+host MacroDeckHost.Infrastructure.Integrations.IntegrationGatewayBinder uses Companion
+host MacroDeckHost.Infrastructure.Integrations.IntegrationGatewayBinder uses HomeAssistant
+host MacroDeckHost.Infrastructure.Integrations.IntegrationGatewayBinder uses MusicPlayer
+host MacroDeckHost.Infrastructure.Integrations.IntegrationGatewayBinder uses System
+host MacroDeckHost.Infrastructure.Integrations.IntegrationInitializer uses Adb
+host MacroDeckHost.Infrastructure.Integrations.IntegrationInitializer uses Companion
+host MacroDeckHost.Integrations.AdGuardHomeConfigurationMutationAdapter uses AdGuardHome
+host MacroDeckHost.Integrations.CompanionCommandRequests uses Companion
+host MacroDeckHost.Integrations.CompanionConfigurationMutationAdapter uses Companion
+host MacroDeckHost.Integrations.CompanionConfigurationMutationAdapter uses Obs
+host MacroDeckHost.Integrations.CompanionDeviceRegistry uses Companion
+host MacroDeckHost.Integrations.JellyfinConfigurationMutationAdapter uses Jellyfin
+host MacroDeckHost.Integrations.JellyfinConfigurationMutationAdapter uses Obs
+host MacroDeckHost.Integrations.ObsConfigurationMutationAdapter uses Obs
+host MacroDeckHost.Plugins.Pairing.PluginPairingSystemNotificationHandler uses System
+host MacroDeckHost.Program uses Http
+host MacroDeckHost.Program uses Native
+host MacroDeckHost.Program uses Spotify
+host MacroDeckHost.Startup uses Companion
+host MacroDeckHost.Startup uses Native
+host MacroDeckHost.Startup uses System
+integration (shared) uses MacroDeckHost.Application.Variables.IVariablePollingInvalidationSignal
+integration (shared) uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeCommand
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeCommandExecutor
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeCommandKind
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeCommandOutcome
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeConnection
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeDurationText
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomePauseDuration
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeSnapshot
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeStatistics
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.AdGuardHomeWidgetType
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.IAdGuardHomeSink
+integration AdGuardHome uses MacroDeckHost.Application.AdGuardHome.IAdGuardHomeSinkConsumer
+integration AdGuardHome uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration Companion uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration Delegation uses MacroDeckHost.Application.Variables.IVariablePollingInvalidationSignal
+integration Delegation uses MacroDeckHost.Application.Variables.VariableNameSanitizer
+integration HomeAssistant uses MacroDeckHost.Application.Persistence.IVariableBindingStore
+integration HomeAssistant uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration HomeAssistant uses MacroDeckHost.Domain.Entities.VariableBinding
+integration Http uses MacroDeckHost.Application.Network.Http.HttpUserAgent
+integration Http uses MacroDeckHost.Application.Network.Http.IHttpUserAgentSource
+integration Http uses MacroDeckHost.Application.Network.Http.UserAgentHandler
+integration Http uses MacroDeckHost.Application.Network.Http.UserAgentWebSocket
+integration Jellyfin uses MacroDeckHost.Application.Jellyfin.IJellyfinSessionSource
+integration Jellyfin uses MacroDeckHost.Application.Jellyfin.JellyfinServerSummary
+integration Jellyfin uses MacroDeckHost.Application.Jellyfin.JellyfinSessionSummary
+integration Jellyfin uses MacroDeckHost.Application.Variables.IVariablePollingInvalidationSignal
+integration Jellyfin uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration Keyboard uses MacroDeckHost.Domain.Keyboard.PhysicalKeys
+integration Meld uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration MusicPlayer uses MacroDeckHost.Application.MusicPlayer.IMusicPlayerAlbumColor
+integration MusicPlayer uses MacroDeckHost.Application.MusicPlayer.MusicPlayerInstanceDescriptor
+integration Native uses MacroDeckHost.Application.Services.HourCycles
+integration Native uses MacroDeckHost.Application.Services.ISystemHourCycleReader
+integration Obs uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration Spotify uses MacroDeckHost.Application.Services.TimeOfDayFormat
+integration Streamerbot uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration StreamlabsDesktop uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration System uses MacroDeckHost.Application.Persistence.IKnownAudioDeviceStore
+integration System uses MacroDeckHost.Application.Persistence.KnownAudioDevice
+integration System uses MacroDeckHost.Application.Variables.IVariablePollingInvalidationSignal
+integration System uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration System uses MacroDeckHost.Application.Variables.VariableNameSanitizer
+integration System uses MacroDeckHost.Domain.Keyboard.PhysicalKeys
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatAccount
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatBadge
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatCleared
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatConnectionChanged
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatEvent
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatFragment
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatMessage
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatMessageDeleted
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatMessageReceived
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatModerationKind
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatModerationRequest
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatModerationResult
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatStyle
+integration Twitch uses MacroDeckHost.Application.StreamChat.ChatUserCleared
+integration Twitch uses MacroDeckHost.Application.StreamChat.IStreamChatModerator
+integration Twitch uses MacroDeckHost.Application.StreamChat.IStreamChatSink
+integration Twitch uses MacroDeckHost.Application.StreamChat.IStreamChatSinkConsumer
+integration Twitch uses MacroDeckHost.Application.StreamChat.StreamPlatform
+integration Twitch uses MacroDeckHost.Application.StreamChat.StreamPlatforms
+integration Twitch uses MacroDeckHost.Application.StreamStats.IStreamStatsSink
+integration Twitch uses MacroDeckHost.Application.StreamStats.IStreamStatsSinkConsumer
+integration Twitch uses MacroDeckHost.Application.StreamStats.StreamStatsAccount
+integration Voicemeeter uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration WebNowPlaying uses MacroDeckHost.Application.Variables.IVariableRefreshSignal
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatAccount
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatBadge
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatConnectionChanged
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatEvent
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatFragment
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatMessage
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatMessageDeleted
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatMessageReceived
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatModerationKind
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatModerationRequest
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatModerationResult
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatStyle
+integration YouTube uses MacroDeckHost.Application.StreamChat.ChatUserCleared
+integration YouTube uses MacroDeckHost.Application.StreamChat.IStreamChatModerator
+integration YouTube uses MacroDeckHost.Application.StreamChat.IStreamChatSink
+integration YouTube uses MacroDeckHost.Application.StreamChat.IStreamChatSinkConsumer
+integration YouTube uses MacroDeckHost.Application.StreamChat.StreamPlatform
+integration YouTube uses MacroDeckHost.Application.StreamChat.StreamPlatforms
+integration YouTube uses MacroDeckHost.Application.StreamStats.IStreamStatsSink
+integration YouTube uses MacroDeckHost.Application.StreamStats.IStreamStatsSinkConsumer
+integration YouTube uses MacroDeckHost.Application.StreamStats.StreamStatsAccount
+names MacroDeckHost.Application.AdGuardHome.AdGuardHomeWidgetType app.macro-deck.adguard-home
+names MacroDeckHost.Application.Jellyfin.JellyfinWidgetTypes app.macro-deck.jellyfin
+names MacroDeckHost.Application.MusicPlayer.ActionInteractions app.macro-deck.music-player
+names MacroDeckHost.Application.StreamChat.StreamPlatforms app.macro-deck.twitch
+names MacroDeckHost.Application.StreamChat.StreamPlatforms app.macro-deck.youtube
+names MacroDeckHost.Application.Ui.Handlers.CreateWidgetFromApplicationRequestMessageHandler app.macro-deck.system
+names MacroDeckHost.Application.Variables.SharedVariables app.macro-deck.delegate
+names MacroDeckHost.Application.Widgets.WidgetDefaultShortPress app.macro-deck.weather
+names MacroDeckHost.Infrastructure.BackgroundServices.MusicPlayerStateBroadcastBackgroundService app.macro-deck.music-player
+names MacroDeckHost.Integrations.AdGuardHomeConfigurationMutationAdapter app.macro-deck.adguard-home
+names MacroDeckHost.Integrations.CompanionConfigurationMutationAdapter app.macro-deck.companion
+names MacroDeckHost.Integrations.CompanionDeviceRegistry app.macro-deck.companion
+names MacroDeckHost.Integrations.JellyfinConfigurationMutationAdapter app.macro-deck.jellyfin
+names MacroDeckHost.Integrations.ObsConfigurationMutationAdapter app.macro-deck.obs
+names MacroDeckHost.Widgets.AdGuardHome.AdGuardHomeUiProvider app.macro-deck.adguard-home
+names MacroDeckHost.Widgets.AdGuardHome.AdGuardHomeWidgetIcons app.macro-deck.adguard-home
+names MacroDeckHost.Widgets.Jellyfin.JellyfinSessionsUiProvider app.macro-deck.jellyfin
+names MacroDeckHost.Widgets.Jellyfin.JellyfinSessionsWidgetSession app.macro-deck.jellyfin
+names MacroDeckHost.Widgets.MusicPlayer.MusicPlayerDevicePickerUiProvider app.macro-deck.music-player
+names MacroDeckHost.Widgets.MusicPlayer.MusicPlayerPickerSession app.macro-deck.music-player
+names MacroDeckHost.Widgets.MusicPlayer.MusicPlayerPickerUiProvider app.macro-deck.music-player
+names MacroDeckHost.Widgets.MusicPlayer.MusicPlayerViewStateResolver app.macro-deck.music-player
+names MacroDeckHost.Widgets.MusicPlayer.MusicPlayerWidgetIcons app.macro-deck.music-player
+names MacroDeckHost.Widgets.Weather.WeatherDetailsUiProvider app.macro-deck.weather
+names MacroDeckHost.Widgets.Weather.WeatherWidgetIcons app.macro-deck.weather

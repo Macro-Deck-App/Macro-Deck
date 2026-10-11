@@ -34,13 +34,17 @@ without much effort. It is a plugin that happens to run in-process:
 - Everything it owns lives in its own folder in `MacroDeckHost.Integrations`: actions, config flow,
   state, widget types, widget and dialog UI (served through `IUiProvider` as a plugin serves it) and
   assets. None of it goes into `Application`, `Infrastructure`, `Widgets` or the host project.
+  `MacroDeckHost.Widgets` holds only shared base widgets: the host's own widget types and widgets
+  for an SDK capability any provider, a plugin included, can feed.
 - If it needs something the SDK does not offer, the SDK gains it as a public, documented addition that
   works out of process too, protocol included, so plugins can use it as well. That is public-contract
   work under the rules above, not a reason for a host-only shortcut.
 
 Code that predates this rule (integration hubs and sinks in `Application`, integration widgets in
 `MacroDeckHost.Widgets`, host-side adapters for single integrations) is known debt: never extend it
-or copy its pattern. System integrations (`ISystemIntegration`) are host features and exempt. See
+or copy its pattern. `IntegrationBoundaryTests` enforce this; their baseline lists the debt and may
+only shrink, so never add a line to it. System integrations (`ISystemIntegration`) are host features
+and exempt. See
 [ADR 0107](engineering/decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md).
 
 ## Dependencies

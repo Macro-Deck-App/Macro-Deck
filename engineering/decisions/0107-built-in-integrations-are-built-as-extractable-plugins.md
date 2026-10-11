@@ -27,6 +27,9 @@ integration needs, and an integration cannot be moved out of the host or shipped
   state, widget types, widget and dialog UI served through `IUiProvider`, and assets. No part of it lives in
   `Application`, `Infrastructure`, `Widgets` or the host project, and no host code references it by its
   concrete type.
+- `MacroDeckHost.Widgets` holds only shared base widgets: the host's own widget types and widgets that render an
+  SDK capability any provider, a plugin included, can feed. A widget that serves one integration lives in that
+  integration.
 - When an integration needs something the SDK lacks, the SDK gains it as a public, documented, additive
   capability that also works over the plugin protocol. Each capability lands together with the first
   integration that uses it, so its shape is tested against a real consumer before it becomes a compatibility
