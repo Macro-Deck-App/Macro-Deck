@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
@@ -14,19 +15,29 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 {
 	private readonly IUiProvider _provider;
 	private readonly IUiSessionSink _sink;
+	private readonly Func<UiEventOrigins?>? _origins;
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.Ordinal);
 
-	public InProcessUiSessionProvider(string providerId, IUiProvider provider, IUiSessionSink sink, ILogger logger)
+	public InProcessUiSessionProvider(string providerId,
+		IUiProvider provider,
+		IUiSessionSink sink,
+		ILogger logger,
+		bool gatedByHostLock = false,
+		Func<UiEventOrigins?>? origins = null)
 	{
 		ProviderId = providerId;
+		GatedByHostLock = gatedByHostLock;
+		_origins = origins;
 		_provider = provider;
 		_sink = sink;
 		_logger = logger.ForContext<InProcessUiSessionProvider>();
 	}
 
 	public string ProviderId { get; }
+
+	public bool GatedByHostLock { get; }
 
 	public async Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command,
 		CancellationToken cancellationToken)
@@ -94,6 +105,24 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 				await live.DisposeAsync().ConfigureAwait(false);
 			}
 		}
+	}
+
+	private IUiEventOrigin OriginFor(string sessionId, string eventName, string? clientId)
+		=> _origins?.Invoke()?.Create(ProviderId, sessionId, clientId, eventName) ?? new DetachedOrigin(clientId);
+
+	private sealed class DetachedOrigin(string? clientId) : IUiEventOrigin
+	{
+		public string? ClientId { get; } = string.IsNullOrEmpty(clientId) ? null : clientId;
+
+		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
+			=> Task.FromResult(false);
+
+		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
+			=> Task.FromResult(false);
+
+		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+			=> Task.FromResult(ModalResult.FromCancellation<T>());
 	}
 
 	private enum WorkKind
@@ -269,7 +298,7 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 				}
 				else
 				{
-					_session.Dispatch(uiEvent);
+					_session.Dispatch(uiEvent, _owner.OriginFor(_sessionId, uiEvent.Name, originClientId));
 				}
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)

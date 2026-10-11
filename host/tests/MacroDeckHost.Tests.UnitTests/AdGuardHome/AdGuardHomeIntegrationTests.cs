@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
-using MacroDeckHost.Application.AdGuardHome;
 using MacroDeckHost.Integrations.AdGuardHome;
 using MacroDeckHost.Integrations.AdGuardHome.Actions;
 using MacroDeckHost.Tests.UnitTests.Calendar;
@@ -12,7 +11,7 @@ namespace MacroDeckHost.Tests.UnitTests.AdGuardHome;
 internal sealed class AdGuardHomeIntegrationTests
 {
 	private FakeAdGuardHomeContext _context = null!;
-	private AdGuardHomeHub _hub = null!;
+	private IAdGuardHomeInstances _hub = null!;
 	private Dictionary<string, FakeAdGuardHomeClient> _clients = null!;
 	private FakeTimeProvider _time = null!;
 	private int _createdClients;
@@ -22,7 +21,6 @@ internal sealed class AdGuardHomeIntegrationTests
 	public void SetUp()
 	{
 		_context = new FakeAdGuardHomeContext();
-		_hub = new AdGuardHomeHub();
 		_clients = new Dictionary<string, FakeAdGuardHomeClient>(StringComparer.Ordinal);
 		_createdClients = 0;
 		_time = new FakeTimeProvider();
@@ -33,7 +31,7 @@ internal sealed class AdGuardHomeIntegrationTests
 			_createdClients++;
 			return client;
 		}, _time);
-		_integration.UseAdGuardHomeSink(_hub);
+		_hub = _integration.Instances;
 	}
 
 	[TearDown]
@@ -270,6 +268,17 @@ internal sealed class AdGuardHomeIntegrationTests
 
 		Assert.That(_integration.Variables.Select(variable => variable.Name),
 			Does.Contain("adguard_home_office_dns_queries"));
+	}
+
+	[Test]
+	public async Task A_published_change_asks_for_the_variables_to_be_read_again()
+	{
+		AddInstance("Home", "home.lan", "home");
+		await StartAsync();
+		await ConnectedAsync(1);
+
+		await CalendarTree.WaitForAsync(() => _context.OwnVariables.RefreshRequests >= 2,
+			"the connected instance never asked for its variables to be read again");
 	}
 
 	[Test]

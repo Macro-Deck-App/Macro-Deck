@@ -127,6 +127,23 @@ internal sealed class RemotePluginSnapshotStoreTests
 	}
 
 	[Test]
+	public async Task A_weather_details_action_survives_a_fresh_store()
+	{
+		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);
+
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty("com.example.plugin") with
+		{
+			AcceptedKinds = [CapabilityKinds.Weather],
+			WeatherDetailsAction = new MacroDeck.Sdk.Weather.WeatherDetailsAction("open-station", "station")
+		});
+
+		var reloaded = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		Assert.That(reloaded.WeatherDetailsAction,
+			Is.EqualTo(new MacroDeck.Sdk.Weather.WeatherDetailsAction("open-station", "station")));
+	}
+
+	[Test]
 	public async Task An_optional_configuration_survives_a_fresh_store()
 	{
 		var store = new RemotePluginSnapshotStore(_paths, Log.Logger);

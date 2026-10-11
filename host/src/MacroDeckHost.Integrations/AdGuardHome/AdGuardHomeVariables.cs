@@ -1,7 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.AdGuardHome;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Variables;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;

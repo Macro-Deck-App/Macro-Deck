@@ -141,6 +141,7 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			WeatherInstances = persisted.Weather?.Instances is { } weatherInstances
 				? [.. weatherInstances.Select(WeatherCatalogMapper.ToDomain)]
 				: [],
+			WeatherDetailsAction = WeatherCatalogMapper.ToDomain(persisted.Weather?.DetailsAction),
 			CalendarProviderName = persisted.Calendar?.ProviderName ?? string.Empty,
 			CalendarAccounts = persisted.Calendar?.Accounts is { } calendarAccounts
 				? [.. calendarAccounts.Select(CalendarMapper.ToDomain)]
@@ -277,7 +278,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			Weather = new WeatherDescribePayload
 			{
 				ProviderName = snapshot.WeatherProviderName,
-				Instances = [.. snapshot.WeatherInstances.Select(WeatherCatalogMapper.ToDto)]
+				Instances = [.. snapshot.WeatherInstances.Select(WeatherCatalogMapper.ToDto)],
+				DetailsAction = WeatherCatalogMapper.ToDto(snapshot.WeatherDetailsAction)
 			},
 			Calendar = new CalendarDescribePayload
 			{

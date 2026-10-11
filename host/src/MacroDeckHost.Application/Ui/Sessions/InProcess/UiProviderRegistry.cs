@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Ui;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters;
@@ -10,15 +11,20 @@ public sealed class UiProviderRegistry : IDisposable
 {
 	private readonly IIntegrationRegistry _integrations;
 	private readonly Func<IUiSessionSink> _sink;
+	private readonly Func<UiEventOrigins?>? _origins;
 	private readonly ILogger _logger;
 
 	private readonly ConcurrentDictionary<string, InProcessUiSessionProvider> _adapters =
 		new(StringComparer.Ordinal);
 
-	public UiProviderRegistry(IIntegrationRegistry integrations, Func<IUiSessionSink> sink, ILogger logger)
+	public UiProviderRegistry(IIntegrationRegistry integrations,
+		Func<IUiSessionSink> sink,
+		ILogger logger,
+		Func<UiEventOrigins?>? origins = null)
 	{
 		_integrations = integrations;
 		_sink = sink;
+		_origins = origins;
 		_logger = logger;
 		_integrations.AvailabilityChanged += OnAvailabilityChanged;
 	}
@@ -40,8 +46,17 @@ public sealed class UiProviderRegistry : IDisposable
 		}
 
 		return _adapters.GetOrAdd(providerId,
-			static (id, state) => new InProcessUiSessionProvider(id, state.Provider, state.Sink(), state.Logger),
-			(Provider: provider, Sink: _sink, Logger: _logger));
+			static (id, state) => new InProcessUiSessionProvider(id,
+				state.Provider,
+				state.Sink(),
+				state.Logger,
+				gatedByHostLock: !state.IsSystem,
+				origins: state.Origins),
+			(Provider: provider,
+				Sink: _sink,
+				Logger: _logger,
+				IsSystem: integration is ISystemIntegration,
+				Origins: _origins));
 	}
 
 	public void Dispose()

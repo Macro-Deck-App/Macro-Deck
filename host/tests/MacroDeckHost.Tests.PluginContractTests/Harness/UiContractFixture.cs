@@ -89,7 +89,10 @@ internal abstract class UiContractFixture : CapabilityContractFixture
 			new NullUiTransport(),
 			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
 			new CallbackFakeHostLockState(),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			eventOrigins: new UiEventOrigins(Broker,
+				UiTransport,
+				new UiInteractionsFactory(Modals, UiTransport, Serilog.Core.Logger.None)));
 
 		HostInvokeHandler = (correlationId, payload, cancellationToken)
 			=> router.RouteAsync(PluginId, correlationId, payload, cancellationToken);

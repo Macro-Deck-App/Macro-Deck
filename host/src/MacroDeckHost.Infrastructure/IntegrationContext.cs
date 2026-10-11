@@ -29,6 +29,7 @@ public class IntegrationContext : IIntegrationContext
 		INotificationService notificationService,
 		IUiResourceRegistry? uiResources = null)
 	{
+		UiResources = uiResources ?? NoUiResources.Instance;
 		Colors = colors;
 		Variables = variables;
 		UserVariables = userVariables;

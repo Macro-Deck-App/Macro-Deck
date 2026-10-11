@@ -9,6 +9,9 @@ internal static class WeatherDescriptorMapper
 	public static WeatherStationInstanceDto ToDto(WeatherStationInstance instance)
 		=> new() { Id = instance.Id, DisplayName = instance.DisplayName };
 
+	public static WeatherDetailsActionDto ToDto(WeatherDetailsAction action)
+		=> new() { ActionId = action.ActionId, StationParameter = action.StationParameter };
+
 	public static WeatherForecastDayDto ToDto(WeatherForecastDay day)
 		=> new() { Date = day.Date, Condition = day.Condition.ToString(), Min = day.Min, Max = day.Max };
 

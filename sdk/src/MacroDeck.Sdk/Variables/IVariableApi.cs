@@ -43,4 +43,52 @@ public interface IVariableApi
 
 	/// <summary>Deletes an owned variable. Unknown or foreign IDs are ignored.</summary>
 	Task DeleteAsync(Guid variableId);
+
+	/// <summary>
+	/// Asks Macro Deck to read every declared variable of this integration again now, instead of at each
+	/// variable's next refresh interval. Call it after something changed what <c>ReadAsync</c> would answer,
+	/// such as a connection that came up. Requests made while one is pending are merged into one read.
+	/// </summary>
+	/// <remarks>
+	/// Best effort: it never throws because the request could not be delivered. A Macro Deck that predates
+	/// it, and any implementation that does not override it, does nothing; the variables are still read at
+	/// their refresh interval. Pushed variables are unaffected: set those with <see cref="SetValueAsync" />.
+	/// </remarks>
+	Task RequestRefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	/// <summary>
+	/// Tells Macro Deck that the set of variables this integration declares has changed, for example
+	/// after a configuration entry was added, so it reads the declarations again and starts or stops
+	/// reading the affected variables. This does not affect an on-demand variable catalog.
+	/// </summary>
+	/// <remarks>
+	/// Best effort: it never throws because the notice could not be delivered. A plugin's notice travels as a
+	/// <c>state.update</c> for the <c>variables</c> capability kind, which every Macro Deck version
+	/// understands. An implementation that does not override it does nothing.
+	/// </remarks>
+	Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	/// <summary>
+	/// Opens a rolling window of the recent values of one of this integration's own global numeric
+	/// variables, keeping at most <paramref name="capacity" /> samples, for example to draw a graph in a
+	/// widget. The window may be opened before the variable exists; it fills once the variable reads as an
+	/// available number.
+	/// </summary>
+	/// <param name="name">The canonical name of the variable.</param>
+	/// <param name="capacity">How many samples to keep, at least 1. Macro Deck may keep fewer than asked
+	/// for; the window documents what it holds through <see cref="IVariableHistoryWindow.Values" />.</param>
+	/// <param name="cancellationToken">Cancels opening the window.</param>
+	/// <remarks>
+	/// The default implementation, and a Macro Deck that predates variable history, throw a
+	/// <see cref="VariableHistoryException" /> with <see cref="VariableHistoryErrorCode.Unsupported" />, so a
+	/// widget can catch it and draw without a graph.
+	/// </remarks>
+	/// <exception cref="VariableHistoryException">No window could be opened; see
+	/// <see cref="VariableHistoryException.ErrorCode" />.</exception>
+	Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+		int capacity,
+		CancellationToken cancellationToken = default)
+		=> Task.FromException<IVariableHistoryWindow>(new VariableHistoryException(
+			VariableHistoryErrorCode.Unsupported,
+			"This Macro Deck keeps no variable history."));
 }

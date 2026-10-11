@@ -29,4 +29,16 @@ public static class UiDialogSurfaceAttributes
 	/// <summary>What the opening action passed in, as the JSON object it was serialized as. Absent reads as
 	/// empty.</summary>
 	public const string Data = "data";
+
+	/// <summary>The BCP 47 culture the person using Macro Deck reads it in, for example <c>de</c> or
+	/// <c>pt-BR</c>, so a provider can format content it draws as text, such as a time of day, the way that
+	/// person reads it. Absent when the host has not said, so a provider that reads it from an older host
+	/// falls back to its own default.</summary>
+	public const string Culture = "culture";
+
+	/// <summary>The hour cycle the person reads times of day in: <c>h12</c> for a 12-hour clock with a day
+	/// period, or <c>h23</c> for a 24-hour clock. It already reflects the person's time format setting, so a
+	/// provider formatting a time of day as text uses it instead of the culture's default. Absent when the
+	/// host has not said.</summary>
+	public const string HourCycle = "hourCycle";
 }

@@ -13,6 +13,7 @@ public sealed class FakeWidgetApi : IWidgetApi
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, WidgetTargetInfo> _widgets = new(StringComparer.Ordinal);
 	private readonly Dictionary<string, WidgetAppearanceRequest> _lastApplied = new(StringComparer.Ordinal);
+	private readonly Dictionary<string, WidgetDataSnapshot> _data = new(StringComparer.Ordinal);
 
 	/// <summary>
 	/// The most recent <see cref="ApplyAsync" /> request that actually changed something, by widget id.
@@ -39,6 +40,30 @@ public sealed class FakeWidgetApi : IWidgetApi
 		lock (_gate)
 		{
 			_widgets[widget.Id] = widget;
+		}
+	}
+
+	/// <summary>
+	/// Stores the data <see cref="GetWidgetDataAsync" /> answers for a widget, as if the widget were of a
+	/// type the integration under test registered. A widget without seeded data answers <c>null</c>, the
+	/// same as a widget of another provider's type does on the host.
+	/// </summary>
+	public void SeedData(WidgetDataSnapshot data)
+	{
+		ArgumentNullException.ThrowIfNull(data);
+
+		lock (_gate)
+		{
+			_data[data.WidgetId] = data;
+		}
+	}
+
+	/// <summary>Answers the data seeded with <see cref="SeedData" />, or <c>null</c>.</summary>
+	public Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId, CancellationToken cancellationToken = default)
+	{
+		lock (_gate)
+		{
+			return Task.FromResult(_data.GetValueOrDefault(widgetId));
 		}
 	}
 

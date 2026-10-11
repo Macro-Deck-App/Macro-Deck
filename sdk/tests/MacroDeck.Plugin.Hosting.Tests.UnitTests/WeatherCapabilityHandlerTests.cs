@@ -54,6 +54,39 @@ public class WeatherCapabilityHandlerTests
 	}
 
 	[Test]
+	public async Task Describe_carries_the_details_action_a_provider_declares()
+	{
+		var integration = new TestWeatherIntegration("Rooftop",
+			new Dictionary<string, IWeatherStation> { ["roof"] = new TestWeatherStation() })
+		{
+			DetailsAction = new WeatherDetailsAction("open-station", "station")
+		};
+		var handler = new WeatherCapabilityHandler([integration], TestMetadata.Default);
+
+		var result = await handler.InvokeAsync(
+			Invocation(ProviderCapabilityId.LocalId, CapabilityOperations.Weather.Describe),
+			CancellationToken.None);
+
+		var payload = result.Data!.Value.Deserialize<WeatherDescribePayload>(PluginProtocolJson.Options);
+		Assert.That(payload!.DetailsAction,
+			Is.EqualTo(new WeatherDetailsActionDto { ActionId = "open-station", StationParameter = "station" }));
+	}
+
+	[Test]
+	public async Task Describe_of_a_provider_written_before_details_actions_carries_none()
+	{
+		var integration = new TestWeatherIntegration("Rooftop",
+			new Dictionary<string, IWeatherStation> { ["roof"] = new TestWeatherStation() });
+		var handler = new WeatherCapabilityHandler([integration], TestMetadata.Default);
+
+		var result = await handler.InvokeAsync(
+			Invocation(ProviderCapabilityId.LocalId, CapabilityOperations.Weather.Describe),
+			CancellationToken.None);
+
+		Assert.That(result.Data!.Value.TryGetProperty("detailsAction", out _), Is.False);
+	}
+
+	[Test]
 	public void No_provider_declares_nothing() =>
 		Assert.That(new WeatherCapabilityHandler([], TestMetadata.Default).DeclareCapabilities(), Is.Empty);
 

@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Variables;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Integrations;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
@@ -64,6 +65,9 @@ internal sealed class CallbackContractTests
 	private RemoteUserNotifier _notifications = null!;
 	private RemoteIntegrationContext _context = null!;
 	private RemoteDeviceProviderContext _devices = null!;
+	private VariableRefreshSignal _refreshSignal = null!;
+	private RecordingWidgetDataReader _widgetData = null!;
+	private FixedVariableHistory _history = null!;
 
 	[SetUp]
 	public async Task SetUp()
@@ -81,6 +85,9 @@ internal sealed class CallbackContractTests
 		_secretService = new CallbackFakeSecretService();
 		_uiSessions = new RecordingUiSessionSink();
 		DeviceRegistry = new RecordingDeviceRegistry();
+		_refreshSignal = new VariableRefreshSignal();
+		_widgetData = new RecordingWidgetDataReader();
+		_history = new FixedVariableHistory();
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(_configStore);
@@ -88,7 +95,8 @@ internal sealed class CallbackContractTests
 		services.AddSingleton<IVariableService>(_variableService);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
-		var router = new PluginCallbackRouter(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
+		var sessions = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
+		var router = new PluginCallbackRouter(sessions,
 			_invoker,
 			scopeFactory,
 			_notificationStore,
@@ -108,7 +116,12 @@ internal sealed class CallbackContractTests
 			new NullUiTransport(),
 			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
 			new CallbackFakeHostLockState(),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			variableRefresh: _refreshSignal,
+			widgetData: _widgetData,
+			variableHistory: new PluginVariableHistoryWindows(
+				new OwnedVariableHistory(_history, new VariableRegistry()),
+				sessions));
 
 		_state = new PluginConnectionState();
 		_hostInvoker = new HostInvoker(_state, TimeProvider.System, Serilog.Core.Logger.None);
@@ -169,6 +182,63 @@ internal sealed class CallbackContractTests
 		}
 	}
 
+
+	[Test]
+	public async Task A_refresh_request_over_the_wire_makes_the_host_read_the_plugins_variables_again()
+	{
+		await _context.Variables.RequestRefreshAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.True);
+			Assert.That(_refreshSignal.DrainEagerRefreshRequested("com.example.other"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_reads_the_stored_data_of_its_own_widget_over_the_wire()
+	{
+		var widgetId = Guid.NewGuid().ToString();
+		_widgetData.Store(PluginId, widgetId, PluginId + "::chat", """{"allowModeration":false}""");
+
+		var own = await _context.Widgets.GetWidgetDataAsync(widgetId);
+		var unknown = await _context.Widgets.GetWidgetDataAsync(Guid.NewGuid().ToString());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_widgetData.Owners, Is.All.EqualTo(PluginId), "the owner is the connection, never the payload");
+			Assert.That(own?.WidgetTypeId, Is.EqualTo(PluginId + "::chat"));
+			Assert.That(own?.Data.GetProperty("allowModeration").GetBoolean(), Is.False);
+			Assert.That(unknown, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_reads_the_history_of_its_own_variable_and_closing_the_window_releases_it()
+	{
+		_history.Values = [3, 5, 8];
+
+		var window = await _context.Variables.OpenHistoryAsync("viewer_count", 40);
+		await WaitForAsync(() => window.Values.Count == 3);
+		var values = window.Values;
+		await window.DisposeAsync();
+		await WaitForAsync(() => _history.OpenWindows == 0);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(values, Is.EqualTo(new double?[] { 3, 5, 8 }));
+			Assert.That(_history.Requested, Is.EqualTo(new[] { ("viewer_count", 40) }));
+		});
+	}
+
+	[Test]
+	public void A_plugin_cannot_open_the_history_of_a_name_that_is_not_a_variable_name()
+	{
+		var exception = Assert.ThrowsAsync<VariableHistoryException>(()
+			=> _context.Variables.OpenHistoryAsync("not a name!", 10));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(VariableHistoryErrorCode.NotOwned));
+	}
 
 	[Test]
 	public async Task A_device_registered_over_the_wire_reaches_the_hosts_device_registry()
@@ -654,4 +724,62 @@ internal sealed class RecordingUiSessionSink : IUiSessionSink
 
 	public void PublishReload(string providerId, string sessionId)
 		=> Reloads.Add((providerId, sessionId));
+}
+
+internal sealed class RecordingWidgetDataReader : IWidgetDataReader
+{
+	private readonly Dictionary<(string Owner, string WidgetId), WidgetDataSnapshot> _stored = [];
+
+	public List<string> Owners { get; } = [];
+
+	public void Store(string ownerId, string widgetId, string widgetTypeId, string json)
+	{
+		using var document = JsonDocument.Parse(json);
+		_stored[(ownerId, widgetId)] = new WidgetDataSnapshot(widgetId, widgetTypeId, document.RootElement.Clone());
+	}
+
+	public WidgetDataSnapshot? Read(string ownerId, string widgetId)
+	{
+		lock (Owners)
+		{
+			Owners.Add(ownerId);
+		}
+
+		return _stored.GetValueOrDefault((ownerId, widgetId));
+	}
+}
+
+internal sealed class FixedVariableHistory : IVariableHistory
+{
+	private int _open;
+
+	public IReadOnlyList<double> Values { get; set; } = [];
+
+	public List<(string Name, int Capacity)> Requested { get; } = [];
+
+	public int OpenWindows => Volatile.Read(ref _open);
+
+	public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(string variableName,
+		int capacity,
+		string? scopeRefId = null)
+	{
+		Requested.Add((variableName, capacity));
+		Interlocked.Increment(ref _open);
+		return new Window(this);
+	}
+
+	private sealed class Window(FixedVariableHistory owner) : MacroDeckHost.Application.Variables.IVariableHistoryWindow
+	{
+		public IReadOnlyList<double> Values => owner.Values;
+
+		public string? ScopeRefId => null;
+
+		public event EventHandler? Changed
+		{
+			add { }
+			remove { }
+		}
+
+		public void Dispose() => Interlocked.Decrement(ref owner._open);
+	}
 }

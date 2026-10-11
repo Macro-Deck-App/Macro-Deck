@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
+using MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.Events;
 using MacroDeck.Plugin.Hosting.Capabilities.Icons;
@@ -170,6 +171,26 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 			[CapabilityKinds.Issues]);
 
 		await AssertNoneUnsupportedAsync(CapabilityKinds.Issues, ProviderCapabilityId.LocalId);
+	}
+
+	[Test]
+	public async Task Every_config_entries_operation_is_recognised()
+	{
+		await ConnectAsync([new ConfigEntriesCapabilityHandler([new ConfigEntriesIntegration()])],
+			[Provider(CapabilityKinds.ConfigEntries)],
+			[CapabilityKinds.ConfigEntries]);
+
+		await AssertNoneUnsupportedAsync(CapabilityKinds.ConfigEntries, ProviderCapabilityId.LocalId);
+	}
+
+	private sealed class ConfigEntriesIntegration : MacroDeck.Sdk.IPluginIntegration,
+		MacroDeck.Sdk.ConfigFlow.IConfigEntryLifecycle
+	{
+		public IReadOnlyList<MacroDeck.Sdk.Actions.IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 
 	[Test]

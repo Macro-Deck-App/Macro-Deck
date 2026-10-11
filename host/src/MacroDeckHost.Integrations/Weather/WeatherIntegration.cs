@@ -5,15 +5,18 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
+using MacroDeckHost.Integrations.Weather.Details;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Weather;
 
 [MacroDeckIntegration]
 public sealed class WeatherIntegration
-	: IIntegration, IWeatherProvider, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IDisposable
+	: IIntegration, IWeatherProvider, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IUiProvider,
+		IWeatherStations, IDisposable
 {
 	private static readonly TimeSpan _refreshInterval = TimeSpan.FromMinutes(15);
 
@@ -23,6 +26,10 @@ public sealed class WeatherIntegration
 	private static readonly byte[] _icon = LoadIcon();
 
 	private readonly IOpenMeteoClient _client;
+	private readonly WeatherDetailsUiProvider _details;
+
+	private IIntegrationContext? _context;
+	private EventHandler? _stationsChanged;
 
 	public WeatherIntegration()
 		: this(new OpenMeteoClient())
@@ -36,6 +43,13 @@ public sealed class WeatherIntegration
 		// Handed the live instance list rather than the integration itself, so the action reads the
 		// stations as they are when a user opens its options rather than as they were at construction.
 		Actions = [new WeatherDetailsActionDefinition(GetInstances)];
+		_details = new WeatherDetailsUiProvider(this, () => _context?.UiResources);
+	}
+
+	event EventHandler? IWeatherStations.StationsChanged
+	{
+		add => _stationsChanged += value;
+		remove => _stationsChanged -= value;
 	}
 
 	private volatile IReadOnlyList<ConfiguredStation> _stations = [];
@@ -51,6 +65,13 @@ public sealed class WeatherIntegration
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
 	public string ProviderName => "Open-Meteo";
+
+	public WeatherDetailsAction DetailsAction { get; } =
+		new(WeatherDetailsActionDefinition.ActionId, WeatherDetailsActionDefinition.InstanceParameter);
+
+	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _details.Surfaces;
+
+	string? IWeatherStations.FirstStationId => _stations is [var first, ..] ? first.EntryId : null;
 
 	public string IconMimeType => "image/svg+xml";
 
@@ -98,8 +119,15 @@ public sealed class WeatherIntegration
 	public IWeatherStation? GetStation(string instanceId)
 		=> _stations.FirstOrDefault(s => s.EntryId == instanceId)?.Station;
 
+	WeatherSnapshot? IWeatherStations.Snapshot(string stationId)
+		=> _stations.FirstOrDefault(s => s.EntryId == stationId)?.Station.Current;
+
+	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
+		=> _details.CreateSessionAsync(request, cancellationToken);
+
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		_context = context;
 		await LoadStations(context);
 		StartRefreshLoop();
 		IsInitialized = true;
@@ -208,6 +236,7 @@ public sealed class WeatherIntegration
 
 		_stations = stations;
 		_logger.Information("Weather integration loaded {Count} location(s)", stations.Count);
+		_stationsChanged?.Invoke(this, EventArgs.Empty);
 	}
 
 	private void StartRefreshLoop()
@@ -248,6 +277,8 @@ public sealed class WeatherIntegration
 				_logger.Warning(ex, "Failed to refresh weather for {Location}", station.Station.DisplayName);
 			}
 		}
+
+		_stationsChanged?.Invoke(this, EventArgs.Empty);
 	}
 
 	public void Dispose()

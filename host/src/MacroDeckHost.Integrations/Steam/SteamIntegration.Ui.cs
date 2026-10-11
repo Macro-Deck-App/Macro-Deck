@@ -17,11 +17,11 @@ public sealed partial class SteamIntegration
 			: SteamWidgetSessions.Create(request, this, artwork, _logo, _time));
 	}
 
-	private static async Task<UiResource?> RegisterLogoAsync(IUiResourceRegistry resources)
+	private static async Task<UiResource?> LogoAsync(IUiResourceRegistry resources)
 	{
 		try
 		{
-			return await resources.RegisterAsync("logo", _icon, "image/svg+xml");
+			return await resources.GetPluginIconAsync(SteamWidgetSessions.IconFolder, SteamWidgetSessions.LogoIcon);
 		}
 		catch (UiResourceException exception)
 		{

@@ -16,7 +16,27 @@ public static class HostOperations
 
 		public const string Delete = "delete";
 
-		public static readonly IReadOnlyList<string> All = [List, Get, Create, Set, Delete];
+		/// <summary>Asks the host to read every declared variable of the calling plugin again on its next
+		/// poll instead of at each variable's refresh interval. Carries no arguments. Requests that arrive
+		/// while one is pending are merged. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>; the SDK treats that as a no-op.</summary>
+		public const string Refresh = "refresh";
+
+		/// <summary>Opens a history window on one of the calling plugin's own global variables and answers
+		/// its window id. A host that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>; the SDK
+		/// reports that as an unsupported variable history.</summary>
+		public const string HistoryOpen = "history.open";
+
+		/// <summary>Answers the samples a window opened with <see cref="HistoryOpen" /> holds, oldest
+		/// first.</summary>
+		public const string HistoryRead = "history.read";
+
+		/// <summary>Closes a window opened with <see cref="HistoryOpen" />. Closing an unknown window is not
+		/// an error.</summary>
+		public const string HistoryClose = "history.close";
+
+		public static readonly IReadOnlyList<string> All =
+			[List, Get, Create, Set, Delete, Refresh, HistoryOpen, HistoryRead, HistoryClose];
 	}
 
 	public static class UserVariables
@@ -73,7 +93,12 @@ public static class HostOperations
 		/// exactly as it can be an icon provider.</summary>
 		public const string InvalidateIcon = "invalidate-icon";
 
-		public static readonly IReadOnlyList<string> All = [Apply, InvalidateIcon];
+		/// <summary>Answers the stored data of a widget whose type the calling plugin registered, or no
+		/// result for any other widget. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>; the SDK reports that as no data.</summary>
+		public const string GetData = "get-data";
+
+		public static readonly IReadOnlyList<string> All = [Apply, InvalidateIcon, GetData];
 	}
 
 	public static class Notifications
@@ -141,8 +166,22 @@ public static class HostOperations
 		/// answers no <c>resource</c>. A host that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
 		public const string RegisterMusicPlayerArtwork = "register-music-player-artwork";
 
+		/// <summary>Shows a failure on the client that raised an event in one of the plugin's sessions, the
+		/// way a failed action is shown. Delivered only while that client is attached to the session. A
+		/// host that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string OriginReportFailure = "origin.report-failure";
+
+		/// <summary>Opens one of the plugin's dialogs on the client that raised an event in one of its
+		/// sessions, while that client is attached to it. Answers like
+		/// <c>action-interactions/show-modal</c>. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>.</summary>
+		public const string OriginShowModal = "origin.show-modal";
+
 		public static readonly IReadOnlyList<string> All =
-			[Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork];
+		[
+			Snapshot, Patch, Fault, Reload, RegisterResource, RemoveResource, RegisterMusicPlayerArtwork,
+			OriginReportFailure, OriginShowModal
+		];
 	}
 
 	public static class IconPacks

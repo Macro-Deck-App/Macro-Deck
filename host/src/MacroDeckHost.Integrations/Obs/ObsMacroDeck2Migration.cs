@@ -76,11 +76,12 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 			// MigrationService writes entries straight to the config store, bypassing that adapter, so this
 			// migrator has to allocate and stamp both keys itself or the migrated connection would silently
 			// never load.
-			var identity = ObsConfigurationIdentityAllocator.Allocate(title, occupiedKeys);
-			if (identity is null)
+			if (ConfigurationIdentityAllocator.Allocate(title, occupiedKeys) is not { } key)
 			{
 				continue;
 			}
+
+			var identity = new ObsConfigurationIdentity(title, key);
 
 			occupiedKeys.Add(identity.Key);
 

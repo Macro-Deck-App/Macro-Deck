@@ -1018,6 +1018,7 @@ export const AppStrings = {
 			FlowExpired: 'macrodeck.app:Errors.Config.FlowExpired',
 			InvalidEntryId: 'macrodeck.app:Errors.Config.InvalidEntryId',
 			TitleRequired: 'macrodeck.app:Errors.Config.TitleRequired',
+			VariableNamesUnavailable: 'macrodeck.app:Errors.Config.VariableNamesUnavailable',
 		},
 		Device: {
 			LoadFailed: 'macrodeck.app:Errors.Device.LoadFailed',
@@ -9862,6 +9863,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Config.FlowExpired': 'The config flow session has expired. Please start again.',
 	'macrodeck.app:Errors.Config.InvalidEntryId': '\'{id}\' is not a valid config entry id',
 	'macrodeck.app:Errors.Config.TitleRequired': 'Enter a configuration name.',
+	'macrodeck.app:Errors.Config.VariableNamesUnavailable': 'A unique variable name could not be created. Rename the configuration and try again.',
 	'macrodeck.app:Errors.Device.LoadFailed': 'Failed to load devices',
 	'macrodeck.app:Errors.Event.LoadFailed': 'Failed to load events',
 	'macrodeck.app:Errors.Events.NotFoundWithId': 'Event \'{eventId}\' not found',

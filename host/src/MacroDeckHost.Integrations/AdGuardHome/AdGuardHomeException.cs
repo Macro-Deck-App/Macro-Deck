@@ -1,4 +1,3 @@
-using MacroDeckHost.Application.AdGuardHome;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 

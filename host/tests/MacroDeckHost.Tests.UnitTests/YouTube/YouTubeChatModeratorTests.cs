@@ -1,5 +1,5 @@
 using System.Net;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using MacroDeckHost.Tests.UnitTests.Twitch;

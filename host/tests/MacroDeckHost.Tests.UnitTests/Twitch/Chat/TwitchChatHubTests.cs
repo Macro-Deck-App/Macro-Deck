@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using Serilog.Core;
 
@@ -220,13 +220,13 @@ internal sealed class TwitchChatHubTests
 		hub.Tick();
 		changes.Clear();
 
-		images.Resolve(TwitchChatImage.Emote("25"));
+		images.Resolve(StreamChatImage.Emote("25"));
 		hub.Tick();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(images.Requested, Does.Contain(TwitchChatImage.Emote("25")));
-			Assert.That(images.Pinned, Does.Contain(TwitchChatImage.Emote("25").Key));
+			Assert.That(images.Requested, Does.Contain(StreamChatImage.Emote("25")));
+			Assert.That(images.Pinned, Does.Contain(StreamChatImage.Emote("25").Key));
 			Assert.That(changes, Is.EqualTo(new[] { Streamer }));
 		});
 	}
@@ -247,7 +247,7 @@ internal sealed class TwitchChatHubTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(requestedUnwatched, Is.Zero);
-			Assert.That(images.Requested, Does.Contain(TwitchChatImage.Emote("25")));
+			Assert.That(images.Requested, Does.Contain(StreamChatImage.Emote("25")));
 		});
 	}
 
@@ -268,7 +268,7 @@ internal sealed class TwitchChatHubTests
 
 		hub.Tick();
 
-		Assert.That(images.Requested, Does.Not.Contain(TwitchChatImage.Emote("1")));
+		Assert.That(images.Requested, Does.Not.Contain(StreamChatImage.Emote("1")));
 	}
 
 	private void Post(string accountId, params string[] ids)

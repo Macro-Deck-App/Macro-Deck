@@ -68,7 +68,10 @@ internal sealed class WeatherCapabilityHandler(IEnumerable<IPluginIntegration> i
 		{
 			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
 				metadata.Name,
-			Instances = BuildInstances()
+			Instances = BuildInstances(),
+			DetailsAction = _providers.Select(p => p.DetailsAction).OfType<WeatherDetailsAction>()
+				.Select(WeatherDescriptorMapper.ToDto)
+				.FirstOrDefault()
 		});
 
 	/// <summary>The <c>instances</c> operation - see <c>MusicPlayerInstancesResult</c>'s identical remarks.</summary>

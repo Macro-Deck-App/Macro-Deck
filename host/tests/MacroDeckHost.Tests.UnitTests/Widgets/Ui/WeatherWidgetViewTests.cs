@@ -251,8 +251,8 @@ public class WeatherWidgetViewTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(currentIcon, Is.EqualTo("app.macro-deck.weather.clear-night"));
-			Assert.That(rowIcon, Is.EqualTo("app.macro-deck.weather.static.clear-day"));
+			Assert.That(currentIcon, Is.EqualTo("app.macro-deck.widget-weather.clear-night"));
+			Assert.That(rowIcon, Is.EqualTo("app.macro-deck.widget-weather.static.clear-day"));
 			Assert.That(rowIcon, Is.Not.EqualTo(currentIcon));
 		});
 	}
@@ -892,8 +892,8 @@ public class WeatherWidgetViewTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(animatedCurrent, Is.EqualTo("app.macro-deck.weather.clear-night"));
-			Assert.That(stillCurrent, Is.EqualTo("app.macro-deck.weather.static.clear-night"));
+			Assert.That(animatedCurrent, Is.EqualTo("app.macro-deck.widget-weather.clear-night"));
+			Assert.That(stillCurrent, Is.EqualTo("app.macro-deck.widget-weather.static.clear-night"));
 
 			Assert.That(stillRow, Is.EqualTo(animatedRow));
 			Assert.That(animatedRow, Does.Contain(".static."));

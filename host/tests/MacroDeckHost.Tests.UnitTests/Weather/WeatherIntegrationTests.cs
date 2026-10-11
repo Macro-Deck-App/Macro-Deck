@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
@@ -94,7 +95,7 @@ internal sealed class WeatherIntegrationTests
 		Assert.That(snapshot.Temperature, Is.Not.EqualTo(21.0));
 	}
 
-	private static OpenMeteoForecastResponse ForecastWith(double temperature)
+	internal static OpenMeteoForecastResponse ForecastWith(double temperature)
 		=> new()
 		{
 			Current = new OpenMeteoCurrent
@@ -106,7 +107,7 @@ internal sealed class WeatherIntegrationTests
 			}
 		};
 
-	private sealed class FakeConfig : IIntegrationConfig
+	internal sealed class FakeConfig : IIntegrationConfig
 	{
 		private readonly List<ConfigEntrySnapshot> _entries = [];
 		private readonly Dictionary<(Guid, string), string?> _values = [];
@@ -159,7 +160,7 @@ internal sealed class WeatherIntegrationTests
 			=> throw new NotSupportedException();
 	}
 
-	private sealed class FakeContext : IIntegrationContext
+	internal sealed class FakeContext : IIntegrationContext
 	{
 		public FakeConfig ConfigStore { get; } = new();
 
@@ -178,5 +179,7 @@ internal sealed class WeatherIntegrationTests
 		public IEventPublisher Events => throw new NotSupportedException();
 
 		public IUserNotifier Notifications => throw new NotSupportedException();
+
+		public IUiResourceRegistry UiResources { get; init; } = null!;
 	}
 }

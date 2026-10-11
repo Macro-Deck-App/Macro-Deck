@@ -209,6 +209,29 @@ public class MusicPlayerWeatherVirtualProfilesDtoSerializationTests
 	}
 
 	[Test]
+	public void A_weather_details_action_round_trips_and_is_absent_when_not_declared()
+	{
+		var declared = new WeatherDescribePayload
+		{
+			ProviderName = "Rooftop",
+			Instances = [],
+			DetailsAction = new WeatherDetailsActionDto { ActionId = "open-station", StationParameter = "station" }
+		};
+		var undeclared = declared with { DetailsAction = null };
+
+		var actual = JsonSerializer.Deserialize<WeatherDescribePayload>(
+			JsonSerializer.Serialize(declared, PluginProtocolJson.Options),
+			PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(actual!.DetailsAction, Is.EqualTo(declared.DetailsAction));
+			Assert.That(JsonSerializer.Serialize(undeclared, PluginProtocolJson.Options),
+				Does.Not.Contain("detailsAction"));
+		});
+	}
+
+	[Test]
 	public void Weather_describe_payload_and_snapshot_round_trip_and_tolerate_unknown_fields()
 	{
 		var payload = new WeatherDescribePayload

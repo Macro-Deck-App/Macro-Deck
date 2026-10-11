@@ -20310,6 +20310,9 @@
   <data name="Errors.Config.TitleRequired" xml:space="preserve">
     <value>أدخل اسم التهيئة.</value>
   </data>
+  <data name="Errors.Config.VariableNamesUnavailable" xml:space="preserve">
+    <value>تعذّر إنشاء اسم متغير فريد. أعد تسمية التهيئة ثم حاول مرة أخرى.</value>
+  </data>
   <data name="Integrations.Obs.Config.VariableIdentityExhausted" xml:space="preserve">
     <value>تعذّر إنشاء اسم متغير فريد. أعد تسمية التهيئة ثم حاول مرة أخرى.</value>
   </data>

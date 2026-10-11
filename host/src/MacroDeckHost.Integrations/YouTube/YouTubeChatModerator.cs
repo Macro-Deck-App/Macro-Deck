@@ -1,5 +1,5 @@
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using Serilog;

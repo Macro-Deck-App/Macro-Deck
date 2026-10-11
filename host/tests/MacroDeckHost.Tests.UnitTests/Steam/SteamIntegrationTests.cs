@@ -72,12 +72,12 @@ internal sealed class SteamIntegrationTests
 	[Test]
 	public void Setup_is_optional_and_several_accounts_are_allowed()
 	{
-		var provider = (IConfigFlowProvider)Integration();
+		var integration = Integration();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(provider.RequiresConfiguration, Is.False);
-			Assert.That(provider.AllowsMultipleConfigurations, Is.True);
+			Assert.That(integration.RequiresConfiguration, Is.False);
+			Assert.That(integration.AllowsMultipleConfigurations, Is.True);
 		});
 	}
 
@@ -367,6 +367,40 @@ internal sealed class SteamIntegrationTests
 	}
 
 	[Test]
+	public async Task The_widget_shows_the_steam_logo_the_integration_ships()
+	{
+		var integration = Integration();
+		var context = new FakeContext();
+		await integration.InitializeAsync(context);
+
+		await using var session = (await integration.CreateSessionAsync(new UiSessionRequest
+		{
+			Surface = new UiSurface
+			{
+				Kind = UiSurfaceKinds.Widget,
+				SessionMode = UiSessionModes.Shared,
+				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				{
+					[UiWidgetSurfaceAttributes.WidgetType] =
+						JsonSerializer.SerializeToElement(SteamWidgetType.CurrentlyPlayingQualifiedId),
+					[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { }),
+				},
+			},
+			UiModelVersion = 1,
+		}, CancellationToken.None))!;
+		var logo = await context.UiResources.GetPluginIconAsync("widget", "logo");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(logo.MediaType, Is.EqualTo("image/svg+xml"));
+			Assert.That(JsonSerializer.Serialize(session.BuildTree().Root), Does.Contain(logo.ResourceId));
+			Assert.That(integration.GetIcon(), Is.Not.Empty);
+		});
+
+		await integration.ShutdownAsync();
+	}
+
+	[Test]
 	public void The_widget_types_have_stable_ids_and_a_data_schema()
 	{
 		var types = Integration().GetWidgetTypes();
@@ -424,7 +458,7 @@ internal sealed class SteamIntegrationTests
 		public IEventPublisher Events => Published;
 		public IUserNotifier Notifications => throw new NotSupportedException();
 		public IUiResourceRegistry UiResources { get; } =
-			new BuiltInUiResourceRegistry(SteamWidgetType.OwnerId, new UiResourceStore());
+			new BuiltInUiResources(SteamWidgetType.OwnerId, new UiResourceStore(), typeof(SteamIntegration));
 
 		public void Add(IReadOnlyDictionary<string, string?> values, string? secret, string title = "Steam")
 		{

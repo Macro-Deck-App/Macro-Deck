@@ -69,7 +69,9 @@ asks you to confirm first. The dialog says whether the action worked, or why Twi
 - **Twitch did not grant Macro Deck the permission for this action**: reconnect the Twitch account in
   **Integrations** to grant the moderation permissions.
 - **Twitch did not allow this**: reconnect the Twitch account in **Integrations** and try again.
-- **The host is locked**: unlock the computer running Macro Deck, as for any other action.
+
+While the computer running Macro Deck is locked, the chat dialog keeps showing the chat, but tapping a message
+shows that the computer is locked instead of selecting it. Unlock the computer, as for any other action.
 
 On YouTube, **Unban** only lifts bans you made through Macro Deck during the current broadcast; lift other bans
 in YouTube Studio. See [YouTube](/guide/youtube/#moderating-youtube-chat).
@@ -304,7 +306,8 @@ What a widget does, and when. The **Scenes** button runs **Change Folder to** on
 | Event | Turn the mic slider's accent red when OBS reports **Streaming Started** |
 
 Some widgets already do something on a short press before you add anything: pressing a **Weather** widget
-opens its details, and a **Calendar** widget its list of events or the details of its next event. Give such
+opens its details (for a location from a plugin, only when that plugin offers details), and a **Calendar**
+widget its list of events or the details of its next event. Give such
 a widget a Short Press action of your own and yours runs instead. A hardware deck has no screen for these
 details, so these widgets do nothing there until you add an action.
 

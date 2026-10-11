@@ -614,3 +614,45 @@ internal sealed class NoPluginConnections : MacroDeckHost.Application.Plugins.Ca
 
 	public bool IsConnected(string pluginId) => Connected.Contains(pluginId);
 }
+
+internal sealed class RecordingUiInteractionsFactory : MacroDeckHost.Application.Ui.Modals.IUiInteractionsFactory
+{
+	private readonly Lock _gate = new();
+	private readonly List<(string IntegrationId, string? ClientId, ModalDefinition Modal)> _opened = [];
+
+	public IReadOnlyList<(string IntegrationId, string? ClientId, ModalDefinition Modal)> Opened
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _opened];
+			}
+		}
+	}
+
+	public IUiInteractions ForIntegration(string integrationId) => new Interactions(this, integrationId);
+
+	private sealed class Interactions(RecordingUiInteractionsFactory owner, string integrationId) : IUiInteractions
+	{
+		public Task<bool> ShowModalAsync(string? originClientId,
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			lock (owner._gate)
+			{
+				owner._opened.Add((integrationId, originClientId, modal));
+			}
+
+			return Task.FromResult(true);
+		}
+
+		public async Task<ModalResult<T>> ShowModalAsync<T>(string? originClientId,
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			await ShowModalAsync(originClientId, modal, cancellationToken);
+			return ModalResult.FromCancellation<T>();
+		}
+	}
+}

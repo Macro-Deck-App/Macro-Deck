@@ -38,6 +38,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.VideoStreams;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
@@ -77,7 +78,9 @@ public class PluginCallbackRouterTests
 		IMusicPlayerArtworkService? musicPlayerArtwork = null,
 		MusicPlayerArtworkCallbackThrottle? musicPlayerArtworkThrottle = null,
 		TimeSpan? musicPlayerArtworkTimeout = null,
-		INotificationManager? notificationManager = null)
+		INotificationManager? notificationManager = null,
+		PluginVariableHistoryWindows? variableHistory = null,
+		VariableHistoryReadThrottle? variableHistoryReadThrottle = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -116,7 +119,9 @@ public class PluginCallbackRouterTests
 			musicPlayerArtwork: musicPlayerArtwork,
 			musicPlayerArtworkThrottle: musicPlayerArtworkThrottle,
 			musicPlayerArtworkTimeout: musicPlayerArtworkTimeout,
-			notificationManager: notificationManager);
+			notificationManager: notificationManager,
+			variableHistory: variableHistory,
+			variableHistoryReadThrottle: variableHistoryReadThrottle);
 	}
 
 	[SetUp]
@@ -320,14 +325,54 @@ public class PluginCallbackRouterTests
 
 	private static HostInvokePayload RegisterArtwork(string name = "cover",
 		string instanceId = "net.example.jukebox::default",
-		string artworkId = "cover-1")
+		string artworkId = "cover-1",
+		int? maxSize = null)
 		=> new()
 		{
 			Api = HostApis.Ui,
 			Operation = HostOperations.Ui.RegisterMusicPlayerArtwork,
 			Arguments = Arg(new UiRegisterMusicPlayerArtworkArguments
-				{ Name = name, InstanceId = instanceId, ArtworkId = artworkId })
+				{ Name = name, InstanceId = instanceId, ArtworkId = artworkId, MaxSize = maxSize })
 		};
+
+	[Test]
+	public async Task Artwork_asked_for_at_a_size_is_looked_up_at_that_size()
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1, 2], "image/webp", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		var result = await router.RouteAsync("plugin.a",
+			"session-1",
+			"c1",
+			RegisterArtwork(maxSize: 256),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.Null);
+			Assert.That(artwork.Requests, Is.EqualTo(new[] { ("net.example.jukebox::default", "cover-1", (int?)256) }));
+		});
+	}
+
+	[TestCase(0)]
+	[TestCase(-128)]
+	public async Task An_artwork_size_that_is_not_positive_is_refused_before_the_player_is_asked(int maxSize)
+	{
+		var artwork = new FakeMusicPlayerArtworkService { Image = new ArtworkImageResult([1], "image/webp", "\"e\"") };
+		var router = ArtworkRouter(new RecordingUiResources(), artwork);
+
+		var result = await router.RouteAsync("plugin.a",
+			"session-1",
+			"c1",
+			RegisterArtwork(maxSize: maxSize),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(artwork.Requests, Is.Empty);
+		});
+	}
 
 	[Test]
 	public async Task Artwork_of_another_plugins_player_is_registered_for_the_calling_plugins_session()
@@ -957,6 +1002,102 @@ public class PluginCallbackRouterTests
 		Assert.That(_variableService.ValueOf(handle.Id), Is.Not.EqualTo("pwned"));
 	}
 
+
+	[Test]
+	public async Task A_host_without_widget_data_or_variable_history_answers_those_operations_as_unsupported()
+	{
+		var router = Router();
+
+		var data = await router.RouteAsync("plugin.a",
+			"c1",
+			new HostInvokePayload
+			{
+				Api = HostApis.Widgets,
+				Operation = HostOperations.Widgets.GetData,
+				Arguments = JsonSerializer.SerializeToElement(new WidgetsGetDataArguments { WidgetId = Guid.NewGuid().ToString() },
+					PluginProtocolJson.Options)
+			},
+			CancellationToken.None);
+		var history = await router.RouteAsync("plugin.a",
+			"c2",
+			new HostInvokePayload
+			{
+				Api = HostApis.Variables,
+				Operation = HostOperations.Variables.HistoryOpen,
+				Arguments = JsonSerializer.SerializeToElement(
+					new VariablesHistoryOpenArguments { Name = "viewer_count", Capacity = 10 },
+					PluginProtocolJson.Options)
+			},
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
+			Assert.That(history.Error?.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
+		});
+	}
+
+	[Test]
+	public async Task Variable_history_reads_pass_once_per_second_per_window_and_a_tight_loop_is_refused()
+	{
+		var variables = new VariableRegistry();
+		var sessions = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
+		using var windows = new PluginVariableHistoryWindows(
+			new OwnedVariableHistory(new VariableHistory(variables, TimeProvider.System), variables),
+			sessions);
+		var router = Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, capacity: 100, refillPerSecond: 0),
+			sessionRegistry: sessions,
+			variableHistory: windows,
+			variableHistoryReadThrottle: new VariableHistoryReadThrottle(_time));
+		string[] windowIds =
+		[
+			windows.Open("plugin.a", "viewer_count", 10),
+			windows.Open("plugin.a", "follower_count", 10),
+			windows.Open("plugin.a", "subscriber_count", 10),
+		];
+
+		var paced = new List<HostCallbackResult>();
+		for (var second = 0; second < 30; second++)
+		{
+			_time.Advance(TimeSpan.FromSeconds(1));
+			foreach (var windowId in windowIds)
+			{
+				paced.Add(await ReadHistoryAsync(router, windowId));
+			}
+		}
+
+		var looped = new List<HostCallbackResult>();
+		for (var call = 0; call < 200; call++)
+		{
+			looped.Add(await ReadHistoryAsync(router, windowIds[0]));
+		}
+
+		var refused = looped.Where(result => result.Error is not null).ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(paced.Select(result => result.Error), Is.All.Null);
+			Assert.That(refused, Is.Not.Empty);
+			Assert.That(refused.Select(result => result.Error!.Code), Is.All.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(refused.Select(result => result.Error!.Retryable), Is.All.True);
+			Assert.That(looped.Count(result => result.Error is null),
+				Is.LessThanOrEqualTo(windowIds.Length * VariableHistoryReadThrottle.BurstPerWindow));
+		});
+	}
+
+	private static Task<HostCallbackResult> ReadHistoryAsync(PluginCallbackRouter router, string windowId)
+		=> router.RouteAsync("plugin.a",
+			"read",
+			new HostInvokePayload
+			{
+				Api = HostApis.Variables,
+				Operation = HostOperations.Variables.HistoryRead,
+				Arguments = JsonSerializer.SerializeToElement(new VariablesHistoryWindowArguments { WindowId = windowId },
+					PluginProtocolJson.Options)
+			},
+			CancellationToken.None);
 
 	[Test]
 	public async Task An_unknown_api_is_capability_unsupported()

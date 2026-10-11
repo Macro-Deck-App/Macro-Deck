@@ -120,4 +120,31 @@ public interface IUiResourceRegistry
 		CancellationToken cancellationToken = default)
 		=> Task.FromException<UiResource?>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot register the artwork of another music player."));
+
+	/// <summary>
+	/// Registers the current artwork of any music player like
+	/// <see cref="RegisterMusicPlayerArtworkAsync(string, string, string, CancellationToken)" />, as an image no
+	/// larger than a place <paramref name="maxSize" /> pixels wide needs.
+	/// </summary>
+	/// <remarks>
+	/// Macro Deck keeps each cover at its full size, at most 640 pixels on its longer side, and as 128 and 256
+	/// pixel copies when the cover is larger than those. It registers the smallest copy at least
+	/// <paramref name="maxSize" /> pixels on its longer side, or the full-size cover when no copy is. A smaller
+	/// image uses less of the quota and reaches clients sooner. A Macro Deck, or a context, that predates the
+	/// size ignores it and registers the full-size cover; that is also what the default implementation does.
+	/// </remarks>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="maxSize" /> is zero or negative. Nothing
+	/// was sent.</exception>
+	/// <exception cref="ArgumentException">The name is not valid. Nothing was sent.</exception>
+	/// <exception cref="UiResourceException">As for
+	/// <see cref="RegisterMusicPlayerArtworkAsync(string, string, string, CancellationToken)" />.</exception>
+	Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		int maxSize,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxSize);
+		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, cancellationToken);
+	}
 }

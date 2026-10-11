@@ -36,6 +36,7 @@ public class CalendarWidgetPressTests
 		integrations.Add(_integration);
 		_defaults = new WidgetDefaultShortPress(() => new WidgetTypeRegistry(new RecordingMediator()),
 			integrations,
+			new MacroDeckHost.Application.Weather.WeatherRegistry(integrations, Serilog.Core.Logger.None),
 			TestLocalization.Resolver);
 	}
 

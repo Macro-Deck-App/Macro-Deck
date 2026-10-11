@@ -130,17 +130,19 @@ public sealed class TimeFormatResolver
 	public async Task<TimeOfDayFormat> ResolveAsync()
 	{
 		var culture = CultureInfo.GetCultureInfo((await _preferences.GetLocalization()).Culture);
-		var hourCycle = await _preferences.GetTimeFormat() switch
+
+		return new TimeOfDayFormat(culture, ResolveHourCycle(await _preferences.GetTimeFormat(), culture, _systemReader));
+	}
+
+	public static string ResolveHourCycle(string timeFormat, CultureInfo culture, ISystemHourCycleReader systemReader)
+		=> timeFormat switch
 		{
 			AppPreferenceService.TimeFormat12h => HourCycles.H12,
 			AppPreferenceService.TimeFormat24h => HourCycles.H23,
-			_ => _systemReader.Read() ??
+			_ => systemReader.Read() ??
 				HourCycles.FromPattern(culture.DateTimeFormat.ShortTimePattern) ??
 				HourCycles.H23
 		};
-
-		return new TimeOfDayFormat(culture, hourCycle);
-	}
 
 	public async Task<string> ResolveHourCycle() => (await ResolveAsync()).HourCycle;
 }

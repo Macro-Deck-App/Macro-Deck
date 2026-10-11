@@ -235,6 +235,19 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		return await RegisterAsync(name, artwork.Content, artwork.MediaType, cancellationToken).ConfigureAwait(false);
 	}
 
+	/// <inheritdoc />
+	/// <remarks>Registers the seeded bytes whatever <paramref name="maxSize" /> asks for, as Macro Deck does
+	/// for a cover too small to have smaller copies.</remarks>
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		string instanceId,
+		string artworkId,
+		int maxSize,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxSize);
+		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, cancellationToken);
+	}
+
 	internal FakeMusicPlayerArtwork? FindMusicPlayerArtwork(string instanceId, string artworkId)
 	{
 		lock (_gate)

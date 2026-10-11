@@ -8,9 +8,14 @@ namespace MacroDeckHost.Tests.UnitTests;
 [TestFixture]
 internal sealed partial class ShippedSvgArtworkTests
 {
-	public static IEnumerable<TestCaseData> IntegrationIcons() => EmbeddedSvgs(typeof(ObsIntegration).Assembly);
+	// An integration's Icons/animated folder holds animated artwork its dialogs draw, held to the widget
+	// artwork rule; every other SVG of an integration must keep its colours without CSS.
+	public static IEnumerable<TestCaseData> IntegrationIcons()
+		=> EmbeddedSvgs(typeof(ObsIntegration).Assembly, name => !IsAnimatedArtwork(name));
 
-	public static IEnumerable<TestCaseData> WidgetArtwork() => EmbeddedSvgs(typeof(WeatherWidgetUiProvider).Assembly);
+	public static IEnumerable<TestCaseData> WidgetArtwork()
+		=> EmbeddedSvgs(typeof(WeatherWidgetUiProvider).Assembly, _ => true)
+			.Concat(EmbeddedSvgs(typeof(ObsIntegration).Assembly, IsAnimatedArtwork));
 
 	[TestCaseSource(nameof(IntegrationIcons))]
 	public void An_integration_icon_keeps_its_colours_in_readers_that_ignore_css(string svg)
@@ -37,9 +42,13 @@ internal sealed partial class ShippedSvgArtworkTests
 			Is.Empty);
 	}
 
-	private static IEnumerable<TestCaseData> EmbeddedSvgs(Assembly assembly)
+	private static bool IsAnimatedArtwork(string resourceName)
+		=> resourceName.Contains(".Icons.animated.", StringComparison.Ordinal);
+
+	private static IEnumerable<TestCaseData> EmbeddedSvgs(Assembly assembly, Func<string, bool> include)
 	{
-		foreach (var name in assembly.GetManifestResourceNames().Where(n => n.EndsWith(".svg", StringComparison.Ordinal)))
+		foreach (var name in assembly.GetManifestResourceNames()
+			.Where(n => n.EndsWith(".svg", StringComparison.Ordinal) && include(n)))
 		{
 			using var stream = assembly.GetManifestResourceStream(name)!;
 			using var reader = new StreamReader(stream);

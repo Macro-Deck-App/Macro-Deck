@@ -1,9 +1,10 @@
 ---
 title: Modal views
-description: Opening a dialog from an action, how it is sized, which node completes it, and what bounds the wait.
+description: Opening a dialog from an action or a widget, how it is sized, which node completes it, and what bounds the wait.
 ---
 
-An action can put a dialog on the client that ran it and, when it needs one, wait for the answer.
+An action can put a dialog on the client that ran it and, when it needs one, wait for the answer. A widget or
+another view can do the same on the client that pressed it, through the event's origin.
 
 ## Example
 
@@ -80,6 +81,10 @@ A `dialog` surface carries `modalId`, `viewId` and whatever `Data` the action pa
 (`UiDialogSurfaceAttributes`). Decline a `viewId` you do not serve rather than guessing. A dialog is
 `exclusive`: it belongs to one client, so unlike a deck widget its tree may carry entered values.
 
+It also carries `culture` (the language the person reads Macro Deck in, for example `de`) and `hourCycle`
+(`h12` or `h23`, already following the person's time format setting). Use them when you write a time of
+day or other formatted value as text. An older host sends neither, so fall back to your own default.
+
 ## Completing a modal
 
 ```csharp
@@ -111,6 +116,22 @@ var opened = await context.Ui.ShowModalAsync(
 
 The non-generic overload is for a modal that shows something rather than asks something. It returns as
 soon as the modal is open, with `true` if it opened.
+
+## Opening a dialog from a widget
+
+A press on your widget hands the session an `IUiEventOrigin` (see
+[Answering the client that acted](/ui/views/sessions/#answering-the-client-that-acted)). It opens your
+dialog on the client that pressed, with the same `ModalDefinition` and the same answer rules:
+
+```csharp
+var answer = await origin.ShowModalAsync<string>(
+    new ModalDefinition { ViewId = "device-picker", Title = MyStrings.SelectDevice() },
+    cancellationToken);
+```
+
+Unlike an action's modal, nothing bounds the wait but your `cancellationToken`, the user and the client
+staying attached: a client that leaves the view or disconnects ends it as a cancellation. Pass a token that
+ends with the work the dialog belongs to.
 
 ## How a dialog is sized
 

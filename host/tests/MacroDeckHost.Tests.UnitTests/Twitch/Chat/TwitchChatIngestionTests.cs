@@ -1,5 +1,5 @@
 using System.Text.Json;
-using MacroDeckHost.Application.StreamChat;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using Serilog.Core;

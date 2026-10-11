@@ -23,6 +23,8 @@ public sealed class RemoteUiSessionProvider : IUiSessionProvider
 
 	public string ProviderId { get; }
 
+	public bool GatedByHostLock => true;
+
 	public async Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command,
 		CancellationToken cancellationToken)
 	{

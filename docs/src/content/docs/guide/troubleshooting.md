@@ -105,7 +105,9 @@ again.
 
 Connected devices show a lock screen for as long as the computer is locked. You can keep the deck
 visible instead by turning off **Lock clients when this computer is locked** in
-**Settings > Security**. Actions stay blocked either way.
+**Settings > Security**. Actions stay blocked either way, and so do widgets and dialogs that come from a
+plugin or an integration, such as the Twitch and YouTube chat: pressing one shows that the computer is
+locked, and the widget keeps showing its content.
 
 ## A dialog says it cannot be shown
 

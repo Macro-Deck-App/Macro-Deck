@@ -112,4 +112,20 @@ public class A12_VariableFakeTests
 			Assert.That(api.Created[0].Id, Is.EqualTo(handle.Id));
 		});
 	}
+
+	[Test]
+	public async Task FakeVariableApi_counts_refresh_requests_and_declared_set_changes()
+	{
+		var api = new FakeVariableApi();
+
+		await api.RequestRefreshAsync();
+		await api.RequestRefreshAsync();
+		await api.NotifyDeclarationsChangedAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(api.RefreshRequests, Is.EqualTo(2));
+			Assert.That(api.DeclarationChanges, Is.EqualTo(1));
+		});
+	}
 }

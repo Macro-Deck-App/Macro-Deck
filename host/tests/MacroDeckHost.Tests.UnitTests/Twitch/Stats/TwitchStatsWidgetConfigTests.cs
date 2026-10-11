@@ -3,15 +3,14 @@ using Json.Schema;
 using MacroDeck.Localization;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Testing;
-using MacroDeckHost.Application.StreamChat;
-using MacroDeckHost.Application.StreamStats;
+using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Widgets.Ui;
-using MacroDeckHost.Widgets.StreamStats;
+using MacroDeckHost.Integrations.Streaming.Widgets;
 using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Twitch.Stats;
@@ -127,13 +126,13 @@ internal sealed class TwitchStatsWidgetConfigTests
 			Assert.That(WidgetDataSchema.Validate(schema, defaults), Is.Empty);
 			Assert.That(WidgetDataSchema.Validate(schema, edited), Is.Empty);
 			Assert.That(Strings(edited.GetProperty("tiles")), Is.EqualTo(new[] { "subscribers", "viewers" }));
-			Assert.That(StreamStatsWidgetSettings.Options(StreamPlatforms.Twitch, edited).Metric,
+			Assert.That(StreamStatsWidgetSettings.Options(TwitchStreamPlatform.Platform, edited).Metric,
 				Is.EqualTo("subscribers"));
 		});
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(StreamStatsWidgetConfigView.Build(StreamPlatforms.Twitch,
+		=> UiTestHost.Render(StreamStatsWidgetConfigView.Build(TwitchStreamPlatform.Platform,
 			data is JsonElement element ? element : JsonSerializer.SerializeToElement(data),
 			[new StreamStatsAccount("111", "Streamer", "twitch_streamer_")]));
 

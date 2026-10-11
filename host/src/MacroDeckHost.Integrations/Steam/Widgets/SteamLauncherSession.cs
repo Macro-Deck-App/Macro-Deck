@@ -24,7 +24,9 @@ internal sealed class SteamLauncherSession : IUiSession
 	private readonly UiView _view;
 	private readonly ITimer _timer;
 	private readonly Lock _sync = new();
+	private readonly Lock _dispatch = new();
 
+	private IUiEventOrigin? _origin;
 	private LocalizedText _failure;
 	private DateTimeOffset _failureUntil;
 	private bool _disposed;
@@ -68,7 +70,9 @@ internal sealed class SteamLauncherSession : IUiSession
 
 	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent) => Deliver(uiEvent, null);
+
+	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Deliver(uiEvent, origin);
 
 	public ValueTask DisposeAsync()
 	{
@@ -90,6 +94,22 @@ internal sealed class SteamLauncherSession : IUiSession
 		return ValueTask.CompletedTask;
 	}
 
+	private void Deliver(UiEvent uiEvent, IUiEventOrigin? origin)
+	{
+		lock (_dispatch)
+		{
+			_origin = origin;
+			try
+			{
+				_view.Dispatch(uiEvent);
+			}
+			finally
+			{
+				_origin = null;
+			}
+		}
+	}
+
 	private void OnChanged(object? sender, EventArgs args) => Refresh();
 
 	private UiEventOutcome Press(int appId)
@@ -99,11 +119,11 @@ internal sealed class SteamLauncherSession : IUiSession
 			return UiEventOutcome.Rejected("Steam is not available.");
 		}
 
-		_ = RunAsync(appId);
+		_ = RunAsync(appId, _origin);
 		return UiEventOutcome.Accepted;
 	}
 
-	private async Task RunAsync(int appId)
+	private async Task RunAsync(int appId, IUiEventOrigin? origin)
 	{
 		var outcome = await _source!.ExecuteAsync(new SteamCommand(SteamCommandKind.LaunchGame, appId),
 				CancellationToken.None)
@@ -114,7 +134,7 @@ internal sealed class SteamLauncherSession : IUiSession
 			return;
 		}
 
-		LocalizedString message = outcome switch
+		LocalizedText message = outcome switch
 		{
 			SteamCommandOutcome.NotAvailable => Errors.NotAvailable(),
 			SteamCommandOutcome.InvalidAppId => Errors.InvalidGame(),
@@ -128,6 +148,11 @@ internal sealed class SteamLauncherSession : IUiSession
 		}
 
 		Refresh();
+
+		if (origin is not null)
+		{
+			await origin.ReportFailureAsync(message).ConfigureAwait(false);
+		}
 	}
 
 	private SteamLauncherState Compute()

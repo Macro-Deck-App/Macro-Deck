@@ -38,6 +38,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		ScreenSaverProvider = new ScreenSaverProviderTestClient(this);
 		VideoStreamProvider = new VideoStreamProviderTestClient(this);
 		Issues = new IssuesTestClient(this);
+		ConfigEntries = new ConfigEntriesTestClient(this);
 		Messaging = new MessagingTestClient(this);
 		Ui = new UiTestClient(this, connection);
 	}
@@ -104,6 +105,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>issues</c> capability.</summary>
 	public IssuesTestClient Issues { get; }
+
+	/// <summary>The <c>config-entries</c> capability.</summary>
+	public ConfigEntriesTestClient ConfigEntries { get; }
 
 	/// <summary>The <c>messaging</c> capability.</summary>
 	public MessagingTestClient Messaging { get; }
