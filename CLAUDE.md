@@ -42,7 +42,9 @@ without much effort. It is a plugin that happens to run in-process:
 
 Code that predates this rule (integration hubs and sinks in `Application`, integration widgets in
 `MacroDeckHost.Widgets`, host-side adapters for single integrations) is known debt: never extend it
-or copy its pattern. System integrations (`ISystemIntegration`) are host features and exempt. See
+or copy its pattern. `IntegrationBoundaryTests` enforce this; their baseline lists the debt and may
+only shrink, so never add a line to it. System integrations (`ISystemIntegration`) are host features
+and exempt. See
 [ADR 0107](engineering/decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md).
 
 ## Dependencies
