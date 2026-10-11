@@ -23,6 +23,26 @@ package tests, and add a regression test from the old consumer's point of view.
 
 See [`docs/`](docs/) and [ADR 0026](engineering/decisions/0026-plugin-protocol-and-sdk-boundary.md).
 
+## Built-in integrations
+
+Every built-in integration is built so that it could be split out into an out-of-process plugin
+without much effort. It is a plugin that happens to run in-process:
+
+- It reaches the host only through the SDK: `IIntegrationContext`, the provider interfaces and the
+  `MacroDeck.Ui` DSL. No host services, no types from the host projects, no host-injected setter or
+  consumer interfaces, no other code that finds and casts the integration instance.
+- Everything it owns lives in its own folder in `MacroDeckHost.Integrations`: actions, config flow,
+  state, widget types, widget and dialog UI (served through `IUiProvider` as a plugin serves it) and
+  assets. None of it goes into `Application`, `Infrastructure`, `Widgets` or the host project.
+- If it needs something the SDK does not offer, the SDK gains it as a public, documented addition that
+  works out of process too, protocol included, so plugins can use it as well. That is public-contract
+  work under the rules above, not a reason for a host-only shortcut.
+
+Code that predates this rule (integration hubs and sinks in `Application`, integration widgets in
+`MacroDeckHost.Widgets`, host-side adapters for single integrations) is known debt: never extend it
+or copy its pattern. System integrations (`ISystemIntegration`) are host features and exempt. See
+[ADR 0107](engineering/decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md).
+
 ## Dependencies
 
 Never install or add a third-party package just because it looks useful or because a name was
