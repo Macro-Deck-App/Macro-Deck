@@ -54,7 +54,7 @@ internal sealed class UiInvalidationContractTests : UiContractFixture
 			"Both clients never received a tree, so nothing proves they were live.");
 
 		// The plugin will never answer this one.
-		Link.DropNextReply();
+		Link.DropReplyTo(CapabilityOperations.Ui.SessionEvent);
 		var call = Task.Run(() => Broker.SendEvent(new UiSendEventRequest
 				{ SessionId = sessionId, NodeId = "root", Name = "click", Revision = 3 },
 			"c1"));
