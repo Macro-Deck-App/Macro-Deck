@@ -399,6 +399,17 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Publish, Remove, Sync, Withdraw];
 	}
 
+	public static class Weather
+	{
+		/// <summary>
+		/// Without arguments: the plugin's station snapshots changed, read them again now. Notices that arrive
+		/// while a read is pending are merged into it.
+		/// </summary>
+		public const string SnapshotsChanged = "snapshots-changed";
+
+		public static readonly IReadOnlyList<string> All = [SnapshotsChanged];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -430,6 +441,7 @@ public static class HostOperations
 			[HostApis.VideoStreams] = VideoStreams.All,
 			[HostApis.Colors] = Colors.All,
 			[HostApis.Batteries] = Batteries.All,
+			[HostApis.Weather] = Weather.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

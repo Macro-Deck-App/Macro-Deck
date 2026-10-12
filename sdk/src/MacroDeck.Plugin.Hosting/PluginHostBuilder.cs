@@ -474,6 +474,7 @@ public sealed class PluginHostBuilder
 		}
 
 		Services.TryAddSingleton<RemoteVariableApi>();
+		Services.TryAddSingleton<RemoteWeatherProviderApi>();
 		Services.TryAddSingleton<RemoteUserVariableApi>();
 		Services.TryAddSingleton<RemoteIntegrationConfig>();
 		Services.TryAddSingleton<RemoteDeckNavigator>();

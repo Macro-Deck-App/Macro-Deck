@@ -18,7 +18,7 @@ public sealed class WeatherIntegration
 	: IIntegration, IWeatherProvider, IVariableProvider, IConfigFlowProvider, IIntegrationIconProvider, IUiProvider,
 		IWeatherStations, IDisposable
 {
-	private static readonly TimeSpan _refreshInterval = TimeSpan.FromMinutes(15);
+	private static readonly TimeSpan _defaultRefreshInterval = TimeSpan.FromMinutes(15);
 
 	public const string IntegrationId = "app.macro-deck.weather";
 
@@ -26,6 +26,7 @@ public sealed class WeatherIntegration
 	private static readonly byte[] _icon = LoadIcon();
 
 	private readonly IOpenMeteoClient _client;
+	private readonly TimeSpan _refreshInterval;
 	private readonly WeatherDetailsUiProvider _details;
 
 	private IIntegrationContext? _context;
@@ -36,9 +37,10 @@ public sealed class WeatherIntegration
 	{
 	}
 
-	internal WeatherIntegration(IOpenMeteoClient client)
+	internal WeatherIntegration(IOpenMeteoClient client, TimeSpan? refreshInterval = null)
 	{
 		_client = client;
+		_refreshInterval = refreshInterval ?? _defaultRefreshInterval;
 
 		// Handed the live instance list rather than the integration itself, so the action reads the
 		// stations as they are when a user opens its options rather than as they were at construction.
@@ -279,6 +281,12 @@ public sealed class WeatherIntegration
 		}
 
 		_stationsChanged?.Invoke(this, EventArgs.Empty);
+
+		if (_context is { } context)
+		{
+			_ = context.Variables.RequestRefreshAsync(CancellationToken.None);
+			_ = context.WeatherProvider.NotifySnapshotsChangedAsync(CancellationToken.None);
+		}
 	}
 
 	public void Dispose()

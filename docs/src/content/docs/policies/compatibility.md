@@ -240,6 +240,12 @@ What did **not** need a major:
   details** action. A weather plugin built against an older SDK declares none, so its stations get no default
   press; a flow the user added still runs. See
   [Pressing the widget](/features/weather/#pressing-the-widget).
+- Weather providers gained `IIntegrationContext.WeatherProvider` (`IWeatherProviderApi`,
+  `NotifySnapshotsChangedAsync`) and the `weather` host api with `snapshots-changed`, all within major `3`.
+  The member is a default interface member returning `UnsupportedWeatherProviderApi.Instance`, so an
+  existing implementation keeps compiling. An older host answers `CAPABILITY_UNSUPPORTED`, which the SDK
+  turns into a no-op; the host then reads the stations on its own interval as before. See
+  [Telling Macro Deck the weather changed](/features/weather/#telling-macro-deck-the-weather-changed).
 - Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
   optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
 - [Batteries](/features/batteries/) added a capability kind, `battery-provider`, at capability version

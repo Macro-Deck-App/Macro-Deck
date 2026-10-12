@@ -101,6 +101,7 @@ x-macrodeck-host-operations:
   video-streams: [providers-changed, streams-changed, session-update, session-close]
   colors: [resolve, watches]
   batteries: [publish, remove, sync, withdraw]
+  weather: [snapshots-changed]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:

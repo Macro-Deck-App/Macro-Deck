@@ -90,11 +90,18 @@ public static class HostApis
 	/// </summary>
 	public const string Batteries = "batteries";
 
+	/// <summary>
+	/// The <c>weather</c> host api: a weather provider tells the host its station snapshots changed, so the
+	/// host reads them again at once. Requires the negotiated <c>weather</c> capability. A host that predates
+	/// it answers <c>CAPABILITY_UNSUPPORTED</c> and keeps reading the stations on its own interval.
+	/// </summary>
+	public const string Weather = "weather";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
-		IconPacks, VideoStreams, Colors, Batteries,
+		IconPacks, VideoStreams, Colors, Batteries, Weather,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
