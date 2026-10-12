@@ -292,6 +292,21 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		return _sessionRegistry.GetCapabilities(pluginId) is { } session && NeverDeclaredVariables(session);
 	}
 
+	private RemotePluginCapabilitySnapshot AcceptProbedVariables(
+		string pluginId,
+		string? sessionId,
+		RemotePluginCapabilitySnapshot snapshot,
+		IReadOnlySet<string> answered)
+	{
+		if (sessionId is null || !answered.Contains(CapabilityKinds.Variables) || !AcceptsUndeclaredVariables(pluginId, snapshot))
+		{
+			return snapshot;
+		}
+
+		_undeclaredVariablesSessions[pluginId] = sessionId;
+		return snapshot with { AcceptedKinds = [.. snapshot.AcceptedKinds, CapabilityKinds.Variables] };
+	}
+
 	private static bool NeverDeclaredVariables(PluginSessionCapabilities session)
 		=> !session.Capabilities.ContainsKey(CapabilityKinds.Variables) &&
 			session.DeclaredCapabilities.All(capability =>
@@ -336,9 +351,25 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			return false;
 		}
 
+		var probeVariables = !acceptedKinds.Contains(CapabilityKinds.Variables) && NeverDeclaredVariables(capabilities);
+		var sessionId = probeVariables ? CurrentSessionId(pluginId) : null;
+
 		var hadPriorSnapshot = _snapshotStore.Has(pluginId);
-		var refreshResult = await _refresher.RefreshAsync(pluginId, acceptedKinds, cancellationToken)
+		var refreshResult = await _refresher.RefreshAsync(pluginId,
+				acceptedKinds,
+				cancellationToken,
+				probeVariables ? [CapabilityKinds.Variables] : null,
+				probeVariables ? (snapshot, answered) => AcceptProbedVariables(pluginId, sessionId, snapshot, answered) : null)
 			.ConfigureAwait(false);
+
+		if (refreshResult.TimedOutProbes.Count > 0)
+		{
+			_logger.Information("Plugin '{PluginId}' did not answer a describe of {Kinds} within {Timeout}; " +
+				"its variables stay unavailable until it registers again",
+				pluginId,
+				refreshResult.TimedOutProbes,
+				RemotePluginSnapshotRefresher.ProbeTimeout);
+		}
 
 		if (!refreshResult.AllSucceeded && !hadPriorSnapshot)
 		{

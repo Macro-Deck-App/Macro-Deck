@@ -128,20 +128,6 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 		Assert.That(new VariableCatalogProviders(IntegrationRegistry).ResolveOwner(PluginId), Is.Null);
 	}
 
-	private Task<IIntegration> ConnectAsTheSdkDeclaresAsync(
-		IReadOnlyList<ICapabilityHandler> handlers,
-		Func<Task>? duringRegister = null)
-	{
-		var declared = handlers.SelectMany(handler => handler.DeclareCapabilities()).ToList();
-		var accepted = declared
-			.GroupBy(capability => capability.Kind, StringComparer.Ordinal)
-			.Where(group => CapabilityVersionNegotiator.Negotiate(group.Key, group.First().VersionRange).Accepted)
-			.Select(group => group.Key)
-			.ToList();
-
-		return ConnectAsync(handlers, declared, accepted, duringRegister: duringRegister);
-	}
-
 	private async Task AnnounceAsync(string kind)
 	{
 		var handled = Link.StateUpdatesHandled;

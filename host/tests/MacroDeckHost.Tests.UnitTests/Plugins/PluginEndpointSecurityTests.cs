@@ -977,6 +977,12 @@ public class PluginEndpointSecurityTests
 		while (true)
 		{
 			var envelope = await ReceiveEnvelopeAsync(socket);
+			if (envelope is not null && string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
+			{
+				await AnswerUnsupportedAsync(socket, envelope);
+				continue;
+			}
+
 			if (envelope is null || !string.Equals(envelope.Type, MessageTypes.HostState, StringComparison.Ordinal))
 			{
 				return envelope;
@@ -989,12 +995,33 @@ public class PluginEndpointSecurityTests
 		while (true)
 		{
 			var envelope = await ReceiveEnvelopeOrCloseAsync(socket);
+			if (envelope is not null && string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
+			{
+				await AnswerUnsupportedAsync(socket, envelope);
+				continue;
+			}
+
 			if (envelope is null || !string.Equals(envelope.Type, MessageTypes.HostState, StringComparison.Ordinal))
 			{
 				return envelope;
 			}
 		}
 	}
+
+	// These sessions declare no capabilities, so registration's variables describe reaches them; they answer
+	// it the way a plugin without the capability does.
+	private static Task AnswerUnsupportedAsync(WebSocket socket, ProtocolEnvelope invoke)
+		=> SendEnvelopeAsync(socket,
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.CapabilityResult,
+				Id = Guid.CreateVersion7().ToString(),
+				CorrelationId = invoke.Id,
+				Error = new ProtocolError
+				{
+					Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "Not implemented.", Retryable = false
+				}
+			});
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{

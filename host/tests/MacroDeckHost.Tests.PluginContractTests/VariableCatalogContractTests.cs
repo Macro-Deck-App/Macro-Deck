@@ -33,9 +33,6 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 	private const string UnitId = "entity/sensor.office_temperature/unit_of_measurement";
 	private const string CustomTagId = "tag/MY_CUSTOM_FIELD";
 
-	/// <summary>A catalog-only provider declares no capability of its own - its resource ids are far too
-	/// numerous to declare and travel inside operation arguments instead - so the connection is opened
-	/// with an empty declared set and the kind accepted at negotiation.</summary>
 	private static IReadOnlyList<DeclaredCapability> NoDeclarations() => [];
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
@@ -58,7 +55,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 			supportsSearch: true);
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var remote = (IVariableProvider)integration;
 
@@ -101,7 +98,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var remote = (IVariableProvider)integration;
 
@@ -143,7 +140,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var remote = (IVariableProvider)integration;
 
@@ -178,7 +175,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var remote = (IVariableProvider)integration;
 		var resolved = await remote.ResolveAsync(CustomTagId, CancellationToken.None);
@@ -199,7 +196,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var remote = (IVariableProvider)integration;
 
@@ -225,7 +222,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var reading = await ((IVariableProvider)integration).ReadAsync(StateId, CancellationToken.None);
 
@@ -257,7 +254,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var result = await ((IVariableProvider)integration).SetValueAsync(StateId, 21.5, CancellationToken.None);
 
@@ -284,7 +281,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		var result = await ((IVariableProvider)integration).SetValueAsync(StateId, 21.5, CancellationToken.None);
 
@@ -336,7 +333,7 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 
 		var integration = await ConnectAsync([Handler(provider)],
 			NoDeclarations(),
-			[CapabilityKinds.Variables]);
+			[]);
 
 		((RemotePluginIntegration)integration).VariableSubscriptions = hostSubscriptions;
 
