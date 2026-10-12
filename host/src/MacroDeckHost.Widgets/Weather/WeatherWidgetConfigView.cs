@@ -24,6 +24,7 @@ internal static class WeatherWidgetConfigView
 		// Must match WeatherWidgetData.Parse: the editor recomposes every bound key on save.
 		var showLocation = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLocation") ??
 			WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
+		var style = new UiState<string>(WeatherWidgetData.Parse(data).Style);
 		var showForecast = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showForecast") ?? true);
 		var animateIcon = new UiState<bool>(WidgetConfigJson.ReadBool(data, "animateIcon") ?? true);
 		var forecastDays = new UiState<double>(
@@ -55,6 +56,19 @@ internal static class WeatherWidgetConfigView
 						Key = "location-heading", Text = AppStrings.Widgets.Weather.LocationSection(),
 					},
 					LocationPicker(registry, instanceId, instanceOptions),
+					new UiHeading { Key = "style-heading", Text = AppStrings.Widgets.Editor.Style() },
+					new UiChoiceInput
+					{
+						Key = WeatherWidgetData.StyleKey,
+						Label = AppStrings.Widgets.Editor.Style(),
+						HideLabel = true,
+						Segmented = true,
+						Binding = Bind.To(style),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							UiOption.Of(WeatherWidgetData.StyleForecast, AppStrings.Widgets.Weather.Forecast()),
+							UiOption.Of(WeatherWidgetData.StyleCompact, AppStrings.Widgets.Weather.Styles.Compact()),
+						]),
+					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiBooleanInput
 					{
@@ -85,6 +99,12 @@ internal static class WeatherWidgetConfigView
 						Key = "showForecast",
 						Label = AppStrings.Widgets.Weather.Forecast(),
 						Binding = Bind.To(showForecast),
+						VisibleWhen = new UiVisibleWhen
+						{
+							ParameterName = WeatherWidgetData.StyleKey,
+							Values = [WeatherWidgetData.StyleForecast],
+							SiblingValue = () => style.Value,
+						},
 					},
 					new UiBooleanInput
 					{
@@ -93,18 +113,23 @@ internal static class WeatherWidgetConfigView
 						Binding = Bind.To(animateIcon),
 						VisibleWhen = new UiVisibleWhen { ParameterName = "showIcon", Values = ["true"] },
 					},
-					new UiNumberInput
+					new UiWhen
 					{
-						Key = "forecastDays",
-						Label = AppStrings.Widgets.Weather.ForecastDays(),
-						Binding = Bind.To(forecastDays),
-						Min = 1,
-						Max = 7,
-						Step = 1,
-						// A closed range of seven, each of which reads as a phrase rather than a digit -
-						// picked from a list, the way the original form offered it, not typed into a box.
-						Options = UiValue.Of(ForecastDayOptions),
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showForecast", Values = ["true"] },
+						Key = "forecastDaysGate",
+						Condition = () => style.Value == WeatherWidgetData.StyleForecast,
+						Content = () => new UiNumberInput
+						{
+							Key = "forecastDays",
+							Label = AppStrings.Widgets.Weather.ForecastDays(),
+							Binding = Bind.To(forecastDays),
+							Min = 1,
+							Max = 7,
+							Step = 1,
+							// A closed range of seven, each of which reads as a phrase rather than a digit -
+							// picked from a list, the way the original form offered it, not typed into a box.
+							Options = UiValue.Of(ForecastDayOptions),
+							VisibleWhen = new UiVisibleWhen { ParameterName = "showForecast", Values = ["true"] },
+						},
 					},
 					new UiProse
 					{

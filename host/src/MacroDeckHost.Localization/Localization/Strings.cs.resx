@@ -20554,6 +20554,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>Předpověď</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>Max.: {high}° Min.: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>Kompaktní</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>Dny předpovědi</value>
   </data>

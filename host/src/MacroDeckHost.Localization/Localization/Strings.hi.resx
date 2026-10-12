@@ -20576,6 +20576,13 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>पूर्वानुमान</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>अधिकतम: {high}° न्यूनतम: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>संक्षिप्त</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>पूर्वानुमान के दिन</value>
   </data>

@@ -900,6 +900,132 @@ public class WeatherWidgetViewTests
 		});
 	}
 
+	[Test]
+	public void Compact_shows_location_temperature_icon_condition_and_todays_high_and_low_without_forecast_rows()
+	{
+		var host = RenderState(Sample(), Compact());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("weather.compact.top.location").Property("text")!.Value.GetRawText(),
+				Does.Contain("Niederkassel"));
+			Assert.That(host.ById("weather.compact.top.temp").Property("text")!.Value.GetRawText(),
+				Does.Contain("\"value\":23"));
+			Assert.That(host.FindById("weather.compact.bottom.iconRow.icon"), Is.Not.Null);
+			Assert.That(host.ById("weather.compact.bottom.condition").Property("text")!.Value.GetRawText(),
+				Does.Contain("Widgets.Weather.Condition.PartlyCloudy"));
+			Assert.That(HighLowTextOf(host), Does.Contain("Widgets.Weather.HighLow"));
+			Assert.That(HighLowTextOf(host), Does.Contain("\"high\":24"));
+			Assert.That(HighLowTextOf(host), Does.Contain("\"low\":12"));
+			Assert.That(host.ByType("ui.range-bar"), Is.Empty);
+			Assert.That(host.FindById("weather.current"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void Compact_rounds_todays_high_and_low_like_the_temperature()
+	{
+		var payload = Sample();
+		payload.Days[0] = Day("2026-07-20", "clear", -0.4, 4.6);
+
+		var host = RenderState(payload, Compact());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(HighLowTextOf(host), Does.Contain("\"high\":5"));
+			Assert.That(HighLowTextOf(host), Does.Contain("\"low\":0"));
+		});
+	}
+
+	[Test]
+	public void Compact_without_forecast_days_or_with_a_non_finite_day_shows_no_high_and_low()
+	{
+		var empty = Sample();
+		empty.Days = [];
+		var broken = Sample();
+		broken.Days[0] = Day("2026-07-20", "clear", double.NaN, 20);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(RenderState(empty, Compact()).FindById("weather.compact.bottom.highLow"), Is.Null);
+			Assert.That(RenderState(broken, Compact()).FindById("weather.compact.bottom.highLow"), Is.Null);
+			Assert.That(RenderState(empty, Compact()).FindById("weather.compact.top.temp"), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public void Compact_honours_each_display_toggle()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(RenderState(Sample(), Compact() with { ShowIcon = false })
+				.FindById("weather.compact.bottom.iconRow.icon"), Is.Null);
+			Assert.That(RenderState(Sample(), Compact() with { ShowCondition = false })
+				.FindById("weather.compact.bottom.condition"), Is.Null);
+			Assert.That(RenderState(Sample(), Compact() with { ShowLocation = false })
+				.FindById("weather.compact.top.location"), Is.Null);
+
+			var noTemperature = RenderState(Sample(), Compact() with { ShowTemperature = false });
+			Assert.That(noTemperature.FindById("weather.compact.top.temp"), Is.Null);
+			Assert.That(noTemperature.FindById("weather.compact.bottom.highLow"), Is.Null);
+			Assert.That(noTemperature.FindById("weather.compact.bottom.condition"), Is.Not.Null);
+		});
+	}
+
+	[Test]
+	public void Compact_ignores_the_forecast_option()
+	{
+		var host = RenderState(Sample(), Compact() with { ShowForecast = true, ForecastDays = 7 });
+
+		Assert.That(host.ByType("ui.range-bar"), Is.Empty);
+	}
+
+	[Test]
+	public void An_unavailable_station_shows_the_same_card_in_both_styles()
+	{
+		var payload = WeatherStatePayload.Unavailable("loc1", "Home");
+
+		var forecast = RenderState(payload, Config());
+		var compact = RenderState(payload, Compact());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(compact.FindById("weather.compact"), Is.Null);
+			Assert.That(compact.ById("weather.state.title").Property("text")!.Value.GetRawText(),
+				Is.EqualTo(forecast.ById("weather.state.title").Property("text")!.Value.GetRawText()));
+		});
+	}
+
+	[TestCase(null)]
+	[TestCase("forecast")]
+	[TestCase("grid")]
+	public void A_missing_or_unknown_style_keeps_the_forecast_card(string? style)
+	{
+		var data = style is null
+			? JsonSerializer.SerializeToElement(new { showIcon = true })
+			: JsonSerializer.SerializeToElement(new { style });
+
+		var config = WeatherWidgetData.Parse(data);
+		var host = RenderState(Sample(), config);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(config.Style, Is.EqualTo(WeatherWidgetData.StyleForecast));
+			Assert.That(host.FindById("weather.compact"), Is.Null);
+			Assert.That(host.ByType("ui.range-bar"), Has.Count.EqualTo(5));
+		});
+	}
+
+	[Test]
+	public void A_stored_compact_style_is_parsed()
+		=> Assert.That(WeatherWidgetData.Parse(JsonSerializer.SerializeToElement(new { style = "compact" })).Style,
+			Is.EqualTo(WeatherWidgetData.StyleCompact));
+
+	private static string HighLowTextOf(UiTestHost host)
+		=> host.ById("weather.compact.bottom.highLow").Property("text")!.Value.GetRawText();
+
+	private static WeatherWidgetData Compact() => new() { Style = WeatherWidgetData.StyleCompact };
+
 	private static WeatherStatePayload SampleAt(double temperature)
 	{
 		var payload = Sample();

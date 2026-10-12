@@ -9177,6 +9177,7 @@ export const AppStrings = {
 			Forecast: 'macrodeck.app:Widgets.Weather.Forecast',
 			ForecastDays: 'macrodeck.app:Widgets.Weather.ForecastDays',
 			ForecastDaysCount: 'macrodeck.app:Widgets.Weather.ForecastDaysCount',
+			HighLow: 'macrodeck.app:Widgets.Weather.HighLow',
 			LiveUpdateHint: 'macrodeck.app:Widgets.Weather.LiveUpdateHint',
 			Loading: 'macrodeck.app:Widgets.Weather.Loading',
 			LocationName: 'macrodeck.app:Widgets.Weather.LocationName',
@@ -9205,6 +9206,9 @@ export const AppStrings = {
 				SnowShowers: 'macrodeck.app:Widgets.Weather.Condition.SnowShowers',
 				Thunderstorm: 'macrodeck.app:Widgets.Weather.Condition.Thunderstorm',
 				Unknown: 'macrodeck.app:Widgets.Weather.Condition.Unknown',
+			},
+			Styles: {
+				Compact: 'macrodeck.app:Widgets.Weather.Styles.Compact',
 			},
 			Weekday: {
 				Fri: 'macrodeck.app:Widgets.Weather.Weekday.Fri',
@@ -16771,6 +16775,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.Weather.ForecastDays': 'Forecast days',
 	'macrodeck.app:Widgets.Weather.ForecastDaysCount.One': '{count} day',
 	'macrodeck.app:Widgets.Weather.ForecastDaysCount.Other': '{count} days',
+	'macrodeck.app:Widgets.Weather.HighLow': 'H: {high}° L: {low}°',
 	'macrodeck.app:Widgets.Weather.LiveUpdateHint': 'Current conditions and the forecast update live from the selected location. Pressing the widget runs the action triggers configured on the right.',
 	'macrodeck.app:Widgets.Weather.Loading': 'Loading forecast…',
 	'macrodeck.app:Widgets.Weather.LocationName': 'Location name',
@@ -16780,6 +16785,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.Weather.NoLocationsHint': 'No weather locations set up yet. Add one via the Weather integration on the Integrations page.',
 	'macrodeck.app:Widgets.Weather.PickLocationHint': 'Pick a location in the widget settings.',
 	'macrodeck.app:Widgets.Weather.SetUpIntegrationHint': 'Set up the Weather integration in Settings.',
+	'macrodeck.app:Widgets.Weather.Styles.Compact': 'Compact',
 	'macrodeck.app:Widgets.Weather.Temperature': 'Temperature',
 	'macrodeck.app:Widgets.Weather.TemperatureUnknown': '--°',
 	'macrodeck.app:Widgets.Weather.TemperatureValue': '{value}°',

@@ -20576,6 +20576,13 @@
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>التوقعات</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>العظمى: {high}° الصغرى: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>مضغوط</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>أيام التوقعات</value>
   </data>

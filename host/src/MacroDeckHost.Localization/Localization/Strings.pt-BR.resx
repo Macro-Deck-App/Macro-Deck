@@ -20576,6 +20576,13 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>Previsão</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>Máx.: {high}° Mín.: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>Compacto</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>Dias de previsão</value>
   </data>

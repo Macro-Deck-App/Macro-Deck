@@ -20576,6 +20576,13 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>予報</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>最高 {high}° 最低 {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>コンパクト</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>予報の日数</value>
   </data>

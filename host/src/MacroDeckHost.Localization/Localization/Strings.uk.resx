@@ -20576,6 +20576,13 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>Прогноз</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>Макс.: {high}° Мін.: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>Компактний</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>Дні прогнозу</value>
   </data>

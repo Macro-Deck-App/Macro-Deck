@@ -20576,6 +20576,13 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>Tahmin</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>Y: {high}° D: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>Kompakt</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>Tahmin günleri</value>
   </data>

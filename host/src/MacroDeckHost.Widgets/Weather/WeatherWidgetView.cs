@@ -28,27 +28,41 @@ internal static class WeatherWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Background = config.BackgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
-			Children =
-			[
-				new UiWhen
-				{
-					Key = "availableGate",
-					Condition = () => state.Value.IsAvailable,
-					Content = () => BuildCurrent(state, config, icons),
-				},
-				new UiWhen
-				{
-					Key = "forecastGate",
-					Condition = () => HasForecastRows(state.Value, config),
-					Content = () => BuildForecastStack(state, config, icons),
-				},
-				new UiWhen
-				{
-					Key = "unavailableGate",
-					Condition = () => !state.Value.IsAvailable,
-					Content = () => BuildUnavailable(state, config),
-				},
-			],
+			Children = config.IsCompact
+				? [
+					new UiWhen
+					{
+						Key = "availableGate",
+						Condition = () => state.Value.IsAvailable,
+						Content = () => BuildCompact(state, config, icons),
+					},
+					new UiWhen
+					{
+						Key = "unavailableGate",
+						Condition = () => !state.Value.IsAvailable,
+						Content = () => BuildUnavailable(state, config),
+					},
+				]
+				: [
+					new UiWhen
+					{
+						Key = "availableGate",
+						Condition = () => state.Value.IsAvailable,
+						Content = () => BuildCurrent(state, config, icons),
+					},
+					new UiWhen
+					{
+						Key = "forecastGate",
+						Condition = () => HasForecastRows(state.Value, config),
+						Content = () => BuildForecastStack(state, config, icons),
+					},
+					new UiWhen
+					{
+						Key = "unavailableGate",
+						Condition = () => !state.Value.IsAvailable,
+						Content = () => BuildUnavailable(state, config),
+					},
+				],
 		};
 	}
 
@@ -162,6 +176,141 @@ internal static class WeatherWidgetView
 			],
 		};
 	}
+
+	private static UiStack BuildCompact(
+		UiAsyncState<WeatherStatePayload> state,
+		WeatherWidgetData config,
+		WeatherIconResources icons)
+		=> new()
+		{
+			Key = "compact",
+			Fill = true,
+			Direction = UiComponentDirections.Vertical,
+			Justify = UiComponentJustify.SpaceBetween,
+			Align = UiComponentAlignments.Start,
+			Children =
+			[
+				new UiStack
+				{
+					Key = "top",
+					Direction = UiComponentDirections.Vertical,
+					Align = UiComponentAlignments.Start,
+					Children =
+					[
+						new UiWhen
+						{
+							Key = "locationGate",
+							Condition = () => HasLocationLine(state.Value, config),
+							Content = () => new UiTextRun
+							{
+								Key = "location",
+								Size = 0.09,
+								MinSize = 0.06,
+								Weight = UiComponentTextWeights.SemiBold,
+								Role = UiComponentTextRoles.Primary,
+								Text = UiText.From(() => state.Value.LocationName),
+							},
+						},
+						new UiWhen
+						{
+							Key = "tempGate",
+							Condition = () => config.ShowTemperature,
+							Content = () => new UiTextRun
+							{
+								Key = "temp",
+								Size = 0.3,
+								Weight = UiComponentTextWeights.Regular,
+								Role = UiComponentTextRoles.Primary,
+								Text = UiText.FromLocalized(() => TemperatureText(state.Value.Temperature)),
+							},
+						},
+					],
+				},
+				new UiStack
+				{
+					Key = "bottom",
+					Direction = UiComponentDirections.Vertical,
+					Align = UiComponentAlignments.Start,
+					Gap = 0.008,
+					Children =
+					[
+						new UiWhen
+						{
+							Key = "iconGate",
+							Condition = () => config.ShowIcon,
+							Content = () => new UiStack
+							{
+								Key = "iconRow",
+								Direction = UiComponentDirections.Horizontal,
+								Justify = UiComponentJustify.Start,
+								Children =
+								[
+									new UiImage
+									{
+										Key = "icon",
+										Size = 0.13,
+										Source = UiValue.Optional(()
+											=> ResolveIcon(config.AnimateIcon ? icons.Animated : icons.Still,
+												state.Value.Condition,
+												state.Value.IsDay)),
+									},
+								],
+							},
+						},
+						new UiWhen
+						{
+							Key = "conditionGate",
+							Condition = () => config.ShowCondition,
+							Content = () => new UiTextRun
+							{
+								Key = "condition",
+								Size = 0.075,
+								MinSize = 0.055,
+								Weight = UiComponentTextWeights.SemiBold,
+								Role = UiComponentTextRoles.Primary,
+								Text = UiText.FromLocalized(() => ConditionText(state.Value.Condition)),
+							},
+						},
+						new UiWhen
+						{
+							Key = "highLowGate",
+							Condition = () => config.ShowTemperature && TodayRange(state.Value) is not null,
+							Content = () => new UiTextRun
+							{
+								Key = "highLow",
+								Size = 0.07,
+								MinSize = 0.05,
+								Weight = UiComponentTextWeights.Medium,
+								Role = UiComponentTextRoles.Primary,
+								Text = UiText.Optional(() => HighLowText(state.Value)),
+							},
+						},
+					],
+				},
+			],
+		};
+
+	internal static (int High, int Low)? TodayRange(WeatherStatePayload payload)
+	{
+		if (payload.Days.Count == 0)
+		{
+			return null;
+		}
+
+		var today = payload.Days[0];
+
+		if (!double.IsFinite(today.Max) || !double.IsFinite(today.Min))
+		{
+			return null;
+		}
+
+		return ((int)Math.Round(today.Max), (int)Math.Round(today.Min));
+	}
+
+	private static UiText HighLowText(WeatherStatePayload payload)
+		=> TodayRange(payload) is var (high, low)
+			? AppStrings.Widgets.Weather.HighLow(high, low)
+			: UiText.None();
 
 	private static UiStack BuildForecastStack(
 		UiAsyncState<WeatherStatePayload> state,

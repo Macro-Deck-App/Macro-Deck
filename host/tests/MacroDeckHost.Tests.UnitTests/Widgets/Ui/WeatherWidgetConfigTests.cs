@@ -69,6 +69,8 @@ public class WeatherWidgetConfigTests
 		host.ById("border.style").Change("comet");
 		host.ById("border.color").Change("#00ff00");
 
+		var forecast = Compose(host);
+		host.ById("style").Change("compact");
 		var composed = Compose(host);
 		var provider = new WidgetDataSchemaProvider(new WidgetTypeRegistry(new RecordingMediator()));
 
@@ -76,10 +78,12 @@ public class WeatherWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
+			Assert.That(WidgetDataSchema.Validate(schema!, forecast), Is.Empty);
+			Assert.That(forecast.GetProperty("forecastDays").GetDouble(), Is.EqualTo(3));
 			Assert.That(WidgetDataSchema.Validate(schema!, composed), Is.Empty);
 			Assert.That(composed.GetProperty("instanceId").GetString(), Is.EqualTo("owm.hamburg"));
 			Assert.That(composed.GetProperty("showIcon").GetBoolean(), Is.False);
-			Assert.That(composed.GetProperty("forecastDays").GetDouble(), Is.EqualTo(3));
+			Assert.That(composed.GetProperty("style").GetString(), Is.EqualTo("compact"));
 			Assert.That(composed.GetProperty("border").GetProperty("style").GetString(), Is.EqualTo("comet"));
 		});
 	}
@@ -106,6 +110,61 @@ public class WeatherWidgetConfigTests
 		host.ById("showForecast").Change(false);
 
 		Assert.That(WidgetConfigTestSupport.IsVisible(host, "forecastDays"), Is.False);
+	}
+
+	[Test]
+	public void The_style_offers_forecast_and_compact_and_defaults_to_forecast()
+	{
+		var host = Render(_stored);
+		var options = host.ById("style").Property(UiConfigProperties.Options)!.Value;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(options.EnumerateArray().Select(o => o.GetProperty("value").GetString()),
+				Is.EqualTo(new[] { "forecast", "compact" }));
+			Assert.That(host.ById("style").Text(UiConfigProperties.Value), Is.EqualTo("forecast"));
+			Assert.That(Render(new { style = "compact" }).ById("style").Text(UiConfigProperties.Value),
+				Is.EqualTo("compact"));
+		});
+	}
+
+	[Test]
+	public void Compact_hides_the_forecast_toggle_and_the_forecast_days_while_the_forecast_is_on()
+	{
+		var host = Render(new { showForecast = true, style = "compact" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showForecast"), Is.False);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "forecastDays"), Is.False);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showIcon"), Is.True);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showTemperature"), Is.True);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showCondition"), Is.True);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showLocation"), Is.True);
+		});
+	}
+
+	[Test]
+	public void Switching_to_compact_and_back_keeps_the_forecast_settings()
+	{
+		var host = Render(_stored);
+
+		host.ById("forecastDays").Change(3);
+		host.ById("style").Change("compact");
+		host.ById("style").Change("forecast");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "showForecast"), Is.True);
+			Assert.That(WidgetConfigTestSupport.IsVisible(host, "forecastDays"), Is.True);
+			Assert.That(host.ById("forecastDays").Number(UiConfigProperties.Value), Is.EqualTo(3));
+		});
+
+		host.ById("showForecast").Change(false);
+		host.ById("style").Change("compact");
+		host.ById("style").Change("forecast");
+
+		Assert.That(host.ById("showForecast").Flag(UiConfigProperties.Value), Is.False);
 	}
 
 	[Test]
@@ -202,9 +261,14 @@ public class WeatherWidgetConfigTests
 			["showLocation"] = host.ById("showLocation").Flag(UiConfigProperties.Value),
 			["showForecast"] = host.ById("showForecast").Flag(UiConfigProperties.Value),
 			["animateIcon"] = host.ById("animateIcon").Flag(UiConfigProperties.Value),
-			["forecastDays"] = host.ById("forecastDays").Number(UiConfigProperties.Value),
+			["style"] = host.ById("style").Text(UiConfigProperties.Value),
 			["border"] = border,
 		};
+
+		if (host.FindById("forecastDays") is { } forecastDays)
+		{
+			data["forecastDays"] = forecastDays.Number(UiConfigProperties.Value);
+		}
 
 		return JsonSerializer.SerializeToElement(data);
 	}

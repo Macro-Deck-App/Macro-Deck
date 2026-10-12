@@ -180,6 +180,8 @@ public class WidgetDataSchemaTests
 	[TestCase(WidgetTypeIds.Slider, """{"orientation":"vertical"}""", true)]
 	[TestCase(WidgetTypeIds.Weather, """{"forecastDays":"five"}""", false)]
 	[TestCase(WidgetTypeIds.Weather, """{"forecastDays":5}""", true)]
+	[TestCase(WidgetTypeIds.Weather, """{"style":"compact"}""", true)]
+	[TestCase(WidgetTypeIds.Weather, """{"style":"grid"}""", false)]
 	public void Wrong_types_and_bad_enums_are_rejected_per_type(string type, string json, bool expectedValid)
 	{
 		var problems = Validate(type, json);

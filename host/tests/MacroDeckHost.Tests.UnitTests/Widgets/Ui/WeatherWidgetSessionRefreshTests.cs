@@ -55,6 +55,23 @@ public class WeatherWidgetSessionRefreshTests
 			"the card never picked up the station that appeared after it opened");
 	}
 
+	[Test]
+	public async Task ACardSavedWithFirstAvailableShowsTheFirstStation()
+	{
+		var registry = new GrowingRegistry();
+		registry.Add("station-1", "Sunnyside");
+		var provider = new WeatherWidgetUiProvider(registry,
+			new NullResourceStore(),
+			new WeatherStateNotifier(),
+			new PassThroughSampleText(),
+			new LoggerConfiguration().CreateLogger());
+
+		await using var session = await provider.CreateSessionAsync(WidgetSurface("""{"instanceId":""}"""),
+			CancellationToken.None);
+
+		Assert.That(TextOf(session!.BuildTree()), Does.Contain("Sunnyside"));
+	}
+
 	private static async Task WaitUntil(Func<bool> condition)
 	{
 		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
@@ -67,7 +84,7 @@ public class WeatherWidgetSessionRefreshTests
 	private static string TextOf(UiTree tree)
 		=> JsonSerializer.Serialize(tree);
 
-	private static UiSessionRequest WidgetSurface()
+	private static UiSessionRequest WidgetSurface(string data = "{}")
 		=> new()
 		{
 			UiModelVersion = 1,
@@ -79,7 +96,7 @@ public class WeatherWidgetSessionRefreshTests
 				{
 					// No instance stated: the widget takes whichever station the host has, which on a
 					// fresh install is none.
-					[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse("{}").RootElement
+					[UiWidgetSurfaceAttributes.Data] = JsonDocument.Parse(data).RootElement
 				}
 			}
 		};
