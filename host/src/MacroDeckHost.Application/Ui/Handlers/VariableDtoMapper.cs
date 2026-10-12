@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
@@ -157,10 +158,11 @@ internal static class VariableDtoMapper
 	/// The refusals a write can produce, with a message a person can read. Every other error keeps the
 	/// service's plain diagnostic text, which is what <see cref="ToError"/> has always sent.
 	/// </summary>
-	public static Transport.Messages.TransportError ToWriteError(
+	public static async Task<Transport.Messages.TransportError> ToWriteError(
 		VariableError error,
 		string? message,
-		string? ownerIntegrationId)
+		string? ownerIntegrationId,
+		VariableOwnerNames ownerNames)
 		=> error switch
 		{
 			VariableError.NotWritable => new Transport.Messages.TransportError
@@ -168,23 +170,24 @@ internal static class VariableDtoMapper
 			VariableError.OwnerUnavailable => new Transport.Messages.TransportError
 			{
 				Code = error.ToString(),
-				Message = AppStrings.Errors.Variables.OwnerUnavailable(integration: ownerIntegrationId ?? string.Empty)
+				Message = AppStrings.Errors.Variables.OwnerUnavailable(integration: await ownerNames.Resolve(ownerIntegrationId))
 			},
 			VariableError.WriteFailed => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.WriteFailed() },
 			_ => ToError(error, message)
 		};
 
-	public static Transport.Messages.TransportError ToValueWriteError(
+	public static async Task<Transport.Messages.TransportError> ToValueWriteError(
 		VariableError error,
 		string? message,
-		string? ownerIntegrationId)
+		string? ownerIntegrationId,
+		VariableOwnerNames ownerNames)
 		=> error switch
 		{
 			VariableError.InvalidValue => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.ValueNotAccepted() },
 			VariableError.NotFound => new Transport.Messages.TransportError
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.NotFound() },
-			_ => ToWriteError(error, message, ownerIntegrationId)
+			_ => await ToWriteError(error, message, ownerIntegrationId, ownerNames)
 		};
 }
