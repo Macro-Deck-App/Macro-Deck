@@ -25,6 +25,7 @@ using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.ScreenSavers;
+using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Widgets;
 
 namespace MacroDeckHost.Tests.PluginContractTests;
@@ -66,6 +67,7 @@ internal sealed class CallbackContractTests
 	private RemoteIntegrationContext _context = null!;
 	private RemoteDeviceProviderContext _devices = null!;
 	private VariableRefreshSignal _refreshSignal = null!;
+	private WeatherBroadcastTrigger _weatherTrigger = null!;
 	private RecordingWidgetDataReader _widgetData = null!;
 	private FixedVariableHistory _history = null!;
 
@@ -86,6 +88,7 @@ internal sealed class CallbackContractTests
 		_uiSessions = new RecordingUiSessionSink();
 		DeviceRegistry = new RecordingDeviceRegistry();
 		_refreshSignal = new VariableRefreshSignal();
+		_weatherTrigger = new WeatherBroadcastTrigger();
 		_widgetData = new RecordingWidgetDataReader();
 		_history = new FixedVariableHistory();
 
@@ -118,6 +121,7 @@ internal sealed class CallbackContractTests
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			variableRefresh: _refreshSignal,
+			weatherTrigger: _weatherTrigger,
 			widgetData: _widgetData,
 			variableHistory: new PluginVariableHistoryWindows(
 				new OwnedVariableHistory(_history, new VariableRegistry()),
@@ -168,12 +172,15 @@ internal sealed class CallbackContractTests
 				Serilog.Core.Logger.None),
 			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()),
 			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None),
-			new RemoteNotificationService(_hostInvoker, _state, new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()));
+			new RemoteNotificationService(_hostInvoker, _state, new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()),
+			weatherProvider: new RemoteWeatherProviderApi(_hostInvoker));
 	}
 
 	[TearDown]
 	public async Task TearDown()
 	{
+		_weatherTrigger.Dispose();
+
 		if (_run is not null)
 		{
 			await _link.DisposeAsync();
@@ -193,6 +200,14 @@ internal sealed class CallbackContractTests
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.True);
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested("com.example.other"), Is.False);
 		});
+	}
+
+	[Test]
+	public async Task A_weather_notice_from_a_plugin_without_the_weather_capability_is_a_no_op_over_the_wire()
+	{
+		Assert.DoesNotThrowAsync(() => _context.WeatherProvider.NotifySnapshotsChangedAsync());
+
+		Assert.That(await _weatherTrigger.WaitAsync(TimeSpan.Zero, CancellationToken.None), Is.False);
 	}
 
 	[Test]

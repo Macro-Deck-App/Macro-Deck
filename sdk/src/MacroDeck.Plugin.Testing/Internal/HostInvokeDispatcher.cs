@@ -4,8 +4,10 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Callbacks.IconPacks;
 using MacroDeck.Plugin.Protocol.Callbacks.Ui;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeck.Plugin.Testing.Fakes;
 using MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.FolderViewProvider;
@@ -56,7 +58,8 @@ internal static class HostInvokeDispatcher
 		string? pluginId = null,
 		UiResourceUploads? uiResourceUploads = null,
 		UiPreviewSink? uiPreviews = null,
-		TestHostColors? colors = null)
+		TestHostColors? colors = null,
+		IReadOnlyList<CapabilityNegotiationResult>? accepted = null)
 	{
 		ArgumentNullException.ThrowIfNull(context);
 		ArgumentNullException.ThrowIfNull(interactions);
@@ -106,6 +109,7 @@ internal static class HostInvokeDispatcher
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
 				HostApis.Colors when colors is not null && pluginId is not null => colors.Dispatch(pluginId, payload),
 				HostApis.Batteries => await BatteriesAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.Weather => await WeatherAsync(context, accepted, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
@@ -133,6 +137,22 @@ internal static class HostInvokeDispatcher
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InternalError,
 				$"The test host's fake '{payload.Api}' threw: {exception.Message}");
 		}
+	}
+
+	private static async Task<HostInvokeOutcome> WeatherAsync(
+		FakeIntegrationContext context,
+		IReadOnlyList<CapabilityNegotiationResult>? accepted,
+		CancellationToken cancellationToken)
+	{
+		if (accepted is not null &&
+			!accepted.Any(result => result.Kind == CapabilityKinds.Weather && result.Accepted))
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnavailable,
+				"Reporting changed weather snapshots requires the weather capability.");
+		}
+
+		await context.WeatherProvider.NotifySnapshotsChangedAsync(cancellationToken).ConfigureAwait(false);
+		return HostInvokeOutcome.Ok((JsonElement?)null);
 	}
 
 	private static async Task<HostInvokeOutcome> BatteriesAsync(
