@@ -37,9 +37,11 @@ public static class WidgetTypeIds
 
 	public const string Gauges = "Gauges";
 
+	public const string Battery = "Battery";
+
 	/// <summary>The built-in ids, in the order they were introduced.</summary>
 	public static readonly IReadOnlyList<string> BuiltIn =
-		[ActionButton, MusicPlayer, Slider, Weather, HistoryGraph, Clock, Countdown, Stopwatch, Gauges];
+		[ActionButton, MusicPlayer, Slider, Weather, HistoryGraph, Clock, Countdown, Stopwatch, Gauges, Battery];
 
 	/// <summary>
 	/// The id a widget stored before types became strings resolves to. The integers are the values the

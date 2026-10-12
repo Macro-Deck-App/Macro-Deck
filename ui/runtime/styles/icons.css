@@ -309,6 +309,42 @@
   mask-image: url('./icons/device-desktop.svg');
   -webkit-mask-image: url('./icons/device-desktop.svg');
 }
+.icon-device-laptop {
+  mask-image: url('./icons/device-laptop.svg');
+  -webkit-mask-image: url('./icons/device-laptop.svg');
+}
+.icon-device-watch {
+  mask-image: url('./icons/device-watch.svg');
+  -webkit-mask-image: url('./icons/device-watch.svg');
+}
+.icon-device-headphones {
+  mask-image: url('./icons/device-headphones.svg');
+  -webkit-mask-image: url('./icons/device-headphones.svg');
+}
+.icon-device-gamepad {
+  mask-image: url('./icons/device-gamepad.svg');
+  -webkit-mask-image: url('./icons/device-gamepad.svg');
+}
+.icon-device-mouse {
+  mask-image: url('./icons/device-mouse.svg');
+  -webkit-mask-image: url('./icons/device-mouse.svg');
+}
+.icon-device-keyboard {
+  mask-image: url('./icons/device-keyboard.svg');
+  -webkit-mask-image: url('./icons/device-keyboard.svg');
+}
+.icon-device-speaker {
+  mask-image: url('./icons/device-speaker.svg');
+  -webkit-mask-image: url('./icons/device-speaker.svg');
+}
+.icon-battery {
+  mask-image: url('./icons/battery.svg');
+  -webkit-mask-image: url('./icons/battery.svg');
+}
+.icon-battery-charging {
+  mask-image: url('./icons/battery-charging.svg');
+  -webkit-mask-image: url('./icons/battery-charging.svg');
+}
 .icon-external-link {
   mask-image: url('./icons/external-link.svg');
   -webkit-mask-image: url('./icons/external-link.svg');

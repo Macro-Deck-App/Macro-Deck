@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -242,6 +242,13 @@ What did **not** need a major:
   [Pressing the widget](/features/weather/#pressing-the-widget).
 - Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
   optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
+- [Batteries](/features/batteries/) added a capability kind, `battery-provider`, at capability version
+  `1`, a host API, `batteries`, with a `host.state` push sent to every plugin, and the
+  `MacroDeck.Sdk.Batteries` types, all within major `3`. `IIntegrationContext.Batteries` is a default
+  interface member returning `UnsupportedBatteryApi.Instance`, so an existing implementation keeps
+  compiling. An older host answers a publish with `CAPABILITY_UNSUPPORTED`, which the SDK turns into a
+  no-op, and an older plugin ignores the `batteries` state. Kinds, charge states and health values are open
+  strings: a reader maps one it does not know to `other` or unknown.
   An older host drops a variable definition that declares `Color` and ignores `allowAlpha`. A colour
   parameter without `allowAlpha` still receives opaque `#rrggbb`, also when the user bound it to a
   variable. A new optional `hostApiFeatures` list on the session request lets a plugin declare

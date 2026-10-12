@@ -161,7 +161,8 @@ public sealed class ExecuteActionButtonTriggerRequestMessageHandler
 			or WidgetTypeIds.Weather
 			or WidgetTypeIds.HistoryGraph
 			or WidgetTypeIds.Clock
-			or WidgetTypeIds.Gauges))
+			or WidgetTypeIds.Gauges
+			or WidgetTypeIds.Battery))
 		{
 			return new ExecuteActionButtonTriggerResponse
 			{

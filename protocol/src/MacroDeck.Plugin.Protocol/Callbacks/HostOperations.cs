@@ -372,6 +372,33 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [Resolve, Watches];
 	}
 
+	/// <summary>
+	/// The <c>batteries</c> host api. The owner of every device is the calling plugin, never a payload
+	/// field. Every operation is all or nothing: one invalid device refuses the whole call with
+	/// <c>INVALID_PAYLOAD</c> and nothing is applied.
+	/// </summary>
+	public static class Batteries
+	{
+		/// <summary>Adds or replaces up to <c>ProtocolLimits.MaxBatteryDevicesPerProvider</c> devices.</summary>
+		public const string Publish = "publish";
+
+		/// <summary>Removes devices for good; readers see their ids in <c>RemovedIds</c>.</summary>
+		public const string Remove = "remove";
+
+		/// <summary>Replaces the plugin's whole set of devices. Devices left out count as removed.</summary>
+		public const string Sync = "sync";
+
+		/// <summary>
+		/// Withdraws every device this plugin session published, without arguments. Readers see them
+		/// disappear but not in <c>RemovedIds</c>, so values derived from them, such as battery variables, are
+		/// kept as not connected instead of being deleted. A provider sends it before it is initialized again
+		/// within the same session.
+		/// </summary>
+		public const string Withdraw = "withdraw";
+
+		public static readonly IReadOnlyList<string> All = [Publish, Remove, Sync, Withdraw];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -402,6 +429,7 @@ public static class HostOperations
 			[HostApis.IconPacks] = IconPacks.All,
 			[HostApis.VideoStreams] = VideoStreams.All,
 			[HostApis.Colors] = Colors.All,
+			[HostApis.Batteries] = Batteries.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -39,6 +40,7 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string AdbDefaultDeviceSerialKey = "adb.defaultDeviceSerial";
 	public const string AdbStopServerOnExitKey = "adb.stopServerOnExit";
 	public const string AdbAllowPluginsKey = "adb.allowPlugins";
+	public const string AdbDeviceIdKeyKey = "adb.deviceIdKey";
 
 	public const string NativeUsbEnabledKey = "usb.nativeEnabled";
 	public const string NativeUsbDevicesKey = "usb.nativeDevices";
@@ -142,6 +144,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 
 	private const int MaxAdbDeviceSerialLength = 128;
 
+	private const int AdbDeviceIdKeyLength = 32;
+
 	private static readonly string[] _validThemeModes = ["light", "dark", "system"];
 
 	private readonly IAppPreferenceRepository _repository;
@@ -212,6 +216,33 @@ public partial class AppPreferenceService : IAppPreferenceService
 		await _repository.SetValue(InstallationIdKey, created.ToString("D"));
 
 		return created;
+	}
+
+	public async Task<byte[]> GetAdbDeviceIdKey()
+	{
+		var stored = (await _repository.GetByKey(AdbDeviceIdKeyKey))?.Value;
+		if (TryDecodeDeviceIdKey(stored) is { } existing)
+		{
+			return existing;
+		}
+
+		var created = RandomNumberGenerator.GetBytes(AdbDeviceIdKeyLength);
+		await _repository.SetValue(AdbDeviceIdKeyKey, Convert.ToBase64String(created));
+
+		return created;
+	}
+
+	private static byte[]? TryDecodeDeviceIdKey(string? stored)
+	{
+		if (string.IsNullOrEmpty(stored))
+		{
+			return null;
+		}
+
+		var buffer = new byte[AdbDeviceIdKeyLength];
+		return Convert.TryFromBase64String(stored, buffer, out var written) && written == AdbDeviceIdKeyLength
+			? buffer
+			: null;
 	}
 
 	public async Task<LoggingSettings> GetLogging()

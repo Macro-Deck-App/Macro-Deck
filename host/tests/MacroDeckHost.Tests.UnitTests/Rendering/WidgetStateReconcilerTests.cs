@@ -565,7 +565,8 @@ public class WidgetStateReconcilerTests
 			int? decimalPlaces,
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
-			VariableUpdateMode updateMode = VariableUpdateMode.Polled) => throw new NotSupportedException();
+			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+			bool publishedByHost = false) => throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
 			string resourceId,

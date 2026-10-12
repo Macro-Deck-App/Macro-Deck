@@ -3,7 +3,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 namespace MacroDeck.Plugin.Analyzers.Tests.UnitTests;
 
 /// <summary>
-/// The analyzer hardcodes the ten capability kinds rather than sharing them with
+/// The analyzer hardcodes the capability kinds rather than sharing them with
 /// MacroDeck.Plugin.Protocol (an analyzer cannot execute the target framework's code to read a static
 /// field's value even if it referenced the assembly - see CapabilityKindVocabulary's remarks). This drift
 /// test is what keeps that hardcoded copy honest.

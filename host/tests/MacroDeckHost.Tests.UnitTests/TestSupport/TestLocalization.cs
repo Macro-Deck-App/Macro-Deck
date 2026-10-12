@@ -76,6 +76,8 @@ internal sealed class FakeLocalizationPreferences : IAppPreferenceService
 
 	public Task<Guid> GetInstallationId() => throw new NotSupportedException();
 
+	public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+
 	public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
 
 	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel) => throw new NotSupportedException();

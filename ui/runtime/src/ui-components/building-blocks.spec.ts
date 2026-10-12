@@ -137,6 +137,14 @@ describe('the building-block components', () => {
       expect(glyph.style.color).toBe('var(--color-text-secondary)');
     });
 
+    for (const name of ['device-laptop', 'device-gamepad', 'battery', 'battery-charging']) {
+      it(`draws "${name}" from the device and battery glyphs ui.icon version 2 added`, () => {
+        mount(node('i', 'ui.icon', { icon: name }));
+
+        expect(find('.widget-icon-glyph')!.className).toBe(`widget-icon-glyph icon icon-${name}`);
+      });
+    }
+
     for (const name of ['xs', 'not-an-icon', 'wifi-solid-full']) {
       it(`draws nothing for "${name}", never the filled square a bare icon class paints`, () => {
         mount(node('i', 'ui.icon', { icon: name }));

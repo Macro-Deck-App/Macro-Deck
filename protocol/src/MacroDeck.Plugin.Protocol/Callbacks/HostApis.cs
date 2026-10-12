@@ -83,11 +83,18 @@ public static class HostApis
 	/// </summary>
 	public const string Colors = "colors";
 
+	/// <summary>
+	/// The <c>batteries</c> host api: a battery provider publishes, removes and resynchronizes its devices,
+	/// and every plugin receives the devices of all providers as a revisioned <c>host.state</c> push. A
+	/// host that predates it answers <c>CAPABILITY_UNSUPPORTED</c> and pushes nothing.
+	/// </summary>
+	public const string Batteries = "batteries";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
-		IconPacks, VideoStreams, Colors,
+		IconPacks, VideoStreams, Colors, Batteries,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

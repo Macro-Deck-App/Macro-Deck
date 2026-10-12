@@ -14,6 +14,7 @@ public class HostApiStabilityTests
 	[
 		"action-interactions",
 		"adb",
+		"batteries",
 		"colors",
 		"config",
 		"deck",
@@ -67,6 +68,7 @@ public class HostApiStabilityTests
 			[HostApis.VideoStreams] =
 				["providers-changed", "streams-changed", "session-update", "session-close"],
 			[HostApis.Colors] = ["resolve", "watches"],
+			[HostApis.Batteries] = ["publish", "remove", "sync", "withdraw"],
 		};
 
 	[Test]

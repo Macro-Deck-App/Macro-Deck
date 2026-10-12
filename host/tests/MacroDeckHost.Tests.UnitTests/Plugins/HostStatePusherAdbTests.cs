@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Adb;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -120,6 +121,39 @@ public class HostStatePusherAdbTests
 		{
 			Assert.That(_access.Refreshed, Is.EqualTo(new[] { settings }));
 			Assert.That(AdbPushes()[^1].Access, Is.EqualTo(AdbAccessStates.NotAllowed));
+		});
+	}
+
+	[Test]
+	public async Task The_adb_state_carries_the_stable_id_and_never_the_hardware_serial()
+	{
+		const string hardwareSerial = "R5CT20ABCDE";
+		using var harness = new AdbManagerHarness();
+		harness.Runner.When(argv => argv.Contains("getprop ro.serialno"),
+			new AdbProcessResult(true, 0, $"{hardwareSerial}\n", string.Empty, false));
+		harness.Runner.When(argv => argv is ["devices", "-l"],
+			new AdbProcessResult(true,
+				0,
+				"List of devices attached\n192.168.1.20:5555 device product:a54x model:SM_A546B transport_id:1\n",
+				string.Empty,
+				false));
+		await harness.Manager.RefreshNowAsync(CancellationToken.None);
+		using var pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
+			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			harness.Manager, _access, Serilog.Core.Logger.None);
+
+		await pusher.PushAllAsync(PluginId);
+
+		var json = _connection.Sent.ToList()
+			.Where(envelope => envelope.Type == MessageTypes.HostState)
+			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
+			.Single(payload => payload.Api == HostApis.Adb)
+			.Data!.Value.GetRawText();
+		var device = AdbPushes().Single().Devices.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.StableId, Is.EqualTo(harness.Manager.Devices.Single().StableId).And.Not.Null);
+			Assert.That(json, Does.Not.Contain(hardwareSerial));
 		});
 	}
 

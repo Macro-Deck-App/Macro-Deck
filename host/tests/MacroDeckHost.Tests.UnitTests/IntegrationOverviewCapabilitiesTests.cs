@@ -311,6 +311,7 @@ public class IntegrationOverviewCapabilitiesTests
 					(CapabilityKinds.WidgetTypeProvider, "Widgets"),
 					(CapabilityKinds.ScreenSaverProvider, "Screensavers"),
 					(CapabilityKinds.VideoStreamProvider, "Video streams"),
+					(CapabilityKinds.BatteryProvider, "Batteries"),
 					(CapabilityKinds.Migration, "Migration")
 				}));
 

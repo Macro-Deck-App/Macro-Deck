@@ -268,4 +268,15 @@ public class AdbCommandBuilderTests
 				Does.Contain("pidof 'app.macrodeck.companion'").And.Contain("echo unknown").And.Contain("echo stopped"));
 		});
 	}
+
+	[Test]
+	public void The_serial_number_query_is_a_fixed_getprop_command()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(AdbCommandBuilder.Build(new AdbSerialNumberCommand(Serial)).Data,
+				Is.EqualTo(new[] { "-s", Serial, "shell", "getprop ro.serialno" }));
+			Assert.That(AdbCommandBuilder.Build(new AdbSerialNumberCommand("bad serial;")).Success, Is.False);
+		});
+	}
 }

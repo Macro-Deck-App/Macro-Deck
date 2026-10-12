@@ -626,6 +626,8 @@ public static class UiIcons
 	public const string ArrowLeft = "arrow-left";
 	public const string ArrowRight = "arrow-right";
 	public const string ArrowUp = "arrow-up";
+	public const string Battery = "battery";
+	public const string BatteryCharging = "battery-charging";
 	public const string Bell = "bell";
 	public const string BracesX = "braces-x";
 	public const string Bug = "bug";
@@ -639,8 +641,15 @@ public static class UiIcons
 	public const string Crosshair = "crosshair";
 	public const string DeviceDesktop = "device-desktop";
 	public const string DeviceFloppy = "device-floppy";
+	public const string DeviceGamepad = "device-gamepad";
+	public const string DeviceHeadphones = "device-headphones";
+	public const string DeviceKeyboard = "device-keyboard";
+	public const string DeviceLaptop = "device-laptop";
+	public const string DeviceMouse = "device-mouse";
 	public const string DevicePhone = "device-phone";
+	public const string DeviceSpeaker = "device-speaker";
 	public const string DeviceTablet = "device-tablet";
+	public const string DeviceWatch = "device-watch";
 	public const string Disc = "disc";
 	public const string Discord = "discord";
 	public const string DotsVertical = "dots-vertical";
@@ -703,10 +712,21 @@ public static class UiIcons
 		Unlock, Upload, User, WeatherType, Wifi, X, Zap,
 	];
 
+	/// <summary>The names <c>ui.icon</c> component version 2 adds: device and battery glyphs. A reader that
+	/// carries only version 1 draws the producer's fallback instead.</summary>
+	public static readonly IReadOnlyList<string> Version2 =
+	[
+		DeviceLaptop, DeviceWatch, DeviceHeadphones, DeviceGamepad, DeviceMouse, DeviceKeyboard, DeviceSpeaker, Battery,
+		BatteryCharging,
+	];
+
 	/// <summary>Every name any version of <c>ui.icon</c> draws.</summary>
-	public static readonly IReadOnlyList<string> WellKnown = Version1;
+	public static readonly IReadOnlyList<string> WellKnown = [.. Version1, .. Version2];
 
 	/// <summary>The <c>ui.icon</c> component version that first draws <paramref name="name" />, or
 	/// <see langword="null" /> when no version does.</summary>
-	public static int? VersionOf(string name) => Version1.Contains(name, StringComparer.Ordinal) ? 1 : null;
+	public static int? VersionOf(string name) =>
+		Version1.Contains(name, StringComparer.Ordinal) ? 1
+		: Version2.Contains(name, StringComparer.Ordinal) ? 2
+		: null;
 }

@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Usb;
@@ -33,6 +34,10 @@ public static class AdbServiceCollectionExtensions
 		services.AddSingleton<IAdbManager>(sp => sp.GetRequiredService<AdbManager>());
 		services.AddSingleton<IAdbDeviceOperations>(sp => sp.GetRequiredService<AdbManager>());
 		services.AddSingleton<IAdbGateway>(sp => new AdbGateway(sp.GetRequiredService<IAdbManager>(),
+			sp.GetRequiredService<ILogger>()));
+		services.AddSingleton(sp => new InProcessAndroidDeviceManager(sp.GetRequiredService<IAdbManager>(),
+			sp.GetRequiredService<IAdbDeviceOperations>(),
+			sp.GetRequiredService<IHostLockState>(),
 			sp.GetRequiredService<ILogger>()));
 		// AdbPlatformToolsInstaller's constructor is internal for the same reason as the two above; the
 		// bare (unnamed) HttpClient is enough since the download timeout is enforced in code, not by the

@@ -105,6 +105,7 @@ internal static class HostInvokeDispatcher
 					.ConfigureAwait(false),
 				HostApis.Messaging when messaging is not null && pluginId is not null => messaging.Dispatch(pluginId, payload),
 				HostApis.Colors when colors is not null && pluginId is not null => colors.Dispatch(pluginId, payload),
+				HostApis.Batteries => await BatteriesAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
@@ -131,6 +132,55 @@ internal static class HostInvokeDispatcher
 		{
 			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InternalError,
 				$"The test host's fake '{payload.Api}' threw: {exception.Message}");
+		}
+	}
+
+	private static async Task<HostInvokeOutcome> BatteriesAsync(
+		FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			switch (payload.Operation)
+			{
+				case HostOperations.Batteries.Publish:
+				{
+					var arguments = Require<BatteriesPublishArguments>(payload);
+					await context.BatteryProvider
+						.PublishAsync([.. arguments.Devices.Select(BatteryWire.ToDevice)], cancellationToken)
+						.ConfigureAwait(false);
+					break;
+				}
+
+				case HostOperations.Batteries.Remove:
+				{
+					var arguments = Require<BatteriesRemoveArguments>(payload);
+					foreach (var deviceId in arguments.DeviceIds)
+					{
+						await context.BatteryProvider.RemoveAsync(deviceId, cancellationToken).ConfigureAwait(false);
+					}
+
+					break;
+				}
+
+				case HostOperations.Batteries.Withdraw:
+					context.BatteryProvider.Withdraw();
+					break;
+
+				default:
+				{
+					var arguments = Require<BatteriesSyncArguments>(payload);
+					context.BatteryProvider.Replace([.. arguments.Devices.Select(BatteryWire.ToDevice)]);
+					break;
+				}
+			}
+
+			return HostInvokeOutcome.Ok((JsonElement?)null);
+		}
+		catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+		{
+			return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, exception.Message);
 		}
 	}
 

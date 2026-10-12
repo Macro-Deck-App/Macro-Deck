@@ -11,6 +11,8 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Testing.Fakes;
 using MacroDeck.Plugin.Testing.Internal;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.Variables;
 using Microsoft.Extensions.DependencyInjection;
@@ -197,6 +199,18 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			services.AddSingleton<TimeProvider>(clock);
 			services.AddSingleton<IIntegrationContext>(context);
 			services.AddSingleton<IMessageChannel>(context.Messages);
+			services.AddSingleton<IBatteryApi>(context.Batteries);
+			services.AddSingleton<IBatteryProviderContext>(context.BatteryProvider);
+
+			// A plugin that registers its own manager keeps it, as on a real host. Otherwise the context's fake
+			// serves both, starting Unsupported as the harness always reported until a test grants access.
+			if (services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(IAndroidDeviceManager)) is not
+				{ } registered || registered.ImplementationType?.Assembly == typeof(PluginHostBuilder).Assembly)
+			{
+				context.AndroidDevices.SetAccess(AndroidDeviceAccess.Unsupported);
+				services.AddSingleton<IAndroidDeviceManager>(context.AndroidDevices);
+			}
+
 			services.AddSingleton<Serilog.ILogger>(collectingLogger);
 		});
 
@@ -214,6 +228,7 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			throw;
 		}
 
+		context.UseRegisteredAndroidDevices(application.Services.GetRequiredService<IAndroidDeviceManager>());
 		return new PluginTestHarness(application, context, clock, logs, collectingLogger, ownedManifest);
 	}
 
@@ -274,6 +289,11 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			if (integration is IVariableProvider { SupportsCatalog: true, SupportsPush: true } catalog)
 			{
 				await catalog.OnAttachedAsync(Context.VariableValues).ConfigureAwait(false);
+			}
+
+			if (integration is IBatteryProvider batteryProvider)
+			{
+				await batteryProvider.InitializeAsync(Context.BatteryProvider).ConfigureAwait(false);
 			}
 		}
 	}

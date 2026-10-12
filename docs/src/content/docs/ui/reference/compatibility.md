@@ -58,6 +58,7 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `ofParent` on a length (`UiLength.OfParent`) | A member of an existing value | Ignores it and resolves `basis` against the widget, which is why `basis` is always sent. Pass the fallback you want as the second argument. See [Sizing](/ui/concepts/sizing/#relative-to-the-containing-box). |
 | `minCellSize` on `ui.grid` | A property | Ignores it and draws `columns` by `rows`, hiding the children that do not fit those rows. Set both to the arrangement an older reader should draw. See [Grid](/ui/components/grid/#choosing-the-columns). |
 | `#rrggbbaa` wherever a `#rrggbb` colour is accepted | A value | Rejects it like any other unknown spelling: the property counts as omitted and the theme colour is drawn. |
+| `device-laptop`, `device-watch`, `device-headphones`, `device-gamepad`, `device-mouse`, `device-keyboard`, `device-speaker`, `battery` and `battery-charging` as the `icon` of `ui.icon`, component version 2 | Values, gated by a component version | Draws the node's `fallback`, because a producer using one of these names asks for version 2. Without that ask a version 1 reader draws nothing for the name. See [Icon](/ui/components/icon/#names-and-versions). |
 
 See [ADR 0064](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0064-components-are-a-registry-over-two-namespaces.md)
 for why the vocabulary is organized as a registry over the `ui.*`/`macrodeck.*` namespaces rather than one

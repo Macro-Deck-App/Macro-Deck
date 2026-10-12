@@ -1,5 +1,7 @@
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Android;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -33,7 +35,9 @@ internal sealed class RemoteIntegrationContext(
 	RemoteMessageChannel messages,
 	RemoteUiResourceRegistry uiResources,
 	RemoteColorApi colors,
-	RemoteNotificationService notificationService) : IIntegrationContext
+	RemoteNotificationService notificationService,
+	RemoteBatteryApi? batteries = null,
+	IAndroidDeviceManager? androidDevices = null) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -58,4 +62,8 @@ internal sealed class RemoteIntegrationContext(
 	public IColorApi Colors { get; } = colors.Lifecycle;
 
 	public INotificationService NotificationService { get; } = notificationService;
+
+	public IBatteryApi Batteries { get; } = batteries?.Lifecycle ?? UnsupportedBatteryApi.Instance;
+
+	public IAndroidDeviceManager AndroidDevices { get; } = androidDevices ?? UnsupportedAndroidDeviceManager.Instance;
 }

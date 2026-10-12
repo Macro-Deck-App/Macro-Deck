@@ -514,6 +514,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	[TestCase(WidgetTypeIds.HistoryGraph)]
 	[TestCase(WidgetTypeIds.Clock)]
 	[TestCase(WidgetTypeIds.Gauges)]
+	[TestCase(WidgetTypeIds.Battery)]
 	public async Task A_non_action_button_tile_still_runs_its_flow_through_this_handler(string widgetType)
 	{
 		_folders = new FakeFolderCache(ActionButtonWidget(widgetType));
@@ -986,7 +987,8 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			int? decimalPlaces,
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
-			VariableUpdateMode updateMode = VariableUpdateMode.Polled) => throw new NotSupportedException();
+			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+			bool publishedByHost = false) => throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
 			string resourceId,

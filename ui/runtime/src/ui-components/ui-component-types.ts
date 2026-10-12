@@ -52,6 +52,10 @@ export const UI_ICON_VERSIONS: readonly (readonly string[])[] = [
     'power', 'puzzle', 'refresh', 'scissors', 'search', 'settings', 'sidebar', 'sliders', 'star', 'store',
     'sun', 'trash', 'undo', 'unlock', 'upload', 'user', 'weather-type', 'wifi', 'x', 'zap',
   ],
+  [
+    'device-laptop', 'device-watch', 'device-headphones', 'device-gamepad', 'device-mouse', 'device-keyboard',
+    'device-speaker', 'battery', 'battery-charging',
+  ],
 ];
 
 export const UI_ICONS_WELL_KNOWN: readonly string[] =

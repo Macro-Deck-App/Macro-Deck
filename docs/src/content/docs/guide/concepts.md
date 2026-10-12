@@ -44,6 +44,7 @@ The tiles in a folder:
 | Clock | The current time and date |
 | History Graph | CPU load over the last minutes, green under 50 % and red above 90 % with **Color thresholds** |
 | Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview. **Color thresholds** color each ring by its value instead of a single warning |
+| Battery | Your phone's battery, or your phone, headset and controller side by side, colored by how full they are |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
 | Music Player | What Spotify or [Jellyfin](/guide/jellyfin/) is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
@@ -292,6 +293,37 @@ widget hides the presets. For the ring you picked:
 
 **Style** draws every ring of the widget as a full **Ring** or as an open **Arc**.
 
+### Battery
+
+A **Battery** widget shows the charge of your devices: one device, all of them (a new widget starts
+with all), or the ones you pick, up to eight on one widget. Each device is a ring or a bar with its icon,
+its level and, if you like, its name. On a wide tile a single device gets a large ring with its name and
+state next to it; several devices arrange themselves for the tile, as rings side by side or as a list of
+bars on a tall one.
+
+The color follows the level, from red when the battery is nearly empty through orange and yellow to green,
+and you can move those limits under **Color thresholds**. A charging device turns light blue and shows a
+lightning bolt beside its level. Turn off **Charging color** to keep the level colors while charging, turn
+off **Show charging indicator** to hide the bolt, or pick **Single color** to give the widget one color of
+your own.
+
+- A device that reports no level shows **--**.
+- A device that is out of reach, for example an unplugged phone, keeps its name and is shown as not
+  connected.
+- A device whose app, plugin or integration is not running, or is turned off, shows its last name as not
+  available until it is back.
+
+Which devices are offered:
+
+- **Android phones and tablets**, once **Enable ADB** is on under **Settings > ADB**, the **ADB / Android
+  Debug Bridge** integration is turned on under **Integrations**, and the device has allowed USB debugging
+  for this computer (see [Connect over USB](/guide/usb-connection/)). A phone you unplug stays in the list as
+  not connected.
+- **Devices from plugins**, such as headsets, controllers or mice, when a plugin you installed reports
+  them.
+
+Every device also gets [battery variables](#battery-variables).
+
 ## Actions and triggers
 
 What a widget does, and when. The **Scenes** button runs **Change Folder to** on a short press:
@@ -475,6 +507,33 @@ Only your own variables can read from a file. To keep a file up to date with any
 example the current OBS scene or `system_cpu_usage_percent`, create an automation: the event
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
+
+### Battery variables
+
+Every device a [Battery](#battery) widget can show gets seven variables, named after the device, for
+example `battery_pixel_8_3f9a1c2e_level`. They belong to the integration or plugin that reports the device,
+so on the **Variables** page an Android phone's variables are listed under **ADB / Android Debug Bridge**
+and a headset's under the plugin that reports it:
+
+- `_level`: the charge in percent.
+- `_charging`: whether the device charges.
+- `_connected`: whether the device is reachable.
+- `_state`: `charging`, `discharging`, `full`, `not-charging` (plugged in but not charging) or `unknown`,
+  and `disconnected` while the device is not connected or not available.
+- `_time_remaining_minutes`: how many minutes the battery lasts, rounded up.
+- `_time_to_full_minutes`: how many minutes until the battery is full, rounded up.
+- `_health`: what the battery reports about its condition: `good`, `overheat`, `dead`, `over-voltage`,
+  `cold`, `failure` or `unknown`.
+
+The two time variables read 0 when the device does not report the time, and while it is not connected or
+not available. While Macro Deck runs, the names stay the same when the device is renamed; after a restart
+they follow the device's name at that time. When a device is not connected or not available, for example
+while ADB is off, `_connected` and `_charging` are false, `_state` reads `disconnected`, and `_level` keeps
+the last level that was reported, so check `_connected` before you rely on the level. While a device is not
+available, `_health` also keeps the last value that was reported. Some devices never report a level; their `_level` reads 0 even while they are
+connected, so a rule such as "below 20" would fire for them. The variables are deleted when the device is
+removed for good, for example by the plugin that reported it, and when you uninstall that plugin. After
+Macro Deck restarts, they come back as soon as the device is reported again.
 
 ### Template variables
 

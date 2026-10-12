@@ -96,6 +96,11 @@ them, copy files and install apps. A plugin can do this only while **Enable ADB*
 Turning off **Allow plugins to use ADB** stops every plugin from using Macro Deck's ADB connection. It
 does not affect USB connections for the app or the web client.
 
+The battery level, name and kind of your Android devices are not covered by this setting: while the ADB
+integration is turned on, they are shown in the [Battery widget](/guide/concepts/#battery) and every
+plugin can read them, like the batteries plugins report. Turn off the ADB integration under
+**Integrations** to hide them.
+
 ## Without USB debugging
 
 The Macro Deck app can also connect over the cable without USB debugging and without ADB, for Android

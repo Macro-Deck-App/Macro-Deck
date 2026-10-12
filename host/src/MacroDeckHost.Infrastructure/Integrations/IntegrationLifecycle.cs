@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Sdk;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins;
@@ -25,6 +26,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 	private readonly VideoStreamProviderHost _videoStreamProviders;
 	private readonly WidgetTypeProviderHost _widgetTypeProviders;
 	private readonly DeviceProviderHost _deviceProviders;
+	private readonly BatteryProviderHost? _batteryProviders;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
@@ -41,8 +43,10 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 		VideoStreamProviderHost videoStreamProviders,
 		DeviceProviderHost deviceProviders,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		BatteryProviderHost? batteryProviders = null)
 	{
+		_batteryProviders = batteryProviders;
 		_registry = registry;
 		_scopeFactory = scopeFactory;
 		_mediator = mediator;
@@ -74,6 +78,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 			await _screenSaverProviders.StopAsync(integration, cancellationToken);
 			await _videoStreamProviders.StopAsync(integration, cancellationToken);
 			await _deviceProviders.StopAsync(integration, cancellationToken);
+			await StopBatteryProviderAsync(integration, cancellationToken);
 			await IntegrationShutdownRunner.RunAsync(integration, _timeProvider, cancellationToken);
 			_logger.Information("Integration '{IntegrationId}' stopped before its configuration is rewritten",
 				integrationId);
@@ -128,6 +133,7 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 			await _screenSaverProviders.StopAsync(integration, cancellationToken);
 			await _videoStreamProviders.StopAsync(integration, cancellationToken);
 			await _deviceProviders.StopAsync(integration, cancellationToken);
+			await StopBatteryProviderAsync(integration, cancellationToken);
 			await IntegrationShutdownRunner.RunAsync(integration, _timeProvider, cancellationToken);
 
 			if (_registry.GetOrigin(integrationId) == IntegrationOrigin.Plugin)
@@ -156,6 +162,9 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 
 		await _mediator.Publish(new IntegrationStateChangedNotification(integrationId), cancellationToken);
 	}
+
+	private Task StopBatteryProviderAsync(IIntegration integration, CancellationToken cancellationToken)
+		=> _batteryProviders?.StopAsync(integration, cancellationToken) ?? Task.CompletedTask;
 
 	private Task<bool> PushConfigChangedAsync(string integrationId, CancellationToken cancellationToken)
 		=> _pluginSessionRegistry.SendToPlugin(integrationId,

@@ -54,6 +54,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | [Devices](/features/devices/) | `IDeviceProvider` | Connect hardware or custom clients as Macro Deck devices. |
 | [Layouts](/features/layouts/) | `ILayoutProvider` | Describe a device's regions and geometry. |
 | [Android devices](/features/android-devices/) | `IAndroidDeviceManager` | Run shell commands, copy files and install apps on Android devices through Macro Deck's ADB connection. |
+| [Batteries](/features/batteries/) | `IBatteryProvider`, `IIntegrationContext.Batteries` | Report the battery levels of phones, headphones, controllers and other devices, and read every provider's devices. |
 | [Macro Deck UI](/ui/) | `IUiProvider` | Draw configuration views, widgets and folder views. |
 | [Widget types](/ui/views/widget-types/) | `IWidgetTypeProvider` | Add deck widgets beside Macro Deck's own. |
 | [Folder views](/ui/views/folder-views/) | `IFolderViewProvider` | Replace a folder's button grid with your own rendering. |
@@ -63,7 +64,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 ## Host APIs
 
 `IIntegrationContext` gives an integration access to what Macro Deck owns: [`Deck`](/features/deck/) navigation and client positions, `Scripts`,
-`Widgets`, [`NotificationService`](/features/notifications/), `Notifications`, variables, configuration, events, [messaging](/features/messaging/) and [images for your own UI](/ui/reference/resources/#registering-your-own-images). In a plugin every call crosses the
+`Widgets`, [`NotificationService`](/features/notifications/), `Notifications`, variables, configuration, events, [messaging](/features/messaging/), [battery devices](/features/batteries/#reading-devices) and [images for your own UI](/ui/reference/resources/#registering-your-own-images). In a plugin every call crosses the
 plugin protocol, so don't call them in a hot loop. [Android devices](/features/android-devices/) are the
 exception to where you find them: take `IAndroidDeviceManager` from dependency injection.
 

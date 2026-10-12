@@ -100,6 +100,7 @@ x-macrodeck-host-operations:
   icon-packs: [sync-bundled, get-icon-resource, get-icon]
   video-streams: [providers-changed, streams-changed, session-update, session-close]
   colors: [resolve, watches]
+  batteries: [publish, remove, sync, withdraw]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:
@@ -785,7 +786,8 @@ components:
         data:
           description: >-
             The pushed state, shaped by the api. Absent when the api has nothing to push. For the
-            colors api it is a ColorWatchStateDto.
+            colors api it is a ColorWatchStateDto, for the batteries api a BatteryStateDto, for the adb
+            api an AdbStateDto.
 
     ColorsResolveArguments:
       type: object
@@ -865,6 +867,187 @@ components:
         color:
           type: string
           description: The colour. Absent when the watched value resolves to no colour.
+
+    AdbStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.AdbStateDto, the data of an adb host.state push,
+        per plugin: whether this plugin may use ADB, and the devices when it may.
+      properties:
+        access:
+          type: string
+          enum: [available, adb-not-enabled, adb-not-allowed]
+        devices:
+          type: array
+          description: Empty unless access is available.
+          items:
+            $ref: "#/components/schemas/AdbDeviceStateDto"
+        revision:
+          type: integer
+          format: int64
+
+    AdbDeviceStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.AdbDeviceStateDto, one device of an AdbStateDto.
+        A device that left is simply absent.
+      properties:
+        serial:
+          type: string
+        state:
+          type: string
+          enum: [online, connecting, offline, unauthorized]
+        model:
+          type: string
+        manufacturer:
+          type: string
+        product:
+          type: string
+        stableId:
+          type: string
+          description: >-
+            Optional. A per-installation keyed hash of the device's hardware serial, the same over USB
+            and Wi-Fi, and the local id the built-in ADB battery provider publishes the device under,
+            so a host:adb plugin can match an adb device with its battery entry. Absent from older
+            hosts and until the host has read it. The hardware serial itself is never sent.
+
+    BatteryDeviceDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteryDeviceDto, one device as its provider
+        publishes it. kind, chargeState and health are open strings; a reader treats a value it does
+        not know as other or unknown.
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          description: The provider-local id, at most maxBatteryDeviceIdLength characters.
+        name:
+          type: string
+          description: At most maxBatteryDeviceNameLength characters.
+        kind:
+          type: string
+          description: phone, tablet, laptop, headphones, watch, controller, mouse, keyboard, speaker or other.
+        levelPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Absent when unknown.
+        chargeState:
+          type: string
+          description: unknown, discharging, charging, full or not-charging.
+        isConnected:
+          type: boolean
+        timeRemainingSeconds:
+          type: integer
+          format: int64
+        timeToFullSeconds:
+          type: integer
+          format: int64
+        health:
+          type: string
+          description: unknown, good, overheat, dead, over-voltage, cold or failure.
+
+    BatteriesPublishArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteriesPublishArguments, the arguments of
+        batteries/publish. Adds or replaces devices of the calling plugin. All or nothing: one invalid
+        device, or a set above maxBatteryDevicesPerProvider, is refused with INVALID_PAYLOAD and nothing
+        is applied.
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatteryDeviceDto"
+
+    BatteriesRemoveArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteriesRemoveArguments, the arguments of
+        batteries/remove. Removes devices for good; unknown ids are ignored.
+      properties:
+        deviceIds:
+          type: array
+          items:
+            type: string
+
+    BatteriesSyncArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteriesSyncArguments, the arguments of
+        batteries/sync. Replaces the calling plugin's whole set of devices; all or nothing like publish.
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatteryDeviceDto"
+
+    BatteriesWithdrawArguments:
+      description: >-
+        batteries/withdraw takes no arguments. It withdraws every device the calling plugin session
+        published: readers see them disappear, but their ids are not in removedIds, so values derived
+        from them stay empty instead of being deleted. A provider sends it before it is initialized
+        again within the same session; the SDK ignores a refused withdraw.
+      type: "null"
+
+    BatteryStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteryStateDto, the data of a batteries
+        host.state, the same for every plugin. A push whose revision is at or below the last one applied
+        in the same session is stale and ignored. removedIds lists devices removed for good since the
+        previous revision; a device absent from devices without being listed was withdrawn and may return.
+      required: [revision, devices]
+      properties:
+        revision:
+          type: integer
+          format: int64
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatteryDeviceSnapshotDto"
+        removedIds:
+          type: array
+          items:
+            type: string
+
+    BatteryDeviceSnapshotDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.BatteryDeviceSnapshotDto, one device of a
+        BatteryStateDto qualified with its provider. id is providerId:localId.
+      required: [id, localId, providerId, name]
+      properties:
+        id:
+          type: string
+        localId:
+          type: string
+        providerId:
+          type: string
+        providerName:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+        levelPercent:
+          type: integer
+        chargeState:
+          type: string
+        isConnected:
+          type: boolean
+        timeRemainingSeconds:
+          type: integer
+          format: int64
+        timeToFullSeconds:
+          type: integer
+          format: int64
+        health:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
 
     AssetBeginPayload:
       type: object

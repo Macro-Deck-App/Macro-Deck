@@ -388,6 +388,10 @@ export const ClientAppStrings = {
 				Description: 'macrodeck.app:WebClient.Widgets.ActionButton.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.ActionButton.Name',
 			},
+			Battery: {
+				Description: 'macrodeck.app:WebClient.Widgets.Battery.Description',
+				Name: 'macrodeck.app:WebClient.Widgets.Battery.Name',
+			},
 			Clock: {
 				Description: 'macrodeck.app:WebClient.Widgets.Clock.Description',
 				Name: 'macrodeck.app:WebClient.Widgets.Clock.Name',
@@ -721,6 +725,8 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Update.UpToDate': 'Macro Deck is up to date.',
 	'macrodeck.app:WebClient.Widgets.ActionButton.Description': 'A customizable button with image and label',
 	'macrodeck.app:WebClient.Widgets.ActionButton.Name': 'Action Button',
+	'macrodeck.app:WebClient.Widgets.Battery.Description': 'Battery levels of your phones, headphones and other devices as rings or bars',
+	'macrodeck.app:WebClient.Widgets.Battery.Name': 'Battery',
 	'macrodeck.app:WebClient.Widgets.Clock.Description': 'Digital or analog clock showing device or host time',
 	'macrodeck.app:WebClient.Widgets.Clock.Name': 'Clock',
 	'macrodeck.app:WebClient.Widgets.Countdown.Description': 'Timer that counts down from a set time and signals when it runs out',

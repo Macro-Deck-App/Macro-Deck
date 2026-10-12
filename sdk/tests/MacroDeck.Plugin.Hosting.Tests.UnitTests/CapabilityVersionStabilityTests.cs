@@ -60,6 +60,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.VideoStreamProvider] = (1, 1),
 			[CapabilityKinds.Calendar] = (1, 1),
 			[CapabilityKinds.ConfigEntries] = (1, 1),
+			[CapabilityKinds.BatteryProvider] = (1, 1),
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -78,6 +79,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.VideoStreamProvider,
 		CapabilityKinds.Calendar,
 		CapabilityKinds.ConfigEntries,
+		CapabilityKinds.BatteryProvider,
 	];
 
 	[Test]
@@ -142,7 +144,8 @@ public class CapabilityVersionStabilityTests
 			.RegisterIntegration(_ => new TestIssueIntegration(() =>
 				[new IntegrationIssue { Id = "i", Title = "Issue" }]))
 			.RegisterIntegration(_ => new TestVideoIntegration())
-			.RegisterIntegration(_ => new TestConfigEntriesIntegration());
+			.RegisterIntegration(_ => new TestConfigEntriesIntegration())
+			.RegisterIntegration(_ => new TestBatteryIntegration());
 
 		if (withCalendar)
 		{

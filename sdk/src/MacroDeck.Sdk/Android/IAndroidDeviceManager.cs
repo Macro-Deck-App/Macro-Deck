@@ -1,7 +1,8 @@
 namespace MacroDeck.Sdk.Android;
 
 /// <summary>
-/// The Android devices Macro Deck's own adb sees. Resolve it from dependency injection. Macro Deck owns
+/// The Android devices Macro Deck's own adb sees. Resolve it from dependency injection or read
+/// <see cref="IIntegrationContext.AndroidDevices" />, which is the same instance. Macro Deck owns
 /// discovery, connection and lifetime: a plugin never creates, connects or disposes a device.
 /// </summary>
 /// <remarks>

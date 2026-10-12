@@ -66,6 +66,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0106 - The host owns the notification lifecycle and the Inbox is one of its parts](0106-the-host-owns-the-notification-lifecycle-and-the-inbox-is-one-of-its-parts.md)
 - [0107 - Built-in integrations are built as extractable plugins](0107-built-in-integrations-are-built-as-extractable-plugins.md)
 - [0108 - UI events carry their origin, and config entries are a plugin capability](0108-ui-events-carry-their-origin-and-config-entries-are-a-plugin-capability.md)
+- [0109 - Battery devices are a host-brokered catalog every plugin may read](0109-battery-devices-are-a-host-brokered-catalog-every-plugin-may-read.md)
 
 ## Macro Deck UI
 

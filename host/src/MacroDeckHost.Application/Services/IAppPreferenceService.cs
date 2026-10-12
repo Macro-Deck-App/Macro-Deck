@@ -101,6 +101,8 @@ public interface IAppPreferenceService
 
 	Task<Guid> GetInstallationId();
 
+	Task<byte[]> GetAdbDeviceIdKey();
+
 	Task<LoggingSettings> GetLogging();
 
 	Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel);

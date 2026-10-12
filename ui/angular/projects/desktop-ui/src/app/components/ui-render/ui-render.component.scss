@@ -397,6 +397,12 @@
   gap: var(--space-3);
 }
 
+.config-node-slider-row > shared-select,
+.config-node-slider-row > shared-combobox {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .config-node-slider {
   flex: 1 1 auto;
 }

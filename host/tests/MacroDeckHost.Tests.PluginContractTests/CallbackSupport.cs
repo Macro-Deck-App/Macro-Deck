@@ -88,7 +88,8 @@ internal sealed class CallbackFakeVariableService : IVariableService
 		int? decimalPlaces,
 		string? definitionId = null,
 		VariableDeclaration? declaration = null,
-		VariableUpdateMode updateMode = VariableUpdateMode.Polled)
+		VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+		bool publishedByHost = false)
 	{
 		var entity = new VariableEntity
 		{

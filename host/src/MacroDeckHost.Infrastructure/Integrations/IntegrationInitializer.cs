@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
@@ -10,6 +11,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
@@ -70,6 +72,9 @@ public sealed class IntegrationInitializer
 	private readonly IWidgetDataReader? _widgetData;
 	private readonly OwnedVariableHistory? _variableHistory;
 	private readonly ConcurrentDictionary<string, BuiltInUiResources> _uiResources = new(StringComparer.Ordinal);
+	private readonly IBatteryRegistry? _batteries;
+	private readonly BatteryProviderHost? _batteryProviders;
+	private readonly InProcessAndroidDeviceManager? _androidDevices;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -77,6 +82,7 @@ public sealed class IntegrationInitializer
 	private readonly IMessageBroker _messageBroker;
 	private readonly PluginColorWatches _colorWatches;
 	private readonly ConcurrentDictionary<string, InProcessColorApi> _colorApis = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, InProcessBatteryApi> _batteryApis = new(StringComparer.Ordinal);
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -111,11 +117,17 @@ public sealed class IntegrationInitializer
 		IUiResourceStore? uiResourceStore = null,
 		IMusicPlayerArtworkService? musicPlayerArtwork = null,
 		IWidgetDataReader? widgetData = null,
-		OwnedVariableHistory? variableHistory = null)
+		OwnedVariableHistory? variableHistory = null,
+		IBatteryRegistry? batteries = null,
+		BatteryProviderHost? batteryProviders = null,
+		InProcessAndroidDeviceManager? androidDevices = null)
 	{
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
 		_notificationManager = notificationManager;
+		_batteries = batteries;
+		_batteryProviders = batteryProviders;
+		_androidDevices = androidDevices;
 		_uiResourceStore = uiResourceStore;
 		_musicPlayerArtwork = musicPlayerArtwork;
 		_albumColor = albumColor;
@@ -195,7 +207,9 @@ public sealed class IntegrationInitializer
 				: new OwnedNotificationService(
 					new NotificationOwner(NotificationSourceCategory.BuiltInIntegration, integration.Id, integrationName),
 					_notificationManager),
-			UiResourcesFor(integration));
+			UiResourcesFor(integration),
+			RenewBatteryApi(integration.Id),
+			_androidDevices);
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -262,6 +276,11 @@ public sealed class IntegrationInitializer
 		await _screenSaverProviders.StartAsync(integration, cancellationToken);
 		await _videoStreamProviders.StartAsync(integration, cancellationToken);
 		await _deviceProviders.StartAsync(integration, cancellationToken);
+		if (_batteryProviders is not null)
+		{
+			await _batteryProviders.StartAsync(integration, integrationName, cancellationToken);
+		}
+
 		await scope.DisposeAsync();
 		return IntegrationInitializationOutcome.Initialized;
 	}
@@ -278,6 +297,11 @@ public sealed class IntegrationInitializer
 		if (_colorApis.TryRemove(integrationId, out var colors))
 		{
 			await colors.DisposeAsync();
+		}
+
+		if (_batteryApis.TryRemove(integrationId, out var batteries))
+		{
+			batteries.Dispose();
 		}
 	}
 
@@ -321,6 +345,23 @@ public sealed class IntegrationInitializer
 		var colors = new InProcessColorApi(_colorWatches, _logger);
 		_colorApis[integrationId] = colors;
 		return colors;
+	}
+
+	private InProcessBatteryApi? RenewBatteryApi(string integrationId)
+	{
+		if (_batteryApis.TryRemove(integrationId, out var previous))
+		{
+			previous.Dispose();
+		}
+
+		if (_batteries is null)
+		{
+			return null;
+		}
+
+		var batteries = new InProcessBatteryApi(_batteries, _logger);
+		_batteryApis[integrationId] = batteries;
+		return batteries;
 	}
 
 	private async Task<InProcessMessageChannel> RenewMessageChannelAsync(string integrationId)

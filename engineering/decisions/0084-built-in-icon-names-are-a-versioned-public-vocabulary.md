@@ -23,7 +23,7 @@ reader can draw.
   producer using a later name sets `RequiredComponentVersion` to `UiIcons.VersionOf(name)` and carries a
   fallback.
 - `ci/scripts/verify-icon-names.mjs` guards it: every published name is a glyph class with an SVG behind it,
-  no size modifier is published, the C# `Version1` equals the runtime's group 1, and the runtime's maximum
+  no size modifier is published, each C# `VersionN` equals the runtime's group N, and the runtime's maximum
   `ui.icon` version equals the group count. Published names are a subset of the glyph classes, so a new app
   icon does not become public by accident.
 

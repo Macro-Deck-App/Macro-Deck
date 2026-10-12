@@ -9,12 +9,17 @@ internal static class WidgetThresholds
 
 	public const string ValueKey = "thresholds";
 
+	public const string Green = "#34c759";
+	public const string Yellow = "#ffcc00";
+	public const string Orange = "#ff9500";
+	public const string Red = "#ff3b30";
+
 	private static readonly (string Id, string Color, double Fraction)[] _defaultBands =
 	[
-		("green", "#34c759", 0),
-		("yellow", "#ffcc00", 0.5),
-		("orange", "#ff9500", 0.75),
-		("red", "#ff3b30", 0.9),
+		("green", Green, 0),
+		("yellow", Yellow, 0.5),
+		("orange", Orange, 0.75),
+		("red", Red, 0.9),
 	];
 
 	public static UiThresholds Defaults(double min, double max)

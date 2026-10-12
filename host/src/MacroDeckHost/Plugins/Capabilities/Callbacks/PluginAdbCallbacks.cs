@@ -17,18 +17,9 @@ public sealed class PluginAdbCallbacks(
 	IPluginSessionRegistry? sessions = null,
 	IAdbManager? adbManager = null)
 {
-	// Leaves room for the envelope inside ProtocolLimits.MaxMessageBytes.
-	internal const int ShellResultBudgetBytes = 192 * 1024;
+	internal const int ShellResultBudgetBytes = AdbDeviceCallPolicy.ShellResultBudgetBytes;
 
-	private static readonly HashSet<string> _changesSomething = new(StringComparer.Ordinal)
-	{
-		HostOperations.Adb.Shell,
-		HostOperations.Adb.Push,
-		HostOperations.Adb.Pull,
-		HostOperations.Adb.Install,
-		HostOperations.Adb.Uninstall,
-		HostOperations.Adb.Connect
-	};
+	private readonly AdbDeviceCallPolicy _callPolicy = new(lockState);
 
 	public async Task<HostCallbackResult?> AdmitAsync(string pluginId,
 		HostInvokePayload payload,
@@ -51,7 +42,7 @@ public sealed class PluginAdbCallbacks(
 			await AskForAccessAsync(pluginId, cancellationToken);
 		}
 
-		return lockState.IsLocked && _changesSomething.Contains(payload.Operation)
+		return _callPolicy.IsRefusedWhileLocked(payload.Operation)
 			? HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 				"The host is locked.",
 				retryable: true,
@@ -130,25 +121,7 @@ public sealed class PluginAdbCallbacks(
 		await consent.AskAfterRefusalAsync(pluginId, name, cancellationToken);
 	}
 
-	internal static AdbShellResultDto FitToBudget(AdbShellOutput output)
-	{
-		var dto = new AdbShellResultDto
-		{
-			ExitCode = output.ExitCode,
-			StandardOutput = output.StandardOutput,
-			StandardError = output.StandardError,
-			Truncated = output.Truncated
-		};
-
-		while (JsonSerializer.SerializeToUtf8Bytes(dto, PluginProtocolJson.Options).Length > ShellResultBudgetBytes)
-		{
-			dto = dto.StandardOutput.Length >= dto.StandardError.Length
-				? dto with { StandardOutput = dto.StandardOutput[..(dto.StandardOutput.Length / 2)], Truncated = true }
-				: dto with { StandardError = dto.StandardError[..(dto.StandardError.Length / 2)], Truncated = true };
-		}
-
-		return dto;
-	}
+	internal static AdbShellResultDto FitToBudget(AdbShellOutput output) => AdbDeviceCallPolicy.FitToBudget(output);
 
 	private static AdbBatteryStateDto ToDto(AdbBatteryReading reading)
 		=> new()

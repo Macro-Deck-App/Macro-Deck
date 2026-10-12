@@ -8,7 +8,8 @@ public sealed record AdbDevice(
 	string? Product,
 	string? TransportId,
 	AdbTunnel? Tunnel,
-	DateTimeOffset LastSeenAt)
+	DateTimeOffset LastSeenAt,
+	string? StableId = null)
 {
 	public bool IsAuthorized => State is AdbDeviceState.Device;
 

@@ -4,6 +4,7 @@ using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Logging;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Devices;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.ScreenSavers;
@@ -119,12 +120,14 @@ internal sealed class IntegrationLifecycleHostedService(
 		await _gate.WaitAsync(CancellationToken.None);
 		var messages = services.GetService<RemoteMessageChannel>();
 		var colors = services.GetService<RemoteColorApi>();
+		var batteries = services.GetService<RemoteBatteryApi>();
 		try
 		{
 			// Before ShutdownAsync: an integration disposing its registrations there must not hand
 			// its topics to another plugin while it is about to register them again.
 			messages?.ReleaseLifecycleRegistrations();
 			colors?.ReleaseLifecycleWatches();
+			batteries?.ReleaseLifecycleHandlers();
 			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: true));
 
 			if (_initialized.Count > 0)
@@ -182,6 +185,12 @@ internal sealed class IntegrationLifecycleHostedService(
 						await provider.InitializeAsync(deviceContext);
 					}
 
+					if (integration is IBatteryProvider batteryProvider &&
+						services.GetService<IBatteryProviderContext>() is { } batteryContext)
+					{
+						await batteryProvider.InitializeAsync(batteryContext);
+					}
+
 					// Likewise a push-capable variable catalog: attach it to its sink only after its own
 					// InitializeAsync has run. Both flags gate the attach - a provider with no catalog has
 					// nothing to push about, and one that does not push never uses the sink it is handed.
@@ -236,6 +245,11 @@ internal sealed class IntegrationLifecycleHostedService(
 					await provider.ShutdownAsync();
 				}
 
+				if (integration is IBatteryProvider batteryProvider)
+				{
+					await batteryProvider.ShutdownAsync();
+				}
+
 				// None of the layout, folder view, screensaver or widget type providers has a ShutdownAsync of
 				// its own: a provider releases whatever InitializeAsync acquired from the integration's own.
 				await integration.ShutdownAsync();
@@ -249,6 +263,11 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 
 		_initialized.Clear();
+
+		if (services.GetService<RemoteBatteryProviderContext>() is { } batteryContext)
+		{
+			await batteryContext.ResetAsync();
+		}
 	}
 
 	private async Task ReleaseVideoStreamsAsync(Func<VideoStreamProviderRegistry, Task> release)

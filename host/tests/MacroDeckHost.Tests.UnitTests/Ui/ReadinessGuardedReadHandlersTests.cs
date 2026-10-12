@@ -330,7 +330,8 @@ public class ReadinessGuardedReadHandlersTests
 			int? decimalPlaces,
 			string? definitionId = null,
 			VariableDeclaration? declaration = null,
-			VariableUpdateMode updateMode = VariableUpdateMode.Polled) =>
+			VariableUpdateMode updateMode = VariableUpdateMode.Polled,
+			bool publishedByHost = false) =>
 			throw new NotSupportedException();
 
 		public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,

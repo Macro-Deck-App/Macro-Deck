@@ -77,6 +77,8 @@
                        LogicalName="widget-data-stopwatch-v1.schema.json" />
     <EmbeddedResource Include="Widgets\Schemas\widget-data-gauges-v1.schema.json"
                        LogicalName="widget-data-gauges-v1.schema.json" />
+    <EmbeddedResource Include="Widgets\Schemas\widget-data-battery-v1.schema.json"
+                       LogicalName="widget-data-battery-v1.schema.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />

@@ -79,7 +79,7 @@ const GLYPHS = [
 	".icon-wifi {\n  mask-image: url('./icons/wifi-solid-full.svg');\n}",
 ].join('\n');
 
-function contract({ runtime = ["'crosshair', 'wifi'"], sdk = 'Crosshair, Wifi', maximum = 'UI_ICON_VERSIONS.length' } = {}) {
+function contract({ runtime = ["'crosshair', 'wifi'"], sdk = 'Crosshair, Wifi', sdkLater = [], maximum = 'UI_ICON_VERSIONS.length' } = {}) {
 	const root = fixture('', { utilities: GLYPHS });
 	mkdirSync(join(root, 'ui/runtime/src/ui-components'), { recursive: true });
 	mkdirSync(join(root, 'ui-model/src/MacroDeck.Ui/Components'), { recursive: true });
@@ -87,8 +87,10 @@ function contract({ runtime = ["'crosshair', 'wifi'"], sdk = 'Crosshair, Wifi', 
 		`export const UI_ICON_VERSIONS: readonly (readonly string[])[] = [\n${runtime.map(g => `  [${g}],`).join('\n')}\n];\n`);
 	writeFileSync(join(root, RUNTIME_ICON), `version: { minimum: 1, maximum: ${maximum} },`);
 	writeFileSync(join(root, SDK_VALUES),
-		'public const string Crosshair = "crosshair";\npublic const string Wifi = "wifi";\n'
-		+ `public static readonly IReadOnlyList<string> Version1 =\n[\n${sdk},\n];`);
+		'public const string ChevronDown = "chevron-down";\npublic const string Crosshair = "crosshair";\n'
+		+ 'public const string Wifi = "wifi";\n'
+		+ [sdk, ...sdkLater].map((group, index) =>
+			`public static readonly IReadOnlyList<string> Version${index + 1} =\n[\n${group},\n];`).join('\n'));
 	return root;
 }
 
@@ -103,8 +105,25 @@ test('rejects a published size modifier, which would paint a filled square', () 
 });
 
 test('rejects a published name with no glyph behind it', () => {
-	const problems = findIconContractProblems(contract({ runtime: ["'crosshair', 'wifi'", "'chevron-down'"] }));
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair', 'wifi'", "'chevron-down'"], sdkLater: ['ChevronDown'] }));
 	assert.deepEqual(problems, ['group 2: "chevron-down" has no glyph class in ui/runtime/styles/icons.css']);
+});
+
+test('accepts a later group both sides agree on', () => {
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair'", "'wifi'"], sdk: 'Crosshair', sdkLater: ['Wifi'] }));
+	assert.deepEqual(problems, []);
+});
+
+test('rejects a later group the reader publishes but the producer does not', () => {
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair'", "'wifi'"], sdk: 'Crosshair' }));
+	assert.deepEqual(problems, [`${SDK_VALUES} UiIcons.Version2 and ${RUNTIME_TYPES} group 2 differ`]);
+});
+
+test('rejects a name the producer files under a different group than the reader', () => {
+	const problems = findIconContractProblems(contract({ runtime: ["'crosshair', 'wifi'"], sdk: 'Crosshair', sdkLater: ['Wifi'] }));
+	assert.equal(problems.length, 2);
+	assert.match(problems[0], /Version1 and .* group 1 differ/);
+	assert.match(problems[1], /Version2 and .* group 2 differ/);
 });
 
 test('rejects a first group the producer and the reader disagree on', () => {

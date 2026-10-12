@@ -18,6 +18,7 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	private readonly FakeAndroidDeviceManager _manager;
 	private readonly Lock _gate = new();
 	private readonly List<AndroidDeviceCall> _calls = [];
+	private AndroidDeviceInfo _info;
 	private AndroidDeviceState _state;
 
 	internal FakeAndroidDevice(FakeAndroidDeviceManager manager,
@@ -27,7 +28,7 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	{
 		_manager = manager;
 		Serial = serial;
-		Info = info;
+		_info = info;
 		_state = state;
 	}
 
@@ -35,7 +36,32 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	public string Serial { get; }
 
 	/// <inheritdoc />
-	public AndroidDeviceInfo Info { get; }
+	public AndroidDeviceInfo Info
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _info;
+			}
+		}
+	}
+
+	/// <summary>
+	/// The <see cref="AndroidDeviceInfo.StableId" /> in <see cref="Info" />. Setting it replaces <see cref="Info" />
+	/// without raising an event, like a host that reads the id after the device attached.
+	/// </summary>
+	public string? StableId
+	{
+		get => Info.StableId;
+		set
+		{
+			lock (_gate)
+			{
+				_info = _info with { StableId = value };
+			}
+		}
+	}
 
 	/// <inheritdoc />
 	public AndroidDeviceState State

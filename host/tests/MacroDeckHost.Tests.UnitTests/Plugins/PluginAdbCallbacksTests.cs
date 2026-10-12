@@ -188,9 +188,11 @@ internal sealed class FakeAdbDeviceOperations : IAdbDeviceOperations
 		string command,
 		CancellationToken cancellationToken) => Shell(cancellationToken);
 
+	public Result<AdbBatteryReading, AdbFailureCode> Battery { get; set; } = Result.Ok<AdbBatteryReading, AdbFailureCode>(
+		new AdbBatteryReading(50, false, AdbBatteryStatus.Discharging, AdbBatteryHealth.Good));
+
 	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(string serial, CancellationToken cancellationToken)
-		=> Task.FromResult(Result.Ok<AdbBatteryReading, AdbFailureCode>(
-			new AdbBatteryReading(50, false, AdbBatteryStatus.Discharging, AdbBatteryHealth.Good)));
+		=> Task.FromResult(Battery);
 
 	public Task<Result<AdbFailureCode>> PushFileAsync(string serial,
 		string localPath,

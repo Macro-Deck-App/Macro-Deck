@@ -192,6 +192,23 @@ returns: Macro Deck's relay does that, and the harness has none. Use a fresh ses
 refusal is a failed outcome whose `details.reason` is a `video_stream_` reason. See
 [Video streams](/features/video-streams/#testing).
 
+## Testing batteries
+
+```csharp
+var batteries = new FakeBatteryProviderContext();
+await new HeadsetIntegration(watcher).InitializeAsync(batteries);
+
+Assert.That(batteries.Devices["pad-1"].LevelPercent, Is.EqualTo(80));
+```
+
+`FakeBatteryProviderContext` keeps the host's rules: publishing a known id replaces the device, a list is
+applied all or nothing, and a provider holds at most 64 devices. `Devices`, `Publishes` and `RemovedIds`
+record what your provider did. `FakeBatteryApi` is the reading side: `Set` replaces the catalog and raises
+`Changed`, and `SubscriberCount` shows whether your code still listens. In a harness,
+`harness.Context.Batteries` serves `IIntegrationContext.Batteries` and `harness.Context.BatteryProvider` is
+what `InitializeIntegrationsAsync` starts your battery provider against. See
+[Batteries](/features/batteries/#testing).
+
 ## Testing calendars
 
 ```csharp

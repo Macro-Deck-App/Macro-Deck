@@ -46,6 +46,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Name(),
 		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Name(),
 		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Name(),
+		WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Name(),
 		_ => default,
 	};
 
@@ -60,6 +61,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Countdown => AppStrings.WebClient.Widgets.Countdown.Description(),
 		WidgetTypeIds.Stopwatch => AppStrings.WebClient.Widgets.Stopwatch.Description(),
 		WidgetTypeIds.Gauges => AppStrings.WebClient.Widgets.Gauges.Description(),
+		WidgetTypeIds.Battery => AppStrings.WebClient.Widgets.Battery.Description(),
 		_ => default,
 	};
 
@@ -80,6 +82,7 @@ public static class BuiltInWidgetTypes
 		WidgetTypeIds.Stopwatch => "{}",
 		WidgetTypeIds.Gauges =>
 			$$"""{"gauges":[{"id":"cpu","variable":"system_cpu_usage_percent","name":"CPU","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.Cpu)}}"},"max":100},{"id":"ram","variable":"system_ram_usage_percent","name":"RAM","icon":{"type":"icon-pack","reference":"{{IncludedIconPack.IconId(IncludedIconPack.MemoryStick)}}"},"max":100}]}""",
+		WidgetTypeIds.Battery => """{"mode":"all","style":"ring"}""",
 		_ => "{}",
 	};
 }

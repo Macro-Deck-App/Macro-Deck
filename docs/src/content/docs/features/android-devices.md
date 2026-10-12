@@ -79,8 +79,9 @@ The user gets a **Sleep phone** action that turns off the screen of the phone wi
 
 Things to know:
 
-- **Resolve it from DI.** `IAndroidDeviceManager` is not on `IIntegrationContext`. Take it in a
-  constructor, like any other service; the SDK registers it for every plugin.
+- **Resolve it from DI, or read `context.AndroidDevices`.** Take it in a constructor, like any other
+  service; the SDK registers it for every plugin. `IIntegrationContext.AndroidDevices` returns the same
+  instance, for code that only has the context.
 - **Check `Access` before you rely on it.** Whether your plugin may use ADB is the user's decision and
   can change while your plugin runs - see [Who decides](#who-decides).
 - **Macro Deck owns the devices.** It discovers, connects and forgets them. A plugin never creates,
@@ -150,6 +151,12 @@ android.DeviceStateChanged += (_, e) =>
   authorization prompt on the device), `Unauthorized`, or `Offline`. Operations need `Online`.
 - **`Info`** carries `Model`, `Manufacturer` and `Product` as the device reports them; any of them can be
   `null` until the device is online.
+- **`Info.StableId`** is the same for the same hardware over USB and Wi-Fi, and across a Wi-Fi port change,
+  while `Serial` differs per connection. It is a keyed hash of the device's hardware serial with a key
+  unique to this Macro Deck installation, so it cannot be matched against a serial, or between two
+  installations. It is `null` until Macro Deck has read it and on an older host, and it is the local id
+  under which the built-in ADB integration publishes the device's [battery](/features/batteries/), so a
+  plugin with `host:adb` can tell which battery entry belongs to which device.
 - **`DeviceDisconnected`** is also raised for every device when access is withdrawn.
 - **Handlers run on the connection's receive loop.** Keep them short and start real work, such as an
   operation on the device, without awaiting it in the handler. An exception from a handler is logged and
@@ -255,10 +262,26 @@ first two apart before you call anything.
   fails with `Timeout`. Pass a `CancellationToken` to give up sooner: cancelling also ends the call on the
   host.
 
+## Integrations built into Macro Deck
+
+Macro Deck's own integrations reach ADB through the same `IAndroidDeviceManager`, read from
+`IIntegrationContext.AndroidDevices` (see [ADR 0107](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
+For them `Access` is `Available` whenever ADB is enabled: they are part of Macro Deck, so neither
+**Allow plugins to use ADB** nor `host:adb` applies. Everything else does, the locked-host refusals and the
+shell output limit included. Should such an integration ever move out of process, it becomes a plugin like
+any other and needs `host:adb` and the user's permission.
+
+The built-in ADB integration's battery provider is written against this API alone and is a worked example
+of it: it publishes each device under `Info.StableId`, skips a device until it reports one, reads
+`GetBatteryStateAsync` on every change and every 15 seconds, and asks
+`getprop ro.build.characteristics` once per device to tell a tablet from a phone.
+
 ## Older hosts
 
 On a Macro Deck that predates this API, `Access` stays `Unsupported`, `Devices` stays empty and every
-operation fails with `Unsupported`. A plugin that uses ADB for an optional feature keeps working there with
+operation fails with `Unsupported`. A host that predates `StableId` leaves it `null`, and a context from a
+host that offers no ADB to integrations answers `context.AndroidDevices` with an always-`Unsupported`
+manager. A plugin that uses ADB for an optional feature keeps working there with
 that feature off. Set a minimum host version in
 [`compatibility.macroDeck`](/reference/manifest/#compatibility) if ADB is the point of your plugin.
 
@@ -281,9 +304,14 @@ Assert.That(phone.Calls.Single().Operation, Is.EqualTo(nameof(IAndroidDevice.Exe
   error, as a real host does. `AddDevice`, `RemoveDevice` and `SetDeviceState` raise the matching events.
 - **`FakeAndroidDevice`** records every call in `Calls`. `ShellHandler`, `Battery` and
   `InstalledPackages` script its answers, and `Failure` makes every operation throw with that code.
-- **In a `PluginTestHarness`**, register the fake with
-  `builder.ConfigureServices((_, services) => services.AddSingleton<IAndroidDeviceManager>(android))`. The
-  harness offers no ADB of its own, so without the fake `Access` stays `Unsupported`.
+- **`StableId`** on a `FakeAndroidDevice` sets `Info.StableId` later, like a host that reads it after the
+  device attached. No event is raised.
+- **In a `PluginTestHarness`**, `harness.Context.AndroidDevices` is the plugin's manager, both through DI and
+  through `context.AndroidDevices`. Its `Access` starts as `Unsupported`, as the harness has always
+  reported; call `SetAccess(AndroidDeviceAccess.Available)` and `AddDevice` to script it. A plugin that
+  registers its own manager with
+  `builder.ConfigureServices((_, services) => services.AddSingleton<IAndroidDeviceManager>(android))` keeps
+  it, and `context.AndroidDevices` then returns that one.
 
 ## Security
 
@@ -297,3 +325,4 @@ visible, switchable decision about plugins that use Macro Deck's connection. See
 - [WebSocket reference](/reference/websocket/#adb) - the `adb` host API on the wire.
 - [Manifest](/reference/manifest/#permissions) - the permission vocabulary.
 - [Connect over USB](/guide/usb-connection/) - how users set up ADB.
+- [Batteries](/features/batteries/) - Android batteries are already in the battery catalog, readable without `host:adb`.

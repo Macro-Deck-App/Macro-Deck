@@ -50,6 +50,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.Calendar] = ["describe", "accounts", "calendars", "events", "event"],
 			[CapabilityKinds.ConfigEntries] =
 				["describe", "prepare", "status", "usable", "reload", "synchronize", "release"],
+			[CapabilityKinds.BatteryProvider] = ["describe"],
 		};
 
 	[Test]
