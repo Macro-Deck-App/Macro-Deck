@@ -104,6 +104,8 @@ slow a deck down. Turn Low Power Mode off in Control Center or under **Battery**
 
 - **Discord** and **GitHub Issues**: ask the community and report bugs.
 - **Share diagnostics**: shares recent connection events and the addresses of your computers, for a bug report.
-  It never contains passwords or tokens.
+  If the app closed because of an error, it also contains the last crash: when it happened, the app version and
+  where in the app it failed. The app keeps the last crash until a newer one replaces it, so open the app again
+  after a crash and share the diagnostics from here. It never contains passwords or tokens.
 - **About**: version, build and **Open source licenses**.
 - **Legal**: imprint, privacy policy and terms of service.
