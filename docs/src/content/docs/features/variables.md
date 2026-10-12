@@ -420,7 +420,9 @@ without re-binding once it can be resolved and read again.
 ## Over the plugin protocol
 
 Each **eager** variable is declared as one capability, like an action. Catalog ids are never declared -
-they travel in the operation arguments, which keeps a large catalog under `MaxDeclaredCapabilities`. See
+they travel in the operation arguments, which keeps a large catalog under `MaxDeclaredCapabilities`. A
+provider with only a catalog or only on-demand variables therefore declares nothing; Macro Deck asks it for
+`describe` when it connects and offers its variables from then on, so it needs no announcement. See
 [the WebSocket reference](/reference/websocket/#capabilities) for the
 `describe`/`get`/`set`/`discover`/`resolve`/`subscribe` operations, the `variables`/`refresh` host operation
 behind `RequestRefreshAsync`, the `variables`/`history.open`, `history.read` and `history.close` operations

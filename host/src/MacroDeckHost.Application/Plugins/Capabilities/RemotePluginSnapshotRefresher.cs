@@ -80,7 +80,9 @@ public sealed class RemotePluginSnapshotRefresher
 	public async Task<RemotePluginSnapshotRefreshResult> RefreshAsync(
 		string pluginId,
 		IReadOnlyCollection<string> acceptedKinds,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken,
+		IReadOnlyCollection<string>? probedKinds = null,
+		Func<RemotePluginCapabilitySnapshot, IReadOnlySet<string>, RemotePluginCapabilitySnapshot>? adjust = null)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 		ArgumentNullException.ThrowIfNull(acceptedKinds);
@@ -116,9 +118,54 @@ public sealed class RemotePluginSnapshotRefresher
 			}
 		}
 
+		var answeredProbes = new HashSet<string>(StringComparer.Ordinal);
+		var timedOutProbes = new List<string>();
+		foreach (var kind in probedKinds ?? [])
+		{
+			if (acceptedKinds.Contains(kind) || !_mappers.TryGetValue(kind, out var mapper))
+			{
+				continue;
+			}
+
+			try
+			{
+				var data = await _invoker.InvokeAsync(pluginId,
+						new CapabilityInvokeRequest
+						{
+							Kind = kind,
+							LocalId = DescribeLocalId,
+							Operation = CapabilityOperations.Actions.Describe,
+							Timeout = ProbeTimeout
+						},
+						cancellationToken)
+					.ConfigureAwait(false);
+
+				if (data is not null)
+				{
+					snapshot = mapper(snapshot, data);
+					answeredProbes.Add(kind);
+				}
+			}
+			catch (RemoteCapabilityException exception)
+			{
+				if (exception.Code == ProtocolErrorCodes.Timeout)
+				{
+					timedOutProbes.Add(kind);
+				}
+			}
+			catch (Exception exception) when (exception is not (OperationCanceledException or OutOfMemoryException))
+			{
+			}
+		}
+
+		if (adjust is not null)
+		{
+			snapshot = adjust(snapshot, answeredProbes);
+		}
+
 		await _store.SaveAsync(snapshot, cancellationToken).ConfigureAwait(false);
 
-		return new RemotePluginSnapshotRefreshResult(snapshot, failedKinds);
+		return new RemotePluginSnapshotRefreshResult(snapshot, failedKinds) { TimedOutProbes = timedOutProbes };
 	}
 
 	public async Task<RemotePluginSnapshotRefreshResult> RefreshKindAsync(
@@ -169,6 +216,10 @@ public sealed class RemotePluginSnapshotRefresher
 	}
 
 	private const string DescribeLocalId = "*";
+
+	// Bounded because a probed kind was never declared: a plugin that ignores it instead of answering
+	// CAPABILITY_UNSUPPORTED must not hold its own registration for the full invoke timeout.
+	public static readonly TimeSpan ProbeTimeout = TimeSpan.FromSeconds(5);
 
 	private static RemotePluginCapabilitySnapshot ApplyActionsDescribe(
 		RemotePluginCapabilitySnapshot snapshot,
@@ -489,6 +540,8 @@ public sealed record RemotePluginSnapshotRefreshResult(
 	RemotePluginCapabilitySnapshot Snapshot,
 	IReadOnlyList<string> FailedKinds)
 {
+	public IReadOnlyList<string> TimedOutProbes { get; init; } = [];
+
 	public bool AllSucceeded => FailedKinds.Count == 0;
 
 	public RemotePluginCapabilitySnapshot? Previous { get; init; }

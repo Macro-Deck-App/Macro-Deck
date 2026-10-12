@@ -193,11 +193,13 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
 | `CapabilityNegotiationResult` | `kind` | string | yes | The kind negotiated. |
-| | `accepted` | boolean | yes | Whether the session will use it. |
+| | `accepted` | boolean | yes | Whether the session will use it. `variables` can also be used without being declared, see below. |
 | | `negotiatedVersion` | integer | no | The agreed capability version. |
 | | `rejectionReason` | string | no | Why it was rejected. |
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
+
+One kind is used without being negotiated: when a session declared no `variables` capability, the host still sends `variables`/`describe` while it registers the plugin (with a 5 second deadline), because a provider with only a catalog or only on-demand variables has nothing to declare. When the answer carries variables or a catalog, the session uses `variables` from then on. A plugin without the capability answers `CAPABILITY_UNSUPPORTED`, as for any kind it does not implement. A `variables` capability that was declared and rejected stays unused.
 
 The twenty-three `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 

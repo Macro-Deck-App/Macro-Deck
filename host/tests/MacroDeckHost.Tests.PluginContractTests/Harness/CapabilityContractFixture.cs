@@ -274,6 +274,20 @@ internal abstract class CapabilityContractFixture
 			=> string.Equals(integration.Id, PluginId, StringComparison.Ordinal));
 	}
 
+	protected Task<IIntegration> ConnectAsTheSdkDeclaresAsync(
+		IReadOnlyList<ICapabilityHandler> handlers,
+		Func<Task>? duringRegister = null)
+	{
+		var declared = handlers.SelectMany(handler => handler.DeclareCapabilities()).ToList();
+		var accepted = declared
+			.GroupBy(capability => capability.Kind, StringComparer.Ordinal)
+			.Where(group => CapabilityVersionNegotiator.Negotiate(group.Key, group.First().VersionRange).Accepted)
+			.Select(group => group.Key)
+			.ToList();
+
+		return ConnectAsync(handlers, declared, accepted, duringRegister: duringRegister);
+	}
+
 	protected Task<JsonElement?> InvokeRawAsync(string kind,
 		string localId,
 		string operation,
