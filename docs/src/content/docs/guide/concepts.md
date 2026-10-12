@@ -45,7 +45,7 @@ The tiles in a folder:
 | History Graph | CPU load over the last minutes, green under 50 % and red above 90 % with **Color thresholds** |
 | Gauges | CPU, RAM and GPU load side by side as rings with an icon, like a battery overview. **Color thresholds** color each ring by its value instead of a single warning |
 | Battery | Your phone's battery, or your phone, headset and controller side by side, colored by how full they are |
-| Weather | Today and the next days for your city. Press it for the full details |
+| Weather | Today and the next days for your city, or under **Style** > **Compact** just the current temperature, the condition and today's high and low. Press it for the full details |
 | Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
 | Music Player | What Spotify or [Jellyfin](/guide/jellyfin/) is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Jellyfin Sessions | What plays on your [Jellyfin](/guide/jellyfin/) servers, on whose device, offered once a Jellyfin server is set up |

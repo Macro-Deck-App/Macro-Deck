@@ -14,14 +14,18 @@ internal static class WeatherWidgetViewPreviews
 	[UiPreview("Rain", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Rain() => Build(WeatherPreviewSamples.Rain());
 
+	[UiPreview("Compact", Profile = UiPreviewProfiles.Widget)]
+	public static UiElement Compact()
+		=> Build(WeatherPreviewSamples.ClearDay(), new WeatherWidgetData { Style = WeatherWidgetData.StyleCompact });
+
 	[UiPreview("Unavailable", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Unavailable() => Build(WeatherStatePayload.Unavailable(locationName: "Home"));
 
-	private static UiElement Build(WeatherStatePayload payload)
+	private static UiElement Build(WeatherStatePayload payload, WeatherWidgetData? config = null)
 	{
 		var icons = WeatherWidgetIcons.EnsureRegistered(WidgetPreviewResources.Store);
 		var state = new UiAsyncState<WeatherStatePayload>(_ => Task.FromResult(payload), payload);
 
-		return WeatherWidgetView.Build(state, new WeatherWidgetData(), icons);
+		return WeatherWidgetView.Build(state, config ?? new WeatherWidgetData(), icons);
 	}
 }

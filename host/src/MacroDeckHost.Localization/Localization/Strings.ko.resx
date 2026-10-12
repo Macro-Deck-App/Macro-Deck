@@ -18391,7 +18391,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>렌더링</value>
   </data>
   <data name="WebClient.Rendering.Simple" xml:space="preserve">
-    <value>간단히</value>
+    <value>컴팩트</value>
   </data>
   <data name="WebClient.Rendering.Standard" xml:space="preserve">
     <value>표준</value>
@@ -20180,6 +20180,13 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>예보</value>
+  </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>최고 {high}° 최저 {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>컴팩트</value>
   </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>예보 일수</value>

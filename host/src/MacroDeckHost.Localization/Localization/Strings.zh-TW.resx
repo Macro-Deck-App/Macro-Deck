@@ -20181,6 +20181,13 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>預報</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>最高 {high}° 最低 {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>精簡</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>預報天數</value>
   </data>

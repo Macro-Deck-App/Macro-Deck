@@ -4,6 +4,12 @@ namespace MacroDeckHost.Widgets.Weather;
 
 public sealed record WeatherWidgetData
 {
+	public const string StyleKey = "style";
+
+	public const string StyleForecast = "forecast";
+
+	public const string StyleCompact = "compact";
+
 	public string? InstanceId { get; init; }
 
 	public bool ShowIcon { get; init; } = true;
@@ -22,6 +28,10 @@ public sealed record WeatherWidgetData
 
 	public string? BackgroundColor { get; init; }
 
+	public string Style { get; init; } = StyleForecast;
+
+	public bool IsCompact => Style == StyleCompact;
+
 	public static WeatherWidgetData Parse(JsonElement data)
 	{
 		if (data.ValueKind != JsonValueKind.Object)
@@ -31,7 +41,7 @@ public sealed record WeatherWidgetData
 
 		return new WeatherWidgetData
 		{
-			InstanceId = ReadString(data, "instanceId"),
+			InstanceId = ReadString(data, "instanceId") is { Length: > 0 } instanceId ? instanceId : null,
 			ShowIcon = ReadBool(data, "showIcon") ?? true,
 			ShowTemperature = ReadBool(data, "showTemperature") ?? true,
 			ShowCondition = ReadBool(data, "showCondition") ?? true,
@@ -42,8 +52,12 @@ public sealed record WeatherWidgetData
 			AnimateIcon = ReadBool(data, "animateIcon") ?? true,
 			ForecastDays = Math.Clamp(ReadInt(data, "forecastDays") ?? 5, 1, 7),
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
+			Style = ReadStyle(data),
 		};
 	}
+
+	private static string ReadStyle(JsonElement data)
+		=> ReadString(data, StyleKey) == StyleCompact ? StyleCompact : StyleForecast;
 
 	private static string? ReadString(JsonElement data, string name)
 		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String

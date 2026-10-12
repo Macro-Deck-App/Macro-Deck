@@ -20157,6 +20157,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>Vorhersage</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>H: {high}° T: {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>Kompakt</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>Vorhersagetage</value>
   </data>

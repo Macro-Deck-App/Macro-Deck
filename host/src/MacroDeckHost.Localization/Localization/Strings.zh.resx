@@ -20163,6 +20163,13 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Weather.Forecast" xml:space="preserve">
     <value>预报</value>
   </data>
+  <data name="Widgets.Weather.HighLow" xml:space="preserve">
+    <value>最高 {high}° 最低 {low}°</value>
+    <comment>[high:int][low:int]</comment>
+  </data>
+  <data name="Widgets.Weather.Styles.Compact" xml:space="preserve">
+    <value>紧凑</value>
+  </data>
   <data name="Widgets.Weather.ForecastDays" xml:space="preserve">
     <value>预报天数</value>
   </data>

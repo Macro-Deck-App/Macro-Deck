@@ -10,6 +10,10 @@
       "type": ["string", "null"],
       "description": "Which weather station (location) this widget displays. Empty or null means the first available station."
     },
+    "style": {
+      "enum": ["forecast", "compact"],
+      "description": "Card layout. forecast shows the current conditions above the multi-day forecast rows; compact shows the location, a large current temperature, the condition and today's high and low. Absent means forecast."
+    },
     "showIcon": {
       "type": "boolean",
       "description": "Show the current-condition icon."
