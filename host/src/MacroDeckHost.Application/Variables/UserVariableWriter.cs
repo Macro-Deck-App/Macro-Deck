@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables.Colors;
@@ -147,15 +146,8 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.WriteFailed());
 		}
 
-		var integration = services.GetRequiredService<IIntegrationRegistry>().Integrations
-			.FirstOrDefault(candidate => string.Equals(candidate.Id, ownerIntegrationId, StringComparison.Ordinal));
-		var name = integration is null || integration.Name.IsEmpty
-			? null
-			: await ActiveLocalization.Resolve(services, integration.Name);
-
-		return await ActiveLocalization.Resolve(services,
-			AppStrings.Errors.Variables.OwnerUnavailable(
-				integration: string.IsNullOrWhiteSpace(name) ? ownerIntegrationId : name));
+		var name = await services.GetRequiredService<VariableOwnerNames>().Resolve(ownerIntegrationId);
+		return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.OwnerUnavailable(integration: name));
 	}
 
 	public async Task<UserVariableCreateResult> CreateAsync(

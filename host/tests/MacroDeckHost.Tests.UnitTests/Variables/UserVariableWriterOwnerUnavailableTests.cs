@@ -99,6 +99,7 @@ public class UserVariableWriterOwnerUnavailableTests
 			var services = new ServiceCollection()
 				.AddScoped<IVariableService>(_ => variables)
 				.AddSingleton<IIntegrationRegistry>(integrations)
+				.AddSingleton<VariableOwnerNames>()
 				.AddSingleton(TestLocalization.Resolver)
 				.AddSingleton<IAppPreferenceService>(new FakeLocalizationPreferences { Culture = culture })
 				.BuildServiceProvider();
