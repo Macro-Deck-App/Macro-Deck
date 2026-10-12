@@ -31,6 +31,12 @@ public sealed record ConfigEntryPrepareArguments
 	public IReadOnlyList<ConfigEntryDto> Siblings { get; init; } = [];
 
 	public bool TitleChanged { get; init; }
+
+	/// <summary>Reserved variable names the host could not hold in earlier attempts of the same change, all of
+	/// them so far. Sent only on a repeated prepare, which the host makes only after a result with
+	/// <see cref="ConfigEntryPrepareResult.RetryOnConflict" />. Additive within protocol v1: a host that
+	/// predates it never sends it.</summary>
+	public IReadOnlyList<string>? RejectedVariableNames { get; init; }
 }
 
 /// <summary>A global variable an entry being prepared will create, so the host can hold its name.</summary>
@@ -55,6 +61,11 @@ public sealed record ConfigEntryPrepareResult
 	public LocalizedText? Error { get; init; }
 
 	public IReadOnlyList<ConfigEntryReservedVariableDto> ReservedVariables { get; init; } = [];
+
+	/// <summary><c>true</c> asks the host to prepare again with the names it could not hold, instead of refusing
+	/// the entry on a reservation conflict. Additive within protocol v1: absent reads as <c>false</c>, and a
+	/// host that predates it refuses on the first conflict.</summary>
+	public bool? RetryOnConflict { get; init; }
 }
 
 /// <summary>Arguments of <c>config-entries/status</c> and <c>config-entries/usable</c>.</summary>

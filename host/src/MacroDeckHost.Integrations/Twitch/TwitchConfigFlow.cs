@@ -5,6 +5,7 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Twitch;
 
@@ -37,7 +38,10 @@ public sealed class TwitchConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> RequestDeviceCode(cancellationToken);
+	{
+		IntegrationHttp.Use(context.Http);
+		return RequestDeviceCode(cancellationToken);
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

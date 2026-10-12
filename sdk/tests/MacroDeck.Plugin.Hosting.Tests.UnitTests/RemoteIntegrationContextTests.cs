@@ -55,7 +55,9 @@ public class RemoteIntegrationContextTests
 			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()),
 			new RemoteColorApi(_invoker, new PluginConnectionState(), stateCache, Serilog.Core.Logger.None),
 			new RemoteNotificationService(_invoker, new PluginConnectionState(), new NotificationResultStore()),
-			weatherProvider: new RemoteWeatherProviderApi(_invoker));
+			weatherProvider: new RemoteWeatherProviderApi(_invoker),
+			locale: new RemoteLocaleApi(_invoker),
+			musicPlayers: new RemoteMusicPlayerApi(stateCache, _invoker, Serilog.Core.Logger.None));
 	}
 
 	[TearDown]
@@ -120,6 +122,15 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.Variables,
 			HostOperations.Variables.Refresh,
 			(context, invoker) => context.Variables.RequestRefreshAsync());
+		yield return Case(HostApis.Variables,
+			HostOperations.Variables.Bind,
+			(context, invoker) =>
+			{
+				invoker.NextResult = JsonSerializer.SerializeToElement(
+					new VariablesBindResult { Outcomes = [VariableBindingOutcomes.Bound] },
+					PluginProtocolJson.Options);
+				return context.Variables.BindAsync([new VariableBindingRequest("a/b", "a_b", VariableType.Text)]);
+			});
 
 		yield return Case(HostApis.Weather,
 			HostOperations.Weather.SnapshotsChanged,
@@ -132,6 +143,14 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.UserVariables,
 			HostOperations.UserVariables.Create,
 			(context, invoker) => context.UserVariables.CreateAsync("n", null, VariableType.Text, "1"));
+
+		yield return Case(HostApis.Locale,
+			HostOperations.Locale.TimeOfDayFormat,
+			(context, invoker) => context.Locale.GetTimeOfDayFormatAsync());
+
+		yield return Case(HostApis.MusicPlayers,
+			HostOperations.MusicPlayers.AlbumColor,
+			(context, invoker) => context.MusicPlayers.GetAlbumColorAsync("spotify::default"));
 
 		yield return Case(HostApis.Colors,
 			HostOperations.Colors.Resolve,
@@ -575,6 +594,11 @@ public class RemoteIntegrationContextTests
 		foreach (var operation in HostOperations.Batteries.All)
 		{
 			covered.Add((HostApis.Batteries, operation));
+		}
+
+		foreach (var operation in HostOperations.CompanionDevices.All)
+		{
+			covered.Add((HostApis.CompanionDevices, operation));
 		}
 
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));

@@ -197,9 +197,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	{
 		// X servers on the evdev/libinput driver (Xorg and XWayland) number keys as evdev code plus 8.
 		const uint EvdevOffset = 8;
-		if (PhysicalKeys.IsPositional(key))
+		if (NativeKeys.IsPositional(key))
 		{
-			return PhysicalKeys.TryGetScanCode(key, out var position) ? position + EvdevOffset : 0;
+			return NativeKeys.TryGetWindowsScanCode(key, out var position) ? position + EvdevOffset : 0;
 		}
 
 		if (!TryGetKeysym(key, out var keysym))
@@ -208,7 +208,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		}
 
 		var keycode = keysymToKeycode(keysym);
-		if (keycode == 0 && key is >= KeyCode.A and <= KeyCode.Z && PhysicalKeys.TryGetScanCode(key, out var letter))
+		if (keycode == 0 && key is >= KeyCode.A and <= KeyCode.Z && NativeKeys.TryGetWindowsScanCode(key, out var letter))
 		{
 			return letter + EvdevOffset;
 		}

@@ -249,20 +249,21 @@ internal sealed class HomeAssistantIntegrationTests
 	[Test]
 	public async Task Initializing_migrates_previously_watched_entities_into_the_binding_store()
 	{
-		var context = new FakeHomeAssistantIntegrationContext();
+		var store = new FakeVariableBindingStore();
+		var context = FakeHomeAssistantIntegrationContext.RecordingBindingsIn(store);
 		var entryId = context.ConfigStore.AddEntry("Home Assistant",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[HomeAssistantConfigKeys.WatchedEntities] = "[\"switch.desk\"]"
 			});
-		var store = new FakeVariableBindingStore();
-		((IHomeAssistantBindingStoreConsumer)_integration).UseBindingStore(store);
 
 		await _integration.InitializeAsync(context);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(store.Load().Select(b => b.Name), Is.EquivalentTo(_migratedDeskSwitchVariableNames));
+			Assert.That(store.Load().Select(b => b.IntegrationId),
+				Has.All.EqualTo(HomeAssistantIntegration.IntegrationId));
 			Assert.That(store.Load(),
 				Has.All.Matches<Domain.Entities.VariableBinding>(b =>
 					b.MigratedFrom == HomeAssistantWatchedEntityMigration.MigratedFromId));
@@ -281,16 +282,38 @@ internal sealed class HomeAssistantIntegrationTests
 	}
 
 	[Test]
+	public async Task A_watched_entity_that_cannot_be_bound_does_not_block_the_others_from_migrating()
+	{
+		var store = new FakeVariableBindingStore();
+		var context = FakeHomeAssistantIntegrationContext.RecordingBindingsIn(store);
+		var entryId = context.ConfigStore.AddEntry("Home Assistant",
+			new Dictionary<string, string?>(StringComparer.Ordinal)
+			{
+				[HomeAssistantConfigKeys.WatchedEntities] = "[\"switch.desk lamp\",\"switch.desk\"]"
+			});
+
+		await _integration.InitializeAsync(context);
+
+		var migrated
+			= await context.ConfigStore.GetStringAsync(entryId, HomeAssistantConfigKeys.WatchedEntitiesMigrated);
+		Assert.Multiple(() =>
+		{
+			Assert.That(store.Load().Select(b => b.LocalResourceId),
+				Is.EquivalentTo(new[] { "entity/switch.desk/state", "entity/switch.desk/attributes" }));
+			Assert.That(migrated, Is.EqualTo("true"));
+		});
+	}
+
+	[Test]
 	public async Task Initializing_a_second_time_does_not_re_run_or_duplicate_the_migration()
 	{
-		var context = new FakeHomeAssistantIntegrationContext();
+		var store = new FakeVariableBindingStore();
+		var context = FakeHomeAssistantIntegrationContext.RecordingBindingsIn(store);
 		context.ConfigStore.AddEntry("Home Assistant",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[HomeAssistantConfigKeys.WatchedEntities] = "[\"switch.desk\"]"
 			});
-		var store = new FakeVariableBindingStore();
-		((IHomeAssistantBindingStoreConsumer)_integration).UseBindingStore(store);
 
 		await _integration.InitializeAsync(context);
 		await _integration.InitializeAsync(context);
@@ -299,29 +322,39 @@ internal sealed class HomeAssistantIntegrationTests
 	}
 
 	[Test]
-	public async Task No_binding_store_means_no_migration_but_initialization_still_succeeds()
+	public async Task A_macro_deck_that_cannot_record_bindings_keeps_the_watched_entities_for_a_later_start()
 	{
 		var context = new FakeHomeAssistantIntegrationContext();
-		context.ConfigStore.AddEntry("Home Assistant",
+		var entryId = context.ConfigStore.AddEntry("Home Assistant",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[HomeAssistantConfigKeys.WatchedEntities] = "[\"switch.desk\"]"
 			});
 
-		Assert.DoesNotThrowAsync(() => _integration.InitializeAsync(context));
+		await _integration.InitializeAsync(context);
+
+		var migrated
+			= await context.ConfigStore.GetStringAsync(entryId, HomeAssistantConfigKeys.WatchedEntitiesMigrated);
+		var watched = await context.ConfigStore.GetStringAsync(entryId, HomeAssistantConfigKeys.WatchedEntities);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integration.IsInitialized, Is.True);
+			Assert.That(migrated, Is.Not.EqualTo("true"));
+			Assert.That(watched, Is.EqualTo("[\"switch.desk\"]"));
+		});
 	}
 
 	[Test]
 	public async Task A_failed_save_does_not_mark_the_migration_complete()
 	{
-		var context = new FakeHomeAssistantIntegrationContext();
+		var store = new FakeVariableBindingStore { FailNextSave = true };
+		var context = FakeHomeAssistantIntegrationContext.RecordingBindingsIn(store);
 		context.ConfigStore.AddEntry("Home Assistant",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[HomeAssistantConfigKeys.WatchedEntities] = "[\"switch.desk\"]"
 			});
-		var store = new FakeVariableBindingStore { FailNextSave = true };
-		((IHomeAssistantBindingStoreConsumer)_integration).UseBindingStore(store);
 
 		await _integration.InitializeAsync(context);
 
@@ -330,7 +363,6 @@ internal sealed class HomeAssistantIntegrationTests
 		// The next start (a fresh integration instance, same store and config) must retry rather than
 		// having given up because MarkCompletedAsync never ran.
 		var retryIntegration = new HomeAssistantIntegration();
-		((IHomeAssistantBindingStoreConsumer)retryIntegration).UseBindingStore(store);
 		await retryIntegration.InitializeAsync(context);
 		retryIntegration.Dispose();
 

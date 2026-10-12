@@ -1,4 +1,5 @@
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 
@@ -87,7 +88,7 @@ internal static class CompanionVariables
 	private static object? Value(CompanionDeviceState state, string slot) => slot switch
 	{
 		"battery_level_percent" => state.BatteryLevelPercent,
-		"charging" => state.Charging,
+		"charging" => state.IsCharging,
 		"orientation" => state.Orientation,
 		"screen_brightness_percent" => state.ScreenBrightnessPercent,
 		"model" => state.Model,

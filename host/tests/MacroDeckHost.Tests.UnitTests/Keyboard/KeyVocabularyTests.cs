@@ -18,10 +18,10 @@ public class KeyVocabularyTests
 		{
 			foreach (var key in _positionalKeys)
 			{
-				Assert.That(PhysicalKeys.IsPositional(key), Is.True, key.ToString());
-				Assert.That(PhysicalKeys.TryGetScanCode(key, out var scan), Is.True, key.ToString());
-				Assert.That(PhysicalKeys.TryGetMacKeyCode(key, out _), Is.True, key.ToString());
-				Assert.That(PhysicalKeys.TryFromScanCode(scan, out var back) ? back : KeyCode.None, Is.EqualTo(key));
+				Assert.That(NativeKeys.IsPositional(key), Is.True, key.ToString());
+				Assert.That(NativeKeys.TryGetWindowsScanCode(key, out var scan), Is.True, key.ToString());
+				Assert.That(NativeKeys.TryGetMacOSKeyCode(key, out _), Is.True, key.ToString());
+				Assert.That(NativeKeys.TryFromWindowsScanCode(scan, out var back) ? back : KeyCode.None, Is.EqualTo(key));
 			}
 		});
 	}
@@ -29,7 +29,7 @@ public class KeyVocabularyTests
 	[Test]
 	public void Letters_digits_and_named_keys_are_not_positional()
 		=> Assert.That(new[] { KeyCode.A, KeyCode.Z, KeyCode.D1, KeyCode.Enter, KeyCode.Numpad1 }
-			.Where(PhysicalKeys.IsPositional), Is.Empty);
+			.Where(NativeKeys.IsPositional), Is.Empty);
 
 	[TestCase(KeyCode.Minus, 0x0C, 27)]
 	[TestCase(KeyCode.BracketLeft, 0x1A, 33)]
@@ -39,8 +39,8 @@ public class KeyVocabularyTests
 	[TestCase(KeyCode.Q, 0x10, 12)]
 	public void Physical_positions_are_the_us_keyboard_positions(KeyCode key, int scan, int macKeyCode)
 	{
-		PhysicalKeys.TryGetScanCode(key, out var actualScan);
-		PhysicalKeys.TryGetMacKeyCode(key, out var actualMac);
+		NativeKeys.TryGetWindowsScanCode(key, out var actualScan);
+		NativeKeys.TryGetMacOSKeyCode(key, out var actualMac);
 		Assert.Multiple(() =>
 		{
 			Assert.That(actualScan, Is.EqualTo(scan));
@@ -53,9 +53,9 @@ public class KeyVocabularyTests
 	{
 		Assert.Multiple(() =>
 		{
-			foreach (var key in Enum.GetValues<KeyCode>().Where(key => PhysicalKeys.TryGetScanCode(key, out _)))
+			foreach (var key in Enum.GetValues<KeyCode>().Where(key => NativeKeys.TryGetWindowsScanCode(key, out _)))
 			{
-				PhysicalKeys.TryGetScanCode(key, out var scan);
+				NativeKeys.TryGetWindowsScanCode(key, out var scan);
 				Assert.That(NativeKeys.FromLinux(scan), Is.EqualTo(key), key.ToString());
 			}
 		});

@@ -321,6 +321,208 @@ public class RemoteAndroidDeviceManagerTests
 		Assert.That(exception!.ErrorCode, Is.EqualTo(AndroidDeviceErrorCode.CommandFailed));
 	}
 
+	private static IEnumerable<TestCaseData> TypedOperations()
+	{
+		yield return Typed(HostOperations.Adb.Key, device => device.SendKeyAsync(AndroidKey.VolumeUp),
+			new AdbKeyArguments { Serial = "A1", Key = AdbKeys.VolumeUp });
+		yield return Typed(HostOperations.Adb.Tap, device => device.TapAsync(10, 20),
+			new AdbTapArguments { Serial = "A1", X = 10, Y = 20 });
+		yield return Typed(HostOperations.Adb.Swipe, device => device.SwipeAsync(1, 2, 3, 4, TimeSpan.FromMilliseconds(250)),
+			new AdbSwipeArguments { Serial = "A1", FromX = 1, FromY = 2, ToX = 3, ToY = 4, DurationMilliseconds = 250 });
+		yield return Typed(HostOperations.Adb.InputText, device => device.InputTextAsync("hello"),
+			new AdbTextArguments { Serial = "A1", Text = "hello" });
+		yield return Typed(HostOperations.Adb.StartApp, device => device.StartAppAsync("com.example.app"),
+			new AdbPackageArguments { Serial = "A1", PackageName = "com.example.app" });
+		yield return Typed(HostOperations.Adb.ForceStopApp, device => device.ForceStopAppAsync("com.example.app"),
+			new AdbPackageArguments { Serial = "A1", PackageName = "com.example.app" });
+		yield return Typed(HostOperations.Adb.OpenUri, device => device.OpenUriAsync("https://example.com"),
+			new AdbUriArguments { Serial = "A1", Uri = "https://example.com" });
+		yield return Typed(HostOperations.Adb.Reboot, device => device.RebootAsync(AndroidRebootMode.Bootloader),
+			new AdbRebootArguments { Serial = "A1", Mode = AdbRebootModes.Bootloader });
+	}
+
+	private static TestCaseData Typed(string operation, Func<IAndroidDevice, Task> exercise, object arguments)
+		=> new TestCaseData(operation, exercise, arguments).SetName($"{{m}}({operation})");
+
+	[TestCaseSource(nameof(TypedOperations))]
+	public async Task Every_typed_operation_sends_its_adb_operation_and_arguments(string operation,
+		Func<IAndroidDevice, Task> exercise,
+		object arguments)
+	{
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online));
+
+		await exercise(_manager.FindDevice("A1")!);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That((_invoker.LastApi, _invoker.LastOperation), Is.EqualTo((HostApis.Adb, operation)));
+			Assert.That(_invoker.LastArguments, Is.EqualTo(arguments));
+		});
+	}
+
+	[Test]
+	public void A_typed_operation_against_a_host_that_predates_it_is_unsupported()
+	{
+		var device = new RemoteAndroidDevice("A1", new FailingHostInvoker(new ProtocolError
+		{
+			Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'key'", Retryable = false
+		}));
+
+		var exception = Assert.ThrowsAsync<AndroidDeviceException>(() => device.SendKeyAsync(AndroidKey.Home));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(AndroidDeviceErrorCode.Unsupported));
+	}
+
+	[Test]
+	public async Task The_status_is_read_from_the_host_and_null_while_it_has_no_reading()
+	{
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online));
+		var device = _manager.FindDevice("A1")!;
+
+		var before = await device.GetStatusAsync();
+		_invoker.NextResult = Json(new AdbDeviceStatusDto { ScreenOn = true, Locked = false, ForegroundPackage = "com.example.app" });
+		var after = await device.GetStatusAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That((_invoker.LastApi, _invoker.LastOperation), Is.EqualTo((HostApis.Adb, HostOperations.Adb.Status)));
+			Assert.That(before, Is.Null);
+			Assert.That(after,
+				Is.EqualTo(new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" }));
+		});
+	}
+
+	[Test]
+	public async Task The_status_from_a_host_that_predates_it_is_null()
+	{
+		var device = new RemoteAndroidDevice("A1", new FailingHostInvoker(new ProtocolError
+		{
+			Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "no operation 'status'", Retryable = false
+		}));
+
+		Assert.That(await device.GetStatusAsync(), Is.Null);
+	}
+
+	[Test]
+	public async Task A_screenshot_arrives_over_the_host_asset_channel_named_in_the_reply()
+	{
+		var assets = new ScriptedHostAssets();
+		var manager = new RemoteAndroidDeviceManager(_invoker, _cache, Serilog.Core.Logger.None, assets);
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online));
+		byte[] png = [137, 80, 78, 71];
+		assets.Transfers["transfer-1"] = new HostAssetTransfer(true, "image/png", png);
+		_invoker.NextResult = Json(new AdbScreenshotResultDto
+		{
+			ByteLength = png.Length, ContentHash = "sha256:x", TransferId = "transfer-1"
+		});
+
+		var bytes = await manager.FindDevice("A1")!.CaptureScreenshotAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(bytes, Is.EqualTo(png));
+			Assert.That(_invoker.LastOperation, Is.EqualTo(HostOperations.Adb.Screenshot));
+		});
+	}
+
+	[Test]
+	public void A_device_lacking_usb_permission_reads_unauthorized_and_a_change_of_it_is_reported()
+	{
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Unauthorized));
+		_events.Clear();
+
+		Push(2, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Unauthorized) with { LacksUsbPermission = true });
+
+		var device = _manager.FindDevice("A1")!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.State, Is.EqualTo(AndroidDeviceState.Unauthorized));
+			Assert.That(device.LacksUsbPermission, Is.True);
+			Assert.That(_events, Is.EqualTo(new[] { "state:A1:Unauthorized->Unauthorized" }));
+		});
+	}
+
+	[Test]
+	public void An_offline_device_carries_the_mode_the_host_reports_and_a_mode_change_is_reported()
+	{
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Offline), Device("B2", AdbDeviceStates.Offline) with { Mode = "warp" });
+		_events.Clear();
+
+		Push(2, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Offline) with { Mode = AdbDeviceModes.Recovery },
+			Device("B2", AdbDeviceStates.Offline) with { Mode = "warp" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_manager.FindDevice("A1")!.Mode, Is.EqualTo(AndroidDeviceMode.Recovery));
+			Assert.That(_manager.FindDevice("B2")!.Mode, Is.EqualTo(AndroidDeviceMode.Unknown));
+			Assert.That(_events, Is.EqualTo(new[] { "state:A1:Offline->Offline" }));
+		});
+	}
+
+	[Test]
+	public void A_missing_adb_is_reported_from_the_push_and_absent_from_an_older_host()
+	{
+		Push(1, AdbAccessStates.Available);
+		var older = _manager.IsAdbUnavailable;
+		_events.Clear();
+
+		_cache.Apply(new ProtocolEnvelope
+		{
+			Type = MessageTypes.HostState,
+			Id = Guid.NewGuid().ToString(),
+			Payload = JsonSerializer.SerializeToElement(new HostStatePayload
+				{
+					Api = HostApis.Adb,
+					Data = JsonSerializer.SerializeToElement(new AdbStateDto
+						{
+							Access = AdbAccessStates.Available, AdbUnavailable = true, Revision = 2
+						},
+						PluginProtocolJson.Options)
+				},
+				PluginProtocolJson.Options)
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(older, Is.False);
+			Assert.That(_manager.IsAdbUnavailable, Is.True);
+			Assert.That(_events, Is.EqualTo(new[] { "access" }));
+		});
+	}
+
+	[Test]
+	public void The_default_device_is_the_one_the_host_names_and_none_from_a_host_that_names_none()
+	{
+		Push(1, AdbAccessStates.Available, Device("A1", AdbDeviceStates.Online), Device("B2", AdbDeviceStates.Online));
+		var none = _manager.DefaultDevice;
+
+		_cache.Apply(new ProtocolEnvelope
+		{
+			Type = MessageTypes.HostState,
+			Id = Guid.NewGuid().ToString(),
+			Payload = JsonSerializer.SerializeToElement(new HostStatePayload
+				{
+					Api = HostApis.Adb,
+					Data = JsonSerializer.SerializeToElement(new AdbStateDto
+						{
+							Access = AdbAccessStates.Available,
+							Devices = [Device("A1", AdbDeviceStates.Online)],
+							DefaultDeviceSerial = "B2",
+							Revision = 2
+						},
+						PluginProtocolJson.Options)
+				},
+				PluginProtocolJson.Options)
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(none, Is.Null);
+			Assert.That(_manager.DefaultDevice?.Serial, Is.EqualTo("B2"));
+			Assert.That(_manager.FindDevice("B2"), Is.Null, "the default device can be one that is not attached");
+		});
+	}
+
 	private void Push(long revision, string access, params AdbDeviceStateDto[] devices)
 		=> _cache.Apply(new ProtocolEnvelope
 		{
@@ -359,5 +561,19 @@ public class RemoteAndroidDeviceManagerTests
 			=> Task.FromException<JsonElement?>(HostInvocationException.From(error));
 
 		public bool TryComplete(ProtocolEnvelope result) => false;
+	}
+
+	private sealed class ScriptedHostAssets : IPluginHostAssetReceiver
+	{
+		public Dictionary<string, HostAssetTransfer> Transfers { get; } = new(StringComparer.Ordinal);
+
+		public Task<HostAssetTransfer> AwaitAsync(string transferId, CancellationToken cancellationToken)
+			=> Task.FromResult(Transfers[transferId]);
+
+		public ProtocolEnvelope Handle(ProtocolEnvelope envelope) => throw new NotSupportedException();
+
+		public void Reset()
+		{
+		}
 	}
 }

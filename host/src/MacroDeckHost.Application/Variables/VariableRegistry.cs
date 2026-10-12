@@ -100,35 +100,20 @@ public sealed class VariableRegistry
 	internal bool TryReserveGlobalIntegrationVariables(
 		Guid token,
 		string integrationId,
-		IReadOnlyList<IntegrationVariableReservation> variables)
+		IReadOnlyList<IntegrationVariableReservation> variables,
+		out IReadOnlyList<string> conflictingNames)
 	{
 		lock (_lock)
 		{
-			foreach (var variable in variables)
+			var conflicts = variables
+				.Where(variable => Conflicts(token, integrationId, variable))
+				.Select(variable => variable.Name)
+				.Distinct(StringComparer.Ordinal)
+				.ToList();
+			conflictingNames = conflicts;
+			if (conflicts.Count > 0)
 			{
-				var key = (VariableScope.Global, (string?)null, variable.Name);
-				if (_reservations.TryGetValue(key, out var reserved) && reserved.Token != token)
-				{
-					return false;
-				}
-
-				if (_byKey.TryGetValue(key, out var existingId) &&
-					(!_byId.TryGetValue(existingId, out var existing) ||
-						!Matches(existing.Variable, integrationId, variable.DefinitionId, variable.Type)))
-				{
-					return false;
-				}
-
-				if (QualifiedId.TryCreate(integrationId,
-						variable.DefinitionId,
-						LocalIdKind.Resource,
-						out var qualified) &&
-					_byDefinition.TryGetValue(qualified.ToString(), out var definitionId) &&
-					(!_byId.TryGetValue(definitionId, out var definition) ||
-						!Matches(definition.Variable, integrationId, variable.DefinitionId, variable.Type)))
-				{
-					return false;
-				}
+				return false;
 			}
 
 			foreach (var variable in variables)
@@ -141,6 +126,30 @@ public sealed class VariableRegistry
 
 			return true;
 		}
+	}
+
+	private bool Conflicts(Guid token, string integrationId, IntegrationVariableReservation variable)
+	{
+		var key = (VariableScope.Global, (string?)null, variable.Name);
+		if (_reservations.TryGetValue(key, out var reserved) && reserved.Token != token)
+		{
+			return true;
+		}
+
+		if (_byKey.TryGetValue(key, out var existingId) &&
+			(!_byId.TryGetValue(existingId, out var existing) ||
+				!Matches(existing.Variable, integrationId, variable.DefinitionId, variable.Type)))
+		{
+			return true;
+		}
+
+		return QualifiedId.TryCreate(integrationId,
+				variable.DefinitionId,
+				LocalIdKind.Resource,
+				out var qualified) &&
+			_byDefinition.TryGetValue(qualified.ToString(), out var definitionId) &&
+			(!_byId.TryGetValue(definitionId, out var definition) ||
+				!Matches(definition.Variable, integrationId, variable.DefinitionId, variable.Type));
 	}
 
 	internal void ReleaseIntegrationVariableReservation(Guid token)

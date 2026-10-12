@@ -24,7 +24,7 @@ internal sealed class HomeAssistantConfigFlowTests
 	[Test]
 	public async Task The_flow_starts_on_the_connection_step()
 	{
-		var result = await _flow.StartAsync(null!, CancellationToken.None);
+		var result = await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{

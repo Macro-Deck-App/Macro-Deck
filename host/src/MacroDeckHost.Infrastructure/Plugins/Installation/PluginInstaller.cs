@@ -71,6 +71,7 @@ public sealed class PluginInstaller : IPluginInstaller
 	private readonly DurableJsonFile _currentVersionFiles;
 	private readonly IPluginAdbConsentNotifier? _adbConsent;
 	private readonly IPluginIconPackSync? _iconPackSync;
+	private readonly IPluginCompanionDeviceConsentNotifier? _companionConsent;
 
 	public PluginInstaller(IMacroDeckPaths paths,
 		IPluginArtifactReader artifactReader,
@@ -89,9 +90,11 @@ public sealed class PluginInstaller : IPluginInstaller
 		TimeProvider timeProvider,
 		ILogger logger,
 		IPluginAdbConsentNotifier? adbConsent = null,
-		IPluginIconPackSync? iconPackSync = null)
+		IPluginIconPackSync? iconPackSync = null,
+		IPluginCompanionDeviceConsentNotifier? companionConsent = null)
 	{
 		_adbConsent = adbConsent;
+		_companionConsent = companionConsent;
 		_iconPackSync = iconPackSync;
 		_paths = paths;
 		_artifactReader = artifactReader;
@@ -509,6 +512,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			await _integrationRegistrar.ForgetAsync(pluginId, cancellationToken);
 
 			_adbConsent?.Dismiss(pluginId);
+			_companionConsent?.Dismiss(pluginId);
 
 			PluginInstallerLog.Uninstalled(_logger, pluginId, request.KeepData);
 			uninstalled = PluginInstallResult.Ok(pluginId,
@@ -889,6 +893,7 @@ public sealed class PluginInstaller : IPluginInstaller
 		IReadOnlyList<PluginInstallWarning> warnings;
 		bool canStart;
 		bool previouslyDeclaredAdb;
+		bool previouslyDeclaredCompanionDevices;
 		try
 		{
 			if (await PromoteStagedVersion(manifest.Id,
@@ -932,6 +937,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			// perfectly good install of a cross-platform artifact.
 			canStart = request.StartAfterActivation && HasEntrypointForThisHost(manifest);
 			previouslyDeclaredAdb = ActiveVersionDeclaresAdb(manifest.Id);
+			previouslyDeclaredCompanionDevices = ActiveVersionDeclares(manifest.Id, PluginPermissions.HostCompanionDevices);
 			handedOver = true;
 		}
 		finally
@@ -967,6 +973,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			}
 
 			await AskForAdbConsentAsync(manifest, previouslyDeclaredAdb, cancellationToken);
+			await AskForCompanionDeviceConsentAsync(manifest, previouslyDeclaredCompanionDevices, cancellationToken);
 
 			// A plugin that was activated but deliberately not started never welcomes a session, and the
 			// registrar only registers such plugins at startup. Without this an install held back by a
@@ -1255,8 +1262,39 @@ public sealed class PluginInstaller : IPluginInstaller
 			PluginHostCompatibility.ClassifyMacroDeckRange(hostRange, HostVersion.Current));
 	}
 
-	private static bool DeclaresAdb(PluginManifest manifest)
-		=> manifest.Permissions?.Contains(PluginPermissions.HostAdb, StringComparer.Ordinal) == true;
+	private static bool DeclaresAdb(PluginManifest manifest) => Declares(manifest, PluginPermissions.HostAdb);
+
+	private static bool Declares(PluginManifest manifest, string permission)
+		=> manifest.Permissions?.Contains(permission, StringComparer.Ordinal) == true;
+
+	private async Task AskForCompanionDeviceConsentAsync(PluginManifest manifest,
+		bool previouslyDeclared,
+		CancellationToken cancellationToken)
+	{
+		if (_companionConsent is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await _companionConsent.NotifyIfNeededAsync(manifest.Id,
+				manifest.Name ?? manifest.Id,
+				Declares(manifest, PluginPermissions.HostCompanionDevices),
+				previouslyDeclared,
+				cancellationToken);
+		}
+		catch (Exception exception) when (exception is not (OperationCanceledException or OutOfMemoryException))
+		{
+			_logger.Warning(exception, "Could not ask whether {PluginId} may use Companion devices", manifest.Id);
+		}
+	}
+
+	private bool ActiveVersionDeclares(string pluginId, string permission)
+		=> _catalog.TryResolveActive(pluginId, out var active) &&
+			active is not null &&
+			_manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest is { } manifest &&
+			Declares(manifest, permission);
 
 	private async Task AskForAdbConsentAsync(PluginManifest manifest,
 		bool previouslyDeclaredAdb,
@@ -1315,6 +1353,12 @@ public sealed class PluginInstaller : IPluginInstaller
 		{
 			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.UsesAdb,
 				"The plugin uses ADB to work with Android devices."));
+		}
+
+		if (Declares(manifest, PluginPermissions.HostCompanionDevices))
+		{
+			warnings.Add(PluginInstallWarning.Advisory(PluginDependencyWarningCodes.UsesCompanionDevices,
+				"The plugin uses the devices connected through Macro Deck Companion."));
 		}
 
 		if (!HasEntrypointForThisHost(manifest))

@@ -1,6 +1,5 @@
 using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Delegation.Protocol;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -9,15 +8,15 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation;
 
 [MacroDeckIntegration]
 public sealed class DelegateIntegration
-	: IIntegration, IConfigFlowProvider, IVariableProvider, IIntegrationIconProvider, IIntegrationIssueProvider,
-		IVariablePollingInvalidationConsumer, IDisposable
+	: IIntegration, IConfigFlowProvider, IVariableProvider, IIntegrationIconProvider, IIntegrationIssueProvider, IDisposable
 {
-	public const string IntegrationId = SharedVariables.DelegateIntegrationId;
+	public const string IntegrationId = "app.macro-deck.delegate";
 
 	internal const string SharedImportIssuePrefix = "shared-import:";
 
@@ -34,7 +33,6 @@ public sealed class DelegateIntegration
 
 	private IIntegrationConfig? _config;
 	private IVariableApi? _variableApi;
-	private IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private volatile DelegateSharedImports _imports = DelegateSharedImports.Empty;
 	private DateTimeOffset _importsBuiltAt = DateTimeOffset.MinValue;
 	private volatile bool _disposed;
@@ -93,6 +91,7 @@ public sealed class DelegateIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_config = context.Config;
 		_variableApi = context.Variables;
 
@@ -107,9 +106,6 @@ public sealed class DelegateIntegration
 		IsInitialized = false;
 		await _remotes.ShutdownAsync();
 	}
-
-	public void UseVariablePollingInvalidation(IVariablePollingInvalidationSignal signal)
-		=> _pollingInvalidation = signal;
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -218,7 +214,10 @@ public sealed class DelegateIntegration
 				}
 			}
 
-			_pollingInvalidation?.MarkStale(IntegrationId);
+			if (_variableApi is { } declarations)
+			{
+				await declarations.NotifyDeclarationsChangedAsync();
+			}
 		}
 		catch (Exception ex)
 		{

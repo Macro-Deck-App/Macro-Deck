@@ -33,7 +33,7 @@ internal sealed class CompanionReadinessTests
 		{
 			Assert.That(pendingBeforeReport, Is.True);
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(SentCommands(harness), Is.EqualTo(new[] { CompanionCommand.ScreenOn }));
+			Assert.That(SentCommands(harness), Is.EqualTo(new[] { "screenOn" }));
 		});
 	}
 

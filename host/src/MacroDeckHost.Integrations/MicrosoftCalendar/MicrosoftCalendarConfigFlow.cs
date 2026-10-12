@@ -6,6 +6,7 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.MicrosoftCalendar;
 
@@ -45,7 +46,10 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(AppStep(context.OAuth.RedirectUri)));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(AppStep(context.OAuth.RedirectUri)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

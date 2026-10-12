@@ -10,6 +10,7 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.Calendar;
+using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using DomainEnums = MacroDeckHost.Domain.Enums;
@@ -43,7 +44,6 @@ internal sealed class ConfigEntryLifecycleTests
 			new ConfigurableIntegrationRegistry([_integration]),
 			new RecordingMediator(),
 			new VariablePollingInvalidationSignal(),
-			[],
 			Serilog.Core.Logger.None,
 			_variables);
 	}
@@ -187,8 +187,107 @@ internal sealed class ConfigEntryLifecycleTests
 		Assert.That(_lifecycle.Reinitializations, Is.EqualTo(new[] { IntegrationId }));
 	}
 
+	[Test]
+	public async Task An_integration_that_asks_to_retry_is_prepared_again_with_every_name_that_was_taken()
+	{
+		_integration.RetriesOnConflict = true;
+		AddVariable("server_home_status", "app.example.other", "server_home_status");
+		AddVariable("server_home_2_status", "app.example.other", "server_home_2_status");
+
+		var outcome = await CompleteAsync(Guid.NewGuid(), "Home");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Success, Is.True);
+			Assert.That(_store.Entries.Single().Values["key"].GetString(), Is.EqualTo("home_3"));
+			Assert.That(_integration.Rejections, Is.EqualTo(new[]
+			{
+				Array.Empty<string>(),
+				["server_home_status"],
+				["server_home_status", "server_home_2_status"]
+			}));
+		});
+	}
+
+	[Test]
+	public async Task An_integration_that_does_not_ask_to_retry_is_prepared_once()
+	{
+		AddVariable("server_home_status", "app.example.other", "server_home_status");
+
+		var outcome = await CompleteAsync(Guid.NewGuid(), "Home");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Success, Is.False);
+			Assert.That(_integration.Rejections, Has.Count.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Retrying_stops_with_unavailable_names_once_the_attempt_limit_runs_out()
+	{
+		_integration.RetriesOnConflict = true;
+		for (var suffix = 1; suffix <= 40; suffix++)
+		{
+			var name = suffix == 1 ? "server_home_status" : $"server_home_{suffix}_status";
+			AddVariable(name, "app.example.other", name);
+		}
+
+		var outcome = await CompleteAsync(Guid.NewGuid(), "Home");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Success, Is.False);
+			Assert.That(outcome.Error.ToString(),
+				Is.EqualTo(((LocalizedText)AppStrings.Errors.Config.VariableNamesUnavailable()).ToString()));
+			Assert.That(_integration.Rejections, Has.Count.EqualTo(32));
+			Assert.That(_store.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Synchronizing_hands_the_integration_its_own_variable_api()
+	{
+		var variables = new RecordingVariableApi();
+		var services = new ServiceCollection();
+		services.AddSingleton<IIntegrationConfigStore>(_store);
+		var coordinator = new IntegrationConfigMutationCoordinator(
+			services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+			_lifecycle,
+			new ConfigurableIntegrationRegistry([_integration]),
+			new RecordingMediator(),
+			new VariablePollingInvalidationSignal(),
+			Serilog.Core.Logger.None,
+			_variables,
+			new FixedVariableApis(variables));
+
+		await coordinator.CompleteAsync(IntegrationId,
+			Guid.NewGuid(),
+			"Home",
+			new Dictionary<string, JsonElement>(),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_integration.SynchronizedWith, Is.EqualTo(new[] { variables }));
+			Assert.That(_integration.Synchronized, Has.Count.EqualTo(1));
+		});
+	}
+
+	private sealed class FixedVariableApis(IVariableApi variables) : IIntegrationVariableApiFactory
+	{
+		public IVariableApi Create(string integrationId, IServiceProvider scopedServices)
+			=> integrationId == IntegrationId ? variables : throw new InvalidOperationException(integrationId);
+	}
+
 	private sealed class ServersIntegration : IIntegration, IConfigEntryLifecycle
 	{
+		public bool RetriesOnConflict { get; set; }
+
+		public List<IReadOnlyList<string>> Rejections { get; } = [];
+
+		public List<IVariableApi> SynchronizedWith { get; } = [];
+
 		public string Id => IntegrationId;
 
 		public LocalizedText Name => "Servers";
@@ -219,14 +318,24 @@ internal sealed class ConfigEntryLifecycleTests
 				return Task.FromResult(ConfigEntryPreparationResult.Refuse("A title is required."));
 			}
 
-			var key = preparation.Title.Trim().ToLowerInvariant();
+			Rejections.Add(preparation.RejectedVariableNames);
+			var stem = preparation.Title.Trim().ToLowerInvariant();
+			var key = stem;
+			for (var suffix = 2; preparation.RejectedVariableNames.Contains($"server_{key}_status"); suffix++)
+			{
+				key = $"{stem}_{suffix}";
+			}
+
 			var values = new Dictionary<string, JsonElement>(preparation.Values)
 			{
 				["key"] = JsonSerializer.SerializeToElement(key)
 			};
 
 			return Task.FromResult(ConfigEntryPreparationResult.Accept(values,
-				[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]));
+				[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]) with
+			{
+				RetryOnConflict = RetriesOnConflict
+			});
 		}
 
 		public TaskCompletionSource? Stall { get; set; }
@@ -270,6 +379,14 @@ internal sealed class ConfigEntryLifecycleTests
 		{
 			Synchronized.Add(entries);
 			return Task.CompletedTask;
+		}
+
+		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+			IVariableApi variables,
+			CancellationToken cancellationToken)
+		{
+			SynchronizedWith.Add(variables);
+			return SynchronizeEntriesAsync(entries, cancellationToken);
 		}
 
 		public Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken = default)

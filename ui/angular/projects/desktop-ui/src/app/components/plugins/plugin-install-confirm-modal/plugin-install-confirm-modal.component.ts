@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppStrings, AppStringsKey, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { AppStrings, AppStringsKey, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PLUGIN_WARNING_USES_COMPANION_DEVICES, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { BackupService } from '../../../services/backup.service';
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
@@ -300,7 +300,9 @@ export class PluginInstallConfirmModalComponent {
       .map(warning => ({
         message: warning.code === PLUGIN_WARNING_USES_ADB
           ? this.localization.translateKey(AppStrings.Plugins.UsesAdbNote)
-          : warning.message,
+          : warning.code === PLUGIN_WARNING_USES_COMPANION_DEVICES
+            ? this.localization.translateKey(AppStrings.Plugins.UsesCompanionDevicesNote)
+            : warning.message,
         severity: warning.severity === 'blocking' ? 'error' : 'warn',
         blocking: warning.severity === 'blocking'
       }))

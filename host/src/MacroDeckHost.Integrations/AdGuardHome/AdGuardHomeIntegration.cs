@@ -14,6 +14,7 @@ using MacroDeckHost.Integrations.AdGuardHome.Actions;
 using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
@@ -99,6 +100,7 @@ public sealed partial class AdGuardHomeIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		_hub.UseExecutor(ExecuteAsync);
 		await ReloadConfigurationsAsync(CancellationToken.None);

@@ -29,6 +29,7 @@ public sealed class PluginAssetReceiver : IPluginAssetReceiver
 
 		if (string.IsNullOrEmpty(assetId) ||
 			!AssetKinds.IsKnown(kind) ||
+			kind is AssetKinds.AndroidScreenshot or AssetKinds.CompanionScreenshot ||
 			string.IsNullOrEmpty(mimeType) ||
 			string.IsNullOrEmpty(contentHash) ||
 			totalBytes < 0)

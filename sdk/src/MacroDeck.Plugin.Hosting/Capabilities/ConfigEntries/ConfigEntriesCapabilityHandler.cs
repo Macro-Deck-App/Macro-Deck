@@ -10,7 +10,9 @@ using MacroDeck.Sdk.ConfigFlow;
 
 namespace MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 
-internal sealed class ConfigEntriesCapabilityHandler(IEnumerable<IPluginIntegration> integrations) : ICapabilityHandler
+internal sealed class ConfigEntriesCapabilityHandler(
+	IEnumerable<IPluginIntegration> integrations,
+	IIntegrationContext? context = null) : ICapabilityHandler
 {
 	private static readonly CapabilityVersionRange _version = new() { Minimum = 1, Maximum = 1 };
 
@@ -64,7 +66,8 @@ internal sealed class ConfigEntriesCapabilityHandler(IEnumerable<IPluginIntegrat
 							Values = arguments.Values,
 							Existing = arguments.Existing is null ? null : ToEntry(arguments.Existing),
 							Siblings = [.. arguments.Siblings.Select(ToEntry)],
-							TitleChanged = arguments.TitleChanged
+							TitleChanged = arguments.TitleChanged,
+							RejectedVariableNames = arguments.RejectedVariableNames ?? []
 						},
 						cancellationToken)
 					.ConfigureAwait(false);
@@ -74,6 +77,7 @@ internal sealed class ConfigEntriesCapabilityHandler(IEnumerable<IPluginIntegrat
 					Success = result.Success,
 					Values = result.Values,
 					Error = result.Success || result.Error.IsEmpty ? null : result.Error,
+					RetryOnConflict = result.RetryOnConflict ? true : null,
 					ReservedVariables =
 					[
 						.. result.ReservedVariables
@@ -124,7 +128,11 @@ internal sealed class ConfigEntriesCapabilityHandler(IEnumerable<IPluginIntegrat
 					return MissingArguments(invocation.Operation);
 				}
 
-				await _lifecycle.SynchronizeEntriesAsync([.. arguments.Entries.Select(ToEntry)], cancellationToken)
+				var entries = arguments.Entries.Select(ToEntry).ToList();
+				var variables = context?.Variables;
+				await (variables is null
+						? _lifecycle.SynchronizeEntriesAsync(entries, cancellationToken)
+						: _lifecycle.SynchronizeEntriesAsync(entries, variables, cancellationToken))
 					.ConfigureAwait(false);
 				return CapabilityInvocationResult.Ok();
 			}

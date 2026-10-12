@@ -17,8 +17,9 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 	private readonly ILogger _logger;
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, InProcessAndroidDevice> _known = new(StringComparer.Ordinal);
-	private IReadOnlyList<InProcessAndroidDevice> _attached = [];
+	private List<InProcessAndroidDevice> _attached = [];
 	private AndroidDeviceAccess _access = AndroidDeviceAccess.AdbNotEnabled;
+	private bool _adbUnavailable;
 
 	public InProcessAndroidDeviceManager(IAdbManager adbManager,
 		IAdbDeviceOperations operations,
@@ -68,6 +69,39 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 		lock (_gate)
 		{
 			return _attached.FirstOrDefault(device => string.Equals(device.Serial, serial, StringComparison.Ordinal));
+		}
+	}
+
+	public bool IsAdbUnavailable
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _adbUnavailable;
+			}
+		}
+	}
+
+	public IAndroidDevice? DefaultDevice
+	{
+		get
+		{
+			var configured = _adbManager.Status.DefaultDeviceSerial;
+			lock (_gate)
+			{
+				if (_access != AndroidDeviceAccess.Available)
+				{
+					return null;
+				}
+
+				if (!string.IsNullOrWhiteSpace(configured))
+				{
+					return _known.GetValueOrDefault(configured);
+				}
+
+				return _attached.Count == 1 ? _attached[0] : null;
+			}
 		}
 	}
 
@@ -142,9 +176,11 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 		var changes = new List<Change>();
 		lock (_gate)
 		{
-			if (access != _access)
+			var adbUnavailable = access == AndroidDeviceAccess.Available && status.ResolvedExecutablePath is null;
+			if (access != _access || adbUnavailable != _adbUnavailable)
 			{
 				_access = access;
+				_adbUnavailable = adbUnavailable;
 				changes.Add(new Change(ChangeKind.Access, null, null));
 			}
 
@@ -154,18 +190,24 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 			{
 				var device = Known(adbDevice.Serial);
 				var previousState = device.State;
+				var previousLacksUsbPermission = device.LacksUsbPermission;
+				var previousMode = device.Mode;
 				device.Update(new AndroidDeviceInfo(adbDevice.Model, adbDevice.Manufacturer, adbDevice.Product)
 					{
 						StableId = adbDevice.StableId
 					},
-					ToState(adbDevice.State));
+					ToState(adbDevice.State),
+					adbDevice.State == AdbDeviceState.NoPermissions,
+					ToMode(adbDevice.State));
 				attached.Add(device);
 
 				if (!before.Remove(adbDevice.Serial))
 				{
 					changes.Add(new Change(ChangeKind.Connected, device, null));
 				}
-				else if (previousState != device.State)
+				else if (previousState != device.State ||
+					previousLacksUsbPermission != device.LacksUsbPermission ||
+					previousMode != device.Mode)
 				{
 					changes.Add(new Change(ChangeKind.StateChanged, device, previousState));
 				}
@@ -182,7 +224,7 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 	{
 		if (!_known.TryGetValue(serial, out var device))
 		{
-			device = new InProcessAndroidDevice(serial, this, _operations);
+			device = new InProcessAndroidDevice(serial, this, _operations, _adbManager);
 			_known[serial] = device;
 		}
 
@@ -223,6 +265,16 @@ public sealed class InProcessAndroidDeviceManager : IAndroidDeviceManager, IDisp
 			AdbDeviceState.Authorizing => AndroidDeviceState.Connecting,
 			AdbDeviceState.Unauthorized or AdbDeviceState.NoPermissions => AndroidDeviceState.Unauthorized,
 			_ => AndroidDeviceState.Offline
+		};
+
+	internal static AndroidDeviceMode ToMode(AdbDeviceState state)
+		=> state switch
+		{
+			AdbDeviceState.Bootloader => AndroidDeviceMode.Bootloader,
+			AdbDeviceState.Recovery => AndroidDeviceMode.Recovery,
+			AdbDeviceState.Sideload => AndroidDeviceMode.Sideload,
+			AdbDeviceState.Unknown => AndroidDeviceMode.Unknown,
+			_ => AndroidDeviceMode.Normal
 		};
 
 	private enum ChangeKind

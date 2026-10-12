@@ -15,13 +15,14 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Infrastructure.Widgets;
-using MacroDeckHost.Integrations.Adb;
-using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Widgets;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Decks;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
@@ -51,8 +52,6 @@ public sealed class IntegrationInitializer
 	private readonly IEventBus _eventBus;
 	private readonly IEventBindingTracker _bindingTracker;
 	private readonly IUserNotificationStore _userNotificationStore;
-	private readonly IAdbGateway _adbGateway;
-	private readonly ICompanionGateway _companionGateway;
 	private readonly IVariableBindingStore _bindingStore;
 	private readonly IVariableRefreshSignal _refreshSignal;
 	private readonly IIntegrationHostIssueStore _hostIssueStore;
@@ -64,10 +63,11 @@ public sealed class IntegrationInitializer
 	private readonly DeviceProviderHost _deviceProviders;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
-	private readonly IKnownAudioDeviceStore? _knownAudioDevices;
 	private readonly IVariablePollingInvalidationSignal? _pollingInvalidation;
 	private readonly CalendarHostServices? _calendarServices;
 	private readonly IMusicPlayerAlbumColor? _albumColor;
+	private readonly IMusicPlayerRegistry? _musicPlayerRegistry;
+	private readonly IMusicPlayerStateNotifier? _musicPlayerNotifier;
 	private readonly INotificationManager? _notificationManager;
 	private readonly IUiResourceStore? _uiResourceStore;
 	private readonly IMusicPlayerArtworkService? _musicPlayerArtwork;
@@ -79,6 +79,10 @@ public sealed class IntegrationInitializer
 	private readonly BatteryProviderHost? _batteryProviders;
 	private readonly InProcessAndroidDeviceManager? _androidDevices;
 	private readonly IntegrationWeatherProviderApi? _weatherProvider;
+	private readonly IntegrationStorageProvider? _storage;
+	private readonly ILocaleApi? _locale;
+	private readonly IHostHttp? _http;
+	private readonly ICompanionDeviceApi? _companionDevices;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -87,6 +91,7 @@ public sealed class IntegrationInitializer
 	private readonly PluginColorWatches _colorWatches;
 	private readonly ConcurrentDictionary<string, InProcessColorApi> _colorApis = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, InProcessBatteryApi> _batteryApis = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, InProcessMusicPlayerApi> _musicPlayerApis = new(StringComparer.Ordinal);
 
 	public IntegrationInitializer(
 		IServiceScopeFactory serviceScopeFactory,
@@ -98,8 +103,6 @@ public sealed class IntegrationInitializer
 		IEventBus eventBus,
 		IEventBindingTracker bindingTracker,
 		IUserNotificationStore userNotificationStore,
-		IAdbGateway adbGateway,
-		ICompanionGateway companionGateway,
 		IVariableBindingStore bindingStore,
 		IVariableRefreshSignal refreshSignal,
 		IIntegrationHostIssueStore hostIssueStore,
@@ -113,7 +116,6 @@ public sealed class IntegrationInitializer
 		ILogger logger,
 		IMessageBroker messageBroker,
 		PluginColorWatches colorWatches,
-		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		CalendarHostServices? calendarServices = null,
 		IMusicPlayerAlbumColor? albumColor = null,
@@ -126,9 +128,21 @@ public sealed class IntegrationInitializer
 		BatteryProviderHost? batteryProviders = null,
 		InProcessAndroidDeviceManager? androidDevices = null,
 		IWeatherBroadcastTrigger? weatherTrigger = null,
+		IntegrationStorageProvider? storage = null,
+		ILocaleApi? locale = null,
+		IHostHttp? http = null,
+		ICompanionDeviceApi? companionDevices = null,
+		IMusicPlayerRegistry? musicPlayerRegistry = null,
+		IMusicPlayerStateNotifier? musicPlayerNotifier = null,
 		EmailHostServices? emailServices = null)
 	{
 		_weatherProvider = weatherTrigger is null ? null : new IntegrationWeatherProviderApi(weatherTrigger);
+		_musicPlayerRegistry = musicPlayerRegistry;
+		_musicPlayerNotifier = musicPlayerNotifier;
+		_companionDevices = companionDevices;
+		_storage = storage;
+		_locale = locale;
+		_http = http;
 		_emailServices = emailServices;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
@@ -142,7 +156,6 @@ public sealed class IntegrationInitializer
 		_calendarServices = calendarServices;
 		_messageBroker = messageBroker;
 		_colorWatches = colorWatches;
-		_knownAudioDevices = knownAudioDevices;
 		_pollingInvalidation = pollingInvalidation;
 		_serviceScopeFactory = serviceScopeFactory;
 		_deckNavigator = deckNavigator;
@@ -153,8 +166,6 @@ public sealed class IntegrationInitializer
 		_eventBus = eventBus;
 		_bindingTracker = bindingTracker;
 		_userNotificationStore = userNotificationStore;
-		_adbGateway = adbGateway;
-		_companionGateway = companionGateway;
 		_bindingStore = bindingStore;
 		_refreshSignal = refreshSignal;
 		_hostIssueStore = hostIssueStore;
@@ -171,16 +182,7 @@ public sealed class IntegrationInitializer
 	public IReadOnlySet<string> AttemptedIds => _attempted.Keys.ToHashSet(StringComparer.Ordinal);
 
 	public void BindGateways(IIntegration integration)
-		=> IntegrationGatewayBinder.Bind(integration,
-			_adbGateway,
-			_companionGateway,
-			_bindingStore,
-			_refreshSignal,
-			_knownAudioDevices,
-			_pollingInvalidation,
-			_calendarServices,
-			_albumColor,
-			_emailServices);
+		=> IntegrationGatewayBinder.Bind(integration, _calendarServices, _emailServices);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,
@@ -194,7 +196,8 @@ public sealed class IntegrationInitializer
 			variableService,
 			_refreshSignal,
 			_pollingInvalidation,
-			_variableHistory);
+			_variableHistory,
+			new VariableBindingAppender(_bindingStore, _timeProvider));
 		var widgetApi = new IntegrationWidgetApi(integration.Id, _widgetApi, _widgetIconInvalidator, _widgetData);
 		var config = new IntegrationConfig(integration.Id, _serviceScopeFactory);
 
@@ -219,7 +222,12 @@ public sealed class IntegrationInitializer
 			UiResourcesFor(integration),
 			RenewBatteryApi(integration.Id),
 			_androidDevices,
-			_weatherProvider);
+			_weatherProvider,
+			_storage?.For(integration.Id),
+			_locale,
+			_http,
+			_companionDevices,
+			RenewMusicPlayerApi(integration.Id));
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a
@@ -313,6 +321,11 @@ public sealed class IntegrationInitializer
 		{
 			batteries.Dispose();
 		}
+
+		if (_musicPlayerApis.TryRemove(integrationId, out var musicPlayers))
+		{
+			musicPlayers.Dispose();
+		}
 	}
 
 	public void ReleaseUiResources(string integrationId)
@@ -372,6 +385,23 @@ public sealed class IntegrationInitializer
 		var batteries = new InProcessBatteryApi(_batteries, _logger);
 		_batteryApis[integrationId] = batteries;
 		return batteries;
+	}
+
+	private InProcessMusicPlayerApi? RenewMusicPlayerApi(string integrationId)
+	{
+		if (_musicPlayerApis.TryRemove(integrationId, out var previous))
+		{
+			previous.Dispose();
+		}
+
+		if (_musicPlayerRegistry is null || _albumColor is null || _musicPlayerNotifier is null)
+		{
+			return null;
+		}
+
+		var musicPlayers = new InProcessMusicPlayerApi(_musicPlayerRegistry, _albumColor, _musicPlayerNotifier, _logger);
+		_musicPlayerApis[integrationId] = musicPlayers;
+		return musicPlayers;
 	}
 
 	private async Task<InProcessMessageChannel> RenewMessageChannelAsync(string integrationId)

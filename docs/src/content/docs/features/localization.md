@@ -215,6 +215,29 @@ plugin's catalog has not reached the host yet.
 Against a host older than protocol v3, the SDK resolves descriptor text (action names, labels) in your
 default language before sending it. You do not need to handle this case.
 
+## Formatting a time of day
+
+Text you build yourself, such as "Resumes at 3:05 PM" in an issue description, should use the time format
+the user chose in Macro Deck, not the culture of your process. Ask `context.Locale` for it each time you
+build the text, because the user can change the language, the time format setting or the operating system
+clock at any time:
+
+```csharp
+var format = await context.Locale.GetTimeOfDayFormatAsync();
+var text = Strings.Issues.ResumesAt(time: format.Format(TimeOnly.FromDateTime(resumesAt.LocalDateTime)));
+```
+
+`TimeOfDayFormat` (`MacroDeck.Sdk.Locale`) carries the `Culture` of the Macro Deck interface and the
+`HourCycle`, `HourCycles.H12` or `HourCycles.H23`: the user's 12-hour or 24-hour setting, or the operating
+system's when the setting follows the system. `Format` writes the culture's short time pattern in that hour
+cycle; a 12-hour clock in a culture without AM/PM designators is written as `h:mm tt` in the invariant
+culture.
+
+A plugin's call crosses as `locale`/`time-of-day-format`. A Macro Deck that predates it, and a context that
+does not implement `Locale`, answer the process's current culture with a 24-hour clock. In tests, set
+`FakeIntegrationContext.Locale.TimeOfDayFormat`. Times inside your own UI trees need none of this: the
+[time component](/ui/components/time/) already follows the reader's language and hour cycle.
+
 ## Testing translations
 
 ```csharp

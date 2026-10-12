@@ -2,7 +2,6 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -46,7 +45,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
 			description: AppStrings.Integrations.Obs.Actions.GetSourceVisibility.VariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 

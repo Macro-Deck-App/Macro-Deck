@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Variables;
+
 namespace MacroDeck.Sdk.ConfigFlow;
 
 /// <summary>
@@ -55,6 +57,19 @@ public interface IConfigEntryLifecycle
 	Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;
+
+	/// <summary>
+	/// Called with every stored entry after each change, like the overload without
+	/// <paramref name="variables" />, which the default calls. <paramref name="variables" /> is this
+	/// integration's own variable api and works whether or not the integration is initialized, so an
+	/// integration that is off can still create the variables of a new entry and delete those of a removed one.
+	/// </summary>
+	/// <remarks>A Macro Deck that predates this overload calls the one without
+	/// <paramref name="variables" /> instead.</remarks>
+	Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		IVariableApi variables,
+		CancellationToken cancellationToken)
+		=> SynchronizeEntriesAsync(entries, cancellationToken);
 
 	/// <summary>Called once the change a preparation was for has ended, stored or not, so the integration
 	/// can let go of anything it held for it. Macro Deck releases the variable names it reserved for the

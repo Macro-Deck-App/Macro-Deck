@@ -5,7 +5,6 @@ using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Infrastructure.Lifecycle;
-using MacroDeckHost.Integrations.Adb;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ILogger = Serilog.ILogger;
@@ -33,8 +32,6 @@ public static class AdbServiceCollectionExtensions
 			sp.GetService<INativeUsbSerials>()));
 		services.AddSingleton<IAdbManager>(sp => sp.GetRequiredService<AdbManager>());
 		services.AddSingleton<IAdbDeviceOperations>(sp => sp.GetRequiredService<AdbManager>());
-		services.AddSingleton<IAdbGateway>(sp => new AdbGateway(sp.GetRequiredService<IAdbManager>(),
-			sp.GetRequiredService<ILogger>()));
 		services.AddSingleton(sp => new InProcessAndroidDeviceManager(sp.GetRequiredService<IAdbManager>(),
 			sp.GetRequiredService<IAdbDeviceOperations>(),
 			sp.GetRequiredService<IHostLockState>(),

@@ -271,8 +271,8 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 		// OEM virtual keys depend on the keyboard layout, so they map to a position only through one.
 		if (_oemVirtualKeys.TryGetValue(virtualKeyCode, out var oem) &&
 			_virtualKeyToScanCode?.Invoke(oem) is { } scan && scan != 0 &&
-			PhysicalKeys.TryFromScanCode(scan, out var physical) &&
-			PhysicalKeys.IsPositional(physical))
+			NativeKeys.TryFromWindowsScanCode(scan, out var physical) &&
+			NativeKeys.IsPositional(physical))
 		{
 			key = physical.ToString();
 			return true;

@@ -1,7 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
@@ -37,7 +36,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 		ActionParameter.Autocomplete(StreamlabsActionValues.VariableParameter,
 			label: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableLabel(),
 			description: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 

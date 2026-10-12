@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Adb;
@@ -24,8 +23,7 @@ public interface IPluginAdbAccessPolicy
 	bool CanBeGranted(string pluginId);
 }
 
-// ADR 0092: an installed plugin must declare host:adb; a self-registered session was admitted by the user
-// through a developer token or pairing and declares nothing to the host, so it is exempt.
+// ADR 0092: an installed plugin must declare host:adb.
 public sealed class PluginAdbAccessPolicy(
 	IAdbManager adbManager,
 	IPluginSessionRegistry sessionRegistry,
@@ -33,7 +31,8 @@ public sealed class PluginAdbAccessPolicy(
 	IPluginManifestReader manifestReader,
 	IServiceScopeFactory scopeFactory) : IPluginAdbAccessPolicy
 {
-	private readonly ConcurrentDictionary<string, bool> _declaresAdbByManifest = new(StringComparer.Ordinal);
+	private readonly PluginPermissionDeclarations _declarations =
+		new(PluginPermissions.HostAdb, sessionRegistry, installationCatalog, manifestReader);
 	private volatile StrongBox<bool>? _allowPlugins;
 
 	public async Task<PluginAdbAccess> EvaluateAsync(string pluginId, CancellationToken cancellationToken = default)
@@ -49,17 +48,10 @@ public sealed class PluginAdbAccessPolicy(
 			return PluginAdbAccess.NotAllowed;
 		}
 
-		return IsSelfRegistered(pluginId) || DeclaresAdb(pluginId) ? PluginAdbAccess.Available : PluginAdbAccess.NotAllowed;
+		return _declarations.IsGrantable(pluginId) ? PluginAdbAccess.Available : PluginAdbAccess.NotAllowed;
 	}
 
-	public bool CanBeGranted(string pluginId)
-		=> IsSelfRegistered(pluginId) || DeclaresAdb(pluginId);
-
-	private bool IsSelfRegistered(string pluginId)
-		=> sessionRegistry.Snapshot()
-			.Any(session => session.PluginId == pluginId &&
-				session.State == PluginSessionState.Connected &&
-				session.Origin == PluginSessionOrigin.SelfRegistered);
+	public bool CanBeGranted(string pluginId) => _declarations.IsGrantable(pluginId);
 
 	public void Refresh(AdbSettings settings) => _allowPlugins = new StrongBox<bool>(settings.AllowPlugins);
 
@@ -74,29 +66,5 @@ public sealed class PluginAdbAccessPolicy(
 		var settings = await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetAdb();
 		_allowPlugins ??= new StrongBox<bool>(settings.AllowPlugins);
 		return _allowPlugins.Value;
-	}
-
-	private bool DeclaresAdb(string pluginId)
-	{
-		if (!installationCatalog.TryResolveActive(pluginId, out var active) || active is null)
-		{
-			return false;
-		}
-
-		var key = $"{active.ManifestPath}|{File.GetLastWriteTimeUtc(active.ManifestPath).Ticks}";
-		if (_declaresAdbByManifest.TryGetValue(key, out var declares))
-		{
-			return declares;
-		}
-
-		var manifest = manifestReader.Read(active.ManifestPath, pluginId, active.Version).Manifest;
-		if (manifest is null)
-		{
-			return false;
-		}
-
-		declares = manifest.Permissions?.Contains(PluginPermissions.HostAdb, StringComparer.Ordinal) == true;
-		_declaresAdbByManifest[key] = declares;
-		return declares;
 	}
 }

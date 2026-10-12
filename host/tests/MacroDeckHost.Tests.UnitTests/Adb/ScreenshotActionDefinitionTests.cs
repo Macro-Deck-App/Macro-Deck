@@ -2,13 +2,14 @@ using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Adb.Actions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 
 [TestFixture]
 internal sealed class ScreenshotActionDefinitionTests
 {
-	private FakeAdbGateway _gateway = null!;
+	private ScriptedAndroidDevices _devices = null!;
 	private AdbHealthTracker _health = null!;
 	private ActionVariableTargets _targets = null!;
 	private VariableApiAccessor _variables = null!;
@@ -18,7 +19,8 @@ internal sealed class ScreenshotActionDefinitionTests
 	[SetUp]
 	public void SetUp()
 	{
-		_gateway = new FakeAdbGateway();
+		_devices = new ScriptedAndroidDevices();
+		_devices.Attach("DEFAULT", stableId: null);
 		_health = new AdbHealthTracker();
 		_targets = new ActionVariableTargets(AdbIntegration.IntegrationId);
 		_variables = new VariableApiAccessor
@@ -26,7 +28,7 @@ internal sealed class ScreenshotActionDefinitionTests
 			Current = _targets.IntegrationVariables,
 			UserVariables = _targets.UserVariables
 		};
-		_action = new ScreenshotActionDefinition(() => _gateway, _health, _variables);
+		_action = new ScreenshotActionDefinition(new AdbActionServices(() => _devices, () => null, _health, _variables));
 		_folder = Path.Combine(Path.GetTempPath(), "adb-screenshot-tests-" + Guid.NewGuid().ToString("N"));
 	}
 
@@ -68,12 +70,14 @@ internal sealed class ScreenshotActionDefinitionTests
 	}
 
 	[Test]
-	public async Task Forwards_the_chosen_device_to_the_gateway()
+	public async Task Captures_the_chosen_device()
 	{
+		_devices.Attach("SERIAL1", stableId: null);
+
 		await _action.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder, ["device"] = "SERIAL1" }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "CaptureScreenshot:SERIAL1" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "CaptureScreenshot:SERIAL1" }));
 	}
 
 	[Test]
@@ -100,7 +104,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	}
 
 	[Test]
-	public async Task Without_a_folder_fails_with_invalid_parameter_and_never_calls_the_gateway()
+	public async Task Without_a_folder_fails_with_invalid_parameter_and_never_calls_a_device()
 	{
 		var result = await _action.CreateExecutor().ExecuteAsync(Context([]));
 
@@ -108,14 +112,14 @@ internal sealed class ScreenshotActionDefinitionTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
 	[Test]
-	public async Task A_disabled_gateway_fails_without_touching_disk()
+	public async Task With_adb_turned_off_it_fails_without_touching_disk()
 	{
-		_gateway.IsEnabled = false;
+		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 
 		var result = await _action.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder }));
@@ -128,9 +132,10 @@ internal sealed class ScreenshotActionDefinitionTests
 	}
 
 	[Test]
-	public async Task A_gateway_failure_is_reported_and_nothing_is_written_to_disk()
+	public async Task A_device_failure_is_reported_and_nothing_is_written_to_disk()
 	{
-		_gateway.NextResult = AdbGatewayResult.Fail(AdbGatewayFailureCode.DeviceNotFound, "no such device");
+		((ScriptedAndroidDevice)_devices.FindDevice("DEFAULT")!).NextFailure =
+			new AndroidDeviceException(AndroidDeviceErrorCode.DeviceNotFound, "no such device");
 
 		var result = await _action.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder }));
@@ -146,7 +151,7 @@ internal sealed class ScreenshotActionDefinitionTests
 	[Test]
 	public async Task No_screenshot_data_is_reported_as_a_provider_error()
 	{
-		_gateway.NextScreenshot = null;
+		((ScriptedAndroidDevice)_devices.FindDevice("DEFAULT")!).Screenshot = [];
 
 		var result = await _action.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["folder"] = _folder }));

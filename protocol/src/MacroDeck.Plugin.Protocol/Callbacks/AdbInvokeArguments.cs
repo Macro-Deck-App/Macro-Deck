@@ -9,7 +9,7 @@ public sealed record AdbShellArguments
 	public required string Command { get; init; }
 }
 
-/// <summary>Arguments for <c>battery</c>, which takes nothing but the device.</summary>
+/// <summary>Arguments for <c>battery</c>, <c>screenshot</c> and <c>status</c>, which take nothing but the device.</summary>
 public sealed record AdbDeviceArguments
 {
 	public required string Serial { get; init; }
@@ -45,7 +45,7 @@ public sealed record AdbInstallArguments
 	public required string ApkPath { get; init; }
 }
 
-/// <summary>Arguments for <c>uninstall</c> and <c>package-installed</c>.</summary>
+/// <summary>Arguments for <c>uninstall</c>, <c>package-installed</c>, <c>start-app</c> and <c>force-stop-app</c>.</summary>
 public sealed record AdbPackageArguments
 {
 	public required string Serial { get; init; }
@@ -100,6 +100,150 @@ public sealed record AdbBatteryStateDto
 public sealed record AdbPackageInstalledDto
 {
 	public bool Installed { get; init; }
+}
+
+/// <summary>Arguments for <c>key</c>.</summary>
+public sealed record AdbKeyArguments
+{
+	public required string Serial { get; init; }
+
+	/// <summary>One of <see cref="AdbKeys" />.</summary>
+	public required string Key { get; init; }
+}
+
+/// <summary>Arguments for <c>tap</c>, in screen pixels from the top left.</summary>
+public sealed record AdbTapArguments
+{
+	public required string Serial { get; init; }
+
+	public required int X { get; init; }
+
+	public required int Y { get; init; }
+}
+
+/// <summary>Arguments for <c>swipe</c>, in screen pixels from the top left.</summary>
+public sealed record AdbSwipeArguments
+{
+	public required string Serial { get; init; }
+
+	public required int FromX { get; init; }
+
+	public required int FromY { get; init; }
+
+	public required int ToX { get; init; }
+
+	public required int ToY { get; init; }
+
+	public required int DurationMilliseconds { get; init; }
+}
+
+/// <summary>Arguments for <c>input-text</c>.</summary>
+public sealed record AdbTextArguments
+{
+	public required string Serial { get; init; }
+
+	public required string Text { get; init; }
+}
+
+/// <summary>Arguments for <c>open-uri</c>.</summary>
+public sealed record AdbUriArguments
+{
+	public required string Serial { get; init; }
+
+	public required string Uri { get; init; }
+}
+
+/// <summary>Arguments for <c>reboot</c>.</summary>
+public sealed record AdbRebootArguments
+{
+	public required string Serial { get; init; }
+
+	/// <summary>One of <see cref="AdbRebootModes" />.</summary>
+	public string Mode { get; init; } = AdbRebootModes.Normal;
+}
+
+/// <summary>
+/// Result of <c>screenshot</c>: metadata only. The PNG bytes follow over <c>host.asset.*</c> with kind
+/// <c>android-screenshot</c> under <see cref="TransferId" />, like a <c>devices</c> icon.
+/// </summary>
+public sealed record AdbScreenshotResultDto
+{
+	public string ContentType { get; init; } = "image/png";
+
+	public int ByteLength { get; init; }
+
+	/// <summary>Must match the <c>contentHash</c> of the <c>host.asset.begin</c> that follows.</summary>
+	public string ContentHash { get; init; } = string.Empty;
+
+	public string TransferId { get; init; } = string.Empty;
+}
+
+/// <summary>Result of <c>status</c>. A value the device does not report is absent.</summary>
+public sealed record AdbDeviceStatusDto
+{
+	public bool? ScreenOn { get; init; }
+
+	public bool? Locked { get; init; }
+
+	public string? ForegroundPackage { get; init; }
+}
+
+public static class AdbKeys
+{
+	public const string Home = "home";
+
+	public const string Back = "back";
+
+	public const string Enter = "enter";
+
+	public const string Menu = "menu";
+
+	public const string Search = "search";
+
+	public const string VolumeUp = "volume-up";
+
+	public const string VolumeDown = "volume-down";
+
+	public const string VolumeMute = "volume-mute";
+
+	public const string MediaPlayPause = "media-play-pause";
+
+	public const string MediaNext = "media-next";
+
+	public const string MediaPrevious = "media-previous";
+
+	public const string Power = "power";
+
+	public const string Sleep = "sleep";
+
+	public const string Wakeup = "wakeup";
+
+	public const string AppSwitch = "app-switch";
+
+	public const string DpadUp = "dpad-up";
+
+	public const string DpadDown = "dpad-down";
+
+	public const string DpadLeft = "dpad-left";
+
+	public const string DpadRight = "dpad-right";
+
+	public const string DpadCenter = "dpad-center";
+
+	public static readonly IReadOnlyList<string> All =
+	[
+		Home, Back, Enter, Menu, Search, VolumeUp, VolumeDown, VolumeMute, MediaPlayPause, MediaNext, MediaPrevious,
+		Power, Sleep, Wakeup, AppSwitch, DpadUp, DpadDown, DpadLeft, DpadRight, DpadCenter
+	];
+}
+
+public static class AdbRebootModes
+{
+	public const string Normal = "normal";
+
+	public const string Recovery = "recovery";
+
+	public const string Bootloader = "bootloader";
 }
 
 public static class AdbBatteryStatuses

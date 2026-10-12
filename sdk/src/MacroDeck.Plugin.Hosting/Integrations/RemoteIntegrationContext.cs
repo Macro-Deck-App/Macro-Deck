@@ -3,12 +3,17 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
@@ -39,7 +44,12 @@ internal sealed class RemoteIntegrationContext(
 	RemoteNotificationService notificationService,
 	RemoteBatteryApi? batteries = null,
 	IAndroidDeviceManager? androidDevices = null,
-	RemoteWeatherProviderApi? weatherProvider = null) : IIntegrationContext
+	RemoteWeatherProviderApi? weatherProvider = null,
+	IIntegrationStorage? storage = null,
+	RemoteLocaleApi? locale = null,
+	RemoteHostHttp? http = null,
+	RemoteCompanionDeviceApi? companionDevices = null,
+	RemoteMusicPlayerApi? musicPlayers = null) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -71,4 +81,15 @@ internal sealed class RemoteIntegrationContext(
 
 	public IWeatherProviderApi WeatherProvider { get; } =
 		weatherProvider ?? (IWeatherProviderApi)UnsupportedWeatherProviderApi.Instance;
+
+	public IIntegrationStorage Storage { get; } = storage ?? UnavailableIntegrationStorage.Instance;
+
+	public ILocaleApi Locale { get; } = locale ?? (ILocaleApi)LocalLocaleApi.Instance;
+
+	public IHostHttp Http { get; } = http ?? (IHostHttp)DefaultHostHttp.Instance;
+
+	public ICompanionDeviceApi CompanionDevices { get; } =
+		companionDevices ?? (ICompanionDeviceApi)UnsupportedCompanionDeviceApi.Instance;
+
+	public IMusicPlayerApi MusicPlayers { get; } = musicPlayers?.Lifecycle ?? UnsupportedMusicPlayerApi.Instance;
 }

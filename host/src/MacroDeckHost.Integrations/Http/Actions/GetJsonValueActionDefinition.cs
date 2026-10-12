@@ -1,4 +1,3 @@
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Integrations.Http.Client;
 using MacroDeckHost.Integrations.Http.JsonPath;
 using MacroDeckHost.Localization;
@@ -44,7 +43,7 @@ internal sealed class GetJsonValueActionDefinition : IActionDefinition
 			defaultValue: "$"),
 		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Http.Params.SaveToVariableLabel(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 

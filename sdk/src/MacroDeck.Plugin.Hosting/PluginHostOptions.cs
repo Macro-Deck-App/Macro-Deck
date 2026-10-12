@@ -54,6 +54,11 @@ public sealed class PluginHostOptions
 	/// belong. It is not the same as <see cref="StateDirectory"/>, which holds the SDK's own credentials
 	/// for a self-registering plugin.
 	/// </para>
+	/// <para>
+	/// <c>IIntegrationContext.Storage</c> keeps its documents under <c>integration-data/&lt;plugin id&gt;/</c>
+	/// in this directory. Without a data directory that storage reads every key as missing and throws
+	/// <see cref="InvalidOperationException" /> on a write.
+	/// </para>
 	/// </summary>
 	public string? DataDirectory { get; set; }
 

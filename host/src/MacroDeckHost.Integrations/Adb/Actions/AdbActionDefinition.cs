@@ -1,6 +1,7 @@
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
 
 namespace MacroDeckHost.Integrations.Adb.Actions;
 
@@ -9,25 +10,19 @@ internal sealed class AdbActionDefinition : IActionDefinition
 	internal const string DeviceParameterName = "device";
 	internal static readonly LocalizedText DisabledMessage = AppStrings.Integrations.Adb.Errors.AdbDisabled();
 
-	private readonly Func<IAdbGateway?> _resolveGateway;
-	private readonly AdbHealthTracker _health;
-
-	private readonly Func<IAdbGateway, string?, IReadOnlyDictionary<string, object>, CancellationToken,
-		Task<AdbGatewayResult>> _command;
+	private readonly AdbActionServices _services;
+	private readonly Func<AdbTarget, IReadOnlyDictionary<string, object>, CancellationToken, Task<AdbOutcome>> _command;
 
 	public AdbActionDefinition(
-		Func<IAdbGateway?> resolveGateway,
-		AdbHealthTracker health,
+		AdbActionServices services,
 		string id,
 		LocalizedText name,
 		LocalizedText description,
 		LocalizedText deviceDescription,
 		IReadOnlyList<ActionParameter> extraParameters,
-		Func<IAdbGateway, string?, IReadOnlyDictionary<string, object>, CancellationToken, Task<AdbGatewayResult>>
-			command)
+		Func<AdbTarget, IReadOnlyDictionary<string, object>, CancellationToken, Task<AdbOutcome>> command)
 	{
-		_resolveGateway = resolveGateway;
-		_health = health;
+		_services = services;
 		Id = id;
 		Name = name;
 		Description = description;
@@ -49,37 +44,45 @@ internal sealed class AdbActionDefinition : IActionDefinition
 		=> ActionParameter.DynamicChoice(DeviceParameterName,
 			label: AppStrings.Integrations.Adb.Params.DeviceLabel(),
 			description: description,
-			optionsSourceId: AdbOptionsSourceIds.Devices,
+			optionsSourceId: HostOptionsSources.AndroidDevices,
 			placeholder: AppStrings.Integrations.Adb.Params.DeviceDefaultPlaceholder(),
 			required: false);
 
 	internal static string? ReadDevice(IReadOnlyDictionary<string, object> parameters)
 		=> parameters.TryGetValue(DeviceParameterName, out var value) ? value as string : null;
 
-	internal static ActionResult MapResult(AdbGatewayResult result)
+	internal static ActionResult MapResult(AdbOutcome outcome)
 	{
-		if (result.Success)
+		if (outcome.Failure is not { } failure)
 		{
 			return ActionResult.Success();
 		}
 
-		var errorCode = result.Failure switch
+		var errorCode = failure switch
 		{
-			AdbGatewayFailureCode.Disabled => ActionErrorCodes.Unavailable,
-			AdbGatewayFailureCode.ExecutableNotFound => ActionErrorCodes.Unavailable,
-			AdbGatewayFailureCode.ServerUnreachable => ActionErrorCodes.NotConnected,
-			AdbGatewayFailureCode.DeviceNotFound => ActionErrorCodes.NotFound,
-			AdbGatewayFailureCode.DeviceUnauthorized => ActionErrorCodes.PermissionDenied,
-			AdbGatewayFailureCode.DeviceOffline => ActionErrorCodes.NotConnected,
-			AdbGatewayFailureCode.Timeout => ActionErrorCodes.Timeout,
-			AdbGatewayFailureCode.InvalidParameter => ActionErrorCodes.InvalidParameter,
-			AdbGatewayFailureCode.CommandFailed => ActionErrorCodes.ProviderError,
-			AdbGatewayFailureCode.Unsupported => ActionErrorCodes.Unavailable,
+			AndroidDeviceErrorCode.AdbNotEnabled => ActionErrorCodes.Unavailable,
+			AndroidDeviceErrorCode.AdbNotAllowed => ActionErrorCodes.Unavailable,
+			AndroidDeviceErrorCode.AdbUnavailable => ActionErrorCodes.Unavailable,
+			AndroidDeviceErrorCode.DeviceNotFound => ActionErrorCodes.NotFound,
+			AndroidDeviceErrorCode.DeviceUnauthorized => ActionErrorCodes.PermissionDenied,
+			AndroidDeviceErrorCode.DeviceOffline => ActionErrorCodes.NotConnected,
+			AndroidDeviceErrorCode.HostUnavailable => ActionErrorCodes.NotConnected,
+			AndroidDeviceErrorCode.Timeout => ActionErrorCodes.Timeout,
+			AndroidDeviceErrorCode.InvalidArgument => ActionErrorCodes.InvalidParameter,
+			AndroidDeviceErrorCode.CommandFailed => ActionErrorCodes.ProviderError,
+			AndroidDeviceErrorCode.Unsupported => ActionErrorCodes.Unavailable,
+			AndroidDeviceErrorCode.HostLocked => ActionErrorCodes.Unavailable,
 			_ => ActionErrorCodes.ProviderError
 		};
 
 		return ActionResult.Failed(errorCode,
-			result.Message is { } message ? message : AppStrings.Integrations.Adb.Errors.CommandFailed());
+			outcome.Message is { } message ? message : AppStrings.Integrations.Adb.Errors.CommandFailed());
+	}
+
+	internal static bool IsAvailable(IAndroidDeviceManager? manager, out IAndroidDeviceManager available)
+	{
+		available = manager!;
+		return manager is { Access: AndroidDeviceAccess.Available };
 	}
 
 	private sealed class Executor : IActionExecutor
@@ -93,16 +96,21 @@ internal sealed class AdbActionDefinition : IActionDefinition
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			var gateway = _owner._resolveGateway();
-			if (gateway is null || !gateway.IsEnabled)
+			if (!IsAvailable(_owner._services.Devices(), out var manager))
 			{
 				return ActionResult.Failed(ActionErrorCodes.Unavailable, DisabledMessage);
 			}
 
-			var device = ReadDevice(context.Parameters);
-			var result = await _owner._command(gateway, device, context.Parameters, context.CancellationToken);
-			_owner._health.Record(result);
-			return MapResult(result);
+			var target = new AdbTarget(manager, _owner._services.Tracker(), ReadDevice(context.Parameters));
+			var outcome = await _owner._command(target, context.Parameters, context.CancellationToken);
+			_owner._services.Health.Record(outcome);
+			return MapResult(outcome);
 		}
 	}
 }
+
+internal sealed record AdbActionServices(
+	Func<IAndroidDeviceManager?> Devices,
+	Func<AdbDeviceTracker?> Tracker,
+	AdbHealthTracker Health,
+	VariableApiAccessor Variables);

@@ -229,6 +229,28 @@ event stream is fine. It is best effort: it never throws because the request cou
 Macro Deck that predates it treats it as a no-op, so the variables are still read at their interval.
 Pushed catalog resources are unaffected; publish those through the sink.
 
+When a change affects only a few variables, name them by definition id so the rest keep their cadence:
+
+```csharp
+await context.Variables.RequestDefinitionRefreshAsync(["volume-percent", "muted"], cancellationToken);
+```
+
+Ids you do not declare are ignored and an empty list asks for nothing. Reading more than asked for is always
+allowed: a pending request for every variable covers pending requests for some, and an `IVariableApi` that
+does not override the member, or a Macro Deck that predates it, reads every declared variable instead.
+
+## Names
+
+A canonical variable name matches `^[a-z][a-z0-9_]*$`. `VariableNames.IsValid` checks one, and
+`VariableNames.Sanitize` derives one from any text the way Macro Deck does: `vars.` is dropped, accents are
+removed, letters are lowercased, every other character becomes `_`, runs of `_` collapse, and a leading digit
+gets a `v_` prefix. The same text always gives the same name, so a name derived from a stable label stays
+stable:
+
+```csharp
+var name = VariableNames.Sanitize($"{machineName} fps"); // "gaming_pc_fps"
+```
+
 `DeclaredVariables` is what the host shows for an integration that is not configured yet. It defaults to
 `Variables`; override it only when `Variables` is empty until something is configured, and set
 `VariablesDependOnConfiguration` when its names contain a `VariableNameTemplate` placeholder for a
@@ -271,7 +293,8 @@ Assert.That(written!.Status, Is.EqualTo("Applied"));
 [sample plugins](/introduction/samples-and-template/) test every variable they declare this way.
 
 `FakeIntegrationContext.Variables` counts `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync` calls in
-`RefreshRequests` and `DeclarationChanges`. `RecordSample` adds a sample to every history window open on a
+`RefreshRequests` and `DeclarationChanges`, lists the ids of each `RequestDefinitionRefreshAsync` call in
+`DefinitionRefreshRequests`, and keeps what `BindAsync` recorded in `Bindings`. `RecordSample` adds a sample to every history window open on a
 name, and `OpenHistoryWindows` counts the windows that are not disposed yet.
 
 ## Templates
@@ -417,6 +440,33 @@ Push applies to the catalog only - eager variables are always polled.
 A resource that disappears keeps its binding and variable; it just reads as unavailable and resumes
 without re-binding once it can be resolved and read again.
 
+### Recording bindings yourself
+
+The user binds catalog resources in the variables view. An integration can record bindings itself, for
+example to carry variables over from an older version that created them another way:
+
+```csharp
+var outcomes = await context.Variables.BindAsync(
+[
+	new VariableBindingRequest("entity/light.kitchen/state", "ha_light_kitchen", VariableType.Text)
+	{
+		MigratedFrom = "my-plugin/watched-entities-v1"
+	}
+], cancellationToken);
+```
+
+- The bindings always belong to the calling integration, and are recorded together or not at all.
+- A resource the integration already has a binding for answers `AlreadyBound` and keeps its binding, even
+  when the user renamed its variable since. Running the same migration twice is therefore safe.
+- Every name must satisfy `VariableNames.IsValid` and every resource id must be a valid resource id;
+  otherwise `ArgumentException` is thrown and nothing is recorded. A plugin sends at most 512 per call.
+- Recording does not create the variables right away. Macro Deck creates them when it restores bindings,
+  at the latest on its next start; a requested name another variable holds by then is replaced with one
+  derived from it, as for any binding.
+- `InvalidOperationException` means the bindings could not be stored. The default implementation, and a
+  Macro Deck that predates the member, throw `NotSupportedException`. Keep the data you migrate from until a
+  call succeeds, so the next start can try again.
+
 ## Over the plugin protocol
 
 Each **eager** variable is declared as one capability, like an action. Catalog ids are never declared -
@@ -425,7 +475,8 @@ provider with only a catalog or only on-demand variables therefore declares noth
 `describe` when it connects and offers its variables from then on, so it needs no announcement. See
 [the WebSocket reference](/reference/websocket/#capabilities) for the
 `describe`/`get`/`set`/`discover`/`resolve`/`subscribe` operations, the `variables`/`refresh` host operation
-behind `RequestRefreshAsync`, the `variables`/`history.open`, `history.read` and `history.close` operations
+behind `RequestRefreshAsync` and `RequestDefinitionRefreshAsync` (with an optional `definitionIds` list), the
+`variables`/`bind` operation behind `BindAsync`, the `variables`/`history.open`, `history.read` and `history.close` operations
 behind `OpenHistoryAsync` (a plugin's window reads its samples once per second and ends with the
 connection), and the `variable-values` host API.
 Declare `host:variable-values` in [`manifest.json`](/reference/manifest/) when you use it.

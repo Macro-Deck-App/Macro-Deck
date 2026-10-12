@@ -84,6 +84,10 @@ public static class ProtocolErrorCodes
 	/// <summary>An <c>icon-packs</c>/<c>get-icon</c> naming an icon id no installed icon pack contains.</summary>
 	public const string IconNotFound = "ICON_NOT_FOUND";
 
+	/// <summary>A <c>companion-devices</c> call refused because this plugin may not use Companion devices: the user
+	/// has not allowed plugins to use them, or the manifest does not declare <c>host:companion-devices</c>.</summary>
+	public const string CompanionDevicesNotAllowed = "COMPANION_DEVICES_NOT_ALLOWED";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -92,6 +96,6 @@ public static class ProtocolErrorCodes
 		CapabilityUnavailable, PayloadTooLarge, AssetTooLarge, QueueOverflow, RateLimited,
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
 		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
-		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed, IconNotFound,
+		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed, IconNotFound, CompanionDevicesNotAllowed,
 	];
 }

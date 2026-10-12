@@ -156,7 +156,7 @@ internal sealed class CompanionStateAndActionsTests
 			Assert.That(state.ScreenBrightnessPercent, Is.Zero);
 			Assert.That(state.Orientation, Is.Null);
 			Assert.That(state.Model, Has.Length.EqualTo(64));
-			Assert.That(state.Charging, Is.True);
+			Assert.That(state.IsCharging, Is.True);
 		});
 	}
 

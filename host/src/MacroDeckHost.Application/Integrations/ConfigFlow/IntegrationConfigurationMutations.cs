@@ -43,30 +43,6 @@ public sealed record IntegrationConfigMutationPreparationResult(
 	IReadOnlyDictionary<string, JsonElement> Values,
 	LocalizedText Error = default);
 
-public interface IIntegrationConfigMutationAdapter
-{
-	string IntegrationId { get; }
-
-	IntegrationConfigMutationPreparationResult Prepare(IntegrationConfigMutationPreparation preparation);
-
-	IntegrationConfigEntryStatus GetStatus(ConfigEntryRecord entry);
-
-	bool IsUsable(ConfigEntryRecord entry);
-
-	Task ReloadAsync(CancellationToken cancellationToken);
-
-	Task SynchronizeVariablesAsync(
-		IReadOnlyList<ConfigEntryRecord> entries,
-		CancellationToken cancellationToken)
-		=> Task.CompletedTask;
-
-	void ReleasePreparation(Guid entryId)
-	{
-	}
-
-	bool CreatesEntriesFromFlow => true;
-}
-
 public sealed record IntegrationConfigMutationOutcome(
 	bool Success,
 	Guid? EntryId = null,
@@ -110,8 +86,6 @@ public interface IIntegrationConfigMutationCoordinator
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
 		=> CompleteAsync(integrationId, entryId, title, values, cancellationToken);
-
-	bool CreatesEntriesFromFlow(string integrationId) => true;
 }
 
 public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMutationCoordinator
@@ -121,9 +95,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 	private readonly IIntegrationRegistry _registry;
 	private readonly IMediator _mediator;
 	private readonly IVariablePollingInvalidationSignal _variableInvalidation;
-	private readonly Dictionary<string, IIntegrationConfigMutationAdapter> _adapters;
 	private readonly ILogger _logger;
 	private readonly VariableRegistry? _variableRegistry;
+	private readonly IIntegrationVariableApiFactory? _variableApis;
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _gates = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<Guid, Guid> _lifecycleReservations = new();
 
@@ -133,17 +107,17 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		IIntegrationRegistry registry,
 		IMediator mediator,
 		IVariablePollingInvalidationSignal variableInvalidation,
-		IEnumerable<IIntegrationConfigMutationAdapter> adapters,
 		ILogger logger,
-		VariableRegistry? variableRegistry = null)
+		VariableRegistry? variableRegistry = null,
+		IIntegrationVariableApiFactory? variableApis = null)
 	{
 		_variableRegistry = variableRegistry;
+		_variableApis = variableApis;
 		_scopeFactory = scopeFactory;
 		_lifecycle = lifecycle;
 		_registry = registry;
 		_mediator = mediator;
 		_variableInvalidation = variableInvalidation;
-		_adapters = adapters.ToDictionary(adapter => adapter.IntegrationId, StringComparer.Ordinal);
 		_logger = logger;
 	}
 
@@ -355,9 +329,6 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 			cancellationToken);
 	}
 
-	public bool CreatesEntriesFromFlow(string integrationId)
-		=> !_adapters.TryGetValue(integrationId, out var adapter) || adapter.CreatesEntriesFromFlow;
-
 	public async Task<IReadOnlyList<IntegrationConfigEntryDescription>> DescribeAsync(
 		string integrationId,
 		CancellationToken cancellationToken)
@@ -405,18 +376,11 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		}
 	}
 
-	private IConfigEntryBinding? Binding(string integrationId)
-	{
-		if (_adapters.TryGetValue(integrationId, out var adapter))
-		{
-			return new AdapterConfigEntryBinding(adapter);
-		}
-
-		return _registry.Integrations.FirstOrDefault(candidate =>
+	private LifecycleConfigEntryBinding? Binding(string integrationId)
+		=> _registry.Integrations.FirstOrDefault(candidate =>
 				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is IConfigEntryLifecycle lifecycle
 			? new LifecycleConfigEntryBinding(integrationId, lifecycle, _variableRegistry, _lifecycleReservations)
 			: null;
-	}
 
 	private Task<IntegrationConfigMutationPreparationResult> PrepareAsync(
 		string integrationId,
@@ -438,11 +402,21 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				cancellationToken)
 			: Task.FromResult(new IntegrationConfigMutationPreparationResult(true, values));
 
-	private Task SynchronizeVariables(
+	private async Task SynchronizeVariables(
 		string integrationId,
 		IReadOnlyList<ConfigEntryRecord> entries,
 		CancellationToken cancellationToken)
-		=> Binding(integrationId)?.SynchronizeAsync(entries, cancellationToken) ?? Task.CompletedTask;
+	{
+		if (Binding(integrationId) is not { } binding)
+		{
+			return;
+		}
+
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		await binding.SynchronizeAsync(entries,
+			_variableApis?.Create(integrationId, scope.ServiceProvider),
+			cancellationToken);
+	}
 
 	private Task ReleasePreparationAsync(string integrationId, Guid entryId, CancellationToken cancellationToken)
 		=> Binding(integrationId)?.ReleasePreparationAsync(entryId, cancellationToken) ?? Task.CompletedTask;

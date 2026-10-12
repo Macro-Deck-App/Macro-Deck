@@ -1,7 +1,5 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using MacroDeckHost.Application.Persistence;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Variables;
@@ -144,7 +142,7 @@ internal static partial class AudioDeviceVariables
 	public static string Slug(string name)
 	{
 		// The x keeps Sanitize from prefixing v_ to a name that starts with a digit.
-		return Truncate(VariableNameSanitizer.Sanitize("x" + name)[1..].TrimStart('_'), SlugBudget);
+		return Truncate(VariableNames.Sanitize("x" + name)[1..].TrimStart('_'), SlugBudget);
 	}
 
 	private static string Truncate(string slug, int length)

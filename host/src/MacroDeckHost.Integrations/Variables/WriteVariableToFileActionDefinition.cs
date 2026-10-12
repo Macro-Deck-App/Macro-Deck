@@ -1,7 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Localization;
@@ -31,7 +30,7 @@ internal sealed class WriteVariableToFileActionDefinition : IActionDefinition
 		ActionParameter.Autocomplete("variable",
 			label: AppStrings.Integrations.Variables.Actions.VariableLabel(),
 			description: AppStrings.Integrations.Variables.Actions.WriteToFileVariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.Variables,
+			optionsSourceId: HostOptionsSources.Variables,
 			required: true),
 		ActionParameter.File("file",
 			label: AppStrings.Integrations.Variables.Actions.FileLabel(),

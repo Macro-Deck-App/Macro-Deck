@@ -1,4 +1,3 @@
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Integrations.Twitch.Protocol;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -642,7 +641,7 @@ internal static class TwitchActions
 					ActionParameter.Autocomplete("targetVariable",
 						label: Strings.CreateClip.TargetVariableLabel(),
 						description: Strings.CreateClip.TargetVariableDescription(),
-						optionsSourceId: VariableOptionsSourceIds.UserVariables)
+						optionsSourceId: HostOptionsSources.UserVariables)
 				],
 				async scope =>
 				{

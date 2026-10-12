@@ -22,8 +22,8 @@
     <shared-error-banner class="vars-error" [message]="loadError" [dismissible]="false" />
   }
 
-  @if (writeFailed()) {
-    <shared-error-banner class="vars-error" [message]="writeFailedMessage()" (dismiss)="writeFailed.set(false)" />
+  @if (writeError(); as message) {
+    <shared-error-banner class="vars-error" [message]="message" (dismiss)="writeError.set(null)" />
   }
 
   @if (shareFailed()) {

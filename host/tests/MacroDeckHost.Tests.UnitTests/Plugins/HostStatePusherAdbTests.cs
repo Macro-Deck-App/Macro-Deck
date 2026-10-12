@@ -157,6 +157,75 @@ public class HostStatePusherAdbTests
 		});
 	}
 
+	[Test]
+	public async Task The_push_names_the_default_device_and_marks_a_device_lacking_usb_permission()
+	{
+		_adb.Devices = [Device("A1", AdbDeviceState.Device), Device("C3", AdbDeviceState.NoPermissions)];
+		_adb.Status = AdbStatus.Disabled with { Enabled = true, DefaultDeviceSerial = "C3" };
+
+		await _pusher.PushAllAsync(PluginId);
+
+		var push = AdbPushes().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(push.DefaultDeviceSerial, Is.EqualTo("C3"));
+			Assert.That(push.Devices.Select(device => (device.Serial, device.State, device.LacksUsbPermission)),
+				Is.EqualTo(new[]
+				{
+					("A1", AdbDeviceStates.Online, (bool?)null), ("C3", AdbDeviceStates.Unauthorized, (bool?)true)
+				}));
+		});
+	}
+
+	[Test]
+	public async Task Without_a_configured_default_the_only_attached_device_is_named_and_none_with_several()
+	{
+		_adb.Devices = [Device("A1", AdbDeviceState.Device), Device("GONE", AdbDeviceState.Disconnected)];
+		await _pusher.PushAllAsync(PluginId);
+		_adb.Devices = [Device("A1", AdbDeviceState.Device), Device("B2", AdbDeviceState.Device)];
+		await _pusher.PushAllAsync(PluginId);
+
+		var pushes = AdbPushes();
+		Assert.Multiple(() =>
+		{
+			Assert.That(pushes[0].DefaultDeviceSerial, Is.EqualTo("A1"));
+			Assert.That(pushes[1].DefaultDeviceSerial, Is.Null);
+		});
+	}
+
+	[Test]
+	public async Task The_push_says_when_adb_is_missing_and_which_mode_an_offline_device_is_in()
+	{
+		_adb.Devices = [Device("A1", AdbDeviceState.Recovery), Device("B2", AdbDeviceState.Offline)];
+		_adb.Status = AdbStatus.Disabled with { Enabled = true };
+		await _pusher.PushAllAsync(PluginId);
+		_adb.Status = AdbStatus.Disabled with { Enabled = true, ResolvedExecutablePath = "/usr/bin/adb" };
+		await _pusher.PushAllAsync(PluginId);
+
+		var pushes = AdbPushes();
+		Assert.Multiple(() =>
+		{
+			Assert.That(pushes[0].AdbUnavailable, Is.True);
+			Assert.That(pushes[1].AdbUnavailable, Is.Null);
+			Assert.That(pushes[0].Devices.Select(device => (device.State, device.Mode)),
+				Is.EqualTo(new[]
+				{
+					(AdbDeviceStates.Offline, (string?)AdbDeviceModes.Recovery), (AdbDeviceStates.Offline, (string?)null)
+				}));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_without_access_is_not_told_the_default_device()
+	{
+		_access.Access = PluginAdbAccess.NotAllowed;
+		_adb.Status = AdbStatus.Disabled with { Enabled = true, DefaultDeviceSerial = "A1" };
+
+		await _pusher.PushAllAsync(PluginId);
+
+		Assert.That(AdbPushes().Single().DefaultDeviceSerial, Is.Null);
+	}
+
 	private async Task<List<AdbStateDto>> WaitForAdbPushes(int count)
 	{
 		var deadline = DateTime.UtcNow.AddSeconds(5);

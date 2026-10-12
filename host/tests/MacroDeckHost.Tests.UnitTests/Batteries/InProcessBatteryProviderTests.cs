@@ -53,8 +53,6 @@ internal sealed class InProcessBatteryProviderTests
 			new StubEventBindingTracker(),
 			new UserNotificationStore(),
 			null!,
-			null!,
-			null!,
 			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),

@@ -1,7 +1,5 @@
 using System.Globalization;
 using System.Threading.Channels;
-using MacroDeckHost.Application.Persistence;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System.Actions;
 using MacroDeckHost.Integrations.System.Application;
 using MacroDeckHost.Integrations.System.Focus;
@@ -17,6 +15,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Variables;
 using Serilog;
 
@@ -28,10 +27,7 @@ public sealed class SystemIntegration
 		IVariableProvider,
 		IIntegrationIssueProvider,
 		IIntegrationIconProvider,
-		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
-		IVariablePollingInvalidationConsumer,
-		IKnownAudioDeviceStoreConsumer
+		IMigrationProvider
 {
 	public const string IntegrationId = "app.macro-deck.system";
 
@@ -97,15 +93,15 @@ public sealed class SystemIntegration
 	private VariableHandle? _focusedAppHandle;
 	private VariableHandle? _focusedAppPathHandle;
 	private VariableHandle? _focusedAppBundleIdHandle;
-	private IVariableRefreshSignal? _refreshSignal;
 
 	private readonly IReadOnlyList<VariableDefinition> _fixedVariables;
 	private readonly global::System.Threading.Lock _refreshLock = new();
 	private volatile AudioState _audio;
 	private volatile IReadOnlyList<string?> _diskSlots = [];
 	private volatile IReadOnlyList<VariableDefinition> _variables;
-	private IKnownAudioDeviceStore? _audioStore;
-	private IVariablePollingInvalidationSignal? _pollingInvalidation;
+	private readonly global::System.Threading.Lock _audioSaveLock = new();
+	private Task _audioSaveChain = Task.CompletedTask;
+	private IIntegrationStorage _storage = UnavailableIntegrationStorage.Instance;
 	private bool _persistAudioDevices;
 	private CancellationTokenSource? _discoveryCancellation;
 	private Task? _discoveryLoop;
@@ -346,7 +342,7 @@ public sealed class SystemIntegration
 		_focusWriterLoop = Task.Run(() => RunFocusWriterLoopAsync(channel.Reader));
 		channel.Writer.TryWrite(FocusedApplicationSnapshot.Current.Value);
 
-		LoadKnownAudioDevices();
+		await LoadKnownAudioDevicesAsync(context.Storage);
 		// IsInitialized is always true, so the poller may already have registered the fixed list; the
 		// first refresh always republishes so the stored devices are declared too.
 		await RefreshAudioDevicesAsync(republish: true, CancellationToken.None);
@@ -374,12 +370,7 @@ public sealed class SystemIntegration
 
 	private void OnFocusChanged(FocusedAppInfo? info) => _focusChannel?.Writer.TryWrite(info);
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
-	public void UseVariablePollingInvalidation(IVariablePollingInvalidationSignal signal)
-		=> _pollingInvalidation = signal;
-
-	public void UseKnownAudioDeviceStore(IKnownAudioDeviceStore store) => _audioStore = store;
+	internal void UseVariables(IVariableApi variables) => _variableAccessor.Current = variables;
 
 	internal Task RefreshAudioDevicesAsync() => RefreshAudioDevicesAsync(republish: false, CancellationToken.None);
 
@@ -387,28 +378,52 @@ public sealed class SystemIntegration
 
 	private void OnVolumeChanged()
 	{
-		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, VolumePercentId);
-		_refreshSignal?.RequestDefinitionRefresh(IntegrationId, MutedId);
+		List<string> ids = [VolumePercentId, MutedId];
 
 		var audio = _audio;
 		if (audio.DefaultOutputId is { } defaultOutput &&
 			audio.Known.FirstOrDefault(device =>
 				device.Flow == AudioDeviceVariables.OutputFlow && device.DeviceId == defaultOutput) is { } known)
 		{
-			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, AudioDeviceVariables.VolumeId(known));
-			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, AudioDeviceVariables.MutedId(known));
+			ids.Add(AudioDeviceVariables.VolumeId(known));
+			ids.Add(AudioDeviceVariables.MutedId(known));
+		}
+
+		RequestDefinitionRefresh(ids);
+	}
+
+	private void RequestDefinitionRefresh(List<string> definitionIds)
+	{
+		if (definitionIds.Count > 0 && _variableAccessor.Current is { } variables)
+		{
+			_ = variables.RequestDefinitionRefreshAsync(definitionIds);
 		}
 	}
 
-	private void LoadKnownAudioDevices()
+	private void NotifyDeclarationsChanged() => _ = _variableAccessor.Current?.NotifyDeclarationsChangedAsync();
+
+	private async Task LoadKnownAudioDevicesAsync(IIntegrationStorage storage)
 	{
-		IReadOnlyList<KnownAudioDevice> stored = [];
-		_persistAudioDevices = _audioStore is not null && _audioStore.TryLoad(out stored);
-		if (_audioStore is not null && !_persistAudioDevices)
+		_storage = storage;
+		IntegrationStorageReadResult read;
+		try
+		{
+			read = await storage.ReadAsync(KnownAudioDevices.StorageKey, KnownAudioDevices.IsValid);
+		}
+		catch (Exception ex) when (ex is not OutOfMemoryException)
+		{
+			_logger.Warning(ex, "Could not read the known audio device list");
+			read = IntegrationStorageReadResult.Unreadable;
+		}
+
+		// An unreadable list is never written back, or the next save would replace the user's pinned names.
+		_persistAudioDevices = read.Status != IntegrationStorageReadStatus.Unreadable;
+		if (!_persistAudioDevices)
 		{
 			_logger.Warning("The known audio device list could not be read; audio devices are not saved this session");
 		}
 
+		var stored = read.Content is { } content ? KnownAudioDevices.Deserialize(content) ?? [] : [];
 		var audio = _audio;
 		_audio = BuildAudioState(AudioDeviceVariables.Valid(stored), audio.Present, audio.DefaultOutputId);
 		ComposeVariables();
@@ -432,21 +447,46 @@ public sealed class SystemIntegration
 			devices = [];
 		}
 
+		bool declarationChanged;
 		lock (_refreshLock)
 		{
-			ApplyAudioDevices(devices, republish);
+			declarationChanged = ApplyAudioDevices(devices, republish);
+		}
+
+		if (declarationChanged && _persistAudioDevices)
+		{
+			await SaveKnownAudioDevicesAsync();
 		}
 	}
 
-	private void ApplyAudioDevices(IReadOnlyList<AudioDevice> devices, bool republish)
+	// Chained so saves never overlap, and each writes the latest list, whatever order refreshes finish in.
+	private Task SaveKnownAudioDevicesAsync()
+	{
+		lock (_audioSaveLock)
+		{
+			_audioSaveChain = SaveKnownAudioDevicesAfterAsync(_audioSaveChain);
+			return _audioSaveChain;
+		}
+	}
+
+	private async Task SaveKnownAudioDevicesAfterAsync(Task previous)
+	{
+		await previous;
+		try
+		{
+			await _storage.WriteAsync(KnownAudioDevices.StorageKey, KnownAudioDevices.Serialize(_audio.Known));
+		}
+		catch (Exception ex) when (ex is not OutOfMemoryException)
+		{
+			_logger.Warning(ex, "Could not save the known audio device list");
+		}
+	}
+
+	private bool ApplyAudioDevices(IReadOnlyList<AudioDevice> devices, bool republish)
 	{
 		var current = _audio;
 		var known = AudioDeviceVariables.Merge(current.Known, devices);
 		var declarationChanged = !known.SequenceEqual(current.Known);
-		if (declarationChanged && _persistAudioDevices)
-		{
-			_audioStore!.Save(known);
-		}
 
 		var present = devices.Select(device => PresenceKey(device.Flow, device.Id)).ToHashSet(StringComparer.Ordinal);
 		var defaultOutput = devices.FirstOrDefault(device => device is { Flow: AudioFlow.Output, IsDefault: true })?.Id;
@@ -454,12 +494,13 @@ public sealed class SystemIntegration
 		if (!declarationChanged && !republish)
 		{
 			_audio = current with { Present = present, DefaultOutputId = defaultOutput };
-			return;
+			return false;
 		}
 
 		_audio = BuildAudioState(known, present, defaultOutput);
 		ComposeVariables();
-		_pollingInvalidation?.MarkStale(IntegrationId);
+		NotifyDeclarationsChanged();
+		return declarationChanged;
 	}
 
 	private static AudioState BuildAudioState(
@@ -497,20 +538,20 @@ public sealed class SystemIntegration
 			if (slots.Count != current.Count)
 			{
 				ComposeVariables();
-				_pollingInvalidation?.MarkStale(IntegrationId);
+				NotifyDeclarationsChanged();
 			}
 		}
 
+		var moved = new List<string>();
 		for (var index = 0; index < current.Count; index++)
 		{
 			if (current[index] != slots[index])
 			{
-				foreach (var definition in DiskVariables.Declare(index))
-				{
-					_refreshSignal?.RequestDefinitionRefresh(IntegrationId, definition.ResolvedId!);
-				}
+				moved.AddRange(DiskVariables.Declare(index).Select(definition => definition.ResolvedId!));
 			}
 		}
+
+		RequestDefinitionRefresh(moved);
 	}
 
 	// Disks come before audio devices so that a remembered-device list loaded over its cap is what the

@@ -4,16 +4,17 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Issues;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Services;
 using MacroDeckHost.Localization;
 using Serilog;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Http;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Spotify;
 
@@ -55,7 +56,6 @@ public sealed class SpotifyIntegration
 	private readonly TimeSpan _persisterDrainTimeout;
 	private readonly TimeSpan? _persistenceBudget;
 	private readonly TimeProvider? _timeProvider;
-	private readonly Func<Task<TimeOfDayFormat>>? _timeOfDayFormat;
 
 	private IIntegrationContext? _context;
 	private SpotifyTokenPersister? _tokenPersister;
@@ -71,10 +71,6 @@ public sealed class SpotifyIntegration
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
-	// Built-in integrations are created by Activator.CreateInstance and never see the DI container,
-	// so the host installs its time-of-day resolution here once it is built.
-	internal static Func<Task<TimeOfDayFormat>>? HostTimeOfDayFormat { get; set; }
-
 	public SpotifyIntegration()
 		: this(new SpotifyOAuthClient())
 	{
@@ -86,12 +82,10 @@ public sealed class SpotifyIntegration
 		TimeSpan? unreachableIssueThreshold = null,
 		TimeSpan? persisterDrainTimeout = null,
 		TimeSpan? persistenceBudget = null,
-		TimeProvider? timeProvider = null,
-		Func<Task<TimeOfDayFormat>>? timeOfDayFormat = null)
+		TimeProvider? timeProvider = null)
 	{
 		_oauth = oauth;
 		_timeProvider = timeProvider;
-		_timeOfDayFormat = timeOfDayFormat;
 		_transport = transport ?? SpotifyHttpClients.Api;
 		_unreachableIssueThreshold = unreachableIssueThreshold ?? _defaultUnreachableIssueThreshold;
 		_persisterDrainTimeout = persisterDrainTimeout ?? _defaultPersisterDrainTimeout;
@@ -271,6 +265,7 @@ public sealed class SpotifyIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		if (!await TryEnterLifecycleGateAsync("initialization"))
 		{
 			throw new TimeoutException($"Spotify could not start within {_lifecycleGateTimeout}.");
@@ -545,8 +540,7 @@ public sealed class SpotifyIntegration
 		=> [primary];
 
 	private Task<TimeOfDayFormat> TimeOfDayFormatAsync()
-		=> (_timeOfDayFormat ?? HostTimeOfDayFormat)?.Invoke() ??
-			Task.FromResult(new TimeOfDayFormat(CultureInfo.CurrentCulture, HourCycles.H23));
+		=> (_context?.Locale ?? LocalLocaleApi.Instance).GetTimeOfDayFormatAsync();
 
 	private static string LocalTimeOfDay(TimeOfDayFormat format, DateTimeOffset instant)
 		=> format.Format(TimeOnly.FromDateTime(instant.ToLocalTime().DateTime));

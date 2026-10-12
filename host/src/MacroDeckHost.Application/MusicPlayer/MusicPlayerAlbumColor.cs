@@ -2,8 +2,6 @@ namespace MacroDeckHost.Application.MusicPlayer;
 
 public interface IMusicPlayerAlbumColor
 {
-	IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances();
-
 	Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default);
 }
 
@@ -11,7 +9,6 @@ public sealed class MusicPlayerAlbumColor : IMusicPlayerAlbumColor
 {
 	private const int ArtworkSize = 64;
 
-	private readonly IMusicPlayerRegistry _registry;
 	private readonly IMusicPlayerStateCache _stateCache;
 	private readonly IMusicPlayerArtworkService _artworkService;
 	private readonly IArtworkPaletteExtractor _paletteExtractor;
@@ -19,18 +16,14 @@ public sealed class MusicPlayerAlbumColor : IMusicPlayerAlbumColor
 	private readonly Dictionary<string, Entry> _entries = new(StringComparer.Ordinal);
 
 	public MusicPlayerAlbumColor(
-		IMusicPlayerRegistry registry,
 		IMusicPlayerStateCache stateCache,
 		IMusicPlayerArtworkService artworkService,
 		IArtworkPaletteExtractor paletteExtractor)
 	{
-		_registry = registry;
 		_stateCache = stateCache;
 		_artworkService = artworkService;
 		_paletteExtractor = paletteExtractor;
 	}
-
-	public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => _registry.GetInstances();
 
 	public async Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
 	{

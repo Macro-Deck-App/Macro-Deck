@@ -22,5 +22,7 @@ public enum UserNotificationActionKind
 	EnablePluginAdb,
 
 	OpenDownloadPage,
-	OpenTroubleshootingGuide
+	OpenTroubleshootingGuide,
+
+	EnablePluginCompanionDevices
 }

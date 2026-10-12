@@ -3046,6 +3046,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>O valor não corresponde ao tipo da variável.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>O valor não pode ser usado para esta variável.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Os dados do widget devem ser um objeto JSON.</value>
   </data>
@@ -13782,6 +13785,13 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>{name} precisa do ADB para funcionar com seus dispositivos Android, mas os plugins não têm permissão para usar o ADB no momento. Permitir que plugins usem o ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Um plugin quer usar seus dispositivos Companion</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} quer trabalhar com os celulares e tablets conectados pelo Macro Deck Companion, mas os plugins não têm permissão para usá-los no momento. Permitir que plugins usem dispositivos Companion?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Pacote de ícones mantido</value>
   </data>
@@ -14022,6 +14032,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Este plugin usa ADB para trabalhar com seus dispositivos Android. Ele pode executar comandos neles, copiar arquivos e instalar aplicativos.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Usa dispositivos Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Este plugin usa os dispositivos conectados pelo Macro Deck Companion. Ele pode ler o que eles informam, como bateria e rede, enviar comandos e tirar capturas de tela. Uma captura da tela inteira ainda precisa ser aprovada no dispositivo.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>A assinatura deste plugin foi verificada pelo Macro Deck Creator Portal, mas o manifesto não indica um autor.</value>
@@ -15174,6 +15190,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Instalar o aplicativo exige o ADB. Ative-o primeiro nas configurações de ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Plugins que declaram acesso a dispositivos Companion podem ler o que seus dispositivos Companion informam, enviar comandos e tirar capturas de tela. Uma captura da tela inteira ainda precisa ser aprovada no dispositivo.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Permitir que plugins usem dispositivos Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>O APK foi salvo.</value>
   </data>
@@ -15291,6 +15313,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Abrir configurações do ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Acesso de plugins</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Salvar APK</value>

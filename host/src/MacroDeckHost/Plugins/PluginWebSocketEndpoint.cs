@@ -57,6 +57,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IRemotePluginIntegrationRegistrar _registrar;
 	private readonly IPluginCallbackRouter _callbackRouter;
 	private readonly PluginAdbInvokeRunner? _adbInvokes;
+	private readonly PluginCompanionDeviceInvokeRunner? _companionInvokes;
 	private readonly PluginMessagingInvokeRunner? _messagingInvokes;
 	private readonly ConcurrentDictionary<string, int> _artworkInvokesInFlight = new(StringComparer.Ordinal);
 	private readonly IPluginAssetReceiver _assetReceiver;
@@ -92,8 +93,10 @@ public sealed class PluginWebSocketEndpoint
 		PluginAdbInvokeRunner? adbInvokes = null,
 		PluginMessagingInvokeRunner? messagingInvokes = null,
 		VideoStreamPluginSessions? videoStreams = null,
+		PluginCompanionDeviceInvokeRunner? companionInvokes = null,
 		IEmailSyncSignal? emailSync = null)
 	{
+		_companionInvokes = companionInvokes;
 		_videoStreams = videoStreams;
 		_emailSync = emailSync;
 		_hostAssetSender = hostAssetSender;
@@ -643,6 +646,7 @@ public sealed class PluginWebSocketEndpoint
 
 			case MessageTypes.HostCancel:
 				_adbInvokes?.Cancel(connection, envelope.CorrelationId);
+				_companionInvokes?.Cancel(connection, envelope.CorrelationId);
 				_messagingInvokes?.Cancel(connection, envelope.CorrelationId);
 				break;
 
@@ -905,14 +909,22 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
+		if (_companionInvokes is not null &&
+			string.Equals(payload.Api, HostApis.CompanionDevices, StringComparison.Ordinal))
+		{
+			await _companionInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
+			return;
+		}
+
 		if (_messagingInvokes is not null && string.Equals(payload.Api, HostApis.Messaging, StringComparison.Ordinal))
 		{
 			await _messagingInvokes.StartAsync(connection, pluginId, sessionId, envelope, payload, cancellationToken);
 			return;
 		}
 
-		if (string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) &&
-			string.Equals(payload.Operation, HostOperations.Ui.RegisterMusicPlayerArtwork, StringComparison.Ordinal))
+		if ((string.Equals(payload.Api, HostApis.Ui, StringComparison.Ordinal) &&
+				string.Equals(payload.Operation, HostOperations.Ui.RegisterMusicPlayerArtwork, StringComparison.Ordinal)) ||
+			string.Equals(payload.Api, HostApis.MusicPlayers, StringComparison.Ordinal))
 		{
 			await StartArtworkInvokeAsync(connection, pluginId, sessionId, envelope, payload, cancellationToken);
 			return;

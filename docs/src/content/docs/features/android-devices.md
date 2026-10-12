@@ -3,8 +3,9 @@ title: Android devices
 description: Work with Android devices through Macro Deck's own ADB connection with IAndroidDeviceManager - the host:adb permission, the user's control, operations, errors, limits and testing.
 ---
 
-A plugin can run shell commands on an Android device, read its battery, copy files and install or
-uninstall apps through Macro Deck's own ADB (Android Debug Bridge) connection. Macro Deck finds the
+A plugin can press keys, tap, type, start apps, take screenshots, run shell commands, read the battery, copy
+files and install or uninstall apps on an Android device through Macro Deck's own ADB (Android Debug Bridge)
+connection. Macro Deck finds the
 `adb` program, runs the ADB server and tracks the attached devices; your plugin ships no `adb` client of
 its own and never talks to the ADB server directly.
 
@@ -61,10 +62,8 @@ internal sealed class SleepPhoneAction(IAndroidDeviceManager android) : IActionD
 
 			try
 			{
-				var result = await device.ExecuteShellAsync("input keyevent KEYCODE_SLEEP", context.CancellationToken);
-				return result.ExitCode == 0
-					? ActionResult.Success()
-					: ActionResult.Failed(ActionErrorCodes.ProviderRejected, Strings.Errors.PhoneRefused());
+				await device.SendKeyAsync(AndroidKey.Sleep, context.CancellationToken);
+				return ActionResult.Success();
 			}
 			catch (AndroidDeviceException)
 			{
@@ -90,7 +89,8 @@ Things to know:
 ## Declaring `host:adb`
 
 An installed plugin reaches ADB only when its manifest lists `host:adb` in
-[`permissions`](/reference/manifest/#permissions). It is the one permission the host enforces; every
+[`permissions`](/reference/manifest/#permissions). It is one of the two permissions the host enforces,
+next to [`host:companion-devices`](/features/companion-devices/#declaring-hostcompanion-devices); every
 other entry in the vocabulary is still declared for disclosure only. If plugins are not allowed to use ADB
 when the user installs the first version of your plugin that declares it, Macro Deck asks the user whether
 to allow it. It does not ask again for an update of a version that already declared it.
@@ -157,6 +157,23 @@ android.DeviceStateChanged += (_, e) =>
   installations. It is `null` until Macro Deck has read it and on an older host, and it is the local id
   under which the built-in ADB integration publishes the device's [battery](/features/batteries/), so a
   plugin with `host:adb` can tell which battery entry belongs to which device.
+- **`LacksUsbPermission`** is `true` for an `Unauthorized` device the computer lacks the USB permissions
+  for, a missing Linux udev rule for example, rather than one that has not authorized this computer. Tell
+  the user which: the fix differs. A change of it raises `DeviceStateChanged` even though `State` stays
+  `Unauthorized`. It is always `false` on an older host.
+- **`Mode`** tells an `Offline` device in the `Bootloader`, `Recovery` or `Sideload` apart from one that is
+  simply not answering (`Normal`); `Unknown` is a state adb reported that Macro Deck does not recognise. It is
+  `Normal` for every other state. A change of it raises `DeviceStateChanged` even though `State` stays
+  `Offline`. It is always `Normal` on an older host.
+- **`IsAdbUnavailable`** on the manager is `true` while `Access` is `Available` but Macro Deck cannot find the
+  `adb` program: no device can appear and every operation fails with `AdbUnavailable`, so tell the user to
+  install the platform tools in **Settings > ADB** rather than to attach a device. A change raises
+  `AccessChanged`. It is always `false` on an older host.
+- **`DefaultDevice`** is the device to use when the user picked none: the default device chosen in
+  **Settings > ADB**, or the only attached device when none is chosen. It is `null` when none is chosen and
+  not exactly one device is attached. A chosen default device that has just gone away is still returned, so
+  check `FindDevice(DefaultDevice.Serial)` before you treat it as attached; its operations then fail with
+  `DeviceOffline` or `DeviceNotFound`. It is `null` on an older host.
 - **`DeviceDisconnected`** is also raised for every device when access is withdrawn.
 - **Handlers run on the connection's receive loop.** Keep them short and start real work, such as an
   operation on the device, without awaiting it in the handler. An exception from a handler is logged and
@@ -173,8 +190,37 @@ android.DeviceStateChanged += (_, e) =>
 | `InstallApkAsync(apkPath)` | Installs an APK, replacing an installed version of the same app. |
 | `UninstallPackageAsync(packageName)` | Uninstalls an app. |
 | `IsPackageInstalledAsync(packageName)` | Whether an app is installed. |
+| `SendKeyAsync(key)` | Presses one `AndroidKey`, such as `Home`, `Wakeup`, `Sleep`, `VolumeUp` or `MediaPlayPause`. |
+| `TapAsync(x, y)` | Taps the screen at a point, in screen pixels from the top left. |
+| `SwipeAsync(fromX, fromY, toX, toY, duration)` | Swipes from one point to another. |
+| `InputTextAsync(text)` | Types text into the focused field. |
+| `StartAppAsync(packageName)` | Starts an app's launcher activity, or brings the app to the front. |
+| `ForceStopAppAsync(packageName)` | Force-stops an app. |
+| `OpenUriAsync(uri)` | Opens a URI with the app the device picks for it. |
+| `RebootAsync(mode)` | Restarts the device into Android, recovery or the bootloader (`AndroidRebootMode`). |
+| `CaptureScreenshotAsync()` | Returns the current screen as PNG bytes. |
+| `GetStatusAsync()` | Returns whether the screen is on, whether the lock screen shows, and the foreground app. |
 
 Every operation is a round trip to Macro Deck, so do not call them in a tight loop.
+
+### Keys, touches, apps and screenshots
+
+```csharp
+await device.SendKeyAsync(AndroidKey.Wakeup, cancellationToken);
+await device.StartAppAsync("com.spotify.music", cancellationToken);
+var png = await device.CaptureScreenshotAsync(cancellationToken);
+```
+
+- **These are fixed commands.** Macro Deck builds the adb command itself and validates and quotes every
+  argument, so they need no shell and keep working while Macro Deck is locked, see [Limits](#limits).
+  Coordinates are 0 to 8192, a swipe lasts at most five seconds, text is at most 500 characters, a URI at
+  most 2000. An argument outside these fails with `InvalidArgument` before adb runs.
+- **A screenshot is at most 8 MiB for a plugin.** It travels in chunks after the reply; a larger one fails
+  with `CommandFailed`.
+- **`GetStatusAsync` returns `null` until Macro Deck has a reading.** Macro Deck reads the screen state in
+  the background for every device someone asked about recently and shares the reading between callers, so
+  the first call starts the readings and returns `null`; ask again a few seconds later. A value the device
+  does not report is `null`.
 
 ### Shell commands
 
@@ -255,7 +301,9 @@ first two apart before you call anything.
 - **At most four calls in flight per plugin.** A fifth is refused at once with `RateLimited`; it is not
   queued. ADB calls also count toward the plugin's shared callback throttle.
 - **While Macro Deck is locked**, shell commands, pushes, pulls, installs, uninstalls and connects are refused with
-  `HostLocked`. Battery reads and `IsPackageInstalledAsync` still work.
+  `HostLocked`. Battery reads, `IsPackageInstalledAsync` and the fixed operations (keys, taps, swipes, text,
+  starting and stopping apps, opening a URI, reboots, screenshots and the status) still work, for plugins and
+  built-in integrations alike, so a deck button bound to one keeps working on a locked computer.
 - **Every operation has a time limit** on the host, about a minute for a shell command or an uninstall,
   five minutes for a push, pull or install, twenty seconds for a connect, and ten seconds for the battery
   and package queries. It then
@@ -267,9 +315,17 @@ first two apart before you call anything.
 Macro Deck's own integrations reach ADB through the same `IAndroidDeviceManager`, read from
 `IIntegrationContext.AndroidDevices` (see [ADR 0107](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 For them `Access` is `Available` whenever ADB is enabled: they are part of Macro Deck, so neither
-**Allow plugins to use ADB** nor `host:adb` applies. Everything else does, the locked-host refusals and the
+**Allow plugins to use ADB** nor `host:adb` applies. Everything else does, the locked-host rule and the
 shell output limit included. Should such an integration ever move out of process, it becomes a plugin like
 any other and needs `host:adb` and the user's permission.
+
+The built-in ADB integration uses nothing else. Its actions run the fixed operations on the device the user
+picked or on `DefaultDevice`, its variables read `Devices`, `DefaultDevice`, `GetStatusAsync` and the
+battery, its issues use `LacksUsbPermission`, an action reports a missing adb from `IsAdbUnavailable`
+before it looks for a device, and it derives its own device events (connected,
+disconnected, authorized, unauthorized, online, offline) from `DeviceConnected`, `DeviceDisconnected` and
+`DeviceStateChanged`, remembering a device that went away for five minutes so that its return reads as
+online again.
 
 The built-in ADB integration's battery provider is written against this API alone and is a worked example
 of it: it publishes each device under `Info.StableId`, skips a device until it reports one, reads
@@ -279,7 +335,12 @@ of it: it publishes each device under `Info.StableId`, skips a device until it r
 ## Older hosts
 
 On a Macro Deck that predates this API, `Access` stays `Unsupported`, `Devices` stays empty and every
-operation fails with `Unsupported`. A host that predates `StableId` leaves it `null`, and a context from a
+operation fails with `Unsupported`. A host that predates the fixed operations fails each of them with
+`Unsupported`, answers `GetStatusAsync` with `null`, reports `LacksUsbPermission` as `false` (such a device
+still reads `Unauthorized`), `Mode` as `Normal` (a device in recovery still reads `Offline`),
+`IsAdbUnavailable` as `false` and `DefaultDevice` as `null`. An `IAndroidDevice` or `IAndroidDeviceManager` you
+implemented yourself against an older SDK behaves the same way through the default interface members. A
+host that predates `StableId` leaves it `null`, and a context from a
 host that offers no ADB to integrations answers `context.AndroidDevices` with an always-`Unsupported`
 manager. A plugin that uses ADB for an optional feature keeps working there with
 that feature off. Set a minimum host version in
@@ -302,8 +363,11 @@ Assert.That(phone.Calls.Single().Operation, Is.EqualTo(nameof(IAndroidDevice.Exe
 
 - **Access starts as `Available`.** `SetAccess` changes it and refuses every operation with the matching
   error, as a real host does. `AddDevice`, `RemoveDevice` and `SetDeviceState` raise the matching events.
-- **`FakeAndroidDevice`** records every call in `Calls`. `ShellHandler`, `Battery` and
-  `InstalledPackages` script its answers, and `Failure` makes every operation throw with that code.
+- **`FakeAndroidDevice`** records every call in `Calls`. `ShellHandler`, `Battery`, `Screenshot`, `Status`
+  and `InstalledPackages` script its answers, and `Failure` makes every operation throw with that code.
+- **`DefaultDeviceSerial`** on the manager names the default device; left `null`, `DefaultDevice` is the only
+  attached device. `SetLacksUsbPermission` and `SetDeviceMode` change a device's `LacksUsbPermission` and `Mode` and raise
+  `DeviceStateChanged`; `SetAdbUnavailable` changes `IsAdbUnavailable` and raises `AccessChanged`. A device removed and added again comes back as the same instance.
 - **`StableId`** on a `FakeAndroidDevice` sets `Info.StableId` later, like a host that reads it after the
   device attached. No event is raised.
 - **In a `PluginTestHarness`**, `harness.Context.AndroidDevices` is the plugin's manager, both through DI and

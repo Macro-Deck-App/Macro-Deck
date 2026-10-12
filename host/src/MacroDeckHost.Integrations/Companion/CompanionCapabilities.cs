@@ -1,43 +1,31 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Integrations.Companion.Actions;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion;
 
-public static class CompanionCapabilities
+internal static class CompanionCapabilities
 {
-	public const string ScreenOn = "screenOn";
-	public const string ScreenOff = "screenOff";
-	public const string ScreenshotDeck = "screenshotDeck";
-	public const string ScreenshotFull = "screenshotFull";
-	public const string Focus = "focus";
-	public const string NetworkName = "networkName";
-	public const string Cpu = "cpu";
-	public const string Memory = "memory";
+	public const string ScreenOn = CompanionDeviceCapabilities.ScreenOn;
+	public const string ScreenOff = CompanionDeviceCapabilities.ScreenOff;
+	public const string ScreenshotDeck = CompanionDeviceCapabilities.ScreenshotDeck;
+	public const string ScreenshotFull = CompanionDeviceCapabilities.ScreenshotFull;
+	public const string Focus = CompanionDeviceCapabilities.Focus;
 
-	public static IReadOnlySet<string> All { get; } = new HashSet<string>(StringComparer.Ordinal)
-	{
-		ScreenOn, ScreenOff, ScreenshotDeck, ScreenshotFull, Focus, NetworkName, Cpu, Memory
-	};
-
-	public static IReadOnlySet<string> Requestable { get; } = new HashSet<string>(StringComparer.Ordinal)
-	{
-		ScreenOn, ScreenOff, Focus, ScreenshotFull
-	};
-
-	internal static (ActionResult? Error, bool Prompt, bool AwaitResult) Require(ICompanionGateway gateway,
+	internal static (ActionResult? Error, bool Prompt, bool AwaitResult) Require(ICompanionDeviceApi devices,
 		Guid deviceId,
 		string capability)
 	{
-		if (!gateway.TryGetState(deviceId, out var state))
+		if (devices.FindDevice(deviceId)?.State is not { } state)
 		{
 			return (CompanionTargetResolver.NotConnected(), false, false);
 		}
 
 		if (state.Capabilities.Contains(capability))
 		{
-			return (null, false, state.AnswersCommands);
+			return (null, false, state.ConfirmsCommands);
 		}
 
 		return state.RequestableCapabilities.Contains(capability)
@@ -45,17 +33,17 @@ public static class CompanionCapabilities
 			: (Unavailable(capability), false, false);
 	}
 
-	internal static ActionResult Failed(CompanionCommandFailure failure, string capability, bool prompted)
+	internal static ActionResult Failed(CompanionDeviceFailure failure, string capability, bool prompted)
 		=> failure switch
 		{
-			CompanionCommandFailure.NotConnected => CompanionTargetResolver.NotConnected(),
-			CompanionCommandFailure.Removed => ActionResult.Failed(ActionErrorCodes.NotFound,
+			CompanionDeviceFailure.NotConnected => CompanionTargetResolver.NotConnected(),
+			CompanionDeviceFailure.Removed => ActionResult.Failed(ActionErrorCodes.NotFound,
 				AppStrings.Integrations.Companion.Errors.ConfigurationNotFound()),
-			CompanionCommandFailure.TimedOut => ActionResult.Failed(ActionErrorCodes.Timeout,
+			CompanionDeviceFailure.TimedOut => ActionResult.Failed(ActionErrorCodes.Timeout,
 				TimedOutMessage(capability, prompted)),
-			CompanionCommandFailure.ConsentDenied => ActionResult.Failed(ActionErrorCodes.PermissionDenied,
+			CompanionDeviceFailure.ConsentDenied => ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 				AppStrings.Integrations.Companion.Errors.PermissionDeclined()),
-			CompanionCommandFailure.Unavailable => Unavailable(capability),
+			CompanionDeviceFailure.Unavailable => Unavailable(capability),
 			_ => ActionResult.Failed(ActionErrorCodes.ProviderError,
 				capability is ScreenshotDeck or ScreenshotFull
 					? AppStrings.Integrations.Companion.Errors.ScreenshotFailed()

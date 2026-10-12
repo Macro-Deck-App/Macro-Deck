@@ -149,6 +149,41 @@ action interactions. Out of process these are protocol calls or cached protocol 
 event-driven designs to tight loops over host APIs. See [Capabilities](/features/) and
 [Capability parity](/reference/capability-parity/).
 
+`Storage` is the exception: it never crosses the protocol. The SDK keeps the documents itself under
+`integration-data/<plugin id>/` in `DataDirectory`, so they survive updates and rollbacks like the rest of
+that directory. A plugin started without a data directory, such as one run outside a supervisor without
+`MACRO_DECK_PLUGIN_DATA_DIRECTORY`, reads every key as missing and gets an `InvalidOperationException` from
+a write. See [Integration storage](/features/integration-storage/).
+
+### Outgoing HTTP requests
+
+Users can set the User-Agent Macro Deck sends in its network settings, and some services filter on it.
+Send `context.Http.UserAgent` with every HTTP request and WebSocket handshake your integration makes, and
+read it per request, because the user can change it while the plugin runs. A config flow, which may run
+before the integration was ever initialized, gets the same value from `IConfigFlowContext.Http`.
+
+```csharp
+public sealed class UserAgentHandler(IHostHttp http) : DelegatingHandler(new SocketsHttpHandler())
+{
+	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
+		if (request.Headers.UserAgent.Count == 0)
+		{
+			request.Headers.TryAddWithoutValidation("User-Agent", http.UserAgent);
+		}
+
+		return base.SendAsync(request, cancellationToken);
+	}
+}
+
+// In InitializeAsync:
+_client = new HttpClient(new UserAgentHandler(context.Http));
+```
+
+Out of process the value comes from the host's `http` `host.state` push, so it is the SDK default,
+`MacroDeck/` and the SDK version, until the first push arrives, and always on a Macro Deck that predates the
+push. In process it is the live setting. `IHostHttp` is also registered for dependency injection.
+
 ## Reserved routes
 
 | Route | Answers |

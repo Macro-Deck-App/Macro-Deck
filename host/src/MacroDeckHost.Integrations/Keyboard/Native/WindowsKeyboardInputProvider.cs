@@ -247,7 +247,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			return false;
 		}
 
-		if (PhysicalKeys.IsPositional(key) && PhysicalKeys.TryGetScanCode(key, out scan))
+		if (NativeKeys.IsPositional(key) && NativeKeys.TryGetWindowsScanCode(key, out scan))
 		{
 			vk = (ushort)MapVirtualKeyEx(scan, MapVkVscToVkEx, layout);
 			if (vk == 0)

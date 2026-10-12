@@ -7,6 +7,7 @@ using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.YouTube.Config;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube;
 
@@ -54,7 +55,10 @@ public sealed class YouTubeConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ClientStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ClientStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

@@ -71,11 +71,8 @@ internal sealed class ObsMacroDeck2Migration : IIntegrationMigration
 
 			var title = ReadCredential(credentials, "name") is { Length: > 0 } name ? name : "OBS Connection";
 
-			// ObsIntegration.LoadDesiredAsync only picks up a config entry that carries the schema and
-			// identity keys the config-flow UI normally adds through ObsConfigurationMutationAdapter.Prepare.
-			// MigrationService writes entries straight to the config store, bypassing that adapter, so this
-			// migrator has to allocate and stamp both keys itself or the migrated connection would silently
-			// never load.
+			// Migrated entries bypass PrepareEntryAsync, which stamps the schema and identity keys that
+			// LoadDesiredAsync requires, so the migrator stamps them itself or the entry never loads.
 			if (ConfigurationIdentityAllocator.Allocate(title, occupiedKeys) is not { } key)
 			{
 				continue;

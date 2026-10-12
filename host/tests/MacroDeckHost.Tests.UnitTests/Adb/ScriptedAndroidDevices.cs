@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeck.Sdk.Android;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -6,7 +7,53 @@ internal sealed class ScriptedAndroidDevices : IAndroidDeviceManager
 {
 	private readonly Lock _sync = new();
 	private readonly List<ScriptedAndroidDevice> _devices = [];
+	private readonly Dictionary<string, ScriptedAndroidDevice> _known = new(StringComparer.Ordinal);
+	private readonly List<string> _calls = [];
 	private AndroidDeviceAccess _access = AndroidDeviceAccess.Available;
+
+	public IReadOnlyList<string> Calls
+	{
+		get
+		{
+			lock (_sync)
+			{
+				return [.. _calls];
+			}
+		}
+	}
+
+	public bool IsAdbUnavailable { get; set; }
+
+	public string? DefaultSerial { get; set; }
+
+	public IAndroidDevice? DefaultDevice
+	{
+		get
+		{
+			lock (_sync)
+			{
+				if (_access != AndroidDeviceAccess.Available)
+				{
+					return null;
+				}
+
+				if (DefaultSerial is { } serial)
+				{
+					return _known.GetValueOrDefault(serial);
+				}
+
+				return _devices.Count == 1 ? _devices[0] : null;
+			}
+		}
+	}
+
+	internal void Record(string call)
+	{
+		lock (_sync)
+		{
+			_calls.Add(call);
+		}
+	}
 
 	public event EventHandler<AndroidDeviceEventArgs>? DeviceConnected;
 
@@ -47,16 +94,30 @@ internal sealed class ScriptedAndroidDevices : IAndroidDeviceManager
 	public ScriptedAndroidDevice Attach(string serial,
 		string? stableId,
 		bool raise = true,
-		AndroidBatteryState? battery = null)
+		AndroidBatteryState? battery = null,
+		AndroidDeviceState state = AndroidDeviceState.Online,
+		string? model = "Pixel_8",
+		bool lacksUsbPermission = false,
+		AndroidDeviceMode mode = AndroidDeviceMode.Normal)
 	{
-		var device = new ScriptedAndroidDevice(serial, stableId);
-		if (battery is not null)
-		{
-			device.Battery = battery;
-		}
-
+		ScriptedAndroidDevice device;
 		lock (_sync)
 		{
+			if (!_known.TryGetValue(serial, out device!))
+			{
+				device = new ScriptedAndroidDevice(serial, stableId) { Owner = this };
+				_known[serial] = device;
+			}
+
+			device.State = state;
+			device.LacksUsbPermission = lacksUsbPermission;
+			device.Mode = mode;
+			device.Info = device.Info with { Model = model };
+			if (battery is not null)
+			{
+				device.Battery = battery;
+			}
+
 			_devices.Add(device);
 		}
 
@@ -101,6 +162,24 @@ internal sealed class ScriptedAndroidDevices : IAndroidDeviceManager
 
 	public void RaiseStateChanged(ScriptedAndroidDevice device, AndroidDeviceState previous)
 		=> DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, previous));
+
+	public void SetState(string serial,
+		AndroidDeviceState state,
+		bool lacksUsbPermission = false,
+		AndroidDeviceMode mode = AndroidDeviceMode.Normal)
+	{
+		ScriptedAndroidDevice device;
+		lock (_sync)
+		{
+			device = _devices.Single(candidate => candidate.Serial == serial);
+		}
+
+		var previous = device.State;
+		device.State = state;
+		device.LacksUsbPermission = lacksUsbPermission;
+		device.Mode = mode;
+		DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, previous));
+	}
 }
 
 internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : IAndroidDevice
@@ -147,7 +226,7 @@ internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : I
 	}
 
 	public Task<AndroidBatteryState> GetBatteryStateAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(Battery);
+		=> BatteryFailure is { } failure ? Task.FromException<AndroidBatteryState>(failure) : Task.FromResult(Battery);
 
 	public Task PushFileAsync(string localPath, string remotePath, CancellationToken cancellationToken = default)
 		=> throw new NotSupportedException();
@@ -163,4 +242,66 @@ internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : I
 
 	public Task<bool> IsPackageInstalledAsync(string packageName, CancellationToken cancellationToken = default)
 		=> throw new NotSupportedException();
+
+	internal ScriptedAndroidDevices? Owner { get; init; }
+
+	public bool LacksUsbPermission { get; set; }
+
+	public AndroidDeviceMode Mode { get; set; }
+
+	public AndroidDeviceException? NextFailure { get; set; }
+
+	public AndroidDeviceException? BatteryFailure { get; set; }
+
+	public byte[] Screenshot { get; set; } = [1, 2, 3];
+
+	public AndroidDeviceStatus? Status { get; set; }
+
+	public Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default) => Run($"SendKey:{key}");
+
+	public Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
+		=> Run($"Tap:{Invariant(x)}:{Invariant(y)}");
+
+	public Task SwipeAsync(int fromX,
+		int fromY,
+		int toX,
+		int toY,
+		TimeSpan duration,
+		CancellationToken cancellationToken = default)
+		=> Run($"Swipe:{Invariant(fromX)}:{Invariant(fromY)}:{Invariant(toX)}:{Invariant(toY)}:" +
+			Invariant((int)duration.TotalMilliseconds));
+
+	public Task InputTextAsync(string text, CancellationToken cancellationToken = default) => Run($"InputText:{text}");
+
+	public Task StartAppAsync(string packageName, CancellationToken cancellationToken = default)
+		=> Run($"StartApp:{packageName}");
+
+	public Task ForceStopAppAsync(string packageName, CancellationToken cancellationToken = default)
+		=> Run($"ForceStopApp:{packageName}");
+
+	public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default) => Run($"OpenUri:{uri}");
+
+	public Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
+		=> Run($"Reboot:{mode}");
+
+	public async Task<byte[]> CaptureScreenshotAsync(CancellationToken cancellationToken = default)
+	{
+		await Run("CaptureScreenshot");
+		return Screenshot;
+	}
+
+	public Task<AndroidDeviceStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
+	{
+		Owner?.Record($"GetStatus:{Serial}");
+		return Task.FromResult(Status);
+	}
+
+	private Task Run(string call)
+	{
+		var separator = call.IndexOf(':');
+		Owner?.Record(separator < 0 ? $"{call}:{Serial}" : $"{call[..separator]}:{Serial}{call[separator..]}");
+		return NextFailure is { } failure ? Task.FromException(failure) : Task.CompletedTask;
+	}
+
+	private static string Invariant(int value) => value.ToString(CultureInfo.InvariantCulture);
 }

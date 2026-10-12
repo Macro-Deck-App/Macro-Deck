@@ -3046,6 +3046,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Значение не соответствует типу переменной.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Это значение нельзя использовать для этой переменной.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Данные виджета должны быть объектом JSON.</value>
   </data>
@@ -13782,6 +13785,13 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>{name} нужен ADB для работы с Android-устройствами, но плагинам сейчас не разрешено использовать ADB. Разрешить плагинам использовать ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Плагин хочет использовать ваши устройства Companion</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} хочет работать с телефонами и планшетами, подключёнными через Macro Deck Companion, но плагинам сейчас не разрешено их использовать. Разрешить плагинам использовать устройства Companion?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Набор значков сохранён</value>
   </data>
@@ -14022,6 +14032,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Этот плагин использует ADB для работы с вашими Android-устройствами. Он может выполнять на них команды, копировать файлы и устанавливать приложения.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Использует устройства Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Этот плагин использует устройства, подключённые через Macro Deck Companion. Он может читать их данные, например заряд батареи и сеть, отправлять им команды и делать снимки экрана. Снимок всего экрана по-прежнему нужно подтвердить на устройстве.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Подпись этого плагина проверена Macro Deck Creator Portal, но в его манифесте не указан автор.</value>
@@ -15174,6 +15190,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Для установки приложения нужен ADB. Сначала включите его в настройках ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Плагины, заявившие доступ к устройствам Companion, могут читать данные ваших устройств Companion, отправлять им команды и делать снимки экрана. Снимок всего экрана по-прежнему нужно подтвердить на устройстве.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Разрешить плагинам использовать устройства Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK-файл сохранён.</value>
   </data>
@@ -15291,6 +15313,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Открыть настройки ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Доступ плагинов</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Сохранить APK</value>

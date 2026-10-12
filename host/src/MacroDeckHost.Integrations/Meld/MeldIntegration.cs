@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Meld.Actions;
 using MacroDeckHost.Integrations.Meld.Protocol;
 using MacroDeck.Localization;
@@ -12,6 +11,7 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Meld;
 
@@ -24,7 +24,6 @@ public sealed class MeldIntegration
 		IEventProvider,
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = MeldObjects.IntegrationId;
@@ -38,7 +37,6 @@ public sealed class MeldIntegration
 	private readonly MeldVariableCatalog _catalog;
 
 	private MeldConnection? _connection;
-	private IVariableRefreshSignal? _refreshSignal;
 	private MeldEventEmitter? _events;
 
 	public MeldIntegration()
@@ -119,8 +117,6 @@ public sealed class MeldIntegration
 
 	public byte[] GetIcon() => _icon;
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
 	public IConfigFlow CreateConfigFlow() => new MeldConfigFlow();
 
 	public ValueTask<VariableCatalogPage> DiscoverAsync(
@@ -138,6 +134,7 @@ public sealed class MeldIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new MeldEventEmitter(context.Events);
@@ -284,7 +281,7 @@ public sealed class MeldIntegration
 			onState: state => events?.Observe(state),
 			onTrackMute: (trackId, trackName, muted) => events?.ObserveTrackMute(trackId, trackName, muted),
 			onReset: () => events?.Reset(),
-			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
 		_connection.Start();
 	}
 

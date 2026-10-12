@@ -1,10 +1,12 @@
+using MacroDeck.Sdk.Android;
+
 namespace MacroDeckHost.Integrations.Adb;
 
 internal sealed class AdbHealthTracker
 {
-	private AdbGatewayFailureCode? _lastFailure;
+	private AndroidDeviceErrorCode? _lastFailure;
 
-	public AdbGatewayFailureCode? LastFailure => _lastFailure;
+	public AndroidDeviceErrorCode? LastFailure => _lastFailure;
 
-	public void Record(AdbGatewayResult result) => _lastFailure = result.Success ? null : result.Failure;
+	public void Record(AdbOutcome outcome) => _lastFailure = outcome.Failure;
 }

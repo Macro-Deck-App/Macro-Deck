@@ -15,7 +15,10 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 	private readonly Lock _gate = new();
 	private readonly List<FakeAndroidDevice> _devices = [];
 	private readonly List<string> _connectedAddresses = [];
+	private readonly Dictionary<string, FakeAndroidDevice> _known = new(StringComparer.Ordinal);
 	private AndroidDeviceAccess _access = AndroidDeviceAccess.Available;
+	private string? _defaultDeviceSerial;
+	private bool _adbUnavailable;
 
 	/// <inheritdoc />
 	public event EventHandler<AndroidDeviceEventArgs>? DeviceConnected;
@@ -56,6 +59,79 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 	/// <inheritdoc />
 	public IAndroidDevice? FindDevice(string serial)
 		=> Devices.FirstOrDefault(device => string.Equals(device.Serial, serial, StringComparison.Ordinal));
+
+	/// <inheritdoc />
+	/// <remarks>The device named by <see cref="DefaultDeviceSerial" />, attached or added and removed earlier, or the only
+	/// attached device when it is <c>null</c>.</remarks>
+	public IAndroidDevice? DefaultDevice
+	{
+		get
+		{
+			lock (_gate)
+			{
+				if (_access != AndroidDeviceAccess.Available)
+				{
+					return null;
+				}
+
+				if (_defaultDeviceSerial is { } serial)
+				{
+					return _known.GetValueOrDefault(serial);
+				}
+
+				return _devices.Count == 1 ? _devices[0] : null;
+			}
+		}
+	}
+
+	/// <inheritdoc />
+	/// <remarks>Changed with <see cref="SetAdbUnavailable" />. Operations are not refused by it: set
+	/// <see cref="FakeAndroidDevice.Failure" /> as well when the test needs that.</remarks>
+	public bool IsAdbUnavailable
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _adbUnavailable;
+			}
+		}
+	}
+
+	/// <summary>Changes <see cref="IsAdbUnavailable" /> and raises <see cref="AccessChanged" />.</summary>
+	public void SetAdbUnavailable(bool adbUnavailable)
+	{
+		lock (_gate)
+		{
+			if (_adbUnavailable == adbUnavailable)
+			{
+				return;
+			}
+
+			_adbUnavailable = adbUnavailable;
+		}
+
+		AccessChanged?.Invoke(this, EventArgs.Empty);
+	}
+
+	/// <summary>The serial of the default device the user picked in the ADB settings, or <c>null</c> for none.</summary>
+	public string? DefaultDeviceSerial
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _defaultDeviceSerial;
+			}
+		}
+		set
+		{
+			lock (_gate)
+			{
+				_defaultDeviceSerial = value;
+			}
+		}
+	}
 
 	/// <summary>Every address passed to <see cref="ConnectAsync" />, in call order, including refused ones.</summary>
 	public IReadOnlyList<string> ConnectedAddresses
@@ -115,12 +191,13 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 		AccessChanged?.Invoke(this, EventArgs.Empty);
 	}
 
-	/// <summary>Attaches a device and raises <see cref="DeviceConnected" />.</summary>
+	/// <summary>Attaches a device and raises <see cref="DeviceConnected" />. A device removed earlier comes back as the same
+	/// instance.</summary>
 	public FakeAndroidDevice AddDevice(string serial,
 		AndroidDeviceState state = AndroidDeviceState.Online,
 		AndroidDeviceInfo? info = null)
 	{
-		var device = new FakeAndroidDevice(this, serial, info ?? new AndroidDeviceInfo(null, null, null), state);
+		FakeAndroidDevice device;
 		lock (_gate)
 		{
 			if (_devices.Any(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)))
@@ -128,7 +205,19 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 				throw new InvalidOperationException($"A device with serial '{serial}' is already attached.");
 			}
 
+			// The same instance comes back on a reconnect, as IAndroidDevice promises.
+			if (_known.TryGetValue(serial, out var known))
+			{
+				device = known;
+				device.Reattach(info ?? new AndroidDeviceInfo(null, null, null), state);
+			}
+			else
+			{
+				device = new FakeAndroidDevice(this, serial, info ?? new AndroidDeviceInfo(null, null, null), state);
+			}
+
 			_devices.Add(device);
+			_known[serial] = device;
 		}
 
 		DeviceConnected?.Invoke(this, new AndroidDeviceEventArgs(device, null));
@@ -172,5 +261,45 @@ public sealed class FakeAndroidDeviceManager : IAndroidDeviceManager
 
 		device.SetState(state);
 		DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, previous));
+	}
+
+	/// <summary>Changes an attached device's <see cref="IAndroidDevice.LacksUsbPermission" /> and raises
+	/// <see cref="DeviceStateChanged" />.</summary>
+	public void SetLacksUsbPermission(string serial, bool lacksUsbPermission)
+	{
+		FakeAndroidDevice device;
+		lock (_gate)
+		{
+			device = _devices.FirstOrDefault(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)) ??
+				throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
+		}
+
+		if (device.LacksUsbPermission == lacksUsbPermission)
+		{
+			return;
+		}
+
+		device.SetLacksUsbPermission(lacksUsbPermission);
+		DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, device.State));
+	}
+
+	/// <summary>Changes an attached device's <see cref="IAndroidDevice.Mode" /> and raises
+	/// <see cref="DeviceStateChanged" />.</summary>
+	public void SetDeviceMode(string serial, AndroidDeviceMode mode)
+	{
+		FakeAndroidDevice device;
+		lock (_gate)
+		{
+			device = _devices.FirstOrDefault(existing => string.Equals(existing.Serial, serial, StringComparison.Ordinal)) ??
+				throw new InvalidOperationException($"No device with serial '{serial}' is attached.");
+		}
+
+		if (device.Mode == mode)
+		{
+			return;
+		}
+
+		device.SetMode(mode);
+		DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, device.State));
 	}
 }

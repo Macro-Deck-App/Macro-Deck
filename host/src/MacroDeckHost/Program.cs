@@ -258,11 +258,8 @@ public static class Program
 
 			await SeedLogLevelAsync(host, logLevelState);
 			await SeedHttpUserAgentAsync(host);
-			Integrations.Http.IntegrationHttp.Use(host.Services.GetRequiredService<IHttpUserAgentSource>());
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-			Integrations.Spotify.SpotifyIntegration.HostTimeOfDayFormat
-				= () => TimeFormatResolver.ResolveAsync(scopeFactory);
 			Integrations.Variables.VariablesIntegration.HostVariableReader
 				= (name, ownerWidgetId, _) => Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
 

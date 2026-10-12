@@ -118,6 +118,11 @@ public sealed record ConfigFlowResultDto
 
 	/// <summary>Set for External only.</summary>
 	public string? ResumeStepId { get; init; }
+
+	/// <summary>Complete only: <c>true</c> finishes the flow without storing a config entry
+	/// (<c>ConfigFlowResult.CompleteWithoutEntry</c>). Additive within protocol v1: absent reads as
+	/// <c>false</c>, and a host that predates it stores an entry from the collected values.</summary>
+	public bool? WithoutEntry { get; init; }
 }
 
 /// <summary>

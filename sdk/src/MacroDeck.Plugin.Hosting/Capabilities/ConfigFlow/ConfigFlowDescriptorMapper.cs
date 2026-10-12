@@ -57,7 +57,8 @@ internal static class ConfigFlowDescriptorMapper
 				EntryTitle = result.EntryTitle,
 				Values = result.Values?.ToDictionary(pair => pair.Key,
 					pair => ToDto(pair.Value),
-					StringComparer.Ordinal)
+					StringComparer.Ordinal),
+				WithoutEntry = result.StoresEntry ? null : true
 			},
 			ConfigFlowResultKind.External => new ConfigFlowResultDto
 			{

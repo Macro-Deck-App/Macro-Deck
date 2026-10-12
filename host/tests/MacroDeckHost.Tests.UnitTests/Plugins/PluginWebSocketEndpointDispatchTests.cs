@@ -299,6 +299,45 @@ public class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
+	public async Task Album_colour_lookups_wait_off_the_dispatch_loop_and_share_the_artwork_lookup_limit()
+	{
+		var router = new BlockingArtworkRouter();
+		var endpoint = EndpointWith(router);
+		var connection = new FakePluginConnection();
+
+		for (var index = 1; index <= 5; index++)
+		{
+			await endpoint.HandleHostInvokeAsync(connection,
+				"com.example.plugin",
+				"session-1",
+				index == 1
+					? ArtworkInvoke("1")
+					: new ProtocolEnvelope
+					{
+						Type = MessageTypes.HostInvoke,
+						Id = index.ToString(CultureInfo.InvariantCulture),
+						Payload = JsonSerializer.SerializeToElement(
+							new HostInvokePayload
+							{
+								Api = HostApis.MusicPlayers, Operation = HostOperations.MusicPlayers.AlbumColor
+							},
+							PluginProtocolJson.Options)
+					},
+				CancellationToken.None);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(connection.Sent, Has.Count.EqualTo(1), "the dispatch loop returned while four lookups wait");
+			Assert.That(connection.Sent[0].CorrelationId, Is.EqualTo("5"));
+			Assert.That(connection.Sent[0].Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+		});
+
+		router.Release.SetResult();
+		await WaitForAsync(() => connection.Sent.Count == 5);
+	}
+
+	[Test]
 	public async Task A_finished_artwork_lookup_frees_its_slot_even_when_the_router_threw()
 	{
 		var router = new BlockingArtworkRouter { ThrowOnRelease = true };

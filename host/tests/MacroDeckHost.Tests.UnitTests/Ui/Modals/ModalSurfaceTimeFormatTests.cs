@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Ui.Sessions;

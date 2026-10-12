@@ -3,18 +3,17 @@ using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Integrations;
-using MacroDeckHost.Integrations.Adb;
-using MacroDeckHost.Integrations.HomeAssistant;
-using MacroDeckHost.Tests.UnitTests.Adb;
+using MacroDeckHost.Application.Calendar;
+using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Integrations.Calendar;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Variables;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -26,16 +25,12 @@ namespace MacroDeckHost.Tests.UnitTests.Integrations;
 internal sealed class IntegrationGatewayBinderTests
 {
 	[Test]
-	public void Bind_gives_the_gateway_to_a_consumer_integration()
+	public void Bind_gives_the_host_services_to_a_consumer_integration()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new GatewayConsumerIntegration();
 
-		IntegrationGatewayBinder.Bind(integration,
-			gateway,
-			null!,
-			new NullVariableBindingStore(),
-			new VariableRefreshSignal());
+		IntegrationGatewayBinder.Bind(integration, gateway);
 
 		Assert.That(integration.ReceivedGateway, Is.SameAs(gateway));
 	}
@@ -43,52 +38,35 @@ internal sealed class IntegrationGatewayBinderTests
 	[Test]
 	public void Bind_does_nothing_to_an_integration_that_does_not_implement_the_marker()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new PlainRecordingIntegration();
 
-		Assert.DoesNotThrow(() => IntegrationGatewayBinder.Bind(integration,
-			gateway,
-			null!,
-			new NullVariableBindingStore(),
-			new VariableRefreshSignal()));
+		Assert.DoesNotThrow(() => IntegrationGatewayBinder.Bind(integration, gateway));
 	}
 
 	[Test]
-	public void Bind_gives_the_variable_refresh_signal_to_a_consumer_integration()
+	public async Task A_definition_refresh_requested_during_initialization_reaches_the_poller()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var signal = new VariableRefreshSignal();
-		var integration = new RefreshSignalConsumerIntegration();
-
-		IntegrationGatewayBinder.Bind(integration, gateway, null!, new NullVariableBindingStore(), signal);
-
-		Assert.That(integration.ReceivedSignal, Is.SameAs(signal));
-	}
-
-	[Test]
-	public async Task Startup_binds_the_variable_refresh_signal_before_InitializeAsync_runs()
-	{
-		using var gateway = CreateGateway();
-		var integration = new RefreshSignalConsumerIntegration();
+		var integration = new VariableRequestingIntegration(variables
+			=> variables.RequestDefinitionRefreshAsync(["volume-percent", "muted"]));
 		using var serviceProvider = BuildScopeServices();
-		var initializer = CreateInitializer(gateway, serviceProvider);
+		var initializer = CreateInitializer(gateway, serviceProvider, refreshSignal: signal);
 
-		await initializer.InitializeAsync(integration, "Refresh Signal Consumer");
+		await initializer.InitializeAsync(integration, "Variable Requester");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(integration.ReceivedSignal, Is.Not.Null);
-			Assert.That(integration.SignalReceivedBeforeInitialize,
-				Is.True,
-				"UseVariableRefreshSignal must run before InitializeAsync, because an integration wires its " +
-				"connections up during initialization");
+			Assert.That(signal.DrainDefinitionsFor(integration.Id), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(signal.DrainEagerRefreshRequested(integration.Id), Is.False);
 		});
 	}
 
 	[Test]
 	public async Task Startup_binds_the_gateway_before_InitializeAsync_runs()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new GatewayConsumerIntegration();
 		using var serviceProvider = BuildScopeServices();
 		var initializer = CreateInitializer(gateway, serviceProvider);
@@ -100,7 +78,7 @@ internal sealed class IntegrationGatewayBinderTests
 			Assert.That(integration.ReceivedGateway, Is.SameAs(gateway));
 			Assert.That(integration.GatewayReceivedBeforeInitialize,
 				Is.True,
-				"UseGateway must run before InitializeAsync");
+				"the host services must be handed over before InitializeAsync");
 			Assert.That(integration.InitializeCallCount, Is.EqualTo(1));
 		});
 	}
@@ -108,7 +86,7 @@ internal sealed class IntegrationGatewayBinderTests
 	[Test]
 	public async Task Startup_leaves_a_non_consumer_integration_untouched_and_still_initializes_it()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new PlainRecordingIntegration();
 		using var serviceProvider = BuildScopeServices();
 		var initializer = CreateInitializer(gateway, serviceProvider);
@@ -121,7 +99,7 @@ internal sealed class IntegrationGatewayBinderTests
 	[Test]
 	public async Task Reinitialize_binds_the_gateway_before_InitializeAsync_runs()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new GatewayConsumerIntegration();
 		using var serviceProvider = BuildScopeServices();
 		var lifecycle = new IntegrationLifecycle(new ConfigurableIntegrationRegistry([integration]),
@@ -145,7 +123,7 @@ internal sealed class IntegrationGatewayBinderTests
 			Assert.That(integration.ReceivedGateway, Is.SameAs(gateway));
 			Assert.That(integration.GatewayReceivedBeforeInitialize,
 				Is.True,
-				"UseGateway must run before InitializeAsync on the reinitialize path too");
+				"the host services must be handed over before InitializeAsync on the reinitialize path too");
 			Assert.That(integration.InitializeCallCount, Is.EqualTo(1));
 			Assert.That(integration.ShutdownCallCount, Is.EqualTo(1));
 		});
@@ -154,7 +132,7 @@ internal sealed class IntegrationGatewayBinderTests
 	[Test]
 	public async Task Reinitialize_leaves_a_non_consumer_integration_untouched_and_still_initializes_it()
 	{
-		using var gateway = CreateGateway();
+		var gateway = CreateGateway();
 		var integration = new PlainRecordingIntegration();
 		using var serviceProvider = BuildScopeServices();
 		var lifecycle = new IntegrationLifecycle(new ConfigurableIntegrationRegistry([integration]),
@@ -176,45 +154,94 @@ internal sealed class IntegrationGatewayBinderTests
 		Assert.That(integration.InitializeCallCount, Is.EqualTo(1));
 	}
 
-	/// <summary>
-	/// The Home Assistant watched-entity migration reaches the binding store only through this seam, and
-	/// it must run before InitializeAsync or the migration has nothing to write into - which is exactly
-	/// how it shipped unwired once already.
-	/// </summary>
 	[Test]
-	public void Bind_gives_the_binding_store_to_a_consumer_integration()
+	public async Task Bindings_recorded_during_initialization_are_stored_for_the_calling_integration()
 	{
-		using var gateway = CreateGateway();
-		var store = new NullVariableBindingStore();
-		var integration = new BindingStoreConsumerIntegration();
+		var gateway = CreateGateway();
+		var store = new RecordingVariableBindingStore();
+		var integration = new VariableRequestingIntegration(variables => variables.BindAsync(
+		[
+			new VariableBindingRequest("entity/light.kitchen/state", "ha_light_kitchen", VariableType.Text)
+			{
+				MigratedFrom = "test/v1"
+			}
+		]));
+		using var serviceProvider = BuildScopeServices();
+		var initializer = CreateInitializer(gateway, serviceProvider, bindingStore: store);
 
-		IntegrationGatewayBinder.Bind(integration, gateway, null!, store, new VariableRefreshSignal());
+		await initializer.InitializeAsync(integration, "Variable Requester");
 
-		Assert.That(integration.ReceivedStore, Is.SameAs(store));
+		Assert.That(store.Saved.Select(binding => (binding.IntegrationId, binding.LocalResourceId, binding.Name,
+				binding.MigratedFrom)),
+			Is.EqualTo(new[] { (integration.Id, "entity/light.kitchen/state", "ha_light_kitchen", (string?)"test/v1") }));
 	}
 
 	[Test]
-	public async Task Startup_binds_the_binding_store_before_InitializeAsync_runs()
+	public async Task A_built_in_integration_reads_every_providers_music_players_and_album_colours_through_its_context()
 	{
-		using var gateway = CreateGateway();
-		var integration = new BindingStoreConsumerIntegration();
+		var integration = new MusicPlayerReadingIntegration();
 		using var serviceProvider = BuildScopeServices();
-		var initializer = CreateInitializer(gateway, serviceProvider);
+		var initializer = CreateInitializer(CreateGateway(),
+			serviceProvider,
+			musicPlayers: new OneMusicPlayer(),
+			albumColor: new OneAlbumColor());
 
-		await initializer.InitializeAsync(integration, "Binding Store Consumer");
+		await initializer.InitializeAsync(integration, "Music Player Reader");
 
-		Assert.Multiple(() =>
+		Assert.Multiple(async () =>
 		{
-			Assert.That(integration.ReceivedStore, Is.Not.Null);
-			Assert.That(integration.StoreReceivedBeforeInitialize,
-				Is.True,
-				"UseBindingStore must run before InitializeAsync");
+			Assert.That(integration.Context!.MusicPlayers.Instances.Select(instance => instance.Id),
+				Is.EqualTo(new[] { "net.example.jukebox::default" }));
+			Assert.That(await integration.Context.MusicPlayers.GetAlbumColorAsync("net.example.jukebox::default"),
+				Is.EqualTo("#102030"));
 		});
 	}
 
-	private static AdbGateway CreateGateway() => new(new FakeAdbManager(), new LoggerConfiguration().CreateLogger());
+	private sealed class MusicPlayerReadingIntegration : IIntegration
+	{
+		public string Id => "test.music-player-reader";
+		public LocalizedText Name => "Music Player Reader";
+		public string Version => "1.0.0";
+		public bool IsInitialized => Context is not null;
+		public IReadOnlyList<IActionDefinition> Actions => [];
+		public IIntegrationContext? Context { get; private set; }
 
-	private static IntegrationInitializer CreateInitializer(IAdbGateway gateway, ServiceProvider serviceProvider)
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			Context = context;
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync() => Task.CompletedTask;
+	}
+
+	private sealed class OneMusicPlayer : IMusicPlayerRegistry
+	{
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+			=> [new MusicPlayerInstanceDescriptor("net.example.jukebox::default", "net.example.jukebox", "Jukebox", "Jukebox", false)];
+
+		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayer(string instanceId) => null;
+
+		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayerWithOptions(string instanceId,
+			IReadOnlyDictionary<string, object> options) => null;
+
+		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? DefaultPlayer => null;
+	}
+
+	private sealed class OneAlbumColor : IMusicPlayerAlbumColor
+	{
+		public Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
+			=> Task.FromResult<string?>("#102030");
+	}
+
+	private static CalendarHostServices CreateGateway() => new(null!, null!, TimeProvider.System, null!);
+
+	private static IntegrationInitializer CreateInitializer(CalendarHostServices gateway,
+		ServiceProvider serviceProvider,
+		IVariableBindingStore? bindingStore = null,
+		IVariableRefreshSignal? refreshSignal = null,
+		IMusicPlayerRegistry? musicPlayers = null,
+		IMusicPlayerAlbumColor? albumColor = null)
 		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
@@ -224,10 +251,8 @@ internal sealed class IntegrationGatewayBinderTests
 			new RecordingEventBus(),
 			new StubEventBindingTracker(),
 			new UserNotificationStore(),
-			gateway,
-			null!,
-			new NullVariableBindingStore(),
-			new VariableRefreshSignal(),
+			bindingStore ?? new NullVariableBindingStore(),
+			refreshSignal ?? new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
 			TestFolderViewProviders.Host(),
@@ -238,7 +263,11 @@ internal sealed class IntegrationGatewayBinderTests
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger(),
 			new MessageBroker(Serilog.Core.Logger.None),
-			TestColors.Watches);
+			TestColors.Watches,
+			calendarServices: gateway,
+			albumColor: albumColor,
+			musicPlayerRegistry: musicPlayers,
+			musicPlayerNotifier: new MusicPlayerStateNotifier());
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()
@@ -248,23 +277,18 @@ internal sealed class IntegrationGatewayBinderTests
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
 
-	private sealed class RefreshSignalConsumerIntegration : IIntegration, IVariableRefreshSignalConsumer
+	private sealed class VariableRequestingIntegration(Func<IVariableApi, Task> request) : IIntegration
 	{
-		public string Id => "test.refresh-signal-consumer";
-		public LocalizedText Name => "Refresh Signal Consumer";
+		public string Id => "test.variable-requester";
+		public LocalizedText Name => "Variable Requester";
 		public string Version => "1.0.0";
 		public bool IsInitialized { get; private set; }
 		public IReadOnlyList<IActionDefinition> Actions => [];
-		public IVariableRefreshSignal? ReceivedSignal { get; private set; }
-		public bool SignalReceivedBeforeInitialize { get; private set; }
 
-		public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => ReceivedSignal = signal;
-
-		public Task InitializeAsync(IIntegrationContext context)
+		public async Task InitializeAsync(IIntegrationContext context)
 		{
-			SignalReceivedBeforeInitialize = ReceivedSignal is not null;
+			await request(context.Variables);
 			IsInitialized = true;
-			return Task.CompletedTask;
 		}
 
 		public Task ShutdownAsync()
@@ -274,19 +298,19 @@ internal sealed class IntegrationGatewayBinderTests
 		}
 	}
 
-	private sealed class GatewayConsumerIntegration : IIntegration, IAdbGatewayConsumer
+	private sealed class GatewayConsumerIntegration : IIntegration, ICalendarHostServicesConsumer
 	{
 		public string Id { get; init; } = "test.gateway-consumer";
 		public LocalizedText Name => "Gateway Consumer";
 		public string Version => "1.0.0";
 		public bool IsInitialized { get; private set; }
 		public IReadOnlyList<IActionDefinition> Actions => [];
-		public IAdbGateway? ReceivedGateway { get; private set; }
+		public CalendarHostServices? ReceivedGateway { get; private set; }
 		public bool GatewayReceivedBeforeInitialize { get; private set; }
 		public int InitializeCallCount { get; private set; }
 		public int ShutdownCallCount { get; private set; }
 
-		public void UseGateway(IAdbGateway gateway) => ReceivedGateway = gateway;
+		public void UseCalendarServices(CalendarHostServices services) => ReceivedGateway = services;
 
 		public Task InitializeAsync(IIntegrationContext context)
 		{
@@ -304,29 +328,24 @@ internal sealed class IntegrationGatewayBinderTests
 		}
 	}
 
-	private sealed class BindingStoreConsumerIntegration : IIntegration, IHomeAssistantBindingStoreConsumer
+	private sealed class RecordingVariableBindingStore : IVariableBindingStore
 	{
-		public string Id { get; init; } = "test.binding-store-consumer";
-		public LocalizedText Name => "Binding Store Consumer";
-		public string Version => "1.0.0";
-		public bool IsInitialized { get; private set; }
-		public IReadOnlyList<IActionDefinition> Actions => [];
-		public IVariableBindingStore? ReceivedStore { get; private set; }
-		public bool StoreReceivedBeforeInitialize { get; private set; }
+		public List<VariableBinding> Saved { get; } = [];
 
-		public void UseBindingStore(IVariableBindingStore store) => ReceivedStore = store;
+		public IReadOnlyList<VariableBinding> Load() => [.. Saved];
 
-		public Task InitializeAsync(IIntegrationContext context)
+		public bool TryLoad(out IReadOnlyList<VariableBinding> bindings)
 		{
-			StoreReceivedBeforeInitialize = ReceivedStore is not null;
-			IsInitialized = true;
-			return Task.CompletedTask;
+			bindings = [.. Saved];
+			return true;
 		}
 
-		public Task ShutdownAsync()
+		public bool Save(IEnumerable<VariableBinding> bindings)
 		{
-			IsInitialized = false;
-			return Task.CompletedTask;
+			var snapshot = bindings.ToList();
+			Saved.Clear();
+			Saved.AddRange(snapshot);
+			return true;
 		}
 	}
 

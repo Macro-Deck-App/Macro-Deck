@@ -556,6 +556,92 @@ public class ConfigFlowManagerTests
 			CancellationToken.None);
 	}
 
+	[TestCase(false)]
+	[TestCase(true)]
+	public async Task A_flow_completed_without_an_entry_stores_nothing_and_lifts_an_off_choice_only_without_an_entry(
+		bool hasEntry)
+	{
+		var services = new ServiceCollection();
+		services.AddSingleton<ISecretService>(_secretService);
+		services.AddSingleton<IIntegrationConfigStore>(_store);
+		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
+		var registry = new IntegrationRegistry(scopeFactory,
+			new Companion.CompanionHarness.MemoryStateStore(new Dictionary<string, bool> { ["com.example.no-entry"] = false }),
+			_logger);
+		Assert.That(await registry.RegisterAsync(new NoEntryConfigFlowIntegration()),
+			Is.EqualTo(IntegrationRegistrationResult.Success));
+		if (hasEntry)
+		{
+			_store.Existing.Add(new ConfigEntryRecord(Guid.NewGuid(),
+				"com.example.no-entry",
+				"Studio",
+				DateTime.UtcNow,
+				new Dictionary<string, JsonElement>()));
+		}
+
+		var availability = new List<IntegrationAvailabilityChangedEventArgs>();
+		registry.AvailabilityChanged += (_, change) => availability.Add(change);
+		var uiSessionBroker = new RecordingUiSessionBroker();
+		var manager = new ConfigFlowManager(registry,
+			scopeFactory,
+			_lifecycle,
+			_oauth,
+			_listenerState,
+			new EmptyRemotePluginSnapshotStore(),
+			new ConfigFlowUiProviderRegistry(() => uiSessionBroker, _logger),
+			new UiSessionRegistry(TimeProvider.System),
+			uiSessionBroker,
+			_logger);
+
+		var start = await manager.StartAsync("com.example.no-entry", CancellationToken.None);
+		var outcome = await manager.SubmitAsync(start.FlowId,
+			"name",
+			Values(("name", JsonValue("Studio"))),
+			CancellationToken.None);
+		var again = await manager.SubmitAsync(start.FlowId, "name", Values(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
+			Assert.That(outcome.EntryId, Is.Null);
+			Assert.That(_store.Created, Is.Empty);
+			Assert.That(_lifecycle.Reinitialized, Is.Empty);
+			Assert.That(again.FlowFound, Is.False);
+			Assert.That(availability.Select(change => (change.IntegrationId, change.IsAvailable)),
+				Is.EqualTo(hasEntry ? Array.Empty<(string, bool)>() : new[] { ("com.example.no-entry", true) }));
+			Assert.That(registry.IsExplicitlyDisabled("com.example.no-entry"), Is.EqualTo(hasEntry));
+		});
+	}
+
+	private sealed class NoEntryConfigFlowIntegration : IIntegration, IConfigFlowProvider
+	{
+		public string Id => "com.example.no-entry";
+		public LocalizedText Name => "No Entry Config Flow Integration";
+		public string Version => "1.0.0";
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task ShutdownAsync() => Task.CompletedTask;
+		public IConfigFlow CreateConfigFlow() => new NoEntryConfigFlow();
+		public bool IsInitialized => true;
+	}
+
+	private sealed class NoEntryConfigFlow : IConfigFlow
+	{
+		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
+			=> Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+			{
+				StepId = "name", Fields = [ActionParameter.Text("name")]
+			}));
+
+		public Task<ConfigFlowResult> SubmitAsync(
+			string stepId,
+			IReadOnlyDictionary<string, object?> input,
+			IConfigFlowContext context,
+			CancellationToken cancellationToken)
+			=> Task.FromResult(ConfigFlowResult.CompleteWithoutEntry());
+	}
+
 	private static Dictionary<string, JsonElement> Values(params (string Key, JsonElement Value)[] pairs)
 		=> pairs.ToDictionary(p => p.Key, p => p.Value);
 

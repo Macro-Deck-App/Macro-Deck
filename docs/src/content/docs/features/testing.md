@@ -223,6 +223,44 @@ Assert.That(harness.Context.WeatherProvider.SnapshotNotices, Is.EqualTo(1));
 `CAPABILITY_UNAVAILABLE` when the plugin's `weather` capability was not negotiated. See
 [Weather](/features/weather/#telling-macro-deck-the-weather-changed).
 
+## Testing Companion devices
+
+```csharp
+var companion = new FakeCompanionDeviceApi();
+var tablet = Guid.NewGuid();
+companion.Connect(tablet, new CompanionDeviceState { ConfirmsCommands = true });
+companion.OnRequest = (_, _) => CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.ConsentDenied);
+
+await new TabletDimmer(companion).DimAsync(tablet);
+
+Assert.That(companion.Calls.Single().Kind, Is.EqualTo(FakeCompanionDeviceCallKind.Request));
+```
+
+`FakeCompanionDeviceApi` starts with access `Available` and no devices. `Connect`, `Report` and `Disconnect`
+script the devices and raise the matching events, each connection with a new `ReadySequence`; `SetAccess`
+changes access, and while it is `NotAllowed` requests and screenshots fail with `NotAllowed`. `OnRequest` and
+`OnScreenshot` decide how requests and screenshots end, and `Calls` records every send, request and
+screenshot. In a harness, `harness.Context.CompanionDevices` serves both `IIntegrationContext.CompanionDevices`
+and an injected `ICompanionDeviceApi`, starting at `Unsupported` until the test calls `SetAccess`. See
+[Companion devices](/features/companion-devices/#testing).
+
+## Testing music player readers
+
+`harness.Context.MusicPlayers` is a `FakeMusicPlayerApi` serving both `IIntegrationContext.MusicPlayers` and an
+injected `IMusicPlayerApi`. `Set(players)` replaces the players and raises `InstancesChanged`,
+`SetAlbumColor(instanceId, color)` sets what `GetAlbumColorAsync` answers, and `SubscriberCount` shows whether
+your code still listens. See
+[Reading every provider's players](/features/music-players/#reading-every-providers-players).
+
+## Storage, time format and User-Agent
+
+`harness.Context.Storage` is a `FakeIntegrationStorage` with Macro Deck's key rules and read outcomes:
+`Set` seeds a document, `SetUnreadable` makes a key hold damaged copies, and `Get` reads what your
+integration wrote - see [Integration storage](/features/integration-storage/#testing).
+`harness.Context.Locale.TimeOfDayFormat` sets the time format `IIntegrationContext.Locale` answers, by default
+the invariant culture with a 24-hour clock, and `harness.Context.Http.UserAgent` the User-Agent
+`IIntegrationContext.Http` and an injected `IHostHttp` report.
+
 ## Testing calendars
 
 ```csharp
@@ -273,7 +311,10 @@ Assert.That(outcome.DataAs<ConfigEntryPrepareResult>()!.Success, Is.True);
 
 `harness.ConfigEntries`, a `ConfigEntriesTestClient`, drives the `config-entries` capability the way the host
 does while it stores an entry, with `PrepareAsync`, `GetStatusAsync`, `IsUsableAsync`, `ReloadAsync`,
-`SynchronizeAsync` and `ReleaseAsync`. See
+`SynchronizeAsync` and `ReleaseAsync`. Set `RejectedVariableNames` on the arguments to test a repeated
+`prepare`, and read `RetryOnConflict` from the result. `SynchronizeAsync` calls the `SynchronizeEntriesAsync`
+overload that takes a variable api, backed by `harness.Context.Variables`, also when the integration was never
+initialized. See
 [Taking part in storing an entry](/features/setup-flows/#taking-part-in-storing-an-entry).
 
 ## Testing what a session shows on the pressing client

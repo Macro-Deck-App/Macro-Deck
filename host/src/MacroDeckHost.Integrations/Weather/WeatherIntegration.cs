@@ -10,6 +10,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
 using MacroDeckHost.Integrations.Weather.Details;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 
@@ -129,6 +130,7 @@ public sealed class WeatherIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		await LoadStations(context);
 		StartRefreshLoop();

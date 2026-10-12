@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Config;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
@@ -28,7 +29,10 @@ public sealed class AdGuardHomeConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

@@ -2,6 +2,7 @@ using System.Text;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
 
 namespace MacroDeckHost.Integrations.Adb.Actions;
 
@@ -9,32 +10,26 @@ internal static class AdbActions
 {
 	private static readonly LocalizedText DeviceDescription = AppStrings.Integrations.Adb.Params.DeviceDescription();
 
-	public static IReadOnlyList<IActionDefinition> Create(
-		Func<IAdbGateway?> resolveGateway,
-		AdbHealthTracker health,
-		VariableApiAccessor variables)
+	public static IReadOnlyList<IActionDefinition> Create(AdbActionServices services)
 		=>
 		[
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"wake",
 				AppStrings.Integrations.Adb.Actions.WakeName(),
 				AppStrings.Integrations.Adb.Actions.WakeDescription(),
 				DeviceDescription,
 				[],
-				(gateway, device, parameters, ct) => gateway.SendKeyAsync(device, AdbGatewayKey.Wakeup, ct)),
+				(target, parameters, ct) => target.RunAsync(device => device.SendKeyAsync(AndroidKey.Wakeup, ct))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"sleep",
 				AppStrings.Integrations.Adb.Actions.SleepName(),
 				AppStrings.Integrations.Adb.Actions.SleepDescription(),
 				DeviceDescription,
 				[],
-				(gateway, device, parameters, ct) => gateway.SendKeyAsync(device, AdbGatewayKey.Sleep, ct)),
+				(target, parameters, ct) => target.RunAsync(device => device.SendKeyAsync(AndroidKey.Sleep, ct))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"start-app",
 				AppStrings.Integrations.Adb.Actions.StartAppName(),
 				AppStrings.Integrations.Adb.Actions.StartAppDescription(),
@@ -45,13 +40,12 @@ internal static class AdbActions
 						placeholder: "com.example.app",
 						required: true)
 				],
-				(gateway, device, parameters, ct) => RequireText(parameters,
+				(target, parameters, ct) => RequireText(parameters,
 					"package",
 					"A package name is required.",
-					package => gateway.StartAppAsync(device, package, ct))),
+					package => target.RunAsync(device => device.StartAppAsync(package, ct)))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"stop-app",
 				AppStrings.Integrations.Adb.Actions.StopAppName(),
 				AppStrings.Integrations.Adb.Actions.StopAppDescription(),
@@ -62,13 +56,12 @@ internal static class AdbActions
 						placeholder: "com.example.app",
 						required: true)
 				],
-				(gateway, device, parameters, ct) => RequireText(parameters,
+				(target, parameters, ct) => RequireText(parameters,
 					"package",
 					"A package name is required.",
-					package => gateway.ForceStopAppAsync(device, package, ct))),
+					package => target.RunAsync(device => device.ForceStopAppAsync(package, ct)))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"open-uri",
 				AppStrings.Integrations.Adb.Actions.OpenLinkName(),
 				AppStrings.Integrations.Adb.Actions.OpenLinkDescription(),
@@ -79,13 +72,12 @@ internal static class AdbActions
 						placeholder: "https://example.com",
 						required: true)
 				],
-				(gateway, device, parameters, ct) => RequireText(parameters,
+				(target, parameters, ct) => RequireText(parameters,
 					"uri",
 					"A URI is required.",
-					uri => gateway.OpenUriAsync(device, uri, ct))),
+					uri => target.RunAsync(device => device.OpenUriAsync(uri, ct)))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"input-text",
 				AppStrings.Integrations.Adb.Actions.TypeTextName(),
 				AppStrings.Integrations.Adb.Actions.TypeTextDescription(),
@@ -95,13 +87,12 @@ internal static class AdbActions
 						label: AppStrings.Integrations.Adb.Params.TextLabel(),
 						required: true)
 				],
-				(gateway, device, parameters, ct) => RequireText(parameters,
+				(target, parameters, ct) => RequireText(parameters,
 					"text",
 					"Text is required.",
-					text => gateway.InputTextAsync(device, text, ct))),
+					text => target.RunAsync(device => device.InputTextAsync(text, ct)))),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"key-event",
 				AppStrings.Integrations.Adb.Actions.SendKeyName(),
 				AppStrings.Integrations.Adb.Actions.SendKeyDescription(),
@@ -110,20 +101,18 @@ internal static class AdbActions
 					ActionParameter.Choice("key",
 						options: KeyOptions(),
 						label: AppStrings.Integrations.Adb.Params.KeyLabel(),
-						defaultValue: nameof(AdbGatewayKey.Home),
+						defaultValue: nameof(AndroidKey.Home),
 						required: true)
 				],
-				(gateway, device, parameters, ct) =>
+				(target, parameters, ct) =>
 				{
 					var raw = AdbActionValues.ReadString(parameters, "key");
-					return Enum.TryParse<AdbGatewayKey>(raw, out var key)
-						? gateway.SendKeyAsync(device, key, ct)
-						: Task.FromResult(AdbGatewayResult.Fail(AdbGatewayFailureCode.InvalidParameter,
-							"Unknown key."));
+					return Enum.TryParse<AndroidKey>(raw, out var key)
+						? target.RunAsync(device => device.SendKeyAsync(key, ct))
+						: Task.FromResult(AdbOutcome.Fail(AndroidDeviceErrorCode.InvalidArgument, "Unknown key."));
 				}),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"tap",
 				AppStrings.Integrations.Adb.Actions.TapName(),
 				AppStrings.Integrations.Adb.Actions.TapDescription(),
@@ -138,15 +127,14 @@ internal static class AdbActions
 						min: 0,
 						required: true)
 				],
-				(gateway, device, parameters, ct) =>
+				(target, parameters, ct) =>
 				{
 					var x = AdbActionValues.ReadInt(parameters, "x", 0);
 					var y = AdbActionValues.ReadInt(parameters, "y", 0);
-					return gateway.TapAsync(device, x, y, ct);
+					return target.RunAsync(device => device.TapAsync(x, y, ct));
 				}),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"swipe",
 				AppStrings.Integrations.Adb.Actions.SwipeName(),
 				AppStrings.Integrations.Adb.Actions.SwipeDescription(),
@@ -173,18 +161,18 @@ internal static class AdbActions
 						min: 0,
 						defaultValue: 300)
 				],
-				(gateway, device, parameters, ct) =>
+				(target, parameters, ct) =>
 				{
 					var x1 = AdbActionValues.ReadInt(parameters, "x1", 0);
 					var y1 = AdbActionValues.ReadInt(parameters, "y1", 0);
 					var x2 = AdbActionValues.ReadInt(parameters, "x2", 0);
 					var y2 = AdbActionValues.ReadInt(parameters, "y2", 0);
 					var durationMs = AdbActionValues.ReadInt(parameters, "durationMs", 300);
-					return gateway.SwipeAsync(device, x1, y1, x2, y2, durationMs, ct);
+					return target.RunAsync(device =>
+						device.SwipeAsync(x1, y1, x2, y2, TimeSpan.FromMilliseconds(durationMs), ct));
 				}),
 
-			new AdbActionDefinition(resolveGateway,
-				health,
+			new AdbActionDefinition(services,
 				"reboot",
 				AppStrings.Integrations.Adb.Actions.RebootName(),
 				AppStrings.Integrations.Adb.Actions.RebootDescription(),
@@ -195,49 +183,49 @@ internal static class AdbActions
 						[
 							new ActionParameterOption
 							{
-								Value = nameof(AdbGatewayRebootMode.Normal),
+								Value = nameof(AndroidRebootMode.Normal),
 								Label = AppStrings.Integrations.Adb.Actions.RebootModeNormal()
 							},
 							new ActionParameterOption
 							{
-								Value = nameof(AdbGatewayRebootMode.Recovery),
+								Value = nameof(AndroidRebootMode.Recovery),
 								Label = AppStrings.Integrations.Adb.Actions.RebootModeRecovery()
 							},
 							new ActionParameterOption
 							{
-								Value = nameof(AdbGatewayRebootMode.Bootloader),
+								Value = nameof(AndroidRebootMode.Bootloader),
 								Label = AppStrings.Integrations.Adb.Actions.RebootModeBootloader()
 							}
 						],
 						label: AppStrings.Integrations.Adb.Actions.RebootModeLabel(),
-						defaultValue: nameof(AdbGatewayRebootMode.Normal))
+						defaultValue: nameof(AndroidRebootMode.Normal))
 				],
-				(gateway, device, parameters, ct) =>
+				(target, parameters, ct) =>
 				{
 					var raw = AdbActionValues.ReadString(parameters, "mode");
-					var mode = Enum.TryParse<AdbGatewayRebootMode>(raw, out var parsed)
+					var mode = Enum.TryParse<AndroidRebootMode>(raw, out var parsed)
 						? parsed
-						: AdbGatewayRebootMode.Normal;
-					return gateway.RebootAsync(device, mode, ct);
+						: AndroidRebootMode.Normal;
+					return target.RunAsync(device => device.RebootAsync(mode, ct));
 				}),
 
-			new ScreenshotActionDefinition(resolveGateway, health, variables)
+			new ScreenshotActionDefinition(services)
 		];
 
-	private static Task<AdbGatewayResult> RequireText(
+	private static Task<AdbOutcome> RequireText(
 		IReadOnlyDictionary<string, object> parameters,
 		string parameterName,
 		string missingMessage,
-		Func<string, Task<AdbGatewayResult>> whenPresent)
+		Func<string, Task<AdbOutcome>> whenPresent)
 	{
 		var value = AdbActionValues.ReadString(parameters, parameterName);
 		return string.IsNullOrWhiteSpace(value)
-			? Task.FromResult(AdbGatewayResult.Fail(AdbGatewayFailureCode.InvalidParameter, missingMessage))
+			? Task.FromResult(AdbOutcome.Fail(AndroidDeviceErrorCode.InvalidArgument, missingMessage))
 			: whenPresent(value);
 	}
 
 	private static List<ActionParameterOption> KeyOptions()
-		=> Enum.GetValues<AdbGatewayKey>()
+		=> Enum.GetValues<AndroidKey>()
 			.Select(key => new ActionParameterOption
 				{ Value = key.ToString(), Label = Humanize(key.ToString()) })
 			.ToList();
