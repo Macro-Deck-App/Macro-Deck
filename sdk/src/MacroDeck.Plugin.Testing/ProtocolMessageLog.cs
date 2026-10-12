@@ -64,9 +64,9 @@ public sealed class ProtocolMessageLog
 
 	/// <summary>
 	/// Every close frame the test host has sent from its own side, across every connection it has
-	/// accepted, in the order it sent them. <c>PluginConnection.CloseAsync</c> is the only source: a
-	/// close the plugin itself initiates is not captured as an entry here, only as the receive loop
-	/// ending.
+	/// accepted, in the order it sent them: closes a test asks for and the normal close that rejects a
+	/// failed handshake. A close the plugin itself initiates is not captured, and neither is the test
+	/// host's echo of it.
 	/// </summary>
 	public IReadOnlyList<RecordedProtocolClose> Closes => [.. _closes];
 
