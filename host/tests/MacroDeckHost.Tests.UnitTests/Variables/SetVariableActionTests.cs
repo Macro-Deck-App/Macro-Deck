@@ -93,6 +93,7 @@ public class SetVariableActionTests
 	[TestCase(UserVariableWriteStatus.NotFound, ActionErrorCodes.NotFound)]
 	[TestCase(UserVariableWriteStatus.NotEditable, ActionErrorCodes.PermissionDenied)]
 	[TestCase(UserVariableWriteStatus.InvalidValue, ActionErrorCodes.InvalidParameter)]
+	[TestCase(UserVariableWriteStatus.Unavailable, ActionErrorCodes.NotConnected)]
 	public async Task A_write_failure_is_reported_truthfully(UserVariableWriteStatus status, string expectedCode)
 	{
 		_api.Result = new UserVariableWriteResult(status, "nope");

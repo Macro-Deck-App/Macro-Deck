@@ -105,6 +105,10 @@ internal sealed class SetVariableActionDefinition : IActionDefinition
 					result.Message is { } notEditableMessage
 						? notEditableMessage
 						: AppStrings.Integrations.Variables.Errors.VariableReadOnly()),
+				UserVariableWriteStatus.Unavailable => ActionResult.Failed(ActionErrorCodes.NotConnected,
+					result.Message is { } unavailableMessage
+						? unavailableMessage
+						: AppStrings.Integrations.Variables.Errors.VariablesUnavailable()),
 				_ => ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					result.Message is { } invalidMessage
 						? invalidMessage
