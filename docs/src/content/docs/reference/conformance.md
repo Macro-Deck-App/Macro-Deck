@@ -16,7 +16,7 @@ macrodeck-plugin test --project src/HelloDeck
 ```
 
 ```text
-Macro Deck plugin conformance report (suite 1.2.0)
+Macro Deck plugin conformance report (suite 1.3.0)
 Plugin: com.example.hello-deck 1.0.0
 Started: 2026-09-12T10:27:14.6935280+00:00, duration: 00:00:20.8027253
 Passed: 25, Failed: 0, Skipped: 24
@@ -155,6 +155,14 @@ MDC0104-MDC0107 read the manifest, so they skip for any subject but an artifact.
 
 ### Capability serialization (MDC03xx)
 
+<a id="variables-precondition"></a>The variables checks (MDC0311, MDC0314, MDC0315 and [MDC0403](#mdc0403)) run when the subject has
+variables: it declares `variables`, or it declares nothing and `variables/describe` reports `variables`,
+`declaredVariables` or `supportsCatalog: true`. That is the rule the host uses to offer a plugin's
+variables, and it covers a provider with only a catalog or only on-demand variables, which declares no
+capability at all. Without a declaration they skip when `describe` answers `CAPABILITY_UNSUPPORTED` or any
+other error, does not reply within 5 s, returns something that is not a catalog, or describes nothing. A
+subject that declares `variables` and cannot answer `describe` fails them.
+
 | Id | Req | Checks | How to fix |
 | --- | --- | --- | --- |
 | <a id="mdc0301"></a>MDC0301 | R, guard | Every declared kind is in `CapabilityKinds.All`. | Declare only known kinds. |
@@ -167,11 +175,11 @@ MDC0104-MDC0107 read the manifest, so they skip for any subject but an artifact.
 | <a id="mdc0308"></a>MDC0308 | R | The `ui/describe` reply is within 256 KiB and deserializes into `UiDescribePayload`; skips without ui. | Keep the surface list small. |
 | <a id="mdc0309"></a>MDC0309 | R | For each action reporting `ProvidesState`, `state` returns an `ActionStateResult` whose present snapshot has a non-empty `States` list with non-empty unique ids and an `ActiveStateId` naming one of them; `null` passes. | Return a consistent snapshot, or `null` when nothing is known. |
 | <a id="mdc0310"></a>MDC0310 | R | Every returned state id passes `MacroDeckId.TryValidateLocalId(_, LocalIdKind.Declared)`, as a button persists it; skips without `ProvidesState`. | Use declared-id grammar for state ids. |
-| <a id="mdc0311"></a>MDC0311 | R | `variables/discover` answers within 5 s with at most `MaxVariableCatalogPageSize` items, each with a known `VariableType` and a resource id without `::` and within `MacroDeckId.MaxResourceLocalIdLength`, and any `ContinuationToken` non-empty; skips without variables or with `supportsCatalog: false`, and **fails** if `describe` cannot be answered. | Page and bound the catalog. |
+| <a id="mdc0311"></a>MDC0311 | R | `variables/discover` answers within 5 s with at most `MaxVariableCatalogPageSize` items, each with a known `VariableType` and a resource id without `::` and within `MacroDeckId.MaxResourceLocalIdLength`, and any `ContinuationToken` non-empty; skips without [variables](#variables-precondition) or with `supportsCatalog: false`, and **fails** if `variables` is declared and `describe` cannot be answered. | Page and bound the catalog. |
 | <a id="mdc0312"></a>MDC0312 | R | For each action reporting `ProvidesIcon`, a `NoIcon` snapshot has no `Reference` and an empty `Version`, and any other has a non-empty `Version` and a `Reference` with non-empty `Type` and `Reference`; `HasValue: false` passes. | Return an internally consistent icon snapshot. |
 | <a id="mdc0313"></a>MDC0313 | R | A non-`NoIcon` snapshot with no `Reference` answers `icon.content` with a non-empty `ContentHash` and an `image/*` `MediaType`, reports its `Version` has moved on, or fails only with `AssetTooLarge`; skips without `ProvidesIcon`. | Serve the icon bytes you advertise. |
-| <a id="mdc0314"></a>MDC0314 | R | For each eager variable declaring `write`, writing its current reading back through `variables/set` succeeds as an invocation with a status other than `NotWritable` or `NotFound`; skips when nothing declares `write`, inconclusive when every writable variable reads unavailable. | Declare `write` only on variables you accept writes for. |
-| <a id="mdc0315"></a>MDC0315 | R | `variables` and `declaredVariables` together hold at most `VariableLimits.MaxEagerVariablesPerProvider` eager entries, counted across the whole plugin; skips without variables. | Move the rest into a catalog. |
+| <a id="mdc0314"></a>MDC0314 | R | For each eager variable declaring `write`, writing its current reading back through `variables/set` succeeds as an invocation with a status other than `NotWritable` or `NotFound`; skips without [variables](#variables-precondition) or when nothing declares `write`, inconclusive when every writable variable reads unavailable. | Declare `write` only on variables you accept writes for. |
+| <a id="mdc0315"></a>MDC0315 | R | `variables` and `declaredVariables` together hold at most `VariableLimits.MaxEagerVariablesPerProvider` eager entries, counted across the whole plugin; skips without [variables](#variables-precondition). | Move the rest into a catalog. |
 
 ### Duplicate ids (MDC04xx)
 
@@ -179,7 +187,7 @@ MDC0104-MDC0107 read the manifest, so they skip for any subject but an artifact.
 | --- | --- | --- | --- |
 | <a id="mdc0401"></a>MDC0401 | R, guard | No `(Kind, LocalId)` pair repeats among declared capabilities. | Rename one. |
 | <a id="mdc0402"></a>MDC0402 | R | No `Id` repeats in `weather/instances`; skips without weather. | Keep instance ids unique. |
-| <a id="mdc0403"></a>MDC0403 | R | No two eager variables resolve to the same local id, or to the same identity derived from `Name` when neither declares one; catalog ids are out of scope; skips without variables. | Give each eager variable its own id. |
+| <a id="mdc0403"></a>MDC0403 | R | No two eager variables resolve to the same local id, or to the same identity derived from `Name` when neither declares one; catalog ids are out of scope; skips without [variables](#variables-precondition). | Give each eager variable its own id. |
 
 ### Timeout and cancellation (MDC05xx)
 
@@ -225,7 +233,7 @@ MDC0104-MDC0107 read the manifest, so they skip for any subject but an artifact.
 
 | Member | Type |
 | --- | --- |
-| `SuiteVersion` | `string` (currently `1.2.0`) |
+| `SuiteVersion` | `string` (currently `1.3.0`) |
 | `PluginId`, `PluginVersion` | `string?` |
 | `StartedAt` | `DateTimeOffset` |
 | `Duration` | `TimeSpan` |
@@ -239,7 +247,7 @@ JSON is camelCase, indented, with string enums (trimmed):
 
 ```json
 {
-  "suiteVersion": "1.2.0",
+  "suiteVersion": "1.3.0",
   "pluginId": "com.example.hello-deck",
   "pluginVersion": "1.0.0",
   "startedAt": "2026-09-12T10:27:59.604661+00:00",
@@ -272,7 +280,7 @@ Markdown (trimmed):
 ```md
 # Macro Deck plugin conformance report
 
-Suite version: `1.2.0`
+Suite version: `1.3.0`
 Plugin: `com.example.hello-deck` `1.0.0`
 Conformant: **yes**
 Passed: 25 - Failed: 0 - Skipped: 24

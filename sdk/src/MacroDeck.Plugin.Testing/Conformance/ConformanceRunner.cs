@@ -28,7 +28,7 @@ public sealed class ConformanceRunner
 	/// cosmetic change, such as reworded <see cref="IConformanceCheck.Title" /> text. See
 	/// <see cref="IConformanceCheck.Id" />'s own remarks on why an id is a stable contract independent of this.
 	/// </summary>
-	public const string SuiteVersion = "1.2.0";
+	public const string SuiteVersion = "1.3.0";
 
 	private readonly ConformanceOptions _options;
 

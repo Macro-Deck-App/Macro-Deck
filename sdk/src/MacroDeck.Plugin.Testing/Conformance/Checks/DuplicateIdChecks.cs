@@ -102,7 +102,9 @@ internal sealed class NoDuplicateVariableDefinitionIdsCheck() : ConformanceCheck
 		if (context.Session!.Declared.All(capability =>
 			!string.Equals(capability.Kind, CapabilityKinds.Variables, StringComparison.Ordinal)))
 		{
-			return ConformanceCheckResult.Skip("This subject does not declare the variables capability.");
+			var (probed, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
+
+			return unavailable ?? Evaluate(probed!);
 		}
 
 		var outcome = await context.Session.Variables.DescribeAsync().ConfigureAwait(false);
@@ -122,6 +124,11 @@ internal sealed class NoDuplicateVariableDefinitionIdsCheck() : ConformanceCheck
 				"variables/describe's result could not be read as a VariableCatalogPayload.");
 		}
 
+		return Evaluate(catalog);
+	}
+
+	private static ConformanceCheckResult Evaluate(VariableCatalogPayload catalog)
+	{
 		// A null Id means the provider never set one; the effective identity a host resolves it to is
 		// derived from Name instead - see VariableDefinitionDto.Id's own remarks.
 		var eager = catalog.Variables.Where(VariableCatalogProbe.IsEager).ToList();

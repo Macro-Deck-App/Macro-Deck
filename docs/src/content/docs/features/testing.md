@@ -331,7 +331,7 @@ macrodeck-plugin test --project src/Demo
 ```
 
 ```text
-Macro Deck plugin conformance report (suite 1.2.0)
+Macro Deck plugin conformance report (suite 1.3.0)
 Plugin: com.example.demo 1.0.0
 Passed: 25, Failed: 0, Skipped: 24
 Conformant: yes
