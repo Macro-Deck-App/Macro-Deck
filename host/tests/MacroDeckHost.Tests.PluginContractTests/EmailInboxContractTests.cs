@@ -178,6 +178,31 @@ internal sealed class EmailInboxContractTests : CapabilityContractFixture
 				.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
 	}
 
+	[Test]
+	public async Task An_unchanged_inbox_list_does_not_re_register_the_plugin()
+	{
+		var mail = new TestEmailInboxIntegration("Example Mail", "work");
+		await ConnectAsync(mail);
+		var before = Current();
+
+		await Registrar.ApplyStateUpdateAsync(PluginId, CapabilityKinds.EmailInbox);
+		var unchanged = Current();
+
+		mail.InboxIds.Add("home");
+		await Registrar.ApplyStateUpdateAsync(PluginId, CapabilityKinds.EmailInbox);
+		var changed = Current();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unchanged, Is.SameAs(before), "an unchanged list must not replace the integration");
+			Assert.That(changed, Is.Not.SameAs(before), "a changed list is applied");
+			Assert.That(((IEmailInboxProvider)changed).GetInboxes(), Has.Count.EqualTo(2));
+		});
+
+		IIntegration Current()
+			=> IntegrationRegistry.Integrations.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+	}
+
 	private sealed class InMemoryKeys : IEmailInboxKeyStore
 	{
 		private EmailInboxKeySet _keys = EmailInboxKeySet.Empty;

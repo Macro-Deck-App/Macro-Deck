@@ -10,6 +10,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk.Identity;
 using Mediator;
+using ILogger = Serilog.ILogger;
 using VariableWriteStatus = MacroDeck.Sdk.Variables.VariableWriteStatus;
 
 namespace MacroDeckHost.Application.Services;
@@ -24,6 +25,7 @@ public class VariableService : IVariableService
 	private readonly IMusicPlayerPollNudge _musicPlayerPollNudge;
 	private readonly FileVariableSynchronizer _files;
 	private readonly TemplateVariableSynchronizer _templates;
+	private readonly ILogger _logger;
 
 	public VariableService(
 		VariableRegistry registry,
@@ -33,7 +35,8 @@ public class VariableService : IVariableService
 		IVariableRefreshSignal refreshSignal,
 		IMusicPlayerPollNudge musicPlayerPollNudge,
 		FileVariableSynchronizer files,
-		TemplateVariableSynchronizer templates)
+		TemplateVariableSynchronizer templates,
+		ILogger logger)
 	{
 		_registry = registry;
 		_userStore = userStore;
@@ -43,6 +46,7 @@ public class VariableService : IVariableService
 		_musicPlayerPollNudge = musicPlayerPollNudge;
 		_files = files;
 		_templates = templates;
+		_logger = logger;
 	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetAll() => Task.FromResult(_registry.GetAll());
@@ -295,6 +299,7 @@ public class VariableService : IVariableService
 		var ownerIntegrationId = entity.OwnerIntegrationId;
 		if (ownerIntegrationId is null || entity.DefinitionId is null)
 		{
+			_logger.Information("Refused a write to variable '{Variable}': it has no reachable owner", entity.Name);
 			return Result.Fail<VariableEntity, VariableError>(VariableError.OwnerUnavailable,
 				$"Variable '{entity.Name}' has no reachable owner");
 		}
@@ -302,6 +307,11 @@ public class VariableService : IVariableService
 		var provider = _providers.ResolveOwner(ownerIntegrationId);
 		if (provider is null)
 		{
+			_logger.Information(
+				"Refused a write to variable '{Variable}': integration '{IntegrationId}' is not currently available " +
+				"(not registered, disabled, not initialized or not offering variables)",
+				entity.Name,
+				ownerIntegrationId);
 			return Result.Fail<VariableEntity, VariableError>(VariableError.OwnerUnavailable,
 				$"Integration '{ownerIntegrationId}' is not currently available");
 		}

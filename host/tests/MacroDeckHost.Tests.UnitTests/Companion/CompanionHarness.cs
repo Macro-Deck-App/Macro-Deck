@@ -68,7 +68,8 @@ internal sealed class CompanionHarness
 				new RecordingMediator(),
 				new FakeVariableFileSystem(),
 				Serilog.Core.Logger.None),
-				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()));
+				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()),
+				Serilog.Core.Logger.None);
 		Adapter = new CompanionConfigurationMutationAdapter(Registry, VariableRegistry, ScopeFactory, suffixFactory);
 		Coordinator = new GatedCoordinator(new IntegrationConfigMutationCoordinator(ScopeFactory,
 			new InitializingLifecycle(this),

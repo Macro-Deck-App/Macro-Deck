@@ -822,6 +822,7 @@ public class SliderWidgetSessionTests
 			.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 			.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
 			.AddTestFileVariables()
+			.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None)
 			.AddScoped<IVariableService, VariableService>()
 			.BuildServiceProvider()
 			.GetRequiredService<IServiceScopeFactory>();
@@ -1007,6 +1008,7 @@ public class SliderWidgetSessionTests
 				.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 				.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
 				.AddTestFileVariables()
+				.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None)
 			.AddScoped<IVariableService, VariableService>()
 				.BuildServiceProvider()
 				.GetRequiredService<IServiceScopeFactory>();

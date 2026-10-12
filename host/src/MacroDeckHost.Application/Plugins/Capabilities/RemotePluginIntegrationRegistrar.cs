@@ -80,6 +80,10 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		_iconWaiters
 			= new();
 
+	private readonly Lock _registrationGate = new();
+	private readonly Dictionary<string, HashSet<string>> _stateUpdatesDuringRegistration = new(StringComparer.Ordinal);
+	private readonly ConcurrentDictionary<string, string> _undeclaredVariablesSessions = new(StringComparer.Ordinal);
+
 	public RemotePluginIntegrationRegistrar(
 		IPluginSessionRegistry sessionRegistry,
 		IIntegrationRegistry integrationRegistry,
@@ -141,6 +145,170 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 
+		var pending = new HashSet<string>(StringComparer.Ordinal);
+		bool ownsRegistration;
+		lock (_registrationGate)
+		{
+			ownsRegistration = _stateUpdatesDuringRegistration.TryAdd(pluginId, pending);
+		}
+
+		if (!ownsRegistration)
+		{
+			return await RegisterCoreAsync(pluginId, cancellationToken).ConfigureAwait(false);
+		}
+
+		try
+		{
+			var registered = await RegisterCoreAsync(pluginId, cancellationToken).ConfigureAwait(false);
+			if (registered)
+			{
+				await ReplayStateUpdatesAsync(pluginId, pending, cancellationToken).ConfigureAwait(false);
+			}
+
+			return registered;
+		}
+		finally
+		{
+			ReleaseRegistration(pluginId, pending);
+		}
+	}
+
+	public async Task ApplyStateUpdateAsync(string pluginId, string kind, CancellationToken cancellationToken = default)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(pluginId);
+		ArgumentException.ThrowIfNullOrEmpty(kind);
+
+		// Deferred, never awaited: the registration in flight waits on describe replies and icon uploads
+		// that arrive behind this state.update, and its own snapshot save would overwrite this refresh.
+		lock (_registrationGate)
+		{
+			if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var pending))
+			{
+				pending.Add(kind);
+				return;
+			}
+		}
+
+		await RefreshAndApplyKindAsync(pluginId, kind, cancellationToken).ConfigureAwait(false);
+	}
+
+	private void ReleaseRegistration(string pluginId, HashSet<string> pending)
+	{
+		lock (_registrationGate)
+		{
+			if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current) && ReferenceEquals(current, pending))
+			{
+				_stateUpdatesDuringRegistration.Remove(pluginId);
+			}
+		}
+	}
+
+	private async Task ReplayStateUpdatesAsync(string pluginId, HashSet<string> pending, CancellationToken cancellationToken)
+	{
+		while (true)
+		{
+			string[] kinds;
+			lock (_registrationGate)
+			{
+				if (pending.Count == 0)
+				{
+					if (_stateUpdatesDuringRegistration.TryGetValue(pluginId, out var current) &&
+						ReferenceEquals(current, pending))
+					{
+						_stateUpdatesDuringRegistration.Remove(pluginId);
+					}
+
+					return;
+				}
+
+				kinds = [.. pending];
+				pending.Clear();
+			}
+
+			foreach (var kind in kinds)
+			{
+				try
+				{
+					await RefreshAndApplyKindAsync(pluginId, kind, cancellationToken).ConfigureAwait(false);
+				}
+				catch (Exception exception) when (exception is not (OutOfMemoryException or OperationCanceledException))
+				{
+					_logger.Warning(exception,
+						"Could not apply the {Kind} state update plugin '{PluginId}' sent while it was registering",
+						kind,
+						pluginId);
+				}
+			}
+		}
+	}
+
+	private async Task RefreshAndApplyKindAsync(string pluginId, string kind, CancellationToken cancellationToken)
+	{
+		var result = await _refresher.RefreshKindAsync(pluginId, kind, cancellationToken).ConfigureAwait(false);
+		if (!result.AllSucceeded)
+		{
+			return;
+		}
+
+		var snapshot = result.Snapshot;
+		// Re-registering replays the integration's connected event, so an unchanged inbox list is not applied.
+		if (string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) &&
+			!EmailInboxesChanged(result.Previous, snapshot))
+		{
+			return;
+		}
+
+		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) &&
+			AcceptsUndeclaredVariables(pluginId, snapshot) &&
+			CurrentSessionId(pluginId) is { } sessionId)
+		{
+			// Kept per session: a resume or capability.declare re-registers from the negotiated kinds, and
+			// the SDK sends no second announcement after a resume.
+			_undeclaredVariablesSessions[pluginId] = sessionId;
+			snapshot = snapshot with { AcceptedKinds = [.. snapshot.AcceptedKinds, CapabilityKinds.Variables] };
+			await _snapshotStore.SaveAsync(snapshot, cancellationToken).ConfigureAwait(false);
+		}
+
+		await ApplyRefreshedSnapshotAsync(pluginId, snapshot, cancellationToken).ConfigureAwait(false);
+	}
+
+	private static bool EmailInboxesChanged(
+		RemotePluginCapabilitySnapshot? previous,
+		RemotePluginCapabilitySnapshot current)
+		=> previous is null ||
+			!string.Equals(previous.EmailInboxProviderName, current.EmailInboxProviderName, StringComparison.Ordinal) ||
+			!previous.EmailInboxes.SequenceEqual(current.EmailInboxes);
+
+	// The SDK declares variables per eager item, so a provider that is empty at hello never negotiated the
+	// kind; a describe that answered with variables proves it serves it. Accepted without a negotiated version.
+	private bool AcceptsUndeclaredVariables(string pluginId, RemotePluginCapabilitySnapshot snapshot)
+	{
+		if (snapshot.AcceptedKinds.Contains(CapabilityKinds.Variables, StringComparer.Ordinal) ||
+			snapshot is { Variables.Count: 0, DeclaredVariables.Count: 0, SupportsVariableCatalog: false })
+		{
+			return false;
+		}
+
+		return _sessionRegistry.GetCapabilities(pluginId) is { } session && NeverDeclaredVariables(session);
+	}
+
+	private static bool NeverDeclaredVariables(PluginSessionCapabilities session)
+		=> !session.Capabilities.ContainsKey(CapabilityKinds.Variables) &&
+			session.DeclaredCapabilities.All(capability =>
+				!string.Equals(capability.Kind, CapabilityKinds.Variables, StringComparison.Ordinal));
+
+	private string? CurrentSessionId(string pluginId)
+		=> _sessionRegistry.Snapshot()
+			.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal))
+			?.SessionId;
+
+	private bool AcceptedVariablesInCurrentSession(string pluginId, PluginSessionCapabilities session)
+		=> _undeclaredVariablesSessions.TryGetValue(pluginId, out var acceptedIn) &&
+			NeverDeclaredVariables(session) &&
+			string.Equals(acceptedIn, CurrentSessionId(pluginId), StringComparison.Ordinal);
+
+	private async Task<bool> RegisterCoreAsync(string pluginId, CancellationToken cancellationToken)
+	{
 		var capabilities = _sessionRegistry.GetCapabilities(pluginId);
 		if (capabilities is null)
 		{
@@ -152,6 +320,11 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 			.Where(pair => pair.Value.Accepted)
 			.Select(pair => pair.Key)
 			.ToList();
+
+		if (AcceptedVariablesInCurrentSession(pluginId, capabilities))
+		{
+			acceptedKinds.Add(CapabilityKinds.Variables);
+		}
 
 		var conflicts = Validate(pluginId, capabilities.DeclaredCapabilities, acceptedKinds);
 		if (conflicts.Count > 0)
@@ -1024,6 +1197,8 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		{
 			return;
 		}
+
+		_undeclaredVariablesSessions.TryRemove(new KeyValuePair<string, string>(e.PluginId, e.SessionId));
 
 		_notificationManager?.CloseOwner(e.PluginId);
 

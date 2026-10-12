@@ -179,7 +179,8 @@ internal abstract class CapabilityContractFixture
 		IReadOnlyList<DeclaredCapability> declaredCapabilities,
 		IReadOnlyCollection<string> acceptedKinds,
 		Func<Task>? beforeRegister = null,
-		int negotiatedCapabilityVersion = 1)
+		int negotiatedCapabilityVersion = 1,
+		Func<Task>? duringRegister = null)
 	{
 		_sessionId = Guid.CreateVersion7().ToString("D");
 
@@ -210,16 +211,8 @@ internal abstract class CapabilityContractFixture
 			HostAssetAckHandler = ack => HostAssetSender.TryComplete(PluginId, ack)
 		};
 		_link.CapabilityResultReceived += envelope => Invoker.TryComplete(PluginId, envelope);
-		_link.StateUpdateHandler = async (kind, cancellationToken) =>
-		{
-			var result = await SnapshotRefresher.RefreshKindAsync(PluginId, kind, cancellationToken)
-				.ConfigureAwait(false);
-			if (result.AllSucceeded)
-			{
-				await Registrar.ApplyRefreshedSnapshotAsync(PluginId, result.Snapshot, cancellationToken)
-					.ConfigureAwait(false);
-			}
-		};
+		_link.StateUpdateHandler = (kind, cancellationToken)
+			=> Registrar.ApplyStateUpdateAsync(PluginId, kind, cancellationToken);
 
 		if (!SessionRegistry.TryAttach(_sessionId, _link, "contract-fixture"))
 		{
@@ -265,7 +258,13 @@ internal abstract class CapabilityContractFixture
 			await beforeRegister();
 		}
 
-		var registered = await Registrar.RegisterAsync(PluginId, CancellationToken.None);
+		var registration = Registrar.RegisterAsync(PluginId, CancellationToken.None);
+		if (duringRegister is not null)
+		{
+			await duringRegister();
+		}
+
+		var registered = await registration;
 		if (!registered)
 		{
 			throw new InvalidOperationException("The registrar rejected this contract fixture's plugin.");
