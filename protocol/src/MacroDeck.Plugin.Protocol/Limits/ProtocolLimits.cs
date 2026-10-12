@@ -212,4 +212,28 @@ public static class ProtocolLimits
 
 	/// <summary>Bounds a battery device's kind.</summary>
 	public const int MaxBatteryDeviceKindLength = BatteryLimits.MaxKindLength;
+
+	/// <summary>Bounds the serialized result of an <c>email-inbox</c> <c>describe</c>, <c>inboxes</c> or
+	/// <c>snapshot</c> reply, below <see cref="MaxMessageBytes" /> so the reply plus its envelope fits one
+	/// frame. A <c>snapshot</c> reply that would exceed it drops its oldest messages and says so in
+	/// <c>Truncated</c>.</summary>
+	public const int MaxEmailInboxReplyBytes = 192 * 1024;
+
+	/// <summary>Bounds a message subject and an inbox status message. Longer text is cut.</summary>
+	public const int MaxEmailSubjectLength = 512;
+
+	/// <summary>Bounds a message preview. Longer text is cut.</summary>
+	public const int MaxEmailPreviewLength = 280;
+
+	/// <summary>Bounds a sender's name and address and an inbox's display name and address. Longer text
+	/// is cut.</summary>
+	public const int MaxEmailSenderLength = 320;
+
+	/// <summary>Bounds the inboxes a <c>describe</c> or <c>inboxes</c> reply carries. Further inboxes are
+	/// dropped.</summary>
+	public const int MaxEmailInboxes = 32;
+
+	/// <summary>Bounds the messages a <c>snapshot</c> reply carries, and the <c>maxMessages</c> a host may
+	/// ask for.</summary>
+	public const int MaxEmailMessages = 50;
 }

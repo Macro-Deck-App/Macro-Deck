@@ -3326,6 +3326,91 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Events.Core.VariablesCategory" xml:space="preserve">
     <value>Переменные</value>
   </data>
+  <data name="Events.Email.AnyInboxPlaceholder" xml:space="preserve">
+    <value>Любой почтовый ящик</value>
+  </data>
+  <data name="Events.Email.Category" xml:space="preserve">
+    <value>События почты</value>
+  </data>
+  <data name="Events.Email.InboxConnectedDescription" xml:space="preserve">
+    <value>Выполняется, когда почтовый ящик снова подключается после отключения.</value>
+  </data>
+  <data name="Events.Email.InboxConnectedName" xml:space="preserve">
+    <value>Почтовый ящик подключён</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedDescription" xml:space="preserve">
+    <value>Выполняется, когда почтовый ящик теряет соединение с почтовым сервером.</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedName" xml:space="preserve">
+    <value>Почтовый ящик отключён</value>
+  </data>
+  <data name="Events.Email.InboxFilterDescription" xml:space="preserve">
+    <value>Необязательно. Выполнять только для этого почтового ящика.</value>
+  </data>
+  <data name="Events.Email.InboxLabel" xml:space="preserve">
+    <value>Почтовый ящик</value>
+  </data>
+  <data name="Events.Email.InboxNameLabel" xml:space="preserve">
+    <value>Название почтового ящика</value>
+  </data>
+  <data name="Events.Email.InboxOption" xml:space="preserve">
+    <value>{inbox} ({provider})</value>
+    <comment>{inbox} is the inbox name, {provider} the email service or integration.</comment>
+  </data>
+  <data name="Events.Email.IsReadLabel" xml:space="preserve">
+    <value>Прочитано</value>
+  </data>
+  <data name="Events.Email.MessageIdLabel" xml:space="preserve">
+    <value>ID сообщения</value>
+  </data>
+  <data name="Events.Email.PreviewLabel" xml:space="preserve">
+    <value>Предпросмотр</value>
+  </data>
+  <data name="Events.Email.PreviousUnreadCountLabel" xml:space="preserve">
+    <value>Прежнее число непрочитанных</value>
+  </data>
+  <data name="Events.Email.ProviderName" xml:space="preserve">
+    <value>Почта</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedDescription" xml:space="preserve">
+    <value>Выполняется, когда письмо отмечается как прочитанное или непрочитанное.</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedName" xml:space="preserve">
+    <value>Письмо прочитано или не прочитано</value>
+  </data>
+  <data name="Events.Email.ReceivedAtLabel" xml:space="preserve">
+    <value>Время получения</value>
+  </data>
+  <data name="Events.Email.ReceivedDescription" xml:space="preserve">
+    <value>Выполняется, когда в почтовый ящик приходит новое письмо.</value>
+  </data>
+  <data name="Events.Email.ReceivedName" xml:space="preserve">
+    <value>Письмо получено</value>
+  </data>
+  <data name="Events.Email.SenderAddressLabel" xml:space="preserve">
+    <value>Адрес отправителя</value>
+  </data>
+  <data name="Events.Email.SenderFilterDescription" xml:space="preserve">
+    <value>Необязательно. Выполнять только для писем от этого отправителя.</value>
+  </data>
+  <data name="Events.Email.SenderLabel" xml:space="preserve">
+    <value>Отправитель</value>
+  </data>
+  <data name="Events.Email.SubjectFilterDescription" xml:space="preserve">
+    <value>Необязательно. Выполнять только для писем с этой темой.</value>
+  </data>
+  <data name="Events.Email.SubjectLabel" xml:space="preserve">
+    <value>Тема</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedDescription" xml:space="preserve">
+    <value>Выполняется, когда меняется число непрочитанных писем в почтовом ящике.</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedName" xml:space="preserve">
+    <value>Число непрочитанных изменилось</value>
+  </data>
+  <data name="Events.Email.UnreadCountLabel" xml:space="preserve">
+    <value>Число непрочитанных</value>
+  </data>
   <data name="Events.MusicPlayer.AlbumLabel" xml:space="preserve">
     <value>Альбом</value>
   </data>
@@ -4656,6 +4741,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>Устройства</value>
   </data>
+  <data name="Integrations.Capability.EmailInbox" xml:space="preserve">
+    <value>Почтовый ящик</value>
+  </data>
   <data name="Integrations.Capability.Events" xml:space="preserve">
     <value>События</value>
   </data>
@@ -5742,6 +5830,50 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Голосовой сервер</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
+    <value>Сразу проверяет все подключённые почтовые ящики на новые письма, а не ждёт следующего обновления.</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Name" xml:space="preserve">
+    <value>Обновить почтовые ящики</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Unavailable" xml:space="preserve">
+    <value>Сейчас не удаётся обновить почтовые ящики.</value>
+  </data>
+  <data name="Integrations.Email.Name" xml:space="preserve">
+    <value>Почта</value>
+  </data>
+  <data name="Integrations.Email.Variables.InboxConnected" xml:space="preserve">
+    <value>{inbox}: подключено</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxCount" xml:space="preserve">
+    <value>Почтовые ящики</value>
+    <comment>The number of connected email inboxes.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestReceivedAt" xml:space="preserve">
+    <value>{inbox}: получение последнего письма</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds when its newest email arrived.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSender" xml:space="preserve">
+    <value>{inbox}: последний отправитель</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSubject" xml:space="preserve">
+    <value>{inbox}: последняя тема</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxTotalCount" xml:space="preserve">
+    <value>{inbox}: письма</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds how many emails it contains.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxUnreadCount" xml:space="preserve">
+    <value>{inbox}: непрочитанные письма</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.UnreadCount" xml:space="preserve">
+    <value>Непрочитанные письма</value>
+    <comment>The number of unread emails across every connected inbox.</comment>
   </data>
   <data name="Integrations.Example.Actions.AdvancedDescription" xml:space="preserve">
     <value>Вложенные свойства</value>
@@ -6885,6 +7017,138 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.Http.Params.UrlLabel" xml:space="preserve">
     <value>URL</value>
+  </data>
+  <data name="Integrations.Imap.Config.AlreadyConfigured" xml:space="preserve">
+    <value>Эта папка этой учётной записи почты уже настроена.</value>
+  </data>
+  <data name="Integrations.Imap.Config.AppPasswordInstruction" xml:space="preserve">
+    <value>Если в учётной записи включена двухэтапная проверка, создайте пароль приложения в настройках безопасности почтового сервиса и введите его как пароль.</value>
+  </data>
+  <data name="Integrations.Imap.Config.CertificateFailed" xml:space="preserve">
+    <value>Не удалось проверить сертификат безопасности {host}, поэтому Macro Deck не подключился.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConfigurationNamePlaceholder" xml:space="preserve">
+    <value>например, Работа</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck читает одну папку учётной записи по IMAP, чтобы показывать новую почту. Он никогда не изменяет, не перемещает и не удаляет письма.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectTitle" xml:space="preserve">
+    <value>Подключение учётной записи почты</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionFailed" xml:space="preserve">
+    <value>Не удалось подключиться к {host} через порт {port}. Проверьте имя сервера, порт и параметр безопасности.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>{host} не ответил вовремя. Проверьте имя сервера и порт.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterHost" xml:space="preserve">
+    <value>Введите сервер IMAP, например imap.example.com.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterPassword" xml:space="preserve">
+    <value>Введите пароль.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterUsername" xml:space="preserve">
+    <value>Введите имя пользователя.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterValidPort" xml:space="preserve">
+    <value>Введите порт от 1 до 65535.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderDescription" xml:space="preserve">
+    <value>Отслеживаемая папка. INBOX — основная папка «Входящие».</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderLabel" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderNotFound" xml:space="preserve">
+    <value>В этой учётной записи нет папки {folder}.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostDescription" xml:space="preserve">
+    <value>Сервер входящей почты из настроек почтового сервиса.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostLabel" xml:space="preserve">
+    <value>Сервер IMAP</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordDescription" xml:space="preserve">
+    <value>Пароль или пароль приложения. Он хранится в зашифрованном виде на этом компьютере.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordLabel" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortDescription" xml:space="preserve">
+    <value>Обычно 993 для SSL/TLS и 143 для STARTTLS.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortLabel" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderCustom" xml:space="preserve">
+    <value>Свой сервер</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderDescription" xml:space="preserve">
+    <value>Выберите почтовый сервис, чтобы использовать его настройки сервера, или «Свой сервер», чтобы ввести их вручную.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderLabel" xml:space="preserve">
+    <value>Почтовый сервис</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityDescription" xml:space="preserve">
+    <value>Соединение всегда зашифровано, а сертификат сервера всегда проверяется.</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityLabel" xml:space="preserve">
+    <value>Безопасность</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecuritySslTls" xml:space="preserve">
+    <value>SSL/TLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SignInRejected" xml:space="preserve">
+    <value>Сервер отклонил имя пользователя или пароль. Если в учётной записи включена двухэтапная проверка, используйте пароль приложения.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UnknownStep" xml:space="preserve">
+    <value>Этот шаг настройки неизвестен.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameDescription" xml:space="preserve">
+    <value>Обычно полный адрес электронной почты.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameLabel" xml:space="preserve">
+    <value>Имя пользователя</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedDescription" xml:space="preserve">
+    <value>Не удалось проверить сертификат безопасности {host}, поэтому Macro Deck не подключается к серверу. Выберите «Изменить подключение» рядом с учётной записью и введите имя сервера точно так, как оно указано в сертификате.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedTitle" xml:space="preserve">
+    <value>Недоверенный сертификат почтового сервера для {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundDescription" xml:space="preserve">
+    <value>Папки {folder} больше нет на почтовом сервере. Выберите «Изменить подключение» рядом с учётной записью и введите текущее название папки.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundTitle" xml:space="preserve">
+    <value>Не найдена папка почты для {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedDescription" xml:space="preserve">
+    <value>Почтовый сервер отклонил сохранённое имя пользователя или пароль. Выберите «Изменить подключение» рядом с учётной записью и введите текущий пароль или пароль приложения.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedTitle" xml:space="preserve">
+    <value>Не удалось войти в почту {account}</value>
+  </data>
+  <data name="Integrations.Imap.Name" xml:space="preserve">
+    <value>Почта (IMAP)</value>
+  </data>
+  <data name="Integrations.Imap.Status.CertificateFailed" xml:space="preserve">
+    <value>Не удалось проверить сертификат безопасности {host}.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Connecting" xml:space="preserve">
+    <value>Подключение к {host}.</value>
+  </data>
+  <data name="Integrations.Imap.Status.FolderNotFound" xml:space="preserve">
+    <value>Папки {folder} больше нет.</value>
+  </data>
+  <data name="Integrations.Imap.Status.SignInFailed" xml:space="preserve">
+    <value>Не удалось войти. Выберите «Изменить подключение» рядом с учётной записью и введите текущий пароль или пароль приложения.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Unreachable" xml:space="preserve">
+    <value>{host} недоступен. Macro Deck продолжает попытки.</value>
   </data>
   <data name="Integrations.Issues.AccessibilityPermissionGranted" xml:space="preserve">
     <value>Разрешение «Универсальный доступ» предоставлено.</value>
@@ -19451,6 +19715,137 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.Editor.WhenLabel" xml:space="preserve">
     <value>Когда:</value>
+  </data>
+  <data name="Widgets.EmailInbox.AllInboxes" xml:space="preserve">
+    <value>Все ящики</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Inboxes" xml:space="preserve">
+    <value>Почтовые ящики</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.InboxesDescription" xml:space="preserve">
+    <value>Оставьте пустым, чтобы показывать все подключённые почтовые ящики.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessages" xml:space="preserve">
+    <value>Показывать писем</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessagesDescription" xml:space="preserve">
+    <value>Наибольшее число писем в списке. Маленькая плитка показывает меньше.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Mode" xml:space="preserve">
+    <value>Показывать</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeCount" xml:space="preserve">
+    <value>Число непрочитанных</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeList" xml:space="preserve">
+    <value>Список писем</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.NoInboxesHint" xml:space="preserve">
+    <value>Почтовые ящики ещё не подключены. Сначала добавьте учётную запись почты, например через интеграцию IMAP.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowPreview" xml:space="preserve">
+    <value>Показывать предпросмотр</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSender" xml:space="preserve">
+    <value>Показывать отправителя</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSubject" xml:space="preserve">
+    <value>Показывать тему</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowTimestamp" xml:space="preserve">
+    <value>Показывать время получения</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.UnreadOnly" xml:space="preserve">
+    <value>Только непрочитанные письма</value>
+  </data>
+  <data name="Widgets.EmailInbox.CountOverflow" xml:space="preserve">
+    <value>{number}+</value>
+    <comment>Shown instead of the unread count when it is too large to fit, for example 999+.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Description" xml:space="preserve">
+    <value>Показывает, сколько непрочитанных писем ждёт, или новейшие письма из подключённых почтовых ящиков.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Disconnected" xml:space="preserve">
+    <value>Этот почтовый ящик сейчас недоступен</value>
+  </data>
+  <data name="Widgets.EmailInbox.Name" xml:space="preserve">
+    <value>Почтовый ящик</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoEmails" xml:space="preserve">
+    <value>Писем нет</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoInboxes" xml:space="preserve">
+    <value>Почтовый ящик не подключён</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoSubject" xml:space="preserve">
+    <value>(Без темы)</value>
+    <comment>Shown for an email without a subject.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.NoUnreadEmails" xml:space="preserve">
+    <value>Непрочитанных писем нет</value>
+  </data>
+  <data name="Widgets.EmailInbox.Offline" xml:space="preserve">
+    <value>Не в сети</value>
+    <comment>Short status on a small email widget whose inbox can't be reached.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendPreview" xml:space="preserve">
+    <value>Ты свободен в пятницу вечером? Я нашёл новое место неподалёку.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSender" xml:space="preserve">
+    <value>Sam Lee</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSubject" xml:space="preserve">
+    <value>Ужин в пятницу?</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.Inbox" xml:space="preserve">
+    <value>Работа</value>
+    <comment>Sample inbox name shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoicePreview" xml:space="preserve">
+    <value>Ваш счёт готов, оплата будет списана 15-го числа.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSender" xml:space="preserve">
+    <value>Отдел расчётов</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSubject" xml:space="preserve">
+    <value>Ваш счёт за март</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamPreview" xml:space="preserve">
+    <value>Вот краткий итог того, о чём мы договорились, и следующие шаги.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSender" xml:space="preserve">
+    <value>Alex Morgan</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSubject" xml:space="preserve">
+    <value>Заметки с сегодняшнего планирования</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.SomeDisconnected" xml:space="preserve">
+    <value>Некоторые почтовые ящики сейчас недоступны</value>
+  </data>
+  <data name="Widgets.EmailInbox.UnknownSender" xml:space="preserve">
+    <value>(Неизвестный отправитель)</value>
+    <comment>Shown for an email without a sender.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.One" xml:space="preserve">
+    <value>{count} непрочитанное</value>
+    <comment>[plural][count:int] How many emails are unread.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.Other" xml:space="preserve">
+    <value>Непрочитанных: {count}</value>
+    <comment>[plural][count:int]</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Yesterday" xml:space="preserve">
+    <value>Вчера</value>
+    <comment>Shown as the time of an email received yesterday.</comment>
   </data>
   <data name="Widgets.Folder.AutomaticActivation" xml:space="preserve">
     <value>Автоматическая активация…</value>

@@ -120,6 +120,7 @@ assets:
       - ui/runtime/styles/icons/list.svg
       - ui/runtime/styles/icons/lock.svg
       - ui/runtime/styles/icons/log-out.svg
+      - ui/runtime/styles/icons/mail.svg
       - ui/runtime/styles/icons/message-square.svg
       - ui/runtime/styles/icons/minus.svg
       - ui/runtime/styles/icons/moon.svg
@@ -158,6 +159,7 @@ assets:
       - ui/runtime/styles/icons/wifi-solid-full.svg
       - ui/runtime/styles/icons/x.svg
       - ui/runtime/styles/icons/zap.svg
+      - host/src/MacroDeckHost.Widgets/EmailInbox/Icons/mail.svg
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/disc.svg
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/disc-spinning.svg
       - host/src/MacroDeckHost.Widgets/MusicPlayer/Icons/music-note.svg
@@ -189,6 +191,7 @@ assets:
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/zap.svg
       - host/src/MacroDeckHost.Integrations/Companion/companion-icon.svg
       - host/src/MacroDeckHost.Integrations/Http/http-icon.svg
+      - host/src/MacroDeckHost.Integrations/Imap/imap.svg
       - host/src/MacroDeckHost.Integrations/Keyboard/keyboard-icon.svg
       - host/src/MacroDeckHost.Integrations/Mouse/mouse-icon.svg
       - host/src/MacroDeckHost.Integrations/System/system-icon.svg

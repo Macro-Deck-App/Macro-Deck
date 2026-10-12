@@ -11,6 +11,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Calendar;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters.EmailInbox;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.ConfigFlow;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.MusicPlayer;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
@@ -23,6 +24,7 @@ using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.FolderViews;
@@ -37,6 +39,7 @@ using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Migration;
+using SdkEmailInbox = MacroDeck.Sdk.Email.EmailInbox;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters;
 
@@ -48,6 +51,7 @@ public abstract partial class RemotePluginIntegration :
 	IMusicPlayerProvider,
 	IWeatherProvider,
 	ICalendarProvider,
+	IEmailInboxProvider,
 	IProfileProvider,
 	IMigrationProvider,
 	IDeviceProvider,
@@ -427,6 +431,25 @@ public abstract partial class RemotePluginIntegration :
 
 	private RemoteCalendarProvider CreateCalendarProvider()
 		=> new(Id, Snapshot.CalendarProviderName, Snapshot.CalendarAccounts, _invoker);
+
+	string IEmailInboxProvider.ProviderName => Snapshot.EmailInboxProviderName;
+
+	IReadOnlyList<SdkEmailInbox> IEmailInboxProvider.GetInboxes() => Snapshot.EmailInboxes;
+
+	Task<EmailInboxSnapshot> IEmailInboxProvider.GetSnapshotAsync(
+		string inboxId,
+		EmailMessageQuery query,
+		CancellationToken cancellationToken)
+		=> new RemoteEmailInboxProvider(Id, Snapshot.EmailInboxProviderName, Snapshot.EmailInboxes, _invoker)
+			.GetSnapshotAsync(inboxId, query, cancellationToken);
+
+	// Never raised: PluginWebSocketEndpoint routes the plugin's state.update for this kind to the email sync
+	// signal, because a fresh adapter replaces this instance on every snapshot refresh.
+	event EventHandler<EmailInboxChangedEventArgs>? IEmailInboxProvider.Changed
+	{
+		add { }
+		remove { }
+	}
 
 	// A plugin owns its own device discovery, so the host neither starts nor stops it - the plugin's own
 	// hosting runs InitializeAsync/ShutdownAsync in its process, and registrations arrive as callbacks.

@@ -2,6 +2,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
+using MacroDeck.Plugin.Hosting.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Hosting.Capabilities.Events;
 using MacroDeck.Plugin.Hosting.Capabilities.Icons;
 using MacroDeck.Plugin.Hosting.Capabilities.Issues;
@@ -144,6 +145,19 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 			[CapabilityKinds.Calendar]);
 
 		await AssertNoneUnsupportedAsync(CapabilityKinds.Calendar, ProviderCapabilityId.LocalId);
+	}
+
+	[Test]
+	public async Task Every_email_inbox_operation_is_recognised()
+	{
+		await ConnectAsync([
+				new EmailInboxCapabilityHandler([new TestEmailInboxIntegration("Example Mail", "work")],
+					TestMetadata.Default)
+			],
+			[Provider(CapabilityKinds.EmailInbox)],
+			[CapabilityKinds.EmailInbox]);
+
+		await AssertNoneUnsupportedAsync(CapabilityKinds.EmailInbox, ProviderCapabilityId.LocalId);
 	}
 
 	[Test]

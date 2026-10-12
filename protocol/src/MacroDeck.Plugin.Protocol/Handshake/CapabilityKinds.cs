@@ -1,6 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The twenty-two capability kinds a plugin can declare.</summary>
+/// <summary>The twenty-three capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -71,11 +71,18 @@ public static class CapabilityKinds
 	/// </summary>
 	public const string BatteryProvider = "battery-provider";
 
+	/// <summary>
+	/// Reads email inboxes: their status, counts and newest messages. Declared at
+	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string EmailInbox = "email-inbox";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
 		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar, ConfigEntries, BatteryProvider,
+		EmailInbox,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

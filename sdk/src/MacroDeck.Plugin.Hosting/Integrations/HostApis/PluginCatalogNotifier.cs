@@ -32,7 +32,9 @@ public interface IPluginCatalogNotifier
 	/// </summary>
 	/// <param name="kind">The capability kind whose declared catalogue changed.</param>
 	/// <param name="localId">The declared local id that went stale, when only one did. Omitted, the
-	/// host re-describes the whole kind.</param>
+	/// host re-describes the whole kind. For <c>email-inbox</c> it is an inbox id instead, and the host
+	/// reads only that inbox's snapshot again; omitted, it reads the inbox list again, see
+	/// <see cref="StateUpdatePayload.LocalId" />.</param>
 	/// <param name="reason">Diagnostic only - the host never branches on it, see
 	/// <see cref="StateUpdatePayload.Reason" />.</param>
 	void CatalogChanged(string kind, string? localId = null, string? reason = null);

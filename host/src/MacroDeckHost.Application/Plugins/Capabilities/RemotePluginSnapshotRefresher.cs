@@ -6,6 +6,7 @@ using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.BatteryProvider;
 using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
 using MacroDeck.Plugin.Protocol.Capabilities.ConfigFlow;
+using MacroDeck.Plugin.Protocol.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Protocol.Capabilities.Events;
 using MacroDeck.Plugin.Protocol.Capabilities.Icons;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
@@ -53,6 +54,7 @@ public sealed class RemotePluginSnapshotRefresher
 				[CapabilityKinds.Weather] = ApplyWeatherDescribe,
 				[CapabilityKinds.Calendar] = ApplyCalendarDescribe,
 				[CapabilityKinds.BatteryProvider] = ApplyBatteryProviderDescribe,
+				[CapabilityKinds.EmailInbox] = ApplyEmailInboxDescribe,
 				[CapabilityKinds.VirtualProfiles] = ApplyVirtualProfilesDescribe,
 				[CapabilityKinds.ConfigFlow] = ApplyConfigFlowDescribe,
 				[CapabilityKinds.Icons] = ApplyIconsDescribe,
@@ -69,6 +71,7 @@ public sealed class RemotePluginSnapshotRefresher
 				[CapabilityKinds.MusicPlayer] = (CapabilityOperations.MusicPlayer.Instances, ApplyMusicPlayerInstances),
 				[CapabilityKinds.Weather] = (CapabilityOperations.Weather.Instances, ApplyWeatherInstances),
 				[CapabilityKinds.Calendar] = (CapabilityOperations.Calendar.Accounts, ApplyCalendarAccounts),
+				[CapabilityKinds.EmailInbox] = (CapabilityOperations.EmailInbox.Inboxes, ApplyEmailInboxes),
 				[CapabilityKinds.VirtualProfiles] = (CapabilityOperations.VirtualProfiles.Profiles,
 					ApplyVirtualProfilesInstances)
 			};
@@ -126,7 +129,8 @@ public sealed class RemotePluginSnapshotRefresher
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
 		ArgumentException.ThrowIfNullOrEmpty(kind);
 
-		var snapshot = _store.GetSnapshot(pluginId) with { PluginId = pluginId };
+		var previous = _store.GetSnapshot(pluginId) with { PluginId = pluginId };
+		var snapshot = previous;
 
 		string localId;
 		string operation;
@@ -142,7 +146,7 @@ public sealed class RemotePluginSnapshotRefresher
 		}
 		else
 		{
-			return new RemotePluginSnapshotRefreshResult(snapshot, []);
+			return new RemotePluginSnapshotRefreshResult(snapshot, []) { Previous = previous };
 		}
 
 		try
@@ -156,12 +160,12 @@ public sealed class RemotePluginSnapshotRefresher
 		}
 		catch (Exception exception) when (exception is RemoteCapabilityException or OperationCanceledException)
 		{
-			return new RemotePluginSnapshotRefreshResult(snapshot, [kind]);
+			return new RemotePluginSnapshotRefreshResult(snapshot, [kind]) { Previous = previous };
 		}
 
 		await _store.SaveAsync(snapshot, cancellationToken).ConfigureAwait(false);
 
-		return new RemotePluginSnapshotRefreshResult(snapshot, []);
+		return new RemotePluginSnapshotRefreshResult(snapshot, []) { Previous = previous };
 	}
 
 	private const string DescribeLocalId = "*";
@@ -356,6 +360,36 @@ public sealed class RemotePluginSnapshotRefresher
 		return snapshot with { CalendarAccounts = [.. payload.Accounts.Select(CalendarMapper.ToDomain)] };
 	}
 
+	private static RemotePluginCapabilitySnapshot ApplyEmailInboxDescribe(
+		RemotePluginCapabilitySnapshot snapshot,
+		JsonElement? data)
+	{
+		var payload = data?.Deserialize<EmailInboxDescribePayload>(PluginProtocolJson.Options);
+		if (payload is null)
+		{
+			return snapshot;
+		}
+
+		return snapshot with
+		{
+			EmailInboxProviderName = payload.ProviderName,
+			EmailInboxes = EmailInboxMapper.ToDomain(payload.Inboxes)
+		};
+	}
+
+	private static RemotePluginCapabilitySnapshot ApplyEmailInboxes(
+		RemotePluginCapabilitySnapshot snapshot,
+		JsonElement? data)
+	{
+		var payload = data?.Deserialize<EmailInboxesResult>(PluginProtocolJson.Options);
+		if (payload is null)
+		{
+			return snapshot;
+		}
+
+		return snapshot with { EmailInboxes = EmailInboxMapper.ToDomain(payload.Inboxes) };
+	}
+
 	private static RemotePluginCapabilitySnapshot ApplyVirtualProfilesDescribe(
 		RemotePluginCapabilitySnapshot snapshot,
 		JsonElement? data)
@@ -456,4 +490,6 @@ public sealed record RemotePluginSnapshotRefreshResult(
 	IReadOnlyList<string> FailedKinds)
 {
 	public bool AllSucceeded => FailedKinds.Count == 0;
+
+	public RemotePluginCapabilitySnapshot? Previous { get; init; }
 }

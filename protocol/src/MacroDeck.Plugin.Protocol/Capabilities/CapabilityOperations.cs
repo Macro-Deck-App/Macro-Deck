@@ -446,6 +446,23 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Describe];
 	}
 
+	/// <summary>
+	/// Reads of an email inbox provider. Inboxes are config-entry shaped and change at runtime, so
+	/// <see cref="Snapshot" /> carries the inbox id in its arguments rather than in the declared local id.
+	/// </summary>
+	public static class EmailInbox
+	{
+		public const string Describe = "describe";
+
+		public const string Inboxes = "inboxes";
+
+		/// <summary>One inbox's status, counts and newest messages, cut to
+		/// <c>ProtocolLimits.MaxEmailInboxReplyBytes</c>.</summary>
+		public const string Snapshot = "snapshot";
+
+		public static readonly IReadOnlyList<string> All = [Describe, Inboxes, Snapshot];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -471,6 +488,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.Calendar] = Calendar.All,
 			[Handshake.CapabilityKinds.ConfigEntries] = ConfigEntries.All,
 			[Handshake.CapabilityKinds.BatteryProvider] = BatteryProvider.All,
+			[Handshake.CapabilityKinds.EmailInbox] = EmailInbox.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

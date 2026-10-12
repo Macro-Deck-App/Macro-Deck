@@ -51,6 +51,7 @@ public class CapabilityOperationStabilityTests
 			[CapabilityKinds.ConfigEntries] =
 				["describe", "prepare", "status", "usable", "reload", "synchronize", "release"],
 			[CapabilityKinds.BatteryProvider] = ["describe"],
+			[CapabilityKinds.EmailInbox] = ["describe", "inboxes", "snapshot"],
 		};
 
 	[Test]

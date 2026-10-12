@@ -160,7 +160,7 @@ are listed in the descriptor's `capabilityKinds`:
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
 `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`,
-`video-stream-provider`, `calendar`, `config-entries`, `battery-provider`.
+`video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
@@ -187,6 +187,11 @@ are listed in the descriptor's `capabilityKinds`:
 - `battery-provider` was added as a new kind at capability version `1`, additively in major `3`, together
   with the `batteries` host API. Its only operation is `describe`; devices travel the other way - see
   [`batteries`](/reference/websocket/#batteries) and [Batteries](/features/batteries/).
+- `email-inbox` was added as a new kind at capability version `1`, additively in major `3`. A host that
+  predates it rejects the declaration non-fatally and the session goes on without it. For this kind only,
+  `state.update` with a `localId` names an inbox, not a declared capability: that inbox's content or status
+  changed, and the host reads its `snapshot` again instead of re-describing the kind. Its operations and
+  reply limits are in the [WebSocket reference](/reference/websocket/#email-inbox).
 
 See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 

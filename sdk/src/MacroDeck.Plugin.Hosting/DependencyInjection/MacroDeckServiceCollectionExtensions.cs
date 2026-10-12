@@ -5,6 +5,7 @@ using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
+using MacroDeck.Plugin.Hosting.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Hosting.Capabilities.FolderViewProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.ScreenSaverProvider;
 using MacroDeck.Plugin.Hosting.Capabilities.VideoStreamProvider;
@@ -23,6 +24,7 @@ using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.FolderViews;
@@ -186,6 +188,11 @@ internal static class MacroDeckServiceCollectionExtensions
 		if (typeof(ICalendarProvider).IsAssignableFrom(typeof(TIntegration)))
 		{
 			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, CalendarCapabilityHandler>());
+		}
+
+		if (typeof(IEmailInboxProvider).IsAssignableFrom(typeof(TIntegration)))
+		{
+			services.TryAddEnumerable(ServiceDescriptor.Singleton<ICapabilityHandler, EmailInboxCapabilityHandler>());
 		}
 
 		if (typeof(IMigrationProvider).IsAssignableFrom(typeof(TIntegration)))

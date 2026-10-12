@@ -304,6 +304,60 @@ Macro Deck after you allowed access.
   **Use additional HTTPS port**, or turn HTTPS off while you connect the account, then start the setup
   again.
 
+## Email sign-in failed
+
+The IMAP setup says **The server refused the username or password**, or later **Integrations** shows
+**Email sign-in failed** for an account and its Email Inbox widgets show **Offline**.
+
+- **Two-step verification is on:** most providers, Gmail and iCloud Mail among them, refuse your normal
+  password from other apps. Create an app password in your account's security settings and enter it as the
+  password, see [Connect an IMAP account](/guide/concepts/#connect-an-imap-account).
+- **You changed your password** or revoked the app password: choose **Edit connection** next to the account
+  and enter the current one. The account keeps its name, so widgets, triggers and variables keep working.
+- **The username is not your full email address:** most providers expect the whole address.
+- **The account only allows OAuth**, as most Outlook.com and Microsoft 365 accounts do: Macro Deck cannot
+  sign in to it yet.
+
+## The email setup cannot connect
+
+- **Could not connect to** the server **on port** ...: with **Custom server**, check the **IMAP server**, the
+  **Port** and the **Security**. **SSL/TLS** goes with port `993` and **STARTTLS** usually with `143`; a mix,
+  such as SSL/TLS on 143, fails. Use the incoming (IMAP) server from your provider, not the SMTP server for
+  sending. With a listed **Email provider** the settings are filled in for you, so check that IMAP access is
+  turned on in your account's mail settings and that your network does not block port `993`.
+- **... did not answer in time:** the server name or the port is wrong, or a firewall blocks the port.
+  Some networks block 993 and 143; try another network.
+- **The security certificate ... could not be verified:** Macro Deck always checks the server's certificate
+  and does not connect when it is expired, self-signed or issued for another name. Enter the server name
+  exactly as the certificate names it, as your provider documents it. For a server of your own, give it a
+  certificate from a public certificate authority, or trust its certificate in your operating system's
+  certificate store.
+- **This account has no folder named** ...: folder names are those of the server, which can differ from what
+  your mail app shows, especially for subfolders or in another language. Leave **Folder** at `INBOX` for the
+  inbox.
+
+## The Email Inbox widget shows Offline
+
+The widget keeps its last emails and shows **Offline** under the count, or a warning sign in the header of a
+small message list. In the full message list of a widget that shows one inbox, the line at the bottom says
+why, for example **Cannot reach** the server; a widget that shows several inboxes says **Some inboxes can't
+be reached right now**, and one whose inbox stopped answering altogether says **Can't reach this inbox right
+now**. Problems you have to fix yourself also appear under **Integrations**, on
+the **Email (IMAP)** page next to the account:
+
+- **Cannot reach** the server, **Macro Deck keeps trying:** the computer is offline or the mail server is
+  down. Macro Deck reconnects on its own and the widget catches up, including emails that arrived meanwhile.
+  This one only shows in the widget, because it fixes itself.
+- **Email sign-in failed:** see [Email sign-in failed](#email-sign-in-failed).
+- **Email server certificate not trusted:** see
+  [The email setup cannot connect](#the-email-setup-cannot-connect), then choose **Edit connection** next to
+  the account and correct the server name.
+- **Email folder missing:** the folder was renamed or deleted on the server. Choose **Edit connection** next
+  to the account and enter its new name. Another folder counts as another inbox: pick it again in your
+  Email Inbox widgets and Email triggers, and use its variables, which get a new name such as
+  `email_work_2_unread_count`. See [Connect an IMAP account](/guide/concepts/#connect-an-imap-account).
+- **The integration is turned off:** turn it on again under **Integrations**.
+
 ## Jellyfin does not connect or a button does nothing
 
 - **Jellyfin server unreachable** under **Integrations**: check the address in the configuration, including

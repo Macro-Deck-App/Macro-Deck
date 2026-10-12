@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading.Channels;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Capabilities;
+using MacroDeck.Plugin.Protocol.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Protocol.Capabilities.Variables;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -13,6 +14,7 @@ using MacroDeck.Plugin.Protocol.Logging;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Auth;
+using MacroDeckHost.Application.Email;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
@@ -65,7 +67,9 @@ public class PluginWebSocketEndpointDispatchTests
 		PluginSessionRegistry SessionRegistry,
 		ScriptedCapabilityInvoker Invoker,
 		RecordingRegistrar Registrar,
-		InMemorySnapshotStore SnapshotStore) CreateEndpointWithState(string pluginId, string sessionId)
+		InMemorySnapshotStore SnapshotStore) CreateEndpointWithState(string pluginId,
+		string sessionId,
+		IEmailSyncSignal? emailSync = null)
 	{
 		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		var invoker = new ScriptedCapabilityInvoker();
@@ -86,7 +90,8 @@ public class PluginWebSocketEndpointDispatchTests
 			new RecordingMediator(),
 			new NeverStoppingLifetime(),
 			CreateLogIngestor(registry),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			emailSync: emailSync);
 
 		var connection = new FakePluginConnection();
 		var record = new PluginSessionRecord
@@ -440,6 +445,56 @@ public class PluginWebSocketEndpointDispatchTests
 
 		Assert.That(registrar.StateUpdates, Is.EqualTo(new[] { (pluginId, CapabilityKinds.Variables) }));
 	}
+
+	[Test]
+	public async Task An_email_inbox_push_only_asks_for_a_re_read_of_that_inbox()
+	{
+		const string pluginId = "com.example.mail";
+		using var signal = new EmailSyncSignal();
+		var (endpoint, _, _, invoker, registrar, _) = CreateEndpointWithState(pluginId, "session-1", signal);
+
+		await endpoint.HandleStateUpdateAsync(pluginId, EmailStateUpdate("work"), CancellationToken.None);
+
+		var pending = signal.TakePending();
+		Assert.Multiple(() =>
+		{
+			Assert.That(pending.Inboxes, Is.EquivalentTo(new[] { (pluginId, "work") }));
+			Assert.That(invoker.InvokeCount, Is.Zero, "no snapshot refresh round trip");
+			Assert.That(registrar.StateUpdates, Is.Empty, "no state update applied, so no re-registration");
+			Assert.That(registrar.AppliedPluginIds, Is.Empty, "no re-registration, so no connected event");
+		});
+	}
+
+	[Test]
+	public async Task An_email_inbox_list_push_goes_through_the_registrar_and_re_reads_every_inbox()
+	{
+		const string pluginId = "com.example.mail";
+		using var signal = new EmailSyncSignal();
+		var (endpoint, _, _, invoker, registrar, _) = CreateEndpointWithState(pluginId, "session-1", signal);
+		invoker.EmailInboxesResult = new EmailInboxesResult
+		{
+			Inboxes = [new EmailInboxDto { Id = "work", DisplayName = "Work" }]
+		};
+
+		await endpoint.HandleStateUpdateAsync(pluginId, EmailStateUpdate(null), CancellationToken.None);
+		var pending = signal.TakePending();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registrar.StateUpdates, Is.EqualTo(new[] { (pluginId, CapabilityKinds.EmailInbox) }));
+			Assert.That(pending.Integrations, Is.EquivalentTo(new[] { pluginId }));
+		});
+	}
+
+	private static ProtocolEnvelope EmailStateUpdate(string? inboxId)
+		=> new()
+		{
+			Type = MessageTypes.StateUpdate,
+			Id = Guid.NewGuid().ToString("N"),
+			Payload = JsonSerializer.SerializeToElement(
+				new StateUpdatePayload { Kind = CapabilityKinds.EmailInbox, LocalId = inboxId },
+				PluginProtocolJson.Options)
+		};
 
 	[Test]
 	public void HandleStateUpdateAsync_With_A_Malformed_Payload_Does_Not_Throw()
@@ -903,6 +958,8 @@ public class PluginWebSocketEndpointDispatchTests
 
 		public List<string> UnregisteredPluginIds { get; } = [];
 
+		public List<string> AppliedPluginIds { get; } = [];
+
 		public RemotePluginSnapshotRefresher? Refresher { get; init; }
 
 		public List<(string PluginId, string Kind)> StateUpdates { get; } = [];
@@ -943,7 +1000,11 @@ public class PluginWebSocketEndpointDispatchTests
 
 		public Task ApplyRefreshedSnapshotAsync(string pluginId,
 			RemotePluginCapabilitySnapshot snapshot,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			AppliedPluginIds.Add(pluginId);
+			return Task.CompletedTask;
+		}
 
 		public Task RefreshLocalizationCatalogsAsync(CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
@@ -954,6 +1015,8 @@ public class PluginWebSocketEndpointDispatchTests
 		private int _invokeCount;
 
 		public VariableCatalogPayload? VariablesDescribeResult { get; set; }
+
+		public EmailInboxesResult? EmailInboxesResult { get; set; }
 
 		public SemaphoreSlim? Gate { get; set; }
 
@@ -976,6 +1039,13 @@ public class PluginWebSocketEndpointDispatchTests
 				return JsonSerializer.SerializeToElement(VariablesDescribeResult ??
 					new VariableCatalogPayload { DeclaredVariables = [], Variables = [] },
 					PluginProtocolJson.Options);
+			}
+
+			if (request.Kind == CapabilityKinds.EmailInbox &&
+				request.Operation == CapabilityOperations.EmailInbox.Inboxes &&
+				EmailInboxesResult is { } inboxes)
+			{
+				return JsonSerializer.SerializeToElement(inboxes, PluginProtocolJson.Options);
 			}
 
 			throw new NotSupportedException($"Not scripted for kind '{request.Kind}'.");

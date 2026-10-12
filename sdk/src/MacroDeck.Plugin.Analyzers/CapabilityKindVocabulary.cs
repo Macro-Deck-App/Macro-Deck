@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 namespace MacroDeck.Plugin.Analyzers;
 
 /// <summary>
-/// The twenty-two capability kinds a plugin can declare, hardcoded rather than shared with
+/// The twenty-three capability kinds a plugin can declare, hardcoded rather than shared with
 /// <c>MacroDeck.Plugin.Protocol.Handshake.CapabilityKinds</c>.
 ///
 /// <para>
@@ -22,7 +22,7 @@ internal static class CapabilityKindVocabulary
 		"actions", "events", "variables", "icons", "config-flow", "music-player", "weather",
 		"virtual-profiles", "issues", "ui", "localization", "device-provider", "layout-provider",
 		"folder-view-provider", "migration", "widget-type-provider", "screensaver-provider", "messaging",
-		"video-stream-provider", "calendar", "config-entries", "battery-provider"
+		"video-stream-provider", "calendar", "config-entries", "battery-provider", "email-inbox"
 	];
 
 	public static bool IsKnown(string? kind) => kind is not null && All.Contains(kind);

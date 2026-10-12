@@ -3325,6 +3325,91 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Events.Core.VariablesCategory" xml:space="preserve">
     <value>Variabili</value>
   </data>
+  <data name="Events.Email.AnyInboxPlaceholder" xml:space="preserve">
+    <value>Qualsiasi casella di posta</value>
+  </data>
+  <data name="Events.Email.Category" xml:space="preserve">
+    <value>Eventi email</value>
+  </data>
+  <data name="Events.Email.InboxConnectedDescription" xml:space="preserve">
+    <value>Viene eseguito quando una casella di posta si ricollega dopo essere stata scollegata.</value>
+  </data>
+  <data name="Events.Email.InboxConnectedName" xml:space="preserve">
+    <value>Casella di posta collegata</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedDescription" xml:space="preserve">
+    <value>Viene eseguito quando una casella di posta perde la connessione al server di posta.</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedName" xml:space="preserve">
+    <value>Casella di posta scollegata</value>
+  </data>
+  <data name="Events.Email.InboxFilterDescription" xml:space="preserve">
+    <value>Facoltativo. Esegui solo per questa casella di posta.</value>
+  </data>
+  <data name="Events.Email.InboxLabel" xml:space="preserve">
+    <value>Casella di posta</value>
+  </data>
+  <data name="Events.Email.InboxNameLabel" xml:space="preserve">
+    <value>Nome della casella di posta</value>
+  </data>
+  <data name="Events.Email.InboxOption" xml:space="preserve">
+    <value>{inbox} ({provider})</value>
+    <comment>{inbox} is the inbox name, {provider} the email service or integration.</comment>
+  </data>
+  <data name="Events.Email.IsReadLabel" xml:space="preserve">
+    <value>Letta</value>
+  </data>
+  <data name="Events.Email.MessageIdLabel" xml:space="preserve">
+    <value>ID del messaggio</value>
+  </data>
+  <data name="Events.Email.PreviewLabel" xml:space="preserve">
+    <value>Anteprima</value>
+  </data>
+  <data name="Events.Email.PreviousUnreadCountLabel" xml:space="preserve">
+    <value>Numero precedente di non lette</value>
+  </data>
+  <data name="Events.Email.ProviderName" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedDescription" xml:space="preserve">
+    <value>Viene eseguito quando un'email viene segnata come letta o non letta.</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedName" xml:space="preserve">
+    <value>Email letta o non letta</value>
+  </data>
+  <data name="Events.Email.ReceivedAtLabel" xml:space="preserve">
+    <value>Ricevuta il</value>
+  </data>
+  <data name="Events.Email.ReceivedDescription" xml:space="preserve">
+    <value>Viene eseguito quando arriva una nuova email in una casella di posta.</value>
+  </data>
+  <data name="Events.Email.ReceivedName" xml:space="preserve">
+    <value>Email ricevuta</value>
+  </data>
+  <data name="Events.Email.SenderAddressLabel" xml:space="preserve">
+    <value>Indirizzo del mittente</value>
+  </data>
+  <data name="Events.Email.SenderFilterDescription" xml:space="preserve">
+    <value>Facoltativo. Esegui solo per le email di questo mittente.</value>
+  </data>
+  <data name="Events.Email.SenderLabel" xml:space="preserve">
+    <value>Mittente</value>
+  </data>
+  <data name="Events.Email.SubjectFilterDescription" xml:space="preserve">
+    <value>Facoltativo. Esegui solo per le email con questo oggetto.</value>
+  </data>
+  <data name="Events.Email.SubjectLabel" xml:space="preserve">
+    <value>Oggetto</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedDescription" xml:space="preserve">
+    <value>Viene eseguito quando cambia il numero di email non lette in una casella di posta.</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedName" xml:space="preserve">
+    <value>Numero di non lette cambiato</value>
+  </data>
+  <data name="Events.Email.UnreadCountLabel" xml:space="preserve">
+    <value>Numero di non lette</value>
+  </data>
   <data name="Events.MusicPlayer.AlbumLabel" xml:space="preserve">
     <value>Album</value>
   </data>
@@ -4655,6 +4740,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>Dispositivi</value>
   </data>
+  <data name="Integrations.Capability.EmailInbox" xml:space="preserve">
+    <value>Casella di posta email</value>
+  </data>
   <data name="Integrations.Capability.Events" xml:space="preserve">
     <value>Eventi</value>
   </data>
@@ -5741,6 +5829,50 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Server vocale</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
+    <value>Controlla subito tutte le caselle di posta collegate per nuovi messaggi invece di aspettare il prossimo aggiornamento.</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Name" xml:space="preserve">
+    <value>Aggiorna caselle di posta</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Unavailable" xml:space="preserve">
+    <value>Al momento non è possibile aggiornare le caselle di posta.</value>
+  </data>
+  <data name="Integrations.Email.Name" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Integrations.Email.Variables.InboxConnected" xml:space="preserve">
+    <value>{inbox} collegata</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxCount" xml:space="preserve">
+    <value>Caselle di posta</value>
+    <comment>The number of connected email inboxes.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestReceivedAt" xml:space="preserve">
+    <value>{inbox} ultima email ricevuta</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds when its newest email arrived.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSender" xml:space="preserve">
+    <value>{inbox} ultimo mittente</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSubject" xml:space="preserve">
+    <value>{inbox} ultimo oggetto</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxTotalCount" xml:space="preserve">
+    <value>{inbox} email</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds how many emails it contains.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxUnreadCount" xml:space="preserve">
+    <value>{inbox} email non lette</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.UnreadCount" xml:space="preserve">
+    <value>Email non lette</value>
+    <comment>The number of unread emails across every connected inbox.</comment>
   </data>
   <data name="Integrations.Example.Actions.AdvancedDescription" xml:space="preserve">
     <value>Proprietà annidate</value>
@@ -6884,6 +7016,138 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Integrations.Http.Params.UrlLabel" xml:space="preserve">
     <value>URL</value>
+  </data>
+  <data name="Integrations.Imap.Config.AlreadyConfigured" xml:space="preserve">
+    <value>Questa cartella di questo account email è già configurata.</value>
+  </data>
+  <data name="Integrations.Imap.Config.AppPasswordInstruction" xml:space="preserve">
+    <value>Se il tuo account usa la verifica in due passaggi, crea una password per le app nelle impostazioni di sicurezza del tuo provider email e inseriscila come password.</value>
+  </data>
+  <data name="Integrations.Imap.Config.CertificateFailed" xml:space="preserve">
+    <value>Non è stato possibile verificare il certificato di sicurezza di {host}, quindi Macro Deck non si è collegato.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConfigurationNamePlaceholder" xml:space="preserve">
+    <value>ad es. Lavoro</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck legge una cartella dell'account tramite IMAP per mostrare la nuova posta. Non modifica, sposta né elimina mai i messaggi.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectTitle" xml:space="preserve">
+    <value>Collega un account email</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionFailed" xml:space="preserve">
+    <value>Impossibile connettersi a {host} sulla porta {port}. Controlla il nome del server, la porta e l'impostazione di sicurezza.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>{host} non ha risposto in tempo. Controlla il nome del server e la porta.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterHost" xml:space="preserve">
+    <value>Inserisci il server IMAP, ad esempio imap.example.com.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterPassword" xml:space="preserve">
+    <value>Inserisci la password.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterUsername" xml:space="preserve">
+    <value>Inserisci il nome utente.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterValidPort" xml:space="preserve">
+    <value>Inserisci una porta tra 1 e 65535.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderDescription" xml:space="preserve">
+    <value>La cartella da controllare. INBOX è la posta in arrivo principale.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderLabel" xml:space="preserve">
+    <value>Cartella</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderNotFound" xml:space="preserve">
+    <value>Questo account non ha una cartella chiamata {folder}.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostDescription" xml:space="preserve">
+    <value>Il server della posta in arrivo indicato nelle impostazioni di posta del tuo provider.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostLabel" xml:space="preserve">
+    <value>Server IMAP</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordDescription" xml:space="preserve">
+    <value>La tua password o una password per le app. Viene salvata in forma crittografata su questo computer.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortDescription" xml:space="preserve">
+    <value>Di solito 993 per SSL/TLS e 143 per STARTTLS.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortLabel" xml:space="preserve">
+    <value>Porta</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderCustom" xml:space="preserve">
+    <value>Server personalizzato</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderDescription" xml:space="preserve">
+    <value>Scegli il tuo servizio email per usarne le impostazioni del server, oppure Server personalizzato per inserirle tu.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderLabel" xml:space="preserve">
+    <value>Provider email</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityDescription" xml:space="preserve">
+    <value>La connessione è sempre crittografata e il certificato del server viene sempre verificato.</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityLabel" xml:space="preserve">
+    <value>Sicurezza</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecuritySslTls" xml:space="preserve">
+    <value>SSL/TLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SignInRejected" xml:space="preserve">
+    <value>Il server ha rifiutato il nome utente o la password. Se il tuo account usa la verifica in due passaggi, usa una password per le app.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UnknownStep" xml:space="preserve">
+    <value>Questo passaggio di configurazione non è noto.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameDescription" xml:space="preserve">
+    <value>Di solito il tuo indirizzo email completo.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameLabel" xml:space="preserve">
+    <value>Nome utente</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedDescription" xml:space="preserve">
+    <value>Macro Deck non è riuscito a verificare il certificato di sicurezza di {host} e non si connette. Scegli Modifica connessione accanto all'account e inserisci il nome del server esattamente come lo indica il certificato.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedTitle" xml:space="preserve">
+    <value>Certificato del server email non attendibile per {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundDescription" xml:space="preserve">
+    <value>La cartella {folder} non esiste più sul server di posta. Scegli Modifica connessione accanto all'account e inserisci il nome attuale della cartella.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundTitle" xml:space="preserve">
+    <value>Cartella email mancante per {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedDescription" xml:space="preserve">
+    <value>Il server di posta ha rifiutato il nome utente o la password salvati. Scegli Modifica connessione accanto all'account e inserisci la password attuale o una password per le app.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedTitle" xml:space="preserve">
+    <value>Accesso email non riuscito per {account}</value>
+  </data>
+  <data name="Integrations.Imap.Name" xml:space="preserve">
+    <value>Email (IMAP)</value>
+  </data>
+  <data name="Integrations.Imap.Status.CertificateFailed" xml:space="preserve">
+    <value>Non è stato possibile verificare il certificato di sicurezza di {host}.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Connecting" xml:space="preserve">
+    <value>Connessione a {host} in corso.</value>
+  </data>
+  <data name="Integrations.Imap.Status.FolderNotFound" xml:space="preserve">
+    <value>La cartella {folder} non esiste più.</value>
+  </data>
+  <data name="Integrations.Imap.Status.SignInFailed" xml:space="preserve">
+    <value>Accesso non riuscito. Scegli Modifica connessione accanto all'account e inserisci la password attuale o una password per le app.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Unreachable" xml:space="preserve">
+    <value>Impossibile raggiungere {host}. Macro Deck continua a riprovare.</value>
   </data>
   <data name="Integrations.Issues.AccessibilityPermissionGranted" xml:space="preserve">
     <value>Permesso di Accessibilità concesso.</value>
@@ -19431,6 +19695,137 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Widgets.Editor.WhenLabel" xml:space="preserve">
     <value>Quando:</value>
+  </data>
+  <data name="Widgets.EmailInbox.AllInboxes" xml:space="preserve">
+    <value>Tutte le caselle</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Inboxes" xml:space="preserve">
+    <value>Caselle di posta</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.InboxesDescription" xml:space="preserve">
+    <value>Lascia vuoto per mostrare tutte le caselle di posta collegate.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessages" xml:space="preserve">
+    <value>Email mostrate</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessagesDescription" xml:space="preserve">
+    <value>Il numero massimo di email nell'elenco. Un riquadro piccolo ne mostra meno.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Mode" xml:space="preserve">
+    <value>Mostra</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeCount" xml:space="preserve">
+    <value>Numero di non lette</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeList" xml:space="preserve">
+    <value>Elenco dei messaggi</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.NoInboxesHint" xml:space="preserve">
+    <value>Nessuna casella di posta è ancora collegata. Aggiungi prima un account email, ad esempio tramite l'integrazione IMAP.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowPreview" xml:space="preserve">
+    <value>Mostra l'anteprima</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSender" xml:space="preserve">
+    <value>Mostra il mittente</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSubject" xml:space="preserve">
+    <value>Mostra l'oggetto</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowTimestamp" xml:space="preserve">
+    <value>Mostra l'ora di ricezione</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.UnreadOnly" xml:space="preserve">
+    <value>Solo email non lette</value>
+  </data>
+  <data name="Widgets.EmailInbox.CountOverflow" xml:space="preserve">
+    <value>{number}+</value>
+    <comment>Shown instead of the unread count when it is too large to fit, for example 999+.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Description" xml:space="preserve">
+    <value>Mostra quante email non lette ti aspettano oppure le email più recenti delle tue caselle di posta collegate.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Disconnected" xml:space="preserve">
+    <value>Questa casella di posta non è raggiungibile al momento</value>
+  </data>
+  <data name="Widgets.EmailInbox.Name" xml:space="preserve">
+    <value>Casella di posta email</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoEmails" xml:space="preserve">
+    <value>Nessuna email</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoInboxes" xml:space="preserve">
+    <value>Nessuna casella di posta collegata</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoSubject" xml:space="preserve">
+    <value>(Nessun oggetto)</value>
+    <comment>Shown for an email without a subject.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.NoUnreadEmails" xml:space="preserve">
+    <value>Nessuna email non letta</value>
+  </data>
+  <data name="Widgets.EmailInbox.Offline" xml:space="preserve">
+    <value>Offline</value>
+    <comment>Short status on a small email widget whose inbox can't be reached.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendPreview" xml:space="preserve">
+    <value>Sei libero venerdì sera? Ho trovato un nuovo locale qui vicino.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSender" xml:space="preserve">
+    <value>Sam Lee</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSubject" xml:space="preserve">
+    <value>Cena venerdì?</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.Inbox" xml:space="preserve">
+    <value>Lavoro</value>
+    <comment>Sample inbox name shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoicePreview" xml:space="preserve">
+    <value>La tua fattura è pronta e verrà addebitata il 15.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSender" xml:space="preserve">
+    <value>Fatturazione</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSubject" xml:space="preserve">
+    <value>La tua fattura di marzo</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamPreview" xml:space="preserve">
+    <value>Ecco un breve riepilogo di quanto concordato e dei prossimi passi.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSender" xml:space="preserve">
+    <value>Alex Morgan</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSubject" xml:space="preserve">
+    <value>Note della pianificazione di oggi</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.SomeDisconnected" xml:space="preserve">
+    <value>Alcune caselle di posta non sono raggiungibili al momento</value>
+  </data>
+  <data name="Widgets.EmailInbox.UnknownSender" xml:space="preserve">
+    <value>(Mittente sconosciuto)</value>
+    <comment>Shown for an email without a sender.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.One" xml:space="preserve">
+    <value>{count} non letta</value>
+    <comment>[plural][count:int] How many emails are unread.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.Other" xml:space="preserve">
+    <value>{count} non lette</value>
+    <comment>[plural][count:int]</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Yesterday" xml:space="preserve">
+    <value>Ieri</value>
+    <comment>Shown as the time of an email received yesterday.</comment>
   </data>
   <data name="Widgets.Folder.AutomaticActivation" xml:space="preserve">
     <value>Attivazione automatica…</value>

@@ -251,6 +251,13 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		}
 
 		var snapshot = result.Snapshot;
+		// Re-registering replays the integration's connected event, so an unchanged inbox list is not applied.
+		if (string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) &&
+			!EmailInboxesChanged(result.Previous, snapshot))
+		{
+			return;
+		}
+
 		if (string.Equals(kind, CapabilityKinds.Variables, StringComparison.Ordinal) &&
 			AcceptsUndeclaredVariables(pluginId, snapshot) &&
 			CurrentSessionId(pluginId) is { } sessionId)
@@ -264,6 +271,13 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 
 		await ApplyRefreshedSnapshotAsync(pluginId, snapshot, cancellationToken).ConfigureAwait(false);
 	}
+
+	private static bool EmailInboxesChanged(
+		RemotePluginCapabilitySnapshot? previous,
+		RemotePluginCapabilitySnapshot current)
+		=> previous is null ||
+			!string.Equals(previous.EmailInboxProviderName, current.EmailInboxProviderName, StringComparison.Ordinal) ||
+			!previous.EmailInboxes.SequenceEqual(current.EmailInboxes);
 
 	// The SDK declares variables per eager item, so a provider that is empty at hello never negotiated the
 	// kind; a describe that answered with variables proves it serves it. Accepted without a negotiated version.

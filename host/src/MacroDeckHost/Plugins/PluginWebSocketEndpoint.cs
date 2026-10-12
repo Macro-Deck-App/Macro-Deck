@@ -18,6 +18,7 @@ using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Events;
 using MacroDeckHost.Application.Auth;
+using MacroDeckHost.Application.Email;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.VideoStreams;
@@ -68,6 +69,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IPluginLogIngestor _logIngestor;
 	private readonly VideoStreamPluginSessions? _videoStreams;
+	private readonly IEmailSyncSignal? _emailSync;
 	private readonly ILogger _logger;
 
 	private readonly StateUpdateCoalescer _coalescer = new();
@@ -89,9 +91,11 @@ public sealed class PluginWebSocketEndpoint
 		IPluginHostAssetSender? hostAssetSender = null,
 		PluginAdbInvokeRunner? adbInvokes = null,
 		PluginMessagingInvokeRunner? messagingInvokes = null,
-		VideoStreamPluginSessions? videoStreams = null)
+		VideoStreamPluginSessions? videoStreams = null,
+		IEmailSyncSignal? emailSync = null)
 	{
 		_videoStreams = videoStreams;
+		_emailSync = emailSync;
 		_hostAssetSender = hostAssetSender;
 		_adbInvokes = adbInvokes;
 		_messagingInvokes = messagingInvokes;
@@ -687,6 +691,16 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
+		var isEmailInbox = string.Equals(payload.Kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal);
+
+		// An inbox content push only asks for a re-read: re-registering the plugin for every new mail would
+		// replay the integration's connected event and refresh the whole admin UI each time.
+		if (isEmailInbox && !string.IsNullOrEmpty(payload.LocalId))
+		{
+			_emailSync?.Request(pluginId, payload.LocalId);
+			return;
+		}
+
 		await _coalescer.RunAsync($"state:{pluginId}:{payload.Kind}",
 				async () =>
 				{
@@ -694,6 +708,11 @@ public sealed class PluginWebSocketEndpoint
 					{
 						await _registrar.ApplyStateUpdateAsync(pluginId, payload.Kind, cancellationToken)
 							.ConfigureAwait(false);
+
+						if (isEmailInbox)
+						{
+							_emailSync?.Request(pluginId, null);
+						}
 					}
 					catch (Exception exception) when (exception is not OutOfMemoryException)
 					{

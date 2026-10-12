@@ -3326,6 +3326,91 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Events.Core.VariablesCategory" xml:space="preserve">
     <value>Variabelen</value>
   </data>
+  <data name="Events.Email.AnyInboxPlaceholder" xml:space="preserve">
+    <value>Elke inbox</value>
+  </data>
+  <data name="Events.Email.Category" xml:space="preserve">
+    <value>E-mailgebeurtenissen</value>
+  </data>
+  <data name="Events.Email.InboxConnectedDescription" xml:space="preserve">
+    <value>Wordt uitgevoerd wanneer een inbox weer verbonden is nadat de verbinding was verbroken.</value>
+  </data>
+  <data name="Events.Email.InboxConnectedName" xml:space="preserve">
+    <value>Inbox verbonden</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedDescription" xml:space="preserve">
+    <value>Wordt uitgevoerd wanneer een inbox de verbinding met de mailserver verliest.</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedName" xml:space="preserve">
+    <value>Inbox verbinding verbroken</value>
+  </data>
+  <data name="Events.Email.InboxFilterDescription" xml:space="preserve">
+    <value>Optioneel. Alleen uitvoeren voor deze inbox.</value>
+  </data>
+  <data name="Events.Email.InboxLabel" xml:space="preserve">
+    <value>Inbox</value>
+  </data>
+  <data name="Events.Email.InboxNameLabel" xml:space="preserve">
+    <value>Naam van de inbox</value>
+  </data>
+  <data name="Events.Email.InboxOption" xml:space="preserve">
+    <value>{inbox} ({provider})</value>
+    <comment>{inbox} is the inbox name, {provider} the email service or integration.</comment>
+  </data>
+  <data name="Events.Email.IsReadLabel" xml:space="preserve">
+    <value>Gelezen</value>
+  </data>
+  <data name="Events.Email.MessageIdLabel" xml:space="preserve">
+    <value>Bericht-ID</value>
+  </data>
+  <data name="Events.Email.PreviewLabel" xml:space="preserve">
+    <value>Voorbeeld</value>
+  </data>
+  <data name="Events.Email.PreviousUnreadCountLabel" xml:space="preserve">
+    <value>Vorig aantal ongelezen</value>
+  </data>
+  <data name="Events.Email.ProviderName" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedDescription" xml:space="preserve">
+    <value>Wordt uitgevoerd wanneer een e-mail als gelezen of ongelezen wordt gemarkeerd.</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedName" xml:space="preserve">
+    <value>E-mail gelezen of ongelezen</value>
+  </data>
+  <data name="Events.Email.ReceivedAtLabel" xml:space="preserve">
+    <value>Ontvangen op</value>
+  </data>
+  <data name="Events.Email.ReceivedDescription" xml:space="preserve">
+    <value>Wordt uitgevoerd wanneer er een nieuwe e-mail in een inbox binnenkomt.</value>
+  </data>
+  <data name="Events.Email.ReceivedName" xml:space="preserve">
+    <value>E-mail ontvangen</value>
+  </data>
+  <data name="Events.Email.SenderAddressLabel" xml:space="preserve">
+    <value>Adres van afzender</value>
+  </data>
+  <data name="Events.Email.SenderFilterDescription" xml:space="preserve">
+    <value>Optioneel. Alleen uitvoeren voor e-mails van deze afzender.</value>
+  </data>
+  <data name="Events.Email.SenderLabel" xml:space="preserve">
+    <value>Afzender</value>
+  </data>
+  <data name="Events.Email.SubjectFilterDescription" xml:space="preserve">
+    <value>Optioneel. Alleen uitvoeren voor e-mails met dit onderwerp.</value>
+  </data>
+  <data name="Events.Email.SubjectLabel" xml:space="preserve">
+    <value>Onderwerp</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedDescription" xml:space="preserve">
+    <value>Wordt uitgevoerd wanneer het aantal ongelezen e-mails in een inbox verandert.</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedName" xml:space="preserve">
+    <value>Aantal ongelezen gewijzigd</value>
+  </data>
+  <data name="Events.Email.UnreadCountLabel" xml:space="preserve">
+    <value>Aantal ongelezen</value>
+  </data>
   <data name="Events.MusicPlayer.AlbumLabel" xml:space="preserve">
     <value>Album</value>
   </data>
@@ -4656,6 +4741,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>Apparaten</value>
   </data>
+  <data name="Integrations.Capability.EmailInbox" xml:space="preserve">
+    <value>E-mailinbox</value>
+  </data>
   <data name="Integrations.Capability.Events" xml:space="preserve">
     <value>Gebeurtenissen</value>
   </data>
@@ -5742,6 +5830,50 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Spraakserver</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
+    <value>Controleert alle verbonden inboxen meteen op nieuwe berichten, in plaats van op de volgende update te wachten.</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Name" xml:space="preserve">
+    <value>E-mailinboxen vernieuwen</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Unavailable" xml:space="preserve">
+    <value>De e-mailinboxen kunnen nu niet worden vernieuwd.</value>
+  </data>
+  <data name="Integrations.Email.Name" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Integrations.Email.Variables.InboxConnected" xml:space="preserve">
+    <value>{inbox} verbonden</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxCount" xml:space="preserve">
+    <value>E-mailinboxen</value>
+    <comment>The number of connected email inboxes.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestReceivedAt" xml:space="preserve">
+    <value>{inbox} laatste e-mail ontvangen</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds when its newest email arrived.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSender" xml:space="preserve">
+    <value>{inbox} laatste afzender</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSubject" xml:space="preserve">
+    <value>{inbox} laatste onderwerp</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxTotalCount" xml:space="preserve">
+    <value>{inbox} e-mails</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds how many emails it contains.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxUnreadCount" xml:space="preserve">
+    <value>{inbox} ongelezen e-mails</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.UnreadCount" xml:space="preserve">
+    <value>Ongelezen e-mails</value>
+    <comment>The number of unread emails across every connected inbox.</comment>
   </data>
   <data name="Integrations.Example.Actions.AdvancedDescription" xml:space="preserve">
     <value>Geneste eigenschappen</value>
@@ -6885,6 +7017,138 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Http.Params.UrlLabel" xml:space="preserve">
     <value>URL</value>
+  </data>
+  <data name="Integrations.Imap.Config.AlreadyConfigured" xml:space="preserve">
+    <value>Deze map van dit e-mailaccount is al ingesteld.</value>
+  </data>
+  <data name="Integrations.Imap.Config.AppPasswordInstruction" xml:space="preserve">
+    <value>Als je account verificatie in twee stappen gebruikt, maak dan een app-wachtwoord aan in de beveiligingsinstellingen van je e-mailprovider en voer het in als wachtwoord.</value>
+  </data>
+  <data name="Integrations.Imap.Config.CertificateFailed" xml:space="preserve">
+    <value>Het beveiligingscertificaat van {host} kon niet worden gecontroleerd, dus Macro Deck heeft geen verbinding gemaakt.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConfigurationNamePlaceholder" xml:space="preserve">
+    <value>bijv. Werk</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck leest via IMAP één map van het account om nieuwe mail te tonen. Het wijzigt, verplaatst of verwijdert nooit berichten.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectTitle" xml:space="preserve">
+    <value>Een e-mailaccount verbinden</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionFailed" xml:space="preserve">
+    <value>Kan geen verbinding maken met {host} op poort {port}. Controleer de servernaam, de poort en de beveiligingsinstelling.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>{host} heeft niet op tijd geantwoord. Controleer de servernaam en de poort.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterHost" xml:space="preserve">
+    <value>Voer de IMAP-server in, zoals imap.example.com.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterPassword" xml:space="preserve">
+    <value>Voer het wachtwoord in.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterUsername" xml:space="preserve">
+    <value>Voer de gebruikersnaam in.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterValidPort" xml:space="preserve">
+    <value>Voer een poort tussen 1 en 65535 in.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderDescription" xml:space="preserve">
+    <value>De map die wordt gevolgd. INBOX is de hoofdinbox.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderLabel" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderNotFound" xml:space="preserve">
+    <value>Dit account heeft geen map met de naam {folder}.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostDescription" xml:space="preserve">
+    <value>De server voor inkomende mail uit de mailinstellingen van je provider.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostLabel" xml:space="preserve">
+    <value>IMAP-server</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordDescription" xml:space="preserve">
+    <value>Je wachtwoord of een app-wachtwoord. Het wordt versleuteld op deze computer opgeslagen.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordLabel" xml:space="preserve">
+    <value>Wachtwoord</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortDescription" xml:space="preserve">
+    <value>Meestal 993 voor SSL/TLS en 143 voor STARTTLS.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortLabel" xml:space="preserve">
+    <value>Poort</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderCustom" xml:space="preserve">
+    <value>Eigen server</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderDescription" xml:space="preserve">
+    <value>Kies je e-maildienst om de serverinstellingen daarvan te gebruiken, of Eigen server om ze zelf in te vullen.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderLabel" xml:space="preserve">
+    <value>E-mailprovider</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityDescription" xml:space="preserve">
+    <value>De verbinding is altijd versleuteld en het certificaat van de server wordt altijd gecontroleerd.</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityLabel" xml:space="preserve">
+    <value>Beveiliging</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecuritySslTls" xml:space="preserve">
+    <value>SSL/TLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SignInRejected" xml:space="preserve">
+    <value>De server heeft de gebruikersnaam of het wachtwoord geweigerd. Gebruik een app-wachtwoord als je account verificatie in twee stappen gebruikt.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UnknownStep" xml:space="preserve">
+    <value>Deze installatiestap is onbekend.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameDescription" xml:space="preserve">
+    <value>Meestal je volledige e-mailadres.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameLabel" xml:space="preserve">
+    <value>Gebruikersnaam</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedDescription" xml:space="preserve">
+    <value>Macro Deck kon het beveiligingscertificaat van {host} niet controleren en maakt geen verbinding. Kies Verbinding bewerken naast het account en vul de servernaam precies zo in als het certificaat hem noemt.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedTitle" xml:space="preserve">
+    <value>Certificaat van e-mailserver niet vertrouwd voor {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundDescription" xml:space="preserve">
+    <value>De map {folder} bestaat niet meer op de mailserver. Kies Verbinding bewerken naast het account en vul de huidige naam van de map in.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundTitle" xml:space="preserve">
+    <value>E-mailmap ontbreekt voor {account}</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedDescription" xml:space="preserve">
+    <value>De mailserver heeft de opgeslagen gebruikersnaam of het wachtwoord geweigerd. Kies Verbinding bewerken naast het account en vul het huidige wachtwoord of een app-wachtwoord in.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedTitle" xml:space="preserve">
+    <value>E-mailaanmelding mislukt voor {account}</value>
+  </data>
+  <data name="Integrations.Imap.Name" xml:space="preserve">
+    <value>E-mail (IMAP)</value>
+  </data>
+  <data name="Integrations.Imap.Status.CertificateFailed" xml:space="preserve">
+    <value>Het beveiligingscertificaat van {host} kon niet worden gecontroleerd.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Connecting" xml:space="preserve">
+    <value>Verbinding maken met {host}.</value>
+  </data>
+  <data name="Integrations.Imap.Status.FolderNotFound" xml:space="preserve">
+    <value>De map {folder} bestaat niet meer.</value>
+  </data>
+  <data name="Integrations.Imap.Status.SignInFailed" xml:space="preserve">
+    <value>Aanmelden mislukt. Kies Verbinding bewerken naast het account en vul het huidige wachtwoord of een app-wachtwoord in.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Unreachable" xml:space="preserve">
+    <value>{host} is niet bereikbaar. Macro Deck blijft het proberen.</value>
   </data>
   <data name="Integrations.Issues.AccessibilityPermissionGranted" xml:space="preserve">
     <value>Toegankelijkheidsmachtiging verleend.</value>
@@ -19451,6 +19715,137 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Widgets.Editor.WhenLabel" xml:space="preserve">
     <value>Wanneer:</value>
+  </data>
+  <data name="Widgets.EmailInbox.AllInboxes" xml:space="preserve">
+    <value>Alle inboxen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Inboxes" xml:space="preserve">
+    <value>Inboxen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.InboxesDescription" xml:space="preserve">
+    <value>Laat leeg om alle verbonden inboxen te tonen.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessages" xml:space="preserve">
+    <value>Getoonde e-mails</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessagesDescription" xml:space="preserve">
+    <value>Het maximale aantal e-mails in de lijst. Een kleine tegel toont er minder.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Mode" xml:space="preserve">
+    <value>Tonen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeCount" xml:space="preserve">
+    <value>Aantal ongelezen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeList" xml:space="preserve">
+    <value>Berichtenlijst</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.NoInboxesHint" xml:space="preserve">
+    <value>Er is nog geen e-mailinbox verbonden. Voeg eerst een e-mailaccount toe, bijvoorbeeld via de IMAP-integratie.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowPreview" xml:space="preserve">
+    <value>Voorbeeld tonen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSender" xml:space="preserve">
+    <value>Afzender tonen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSubject" xml:space="preserve">
+    <value>Onderwerp tonen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowTimestamp" xml:space="preserve">
+    <value>Ontvangsttijd tonen</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.UnreadOnly" xml:space="preserve">
+    <value>Alleen ongelezen e-mails</value>
+  </data>
+  <data name="Widgets.EmailInbox.CountOverflow" xml:space="preserve">
+    <value>{number}+</value>
+    <comment>Shown instead of the unread count when it is too large to fit, for example 999+.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Description" xml:space="preserve">
+    <value>Toont hoeveel ongelezen e-mails er wachten, of de nieuwste e-mails van je verbonden inboxen.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Disconnected" xml:space="preserve">
+    <value>Deze inbox is nu niet bereikbaar</value>
+  </data>
+  <data name="Widgets.EmailInbox.Name" xml:space="preserve">
+    <value>E-mailinbox</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoEmails" xml:space="preserve">
+    <value>Geen e-mails</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoInboxes" xml:space="preserve">
+    <value>Geen e-mailinbox verbonden</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoSubject" xml:space="preserve">
+    <value>(Geen onderwerp)</value>
+    <comment>Shown for an email without a subject.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.NoUnreadEmails" xml:space="preserve">
+    <value>Geen ongelezen e-mails</value>
+  </data>
+  <data name="Widgets.EmailInbox.Offline" xml:space="preserve">
+    <value>Offline</value>
+    <comment>Short status on a small email widget whose inbox can't be reached.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendPreview" xml:space="preserve">
+    <value>Heb je vrijdagavond tijd? Ik heb een nieuwe plek in de buurt gevonden.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSender" xml:space="preserve">
+    <value>Sam Lee</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSubject" xml:space="preserve">
+    <value>Etentje op vrijdag?</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.Inbox" xml:space="preserve">
+    <value>Werk</value>
+    <comment>Sample inbox name shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoicePreview" xml:space="preserve">
+    <value>Je factuur staat klaar en wordt op de 15e afgeschreven.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSender" xml:space="preserve">
+    <value>Facturatie</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSubject" xml:space="preserve">
+    <value>Je factuur voor maart</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamPreview" xml:space="preserve">
+    <value>Hier is een korte samenvatting van wat we hebben afgesproken en de volgende stappen.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSender" xml:space="preserve">
+    <value>Alex Morgan</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSubject" xml:space="preserve">
+    <value>Notities van de planning van vandaag</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.SomeDisconnected" xml:space="preserve">
+    <value>Sommige inboxen zijn nu niet bereikbaar</value>
+  </data>
+  <data name="Widgets.EmailInbox.UnknownSender" xml:space="preserve">
+    <value>(Onbekende afzender)</value>
+    <comment>Shown for an email without a sender.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.One" xml:space="preserve">
+    <value>{count} ongelezen</value>
+    <comment>[plural][count:int] How many emails are unread.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.Other" xml:space="preserve">
+    <value>{count} ongelezen</value>
+    <comment>[plural][count:int]</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Yesterday" xml:space="preserve">
+    <value>Gisteren</value>
+    <comment>Shown as the time of an email received yesterday.</comment>
   </data>
   <data name="Widgets.Folder.AutomaticActivation" xml:space="preserve">
     <value>Automatische activering…</value>

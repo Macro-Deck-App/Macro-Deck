@@ -241,6 +241,25 @@ Results are what the host receives: `events` returns summaries without descripti
 the reply limits applied, and an account id the plugin does not know is a failed outcome. See
 [Calendars](/features/calendars/#testing).
 
+## Testing email inboxes
+
+```csharp
+var outcome = await harness.EmailInbox.GetSnapshotAsync(new EmailInboxSnapshotArguments
+{
+	InboxId = inboxId, MaxMessages = 5, UnreadOnly = true
+});
+
+Assert.That(outcome.DataAs<EmailInboxSnapshotResult>()!.UnreadCount, Is.EqualTo(2));
+```
+
+`harness.EmailInbox`, an `EmailInboxTestClient`, drives the `email-inbox` capability the way the host does,
+with `DescribeAsync`, `GetInboxesAsync` and `GetSnapshotAsync`. The inbox being read is in the arguments, a
+record from `MacroDeck.Plugin.Protocol.Capabilities.EmailInbox`. Results are what the host receives: the
+status as a name, at most the requested number of messages, newest first, with the reply limits applied, and
+an inbox id the plugin does not know is a failed outcome. Raising `Changed` sends a `state.update` 250 ms
+later, on `harness.Clock` in the harness and in `host.Messages` over the wire. See
+[Email inboxes](/features/email-inboxes/#testing).
+
 ## Testing configuration entries
 
 ```csharp

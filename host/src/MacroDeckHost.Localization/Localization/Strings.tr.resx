@@ -3326,6 +3326,91 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Events.Core.VariablesCategory" xml:space="preserve">
     <value>Değişkenler</value>
   </data>
+  <data name="Events.Email.AnyInboxPlaceholder" xml:space="preserve">
+    <value>Herhangi bir gelen kutusu</value>
+  </data>
+  <data name="Events.Email.Category" xml:space="preserve">
+    <value>E-posta olayları</value>
+  </data>
+  <data name="Events.Email.InboxConnectedDescription" xml:space="preserve">
+    <value>Bağlantısı kesilen bir gelen kutusu yeniden bağlandığında çalışır.</value>
+  </data>
+  <data name="Events.Email.InboxConnectedName" xml:space="preserve">
+    <value>Gelen kutusu bağlandı</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedDescription" xml:space="preserve">
+    <value>Bir gelen kutusunun posta sunucusuyla bağlantısı kesildiğinde çalışır.</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedName" xml:space="preserve">
+    <value>Gelen kutusu bağlantısı kesildi</value>
+  </data>
+  <data name="Events.Email.InboxFilterDescription" xml:space="preserve">
+    <value>İsteğe bağlı. Yalnızca bu gelen kutusu için çalışır.</value>
+  </data>
+  <data name="Events.Email.InboxLabel" xml:space="preserve">
+    <value>Gelen kutusu</value>
+  </data>
+  <data name="Events.Email.InboxNameLabel" xml:space="preserve">
+    <value>Gelen kutusu adı</value>
+  </data>
+  <data name="Events.Email.InboxOption" xml:space="preserve">
+    <value>{inbox} ({provider})</value>
+    <comment>{inbox} is the inbox name, {provider} the email service or integration.</comment>
+  </data>
+  <data name="Events.Email.IsReadLabel" xml:space="preserve">
+    <value>Okundu</value>
+  </data>
+  <data name="Events.Email.MessageIdLabel" xml:space="preserve">
+    <value>Mesaj kimliği</value>
+  </data>
+  <data name="Events.Email.PreviewLabel" xml:space="preserve">
+    <value>Önizleme</value>
+  </data>
+  <data name="Events.Email.PreviousUnreadCountLabel" xml:space="preserve">
+    <value>Önceki okunmamış sayısı</value>
+  </data>
+  <data name="Events.Email.ProviderName" xml:space="preserve">
+    <value>E-posta</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedDescription" xml:space="preserve">
+    <value>Bir e-posta okundu veya okunmadı olarak işaretlendiğinde çalışır.</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedName" xml:space="preserve">
+    <value>E-posta okundu veya okunmadı</value>
+  </data>
+  <data name="Events.Email.ReceivedAtLabel" xml:space="preserve">
+    <value>Alınma zamanı</value>
+  </data>
+  <data name="Events.Email.ReceivedDescription" xml:space="preserve">
+    <value>Bir gelen kutusuna yeni bir e-posta geldiğinde çalışır.</value>
+  </data>
+  <data name="Events.Email.ReceivedName" xml:space="preserve">
+    <value>E-posta alındı</value>
+  </data>
+  <data name="Events.Email.SenderAddressLabel" xml:space="preserve">
+    <value>Gönderen adresi</value>
+  </data>
+  <data name="Events.Email.SenderFilterDescription" xml:space="preserve">
+    <value>İsteğe bağlı. Yalnızca bu gönderenden gelen e-postalar için çalışır.</value>
+  </data>
+  <data name="Events.Email.SenderLabel" xml:space="preserve">
+    <value>Gönderen</value>
+  </data>
+  <data name="Events.Email.SubjectFilterDescription" xml:space="preserve">
+    <value>İsteğe bağlı. Yalnızca bu konuya sahip e-postalar için çalışır.</value>
+  </data>
+  <data name="Events.Email.SubjectLabel" xml:space="preserve">
+    <value>Konu</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedDescription" xml:space="preserve">
+    <value>Bir gelen kutusundaki okunmamış e-posta sayısı değiştiğinde çalışır.</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedName" xml:space="preserve">
+    <value>Okunmamış sayısı değişti</value>
+  </data>
+  <data name="Events.Email.UnreadCountLabel" xml:space="preserve">
+    <value>Okunmamış sayısı</value>
+  </data>
   <data name="Events.MusicPlayer.AlbumLabel" xml:space="preserve">
     <value>Albüm</value>
   </data>
@@ -4656,6 +4741,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>Aygıtlar</value>
   </data>
+  <data name="Integrations.Capability.EmailInbox" xml:space="preserve">
+    <value>E-posta gelen kutusu</value>
+  </data>
   <data name="Integrations.Capability.Events" xml:space="preserve">
     <value>Olaylar</value>
   </data>
@@ -5742,6 +5830,50 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>Ses sunucusu</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
+    <value>Bir sonraki güncellemeyi beklemeden bağlı tüm gelen kutularını yeni mesajlar için hemen denetler.</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Name" xml:space="preserve">
+    <value>E-posta gelen kutularını yenile</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Unavailable" xml:space="preserve">
+    <value>E-posta gelen kutuları şu anda yenilenemiyor.</value>
+  </data>
+  <data name="Integrations.Email.Name" xml:space="preserve">
+    <value>E-posta</value>
+  </data>
+  <data name="Integrations.Email.Variables.InboxConnected" xml:space="preserve">
+    <value>{inbox} bağlı</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxCount" xml:space="preserve">
+    <value>E-posta gelen kutuları</value>
+    <comment>The number of connected email inboxes.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestReceivedAt" xml:space="preserve">
+    <value>{inbox} son e-postanın alınma zamanı</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds when its newest email arrived.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSender" xml:space="preserve">
+    <value>{inbox} son gönderen</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSubject" xml:space="preserve">
+    <value>{inbox} son konu</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxTotalCount" xml:space="preserve">
+    <value>{inbox} e-postaları</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds how many emails it contains.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxUnreadCount" xml:space="preserve">
+    <value>{inbox} okunmamış e-postaları</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.UnreadCount" xml:space="preserve">
+    <value>Okunmamış e-postalar</value>
+    <comment>The number of unread emails across every connected inbox.</comment>
   </data>
   <data name="Integrations.Example.Actions.AdvancedDescription" xml:space="preserve">
     <value>İç içe özellikler</value>
@@ -6885,6 +7017,138 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Http.Params.UrlLabel" xml:space="preserve">
     <value>URL</value>
+  </data>
+  <data name="Integrations.Imap.Config.AlreadyConfigured" xml:space="preserve">
+    <value>Bu e-posta hesabının bu klasörü zaten kurulu.</value>
+  </data>
+  <data name="Integrations.Imap.Config.AppPasswordInstruction" xml:space="preserve">
+    <value>Hesabınız iki adımlı doğrulama kullanıyorsa e-posta sağlayıcınızın güvenlik ayarlarında bir uygulama şifresi oluşturun ve parola olarak girin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.CertificateFailed" xml:space="preserve">
+    <value>{host} sunucusunun güvenlik sertifikası doğrulanamadı, bu yüzden Macro Deck bağlanmadı.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConfigurationNamePlaceholder" xml:space="preserve">
+    <value>örn. İş</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectDescription" xml:space="preserve">
+    <value>Macro Deck yeni postaları göstermek için hesabın bir klasörünü IMAP üzerinden okur. Mesajları asla değiştirmez, taşımaz veya silmez.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectTitle" xml:space="preserve">
+    <value>E-posta hesabı bağlayın</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionFailed" xml:space="preserve">
+    <value>{port} bağlantı noktasında {host} sunucusuna bağlanılamadı. Sunucu adını, bağlantı noktasını ve güvenlik ayarını kontrol edin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>{host} zamanında yanıt vermedi. Sunucu adını ve bağlantı noktasını kontrol edin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterHost" xml:space="preserve">
+    <value>IMAP sunucusunu girin, örneğin imap.example.com.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterPassword" xml:space="preserve">
+    <value>Parolayı girin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterUsername" xml:space="preserve">
+    <value>Kullanıcı adını girin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterValidPort" xml:space="preserve">
+    <value>1 ile 65535 arasında bir bağlantı noktası girin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderDescription" xml:space="preserve">
+    <value>İzlenecek klasör. INBOX ana gelen kutusudur.</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderLabel" xml:space="preserve">
+    <value>Klasör</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderNotFound" xml:space="preserve">
+    <value>Bu hesapta {folder} adlı bir klasör yok.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostDescription" xml:space="preserve">
+    <value>Sağlayıcınızın posta ayarlarındaki gelen posta sunucusu.</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostLabel" xml:space="preserve">
+    <value>IMAP sunucusu</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordDescription" xml:space="preserve">
+    <value>Parolanız veya bir uygulama şifresi. Bu bilgisayarda şifrelenmiş olarak saklanır.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordLabel" xml:space="preserve">
+    <value>Parola</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortDescription" xml:space="preserve">
+    <value>Genellikle SSL/TLS için 993, STARTTLS için 143.</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortLabel" xml:space="preserve">
+    <value>Bağlantı noktası</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderCustom" xml:space="preserve">
+    <value>Özel sunucu</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderDescription" xml:space="preserve">
+    <value>Sunucu ayarlarını kullanmak için e-posta hizmetinizi seçin veya ayarları kendiniz girmek için Özel sunucu seçeneğini seçin.</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderLabel" xml:space="preserve">
+    <value>E-posta sağlayıcısı</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityDescription" xml:space="preserve">
+    <value>Bağlantı her zaman şifrelenir ve sunucunun sertifikası her zaman denetlenir.</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityLabel" xml:space="preserve">
+    <value>Güvenlik</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecuritySslTls" xml:space="preserve">
+    <value>SSL/TLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SignInRejected" xml:space="preserve">
+    <value>Sunucu kullanıcı adını veya parolayı reddetti. Hesabınız iki adımlı doğrulama kullanıyorsa bir uygulama şifresi kullanın.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UnknownStep" xml:space="preserve">
+    <value>Bu kurulum adımı bilinmiyor.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameDescription" xml:space="preserve">
+    <value>Genellikle tam e-posta adresiniz.</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameLabel" xml:space="preserve">
+    <value>Kullanıcı adı</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedDescription" xml:space="preserve">
+    <value>Macro Deck, {host} sunucusunun güvenlik sertifikasını doğrulayamadı ve bu sunucuya bağlanmıyor. Hesabın yanındaki Bağlantıyı düzenle seçeneğini seçin ve sunucu adını tam olarak sertifikada yazdığı gibi girin.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedTitle" xml:space="preserve">
+    <value>{account} için e-posta sunucusu sertifikası güvenilir değil</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundDescription" xml:space="preserve">
+    <value>{folder} klasörü posta sunucusunda artık yok. Hesabın yanındaki Bağlantıyı düzenle seçeneğini seçin ve klasörün güncel adını girin.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundTitle" xml:space="preserve">
+    <value>{account} için e-posta klasörü bulunamadı</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedDescription" xml:space="preserve">
+    <value>Posta sunucusu kayıtlı kullanıcı adını veya parolayı reddetti. Hesabın yanındaki Bağlantıyı düzenle seçeneğini seçin ve geçerli parolayı veya bir uygulama şifresini girin.</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedTitle" xml:space="preserve">
+    <value>{account} için e-posta oturumu açılamadı</value>
+  </data>
+  <data name="Integrations.Imap.Name" xml:space="preserve">
+    <value>E-posta (IMAP)</value>
+  </data>
+  <data name="Integrations.Imap.Status.CertificateFailed" xml:space="preserve">
+    <value>{host} sunucusunun güvenlik sertifikası doğrulanamadı.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Connecting" xml:space="preserve">
+    <value>{host} sunucusuna bağlanılıyor.</value>
+  </data>
+  <data name="Integrations.Imap.Status.FolderNotFound" xml:space="preserve">
+    <value>{folder} klasörü artık yok.</value>
+  </data>
+  <data name="Integrations.Imap.Status.SignInFailed" xml:space="preserve">
+    <value>Oturum açılamadı. Hesabın yanındaki Bağlantıyı düzenle seçeneğini seçin ve geçerli parolayı veya bir uygulama şifresini girin.</value>
+  </data>
+  <data name="Integrations.Imap.Status.Unreachable" xml:space="preserve">
+    <value>{host} sunucusuna ulaşılamıyor. Macro Deck denemeye devam ediyor.</value>
   </data>
   <data name="Integrations.Issues.AccessibilityPermissionGranted" xml:space="preserve">
     <value>Erişilebilirlik izni verildi.</value>
@@ -19451,6 +19715,137 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Editor.WhenLabel" xml:space="preserve">
     <value>Ne zaman:</value>
+  </data>
+  <data name="Widgets.EmailInbox.AllInboxes" xml:space="preserve">
+    <value>Tüm gelen kutuları</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Inboxes" xml:space="preserve">
+    <value>Gelen kutuları</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.InboxesDescription" xml:space="preserve">
+    <value>Bağlı tüm gelen kutularını göstermek için boş bırakın.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessages" xml:space="preserve">
+    <value>Gösterilen e-postalar</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessagesDescription" xml:space="preserve">
+    <value>Listenin gösterdiği en fazla e-posta sayısı. Küçük bir kutucuk daha azını gösterir.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Mode" xml:space="preserve">
+    <value>Göster</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeCount" xml:space="preserve">
+    <value>Okunmamış sayısı</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeList" xml:space="preserve">
+    <value>Mesaj listesi</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.NoInboxesHint" xml:space="preserve">
+    <value>Henüz bağlı bir e-posta gelen kutusu yok. Önce bir e-posta hesabı ekleyin, örneğin IMAP entegrasyonu ile.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowPreview" xml:space="preserve">
+    <value>Önizlemeyi göster</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSender" xml:space="preserve">
+    <value>Göndereni göster</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSubject" xml:space="preserve">
+    <value>Konuyu göster</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowTimestamp" xml:space="preserve">
+    <value>Alınma zamanını göster</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.UnreadOnly" xml:space="preserve">
+    <value>Yalnızca okunmamış e-postalar</value>
+  </data>
+  <data name="Widgets.EmailInbox.CountOverflow" xml:space="preserve">
+    <value>{number}+</value>
+    <comment>Shown instead of the unread count when it is too large to fit, for example 999+.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Description" xml:space="preserve">
+    <value>Bekleyen okunmamış e-posta sayısını veya bağlı gelen kutularınızdaki en yeni e-postaları gösterir.</value>
+  </data>
+  <data name="Widgets.EmailInbox.Disconnected" xml:space="preserve">
+    <value>Bu gelen kutusuna şu anda ulaşılamıyor</value>
+  </data>
+  <data name="Widgets.EmailInbox.Name" xml:space="preserve">
+    <value>E-posta gelen kutusu</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoEmails" xml:space="preserve">
+    <value>E-posta yok</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoInboxes" xml:space="preserve">
+    <value>Bağlı e-posta gelen kutusu yok</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoSubject" xml:space="preserve">
+    <value>(Konu yok)</value>
+    <comment>Shown for an email without a subject.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.NoUnreadEmails" xml:space="preserve">
+    <value>Okunmamış e-posta yok</value>
+  </data>
+  <data name="Widgets.EmailInbox.Offline" xml:space="preserve">
+    <value>Çevrimdışı</value>
+    <comment>Short status on a small email widget whose inbox can't be reached.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendPreview" xml:space="preserve">
+    <value>Cuma akşamı müsait misin? Yakınlarda yeni bir yer buldum.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSender" xml:space="preserve">
+    <value>Sam Lee</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSubject" xml:space="preserve">
+    <value>Cuma akşam yemeği?</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.Inbox" xml:space="preserve">
+    <value>İş</value>
+    <comment>Sample inbox name shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoicePreview" xml:space="preserve">
+    <value>Faturanız hazır ve ayın 15'inde tahsil edilecek.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSender" xml:space="preserve">
+    <value>Faturalandırma</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSubject" xml:space="preserve">
+    <value>Mart ayı faturanız</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamPreview" xml:space="preserve">
+    <value>Üzerinde anlaştıklarımızın ve sonraki adımların kısa bir özeti.</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSender" xml:space="preserve">
+    <value>Alex Morgan</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSubject" xml:space="preserve">
+    <value>Bugünkü planlama toplantısından notlar</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.SomeDisconnected" xml:space="preserve">
+    <value>Bazı gelen kutularına şu anda ulaşılamıyor</value>
+  </data>
+  <data name="Widgets.EmailInbox.UnknownSender" xml:space="preserve">
+    <value>(Bilinmeyen gönderen)</value>
+    <comment>Shown for an email without a sender.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.One" xml:space="preserve">
+    <value>{count} okunmamış</value>
+    <comment>[plural][count:int] How many emails are unread.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.Other" xml:space="preserve">
+    <value>{count} okunmamış</value>
+    <comment>[plural][count:int]</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Yesterday" xml:space="preserve">
+    <value>Dün</value>
+    <comment>Shown as the time of an email received yesterday.</comment>
   </data>
   <data name="Widgets.Folder.AutomaticActivation" xml:space="preserve">
     <value>Otomatik etkinleştirme…</value>

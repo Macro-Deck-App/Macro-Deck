@@ -47,6 +47,7 @@ The tiles in a folder:
 | Battery | Your phone's battery, or your phone, headset and controller side by side, colored by how full they are |
 | Weather | Today and the next days for your city. Press it for the full details |
 | Calendar | Today's date with your next meetings, the next few days on a larger widget, or your next meeting and how long until it starts. Press it for the details |
+| Email Inbox | How many unread emails are waiting, or the newest emails with sender and subject, from the [email accounts](#connect-an-imap-account) you connected |
 | Music Player | What Spotify or [Jellyfin](/guide/jellyfin/) is playing, with play and skip. Some players offer extra settings for each widget below the player choice |
 | Jellyfin Sessions | What plays on your [Jellyfin](/guide/jellyfin/) servers, on whose device, offered once a Jellyfin server is set up |
 | Twitch Chat | Your channel's chat with emotes and badges, offered once a Twitch account is connected |
@@ -270,6 +271,47 @@ don't trust use.
 
 A profile with calendar widgets that you import into a Macro Deck version without calendar support shows
 those widgets as not available.
+
+### Email Inbox widget
+
+The **Email Inbox** widget shows the inboxes you connected under **Integrations**, for example with
+[IMAP](#connect-an-imap-account). Until an inbox is connected it says **No email inbox connected**. It only
+reads: it never marks an email as read, moves or deletes it.
+
+**Show** decides what it shows. **Unread count**, the default, shows the number of unread emails across its
+inboxes in large type under a mail icon, with the inbox's name, or **All Inboxes** for several, below it.
+**Message list** shows the newest emails under a header with the same name and a blue badge with the number
+of unread emails, which disappears when nothing is unread. Unread emails have a blue dot and a bold sender.
+Each email shows its sender and time on the first line, its subject below and, if you turn it on, the first
+words of the email. The time is the time of day for today, **Yesterday**, the weekday during the last week
+and the date before that. Above 999 the count shows **999+**, and until the first inbox has been read it shows
+a dash.
+
+The size decides the layout. **Unread count** puts the mail icon beside the number on a tile at least 1.5
+cells wide but shorter than 1.5 cells, and above it everywhere else. A **Message list** shows as many emails
+as fit the tile, up to **Emails shown**: on a tile narrower than 1.5 cells it shows the newest ones compactly,
+from 1.5 by 1.5 cells as a full list with the preview on up to two lines, and wide but short as one line per
+email. A list with nothing to show says **No emails**, or **No unread emails** with **Only unread emails**
+on. The widget's settings:
+
+| Setting | What it does |
+| --- | --- |
+| **Inboxes** | The inboxes to show, each listed with its provider, such as *Work (IMAP)*. Leave it empty for every inbox, including ones you connect later. |
+| **Show** | **Unread count** or **Message list**. |
+| **Only unread emails** | Lists only unread emails, the newest first. Message list only. |
+| **Emails shown** | The most emails the list shows, from 1 to 10, 5 by default. A tile too small for all of them shows as many as fit. Message list only. |
+| **Show sender**, **Show subject**, **Show preview**, **Show time received** | What each email shows. Sender, subject and time are on by default, the preview, the first words of the email, is off. Message list only. |
+
+When an inbox cannot be reached, the widget keeps its last emails and adds a warning: **Offline** under the
+count, a warning sign beside the header of a small list, **Can't reach this inbox right now** under a full
+list, or **Some inboxes can't be reached right now** when only some of its inboxes are affected. Check the
+account under **Integrations**, see [Troubleshooting](/guide/troubleshooting/#the-email-inbox-widget-shows-offline).
+
+New emails show up within seconds when the mail server reports them, and otherwise after a few minutes.
+The **Refresh Email Inboxes** action, under **Email**, checks every inbox right away.
+
+Everything the widget shows, including senders, subjects and previews, can be seen on every device
+connected to your Macro Deck. Keep email widgets off profiles that devices you don't trust use.
 
 ### Gauges
 
@@ -651,6 +693,56 @@ every meeting can open a link from a stranger. Limit such a trigger to the **Cal
 meetings are in, or add a condition, for example on `{{ event.title }}`, so it joins only the meetings
 you expect.
 
+### Email triggers and variables
+
+Five events from **Email** run actions when your inboxes change, in an automation or as an event trigger on
+a widget:
+
+| Event | Runs |
+| --- | --- |
+| **Email Received** | When a new email arrives. |
+| **Unread Count Changed** | When the number of unread emails in an inbox changes. |
+| **Email Read or Unread** | When an email is marked as read or unread, for example in your mail app. |
+| **Inbox Disconnected** | When an inbox loses its connection to the mail server. |
+| **Inbox Connected** | When an inbox is connected again after it was disconnected. |
+
+Each can be limited to one **Inbox**; left empty, it runs for every inbox. **Email Received** also takes a
+**Sender** and a **Subject**, which must match the whole sender name and the whole subject. To react to part
+of a subject, leave the field empty and add a condition on `{{ event.subject }}` to the actions instead.
+
+**Email Received** runs once per email, for the 20 newest emails of an inbox. It does not run for the
+emails already there when Macro Deck starts or when you connect an inbox, so a restart does not replay your
+inbox. An email that arrived while an inbox was disconnected runs it once the inbox is back. **Inbox
+Disconnected** also runs when the mail server refuses the sign-in. Macro Deck keeps trying to reconnect,
+and **Inbox Connected** runs once the inbox is back.
+
+The actions they run can use the event's values, such as `{{ event.sender }}` in a text field:
+
+| Value | Holds |
+| --- | --- |
+| `inboxName`, `inbox` | The inbox's name, such as *Work*, and its id. Every event has them. |
+| `sender`, `senderAddress` | The sender's name, or the address when there is no name, and the address. **Email Received**; `sender` also **Email Read or Unread**. |
+| `subject`, `preview`, `messageId` | The subject, the first words of the email and its id. **Email Received**; `subject` and `messageId` also **Email Read or Unread**. |
+| `receivedAt` | When it arrived, in UTC, such as `2026-10-05T07:00:00.0000000Z`. **Email Received**. |
+| `unreadCount`, `previousUnreadCount` | The number of unread emails now and before. **Unread Count Changed**. |
+| `isRead` | Whether the email is now read. **Email Read or Unread**. |
+
+Email also brings variables. `email_unread_count` holds the unread emails of every inbox together and
+`email_inbox_count` how many inboxes there are. Every inbox gets its own, named after it, for example
+for an inbox called *Work*:
+
+| Variable | Holds |
+| --- | --- |
+| `email_work_unread_count`, `email_work_total_count` | Its unread emails and all emails in it. |
+| `email_work_latest_sender`, `email_work_latest_subject` | The sender and subject of its newest email. |
+| `email_work_latest_received_at` | When its newest email arrived, in UTC, such as `2026-10-05T07:00:00.0000000Z`. |
+| `email_work_is_connected` | Whether it is connected. |
+
+The name is taken from the inbox's name once and kept, so renaming the inbox later does not rename its
+variables. Two inboxes with the same name get `email_work_...` and `email_work_2_...`. The first 40 inboxes
+get variables. While an email integration is turned off, its inboxes' variables stay and read as
+unavailable; removing an inbox removes its variables.
+
 ## Notifications
 
 Macro Deck tells you about things that need your attention in three ways.
@@ -688,9 +780,9 @@ of one inside Macro Deck.
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
 [SoundPad](/guide/soundpad/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord, Google Calendar,
-Outlook Calendar, [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/) and more. Turn on the ones you use under **Integrations**.
+Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/) and more. Turn on the ones you use under **Integrations**.
 
-![The Integrations page listing ADB, Discord, Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
+![The Integrations page listing ADB, Discord, Email (IMAP), Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 
 The **Store** offers more plugins and icon packs. Everything published there is reviewed and signed
 first.
@@ -927,6 +1019,62 @@ with that account. If you connect an
 account that is already connected, **Integrations** shows **Microsoft account connected twice**: remove the
 older configuration. When Microsoft asks you to sign in again, see
 [Troubleshooting](/guide/troubleshooting/#outlook-calendar-asks-you-to-sign-in-again).
+
+### Connect an IMAP account
+
+**Email (IMAP)** reads one folder of an email account, usually the inbox, from any provider that offers IMAP,
+such as Gmail, Outlook.com, iCloud Mail or the mail of your own domain. Macro Deck only reads: it never
+changes, moves or deletes an email, and never marks one as read.
+
+1. Under **Integrations**, open **Email (IMAP)** and start its setup.
+2. Fill in the account:
+
+   | Field | What to enter |
+   | --- | --- |
+   | **Configuration name** | The inbox's name in Macro Deck, such as *Work*. Its variables are named after it. |
+   | **Email provider** | Your email service, see below. Pick **Custom server** for any service that is not listed. |
+   | **IMAP server** | Only for **Custom server**: the incoming mail server, such as `imap.example.com`. |
+   | **Port** | Only for **Custom server**: `993` for **SSL/TLS**, the default, or usually `143` for **STARTTLS**. |
+   | **Security** | Only for **Custom server**: **SSL/TLS** encrypts the connection from the start, **STARTTLS** switches to encryption right after connecting. Use the one your provider names; both always encrypt and check the server's certificate, and an unencrypted connection is not offered. |
+   | **Username** | Usually your full email address. |
+   | **Password** | Your password or an app password, see below. It is stored encrypted on this computer. |
+   | **Folder** | The folder to watch, `INBOX` by default. |
+
+   **Email provider** lists Gmail, iCloud Mail, Yahoo Mail, AOL Mail, Fastmail, Zoho Mail, Zoho Mail (EU),
+   GMX, WEB.DE, T-Online, IONOS, mailbox.org and Posteo. For these Macro Deck fills in the server settings
+   itself. For anything else, such as Outlook.com or the mail of your own domain, pick **Custom server** and
+   enter the IMAP settings from your provider's help pages, often listed under *IMAP* or *other mail apps*.
+
+3. Continue. Macro Deck signs in once to check the settings, and says what went wrong if it cannot, such as a
+   refused password or a folder that does not exist.
+
+Most providers do not accept your normal password from other apps once two-step verification is on.
+Create an **app password** in your account's security settings and enter it instead:
+
+- **Gmail:** turn on 2-Step Verification, then create an app password under **App passwords** in your Google
+  account.
+- **Outlook.com, Hotmail, Live and Microsoft 365:** Microsoft lets most of these accounts sign in to IMAP
+  only with OAuth, which Macro Deck does not support yet. If your account still offers app passwords,
+  create one in the advanced security options of your Microsoft account.
+- **iCloud Mail:** create an app-specific password at account.apple.com, under **Sign-In and Security**. The
+  username is your iCloud email address.
+
+Signing in with OAuth, the browser sign-in that Google Calendar and Outlook Calendar use, is not supported
+yet, so accounts that only allow that cannot be connected for now.
+
+To add another account or another folder of the same account, choose **Add configuration** on the Email
+(IMAP) page. A folder that is already connected is refused. Macro Deck keeps a connection open and hears
+about new mail within seconds when the server supports it, and checks every minute when it does not. When
+the server refuses the password later, for example after you changed it, **Integrations** shows **Email
+sign-in failed** for the account: choose **Edit connection** next to the account and enter the current
+password or a new app password. See [Troubleshooting](/guide/troubleshooting/#email-sign-in-failed) for other problems.
+
+Macro Deck tells inboxes apart by their server, port, **Username** and **Folder**; a listed provider and
+**Custom server** with the same settings are the same inbox. Changing any of these with **Edit connection**,
+including picking another provider, turns the account into a new inbox: select it again in your Email Inbox
+widgets and in the **Inbox** of your Email triggers, and its variables get a new name, such as
+`email_work_2_unread_count` instead of `email_work_unread_count`. A new password or a new configuration name
+keeps the inbox as it is.
 
 ## Managing OBS recordings
 

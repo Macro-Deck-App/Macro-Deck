@@ -28,6 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="MailKit" />
       <PackageReference Include="SpotifyAPI.Web" />
       <PackageReference Include="obs-websocket-dotnet" />
       <PackageReference Include="SoundpadConnector" />

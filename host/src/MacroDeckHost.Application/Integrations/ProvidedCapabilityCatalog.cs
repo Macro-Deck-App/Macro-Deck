@@ -5,6 +5,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Calendar;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.Layouts;
@@ -50,6 +51,8 @@ public static class ProvidedCapabilityCatalog
 			integration => integration is IWeatherProvider),
 		(CapabilityKinds.Calendar, AppStrings.Integrations.Capability.Calendar(),
 			integration => integration is ICalendarProvider),
+		(CapabilityKinds.EmailInbox, AppStrings.Integrations.Capability.EmailInbox(),
+			integration => integration is IEmailInboxProvider),
 		(CapabilityKinds.VirtualProfiles, AppStrings.Integrations.Capability.VirtualProfiles(),
 			integration => integration is IProfileProvider),
 		(CapabilityKinds.DeviceProvider, AppStrings.Integrations.Capability.DeviceProvider(),

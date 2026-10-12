@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Calendar;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Variables;
 using Serilog;
@@ -265,6 +266,33 @@ internal sealed class RemotePluginSnapshotStoreTests
 			Assert.That(reloaded.CalendarProviderName, Is.EqualTo("Google Calendar"));
 			Assert.That(reloaded.CalendarAccounts.Single().Id, Is.EqualTo("alice"));
 			Assert.That(reloaded.CalendarAccounts.Single().DisplayName, Is.EqualTo("alice@example.com"));
+		});
+	}
+
+	[Test]
+	public async Task The_email_inbox_section_round_trips_and_an_older_document_reads_without_inboxes()
+	{
+		Directory.CreateDirectory(_paths.ConfigDirectory);
+		File.WriteAllText(Path.Combine(_paths.ConfigDirectory, "plugin-capability-snapshots.json"),
+			PreAdr0081Document);
+		var older = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.plugin");
+
+		await new RemotePluginSnapshotStore(_paths, Log.Logger).SaveAsync(
+			RemotePluginCapabilitySnapshot.Empty("com.example.mail") with
+			{
+				AcceptedKinds = [CapabilityKinds.EmailInbox],
+				EmailInboxProviderName = "Example Mail",
+				EmailInboxes = [new EmailInbox { Id = "work", DisplayName = "Work", Address = "me@example.com" }]
+			});
+		var reloaded = new RemotePluginSnapshotStore(_paths, Log.Logger).GetSnapshot("com.example.mail");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(older.EmailInboxProviderName, Is.Empty);
+			Assert.That(older.EmailInboxes, Is.Empty);
+			Assert.That(reloaded.EmailInboxProviderName, Is.EqualTo("Example Mail"));
+			Assert.That(reloaded.EmailInboxes.Single(),
+				Is.EqualTo(new EmailInbox { Id = "work", DisplayName = "Work", Address = "me@example.com" }));
 		});
 	}
 

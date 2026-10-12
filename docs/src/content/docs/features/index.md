@@ -33,6 +33,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | [Music players](/features/music-players/) | `IMusicPlayerProvider` | Drive the Music Player widget and reuse Macro Deck's ready-made music actions. |
 | [Weather](/features/weather/) | `IWeatherProvider` | Supply weather stations to Macro Deck's weather features. |
 | [Calendars](/features/calendars/) | `ICalendarProvider` | Supply calendar accounts and events to Macro Deck's calendar widgets, triggers and Join Meeting action. |
+| [Email inboxes](/features/email-inboxes/) | `IEmailInboxProvider` | Supply email inboxes to Macro Deck's email widget, variables and triggers. |
 | [Virtual profiles](/features/virtual-profiles/) | `IProfileProvider` | Offer profiles the plugin generates. |
 
 ## Setup and maintenance

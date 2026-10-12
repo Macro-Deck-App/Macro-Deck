@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
+using MacroDeck.Plugin.Protocol.Capabilities.EmailInbox;
 using MacroDeck.Plugin.Protocol.Capabilities.Migration;
 using MacroDeck.Plugin.Protocol.Capabilities.MusicPlayer;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
@@ -127,6 +128,40 @@ public class RemotePluginSnapshotRefresherTests
 			Assert.That(result.Snapshot.CalendarAccounts.Select(account => account.Id),
 				Is.EqualTo(new[] { "alice", "bob" }));
 			Assert.That(result.Snapshot.CalendarProviderName, Is.EqualTo("Google Calendar"));
+		});
+	}
+
+	[Test]
+	public async Task RefreshKindAsync_for_email_inboxes_rereads_the_inbox_list_and_reports_the_previous_one()
+	{
+		var invoker = new RecordingInvoker
+		{
+			Result = new EmailInboxesResult
+			{
+				Inboxes =
+				[
+					new EmailInboxDto { Id = "work", DisplayName = "Work" },
+					new EmailInboxDto { Id = "home", DisplayName = "Home", Address = "me@example.com" }
+				]
+			}
+		};
+		var store = new InMemorySnapshotStore();
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty(PluginId) with
+		{
+			EmailInboxProviderName = "Example Mail",
+			EmailInboxes = [new MacroDeck.Sdk.Email.EmailInbox { Id = "work", DisplayName = "Work" }]
+		});
+		var refresher = new RemotePluginSnapshotRefresher(invoker, store);
+
+		var result = await refresher.RefreshKindAsync(PluginId, CapabilityKinds.EmailInbox, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(invoker.LastRequest!.Operation, Is.EqualTo(CapabilityOperations.EmailInbox.Inboxes));
+			Assert.That(invoker.LastRequest.LocalId, Is.EqualTo(ProviderCapabilityId.LocalId));
+			Assert.That(result.Snapshot.EmailInboxes.Select(inbox => inbox.Id), Is.EqualTo(new[] { "work", "home" }));
+			Assert.That(result.Snapshot.EmailInboxProviderName, Is.EqualTo("Example Mail"));
+			Assert.That(result.Previous!.EmailInboxes.Select(inbox => inbox.Id), Is.EqualTo(new[] { "work" }));
 		});
 	}
 

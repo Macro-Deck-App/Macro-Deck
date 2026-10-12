@@ -3326,6 +3326,91 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Events.Core.VariablesCategory" xml:space="preserve">
     <value>वेरिएबल</value>
   </data>
+  <data name="Events.Email.AnyInboxPlaceholder" xml:space="preserve">
+    <value>कोई भी इनबॉक्स</value>
+  </data>
+  <data name="Events.Email.Category" xml:space="preserve">
+    <value>ईमेल इवेंट</value>
+  </data>
+  <data name="Events.Email.InboxConnectedDescription" xml:space="preserve">
+    <value>डिस्कनेक्ट होने के बाद इनबॉक्स फिर से कनेक्ट होने पर चलता है।</value>
+  </data>
+  <data name="Events.Email.InboxConnectedName" xml:space="preserve">
+    <value>इनबॉक्स कनेक्ट हुआ</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedDescription" xml:space="preserve">
+    <value>इनबॉक्स का मेल सर्वर से कनेक्शन टूटने पर चलता है।</value>
+  </data>
+  <data name="Events.Email.InboxDisconnectedName" xml:space="preserve">
+    <value>इनबॉक्स डिस्कनेक्ट हुआ</value>
+  </data>
+  <data name="Events.Email.InboxFilterDescription" xml:space="preserve">
+    <value>वैकल्पिक। केवल इस इनबॉक्स के लिए चलाएं।</value>
+  </data>
+  <data name="Events.Email.InboxLabel" xml:space="preserve">
+    <value>इनबॉक्स</value>
+  </data>
+  <data name="Events.Email.InboxNameLabel" xml:space="preserve">
+    <value>इनबॉक्स का नाम</value>
+  </data>
+  <data name="Events.Email.InboxOption" xml:space="preserve">
+    <value>{inbox} ({provider})</value>
+    <comment>{inbox} is the inbox name, {provider} the email service or integration.</comment>
+  </data>
+  <data name="Events.Email.IsReadLabel" xml:space="preserve">
+    <value>पढ़ा गया</value>
+  </data>
+  <data name="Events.Email.MessageIdLabel" xml:space="preserve">
+    <value>संदेश ID</value>
+  </data>
+  <data name="Events.Email.PreviewLabel" xml:space="preserve">
+    <value>पूर्वावलोकन</value>
+  </data>
+  <data name="Events.Email.PreviousUnreadCountLabel" xml:space="preserve">
+    <value>पिछली अपठित संख्या</value>
+  </data>
+  <data name="Events.Email.ProviderName" xml:space="preserve">
+    <value>ईमेल</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedDescription" xml:space="preserve">
+    <value>किसी ईमेल को पढ़ा गया या अपठित चिह्नित करने पर चलता है।</value>
+  </data>
+  <data name="Events.Email.ReadStateChangedName" xml:space="preserve">
+    <value>ईमेल पढ़ा गया या अपठित</value>
+  </data>
+  <data name="Events.Email.ReceivedAtLabel" xml:space="preserve">
+    <value>प्राप्ति का समय</value>
+  </data>
+  <data name="Events.Email.ReceivedDescription" xml:space="preserve">
+    <value>किसी इनबॉक्स में नया ईमेल आने पर चलता है।</value>
+  </data>
+  <data name="Events.Email.ReceivedName" xml:space="preserve">
+    <value>ईमेल प्राप्त हुआ</value>
+  </data>
+  <data name="Events.Email.SenderAddressLabel" xml:space="preserve">
+    <value>प्रेषक का पता</value>
+  </data>
+  <data name="Events.Email.SenderFilterDescription" xml:space="preserve">
+    <value>वैकल्पिक। केवल इस प्रेषक के ईमेल के लिए चलाएं।</value>
+  </data>
+  <data name="Events.Email.SenderLabel" xml:space="preserve">
+    <value>प्रेषक</value>
+  </data>
+  <data name="Events.Email.SubjectFilterDescription" xml:space="preserve">
+    <value>वैकल्पिक। केवल इस विषय वाले ईमेल के लिए चलाएं।</value>
+  </data>
+  <data name="Events.Email.SubjectLabel" xml:space="preserve">
+    <value>विषय</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedDescription" xml:space="preserve">
+    <value>किसी इनबॉक्स में अपठित ईमेल की संख्या बदलने पर चलता है।</value>
+  </data>
+  <data name="Events.Email.UnreadCountChangedName" xml:space="preserve">
+    <value>अपठित संख्या बदली</value>
+  </data>
+  <data name="Events.Email.UnreadCountLabel" xml:space="preserve">
+    <value>अपठित संख्या</value>
+  </data>
   <data name="Events.MusicPlayer.AlbumLabel" xml:space="preserve">
     <value>एल्बम</value>
   </data>
@@ -4656,6 +4741,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Capability.DeviceProvider" xml:space="preserve">
     <value>डिवाइस</value>
   </data>
+  <data name="Integrations.Capability.EmailInbox" xml:space="preserve">
+    <value>ईमेल इनबॉक्स</value>
+  </data>
   <data name="Integrations.Capability.Events" xml:space="preserve">
     <value>इवेंट</value>
   </data>
@@ -5742,6 +5830,50 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Discord.Variables.VoiceServer" xml:space="preserve">
     <value>वॉइस सर्वर</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Description" xml:space="preserve">
+    <value>अगले अपडेट की प्रतीक्षा किए बिना सभी कनेक्टेड इनबॉक्स में नए संदेश अभी जाँचता है।</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Name" xml:space="preserve">
+    <value>ईमेल इनबॉक्स रीफ़्रेश करें</value>
+  </data>
+  <data name="Integrations.Email.Actions.RefreshInboxes.Unavailable" xml:space="preserve">
+    <value>ईमेल इनबॉक्स अभी रीफ़्रेश नहीं किए जा सकते।</value>
+  </data>
+  <data name="Integrations.Email.Name" xml:space="preserve">
+    <value>ईमेल</value>
+  </data>
+  <data name="Integrations.Email.Variables.InboxConnected" xml:space="preserve">
+    <value>{inbox} कनेक्टेड</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxCount" xml:space="preserve">
+    <value>ईमेल इनबॉक्स</value>
+    <comment>The number of connected email inboxes.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestReceivedAt" xml:space="preserve">
+    <value>{inbox} नवीनतम ईमेल प्राप्ति</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds when its newest email arrived.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSender" xml:space="preserve">
+    <value>{inbox} नवीनतम प्रेषक</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxLatestSubject" xml:space="preserve">
+    <value>{inbox} नवीनतम विषय</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxTotalCount" xml:space="preserve">
+    <value>{inbox} ईमेल</value>
+    <comment>{inbox} is the name of an email inbox. The variable holds how many emails it contains.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.InboxUnreadCount" xml:space="preserve">
+    <value>{inbox} अपठित ईमेल</value>
+    <comment>{inbox} is the name of an email inbox.</comment>
+  </data>
+  <data name="Integrations.Email.Variables.UnreadCount" xml:space="preserve">
+    <value>अपठित ईमेल</value>
+    <comment>The number of unread emails across every connected inbox.</comment>
   </data>
   <data name="Integrations.Example.Actions.AdvancedDescription" xml:space="preserve">
     <value>नेस्टेड गुण</value>
@@ -6885,6 +7017,138 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Http.Params.UrlLabel" xml:space="preserve">
     <value>URL</value>
+  </data>
+  <data name="Integrations.Imap.Config.AlreadyConfigured" xml:space="preserve">
+    <value>इस ईमेल खाते का यह फ़ोल्डर पहले से सेट अप है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.AppPasswordInstruction" xml:space="preserve">
+    <value>यदि आपका खाता दो-चरणीय सत्यापन का उपयोग करता है, तो अपने ईमेल प्रदाता की सुरक्षा सेटिंग में ऐप पासवर्ड बनाएं और उसे पासवर्ड के रूप में दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.CertificateFailed" xml:space="preserve">
+    <value>{host} का सुरक्षा प्रमाणपत्र सत्यापित नहीं हो सका, इसलिए Macro Deck ने कनेक्ट नहीं किया।</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConfigurationNamePlaceholder" xml:space="preserve">
+    <value>जैसे काम</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectDescription" xml:space="preserve">
+    <value>नया मेल दिखाने के लिए Macro Deck IMAP के ज़रिए खाते का एक फ़ोल्डर पढ़ता है। यह संदेशों को कभी नहीं बदलता, ले जाता या हटाता।</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectTitle" xml:space="preserve">
+    <value>ईमेल खाता कनेक्ट करें</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionFailed" xml:space="preserve">
+    <value>पोर्ट {port} पर {host} से कनेक्ट नहीं हो सका। सर्वर का नाम, पोर्ट और सुरक्षा सेटिंग जाँचें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.ConnectionTimedOut" xml:space="preserve">
+    <value>{host} ने समय पर जवाब नहीं दिया। सर्वर का नाम और पोर्ट जाँचें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterHost" xml:space="preserve">
+    <value>IMAP सर्वर दर्ज करें, जैसे imap.example.com।</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterPassword" xml:space="preserve">
+    <value>पासवर्ड दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterUsername" xml:space="preserve">
+    <value>उपयोगकर्ता नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.EnterValidPort" xml:space="preserve">
+    <value>1 और 65535 के बीच का पोर्ट दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderDescription" xml:space="preserve">
+    <value>देखा जाने वाला फ़ोल्डर। INBOX मुख्य इनबॉक्स है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderLabel" xml:space="preserve">
+    <value>फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Imap.Config.FolderNotFound" xml:space="preserve">
+    <value>इस खाते में {folder} नाम का कोई फ़ोल्डर नहीं है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostDescription" xml:space="preserve">
+    <value>आपके प्रदाता की मेल सेटिंग में दिया गया इनकमिंग मेल सर्वर।</value>
+  </data>
+  <data name="Integrations.Imap.Config.HostLabel" xml:space="preserve">
+    <value>IMAP सर्वर</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordDescription" xml:space="preserve">
+    <value>आपका पासवर्ड या ऐप पासवर्ड। यह इस कंप्यूटर पर एन्क्रिप्ट करके संग्रहीत होता है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.PasswordLabel" xml:space="preserve">
+    <value>पासवर्ड</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortDescription" xml:space="preserve">
+    <value>आमतौर पर SSL/TLS के लिए 993 और STARTTLS के लिए 143।</value>
+  </data>
+  <data name="Integrations.Imap.Config.PortLabel" xml:space="preserve">
+    <value>पोर्ट</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderCustom" xml:space="preserve">
+    <value>कस्टम सर्वर</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderDescription" xml:space="preserve">
+    <value>अपनी ईमेल सेवा चुनें ताकि उसकी सर्वर सेटिंग इस्तेमाल हों, या उन्हें खुद डालने के लिए कस्टम सर्वर चुनें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.ProviderLabel" xml:space="preserve">
+    <value>ईमेल प्रदाता</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityDescription" xml:space="preserve">
+    <value>कनेक्शन हमेशा एन्क्रिप्ट रहता है और सर्वर का प्रमाणपत्र हमेशा जाँचा जाता है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityLabel" xml:space="preserve">
+    <value>सुरक्षा</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecuritySslTls" xml:space="preserve">
+    <value>SSL/TLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SecurityStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="Integrations.Imap.Config.SignInRejected" xml:space="preserve">
+    <value>सर्वर ने उपयोगकर्ता नाम या पासवर्ड अस्वीकार कर दिया। यदि आपका खाता दो-चरणीय सत्यापन का उपयोग करता है, तो ऐप पासवर्ड का उपयोग करें।</value>
+  </data>
+  <data name="Integrations.Imap.Config.UnknownStep" xml:space="preserve">
+    <value>यह सेटअप चरण ज्ञात नहीं है।</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameDescription" xml:space="preserve">
+    <value>आमतौर पर आपका पूरा ईमेल पता।</value>
+  </data>
+  <data name="Integrations.Imap.Config.UsernameLabel" xml:space="preserve">
+    <value>उपयोगकर्ता नाम</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedDescription" xml:space="preserve">
+    <value>Macro Deck {host} का सुरक्षा प्रमाणपत्र सत्यापित नहीं कर सका, इसलिए उससे कनेक्ट नहीं करता। खाते के पास कनेक्शन संपादित करें चुनें और सर्वर का नाम ठीक वैसे ही दर्ज करें जैसा प्रमाणपत्र में है।</value>
+  </data>
+  <data name="Integrations.Imap.Issues.CertificateFailedTitle" xml:space="preserve">
+    <value>{account} के लिए ईमेल सर्वर प्रमाणपत्र विश्वसनीय नहीं</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundDescription" xml:space="preserve">
+    <value>फ़ोल्डर {folder} अब मेल सर्वर पर मौजूद नहीं है। खाते के पास कनेक्शन संपादित करें चुनें और फ़ोल्डर का मौजूदा नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Issues.FolderNotFoundTitle" xml:space="preserve">
+    <value>{account} के लिए ईमेल फ़ोल्डर नहीं मिला</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedDescription" xml:space="preserve">
+    <value>मेल सर्वर ने संग्रहीत उपयोगकर्ता नाम या पासवर्ड अस्वीकार कर दिया। खाते के पास कनेक्शन संपादित करें चुनें और मौजूदा पासवर्ड या ऐप पासवर्ड दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Issues.SignInFailedTitle" xml:space="preserve">
+    <value>{account} के लिए ईमेल साइन-इन विफल</value>
+  </data>
+  <data name="Integrations.Imap.Name" xml:space="preserve">
+    <value>ईमेल (IMAP)</value>
+  </data>
+  <data name="Integrations.Imap.Status.CertificateFailed" xml:space="preserve">
+    <value>{host} का सुरक्षा प्रमाणपत्र सत्यापित नहीं हो सका।</value>
+  </data>
+  <data name="Integrations.Imap.Status.Connecting" xml:space="preserve">
+    <value>{host} से कनेक्ट हो रहा है।</value>
+  </data>
+  <data name="Integrations.Imap.Status.FolderNotFound" xml:space="preserve">
+    <value>फ़ोल्डर {folder} अब मौजूद नहीं है।</value>
+  </data>
+  <data name="Integrations.Imap.Status.SignInFailed" xml:space="preserve">
+    <value>साइन-इन विफल रहा। खाते के पास कनेक्शन संपादित करें चुनें और मौजूदा पासवर्ड या ऐप पासवर्ड दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Imap.Status.Unreachable" xml:space="preserve">
+    <value>{host} तक नहीं पहुँच पा रहे। Macro Deck कोशिश करता रहेगा।</value>
   </data>
   <data name="Integrations.Issues.AccessibilityPermissionGranted" xml:space="preserve">
     <value>एक्सेसिबिलिटी अनुमति दी गई।</value>
@@ -19451,6 +19715,137 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.Editor.WhenLabel" xml:space="preserve">
     <value>जब:</value>
+  </data>
+  <data name="Widgets.EmailInbox.AllInboxes" xml:space="preserve">
+    <value>सभी इनबॉक्स</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Inboxes" xml:space="preserve">
+    <value>इनबॉक्स</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.InboxesDescription" xml:space="preserve">
+    <value>सभी कनेक्टेड इनबॉक्स दिखाने के लिए खाली छोड़ें।</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessages" xml:space="preserve">
+    <value>दिखाए जाने वाले ईमेल</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.MaxMessagesDescription" xml:space="preserve">
+    <value>सूची में अधिकतम ईमेल की संख्या। छोटी टाइल कम दिखाती है।</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.Mode" xml:space="preserve">
+    <value>दिखाएं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeCount" xml:space="preserve">
+    <value>अपठित संख्या</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ModeList" xml:space="preserve">
+    <value>संदेश सूची</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.NoInboxesHint" xml:space="preserve">
+    <value>अभी तक कोई ईमेल इनबॉक्स कनेक्ट नहीं है। पहले कोई ईमेल खाता जोड़ें, उदाहरण के लिए IMAP एकीकरण के ज़रिए।</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowPreview" xml:space="preserve">
+    <value>पूर्वावलोकन दिखाएं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSender" xml:space="preserve">
+    <value>प्रेषक दिखाएं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowSubject" xml:space="preserve">
+    <value>विषय दिखाएं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.ShowTimestamp" xml:space="preserve">
+    <value>प्राप्ति का समय दिखाएं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Config.UnreadOnly" xml:space="preserve">
+    <value>केवल अपठित ईमेल</value>
+  </data>
+  <data name="Widgets.EmailInbox.CountOverflow" xml:space="preserve">
+    <value>{number}+</value>
+    <comment>Shown instead of the unread count when it is too large to fit, for example 999+.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Description" xml:space="preserve">
+    <value>दिखाता है कि कितने अपठित ईमेल प्रतीक्षा में हैं, या आपके कनेक्टेड इनबॉक्स के नवीनतम ईमेल।</value>
+  </data>
+  <data name="Widgets.EmailInbox.Disconnected" xml:space="preserve">
+    <value>यह इनबॉक्स अभी उपलब्ध नहीं है</value>
+  </data>
+  <data name="Widgets.EmailInbox.Name" xml:space="preserve">
+    <value>ईमेल इनबॉक्स</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoEmails" xml:space="preserve">
+    <value>कोई ईमेल नहीं</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoInboxes" xml:space="preserve">
+    <value>कोई ईमेल इनबॉक्स कनेक्ट नहीं है</value>
+  </data>
+  <data name="Widgets.EmailInbox.NoSubject" xml:space="preserve">
+    <value>(कोई विषय नहीं)</value>
+    <comment>Shown for an email without a subject.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.NoUnreadEmails" xml:space="preserve">
+    <value>कोई अपठित ईमेल नहीं</value>
+  </data>
+  <data name="Widgets.EmailInbox.Offline" xml:space="preserve">
+    <value>ऑफ़लाइन</value>
+    <comment>Short status on a small email widget whose inbox can't be reached.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendPreview" xml:space="preserve">
+    <value>क्या आप शुक्रवार शाम खाली हैं? मुझे पास में एक नई जगह मिली है।</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSender" xml:space="preserve">
+    <value>Sam Lee</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.FriendSubject" xml:space="preserve">
+    <value>शुक्रवार को डिनर?</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.Inbox" xml:space="preserve">
+    <value>काम</value>
+    <comment>Sample inbox name shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoicePreview" xml:space="preserve">
+    <value>आपका इनवॉइस तैयार है और 15 तारीख को भुगतान लिया जाएगा।</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSender" xml:space="preserve">
+    <value>बिलिंग</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.InvoiceSubject" xml:space="preserve">
+    <value>मार्च का आपका इनवॉइस</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamPreview" xml:space="preserve">
+    <value>हमने जो तय किया और अगले कदमों का एक छोटा सारांश यह है।</value>
+    <comment>Sample email preview shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSender" xml:space="preserve">
+    <value>Alex Morgan</value>
+    <comment>Sample email sender shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Sample.TeamSubject" xml:space="preserve">
+    <value>आज की योजना बैठक के नोट्स</value>
+    <comment>Sample email subject shown in the widget picker.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.SomeDisconnected" xml:space="preserve">
+    <value>कुछ इनबॉक्स अभी उपलब्ध नहीं हैं</value>
+  </data>
+  <data name="Widgets.EmailInbox.UnknownSender" xml:space="preserve">
+    <value>(अज्ञात प्रेषक)</value>
+    <comment>Shown for an email without a sender.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.One" xml:space="preserve">
+    <value>{count} अपठित</value>
+    <comment>[plural][count:int] How many emails are unread.</comment>
+  </data>
+  <data name="Widgets.EmailInbox.UnreadCount.Other" xml:space="preserve">
+    <value>अपठित: {count}</value>
+    <comment>[plural][count:int]</comment>
+  </data>
+  <data name="Widgets.EmailInbox.Yesterday" xml:space="preserve">
+    <value>कल</value>
+    <comment>Shown as the time of an email received yesterday.</comment>
   </data>
   <data name="Widgets.Folder.AutomaticActivation" xml:space="preserve">
     <value>स्वचालित सक्रियण…</value>
