@@ -75,8 +75,13 @@
   cursor: pointer;
 }
 
+.cb-listbox {
+  display: contents;
+}
+
 .cb-option:hover,
-.cb-option-active {
+.cb-option-active,
+.cb-option-highlight {
   background-color: var(--color-bg-hover);
 }
 

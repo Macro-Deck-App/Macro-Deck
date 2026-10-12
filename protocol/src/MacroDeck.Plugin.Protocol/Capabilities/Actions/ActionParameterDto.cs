@@ -58,6 +58,11 @@ public sealed record ActionParameterDto
 	/// false, so a plugin that predates it keeps receiving opaque <c>#rrggbb</c> values.</summary>
 	public bool? AllowAlpha { get; init; }
 
+	/// <summary>Whether the user can type into a choice or dynamic choice parameter's field to filter its
+	/// options. Optional and additive: absent means false, and a host that predates it draws the plain select.
+	/// </summary>
+	public bool? Searchable { get; init; }
+
 	public bool LiteralOnly { get; init; }
 
 	public string? ValidationRegex { get; init; }

@@ -139,6 +139,25 @@ internal sealed class RooftopStation(RooftopClient client) : IWeatherStation
 location name set. Start with it and keep the last good snapshot when a refresh fails, as the built-in
 Open-Meteo station does. A brief outage then doesn't blank the widget.
 
+## Telling Macro Deck the weather changed
+
+Macro Deck reads your stations about once a minute on its own. After a station fetched new data, tell it
+so, and Weather widgets show the new conditions at once instead of up to a minute later. If your
+integration also declares weather variables, ask for those to be read again at the same moment, so a
+widget whose states follow them never disagrees with the Weather widget.
+
+```csharp
+// at the end of each refresh, with the IIntegrationContext from InitializeAsync
+_ = context.WeatherProvider.NotifySnapshotsChangedAsync();
+_ = context.Variables.RequestRefreshAsync();
+```
+
+- `NotifySnapshotsChangedAsync` is best effort and never throws. Notices that arrive while one is pending
+  are merged into one read, so calling it once per refresh is enough.
+- It covers changed snapshots only. A changed list of stations is still a catalog change (see
+  [Over the plugin protocol](#over-the-plugin-protocol)).
+- A Macro Deck older than this member ignores the notice and keeps reading the stations once a minute.
+
 ## The snapshot
 
 ```csharp
@@ -196,6 +215,11 @@ read as an unavailable snapshot. The station list is a snapshot, so after your c
 removes a location, call `CatalogChanged(CapabilityKinds.Weather)` on an injected
 `IPluginCatalogNotifier`. The [weather sample](/introduction/samples-and-template/) does exactly this.
 See [Capability parity](/reference/capability-parity/).
+
+`context.WeatherProvider.NotifySnapshotsChangedAsync()` sends the `weather` host api's `snapshots-changed`
+operation (see [WebSocket protocol](/reference/websocket/#weather)). Macro Deck accepts it only from a
+plugin whose `weather` capability was negotiated and answers `CAPABILITY_UNAVAILABLE` otherwise; an older
+Macro Deck answers `CAPABILITY_UNSUPPORTED`. The SDK swallows both, so the call stays safe everywhere.
 
 ## See also
 

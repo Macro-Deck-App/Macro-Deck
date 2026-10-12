@@ -20581,23 +20581,26 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Onboarding.Links.GitHubDescription" xml:space="preserve">
     <value>सोर्स कोड, रिलीज़ और इश्यू ट्रैकर।</value>
   </data>
-  <data name="Onboarding.Links.Sponsors" xml:space="preserve">
-    <value>GitHub Sponsors</value>
-  </data>
-  <data name="Onboarding.Links.SponsorsDescription" xml:space="preserve">
+  <data name="Onboarding.Links.DonateDescription" xml:space="preserve">
     <value>Macro Deck के विकास का समर्थन करें।</value>
-  </data>
-  <data name="Onboarding.Links.KoFi" xml:space="preserve">
-    <value>Ko-fi</value>
-  </data>
-  <data name="Onboarding.Links.KoFiDescription" xml:space="preserve">
-    <value>डेवलपर को एक कॉफ़ी खरीदें।</value>
   </data>
   <data name="Onboarding.Links.Discord" xml:space="preserve">
     <value>Discord</value>
   </data>
   <data name="Onboarding.Links.DiscordDescription" xml:space="preserve">
     <value>मदद लें और समुदाय से बात करें।</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStore" xml:space="preserve">
+    <value>Google Play पर Companion ऐप</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStoreDescription" xml:space="preserve">
+    <value>अपने Android फ़ोन या टैबलेट पर Macro Deck इस्तेमाल करें।</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStore" xml:space="preserve">
+    <value>App Store पर Companion ऐप</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStoreDescription" xml:space="preserve">
+    <value>अपने iPhone या iPad पर Macro Deck इस्तेमाल करें।</value>
   </data>
   <data name="Onboarding.RecoveryKey.Title" xml:space="preserve">
     <value>आपकी बैकअप रिकवरी कुंजी</value>

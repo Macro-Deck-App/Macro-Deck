@@ -1,3 +1,4 @@
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.Weather;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -166,7 +167,7 @@ internal sealed class WeatherIntegrationTests
 
 		public IIntegrationConfig Config => ConfigStore;
 
-		public IVariableApi Variables => throw new NotSupportedException();
+		public IVariableApi Variables { get; } = new IntegrationVariableApi(WeatherIntegration.IntegrationId, null!);
 
 		public IUserVariableApi UserVariables => throw new NotSupportedException();
 

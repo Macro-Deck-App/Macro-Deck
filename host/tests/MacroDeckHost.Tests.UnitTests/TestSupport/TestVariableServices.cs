@@ -30,6 +30,7 @@ internal static class TestVariableServices
 			.AddSingleton<IVariableRefreshSignal>(new VariableRefreshSignal())
 			.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(owners))
 			.AddTestFileVariables()
+			.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None)
 			.AddScoped<IVariableService, VariableService>();
 	}
 
@@ -59,6 +60,7 @@ internal static class TestVariableServices
 			new VariableRefreshSignal(),
 			new MusicPlayerPollNudge(owners),
 			files ?? new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Serilog.Core.Logger.None),
-			templates ?? new TemplateVariableSynchronizer(registry, mediator));
+			templates ?? new TemplateVariableSynchronizer(registry, mediator),
+			Serilog.Core.Logger.None);
 	}
 }

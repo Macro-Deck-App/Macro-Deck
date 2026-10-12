@@ -462,7 +462,8 @@ internal sealed class ObsMultipleConfigurationsTests
 					new RecordingMediator(),
 					new FakeVariableFileSystem(),
 					Serilog.Core.Logger.None),
-				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()));
+				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()),
+				Serilog.Core.Logger.None);
 			Store = new MemoryConfigStore();
 			var services = new ServiceCollection();
 			services.AddSingleton<IIntegrationConfigStore>(Store);

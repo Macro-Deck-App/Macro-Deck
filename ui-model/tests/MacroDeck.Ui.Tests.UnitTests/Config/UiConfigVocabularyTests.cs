@@ -284,6 +284,45 @@ public class UiConfigVocabularyTests
 		Assert.That(node.Properties[UiConfigProperties.Reorderable].GetBoolean(), Is.True);
 	}
 
+	[Test]
+	public void A_choice_authored_without_the_searchable_flag_emits_the_same_node_as_before()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(WithOptions(new UiChoiceInput { Key = "counter" })));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Choice);
+
+		Assert.That(node.Properties.Keys, Does.Not.Contain(UiConfigProperties.Searchable));
+	}
+
+	[Test]
+	public void A_searchable_choice_emits_the_flag_on_the_choice_node()
+	{
+		var tree = UiViewBuilder.Build(ConfigSurface(),
+			Configure(WithOptions(new UiChoiceInput { Key = "counter", Searchable = true })));
+
+		var node = Walk(tree.Root).Single(n => n.Type == UiConfigPrimitives.Choice);
+
+		Assert.That(node.Properties[UiConfigProperties.Searchable].GetBoolean(), Is.True);
+	}
+
+	[Test]
+	public void A_dynamic_choice_emits_the_searchable_flag_only_when_authored()
+	{
+		var plain = Walk(UiViewBuilder.Build(ConfigSurface(),
+				Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter" }))).Root)
+			.Single(n => n.Type == UiConfigPrimitives.DynamicChoice);
+		var searchable = Walk(UiViewBuilder.Build(ConfigSurface(),
+				Configure(WithOptions(new UiDynamicChoiceInput { Key = "counter", Searchable = true }))).Root)
+			.Single(n => n.Type == UiConfigPrimitives.DynamicChoice);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plain.Properties.Keys, Does.Not.Contain(UiConfigProperties.Searchable));
+			Assert.That(searchable.Properties[UiConfigProperties.Searchable].GetBoolean(), Is.True);
+		});
+	}
+
 	/// <summary>
 	/// One element of each of the forty-one types, with every property the DSL exposes populated. The option
 	/// properties are set explicitly rather than through a <see cref="UiOptionsState" />, because
@@ -328,9 +367,10 @@ public class UiConfigVocabularyTests
 						Configure(WithOptions(new UiChoiceInput
 							{ Key = "choice", Segmented = true, HideLabel = true })),
 						Configure(WithOptions(new UiChoiceInput { Key = "cardChoice", Cards = true })),
+						Configure(WithOptions(new UiChoiceInput { Key = "searchableChoice", Searchable = true })),
 						Configure(new UiPasswordInput { Key = "password" }),
 						Configure(new UiSecretInput { Key = "secret" }),
-						Configure(WithOptions(new UiDynamicChoiceInput { Key = "dynamicChoice" })),
+						Configure(WithOptions(new UiDynamicChoiceInput { Key = "dynamicChoice", Searchable = true })),
 						Configure(WithOptions(new UiAutocompleteInput { Key = "autocomplete" })),
 						Configure(WithOptions(new UiMultiSelectInput { Key = "multiSelect" })),
 						Configure(

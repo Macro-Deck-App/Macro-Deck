@@ -204,6 +204,31 @@ stored values, keyed by parameter name. `Secret` and `Password` parameters arriv
 (`UiConfigSurfaceAttributes.MaskedSecretValue`, `"$masked"`), because opening a configuration surface is
 not an intent to reveal a secret. You get the real value the ordinary way, when the user submits.
 
+## Letting the user search a long list
+
+A choice draws a plain select. When its list is long, a few dozen counters, scenes or devices, set
+`Searchable` so the user can type into the field to find an option:
+
+```csharp
+new UiChoiceInput
+{
+    Key = "counterId",
+    Label = Strings.Widget.Counter(),
+    Searchable = true,
+    Binding = Bind.To(counter),
+    Options = UiValue.Of<IReadOnlyList<UiOption>>(counters),
+}
+```
+
+- **Typing filters the options by label**, and the value is still one of the options: typed text alone is
+  never stored, and the field shows the picked option's label, not its value.
+- `UiDynamicChoiceInput` takes the same `Searchable`, and searches the options it resolved.
+- On a choice that is also `Segmented`, `Cards` or `AllowsCustomValue`, `Searchable` has no effect. A
+  choice that allows a custom value is already a field that filters as the user types.
+- A Macro Deck release from before `Searchable` ignores the property and draws the plain select.
+
+For an action parameter, see [Action parameters](/features/actions/#letting-the-user-search-a-long-list).
+
 ## Letting the user pick a file, folder or image
 
 For a path, use a path input rather than a `UiStringInput`, so the user can browse instead of typing:

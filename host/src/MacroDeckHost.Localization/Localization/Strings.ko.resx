@@ -20581,23 +20581,26 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Onboarding.Links.GitHubDescription" xml:space="preserve">
     <value>소스 코드, 릴리스와 이슈 트래커입니다.</value>
   </data>
-  <data name="Onboarding.Links.Sponsors" xml:space="preserve">
-    <value>GitHub Sponsors</value>
-  </data>
-  <data name="Onboarding.Links.SponsorsDescription" xml:space="preserve">
+  <data name="Onboarding.Links.DonateDescription" xml:space="preserve">
     <value>Macro Deck 개발을 후원하세요.</value>
-  </data>
-  <data name="Onboarding.Links.KoFi" xml:space="preserve">
-    <value>Ko-fi</value>
-  </data>
-  <data name="Onboarding.Links.KoFiDescription" xml:space="preserve">
-    <value>개발자에게 커피 한 잔을 선물하세요.</value>
   </data>
   <data name="Onboarding.Links.Discord" xml:space="preserve">
     <value>Discord</value>
   </data>
   <data name="Onboarding.Links.DiscordDescription" xml:space="preserve">
     <value>도움을 받고 커뮤니티와 대화하세요.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStore" xml:space="preserve">
+    <value>Google Play의 Companion 앱</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStoreDescription" xml:space="preserve">
+    <value>Android 휴대폰이나 태블릿에서 Macro Deck을 사용하세요.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStore" xml:space="preserve">
+    <value>App Store의 Companion 앱</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStoreDescription" xml:space="preserve">
+    <value>iPhone이나 iPad에서 Macro Deck을 사용하세요.</value>
   </data>
   <data name="Onboarding.RecoveryKey.Title" xml:space="preserve">
     <value>백업 복구 키</value>

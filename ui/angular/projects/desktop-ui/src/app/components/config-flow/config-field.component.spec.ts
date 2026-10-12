@@ -125,6 +125,31 @@ describe('ConfigFieldComponent', () => {
     expect(fixture.nativeElement.querySelector('shared-combobox')).toBeFalsy();
   });
 
+  it('lets the user type into a searchable choice field to filter by label and submits only the picked option', () => {
+    component.field = field(ActionParameterType.Choice, {
+      searchable: true,
+      options: [{ value: 'id-1', label: 'Push-ups' }, { value: 'id-2', label: 'Squats' }],
+    });
+    const emitted: unknown[] = [];
+    component.valueChange.subscribe(v => emitted.push(v));
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('shared-combobox input.cb-input') as HTMLInputElement;
+    input.dispatchEvent(new Event('focus'));
+    input.value = 'squ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const visible = Array.from(document.querySelectorAll<HTMLButtonElement>('.cb-option'));
+    expect(visible.map(o => o.textContent?.trim())).toEqual(['Squats']);
+    expect(emitted).toEqual([]);
+
+    visible[0].click();
+    fixture.detectChanges();
+
+    expect(emitted).toEqual(['id-2']);
+  });
+
   it('renders a shared checkbox for boolean fields', () => {
     component.field = field(ActionParameterType.Boolean, { description: 'Enable it' });
     fixture.detectChanges();

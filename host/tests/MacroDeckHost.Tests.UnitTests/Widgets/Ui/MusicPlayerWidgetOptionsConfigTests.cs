@@ -33,6 +33,18 @@ public class MusicPlayerWidgetOptionsConfigTests
 	}
 
 	[Test]
+	public void A_choice_option_offers_search_only_when_the_player_declared_it_searchable()
+	{
+		var host = Render(new { instanceId = AnyApp });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("instanceOptions.playlist").Flag(UiConfigProperties.Searchable), Is.True);
+			Assert.That(host.ById("instanceOptions.order").Flag(UiConfigProperties.Searchable), Is.Null);
+		});
+	}
+
+	[Test]
 	public void The_active_player_and_an_instance_without_options_offer_no_option_fields()
 	{
 		var active = Render(new { instanceId = "", instanceOptions = new { cycleSeconds = 30 } });
@@ -103,6 +115,9 @@ public class MusicPlayerWidgetOptionsConfigTests
 				ActionParameter.Choice("order",
 					[new ActionParameterOption { Value = "newest" }, new ActionParameterOption { Value = "oldest" }],
 					"Order"),
+				ActionParameter.Choice("playlist",
+					[new ActionParameterOption { Value = "focus" }, new ActionParameterOption { Value = "chill" }],
+					"Playlist").AsSearchable(),
 			]),
 			Descriptor(Spotify, "Spotify", [ActionParameter.Number("cycleSeconds", "Cycle every", defaultValue: 20)]),
 			Descriptor(Vlc, "VLC", [ActionParameter.Toggle("cycleSeconds", "Follow VLC", defaultValue: true)]),

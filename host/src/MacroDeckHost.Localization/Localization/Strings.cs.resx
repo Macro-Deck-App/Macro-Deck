@@ -20559,23 +20559,26 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Onboarding.Links.GitHubDescription" xml:space="preserve">
     <value>Zdrojový kód, vydání a hlášení chyb.</value>
   </data>
-  <data name="Onboarding.Links.Sponsors" xml:space="preserve">
-    <value>GitHub Sponsors</value>
-  </data>
-  <data name="Onboarding.Links.SponsorsDescription" xml:space="preserve">
+  <data name="Onboarding.Links.DonateDescription" xml:space="preserve">
     <value>Podpora vývoje Macro Decku.</value>
-  </data>
-  <data name="Onboarding.Links.KoFi" xml:space="preserve">
-    <value>Ko-fi</value>
-  </data>
-  <data name="Onboarding.Links.KoFiDescription" xml:space="preserve">
-    <value>Šálek kávy pro vývojáře.</value>
   </data>
   <data name="Onboarding.Links.Discord" xml:space="preserve">
     <value>Discord</value>
   </data>
   <data name="Onboarding.Links.DiscordDescription" xml:space="preserve">
     <value>Pomoc a diskuze s komunitou.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStore" xml:space="preserve">
+    <value>Aplikace Companion na Google Play</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStoreDescription" xml:space="preserve">
+    <value>Macro Deck na telefonu nebo tabletu s Androidem.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStore" xml:space="preserve">
+    <value>Aplikace Companion v App Store</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStoreDescription" xml:space="preserve">
+    <value>Macro Deck na iPhonu nebo iPadu.</value>
   </data>
   <data name="Onboarding.RecoveryKey.Title" xml:space="preserve">
     <value>Obnovovací klíč záloh</value>

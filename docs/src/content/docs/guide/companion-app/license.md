@@ -8,7 +8,10 @@ purchase covers all your phones and tablets.
 
 ## One purchase for all your devices
 
-The license is a one-time purchase in the App Store or on Google Play, with no subscription. It does not stay
+The license is a one-time purchase in the App Store or on Google Play, with no subscription. **Buy license**
+first shows what the app adds over the web client, the price in your store and these terms; nothing is bought
+until you confirm it there. The purchase supports the development and maintenance of Macro Deck, which stays free
+and open source. It does not stay
 on the phone you bought it on: the app hands it to your computer, and **Macro Deck gives it to every Companion
 app that connects**. Your other phones and tablets get it from there, whether they run Android or iOS, and
 also the [Android version without Google Play](#the-android-version-without-google-play), which cannot buy
@@ -59,19 +62,32 @@ others can be revoked, and the terms of service apply.
 
 ## The 7-day trial
 
-Each device can try the app for 7 days. On the paywall, tap **Start 7-day trial**.
+Each device can try the app for 7 days. Start the trial on the last step of the
+[first start](/guide/companion-app/setup/#first-start) or on the **Not licensed** banner of the Connections screen
+with **Start 7-day free trial**, or on the paywall of a deck with **Start 7-day trial**.
 
 ![The paywall in the Android app, with the Start 7-day trial button](../../../../assets/guide/companion/android-paywall.png)
+
+The trial runs on your computer's clock, so it begins on the first connection: started from the first start or the
+banner, the Connections screen says **Your free trial is ready** until then, and the first computer you connect to starts it
+without the paywall. A computer with a Macro Deck version from before licensing offers no trial.
+
+The trial never turns into a purchase. It simply ends after 7 days, and nothing is charged unless you buy the
+license yourself.
 
 - Starting the trial is your consent to a trial ID for this device: on Android the app keeps the Android ID
   salted and hashed on your computer, on iPhone and iPad a random ID from the device's keychain. It makes the trial
   run only once per device, also after reinstalling the app.
 - The trial runs on your computer's clock, so changing the date on the phone does not extend it.
-- The Connections screen shows the days left. After 7 days, decks show the paywall again until a license
-  arrives; your connections and settings stay.
+- The Connections screen shows the days left. After 7 days the Companion app needs a license again; your
+  connections and settings stay. Without a license or a running trial the Connections screen says **Not licensed**.
+
+Macro Deck's web client stays free whatever the app's license says. When the app shows the paywall instead of a
+computer's deck, **Open web client** opens that computer's web client in your browser. It is not offered for a
+computer on the USB cable, whose address only the app itself can reach.
 - **Remove trial ID** in the settings withdraws the consent. A trial that is running keeps running.
 
-The trial needs Macro Deck to answer first, so the button waits a moment after connecting.
+On the paywall the trial needs Macro Deck to answer first, so the button waits a moment after connecting.
 
 ## Restore a purchase
 

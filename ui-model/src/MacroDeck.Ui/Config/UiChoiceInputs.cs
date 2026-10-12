@@ -18,6 +18,13 @@ public sealed record UiChoiceInput : UiOptionsInput<string>
 	/// </summary>
 	public UiValue<bool> Cards { get; init; }
 
+	/// <summary>Lets the user type into the field to filter the options by label, for a long list - a
+	/// presentation flag like <see cref="Segmented" />. Typed text alone is never stored: the value stays one of
+	/// the options and the field shows the picked option's label. Ignored together with <see cref="Segmented" />, <see cref="Cards" /> or
+	/// <see cref="UiOptionsInput{T}.AllowsCustomValue" />; a renderer that does not know the flag draws the
+	/// plain select.</summary>
+	public UiValue<bool> Searchable { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.Choice;
 
@@ -30,6 +37,7 @@ public sealed record UiChoiceInput : UiOptionsInput<string>
 
 		properties.Set(UiConfigProperties.Segmented, Segmented);
 		properties.Set(UiConfigProperties.Cards, Cards);
+		properties.Set(UiConfigProperties.Searchable, Searchable);
 	}
 }
 
@@ -40,8 +48,24 @@ public sealed record UiChoiceInput : UiOptionsInput<string>
 /// </summary>
 public sealed record UiDynamicChoiceInput : UiOptionsInput<string>
 {
+	/// <summary>Lets the user type into the field to filter the resolved options by label, the same
+	/// presentation flag as <see cref="UiChoiceInput.Searchable" />. Ignored together with
+	/// <see cref="UiOptionsInput{T}.AllowsCustomValue" />; a renderer that does not know the flag draws the
+	/// plain select.</summary>
+	public UiValue<bool> Searchable { get; init; }
+
 	/// <inheritdoc />
 	public override string Type => UiConfigPrimitives.DynamicChoice;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Searchable, Searchable);
+	}
 }
 
 /// <summary>

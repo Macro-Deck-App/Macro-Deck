@@ -25,6 +25,7 @@ export function mapActionParameterDef(
     step: p.step,
     showSlider: p.showSlider,
     allowAlpha: p.allowAlpha,
+    searchable: p.searchable,
     options: p.options?.map(o => ({
       label: resolveLocalizedText(o.label, localization) || o.value,
       value: o.value,

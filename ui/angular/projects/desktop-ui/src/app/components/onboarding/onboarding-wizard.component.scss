@@ -53,6 +53,13 @@
   }
 }
 
+.ob-divider {
+  height: 0;
+  margin: 16px 0;
+  border: 0;
+  border-top: 1px solid var(--color-border-primary);
+}
+
 .ob-qr {
   flex-shrink: 0;
 }

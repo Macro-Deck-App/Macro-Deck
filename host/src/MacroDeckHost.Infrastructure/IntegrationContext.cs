@@ -10,6 +10,7 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Resources;
 
@@ -31,8 +32,10 @@ public class IntegrationContext : IIntegrationContext
 		INotificationService notificationService,
 		IUiResourceRegistry? uiResources = null,
 		IBatteryApi? batteries = null,
-		IAndroidDeviceManager? androidDevices = null)
+		IAndroidDeviceManager? androidDevices = null,
+		IWeatherProviderApi? weatherProvider = null)
 	{
+		WeatherProvider = weatherProvider ?? UnsupportedWeatherProviderApi.Instance;
 		UiResources = uiResources ?? NoUiResources.Instance;
 		Colors = colors;
 		Batteries = batteries ?? UnsupportedBatteryApi.Instance;
@@ -94,4 +97,6 @@ public class IntegrationContext : IIntegrationContext
 	public IBatteryApi Batteries { get; }
 
 	public IAndroidDeviceManager AndroidDevices { get; }
+
+	public IWeatherProviderApi WeatherProvider { get; }
 }

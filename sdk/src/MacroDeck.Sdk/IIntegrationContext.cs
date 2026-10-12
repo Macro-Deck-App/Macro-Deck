@@ -9,6 +9,7 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeck.Sdk;
@@ -87,4 +88,11 @@ public interface IIntegrationContext
 	/// <see cref="AndroidDeviceAccess.Unsupported" />, no devices, and never raises an event.
 	/// </summary>
 	IAndroidDeviceManager AndroidDevices => UnsupportedAndroidDeviceManager.Instance;
+
+	/// <summary>
+	/// Tells Macro Deck when this integration's weather stations have new data, so Weather widgets follow
+	/// at once. A context from a Macro Deck without it, and any implementation that does not override this
+	/// member, ignores the notice; the stations are then still read about once a minute.
+	/// </summary>
+	IWeatherProviderApi WeatherProvider => UnsupportedWeatherProviderApi.Instance;
 }

@@ -65,6 +65,7 @@ internal sealed class VariableCatalogHarness
 		services.AddSingleton<IVariableRefreshSignal>(Refresh);
 		services.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(Integrations));
 		services.AddTestFileVariables();
+		services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 		services.AddScoped<IVariableService, VariableService>();
 		var provider = services.BuildServiceProvider();
 		ScopeFactory = provider.GetRequiredService<IServiceScopeFactory>();

@@ -54,7 +54,8 @@ public class RemoteIntegrationContextTests
 				Serilog.Core.Logger.None),
 			new RemoteUiResourceRegistry(_invoker, new Support.FakeAssetUploader()),
 			new RemoteColorApi(_invoker, new PluginConnectionState(), stateCache, Serilog.Core.Logger.None),
-			new RemoteNotificationService(_invoker, new PluginConnectionState(), new NotificationResultStore()));
+			new RemoteNotificationService(_invoker, new PluginConnectionState(), new NotificationResultStore()),
+			weatherProvider: new RemoteWeatherProviderApi(_invoker));
 	}
 
 	[TearDown]
@@ -119,6 +120,10 @@ public class RemoteIntegrationContextTests
 		yield return Case(HostApis.Variables,
 			HostOperations.Variables.Refresh,
 			(context, invoker) => context.Variables.RequestRefreshAsync());
+
+		yield return Case(HostApis.Weather,
+			HostOperations.Weather.SnapshotsChanged,
+			(context, invoker) => context.WeatherProvider.NotifySnapshotsChangedAsync());
 
 		yield return Case(HostApis.UserVariables,
 			HostOperations.UserVariables.Apply,

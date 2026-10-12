@@ -10,6 +10,7 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeck.Plugin.Testing.Fakes;
@@ -57,6 +58,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		Batteries = new FakeBatteryApi();
 		BatteryProvider = new FakeBatteryProviderContext();
 		AndroidDevices = new FakeAndroidDeviceManager();
+		WeatherProvider = new FakeWeatherProviderApi();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -187,6 +189,12 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	/// <inheritdoc />
 	IAndroidDeviceManager IIntegrationContext.AndroidDevices => _registeredAndroidDevices ?? AndroidDevices;
+
+	/// <summary>What a weather provider reported about its stations - see <see cref="FakeWeatherProviderApi" />.</summary>
+	public FakeWeatherProviderApi WeatherProvider { get; }
+
+	/// <inheritdoc />
+	IWeatherProviderApi IIntegrationContext.WeatherProvider => WeatherProvider;
 
 	internal void UseRegisteredAndroidDevices(IAndroidDeviceManager androidDevices)
 		=> _registeredAndroidDevices = ReferenceEquals(androidDevices, AndroidDevices) ? null : androidDevices;

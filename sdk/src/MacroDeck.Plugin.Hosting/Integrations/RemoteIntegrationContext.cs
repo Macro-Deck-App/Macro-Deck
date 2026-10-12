@@ -11,6 +11,7 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
+using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeck.Plugin.Hosting.Integrations;
@@ -37,7 +38,8 @@ internal sealed class RemoteIntegrationContext(
 	RemoteColorApi colors,
 	RemoteNotificationService notificationService,
 	RemoteBatteryApi? batteries = null,
-	IAndroidDeviceManager? androidDevices = null) : IIntegrationContext
+	IAndroidDeviceManager? androidDevices = null,
+	RemoteWeatherProviderApi? weatherProvider = null) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -66,4 +68,7 @@ internal sealed class RemoteIntegrationContext(
 	public IBatteryApi Batteries { get; } = batteries?.Lifecycle ?? UnsupportedBatteryApi.Instance;
 
 	public IAndroidDeviceManager AndroidDevices { get; } = androidDevices ?? UnsupportedAndroidDeviceManager.Instance;
+
+	public IWeatherProviderApi WeatherProvider { get; } =
+		weatherProvider ?? (IWeatherProviderApi)UnsupportedWeatherProviderApi.Instance;
 }

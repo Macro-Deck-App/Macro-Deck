@@ -152,16 +152,21 @@
       @case ('links') {
         <p class="ob-lead">{{ appStrings.Onboarding.Links.Subtitle | translate }}</p>
 
-        @for (link of links; track link.url) {
-          <div class="ob-option">
-            <div class="ob-option-text">
-              <span class="ob-option-title">{{ link.title | translate }}</span>
-              <span class="ob-option-description">{{ link.description | translate }}</span>
+        @for (group of linkGroups; track $index) {
+          @if (!$first) {
+            <hr class="ob-divider" aria-hidden="true">
+          }
+          @for (link of group; track link.url) {
+            <div class="ob-option">
+              <div class="ob-option-text">
+                <span class="ob-option-title">{{ link.title | translate }}</span>
+                <span class="ob-option-description">{{ link.description | translate }}</span>
+              </div>
+              <shared-button variant="secondary" (click)="openLink(link.url)">
+                {{ appStrings.Onboarding.Connect.Open | translate }}
+              </shared-button>
             </div>
-            <shared-button variant="secondary" (click)="openLink(link.url)">
-              {{ appStrings.Onboarding.Connect.Open | translate }}
-            </shared-button>
-          </div>
+          }
         }
       }
     }

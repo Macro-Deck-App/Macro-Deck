@@ -278,6 +278,7 @@ internal static class MusicPlayerWidgetConfigView
 					Key = option.Name,
 					Label = label,
 					Description = option.Description,
+					Searchable = option.Searchable ? UiValue.Of(true) : default,
 					Binding = Bind.To(text),
 					Options = UiValue.Of<IReadOnlyList<UiOption>>([
 						.. option.Options!.Select(choice => new UiOption

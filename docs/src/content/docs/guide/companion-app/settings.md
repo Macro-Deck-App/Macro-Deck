@@ -12,7 +12,7 @@ Open the settings with the gear on the Connections screen. Settings for a single
 
 | Setting | Does |
 | --- | --- |
-| Status | **Licensed**, **Trial** with the days left, **Trial ended** or **Not licensed**. Tap it for the license details, such as the **License ID** support asks for. |
+| Status | **Licensed**, **Trial** with the days left, **Trial ended**, **Trial starts when you connect to your computer** after starting it on the first start, or **Not licensed**. Tap it for the license details, such as the **License ID** support asks for. |
 | Buy license, Restore purchase | Buy the license in the store, or get back one you bought with the same store account. Not shown in the Android version without Google Play services. |
 | Remove trial ID | Withdraws the consent you gave by starting the trial. A trial that is running keeps running. |
 
