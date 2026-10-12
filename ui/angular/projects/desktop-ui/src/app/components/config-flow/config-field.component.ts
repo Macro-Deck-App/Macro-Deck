@@ -19,7 +19,7 @@ import { WidgetTargetPickerComponent } from '../forms/widget-target-picker/widge
 import { HotkeyRecorderComponent } from '../forms/hotkey-recorder/hotkey-recorder.component';
 import { KeyboardComboEditorComponent } from '../forms/keyboard-combo-editor/keyboard-combo-editor.component';
 import { KeyboardSequenceEditorComponent } from '../forms/keyboard-sequence-editor/keyboard-sequence-editor.component';
-import { ComboboxOption } from '../forms/combobox/combobox.component';
+import { ComboboxComponent, ComboboxOption } from '../forms/combobox/combobox.component';
 import { FilePathInputComponent } from '../forms/file-path-input/file-path-input.component';
 import { ActionOptionsService } from '../../services/action-options.service';
 
@@ -30,6 +30,7 @@ import { ActionOptionsService } from '../../services/action-options.service';
   imports: [
     FormsModule,
     SelectComponent,
+    ComboboxComponent,
     CheckboxComponent,
     ButtonComponent,
     MultiSelectComponent,
@@ -84,11 +85,21 @@ import { ActionOptionsService } from '../../services/action-options.service';
           </div>
         }
         @case ('choice') {
-          <shared-select
-            [options]="options"
-            [placeholder]="(field.placeholder | localizedText) || ('macrodeck:Common.Select' | translate)"
-            [ngModel]="stringValue"
-            (ngModelChange)="emit($event)" />
+          @if (field.searchable) {
+            <shared-combobox
+              [value]="stringValue"
+              [placeholder]="(field.placeholder | localizedText) || ('macrodeck:Common.Select' | translate)"
+              [options]="options"
+              [clearable]="false"
+              [pickOnly]="true"
+              (valueChange)="emit($event)" />
+          } @else {
+            <shared-select
+              [options]="options"
+              [placeholder]="(field.placeholder | localizedText) || ('macrodeck:Common.Select' | translate)"
+              [ngModel]="stringValue"
+              (ngModelChange)="emit($event)" />
+          }
         }
         @case ('boolean') {
           <shared-checkbox

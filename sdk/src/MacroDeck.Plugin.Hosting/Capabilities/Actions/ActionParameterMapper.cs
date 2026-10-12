@@ -41,6 +41,7 @@ internal static class ActionParameterMapper
 			Multiline = parameter.Multiline,
 			SupportsReset = parameter.SupportsReset,
 			AllowAlpha = parameter.AllowAlpha ? true : null,
+			Searchable = parameter.Searchable ? true : null,
 			LiteralOnly = parameter.LiteralOnly,
 			ValidationRegex = parameter.ValidationRegex,
 			MaxLength = parameter.MaxLength,

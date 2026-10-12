@@ -149,6 +149,20 @@ and **is still sent to the executor** - never infer anything from a field being 
 Set `Platforms` on the definition only when the capability does not exist on other platforms at all
 (hibernation on macOS); the action is then neither listed nor executable there.
 
+### Letting the user search a long list
+
+A `Choice` or `DynamicChoice` parameter draws a plain select. For a long list, call `AsSearchable()` on it
+and the user can type into the field to filter the options by label:
+
+```csharp
+ActionParameter.DynamicChoice("counter", label: Strings.Parameters.Counter(), required: true).AsSearchable()
+```
+
+Typed text alone is never stored: the value is still one of the options, and the field shows the picked
+option's label. Other parameter
+types ignore it, and so does a Macro Deck release from before `Searchable`, which draws the plain select.
+For a configuration view, see [Letting the user search a long list](/ui/views/configuration/#letting-the-user-search-a-long-list).
+
 ## What the executor gets
 
 | `ActionExecutionContext` | |

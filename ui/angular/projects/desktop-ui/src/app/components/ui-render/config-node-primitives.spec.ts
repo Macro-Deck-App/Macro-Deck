@@ -433,6 +433,73 @@ describe('shared-ui-node every configuration primitive', () => {
     expect(host.querySelector('shared-select')).not.toBeNull();
   });
 
+  for (const type of ['choice', 'dynamic-choice']) {
+    it(`lets the user type into a searchable ${type} to filter by label, picking only an option`, async () => {
+      const rendered = await renderTree({
+        id: 'n',
+        type,
+        properties: {
+          searchable: true,
+          value: '',
+          events: ['change'],
+          options: [
+            { value: 'id-1', label: 'Push-ups' },
+            { value: 'id-2', label: 'Pull-ups' },
+            { value: 'id-3', label: 'Squats' },
+          ],
+        },
+      });
+      const input = el(rendered).querySelector<HTMLInputElement>('shared-combobox input.cb-input')!;
+
+      input.dispatchEvent(new Event('focus'));
+      input.value = 'UPS';
+      input.dispatchEvent(new Event('input'));
+      await tick(rendered);
+
+      const visible = Array.from(document.querySelectorAll<HTMLButtonElement>('.cb-option'));
+      expect(visible.map(o => o.textContent?.trim())).toEqual(['Push-ups', 'Pull-ups']);
+      expect(rendered.events).toEqual([]);
+
+      visible[1].click();
+      await tick(rendered);
+
+      expect(rendered.events).toEqual([{ nodeId: 'n', name: 'change', data: 'id-2' }]);
+    });
+  }
+
+  it('shows the label of a searchable choice value, not the stored value', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'choice',
+      properties: { searchable: true, value: 'id-2', options: [{ value: 'id-2', label: 'Pull-ups' }] },
+    });
+    await tick(rendered);
+
+    expect(el(rendered).querySelector<HTMLInputElement>('shared-combobox input.cb-input')!.value).toBe('Pull-ups');
+  });
+
+  it('keeps a disabled searchable choice from being opened', async () => {
+    const rendered = await renderTree({
+      id: 'n',
+      type: 'choice',
+      properties: { searchable: true, disabled: true, value: '', options: [{ value: 'a', label: 'A' }] },
+    });
+    await tick(rendered);
+
+    expect(el(rendered).querySelector<HTMLInputElement>('shared-combobox input.cb-input')!.disabled).toBeTrue();
+  });
+
+  it('draws a choice without the searchable property as the plain select', async () => {
+    const host = el(await renderTree({
+      id: 'n',
+      type: 'choice',
+      properties: { value: 'a', options: [{ value: 'a', label: 'A' }] },
+    }));
+
+    expect(host.querySelector('shared-combobox')).toBeNull();
+    expect(host.querySelector('shared-select')).not.toBeNull();
+  });
+
   it('draws a reorderable multiselect as an ordered list, and emits the new order when a row moves', async () => {
     const rendered = await renderTree({
       id: 'n',

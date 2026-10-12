@@ -162,6 +162,8 @@ export interface ActionBlockParameter {
 
   allowAlpha?: boolean;
 
+  searchable?: boolean;
+
   valueLabel?: string;
 
   operator?: ComparisonOperator;

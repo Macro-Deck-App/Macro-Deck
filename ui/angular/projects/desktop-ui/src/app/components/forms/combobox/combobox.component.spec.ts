@@ -180,6 +180,104 @@ describe('ComboboxComponent displayLabel', () => {
   });
 });
 
+describe('ComboboxComponent pick only', () => {
+  let fixture: ComponentFixture<ComboboxComponent>;
+  let component: ComboboxComponent;
+  let emitted: string[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ComboboxComponent],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+    });
+    fixture = TestBed.createComponent(ComboboxComponent);
+    component = fixture.componentInstance;
+    component.pickOnly = true;
+    component.options = [{ value: 'id-1', label: 'Push-ups' }, { value: 'id-2', label: 'Squats' }];
+    emitted = [];
+    component.valueChange.subscribe(v => emitted.push(v));
+  });
+
+  it('never stores typed text, also while nothing is picked yet', () => {
+    component.startEdit();
+    component.onInput('squ');
+
+    expect(component.filteredOptions().map(o => o.label)).toEqual(['Squats']);
+    expect(component.value).toBe('');
+    expect(emitted).toEqual([]);
+  });
+
+  it('shows the picked option label without being handed one', () => {
+    component.startEdit();
+    component.pick({ value: 'id-2', label: 'Squats' });
+
+    expect(emitted).toEqual(['id-2']);
+    expect(component.shownText()).toBe('Squats');
+  });
+
+  function key(name: string): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', { key: name, cancelable: true });
+    component.onKeydown(event);
+    return event;
+  }
+
+  it('picks from the keyboard: typing highlights the first match and Enter picks it', () => {
+    component.startEdit();
+    component.onInput('u');
+
+    expect(component.filteredOptions().map(o => o.label)).toEqual(['Push-ups', 'Squats']);
+    key('ArrowDown');
+    expect(key('Enter').defaultPrevented).toBeTrue();
+
+    expect(emitted).toEqual(['id-2']);
+    expect(component.isOpen()).toBeFalse();
+  });
+
+  it('wraps with the arrow keys, skips a disabled option and closes on Escape without picking', () => {
+    component.options = [...component.options, { value: 'id-3', label: 'Sit-ups', disabled: true }];
+    component.startEdit();
+
+    key('ArrowUp');
+    expect(component.filteredOptions()[component.activeIndex()].label).toBe('Squats');
+    key('ArrowDown');
+    expect(component.filteredOptions()[component.activeIndex()].label).toBe('Push-ups');
+    key('Escape');
+
+    expect(component.isOpen()).toBeFalse();
+    expect(emitted).toEqual([]);
+  });
+
+  it('filters by label only, never by the stored value', () => {
+    component.startEdit();
+    component.onInput('id-');
+
+    expect(component.filteredOptions()).toEqual([]);
+  });
+
+  it('cannot be opened or picked from while disabled', async () => {
+    component.disabled = true;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.toggleFromCaret();
+    key('ArrowDown');
+
+    expect(component.isOpen()).toBeFalse();
+    expect((fixture.nativeElement.querySelector('input.cb-input') as HTMLInputElement).disabled).toBeTrue();
+  });
+
+  it('keeps refusing typed text after the value is cleared', () => {
+    component.value = 'id-2';
+    component.startEdit();
+    component.clear();
+
+    component.onInput('anything');
+
+    expect(component.value).toBe('');
+    expect(emitted).toEqual(['']);
+  });
+});
+
 describe('ComboboxComponent keyword filtering', () => {
   let component: ComboboxComponent;
 
