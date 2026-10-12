@@ -62,6 +62,7 @@ export const UiConfigProperties = {
   Wrap: 'wrap',
   HideLabel: 'hideLabel',
   Reorderable: 'reorderable',
+  Searchable: 'searchable',
   OffersStateProvider: 'offersStateProvider',
   OffersIconProvider: 'offersIconProvider',
   StateProviderBlockId: 'stateProviderBlockId',

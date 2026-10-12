@@ -209,6 +209,20 @@ record what your provider did. `FakeBatteryApi` is the reading side: `Set` repla
 what `InitializeIntegrationsAsync` starts your battery provider against. See
 [Batteries](/features/batteries/#testing).
 
+## Testing weather notices
+
+```csharp
+await harness.InitializeIntegrationsAsync();
+
+Assert.That(harness.Context.WeatherProvider.SnapshotNotices, Is.EqualTo(1));
+```
+
+`FakeWeatherProviderApi` counts what a weather provider reports through
+`IIntegrationContext.WeatherProvider`; in a harness it is `harness.Context.WeatherProvider`. Over the wire,
+`MacroDeckTestHost` answers `weather`/`snapshots-changed` the way Macro Deck does, refusing it with
+`CAPABILITY_UNAVAILABLE` when the plugin's `weather` capability was not negotiated. See
+[Weather](/features/weather/#telling-macro-deck-the-weather-changed).
+
 ## Testing calendars
 
 ```csharp

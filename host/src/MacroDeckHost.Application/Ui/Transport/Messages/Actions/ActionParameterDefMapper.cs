@@ -23,6 +23,7 @@ public static class ActionParameterDefMapper
 			Multiline = param.Multiline,
 			SupportsReset = param.SupportsReset,
 			AllowAlpha = param.AllowAlpha ? true : null,
+			Searchable = param.Searchable ? true : null,
 			LiteralOnly = param.LiteralOnly,
 			ValidationRegex = param.ValidationRegex,
 			MaxLength = param.MaxLength,

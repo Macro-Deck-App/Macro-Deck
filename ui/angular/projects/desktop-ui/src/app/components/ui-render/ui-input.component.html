@@ -201,6 +201,16 @@
             [options]="comboboxOptions()"
             (valueChange)="onChange($event)"
             (opened)="onOpen()" />
+        } @else if (searchable()) {
+          <shared-combobox
+            [value]="stringValue()"
+            [placeholder]="placeholder()"
+            [options]="comboboxOptions()"
+            [clearable]="hasEmptyOption()"
+            [pickOnly]="true"
+            [disabled]="disabled()"
+            (valueChange)="onChange($event)"
+            (opened)="onOpen()" />
         } @else {
           <shared-select
             [options]="selectOptions()"
@@ -219,6 +229,17 @@
               [placeholder]="placeholder()"
               [options]="comboboxOptions()"
               [loading]="loading()"
+              (valueChange)="onChange($event)"
+              (opened)="onOpen()" />
+          } @else if (searchable()) {
+            <shared-combobox
+              [value]="stringValue()"
+              [placeholder]="placeholder()"
+              [options]="comboboxOptions()"
+              [loading]="loading()"
+              [clearable]="hasEmptyOption()"
+              [pickOnly]="true"
+              [disabled]="disabled()"
               (valueChange)="onChange($event)"
               (opened)="onOpen()" />
           } @else {

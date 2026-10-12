@@ -18,6 +18,7 @@ using MacroDeckHost.Infrastructure.Widgets;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Variables.Colors;
+using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Widgets;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Decks;
@@ -77,6 +78,7 @@ public sealed class IntegrationInitializer
 	private readonly IBatteryRegistry? _batteries;
 	private readonly BatteryProviderHost? _batteryProviders;
 	private readonly InProcessAndroidDeviceManager? _androidDevices;
+	private readonly IntegrationWeatherProviderApi? _weatherProvider;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -123,8 +125,10 @@ public sealed class IntegrationInitializer
 		IBatteryRegistry? batteries = null,
 		BatteryProviderHost? batteryProviders = null,
 		InProcessAndroidDeviceManager? androidDevices = null,
+		IWeatherBroadcastTrigger? weatherTrigger = null,
 		EmailHostServices? emailServices = null)
 	{
+		_weatherProvider = weatherTrigger is null ? null : new IntegrationWeatherProviderApi(weatherTrigger);
 		_emailServices = emailServices;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
@@ -214,7 +218,8 @@ public sealed class IntegrationInitializer
 					_notificationManager),
 			UiResourcesFor(integration),
 			RenewBatteryApi(integration.Id),
-			_androidDevices);
+			_androidDevices,
+			_weatherProvider);
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a

@@ -40,6 +40,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Weather;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Variables;
@@ -109,6 +110,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly PluginVariableHistoryWindows? _variableHistory;
 	private readonly VariableHistoryReadThrottle _variableHistoryReadThrottle;
 	private readonly IBatteryRegistry? _batteries;
+	private readonly IWeatherBroadcastTrigger? _weatherTrigger;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -165,8 +167,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IWidgetDataReader? widgetData = null,
 		PluginVariableHistoryWindows? variableHistory = null,
 		VariableHistoryReadThrottle? variableHistoryReadThrottle = null,
-		IBatteryRegistry? batteries = null)
+		IBatteryRegistry? batteries = null,
+		IWeatherBroadcastTrigger? weatherTrigger = null)
 	{
+		_weatherTrigger = weatherTrigger;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
 		_variableHistoryReadThrottle = variableHistoryReadThrottle ?? new VariableHistoryReadThrottle(TimeProvider.System);
@@ -275,6 +279,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.VideoStreams => RouteVideoStreams(pluginId, sessionId, connection, payload),
 				HostApis.Colors => RouteColors(pluginId, payload),
 				HostApis.Batteries => RouteBatteries(pluginId, sessionId, payload),
+				HostApis.Weather => RouteWeather(pluginId, payload),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -2301,6 +2306,25 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			default:
 				return UnknownOperation(payload);
 		}
+	}
+
+	private HostCallbackResult RouteWeather(string pluginId, HostInvokePayload payload)
+	{
+		if (_weatherTrigger is null || payload.Operation != HostOperations.Weather.SnapshotsChanged)
+		{
+			return UnknownOperation(payload);
+		}
+
+		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities ||
+			!capabilities.TryGetValue(CapabilityKinds.Weather, out var negotiated) ||
+			!negotiated.Accepted)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"Reporting changed weather snapshots requires the weather capability.");
+		}
+
+		_weatherTrigger.RequestRefresh();
+		return HostCallbackResult.Ok();
 	}
 
 	private HostCallbackResult RouteBatteries(string pluginId, string? sessionId, HostInvokePayload payload)

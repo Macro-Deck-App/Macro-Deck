@@ -52,6 +52,7 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `ui.first-fit`, component version 1 | A type | Draws the node's `fallback`. One is invented when you set none: a copy of the last layout, the one that is always acceptable. When it decides whether the tile's own press belongs to a control, it walks every layout - see [First fit](/ui/components/first-fit/#older-readers-and-readers-that-cannot-measure). |
 | `macrodeck.video-stream` and its `stream` property, component version 1 | A type | Draws the node's `fallback`, and opens no session. See [Video stream](/ui/components/video-stream/#older-readers). |
 | `transparent` as the `background` of `ui.stack` and `ui.button` | A value | Treats it as no background: a stack draws the tile face behind it, a button its accent colour. The tile face stays, so the folder background does not show through. |
+| `searchable` on `choice` and `dynamic-choice` | A property | Ignores it and draws the plain select; the value and its label are unchanged. |
 | `allowTransparent` on `color` | A property | Ignores it and offers no Transparent swatch; a stored `transparent` still shows as the input's value. |
 | `thresholds` (`UiThresholdsInput`) and its `unit`, `fixedCount`, `fixedColors` and `maxCount` properties | A configuration type | Declines it and draws the node's `fallback`, or shows the field as unsupported. |
 | `allowVariables` on `color` and `thresholds` | A property | Ignores it and offers fixed colours only. |

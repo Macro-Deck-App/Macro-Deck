@@ -434,7 +434,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 					_session.PluginId,
 					_uiResourceUploads,
 					UiPreviews,
-					_colors)
+					_colors,
+					_session.Accepted)
 				.ConfigureAwait(false);
 		}
 

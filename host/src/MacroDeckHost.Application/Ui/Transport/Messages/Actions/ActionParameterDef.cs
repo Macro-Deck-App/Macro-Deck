@@ -29,6 +29,8 @@ public class ActionParameterDef
 
 	public bool? AllowAlpha { get; set; }
 
+	public bool? Searchable { get; set; }
+
 	public bool LiteralOnly { get; set; }
 
 	public string? ValidationRegex { get; set; }

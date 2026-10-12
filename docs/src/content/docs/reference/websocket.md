@@ -307,7 +307,7 @@ A failed or timed-out invoke counts as the default: the entry is stored as the f
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, `batteries`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, `batteries`, `weather`, and the push-only `event-bindings`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -330,6 +330,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `video-streams` | Only for sessions the host opened on the calling plugin's own providers; own rate limit instead of the per-plugin callback throttle - see [`video-streams`](#video-streams). |
 | `colors` | `resolve` takes `value` and an optional `widgetId` and answers `color`, absent for no colour; only Color variables resolve. `watches` replaces the plugin's whole table of `{watchId, value, widgetId?}`, at most `maxColorWatches`, and the host pushes a `host.state` for `colors` with `revision` and every watch's `{watchId, color?}` after each table change and each change of a watched colour; a push at or below the last applied `revision` is stale. A host without the api answers `CAPABILITY_UNSUPPORTED`. See [Resolving colours yourself](/features/variables/#resolving-colours-yourself). |
 | `batteries` | Needs the `battery-provider` capability kind to publish; the `host.state` push goes to every plugin - see [`batteries`](#batteries). |
+| `weather` | Needs the `weather` capability kind - see [`weather`](#weather). |
 
 #### `widgets` by major
 
@@ -700,6 +701,24 @@ A host without this api answers every `batteries` invoke with `CAPABILITY_UNSUPP
 Version 1, declared at local id `provider`. Its one operation is `describe`, which answers `providerName`;
 empty means the plugin's manifest name. DTOs are in
 [`BatteryProviderDtos.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Capabilities/BatteryProvider/BatteryProviderDtos.cs).
+
+#### `weather`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":10000,
+ "payload":{"api":"weather","operation":"snapshots-changed"}}
+```
+
+| Operation | Arguments | Result `data` | Meaning |
+| --- | --- | --- | --- |
+| `snapshots-changed` | none | none | The calling plugin's station snapshots changed: the host reads every station again now and pushes what changed to Weather widgets, instead of waiting for its periodic read (about once a minute). Notices that arrive while a read is pending are merged into it. |
+
+- A plugin that did not get the `weather` capability accepted is refused with `CAPABILITY_UNAVAILABLE`.
+- It does not announce a changed list of stations; that stays a `state.update` with kind `weather`.
+- The call counts toward the per-plugin callback throttle.
+- A host without this api answers `CAPABILITY_UNSUPPORTED` and keeps reading the stations on its own
+  interval. The SDK side, `IIntegrationContext.WeatherProvider`, ignores both refusals; see
+  [Weather](/features/weather/#telling-macro-deck-the-weather-changed).
 
 ### Events, logs and state
 

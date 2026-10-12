@@ -1,4 +1,13 @@
-@if (controlType === 'choice') {
+@if (controlType === 'choice' && parameter?.searchable) {
+  <shared-combobox
+    class="cb-literal-select"
+    [value]="stringValue"
+    [placeholder]="placeholder"
+    [options]="choiceOptions"
+    [clearable]="false"
+    [pickOnly]="true"
+    (valueChange)="emit($event)" />
+} @else if (controlType === 'choice') {
   <shared-select
     class="cb-literal-select"
     [placeholder]="placeholder"

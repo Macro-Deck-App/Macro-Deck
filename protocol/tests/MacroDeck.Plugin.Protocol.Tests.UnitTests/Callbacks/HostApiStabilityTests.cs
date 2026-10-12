@@ -32,6 +32,7 @@ public class HostApiStabilityTests
 		"variable-values",
 		"variables",
 		"video-streams",
+		"weather",
 		"widget-types",
 		"widgets",
 	];
@@ -69,6 +70,7 @@ public class HostApiStabilityTests
 				["providers-changed", "streams-changed", "session-update", "session-close"],
 			[HostApis.Colors] = ["resolve", "watches"],
 			[HostApis.Batteries] = ["publish", "remove", "sync", "withdraw"],
+			[HostApis.Weather] = ["snapshots-changed"],
 		};
 
 	[Test]

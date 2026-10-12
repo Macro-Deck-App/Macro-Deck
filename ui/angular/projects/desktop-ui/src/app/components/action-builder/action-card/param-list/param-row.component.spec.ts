@@ -253,6 +253,51 @@ describe('ParamRowComponent host-backed option labels', () => {
     expect(fixture.nativeElement.querySelector('.sel-label')?.textContent?.trim()).toBe('Any scene');
   });
 
+  async function renderChoice(param: ActionBlockParameter): Promise<ComponentFixture<ParamRowComponent>> {
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', param);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('lets the user type into a searchable choice parameter to filter by label and stores only the picked option', async () => {
+    const fixture = await renderChoice({
+      name: 'counter', type: 'choice', label: 'Counter', value: '', searchable: true,
+      options: [{ value: 'id-1', label: 'Push-ups' }, { value: 'id-2', label: 'Squats' }],
+    });
+    const input = fixture.nativeElement.querySelector('shared-combobox input.cb-input') as HTMLInputElement;
+
+    input.dispatchEvent(new Event('focus'));
+    input.value = 'squ';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    const visible = Array.from(document.querySelectorAll<HTMLButtonElement>('.cb-option'));
+    expect(visible.map(o => o.textContent?.trim())).toEqual(['Squats']);
+    expect(store.updateParam.calls.count()).toBe(0);
+
+    visible[0].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(store.updateParam.calls.mostRecent().args[2] as string).toBe('id-2');
+    expect(input.value).toBe('Squats');
+  });
+
+  it('draws a choice parameter that did not opt in as the plain select', async () => {
+    const fixture = await renderChoice({
+      name: 'sceneName', type: 'choice', label: 'Scene', value: 'Live',
+      options: [{ value: 'Live', label: 'Live' }],
+    });
+
+    expect(fixture.nativeElement.querySelector('shared-combobox')).toBeNull();
+    expect(fixture.nativeElement.querySelector('shared-select')).not.toBeNull();
+  });
+
   it('drops the cached label when a dynamic pick list is cleared', async () => {
     const fixture = TestBed.createComponent(ParamRowComponent);
     fixture.componentRef.setInput('blockId', 'block-1');
