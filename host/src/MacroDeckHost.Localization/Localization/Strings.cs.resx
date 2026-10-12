@@ -3047,6 +3047,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Hodnota neodpovídá typu proměnné.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Hodnotu nelze pro tuto proměnnou použít.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Data widgetu musí být objekt JSON.</value>
   </data>

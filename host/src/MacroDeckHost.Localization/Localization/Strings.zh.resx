@@ -3046,6 +3046,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>该值与变量的类型不匹配。</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>该值无法用于此变量。</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>组件数据必须是 JSON 对象。</value>
   </data>

@@ -3046,6 +3046,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>此值與變數的類型不符。</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>此值無法用於這個變數。</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>小工具資料必須是 JSON 物件。</value>
   </data>

@@ -3046,6 +3046,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>De waarde past niet bij het type van de variabele.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>De waarde kan niet voor deze variabele worden gebruikt.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>De widgetgegevens moeten een JSON-object zijn.</value>
   </data>

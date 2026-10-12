@@ -3046,6 +3046,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>値が変数の型と一致しません。</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>この値は変数に使用できません。</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>ウィジェットのデータは JSON オブジェクトである必要があります。</value>
   </data>

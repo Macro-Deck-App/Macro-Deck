@@ -214,8 +214,6 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.EmptyNoneMessage));
   readonly valueUnavailableLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ValueUnavailable));
-  readonly writeFailedMessage = computed(() =>
-    this.localization.translateKey(AppStrings.Errors.Variables.WriteFailed));
   readonly readOnlyLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.ReadOnly));
   readonly readOnlyTooltip = computed(() =>
@@ -311,7 +309,7 @@ export class VariablesManagerComponent implements OnInit {
   readonly editingVariableId = signal<string | null>(null);
   readonly editingValue = signal<string>('');
   readonly deleteCandidate = signal<Variable | null>(null);
-  readonly writeFailed = signal(false);
+  readonly writeError = signal<string | null>(null);
   readonly shareFailed = signal(false);
   readonly unbindCandidate = signal<Variable | null>(null);
   readonly unbindFailed = signal(false);
@@ -867,7 +865,7 @@ export class VariablesManagerComponent implements OnInit {
 
   startEdit(variable: Variable): void {
     if (!this.canEditValue(variable)) return;
-    this.writeFailed.set(false);
+    this.writeError.set(null);
     this.editingVariableId.set(variable.id);
     this.editingValue.set(variable.value ?? '');
   }
@@ -890,12 +888,13 @@ export class VariablesManagerComponent implements OnInit {
     await this.writeValue(variable, variable.value === 'true' ? 'false' : 'true');
   }
 
-  // The host's own refusal reason is not surfaced: `ApiError.message` is not string-typed for this
-  // client, so every failure reads as the same generic message until that is widened separately.
   private async writeValue(variable: Variable, value: string): Promise<void> {
-    this.writeFailed.set(false);
-    const written = await this.variableService.setValue(variable.id, value);
-    this.writeFailed.set(written === null);
+    this.writeError.set(null);
+    const result = await this.variableService.setValue(variable.id, value);
+    if (!result.variable) {
+      this.writeError.set(result.errorMessage
+        || this.localization.translateKey(AppStrings.Errors.Variables.WriteFailed));
+    }
   }
 
   async toggleShared(variable: Variable): Promise<void> {

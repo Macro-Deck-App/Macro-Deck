@@ -54,7 +54,7 @@ public class SetSharedVariableValueRequestMessageHandler
 			return new SetSharedVariableValueResponse
 			{
 				Success = false,
-				Error = VariableDtoMapper.ToWriteError(result.Error!.Value, result.ErrorMessage, variable.OwnerIntegrationId)
+				Error = VariableDtoMapper.ToValueWriteError(result.Error!.Value, result.ErrorMessage, variable.OwnerIntegrationId)
 			};
 		}
 

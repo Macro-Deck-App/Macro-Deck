@@ -401,18 +401,75 @@ describe('VariablesManagerComponent', () => {
       value: '20',
     };
 
-    it('surfaces a refused write rather than swallowing it', async () => {
-      setVariableValueSpy.and.resolveTo({ success: false, error: { code: 'NotWritable', message: 'no' } });
-      fixture.componentRef.setInput('variables', [writable]);
-      await fixture.whenStable();
+    function refused(code: string, message: unknown): object {
+      return { success: false, error: { code, message } };
+    }
 
+    async function write(value: string): Promise<void> {
       component.startEdit(writable);
-      component.editingValue.set('50');
+      component.editingValue.set(value);
       await component.commitEdit(writable);
       await fixture.whenStable();
+    }
 
-      expect(component.writeFailed()).toBeTrue();
+    function bannerText(): string | undefined {
+      return (fixture.nativeElement.querySelector('shared-error-banner') as HTMLElement | null)?.textContent?.trim();
+    }
+
+    beforeEach(async () => {
+      fixture.componentRef.setInput('variables', [writable]);
+      await fixture.whenStable();
+    });
+
+    it('surfaces a refused write rather than swallowing it', async () => {
+      setVariableValueSpy.and.resolveTo(refused('NotWritable',
+        { $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.NotWritable' } }));
+
+      await write('50');
+
       expect(fixture.nativeElement.querySelector('shared-error-banner')).not.toBeNull();
+    });
+
+    it('shows the host reason when the owner of the variable is not available', async () => {
+      setVariableValueSpy.and.resolveTo(refused('OwnerUnavailable', {
+        $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.OwnerUnavailable', arguments: { integration: 'obs' } },
+      }));
+
+      await write('50');
+
+      expect(bannerText()).toContain('obs is not available right now');
+    });
+
+    it('shows the host reason when the value cannot be used', async () => {
+      setVariableValueSpy.and.resolveTo(refused('InvalidValue',
+        { $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.ValueNotAccepted' } }));
+
+      await write('abc');
+
+      expect(bannerText()).toContain('The value cannot be used for this variable.');
+    });
+
+    it('falls back to the generic message when the host gives no reason', async () => {
+      setVariableValueSpy.and.resolveTo(refused('WriteFailed', ''));
+
+      await write('50');
+
+      expect(bannerText()).toContain('The value could not be applied');
+    });
+
+    it('does not carry an earlier reason over to a later write', async () => {
+      setVariableValueSpy.and.resolveTo(refused('OwnerUnavailable', {
+        $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.OwnerUnavailable', arguments: { integration: 'obs' } },
+      }));
+      await write('50');
+
+      setVariableValueSpy.and.resolveTo(refused('WriteFailed', ''));
+      await write('51');
+      expect(bannerText()).toContain('The value could not be applied');
+
+      setVariableValueSpy.and.resolveTo({ success: true, pending: true, variable: writable });
+      await write('52');
+      expect(fixture.nativeElement.querySelector('shared-error-banner')).toBeNull();
     });
 
     it('leaves the listed value alone while an owner-dispatched write is still pending', async () => {
@@ -425,7 +482,7 @@ describe('VariablesManagerComponent', () => {
       await component.commitEdit(writable);
       await fixture.whenStable();
 
-      expect(component.writeFailed()).toBeFalse();
+      expect(fixture.nativeElement.querySelector('shared-error-banner')).toBeNull();
       expect(component.listed().find(v => v.id === 'w1')).toBeUndefined();
     });
   });

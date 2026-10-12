@@ -74,7 +74,7 @@ public class SetVariableValueRequestMessageHandler
 			return new SetVariableValueResponse
 			{
 				Success = false,
-				Error = VariableDtoMapper.ToWriteError(result.Error!.Value,
+				Error = VariableDtoMapper.ToValueWriteError(result.Error!.Value,
 					result.ErrorMessage,
 					entity.OwnerIntegrationId)
 			};

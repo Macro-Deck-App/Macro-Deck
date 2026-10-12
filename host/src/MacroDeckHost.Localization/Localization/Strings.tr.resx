@@ -3046,6 +3046,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Değer, değişkenin türüyle eşleşmiyor.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Bu değer bu değişken için kullanılamaz.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Widget verisi bir JSON nesnesi olmalı.</value>
   </data>

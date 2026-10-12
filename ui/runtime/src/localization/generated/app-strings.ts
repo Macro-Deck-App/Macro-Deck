@@ -1219,6 +1219,7 @@ export const AppStrings = {
 			TemplateReadOnly: 'macrodeck.app:Errors.Variables.TemplateReadOnly',
 			UnknownScope: 'macrodeck.app:Errors.Variables.UnknownScope',
 			ValueDoesNotFitType: 'macrodeck.app:Errors.Variables.ValueDoesNotFitType',
+			ValueNotAccepted: 'macrodeck.app:Errors.Variables.ValueNotAccepted',
 			WriteFailed: 'macrodeck.app:Errors.Variables.WriteFailed',
 		},
 		VideoStream: {
@@ -10211,6 +10212,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Variables.TemplateReadOnly': 'This variable computes its value from a template',
 	'macrodeck.app:Errors.Variables.UnknownScope': 'Unknown variable scope',
 	'macrodeck.app:Errors.Variables.ValueDoesNotFitType': 'The value does not match the variable\'s type.',
+	'macrodeck.app:Errors.Variables.ValueNotAccepted': 'The value cannot be used for this variable.',
 	'macrodeck.app:Errors.Variables.WriteFailed': 'The value could not be applied',
 	'macrodeck.app:Errors.VideoStream.Busy': 'The video source is busy right now.',
 	'macrodeck.app:Errors.VideoStream.Failed': 'Something went wrong with the video stream.',
