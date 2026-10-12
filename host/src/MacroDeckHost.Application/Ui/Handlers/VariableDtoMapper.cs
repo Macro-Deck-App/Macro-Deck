@@ -174,4 +174,17 @@ internal static class VariableDtoMapper
 				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.WriteFailed() },
 			_ => ToError(error, message)
 		};
+
+	public static Transport.Messages.TransportError ToValueWriteError(
+		VariableError error,
+		string? message,
+		string? ownerIntegrationId)
+		=> error switch
+		{
+			VariableError.InvalidValue => new Transport.Messages.TransportError
+				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.ValueNotAccepted() },
+			VariableError.NotFound => new Transport.Messages.TransportError
+				{ Code = error.ToString(), Message = AppStrings.Errors.Variables.NotFound() },
+			_ => ToWriteError(error, message, ownerIntegrationId)
+		};
 }

@@ -3046,6 +3046,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Nilai tidak sesuai dengan jenis variabel.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Nilai tidak dapat digunakan untuk variabel ini.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Data widget harus berupa objek JSON.</value>
   </data>

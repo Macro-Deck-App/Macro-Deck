@@ -3047,6 +3047,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Wartość nie pasuje do typu zmiennej.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Wartości nie można użyć dla tej zmiennej.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Dane widżetu muszą być obiektem JSON.</value>
   </data>

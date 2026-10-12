@@ -3046,6 +3046,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>값이 변수의 유형과 맞지 않습니다.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>이 값은 이 변수에 사용할 수 없습니다.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>위젯 데이터는 JSON 객체여야 합니다.</value>
   </data>

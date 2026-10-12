@@ -3046,6 +3046,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Der Wert passt nicht zum Typ der Variable.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Der Wert kann für diese Variable nicht verwendet werden.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Die Widget-Daten müssen ein JSON-Objekt sein.</value>
   </data>

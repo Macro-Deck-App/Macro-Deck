@@ -3046,6 +3046,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>Значение не соответствует типу переменной.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>Это значение нельзя использовать для этой переменной.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>Данные виджета должны быть объектом JSON.</value>
   </data>

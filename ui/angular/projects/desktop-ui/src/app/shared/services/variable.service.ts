@@ -159,11 +159,11 @@ export class VariableService {
   }
 
   async setValue(id: string, value: string | undefined,
-                 resourceIntegrationId?: string, resourceKey?: string): Promise<Variable | null> {
+                 resourceIntegrationId?: string, resourceKey?: string): Promise<VariableSaveResult> {
     const response = await this.ipc.setVariableValue({ id, value, resourceIntegrationId, resourceKey });
     if (!response.success || !response.variable) {
       console.warn('setVariableValue failed:', response.error);
-      return null;
+      return { variable: null, errorCode: response.error?.code ?? null, errorMessage: resolveLocalizedText(response.error?.message, this.localization) || null };
     }
     // A write handed to the variable's owner comes back with the value as it still stands - the
     // authoritative one arrives later on the read side. Echoing it locally would snap the field
@@ -171,7 +171,7 @@ export class VariableService {
     if (!response.pending) {
       this.upsertLocal(response.variable);
     }
-    return response.variable;
+    return { variable: response.variable, errorCode: null };
   }
 
   async sanitizeName(input: string): Promise<{ sanitized: string; isValid: boolean }> {

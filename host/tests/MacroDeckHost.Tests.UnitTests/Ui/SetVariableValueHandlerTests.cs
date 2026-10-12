@@ -65,6 +65,42 @@ public class SetVariableValueHandlerTests
 	}
 
 	[Test]
+	public async Task A_value_the_provider_rejects_is_refused_in_words_a_person_can_read()
+	{
+		var (handler, provider, id) = Build(new VariableWriteCapability());
+		provider.Answer = VariableWriteResult.InvalidValue("volume out of range for device X");
+
+		var response = await handler.Handle(new SetVariableValueRequest { Id = id.ToString(), Value = "42" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.InvalidValue)));
+			Assert.That(response.Error.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Variables.ValueNotAccepted().Key));
+		});
+	}
+
+	[Test]
+	public async Task A_variable_the_provider_no_longer_knows_is_refused_in_words_a_person_can_read()
+	{
+		var (handler, provider, id) = Build(new VariableWriteCapability());
+		provider.Answer = VariableWriteResult.NotFound("no such entity");
+
+		var response = await handler.Handle(new SetVariableValueRequest { Id = id.ToString(), Value = "42" },
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.NotFound)));
+			Assert.That(response.Error.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Variables.NotFound().Key));
+		});
+	}
+
+	[Test]
 	public async Task A_user_variable_is_applied_immediately_rather_than_left_pending()
 	{
 		var (handler, _, _, service) = BuildParts(new VariableWriteCapability());

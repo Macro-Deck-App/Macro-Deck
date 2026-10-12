@@ -3046,6 +3046,9 @@
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>القيمة لا تتوافق مع نوع المتغير.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>لا يمكن استخدام هذه القيمة لهذا المتغير.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>بيانات الأداة يجب أن تكون كائن JSON.</value>
   </data>

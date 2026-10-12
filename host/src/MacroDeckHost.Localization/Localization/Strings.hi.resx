@@ -3046,6 +3046,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>मान वेरिएबल के प्रकार से मेल नहीं खाता।</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>इस वेरिएबल के लिए यह मान उपयोग नहीं किया जा सकता।</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>विजेट डेटा एक JSON ऑब्जेक्ट होना चाहिए।</value>
   </data>

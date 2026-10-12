@@ -321,8 +321,8 @@ public class VariableService : IVariableService
 
 		if (result.Status != VariableWriteStatus.Applied)
 		{
-			// Only the literal half of the provider's message: a localized one would come through as its
-			// key here, and the client renders its own message for a refused write anyway.
+			// Only the literal half of the provider's message, for diagnostics: a localized one would come
+			// through as its key here, and the set-value handlers answer every status with the host's own text.
 			return Result.Fail<VariableEntity, VariableError>(ErrorOf(result.Status), result.Message.Literal);
 		}
 

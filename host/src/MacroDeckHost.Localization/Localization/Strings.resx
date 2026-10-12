@@ -3046,6 +3046,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Variables.ValueDoesNotFitType" xml:space="preserve">
     <value>The value does not match the variable's type.</value>
   </data>
+  <data name="Errors.Variables.ValueNotAccepted" xml:space="preserve">
+    <value>The value cannot be used for this variable.</value>
+  </data>
   <data name="Errors.Widgets.DataMustBeJsonObject" xml:space="preserve">
     <value>The widget data must be a JSON object.</value>
   </data>
