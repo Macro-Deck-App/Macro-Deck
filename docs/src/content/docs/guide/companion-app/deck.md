@@ -32,7 +32,8 @@ closes it. Each one says where it comes from, so a plugin can never pass for Mac
 ![Two messages from Macro Deck at the top of the deck on Android](../../../../assets/guide/companion/android-notifications.png)
 
 The first answer from any of your devices counts and closes the question everywhere. Messages wait while the deck
-is not shown, for example on the paywall or while the computer is locked, and appear once it is back. On iPhone and
+is not shown, for example on the paywall or while the computer is locked, and appear once it is back, unless
+they ran out in the meantime. On iPhone and
 iPad a question takes the place of a dialog that was open and the messages at the top are hidden while any sheet
 is open.
 
