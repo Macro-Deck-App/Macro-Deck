@@ -29,6 +29,12 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 	public Func<string, CancellationToken, Task>? StateUpdateHandler { get; set; }
 
+	private int _stateUpdatesHandled;
+
+	public Task LastStateUpdate { get; private set; } = Task.CompletedTask;
+
+	public int StateUpdatesHandled => Volatile.Read(ref _stateUpdatesHandled);
+
 	/// <summary>Routes the plugin's <c>host.asset.ack</c> back to the host's asset sender, which is what
 	/// lets a chunked host-to-plugin transfer advance past its first step.</summary>
 	public Func<ProtocolEnvelope, bool>? HostAssetAckHandler { get; set; }
@@ -168,7 +174,8 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 				envelope.Payload?.Deserialize<StateUpdatePayload>(PluginProtocolJson.Options) is
 					{ Kind.Length: > 0 } payload)
 			{
-				_ = handler(payload.Kind, CancellationToken.None);
+				LastStateUpdate = handler(payload.Kind, CancellationToken.None);
+				Interlocked.Increment(ref _stateUpdatesHandled);
 			}
 
 			return;
