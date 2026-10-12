@@ -1,4 +1,5 @@
 using System.Globalization;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Scripts;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables.Colors;
@@ -59,6 +60,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 
 		Guid ownerDispatchId;
 		object? ownerDispatchValue;
+		string? ownerIntegrationId;
 
 		await _gate.WaitAsync(cancellationToken);
 		try
@@ -98,11 +100,12 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 
 				return update.Success
 					? UserVariableWriteResult.Applied()
-					: Failed(update.Error, update.ErrorMessage);
+					: await Failed(scope.ServiceProvider, update.Error, update.ErrorMessage, entity.OwnerIntegrationId);
 			}
 
 			ownerDispatchId = entity.Id;
 			ownerDispatchValue = computed.Value;
+			ownerIntegrationId = entity.OwnerIntegrationId;
 		}
 		finally
 		{
@@ -112,19 +115,48 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		var dispatched = await service.SetValue(ownerDispatchId, ownerDispatchValue, cancellationToken);
 		return dispatched.Success
 			? UserVariableWriteResult.Applied()
-			: Failed(dispatched.Error, dispatched.ErrorMessage);
+			: await Failed(scope.ServiceProvider, dispatched.Error, dispatched.ErrorMessage, ownerIntegrationId);
 	}
 
-	private static UserVariableWriteResult Failed(VariableError? error, string? message)
-		=> UserVariableWriteResult.Failed(error switch
+	private static async Task<UserVariableWriteResult> Failed(
+		IServiceProvider services,
+		VariableError? error,
+		string? message,
+		string? ownerIntegrationId)
+	{
+		if (error is VariableError.OwnerUnavailable)
+		{
+			return UserVariableWriteResult.Failed(UserVariableWriteStatus.Unavailable,
+				await OwnerUnavailableMessage(services, ownerIntegrationId));
+		}
+
+		return UserVariableWriteResult.Failed(error switch
 			{
 				VariableError.NotWritable => UserVariableWriteStatus.NotEditable,
 				VariableError.NotEditable => UserVariableWriteStatus.NotEditable,
-				VariableError.OwnerUnavailable => UserVariableWriteStatus.Unavailable,
 				VariableError.NotFound => UserVariableWriteStatus.NotFound,
 				_ => UserVariableWriteStatus.InvalidValue
 			},
 			message ?? error?.ToString() ?? "The variable could not be written.");
+	}
+
+	private static async Task<string> OwnerUnavailableMessage(IServiceProvider services, string? ownerIntegrationId)
+	{
+		if (string.IsNullOrEmpty(ownerIntegrationId))
+		{
+			return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.WriteFailed());
+		}
+
+		var integration = services.GetRequiredService<IIntegrationRegistry>().Integrations
+			.FirstOrDefault(candidate => string.Equals(candidate.Id, ownerIntegrationId, StringComparison.Ordinal));
+		var name = integration is null || integration.Name.IsEmpty
+			? null
+			: await ActiveLocalization.Resolve(services, integration.Name);
+
+		return await ActiveLocalization.Resolve(services,
+			AppStrings.Errors.Variables.OwnerUnavailable(
+				integration: string.IsNullOrWhiteSpace(name) ? ownerIntegrationId : name));
+	}
 
 	public async Task<UserVariableCreateResult> CreateAsync(
 		string name,
