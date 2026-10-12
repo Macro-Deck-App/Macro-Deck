@@ -578,16 +578,11 @@ internal sealed class VariableCatalogDiscoverPageIsWellFormedCheck() : Conforman
 	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Variables))
-		{
-			return ConformanceCheckResult.Skip("This subject does not declare the variables capability.");
-		}
+		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
 
-		var (catalog, describeFailure) = await VariableCatalogProbe.DescribeAsync(context).ConfigureAwait(false);
-
-		if (describeFailure is not null)
+		if (unavailable is not null)
 		{
-			return describeFailure;
+			return unavailable;
 		}
 
 		if (!catalog!.SupportsCatalog)
@@ -1163,6 +1158,44 @@ internal static class ActionIconProbe
 /// </summary>
 internal static class VariableCatalogProbe
 {
+	public static async Task<(VariableCatalogPayload? Catalog, ConformanceCheckResult? Unavailable)> ResolveAsync(
+		ConformanceContext context)
+	{
+		if (ConformanceCheckSupport.Declares(context, CapabilityKinds.Variables))
+		{
+			return await DescribeAsync(context).ConfigureAwait(false);
+		}
+
+		var catalog = await ProbeUndeclaredAsync(context).ConfigureAwait(false);
+
+		return catalog is { Variables.Count: 0, DeclaredVariables.Count: 0, SupportsCatalog: false } or null
+			? (null, ConformanceCheckResult.Skip(
+				"This subject neither declares the variables capability nor describes any variables or a catalog."))
+			: (catalog, null);
+	}
+
+	// Mirrors the host's registration probe, which ignores any failure of an undeclared kind: a subject
+	// the host never treats as a variable provider must not fail a variables check.
+	private static async Task<VariableCatalogPayload?> ProbeUndeclaredAsync(ConformanceContext context)
+	{
+		using var safetyNet = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+		try
+		{
+			var outcome = await context.Session!.Variables
+				.DescribeAsync(new CapabilityInvokeOptions { CancellationToken = safetyNet.Token })
+				.ConfigureAwait(false);
+
+			var catalog = outcome.Succeeded ? outcome.DataAs<VariableCatalogPayload>() : null;
+
+			return catalog is { Variables: not null, DeclaredVariables: not null } ? catalog : null;
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			return null;
+		}
+	}
+
 	public static async Task<(VariableCatalogPayload? Catalog, ConformanceCheckResult? Failure)> DescribeAsync(
 		ConformanceContext context)
 	{
@@ -1229,16 +1262,11 @@ internal sealed class WritableVariablesAcceptWritesCheck() : ConformanceCheckBas
 	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Variables))
-		{
-			return ConformanceCheckResult.Skip("This subject does not declare the variables capability.");
-		}
+		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
 
-		var (catalog, describeFailure) = await VariableCatalogProbe.DescribeAsync(context).ConfigureAwait(false);
-
-		if (describeFailure is not null)
+		if (unavailable is not null)
 		{
-			return describeFailure;
+			return unavailable;
 		}
 
 		var writable = catalog!.Variables
@@ -1382,16 +1410,11 @@ internal sealed class EagerVariableSetIsWithinLimitCheck() : ConformanceCheckBas
 	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
-		if (!ConformanceCheckSupport.Declares(context, CapabilityKinds.Variables))
-		{
-			return ConformanceCheckResult.Skip("This subject does not declare the variables capability.");
-		}
+		var (catalog, unavailable) = await VariableCatalogProbe.ResolveAsync(context).ConfigureAwait(false);
 
-		var (catalog, describeFailure) = await VariableCatalogProbe.DescribeAsync(context).ConfigureAwait(false);
-
-		if (describeFailure is not null)
+		if (unavailable is not null)
 		{
-			return describeFailure;
+			return unavailable;
 		}
 
 		var provided = catalog!.Variables.Count(VariableCatalogProbe.IsEager);

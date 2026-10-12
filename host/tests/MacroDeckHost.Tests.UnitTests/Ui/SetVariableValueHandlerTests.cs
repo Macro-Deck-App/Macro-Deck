@@ -1,3 +1,4 @@
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
@@ -103,7 +104,7 @@ public class SetVariableValueHandlerTests
 	[Test]
 	public async Task A_user_variable_is_applied_immediately_rather_than_left_pending()
 	{
-		var (handler, _, _, service) = BuildParts(new VariableWriteCapability());
+		var (handler, _, _, service, _) = BuildParts(new VariableWriteCapability());
 		var created = await service.CreateUserVariable("greeting",
 			VariableScope.Global,
 			null,
@@ -126,7 +127,7 @@ public class SetVariableValueHandlerTests
 	[Test]
 	public async Task A_template_variable_is_refused_as_not_writable_in_words_a_person_can_read()
 	{
-		var (handler, _, _, service) = BuildParts(new VariableWriteCapability());
+		var (handler, _, _, service, _) = BuildParts(new VariableWriteCapability());
 		var created = await service.CreateUserVariable("computed",
 			VariableScope.Global,
 			null,
@@ -148,19 +149,74 @@ public class SetVariableValueHandlerTests
 		});
 	}
 
-	private static (SetVariableValueRequestMessageHandler Handler, FakeWritableVariableProviderIntegration Provider,
-		Guid Id) Build(VariableWriteCapability? write)
+	[Test]
+	public async Task An_owner_that_reports_itself_unavailable_is_named_by_its_display_name()
 	{
-		var (handler, provider, id, _) = BuildParts(write);
-		return (handler, provider, id);
+		var (handler, provider, id) = Build(new VariableWriteCapability());
+		provider.Answer = VariableWriteResult.Unavailable("offline");
+
+		var response = await handler.Handle(new SetVariableValueRequest { Id = id.ToString(), Value = "42" },
+			CancellationToken.None);
+
+		AssertOwnerUnavailable(response, "Volume Mixer");
+	}
+
+	[Test]
+	public async Task A_disabled_built_in_owner_is_named_by_its_localized_name()
+	{
+		var parts = BuildParts(new VariableWriteCapability(), AppStrings.Integrations.System.Name());
+		parts.Integrations.SetEnabled(IntegrationId, false);
+
+		var response = await parts.Handler.Handle(
+			new SetVariableValueRequest { Id = parts.Id.ToString(), Value = "42" },
+			CancellationToken.None);
+
+		AssertOwnerUnavailable(response, "System");
+		Assert.That(parts.Provider.Writes, Is.Empty);
+	}
+
+	[Test]
+	public async Task An_owner_that_is_no_longer_registered_is_named_by_its_id()
+	{
+		var parts = BuildParts(new VariableWriteCapability());
+		await parts.Integrations.UnregisterAsync(IntegrationId);
+
+		var response = await parts.Handler.Handle(
+			new SetVariableValueRequest { Id = parts.Id.ToString(), Value = "42" },
+			CancellationToken.None);
+
+		AssertOwnerUnavailable(response, IntegrationId);
+	}
+
+	private static void AssertOwnerUnavailable(SetVariableValueResponse response, string integration)
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.OwnerUnavailable)));
+			Assert.That(response.Error.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration: integration).Key));
+			Assert.That(TestLocalization.Resolve(response.Error.Message),
+				Is.EqualTo($"{integration} is not available right now"));
+		});
 	}
 
 	private static (SetVariableValueRequestMessageHandler Handler, FakeWritableVariableProviderIntegration Provider,
-		Guid Id, VariableService Service) BuildParts(VariableWriteCapability? write)
+		Guid Id) Build(VariableWriteCapability? write)
+	{
+		var parts = BuildParts(write);
+		return (parts.Handler, parts.Provider, parts.Id);
+	}
+
+	private static (SetVariableValueRequestMessageHandler Handler, FakeWritableVariableProviderIntegration Provider,
+		Guid Id, VariableService Service, ConfigurableIntegrationRegistry Integrations) BuildParts(
+			VariableWriteCapability? write,
+			LocalizedText? name = null)
 	{
 		var provider = new FakeWritableVariableProviderIntegration
 		{
 			Id = IntegrationId,
+			Name = name ?? "Volume Mixer",
 			IsInitialized = true,
 			Variables =
 			[
@@ -169,10 +225,11 @@ public class SetVariableValueHandlerTests
 		};
 
 		var registry = new VariableRegistry();
+		var integrations = new ConfigurableIntegrationRegistry([provider]);
 		var service = TestVariableServices.Create(registry,
 			new NullUserVariableStore(),
 			new RecordingMediator(),
-			new ConfigurableIntegrationRegistry([provider]));
+			integrations);
 
 		var created = service.CreateIntegrationVariable(IntegrationId,
 				"volume",
@@ -189,9 +246,10 @@ public class SetVariableValueHandlerTests
 		var handler = new SetVariableValueRequestMessageHandler(service,
 			new FakeHostLockState { IsLocked = false },
 			registry,
-			InMemorySharedVariableStore.For(registry));
+			InMemorySharedVariableStore.For(registry),
+			new VariableOwnerNames(integrations, TestLocalization.ScopeFactory));
 
-		return (handler, provider, created.Data!.Id, service);
+		return (handler, provider, created.Data!.Id, service, integrations);
 	}
 
 	private sealed class NullUserVariableStore : IUserVariableStore

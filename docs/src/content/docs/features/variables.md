@@ -480,8 +480,8 @@ behind `RequestRefreshAsync` and `RequestDefinitionRefreshAsync` (with an option
 behind `OpenHistoryAsync` (a plugin's window reads its samples once per second and ends with the
 connection), and the `variable-values` host API.
 Declare `host:variable-values` in [`manifest.json`](/reference/manifest/) when you use it.
-`MacroDeckTestHost` drives all six operations; see [conformance](/reference/conformance/) for MDC0311, MDC0314
-and MDC0315.
+`MacroDeckTestHost` drives all six operations; see [conformance](/reference/conformance/) for MDC0311, MDC0314,
+MDC0315 and MDC0403, which also check a plugin whose variables come only from a catalog or on demand.
 
 ## Writing a user variable
 

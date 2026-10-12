@@ -12,7 +12,7 @@ macrodeck-plugin test --project src/HelloDeck
 ```
 
 ```text
-Macro Deck plugin conformance report (suite 1.2.0)
+Macro Deck plugin conformance report (suite 1.3.0)
 Plugin: com.example.hello-deck 1.0.0
 Started: 2026-09-12T09:36:25.7456760+00:00, duration: 00:00:22.3743497
 Passed: 25, Failed: 0, Skipped: 24
@@ -22,7 +22,7 @@ Conformant: yes
 [PASS] MDC0102 Every declared capability's local id is a valid declared-kind identifier (Required)
 ...
 [SKIP] MDC0403 No two eager variables resolve to the same id (Required)
-    Reason:   This subject does not declare the variables capability.
+    Reason:   This subject neither declares the variables capability nor describes any variables or a catalog.
 ...
 ```
 
@@ -36,7 +36,7 @@ macrodeck-plugin test --artifact ./artifacts/com.example.hello-deck-1.0.0-osx-ar
 ```markdown
 # Macro Deck plugin conformance report
 
-Suite version: `1.2.0`
+Suite version: `1.3.0`
 Plugin: `com.example.hello-deck` `1.0.0`
 Conformant: **yes**
 Passed: 29 - Failed: 0 - Skipped: 20
