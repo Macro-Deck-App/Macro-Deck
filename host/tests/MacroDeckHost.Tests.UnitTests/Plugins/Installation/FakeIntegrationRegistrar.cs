@@ -40,6 +40,9 @@ internal sealed class FakeIntegrationRegistrar : IRemotePluginIntegrationRegistr
 		RemotePluginCapabilitySnapshot snapshot,
 		CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+	public Task ApplyStateUpdateAsync(string pluginId, string kind, CancellationToken cancellationToken = default)
+		=> Task.CompletedTask;
+
 	public Task RefreshLocalizationCatalogsAsync(CancellationToken cancellationToken = default)
 		=> Task.CompletedTask;
 }

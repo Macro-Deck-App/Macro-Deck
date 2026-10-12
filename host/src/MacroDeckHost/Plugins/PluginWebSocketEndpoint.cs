@@ -54,7 +54,6 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly IRemotePluginIntegrationRegistrar _registrar;
-	private readonly RemotePluginSnapshotRefresher _snapshotRefresher;
 	private readonly IPluginCallbackRouter _callbackRouter;
 	private readonly PluginAdbInvokeRunner? _adbInvokes;
 	private readonly PluginMessagingInvokeRunner? _messagingInvokes;
@@ -77,7 +76,6 @@ public sealed class PluginWebSocketEndpoint
 		IPluginSessionRegistry sessionRegistry,
 		IPluginCapabilityInvoker invoker,
 		IRemotePluginIntegrationRegistrar registrar,
-		RemotePluginSnapshotRefresher snapshotRefresher,
 		IPluginCallbackRouter callbackRouter,
 		IPluginAssetReceiver assetReceiver,
 		HostStatePusher statePusher,
@@ -100,7 +98,6 @@ public sealed class PluginWebSocketEndpoint
 		_sessionRegistry = sessionRegistry;
 		_invoker = invoker;
 		_registrar = registrar;
-		_snapshotRefresher = snapshotRefresher;
 		_callbackRouter = callbackRouter;
 		_assetReceiver = assetReceiver;
 		_statePusher = statePusher;
@@ -695,15 +692,8 @@ public sealed class PluginWebSocketEndpoint
 				{
 					try
 					{
-						var result = await _snapshotRefresher
-							.RefreshKindAsync(pluginId, payload.Kind, cancellationToken)
+						await _registrar.ApplyStateUpdateAsync(pluginId, payload.Kind, cancellationToken)
 							.ConfigureAwait(false);
-
-						if (result.AllSucceeded)
-						{
-							await _registrar.ApplyRefreshedSnapshotAsync(pluginId, result.Snapshot, cancellationToken)
-								.ConfigureAwait(false);
-						}
 					}
 					catch (Exception exception) when (exception is not OutOfMemoryException)
 					{

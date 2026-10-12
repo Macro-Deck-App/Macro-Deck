@@ -45,7 +45,6 @@ public class PluginWebSocketEndpointDispatchTests
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			new FakeRemotePluginIntegrationRegistrar(),
-			new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore()),
 			new FakePluginCallbackRouter(),
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			statePusher,
@@ -70,15 +69,14 @@ public class PluginWebSocketEndpointDispatchTests
 	{
 		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		var invoker = new ScriptedCapabilityInvoker();
-		var registrar = new RecordingRegistrar();
 		var snapshotStore = new InMemorySnapshotStore();
+		var registrar = new RecordingRegistrar { Refresher = new RemotePluginSnapshotRefresher(invoker, snapshotStore) };
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
 			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			registrar,
-			new RemotePluginSnapshotRefresher(invoker, snapshotStore),
 			new FakePluginCallbackRouter(),
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			statePusher,
@@ -219,7 +217,6 @@ public class PluginWebSocketEndpointDispatchTests
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			new FakePluginCapabilityInvoker(),
 			new FakeRemotePluginIntegrationRegistrar(),
-			new RemotePluginSnapshotRefresher(new FakePluginCapabilityInvoker(), new InMemorySnapshotStore()),
 			router,
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
@@ -343,7 +340,6 @@ public class PluginWebSocketEndpointDispatchTests
 		return new PluginWebSocketEndpoint(registry,
 			new FakePluginCapabilityInvoker(),
 			new FakeRemotePluginIntegrationRegistrar(),
-			new RemotePluginSnapshotRefresher(new FakePluginCapabilityInvoker(), new InMemorySnapshotStore()),
 			router,
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
@@ -427,18 +423,10 @@ public class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
-	public async Task HandleStateUpdateAsync_Refreshes_The_Snapshot_For_The_Named_Kind()
+	public async Task HandleStateUpdateAsync_Hands_The_Named_Kind_To_The_Registrar()
 	{
 		const string pluginId = "com.example.plugin";
-		var (endpoint, _, _, invoker, _, snapshotStore) = CreateEndpointWithState(pluginId, "session-1");
-
-		invoker.VariablesDescribeResult = new VariableCatalogPayload
-		{
-			DeclaredVariables =
-				[new VariableDefinitionDto { Name = "cpu_temp", Type = "Numeric", Id = "cpu-temp" }],
-			Variables =
-				[new VariableDefinitionDto { Name = "cpu_temp", Type = "Numeric", Id = "cpu-temp" }]
-		};
+		var (endpoint, _, _, _, registrar, _) = CreateEndpointWithState(pluginId, "session-1");
 
 		await endpoint.HandleStateUpdateAsync(pluginId,
 			new ProtocolEnvelope
@@ -450,9 +438,7 @@ public class PluginWebSocketEndpointDispatchTests
 			},
 			CancellationToken.None);
 
-		var names = snapshotStore.GetSnapshot(pluginId).DeclaredVariables.Select(v => v.Name).ToList();
-		string[] expected = ["cpu_temp"];
-		Assert.That(names, Is.EqualTo(expected));
+		Assert.That(registrar.StateUpdates, Is.EqualTo(new[] { (pluginId, CapabilityKinds.Variables) }));
 	}
 
 	[Test]
@@ -811,7 +797,6 @@ public class PluginWebSocketEndpointDispatchTests
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			new FakeRemotePluginIntegrationRegistrar(),
-			new RemotePluginSnapshotRefresher(invoker, new InMemorySnapshotStore()),
 			new FakePluginCallbackRouter(),
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
 			statePusher,
@@ -904,6 +889,10 @@ public class PluginWebSocketEndpointDispatchTests
 			RemotePluginCapabilitySnapshot snapshot,
 			CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+		public Task ApplyStateUpdateAsync(string pluginId,
+			string kind,
+			CancellationToken cancellationToken = default) => Task.CompletedTask;
+
 		public Task RefreshLocalizationCatalogsAsync(CancellationToken cancellationToken = default)
 			=> Task.CompletedTask;
 	}
@@ -913,6 +902,20 @@ public class PluginWebSocketEndpointDispatchTests
 		public List<string> RegisteredPluginIds { get; } = [];
 
 		public List<string> UnregisteredPluginIds { get; } = [];
+
+		public RemotePluginSnapshotRefresher? Refresher { get; init; }
+
+		public List<(string PluginId, string Kind)> StateUpdates { get; } = [];
+
+		public Task ApplyStateUpdateAsync(string pluginId, string kind, CancellationToken cancellationToken = default)
+		{
+			lock (StateUpdates)
+			{
+				StateUpdates.Add((pluginId, kind));
+			}
+
+			return Refresher?.RefreshKindAsync(pluginId, kind, cancellationToken) ?? Task.CompletedTask;
+		}
 
 		public Task<bool> RegisterAsync(string pluginId, CancellationToken cancellationToken = default)
 		{

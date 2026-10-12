@@ -19,6 +19,8 @@ public interface IRemotePluginIntegrationRegistrar
 		RemotePluginCapabilitySnapshot snapshot,
 		CancellationToken cancellationToken = default);
 
+	Task ApplyStateUpdateAsync(string pluginId, string kind, CancellationToken cancellationToken = default);
+
 	Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default);
 
 	Task RegisterInstalledDetachedAsync(string pluginId, CancellationToken cancellationToken = default);
