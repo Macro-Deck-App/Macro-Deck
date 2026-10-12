@@ -56,6 +56,7 @@ export interface ActionParameterDef {
   step?: number;
   showSlider?: boolean;
   allowAlpha?: boolean;
+  searchable?: boolean;
   options?: ActionParameterOption[];
   dynamicOptions?: boolean;
   optionsSourceId?: string;

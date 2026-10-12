@@ -226,6 +226,10 @@ public static class UiConfigProperties
 	/// value meaningful.</summary>
 	public const string Reorderable = "reorderable";
 
+	/// <summary>Whether the user can type into a choice or dynamic choice to filter its options by label. The
+	/// value stays one of the options.</summary>
+	public const string Searchable = "searchable";
+
 	/// <summary>Whether an action list lets the user adopt one of its actions as the surface's state provider.
 	/// Takes effect only while the node also handles <see cref="UiConfigEvents.Provide" />.</summary>
 	public const string OffersStateProvider = "offersStateProvider";
@@ -290,7 +294,7 @@ public static class UiConfigProperties
 		CanSubmit, Direction, Text, Url, DefaultExpanded, ClearOnCollapse, Severity, For, Triggers, CanRun,
 		IntegrationId, VariableTypes, WritableOnly, Capability, ConfigurationEntries, Segmented, Cards, Icon,
 		AspectRatio, Background, Tint, States, FalseLabel, TrueLabel, RowWeight, Wrap, HideLabel,
-		Reorderable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
+		Reorderable, Searchable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
 		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
 		FixedCount, FixedColors, MaxCount,
 	];

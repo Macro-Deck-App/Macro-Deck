@@ -114,6 +114,33 @@ public sealed class ActionParameter
 		return copy;
 	}
 
+	/// <summary>
+	/// Whether the user can type into a <c>Choice</c> or <c>DynamicChoice</c> parameter's field to filter its
+	/// options by label. Typed text alone is never stored: the value stays one of the options and the field
+	/// shows the picked option's label. Other parameter types ignore it, and so does a Macro Deck release that
+	/// predates it, which draws the plain select. Set it with
+	/// <see cref="AsSearchable" /> rather than through an object initializer, so the static factories stay
+	/// usable.
+	/// </summary>
+	public bool Searchable
+	{
+		get => _searchable;
+		init => _searchable = value;
+	}
+
+	private bool _searchable;
+
+	/// <summary>
+	/// Returns a copy of this parameter whose field the user can type into to filter a long list of options:
+	/// <c>ActionParameter.DynamicChoice("counter", ...).AsSearchable()</c>. See <see cref="Searchable" />.
+	/// </summary>
+	public ActionParameter AsSearchable()
+	{
+		var copy = (ActionParameter)MemberwiseClone();
+		copy._searchable = true;
+		return copy;
+	}
+
 	public static ActionParameter Text(string name,
 		LocalizedText label = default,
 		LocalizedText description = default,

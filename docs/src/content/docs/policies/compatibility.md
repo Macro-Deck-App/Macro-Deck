@@ -265,6 +265,10 @@ What did **not** need a major:
   loading. An older host answers `CAPABILITY_UNSUPPORTED`, and the SDK falls back to resolving fixed colours
   locally, giving `null` for a reference and delivering a watch once. See
   [Resolving colours yourself](/features/variables/#resolving-colours-yourself).
+- Searchable selects added `ActionParameter.Searchable` with `ActionParameter.AsSearchable()`, and an
+  optional `searchable` field on `ActionParameterDto`, all within major `3`. An older host ignores it and
+  draws the plain select; a parameter from an older plugin has no `searchable` and is not searchable. See
+  [Letting the user search a long list](/features/actions/#letting-the-user-search-a-long-list).
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

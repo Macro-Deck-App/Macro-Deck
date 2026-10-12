@@ -128,6 +128,7 @@ export class UiInputComponent {
   protected readonly segmented = computed(() => nodeBoolean(this.node(), Properties.Segmented) === true);
   protected readonly cards = computed(() => nodeBoolean(this.node(), Properties.Cards) === true);
   protected readonly reorderable = computed(() => nodeBoolean(this.node(), Properties.Reorderable) === true);
+  protected readonly searchable = computed(() => nodeBoolean(this.node(), Properties.Searchable) === true);
 
   protected readonly toggleRow = computed(
     () => this.node().type === UiConfigPrimitives.Boolean && !this.segmented() && !this.hideLabel(),

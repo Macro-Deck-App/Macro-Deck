@@ -143,21 +143,44 @@
           }
         }
         @case ('choice') {
-          <shared-select
-            [options]="choiceOptions"
-            [placeholder]="emptyOptionLabel"
-            [clearable]="!param.required"
-            [ngModel]="primitive"
-            (ngModelChange)="onChange($event)" />
+          @if (param.searchable) {
+            <shared-combobox
+              [value]="stringValue"
+              [placeholder]="emptyOptionLabel"
+              [options]="choiceOptions"
+              [clearable]="!param.required"
+              [pickOnly]="true"
+              (valueChange)="onChange($event)" />
+          } @else {
+            <shared-select
+              [options]="choiceOptions"
+              [placeholder]="emptyOptionLabel"
+              [clearable]="!param.required"
+              [ngModel]="primitive"
+              (ngModelChange)="onChange($event)" />
+          }
         }
         @case ('dynamic-choice') {
-          <shared-select
-            [options]="dynamicChoiceOptions"
-            [placeholder]="emptyOptionLabel"
-            [clearable]="!param.required"
-            [ngModel]="primitive"
-            (ngModelChange)="onOptionChange($event)"
-            (opened)="loadDynamicOptions()" />
+          @if (param.searchable) {
+            <shared-combobox
+              [value]="stringValue"
+              [displayLabel]="autocompleteDisplayLabel"
+              [placeholder]="emptyOptionLabel"
+              [options]="dynamicChoiceOptions"
+              [loading]="dynLoading()"
+              [clearable]="!param.required"
+              [pickOnly]="true"
+              (valueChange)="onOptionChange($event)"
+              (opened)="loadDynamicOptions()" />
+          } @else {
+            <shared-select
+              [options]="dynamicChoiceOptions"
+              [placeholder]="emptyOptionLabel"
+              [clearable]="!param.required"
+              [ngModel]="primitive"
+              (ngModelChange)="onOptionChange($event)"
+              (opened)="loadDynamicOptions()" />
+          }
           <shared-button
             variant="ghost"
             size="icon"
