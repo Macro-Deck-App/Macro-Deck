@@ -17,16 +17,19 @@ public class SetVariableValueRequestMessageHandler
 	private readonly IHostLockState _lockState;
 	private readonly VariableRegistry _registry;
 	private readonly SharedVariables _sharedVariables;
+	private readonly VariableOwnerNames _ownerNames;
 
 	public SetVariableValueRequestMessageHandler(IVariableService service,
 		IHostLockState lockState,
 		VariableRegistry registry,
-		SharedVariables sharedVariables)
+		SharedVariables sharedVariables,
+		VariableOwnerNames ownerNames)
 	{
 		_service = service;
 		_lockState = lockState;
 		_registry = registry;
 		_sharedVariables = sharedVariables;
+		_ownerNames = ownerNames;
 	}
 
 	public async ValueTask<SetVariableValueResponse> Handle(
@@ -74,9 +77,10 @@ public class SetVariableValueRequestMessageHandler
 			return new SetVariableValueResponse
 			{
 				Success = false,
-				Error = VariableDtoMapper.ToWriteError(result.Error!.Value,
+				Error = await VariableDtoMapper.ToWriteError(result.Error!.Value,
 					result.ErrorMessage,
-					entity.OwnerIntegrationId)
+					entity.OwnerIntegrationId,
+					_ownerNames)
 			};
 		}
 

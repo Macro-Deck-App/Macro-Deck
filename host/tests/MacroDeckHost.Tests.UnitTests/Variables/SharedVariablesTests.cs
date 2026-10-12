@@ -7,8 +7,12 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Integrations.Delegation;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui;
+using VariableDefinition = MacroDeck.Sdk.Variables.VariableDefinition;
+using VariableWriteCapability = MacroDeck.Sdk.Variables.VariableWriteCapability;
+using VariableWriteResult = MacroDeck.Sdk.Variables.VariableWriteResult;
 
 namespace MacroDeckHost.Tests.UnitTests.Variables;
 
@@ -22,13 +26,15 @@ internal sealed class SharedVariablesTests
 	private VariableService _service = null!;
 	private InMemorySharedVariableStore _store = null!;
 	private SharedVariables _shared = null!;
+	private ConfigurableIntegrationRegistry _integrations = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_registry = new VariableRegistry();
 		_mediator = new RecordingMediator();
-		_service = TestVariableServices.Create(_registry, new NullUserVariableStore(), _mediator);
+		_integrations = new ConfigurableIntegrationRegistry([]);
+		_service = TestVariableServices.Create(_registry, new NullUserVariableStore(), _mediator, _integrations);
 		_store = new InMemorySharedVariableStore();
 		_shared = InMemorySharedVariableStore.For(_registry, _store);
 	}
@@ -206,7 +212,8 @@ internal sealed class SharedVariablesTests
 
 		var response = await new SetSharedVariableValueRequestMessageHandler(_shared,
 				_service,
-				new FakeHostLockState { IsLocked = true })
+				new FakeHostLockState { IsLocked = true },
+				OwnerNames())
 			.Handle(new SetSharedVariableValueRequest { Name = "deaths", Value = "4" }, CancellationToken.None);
 
 		Assert.That(response.Error!.Code, Is.EqualTo("HOST_LOCKED"));
@@ -230,6 +237,48 @@ internal sealed class SharedVariablesTests
 	}
 
 	[Test]
+	public async Task A_write_by_name_to_an_unavailable_owner_names_the_owner_by_its_display_name()
+	{
+		var provider = new FakeWritableVariableProviderIntegration
+		{
+			Id = "app.example.mixer",
+			Name = "Volume Mixer",
+			IsInitialized = true,
+			Answer = VariableWriteResult.Unavailable("offline"),
+			Variables =
+			[
+				VariableDefinition.Eager("volume", MacroDeck.Sdk.Variables.VariableType.Numeric) with
+				{
+					Id = "volume", Write = new VariableWriteCapability()
+				}
+			]
+		};
+		await _integrations.RegisterAsync(provider);
+		var volume = (await _service.CreateIntegrationVariable(provider.Id,
+			"mixer_volume",
+			VariableScope.Global,
+			null,
+			VariableType.Numeric,
+			10m,
+			0,
+			"volume",
+			new VariableDeclaration { Write = new VariableWriteCapability() })).Data!;
+		await SetShared(volume, true);
+
+		var response = await SetValue("mixer_volume", "42");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.OwnerUnavailable)));
+			Assert.That(response.Error.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration: "Volume Mixer").Key));
+			Assert.That(TestLocalization.Resolve(response.Error.Message),
+				Is.EqualTo("Volume Mixer is not available right now"));
+		});
+	}
+
+	[Test]
 	public async Task The_flags_are_read_back_from_the_store_on_a_new_start()
 	{
 		var deaths = await CreateUser("deaths", VariableType.Numeric, 3m);
@@ -239,6 +288,8 @@ internal sealed class SharedVariablesTests
 
 		Assert.That(restarted.IsShared(deaths), Is.True);
 	}
+
+	private VariableOwnerNames OwnerNames() => new(_integrations, TestLocalization.ScopeFactory);
 
 	private async Task<VariableEntity> CreateUser(string name, VariableType type, object value)
 		=> (await _service.CreateUserVariable(name, VariableScope.Global, null, type, value, null)).Data!;
@@ -282,6 +333,7 @@ internal sealed class SharedVariablesTests
 	private async Task<SetSharedVariableValueResponse> SetValue(string name, string value)
 		=> await new SetSharedVariableValueRequestMessageHandler(_shared,
 				_service,
-				new FakeHostLockState { IsLocked = false })
+				new FakeHostLockState { IsLocked = false },
+				OwnerNames())
 			.Handle(new SetSharedVariableValueRequest { Name = name, Value = value }, CancellationToken.None);
 }

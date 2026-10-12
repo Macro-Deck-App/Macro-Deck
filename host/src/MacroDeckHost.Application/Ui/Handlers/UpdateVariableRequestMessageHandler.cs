@@ -17,16 +17,19 @@ public class UpdateVariableRequestMessageHandler
 	private readonly IHostLockState _lockState;
 	private readonly VariableRegistry _registry;
 	private readonly SharedVariables _sharedVariables;
+	private readonly VariableOwnerNames _ownerNames;
 
 	public UpdateVariableRequestMessageHandler(IVariableService service,
 		IHostLockState lockState,
 		VariableRegistry registry,
-		SharedVariables sharedVariables)
+		SharedVariables sharedVariables,
+		VariableOwnerNames ownerNames)
 	{
 		_service = service;
 		_lockState = lockState;
 		_registry = registry;
 		_sharedVariables = sharedVariables;
+		_ownerNames = ownerNames;
 	}
 
 	public async ValueTask<UpdateVariableResponse> Handle(
@@ -81,7 +84,7 @@ public class UpdateVariableRequestMessageHandler
 				VariableDtoMapper.TemplateSourceFromWire(request.TemplateSource));
 			if (!definition.Success || definition.Data is null)
 			{
-				return Failed(definition.Error!.Value, definition.ErrorMessage, entity.OwnerIntegrationId);
+				return await Failed(definition.Error!.Value, definition.ErrorMessage, entity.OwnerIntegrationId);
 			}
 
 			current = definition.Data;
@@ -93,7 +96,7 @@ public class UpdateVariableRequestMessageHandler
 			var value = await _service.SetValue(id, parsedValue, cancellationToken);
 			if (!value.Success || value.Data is null)
 			{
-				return Failed(value.Error!.Value, value.ErrorMessage, entity.OwnerIntegrationId);
+				return await Failed(value.Error!.Value, value.ErrorMessage, entity.OwnerIntegrationId);
 			}
 
 			current = value.Data;
@@ -107,13 +110,13 @@ public class UpdateVariableRequestMessageHandler
 		};
 	}
 
-	private static UpdateVariableResponse Failed(
+	private async Task<UpdateVariableResponse> Failed(
 		VariableError error,
 		string? message,
 		string? ownerIntegrationId)
 		=> new()
 		{
 			Success = false,
-			Error = VariableDtoMapper.ToWriteError(error, message, ownerIntegrationId)
+			Error = await VariableDtoMapper.ToWriteError(error, message, ownerIntegrationId, _ownerNames)
 		};
 }

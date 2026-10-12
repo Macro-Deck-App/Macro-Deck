@@ -520,6 +520,7 @@ public class Startup
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
 		services.AddSingleton<ISharedVariableStore, JsonSharedVariableStore>();
 		services.AddSingleton<SharedVariables>();
+		services.AddSingleton<VariableOwnerNames>();
 		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
 		services.AddSingleton<VariableBindingLookup>();
 		services.AddSingleton<VariableNameFactory>();
