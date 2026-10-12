@@ -7,6 +7,11 @@ A view is a tree of these node types. Each one has its own page below: purpose, 
 leaving one out means - supported children, events and interactions, and how it sizes on the main and
 cross axis.
 
+A renderer is checked against the shared fixtures in
+[`ui-model/fixtures/component-profile/`](https://github.com/Macro-Deck-App/Macro-Deck/tree/main/ui-model/fixtures/component-profile):
+the geometry each tree resolves to, and what a browser lays out from it - boxes, text widths and which
+texts are cut off. Its README describes both.
+
 ## `ui.*`
 
 | Type | Purpose | Page |

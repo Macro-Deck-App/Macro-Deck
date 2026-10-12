@@ -1,0 +1,235 @@
+{
+  "tree": "conformance-gauge-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.layer",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.dial": {
+          "type": "ui.image",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.needle": {
+          "type": "ui.transform",
+          "box": {
+            "x": 16.12,
+            "y": -174.53,
+            "width": 508.42,
+            "height": 508.42
+          }
+        },
+        "conformance.needle.image": {
+          "type": "ui.image",
+          "box": {
+            "x": 16.12,
+            "y": -174.53,
+            "width": 508.42,
+            "height": 508.42
+          }
+        },
+        "conformance.identity": {
+          "type": "ui.transform",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.identity.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.59,
+            "width": 240,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "km/h",
+              "naturalWidth": 34.28,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.outer": {
+          "type": "ui.transform",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.inner": {
+          "type": "ui.transform",
+          "box": {
+            "x": 60,
+            "y": 60,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.inner.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 58.7,
+            "y": 60,
+            "width": 9.09,
+            "height": 120
+          },
+          "texts": [
+            {
+              "text": "N",
+              "naturalWidth": 8.8,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.layer",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.dial": {
+          "type": "ui.image",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.needle": {
+          "type": "ui.transform",
+          "box": {
+            "x": 8.06,
+            "y": -87.27,
+            "width": 254.21,
+            "height": 254.21
+          }
+        },
+        "conformance.needle.image": {
+          "type": "ui.image",
+          "box": {
+            "x": 8.06,
+            "y": -87.27,
+            "width": 254.21,
+            "height": 254.21
+          }
+        },
+        "conformance.identity": {
+          "type": "ui.transform",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.identity.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.59,
+            "width": 120,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "km/h",
+              "naturalWidth": 34.28,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.outer": {
+          "type": "ui.transform",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.inner": {
+          "type": "ui.transform",
+          "box": {
+            "x": 30,
+            "y": 30,
+            "width": 60,
+            "height": 60
+          }
+        },
+        "conformance.inner.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 28.7,
+            "y": 30,
+            "width": 9.09,
+            "height": 60
+          },
+          "texts": [
+            {
+              "text": "N",
+              "naturalWidth": 8.8,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

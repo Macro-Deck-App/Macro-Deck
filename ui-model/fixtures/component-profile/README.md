@@ -4,7 +4,8 @@ The shared fixture every Macro Deck UI renderer is checked against. It exists be
 tree on its own pins the **producer** - it says nothing about whether two renderers draw the same
 picture from it.
 
-Three artefacts, and the third is the one that does the work:
+Each tree comes with the geometry a renderer resolves from it, and every tree with what a browser actually
+lays out from it:
 
 | file | pins |
 |---|---|
@@ -40,6 +41,10 @@ Three artefacts, and the third is the one that does the work:
 | `conformance-anchored-list-layout.json` | each list's box, which of them follow their end, and what a reader without `ui.list` version 3 draws instead |
 | `conformance-video-stream-tree.json` | the wire form of `macrodeck.video-stream` - the stream reference on its own key with a provider id and a stream id holding a space, `fit`, a `size` that is a main-axis extent, a view with no stream, and the fallback an older reader draws |
 | `conformance-video-stream-layout.json` | each view's box, drawn with no session: the placeholder fills the box the stack gave it |
+| `conformance-text-fit-tree.json` | the wire form of the text a browser has to squeeze, cut off or clamp - see below; it has no layout table, only a measured file |
+| `conformance-todo-header-tree.json` | the Todo List header before its fix: a count with no `mainSize` beside a `fill` title, where the browser shrinks the count and "128" is cut off |
+| `measured-scenes.json` | which trees are measured, at which tiles and bases, with which face |
+| `<scene>-measured.json` | what headless Chrome **lays out** from each tree: every node's box, and each text's natural width, given width and whether it is cut off - generated, never hand-edited |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
 
 One tree per widget shape rather than one growing tree: the weather tree's proportions are themselves
@@ -49,6 +54,71 @@ part of what a renderer is checked against, and folding a second widget into it 
 serializer and saving the output - that would only prove the implementation agrees with itself. It is
 canonical JSON, so it is one line, like the wire goldens in
 `ui-model/tests/MacroDeck.Ui.Model.Tests.UnitTests/Fixtures/`.
+
+## The measured files
+
+The layout tables pin what a renderer resolves before the browser takes over. What happens after that -
+flexbox shrinking, text measurement, `text-overflow`, `min-width` in `ch` - is only visible in a browser,
+and two renderers can agree on every resolved number and still draw "1…" in one and "…" in the other.
+The `*-measured.json` files close that gap.
+
+`ui/scripts/measure-conformance.mjs` renders every scene of `measured-scenes.json` with the framework-free
+runtime in headless Chrome and writes, per case and per node id:
+
+- `box`: the border box relative to the tile, as the browser paints it (axis-aligned, so a node inside a
+  `ui.transform` reports its transformed bounds; no press is active);
+- for every `.widget-text` element the node draws: `text` as drawn, `naturalWidth` (the max-content
+  width), `givenWidth` (the computed width it was given) and `truncated` - `x` when `scrollWidth >
+  clientWidth`, `y` when an unclamped copy at the same width is taller than the height it was given.
+
+The frame is the jsdom spec's: the tree is rendered unscaled at the case's `tile` with its `basis`, so
+every number is in tile px. Cases come from the tree's layout table when it has one; a case without a
+numeric basis or a positive, definite tile is skipped (the unmeasured, empty and open-height boxes of
+`conformance-responsive-layout.json`), and trees without a usable table state their cases in
+`measured-scenes.json` - the responsive tree at basis 120, as its spec renders it.
+
+Text is set in the one face `measured-scenes.json` names, registered for every weight so no renderer
+synthesises a bold; its SHA-256 is in every measured file. Times use a fixed clock in the `UTC` time zone
+(also recorded in every file), localization references resolve through the runtime's bundled English
+catalog, and transitions and animations are off.
+
+CI's pinned Chrome on Linux is the reference. `node ui/scripts/measure-conformance.mjs --check` compares
+boxes and widths within 0.1 px and `text` and `truncated` exactly; the Chrome version is informational.
+It also fails when a `conformance-*-tree.json` is missing from `measured-scenes.json` or a measured file
+belongs to no scene.
+To regenerate, run `npm --prefix ui run measure:conformance` (Chrome from `CHROME_BIN`, `CHROME`, or
+Playwright's headless shell). When a local Chrome lays out differently from CI's, take the files from the
+failed run's `measured-conformance` artifact instead.
+
+Where a layout table and a measured file disagree, they answer different questions: the table states what
+a renderer resolves, the measured file what the browser then draws. Today they disagree only on the height
+of nodes that declare neither `mainSize` nor `fill`, which the jsdom spec deliberately leaves unchecked:
+
+- the action-button tree's `full`, `press`, `boundary` and `silent` buttons, and the modifier tree's
+  `card`, `press`, `wrapper` and `circle`: the root holds more than its height, so the browser shrinks
+  these content-sized nodes below the table's height (and grows `full` past it);
+- the slider tree's `plain` and `empty` sliders: they have no content to size from, so the browser draws
+  them with no height at all.
+
+A renderer matches the measured file, because that is what the web client shows. Whether these nodes
+should draw as the tables say is a question for the runtime and the tables, not for these files.
+
+A change to a measured file is a change to what every renderer has to draw: the Companion App checks its
+Compose renderer against these files, so it has to follow in the same release.
+
+## What the text-fit tree deliberately contains
+
+Measured at four tiles, so the same tree is squeezed by different amounts:
+
+- a row with a `fill` title and a count with no `mainSize` - the browser shrinks both, and the count is
+  cut off at every tile;
+- a `digits` reservation that is not a whole number, beside a label pushed to the other end;
+- a `minSize` text that fits by shrinking, and a `maxLines: 1` text that cannot, cut off at every tile but
+  the widest;
+- a `maxLines: 2` text long enough to be clamped, so `truncated.y` is exercised;
+- a `clip-start` stack holding more lines than fit, so the oldest ones are clipped at the start;
+- a `fill` column of four lines with less height than they need at three of the tiles, so the browser
+  shrinks each line, and enough at the fourth.
 
 ## What the tree deliberately contains
 
@@ -297,6 +367,7 @@ A renderer claims component-profile support by reproducing these tables within i
 |---|---|
 | the wire form | `MacroDeck.Ui.Tests.UnitTests`' `ComponentProfileConformanceFixtureTests` - every tree is canonical, the set covers the whole vocabulary, and the trees still carry both length branches, both reference spellings, the slider's affordance shapes, the button's declaration shapes and the degradation paths |
 | the Angular renderer | `ui-widget-node.component.spec.ts` - resolves the same lengths this table lists, in both the cross-clamped and basis-bound branches, and asserts the 1.9 ratio; `widget-slider-interaction.spec.ts` covers the affordance and the drag; `widget-button-interaction.spec.ts` covers the press ordering and the artwork/ring painting; `widget-progress.spec.ts` covers the position carried forward, the three runs and the crossfade |
+| what the browser lays out | `ui/scripts/measure-conformance.mjs --check` in CI, against the pinned Chrome |
 | a future renderer | this table, reproduced in its own test suite |
 
 The Angular assertions restate the table's numbers rather than reading this file: the fixture lives outside

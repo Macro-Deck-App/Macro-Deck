@@ -1,0 +1,430 @@
+{
+  "tree": "conformance-responsive-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.layouts.compact": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.layouts.compact.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "21",
+              "naturalWidth": 11.77,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.layouts.compact.badge": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 12,
+            "width": 120,
+            "height": 0
+          }
+        },
+        "conformance.layouts.compact.badge.more": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 12,
+            "width": 120,
+            "height": 0
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 240,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 120
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 120
+          }
+        },
+        "conformance.layouts.wide": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 120
+          }
+        },
+        "conformance.layouts.wide.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 11.77,
+            "height": 124.78
+          },
+          "texts": [
+            {
+              "text": "21",
+              "naturalWidth": 11.77,
+              "givenWidth": 11.77,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.layouts.wide.play": {
+          "type": "ui.button",
+          "box": {
+            "x": 11.77,
+            "y": 0,
+            "width": 0,
+            "height": 120
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "conformance.layouts.panorama": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "conformance.layouts.panorama.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 50.89,
+            "height": 124.78
+          },
+          "texts": [
+            {
+              "text": "21 Sunny",
+              "naturalWidth": 50.89,
+              "givenWidth": 50.89,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.layouts.tall": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.layouts.tall.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "21",
+              "naturalWidth": 11.77,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "conformance.layouts.tall": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "conformance.layouts.tall.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "21",
+              "naturalWidth": 11.77,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.layouts.large": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.layouts.large.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 240,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "21 Sunny, 12 km/h",
+              "naturalWidth": 103.72,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 252
+          }
+        },
+        "conformance.layouts": {
+          "type": "ui.responsive",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 252
+          }
+        },
+        "conformance.layouts.large": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 252
+          }
+        },
+        "conformance.layouts.large.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 252,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "21 Sunny, 12 km/h",
+              "naturalWidth": 103.72,
+              "givenWidth": 252,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

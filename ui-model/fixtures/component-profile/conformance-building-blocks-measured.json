@@ -1,0 +1,253 @@
+{
+  "tree": "conformance-building-blocks-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.grid",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.shape": {
+          "type": "ui.shape",
+          "box": {
+            "x": 9.59,
+            "y": 9.59,
+            "width": 145.59,
+            "height": 70.39
+          }
+        },
+        "conformance.icon": {
+          "type": "ui.icon",
+          "box": {
+            "x": 160,
+            "y": 9.59,
+            "width": 70.39,
+            "height": 70.39
+          }
+        },
+        "conformance.gauge": {
+          "type": "ui.gauge",
+          "box": {
+            "x": 9.59,
+            "y": 84.8,
+            "width": 70.39,
+            "height": 145.59
+          }
+        },
+        "conformance.toggle": {
+          "type": "ui.toggle",
+          "box": {
+            "x": 84.8,
+            "y": 84.8,
+            "width": 70.39,
+            "height": 70.39
+          }
+        },
+        "conformance.segmented": {
+          "type": "ui.segmented",
+          "box": {
+            "x": 160,
+            "y": 84.8,
+            "width": 70.39,
+            "height": 70.39
+          }
+        },
+        "conformance.segmented.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 160,
+            "y": 82.2,
+            "width": 35.19,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "Day",
+              "naturalWidth": 23.5,
+              "givenWidth": 35.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.segmented.night": {
+          "type": "ui.text",
+          "box": {
+            "x": 195.19,
+            "y": 82.2,
+            "width": 35.19,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "Night",
+              "naturalWidth": 31.69,
+              "givenWidth": 35.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dial": {
+          "type": "ui.dial",
+          "box": {
+            "x": 84.8,
+            "y": 160,
+            "width": 70.39,
+            "height": 70.39
+          }
+        },
+        "conformance.path": {
+          "type": "ui.shape",
+          "box": {
+            "x": 160,
+            "y": 160,
+            "width": 70.39,
+            "height": 70.39
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.grid",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.shape": {
+          "type": "ui.shape",
+          "box": {
+            "x": 4.8,
+            "y": 4.8,
+            "width": 72.8,
+            "height": 35.19
+          }
+        },
+        "conformance.icon": {
+          "type": "ui.icon",
+          "box": {
+            "x": 80,
+            "y": 4.8,
+            "width": 35.19,
+            "height": 35.19
+          }
+        },
+        "conformance.gauge": {
+          "type": "ui.gauge",
+          "box": {
+            "x": 4.8,
+            "y": 42.39,
+            "width": 35.19,
+            "height": 72.8
+          }
+        },
+        "conformance.toggle": {
+          "type": "ui.toggle",
+          "box": {
+            "x": 42.39,
+            "y": 42.39,
+            "width": 35.19,
+            "height": 35.19
+          }
+        },
+        "conformance.segmented": {
+          "type": "ui.segmented",
+          "box": {
+            "x": 80,
+            "y": 42.39,
+            "width": 35.19,
+            "height": 35.19
+          }
+        },
+        "conformance.segmented.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 80,
+            "y": 39.8,
+            "width": 17.59,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "Day",
+              "naturalWidth": 23.5,
+              "givenWidth": 17.59,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.segmented.night": {
+          "type": "ui.text",
+          "box": {
+            "x": 97.59,
+            "y": 39.8,
+            "width": 17.59,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "Night",
+              "naturalWidth": 31.69,
+              "givenWidth": 17.59,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dial": {
+          "type": "ui.dial",
+          "box": {
+            "x": 42.39,
+            "y": 80,
+            "width": 35.19,
+            "height": 35.19
+          }
+        },
+        "conformance.path": {
+          "type": "ui.shape",
+          "box": {
+            "x": 80,
+            "y": 80,
+            "width": 35.19,
+            "height": 35.19
+          }
+        }
+      }
+    }
+  ]
+}

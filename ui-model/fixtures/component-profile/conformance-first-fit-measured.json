@@ -1,0 +1,261 @@
+{
+  "tree": "conformance-first-fit-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.group": {
+          "type": "ui.first-fit",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.group.inline": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.group.inline.name": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -4.8,
+            "width": 74.36,
+            "height": 249.59
+          },
+          "texts": [
+            {
+              "text": "Mouse",
+              "naturalWidth": 74.36,
+              "givenWidth": 74.36,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.inline.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 74.36,
+            "y": -4.8,
+            "width": 123.3,
+            "height": 249.59
+          },
+          "texts": [
+            {
+              "text": "0:35 to full",
+              "naturalWidth": 123.3,
+              "givenWidth": 123.3,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.stacked": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.group.stacked.name": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -4.8,
+            "width": 240,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "Mouse",
+              "naturalWidth": 74.36,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.stacked.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 19.2,
+            "width": 240,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "0:35 to full",
+              "naturalWidth": 123.3,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.group": {
+          "type": "ui.first-fit",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.group.inline": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.group.inline.name": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 37.19,
+            "height": 124.78
+          },
+          "texts": [
+            {
+              "text": "Mouse",
+              "naturalWidth": 37.19,
+              "givenWidth": 37.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.inline.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 37.19,
+            "y": -2.39,
+            "width": 61.66,
+            "height": 124.78
+          },
+          "texts": [
+            {
+              "text": "0:35 to full",
+              "naturalWidth": 61.66,
+              "givenWidth": 61.66,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.stacked": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.group.stacked.name": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "Mouse",
+              "naturalWidth": 37.19,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.group.stacked.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 9.61,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "0:35 to full",
+              "naturalWidth": 61.66,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

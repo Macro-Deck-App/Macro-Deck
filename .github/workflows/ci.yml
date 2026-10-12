@@ -296,6 +296,21 @@ jobs:
       - name: Service worker manifest check
         run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
 
+      # The measured fixtures are what this pinned Chrome lays out; a stale one fails here, and the
+      # regenerated files are uploaded so a contributor without this Chrome can still apply them.
+      - name: Browser-measured conformance fixtures
+        run: |
+          node --test ui/scripts/measure-conformance/compare.test.mjs
+          node ui/scripts/measure-conformance.mjs --check --out "$RUNNER_TEMP/measured-conformance"
+
+      - name: Upload regenerated measured fixtures
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: measured-conformance
+          path: ${{ runner.temp }}/measured-conformance
+          if-no-files-found: ignore
+
   third-party-notices:
     name: Third-party notices & license policy
     runs-on: blacksmith-2vcpu-ubuntu-2404

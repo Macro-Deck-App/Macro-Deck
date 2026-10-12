@@ -57,6 +57,8 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-chat-tree.json";
 		yield return "conformance-anchored-list-tree.json";
 		yield return "conformance-video-stream-tree.json";
+		yield return "conformance-text-fit-tree.json";
+		yield return "conformance-todo-header-tree.json";
 	}
 
 	private static readonly string[] _firstFitLayouts = ["conformance.group.inline", "conformance.group.stacked"];
@@ -568,6 +570,44 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(spans[0].GetProperty("color").GetString(), Is.EqualTo("#9146ff"));
 			Assert.That(spans[4].GetProperty("color").GetString(), Is.EqualTo("red"),
 				"a colour that is not #rrggbb is the case a reader has to ignore");
+		});
+	}
+
+	[Test]
+	public void The_text_fit_fixture_pins_the_text_a_browser_squeezes_cuts_off_or_clamps()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-text-fit-tree.json"), UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(nodes["fit.row.title"].Properties["fill"].GetBoolean(), Is.True);
+			Assert.That(nodes["fit.row.count"].Properties.ContainsKey("mainSize"), Is.False,
+				"a count without mainSize beside a fill title is the row the browser shrinks");
+			Assert.That(nodes["fit.digits.value"].Properties["digits"].GetDouble() % 1, Is.Not.Zero,
+				"a reservation that is not a whole number is what a reader rounding to digits gets wrong");
+			Assert.That(nodes["fit.min"].Properties.ContainsKey("minSize"), Is.True);
+			Assert.That(nodes["fit.single"].Properties["maxLines"].GetInt32(), Is.EqualTo(1));
+			Assert.That(nodes["fit.clamp"].Properties["maxLines"].GetInt32(), Is.EqualTo(2));
+			Assert.That(nodes["fit.ticker"].Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.ClipStart));
+			Assert.That(nodes["fit.ticker"].RequiredComponentVersion, Is.EqualTo(2));
+			Assert.That(nodes["fit.column"].Properties["fill"].GetBoolean(), Is.True);
+			Assert.That(nodes["fit.column"].Children, Has.Count.EqualTo(4));
+		});
+	}
+
+	[Test]
+	public void The_todo_header_fixture_keeps_the_count_without_a_main_size_beside_a_fill_title()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-todo-header-tree.json"), UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(nodes["todo.header.title"].Properties["fill"].GetBoolean(), Is.True);
+			Assert.That(nodes["todo.header.count"].Properties.ContainsKey("mainSize"), Is.False,
+				"giving the count a mainSize is the fix, and the fixture pins the header before it");
+			Assert.That(nodes["todo.header.count"].Properties["text"].GetString(), Is.EqualTo("128"));
 		});
 	}
 

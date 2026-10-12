@@ -1,0 +1,127 @@
+{
+  "tree": "conformance-todo-header-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 295,
+        "height": 295
+      },
+      "basis": 295,
+      "nodes": {
+        "todo": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 295,
+            "height": 295
+          }
+        },
+        "todo.header": {
+          "type": "ui.stack",
+          "box": {
+            "x": 17.69,
+            "y": 17.69,
+            "width": 259.59,
+            "height": 35.39
+          }
+        },
+        "todo.header.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 17.69,
+            "y": 14.73,
+            "width": 210.59,
+            "height": 41.28
+          },
+          "texts": [
+            {
+              "text": "Weekend groceries list",
+              "naturalWidth": 312.88,
+              "givenWidth": 210.59,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "todo.header.count": {
+          "type": "ui.text",
+          "box": {
+            "x": 237.13,
+            "y": 14.73,
+            "width": 40.16,
+            "height": 41.28
+          },
+          "texts": [
+            {
+              "text": "128",
+              "naturalWidth": 47.81,
+              "givenWidth": 40.16,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "todo.items": {
+          "type": "ui.stack",
+          "box": {
+            "x": 17.69,
+            "y": 61.92,
+            "width": 259.59,
+            "height": 215.34
+          }
+        },
+        "todo.items.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 17.69,
+            "y": 57.2,
+            "width": 259.59,
+            "height": 33.03
+          },
+          "texts": [
+            {
+              "text": "Milk",
+              "naturalWidth": 41.61,
+              "givenWidth": 259.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "todo.items.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 17.69,
+            "y": 86.69,
+            "width": 259.59,
+            "height": 33.03
+          },
+          "texts": [
+            {
+              "text": "Bread",
+              "naturalWidth": 65.27,
+              "givenWidth": 259.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
