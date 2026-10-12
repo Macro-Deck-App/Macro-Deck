@@ -26,9 +26,10 @@ app halfway, it opens on the step you left. On the last step:
   computer; see [The 7-day trial](/guide/companion-app/license/#the-7-day-trial).
 - **More information** opens the purchase screen with what the app adds over the web client and the price in your
   store. Closing it returns to the last step; nothing is started or bought until you tap **Buy license** there.
+- **How the license works** opens [License and trial](/guide/companion-app/license/) in the browser.
 - **Continue without trial** finishes without starting the trial. You can still start it later from the paywall.
 
-![The last onboarding step on Android: Try it free for 7 days, No automatic charges, and the Start 7-day free trial, More information and Continue without trial buttons](../../../../assets/guide/companion/android-onboarding.png)
+![The last onboarding step on Android: Try it free for 7 days, No automatic charges, the How the license works link, and the Start 7-day free trial, More information and Continue without trial buttons](../../../../assets/guide/companion/android-onboarding.png)
 
 The steps show only once, on a new installation. If you updated from an earlier version, or the device already
 holds a license or a trial (on iPhone and iPad these survive reinstalling the app), the app opens on the
