@@ -379,10 +379,17 @@ describe('OnboardingWizardComponent', () => {
 
     expect(externalLinks.open.calls.allArgs()).toEqual([
       ['https://github.com/Macro-Deck-App/Macro-Deck'],
-      ['https://github.com/sponsors/Macro-Deck-App'],
-      ['https://ko-fi.com/manuelmayer'],
+      ['https://macro-deck.app/donate'],
       ['https://discord.macro-deck.app'],
+      ['https://play.google.com/store/apps/details?id=app.macrodeck.companion'],
+      ['https://apps.apple.com/app/id6810664560'],
     ]);
+    expect(wizard.textContent).not.toContain('Sponsors');
+    expect(wizard.textContent).not.toContain('Ko-fi');
+    const divider = wizard.querySelector('.ob-divider')!;
+    const rows = Array.from(wizard.querySelectorAll('.ob-option, .ob-divider'));
+    expect(rows.indexOf(divider)).toBe(3);
+    expect(rows.length).toBe(6);
     expect(wizard.querySelectorAll('a[href]').length).toBe(0);
   });
 

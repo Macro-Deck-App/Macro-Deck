@@ -8,33 +8,48 @@ import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confir
 import { LoadingStateComponent } from '../feedback/loading-state/loading-state.component';
 import { RecoveryKeyModalComponent } from '../backup/recovery-key-modal/recovery-key-modal.component';
 import { ConnectQrComponent } from '../shell/connect-qr/connect-qr.component';
-import { MACRO_DECK_REPOSITORY_URL } from '../../util/macro-deck-links';
+import {
+  COMPANION_APP_STORE_URL,
+  COMPANION_PLAY_STORE_URL,
+  MACRO_DECK_DISCORD_URL,
+  MACRO_DECK_DONATE_URL,
+  MACRO_DECK_REPOSITORY_URL,
+} from '../../util/macro-deck-links';
 
 type OnboardingStep = 'welcome' | 'connect' | 'recovery-key' | 'links';
 
 const STEPS: OnboardingStep[] = ['welcome', 'connect', 'recovery-key', 'links'];
 
-const LINKS = [
-  {
-    url: MACRO_DECK_REPOSITORY_URL,
-    title: AppStrings.Onboarding.Links.GitHub,
-    description: AppStrings.Onboarding.Links.GitHubDescription,
-  },
-  {
-    url: 'https://github.com/sponsors/Macro-Deck-App',
-    title: AppStrings.Onboarding.Links.Sponsors,
-    description: AppStrings.Onboarding.Links.SponsorsDescription,
-  },
-  {
-    url: 'https://ko-fi.com/manuelmayer',
-    title: AppStrings.Onboarding.Links.KoFi,
-    description: AppStrings.Onboarding.Links.KoFiDescription,
-  },
-  {
-    url: 'https://discord.macro-deck.app',
-    title: AppStrings.Onboarding.Links.Discord,
-    description: AppStrings.Onboarding.Links.DiscordDescription,
-  },
+const LINK_GROUPS = [
+  [
+    {
+      url: MACRO_DECK_REPOSITORY_URL,
+      title: AppStrings.Onboarding.Links.GitHub,
+      description: AppStrings.Onboarding.Links.GitHubDescription,
+    },
+    {
+      url: MACRO_DECK_DONATE_URL,
+      title: AppStrings.Shell.Footer.Donate,
+      description: AppStrings.Onboarding.Links.DonateDescription,
+    },
+    {
+      url: MACRO_DECK_DISCORD_URL,
+      title: AppStrings.Onboarding.Links.Discord,
+      description: AppStrings.Onboarding.Links.DiscordDescription,
+    },
+  ],
+  [
+    {
+      url: COMPANION_PLAY_STORE_URL,
+      title: AppStrings.Onboarding.Links.CompanionPlayStore,
+      description: AppStrings.Onboarding.Links.CompanionPlayStoreDescription,
+    },
+    {
+      url: COMPANION_APP_STORE_URL,
+      title: AppStrings.Onboarding.Links.CompanionAppStore,
+      description: AppStrings.Onboarding.Links.CompanionAppStoreDescription,
+    },
+  ],
 ] as const;
 
 type RecoveryKeyModalState =
@@ -69,7 +84,7 @@ export class OnboardingWizardComponent {
   protected readonly localization = inject(LocalizationService);
   protected readonly onboarding = inject(OnboardingService);
   protected readonly appStrings = AppStrings;
-  protected readonly links = LINKS;
+  protected readonly linkGroups = LINK_GROUPS;
 
   protected readonly step = signal<OnboardingStep>('welcome');
   protected readonly connection = signal<GetConnectionInfoResponse | null>(null);

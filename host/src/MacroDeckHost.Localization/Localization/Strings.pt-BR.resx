@@ -20574,23 +20574,26 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Onboarding.Links.GitHubDescription" xml:space="preserve">
     <value>Código-fonte, versões e rastreador de problemas.</value>
   </data>
-  <data name="Onboarding.Links.Sponsors" xml:space="preserve">
-    <value>GitHub Sponsors</value>
-  </data>
-  <data name="Onboarding.Links.SponsorsDescription" xml:space="preserve">
+  <data name="Onboarding.Links.DonateDescription" xml:space="preserve">
     <value>Apoie o desenvolvimento do Macro Deck.</value>
-  </data>
-  <data name="Onboarding.Links.KoFi" xml:space="preserve">
-    <value>Ko-fi</value>
-  </data>
-  <data name="Onboarding.Links.KoFiDescription" xml:space="preserve">
-    <value>Pague um café para o desenvolvedor.</value>
   </data>
   <data name="Onboarding.Links.Discord" xml:space="preserve">
     <value>Discord</value>
   </data>
   <data name="Onboarding.Links.DiscordDescription" xml:space="preserve">
     <value>Receba ajuda e converse com a comunidade.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStore" xml:space="preserve">
+    <value>App Companion no Google Play</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStoreDescription" xml:space="preserve">
+    <value>Use o Macro Deck em celulares e tablets Android.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStore" xml:space="preserve">
+    <value>App Companion na App Store</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStoreDescription" xml:space="preserve">
+    <value>Use o Macro Deck no iPhone ou no iPad.</value>
   </data>
   <data name="Onboarding.RecoveryKey.Title" xml:space="preserve">
     <value>Sua chave de recuperação de backup</value>

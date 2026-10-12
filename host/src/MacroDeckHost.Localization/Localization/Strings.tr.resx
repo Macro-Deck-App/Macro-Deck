@@ -20574,23 +20574,26 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Onboarding.Links.GitHubDescription" xml:space="preserve">
     <value>Kaynak kodu, sürümler ve sorun takip sistemi.</value>
   </data>
-  <data name="Onboarding.Links.Sponsors" xml:space="preserve">
-    <value>GitHub Sponsors</value>
-  </data>
-  <data name="Onboarding.Links.SponsorsDescription" xml:space="preserve">
+  <data name="Onboarding.Links.DonateDescription" xml:space="preserve">
     <value>Macro Deck'in geliştirilmesini destekleyin.</value>
-  </data>
-  <data name="Onboarding.Links.KoFi" xml:space="preserve">
-    <value>Ko-fi</value>
-  </data>
-  <data name="Onboarding.Links.KoFiDescription" xml:space="preserve">
-    <value>Geliştiriciye bir kahve ısmarlayın.</value>
   </data>
   <data name="Onboarding.Links.Discord" xml:space="preserve">
     <value>Discord</value>
   </data>
   <data name="Onboarding.Links.DiscordDescription" xml:space="preserve">
     <value>Yardım alın ve topluluk ile konuşun.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStore" xml:space="preserve">
+    <value>Google Play'de Companion uygulaması</value>
+  </data>
+  <data name="Onboarding.Links.CompanionPlayStoreDescription" xml:space="preserve">
+    <value>Macro Deck'i Android telefonunuzda veya tabletinizde kullanın.</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStore" xml:space="preserve">
+    <value>App Store'da Companion uygulaması</value>
+  </data>
+  <data name="Onboarding.Links.CompanionAppStoreDescription" xml:space="preserve">
+    <value>Macro Deck'i iPhone veya iPad'inizde kullanın.</value>
   </data>
   <data name="Onboarding.RecoveryKey.Title" xml:space="preserve">
     <value>Yedek kurtarma anahtarınız</value>
