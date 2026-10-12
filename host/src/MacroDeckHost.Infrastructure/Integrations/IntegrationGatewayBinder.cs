@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Calendar;
+using MacroDeckHost.Application.Email;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Variables;
@@ -6,6 +7,7 @@ using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Calendar;
 using MacroDeckHost.Integrations.Companion;
+using MacroDeckHost.Integrations.Email;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.MusicPlayer;
 using MacroDeckHost.Integrations.System;
@@ -23,7 +25,8 @@ internal static class IntegrationGatewayBinder
 		IKnownAudioDeviceStore? knownAudioDevices = null,
 		IVariablePollingInvalidationSignal? pollingInvalidation = null,
 		CalendarHostServices? calendarServices = null,
-		IMusicPlayerAlbumColor? albumColor = null)
+		IMusicPlayerAlbumColor? albumColor = null,
+		EmailHostServices? emailServices = null)
 	{
 		if (albumColor is not null && integration is IMusicPlayerAlbumColorConsumer albumColorConsumer)
 		{
@@ -33,6 +36,11 @@ internal static class IntegrationGatewayBinder
 		if (calendarServices is not null && integration is ICalendarHostServicesConsumer calendarConsumer)
 		{
 			calendarConsumer.UseCalendarServices(calendarServices);
+		}
+
+		if (emailServices is not null && integration is IEmailHostServicesConsumer emailConsumer)
+		{
+			emailConsumer.UseEmailServices(emailServices);
 		}
 
 		if (knownAudioDevices is not null && integration is IKnownAudioDeviceStoreConsumer audioDeviceConsumer)

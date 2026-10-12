@@ -23,6 +23,7 @@ internal static class SdkContractTypeNames
 		"MacroDeck.Sdk.Weather.IWeatherProvider",
 		"MacroDeck.Sdk.MusicPlayer.IMusicPlayerProvider",
 		"MacroDeck.Sdk.Calendar.ICalendarProvider",
+		"MacroDeck.Sdk.Email.IEmailInboxProvider",
 		"MacroDeck.Sdk.Profiles.IProfileProvider",
 		"MacroDeck.Sdk.Issues.IIntegrationIssueProvider",
 		"MacroDeck.Sdk.IIntegrationIconProvider",

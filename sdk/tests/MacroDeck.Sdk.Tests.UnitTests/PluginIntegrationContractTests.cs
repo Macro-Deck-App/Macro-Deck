@@ -1,5 +1,6 @@
 using System.Reflection;
 using MacroDeck.Sdk.Calendar;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Profiles;
@@ -85,6 +86,7 @@ public class PluginIntegrationContractTests
 	[TestCase(typeof(IEventProvider))]
 	[TestCase(typeof(IWeatherProvider))]
 	[TestCase(typeof(ICalendarProvider))]
+	[TestCase(typeof(IEmailInboxProvider))]
 	[TestCase(typeof(IMusicPlayerProvider))]
 	[TestCase(typeof(IProfileProvider))]
 	public void A_provider_name_is_optional_but_still_declared(Type providerType)

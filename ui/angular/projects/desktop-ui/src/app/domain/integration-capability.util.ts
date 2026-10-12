@@ -11,6 +11,7 @@ const CAPABILITY_ICONS: Record<string, string> = {
   'music-player': 'music-player-type',
   weather: 'weather-type',
   calendar: 'clock-type',
+  'email-inbox': 'mail',
   'virtual-profiles': 'layers',
   'battery-provider': 'battery',
 };

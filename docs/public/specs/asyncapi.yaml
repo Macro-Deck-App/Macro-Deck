@@ -741,6 +741,9 @@ components:
           type: string
         localId:
           type: string
+          description: >-
+            The declared local id whose snapshot is stale; absent when the whole kind is affected. For
+            email-inbox it is an inbox id: that inbox's content or status changed, without a re-describe.
         reason:
           type: string
 

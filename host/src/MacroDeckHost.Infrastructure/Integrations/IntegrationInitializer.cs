@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Calendar;
+using MacroDeckHost.Application.Email;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.MusicPlayer;
@@ -71,6 +72,7 @@ public sealed class IntegrationInitializer
 	private readonly IMusicPlayerArtworkService? _musicPlayerArtwork;
 	private readonly IWidgetDataReader? _widgetData;
 	private readonly OwnedVariableHistory? _variableHistory;
+	private readonly EmailHostServices? _emailServices;
 	private readonly ConcurrentDictionary<string, BuiltInUiResources> _uiResources = new(StringComparer.Ordinal);
 	private readonly IBatteryRegistry? _batteries;
 	private readonly BatteryProviderHost? _batteryProviders;
@@ -120,8 +122,10 @@ public sealed class IntegrationInitializer
 		OwnedVariableHistory? variableHistory = null,
 		IBatteryRegistry? batteries = null,
 		BatteryProviderHost? batteryProviders = null,
-		InProcessAndroidDeviceManager? androidDevices = null)
+		InProcessAndroidDeviceManager? androidDevices = null,
+		EmailHostServices? emailServices = null)
 	{
+		_emailServices = emailServices;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
 		_notificationManager = notificationManager;
@@ -171,7 +175,8 @@ public sealed class IntegrationInitializer
 			_knownAudioDevices,
 			_pollingInvalidation,
 			_calendarServices,
-			_albumColor);
+			_albumColor,
+			_emailServices);
 
 	public async Task<IntegrationInitializationOutcome> InitializeAsync(
 		IIntegration integration,

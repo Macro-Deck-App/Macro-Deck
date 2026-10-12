@@ -79,6 +79,12 @@ x-macrodeck-limits:
   maxBatteryDeviceIdLength: 128
   maxBatteryDeviceNameLength: 128
   maxBatteryDeviceKindLength: 32
+  maxEmailInboxReplyBytes: 196608
+  maxEmailSubjectLength: 512
+  maxEmailPreviewLength: 280
+  maxEmailSenderLength: 320
+  maxEmailInboxes: 32
+  maxEmailMessages: 50
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Limits.ProtocolTimeouts (camelCase + Ms suffix, whole milliseconds)
 x-macrodeck-timeouts:
@@ -115,6 +121,7 @@ x-macrodeck-capability-kinds:
   - calendar
   - config-entries
   - battery-provider
+  - email-inbox
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:

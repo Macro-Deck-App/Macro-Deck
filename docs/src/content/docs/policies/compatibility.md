@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `email-inbox`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -215,6 +215,13 @@ What did **not** need a major:
   `IConfigEntryLifecycle` interface, every member with a default, and the capability kind `config-entries`
   at capability version `1`, within major `3`. An older host rejects the kind non-fatally and stores entries
   as before, and a plugin that does not implement the interface never declares it.
+- [Email inboxes](/features/email-inboxes/) added the `IEmailInboxProvider` interface, a capability kind,
+  `email-inbox`, at capability version `1`, with its own operations, DTOs and reply limits, all within major
+  `3`. `state.update` gained a meaning for this kind only: a `localId` names an inbox whose content or status
+  changed, and the host reads that inbox again without re-describing the kind; every other kind reads
+  `localId` as before. An older host rejects the kind non-fatally and the plugin's other capabilities keep
+  working, and a plugin that does not implement `IEmailInboxProvider` never declares it. The host's email
+  widget, variables and `email` trigger provider are host-owned additions, not protocol changes.
 - [Event origins](/ui/views/sessions/#answering-the-client-that-acted) added `IUiEventOrigin` and an
   `IUiSession.Dispatch(UiEvent, IUiEventOrigin)` overload whose default forwards to `Dispatch(UiEvent)`, so a
   session compiled before it keeps receiving every event. The `ui` host API gained `origin.report-failure`

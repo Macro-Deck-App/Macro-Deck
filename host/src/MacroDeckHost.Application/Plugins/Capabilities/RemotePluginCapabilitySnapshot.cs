@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeck.Sdk.Calendar;
+using MacroDeck.Sdk.Email;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Profiles;
@@ -59,6 +60,10 @@ public sealed record RemotePluginCapabilitySnapshot
 	public string CalendarProviderName { get; init; } = string.Empty;
 
 	public IReadOnlyList<CalendarAccount> CalendarAccounts { get; init; } = [];
+
+	public string EmailInboxProviderName { get; init; } = string.Empty;
+
+	public IReadOnlyList<EmailInbox> EmailInboxes { get; init; } = [];
 
 	public string ProfileProviderName { get; init; } = string.Empty;
 

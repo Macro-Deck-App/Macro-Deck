@@ -26,6 +26,19 @@ public class ProtocolLimitsTests
 		=> Assert.That(ProtocolLimits.MaxCalendarReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
 
 	[Test]
+	public void An_email_inbox_reply_fits_one_message_with_room_for_its_envelope()
+		=> Assert.That(ProtocolLimits.MaxEmailInboxReplyBytes, Is.LessThan(ProtocolLimits.MaxMessageBytes));
+
+	[Test]
+	public void An_email_inbox_reply_at_every_field_cap_fits_its_byte_budget()
+	{
+		var perMessage = ProtocolLimits.MaxEmailSubjectLength + ProtocolLimits.MaxEmailPreviewLength +
+			2 * ProtocolLimits.MaxEmailSenderLength;
+
+		Assert.That(ProtocolLimits.MaxEmailMessages * perMessage, Is.LessThan(ProtocolLimits.MaxEmailInboxReplyBytes));
+	}
+
+	[Test]
 	public void Max_json_depth_matches_the_serializers_configured_max_depth()
 		=> Assert.That(PluginProtocolJson.Options.MaxDepth, Is.EqualTo(ProtocolLimits.MaxJsonDepth));
 

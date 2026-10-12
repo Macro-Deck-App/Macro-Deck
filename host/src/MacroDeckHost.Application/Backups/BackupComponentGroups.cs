@@ -47,7 +47,8 @@ public static class BackupComponentGroups
 				File("data/user-variables.json"),
 				File("data/dynamic-variable-bindings.json"),
 				File("data/shared-variables.json"),
-				File("data/system-audio-devices.json")
+				File("data/system-audio-devices.json"),
+				File("data/email-inboxes.json")
 			],
 			[]),
 		new(BackupComponentGroup.Integrations,

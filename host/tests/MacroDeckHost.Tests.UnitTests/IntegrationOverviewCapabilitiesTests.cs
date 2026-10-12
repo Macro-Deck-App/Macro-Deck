@@ -304,6 +304,7 @@ public class IntegrationOverviewCapabilitiesTests
 					(CapabilityKinds.MusicPlayer, "Music Player"),
 					(CapabilityKinds.Weather, "Weather"),
 					(CapabilityKinds.Calendar, "Calendar"),
+					(CapabilityKinds.EmailInbox, "Email Inbox"),
 					(CapabilityKinds.VirtualProfiles, "Virtual Profiles"),
 					(CapabilityKinds.DeviceProvider, "Devices"),
 					(CapabilityKinds.LayoutProvider, "Layouts"),

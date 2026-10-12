@@ -361,6 +361,10 @@
   mask-image: url('./icons/message-square.svg');
   -webkit-mask-image: url('./icons/message-square.svg');
 }
+.icon-mail {
+  mask-image: url('./icons/mail.svg');
+  -webkit-mask-image: url('./icons/mail.svg');
+}
 .icon-bug {
   mask-image: url('./icons/bug.svg');
   -webkit-mask-image: url('./icons/bug.svg');

@@ -61,6 +61,8 @@ internal static class ConformanceCheckSupport
 			.Describe,
 		_ when string.Equals(kind, CapabilityKinds.ConfigEntries, StringComparison.Ordinal) =>
 			CapabilityOperations.ConfigEntries.Describe,
+		_ when string.Equals(kind, CapabilityKinds.EmailInbox, StringComparison.Ordinal) =>
+			CapabilityOperations.EmailInbox.Describe,
 		_ => null
 	};
 

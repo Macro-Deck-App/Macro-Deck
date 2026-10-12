@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the twenty kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the twenty-three kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -199,7 +199,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rejected with a reason, and the session proceeds degraded.
 
-The twenty-two `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The twenty-three `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -255,6 +255,22 @@ Provider-shaped, like `weather`: one capability at the local id `provider`, what
 An account id the plugin does not know is `CAPABILITY_UNAVAILABLE`, and a failed read is a failed invoke, never an empty result. `response` is a `CalendarResponseStatus` member name as a string; a reader treats a name it does not know as `Unknown`.
 
 The reply caps are fixed in `ProtocolLimits` rather than advertised, and `MacroDeck.Plugin.Hosting` applies them for you: `maxCalendarReplyBytes` (192 KiB) bounds an `events` or `event` reply, and an `events` reply that would exceed it drops its latest events and sets `truncated`. Titles, calendar names and participant names and emails are cut to `maxCalendarTitleLength` (256), a location to `maxCalendarLocationLength` (512) and a description to `maxCalendarDescriptionLength` (16 KiB); a meeting URL longer than `maxCalendarMeetingUrlLength` (2048) is dropped, because a cut URL would not work, and an event carries at most `maxCalendarParticipants` (100) participants. See [Calendars](/features/calendars/) and `MacroDeck.Plugin.Protocol.Capabilities.Calendar`.
+
+#### `email-inbox`
+
+Provider-shaped, like `calendar`: one capability at the local id `provider`, whatever the number of inboxes. Inboxes come and go with the plugin's configuration, so `snapshot` names the inbox in its arguments. All three operations are `capability.invoke`.
+
+| Operation | Arguments | Result | Meaning |
+| --- | --- | --- | --- |
+| `describe` | none | `providerName`, `inboxes` | The provider name and the inboxes (`id`, `displayName`, `address`). The host keeps them as the snapshot behind `GetInboxes()`. |
+| `inboxes` | none | `inboxes` | The same inbox list on its own. The host reads it after a `state.update` for the kind without a `localId`. |
+| `snapshot` | `inboxId`, `maxMessages` (default 10), `unreadOnly` | `status`, `statusMessage`, `unreadCount`, `totalCount`, `messages`, `syncedAt`, `truncated` | One inbox's state. `messages` are newest first: `id`, `senderName`, `senderAddress`, `subject`, `preview`, `receivedAt`, `isRead`. With `unreadOnly`, the newest unread messages wherever they are in the inbox. |
+
+An inbox id the plugin does not know is `CAPABILITY_UNAVAILABLE`, and a failed read is a failed invoke, never an empty result. `status` is an `EmailInboxStatus` member name as a string (`Connecting`, `Connected`, `Disconnected`, `Error`); a reader treats a name it does not know as `Disconnected`.
+
+A `state.update` for this kind reads `localId` differently from every other kind: it is an inbox id, and it means that inbox's messages, counts or status changed, so the host reads its `snapshot` again and nothing else. Without a `localId`, the inbox list changed and the host reads `inboxes`. `MacroDeck.Plugin.Hosting` sends both when the provider raises `Changed`, held back 250 ms per inbox so a burst becomes one message.
+
+The reply caps are fixed in `ProtocolLimits` rather than advertised, and `MacroDeck.Plugin.Hosting` applies them for you: `maxEmailInboxReplyBytes` (192 KiB) bounds every reply, and a `snapshot` reply that would exceed it drops its oldest messages and sets `truncated`. `maxMessages` is clamped to 1 to `maxEmailMessages` (50), a reply carries at most `maxEmailInboxes` (32) inboxes, and a subject or status message is cut to `maxEmailSubjectLength` (512), a preview to `maxEmailPreviewLength` (280) and a sender name or address and an inbox's display name or address to `maxEmailSenderLength` (320). See [Email inboxes](/features/email-inboxes/) and `MacroDeck.Plugin.Protocol.Capabilities.EmailInbox`.
 
 #### `config-entries`
 
@@ -701,7 +717,7 @@ All three are plugin → host and **fire-and-forget** - no reply message.
 | `log.publish` | `events` | array of `LogEventDto` | yes | A batch of structured log events (≤ 64). |
 | | `dropped` | integer | no | Events the plugin's sink dropped since the previous batch. |
 | `state.update` | `kind` | string | yes | The kind whose snapshot is stale - re-describe it. Not data-carrying. |
-| | `localId` | string | no | The capability that changed. |
+| | `localId` | string | no | The capability that changed. For `email-inbox`, the inbox whose content or status changed - see [`email-inbox`](#email-inbox). |
 | | `reason` | string | no | Diagnostic reason. |
 
 Built from the schema:

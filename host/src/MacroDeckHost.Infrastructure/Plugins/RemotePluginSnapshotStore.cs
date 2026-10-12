@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Protocol.Capabilities.Variables;
 using MacroDeck.Plugin.Protocol.Capabilities.VirtualProfiles;
 using MacroDeck.Plugin.Protocol.Capabilities.Weather;
 using MacroDeck.Plugin.Protocol.Capabilities.Calendar;
+using MacroDeck.Plugin.Protocol.Capabilities.EmailInbox;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Capabilities.Mapping;
@@ -145,6 +146,10 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 			CalendarProviderName = persisted.Calendar?.ProviderName ?? string.Empty,
 			CalendarAccounts = persisted.Calendar?.Accounts is { } calendarAccounts
 				? [.. calendarAccounts.Select(CalendarMapper.ToDomain)]
+				: [],
+			EmailInboxProviderName = persisted.EmailInbox?.ProviderName ?? string.Empty,
+			EmailInboxes = persisted.EmailInbox?.Inboxes is { } emailInboxes
+				? EmailInboxMapper.ToDomain(emailInboxes)
 				: [],
 			ProfileProviderName = persisted.VirtualProfiles?.ProviderName ?? string.Empty,
 			Profiles = persisted.VirtualProfiles?.Profiles is { } profiles
@@ -286,6 +291,11 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 				ProviderName = snapshot.CalendarProviderName,
 				Accounts = [.. snapshot.CalendarAccounts.Select(CalendarMapper.ToDto)]
 			},
+			EmailInbox = new EmailInboxDescribePayload
+			{
+				ProviderName = snapshot.EmailInboxProviderName,
+				Inboxes = [.. snapshot.EmailInboxes.Select(EmailInboxMapper.ToDto)]
+			},
 			VirtualProfiles = new VirtualProfilesDescribePayload
 			{
 				ProviderName = snapshot.ProfileProviderName,
@@ -346,6 +356,8 @@ public sealed class RemotePluginSnapshotStore : IRemotePluginSnapshotStore
 		public WeatherDescribePayload? Weather { get; init; }
 
 		public CalendarDescribePayload? Calendar { get; init; }
+
+		public EmailInboxDescribePayload? EmailInbox { get; init; }
 
 		public VirtualProfilesDescribePayload? VirtualProfiles { get; init; }
 	}

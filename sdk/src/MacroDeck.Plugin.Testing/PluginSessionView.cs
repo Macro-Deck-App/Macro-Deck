@@ -30,6 +30,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		MusicPlayer = new MusicPlayerTestClient(this);
 		Weather = new WeatherTestClient(this);
 		Calendar = new CalendarTestClient(this);
+		EmailInbox = new EmailInboxTestClient(this);
 		VirtualProfiles = new VirtualProfilesTestClient(this);
 		DeviceProvider = new DeviceProviderTestClient(this);
 		LayoutProvider = new LayoutProviderTestClient(this);
@@ -81,6 +82,9 @@ public sealed class PluginSessionView : ICapabilityInvoker
 
 	/// <summary>The <c>calendar</c> capability.</summary>
 	public CalendarTestClient Calendar { get; }
+
+	/// <summary>The <c>email-inbox</c> capability.</summary>
+	public EmailInboxTestClient EmailInbox { get; }
 
 	/// <summary>The <c>virtual-profiles</c> capability.</summary>
 	public VirtualProfilesTestClient VirtualProfiles { get; }
