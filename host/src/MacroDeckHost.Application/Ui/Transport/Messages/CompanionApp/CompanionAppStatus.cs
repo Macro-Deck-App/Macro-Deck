@@ -16,6 +16,8 @@ public sealed class CompanionAppStatus
 
 	public bool AutoUpdate { get; init; }
 
+	public bool AllowPlugins { get; init; }
+
 	public bool AdbEnabled { get; init; }
 
 	public IReadOnlyList<CompanionAppDevice> Devices { get; init; } = [];

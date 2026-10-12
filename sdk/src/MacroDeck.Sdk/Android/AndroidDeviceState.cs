@@ -11,6 +11,7 @@ public enum AndroidDeviceState
 	/// <summary>Ready for operations.</summary>
 	Online = 2,
 
-	/// <summary>The device has not authorized this computer, or the computer lacks USB permissions.</summary>
+	/// <summary>The device has not authorized this computer, or the computer lacks USB permissions, which
+	/// <see cref="IAndroidDevice.LacksUsbPermission" /> tells apart.</summary>
 	Unauthorized = 3
 }

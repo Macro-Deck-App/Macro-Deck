@@ -12,18 +12,11 @@
         <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
         <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
         <ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
-        <!-- HomeAssistantWatchedEntityMigration produces MacroDeckHost.Domain.Entities.VariableBinding
-             records. -->
         <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
-        <!-- HomeAssistantIntegration exposes IHomeAssistantBindingStoreConsumer so a host-owned caller can
-             hand it the IVariableBindingStore singleton before InitializeAsync runs - the same
-             pattern IAdbGatewayConsumer already uses for the ADB gateway. Application does not reference
-             this project back, so this does not create a cycle. -->
         <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="MacroDeckHost.Domain.Keyboard" />
         <Using Include="MacroDeck.Sdk.Input" />
     </ItemGroup>
 

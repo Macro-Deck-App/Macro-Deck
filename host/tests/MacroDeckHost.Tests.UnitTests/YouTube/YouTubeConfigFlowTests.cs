@@ -46,7 +46,7 @@ internal sealed class YouTubeConfigFlowTests
 	[Test]
 	public async Task Setup_starts_by_asking_for_the_google_client_and_says_where_to_create_it()
 	{
-		var step = (await _flow.StartAsync(null!, CancellationToken.None)).NextStep!;
+		var step = (await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None)).NextStep!;
 
 		Assert.Multiple(() =>
 		{
@@ -74,7 +74,7 @@ internal sealed class YouTubeConfigFlowTests
 	[Test]
 	public async Task The_client_id_and_the_secret_are_both_required()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		var result = await _flow.SubmitAsync("client",
 			new Dictionary<string, object?> { [YouTubeConfigKeys.ClientId] = "  " },

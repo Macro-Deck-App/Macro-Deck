@@ -13,7 +13,7 @@ or shipped but not implemented, is stated as such.
 | --- | --- | --- |
 | Host | Everything: it owns state, credentials, secrets and install decisions | - |
 | Desktop app, over the private loopback port | **Admin**, with a per-launch secret instead of a token | A process running as the same user can read that secret - see [loopback trust](#loopback-trust-needs-a-per-launch-secret) |
-| Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb` |
+| Plugin process | Scope `plugin`: the plugin protocol surface, and nothing else | Not sandboxed: it runs with the user's full privileges. Declared permissions are [not enforced](#permissions-declared-not-enforced), except `host:adb` and `host:companion-devices` |
 | Deck clients (web client, companion) | Scope `client`: the viewer-safe endpoints | Plugin endpoints refuse them |
 | LAN callers and browsers | The public listener's API and web client | Every plugin endpoint refuses them |
 | Creator Portal and Store | Signing Store plugins after checking the publishing workflow's provenance; publishing the signed registry and its revoked keys | Revocation refuses new installs and updates, not a plugin that is already installed |
@@ -322,7 +322,7 @@ digest, and every declared file's hash and size. See [`sign`](/cli/signing/#sign
 
 <a id="permissions-declared-not-enforced"></a>
 
-## Permissions: declared, and enforced only for ADB
+## Permissions: declared, and enforced only for ADB and Companion devices
 
 ```json
 { "permissions": ["host:variables", "host:adb"] }
@@ -332,12 +332,12 @@ A manifest may declare permissions from a fixed vocabulary (`host:variables` thr
 mirroring the host callback surface one for one. They are parsed, shape-validated, persisted and surfaced
 through the installed-plugins API so a consent surface has something real to render.
 
-**The host gates exactly one host API on a declared permission: `adb`, on `host:adb`.** Every other host
-callback is served whether or not the calling plugin declared the permission that covers it. Plugins that
+**The host gates exactly two host APIs on a declared permission: `adb`, on `host:adb`, and
+`companion-devices`, on `host:companion-devices`.** Every other host callback is served whether or not the calling plugin declared the permission that covers it. Plugins that
 predate the vocabulary declare nothing, so a default-deny posture for the rest would break every plugin
 already running, and a default-allow posture would not be a boundary worth the name.
 
-`host:adb` is enforced because it is new: no existing plugin relied on it. A plugin reaches Macro Deck's
+Both are enforced because they were new: no existing plugin relied on them. A plugin reaches Macro Deck's
 ADB connection only when ADB is enabled, the user has left **Allow plugins to use ADB** on, and the active
 version of the installed plugin declares `host:adb`. Installing a plugin that declares it while ADB or
 that setting is off asks the user whether to turn both on. A self-registered session, admitted through a
@@ -350,6 +350,31 @@ without declaring anything. `host:adb` gives the user a visible, switchable deci
 Macro Deck's connection; it does not stop a hostile plugin from reaching a device. Local paths an `adb`
 call names are read and written with Macro Deck's identity, which is the same user the plugin already runs
 as.
+
+**A locked host runs only fixed ADB commands.** While Macro Deck is locked, the open-ended operations (shell,
+push, pull, install, uninstall, connect) are refused for plugins and built-in integrations alike. The typed
+operations (keys, taps, swipes, text, starting and stopping an app, opening a URI, reboot, screenshot, screen
+status) still run, so a deck button bound to one keeps working; each is a fixed command whose arguments the
+host validates and quotes. A plugin allowed to use ADB can therefore, for example, type text or capture the
+screen of an attached device while the computer is locked.
+
+<a id="companion-devices"></a>
+
+**Companion devices are off until the user allows them.** A plugin reaches the phones and tablets
+connected through the Companion app only when the user has turned on **Allow plugins to use Companion
+devices** in **Settings > Companion App**, which is off by default, and the active version of the installed
+plugin declares `host:companion-devices`. Installing a plugin that declares it while that setting is off
+asks the user whether to turn it on; a plugin that declares it and is refused a call asks once per run of
+Macro Deck. A self-registered session counts as declaring it, as for `host:adb`; the setting still applies.
+An allowed plugin reads everything the devices report, including battery, model, network type and the
+Wi-Fi network's name, sends them commands (brightness, orientation, vibration, screen on and off, bringing
+Macro Deck to the front) and captures screenshots. A deck screenshot shows whatever the deck shows,
+including other plugins' widgets, and needs no approval on the device; a full screen screenshot still needs
+the device's user to approve it on the device, whatever the setting says. The setting covers every plugin
+that declares the permission, and Macro Deck's own integrations are not subject to it. This too is user
+control rather than isolation: the plugin process itself stays unsandboxed. See
+[Companion devices](/features/companion-devices/) and
+[ADR 0110](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0110-plugins-reach-companion-devices-through-a-permission-gated-host-api.md).
 
 Treat the other declared permissions as documentation of intent, not as a constraint on what a plugin can
 reach.
@@ -445,7 +470,7 @@ Read this before deciding what a plugin should be trusted with.
 | Limitation | Detail |
 | --- | --- |
 | A plugin runs with the user's full privileges | A managed plugin is an ordinary child process: no sandbox, container, separate account or privilege reduction. It can do anything the user can - read and write their files, open network connections, start processes. Installing one is equivalent to running any other downloaded program |
-| Permissions are not a boundary | A plugin that declares nothing can still reach every host API except `adb`, and even `host:adb` gates only Macro Deck's own ADB connection, not a plugin's own - see [above](#permissions-declared-not-enforced) |
+| Permissions are not a boundary | A plugin that declares nothing can still reach every host API except `adb` and `companion-devices`, and even these gate only Macro Deck's own connections, not a plugin's own - see [above](#permissions-declared-not-enforced) |
 | An unsigned plugin is still admitted on your say-so | See [signing](#signing-the-creator-portal-signs-and-the-host-verifies-before-install-and-before-every-load). For an unsigned install the declared-digest check is corruption detection, not a boundary: whoever can rewrite the binary can rewrite the unsigned manifest. Trust rests on where you got the file |
 | Revocation stops new installs only | A plugin installed before its certificate or issuer was revoked keeps running; the Store marks it, and removing it is your decision |
 | A process running as the same user can become admin | It can read the desktop app's loopback secret. The model defends against LAN callers, browsers and other local accounts, not a hostile process running as the same user |

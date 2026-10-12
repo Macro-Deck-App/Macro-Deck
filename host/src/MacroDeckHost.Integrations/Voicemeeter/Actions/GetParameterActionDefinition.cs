@@ -2,7 +2,6 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -43,7 +42,7 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableLabel(),
 			description: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true),
 		ActionParameter.Choice(TypeParameter,
 			options:

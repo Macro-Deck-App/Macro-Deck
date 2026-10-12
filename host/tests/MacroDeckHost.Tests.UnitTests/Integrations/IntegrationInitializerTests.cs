@@ -1,3 +1,7 @@
+using System.Globalization;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
+using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Messaging;
 using MacroDeckHost.Application.Services;
@@ -332,12 +336,56 @@ internal sealed class IntegrationInitializerTests
 			=> context.RegisterProviderAsync(new ScriptedVideoProvider("front", "main"), cancellationToken);
 	}
 
+	[Test]
+	public async Task The_context_carries_the_integrations_own_storage_the_users_time_format_and_user_agent()
+	{
+		var paths = new TestPaths();
+		try
+		{
+			using var serviceProvider = BuildScopeServices();
+			using var storage = new IntegrationStorageProvider(paths, Serilog.Core.Logger.None);
+			var userAgent = new HttpUserAgentState();
+			var format = new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12);
+			var initializer = CreateInitializer(serviceProvider,
+				new ManualTimeProvider(),
+				storage: storage,
+				locale: new FixedLocale(format),
+				http: new HostHttp(userAgent));
+			var integration = new ScenarioIntegration { Id = "com.example.context" };
+
+			await initializer.InitializeAsync(integration, "context");
+			await integration.Context!.Storage.WriteAsync("state.json", "{}");
+			userAgent.Apply("Custom/2.0");
+
+			Assert.Multiple(async () =>
+			{
+				Assert.That(File.Exists(Path.Combine(paths.DataDirectory, "integration-data", "com.example.context",
+					"state.json")), Is.True);
+				Assert.That(await integration.Context.Locale.GetTimeOfDayFormatAsync(), Is.SameAs(format));
+				Assert.That(integration.Context.Http.UserAgent, Is.EqualTo("Custom/2.0"));
+			});
+		}
+		finally
+		{
+			paths.Cleanup();
+		}
+	}
+
+	private sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
+	{
+		public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
+			=> Task.FromResult(format);
+	}
+
 	private static IntegrationInitializer CreateInitializer(
 		ServiceProvider serviceProvider,
 		TimeProvider timeProvider,
 		IIntegrationHostIssueStore? hostIssueStore = null,
 		IEventBindingTracker? bindingTracker = null,
-		VideoStreamProviderHost? videoStreams = null)
+		VideoStreamProviderHost? videoStreams = null,
+		IntegrationStorageProvider? storage = null,
+		ILocaleApi? locale = null,
+		IHostHttp? http = null)
 		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
@@ -347,8 +395,6 @@ internal sealed class IntegrationInitializerTests
 			new RecordingEventBus(),
 			bindingTracker ?? new StubEventBindingTracker(),
 			new UserNotificationStore(),
-			null!,
-			null!,
 			null!,
 			new VariableRefreshSignal(),
 			hostIssueStore ?? new FakeIntegrationHostIssueStore(),
@@ -361,7 +407,10 @@ internal sealed class IntegrationInitializerTests
 			timeProvider,
 			new LoggerConfiguration().CreateLogger(),
 			new MessageBroker(Serilog.Core.Logger.None),
-			TestColors.Watches);
+			TestColors.Watches,
+			storage: storage,
+			locale: locale,
+			http: http);
 
 	private static ServiceProvider BuildScopeServices()
 		=> new ServiceCollection()
@@ -409,8 +458,11 @@ internal sealed class IntegrationInitializerTests
 		public Func<Task>? Work { get; init; }
 		public Action? BeforeReturningTask { get; init; }
 
+		public IIntegrationContext? Context { get; private set; }
+
 		public Task InitializeAsync(IIntegrationContext context)
 		{
+			Context = context;
 			BeforeReturningTask?.Invoke();
 			var task = Work?.Invoke() ?? Task.CompletedTask;
 			IsInitialized = true;

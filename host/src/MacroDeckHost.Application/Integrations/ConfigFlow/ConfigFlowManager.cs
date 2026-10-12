@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Http;
 using MacroDeck.Ui.Model.Versioning;
 using MacroDeckHost.Localization;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ public class ConfigFlowManager : IConfigFlowManager
 	private readonly IUiSessionBroker _uiSessionBroker;
 	private readonly ILogger _logger;
 	private readonly IIntegrationConfigMutationCoordinator? _mutations;
+	private readonly IHostHttp _http;
 	private readonly ConcurrentDictionary<Guid, ActiveFlow> _flows = new();
 
 	public ConfigFlowManager(
@@ -43,8 +45,10 @@ public class ConfigFlowManager : IConfigFlowManager
 		UiSessionRegistry uiSessions,
 		IUiSessionBroker uiSessionBroker,
 		ILogger logger,
-		IIntegrationConfigMutationCoordinator? mutations = null)
+		IIntegrationConfigMutationCoordinator? mutations = null,
+		IHostHttp? http = null)
 	{
+		_http = http ?? DefaultHostHttp.Instance;
 		_registry = registry;
 		_scopeFactory = scopeFactory;
 		_lifecycle = lifecycle;
@@ -109,7 +113,8 @@ public class ConfigFlowManager : IConfigFlowManager
 		var context = new ConfigFlowContext(_oauth,
 			registration,
 			_listenerState.PublicListenerAvailable,
-			existingEntry?.Title ?? title);
+			existingEntry?.Title ?? title,
+			_http);
 		var flow = provider.CreateConfigFlow();
 
 		ConfigFlowResult result;
@@ -326,13 +331,16 @@ public class ConfigFlowManager : IConfigFlowManager
 					result.ExternalUrl,
 					result.ResumeStepId);
 
-			case ConfigFlowResultKind.Complete when _mutations is not null &&
-				!_mutations.CreatesEntriesFromFlow(active.IntegrationId):
-				// An integration that creates its entries itself: completing only closes the flow, so no
-				// entry without the thing it is keyed by can come out of the dialog.
+			case ConfigFlowResultKind.Complete when !result.StoresEntry:
 				_flows.TryRemove(flowId, out _);
 				_oauth.Release(active.OAuthState);
 				await CloseConfigUiSessionsAsync(flowId, cancellationToken);
+				await LiftDisabledChoiceWithoutUsableEntryAsync(active.IntegrationId,
+					scope.ServiceProvider,
+					cancellationToken);
+
+				_logger.Information("Config flow for '{IntegrationId}' completed without an entry",
+					active.IntegrationId);
 				return new ConfigFlowSubmitOutcome(true, result.Kind, null, null, null, null);
 
 			case ConfigFlowResultKind.Complete:
@@ -431,6 +439,36 @@ public class ConfigFlowManager : IConfigFlowManager
 		}
 
 		_logger.Information("Config flow for '{IntegrationId}' abandoned", active.IntegrationId);
+	}
+
+	// Completing a flow that stores nothing is the user setting the integration up, so a stored off
+	// choice without a usable entry is lifted; a usable entry the user switched off stays off.
+	private async Task LiftDisabledChoiceWithoutUsableEntryAsync(
+		string integrationId,
+		IServiceProvider services,
+		CancellationToken cancellationToken)
+	{
+		if (!_registry.IsExplicitlyDisabled(integrationId))
+		{
+			return;
+		}
+
+		try
+		{
+			var hasUsableEntry = _mutations is not null
+				? (await _mutations.DescribeAsync(integrationId, cancellationToken)).Any(entry => entry.Usable)
+				: (await services.GetRequiredService<IIntegrationConfigStore>().List(integrationId)).Count > 0;
+			if (!hasUsableEntry)
+			{
+				_registry.ClearDisabledChoice(integrationId);
+			}
+		}
+		catch (Exception ex) when (ex is not OperationCanceledException)
+		{
+			_logger.Warning(ex,
+				"Could not lift the stored off choice for '{IntegrationId}' after its config flow completed",
+				integrationId);
+		}
 	}
 
 	/// <summary>Closes whatever UI session this flow's tree is rendering in, on both ways a flow ends -
@@ -646,8 +684,10 @@ public class ConfigFlowManager : IConfigFlowManager
 		public ConfigFlowContext(IOAuthCallbackCoordinator coordinator,
 			OAuthRegistration registration,
 			bool publicListenerAvailable,
-			string? entryTitle)
+			string? entryTitle,
+			IHostHttp http)
 		{
+			Http = http;
 			_coordinator = coordinator;
 			_registration = registration;
 			_publicListenerAvailable = publicListenerAvailable;
@@ -655,6 +695,8 @@ public class ConfigFlowManager : IConfigFlowManager
 		}
 
 		public string? EntryTitle { get; }
+
+		public IHostHttp Http { get; }
 
 		public IOAuthSession OAuth => _oauth ??= _publicListenerAvailable
 			? new OAuthSession(_coordinator, _registration)

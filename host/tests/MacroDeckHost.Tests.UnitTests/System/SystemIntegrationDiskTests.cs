@@ -3,6 +3,7 @@ using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Integrations.System.Volume;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
@@ -30,7 +31,9 @@ public class SystemIntegrationDiskTests
 			metrics,
 			new FakePowerService(true));
 		var stale = new StaleCounter();
-		integration.UseVariablePollingInvalidation(stale);
+		integration.UseVariables(new SignalForwardingVariableApi(new RecordingVariableApi(),
+			SystemIntegration.IntegrationId,
+			declarations: stale));
 		return (integration, metrics, stale);
 	}
 
@@ -163,9 +166,12 @@ public class SystemIntegrationDiskTests
 	[Test]
 	public async Task A_disk_taking_a_freed_number_is_read_again_at_once()
 	{
-		var (integration, metrics, _) = Create();
+		var (integration, metrics, stale) = Create();
 		var refresh = new VariableRefreshSignal();
-		integration.UseVariableRefreshSignal(refresh);
+		integration.UseVariables(new SignalForwardingVariableApi(new RecordingVariableApi(),
+			SystemIntegration.IntegrationId,
+			refresh,
+			stale));
 		metrics.Disks.AddRange([_system, _backup]);
 		await integration.RefreshDisksAsync();
 		refresh.DrainDefinitionsFor(SystemIntegration.IntegrationId);

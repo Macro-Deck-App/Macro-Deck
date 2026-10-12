@@ -1,24 +1,25 @@
 using System.Net.WebSockets;
-using MacroDeckHost.Application.Network.Http;
+using MacroDeck.Sdk.Http;
 
 namespace MacroDeckHost.Integrations.Http;
 
-public static class IntegrationHttp
+internal static class IntegrationHttp
 {
-	private static readonly ForwardingSource _live = new();
+	private static readonly ForwardingHostHttp _live = new();
 
-	public static void Use(IHttpUserAgentSource source)
+	// In process every context hands out the same live value; out of process each plugin binds its own.
+	internal static void Use(IHostHttp http)
 	{
-		ArgumentNullException.ThrowIfNull(source);
+		ArgumentNullException.ThrowIfNull(http);
 
-		_live.Target = source;
+		_live.Target = http;
 	}
 
-	internal static IHttpUserAgentSource Live => _live;
+	internal static IHostHttp Live => _live;
 
 	internal static HttpMessageHandler CreateHandler(
 		Action<SocketsHttpHandler>? configure = null,
-		IHttpUserAgentSource? source = null)
+		IHostHttp? source = null)
 	{
 		var inner = new SocketsHttpHandler();
 		configure?.Invoke(inner);
@@ -29,7 +30,7 @@ public static class IntegrationHttp
 	internal static HttpClient CreateClient(
 		TimeSpan? timeout = null,
 		Action<SocketsHttpHandler>? configure = null,
-		IHttpUserAgentSource? source = null)
+		IHostHttp? source = null)
 	{
 		var client = new HttpClient(CreateHandler(configure, source), disposeHandler: true);
 		if (timeout is { } value)
@@ -40,22 +41,36 @@ public static class IntegrationHttp
 		return client;
 	}
 
-	internal static ClientWebSocket CreateWebSocket(IHttpUserAgentSource? source = null)
+	internal static ClientWebSocket CreateWebSocket(IHostHttp? source = null)
 	{
 		var socket = new ClientWebSocket();
-		UserAgentWebSocket.Apply(socket.Options, source ?? Live);
+		socket.Options.SetRequestHeader("User-Agent", (source ?? Live).UserAgent);
 		return socket;
 	}
 
-	private sealed class ForwardingSource : IHttpUserAgentSource
+	private sealed class ForwardingHostHttp : IHostHttp
 	{
-		private volatile IHttpUserAgentSource? _target;
+		private volatile IHostHttp _target = DefaultHostHttp.Instance;
 
-		public IHttpUserAgentSource? Target
+		public IHostHttp Target
 		{
 			set => _target = value;
 		}
 
-		public string Current => _target?.Current ?? HttpUserAgent.Default;
+		public string UserAgent => _target.UserAgent;
+	}
+
+	private sealed class UserAgentHandler(IHostHttp source, HttpMessageHandler inner) : DelegatingHandler(inner)
+	{
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+			CancellationToken cancellationToken)
+		{
+			if (request.Headers.UserAgent.Count == 0)
+			{
+				request.Headers.TryAddWithoutValidation("User-Agent", source.UserAgent);
+			}
+
+			return base.SendAsync(request, cancellationToken);
+		}
 	}
 }

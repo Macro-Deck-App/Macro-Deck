@@ -6,6 +6,7 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Meld;
 
@@ -34,7 +35,10 @@ public sealed class MeldConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

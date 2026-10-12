@@ -201,7 +201,11 @@ internal sealed class FakePluginConnection : IPluginConnection
 
 	public async Task Send(ProtocolEnvelope envelope, CancellationToken cancellationToken = default)
 	{
-		Sent.Add(envelope);
+		// Off-loop host results, such as artwork lookups, complete on several pool threads at once.
+		lock (Sent)
+		{
+			Sent.Add(envelope);
+		}
 
 		if (SendGate is { } gate)
 		{

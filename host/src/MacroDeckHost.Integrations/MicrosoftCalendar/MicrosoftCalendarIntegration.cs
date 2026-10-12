@@ -8,6 +8,7 @@ using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.MicrosoftCalendar;
 
@@ -67,6 +68,7 @@ public sealed class MicrosoftCalendarIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		await _accounts.ReloadAsync(context.Config);
 		IsInitialized = true;
 	}

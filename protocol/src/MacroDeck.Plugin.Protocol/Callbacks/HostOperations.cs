@@ -16,10 +16,12 @@ public static class HostOperations
 
 		public const string Delete = "delete";
 
-		/// <summary>Asks the host to read every declared variable of the calling plugin again on its next
-		/// poll instead of at each variable's refresh interval. Carries no arguments. Requests that arrive
-		/// while one is pending are merged. A host that predates the operation answers
-		/// <c>CAPABILITY_UNSUPPORTED</c>; the SDK treats that as a no-op.</summary>
+		/// <summary>Asks the host to read declared variables of the calling plugin again on its next poll
+		/// instead of at each variable's refresh interval: every one when it carries no arguments, or only
+		/// those named by <see cref="VariablesRefreshArguments.DefinitionIds" />. Requests that arrive while
+		/// one is pending are merged. A host that predates the operation answers
+		/// <c>CAPABILITY_UNSUPPORTED</c>; the SDK treats that as a no-op. A host that predates the definition
+		/// ids ignores them and reads every declared variable.</summary>
 		public const string Refresh = "refresh";
 
 		/// <summary>Opens a history window on one of the calling plugin's own global variables and answers
@@ -35,8 +37,14 @@ public static class HostOperations
 		/// an error.</summary>
 		public const string HistoryClose = "history.close";
 
+		/// <summary>Records bindings from the calling plugin's own variable catalog resources to variables,
+		/// see <see cref="VariablesBindArguments" />, and answers a <see cref="VariablesBindResult" />. A host
+		/// that predates the operation answers <c>CAPABILITY_UNSUPPORTED</c>; the SDK reports that as not
+		/// supported.</summary>
+		public const string Bind = "bind";
+
 		public static readonly IReadOnlyList<string> All =
-			[List, Get, Create, Set, Delete, Refresh, HistoryOpen, HistoryRead, HistoryClose];
+			[List, Get, Create, Set, Delete, Refresh, HistoryOpen, HistoryRead, HistoryClose, Bind];
 	}
 
 	public static class UserVariables
@@ -320,8 +328,35 @@ public static class HostOperations
 		/// <summary>Connects the host's adb to a device over the network. Takes no serial.</summary>
 		public const string Connect = "connect";
 
+		/// <summary>Presses one key of <see cref="AdbKeys" />. Allowed while the host is locked, like every typed
+		/// operation below.</summary>
+		public const string Key = "key";
+
+		public const string Tap = "tap";
+
+		public const string Swipe = "swipe";
+
+		public const string InputText = "input-text";
+
+		public const string StartApp = "start-app";
+
+		public const string ForceStopApp = "force-stop-app";
+
+		public const string OpenUri = "open-uri";
+
+		public const string Reboot = "reboot";
+
+		/// <summary>Answers <see cref="AdbScreenshotResultDto" />; the PNG follows over <c>host.asset.*</c>.</summary>
+		public const string Screenshot = "screenshot";
+
+		/// <summary>Answers <see cref="AdbDeviceStatusDto" />, or no data while the host has no reading yet.</summary>
+		public const string Status = "status";
+
 		public static readonly IReadOnlyList<string> All =
-			[Shell, Battery, Push, Pull, Install, Uninstall, PackageInstalled, Connect];
+		[
+			Shell, Battery, Push, Pull, Install, Uninstall, PackageInstalled, Connect, Key, Tap, Swipe, InputText,
+			StartApp, ForceStopApp, OpenUri, Reboot, Screenshot, Status
+		];
 	}
 
 	/// <summary>The <c>messaging</c> host api.</summary>
@@ -410,6 +445,57 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [SnapshotsChanged];
 	}
 
+	/// <summary>The <c>locale</c> host api.</summary>
+	public static class Locale
+	{
+		/// <summary>Takes no arguments and answers a <see cref="LocaleTimeOfDayFormatResult" />: the culture of
+		/// the Macro Deck interface and the hour cycle the user chose, or the operating system's.</summary>
+		public const string TimeOfDayFormat = "time-of-day-format";
+
+		public static readonly IReadOnlyList<string> All = [TimeOfDayFormat];
+	}
+
+	/// <summary>The <c>http</c> host api is push-only, so it declares no operations.</summary>
+	public static class Http
+	{
+		public static readonly IReadOnlyList<string> All = [];
+	}
+
+	/// <summary>The <c>companion-devices</c> host api. Every operation is refused with
+	/// <c>COMPANION_DEVICES_NOT_ALLOWED</c> while the plugin's access is not <c>available</c>.</summary>
+	public static class CompanionDevices
+	{
+		/// <summary>Waits up to a few seconds for a device that has just connected to report its state, see
+		/// <see cref="CompanionDeviceArguments" />, and answers <see cref="CompanionDeviceWaitResultDto" />.</summary>
+		public const string Wait = "wait";
+
+		/// <summary>Sends a command without waiting for the device, see <see cref="CompanionDeviceCommandArguments" />,
+		/// and answers <see cref="CompanionDeviceSendResultDto" />.</summary>
+		public const string Send = "send";
+
+		/// <summary>Sends a command and waits for the device's answer, up to about two minutes, and answers
+		/// <see cref="CompanionDeviceRequestResultDto" />. Cancelling it withdraws a command the device has not
+		/// accepted yet.</summary>
+		public const string Request = "request";
+
+		/// <summary>Captures the screen, see <see cref="CompanionScreenshotArguments" />, and answers
+		/// <see cref="CompanionScreenshotResultDto" />; the PNG follows over <c>host.asset.*</c>.</summary>
+		public const string Screenshot = "screenshot";
+
+		public static readonly IReadOnlyList<string> All = [Wait, Send, Request, Screenshot];
+	}
+
+	/// <summary>The <c>music-players</c> host api.</summary>
+	public static class MusicPlayers
+	{
+		/// <summary>Answers <see cref="MusicPlayerAlbumColorResult" /> for <see cref="MusicPlayerAlbumColorArguments" />:
+		/// the average colour of the player's cover, or the last one the host derived for it. The host may have to
+		/// fetch the cover from its provider first, so the call can take a few seconds.</summary>
+		public const string AlbumColor = "album-color";
+
+		public static readonly IReadOnlyList<string> All = [AlbumColor];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -442,6 +528,10 @@ public static class HostOperations
 			[HostApis.Colors] = Colors.All,
 			[HostApis.Batteries] = Batteries.All,
 			[HostApis.Weather] = Weather.All,
+			[HostApis.Locale] = Locale.All,
+			[HostApis.Http] = Http.All,
+			[HostApis.CompanionDevices] = CompanionDevices.All,
+			[HostApis.MusicPlayers] = MusicPlayers.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

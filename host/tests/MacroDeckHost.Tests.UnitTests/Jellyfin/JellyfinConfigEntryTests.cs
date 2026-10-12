@@ -37,7 +37,6 @@ internal sealed class JellyfinConfigEntryTests
 			new ConfigurableIntegrationRegistry([_integration]),
 			new RecordingMediator(),
 			new VariablePollingInvalidationSignal(),
-			[],
 			Serilog.Core.Logger.None,
 			_variables);
 	}

@@ -22,6 +22,11 @@ public class CompanionAppController : ControllerBase
 	public Task<CompanionAppStatus> Update([FromBody] UpdateCompanionAppSettingsRequest request, CancellationToken ct)
 		=> _companionApp.SetAutoUpdateAsync(request.AutoUpdate, ct);
 
+	[HttpPut("plugin-access")]
+	public Task<CompanionAppStatus> UpdatePluginAccess([FromBody] UpdateCompanionAppPluginAccessRequest request,
+		CancellationToken ct)
+		=> _companionApp.SetAllowPluginsAsync(request.AllowPlugins, ct);
+
 	[HttpPost("check")]
 	public Task<CompanionAppStatus> Check(CancellationToken ct) => _companionApp.CheckNowAsync(ct);
 

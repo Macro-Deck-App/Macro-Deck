@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using MacroDeck.Sdk.Locale;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Services;
@@ -9,11 +10,19 @@ public interface ISystemHourCycleReader
 	string? Read();
 }
 
-public static class HourCycles
+public sealed class SystemTimePatternHourCycleReader(Func<string?> readPattern) : ISystemHourCycleReader
 {
-	public const string H12 = "h12";
-	public const string H23 = "h23";
+	public string? Read() => HourCyclePatterns.FromPattern(readPattern());
+}
 
+public sealed class HostLocaleApi(IServiceScopeFactory scopeFactory) : ILocaleApi
+{
+	public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
+		=> TimeFormatResolver.ResolveAsync(scopeFactory);
+}
+
+public static class HourCyclePatterns
+{
 	public static string? FromPattern(string? pattern)
 	{
 		if (string.IsNullOrEmpty(pattern))
@@ -24,10 +33,10 @@ public static class HourCycles
 		var unquoted = StripQuoted(pattern);
 		if (unquoted.AsSpan().IndexOfAny('H', 'k') >= 0)
 		{
-			return H23;
+			return HourCycles.H23;
 		}
 
-		return unquoted.AsSpan().IndexOfAny('h', 'K') >= 0 ? H12 : null;
+		return unquoted.AsSpan().IndexOfAny('h', 'K') >= 0 ? HourCycles.H12 : null;
 	}
 
 	private static string StripQuoted(string pattern)
@@ -47,66 +56,6 @@ public static class HourCycles
 		}
 
 		return builder.ToString();
-	}
-}
-
-public sealed record TimeOfDayFormat(CultureInfo Culture, string HourCycle)
-{
-	public string Format(TimeOnly time)
-	{
-		var twelveHour = HourCycle == HourCycles.H12;
-		if (twelveHour && string.IsNullOrEmpty(Culture.DateTimeFormat.AMDesignator))
-		{
-			return time.ToString("h:mm tt", CultureInfo.InvariantCulture);
-		}
-
-		return time.ToString(Pattern(Culture.DateTimeFormat.ShortTimePattern, twelveHour), Culture);
-	}
-
-	private static string Pattern(string culturePattern, bool twelveHour)
-	{
-		var builder = new StringBuilder(culturePattern.Length + 3);
-		var quoted = false;
-		var hasDesignator = false;
-		foreach (var character in culturePattern)
-		{
-			if (character == '\'')
-			{
-				quoted = !quoted;
-				builder.Append(character);
-			}
-			else if (quoted)
-			{
-				builder.Append(character);
-			}
-			else if (character is 'h' or 'H')
-			{
-				if (!twelveHour)
-				{
-					builder.Append('H');
-				}
-				else if (builder.Length == 0 || builder[^1] != 'h')
-				{
-					builder.Append('h');
-				}
-			}
-			else if (character == 't')
-			{
-				hasDesignator = true;
-				if (twelveHour)
-				{
-					builder.Append(character);
-				}
-			}
-			else
-			{
-				builder.Append(character);
-			}
-		}
-
-		var pattern = builder.ToString().Trim();
-
-		return twelveHour && !hasDesignator ? pattern + " tt" : pattern;
 	}
 }
 
@@ -140,7 +89,7 @@ public sealed class TimeFormatResolver
 			AppPreferenceService.TimeFormat12h => HourCycles.H12,
 			AppPreferenceService.TimeFormat24h => HourCycles.H23,
 			_ => systemReader.Read() ??
-				HourCycles.FromPattern(culture.DateTimeFormat.ShortTimePattern) ??
+				HourCyclePatterns.FromPattern(culture.DateTimeFormat.ShortTimePattern) ??
 				HourCycles.H23
 		};
 

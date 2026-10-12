@@ -1425,6 +1425,10 @@ export class ApiService {
     return this.http('PUT', '/api/settings/companion-app', { autoUpdate });
   }
 
+  updateCompanionAppPluginAccess(allowPlugins: boolean): Promise<CompanionAppStatus> {
+    return this.http('PUT', '/api/settings/companion-app/plugin-access', { allowPlugins });
+  }
+
   async downloadCompanionApk(): Promise<{ blob: Blob; fileName: string }> {
     const response = await this.fetchWithAuth('/api/settings/companion-app/apk', { method: 'GET' });
     if (!response.ok) {

@@ -13,7 +13,11 @@ using MacroDeck.Plugin.Testing.Internal;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
+using MacroDeck.Sdk.Companion;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Variables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -204,7 +208,18 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			services.AddSingleton<IIntegrationContext>(context);
 			services.AddSingleton<IMessageChannel>(context.Messages);
 			services.AddSingleton<IBatteryApi>(context.Batteries);
+			services.AddSingleton<IMusicPlayerApi>(context.MusicPlayers);
 			services.AddSingleton<IBatteryProviderContext>(context.BatteryProvider);
+			services.AddSingleton<IIntegrationStorage>(context.Storage);
+			services.AddSingleton<IHostHttp>(context.Http);
+			if (services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(ICompanionDeviceApi)) is not
+				{ } registeredCompanion ||
+				(registeredCompanion.ImplementationType ?? registeredCompanion.ImplementationFactory?.Method.DeclaringType)
+				?.Assembly == typeof(PluginHostBuilder).Assembly)
+			{
+				context.CompanionDevices.SetAccess(CompanionDeviceAccess.Unsupported);
+				services.AddSingleton<ICompanionDeviceApi>(context.CompanionDevices);
+			}
 
 			// A plugin that registers its own manager keeps it, as on a real host. Otherwise the context's fake
 			// serves both, starting Unsupported as the harness always reported until a test grants access.

@@ -8,6 +8,7 @@ import { IconPackService } from '../../../services/icon-pack.service';
 import { ExternalLinkService } from '../../../services/external-link.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
+import { PluginCompanionConsentService } from '../../../services/plugin-companion-consent.service';
 import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
 import { NotificationActionEvent, NotificationItemComponent } from './notification-item.component';
 
@@ -33,6 +34,7 @@ export class NotificationPanelComponent {
   private readonly iconPacks = inject(IconPackService);
   private readonly restartNotice = inject(RestartNoticeService);
   private readonly adbConsent = inject(PluginAdbConsentService);
+  private readonly companionConsent = inject(PluginCompanionConsentService);
   private readonly externalLinks = inject(ExternalLinkService);
 
   readonly isOpen = input(false);
@@ -93,6 +95,9 @@ export class NotificationPanelComponent {
       case 'EnablePluginAdb':
         void this.allowPluginsToUseAdb(notification.id);
         return;
+      case 'EnablePluginCompanionDevices':
+        void this.allowPluginsToUseCompanionDevices(notification.id);
+        return;
       case 'OpenDownloadPage':
         this.externalLinks.open(DOWNLOAD_PAGE_URL);
         break;
@@ -110,6 +115,12 @@ export class NotificationPanelComponent {
 
   private async allowPluginsToUseAdb(notificationId: string): Promise<void> {
     if (!await this.adbConsent.allow(notificationId)) {
+      this.closed.emit();
+    }
+  }
+
+  private async allowPluginsToUseCompanionDevices(notificationId: string): Promise<void> {
+    if (!await this.companionConsent.allow(notificationId)) {
       this.closed.emit();
     }
   }

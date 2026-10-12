@@ -121,6 +121,7 @@ internal sealed class IntegrationLifecycleHostedService(
 		var messages = services.GetService<RemoteMessageChannel>();
 		var colors = services.GetService<RemoteColorApi>();
 		var batteries = services.GetService<RemoteBatteryApi>();
+		var musicPlayers = services.GetService<RemoteMusicPlayerApi>();
 		try
 		{
 			// Before ShutdownAsync: an integration disposing its registrations there must not hand
@@ -128,6 +129,7 @@ internal sealed class IntegrationLifecycleHostedService(
 			messages?.ReleaseLifecycleRegistrations();
 			colors?.ReleaseLifecycleWatches();
 			batteries?.ReleaseLifecycleHandlers();
+			musicPlayers?.ReleaseLifecycleHandlers();
 			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: true));
 
 			if (_initialized.Count > 0)

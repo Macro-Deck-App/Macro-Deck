@@ -1,5 +1,8 @@
 using MacroDeckHost.Application.Persistence;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Infrastructure.Variables;
+using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -19,11 +22,19 @@ namespace MacroDeckHost.Tests.UnitTests.HomeAssistant;
 /// </summary>
 internal sealed class FakeHomeAssistantIntegrationContext : IIntegrationContext
 {
+	public static FakeHomeAssistantIntegrationContext RecordingBindingsIn(IVariableBindingStore store)
+		=> new()
+		{
+			Variables = new IntegrationVariableApi(HomeAssistantIntegration.IntegrationId,
+				null!,
+				bindings: new VariableBindingAppender(store))
+		};
+
 	public FakeHomeAssistantIntegrationConfig ConfigStore { get; } = new();
 
 	public IIntegrationConfig Config => ConfigStore;
 
-	public IVariableApi Variables { get; } = new NoOpVariableApi();
+	public IVariableApi Variables { get; init; } = new NoOpVariableApi();
 
 	public IUserVariableApi UserVariables => null!;
 

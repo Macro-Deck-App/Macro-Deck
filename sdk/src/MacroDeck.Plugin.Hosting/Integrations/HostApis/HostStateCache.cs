@@ -56,6 +56,10 @@ internal sealed class HostStateCache
 
 	public event Action? BatteriesChanged;
 
+	public event Action? CompanionDevicesChanged;
+
+	public event Action? MusicPlayersChanged;
+
 	/// <summary>Applies one <c>host.state</c> push, replacing whatever was cached for its API.</summary>
 	public void Apply(ProtocolEnvelope envelope)
 	{
@@ -90,6 +94,26 @@ internal sealed class HostStateCache
 			if (ApplyRevisioned(api, payload.Data))
 			{
 				BatteriesChanged?.Invoke();
+			}
+
+			return;
+		}
+
+		if (string.Equals(api, Protocol.Callbacks.HostApis.CompanionDevices, StringComparison.Ordinal))
+		{
+			if (ApplyRevisioned(api, payload.Data))
+			{
+				CompanionDevicesChanged?.Invoke();
+			}
+
+			return;
+		}
+
+		if (string.Equals(api, Protocol.Callbacks.HostApis.MusicPlayers, StringComparison.Ordinal))
+		{
+			if (ApplyRevisioned(api, payload.Data))
+			{
+				MusicPlayersChanged?.Invoke();
 			}
 
 			return;

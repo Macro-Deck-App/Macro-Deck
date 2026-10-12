@@ -41,6 +41,7 @@ public sealed class HttpIntegration : IIntegration, IIntegrationIconProvider
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_variables.Current = context.Variables;
 		_variables.UserVariables = context.UserVariables;
 		IsInitialized = true;

@@ -1,9 +1,9 @@
 using System.Security;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Integrations.Variables;
 using Serilog;
@@ -58,7 +58,7 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 		ActionParameter.Autocomplete(FileNameVariableParameter,
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
 			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables)
+			optionsSourceId: HostOptionsSources.UserVariables)
 	];
 
 	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables, _userVariables);
@@ -112,8 +112,8 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 					AppStrings.Integrations.Adb.Errors.FolderRequired());
 			}
 
-			var (gateway, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
-			if (gateway is null)
+			var (devices, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
+			if (devices is null)
 			{
 				return notConnected!;
 			}
@@ -121,18 +121,18 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 			var capability = mode == DeckMode
 				? CompanionCapabilities.ScreenshotDeck
 				: CompanionCapabilities.ScreenshotFull;
-			var (unavailable, prompt, _) = CompanionCapabilities.Require(gateway, deviceId, capability);
+			var (unavailable, prompt, _) = CompanionCapabilities.Require(devices, deviceId, capability);
 			if (unavailable is not null)
 			{
 				return unavailable;
 			}
 
-			var result = await gateway.RequestAsync(deviceId,
-				new CompanionCommand(CompanionCommand.Screenshot, ScreenshotMode: mode),
+			var result = await devices.CaptureScreenshotAsync(deviceId,
+				mode == DeckMode ? CompanionScreenshotMode.Deck : CompanionScreenshotMode.FullScreen,
 				context.CancellationToken);
 			if (result.Png is not { } png)
 			{
-				return CompanionCapabilities.Failed(result.Failure ?? CompanionCommandFailure.Failed,
+				return CompanionCapabilities.Failed(result.Failure ?? CompanionDeviceFailure.Failed,
 					capability,
 					prompt);
 			}

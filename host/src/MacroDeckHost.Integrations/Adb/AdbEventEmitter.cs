@@ -11,7 +11,7 @@ internal sealed class AdbEventEmitter
 		_publisher = publisher;
 	}
 
-	public void Publish(AdbGatewayDeviceChange change)
+	public void Publish(AdbDeviceChange change)
 	{
 		var eventId = EventIdFor(change.Kind);
 		if (eventId is null)
@@ -28,20 +28,20 @@ internal sealed class AdbEventEmitter
 		if (string.Equals(eventId, AdbEventIds.DeviceConnected, StringComparison.Ordinal))
 		{
 			payload["manufacturer"] = change.Device.Manufacturer;
-			payload["state"] = change.Device.State.ToString();
+			payload["state"] = change.Device.Status.ToString();
 		}
 
 		_publisher.Publish(eventId, payload);
 	}
 
-	private static string? EventIdFor(AdbGatewayDeviceChangeKind kind) => kind switch
+	private static string? EventIdFor(AdbDeviceChangeKind kind) => kind switch
 	{
-		AdbGatewayDeviceChangeKind.Connected => AdbEventIds.DeviceConnected,
-		AdbGatewayDeviceChangeKind.Disconnected => AdbEventIds.DeviceDisconnected,
-		AdbGatewayDeviceChangeKind.Authorized => AdbEventIds.DeviceAuthorized,
-		AdbGatewayDeviceChangeKind.Unauthorized => AdbEventIds.DeviceUnauthorized,
-		AdbGatewayDeviceChangeKind.Online => AdbEventIds.DeviceOnline,
-		AdbGatewayDeviceChangeKind.Offline => AdbEventIds.DeviceOffline,
+		AdbDeviceChangeKind.Connected => AdbEventIds.DeviceConnected,
+		AdbDeviceChangeKind.Disconnected => AdbEventIds.DeviceDisconnected,
+		AdbDeviceChangeKind.Authorized => AdbEventIds.DeviceAuthorized,
+		AdbDeviceChangeKind.Unauthorized => AdbEventIds.DeviceUnauthorized,
+		AdbDeviceChangeKind.Online => AdbEventIds.DeviceOnline,
+		AdbDeviceChangeKind.Offline => AdbEventIds.DeviceOffline,
 		_ => null
 	};
 }

@@ -317,7 +317,10 @@ internal sealed class WebNowPlayingIntegrationTests
 		try
 		{
 			using var integration = new WebNowPlayingIntegration(((IPEndPoint)occupied.LocalEndpoint).Port);
-			await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext());
+			await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
+		{
+			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+		});
 
 			var issues = await integration.GetIssuesAsync();
 
@@ -340,13 +343,19 @@ internal sealed class WebNowPlayingIntegrationTests
 		var port = FreePort();
 		using var integration = new WebNowPlayingIntegration(port);
 
-		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext());
+		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
+		{
+			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+		});
 		var boundWhileOn = integration.ListeningPort;
 		await integration.ShutdownAsync();
 		var probe = new TcpListener(IPAddress.Loopback, port);
 		probe.Start();
 		probe.Stop();
-		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext());
+		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
+		{
+			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+		});
 		var issues = await integration.GetIssuesAsync();
 
 		Assert.Multiple(() =>
@@ -424,7 +433,10 @@ internal sealed class WebNowPlayingIntegrationTests
 	private static async Task<WebNowPlayingIntegration> StartAsync()
 	{
 		var integration = new WebNowPlayingIntegration(0);
-		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext());
+		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
+		{
+			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+		});
 		return integration;
 	}
 

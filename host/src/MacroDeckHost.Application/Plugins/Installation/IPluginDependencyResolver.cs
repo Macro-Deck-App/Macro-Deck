@@ -31,6 +31,8 @@ public static class PluginDependencyWarningCodes
 	public const string NoEntrypointForRuntime = "no_entrypoint_for_runtime";
 
 	public const string UsesAdb = "uses_adb";
+
+	public const string UsesCompanionDevices = "uses_companion_devices";
 }
 
 public interface IPluginDependencyResolver

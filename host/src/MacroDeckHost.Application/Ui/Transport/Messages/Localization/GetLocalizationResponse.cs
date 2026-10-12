@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 
 namespace MacroDeckHost.Application.Ui.Transport.Messages.Localization;

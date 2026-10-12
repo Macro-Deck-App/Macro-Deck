@@ -72,6 +72,7 @@ describe('CompanionAppSettingsComponent', () => {
       'checkCompanionAppUpdate',
       'installCompanionApp',
       'updateCompanionAppSettings',
+      'updateCompanionAppPluginAccess',
       'onNotification',
       'onAdbStateChanged',
       'downloadCompanionApk',
@@ -262,5 +263,20 @@ describe('CompanionAppSettingsComponent', () => {
 
     expect(api.updateCompanionAppSettings).toHaveBeenCalledWith(true);
     expect(fixture.componentInstance.status()?.autoUpdate).toBeTrue();
+  });
+
+  it('shows plugin access as off by default and saves the user turning it on', async () => {
+    api.updateCompanionAppPluginAccess.and.resolveTo(status({ allowPlugins: true }));
+    const fixture = await create();
+    const toggle = fixture.nativeElement.querySelector('[data-testid="companion-app-allow-plugins"]');
+    const wasOn = fixture.componentInstance.status()?.allowPlugins ?? false;
+
+    await fixture.componentInstance.setAllowPlugins(true);
+
+    expect(toggle).not.toBeNull();
+    expect(wasOn).toBeFalse();
+    expect(fixture.nativeElement.textContent).toContain('Allow plugins to use Companion devices');
+    expect(api.updateCompanionAppPluginAccess).toHaveBeenCalledOnceWith(true);
+    expect(fixture.componentInstance.status()?.allowPlugins).toBeTrue();
   });
 });

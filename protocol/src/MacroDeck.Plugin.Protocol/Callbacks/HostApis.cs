@@ -97,11 +97,38 @@ public static class HostApis
 	/// </summary>
 	public const string Weather = "weather";
 
+	/// <summary>
+	/// The <c>locale</c> host api: the user's language and time format preferences, for text a plugin formats
+	/// itself. A host that predates it answers <c>CAPABILITY_UNSUPPORTED</c>.
+	/// </summary>
+	public const string Locale = "locale";
+
+	/// <summary>Push-only: what outgoing HTTP requests should carry, as <see cref="HttpStateDto" />, sent as
+	/// <c>host.state</c> on registration and whenever it changes. It has no <c>host.invoke</c> operations. A
+	/// host that predates it pushes nothing.</summary>
+	public const string Http = "http";
+
+	/// <summary>
+	/// The <c>companion-devices</c> host api: commands and screenshots for the devices connected through the
+	/// Companion app, plus a revisioned <c>host.state</c> push of this plugin's access and the devices. Gated per
+	/// plugin by <c>host:companion-devices</c>. A host that predates it answers <c>CAPABILITY_UNSUPPORTED</c> and
+	/// pushes nothing.
+	/// </summary>
+	public const string CompanionDevices = "companion-devices";
+
+	/// <summary>
+	/// The <c>music-players</c> host api: the album colour of any provider's player, plus a revisioned
+	/// <c>host.state</c> push of the players of all providers, as <see cref="MusicPlayersStateDto" />. Not gated:
+	/// every plugin may read every provider's players. A host that predates it answers
+	/// <c>CAPABILITY_UNSUPPORTED</c> and pushes nothing.
+	/// </summary>
+	public const string MusicPlayers = "music-players";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
-		IconPacks, VideoStreams, Colors, Batteries, Weather,
+		IconPacks, VideoStreams, Colors, Batteries, Weather, Locale, Http, CompanionDevices, MusicPlayers,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

@@ -2,7 +2,7 @@ import { Component, computed, provideZonelessChangeDetection, signal } from '@an
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
-import { UpdateAdbSettingsResponse, UserNotification, UserNotificationAction } from '@macro-deck/runtime';
+import { CompanionAppStatus, UpdateAdbSettingsResponse, UserNotification, UserNotificationAction } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { ExternalLinkService } from '../../../services/external-link.service';
 import { IconPackService } from '../../../services/icon-pack.service';
@@ -370,6 +370,20 @@ describe('NotificationPanelComponent', () => {
       await open();
 
       expect(fixture.nativeElement.textContent).toContain('Allow');
+    });
+  });
+
+  describe('plugin Companion device access action', () => {
+    it('allows plugins to use Companion devices and clears the question', async () => {
+      const accessSpy = spyOn(TestBed.inject(ApiService), 'updateCompanionAppPluginAccess')
+        .and.resolveTo({ allowPlugins: true } as CompanionAppStatus);
+
+      fireAction(notification({ id: 'companion-1', severity: 'Warning' }), { kind: 'EnablePluginCompanionDevices' });
+      await new Promise(resolve => setTimeout(resolve));
+
+      expect(accessSpy).toHaveBeenCalledOnceWith(true);
+      expect(dismissSpy).toHaveBeenCalledWith('companion-1');
+      expect(updateAdbSettingsSpy).not.toHaveBeenCalled();
     });
   });
 

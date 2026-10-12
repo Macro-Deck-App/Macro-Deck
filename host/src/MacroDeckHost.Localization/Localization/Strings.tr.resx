@@ -13782,6 +13782,13 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>{name}, Android aygıtlarınızla çalışmak için ADB'ye ihtiyaç duyar, ancak eklentilerin ADB kullanmasına şu anda izin verilmiyor. Eklentilerin ADB kullanmasına izin verilsin mi?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Bir eklenti Companion aygıtlarınızı kullanmak istiyor</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name}, Macro Deck Companion ile bağlanan telefon ve tabletlerle çalışmak istiyor, ancak eklentilerin bunları kullanmasına şu anda izin verilmiyor. Eklentilerin Companion aygıtlarını kullanmasına izin verilsin mi?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Simge paketi korundu</value>
   </data>
@@ -14022,6 +14029,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Bu eklenti, Android aygıtlarınızla çalışmak için ADB kullanır. Bu aygıtlarda komut çalıştırabilir, dosya kopyalayabilir ve uygulama yükleyebilir.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Companion aygıtlarını kullanır</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Bu eklenti, Macro Deck Companion ile bağlanan aygıtları kullanır. Pil ve ağ gibi aygıtların bildirdiklerini okuyabilir, onlara komut gönderebilir ve ekran görüntüsü alabilir. Tam ekran görüntüsünün yine de aygıtta onaylanması gerekir.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Bu eklentinin imzası Macro Deck Creator Portal tarafından denetlendi, ancak manifesti bir yazar adı belirtmiyor.</value>
@@ -15174,6 +15187,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Yardımcı uygulamayı yüklemek için ADB gerekir. Önce ADB ayarlarında açın.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Companion aygıt erişimi bildiren eklentiler, Companion aygıtlarınızın bildirdiklerini okuyabilir, onlara komut gönderebilir ve ekran görüntüsü alabilir. Tam ekran görüntüsünün yine de aygıtta onaylanması gerekir.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Eklentilerin Companion aygıtlarını kullanmasına izin ver</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK kaydedildi.</value>
   </data>
@@ -15291,6 +15310,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>ADB ayarlarını aç</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Eklenti erişimi</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>APK'yı kaydet</value>

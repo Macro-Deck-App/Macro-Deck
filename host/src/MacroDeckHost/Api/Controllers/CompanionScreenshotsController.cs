@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Auth;
 using MacroDeckHost.Integrations;
-using MacroDeckHost.Integrations.Companion;
+using MacroDeck.Sdk.Companion;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +43,7 @@ public sealed class CompanionScreenshotsController : ControllerBase
 		{
 			_requests.TryComplete(deviceId,
 				requestId,
-				CompanionCommandResult.Failed(CompanionCommandFailure.Failed),
+				CompanionCommandResult.Failed(CompanionDeviceFailure.Failed),
 				CompanionRequestKind.Screenshot,
 				afterRunning: true);
 			return BadRequest();
@@ -95,9 +95,9 @@ public sealed class CompanionScreenshotsController : ControllerBase
 	{
 		var failure = request.Reason switch
 		{
-			"consentDenied" => CompanionCommandFailure.ConsentDenied,
-			"unavailable" => CompanionCommandFailure.Unavailable,
-			_ => CompanionCommandFailure.Failed
+			"consentDenied" => CompanionDeviceFailure.ConsentDenied,
+			"unavailable" => CompanionDeviceFailure.Unavailable,
+			_ => CompanionDeviceFailure.Failed
 		};
 		return DeviceId() is { } deviceId &&
 			_requests.TryComplete(deviceId,

@@ -1,12 +1,13 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;
 
 internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 {
 	private readonly CompanionTargetResolver _resolver;
-	private readonly Func<IReadOnlyDictionary<string, object>, CompanionCommand?> _command;
+	private readonly Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> _command;
 	private readonly string? _capability;
 
 	public CompanionAction(
@@ -15,7 +16,7 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 		LocalizedText description,
 		IReadOnlyList<ActionParameter> parameters,
 		CompanionTargetResolver resolver,
-		Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command,
+		Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> command,
 		string? capability = null)
 	{
 		Id = id;
@@ -45,11 +46,11 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 	private sealed class Executor : IActionExecutor
 	{
 		private readonly CompanionTargetResolver _resolver;
-		private readonly Func<IReadOnlyDictionary<string, object>, CompanionCommand?> _command;
+		private readonly Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> _command;
 		private readonly string? _capability;
 
 		public Executor(CompanionTargetResolver resolver,
-			Func<IReadOnlyDictionary<string, object>, CompanionCommand?> command,
+			Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> command,
 			string? capability)
 		{
 			_resolver = resolver;
@@ -69,15 +70,15 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 				return CompanionTargetResolver.InvalidParameter();
 			}
 
-			var (gateway, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
-			if (gateway is null)
+			var (devices, notConnected) = await _resolver.ConnectAsync(deviceId, context.CancellationToken);
+			if (devices is null)
 			{
 				return notConnected!;
 			}
 
 			if (_capability is { } capability)
 			{
-				var (unavailable, prompt, awaitResult) = CompanionCapabilities.Require(gateway, deviceId, capability);
+				var (unavailable, prompt, awaitResult) = CompanionCapabilities.Require(devices, deviceId, capability);
 				if (unavailable is not null)
 				{
 					return unavailable;
@@ -85,14 +86,14 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 
 				if (awaitResult)
 				{
-					var result = await gateway.RequestAsync(deviceId, command, context.CancellationToken);
+					var result = await devices.RequestAsync(deviceId, command, context.CancellationToken);
 					return result.Failure is { } failure
 						? CompanionCapabilities.Failed(failure, capability, prompt)
 						: ActionResult.Success();
 				}
 			}
 
-			return await gateway.SendAsync(deviceId, command, context.CancellationToken)
+			return await devices.SendAsync(deviceId, command, context.CancellationToken)
 				? ActionResult.Success()
 				: CompanionTargetResolver.NotConnected();
 		}

@@ -3,6 +3,7 @@ using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk.Variables;
 
@@ -19,6 +20,7 @@ internal sealed class RemoteVariableApi(
 	private readonly Lock _refreshGate = new();
 	private Task? _refreshInFlight;
 	private Task? _refreshQueued;
+	private PendingRefresh? _queuedRefresh;
 
 	public async Task<IReadOnlyList<VariableHandle>> GetAllAsync()
 	{
@@ -80,27 +82,84 @@ internal sealed class RemoteVariableApi(
 			CancellationToken.None);
 
 	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
+		=> EnqueueRefresh(null, cancellationToken);
+
+	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+		CancellationToken cancellationToken = default)
 	{
-		Task pending;
-		lock (_refreshGate)
+		ArgumentNullException.ThrowIfNull(definitionIds);
+		var ids = definitionIds.Where(id => !string.IsNullOrEmpty(id)).ToHashSet(StringComparer.Ordinal);
+		return ids.Count == 0 ? Task.CompletedTask : EnqueueRefresh(ids, cancellationToken);
+	}
+
+	public async Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(
+		IReadOnlyCollection<VariableBindingRequest> requests,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(requests);
+		if (requests.Count == 0)
 		{
-			if (_refreshQueued is not null)
-			{
-				pending = _refreshQueued;
-			}
-			else if (_refreshInFlight is not null)
-			{
-				// A request already on its way may be read before the change that prompted this one, so a
-				// single follow-up is queued behind it and every later caller shares that follow-up.
-				pending = _refreshQueued = SendRefreshAfterAsync(_refreshInFlight);
-			}
-			else
-			{
-				pending = _refreshInFlight = SendRefreshAsync();
-			}
+			return [];
 		}
 
-		return pending.WaitAsync(cancellationToken);
+		if (requests.Count > ProtocolLimits.MaxVariableBindingsPerCall)
+		{
+			throw new ArgumentException(
+				$"One call records at most {ProtocolLimits.MaxVariableBindingsPerCall} bindings.",
+				nameof(requests));
+		}
+
+		var bindings = new List<VariableBindingRequestDto>(requests.Count);
+		foreach (var request in requests)
+		{
+			if (request is null || !VariableNames.IsValid(request.Name))
+			{
+				throw new ArgumentException($"'{request?.Name}' is not a canonical variable name.", nameof(requests));
+			}
+
+			bindings.Add(new VariableBindingRequestDto
+			{
+				LocalResourceId = request.LocalResourceId,
+				Name = request.Name,
+				Type = request.Type.ToString(),
+				DecimalPlaces = request.DecimalPlaces,
+				MigratedFrom = request.MigratedFrom
+			});
+		}
+
+		JsonElement? result;
+		try
+		{
+			result = await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
+					HostOperations.Variables.Bind,
+					new VariablesBindArguments { Bindings = bindings },
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (HostInvocationException exception) when (exception.Code == ProtocolErrorCodes.CapabilityUnsupported)
+		{
+			throw new NotSupportedException("This Macro Deck cannot record variable bindings.", exception);
+		}
+		catch (HostInvocationException exception) when (exception.Code == ProtocolErrorCodes.InvalidPayload)
+		{
+			throw new ArgumentException(exception.Message, nameof(requests), exception);
+		}
+		catch (HostInvocationException exception)
+		{
+			throw new InvalidOperationException("The variable bindings could not be recorded.", exception);
+		}
+
+		var outcomes = result?.Deserialize<VariablesBindResult>(PluginProtocolJson.Options)?.Outcomes;
+		if (outcomes is null || outcomes.Count != requests.Count)
+		{
+			throw new InvalidOperationException("The host answered no outcome for every binding.");
+		}
+
+		return outcomes
+			.Select(outcome => outcome == VariableBindingOutcomes.AlreadyBound
+				? VariableBindingOutcome.AlreadyBound
+				: VariableBindingOutcome.Bound)
+			.ToList();
 	}
 
 	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
@@ -161,27 +220,58 @@ internal sealed class RemoteVariableApi(
 		return new RemoteVariableHistoryWindow(invoker, opened.WindowId, time ?? TimeProvider.System);
 	}
 
+	private Task EnqueueRefresh(HashSet<string>? definitionIds, CancellationToken cancellationToken)
+	{
+		Task pending;
+		lock (_refreshGate)
+		{
+			if (_refreshQueued is not null)
+			{
+				_queuedRefresh!.Merge(definitionIds);
+				pending = _refreshQueued;
+			}
+			else if (_refreshInFlight is not null)
+			{
+				// A request already on its way may be read before the change that prompted this one, so a
+				// single follow-up is queued behind it and every later caller shares that follow-up.
+				_queuedRefresh = new PendingRefresh(definitionIds);
+				pending = _refreshQueued = SendRefreshAfterAsync(_refreshInFlight);
+			}
+			else
+			{
+				pending = _refreshInFlight = SendRefreshAsync(new PendingRefresh(definitionIds));
+			}
+		}
+
+		return pending.WaitAsync(cancellationToken);
+	}
+
 	private async Task SendRefreshAfterAsync(Task inFlight)
 	{
 		await Task.Yield();
 		await inFlight.ConfigureAwait(false);
+		PendingRefresh request;
 		lock (_refreshGate)
 		{
 			_refreshInFlight = _refreshQueued;
 			_refreshQueued = null;
+			request = _queuedRefresh!;
+			_queuedRefresh = null;
 		}
 
-		await InvokeRefreshAsync().ConfigureAwait(false);
-		lock (_refreshGate)
-		{
-			_refreshInFlight = null;
-		}
+		await InvokeRefreshAsync(request).ConfigureAwait(false);
+		ReleaseInFlight();
 	}
 
-	private async Task SendRefreshAsync()
+	private async Task SendRefreshAsync(PendingRefresh request)
 	{
 		await Task.Yield();
-		await InvokeRefreshAsync().ConfigureAwait(false);
+		await InvokeRefreshAsync(request).ConfigureAwait(false);
+		ReleaseInFlight();
+	}
+
+	private void ReleaseInFlight()
+	{
 		lock (_refreshGate)
 		{
 			if (_refreshQueued is null)
@@ -191,13 +281,13 @@ internal sealed class RemoteVariableApi(
 		}
 	}
 
-	private async Task InvokeRefreshAsync()
+	private async Task InvokeRefreshAsync(PendingRefresh request)
 	{
 		try
 		{
 			await invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
 					HostOperations.Variables.Refresh,
-					null,
+					request.ToArguments(),
 					CancellationToken.None)
 				.ConfigureAwait(false);
 		}
@@ -206,5 +296,29 @@ internal sealed class RemoteVariableApi(
 			// Best effort by contract: a host that predates the operation answers CAPABILITY_UNSUPPORTED,
 			// and a refused or undelivered request still leaves the variables read at their interval.
 		}
+	}
+
+	private sealed class PendingRefresh(HashSet<string>? definitionIds)
+	{
+		private HashSet<string>? _definitionIds = definitionIds;
+
+		public void Merge(HashSet<string>? definitionIds)
+		{
+			if (definitionIds is null)
+			{
+				_definitionIds = null;
+			}
+			else
+			{
+				_definitionIds?.UnionWith(definitionIds);
+			}
+		}
+
+		// Reading every declared variable covers any subset, so a list too long for one request is sent
+		// as a request for all of them.
+		public VariablesRefreshArguments? ToArguments()
+			=> _definitionIds is { Count: > 0 and <= ProtocolLimits.MaxVariableRefreshDefinitionIds } ids
+				? new VariablesRefreshArguments { DefinitionIds = [.. ids.Order(StringComparer.Ordinal)] }
+				: null;
 	}
 }

@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;
@@ -8,12 +9,12 @@ internal sealed class CompanionTargetResolver
 	public const string ConfigurationParameter = "configuration";
 
 	private readonly Func<IReadOnlyList<CompanionRuntime>> _runtimes;
-	private readonly Func<ICompanionGateway?> _gateway;
+	private readonly Func<ICompanionDeviceApi?> _devices;
 
-	public CompanionTargetResolver(Func<IReadOnlyList<CompanionRuntime>> runtimes, Func<ICompanionGateway?> gateway)
+	public CompanionTargetResolver(Func<IReadOnlyList<CompanionRuntime>> runtimes, Func<ICompanionDeviceApi?> devices)
 	{
 		_runtimes = runtimes;
-		_gateway = gateway;
+		_devices = devices;
 	}
 
 	public static ActionParameter Parameter()
@@ -57,15 +58,15 @@ internal sealed class CompanionTargetResolver
 		return true;
 	}
 
-	public async Task<(ICompanionGateway? Gateway, ActionResult? Error)> ConnectAsync(Guid deviceId,
+	public async Task<(ICompanionDeviceApi? Devices, ActionResult? Error)> ConnectAsync(Guid deviceId,
 		CancellationToken cancellationToken)
 	{
-		if (_gateway() is not { } gateway || !await gateway.WaitForStateAsync(deviceId, cancellationToken))
+		if (_devices() is not { } devices || !await devices.WaitForDeviceAsync(deviceId, cancellationToken))
 		{
 			return (null, NotConnected());
 		}
 
-		return HasConfiguration(deviceId) ? (gateway, null) : (null, ConfigurationNotFound());
+		return HasConfiguration(deviceId) ? (devices, null) : (null, ConfigurationNotFound());
 	}
 
 	private bool HasConfiguration(Guid deviceId) => _runtimes().Any(runtime => runtime.Id == deviceId);

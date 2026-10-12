@@ -4,6 +4,7 @@ using MacroDeckHost.Integrations.System.Focus;
 using MacroDeckHost.Integrations.System.Lock;
 using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Notifications;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -43,6 +44,9 @@ public class SystemIntegrationTests
 		FocusedApplicationSnapshot.Current.Set(null);
 		LockStateSnapshot.Current.Set(null);
 	}
+
+	private static SignalForwardingVariableApi Forwarding(IVariableRefreshSignal signal)
+		=> new(new RecordingVariableApi(), SystemIntegration.IntegrationId, signal);
 
 	private static SystemIntegration Create(
 		FakeVolumeService? volume = null,
@@ -588,11 +592,10 @@ public class SystemIntegrationTests
 		var volume = new FakeVolumeService();
 		var signal = new VariableRefreshSignal();
 		var integration = Create(volume);
-		integration.UseVariableRefreshSignal(signal);
 
 		try
 		{
-			await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+			await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(signal)));
 
 			volume.RaiseChanged();
 
@@ -615,10 +618,9 @@ public class SystemIntegrationTests
 		var volume = new FakeVolumeService();
 		var signal = new VariableRefreshSignal();
 		var integration = Create(volume);
-		integration.UseVariableRefreshSignal(signal);
 
-		await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
-		await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(signal)));
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(signal)));
 		await integration.ShutdownAsync();
 
 		volume.RaiseChanged();

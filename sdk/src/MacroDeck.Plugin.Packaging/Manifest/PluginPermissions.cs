@@ -5,8 +5,10 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 /// <summary>
 /// The permission vocabulary a manifest may declare.
 /// <para>
-/// <b>The host enforces only <see cref="HostAdb" />.</b> An installed plugin reaches the <c>adb</c> host api
-/// only when its manifest declares it (ADR 0092). Every other permission is parsed, shape-validated,
+/// <b>The host enforces only <see cref="HostAdb" /> and <see cref="HostCompanionDevices" />.</b> An installed plugin
+/// reaches the <c>adb</c> host api only when its manifest declares <see cref="HostAdb" /> (ADR 0092), and the
+/// <c>companion-devices</c> host api only when it declares <see cref="HostCompanionDevices" /> (ADR 0110). Every other
+/// permission is parsed, shape-validated,
 /// persisted and exposed so an artifact can disclose what it intends to reach, and so a consent surface has
 /// something to render, but is not enforced: every plugin that predates them declares none, so default-deny
 /// would break shipped behaviour.
@@ -54,6 +56,9 @@ public static class PluginPermissions
 
 	public const string HostVideoStreams = "host:video-streams";
 
+	/// <summary>Enforced: required for an installed plugin to use the <c>companion-devices</c> host api.</summary>
+	public const string HostCompanionDevices = "host:companion-devices";
+
 	public const string EventsPublish = "events:publish";
 
 	public const string AssetsUpload = "assets:upload";
@@ -70,7 +75,7 @@ public static class PluginPermissions
 	[
 		HostVariables, HostUserVariables, HostConfig, HostDeck, HostScripts, HostWidgets,
 		HostNotifications, HostActionInteractions, HostDevices, HostVariableValues, HostLayouts,
-		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, HostMessaging, HostVideoStreams, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
+		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, HostMessaging, HostVideoStreams, HostCompanionDevices, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
 		ProcessSpawn, DeviceUsb,
 	];
 

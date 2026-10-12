@@ -15,24 +15,24 @@ internal sealed class AdbEventEmitterTests
 		_emitter = new AdbEventEmitter(_publisher);
 	}
 
-	private static AdbGatewayDevice Device(
+	private static AdbTrackedDevice Device(
 		string serial = "SERIAL1",
-		AdbGatewayDeviceState state = AdbGatewayDeviceState.Device,
+		AdbDeviceStatus state = AdbDeviceStatus.Device,
 		string? model = "Pixel 8",
 		string? manufacturer = "Google")
-		=> new(serial, state, model, manufacturer, TunnelEstablished: true);
+		=> new(new ScriptedAndroidDevice(serial, null), state, model, manufacturer);
 
-	[TestCase(AdbGatewayDeviceChangeKind.Connected, AdbEventIds.DeviceConnected)]
-	[TestCase(AdbGatewayDeviceChangeKind.Disconnected, AdbEventIds.DeviceDisconnected)]
-	[TestCase(AdbGatewayDeviceChangeKind.Authorized, AdbEventIds.DeviceAuthorized)]
-	[TestCase(AdbGatewayDeviceChangeKind.Unauthorized, AdbEventIds.DeviceUnauthorized)]
-	[TestCase(AdbGatewayDeviceChangeKind.Online, AdbEventIds.DeviceOnline)]
-	[TestCase(AdbGatewayDeviceChangeKind.Offline, AdbEventIds.DeviceOffline)]
+	[TestCase(AdbDeviceChangeKind.Connected, AdbEventIds.DeviceConnected)]
+	[TestCase(AdbDeviceChangeKind.Disconnected, AdbEventIds.DeviceDisconnected)]
+	[TestCase(AdbDeviceChangeKind.Authorized, AdbEventIds.DeviceAuthorized)]
+	[TestCase(AdbDeviceChangeKind.Unauthorized, AdbEventIds.DeviceUnauthorized)]
+	[TestCase(AdbDeviceChangeKind.Online, AdbEventIds.DeviceOnline)]
+	[TestCase(AdbDeviceChangeKind.Offline, AdbEventIds.DeviceOffline)]
 	public void Each_kind_publishes_exactly_one_occurrence_with_the_right_id(
-		AdbGatewayDeviceChangeKind kind,
+		AdbDeviceChangeKind kind,
 		string expectedEventId)
 	{
-		_emitter.Publish(new AdbGatewayDeviceChange(kind, Device()));
+		_emitter.Publish(new AdbDeviceChange(kind, Device()));
 
 		Assert.Multiple(() =>
 		{
@@ -44,8 +44,8 @@ internal sealed class AdbEventEmitterTests
 	[Test]
 	public void DeviceConnected_carries_the_manufacturer_and_state()
 	{
-		_emitter.Publish(new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Connected,
-			Device(serial: "S1", state: AdbGatewayDeviceState.Unauthorized, model: "Pixel 8", manufacturer: "Google")));
+		_emitter.Publish(new AdbDeviceChange(AdbDeviceChangeKind.Connected,
+			Device(serial: "S1", state: AdbDeviceStatus.Unauthorized, model: "Pixel 8", manufacturer: "Google")));
 
 		var parameters = _publisher.Published[0].Parameters!;
 		Assert.Multiple(() =>
@@ -57,14 +57,14 @@ internal sealed class AdbEventEmitterTests
 		});
 	}
 
-	[TestCase(AdbGatewayDeviceChangeKind.Disconnected)]
-	[TestCase(AdbGatewayDeviceChangeKind.Authorized)]
-	[TestCase(AdbGatewayDeviceChangeKind.Unauthorized)]
-	[TestCase(AdbGatewayDeviceChangeKind.Online)]
-	[TestCase(AdbGatewayDeviceChangeKind.Offline)]
-	public void Every_other_kind_carries_only_serial_and_model(AdbGatewayDeviceChangeKind kind)
+	[TestCase(AdbDeviceChangeKind.Disconnected)]
+	[TestCase(AdbDeviceChangeKind.Authorized)]
+	[TestCase(AdbDeviceChangeKind.Unauthorized)]
+	[TestCase(AdbDeviceChangeKind.Online)]
+	[TestCase(AdbDeviceChangeKind.Offline)]
+	public void Every_other_kind_carries_only_serial_and_model(AdbDeviceChangeKind kind)
 	{
-		_emitter.Publish(new AdbGatewayDeviceChange(kind, Device(serial: "S1", model: "Pixel 8")));
+		_emitter.Publish(new AdbDeviceChange(kind, Device(serial: "S1", model: "Pixel 8")));
 
 		var parameters = _publisher.Published[0].Parameters!;
 		Assert.Multiple(() =>
@@ -81,10 +81,10 @@ internal sealed class AdbEventEmitterTests
 	{
 		var declaredIds = AdbEventDefinitions.All.Select(definition => definition.Id).ToList();
 
-		foreach (var kind in Enum.GetValues<AdbGatewayDeviceChangeKind>())
+		foreach (var kind in Enum.GetValues<AdbDeviceChangeKind>())
 		{
 			_publisher.Published.Clear();
-			_emitter.Publish(new AdbGatewayDeviceChange(kind, Device()));
+			_emitter.Publish(new AdbDeviceChange(kind, Device()));
 			Assert.That(declaredIds, Does.Contain(_publisher.Published[0].EventId), kind.ToString());
 		}
 	}

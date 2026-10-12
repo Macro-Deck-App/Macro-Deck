@@ -23,6 +23,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure;
 using MacroDeckHost.Infrastructure.Integrations;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Tests.UnitTests.Adb;
@@ -70,14 +71,15 @@ internal sealed class CompanionHarness
 				Serilog.Core.Logger.None),
 				new TemplateVariableSynchronizer(VariableRegistry, new RecordingMediator()),
 				Serilog.Core.Logger.None);
-		Adapter = new CompanionConfigurationMutationAdapter(Registry, VariableRegistry, ScopeFactory, suffixFactory);
+		Integration = new CompanionIntegration(suffixFactory);
 		Coordinator = new GatedCoordinator(new IntegrationConfigMutationCoordinator(ScopeFactory,
 			new InitializingLifecycle(this),
 			Registry,
 			new RecordingMediator(),
 			new VariablePollingInvalidationSignal(),
-			[Adapter],
-			Logger));
+			Logger,
+			VariableRegistry,
+			new IntegrationVariableApiFactory()));
 		Requests = new CompanionCommandRequests(Time);
 		DeviceRegistry = new CompanionDeviceRegistry(ScopeFactory,
 			() => Coordinator,
@@ -100,13 +102,12 @@ internal sealed class CompanionHarness
 			null!,
 			null!,
 			null!,
-			UnavailableNotificationService.Instance);
+			UnavailableNotificationService.Instance,
+			companionDevices: DeviceRegistry);
 
 		if (register)
 		{
 			Registry.RegisterAsync(Integration).GetAwaiter().GetResult();
-			Integration.UseGateway(DeviceRegistry);
-			Integration.UseVariableRefreshSignal(RefreshSignal);
 		}
 	}
 
@@ -117,11 +118,10 @@ internal sealed class CompanionHarness
 	public MemoryStateStore StateStore { get; }
 	public IServiceScopeFactory ScopeFactory { get; }
 	public IntegrationRegistry Registry { get; }
-	public CompanionIntegration Integration { get; } = new();
+	public CompanionIntegration Integration { get; }
 	public VariableRegistry VariableRegistry { get; } = new();
 	public VariableRefreshSignal RefreshSignal { get; } = new();
 	public VariableService Variables { get; }
-	public CompanionConfigurationMutationAdapter Adapter { get; }
 	public GatedCoordinator Coordinator { get; }
 	public RecordingUiTransport Transport { get; } = new();
 	public FixedInterfaces Interfaces { get; } = new();
@@ -203,8 +203,6 @@ internal sealed class CompanionHarness
 		}
 
 		public Func<Task>? AfterComplete { get; set; }
-
-		public bool CreatesEntriesFromFlow(string integrationId) => Inner.CreatesEntriesFromFlow(integrationId);
 
 		public async Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(string integrationId,
 			Guid entryId,

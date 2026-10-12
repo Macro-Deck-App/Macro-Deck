@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -55,7 +54,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 		ActionParameter.Autocomplete("outputVariable",
 			label: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableLabel(),
 			description: AppStrings.Integrations.System.Actions.RunCommand.OutputVariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables),
+			optionsSourceId: HostOptionsSources.UserVariables),
 		ActionParameter.Number("timeout",
 			label: AppStrings.Integrations.System.Actions.RunCommand.TimeoutLabel(),
 			description: AppStrings.Integrations.System.Actions.RunCommand.TimeoutDescription(),

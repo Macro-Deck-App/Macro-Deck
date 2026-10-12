@@ -1,0 +1,27 @@
+@if (pending(); as request) {
+  <shared-modal
+    [heading]="request.title"
+    size="medium"
+    [closeOnOverlay]="false"
+    [showFooter]="true"
+    (close)="notNow()">
+    <div class="plugin-companion-consent">
+      <span class="icon icon-alert-triangle icon-sm"></span>
+      <div class="plugin-companion-consent-body">
+        @if (request.message) {
+          <p>{{ request.message }}</p>
+        }
+        <p>{{ 'macrodeck.app:Plugins.UsesCompanionDevicesNote' | translate }}</p>
+      </div>
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" [disabled]="busy()" (click)="notNow()">
+        {{ 'macrodeck.app:Settings.Update.NotNowAction' | translate }}
+      </shared-button>
+      <shared-button variant="primary" [loading]="busy()" (click)="allow()">
+        {{ 'macrodeck.app:Shell.Notifications.Action.EnablePluginAdb' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}

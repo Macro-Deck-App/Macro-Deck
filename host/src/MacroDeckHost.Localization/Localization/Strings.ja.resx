@@ -13782,6 +13782,13 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{name} が Android デバイスを操作するには ADB が必要ですが、現在プラグインによる ADB の使用は許可されていません。プラグインによる使用を許可しますか？</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>プラグインが Companion デバイスの使用を求めています</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} は Macro Deck Companion で接続されたスマートフォンやタブレットを使用しようとしていますが、現在プラグインによる使用は許可されていません。プラグインによる Companion デバイスの使用を許可しますか？</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>アイコンパックを保持しました</value>
   </data>
@@ -14022,6 +14029,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>このプラグインは Android デバイスを操作するために ADB を使用します。デバイス上でコマンドを実行したり、ファイルをコピーしたり、アプリをインストールしたりできます。</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Companion デバイスを使用</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>このプラグインは Macro Deck Companion で接続されたデバイスを使用します。バッテリーやネットワークなどデバイスが報告する情報を読み取り、コマンドを送信し、スクリーンショットを撮影できます。画面全体のスクリーンショットは引き続きデバイス上での承認が必要です。</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>このプラグインの署名は Macro Deck Creator Portal で確認されていますが、マニフェストに作成者が記載されていません。</value>
@@ -15174,6 +15187,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>アプリのインストールには ADB が必要です。先に ADB の設定で有効にしてください。</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Companion デバイスへのアクセスを宣言したプラグインは、Companion デバイスが報告する情報を読み取り、コマンドを送信し、スクリーンショットを撮影できます。画面全体のスクリーンショットは引き続きデバイス上での承認が必要です。</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>プラグインによる Companion デバイスの使用を許可</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK を保存しました。</value>
   </data>
@@ -15291,6 +15310,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>ADB の設定を開く</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>プラグインのアクセス</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>APK を保存</value>

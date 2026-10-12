@@ -110,6 +110,8 @@ internal static class HostInvokeDispatcher
 				HostApis.Colors when colors is not null && pluginId is not null => colors.Dispatch(pluginId, payload),
 				HostApis.Batteries => await BatteriesAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.Weather => await WeatherAsync(context, accepted, cancellationToken).ConfigureAwait(false),
+				HostApis.Locale => await LocaleAsync(context, cancellationToken).ConfigureAwait(false),
+				HostApis.MusicPlayers => await MusicPlayersAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
@@ -153,6 +155,25 @@ internal static class HostInvokeDispatcher
 
 		await context.WeatherProvider.NotifySnapshotsChangedAsync(cancellationToken).ConfigureAwait(false);
 		return HostInvokeOutcome.Ok((JsonElement?)null);
+	}
+
+	private static async Task<HostInvokeOutcome> LocaleAsync(FakeIntegrationContext context,
+		CancellationToken cancellationToken)
+	{
+		var format = await context.Locale.GetTimeOfDayFormatAsync(cancellationToken).ConfigureAwait(false);
+		return HostInvokeOutcome.Ok(new LocaleTimeOfDayFormatResult { Culture = format.Culture.Name, HourCycle = format.HourCycle });
+	}
+
+	private static async Task<HostInvokeOutcome> MusicPlayersAsync(FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Require<MusicPlayerAlbumColorArguments>(payload);
+		return HostInvokeOutcome.Ok(new MusicPlayerAlbumColorResult
+		{
+			Color = await context.MusicPlayers.GetAlbumColorAsync(arguments.InstanceId, cancellationToken)
+				.ConfigureAwait(false)
+		});
 	}
 
 	private static async Task<HostInvokeOutcome> BatteriesAsync(
@@ -813,8 +834,51 @@ internal static class HostInvokeDispatcher
 			}
 
 			case HostOperations.Variables.Refresh:
-				await context.Variables.RequestRefreshAsync().ConfigureAwait(false);
+			{
+				var definitionIds = Optional<VariablesRefreshArguments>(payload)?.DefinitionIds;
+				if (definitionIds is { Count: > 0 })
+				{
+					await context.Variables.RequestDefinitionRefreshAsync(definitionIds).ConfigureAwait(false);
+				}
+				else
+				{
+					await context.Variables.RequestRefreshAsync().ConfigureAwait(false);
+				}
+
 				return HostInvokeOutcome.Ok((JsonElement?)null);
+			}
+
+			case HostOperations.Variables.Bind:
+			{
+				var arguments = Require<VariablesBindArguments>(payload);
+				var requests = arguments.Bindings
+					.Select(binding => new VariableBindingRequest(binding.LocalResourceId,
+						binding.Name,
+						Enum.Parse<VariableType>(binding.Type))
+					{
+						DecimalPlaces = binding.DecimalPlaces,
+						MigratedFrom = binding.MigratedFrom
+					})
+					.ToList();
+				IReadOnlyList<VariableBindingOutcome> outcomes;
+				try
+				{
+					outcomes = await context.Variables.BindAsync(requests).ConfigureAwait(false);
+				}
+				catch (ArgumentException exception)
+				{
+					return HostInvokeOutcome.Failed(ProtocolErrorCodes.InvalidPayload, exception.Message);
+				}
+
+				return HostInvokeOutcome.Ok(new VariablesBindResult
+				{
+					Outcomes = outcomes
+						.Select(outcome => outcome == VariableBindingOutcome.AlreadyBound
+							? VariableBindingOutcomes.AlreadyBound
+							: VariableBindingOutcomes.Bound)
+						.ToList()
+				});
+			}
 
 			case HostOperations.Variables.HistoryOpen:
 			{
@@ -1135,6 +1199,12 @@ internal static class HostInvokeDispatcher
 
 		return HostInvokeOutcome.Ok((JsonElement?)null);
 	}
+
+	private static T? Optional<T>(HostInvokePayload payload)
+		where T : class
+		=> payload.Arguments is { ValueKind: JsonValueKind.Object } element
+			? element.Deserialize<T>(PluginProtocolJson.Options)
+			: null;
 
 	private static T Require<T>(HostInvokePayload payload)
 	{

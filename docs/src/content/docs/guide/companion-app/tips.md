@@ -76,6 +76,29 @@ On Android, **Turn screen on when connected** in the
 **Turn screen off when disconnected** turns the screen off again when the computer shuts down, which no automation can
 do: a computer that is off cannot send **Turn screen off**.
 
+## Plugins and your Companion devices
+
+Some plugins work with the phones and tablets connected through the Companion app: they can read what the
+devices report, such as battery, model and network, send them the commands in the table above and take
+screenshots. A plugin can do this only while **Allow plugins to use Companion devices** is on under
+**Plugin access** in **Settings > Companion App** on the computer, and only if it says in advance that it uses
+Companion devices. The setting is off until you turn it on, and applies to every plugin that uses Companion
+devices.
+
+- When you install a plugin that uses Companion devices, the install dialog says so.
+- A plugin that uses Companion devices lists **Uses Companion devices** on its page.
+- If you install such a plugin while the setting is off, Macro Deck asks **A plugin wants to use your
+  Companion devices** in a dialog. Click **Allow** to turn the setting on. **Not now** closes the dialog;
+  the question stays in your notifications until you answer or dismiss it.
+- A plugin that tries to use your devices while the setting is off asks the same question once each time
+  Macro Deck runs, even if it was installed earlier.
+- A screenshot of the full screen still has to be approved on the device, however the setting is set. A
+  screenshot of the deck shows everything on the deck and is not asked for on the device.
+
+Turning off **Allow plugins to use Companion devices** stops every plugin from using your Companion devices.
+It does not affect the **Macro Deck Companion** integration's own actions, variables and events, or the
+deck itself.
+
 ## More ideas
 
 - **Brightness by time of day:** a **Schedule** event at 22:00 runs **Set screen brightness** at 20%, another one at

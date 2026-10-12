@@ -15,6 +15,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Twitch;
 
@@ -139,6 +140,7 @@ public sealed class TwitchIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		// Captured so an action built in the constructor can write its result variable later;
 		// ActionExecutionContext deliberately exposes no variable API.
 		_context = context;

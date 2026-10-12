@@ -1,6 +1,5 @@
 using System.Globalization;
 using MacroDeck.Localization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Obs.Actions;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -14,15 +13,15 @@ using Serilog;
 namespace MacroDeckHost.Integrations.Obs;
 
 [MacroDeckIntegration]
-public sealed class ObsIntegration
+public sealed partial class ObsIntegration
 	: IIntegration,
 		IConfigFlowProvider,
+		IConfigEntryLifecycle,
 		IVariableProvider,
 		IIntegrationIconProvider,
 		IEventProvider,
 		IDynamicEventOptionsProvider,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.obs";
@@ -32,13 +31,13 @@ public sealed class ObsIntegration
 
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly Func<Guid, IObsClient> _clientFactory;
+	private readonly Func<int>? _suffixFactory;
 	private readonly TimeSpan? _pollInterval;
 	private readonly SemaphoreSlim _reloadGate = new(1, 1);
 	private readonly ObsTargetResolver _targetResolver;
 	private readonly ObsVariableCatalog _dynamicVariables;
 
 	private IIntegrationContext? _context;
-	private IVariableRefreshSignal? _refreshSignal;
 	private IReadOnlyList<ObsRuntime> _runtimes = [];
 
 	public ObsIntegration()
@@ -46,9 +45,12 @@ public sealed class ObsIntegration
 	{
 	}
 
-	internal ObsIntegration(Func<Guid, IObsClient> clientFactory, TimeSpan? pollInterval = null)
+	internal ObsIntegration(Func<Guid, IObsClient> clientFactory,
+		TimeSpan? pollInterval = null,
+		Func<int>? suffixFactory = null)
 	{
 		_clientFactory = clientFactory;
+		_suffixFactory = suffixFactory;
 		_pollInterval = pollInterval;
 		_targetResolver = new ObsTargetResolver(RuntimeSnapshot);
 		_dynamicVariables = new ObsVariableCatalog(RuntimeSnapshot);
@@ -116,15 +118,19 @@ public sealed class ObsIntegration
 		return eager ?? await _dynamicVariables.ResolveAsync(localId, cancellationToken).ConfigureAwait(false);
 	}
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
-	private void RequestVariableRefresh() => _refreshSignal?.RequestEagerRefresh(IntegrationId);
+	private void RequestVariableRefresh() => _ = _variableAccessor.Current?.RequestRefreshAsync();
 
 	private void RequestDefinitionRefresh(Guid runtimeId, IReadOnlyList<ObsTargetChange> changes)
 	{
-		foreach (var id in ObsVariableCatalog.DefinitionIdsFor(runtimeId, changes))
+		if (_variableAccessor.Current is not { } variables)
 		{
-			_refreshSignal?.RequestDefinitionRefresh(IntegrationId, id);
+			return;
+		}
+
+		var ids = ObsVariableCatalog.DefinitionIdsFor(runtimeId, changes).ToList();
+		if (ids.Count > 0)
+		{
+			_ = variables.RequestDefinitionRefreshAsync(ids);
 		}
 	}
 

@@ -41,6 +41,7 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.IconPackInvalid] = "The icon pack archive is not usable.",
 			[ProtocolErrorCodes.IconPackSyncNotAllowed] = "Only a self-registered development session can sync bundled icon packs.",
 			[ProtocolErrorCodes.IconNotFound] = "No installed icon pack contains an icon with this id.",
+			[ProtocolErrorCodes.CompanionDevicesNotAllowed] = "This plugin is not allowed to use Companion devices.",
 		};
 
 	public static string For(string code)

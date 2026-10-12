@@ -1,6 +1,8 @@
-using MacroDeckHost.Application.Persistence;
+using System.Text.Json;
+using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Integrations.System.Focus;
 using MacroDeckHost.Integrations.System.Notifications;
 using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
@@ -11,6 +13,7 @@ using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 
@@ -37,7 +40,7 @@ public class SystemIntegrationAudioDeviceTests
 
 	private async Task<SystemIntegration> StartAsync(
 		FakeVolumeService volume,
-		InMemoryKnownAudioDeviceStore? store = null,
+		IIntegrationStorage? store = null,
 		CountingInvalidationSignal? invalidation = null,
 		IVariableRefreshSignal? refresh = null)
 	{
@@ -46,22 +49,12 @@ public class SystemIntegrationAudioDeviceTests
 			new SilentNotificationService(),
 			new FakeSystemMetricsService(),
 			new FakePowerService(true));
-		if (store is not null)
-		{
-			integration.UseKnownAudioDeviceStore(store);
-		}
 
-		if (invalidation is not null)
-		{
-			integration.UseVariablePollingInvalidation(invalidation);
-		}
-
-		if (refresh is not null)
-		{
-			integration.UseVariableRefreshSignal(refresh);
-		}
-
-		await integration.InitializeAsync(new AudioTestContext(new RecordingVariableApi()));
+		await integration.InitializeAsync(new AudioTestContext(new SignalForwardingVariableApi(new RecordingVariableApi(),
+				SystemIntegration.IntegrationId,
+				refresh,
+				invalidation),
+			store ?? UnavailableIntegrationStorage.Instance));
 		_started.Add(integration);
 		return integration;
 	}
@@ -441,26 +434,91 @@ public class SystemIntegrationAudioDeviceTests
 	}
 
 
-	private sealed class InMemoryKnownAudioDeviceStore : IKnownAudioDeviceStore
+	[Test]
+	public async Task Devices_from_a_file_an_earlier_version_wrote_are_declared_and_saved_back_into_storage()
 	{
+		var paths = new TestPaths();
+		try
+		{
+			Directory.CreateDirectory(paths.DataDirectory);
+			var legacyPath = Path.Combine(paths.DataDirectory, "system-audio-devices.json");
+			await File.WriteAllTextAsync(legacyPath, """
+				[
+				  {
+				    "flow": "output",
+				    "deviceId": "old-uid",
+				    "key": "0a1b2c3d",
+				    "slug": "old_speakers",
+				    "name": "Old Speakers"
+				  }
+				]
+				""");
+			using var storage = new IntegrationStorageProvider(paths, Serilog.Core.Logger.None);
+
+			var integration = await StartAsync(VolumeWith(_speakers), storage.For(SystemIntegration.IntegrationId));
+
+			var stored = Path.Combine(paths.DataDirectory, "integration-data", SystemIntegration.IntegrationId,
+				"system-audio-devices.json");
+			using var saved = JsonDocument.Parse(await File.ReadAllTextAsync(stored));
+			Assert.Multiple(() =>
+			{
+				Assert.That(integration.Variables.Select(v => v.Name),
+					Does.Contain("system_audio_output_old_speakers_volume_percent")
+						.And.Contain("system_audio_output_macbook_pro_speakers_volume_percent"));
+				Assert.That(File.Exists(legacyPath), Is.False);
+				Assert.That(saved.RootElement.EnumerateArray().Select(device => device.GetProperty("deviceId").GetString()),
+					Is.EqualTo(new[] { "old-uid", _speakers.Id }));
+				Assert.That(saved.RootElement[0].GetProperty("slug").GetString(), Is.EqualTo("old_speakers"));
+			});
+		}
+		finally
+		{
+			paths.Cleanup();
+		}
+	}
+
+	private sealed class InMemoryKnownAudioDeviceStore : IIntegrationStorage
+	{
+		private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
+
 		public List<KnownAudioDevice> Devices { get; } = [];
 
 		public bool Readable { get; init; } = true;
 
 		public int Saves { get; private set; }
 
-		public bool TryLoad(out IReadOnlyList<KnownAudioDevice> devices)
+		public Task<IntegrationStorageReadResult> ReadAsync(string key,
+			Func<string, bool>? isValid = null,
+			CancellationToken cancellationToken = default)
 		{
-			devices = Readable ? [.. Devices] : [];
-			return Readable;
+			if (!Readable)
+			{
+				return Task.FromResult(IntegrationStorageReadResult.Unreadable);
+			}
+
+			if (Devices.Count == 0)
+			{
+				return Task.FromResult(IntegrationStorageReadResult.Missing);
+			}
+
+			var content = JsonSerializer.Serialize(Devices, _json);
+			return Task.FromResult(isValid is null || isValid(content)
+				? IntegrationStorageReadResult.Found(content)
+				: IntegrationStorageReadResult.Unreadable);
 		}
 
-		public bool Save(IEnumerable<KnownAudioDevice> devices)
+		public Task WriteAsync(string key, string content, CancellationToken cancellationToken = default)
 		{
 			Saves++;
 			Devices.Clear();
-			Devices.AddRange(devices);
-			return true;
+			Devices.AddRange(JsonSerializer.Deserialize<List<KnownAudioDevice>>(content, _json)!);
+			return Task.CompletedTask;
+		}
+
+		public Task DeleteAsync(string key, CancellationToken cancellationToken = default)
+		{
+			Devices.Clear();
+			return Task.CompletedTask;
 		}
 	}
 
@@ -481,9 +539,11 @@ public class SystemIntegrationAudioDeviceTests
 			=> Task.CompletedTask;
 	}
 
-	private sealed class AudioTestContext(IVariableApi variables) : IIntegrationContext
+	private sealed class AudioTestContext(IVariableApi variables, IIntegrationStorage storage) : IIntegrationContext
 	{
 		public IVariableApi Variables { get; } = variables;
+
+		public IIntegrationStorage Storage { get; } = storage;
 
 		public IUserVariableApi UserVariables => null!;
 

@@ -13782,6 +13782,13 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>{name} needs ADB to work with your Android devices, but plugins are currently not allowed to use ADB. Allow plugins to use ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>A plugin wants to use your Companion devices</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} wants to work with the phones and tablets connected through Macro Deck Companion, but plugins are currently not allowed to use them. Allow plugins to use Companion devices?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Icon pack kept</value>
   </data>
@@ -14022,6 +14029,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>This plugin uses ADB to work with your Android devices. It can run commands on them, copy files and install apps.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Uses Companion devices</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>This plugin uses the devices connected through Macro Deck Companion. It can read what they report, such as battery and network, send them commands and take screenshots. A full screen screenshot still has to be approved on the device.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>This plugin's signature was checked by the Macro Deck Creator Portal, but its manifest names no author.</value>
@@ -15174,6 +15187,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Installing the app needs ADB. Turn it on in the ADB settings first.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Plugins that declare Companion device access can read what your Companion devices report, send them commands and take screenshots. A full screen screenshot still has to be approved on the device.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Allow plugins to use Companion devices</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>The APK was saved.</value>
   </data>
@@ -15291,6 +15310,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Open ADB settings</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Plugin access</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Save APK</value>

@@ -29,6 +29,8 @@ using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Infrastructure.Connect;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.ScreenSavers;
@@ -43,11 +45,11 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
-using MacroDeckHost.Integrations.Companion;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Infrastructure.Licensing;
 using MacroDeckHost.Licensing;
+using MacroDeck.Sdk.Companion;
 using MacroDeckHost.CompanionApp;
 using MacroDeckHost.Application.CompanionApp;
 using MacroDeckHost.Infrastructure.CompanionApp;
@@ -520,7 +522,6 @@ public class Startup
 		services.AddSingleton<IVariableBindingStore, JsonVariableBindingStore>();
 		services.AddSingleton<ISharedVariableStore, JsonSharedVariableStore>();
 		services.AddSingleton<SharedVariables>();
-		services.AddSingleton<IKnownAudioDeviceStore, JsonKnownAudioDeviceStore>();
 		services.AddSingleton<VariableBindingLookup>();
 		services.AddSingleton<VariableNameFactory>();
 		services.AddSingleton<VariableCatalogProviders>();
@@ -607,6 +608,10 @@ public class Startup
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();
 		services.AddSingleton<PluginAdbCallbacks>();
 		services.AddSingleton<PluginAdbInvokeRunner>();
+		services.AddSingleton<IPluginCompanionDeviceAccessPolicy, PluginCompanionDeviceAccessPolicy>();
+		services.AddSingleton<IPluginCompanionDeviceConsentNotifier, PluginCompanionDeviceConsentNotifier>();
+		services.AddSingleton<PluginCompanionDeviceCallbacks>();
+		services.AddSingleton<PluginCompanionDeviceInvokeRunner>();
 		services.AddSingleton<MessageBroker>();
 		services.AddSingleton<IMessageBroker>(provider => provider.GetRequiredService<MessageBroker>());
 		services.AddSingleton<PluginMessagingRegistrations>();
@@ -823,8 +828,12 @@ public class Startup
 		services.AddSingleton<HttpUserAgentState>();
 		services.AddSingleton<IHttpUserAgentSource>(provider => provider.GetRequiredService<HttpUserAgentState>());
 		services.AddScoped<IHttpSettingsService, HttpSettingsService>();
-		services.AddSingleton(Integrations.Native.SystemHourCycleReaderFactory.Create());
+		services.AddSingleton<IHostHttp>(provider => new HostHttp(provider.GetRequiredService<IHttpUserAgentSource>()));
+		services.AddSingleton<ISystemHourCycleReader>(
+			new SystemTimePatternHourCycleReader(Integrations.Native.SystemHourCycleReaderFactory.CreatePatternReader()));
 		services.AddScoped<TimeFormatResolver>();
+		services.AddSingleton<ILocaleApi, HostLocaleApi>();
+		services.AddSingleton<IntegrationStorageProvider>();
 		services.AddSingleton(AutostartRegistrarFactory.Create());
 		services.AddSingleton<IAutostartService, AutostartService>();
 		services.AddSingleton<IApplicationRestartService, ApplicationRestartService>();
@@ -838,13 +847,12 @@ public class Startup
 		services.AddScoped<IIntegrationConfigStore, IntegrationConfigStore>();
 		services.AddSingleton<IOAuthCallbackCoordinator, OAuthCallbackCoordinator>();
 		services.AddSingleton<IConfigFlowManager, ConfigFlowManager>();
-		services.AddSingleton<IIntegrationConfigMutationAdapter, ObsConfigurationMutationAdapter>();
-		services.AddSingleton<IIntegrationConfigMutationAdapter, CompanionConfigurationMutationAdapter>();
+		services.AddSingleton<IIntegrationVariableApiFactory, IntegrationVariableApiFactory>();
 		services.AddSingleton<Func<IIntegrationConfigMutationCoordinator>>(sp =>
 			sp.GetRequiredService<IIntegrationConfigMutationCoordinator>);
 		services.AddSingleton<CompanionCommandRequests>();
 		services.AddSingleton<CompanionDeviceRegistry>();
-		services.AddSingleton<ICompanionGateway>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
+		services.AddSingleton<ICompanionDeviceApi>(sp => sp.GetRequiredService<CompanionDeviceRegistry>());
 		services.AddSingleton(new CompanionLicenseTokens(CompanionLicenseTokens.ProductionKeys));
 		services.AddHttpClient(PlatformLicenseClient.HttpClientName)
 			.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { AllowAutoRedirect = false });

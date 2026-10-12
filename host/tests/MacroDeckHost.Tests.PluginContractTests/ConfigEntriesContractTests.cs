@@ -72,6 +72,42 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 	}
 
 	[Test]
+	public async Task Rejected_names_reach_the_plugin_and_its_retry_request_reaches_the_host()
+	{
+		var plugin = new ServersIntegration { RetriesOnConflict = true };
+		var integration = (IConfigEntryLifecycle)await ConnectAsync([new ConfigEntriesCapabilityHandler([plugin])],
+			[Provider()],
+			[CapabilityKinds.ConfigEntries]);
+
+		var prepared = await integration.PrepareEntryAsync(new ConfigEntryPreparation
+		{
+			EntryId = Guid.NewGuid(),
+			Title = "Home",
+			Values = new Dictionary<string, JsonElement>(),
+			RejectedVariableNames = ["server_home"]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(prepared.RetryOnConflict, Is.True);
+			Assert.That(plugin.Rejections.Single(), Is.EqualTo(new[] { "server_home" }));
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_written_before_the_variables_overload_is_synchronized_when_the_host_passes_variables()
+	{
+		var plugin = new ServersIntegration();
+		var integration = (IConfigEntryLifecycle)await ConnectAsync([new ConfigEntriesCapabilityHandler([plugin])],
+			[Provider()],
+			[CapabilityKinds.ConfigEntries]);
+
+		await integration.SynchronizeEntriesAsync([Entry(withKey: true)], new NoVariables(), CancellationToken.None);
+
+		Assert.That(plugin.Synchronized, Is.EqualTo(1));
+	}
+
+	[Test]
 	public async Task A_plugin_that_did_not_declare_the_capability_gets_the_defaults_without_a_round_trip()
 	{
 		var integration = (IConfigEntryLifecycle)await ConnectAsync([], [], []);
@@ -92,11 +128,33 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 		});
 	}
 
+	private sealed class NoVariables : IVariableApi
+	{
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new NotSupportedException();
+
+		public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+
+		public Task<VariableHandle> CreateAsync(string name,
+			VariableType type,
+			object? initialValue = null,
+			int? decimalPlaces = null,
+			string? definitionId = null)
+			=> throw new NotSupportedException();
+
+		public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+
+		public Task DeleteAsync(Guid variableId) => throw new NotSupportedException();
+	}
+
 	private sealed class ServersIntegration : IPluginIntegration, IConfigEntryLifecycle
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
 		public int Synchronized { get; private set; }
+
+		public bool RetriesOnConflict { get; init; }
+
+		public List<IReadOnlyList<string>> Rejections { get; } = [];
 
 		public List<Guid> Released { get; } = [];
 
@@ -106,11 +164,17 @@ internal sealed class ConfigEntriesContractTests : CapabilityContractFixture
 
 		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(string.IsNullOrWhiteSpace(preparation.Title)
+		{
+			Rejections.Add(preparation.RejectedVariableNames);
+			return Task.FromResult(string.IsNullOrWhiteSpace(preparation.Title)
 				? ConfigEntryPreparationResult.Refuse("A title is required.")
 				: ConfigEntryPreparationResult.Accept(
 					new Dictionary<string, JsonElement> { ["key"] = JsonSerializer.SerializeToElement("home") },
-					[VariableDefinition.Eager("server_home", VariableType.Text)]));
+					[VariableDefinition.Eager("server_home", VariableType.Text)]) with
+				{
+					RetryOnConflict = RetriesOnConflict
+				});
+		}
 
 		public Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
 			CancellationToken cancellationToken = default)

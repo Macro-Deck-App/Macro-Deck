@@ -13781,6 +13781,13 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Plugin {name} potřebuje ADB pro práci se zařízeními Android, ale pluginy nyní nemají povoleno ADB používat. Povolit pluginům používat ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Plugin chce používat zařízení Companion</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>Plugin {name} chce pracovat s telefony a tablety připojenými přes Macro Deck Companion, ale pluginy je nyní nemají povoleno používat. Povolit pluginům používat zařízení Companion?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Sada ikon byla zachována</value>
   </data>
@@ -14021,6 +14028,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Tento plugin používá ADB pro práci se zařízeními Android. Může na nich spouštět příkazy, kopírovat soubory a instalovat aplikace.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Používá zařízení Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Tento plugin používá zařízení připojená přes Macro Deck Companion. Může číst, co hlásí, například baterii a síť, posílat jim příkazy a pořizovat snímky obrazovky. Snímek celé obrazovky je i nadále nutné schválit na zařízení.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Podpis tohoto pluginu zkontroloval portál Macro Deck Creator Portal, ale jeho manifest neuvádí žádného autora.</value>
@@ -15173,6 +15186,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>K instalaci aplikace je potřeba ADB, které je nutné nejprve zapnout v nastavení ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Pluginy, které deklarují přístup k zařízením Companion, mohou číst, co zařízení Companion hlásí, posílat jim příkazy a pořizovat snímky obrazovky. Snímek celé obrazovky je i nadále nutné schválit na zařízení.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Povolit pluginům používat zařízení Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK byl uložen.</value>
   </data>
@@ -15290,6 +15309,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Otevřít nastavení ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Přístup pluginů</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Uložit APK</value>

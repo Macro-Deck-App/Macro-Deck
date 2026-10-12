@@ -6,6 +6,7 @@ using MacroDeckHost.Integrations.Jellyfin.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin.Config;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin;
 
@@ -45,7 +46,10 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep(context)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

@@ -3,20 +3,14 @@ using System.Text.RegularExpressions;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.MusicPlayer;
 
-public interface IMusicPlayerAlbumColorConsumer
-{
-	void UseAlbumColor(IMusicPlayerAlbumColor albumColor);
-}
-
 [MacroDeckIntegration]
-public sealed partial class MusicPlayerIntegration
-	: IIntegration, ISystemIntegration, IVariableProvider, IMusicPlayerAlbumColorConsumer
+public sealed partial class MusicPlayerIntegration : IIntegration, ISystemIntegration, IVariableProvider
 {
 	public const string IntegrationId = "app.macro-deck.music-player";
 
@@ -28,7 +22,7 @@ public sealed partial class MusicPlayerIntegration
 		Define(VariableNameTemplate.Placeholder("player"), null)
 	];
 
-	private volatile IMusicPlayerAlbumColor? _albumColor;
+	private volatile IMusicPlayerApi? _musicPlayers;
 
 	public string Id => IntegrationId;
 
@@ -60,15 +54,17 @@ public sealed partial class MusicPlayerIntegration
 		}
 	}
 
-	public void UseAlbumColor(IMusicPlayerAlbumColor albumColor) => _albumColor = albumColor;
-
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		_musicPlayers = context.MusicPlayers;
+		return Task.CompletedTask;
+	}
 
 	public Task ShutdownAsync() => Task.CompletedTask;
 
 	public async ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
-		if (_albumColor is not { } albumColor ||
+		if (_musicPlayers is not { } musicPlayers ||
 			!localId.StartsWith(Prefix, StringComparison.Ordinal) ||
 			!localId.EndsWith(Suffix, StringComparison.Ordinal))
 		{
@@ -83,7 +79,7 @@ public sealed partial class MusicPlayerIntegration
 			return VariableReading.Unavailable;
 		}
 
-		return await albumColor.GetAsync(player.InstanceId, cancellationToken) is { } color
+		return await musicPlayers.GetAlbumColorAsync(player.InstanceId, cancellationToken) is { } color
 			? VariableReading.Of(color)
 			: VariableReading.Unavailable;
 	}
@@ -131,13 +127,13 @@ public sealed partial class MusicPlayerIntegration
 	private List<Player> Players()
 	{
 		var players = new List<Player>();
-		if (_albumColor is not { } albumColor)
+		if (_musicPlayers is not { } musicPlayers)
 		{
 			return players;
 		}
 
 		var used = new HashSet<string>(StringComparer.Ordinal);
-		foreach (var instance in albumColor.GetInstances())
+		foreach (var instance in musicPlayers.Instances)
 		{
 			var baseKey = Slugify(instance.DisplayName);
 			if (baseKey.Length == 0)
@@ -152,7 +148,7 @@ public sealed partial class MusicPlayerIntegration
 				key = $"{baseKey}_{suffix++}";
 			}
 
-			players.Add(new Player(instance.InstanceId, instance.DisplayName, key));
+			players.Add(new Player(instance.Id, instance.DisplayName, key));
 		}
 
 		return players;

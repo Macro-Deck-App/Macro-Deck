@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using MacroDeckHost.Application.Adb;
+using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Application.CompanionApp;
+using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Ui.Transport;
@@ -52,6 +54,8 @@ public sealed partial class CompanionAppService : IDisposable
 	private bool _refreshRequested;
 	private bool? _autoUpdate;
 	private string? _lastPushed;
+	private readonly IPluginCompanionDeviceAccessPolicy? _pluginAccess;
+	private readonly IPluginCompanionDeviceConsentNotifier? _pluginConsent;
 	private DateTimeOffset? _lastDeviceSweepAt;
 	private DateTimeOffset? _lastPageSweepAt;
 
@@ -63,8 +67,12 @@ public sealed partial class CompanionAppService : IDisposable
 		IUiTransport ui,
 		IMacroDeckPaths paths,
 		TimeProvider time,
-		ILogger logger)
+		ILogger logger,
+		IPluginCompanionDeviceAccessPolicy? pluginAccess = null,
+		IPluginCompanionDeviceConsentNotifier? pluginConsent = null)
 	{
+		_pluginAccess = pluginAccess;
+		_pluginConsent = pluginConsent;
 		_adb = adb;
 		_operations = operations;
 		_releases = releases;
@@ -75,7 +83,7 @@ public sealed partial class CompanionAppService : IDisposable
 		_time = time;
 		_logger = logger.ForContext<CompanionAppService>();
 		_adb.SnapshotChanged += OnChanged;
-		_companions.StateChanged += OnCompanionChanged;
+		_companions.DeviceChanged += OnCompanionChanged;
 	}
 
 	public async Task<CompanionAppStatus> GetStatusAsync(CancellationToken cancellationToken)
@@ -137,6 +145,20 @@ public sealed partial class CompanionAppService : IDisposable
 		}
 
 		Wake();
+		return await PushIfChangedAsync(cancellationToken);
+	}
+
+	public async Task<CompanionAppStatus> SetAllowPluginsAsync(bool allow, CancellationToken cancellationToken)
+	{
+		if (_pluginAccess is not null)
+		{
+			await _pluginAccess.SetAllowPluginsAsync(allow, cancellationToken);
+			if (allow)
+			{
+				_pluginConsent?.DismissAll();
+			}
+		}
+
 		return await PushIfChangedAsync(cancellationToken);
 	}
 
@@ -230,13 +252,13 @@ public sealed partial class CompanionAppService : IDisposable
 	public void Dispose()
 	{
 		_adb.SnapshotChanged -= OnChanged;
-		_companions.StateChanged -= OnCompanionChanged;
+		_companions.DeviceChanged -= OnCompanionChanged;
 		_lifetime.Cancel();
 	}
 
 	private void OnChanged(object? sender, EventArgs e) => Wake();
 
-	private void OnCompanionChanged(object? sender, Guid deviceId) => Wake();
+	private void OnCompanionChanged(object? sender, CompanionDeviceEventArgs e) => Wake();
 
 	private void Wake() => _wake.Writer.TryWrite(true);
 
@@ -660,7 +682,7 @@ public sealed partial class CompanionAppService : IDisposable
 		}
 	}
 
-	private List<KeyValuePair<Guid, Integrations.Companion.CompanionDeviceState>> ConnectedAndroidApps()
+	private List<KeyValuePair<Guid, CompanionDeviceState>> ConnectedAndroidApps()
 		=> [.. _companions.ConnectedStates()
 			.Where(app => app.Value.Platform?.StartsWith("Android", StringComparison.OrdinalIgnoreCase) == true)];
 
@@ -695,6 +717,7 @@ public sealed partial class CompanionAppService : IDisposable
 		var apps = ConnectedAndroidApps();
 		await ResolveNamesAsync(apps.Select(app => app.Key), cancellationToken);
 		var autoUpdate = await AutoUpdateEnabledAsync();
+		var allowPlugins = _pluginAccess is not null && await _pluginAccess.GetAllowPluginsAsync(cancellationToken);
 		lock (_sync)
 		{
 			var release = _release;
@@ -708,6 +731,7 @@ public sealed partial class CompanionAppService : IDisposable
 				Checking = _checking || _refreshRequested,
 				CheckFailed = _checkFailed,
 				AutoUpdate = autoUpdate,
+				AllowPlugins = allowPlugins,
 				AdbEnabled = _adb.Status.Enabled,
 				Devices =
 				[

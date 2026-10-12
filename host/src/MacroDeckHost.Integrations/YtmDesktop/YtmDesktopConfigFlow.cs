@@ -6,6 +6,7 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 
@@ -42,7 +43,10 @@ public sealed class YtmDesktopConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(EnableStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(EnableStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

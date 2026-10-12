@@ -16,6 +16,7 @@ using MacroDeckHost.Integrations.System.Application;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam;
 using WidgetStrings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Steam;
 
@@ -117,6 +118,7 @@ public sealed partial class SteamIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		await StopAsync();
 
 		var entries = await context.Config.GetEntriesAsync();

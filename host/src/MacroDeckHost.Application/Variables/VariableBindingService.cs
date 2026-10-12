@@ -28,6 +28,8 @@ public sealed class VariableBindingService : IVariableBindingService
 	// own, ineffective lock guarding the one file both are writing to.
 	private static readonly SemaphoreSlim _mutationLock = new(1, 1);
 
+	internal static SemaphoreSlim MutationLock => _mutationLock;
+
 	public VariableBindingService(
 		VariableCatalogProviders providers,
 		IVariableBindingStore bindingStore,

@@ -1,10 +1,10 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Companion.Actions;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Localization;
@@ -12,14 +12,13 @@ using MacroDeckHost.Localization;
 namespace MacroDeckHost.Integrations.Companion;
 
 [MacroDeckIntegration]
-public sealed class CompanionIntegration
+public sealed partial class CompanionIntegration
 	: IIntegration,
 		IConfigFlowProvider,
+		IConfigEntryLifecycle,
 		IVariableProvider,
 		IEventProvider,
 		IIntegrationIconProvider,
-		ICompanionGatewayConsumer,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.companion";
@@ -29,9 +28,9 @@ public sealed class CompanionIntegration
 	private readonly SemaphoreSlim _reloadGate = new(1, 1);
 	private readonly Lock _announceGate = new();
 	private readonly Dictionary<Guid, long> _announced = new();
+	private readonly Func<int>? _suffixFactory;
 
-	private ICompanionGateway? _gateway;
-	private IVariableRefreshSignal? _refreshSignal;
+	private ICompanionDeviceApi? _devices;
 	private IVariableApi? _variables;
 	private IUserVariableApi? _userVariables;
 	private IIntegrationContext? _context;
@@ -39,8 +38,14 @@ public sealed class CompanionIntegration
 	private CompanionRuntime[] _runtimes = [];
 
 	public CompanionIntegration()
+		: this(null)
 	{
-		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _gateway),
+	}
+
+	internal CompanionIntegration(Func<int>? suffixFactory)
+	{
+		_suffixFactory = suffixFactory;
+		Actions = CompanionActions.Create(new CompanionTargetResolver(RuntimeSnapshot, () => _devices),
 			() => _variables,
 			() => _userVariables);
 	}
@@ -81,11 +86,7 @@ public sealed class CompanionIntegration
 
 	public byte[] GetIcon() => _icon;
 
-	public IConfigFlow CreateConfigFlow() => new CompanionConfigFlow(() => _gateway);
-
-	public void UseGateway(ICompanionGateway gateway) => _gateway = gateway;
-
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
+	public IConfigFlow CreateConfigFlow() => new CompanionConfigFlow();
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -97,13 +98,11 @@ public sealed class CompanionIntegration
 			_events = context.Events;
 		}
 
-		if (_gateway is { } gateway)
-		{
-			gateway.StateChanged -= OnStateChanged;
-			gateway.StateChanged += OnStateChanged;
-			gateway.DeviceReady -= OnDeviceReady;
-			gateway.DeviceReady += OnDeviceReady;
-		}
+		Unsubscribe();
+		var devices = context.CompanionDevices;
+		devices.DeviceChanged += OnDeviceChanged;
+		devices.DeviceReady += OnDeviceReady;
+		Volatile.Write(ref _devices, devices);
 
 		await ReloadConfigurationsAsync();
 		IsInitialized = true;
@@ -111,11 +110,7 @@ public sealed class CompanionIntegration
 
 	public Task ShutdownAsync()
 	{
-		if (_gateway is { } gateway)
-		{
-			gateway.StateChanged -= OnStateChanged;
-			gateway.DeviceReady -= OnDeviceReady;
-		}
+		Unsubscribe();
 
 		lock (_announceGate)
 		{
@@ -143,11 +138,11 @@ public sealed class CompanionIntegration
 			return ValueTask.FromResult(VariableReading.Unavailable);
 		}
 
-		var state = _gateway is { } gateway && gateway.TryGetState(runtime.Id, out var current) ? current : null;
-		return ValueTask.FromResult(CompanionVariables.Read(state, slot));
+		return ValueTask.FromResult(CompanionVariables.Read(Volatile.Read(ref _devices)?.FindDevice(runtime.Id)?.State,
+			slot));
 	}
 
-	internal bool IsConnected(Guid entryId) => _gateway is { } gateway && gateway.TryGetState(entryId, out _);
+	internal bool IsConnected(Guid entryId) => Volatile.Read(ref _devices)?.FindDevice(entryId) is not null;
 
 	internal async Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default)
 	{
@@ -182,21 +177,36 @@ public sealed class CompanionIntegration
 			_reloadGate.Release();
 		}
 
-		_refreshSignal?.RequestEagerRefresh(IntegrationId);
-		if (_gateway is { } gateway)
+		_ = _variables?.RequestRefreshAsync(CancellationToken.None);
+		if (Volatile.Read(ref _devices) is { } devices)
 		{
-			foreach (var ready in gateway.ReadyDevices())
+			foreach (var device in devices.Devices)
 			{
-				Announce(ready);
+				Announce(device);
 			}
 		}
 	}
 
-	private void OnDeviceReady(object? sender, CompanionDeviceReady ready) => Announce(ready);
-
-	private void Announce(CompanionDeviceReady ready)
+	private void Unsubscribe()
 	{
-		if (RuntimeSnapshot().FirstOrDefault(runtime => runtime.Id == ready.DeviceId) is not { } runtime)
+		if (Interlocked.Exchange(ref _devices, null) is { } devices)
+		{
+			devices.DeviceChanged -= OnDeviceChanged;
+			devices.DeviceReady -= OnDeviceReady;
+		}
+	}
+
+	private void OnDeviceReady(object? sender, CompanionDeviceEventArgs e)
+	{
+		if (e.Device is { } device)
+		{
+			Announce(device);
+		}
+	}
+
+	private void Announce(CompanionDevice ready)
+	{
+		if (RuntimeSnapshot().FirstOrDefault(runtime => runtime.Id == ready.Id) is not { } runtime)
 		{
 			return;
 		}
@@ -204,24 +214,24 @@ public sealed class CompanionIntegration
 		IEventPublisher events;
 		lock (_announceGate)
 		{
-			if (_events is null || _announced.GetValueOrDefault(ready.DeviceId) == ready.Sequence)
+			if (_events is null || _announced.GetValueOrDefault(ready.Id) == ready.ReadySequence)
 			{
 				return;
 			}
 
-			_announced[ready.DeviceId] = ready.Sequence;
+			_announced[ready.Id] = ready.ReadySequence;
 			events = _events;
 		}
 
 		events.Publish(CompanionEventDefinitions.DeviceReady,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
-				["deviceId"] = ready.DeviceId.ToString(),
+				["deviceId"] = ready.Id.ToString(),
 				["deviceName"] = runtime.Title
 			});
 	}
 
-	private void OnStateChanged(object? sender, Guid deviceId) => _refreshSignal?.RequestEagerRefresh(IntegrationId);
+	private void OnDeviceChanged(object? sender, CompanionDeviceEventArgs e) => _ = _variables?.RequestRefreshAsync();
 
 	private CompanionRuntime[] RuntimeSnapshot() => Volatile.Read(ref _runtimes);
 

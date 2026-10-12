@@ -58,7 +58,14 @@ public static class BackupComponentGroups
 			// and on another machine the ring is meaningless without the escrow, so all three move
 			// together or not at all. Owner() returning null here would drop the escrow from every
 			// archive silently and leave a stale one behind on restore.
-			[Prefix("keys/key-"), File("keys/kek.escrow"), File("data/integration-states.json")],
+			[
+				Prefix("keys/key-"),
+				File("keys/kek.escrow"),
+				File("data/integration-states.json"),
+				// Private integration state belongs with the config entries it describes. Profiles and
+				// automations require Integrations, so names pinned here come back wherever they are used.
+				Dir("data/integration-data")
+			],
 			["secret", "integration_config_entry"]),
 		new(BackupComponentGroup.AppSettings,
 			[],

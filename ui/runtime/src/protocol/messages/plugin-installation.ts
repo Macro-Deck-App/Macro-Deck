@@ -90,3 +90,5 @@ export const PLUGIN_WARNING_ARTIFACT_UNSIGNED = 'unsigned';
 export const PLUGIN_WARNING_SIGNATURE_UNVERIFIED = 'signature_unverified';
 export const PLUGIN_WARNING_USES_ADB = 'uses_adb';
 export const PLUGIN_PERMISSION_HOST_ADB = 'host:adb';
+export const PLUGIN_WARNING_USES_COMPANION_DEVICES = 'uses_companion_devices';
+export const PLUGIN_PERMISSION_HOST_COMPANION_DEVICES = 'host:companion-devices';

@@ -1,6 +1,5 @@
 using System.Text;
 using MacroDeckHost.Application.MusicPlayer;
-using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 using MacroDeckHost.Integrations.MusicPlayer;
 using MacroDeck.Sdk.Variables;
@@ -118,10 +117,9 @@ internal sealed class MusicPlayerAlbumColorTests
 	}
 
 	[Test]
-	public void The_integration_declares_one_colour_variable_per_player()
+	public async Task The_integration_declares_one_colour_variable_per_player()
 	{
-		var integration = new MusicPlayerIntegration();
-		integration.UseAlbumColor(new Harness().Color);
+		var integration = await new Harness().InitializedIntegrationAsync();
 
 		var variables = integration.Variables;
 
@@ -134,12 +132,11 @@ internal sealed class MusicPlayerAlbumColorTests
 	}
 
 	[Test]
-	public void Players_with_the_same_name_get_distinct_variables()
+	public async Task Players_with_the_same_name_get_distinct_variables()
 	{
 		var harness = new Harness();
 		harness.Instances.Add(new MusicPlayerInstanceDescriptor("jellyfin::x", "jellyfin", "Jellyfin", "Spotify", false));
-		var integration = new MusicPlayerIntegration();
-		integration.UseAlbumColor(harness.Color);
+		var integration = await harness.InitializedIntegrationAsync();
 
 		var names = integration.Variables.Select(variable => variable.Name).ToList();
 
@@ -148,7 +145,7 @@ internal sealed class MusicPlayerAlbumColorTests
 	}
 
 	[Test]
-	public void Before_the_service_arrives_the_integration_offers_a_template()
+	public void Before_it_is_initialized_the_integration_offers_a_template()
 	{
 		var variables = new MusicPlayerIntegration().DeclaredVariables;
 
@@ -161,8 +158,7 @@ internal sealed class MusicPlayerAlbumColorTests
 		var harness = new Harness { Colors = { ["cover-2"] = "#405060" } };
 		harness.Cache.Record(A, State(playing: true, artworkId: "cover-1"));
 		harness.Cache.Record(B, State(playing: false, artworkId: "cover-2"));
-		var integration = new MusicPlayerIntegration();
-		integration.UseAlbumColor(harness.Color);
+		var integration = await harness.InitializedIntegrationAsync();
 
 		var spotify = await integration.ReadAsync("music-player-spotify-album-color");
 		var sinusBot = await integration.ReadAsync("music-player-sinusbot-album-color");
@@ -177,7 +173,7 @@ internal sealed class MusicPlayerAlbumColorTests
 	}
 
 	[Test]
-	public async Task The_integration_reads_unavailable_before_it_is_given_the_colour_service()
+	public async Task The_integration_reads_unavailable_before_it_is_initialized()
 	{
 		var reading = await new MusicPlayerIntegration().ReadAsync("music-player-spotify-album-color");
 
@@ -185,20 +181,22 @@ internal sealed class MusicPlayerAlbumColorTests
 	}
 
 	[Test]
-	public async Task The_gateway_binder_hands_the_colour_service_to_the_integration()
+	public async Task The_integration_reads_through_whatever_music_player_api_its_context_offers()
 	{
-		var harness = new Harness();
-		harness.Cache.Record(A, State(playing: true, artworkId: "cover-1"));
 		var integration = new MusicPlayerIntegration();
+		var players = new FixedMusicPlayerApi { Colors = { ["net.example.jukebox::default"] = "#abcdef" } };
+		players.Players.Add(new MacroDeck.Sdk.MusicPlayer.MusicPlayerInstanceSnapshot
+		{
+			Id = "net.example.jukebox::default", ProviderId = "net.example.jukebox", DisplayName = "Jukebox"
+		});
 
-		IntegrationGatewayBinder.Bind(integration,
-			null!,
-			null!,
-			null!,
-			null!,
-			albumColor: harness.Color);
+		await integration.InitializeAsync(FixedMusicPlayerApi.ContextWith(players));
 
-		Assert.That((await integration.ReadAsync("music-player-spotify-album-color")).Value, Is.EqualTo("#102030"));
+		Assert.Multiple(async () =>
+		{
+			Assert.That(integration.Variables.Single().Name, Is.EqualTo("music_player_jukebox_album_color"));
+			Assert.That((await integration.ReadAsync("music-player-jukebox-album-color")).Value, Is.EqualTo("#abcdef"));
+		});
 	}
 
 	private static MusicPlayerStatePayload State(bool playing, string? artworkId, string track = "Song")
@@ -218,7 +216,8 @@ internal sealed class MusicPlayerAlbumColorTests
 			Colors["cover-1"] = "#102030";
 			Instances.Add(new MusicPlayerInstanceDescriptor(A, "spotify", "Spotify", "Spotify", false));
 			Instances.Add(new MusicPlayerInstanceDescriptor(B, "sinusbot", "SinusBot", "SinusBot", false));
-			Color = new MusicPlayerAlbumColor(new Registry(this), Cache, new Artwork(this), new Extractor(this));
+			Color = new MusicPlayerAlbumColor(Cache, new Artwork(this), new Extractor(this));
+			Api = new InProcessMusicPlayerApi(new Registry(this), Color, new MusicPlayerStateNotifier(), Serilog.Core.Logger.None);
 		}
 
 		public List<MusicPlayerInstanceDescriptor> Instances { get; } = [];
@@ -230,6 +229,15 @@ internal sealed class MusicPlayerAlbumColorTests
 		public int Fetches { get; set; }
 
 		public MusicPlayerAlbumColor Color { get; }
+
+		public InProcessMusicPlayerApi Api { get; }
+
+		public async Task<MusicPlayerIntegration> InitializedIntegrationAsync()
+		{
+			var integration = new MusicPlayerIntegration();
+			await integration.InitializeAsync(FixedMusicPlayerApi.ContextWith(Api));
+			return integration;
+		}
 
 		private sealed class Registry(Harness owner) : IMusicPlayerRegistry
 		{

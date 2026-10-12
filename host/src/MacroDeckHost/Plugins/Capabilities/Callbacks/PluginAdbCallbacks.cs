@@ -1,10 +1,13 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Protocol.Assets;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Errors;
+using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Plugins;
+using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Domain.Common;
 
 namespace MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -15,7 +18,8 @@ public sealed class PluginAdbCallbacks(
 	IHostLockState lockState,
 	IPluginAdbConsentNotifier? consent = null,
 	IPluginSessionRegistry? sessions = null,
-	IAdbManager? adbManager = null)
+	IAdbManager? adbManager = null,
+	IPluginHostAssetSender? assets = null)
 {
 	internal const int ShellResultBudgetBytes = AdbDeviceCallPolicy.ShellResultBudgetBytes;
 
@@ -50,8 +54,18 @@ public sealed class PluginAdbCallbacks(
 			: null;
 	}
 
-	public async Task<HostCallbackResult> ExecuteAsync(HostInvokePayload payload, CancellationToken cancellationToken)
+	public Task<HostCallbackResult> ExecuteAsync(HostInvokePayload payload, CancellationToken cancellationToken)
+		=> ExecuteAsync(string.Empty, payload, cancellationToken);
+
+	public async Task<HostCallbackResult> ExecuteAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
 	{
+		if (IsTyped(payload.Operation))
+		{
+			return await ExecuteTypedAsync(pluginId, payload, cancellationToken);
+		}
+
 		switch (payload.Operation)
 		{
 			case HostOperations.Adb.Shell when Read<AdbShellArguments>(payload) is { } arguments:
@@ -109,6 +123,173 @@ public sealed class PluginAdbCallbacks(
 					ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload));
 		}
 	}
+
+	private static bool IsTyped(string operation)
+		=> operation is HostOperations.Adb.Key
+			or HostOperations.Adb.Tap
+			or HostOperations.Adb.Swipe
+			or HostOperations.Adb.InputText
+			or HostOperations.Adb.StartApp
+			or HostOperations.Adb.ForceStopApp
+			or HostOperations.Adb.OpenUri
+			or HostOperations.Adb.Reboot
+			or HostOperations.Adb.Screenshot
+			or HostOperations.Adb.Status;
+
+	private async Task<HostCallbackResult> ExecuteTypedAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (adbManager is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				ProtocolErrorMessages.For(ProtocolErrorCodes.CapabilityUnsupported));
+		}
+
+		// An empty serial would make the adb manager pick the default device, which a plugin must name itself.
+		if (Read<AdbDeviceArguments>(payload) is not { Serial: { } serial } || string.IsNullOrWhiteSpace(serial))
+		{
+			return Failed(AdbFailureCode.InvalidParameter, "A device serial is required.");
+		}
+
+		switch (payload.Operation)
+		{
+			case HostOperations.Adb.Key when Read<AdbKeyArguments>(payload) is { } arguments:
+				return ToAdbKey(arguments.Key) is { } key
+					? await RunAsync(new AdbKeyEventCommand(serial, key), cancellationToken)
+					: Failed(AdbFailureCode.InvalidParameter, "Unknown key.");
+
+			case HostOperations.Adb.Tap when Read<AdbTapArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbTapCommand(serial, arguments.X, arguments.Y), cancellationToken);
+
+			case HostOperations.Adb.Swipe when Read<AdbSwipeArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbSwipeCommand(serial,
+						arguments.FromX,
+						arguments.FromY,
+						arguments.ToX,
+						arguments.ToY,
+						arguments.DurationMilliseconds),
+					cancellationToken);
+
+			case HostOperations.Adb.InputText when Read<AdbTextArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbInputTextCommand(serial, arguments.Text), cancellationToken);
+
+			case HostOperations.Adb.StartApp when Read<AdbPackageArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbStartAppCommand(serial, arguments.PackageName), cancellationToken);
+
+			case HostOperations.Adb.ForceStopApp when Read<AdbPackageArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbForceStopAppCommand(serial, arguments.PackageName), cancellationToken);
+
+			case HostOperations.Adb.OpenUri when Read<AdbUriArguments>(payload) is { } arguments:
+				return await RunAsync(new AdbOpenUriCommand(serial, arguments.Uri), cancellationToken);
+
+			case HostOperations.Adb.Reboot when Read<AdbRebootArguments>(payload) is { } arguments:
+				return ToAdbRebootMode(arguments.Mode) is { } mode
+					? await RunAsync(new AdbRebootCommand(serial, mode), cancellationToken)
+					: Failed(AdbFailureCode.InvalidParameter, "Unknown reboot mode.");
+
+			case HostOperations.Adb.Screenshot:
+				return await ScreenshotAsync(pluginId, serial, cancellationToken);
+
+			case HostOperations.Adb.Status:
+			{
+				var properties = await adbManager.GetPropertiesAsync(serial, cancellationToken);
+				return properties is null
+					? HostCallbackResult.Ok()
+					: HostCallbackResult.Ok(new AdbDeviceStatusDto
+					{
+						ScreenOn = properties.ScreenOn,
+						Locked = properties.Locked,
+						ForegroundPackage = properties.ForegroundPackage
+					});
+			}
+
+			default:
+				return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+					ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload));
+		}
+	}
+
+	private async Task<HostCallbackResult> RunAsync(AdbCommand command, CancellationToken cancellationToken)
+		=> Completed(await adbManager!.ExecuteAsync(command, cancellationToken));
+
+	// The bytes cannot ride the reply, which is capped at the protocol message size, so they follow over
+	// host.asset like a devices icon. The transfer is not awaited: the plugin correlates it by its id.
+	private async Task<HostCallbackResult> ScreenshotAsync(string pluginId,
+		string serial,
+		CancellationToken cancellationToken)
+	{
+		if (assets is null || string.IsNullOrEmpty(pluginId))
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"This host cannot transfer a screenshot to a plugin.");
+		}
+
+		var result = await adbManager!.CaptureScreenshotAsync(serial, cancellationToken);
+		if (!result.Success)
+		{
+			return Failed(result.Error, result.ErrorMessage);
+		}
+
+		var png = result.Data!;
+		if (png.Length > ProtocolLimits.MaxAssetBytes)
+		{
+			return Failed(AdbFailureCode.CommandFailed, "The screenshot is larger than a plugin can receive.");
+		}
+
+		var transferId = Guid.CreateVersion7().ToString();
+		var contentHash = AssetContentHash.Compute(png);
+		var sender = assets;
+		_ = Task.Run(() => sender.SendAsync(pluginId,
+				transferId,
+				AssetKinds.AndroidScreenshot,
+				"image/png",
+				png,
+				contentHash,
+				CancellationToken.None),
+			CancellationToken.None);
+
+		return HostCallbackResult.Ok(new AdbScreenshotResultDto
+		{
+			ContentType = "image/png",
+			ByteLength = png.Length,
+			ContentHash = contentHash,
+			TransferId = transferId
+		});
+	}
+
+	private static AdbKey? ToAdbKey(string? key) => key switch
+	{
+		AdbKeys.Home => AdbKey.Home,
+		AdbKeys.Back => AdbKey.Back,
+		AdbKeys.Enter => AdbKey.Enter,
+		AdbKeys.Menu => AdbKey.Menu,
+		AdbKeys.Search => AdbKey.Search,
+		AdbKeys.VolumeUp => AdbKey.VolumeUp,
+		AdbKeys.VolumeDown => AdbKey.VolumeDown,
+		AdbKeys.VolumeMute => AdbKey.VolumeMute,
+		AdbKeys.MediaPlayPause => AdbKey.MediaPlayPause,
+		AdbKeys.MediaNext => AdbKey.MediaNext,
+		AdbKeys.MediaPrevious => AdbKey.MediaPrevious,
+		AdbKeys.Power => AdbKey.Power,
+		AdbKeys.Sleep => AdbKey.Sleep,
+		AdbKeys.Wakeup => AdbKey.Wakeup,
+		AdbKeys.AppSwitch => AdbKey.AppSwitch,
+		AdbKeys.DpadUp => AdbKey.DpadUp,
+		AdbKeys.DpadDown => AdbKey.DpadDown,
+		AdbKeys.DpadLeft => AdbKey.DpadLeft,
+		AdbKeys.DpadRight => AdbKey.DpadRight,
+		AdbKeys.DpadCenter => AdbKey.DpadCenter,
+		_ => null
+	};
+
+	private static AdbRebootMode? ToAdbRebootMode(string? mode) => mode switch
+	{
+		AdbRebootModes.Normal => AdbRebootMode.Normal,
+		AdbRebootModes.Recovery => AdbRebootMode.Recovery,
+		AdbRebootModes.Bootloader => AdbRebootMode.Bootloader,
+		_ => null
+	};
 
 	private async Task AskForAccessAsync(string pluginId, CancellationToken cancellationToken)
 	{

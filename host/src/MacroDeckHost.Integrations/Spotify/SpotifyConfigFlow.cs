@@ -6,6 +6,7 @@ using MacroDeckHost.Localization;
 using Serilog;
 using SpotifyAPI.Web;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Spotify;
 
@@ -18,7 +19,10 @@ public sealed class SpotifyConfigFlow : IConfigFlow
 	private string _clientSecret = string.Empty;
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(CredentialsStep(context.OAuth.RedirectUri)));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(CredentialsStep(context.OAuth.RedirectUri)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

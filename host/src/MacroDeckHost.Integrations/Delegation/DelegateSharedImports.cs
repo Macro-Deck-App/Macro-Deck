@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeck.Sdk.Variables;
 
@@ -29,7 +28,7 @@ internal sealed class DelegateSharedImports
 	public DelegateSharedImport? Find(string definitionId) => _byDefinitionId.GetValueOrDefault(definitionId);
 
 	public static string LocalName(string variableKey, string remoteName)
-		=> VariableNameSanitizer.Sanitize($"{variableKey}_{remoteName}");
+		=> VariableNames.Sanitize($"{variableKey}_{remoteName}");
 
 	public static DelegateSharedImports Build(IReadOnlyList<DelegateRemote> remotes)
 	{

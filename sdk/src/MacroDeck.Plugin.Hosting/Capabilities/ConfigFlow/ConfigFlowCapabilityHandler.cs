@@ -7,6 +7,7 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Http;
 
 namespace MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 
@@ -42,11 +43,15 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 
 	private readonly IConfigFlowProvider? _provider;
 	private readonly PluginConfigFlowSessions _sessions;
+	private readonly IHostHttp _http;
 
-	public ConfigFlowCapabilityHandler(IEnumerable<IPluginIntegration> integrations, PluginConfigFlowSessions sessions)
+	public ConfigFlowCapabilityHandler(IEnumerable<IPluginIntegration> integrations,
+		PluginConfigFlowSessions sessions,
+		IHostHttp? http = null)
 	{
 		_provider = integrations.OfType<IConfigFlowProvider>().FirstOrDefault();
 		_sessions = sessions;
+		_http = http ?? DefaultHostHttp.Instance;
 	}
 
 	public string Kind => CapabilityKinds.ConfigFlow;
@@ -120,7 +125,7 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 			await DisposeFlowAsync(previous).ConfigureAwait(false);
 		}
 
-		var context = new RemoteConfigFlowContext(arguments.OAuth, arguments.EntryTitle);
+		var context = new RemoteConfigFlowContext(arguments.OAuth, arguments.EntryTitle, _http);
 		var result = await flow.StartAsync(context, cancellationToken).ConfigureAwait(false);
 
 		return CapabilityInvocationResult.Ok(ConfigFlowDescriptorMapper.ToDto(result));
@@ -144,7 +149,7 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 
 		_sessions.Touch(arguments.SessionId);
 
-		var context = new RemoteConfigFlowContext(arguments.OAuth, arguments.EntryTitle);
+		var context = new RemoteConfigFlowContext(arguments.OAuth, arguments.EntryTitle, _http);
 		var input = arguments.Input.ToDictionary(pair => pair.Key,
 			pair => ToClrValue(pair.Value),
 			StringComparer.Ordinal);
@@ -221,8 +226,9 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 
 	private sealed class RemoteConfigFlowContext : IConfigFlowEntryContext, IOAuthSession
 	{
-		public RemoteConfigFlowContext(ConfigFlowOAuthContextDto oauth, string? entryTitle)
+		public RemoteConfigFlowContext(ConfigFlowOAuthContextDto oauth, string? entryTitle, IHostHttp http)
 		{
+			Http = http;
 			RedirectUri = oauth.RedirectUri;
 			State = oauth.State;
 			AuthorizationCode = oauth.AuthorizationCode;
@@ -238,5 +244,7 @@ internal sealed class ConfigFlowCapabilityHandler : ICapabilityHandler
 		public string? AuthorizationCode { get; }
 
 		public string? EntryTitle { get; }
+
+		public IHostHttp Http { get; }
 	}
 }

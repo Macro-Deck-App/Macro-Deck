@@ -136,7 +136,18 @@ public class IntegrationRegistry : IIntegrationRegistry
 	public long DisabledVersion(string integrationId) => _disabledVersions.GetValueOrDefault(integrationId);
 
 	// Both clears are compare-and-remove, so a choice a concurrent SetEnabled has just stored survives.
-	public bool ClearDisabledChoice(string integrationId) => ClearChoice(integrationId, false);
+	public bool ClearDisabledChoice(string integrationId)
+	{
+		if (!ClearChoice(integrationId, false))
+		{
+			return false;
+		}
+
+		// The user's off choice no longer blocks the integration, so consumers waiting for it may resume.
+		AvailabilityChanged?.Invoke(this,
+			new IntegrationAvailabilityChangedEventArgs { IntegrationId = integrationId, IsAvailable = true });
+		return true;
+	}
 
 	public void ClearEnabledChoice(string integrationId) => ClearChoice(integrationId, true);
 

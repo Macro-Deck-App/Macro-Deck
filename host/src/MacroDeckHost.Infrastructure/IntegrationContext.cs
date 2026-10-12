@@ -2,12 +2,17 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
@@ -33,9 +38,19 @@ public class IntegrationContext : IIntegrationContext
 		IUiResourceRegistry? uiResources = null,
 		IBatteryApi? batteries = null,
 		IAndroidDeviceManager? androidDevices = null,
-		IWeatherProviderApi? weatherProvider = null)
+		IWeatherProviderApi? weatherProvider = null,
+		IIntegrationStorage? storage = null,
+		ILocaleApi? locale = null,
+		IHostHttp? http = null,
+		ICompanionDeviceApi? companionDevices = null,
+		IMusicPlayerApi? musicPlayers = null)
 	{
 		WeatherProvider = weatherProvider ?? UnsupportedWeatherProviderApi.Instance;
+		MusicPlayers = musicPlayers ?? UnsupportedMusicPlayerApi.Instance;
+		CompanionDevices = companionDevices ?? UnsupportedCompanionDeviceApi.Instance;
+		Storage = storage ?? UnavailableIntegrationStorage.Instance;
+		Locale = locale ?? LocalLocaleApi.Instance;
+		Http = http ?? DefaultHostHttp.Instance;
 		UiResources = uiResources ?? NoUiResources.Instance;
 		Colors = colors;
 		Batteries = batteries ?? UnsupportedBatteryApi.Instance;
@@ -99,4 +114,14 @@ public class IntegrationContext : IIntegrationContext
 	public IAndroidDeviceManager AndroidDevices { get; }
 
 	public IWeatherProviderApi WeatherProvider { get; }
+
+	public IIntegrationStorage Storage { get; }
+
+	public ILocaleApi Locale { get; }
+
+	public IHostHttp Http { get; }
+
+	public ICompanionDeviceApi CompanionDevices { get; }
+
+	public IMusicPlayerApi MusicPlayers { get; }
 }

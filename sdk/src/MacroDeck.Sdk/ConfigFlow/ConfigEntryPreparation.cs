@@ -25,6 +25,16 @@ public sealed record ConfigEntryPreparation
 
 	/// <summary>Whether the title differs from the stored one: a rename.</summary>
 	public bool TitleChanged { get; init; }
+
+	/// <summary>
+	/// The names of <see cref="ConfigEntryPreparationResult.ReservedVariables" /> Macro Deck could not hold
+	/// in earlier attempts of this same change, all of them so far. Empty on the first attempt. Macro Deck
+	/// prepares the entry again only when the last result asked for it with
+	/// <see cref="ConfigEntryPreparationResult.RetryOnConflict" />; avoid these names, for example by
+	/// choosing another variable key, or refuse the entry.
+	/// </summary>
+	/// <remarks>A Macro Deck that predates it never sets it and never prepares an entry again.</remarks>
+	public IReadOnlyList<string> RejectedVariableNames { get; init; } = [];
 }
 
 /// <summary>What <see cref="IConfigEntryLifecycle.PrepareEntryAsync" /> decided about an entry.</summary>
@@ -49,6 +59,15 @@ public sealed record ConfigEntryPreparationResult
 	/// integration already owns under the same id and type is not a conflict.
 	/// </summary>
 	public IReadOnlyList<VariableDefinition> ReservedVariables { get; init; } = [];
+
+	/// <summary>
+	/// Whether Macro Deck should prepare the entry again, with the names it could not hold added to
+	/// <see cref="ConfigEntryPreparation.RejectedVariableNames" />, instead of refusing it when a name in
+	/// <see cref="ReservedVariables" /> is taken. Macro Deck gives up after a fixed number of attempts and
+	/// refuses the entry. The default, <c>false</c>, refuses it on the first conflict.
+	/// </summary>
+	/// <remarks>A Macro Deck that predates it ignores it and refuses the entry on the first conflict.</remarks>
+	public bool RetryOnConflict { get; init; }
 
 	/// <summary>Stores the entry, with <paramref name="values" /> when given.</summary>
 	public static ConfigEntryPreparationResult Accept(IReadOnlyDictionary<string, JsonElement>? values = null,

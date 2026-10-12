@@ -3,35 +3,39 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using MacroDeckHost.Application.Services;
 
 namespace MacroDeckHost.Integrations.Native;
 
+// Each reader answers with the system's short time pattern; a forced clock is answered as a pattern of that
+// cycle, so the host classifies every answer the same way it classifies a culture's pattern.
 public static class SystemHourCycleReaderFactory
 {
-	public static ISystemHourCycleReader Create()
+	internal const string TwelveHourPattern = "h:mm tt";
+	internal const string TwentyFourHourPattern = "HH:mm";
+
+	public static Func<string?> CreatePatternReader()
 	{
 		if (OperatingSystem.IsWindows())
 		{
-			return new WindowsHourCycleReader();
+			return WindowsHourCycleReader.Read;
 		}
 
 		if (OperatingSystem.IsMacOS())
 		{
-			return new MacOsHourCycleReader();
+			return MacOsHourCycleReader.Read;
 		}
 
-		return new LinuxHourCycleReader();
+		return new LinuxHourCycleReader().Read;
 	}
 }
 
 [SupportedOSPlatform("macos")]
-internal sealed class MacOsHourCycleReader : ISystemHourCycleReader
+internal static class MacOsHourCycleReader
 {
 	private const nint NoStyle = 0;
 	private const nint ShortStyle = 1;
 
-	public string? Read()
+	public static string? Read()
 	{
 		var anyApplication = MacOsCoreFoundation.CreateCFString("kCFPreferencesAnyApplication");
 		try
@@ -40,15 +44,15 @@ internal sealed class MacOsHourCycleReader : ISystemHourCycleReader
 
 			if (IsSet("AppleICUForce24HourTime", anyApplication))
 			{
-				return HourCycles.H23;
+				return SystemHourCycleReaderFactory.TwentyFourHourPattern;
 			}
 
 			if (IsSet("AppleICUForce12HourTime", anyApplication))
 			{
-				return HourCycles.H12;
+				return SystemHourCycleReaderFactory.TwelveHourPattern;
 			}
 
-			return HourCycles.FromPattern(ShortTimePattern(anyApplication));
+			return ShortTimePattern(anyApplication);
 		}
 		finally
 		{
@@ -109,23 +113,23 @@ internal sealed class MacOsHourCycleReader : ISystemHourCycleReader
 }
 
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsHourCycleReader : ISystemHourCycleReader
+internal static class WindowsHourCycleReader
 {
 	private const uint LocaleShortTime = 0x79;
 
-	public string? Read()
+	public static string? Read()
 	{
 		var buffer = new char[80];
 		var length = GetLocaleInfoEx(null, LocaleShortTime, buffer, buffer.Length);
 
-		return length > 1 ? HourCycles.FromPattern(new string(buffer, 0, length - 1)) : null;
+		return length > 1 ? new string(buffer, 0, length - 1) : null;
 	}
 
 	[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
 	private static extern int GetLocaleInfoEx(string? localeName, uint lcType, [Out] char[] data, int dataLength);
 }
 
-internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
+internal sealed class LinuxHourCycleReader
 {
 	private static readonly TimeSpan _gsettingsTimeout = TimeSpan.FromSeconds(1);
 	private static readonly TimeSpan _gnomeCacheLifetime = TimeSpan.FromSeconds(60);
@@ -134,9 +138,9 @@ internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
 
 	private readonly Lock _gnomeLock = new();
 	private long? _gnomeReadAtMs;
-	private string? _gnomeHourCycle;
+	private string? _gnomePattern;
 
-	public string? Read() => CachedGnomeClockFormat() ?? LocaleHourCycle();
+	public string? Read() => CachedGnomeClockFormat() ?? LocalePattern();
 
 	private string? CachedGnomeClockFormat()
 	{
@@ -145,15 +149,15 @@ internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
 			var now = Environment.TickCount64;
 			if (_gnomeReadAtMs is not { } readAt || now - readAt >= (long)_gnomeCacheLifetime.TotalMilliseconds)
 			{
-				_gnomeHourCycle = GnomeClockFormat();
+				_gnomePattern = GnomeClockFormat();
 				_gnomeReadAtMs = now;
 			}
 
-			return _gnomeHourCycle;
+			return _gnomePattern;
 		}
 	}
 
-	internal static string? LocaleHourCycle()
+	internal static string? LocalePattern()
 	{
 		var name = NormalizeLocale(_localeVariables
 			.Select(Environment.GetEnvironmentVariable)
@@ -165,8 +169,7 @@ internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
 
 		try
 		{
-			return HourCycles.FromPattern(CultureInfo.GetCultureInfo(name, predefinedOnly: true).DateTimeFormat
-				.ShortTimePattern);
+			return CultureInfo.GetCultureInfo(name, predefinedOnly: true).DateTimeFormat.ShortTimePattern;
 		}
 		catch (CultureNotFoundException)
 		{
@@ -217,8 +220,8 @@ internal sealed class LinuxHourCycleReader : ISystemHourCycleReader
 
 			return output.GetAwaiter().GetResult().Trim() switch
 			{
-				"'12h'" => HourCycles.H12,
-				"'24h'" => HourCycles.H23,
+				"'12h'" => SystemHourCycleReaderFactory.TwelveHourPattern,
+				"'24h'" => SystemHourCycleReaderFactory.TwentyFourHourPattern,
 				_ => null
 			};
 		}

@@ -1,6 +1,7 @@
 namespace MacroDeck.Plugin.Protocol.Assets;
 
-/// <summary>The kinds of binary asset a plugin can upload through <c>asset.*</c>.</summary>
+/// <summary>The kinds of binary asset a plugin can upload through <c>asset.*</c>, or the host sends through
+/// <c>host.asset.*</c>.</summary>
 public static class AssetKinds
 {
 	public const string Icon = "icon";
@@ -29,7 +30,20 @@ public static class AssetKinds
 	/// </summary>
 	public const string IconPack = "icon-pack";
 
-	public static readonly IReadOnlyList<string> All = [Icon, Artwork, ActionIcon, UiResource, IconPack];
+	/// <summary>
+	/// A PNG screenshot of an Android device the host sends after answering <c>adb</c>/<c>screenshot</c>. Host to
+	/// plugin only, bounded by <see cref="Limits.ProtocolLimits.MaxAssetBytes" />.
+	/// </summary>
+	public const string AndroidScreenshot = "android-screenshot";
+
+	/// <summary>
+	/// A PNG screenshot of a Companion device the host sends after answering <c>companion-devices</c>/<c>screenshot</c>.
+	/// Host to plugin only, bounded by <see cref="Limits.ProtocolLimits.MaxAssetBytes" />.
+	/// </summary>
+	public const string CompanionScreenshot = "companion-screenshot";
+
+	public static readonly IReadOnlyList<string> All =
+		[Icon, Artwork, ActionIcon, UiResource, IconPack, AndroidScreenshot, CompanionScreenshot];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 

@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -88,15 +89,15 @@ internal sealed class ObsVariableRefreshRequestTests
 		TimeSpan? pollInterval = null)
 	{
 		var integration = new ObsIntegration(_ => client, pollInterval);
-		integration.UseVariableRefreshSignal(signal);
-		await integration.InitializeAsync(new ObsContext());
+		await integration.InitializeAsync(new ObsContext(
+			new IntegrationVariableApi(ObsIntegration.IntegrationId, null!, signal)));
 		return integration;
 	}
 
-	private sealed class ObsContext : IIntegrationContext
+	private sealed class ObsContext(IVariableApi variables) : IIntegrationContext
 	{
 		public IIntegrationConfig Config { get; } = new SingleEntryConfig();
-		public IVariableApi Variables { get; } = new NoOpVariableApi();
+		public IVariableApi Variables { get; } = variables;
 		public IEventPublisher Events { get; } = new NoOpEventPublisher();
 		public IUserVariableApi UserVariables => null!;
 		public IDeckNavigator Deck => throw new NotSupportedException();

@@ -57,6 +57,22 @@ public interface IVariableApi
 	Task RequestRefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
 	/// <summary>
+	/// Asks Macro Deck to read only the declared variables with the given definition ids again now, instead
+	/// of at their next refresh interval. Use it when a change affects a few variables and reading every
+	/// declared variable would be wasteful. Ids the integration does not declare are ignored, and an empty
+	/// collection asks for nothing. Requests made while one is pending are merged into one read.
+	/// </summary>
+	/// <remarks>
+	/// Best effort, like <see cref="RequestRefreshAsync" />: it never throws because the request could not be
+	/// delivered. Reading more than asked for is always allowed, so the default implementation, and a Macro
+	/// Deck that predates this member, read every declared variable instead. A pending request for every
+	/// variable covers any pending request for some.
+	/// </remarks>
+	Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+		CancellationToken cancellationToken = default)
+		=> definitionIds.Count == 0 ? Task.CompletedTask : RequestRefreshAsync(cancellationToken);
+
+	/// <summary>
 	/// Tells Macro Deck that the set of variables this integration declares has changed, for example
 	/// after a configuration entry was added, so it reads the declarations again and starts or stops
 	/// reading the affected variables. This does not affect an on-demand variable catalog.
@@ -67,6 +83,33 @@ public interface IVariableApi
 	/// understands. An implementation that does not override it does nothing.
 	/// </remarks>
 	Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+	/// <summary>
+	/// Records bindings from resources of this integration's variable catalog to variables, as if the user
+	/// had bound them, for example to carry variables over from an older version of the integration. A
+	/// resource this integration already has a binding for is left as it is.
+	/// </summary>
+	/// <param name="requests">The bindings to record. Every name must satisfy
+	/// <see cref="VariableNames.IsValid" /> and every resource id must be a valid resource id.</param>
+	/// <param name="cancellationToken">Cancels the request before anything is recorded.</param>
+	/// <returns>One outcome per request, in request order: <see cref="VariableBindingOutcome.Bound" /> when the
+	/// binding was recorded, <see cref="VariableBindingOutcome.AlreadyBound" /> when this integration already
+	/// had a binding for that resource, including one earlier in the same call.</returns>
+	/// <remarks>
+	/// The bindings belong to the calling integration and are recorded together or not at all. Recording does
+	/// not create the variables right away: Macro Deck creates them the next time it restores bindings, at the
+	/// latest on its next start. A requested name another variable holds by then is replaced with one derived
+	/// from it, as for any binding. The default implementation, and a Macro Deck that predates this member, throw
+	/// <see cref="NotSupportedException" />; a caller that migrates data should keep its old data until a
+	/// call succeeds.
+	/// </remarks>
+	/// <exception cref="ArgumentException">A name or resource id is invalid; nothing was recorded.</exception>
+	/// <exception cref="NotSupportedException">This Macro Deck cannot record bindings.</exception>
+	/// <exception cref="InvalidOperationException">The bindings could not be stored; nothing was recorded.</exception>
+	Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+		CancellationToken cancellationToken = default)
+		=> Task.FromException<IReadOnlyList<VariableBindingOutcome>>(
+			new NotSupportedException("This Macro Deck cannot record variable bindings."));
 
 	/// <summary>
 	/// Opens a rolling window of the recent values of one of this integration's own global numeric

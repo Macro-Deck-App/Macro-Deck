@@ -1,4 +1,3 @@
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -30,7 +29,7 @@ internal sealed class GetTrackMuteActionDefinition : IDynamicOptionsActionDefini
 			required: true),
 		ActionParameter.Autocomplete(MeldActionParameters.Variable,
 			label: AppStrings.Integrations.Meld.Parameters.SaveToVariable(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 

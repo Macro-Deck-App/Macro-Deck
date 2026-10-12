@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
@@ -20,7 +19,6 @@ public sealed class WebNowPlayingIntegration
 		IIntegrationIconProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.webnowplaying";
@@ -41,7 +39,7 @@ public sealed class WebNowPlayingIntegration
 	private volatile WebNowPlayingPlayers? _players;
 	private volatile WebNowPlayingMusicPlayer? _player;
 	private volatile bool _portInUse;
-	private IVariableRefreshSignal? _refreshSignal;
+	private volatile IVariableApi? _variables;
 
 	public WebNowPlayingIntegration()
 		: this(WebNowPlayingServer.DefaultPort)
@@ -74,8 +72,6 @@ public sealed class WebNowPlayingIntegration
 
 	public byte[] GetIcon() => _icon;
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
 		=> _player is null ? [] : [new MusicPlayerInstance(InstanceId, DisplayName)];
 
@@ -84,6 +80,7 @@ public sealed class WebNowPlayingIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		_variables = context.Variables;
 		await StopAsync();
 
 		var players = new WebNowPlayingPlayers();
@@ -212,7 +209,7 @@ public sealed class WebNowPlayingIntegration
 			"?instanceId=" +
 			Uri.EscapeDataString($"{IntegrationId}::{InstanceId}");
 
-	private void RequestRefresh() => _refreshSignal?.RequestEagerRefresh(IntegrationId);
+	private void RequestRefresh() => _ = _variables?.RequestRefreshAsync();
 
 	private async Task StopAsync()
 	{

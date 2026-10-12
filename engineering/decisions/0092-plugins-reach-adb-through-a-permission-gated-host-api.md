@@ -39,6 +39,9 @@ exempt from the declaration: the user admitted it by hand and it has no installe
 **`host:adb` is the first enforced manifest permission.** It can be enforced from the start because no
 existing plugin relies on it. Every other permission stays declared and unenforced.
 
+`host:companion-devices` later became the second enforced permission, see
+[ADR 0110](0110-plugins-reach-companion-devices-through-a-permission-gated-host-api.md).
+
 **Consent is asked at install time.** Installing a version that declares `host:adb` while ADB or plugin
 access is off raises a notification, which the desktop app also presents as a dialog, offering to turn
 both on. An update of a version that already
@@ -57,9 +60,9 @@ then gets exactly one `CANCELLED` result.
 shared adb server, so a device a plugin connects is visible to every plugin and in the ADB settings, which
 offer the same action to the user. Pairing (Android 11 and later) is not offered.
 
-**A locked host changes nothing.** While Macro Deck is locked, shell, push, pull, install, uninstall and connect
-are refused with `CAPABILITY_UNAVAILABLE` and reason `host_locked`. Battery and package queries stay
-available.
+**A locked host runs nothing open-ended.** While Macro Deck is locked, shell, push, pull, install, uninstall and
+connect are refused with `CAPABILITY_UNAVAILABLE` and reason `host_locked`. Battery and package queries stay
+available, and so do the typed operations added by the amendment of 2026-10-12.
 
 **Output is capped.** Shell output is cut to fit one protocol message and flagged `Truncated`, rather than
 failing or streaming.
@@ -78,6 +81,7 @@ keeps loading when members are added.
   additive: an old plugin never calls `adb` and ignores the unknown push; a new plugin on an old host sees
   access `Unsupported` and gets `CAPABILITY_UNSUPPORTED` for every call.
 - In-process integrations get no `IAndroidDeviceManager`; they keep using the host's own services.
+  Superseded by the clarification of 2026-10-11 and the amendment of 2026-10-12.
 - Real devices still cannot be exercised in CI (ADR 0030); validation, access, the in-flight cap, lock
   behaviour, cancellation and truncation are tested against fakes.
 
@@ -93,6 +97,28 @@ the shell output budget are one host-side policy that both paths share. The SDK 
 push; the hardware serial itself still never leaves the ADB manager. An ADB integration extracted into a
 plugin would need `host:adb` and **Allow plugins to use ADB** like any other plugin; without them its battery
 devices disappear.
+
+## Amendment (2026-10-12): typed device operations run while locked
+
+`IAndroidDevice` gains fixed, typed operations: send a key, tap, swipe, type text, start and force-stop an app,
+open a URI, reboot, capture a screenshot and read the screen status, each its own `adb` host api operation
+(`key`, `tap`, `swipe`, `input-text`, `start-app`, `force-stop-app`, `open-uri`, `reboot`, `screenshot`,
+`status`). The built-in ADB integration's actions run through them, so it no longer needs a host-only gateway.
+
+Decision (user, 2026-10-12): these typed operations are allowed while Macro Deck is locked, for every caller,
+in-process integrations and plugins alike. A deck button that wakes a tablet or pauses media has to keep
+working on a locked host, as the ADB integration's actions always did. The open-ended operations (shell,
+push, pull, install, uninstall, connect) stay refused while locked. Each typed operation is a fixed command
+whose arguments the host validates and quotes, so it cannot run anything the user did not bind. Client
+presses still do not run flows while the host is locked; that rule lives in flow execution and is unchanged.
+`host:adb`, **Allow plugins to use ADB** and the consent flow apply to the typed operations exactly as to the
+others.
+
+The screenshot travels over `host.asset.*` with the new asset kind `android-screenshot`, like a device icon,
+because it does not fit one protocol message; a plugin cannot upload that kind. The `adb` state push gains the
+optional `defaultDeviceSerial` and `adbUnavailable` and, per device, `lacksUsbPermission` and `mode`, so a
+device the computer lacks USB permissions for keeps reading `unauthorized`, and one in recovery `offline`, for
+every SDK version while a new SDK can tell them apart.
 
 ## Alternatives considered
 

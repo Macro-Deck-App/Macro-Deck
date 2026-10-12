@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using Serilog;
@@ -11,11 +12,11 @@ internal static class AdbDeviceVariableWriter
 
 	public static async Task HandleAsync(
 		IVariableApi variables,
-		IAdbGateway gateway,
-		AdbGatewayDeviceChange change,
+		IReadOnlyList<AdbTrackedDevice> devices,
+		AdbDeviceChange change,
 		CancellationToken cancellationToken)
 	{
-		var key = DeviceKey(gateway, change.Device);
+		var key = DeviceKey(devices, change.Device);
 		if (key.Length == 0)
 		{
 			return;
@@ -23,7 +24,7 @@ internal static class AdbDeviceVariableWriter
 
 		try
 		{
-			if (change.Kind == AdbGatewayDeviceChangeKind.Disconnected)
+			if (change.Kind == AdbDeviceChangeKind.Disconnected)
 			{
 				await ClearAsync(variables, key);
 				return;
@@ -31,18 +32,18 @@ internal static class AdbDeviceVariableWriter
 
 			var connectedName = NameFor(key, "connected");
 
-			if (change.Kind != AdbGatewayDeviceChangeKind.Authorized &&
+			if (change.Kind != AdbDeviceChangeKind.Authorized &&
 				await variables.GetByNameAsync(connectedName) is null)
 			{
 				return;
 			}
 
-			var properties = await gateway.GetPropertiesAsync(change.Device.Serial, cancellationToken);
+			var batteryLevel = await ReadBatteryLevelAsync(change.Device.Device, cancellationToken);
 
 			await UpsertAsync(variables,
 				connectedName,
 				VariableType.Boolean,
-				change.Device.State != AdbGatewayDeviceState.Disconnected,
+				change.Device.Status != AdbDeviceStatus.Disconnected,
 				null);
 			await UpsertAsync(variables,
 				NameFor(key, "authorized"),
@@ -57,7 +58,7 @@ internal static class AdbDeviceVariableWriter
 			await UpsertAsync(variables,
 				NameFor(key, "battery_level"),
 				VariableType.Numeric,
-				properties?.BatteryLevel,
+				batteryLevel,
 				0);
 		}
 		catch (Exception ex)
@@ -68,10 +69,10 @@ internal static class AdbDeviceVariableWriter
 		}
 	}
 
-	internal static string DeviceKey(IAdbGateway gateway, AdbGatewayDevice device)
+	internal static string DeviceKey(IReadOnlyList<AdbTrackedDevice> devices, AdbTrackedDevice device)
 	{
 		var name = BaseKey(device);
-		var sameName = gateway.Devices
+		var sameName = devices
 			.Where(candidate =>
 				string.Equals(BaseKey(candidate), name, StringComparison.Ordinal))
 			.Select(candidate => candidate.Serial)
@@ -84,10 +85,22 @@ internal static class AdbDeviceVariableWriter
 
 	// Falls back to a generic stem rather than the serial: a device that reports no model must not be
 	// the one case that puts a serial back into a variable name.
-	private static string BaseKey(AdbGatewayDevice device)
+	private static string BaseKey(AdbTrackedDevice device)
 	{
 		var model = AdbVariables.SanitizeSerial(device.Model ?? string.Empty).Trim('_');
 		return model.Length == 0 ? "unknown" : model;
+	}
+
+	private static async Task<int?> ReadBatteryLevelAsync(IAndroidDevice device, CancellationToken cancellationToken)
+	{
+		try
+		{
+			return (await device.GetBatteryStateAsync(cancellationToken)).Level;
+		}
+		catch (AndroidDeviceException)
+		{
+			return null;
+		}
 	}
 
 	private static string NameFor(string key, string suffix) => $"adb_device_{key}_{suffix}";

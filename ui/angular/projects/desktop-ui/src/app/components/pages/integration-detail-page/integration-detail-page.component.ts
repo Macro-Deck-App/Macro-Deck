@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, from, timer } from 'rxjs';
 import type { Variable } from '@macro-deck/runtime';
-import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
+import { AppStrings, ConfigEntryDto, GetIntegrationCapabilitiesResponse, IpcProvidedCapability, IntegrationIssuesChangedEvent, IntegrationsChangedEvent, IpcIntegrationActionCapability, IpcIntegrationVariableCapability, VariableCatalogNode, IpcIntegrationIssue, PLUGIN_PERMISSION_HOST_ADB, PLUGIN_PERMISSION_HOST_COMPANION_DEVICES, PluginCompatibilityReport, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, CheckboxComponent, ErrorBannerComponent, InputComponent, LocalizationService, LocalizedTextPipe, ModalComponent, ToastService, ToggleSwitchComponent, ButtonComponent, TranslatePipe, VariableService } from '@shared';
 import { ConfigFlowDialogComponent } from '../../config-flow/config-flow-dialog.component';
 import { DetailPageComponent } from '../../detail-page/detail-page.component';
@@ -379,11 +379,16 @@ export class IntegrationDetailPageComponent implements OnInit {
     this.catalogBindNode.set(null);
   }
 
-  protected readonly usesAdb = computed(() => {
+  protected readonly usesAdb = computed(() => this.declaresPermission(PLUGIN_PERMISSION_HOST_ADB));
+
+  protected readonly usesCompanionDevices = computed(() =>
+    this.declaresPermission(PLUGIN_PERMISSION_HOST_COMPANION_DEVICES));
+
+  private declaresPermission(permission: string): boolean {
     const integration = this.integration();
     return integration?.isInternal === false
-      && !!this.installation.find(integration.id)?.permissions.includes(PLUGIN_PERMISSION_HOST_ADB);
-  });
+      && !!this.installation.find(integration.id)?.permissions.includes(permission);
+  }
 
   protected readonly additionalCapabilities = computed<IpcProvidedCapability[]>(() =>
     (this.integration()?.providedCapabilities ?? []).filter(c => !COUNTED_CAPABILITY_KINDS.includes(c.kind)));

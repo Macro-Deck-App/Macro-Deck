@@ -32,6 +32,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Include="..\..\..\sdk\src\MacroDeck.Sdk\Storage\DirectoryIntegrationStorage.cs" Link="Integrations\DirectoryIntegrationStorage.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Cronos" />
       <PackageReference Include="Evolve" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" />

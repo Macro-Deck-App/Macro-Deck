@@ -69,7 +69,6 @@ internal sealed class OptionalConfigurationRemovalTests
 				Registry,
 				new RecordingMediator(),
 				new VariablePollingInvalidationSignal(),
-				[],
 				Serilog.Core.Logger.None);
 		}
 

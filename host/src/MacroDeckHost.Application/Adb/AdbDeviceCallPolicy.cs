@@ -12,7 +12,9 @@ public sealed class AdbDeviceCallPolicy(IHostLockState lockState)
 	// Leaves room for the envelope inside ProtocolLimits.MaxMessageBytes.
 	public const int ShellResultBudgetBytes = 192 * 1024;
 
-	private static readonly HashSet<string> _changesSomething = new(StringComparer.Ordinal)
+	// ADR 0092: only the open-ended operations wait for an unlock. The typed ones (key, tap, reboot and the
+	// rest) run while locked for every caller, so deck buttons keep working.
+	private static readonly HashSet<string> _refusedWhileLocked = new(StringComparer.Ordinal)
 	{
 		HostOperations.Adb.Shell,
 		HostOperations.Adb.Push,
@@ -23,7 +25,7 @@ public sealed class AdbDeviceCallPolicy(IHostLockState lockState)
 	};
 
 	public bool IsRefusedWhileLocked(string operation)
-		=> lockState.IsLocked && _changesSomething.Contains(operation);
+		=> lockState.IsLocked && _refusedWhileLocked.Contains(operation);
 
 	public static AdbShellResultDto FitToBudget(AdbShellOutput output)
 	{

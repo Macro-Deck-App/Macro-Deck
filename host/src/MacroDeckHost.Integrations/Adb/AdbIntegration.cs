@@ -20,7 +20,6 @@ public sealed class AdbIntegration
 		IEventProvider,
 		IIntegrationIconProvider,
 		IIntegrationIssueProvider,
-		IAdbGatewayConsumer,
 		IBatteryProvider,
 		IDisposable
 {
@@ -37,17 +36,27 @@ public sealed class AdbIntegration
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly AdbHealthTracker _health = new();
 	private readonly AdbBatteryProvider _batteries;
+	private readonly TimeProvider _timeProvider;
+	private readonly Lock _gate = new();
 
-	private IAdbGateway? _gateway;
 	private AdbEventEmitter? _eventEmitter;
 	private IVariableApi? _variables;
 	private IAndroidDeviceManager? _androidDevices;
-	private bool _subscribed;
+	private AdbDeviceTracker? _tracker;
 
 	public AdbIntegration()
+		: this(TimeProvider.System)
 	{
-		Actions = AdbActions.Create(() => _gateway, _health, _variableAccessor);
-		_batteries = new AdbBatteryProvider(() => _androidDevices, TimeProvider.System);
+	}
+
+	internal AdbIntegration(TimeProvider timeProvider)
+	{
+		_timeProvider = timeProvider;
+		Actions = AdbActions.Create(new AdbActionServices(() => _androidDevices,
+			() => _tracker,
+			_health,
+			_variableAccessor));
+		_batteries = new AdbBatteryProvider(() => _androidDevices, timeProvider);
 	}
 
 	public string Id => IntegrationId;
@@ -73,8 +82,6 @@ public sealed class AdbIntegration
 
 	public bool VariablesDependOnConfiguration => true;
 
-	public void UseGateway(IAdbGateway gateway) => _gateway = gateway;
-
 	// Empty so battery readers show the integration's localized name instead of the variable provider's ADB label.
 	string IBatteryProvider.ProviderName => string.Empty;
 
@@ -92,27 +99,22 @@ public sealed class AdbIntegration
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_eventEmitter = new AdbEventEmitter(context.Events);
-		_androidDevices = context.AndroidDevices;
-
-		if (_gateway is { } gateway)
+		var tracker = new AdbDeviceTracker(context.AndroidDevices, _timeProvider);
+		tracker.Changed += OnDeviceChanged;
+		lock (_gate)
 		{
-			gateway.DeviceChanged -= OnDeviceChanged;
-			gateway.DeviceChanged += OnDeviceChanged;
-			_subscribed = true;
+			_tracker?.Dispose();
+			_tracker = tracker;
 		}
 
+		_androidDevices = context.AndroidDevices;
 		IsInitialized = true;
 		return Task.CompletedTask;
 	}
 
 	public Task ShutdownAsync()
 	{
-		if (_subscribed && _gateway is { } gateway)
-		{
-			gateway.DeviceChanged -= OnDeviceChanged;
-		}
-
-		_subscribed = false;
+		ReleaseTracker();
 		_eventEmitter = null;
 		_variables = null;
 		_androidDevices = null;
@@ -124,29 +126,25 @@ public sealed class AdbIntegration
 
 	public void Dispose()
 	{
-		if (_subscribed && _gateway is { } gateway)
-		{
-			gateway.DeviceChanged -= OnDeviceChanged;
-			_subscribed = false;
-		}
-
+		ReleaseTracker();
 		_batteries.Dispose();
 	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> AdbVariables.ReadAsync(_gateway, localId, cancellationToken);
+		=> AdbVariables.ReadAsync(_androidDevices, _tracker, localId, cancellationToken);
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
 	{
-		var gateway = _gateway;
-		if (gateway is null)
+		var manager = _androidDevices;
+		if (manager is null)
 		{
 			return Task.FromResult<IReadOnlyList<IntegrationIssue>>([]);
 		}
 
 		var issues = new List<IntegrationIssue>();
+		var enabled = manager.Access == AndroidDeviceAccess.Available;
 
-		if (!gateway.IsEnabled)
+		if (!enabled)
 		{
 			issues.Add(new IntegrationIssue
 			{
@@ -157,7 +155,7 @@ public sealed class AdbIntegration
 			});
 		}
 
-		if (_health.LastFailure == AdbGatewayFailureCode.ExecutableNotFound)
+		if (_health.LastFailure == AndroidDeviceErrorCode.AdbUnavailable)
 		{
 			issues.Add(new IntegrationIssue
 			{
@@ -168,7 +166,8 @@ public sealed class AdbIntegration
 			});
 		}
 
-		if (gateway.IsEnabled && !gateway.Devices.Any(device => device.State != AdbGatewayDeviceState.Disconnected))
+		var devices = manager.Devices;
+		if (enabled && devices.Count == 0)
 		{
 			issues.Add(new IntegrationIssue
 			{
@@ -179,14 +178,13 @@ public sealed class AdbIntegration
 			});
 		}
 
-		foreach (var device in gateway.Devices.Where(device =>
-			device.State is AdbGatewayDeviceState.Unauthorized or AdbGatewayDeviceState.NoPermissions))
+		foreach (var device in devices.Where(device => device.State == AndroidDeviceState.Unauthorized))
 		{
 			issues.Add(new IntegrationIssue
 			{
 				Id = $"{UnauthorizedIssuePrefix}{device.Serial}",
-				Title = AppStrings.Integrations.Adb.Issues.UnauthorizedTitle(device: device.Model ?? device.Serial),
-				Description = device.State == AdbGatewayDeviceState.NoPermissions
+				Title = AppStrings.Integrations.Adb.Issues.UnauthorizedTitle(device: device.Info.Model ?? device.Serial),
+				Description = device.LacksUsbPermission
 					? AppStrings.Integrations.Adb.Issues.NoPermissionsDescription()
 					: AppStrings.Integrations.Adb.Issues.UnauthorizedDescription(),
 				Severity = IntegrationIssueSeverity.Warning
@@ -199,7 +197,7 @@ public sealed class AdbIntegration
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
 		=> Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
 
-	private void OnDeviceChanged(object? sender, AdbGatewayDeviceChange change)
+	private void OnDeviceChanged(object? sender, AdbDeviceChange change)
 	{
 		try
 		{
@@ -210,11 +208,27 @@ public sealed class AdbIntegration
 			_logger.Warning(ex, "Failed to publish a device event for {Serial}", change.Device.Serial);
 		}
 
-		var gateway = _gateway;
+		var tracker = _tracker;
 		var variables = _variables;
-		if (gateway is not null && variables is not null)
+		if (tracker is not null && variables is not null)
 		{
-			_ = AdbDeviceVariableWriter.HandleAsync(variables, gateway, change, CancellationToken.None);
+			_ = AdbDeviceVariableWriter.HandleAsync(variables, tracker.Devices, change, CancellationToken.None);
+		}
+	}
+
+	private void ReleaseTracker()
+	{
+		AdbDeviceTracker? tracker;
+		lock (_gate)
+		{
+			tracker = _tracker;
+			_tracker = null;
+		}
+
+		if (tracker is not null)
+		{
+			tracker.Changed -= OnDeviceChanged;
+			tracker.Dispose();
 		}
 	}
 

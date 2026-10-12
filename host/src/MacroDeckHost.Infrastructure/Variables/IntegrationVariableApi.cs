@@ -16,18 +16,21 @@ public sealed class IntegrationVariableApi : IVariableApi
 	private readonly IVariableRefreshSignal? _refresh;
 	private readonly IVariablePollingInvalidationSignal? _declarations;
 	private readonly OwnedVariableHistory? _history;
+	private readonly VariableBindingAppender? _bindings;
 
 	public IntegrationVariableApi(string integrationId,
 		IVariableService service,
 		IVariableRefreshSignal? refresh = null,
 		IVariablePollingInvalidationSignal? declarations = null,
-		OwnedVariableHistory? history = null)
+		OwnedVariableHistory? history = null,
+		VariableBindingAppender? bindings = null)
 	{
 		_integrationId = integrationId;
 		_service = service;
 		_refresh = refresh;
 		_declarations = declarations;
 		_history = history;
+		_bindings = bindings;
 	}
 
 	public Task<SdkHistoryWindow> OpenHistoryAsync(string name,
@@ -49,6 +52,26 @@ public sealed class IntegrationVariableApi : IVariableApi
 		_refresh?.RequestEagerRefresh(_integrationId);
 		return Task.CompletedTask;
 	}
+
+	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(definitionIds);
+		cancellationToken.ThrowIfCancellationRequested();
+		foreach (var definitionId in definitionIds)
+		{
+			_refresh?.RequestDefinitionRefresh(_integrationId, definitionId);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+		CancellationToken cancellationToken = default)
+		=> _bindings is null
+			? Task.FromException<IReadOnlyList<VariableBindingOutcome>>(
+				new NotSupportedException("This context cannot record variable bindings."))
+			: _bindings.AppendAsync(_integrationId, requests, cancellationToken);
 
 	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
 	{

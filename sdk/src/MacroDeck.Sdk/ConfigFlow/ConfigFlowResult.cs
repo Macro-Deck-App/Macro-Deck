@@ -44,6 +44,10 @@ public sealed class ConfigFlowResult
 	/// <summary>Step id to auto-submit once the external callback arrives (External only).</summary>
 	public string? ResumeStepId { get; private init; }
 
+	/// <summary>Whether completing stores a config entry (Complete only): <c>false</c> for a result of
+	/// <see cref="CompleteWithoutEntry" />.</summary>
+	public bool StoresEntry { get; private init; } = true;
+
 	/// <summary>Show the next (or first) step.</summary>
 	public static ConfigFlowResult Step(ConfigFlowStep step)
 		=> new(ConfigFlowResultKind.Step) { NextStep = step };
@@ -75,4 +79,15 @@ public sealed class ConfigFlowResult
 		string title,
 		IReadOnlyDictionary<string, ConfigFlowValue>? values = null)
 		=> new(ConfigFlowResultKind.Complete) { EntryTitle = title, Values = values };
+
+	/// <summary>
+	/// Finish the flow without storing anything: the dialog closes, no config entry is created or changed and
+	/// the collected values are discarded. For an integration that creates its entries itself, for example
+	/// when a device connects. When the user switched the integration off and it has no usable entry, that
+	/// stored choice is removed.
+	/// </summary>
+	/// <remarks>A Macro Deck that predates it treats the result like <see cref="Complete" /> without a title:
+	/// it stores an entry from the collected values under the integration's name.</remarks>
+	public static ConfigFlowResult CompleteWithoutEntry()
+		=> new(ConfigFlowResultKind.Complete) { StoresEntry = false };
 }

@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 
@@ -10,9 +11,9 @@ internal static class CompanionActions
 	internal const string BrightnessParameter = "brightness";
 	internal const string OrientationParameter = "orientation";
 
-	private const string Automatic = "automatic";
-	private const string Portrait = "portrait";
-	private const string Landscape = "landscape";
+	private const string Automatic = CompanionOrientations.Automatic;
+	private const string Portrait = CompanionOrientations.Portrait;
+	private const string Landscape = CompanionOrientations.Landscape;
 
 	public static IReadOnlyList<IActionDefinition> Create(CompanionTargetResolver resolver,
 		Func<IVariableApi?> variables,
@@ -31,7 +32,7 @@ internal static class CompanionActions
 			],
 			resolver,
 			parameters => ReadPercent(parameters.GetValueOrDefault(BrightnessParameter)) is { } percent
-				? new CompanionCommand(CompanionCommand.SetBrightness, BrightnessPercent: percent)
+				? CompanionDeviceCommand.SetBrightness(percent)
 				: null),
 		new CompanionAction("set-orientation",
 			AppStrings.Integrations.Companion.Actions.SetOrientation.Name(),
@@ -54,34 +55,34 @@ internal static class CompanionActions
 			parameters =>
 				parameters.GetValueOrDefault(OrientationParameter) is string orientation
 					and (Automatic or Portrait or Landscape)
-					? new CompanionCommand(CompanionCommand.SetOrientation, Orientation: orientation)
+					? CompanionDeviceCommand.SetOrientation(orientation)
 					: null),
 		new CompanionAction("vibrate",
 			AppStrings.Integrations.Companion.Actions.Vibrate.Name(),
 			AppStrings.Integrations.Companion.Actions.Vibrate.Description(),
 			[],
 			resolver,
-			_ => new CompanionCommand(CompanionCommand.Vibrate)),
+			_ => CompanionDeviceCommand.Vibrate),
 		new CompanionAction("screen-on",
 			AppStrings.Integrations.Companion.Actions.ScreenOn.Name(),
 			AppStrings.Integrations.Companion.Actions.ScreenOn.Description(),
 			[],
 			resolver,
-			_ => new CompanionCommand(CompanionCommand.ScreenOn),
+			_ => CompanionDeviceCommand.ScreenOn,
 			CompanionCapabilities.ScreenOn),
 		new CompanionAction("screen-off",
 			AppStrings.Integrations.Companion.Actions.ScreenOff.Name(),
 			AppStrings.Integrations.Companion.Actions.ScreenOff.Description(),
 			[],
 			resolver,
-			_ => new CompanionCommand(CompanionCommand.ScreenOff),
+			_ => CompanionDeviceCommand.ScreenOff,
 			CompanionCapabilities.ScreenOff),
 		new CompanionAction("focus-host",
 			AppStrings.Integrations.Companion.Actions.FocusHost.Name(),
 			AppStrings.Integrations.Companion.Actions.FocusHost.Description(),
 			[],
 			resolver,
-			_ => new CompanionCommand(CompanionCommand.Focus),
+			_ => CompanionDeviceCommand.Focus,
 			CompanionCapabilities.Focus),
 		new TakeScreenshotAction(resolver, variables, userVariables)
 	];

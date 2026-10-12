@@ -23,7 +23,8 @@ export type UserNotificationActionKind =
   | 'DismissNotification'
   | 'EnablePluginAdb'
   | 'OpenDownloadPage'
-  | 'OpenTroubleshootingGuide';
+  | 'OpenTroubleshootingGuide'
+  | 'EnablePluginCompanionDevices';
 
 export interface UserNotificationAction {
   kind: UserNotificationActionKind;

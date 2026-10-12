@@ -47,6 +47,7 @@ public static class ConfigFlowResultMapper
 			ConfigFlowResultKind.Error => ConfigFlowResult.Error(ToDomain(dto.NextStep!),
 				dto.ErrorMessage ?? default,
 				ToFieldErrors(dto.FieldErrors)),
+			ConfigFlowResultKind.Complete when dto.WithoutEntry == true => ConfigFlowResult.CompleteWithoutEntry(),
 			ConfigFlowResultKind.Complete => ConfigFlowResult.Complete(dto.EntryTitle ?? string.Empty,
 				dto.Values?.ToDictionary(pair => pair.Key, pair => ToDomain(pair.Value), StringComparer.Ordinal)),
 			ConfigFlowResultKind.External => ConfigFlowResult.External(dto.ExternalUrl ?? string.Empty,

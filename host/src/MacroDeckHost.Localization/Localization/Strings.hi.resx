@@ -13782,6 +13782,13 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{name} को आपके Android डिवाइस के साथ काम करने के लिए ADB चाहिए, पर फ़िलहाल प्लगइन को ADB उपयोग करने की अनुमति नहीं है। प्लगइन को ADB उपयोग करने दें?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>एक प्लगइन आपके Companion डिवाइस उपयोग करना चाहता है</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} Macro Deck Companion से जुड़े फ़ोन और टैबलेट के साथ काम करना चाहता है, पर फ़िलहाल प्लगइन को उन्हें उपयोग करने की अनुमति नहीं है। प्लगइन को Companion डिवाइस उपयोग करने दें?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>आइकन पैक रखा गया</value>
   </data>
@@ -14022,6 +14029,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>यह प्लगइन आपके Android डिवाइस के साथ काम करने के लिए ADB उपयोग करता है। यह उन पर कमांड चला सकता है, फ़ाइलें कॉपी कर सकता है और ऐप्स इंस्टॉल कर सकता है।</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Companion डिवाइस उपयोग करता है</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>यह प्लगइन Macro Deck Companion से जुड़े डिवाइस उपयोग करता है। यह उनकी भेजी जानकारी, जैसे बैटरी और नेटवर्क, पढ़ सकता है, उन्हें कमांड भेज सकता है और स्क्रीनशॉट ले सकता है। पूरी स्क्रीन के स्क्रीनशॉट को अब भी डिवाइस पर स्वीकृत करना होगा।</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>इस प्लगइन के हस्ताक्षर की जाँच Macro Deck Creator Portal ने की है, पर इसके मैनिफ़ेस्ट में कोई लेखक नहीं दिया गया है।</value>
@@ -15174,6 +15187,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>ऐप इंस्टॉल करने के लिए ADB चाहिए। पहले ADB सेटिंग्स में इसे चालू करें।</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Companion डिवाइस एक्सेस घोषित करने वाले प्लगइन आपके Companion डिवाइस की भेजी जानकारी पढ़ सकते हैं, उन्हें कमांड भेज सकते हैं और स्क्रीनशॉट ले सकते हैं। पूरी स्क्रीन के स्क्रीनशॉट को अब भी डिवाइस पर स्वीकृत करना होगा।</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>प्लगइन को Companion डिवाइस उपयोग करने दें</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK सहेजी गई।</value>
   </data>
@@ -15291,6 +15310,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>ADB सेटिंग्स खोलें</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>प्लगइन एक्सेस</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>APK सहेजें</value>

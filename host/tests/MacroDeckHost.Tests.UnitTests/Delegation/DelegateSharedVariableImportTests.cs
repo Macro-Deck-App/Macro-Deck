@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Delegation;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeckHost.Tests.UnitTests.System;
@@ -28,7 +27,6 @@ internal sealed class DelegateSharedVariableImportTests
 	private DelegateRemoteManager _manager = null!;
 	private DelegateIntegration _integration = null!;
 	private RecordingVariableApi _variables = null!;
-	private RecordingInvalidation _invalidation = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -39,8 +37,6 @@ internal sealed class DelegateSharedVariableImportTests
 		_manager = new DelegateRemoteManager(() => _client, _time, new LoggerConfiguration().CreateLogger());
 		_integration = new DelegateIntegration(_manager);
 		_variables = new RecordingVariableApi();
-		_invalidation = new RecordingInvalidation();
-		_integration.UseVariablePollingInvalidation(_invalidation);
 	}
 
 	[TearDown]
@@ -83,7 +79,7 @@ internal sealed class DelegateSharedVariableImportTests
 		{
 			Assert.That(definition.Type, Is.EqualTo(VariableType.Boolean));
 			Assert.That(reading.Value, Is.EqualTo(true));
-			Assert.That(_invalidation.Stale, Does.Contain(DelegateIntegration.IntegrationId));
+			Assert.That(_variables.DeclarationChanges, Is.GreaterThan(0));
 		});
 	}
 
@@ -140,7 +136,7 @@ internal sealed class DelegateSharedVariableImportTests
 		await RegisterDeclaredAsync();
 
 		_client.For(GamingPc).SharedVariables.RemoveAll(v => v.Name == "scene");
-		_invalidation.Stale.Clear();
+		_variables.ClearRequests();
 		await RefreshAsync();
 
 		Assert.Multiple(() =>
@@ -148,7 +144,7 @@ internal sealed class DelegateSharedVariableImportTests
 			Assert.That(Names(), Does.Not.Contain("gaming_pc_scene"));
 			Assert.That(OwnedNames(), Does.Not.Contain("gaming_pc_scene"));
 			Assert.That(OwnedNames(), Does.Contain("gaming_pc_obs_streaming"));
-			Assert.That(_invalidation.Stale, Does.Contain(DelegateIntegration.IntegrationId));
+			Assert.That(_variables.DeclarationChanges, Is.GreaterThan(0));
 		});
 	}
 
@@ -446,21 +442,6 @@ internal sealed class DelegateSharedVariableImportTests
 		}
 
 		Assert.That(condition(), Is.True, "the condition was not reached in time");
-	}
-
-	private sealed class RecordingInvalidation : IVariablePollingInvalidationSignal
-	{
-		public List<string> Stale { get; } = [];
-
-		public void MarkStale(string integrationId)
-		{
-			lock (Stale)
-			{
-				Stale.Add(integrationId);
-			}
-		}
-
-		public IReadOnlyCollection<string> DrainStale() => [];
 	}
 
 	private sealed class Context : IIntegrationContext

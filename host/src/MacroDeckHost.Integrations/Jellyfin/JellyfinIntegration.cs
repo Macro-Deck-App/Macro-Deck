@@ -15,6 +15,7 @@ using MacroDeckHost.Integrations.Jellyfin.Protocol;
 using MacroDeckHost.Integrations.Jellyfin.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin;
 
@@ -142,6 +143,7 @@ public sealed partial class JellyfinIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		await ReloadConfigurationsAsync().ConfigureAwait(false);
 		IsInitialized = true;
