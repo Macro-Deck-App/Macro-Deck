@@ -16,14 +16,18 @@ public class HostApiStabilityTests
 		"adb",
 		"batteries",
 		"colors",
+		"companion-devices",
 		"config",
 		"deck",
 		"devices",
 		"event-bindings",
 		"folder-views",
+		"http",
 		"icon-packs",
 		"layouts",
+		"locale",
 		"messaging",
+		"music-players",
 		"notifications",
 		"screensavers",
 		"scripts",
@@ -41,7 +45,10 @@ public class HostApiStabilityTests
 		= new Dictionary<string, string[]>(StringComparer.Ordinal)
 		{
 			[HostApis.Variables] =
-				["list", "get", "create", "set", "delete", "refresh", "history.open", "history.read", "history.close"],
+			[
+				"list", "get", "create", "set", "delete", "refresh", "history.open", "history.read", "history.close",
+				"bind"
+			],
 			[HostApis.UserVariables] = ["apply", "create"],
 			[HostApis.Config] = ["entries", "get-string", "get-secret", "set-string", "set-secret"],
 			[HostApis.Deck] = ["change-folder", "change-profile", "parent", "back"],
@@ -63,7 +70,10 @@ public class HostApiStabilityTests
 			[HostApis.EventBindings] = [],
 			[HostApis.ScreenSavers] = ["register", "unregister"],
 			[HostApis.Adb] =
-				["shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect"],
+			[
+				"shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect", "key", "tap",
+				"swipe", "input-text", "start-app", "force-stop-app", "open-uri", "reboot", "screenshot", "status"
+			],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
 			[HostApis.IconPacks] = ["sync-bundled", "get-icon-resource", "get-icon"],
 			[HostApis.VideoStreams] =
@@ -71,6 +81,10 @@ public class HostApiStabilityTests
 			[HostApis.Colors] = ["resolve", "watches"],
 			[HostApis.Batteries] = ["publish", "remove", "sync", "withdraw"],
 			[HostApis.Weather] = ["snapshots-changed"],
+			[HostApis.Locale] = ["time-of-day-format"],
+			[HostApis.Http] = [],
+			[HostApis.CompanionDevices] = ["wait", "send", "request", "screenshot"],
+			[HostApis.MusicPlayers] = ["album-color"],
 		};
 
 	[Test]

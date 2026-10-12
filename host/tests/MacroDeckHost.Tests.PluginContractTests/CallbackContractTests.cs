@@ -1,3 +1,5 @@
+using System.Globalization;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Variables;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Integrations;
@@ -5,6 +7,7 @@ using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
+using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
@@ -67,6 +70,7 @@ internal sealed class CallbackContractTests
 	private RemoteIntegrationContext _context = null!;
 	private RemoteDeviceProviderContext _devices = null!;
 	private VariableRefreshSignal _refreshSignal = null!;
+	private CallbackBindingStore _bindingStore = null!;
 	private WeatherBroadcastTrigger _weatherTrigger = null!;
 	private RecordingWidgetDataReader _widgetData = null!;
 	private FixedVariableHistory _history = null!;
@@ -88,6 +92,7 @@ internal sealed class CallbackContractTests
 		_uiSessions = new RecordingUiSessionSink();
 		DeviceRegistry = new RecordingDeviceRegistry();
 		_refreshSignal = new VariableRefreshSignal();
+		_bindingStore = new CallbackBindingStore();
 		_weatherTrigger = new WeatherBroadcastTrigger();
 		_widgetData = new RecordingWidgetDataReader();
 		_history = new FixedVariableHistory();
@@ -96,6 +101,7 @@ internal sealed class CallbackContractTests
 		services.AddSingleton<IIntegrationConfigStore>(_configStore);
 		services.AddSingleton<ISecretService>(_secretService);
 		services.AddSingleton<IVariableService>(_variableService);
+		services.AddSingleton<IVariableBindingStore>(_bindingStore);
 		var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		var sessions = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
@@ -125,7 +131,8 @@ internal sealed class CallbackContractTests
 			widgetData: _widgetData,
 			variableHistory: new PluginVariableHistoryWindows(
 				new OwnedVariableHistory(_history, new VariableRegistry()),
-				sessions));
+				sessions),
+			locale: new FixedLocale(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)));
 
 		_state = new PluginConnectionState();
 		_hostInvoker = new HostInvoker(_state, TimeProvider.System, Serilog.Core.Logger.None);
@@ -173,7 +180,27 @@ internal sealed class CallbackContractTests
 			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()),
 			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None),
 			new RemoteNotificationService(_hostInvoker, _state, new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()),
-			weatherProvider: new RemoteWeatherProviderApi(_hostInvoker));
+			weatherProvider: new RemoteWeatherProviderApi(_hostInvoker),
+			locale: new RemoteLocaleApi(_hostInvoker));
+	}
+
+	[Test]
+	public async Task The_time_format_a_plugin_reads_over_the_wire_is_the_one_the_host_resolved()
+	{
+		var format = await _context.Locale.GetTimeOfDayFormatAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(format.Culture.Name, Is.EqualTo("de-DE"));
+			Assert.That(format.HourCycle, Is.EqualTo(HourCycles.H12));
+			Assert.That(format.Format(new TimeOnly(15, 5)), Does.Match(@"^3:05\s"));
+		});
+	}
+
+	private sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
+	{
+		public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
+			=> Task.FromResult(format);
 	}
 
 	[TearDown]
@@ -199,6 +226,48 @@ internal sealed class CallbackContractTests
 		{
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.True);
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested("com.example.other"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_definition_refresh_over_the_wire_makes_the_host_read_only_the_named_variables_again()
+	{
+		await _context.Variables.RequestDefinitionRefreshAsync(["volume-percent", "muted"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Bindings_recorded_over_the_wire_belong_to_the_calling_plugin()
+	{
+		var request = new VariableBindingRequest("entity/light.kitchen/state", "kitchen_light", SdkVariableType.Text);
+
+		var first = await _context.Variables.BindAsync([request]);
+		var second = await _context.Variables.BindAsync([request]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first, Is.EqualTo(new[] { VariableBindingOutcome.Bound }));
+			Assert.That(second, Is.EqualTo(new[] { VariableBindingOutcome.AlreadyBound }));
+			Assert.That(_bindingStore.Bindings.Select(b => (b.IntegrationId, b.LocalResourceId, b.Name)),
+				Is.EqualTo(new[] { (PluginId, "entity/light.kitchen/state", "kitchen_light") }));
+		});
+	}
+
+	[Test]
+	public void A_binding_the_host_refuses_over_the_wire_records_nothing()
+	{
+		var request = new VariableBindingRequest("entity/light.kitchen/state", "kitchen_light", SdkVariableType.Text);
+
+		Assert.Multiple(() =>
+		{
+			Assert.ThrowsAsync<ArgumentException>(() =>
+				_context.Variables.BindAsync([request, request with { LocalResourceId = string.Empty }]));
+			Assert.That(_bindingStore.Bindings, Is.Empty);
 		});
 	}
 
@@ -540,6 +609,85 @@ internal sealed class CallbackContractTests
 
 
 	[Test]
+	public async Task The_adb_state_tells_the_plugin_the_default_device_and_which_device_lacks_usb_permission()
+	{
+		var devices = new RemoteAndroidDeviceManager(_hostInvoker, _stateCache, Serilog.Core.Logger.None);
+		_link.PushHostState(HostApis.Adb,
+			new AdbStateDto
+			{
+				Access = AdbAccessStates.Available,
+				Devices =
+				[
+					new AdbDeviceStateDto { Serial = "emulator-5554", State = AdbDeviceStates.Online },
+					new AdbDeviceStateDto
+					{
+						Serial = "R5CT20ABCDE", State = AdbDeviceStates.Unauthorized, LacksUsbPermission = true
+					}
+				],
+				DefaultDeviceSerial = "emulator-5554",
+				Revision = 1
+			});
+
+		await WaitForAsync(() => devices.Devices.Count == 2);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(devices.DefaultDevice?.Serial, Is.EqualTo("emulator-5554"));
+			Assert.That(devices.FindDevice("R5CT20ABCDE")!.State, Is.EqualTo(MacroDeck.Sdk.Android.AndroidDeviceState.Unauthorized));
+			Assert.That(devices.FindDevice("R5CT20ABCDE")!.LacksUsbPermission, Is.True);
+			Assert.That(devices.FindDevice("emulator-5554")!.LacksUsbPermission, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_plugin_that_never_uses_companion_devices_keeps_working_after_the_host_pushes_their_state()
+	{
+		_link.PushHostState(HostApis.CompanionDevices,
+			new CompanionDevicesStateDto
+			{
+				Access = CompanionDeviceAccessStates.Available,
+				Devices = [new CompanionDeviceStateDto { DeviceId = Guid.NewGuid().ToString("D"), ReadySequence = 1 }],
+				Revision = 1
+			});
+		_link.PushHostState(HostApis.Deck,
+			new DeckStateDto { Folders = [new DeckFolder { Id = "f1", Label = "Folder 1" }] });
+
+		await WaitForAsync(() => _context.Deck.GetFolders().Count > 0);
+		var result = await _context.Scripts.RunAsync("script-1");
+
+		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+	}
+
+	[Test]
+	public async Task The_companion_devices_state_lists_the_devices_a_plugin_may_use()
+	{
+		var phone = Guid.NewGuid();
+		using var devices = new RemoteCompanionDeviceApi(_hostInvoker, _stateCache, Serilog.Core.Logger.None);
+		_link.PushHostState(HostApis.CompanionDevices,
+			new CompanionDevicesStateDto
+			{
+				Access = CompanionDeviceAccessStates.Available,
+				Devices =
+				[
+					new CompanionDeviceStateDto
+					{
+						DeviceId = phone.ToString("D"), ReadySequence = 4, BatteryLevelPercent = 64, Capabilities = ["focus"]
+					}
+				],
+				Revision = 1
+			});
+
+		await WaitForAsync(() => devices.Devices.Count == 1);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(devices.Access, Is.EqualTo(MacroDeck.Sdk.Companion.CompanionDeviceAccess.Available));
+			Assert.That(devices.FindDevice(phone)!.State.BatteryLevelPercent, Is.EqualTo(64));
+			Assert.That(devices.FindDevice(phone)!.State.Capabilities, Does.Contain("focus"));
+		});
+	}
+
+	[Test]
 	public async Task Notify_lands_in_the_hosts_notification_store()
 	{
 		_context.Notifications.Notify(new UserNotificationRequest { Title = "Hello" });
@@ -796,5 +944,24 @@ internal sealed class FixedVariableHistory : IVariableHistory
 		}
 
 		public void Dispose() => Interlocked.Decrement(ref owner._open);
+	}
+}
+
+internal sealed class CallbackBindingStore : IVariableBindingStore
+{
+	public List<MacroDeckHost.Domain.Entities.VariableBinding> Bindings { get; private set; } = [];
+
+	public IReadOnlyList<MacroDeckHost.Domain.Entities.VariableBinding> Load() => Bindings;
+
+	public bool TryLoad(out IReadOnlyList<MacroDeckHost.Domain.Entities.VariableBinding> bindings)
+	{
+		bindings = [.. Bindings];
+		return true;
+	}
+
+	public bool Save(IEnumerable<MacroDeckHost.Domain.Entities.VariableBinding> bindings)
+	{
+		Bindings = [.. bindings];
+		return true;
 	}
 }

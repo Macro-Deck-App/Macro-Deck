@@ -1,5 +1,6 @@
 using System.Text;
 using MacroDeckHost.Localization;
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Integrations.Adb;
@@ -88,11 +89,12 @@ internal static class AdbVariables
 	public static IReadOnlyList<VariableDefinition> DeviceTemplates { get; } = BuildDeviceTemplates();
 
 	public static ValueTask<VariableReading> ReadAsync(
-		IAdbGateway? gateway,
+		IAndroidDeviceManager? manager,
+		AdbDeviceTracker? tracker,
 		string localId,
 		CancellationToken cancellationToken)
 	{
-		if (gateway is null || !gateway.IsEnabled)
+		if (manager is null || manager.Access != AndroidDeviceAccess.Available)
 		{
 			return ValueTask.FromResult(VariableReading.Unavailable);
 		}
@@ -103,13 +105,13 @@ internal static class AdbVariables
 
 		if (string.Equals(name, ConnectedDeviceCount, StringComparison.Ordinal))
 		{
-			return ValueTask.FromResult(VariableReading.Of(gateway.Devices.Count(device =>
-				device.State != AdbGatewayDeviceState.Disconnected)));
+			return ValueTask.FromResult(VariableReading.Of(manager.Devices.Count));
 		}
 
 		if (string.Equals(name, AuthorizedDeviceCount, StringComparison.Ordinal))
 		{
-			return ValueTask.FromResult(VariableReading.Of(gateway.Devices.Count(device => device.IsAuthorized)));
+			return ValueTask.FromResult(VariableReading.Of(manager.Devices.Count(device =>
+				device.State == AndroidDeviceState.Online)));
 		}
 
 		if (name is DeviceBatteryLevel
@@ -117,17 +119,15 @@ internal static class AdbVariables
 			or DeviceLocked
 			or DeviceForegroundApp)
 		{
-			return ReadPropertyAsync(gateway, name, cancellationToken);
+			return ReadPropertyAsync(manager.DefaultDevice, name, cancellationToken);
 		}
 
-		var device = ResolveDefaultDevice(gateway);
-		bool? connected = device is not null ? device.State != AdbGatewayDeviceState.Disconnected : null;
-		bool? authorized = device is not null ? device.IsAuthorized : null;
+		var device = ResolveDefaultDevice(manager, tracker);
 
 		object? value = name switch
 		{
-			DeviceConnected => connected,
-			DeviceAuthorized => authorized,
+			DeviceConnected => device is null ? null : device.Status != AdbDeviceStatus.Disconnected,
+			DeviceAuthorized => device?.IsAuthorized,
 			DeviceModel => device?.Model,
 			DeviceManufacturer => device?.Manufacturer,
 			_ => null
@@ -169,38 +169,59 @@ internal static class AdbVariables
 		return builder.ToString().Trim('_');
 	}
 
-	private static AdbGatewayDevice? ResolveDefaultDevice(IAdbGateway gateway)
+	private static AdbTrackedDevice? ResolveDefaultDevice(IAndroidDeviceManager manager, AdbDeviceTracker? tracker)
 	{
-		var configured = gateway.DefaultDeviceSerial;
-		if (!string.IsNullOrWhiteSpace(configured))
+		if (manager.DefaultDevice is not { } device)
 		{
-			return gateway.Devices.FirstOrDefault(device =>
-				string.Equals(device.Serial, configured, StringComparison.Ordinal));
+			return null;
 		}
 
-		var connected = gateway.Devices.Where(device => device.State != AdbGatewayDeviceState.Disconnected).ToList();
-		return connected.Count == 1 ? connected[0] : null;
+		if (manager.FindDevice(device.Serial) is { } attached)
+		{
+			return new AdbTrackedDevice(attached,
+				AdbDeviceTracker.StatusOf(attached),
+				attached.Info.Model,
+				attached.Info.Manufacturer);
+		}
+
+		return tracker?.Find(device.Serial) is { Status: AdbDeviceStatus.Disconnected } gone ? gone : null;
 	}
 
 	private static async ValueTask<VariableReading> ReadPropertyAsync(
-		IAdbGateway gateway,
+		IAndroidDevice? device,
 		string name,
 		CancellationToken cancellationToken)
 	{
-		var properties = await gateway.GetPropertiesAsync(null, cancellationToken);
-		if (properties is null)
+		if (device is null)
 		{
 			return VariableReading.Unavailable;
 		}
 
-		return VariableReading.Of(name switch
+		try
 		{
-			DeviceBatteryLevel => properties.BatteryLevel,
-			DeviceScreenOn => properties.ScreenOn,
-			DeviceLocked => properties.Locked,
-			DeviceForegroundApp => properties.ForegroundPackage,
-			_ => null
-		});
+			if (name == DeviceBatteryLevel)
+			{
+				return VariableReading.Of((await device.GetBatteryStateAsync(cancellationToken)).Level);
+			}
+
+			var status = await device.GetStatusAsync(cancellationToken);
+			if (status is null)
+			{
+				return VariableReading.Unavailable;
+			}
+
+			return VariableReading.Of(name switch
+			{
+				DeviceScreenOn => status.IsScreenOn,
+				DeviceLocked => status.IsLocked,
+				DeviceForegroundApp => status.ForegroundPackage,
+				_ => null
+			});
+		}
+		catch (AndroidDeviceException)
+		{
+			return VariableReading.Unavailable;
+		}
 	}
 
 	private static List<VariableDefinition> BuildDeviceTemplates()

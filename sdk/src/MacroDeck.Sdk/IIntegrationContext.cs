@@ -1,12 +1,17 @@
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
@@ -95,4 +100,43 @@ public interface IIntegrationContext
 	/// member, ignores the notice; the stations are then still read about once a minute.
 	/// </summary>
 	IWeatherProviderApi WeatherProvider => UnsupportedWeatherProviderApi.Instance;
+
+	/// <summary>
+	/// Text documents this integration keeps for itself across restarts, see <see cref="IIntegrationStorage" />.
+	/// A plugin's storage lives in the data directory Macro Deck gives it. A context from a Macro Deck without
+	/// integration storage, a plugin started without a data directory, and any implementation that does not
+	/// override this member, read every key as missing and throw <see cref="InvalidOperationException" /> on a
+	/// write.
+	/// </summary>
+	IIntegrationStorage Storage => UnavailableIntegrationStorage.Instance;
+
+	/// <summary>
+	/// The user's language and time format preferences. A context from a Macro Deck that cannot report them,
+	/// and any implementation that does not override this member, answer the process's current culture with a
+	/// 24-hour clock.
+	/// </summary>
+	ILocaleApi Locale => LocalLocaleApi.Instance;
+
+	/// <summary>
+	/// What outgoing HTTP and WebSocket requests should carry, such as the User-Agent the user configured. A
+	/// context from a Macro Deck that does not send it, and any implementation that does not override this
+	/// member, answer <see cref="DefaultHostHttp" />.
+	/// </summary>
+	IHostHttp Http => DefaultHostHttp.Instance;
+
+	/// <summary>
+	/// The phones and tablets connected through the Companion app, see <see cref="ICompanionDeviceApi" />. In a plugin
+	/// it is the same instance dependency injection resolves, with the same access rules; an integration built into
+	/// Macro Deck always has access. A context from a Macro Deck without Companion devices, and any implementation
+	/// that does not override this member, reports <see cref="CompanionDeviceAccess.Unsupported" />, no devices, and
+	/// never raises an event.
+	/// </summary>
+	ICompanionDeviceApi CompanionDevices => UnsupportedCompanionDeviceApi.Instance;
+
+	/// <summary>
+	/// Reads the music players of every provider, including other plugins', and their album colours, see
+	/// <see cref="IMusicPlayerApi" />. A context from a Macro Deck without it, and any implementation that does
+	/// not override this member, reports no players, never raises the event and knows no album colour.
+	/// </summary>
+	IMusicPlayerApi MusicPlayers => UnsupportedMusicPlayerApi.Instance;
 }

@@ -1,5 +1,4 @@
 using System.Security;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -12,17 +11,11 @@ namespace MacroDeckHost.Integrations.Adb.Actions;
 
 internal sealed class ScreenshotActionDefinition : IActionDefinition
 {
-	private readonly Func<IAdbGateway?> _resolveGateway;
-	private readonly AdbHealthTracker _health;
-	private readonly VariableApiAccessor _variables;
+	private readonly AdbActionServices _services;
 
-	public ScreenshotActionDefinition(Func<IAdbGateway?> resolveGateway,
-		AdbHealthTracker health,
-		VariableApiAccessor variables)
+	public ScreenshotActionDefinition(AdbActionServices services)
 	{
-		_resolveGateway = resolveGateway;
-		_health = health;
-		_variables = variables;
+		_services = services;
 	}
 
 	public string Id => "screenshot";
@@ -41,31 +34,26 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 		ActionParameter.Autocomplete("fileNameVariable",
 			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
 			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables)
+			optionsSourceId: HostOptionsSources.UserVariables)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolveGateway, _health, _variables);
+	public IActionExecutor CreateExecutor() => new Executor(_services);
 
 	private sealed class Executor : IActionExecutor
 	{
 		private static readonly ILogger _logger =
 			IntegrationLog.For<ScreenshotActionDefinition>(AdbIntegration.IntegrationId);
 
-		private readonly Func<IAdbGateway?> _resolveGateway;
-		private readonly AdbHealthTracker _health;
-		private readonly VariableApiAccessor _variables;
+		private readonly AdbActionServices _services;
 
-		public Executor(Func<IAdbGateway?> resolveGateway, AdbHealthTracker health, VariableApiAccessor variables)
+		public Executor(AdbActionServices services)
 		{
-			_resolveGateway = resolveGateway;
-			_health = health;
-			_variables = variables;
+			_services = services;
 		}
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
-			var gateway = _resolveGateway();
-			if (gateway is null || !gateway.IsEnabled)
+			if (!AdbActionDefinition.IsAvailable(_services.Devices(), out var manager))
 			{
 				return ActionResult.Failed(ActionErrorCodes.Unavailable, AdbActionDefinition.DisabledMessage);
 			}
@@ -77,9 +65,10 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 					AppStrings.Integrations.Adb.Errors.FolderRequired());
 			}
 
-			var device = AdbActionDefinition.ReadDevice(context.Parameters);
-			var (result, png) = await gateway.CaptureScreenshotAsync(device, context.CancellationToken);
-			_health.Record(result);
+			var target = new AdbTarget(manager, _services.Tracker(), AdbActionDefinition.ReadDevice(context.Parameters));
+			var (result, png) =
+				await target.RunAsync(device => device.CaptureScreenshotAsync(context.CancellationToken));
+			_services.Health.Record(result);
 
 			if (!result.Success)
 			{
@@ -114,8 +103,8 @@ internal sealed class ScreenshotActionDefinition : IActionDefinition
 			var fileNameVariable = AdbActionValues.ReadString(context.Parameters, "fileNameVariable");
 			if (!string.IsNullOrWhiteSpace(fileNameVariable))
 			{
-				await ActionVariableTarget.WriteAsync(_variables.UserVariables,
-					_variables.Current,
+				await ActionVariableTarget.WriteAsync(_services.Variables.UserVariables,
+					_services.Variables.Current,
 					fileNameVariable,
 					context.OwnerWidgetId,
 					VariableType.Text,

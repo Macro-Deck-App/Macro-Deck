@@ -10,6 +10,9 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 [TestFixture]
 public class A12_VariableFakeTests
 {
+	private static readonly string[] _refreshedIds = ["muted", "volume-percent"];
+	private static readonly string[] _boundResources = ["entity/light.kitchen/state", "entity/switch.desk/state"];
+
 	[Test]
 	public async Task FakeUserVariableApi_reproduces_the_documented_failure_statuses()
 	{
@@ -110,6 +113,29 @@ public class A12_VariableFakeTests
 		{
 			Assert.That(api.Created, Has.Count.EqualTo(1));
 			Assert.That(api.Created[0].Id, Is.EqualTo(handle.Id));
+		});
+	}
+
+	[Test]
+	public async Task FakeVariableApi_records_definition_refreshes_and_bindings_as_the_host_does()
+	{
+		var api = new FakeVariableApi();
+		var kitchen = new VariableBindingRequest("entity/light.kitchen/state", "kitchen", VariableType.Text);
+
+		await api.RequestDefinitionRefreshAsync(_refreshedIds);
+		await api.RequestDefinitionRefreshAsync([]);
+		var first = await api.BindAsync([kitchen]);
+		var second = await api.BindAsync([kitchen, kitchen with { LocalResourceId = "entity/switch.desk/state" }]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(api.DefinitionRefreshRequests.Single(), Is.EqualTo(_refreshedIds));
+			Assert.That(api.RefreshRequests, Is.Zero);
+			Assert.That(first, Is.EqualTo(new[] { VariableBindingOutcome.Bound }));
+			Assert.That(second, Is.EqualTo(new[] { VariableBindingOutcome.AlreadyBound, VariableBindingOutcome.Bound }));
+			Assert.That(api.Bindings.Select(binding => binding.LocalResourceId),
+				Is.EqualTo(_boundResources));
+			Assert.ThrowsAsync<ArgumentException>(() => api.BindAsync([kitchen with { Name = "Not Canonical" }]));
 		});
 	}
 

@@ -1,4 +1,5 @@
 using MacroDeckHost.Integrations.Adb;
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -6,30 +7,46 @@ namespace MacroDeckHost.Tests.UnitTests.Adb;
 [TestFixture]
 internal sealed class AdbDeviceVariableWriterTests
 {
-	private FakeAdbGateway _gateway = null!;
+	private readonly Dictionary<string, ScriptedAndroidDevice> _phones = new(StringComparer.Ordinal);
 	private RecordingVariableApi _variables = null!;
+	private List<AdbTrackedDevice> _devices = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_gateway = new FakeAdbGateway();
+		_phones.Clear();
 		_variables = new RecordingVariableApi();
+		_devices = [];
 	}
 
-	private static AdbGatewayDevice Device(
+	private ScriptedAndroidDevice Phone(string serial)
+	{
+		if (!_phones.TryGetValue(serial, out var phone))
+		{
+			phone = new ScriptedAndroidDevice(serial, null);
+			_phones[serial] = phone;
+		}
+
+		return phone;
+	}
+
+	private void SetBatteryLevel(string serial, int level)
+		=> Phone(serial).Battery = Phone(serial).Battery with { Level = level };
+
+	private AdbTrackedDevice Device(
 		string serial = "ABC123",
-		AdbGatewayDeviceState state = AdbGatewayDeviceState.Device,
+		AdbDeviceStatus state = AdbDeviceStatus.Device,
 		string? model = "Pixel 8")
-		=> new(serial, state, model, Manufacturer: "Google", TunnelEstablished: true);
+		=> new(Phone(serial), state, model, Manufacturer: "Google");
 
 	[Test]
 	public async Task Authorization_creates_all_four_variables_named_after_the_model()
 	{
-		_gateway.NextProperties = new AdbGatewayProperties(77, true, false, "com.example.app");
+		SetBatteryLevel("ABC123", 77);
 
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device("ABC123")),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device("ABC123")),
 			CancellationToken.None);
 
 		Assert.Multiple(async () =>
@@ -45,9 +62,9 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task A_connected_but_never_authorized_device_creates_nothing()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Connected,
-				Device(state: AdbGatewayDeviceState.Unauthorized)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Connected,
+				Device(state: AdbDeviceStatus.Unauthorized)),
 			CancellationToken.None);
 
 		Assert.That(_variables.CreateCount, Is.EqualTo(0));
@@ -57,15 +74,15 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task A_later_transition_updates_an_already_authorized_devices_variables()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device()),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 			CancellationToken.None);
 
-		_gateway.NextProperties = new AdbGatewayProperties(50, false, true, null);
+		SetBatteryLevel("ABC123", 50);
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Offline,
-				Device(state: AdbGatewayDeviceState.Offline)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Offline,
+				Device(state: AdbDeviceStatus.Offline)),
 			CancellationToken.None);
 
 		Assert.Multiple(async () =>
@@ -81,14 +98,14 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task Disconnect_clears_the_four_variables_to_null_instead_of_deleting_them()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device()),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 			CancellationToken.None);
 
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Disconnected,
-				Device(state: AdbGatewayDeviceState.Disconnected)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Disconnected,
+				Device(state: AdbDeviceStatus.Disconnected)),
 			CancellationToken.None);
 
 		Assert.Multiple(async () =>
@@ -112,9 +129,9 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task Disconnecting_a_device_that_was_never_authorized_does_nothing()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Disconnected,
-				Device(state: AdbGatewayDeviceState.Disconnected)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Disconnected,
+				Device(state: AdbDeviceStatus.Disconnected)),
 			CancellationToken.None);
 
 		Assert.That(_variables.CreateCount, Is.EqualTo(0));
@@ -124,20 +141,20 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task Reauthorizing_after_a_disconnect_reuses_the_existing_variables_rather_than_recreating_them()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device()),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 			CancellationToken.None);
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Disconnected,
-				Device(state: AdbGatewayDeviceState.Disconnected)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Disconnected,
+				Device(state: AdbDeviceStatus.Disconnected)),
 			CancellationToken.None);
 
 		var createCountAfterFirstRun = _variables.CreateCount;
 
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device()),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 			CancellationToken.None);
 
 		Assert.Multiple(async () =>
@@ -156,8 +173,8 @@ internal sealed class AdbDeviceVariableWriterTests
 		{
 			await _variables.CreateAsync("adb_device_pixel_8_connected", VariableType.Boolean);
 			await AdbDeviceVariableWriter.HandleAsync(_variables,
-				_gateway,
-				new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device()),
+				_devices,
+				new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 				CancellationToken.None);
 		});
 	}
@@ -166,8 +183,8 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task The_model_is_sanitized_into_the_variable_name()
 	{
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized,
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized,
 				Device("192.168.1.5:5555", model: "Galaxy S24 Ultra")),
 			CancellationToken.None);
 
@@ -178,11 +195,11 @@ internal sealed class AdbDeviceVariableWriterTests
 	public async Task No_variable_name_ever_contains_the_serial()
 	{
 		var serial = "PBZDWSKV796PIBXW";
-		_gateway.Devices = [Device(serial, model: null)];
+		_devices = [Device(serial, model: null)];
 
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, Device(serial, model: null)),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device(serial, model: null)),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -199,15 +216,15 @@ internal sealed class AdbDeviceVariableWriterTests
 	{
 		var first = Device("AAA111");
 		var second = Device("BBB222");
-		_gateway.Devices = [second, first];
+		_devices = [second, first];
 
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, first),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, first),
 			CancellationToken.None);
 		await AdbDeviceVariableWriter.HandleAsync(_variables,
-			_gateway,
-			new AdbGatewayDeviceChange(AdbGatewayDeviceChangeKind.Authorized, second),
+			_devices,
+			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, second),
 			CancellationToken.None);
 
 		Assert.Multiple(async () =>

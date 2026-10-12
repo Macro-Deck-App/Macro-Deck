@@ -28,6 +28,27 @@ public interface IAndroidDeviceManager
 	IAndroidDevice? FindDevice(string serial);
 
 	/// <summary>
+	/// The device to use when the user picked none for an action: the default device chosen in Macro Deck's ADB
+	/// settings, or, when none is chosen, the only attached device. <c>null</c> when none is chosen and not exactly
+	/// one device is attached, when <see cref="Access" /> is not <see cref="AndroidDeviceAccess.Available" />, and
+	/// on an implementation or a Macro Deck that predates this member.
+	/// </summary>
+	/// <remarks>
+	/// The chosen default device is returned even while it is not attached, as long as Macro Deck has seen it:
+	/// check <see cref="FindDevice" /> to tell. Its operations then fail with
+	/// <see cref="AndroidDeviceErrorCode.DeviceOffline" /> or <see cref="AndroidDeviceErrorCode.DeviceNotFound" />.
+	/// </remarks>
+	IAndroidDevice? DefaultDevice => null;
+
+	/// <summary>
+	/// True while <see cref="Access" /> is <see cref="AndroidDeviceAccess.Available" /> but Macro Deck cannot find
+	/// the adb program, so every operation fails with <see cref="AndroidDeviceErrorCode.AdbUnavailable" /> and no
+	/// device can appear. A change raises <see cref="AccessChanged" />. Always false on a Macro Deck that does not
+	/// report it.
+	/// </summary>
+	bool IsAdbUnavailable => false;
+
+	/// <summary>
 	/// Connects Macro Deck's adb to a device with wireless debugging on, like <c>adb connect</c>.
 	/// <paramref name="address" /> is <c>host:port</c> with a host name or IPv4 address, for example
 	/// <c>192.168.1.20:5555</c>, and becomes the device's serial. Connecting an already connected device succeeds.
@@ -50,9 +71,10 @@ public interface IAndroidDeviceManager
 	/// <summary>Raised when a device goes away, including when access to ADB is withdrawn.</summary>
 	event EventHandler<AndroidDeviceEventArgs>? DeviceDisconnected;
 
-	/// <summary>Raised when an attached device's <see cref="IAndroidDevice.State" /> changes.</summary>
+	/// <summary>Raised when an attached device's <see cref="IAndroidDevice.State" />,
+	/// <see cref="IAndroidDevice.LacksUsbPermission" /> or <see cref="IAndroidDevice.Mode" /> changes.</summary>
 	event EventHandler<AndroidDeviceEventArgs>? DeviceStateChanged;
 
-	/// <summary>Raised when <see cref="Access" /> changes.</summary>
+	/// <summary>Raised when <see cref="Access" /> or <see cref="IsAdbUnavailable" /> changes.</summary>
 	event EventHandler? AccessChanged;
 }

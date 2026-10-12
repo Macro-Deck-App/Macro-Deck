@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using MacroDeckHost.Integrations.Companion;
+using MacroDeck.Sdk.Companion;
 
 namespace MacroDeckHost.Integrations;
 
@@ -7,6 +7,19 @@ public enum CompanionRequestKind
 {
 	Screenshot,
 	Command
+}
+
+public sealed record CompanionCommandResult(byte[]? Png, CompanionDeviceFailure? Failure)
+{
+	public static CompanionCommandResult Done { get; } = new(null, null);
+
+	public static CompanionCommandResult Unconfirmed { get; } = new(null, null) { IsUnconfirmed = true };
+
+	public bool IsUnconfirmed { get; init; }
+
+	public static CompanionCommandResult Of(byte[] png) => new(png, null);
+
+	public static CompanionCommandResult Failed(CompanionDeviceFailure failure) => new(null, failure);
 }
 
 public sealed class CompanionCommandRequests
@@ -47,12 +60,12 @@ public sealed class CompanionCommandRequests
 		{
 			if (!await SendAsync(send, key, pending))
 			{
-				return CompanionCommandResult.Failed(CompanionCommandFailure.NotConnected);
+				return CompanionCommandResult.Failed(CompanionDeviceFailure.NotConnected);
 			}
 
 			pending.Deadline = _timeProvider.CreateTimer(_ => GiveUp(key,
 					pending,
-					CompanionCommandResult.Failed(CompanionCommandFailure.TimedOut)),
+					CompanionCommandResult.Failed(CompanionDeviceFailure.TimedOut)),
 				null,
 				Deadline,
 				Timeout.InfiniteTimeSpan);
@@ -107,7 +120,7 @@ public sealed class CompanionCommandRequests
 
 			pending.State = State.Claimed;
 			pending.ClaimedDeadline = _timeProvider.CreateTimer(
-				_ => TryFinish(key, pending, State.Claimed, pending.AfterClaim(CompanionCommandFailure.TimedOut)),
+				_ => TryFinish(key, pending, State.Claimed, pending.AfterClaim(CompanionDeviceFailure.TimedOut)),
 				null,
 				kind == CompanionRequestKind.Command ? ClaimedCommandDeadline : ClaimedScreenshotDeadline,
 				Timeout.InfiniteTimeSpan);
@@ -125,7 +138,7 @@ public sealed class CompanionCommandRequests
 			pending.Kind == kind &&
 			TryFinish((deviceId, requestId), pending, afterRunning ? pending.AnswerableFrom : State.Open, result);
 
-	public void FailDevice(Guid deviceId, CompanionCommandFailure failure)
+	public void FailDevice(Guid deviceId, CompanionDeviceFailure failure)
 	{
 		foreach (var (key, pending) in _pending.Where(entry => entry.Key.DeviceId == deviceId))
 		{
@@ -198,7 +211,7 @@ public sealed class CompanionCommandRequests
 
 		public ITimer? ClaimedDeadline { get; set; }
 
-		public CompanionCommandResult AfterClaim(CompanionCommandFailure failure)
+		public CompanionCommandResult AfterClaim(CompanionDeviceFailure failure)
 			=> Kind == CompanionRequestKind.Command
 				? CompanionCommandResult.Unconfirmed
 				: CompanionCommandResult.Failed(failure);

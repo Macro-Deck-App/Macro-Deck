@@ -10,6 +10,7 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
@@ -109,6 +110,7 @@ public sealed partial class SinusBotIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		await ConnectFromConfig(context);
 		IsInitialized = true;

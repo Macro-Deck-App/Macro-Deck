@@ -28,6 +28,9 @@ internal static class NativeKeyTables
 
 	private static readonly Dictionary<int, KeyCode> _byMacKeyCode = _positions.ToDictionary(p => (int)p.MacKeyCode, p => p.Key);
 
+	private static readonly Dictionary<KeyCode, (ushort Scan, ushort MacKeyCode)> _byKey =
+		_positions.ToDictionary(p => p.Key, p => (p.Scan, p.MacKeyCode));
+
 	private static readonly Dictionary<int, KeyCode> _windowsPunctuation = new()
 	{
 		[0xBA] = KeyCode.Semicolon, [0xBB] = KeyCode.Equal, [0xBC] = KeyCode.Comma, [0xBD] = KeyCode.Minus,
@@ -105,6 +108,25 @@ internal static class NativeKeyTables
 		[163] = KeyCode.MediaTrackNext, [164] = KeyCode.MediaPlayPause, [165] = KeyCode.MediaTrackPrevious,
 		[166] = KeyCode.MediaStop
 	};
+
+	public static bool IsPositional(KeyCode key)
+		=> key is >= KeyCode.Semicolon and <= KeyCode.Quote or KeyCode.IntlBackslash;
+
+	public static bool TryGetScanCode(KeyCode key, out ushort scan)
+	{
+		var found = _byKey.TryGetValue(key, out var codes);
+		scan = codes.Scan;
+		return found;
+	}
+
+	public static bool TryGetMacKeyCode(KeyCode key, out ushort macKeyCode)
+	{
+		var found = _byKey.TryGetValue(key, out var codes);
+		macKeyCode = codes.MacKeyCode;
+		return found;
+	}
+
+	public static bool TryFromScanCode(ushort scan, out KeyCode key) => _byScan.TryGetValue(scan, out key);
 
 	public static KeyCode FromWindows(int virtualKey, int scanCode, bool isExtended, Func<int, int> scanCodeOf)
 	{

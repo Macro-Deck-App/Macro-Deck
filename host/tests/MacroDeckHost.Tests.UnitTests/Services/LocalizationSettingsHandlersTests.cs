@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Localization;
@@ -346,7 +347,7 @@ public class LocalizationSettingsHandlersTests
 	[TestCase("h:mm 'H'", HourCycles.H12)]
 	[TestCase("mm:ss", null)]
 	public void An_hour_cycle_is_read_from_a_time_pattern(string pattern, string? expected)
-		=> Assert.That(HourCycles.FromPattern(pattern), Is.EqualTo(expected));
+		=> Assert.That(HourCyclePatterns.FromPattern(pattern), Is.EqualTo(expected));
 
 	[Test]
 	public void A_twelve_hour_time_drops_the_leading_zero_of_a_padded_twenty_four_hour_language()

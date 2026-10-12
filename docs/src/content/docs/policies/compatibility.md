@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `email-inbox`, `event-bindings` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `email-inbox`, `locale`, `companion-devices`, `music-players`, `event-bindings`, `http` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -215,6 +215,18 @@ What did **not** need a major:
   `IConfigEntryLifecycle` interface, every member with a default, and the capability kind `config-entries`
   at capability version `1`, within major `3`. An older host rejects the kind non-fatally and stores entries
   as before, and a plugin that does not implement the interface never declares it.
+- `IConfigEntryLifecycle` gained a `SynchronizeEntriesAsync` overload that takes the integration's own
+  `IVariableApi` and whose default calls the existing overload, so an implementation written before it is
+  synchronized exactly as before; its `CancellationToken` has no default, so a call such as
+  `SynchronizeEntriesAsync(entries, default)` still binds to the existing overload. `ConfigEntryPreparation`
+  gained `RejectedVariableNames` (empty by default) and `ConfigEntryPreparationResult` gained
+  `RetryOnConflict` (`false` by default), carried as the optional `rejectedVariableNames` and
+  `retryOnConflict` on `config-entries`/`prepare`. An older host never retries; an older plugin never asks
+  to, and is refused on the first conflict as before.
+- `ConfigFlowResult` gained `CompleteWithoutEntry()` and `StoresEntry` (`true` for every other result),
+  carried as the optional `withoutEntry` on a `flow.submit` `Complete` result. An older host does not know
+  the flag and stores an entry from the collected values under the integration's name, as for
+  `Complete` without a title.
 - [Email inboxes](/features/email-inboxes/) added the `IEmailInboxProvider` interface, a capability kind,
   `email-inbox`, at capability version `1`, with its own operations, DTOs and reply limits, all within major
   `3`. `state.update` gained a meaning for this kind only: a `localId` names an inbox whose content or status
@@ -229,6 +241,25 @@ What did **not** need a major:
 - `IVariableApi` gained `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync`, both defaulting to a
   no-op, and the `variables` host API gained `refresh`; an older host makes the request a no-op.
   `NotifyDeclarationsChangedAsync` uses the existing `state.update`.
+- `IVariableApi` gained `RequestDefinitionRefreshAsync`, defaulting to `RequestRefreshAsync`, and
+  `variables`/`refresh` gained an optional `definitionIds` list; an older host ignores it and reads every
+  declared variable, which is always allowed. `IVariableApi` also gained `BindAsync`, whose default throws
+  `NotSupportedException`, and the `variables` host API gained `bind`; against an older host the SDK
+  reports the bindings as not supported. Two limits were added: `maxVariableRefreshDefinitionIds` and
+  `maxVariableBindingsPerCall`.
+- `VariableNames` (`MacroDeck.Sdk.Variables`), `HostOptionsSources` (`MacroDeck.Sdk.Actions`) and the
+  `NativeKeys` members `IsPositional`, `TryGetWindowsScanCode`, `TryGetMacOSKeyCode` and
+  `TryFromWindowsScanCode` are new SDK helpers. They need no host support: the option source ids are the
+  values every Macro Deck already answers, and the name rules are the ones every Macro Deck already applies.
+- `IIntegrationContext` gained `Storage`, `Locale` and `Http`, and `IConfigFlowContext` gained `Http`, each a
+  default interface member: `UnavailableIntegrationStorage.Instance` (every key missing, a write throws
+  `InvalidOperationException`), `LocalLocaleApi.Instance` (the current culture with a 24-hour clock) and
+  `DefaultHostHttp.Instance` (`MacroDeck/` and the SDK version), so an existing implementation keeps
+  compiling and behaves as before. The `locale` host API (`time-of-day-format`) and the push-only `http`
+  `host.state` are new: an older host answers `CAPABILITY_UNSUPPORTED` or pushes nothing, and the SDK falls
+  back to those same defaults; an older SDK ignores the `http` push. Storage needs no host support: a plugin
+  keeps it in its own data directory. `HourCycles` and `TimeOfDayFormat` (`MacroDeck.Sdk.Locale`) and
+  `IntegrationStorageKeys` (`MacroDeck.Sdk.Storage`) are new SDK types.
 - `maxUiResourceBytesPerPlugin` and `maxUiResourcesPerPlugin` rose from 16 MiB and 256 to 48 MiB and 1024.
   The host advertises them in the protocol descriptor; a plugin built against an older SDK keeps its
   own, lower quota, which a newer host still accepts.
@@ -253,6 +284,44 @@ What did **not** need a major:
   existing implementation keeps compiling. An older host answers `CAPABILITY_UNSUPPORTED`, which the SDK
   turns into a no-op; the host then reads the stations on its own interval as before. See
   [Telling Macro Deck the weather changed](/features/weather/#telling-macro-deck-the-weather-changed).
+- [Android devices](/features/android-devices/) added typed operations to `IAndroidDevice` (`SendKeyAsync`,
+  `TapAsync`, `SwipeAsync`, `InputTextAsync`, `StartAppAsync`, `ForceStopAppAsync`, `OpenUriAsync`,
+  `RebootAsync`, `CaptureScreenshotAsync`, `GetStatusAsync`), `IAndroidDevice.LacksUsbPermission`,
+  `IAndroidDevice.Mode`, `IAndroidDeviceManager.DefaultDevice`, `IAndroidDeviceManager.IsAdbUnavailable`, the
+  `AndroidKey`, `AndroidRebootMode`, `AndroidDeviceMode` and `AndroidDeviceStatus` types, ten `adb` host api
+  operations, the asset kind `android-screenshot`, and the optional `defaultDeviceSerial`, `adbUnavailable`,
+  `lacksUsbPermission` and `mode` fields of the `adb` state, all within major `3`. The members are default interface
+  members, so an `IAndroidDevice` or `IAndroidDeviceManager` written against an older SDK keeps compiling and
+  loading: its typed operations throw `AndroidDeviceException` with `Unsupported`, `GetStatusAsync` answers
+  `null`, `LacksUsbPermission` and `IsAdbUnavailable` are `false`, `Mode` is `Normal` and `DefaultDevice` is
+  `null`. An older host answers the new
+  operations with `CAPABILITY_UNSUPPORTED`, which the SDK reports the same way, and an older plugin ignores
+  the new state fields: a device lacking USB permission still reads `unauthorized`, one in recovery `offline`. `AndroidDeviceState` gains
+  no value. The typed operations run while the host is locked, see
+  [ADR 0092](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0092-plugins-reach-adb-through-a-permission-gated-host-api.md).
+- [Companion devices](/features/companion-devices/) added `IIntegrationContext.CompanionDevices`, the
+  `MacroDeck.Sdk.Companion` types (`ICompanionDeviceApi`, `UnsupportedCompanionDeviceApi` and the device,
+  state, command, result and failure types), the `companion-devices` host API (`wait`, `send`, `request`,
+  `screenshot`) with a per-plugin `host.state` push, the error code `COMPANION_DEVICES_NOT_ALLOWED`, the asset
+  kind `companion-screenshot` and the permission `host:companion-devices`, all within major `3`.
+  `CompanionDevices` is a default interface member returning `UnsupportedCompanionDeviceApi.Instance`, so an
+  existing `IIntegrationContext` implementation keeps compiling and loading. An older host pushes nothing and
+  answers `CAPABILITY_UNSUPPORTED`; the SDK then reports access `Unsupported`, answers a send with `false` and
+  fails a request or screenshot with `NotConnected`, without throwing. An older plugin ignores the push, and
+  an older host installs a manifest that declares `host:companion-devices` with the `unknown-permission`
+  warning. The permission is enforced from the start, which breaks no plugin because none used the API
+  before; see
+  [ADR 0110](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/engineering/decisions/0110-plugins-reach-companion-devices-through-a-permission-gated-host-api.md).
+  Capability names, failures and network types are open strings: a reader ignores a capability it does not
+  know and reads an unknown failure as `failed`.
+- [Reading every provider's players](/features/music-players/#reading-every-providers-players) added
+  `IIntegrationContext.MusicPlayers`, the `MacroDeck.Sdk.MusicPlayer` types `IMusicPlayerApi`,
+  `MusicPlayerInstanceSnapshot` and `UnsupportedMusicPlayerApi`, and the `music-players` host API
+  (`album-color`) with a `host.state` push sent to every plugin, all within major `3`. `MusicPlayers` is a
+  default interface member returning `UnsupportedMusicPlayerApi.Instance`, so an existing `IIntegrationContext`
+  implementation keeps compiling and loading and reports no players. An older host pushes nothing and answers
+  `CAPABILITY_UNSUPPORTED`, which the SDK reports as no players and a `null` colour, without throwing; an
+  older plugin ignores the push. Reading is not gated, like registering another player's artwork.
 - Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
   optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
 - [Batteries](/features/batteries/) added a capability kind, `battery-provider`, at capability version

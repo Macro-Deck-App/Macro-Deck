@@ -1,5 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.EmailInbox;
 

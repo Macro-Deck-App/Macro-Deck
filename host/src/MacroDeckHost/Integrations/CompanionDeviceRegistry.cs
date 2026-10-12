@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
@@ -12,15 +13,34 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Application.Ui.Transport.Messages.Licensing;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Integrations.Companion;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Integrations;
 
-public sealed class CompanionDeviceRegistry : ICompanionGateway
+public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 {
-	private const string IntegrationId = CompanionIntegration.IntegrationId;
+	private const string IntegrationId = "app.macro-deck.companion";
 	private const int MaximumTextLength = 64;
+
+	private static readonly HashSet<string> _knownCapabilities = new HashSet<string>(StringComparer.Ordinal)
+	{
+		CompanionDeviceCapabilities.ScreenOn,
+		CompanionDeviceCapabilities.ScreenOff,
+		CompanionDeviceCapabilities.ScreenshotDeck,
+		CompanionDeviceCapabilities.ScreenshotFull,
+		CompanionDeviceCapabilities.Focus,
+		CompanionDeviceCapabilities.NetworkName,
+		CompanionDeviceCapabilities.Cpu,
+		CompanionDeviceCapabilities.Memory
+	};
+
+	private static readonly HashSet<string> _requestableCapabilities = new HashSet<string>(StringComparer.Ordinal)
+	{
+		CompanionDeviceCapabilities.ScreenOn,
+		CompanionDeviceCapabilities.ScreenOff,
+		CompanionDeviceCapabilities.Focus,
+		CompanionDeviceCapabilities.ScreenshotFull
+	};
 
 	internal static readonly TimeSpan StateReportTimeout = TimeSpan.FromSeconds(5);
 
@@ -36,8 +56,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private readonly ILogger _logger;
 	private readonly Lock _connectionGate = new();
 	private readonly Dictionary<string, Guid> _connections = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<Guid, CompanionDeviceState> _states = new();
-	private readonly Dictionary<Guid, long> _readySequences = new();
+	private readonly ConcurrentDictionary<Guid, CompanionDevice> _states = new();
 	private long _nextReadySequence;
 	private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _deviceGates = new();
 	private readonly ConcurrentDictionary<Guid, Task> _creations = new();
@@ -68,32 +87,43 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		_registry.AvailabilityChanged += OnAvailabilityChanged;
 	}
 
-	public event EventHandler<Guid>? StateChanged;
+	public event EventHandler<CompanionDeviceEventArgs>? DeviceChanged;
 
-	public event EventHandler<CompanionDeviceReady>? DeviceReady;
+	public event EventHandler<CompanionDeviceEventArgs>? DeviceReady;
+
+	public event EventHandler? AccessChanged
+	{
+		add { }
+		remove { }
+	}
 
 	private event Action? ConnectionClosed;
+
+	public CompanionDeviceAccess Access => CompanionDeviceAccess.Available;
+
+	public IReadOnlyList<CompanionDevice> Devices => [.. _states.Values];
+
+	public CompanionDevice? FindDevice(Guid deviceId) => _states.GetValueOrDefault(deviceId);
 
 	public void Report(string connectionId, Guid deviceId, ReportCompanionStateRequest report)
 	{
 		bool firstOfConnection;
-		CompanionDeviceReady? ready = null;
+		bool ready;
+		CompanionDevice device;
 		lock (_connectionGate)
 		{
 			firstOfConnection = _connections.TryAdd(connectionId, deviceId);
-			if (!_states.ContainsKey(deviceId))
-			{
-				ready = new CompanionDeviceReady(deviceId, ++_nextReadySequence);
-				_readySequences[deviceId] = ready.Sequence;
-			}
-
-			_states[deviceId] = Sanitize(report);
+			ready = !_states.TryGetValue(deviceId, out var previous);
+			device = new CompanionDevice(deviceId,
+				previous?.ReadySequence ?? ++_nextReadySequence,
+				Sanitize(report));
+			_states[deviceId] = device;
 		}
 
-		StateChanged?.Invoke(this, deviceId);
-		if (ready is not null)
+		Raise(DeviceChanged, deviceId, device);
+		if (ready)
 		{
-			DeviceReady?.Invoke(this, ready);
+			Raise(DeviceReady, deviceId, device);
 		}
 		if (firstOfConnection)
 		{
@@ -170,12 +200,11 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 				}
 
 				_states.TryRemove(deviceId, out _);
-				_readySequences.Remove(deviceId);
 			}
 
 			_creations.TryRemove(deviceId, out _);
-			_requests.FailDevice(deviceId, CompanionCommandFailure.NotConnected);
-			StateChanged?.Invoke(this, deviceId);
+			_requests.FailDevice(deviceId, CompanionDeviceFailure.NotConnected);
+			Raise(DeviceChanged, deviceId, null);
 		}
 		finally
 		{
@@ -186,17 +215,13 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	}
 
 	public bool TryGetState(Guid deviceId, out CompanionDeviceState state)
-		=> _states.TryGetValue(deviceId, out state!);
-
-	public IReadOnlyList<CompanionDeviceReady> ReadyDevices()
 	{
-		lock (_connectionGate)
-		{
-			return [.. _readySequences.Select(pair => new CompanionDeviceReady(pair.Key, pair.Value))];
-		}
+		var found = _states.TryGetValue(deviceId, out var device);
+		state = device?.State!;
+		return found;
 	}
 
-	public async Task<bool> WaitForStateAsync(Guid deviceId, CancellationToken cancellationToken)
+	public async Task<bool> WaitForDeviceAsync(Guid deviceId, CancellationToken cancellationToken = default)
 	{
 		if (_states.ContainsKey(deviceId))
 		{
@@ -204,9 +229,9 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		}
 
 		var signal = Channel.CreateUnbounded<bool>();
-		void OnStateChanged(object? sender, Guid changed)
+		void OnDeviceChanged(object? sender, CompanionDeviceEventArgs changed)
 		{
-			if (changed == deviceId)
+			if (changed.DeviceId == deviceId)
 			{
 				signal.Writer.TryWrite(true);
 			}
@@ -214,7 +239,7 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 
 		void OnConnectionClosed() => signal.Writer.TryWrite(true);
 
-		StateChanged += OnStateChanged;
+		DeviceChanged += OnDeviceChanged;
 		ConnectionClosed += OnConnectionClosed;
 		try
 		{
@@ -234,45 +259,82 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		}
 		finally
 		{
-			StateChanged -= OnStateChanged;
+			DeviceChanged -= OnDeviceChanged;
 			ConnectionClosed -= OnConnectionClosed;
 		}
 
 		return _states.ContainsKey(deviceId);
 	}
 
-	public IReadOnlyList<KeyValuePair<Guid, CompanionDeviceState>> ConnectedStates() => _states.ToArray();
+	public IReadOnlyList<KeyValuePair<Guid, CompanionDeviceState>> ConnectedStates()
+		=> [.. _states.Select(pair => KeyValuePair.Create(pair.Key, pair.Value.State))];
 
-	public async Task<bool> SendAsync(Guid deviceId, CompanionCommand command, CancellationToken cancellationToken)
+	public Task<bool> SendAsync(Guid deviceId,
+		CompanionDeviceCommand command,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(command);
+		return SendWireAsync(deviceId, ToWire(command), cancellationToken);
+	}
+
+	public async Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+		CompanionDeviceCommand command,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(command);
+		var result = await RequestWireAsync(deviceId,
+			ToWire(command),
+			CompanionRequestKind.Command,
+			cancellationToken);
+		return result.Failure is { } failure
+			? CompanionDeviceCommandResult.Failed(failure)
+			: result.IsUnconfirmed
+				? CompanionDeviceCommandResult.Unconfirmed
+				: CompanionDeviceCommandResult.Done;
+	}
+
+	public async Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+		CompanionScreenshotMode mode,
+		CancellationToken cancellationToken = default)
+	{
+		var result = await RequestWireAsync(deviceId,
+			new CompanionCommandEvent
+			{
+				Command = ScreenshotCommand,
+				ScreenshotMode = mode == CompanionScreenshotMode.FullScreen ? "full" : "deck"
+			},
+			CompanionRequestKind.Screenshot,
+			cancellationToken);
+		return result.Png is { } png
+			? CompanionScreenshotResult.Of(png)
+			: CompanionScreenshotResult.Failed(result.Failure ?? CompanionDeviceFailure.Failed);
+	}
+
+	private const string ScreenshotCommand = "screenshot";
+	private const string CancelRequestCommand = "cancelRequest";
+
+	private async Task<bool> SendWireAsync(Guid deviceId,
+		CompanionCommandEvent command,
+		CancellationToken cancellationToken)
 	{
 		if (!_states.ContainsKey(deviceId))
 		{
 			return false;
 		}
 
-		await _transport.SendToGroup(UiDeviceGroups.For(deviceId),
-			new CompanionCommandEvent
-			{
-				Command = command.Command,
-				BrightnessPercent = command.BrightnessPercent,
-				Orientation = command.Orientation,
-				RequestId = command.RequestId,
-				ScreenshotMode = command.ScreenshotMode
-			},
-			cancellationToken);
+		await _transport.SendToGroup(UiDeviceGroups.For(deviceId), command, cancellationToken);
 		return true;
 	}
 
-	public async Task<CompanionCommandResult> RequestAsync(Guid deviceId,
-		CompanionCommand command,
+	private async Task<CompanionCommandResult> RequestWireAsync(Guid deviceId,
+		CompanionCommandEvent command,
+		CompanionRequestKind kind,
 		CancellationToken cancellationToken)
 	{
 		var result = await _requests.RequestAsync(deviceId,
-			command.Command == CompanionCommand.Screenshot
-				? CompanionRequestKind.Screenshot
-				: CompanionRequestKind.Command,
-			_states.TryGetValue(deviceId, out var state) && state.AnswersCommands,
-			requestId => SendAsync(deviceId, command with { RequestId = requestId }, cancellationToken),
+			kind,
+			_states.TryGetValue(deviceId, out var device) && device.State.ConfirmsCommands,
+			requestId => SendWireAsync(deviceId, With(command, requestId), cancellationToken),
 			requestId => _ = CancelOnDeviceAsync(deviceId, requestId),
 			cancellationToken);
 		if (result.IsUnconfirmed)
@@ -285,12 +347,60 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 		return result;
 	}
 
+	private static CompanionCommandEvent With(CompanionCommandEvent command, string requestId)
+		=> new()
+		{
+			Command = command.Command,
+			BrightnessPercent = command.BrightnessPercent,
+			Orientation = command.Orientation,
+			RequestId = requestId,
+			ScreenshotMode = command.ScreenshotMode
+		};
+
+	private static CompanionCommandEvent ToWire(CompanionDeviceCommand command)
+		=> new()
+		{
+			Command = command.Kind switch
+			{
+				CompanionDeviceCommandKind.SetBrightness => "setBrightness",
+				CompanionDeviceCommandKind.SetOrientation => "setOrientation",
+				CompanionDeviceCommandKind.Vibrate => "vibrate",
+				CompanionDeviceCommandKind.ScreenOn => "screenOn",
+				CompanionDeviceCommandKind.ScreenOff => "screenOff",
+				CompanionDeviceCommandKind.Focus => "focus",
+				_ => throw new ArgumentOutOfRangeException(nameof(command), command.Kind, "Unknown command.")
+			},
+			BrightnessPercent = command.BrightnessPercent,
+			Orientation = command.Orientation
+		};
+
+	private void Raise(EventHandler<CompanionDeviceEventArgs>? handlers, Guid deviceId, CompanionDevice? device)
+	{
+		if (handlers is null)
+		{
+			return;
+		}
+
+		var args = new CompanionDeviceEventArgs(deviceId, device);
+		foreach (var handler in handlers.GetInvocationList().Cast<EventHandler<CompanionDeviceEventArgs>>())
+		{
+			try
+			{
+				handler(this, args);
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, "A Companion device event handler failed for device {DeviceId}", deviceId);
+			}
+		}
+	}
+
 	private async Task CancelOnDeviceAsync(Guid deviceId, string requestId)
 	{
 		try
 		{
-			await SendAsync(deviceId,
-				new CompanionCommand(CompanionCommand.CancelRequest, RequestId: requestId),
+			await SendWireAsync(deviceId,
+				new CompanionCommandEvent { Command = CancelRequestCommand, RequestId = requestId },
 				CancellationToken.None);
 		}
 		catch (Exception ex)
@@ -300,18 +410,6 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 				requestId,
 				deviceId);
 		}
-	}
-
-	public async Task<bool> ResumeAutoCreationAsync(CancellationToken cancellationToken)
-	{
-		var entries = await _coordinator().DescribeAsync(IntegrationId, cancellationToken);
-		if (entries.Any(entry => entry.Usable) || !_registry.ClearDisabledChoice(IntegrationId))
-		{
-			return false;
-		}
-
-		ScheduleCreationForConnectedDevices();
-		return true;
 	}
 
 	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs change)
@@ -355,14 +453,13 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 				}
 
 				wasConnected = _states.TryRemove(deviceId, out _);
-				_readySequences.Remove(deviceId);
 			}
 
 			_creations.TryRemove(deviceId, out _);
-			_requests.FailDevice(deviceId, CompanionCommandFailure.Removed);
+			_requests.FailDevice(deviceId, CompanionDeviceFailure.Removed);
 			if (wasConnected)
 			{
-				StateChanged?.Invoke(this, deviceId);
+				Raise(DeviceChanged, deviceId, null);
 			}
 
 			if (await FindEntryAsync(deviceId) is not null)
@@ -461,24 +558,28 @@ public sealed class CompanionDeviceRegistry : ICompanionGateway
 	private static CompanionDeviceState Sanitize(ReportCompanionStateRequest report)
 	{
 		var capabilities = (report.Capabilities ?? [])
-			.Where(CompanionCapabilities.All.Contains)
+			.Where(_knownCapabilities.Contains)
 			.ToHashSet(StringComparer.Ordinal);
-		return new CompanionDeviceState(Percent(report.BatteryLevelPercent),
-			report.Charging,
-			report.Orientation is "portrait" or "landscape" ? report.Orientation : null,
-			Percent(report.ScreenBrightnessPercent),
-			Text(report.Model),
-			Text(report.Platform),
-			Text(report.AppVersion))
+		return new CompanionDeviceState
 		{
+			BatteryLevelPercent = Percent(report.BatteryLevelPercent),
+			IsCharging = report.Charging,
+			Orientation = report.Orientation is CompanionOrientations.Portrait or CompanionOrientations.Landscape
+				? report.Orientation
+				: null,
+			ScreenBrightnessPercent = Percent(report.ScreenBrightnessPercent),
+			Model = Text(report.Model),
+			Platform = Text(report.Platform),
+			AppVersion = Text(report.AppVersion),
 			Capabilities = capabilities,
-			AnswersCommands = report.RequestableCapabilities is not null,
+			ConfirmsCommands = report.RequestableCapabilities is not null,
 			RequestableCapabilities = (report.RequestableCapabilities ?? [])
-				.Where(capability => CompanionCapabilities.Requestable.Contains(capability) &&
+				.Where(capability => _requestableCapabilities.Contains(capability) &&
 					!capabilities.Contains(capability))
 				.ToHashSet(StringComparer.Ordinal),
 			InFocus = report.InFocus,
-			NetworkType = report.NetworkType is "wifi" or "cellular" or "ethernet" or "vpn" or "none"
+			NetworkType = report.NetworkType is CompanionNetworkTypes.Wifi or CompanionNetworkTypes.Cellular
+				or CompanionNetworkTypes.Ethernet or CompanionNetworkTypes.Vpn or CompanionNetworkTypes.None
 				? report.NetworkType
 				: null,
 			NetworkMetered = report.NetworkMetered,

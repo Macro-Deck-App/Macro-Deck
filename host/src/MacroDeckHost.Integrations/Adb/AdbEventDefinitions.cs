@@ -76,13 +76,13 @@ internal static class AdbEventDefinitions
 	private static ActionParameter SerialPayload()
 		=> ActionParameter.DynamicChoice("serial",
 			label: AppStrings.Integrations.Adb.Params.SerialLabel(),
-			optionsSourceId: AdbOptionsSourceIds.Devices);
+			optionsSourceId: HostOptionsSources.AndroidDevices);
 
 	private static ActionParameter SerialFilter()
 		=> ActionParameter.DynamicChoice("serial",
 			label: AppStrings.Integrations.Adb.Params.DeviceLabel(),
 			description: AppStrings.Integrations.Adb.Events.SerialFilterDescription(),
-			optionsSourceId: AdbOptionsSourceIds.Devices,
+			optionsSourceId: HostOptionsSources.AndroidDevices,
 			placeholder: AppStrings.Integrations.Adb.Events.SerialFilterPlaceholder(),
 			required: false);
 

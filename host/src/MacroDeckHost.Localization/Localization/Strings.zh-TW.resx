@@ -13782,6 +13782,13 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>{name} 需要 ADB 才能與您的 Android 裝置搭配運作，但目前不允許外掛使用 ADB。要允許外掛使用 ADB 嗎？</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>有外掛想要使用您的 Companion 裝置</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} 想要使用透過 Macro Deck Companion 連線的手機和平板，但目前不允許外掛使用這些裝置。要允許外掛使用 Companion 裝置嗎？</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>已保留圖示包</value>
   </data>
@@ -14022,6 +14029,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>此外掛會使用 ADB 與您的 Android 裝置搭配運作。它可以在裝置上執行指令、複製檔案及安裝應用程式。</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>使用 Companion 裝置</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>此外掛會使用透過 Macro Deck Companion 連線的裝置。它可以讀取裝置回報的資訊（例如電量和網路）、傳送命令給裝置並擷取螢幕畫面。擷取整個螢幕仍需在裝置上核准。</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>此外掛的簽章已由 Macro Deck Creator Portal 檢查，但其清單未指定作者。</value>
@@ -15174,6 +15187,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>安裝應用程式需要 ADB。請先在 ADB 設定中將其開啟。</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>宣告 Companion 裝置存取權的外掛可以讀取 Companion 裝置回報的資訊、傳送命令給裝置並擷取螢幕畫面。擷取整個螢幕仍需在裝置上核准。</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>允許外掛使用 Companion 裝置</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK 已儲存。</value>
   </data>
@@ -15291,6 +15310,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>開啟 ADB 設定</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>外掛存取</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>儲存 APK</value>

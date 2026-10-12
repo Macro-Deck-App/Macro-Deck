@@ -53,4 +53,35 @@ public static class NativeKeys
 	/// <see cref="KeyCode.Y" /> here.
 	/// </summary>
 	public static KeyCode FromLinux(int evdevCode) => NativeKeyTables.FromLinux(evdevCode);
+
+	/// <summary>
+	/// Whether <paramref name="key" /> names a physical position rather than a character: the punctuation keys
+	/// from <see cref="KeyCode.Semicolon" /> to <see cref="KeyCode.Quote" /> and <see cref="KeyCode.IntlBackslash" />.
+	/// Such a key types a different character on each layout, so it is sent by its scan code or key code, not by
+	/// a virtual key.
+	/// </summary>
+	public static bool IsPositional(KeyCode key) => NativeKeyTables.IsPositional(key);
+
+	/// <summary>
+	/// The PC set-1 scan code of a letter, digit or punctuation key at its US position, as Windows
+	/// <c>SendInput</c> takes it with <c>KEYEVENTF_SCANCODE</c>; Linux evdev numbers the main key block the same
+	/// way. Returns <c>false</c> for any other key.
+	/// </summary>
+	public static bool TryGetWindowsScanCode(KeyCode key, out ushort scanCode)
+		=> NativeKeyTables.TryGetScanCode(key, out scanCode);
+
+	/// <summary>
+	/// The macOS key code (<c>kVK_*</c>) of a letter, digit or punctuation key at its US position, following
+	/// WebKit's naming for ISO keyboards (<see cref="KeyCode.IntlBackslash" /> is 10, <see cref="KeyCode.Backquote" />
+	/// is 50). Returns <c>false</c> for any other key.
+	/// </summary>
+	public static bool TryGetMacOSKeyCode(KeyCode key, out ushort keyCode)
+		=> NativeKeyTables.TryGetMacKeyCode(key, out keyCode);
+
+	/// <summary>
+	/// The letter, digit or punctuation key at the US position of a PC set-1 scan code, the inverse of
+	/// <see cref="TryGetWindowsScanCode" />. Returns <c>false</c> for a scan code outside that block.
+	/// </summary>
+	public static bool TryFromWindowsScanCode(ushort scanCode, out KeyCode key)
+		=> NativeKeyTables.TryFromScanCode(scanCode, out key);
 }

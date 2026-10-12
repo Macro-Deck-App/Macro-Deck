@@ -35,6 +35,24 @@ internal sealed class RemoteConfigFlowTests
 		});
 	}
 
+	[Test]
+	public async Task A_remote_completion_without_an_entry_stays_one_and_a_plain_completion_stores_an_entry()
+	{
+		var context = new EntryContext("Streaming PC");
+		var withoutEntry = await new RemoteConfigFlow("plugin.example", new RecordingInvoker { WithoutEntry = true })
+			.SubmitAsync("connection", new Dictionary<string, object?>(), context, CancellationToken.None);
+		var plain = await new RemoteConfigFlow("plugin.example", new RecordingInvoker())
+			.SubmitAsync("connection", new Dictionary<string, object?>(), context, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(withoutEntry.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
+			Assert.That(withoutEntry.StoresEntry, Is.False);
+			Assert.That(plain.StoresEntry, Is.True);
+			Assert.That(plain.EntryTitle, Is.EqualTo("Streaming PC"));
+		});
+	}
+
 	private sealed class EntryContext(string entryTitle) : IConfigFlowEntryContext
 	{
 		public string? EntryTitle { get; } = entryTitle;
@@ -52,6 +70,8 @@ internal sealed class RemoteConfigFlowTests
 	{
 		public List<CapabilityInvokeRequest> Requests { get; } = [];
 
+		public bool WithoutEntry { get; init; }
+
 		public Task<JsonElement?> InvokeAsync(string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
@@ -65,7 +85,10 @@ internal sealed class RemoteConfigFlowTests
 				NextStep = request.Operation == CapabilityOperations.ConfigFlow.FlowSubmit
 					? null
 					: new ConfigFlowStepDto { StepId = "connection", Fields = [] },
-				EntryTitle = request.Operation == CapabilityOperations.ConfigFlow.FlowSubmit ? "Streaming PC" : null
+				EntryTitle = request.Operation == CapabilityOperations.ConfigFlow.FlowSubmit && !WithoutEntry
+					? "Streaming PC"
+					: null,
+				WithoutEntry = WithoutEntry ? true : null
 			};
 			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(result,
 				PluginProtocolJson.Options));

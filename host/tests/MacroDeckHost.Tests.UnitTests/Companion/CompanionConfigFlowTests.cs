@@ -119,8 +119,6 @@ internal sealed class CompanionConfigFlowTests
 			null!,
 			null!,
 			null!,
-			harness.DeviceRegistry,
-			null!,
 			harness.RefreshSignal,
 			new FakeIntegrationHostIssueStore(),
 			TestLayoutProviders.Host(),
@@ -132,7 +130,8 @@ internal sealed class CompanionConfigFlowTests
 			TimeProvider.System,
 			CompanionHarness.Logger,
 			new MessageBroker(CompanionHarness.Logger),
-			TestColors.Watches);
+			TestColors.Watches,
+			companionDevices: harness.DeviceRegistry);
 		var startup = new IntegrationStartupBackgroundService(new LifetimeStub(),
 			harness.Registry,
 			harness.ScopeFactory,

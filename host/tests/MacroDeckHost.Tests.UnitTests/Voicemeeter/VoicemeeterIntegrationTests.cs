@@ -445,10 +445,9 @@ internal sealed class VoicemeeterIntegrationTests
 	public async Task Connecting_asks_for_an_eager_refresh()
 	{
 		var signal = new VariableRefreshSignal();
-		_integration.UseVariableRefreshSignal(signal);
 		_remote.Run(VoicemeeterEdition.Banana);
 
-		await Connected();
+		await Connected(signal);
 
 		Assert.That(signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId), Is.True);
 	}
@@ -457,9 +456,8 @@ internal sealed class VoicemeeterIntegrationTests
 	public async Task A_dirty_parameter_asks_for_an_eager_refresh()
 	{
 		var signal = new VariableRefreshSignal();
-		_integration.UseVariableRefreshSignal(signal);
 		_remote.Run(VoicemeeterEdition.Banana);
-		await Connected();
+		await Connected(signal);
 		signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId);
 
 		_remote.UserSets("Strip[0].Gain", -4.3f);
@@ -474,9 +472,8 @@ internal sealed class VoicemeeterIntegrationTests
 	public async Task A_poll_that_finds_nothing_dirty_asks_for_nothing()
 	{
 		var signal = new VariableRefreshSignal();
-		_integration.UseVariableRefreshSignal(signal);
 		_remote.Run(VoicemeeterEdition.Banana);
-		await Connected();
+		await Connected(signal);
 		signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId);
 
 		_integration.Connection!.Poll();
@@ -484,15 +481,17 @@ internal sealed class VoicemeeterIntegrationTests
 		Assert.That(signal.DrainEagerRefreshRequested(VoicemeeterIntegration.IntegrationId), Is.False);
 	}
 
-	private async Task Connected()
+	private async Task Connected(IVariableRefreshSignal? signal = null)
 	{
-		await _integration.InitializeAsync(new FakeContext());
+		await _integration.InitializeAsync(new FakeContext(signal));
 		_integration.Connection!.Poll();
 	}
 
-	private sealed class FakeContext : IIntegrationContext
+	private sealed class FakeContext(IVariableRefreshSignal? signal = null) : IIntegrationContext
 	{
-		public IVariableApi Variables { get; } = new RecordingVariableApi();
+		public IVariableApi Variables { get; } = new SignalForwardingVariableApi(new RecordingVariableApi(),
+			VoicemeeterIntegration.IntegrationId,
+			signal);
 
 		public IUserVariableApi UserVariables => null!;
 

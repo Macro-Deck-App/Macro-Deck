@@ -6,6 +6,7 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop;
 
@@ -31,7 +32,10 @@ public sealed class StreamlabsDesktopConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

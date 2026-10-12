@@ -13,6 +13,7 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord;
 
@@ -216,6 +217,7 @@ public sealed class DiscordIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		_events = new DiscordEventEmitter(context.Events);
 		await ConnectFromConfigAsync(context).ConfigureAwait(false);

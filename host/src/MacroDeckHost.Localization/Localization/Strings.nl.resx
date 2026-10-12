@@ -13782,6 +13782,13 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>{name} heeft ADB nodig om met je Android-apparaten te werken, maar plug-ins mogen ADB momenteel niet gebruiken. Plug-ins toestaan ADB te gebruiken?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Een plug-in wil je Companion-apparaten gebruiken</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} wil werken met de telefoons en tablets die via Macro Deck Companion zijn verbonden, maar plug-ins mogen ze momenteel niet gebruiken. Plug-ins toestaan Companion-apparaten te gebruiken?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Pictogrammenpakket behouden</value>
   </data>
@@ -14022,6 +14029,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Deze plug-in gebruikt ADB om met je Android-apparaten te werken. Hij kan er opdrachten op uitvoeren, bestanden kopiëren en apps installeren.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Gebruikt Companion-apparaten</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Deze plug-in gebruikt de apparaten die via Macro Deck Companion zijn verbonden. Hij kan lezen wat ze melden, zoals batterij en netwerk, ze opdrachten sturen en schermafbeeldingen maken. Een schermafbeelding van het hele scherm moet nog steeds op het apparaat worden goedgekeurd.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>De handtekening van deze plug-in is gecontroleerd door de Macro Deck Creator Portal, maar het manifest noemt geen auteur.</value>
@@ -15174,6 +15187,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Voor het installeren van de app is ADB nodig. Schakel het eerst in bij de ADB-instellingen.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Plug-ins die toegang tot Companion-apparaten aangeven, kunnen lezen wat je Companion-apparaten melden, ze opdrachten sturen en schermafbeeldingen maken. Een schermafbeelding van het hele scherm moet nog steeds op het apparaat worden goedgekeurd.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Plug-ins toestaan Companion-apparaten te gebruiken</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>Het APK-bestand is opgeslagen.</value>
   </data>
@@ -15291,6 +15310,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>ADB-instellingen openen</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Toegang voor plug-ins</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>APK opslaan</value>

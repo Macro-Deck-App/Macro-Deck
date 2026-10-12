@@ -1,58 +1,15 @@
 using System.Collections.Concurrent;
 using MacroDeck.Sdk.ConfigFlow;
+using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Application.Integrations.ConfigFlow;
 
-internal interface IConfigEntryBinding
+internal sealed class LifecycleConfigEntryBinding
 {
-	Task<IntegrationConfigMutationPreparationResult> PrepareAsync(IntegrationConfigMutationPreparation preparation,
-		CancellationToken cancellationToken);
+	internal const int MaximumAttempts = 32;
 
-	Task<IntegrationConfigEntryStatus> GetStatusAsync(ConfigEntryRecord entry, CancellationToken cancellationToken);
-
-	Task<bool> IsUsableAsync(ConfigEntryRecord entry, CancellationToken cancellationToken);
-
-	Task<bool> ReloadAsync(CancellationToken cancellationToken);
-
-	Task SynchronizeAsync(IReadOnlyList<ConfigEntryRecord> entries, CancellationToken cancellationToken);
-
-	Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken);
-}
-
-internal sealed class AdapterConfigEntryBinding(IIntegrationConfigMutationAdapter adapter) : IConfigEntryBinding
-{
-	public Task<IntegrationConfigMutationPreparationResult> PrepareAsync(
-		IntegrationConfigMutationPreparation preparation,
-		CancellationToken cancellationToken)
-		=> Task.FromResult(adapter.Prepare(preparation));
-
-	public Task<IntegrationConfigEntryStatus> GetStatusAsync(ConfigEntryRecord entry,
-		CancellationToken cancellationToken)
-		=> Task.FromResult(adapter.GetStatus(entry));
-
-	public Task<bool> IsUsableAsync(ConfigEntryRecord entry, CancellationToken cancellationToken)
-		=> Task.FromResult(adapter.IsUsable(entry));
-
-	public async Task<bool> ReloadAsync(CancellationToken cancellationToken)
-	{
-		await adapter.ReloadAsync(cancellationToken).ConfigureAwait(false);
-		return true;
-	}
-
-	public Task SynchronizeAsync(IReadOnlyList<ConfigEntryRecord> entries, CancellationToken cancellationToken)
-		=> adapter.SynchronizeVariablesAsync(entries, cancellationToken);
-
-	public Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken)
-	{
-		adapter.ReleasePreparation(entryId);
-		return Task.CompletedTask;
-	}
-}
-
-internal sealed class LifecycleConfigEntryBinding : IConfigEntryBinding
-{
 	private readonly string _integrationId;
 	private readonly IConfigEntryLifecycle _lifecycle;
 	private readonly VariableRegistry? _variables;
@@ -73,32 +30,45 @@ internal sealed class LifecycleConfigEntryBinding : IConfigEntryBinding
 		IntegrationConfigMutationPreparation preparation,
 		CancellationToken cancellationToken)
 	{
-		var result = await _lifecycle.PrepareEntryAsync(new ConfigEntryPreparation
-				{
-					EntryId = preparation.EntryId,
-					Title = preparation.Title,
-					Values = preparation.Values,
-					Existing = preparation.Existing is null ? null : ToStored(preparation.Existing),
-					Siblings = [.. preparation.Siblings.Select(ToStored)],
-					TitleChanged = preparation.TitleChanged
-				},
-				cancellationToken)
-			.ConfigureAwait(false);
-
-		var values = result.Values ?? preparation.Values;
-		if (!result.Success)
+		var rejected = new List<string>();
+		for (var attempt = 0; attempt < MaximumAttempts; attempt++)
 		{
-			return new IntegrationConfigMutationPreparationResult(false, values, result.Error);
+			var result = await _lifecycle.PrepareEntryAsync(new ConfigEntryPreparation
+					{
+						EntryId = preparation.EntryId,
+						Title = preparation.Title,
+						Values = preparation.Values,
+						Existing = preparation.Existing is null ? null : ToStored(preparation.Existing),
+						Siblings = [.. preparation.Siblings.Select(ToStored)],
+						TitleChanged = preparation.TitleChanged,
+						RejectedVariableNames = [.. rejected]
+					},
+					cancellationToken)
+				.ConfigureAwait(false);
+
+			var values = result.Values ?? preparation.Values;
+			if (!result.Success)
+			{
+				return new IntegrationConfigMutationPreparationResult(false, values, result.Error);
+			}
+
+			if (TryReserve(preparation.EntryId, result.ReservedVariables, out var conflicts))
+			{
+				return new IntegrationConfigMutationPreparationResult(true, values);
+			}
+
+			var added = conflicts.Where(name => !rejected.Contains(name, StringComparer.Ordinal)).ToList();
+			if (!result.RetryOnConflict || added.Count == 0)
+			{
+				break;
+			}
+
+			rejected.AddRange(added);
 		}
 
-		if (!TryReserve(preparation.EntryId, result.ReservedVariables))
-		{
-			return new IntegrationConfigMutationPreparationResult(false,
-				values,
-				AppStrings.Errors.Config.VariableNamesUnavailable());
-		}
-
-		return new IntegrationConfigMutationPreparationResult(true, values);
+		return new IntegrationConfigMutationPreparationResult(false,
+			preparation.Values,
+			AppStrings.Errors.Config.VariableNamesUnavailable());
 	}
 
 	public async Task<IntegrationConfigEntryStatus> GetStatusAsync(ConfigEntryRecord entry,
@@ -118,8 +88,12 @@ internal sealed class LifecycleConfigEntryBinding : IConfigEntryBinding
 
 	public Task<bool> ReloadAsync(CancellationToken cancellationToken) => _lifecycle.ReloadEntriesAsync(cancellationToken);
 
-	public Task SynchronizeAsync(IReadOnlyList<ConfigEntryRecord> entries, CancellationToken cancellationToken)
-		=> _lifecycle.SynchronizeEntriesAsync([.. entries.Select(ToStored)], cancellationToken);
+	public Task SynchronizeAsync(IReadOnlyList<ConfigEntryRecord> entries,
+		IVariableApi? variables,
+		CancellationToken cancellationToken)
+		=> variables is null
+			? _lifecycle.SynchronizeEntriesAsync([.. entries.Select(ToStored)], cancellationToken)
+			: _lifecycle.SynchronizeEntriesAsync([.. entries.Select(ToStored)], variables, cancellationToken);
 
 	public async Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken)
 	{
@@ -127,9 +101,12 @@ internal sealed class LifecycleConfigEntryBinding : IConfigEntryBinding
 		await _lifecycle.ReleasePreparationAsync(entryId, cancellationToken).ConfigureAwait(false);
 	}
 
-	private bool TryReserve(Guid entryId, IReadOnlyList<MacroDeck.Sdk.Variables.VariableDefinition> variables)
+	private bool TryReserve(Guid entryId,
+		IReadOnlyList<VariableDefinition> variables,
+		out IReadOnlyList<string> conflicts)
 	{
 		Release(entryId);
+		conflicts = [];
 
 		var reservations = variables
 			.Where(variable => !string.IsNullOrEmpty(variable.Name) && !string.IsNullOrEmpty(variable.ResolvedId))
@@ -144,7 +121,7 @@ internal sealed class LifecycleConfigEntryBinding : IConfigEntryBinding
 		}
 
 		var token = Guid.NewGuid();
-		if (!_variables.TryReserveGlobalIntegrationVariables(token, _integrationId, reservations))
+		if (!_variables.TryReserveGlobalIntegrationVariables(token, _integrationId, reservations, out conflicts))
 		{
 			return false;
 		}

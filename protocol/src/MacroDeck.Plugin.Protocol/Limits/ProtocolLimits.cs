@@ -178,6 +178,12 @@ public static class ProtocolLimits
 	/// callbacks; this bounds the size of one.</summary>
 	public const int MaxVariableValuesPerBatch = 128;
 
+	/// <summary>Most definition ids one <c>variables/refresh</c> may name.</summary>
+	public const int MaxVariableRefreshDefinitionIds = 1024;
+
+	/// <summary>Most bindings one <c>variables/bind</c> may record.</summary>
+	public const int MaxVariableBindingsPerCall = 512;
+
 	/// <summary>Bounds the serialized result of a <c>calendar</c> <c>events</c> or <c>event</c> reply, below
 	/// <see cref="MaxMessageBytes" /> so the reply plus its envelope fits one frame. An <c>events</c> reply
 	/// that would exceed it drops its latest events and says so in <c>Truncated</c>.</summary>

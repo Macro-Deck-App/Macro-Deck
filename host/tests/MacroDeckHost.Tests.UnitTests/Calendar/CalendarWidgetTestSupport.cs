@@ -8,6 +8,7 @@ using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Calendar;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Domain.Entities;

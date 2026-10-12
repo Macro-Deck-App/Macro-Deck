@@ -190,7 +190,7 @@ internal sealed class DelegateConfigFlowTests
 	[Test]
 	public async Task The_connection_step_offers_importing_shared_variables_switched_off()
 	{
-		var start = await _flow.StartAsync(null!, CancellationToken.None);
+		var start = await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		var toggle = start.NextStep!.Fields.Single(f => f.Name == DelegateConfigKeys.ImportSharedVariables);
 

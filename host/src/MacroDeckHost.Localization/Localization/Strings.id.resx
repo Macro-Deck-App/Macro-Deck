@@ -13782,6 +13782,13 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>{name} memerlukan ADB untuk bekerja dengan perangkat Android Anda, tetapi plugin saat ini tidak diizinkan menggunakan ADB. Izinkan plugin menggunakan ADB?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Sebuah plugin ingin menggunakan perangkat Companion Anda</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} ingin bekerja dengan ponsel dan tablet yang terhubung melalui Macro Deck Companion, tetapi plugin saat ini tidak diizinkan menggunakannya. Izinkan plugin menggunakan perangkat Companion?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Paket ikon dipertahankan</value>
   </data>
@@ -14022,6 +14029,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Plugin ini menggunakan ADB untuk bekerja dengan perangkat Android Anda. Plugin dapat menjalankan perintah di perangkat tersebut, menyalin file, dan memasang aplikasi.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Menggunakan perangkat Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Plugin ini menggunakan perangkat yang terhubung melalui Macro Deck Companion. Plugin ini dapat membaca informasi yang dilaporkan perangkat, seperti baterai dan jaringan, mengirim perintah, dan mengambil tangkapan layar. Tangkapan layar penuh tetap harus disetujui di perangkat.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Tanda tangan plugin ini telah diperiksa oleh Macro Deck Creator Portal, tetapi manifesnya tidak mencantumkan penulis.</value>
@@ -15174,6 +15187,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Memasang aplikasi memerlukan ADB. Aktifkan dulu di pengaturan ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Plugin yang mendeklarasikan akses perangkat Companion dapat membaca informasi yang dilaporkan perangkat Companion, mengirim perintah, dan mengambil tangkapan layar. Tangkapan layar penuh tetap harus disetujui di perangkat.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Izinkan plugin menggunakan perangkat Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>APK disimpan.</value>
   </data>
@@ -15291,6 +15310,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Buka pengaturan ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Akses plugin</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Simpan APK</value>

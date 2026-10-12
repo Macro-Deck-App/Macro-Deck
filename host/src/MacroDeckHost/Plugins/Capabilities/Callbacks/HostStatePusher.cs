@@ -6,9 +6,12 @@ using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Triggers;
 using MacroDeck.Sdk.Batteries;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Widgets;
@@ -27,7 +30,12 @@ public sealed class HostStatePusher(
 	IAdbManager adbManager,
 	IPluginAdbAccessPolicy adbAccessPolicy,
 	ILogger logger,
-	IBatteryRegistry? batteries = null) :
+	IBatteryRegistry? batteries = null,
+	HttpUserAgentState? userAgent = null,
+	ICompanionDeviceApi? companionDevices = null,
+	IPluginCompanionDeviceAccessPolicy? companionAccess = null,
+	IMusicPlayerRegistry? musicPlayers = null,
+	IMusicPlayerStateNotifier? musicPlayerNotifier = null) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
 	INotificationHandler<FolderDeletedNotification>,
@@ -58,6 +66,13 @@ public sealed class HostStatePusher(
 	private long _adbRevision;
 	private readonly SemaphoreSlim _batteriesPush = new(1, 1);
 	private long _batteriesRevision;
+	private readonly SemaphoreSlim _companionPush = new(1, 1);
+	private long _companionRevision;
+	private readonly Dictionary<string, PluginCompanionDeviceAccess> _companionAccessPushed = new(StringComparer.Ordinal);
+	private readonly SemaphoreSlim _musicPlayersPush = new(1, 1);
+	private readonly Lock _musicPlayersGate = new();
+	private long _musicPlayersRevision;
+	private IReadOnlyList<MusicPlayerInstanceStateDto>? _musicPlayersBroadcast;
 
 	public void Dispose()
 	{
@@ -65,9 +80,34 @@ public sealed class HostStatePusher(
 		_adbPush.Dispose();
 		_catalogWidgetsPush.Dispose();
 		_batteriesPush.Dispose();
-		if (batteries is not null && Volatile.Read(ref _subscribedToBindings) == 1)
+		_companionPush.Dispose();
+		_musicPlayersPush.Dispose();
+		if (Volatile.Read(ref _subscribedToBindings) == 1)
 		{
-			batteries.Changed -= OnBatteriesChanged;
+			if (musicPlayerNotifier is not null)
+			{
+				musicPlayerNotifier.InstancesChanged -= OnMusicPlayersChanged;
+			}
+
+			if (companionDevices is not null)
+			{
+				companionDevices.DeviceChanged -= OnCompanionDeviceChanged;
+			}
+
+			if (companionAccess is not null)
+			{
+				companionAccess.Changed -= OnCompanionAccessChanged;
+			}
+
+			if (batteries is not null)
+			{
+				batteries.Changed -= OnBatteriesChanged;
+			}
+
+			if (userAgent is not null)
+			{
+				userAgent.Changed -= OnUserAgentChanged;
+			}
 		}
 	}
 
@@ -83,6 +123,26 @@ public sealed class HostStatePusher(
 			{
 				batteries.Changed += OnBatteriesChanged;
 			}
+
+			if (userAgent is not null)
+			{
+				userAgent.Changed += OnUserAgentChanged;
+			}
+
+			if (companionDevices is not null)
+			{
+				companionDevices.DeviceChanged += OnCompanionDeviceChanged;
+			}
+
+			if (companionAccess is not null)
+			{
+				companionAccess.Changed += OnCompanionAccessChanged;
+			}
+
+			if (musicPlayerNotifier is not null)
+			{
+				musicPlayerNotifier.InstancesChanged += OnMusicPlayersChanged;
+			}
 		}
 
 		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
@@ -90,7 +150,10 @@ public sealed class HostStatePusher(
 			PushWidgetsAsync(pluginId, cancellationToken),
 			PushEventBindingsAsync(pluginId, cancellationToken),
 			PushAdbAsync(pluginId, cancellationToken),
-			PushBatteriesAsync(pluginId, [], cancellationToken));
+			PushBatteriesAsync(pluginId, [], cancellationToken),
+			PushHttpAsync(pluginId, cancellationToken),
+			PushCompanionDevicesAsync(pluginId, always: true, cancellationToken),
+			PushMusicPlayersAsync(pluginId, cancellationToken));
 	}
 
 	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
@@ -316,7 +379,12 @@ public sealed class HostStatePusher(
 	}
 
 	private AdbStateDto BuildAdbState(PluginAdbAccess access)
-		=> new()
+	{
+		var devices = adbManager.Devices;
+		var attached = access == PluginAdbAccess.Available
+			? devices.Where(device => device.State != AdbDeviceState.Disconnected).ToList()
+			: [];
+		return new AdbStateDto
 		{
 			Access = access switch
 			{
@@ -324,11 +392,30 @@ public sealed class HostStatePusher(
 				PluginAdbAccess.NotAllowed => AdbAccessStates.NotAllowed,
 				_ => AdbAccessStates.NotEnabled
 			},
-			Devices = access == PluginAdbAccess.Available
-				? [.. adbManager.Devices.Where(device => device.State != AdbDeviceState.Disconnected).Select(ToDto)]
-				: [],
+			Devices = [.. attached.Select(ToDto)],
+			DefaultDeviceSerial = access == PluginAdbAccess.Available
+				? DefaultDeviceSerial(adbManager.Status.DefaultDeviceSerial, devices, attached)
+				: null,
+			AdbUnavailable = access == PluginAdbAccess.Available && adbManager.Status.ResolvedExecutablePath is null
+				? true
+				: null,
 			Revision = ++_adbRevision
 		};
+	}
+
+	private static string? DefaultDeviceSerial(string? configured,
+		IReadOnlyList<AdbDevice> devices,
+		List<AdbDevice> attached)
+	{
+		if (!string.IsNullOrWhiteSpace(configured))
+		{
+			return devices.Any(device => string.Equals(device.Serial, configured, StringComparison.Ordinal))
+				? configured
+				: null;
+		}
+
+		return attached.Count == 1 ? attached[0].Serial : null;
+	}
 
 	private static AdbDeviceStateDto ToDto(AdbDevice device)
 		=> new()
@@ -344,7 +431,16 @@ public sealed class HostStatePusher(
 			Model = device.Model,
 			Manufacturer = device.Manufacturer,
 			Product = device.Product,
-			StableId = device.StableId
+			StableId = device.StableId,
+			LacksUsbPermission = device.State == AdbDeviceState.NoPermissions ? true : null,
+			Mode = device.State switch
+			{
+				AdbDeviceState.Bootloader => AdbDeviceModes.Bootloader,
+				AdbDeviceState.Recovery => AdbDeviceModes.Recovery,
+				AdbDeviceState.Sideload => AdbDeviceModes.Sideload,
+				AdbDeviceState.Unknown => AdbDeviceModes.Unknown,
+				_ => null
+			}
 		};
 
 	private void OnBatteriesChanged(object? sender, BatteryDevicesChangedEventArgs e)
@@ -408,6 +504,177 @@ public sealed class HostStatePusher(
 		finally
 		{
 			_batteriesPush.Release();
+		}
+	}
+
+	private void OnCompanionDeviceChanged(object? sender, CompanionDeviceEventArgs e)
+		=> _ = BroadcastCompanionDevicesAsync(accessChanged: false);
+
+	private void OnCompanionAccessChanged() => _ = BroadcastCompanionDevicesAsync(accessChanged: true);
+
+	private async Task BroadcastCompanionDevicesAsync(bool accessChanged)
+	{
+		try
+		{
+			var pluginIds = sessionRegistry.Snapshot()
+				.Where(session => session.State == PluginSessionState.Connected)
+				.Select(session => session.PluginId)
+				.Distinct(StringComparer.Ordinal)
+				.ToList();
+
+			foreach (var pluginId in pluginIds)
+			{
+				await PushCompanionDevicesAsync(pluginId, accessChanged, CancellationToken.None);
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push Companion devices to plugins");
+		}
+	}
+
+	// Serialized like the adb push. A plugin that may not use Companion devices learns that once, not on
+	// every state report of every device.
+	private async Task<bool> PushCompanionDevicesAsync(string pluginId, bool always, CancellationToken cancellationToken)
+	{
+		if (companionDevices is null || companionAccess is null)
+		{
+			return false;
+		}
+
+		await _companionPush.WaitAsync(cancellationToken);
+		try
+		{
+			var access = await companionAccess.EvaluateAsync(pluginId, cancellationToken);
+			if (!always &&
+				access == PluginCompanionDeviceAccess.NotAllowed &&
+				_companionAccessPushed.TryGetValue(pluginId, out var pushed) &&
+				pushed == PluginCompanionDeviceAccess.NotAllowed)
+			{
+				return false;
+			}
+
+			_companionAccessPushed[pluginId] = access;
+			var state = new CompanionDevicesStateDto
+			{
+				Access = access == PluginCompanionDeviceAccess.Available
+					? CompanionDeviceAccessStates.Available
+					: CompanionDeviceAccessStates.NotAllowed,
+				Devices = access == PluginCompanionDeviceAccess.Available
+					? [.. companionDevices.Devices.Select(CompanionDeviceWire.ToDto)]
+					: [],
+				Revision = ++_companionRevision
+			};
+
+			return await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.CompanionDevices, state),
+				cancellationToken);
+		}
+		finally
+		{
+			_companionPush.Release();
+		}
+	}
+
+	private void OnMusicPlayersChanged(object? sender, EventArgs e) => _ = BroadcastMusicPlayersAsync();
+
+	// Every plugin reads every provider's players, as with artwork, so there is no per-plugin filter. The
+	// notifier also fires when only widget options changed, which this push does not carry.
+	private async Task BroadcastMusicPlayersAsync()
+	{
+		try
+		{
+			if (musicPlayers is null)
+			{
+				return;
+			}
+
+			var instances = MusicPlayerInstances();
+			lock (_musicPlayersGate)
+			{
+				if (_musicPlayersBroadcast is { } previous && previous.SequenceEqual(instances))
+				{
+					return;
+				}
+
+				_musicPlayersBroadcast = instances;
+			}
+
+			var pluginIds = sessionRegistry.Snapshot()
+				.Where(session => session.State == PluginSessionState.Connected)
+				.Select(session => session.PluginId)
+				.Distinct(StringComparer.Ordinal)
+				.ToList();
+
+			foreach (var pluginId in pluginIds)
+			{
+				await PushMusicPlayersAsync(pluginId, CancellationToken.None);
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push music players to plugins");
+		}
+	}
+
+	// Serialized like the adb push, so a push built from an older list never carries the higher revision.
+	private async Task<bool> PushMusicPlayersAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		if (musicPlayers is null)
+		{
+			return false;
+		}
+
+		await _musicPlayersPush.WaitAsync(cancellationToken);
+		try
+		{
+			IReadOnlyList<MusicPlayerInstanceStateDto> instances;
+			try
+			{
+				instances = MusicPlayerInstances();
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				logger.ForContext<HostStatePusher>()
+					.Error(exception, "Failed to list music players for plugin {PluginId}", pluginId);
+				return false;
+			}
+
+			var state = new MusicPlayersStateDto { Instances = instances, Revision = ++_musicPlayersRevision };
+			return await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.MusicPlayers, state),
+				cancellationToken);
+		}
+		finally
+		{
+			_musicPlayersPush.Release();
+		}
+	}
+
+	private IReadOnlyList<MusicPlayerInstanceStateDto> MusicPlayerInstances()
+		=> musicPlayers is null
+			? []
+			: [.. MusicPlayerInstanceSnapshots.From(musicPlayers.GetInstances()).Select(MusicPlayerWire.ToDto)];
+
+	private Task<bool> PushHttpAsync(string pluginId, CancellationToken cancellationToken)
+		=> userAgent is null
+			? Task.FromResult(false)
+			: sessionRegistry.SendToPlugin(pluginId, HttpEnvelope(), cancellationToken);
+
+	private ProtocolEnvelope HttpEnvelope()
+		=> BuildEnvelope(HostApis.Http, new HttpStateDto { UserAgent = userAgent?.Current ?? string.Empty });
+
+	private void OnUserAgentChanged() => _ = PushUserAgentChangeAsync();
+
+	private async Task PushUserAgentChangeAsync()
+	{
+		try
+		{
+			await BroadcastAsync(HttpEnvelope(), CancellationToken.None);
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push the HTTP user agent to plugins");
 		}
 	}
 

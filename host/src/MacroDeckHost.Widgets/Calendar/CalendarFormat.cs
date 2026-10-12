@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Calendar;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Localization;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Calendar;

@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Decks;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Deck;
@@ -12,7 +11,7 @@ internal static class DeckDeviceTarget
 	public static ActionParameter Parameter() => ActionParameter.DynamicChoice(ParameterName,
 		label: AppStrings.Integrations.Deck.Actions.DeviceLabel(),
 		description: AppStrings.Integrations.Deck.Actions.DeviceDescription(),
-		optionsSourceId: DeckOptionsSourceIds.Devices,
+		optionsSourceId: HostOptionsSources.Devices,
 		placeholder: AppStrings.Integrations.Deck.Actions.DevicePlaceholder());
 
 	// A chosen device wins over the press origin, and an offline one fails instead of falling back to everyone.

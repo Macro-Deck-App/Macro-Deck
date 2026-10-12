@@ -207,7 +207,8 @@ UiResource? cover = await context.UiResources.RegisterMusicPlayerArtworkAsync(
 	cancellationToken);
 ```
 
-- **Where the two ids come from.** Nothing in the SDK lists other integrations' players. Both ids appear in
+- **Where the two ids come from.** The instance id is the `Id` of a player in
+  [`MusicPlayers.Instances`](#reading-every-providers-players). Both ids also appear in
   the URL that a player's `*-album-art-url` variable holds, for example
   `/api/music-player/artwork/c0ffee?instanceId=net.example.jukebox%3A%3Adefault`: the last path segment is
   the `artworkId` and the `instanceId` query value is the qualified instance id, both URL-encoded, so decode
@@ -232,8 +233,8 @@ UiResource? cover = await context.UiResources.RegisterMusicPlayerArtworkAsync(
   four run at once; `Unsupported` on a Macro Deck that predates it; or `Failed`. `Failed` covers a player that does
   not answer within 20 seconds, where retrying can succeed, and artwork larger than `maxUiResourceBytes` or
   of a media type Macro Deck does not accept, where it cannot.
-- Any plugin can ask for the artwork of any player, the same images the deck shows to every client. Listing
-  players is not part of this call.
+- Any plugin can ask for the artwork of any player, the same images the deck shows to every client. To list
+  the players, read [`MusicPlayers`](#reading-every-providers-players).
 
 In tests, `FakeUiResourceRegistry.AddMusicPlayerArtwork(instanceId, artworkId, bytes, mediaType)` seeds what
 the call finds, and `MacroDeckTestHost` answers it over the wire as a Macro Deck without other players.
@@ -452,6 +453,52 @@ public ValueTask<VariableWriteResult> SetValueAsync(string localId, object? valu
 	};
 ```
 
+### Reading every provider's players
+
+`IIntegrationContext.MusicPlayers` lists the players of every enabled provider, other plugins' and Macro
+Deck's own included, and tells you the colour of each one's cover:
+
+| `IMusicPlayerApi` member | What it does |
+| --- | --- |
+| `Instances` | Every player as `MusicPlayerInstanceSnapshot`: `Id` (`providerId::instanceId`), `ProviderId`, `ProviderName` and `DisplayName`. Empty until Macro Deck has sent the first list. |
+| `InstancesChanged` | Raised after `Instances` changed. |
+| `GetAlbumColorAsync(instanceId)` | The average colour of the player's cover as lowercase `#rrggbb`, the value of its `music_player_<name>_album_color` variable. |
+
+```csharp
+public async Task InitializeAsync(IIntegrationContext context)
+{
+	foreach (var player in context.MusicPlayers.Instances)
+	{
+		var color = await context.MusicPlayers.GetAlbumColorAsync(player.Id);
+		_logger.Information("{Player} shows {Color}", player.DisplayName, color ?? "no cover");
+	}
+
+	context.MusicPlayers.InstancesChanged += (_, _) => RefreshPicker();
+}
+```
+
+- **No permission is needed.** Any plugin may read any provider's players, just as any plugin may already
+  register any player's cover with `RegisterMusicPlayerArtworkAsync`. The list holds what the deck shows every
+  client: ids, provider names and display names, never playback state or account details.
+- **The colour** is derived from the cover Macro Deck already holds and cached per cover, so asking again for
+  the same cover is cheap. While a player shows no cover, is not connected, or its cover cannot be read, you
+  get the last colour derived for that player. `null` when there is none, when Macro Deck knows no such
+  player, and when it could not answer, including a Macro Deck that predates the call. The first call for a
+  new cover may fetch it from its provider, so it can take a few seconds; in a plugin it counts towards the
+  four artwork lookups that may run at once and is refused as `RateLimited` beyond that, which the SDK
+  reports as `null`.
+- **Handlers run on a background thread.** One that throws is logged and does not affect the others.
+  Handlers subscribed through `IIntegrationContext.MusicPlayers` are released when Macro Deck shuts your
+  integration down or initializes it again. In a plugin, `IMusicPlayerApi` can also be taken from dependency
+  injection; handlers subscribed there are yours to remove.
+- **Older Macro Deck and older SDK.** A context from a Macro Deck without the list, and any
+  `IIntegrationContext` implementation compiled before it existed, reports no players, never raises the event
+  and answers `null` for every colour. A plugin built against an older SDK never asks and ignores the push.
+
+In tests, `FakeIntegrationContext.MusicPlayers` is a `FakeMusicPlayerApi`: `Set(players)` replaces the list and
+raises `InstancesChanged`, and `SetAlbumColor(instanceId, color)` sets what `GetAlbumColorAsync` answers.
+`PluginTestHarness` also registers it as the plugin's `IMusicPlayerApi`.
+
 `MusicPlayerVariableWrites` gives a bound Slider the same write behaviour as the built-in players:
 volume streams while the user drags, position commits on release, values are clamped, and a missing
 player answers `Unavailable`. See [Writable variables](/features/variables/#writable-variables).
@@ -470,7 +517,10 @@ player answers `Unavailable`. See [Writable variables](/features/variables/#writ
 
 ## Over the plugin protocol
 
-Music players are fully supported out of process (capability kind `music-player`). The instance list is
+Music players are fully supported out of process (capability kind `music-player`). Reading every
+provider's players is the separate `music-players` host api: the list arrives as a revisioned `host.state`
+push and the colour as `music-players`/`album-color`, see
+[the WebSocket reference](/reference/websocket/#music-players). The instance list is
 a snapshot, so after `GetInstances` changes (an account was added in your config flow, or an instance's
 `Options` changed), call `CatalogChanged(CapabilityKinds.MusicPlayer)` on an injected `IPluginCatalogNotifier`.
 Options travel as optional fields within `music-player` version 1: the instance list carries them, and

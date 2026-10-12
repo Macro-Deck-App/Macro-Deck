@@ -2,13 +2,14 @@ using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Integrations.Adb.Actions;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
 
 [TestFixture]
 internal sealed class AdbActionsTests
 {
-	private FakeAdbGateway _gateway = null!;
+	private ScriptedAndroidDevices _devices = null!;
 	private AdbHealthTracker _health = null!;
 	private VariableApiAccessor _variables = null!;
 	private IReadOnlyList<IActionDefinition> _actions = null!;
@@ -16,10 +17,12 @@ internal sealed class AdbActionsTests
 	[SetUp]
 	public void SetUp()
 	{
-		_gateway = new FakeAdbGateway();
+		_devices = new ScriptedAndroidDevices();
+		_devices.Attach("DEFAULT", stableId: null);
+		_devices.DefaultSerial = "DEFAULT";
 		_health = new AdbHealthTracker();
 		_variables = new VariableApiAccessor();
-		_actions = AdbActions.Create(() => _gateway, _health, _variables);
+		_actions = AdbActions.Create(new AdbActionServices(() => _devices, () => null, _health, _variables));
 	}
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters) =>
@@ -41,7 +44,7 @@ internal sealed class AdbActionsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "SendKey::Wakeup" }));
+			Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "SendKey:DEFAULT:Wakeup" }));
 		});
 	}
 
@@ -50,21 +53,23 @@ internal sealed class AdbActionsTests
 	{
 		await Action("sleep").CreateExecutor().ExecuteAsync(Context([]));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "SendKey::Sleep" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "SendKey:DEFAULT:Sleep" }));
 	}
 
 	[Test]
 	public async Task StartApp_forwards_the_device_and_package()
 	{
+		_devices.Attach("SERIAL1", stableId: null);
+
 		await Action("start-app").CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object>
 				{ ["device"] = "SERIAL1", ["package"] = "com.example.app" }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "StartApp:SERIAL1:com.example.app" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "StartApp:SERIAL1:com.example.app" }));
 	}
 
 	[Test]
-	public async Task StartApp_without_a_package_fails_without_calling_the_gateway()
+	public async Task StartApp_without_a_package_fails_without_calling_the_device()
 	{
 		var result = await Action("start-app").CreateExecutor().ExecuteAsync(Context([]));
 
@@ -72,7 +77,7 @@ internal sealed class AdbActionsTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
@@ -82,18 +87,18 @@ internal sealed class AdbActionsTests
 		await Action("stop-app").CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["package"] = "com.example.app" }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "ForceStopApp::com.example.app" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "ForceStopApp:DEFAULT:com.example.app" }));
 	}
 
 	[Test]
-	public async Task StopApp_without_a_package_fails_without_calling_the_gateway()
+	public async Task StopApp_without_a_package_fails_without_calling_the_device()
 	{
 		var result = await Action("stop-app").CreateExecutor().ExecuteAsync(Context([]));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
@@ -103,18 +108,18 @@ internal sealed class AdbActionsTests
 		await Action("open-uri").CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["uri"] = "https://example.com" }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "OpenUri::https://example.com" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "OpenUri:DEFAULT:https://example.com" }));
 	}
 
 	[Test]
-	public async Task OpenUri_without_a_uri_fails_without_calling_the_gateway()
+	public async Task OpenUri_without_a_uri_fails_without_calling_the_device()
 	{
 		var result = await Action("open-uri").CreateExecutor().ExecuteAsync(Context([]));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
@@ -124,18 +129,18 @@ internal sealed class AdbActionsTests
 		await Action("input-text").CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["text"] = "hello world" }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "InputText::hello world" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "InputText:DEFAULT:hello world" }));
 	}
 
 	[Test]
-	public async Task InputText_without_text_fails_without_calling_the_gateway()
+	public async Task InputText_without_text_fails_without_calling_the_device()
 	{
 		var result = await Action("input-text").CreateExecutor().ExecuteAsync(Context([]));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
@@ -143,9 +148,9 @@ internal sealed class AdbActionsTests
 	public async Task KeyEvent_parses_the_chosen_key()
 	{
 		await Action("key-event").CreateExecutor()
-			.ExecuteAsync(Context(new Dictionary<string, object> { ["key"] = nameof(AdbGatewayKey.VolumeUp) }));
+			.ExecuteAsync(Context(new Dictionary<string, object> { ["key"] = nameof(AndroidKey.VolumeUp) }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "SendKey::VolumeUp" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "SendKey:DEFAULT:VolumeUp" }));
 	}
 
 	[Test]
@@ -158,17 +163,17 @@ internal sealed class AdbActionsTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
 	[Test]
-	public async Task Every_AdbGatewayKey_is_offered_as_a_choice_option()
+	public async Task Every_AndroidKey_is_offered_as_a_choice_option()
 	{
 		var keyParameter = Action("key-event").Parameters.Single(parameter => parameter.Name == "key");
 
 		Assert.That(keyParameter.Options!.Select(option => option.Value),
-			Is.EquivalentTo(Enum.GetValues<AdbGatewayKey>().Select(key => key.ToString())));
+			Is.EquivalentTo(Enum.GetValues<AndroidKey>().Select(key => key.ToString())));
 	}
 
 	[Test]
@@ -177,7 +182,7 @@ internal sealed class AdbActionsTests
 		await Action("tap").CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object> { ["x"] = 100, ["y"] = 200 }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "Tap::100:200" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Tap:DEFAULT:100:200" }));
 	}
 
 	[Test]
@@ -192,7 +197,7 @@ internal sealed class AdbActionsTests
 			["durationMs"] = 500
 		}));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "Swipe::10:20:30:40:500" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Swipe:DEFAULT:10:20:30:40:500" }));
 	}
 
 	[Test]
@@ -206,16 +211,16 @@ internal sealed class AdbActionsTests
 			["y2"] = 40
 		}));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "Swipe::10:20:30:40:300" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Swipe:DEFAULT:10:20:30:40:300" }));
 	}
 
 	[Test]
 	public async Task Reboot_forwards_the_chosen_mode()
 	{
 		await Action("reboot").CreateExecutor()
-			.ExecuteAsync(Context(new Dictionary<string, object> { ["mode"] = nameof(AdbGatewayRebootMode.Recovery) }));
+			.ExecuteAsync(Context(new Dictionary<string, object> { ["mode"] = nameof(AndroidRebootMode.Recovery) }));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "Reboot::Recovery" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Reboot:DEFAULT:Recovery" }));
 	}
 
 	[Test]
@@ -223,24 +228,23 @@ internal sealed class AdbActionsTests
 	{
 		await Action("reboot").CreateExecutor().ExecuteAsync(Context([]));
 
-		Assert.That(_gateway.Calls, Is.EqualTo(new List<string> { "Reboot::Normal" }));
+		Assert.That(_devices.Calls, Is.EqualTo(new List<string> { "Reboot:DEFAULT:Normal" }));
 	}
 
-	[TestCase(AdbGatewayFailureCode.Disabled, ActionErrorCodes.Unavailable)]
-	[TestCase(AdbGatewayFailureCode.ExecutableNotFound, ActionErrorCodes.Unavailable)]
-	[TestCase(AdbGatewayFailureCode.ServerUnreachable, ActionErrorCodes.NotConnected)]
-	[TestCase(AdbGatewayFailureCode.DeviceNotFound, ActionErrorCodes.NotFound)]
-	[TestCase(AdbGatewayFailureCode.DeviceUnauthorized, ActionErrorCodes.PermissionDenied)]
-	[TestCase(AdbGatewayFailureCode.DeviceOffline, ActionErrorCodes.NotConnected)]
-	[TestCase(AdbGatewayFailureCode.Timeout, ActionErrorCodes.Timeout)]
-	[TestCase(AdbGatewayFailureCode.InvalidParameter, ActionErrorCodes.InvalidParameter)]
-	[TestCase(AdbGatewayFailureCode.CommandFailed, ActionErrorCodes.ProviderError)]
-	[TestCase(AdbGatewayFailureCode.Unsupported, ActionErrorCodes.Unavailable)]
-	public async Task A_gateway_failure_code_maps_to_the_expected_action_error_code(
-		AdbGatewayFailureCode failure,
+	[TestCase(AndroidDeviceErrorCode.AdbNotEnabled, ActionErrorCodes.Unavailable)]
+	[TestCase(AndroidDeviceErrorCode.AdbUnavailable, ActionErrorCodes.Unavailable)]
+	[TestCase(AndroidDeviceErrorCode.DeviceNotFound, ActionErrorCodes.NotFound)]
+	[TestCase(AndroidDeviceErrorCode.DeviceUnauthorized, ActionErrorCodes.PermissionDenied)]
+	[TestCase(AndroidDeviceErrorCode.DeviceOffline, ActionErrorCodes.NotConnected)]
+	[TestCase(AndroidDeviceErrorCode.Timeout, ActionErrorCodes.Timeout)]
+	[TestCase(AndroidDeviceErrorCode.InvalidArgument, ActionErrorCodes.InvalidParameter)]
+	[TestCase(AndroidDeviceErrorCode.CommandFailed, ActionErrorCodes.ProviderError)]
+	[TestCase(AndroidDeviceErrorCode.Unsupported, ActionErrorCodes.Unavailable)]
+	public async Task A_device_failure_code_maps_to_the_expected_action_error_code(
+		AndroidDeviceErrorCode failure,
 		string expectedErrorCode)
 	{
-		_gateway.NextResult = AdbGatewayResult.Fail(failure, "something went wrong");
+		Device("DEFAULT").NextFailure = new AndroidDeviceException(failure, "something went wrong");
 
 		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
 
@@ -253,9 +257,67 @@ internal sealed class AdbActionsTests
 	}
 
 	[Test]
-	public void A_null_gateway_fails_with_unavailable_and_never_throws()
+	public async Task Without_a_chosen_or_default_device_the_action_fails_with_not_found_and_runs_nothing()
 	{
-		var actions = AdbActions.Create(() => null, _health, _variables);
+		_devices.DefaultSerial = null;
+		_devices.Attach("OTHER", stableId: null);
+
+		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+			Assert.That(_devices.Calls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_configured_default_device_not_seen_yet_fails_as_the_adb_manager_reported_it()
+	{
+		_devices.DefaultSerial = "NEVER-SEEN";
+
+		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage),
+				Is.EqualTo("No default device is configured and no single device is connected."));
+			Assert.That(_devices.Calls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Without_adb_the_action_fails_with_unavailable_even_when_no_device_was_ever_seen()
+	{
+		_devices.Detach("DEFAULT");
+		_devices.DefaultSerial = null;
+		_devices.IsAdbUnavailable = true;
+
+		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Is.EqualTo("The adb executable could not be located."));
+			Assert.That(_health.LastFailure, Is.EqualTo(AndroidDeviceErrorCode.AdbUnavailable));
+			Assert.That(_devices.Calls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_chosen_device_that_is_not_attached_fails_with_not_found()
+	{
+		var result = await Action("wake").CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object> { ["device"] = "GONE" }));
+
+		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
+	}
+
+	[Test]
+	public void Before_the_integration_has_android_devices_an_action_fails_with_unavailable_and_never_throws()
+	{
+		var actions = AdbActions.Create(new AdbActionServices(() => null, () => null, _health, _variables));
 		var action = actions.Single(candidate => candidate.Id == "wake");
 
 		ActionResult? result = null;
@@ -269,9 +331,9 @@ internal sealed class AdbActionsTests
 	}
 
 	[Test]
-	public async Task A_disabled_gateway_fails_with_unavailable_and_never_calls_the_gateway()
+	public async Task With_adb_turned_off_an_action_fails_with_unavailable_and_never_calls_a_device()
 	{
-		_gateway.IsEnabled = false;
+		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 
 		var result = await Action("wake").CreateExecutor().ExecuteAsync(Context([]));
 
@@ -281,7 +343,7 @@ internal sealed class AdbActionsTests
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
 			Assert.That(TestLocalization.Resolve(result.ErrorMessage),
 				Is.EqualTo("ADB is turned off in Settings > ADB."));
-			Assert.That(_gateway.Calls, Is.Empty);
+			Assert.That(_devices.Calls, Is.Empty);
 		});
 	}
 
@@ -298,4 +360,6 @@ internal sealed class AdbActionsTests
 			}
 		});
 	}
+
+	private ScriptedAndroidDevice Device(string serial) => (ScriptedAndroidDevice)_devices.FindDevice(serial)!;
 }

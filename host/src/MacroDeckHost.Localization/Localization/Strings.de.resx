@@ -13779,6 +13779,13 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} braucht ADB, um mit deinen Android-Geräten zu arbeiten, aber Plugins dürfen ADB derzeit nicht nutzen. Plugins die Nutzung von ADB erlauben?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Ein Plugin möchte deine Companion-Geräte nutzen</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} möchte mit den Smartphones und Tablets arbeiten, die über Macro Deck Companion verbunden sind, aber Plugins dürfen sie derzeit nicht nutzen. Plugins die Nutzung von Companion-Geräten erlauben?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Symbolpaket behalten</value>
   </data>
@@ -14019,6 +14026,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Dieses Plugin nutzt ADB, um mit deinen Android-Geräten zu arbeiten. Es kann darauf Befehle ausführen, Dateien kopieren und Apps installieren.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Nutzt Companion-Geräte</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Dieses Plugin nutzt die Geräte, die über Macro Deck Companion verbunden sind. Es kann lesen, was sie melden, etwa Akku und Netzwerk, ihnen Befehle senden und Screenshots aufnehmen. Ein Screenshot des ganzen Bildschirms muss weiterhin auf dem Gerät bestätigt werden.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>Die Signatur dieses Plugins wurde vom Macro Deck Creator Portal geprüft, sein Manifest nennt jedoch keinen Autor.</value>
@@ -15171,6 +15184,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>Für die Installation wird ADB benötigt. Schalte es zuerst in den ADB-Einstellungen ein.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Plugins, die Zugriff auf Companion-Geräte angeben, können lesen, was deine Companion-Geräte melden, ihnen Befehle senden und Screenshots aufnehmen. Ein Screenshot des ganzen Bildschirms muss weiterhin auf dem Gerät bestätigt werden.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Plugins die Nutzung von Companion-Geräten erlauben</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>Die APK wurde gespeichert.</value>
   </data>
@@ -15288,6 +15307,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>ADB-Einstellungen öffnen</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Plugin-Zugriff</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>APK speichern</value>

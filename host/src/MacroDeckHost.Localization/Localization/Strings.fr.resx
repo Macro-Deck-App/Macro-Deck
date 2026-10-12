@@ -13781,6 +13781,13 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{name} a besoin d'ADB pour travailler avec tes appareils Android, mais les extensions ne sont pas autorisées à utiliser ADB pour le moment. Autoriser les extensions à utiliser ADB ?</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>Une extension veut utiliser tes appareils Companion</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>{name} veut travailler avec les téléphones et tablettes connectés via Macro Deck Companion, mais les extensions ne sont pas autorisées à les utiliser pour le moment. Autoriser les extensions à utiliser les appareils Companion ?</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>Pack d'icônes conservé</value>
   </data>
@@ -14021,6 +14028,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>Cette extension utilise ADB pour travailler avec tes appareils Android. Elle peut y exécuter des commandes, copier des fichiers et installer des applications.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>Utilise les appareils Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>Cette extension utilise les appareils connectés via Macro Deck Companion. Elle peut lire ce qu'ils signalent, comme la batterie et le réseau, leur envoyer des commandes et prendre des captures d'écran. Une capture de l'écran entier doit toujours être approuvée sur l'appareil.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>La signature de cette extension a été vérifiée par le Macro Deck Creator Portal, mais son manifeste n'indique aucun auteur.</value>
@@ -15173,6 +15186,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>L'installation de l'application nécessite ADB. Active-le d'abord dans les réglages ADB.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>Les extensions qui déclarent l'accès aux appareils Companion peuvent lire ce que signalent tes appareils Companion, leur envoyer des commandes et prendre des captures d'écran. Une capture de l'écran entier doit toujours être approuvée sur l'appareil.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>Autoriser les extensions à utiliser les appareils Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>L'APK a été enregistré.</value>
   </data>
@@ -15290,6 +15309,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>Ouvrir les réglages ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>Accès des extensions</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>Enregistrer l'APK</value>

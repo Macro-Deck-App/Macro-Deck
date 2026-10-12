@@ -28,6 +28,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Capabilities;
@@ -49,6 +50,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeckHost.Application.Variables.Colors;
@@ -111,6 +113,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly VariableHistoryReadThrottle _variableHistoryReadThrottle;
 	private readonly IBatteryRegistry? _batteries;
 	private readonly IWeatherBroadcastTrigger? _weatherTrigger;
+	private readonly ILocaleApi? _locale;
+	private readonly IMusicPlayerAlbumColor? _albumColor;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -168,9 +172,13 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		PluginVariableHistoryWindows? variableHistory = null,
 		VariableHistoryReadThrottle? variableHistoryReadThrottle = null,
 		IBatteryRegistry? batteries = null,
-		IWeatherBroadcastTrigger? weatherTrigger = null)
+		IWeatherBroadcastTrigger? weatherTrigger = null,
+		ILocaleApi? locale = null,
+		IMusicPlayerAlbumColor? albumColor = null)
 	{
 		_weatherTrigger = weatherTrigger;
+		_albumColor = albumColor;
+		_locale = locale;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
 		_variableHistoryReadThrottle = variableHistoryReadThrottle ?? new VariableHistoryReadThrottle(TimeProvider.System);
@@ -280,6 +288,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Colors => RouteColors(pluginId, payload),
 				HostApis.Batteries => RouteBatteries(pluginId, sessionId, payload),
 				HostApis.Weather => RouteWeather(pluginId, payload),
+				HostApis.Locale => await RouteLocaleAsync(cancellationToken),
+				HostApis.MusicPlayers => await RouteMusicPlayerAlbumColorAsync(payload, cancellationToken),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -293,6 +303,60 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InternalError,
 				ProtocolErrorMessages.For(ProtocolErrorCodes.InternalError));
+		}
+	}
+
+	private async Task<HostCallbackResult> RouteLocaleAsync(CancellationToken cancellationToken)
+	{
+		if (_locale is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				"This host does not report the user's time format.");
+		}
+
+		var format = await _locale.GetTimeOfDayFormatAsync(cancellationToken);
+		return HostCallbackResult.Ok(new LocaleTimeOfDayFormatResult
+		{
+			Culture = format.Culture.Name,
+			HourCycle = format.HourCycle
+		});
+	}
+
+	private async Task<HostCallbackResult> RouteMusicPlayerAlbumColorAsync(HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (_albumColor is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				"This host does not report album colours.");
+		}
+
+		var arguments = Deserialize<MusicPlayerAlbumColorArguments>(payload.Arguments);
+		if (arguments is null)
+		{
+			return MissingArguments();
+		}
+
+		if (string.IsNullOrEmpty(arguments.InstanceId) || arguments.InstanceId.Length > MaxMusicPlayerArtworkIdLength)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"A music player instance id is 1 to {MaxMusicPlayerArtworkIdLength} characters.");
+		}
+
+		using var lookup = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		lookup.CancelAfter(_musicPlayerArtworkTimeout);
+		try
+		{
+			return HostCallbackResult.Ok(new MusicPlayerAlbumColorResult
+			{
+				Color = await _albumColor.GetAsync(arguments.InstanceId, lookup.Token)
+			});
+		}
+		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.Timeout,
+				"The music player did not answer the artwork lookup in time.",
+				retryable: true);
 		}
 	}
 
@@ -420,8 +484,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			}
 
 			case HostOperations.Variables.Refresh:
-				_variableRefresh?.RequestEagerRefresh(pluginId);
-				return HostCallbackResult.Ok();
+				return RouteVariableRefresh(pluginId, payload);
+
+			case HostOperations.Variables.Bind:
+				return await RouteVariableBindAsync(pluginId, payload, cancellationToken);
 
 			case HostOperations.Variables.HistoryOpen:
 			case HostOperations.Variables.HistoryRead:
@@ -430,6 +496,85 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 			default:
 				return UnknownOperation(payload);
+		}
+	}
+
+	private HostCallbackResult RouteVariableRefresh(string pluginId, HostInvokePayload payload)
+	{
+		var definitionIds = Deserialize<VariablesRefreshArguments>(payload.Arguments)?.DefinitionIds;
+		if (definitionIds is { Count: > ProtocolLimits.MaxVariableRefreshDefinitionIds })
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"A refresh names at most {ProtocolLimits.MaxVariableRefreshDefinitionIds} definition ids.");
+		}
+
+		var named = definitionIds?.Where(id => !string.IsNullOrEmpty(id)).ToList() ?? [];
+		if (named.Count == 0)
+		{
+			_variableRefresh?.RequestEagerRefresh(pluginId);
+			return HostCallbackResult.Ok();
+		}
+
+		foreach (var definitionId in named)
+		{
+			_variableRefresh?.RequestDefinitionRefresh(pluginId, definitionId);
+		}
+
+		return HostCallbackResult.Ok();
+	}
+
+	private async Task<HostCallbackResult> RouteVariableBindAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Deserialize<VariablesBindArguments>(payload.Arguments);
+		if (arguments?.Bindings is null)
+		{
+			return MissingArguments();
+		}
+
+		if (arguments.Bindings.Count > ProtocolLimits.MaxVariableBindingsPerCall)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				$"One call records at most {ProtocolLimits.MaxVariableBindingsPerCall} bindings.");
+		}
+
+		var requests = new List<VariableBindingRequest>(arguments.Bindings.Count);
+		foreach (var binding in arguments.Bindings)
+		{
+			if (binding is null || !Enum.TryParse<VariableType>(binding.Type, out var type) || !Enum.IsDefined(type))
+			{
+				return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "A binding names no variable type.");
+			}
+
+			requests.Add(new VariableBindingRequest(binding.LocalResourceId, binding.Name, type)
+			{
+				DecimalPlaces = binding.DecimalPlaces,
+				MigratedFrom = binding.MigratedFrom
+			});
+		}
+
+		await using var scope = _scopeFactory.CreateAsyncScope();
+		var appender = new VariableBindingAppender(scope.ServiceProvider.GetRequiredService<IVariableBindingStore>());
+		try
+		{
+			var outcomes = await appender.AppendAsync(pluginId, requests, cancellationToken);
+			return HostCallbackResult.Ok(new VariablesBindResult
+			{
+				Outcomes = outcomes
+					.Select(outcome => outcome == VariableBindingOutcome.AlreadyBound
+						? VariableBindingOutcomes.AlreadyBound
+						: VariableBindingOutcomes.Bound)
+					.ToList()
+			});
+		}
+		catch (ArgumentException exception)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message);
+		}
+		catch (InvalidOperationException exception)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InternalError, exception.Message);
 		}
 	}
 

@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Variables.Templates;
 using System.Text.Json;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.MusicPlayer;
@@ -13,6 +14,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Infrastructure.Variables;
 using MacroDeckHost.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
@@ -180,7 +182,7 @@ internal sealed class ObsMultipleConfigurationsTests
 	[Test]
 	public async Task Delete_is_rejected_without_explicit_confirmation()
 	{
-		var coordinator = new IntegrationConfigMutationCoordinator(null!, null!, null!, null!, null!, [], null!);
+		var coordinator = new IntegrationConfigMutationCoordinator(null!, null!, null!, null!, null!, null!);
 
 		var result = await coordinator.DeleteAsync(ObsIntegration.IntegrationId,
 			Guid.NewGuid(),
@@ -210,6 +212,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			"Renamed legacy",
 			CancellationToken.None);
 		var stored = await harness.Store.Find(entryId);
+		var usable = await harness.Integration.IsEntryUsableAsync(Stored(stored!));
 
 		Assert.Multiple(() =>
 		{
@@ -217,7 +220,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			Assert.That(stored!.Title, Is.EqualTo("Renamed legacy"));
 			Assert.That(stored.Values, Does.Not.ContainKey(ObsConfigurationMetadata.SchemaKey));
 			Assert.That(stored.Values, Does.Not.ContainKey(ObsConfigurationMetadata.VariableIdentityKey));
-			Assert.That(harness.Adapter.IsUsable(stored), Is.False);
+			Assert.That(usable, Is.False);
 			Assert.That(harness.VariableRegistry.GetAll(), Is.Empty);
 		});
 	}
@@ -249,7 +252,7 @@ internal sealed class ObsMultipleConfigurationsTests
 		var a = harness.AddEntry("A", "a");
 		var b = harness.AddEntry("B", "b");
 
-		await harness.Adapter.SynchronizeVariablesAsync(harness.Store.Entries, CancellationToken.None);
+		await harness.SynchronizeAsync();
 
 		var variables = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 		var aVariables = variables.Where(variable =>
@@ -282,7 +285,7 @@ internal sealed class ObsMultipleConfigurationsTests
 		var harness = new MutationHarness();
 		var a = harness.AddEntry("A", "a");
 		var b = harness.AddEntry("B", "b");
-		await harness.Adapter.SynchronizeVariablesAsync(harness.Store.Entries, CancellationToken.None);
+		await harness.SynchronizeAsync();
 		var push = await harness.Variables.CreateIntegrationVariable(ObsIntegration.IntegrationId,
 			"obs_push_status",
 			VariableScope.Global,
@@ -450,7 +453,8 @@ internal sealed class ObsMultipleConfigurationsTests
 	{
 		public MutationHarness(Func<int>? suffixFactory = null)
 		{
-			Registry = new ConfigurableIntegrationRegistry([]);
+			Integration = new ObsIntegration(_ => new FakeObsClient(), suffixFactory: suffixFactory);
+			Registry = new ConfigurableIntegrationRegistry([Integration]);
 			VariableRegistry = new VariableRegistry();
 			Variables = new VariableService(VariableRegistry,
 				new NullUserVariableStore(),
@@ -469,22 +473,27 @@ internal sealed class ObsMultipleConfigurationsTests
 			services.AddSingleton<IIntegrationConfigStore>(Store);
 			services.AddScoped<IVariableService>(_ => Variables);
 			var scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
-			Adapter = new ObsConfigurationMutationAdapter(Registry, VariableRegistry, scopeFactory, suffixFactory);
 			Coordinator = new IntegrationConfigMutationCoordinator(scopeFactory,
 				new RecordingLifecycle(),
 				Registry,
 				new RecordingMediator(),
 				new VariablePollingInvalidationSignal(),
-				[Adapter],
-				Serilog.Log.Logger);
+				Serilog.Log.Logger,
+				VariableRegistry,
+				new IntegrationVariableApiFactory());
 		}
 
 		public ConfigurableIntegrationRegistry Registry { get; }
 		public VariableRegistry VariableRegistry { get; }
 		public VariableService Variables { get; }
 		public MemoryConfigStore Store { get; }
-		public ObsConfigurationMutationAdapter Adapter { get; }
+		public ObsIntegration Integration { get; }
 		public IntegrationConfigMutationCoordinator Coordinator { get; }
+
+		public Task SynchronizeAsync()
+			=> Integration.SynchronizeEntriesAsync([.. Store.Entries.Select(Stored)],
+				new IntegrationVariableApi(ObsIntegration.IntegrationId, Variables),
+				CancellationToken.None);
 
 		public Guid AddEntry(string title, string key)
 		{
@@ -493,6 +502,9 @@ internal sealed class ObsMultipleConfigurationsTests
 			return id;
 		}
 	}
+
+	private static StoredConfigEntry Stored(ConfigEntryRecord entry)
+		=> new() { Id = entry.Id, Title = entry.Title, CreatedAt = entry.CreatedAt, Values = entry.Values };
 
 	private static ConfigEntryRecord ConfigurationRecord(Guid id, string title, string key)
 		=> new(id,

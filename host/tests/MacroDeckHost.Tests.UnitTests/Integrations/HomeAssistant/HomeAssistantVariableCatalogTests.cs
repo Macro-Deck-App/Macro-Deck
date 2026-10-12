@@ -82,7 +82,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 		var config = new FakeIntegrationConfig(JsonSerializer.Serialize(watchedEntities));
 		var migration = new HomeAssistantWatchedEntityMigration(config);
 
-		var bindings = await migration.BuildAsync([]);
+		var bindings = await migration.BuildAsync();
 		var livingRoomState = bindings.Single(b => b.LocalResourceId == "entity/light.living_room/state");
 		var livingRoomAttributes = bindings.Single(b => b.LocalResourceId == "entity/light.living_room/attributes");
 		var temperatureState = bindings.Single(b => b.LocalResourceId == "entity/sensor.office_temperature/state");
@@ -95,9 +95,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 			Assert.That(livingRoomAttributes.Name, Is.EqualTo("ha_light_living_room_attributes"));
 			Assert.That(temperatureState.Name, Is.EqualTo("ha_sensor_office_temperature"));
 
-			Assert.That(bindings.Select(b => b.Type), Has.All.EqualTo(Domain.Enums.VariableType.Text));
-			Assert.That(bindings.Select(b => b.IntegrationId),
-				Has.All.EqualTo(HomeAssistantIntegration.IntegrationId));
+			Assert.That(bindings.Select(b => b.Type), Has.All.EqualTo(VariableType.Text));
 			Assert.That(bindings.Select(b => b.MigratedFrom),
 				Has.All.EqualTo(HomeAssistantWatchedEntityMigration.MigratedFromId));
 		});
@@ -113,7 +111,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 		var config = new FakeIntegrationConfig(JsonSerializer.Serialize(watchedEntities));
 		var migration = new HomeAssistantWatchedEntityMigration(config);
 
-		var bindings = await migration.BuildAsync([]);
+		var bindings = await migration.BuildAsync();
 
 		var first = bindings.Single(b => b.LocalResourceId == "entity/sensor.a!b/state");
 		var second = bindings.Single(b => b.LocalResourceId == "entity/sensor.a#b/state");
@@ -132,7 +130,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 		var config = new FakeIntegrationConfig(JsonSerializer.Serialize(new List<string> { longEntityId }));
 		var migration = new HomeAssistantWatchedEntityMigration(config);
 
-		var bindings = await migration.BuildAsync([]);
+		var bindings = await migration.BuildAsync();
 		var state = bindings.Single(b => b.LocalResourceId == $"entity/{longEntityId}/state");
 
 		Assert.That(state.Name, Is.EqualTo("ha_sensor_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_16c3803b"));
@@ -144,25 +142,24 @@ internal sealed class HomeAssistantVariableCatalogTests
 		var config = new FakeIntegrationConfig(JsonSerializer.Serialize(new List<string> { "!!!" }));
 		var migration = new HomeAssistantWatchedEntityMigration(config);
 
-		var bindings = await migration.BuildAsync([]);
+		var bindings = await migration.BuildAsync();
 		var state = bindings.Single(b => b.LocalResourceId == "entity/!!!/state");
 
 		Assert.That(state.Name, Is.EqualTo("ha_e2d53a722"));
 	}
 
 	[Test]
-	public async Task Bindings_already_present_for_a_resource_are_not_reproduced()
+	public async Task A_rerun_after_an_interrupted_migration_asks_for_the_same_bindings_again()
 	{
-		// Simulates a crash between saving the first attempt's bindings and calling MarkCompletedAsync: the
-		// next BuildAsync call must skip everything already bound rather than minting a "-2" twin with a
-		// new Guid.
+		// A crash between recording the bindings and MarkCompletedAsync reruns the migration; asking for the
+		// same resources under the same names lets Macro Deck answer AlreadyBound instead of minting twins.
 		var config = new FakeIntegrationConfig(JsonSerializer.Serialize(_singleWatchedEntity));
 		var migration = new HomeAssistantWatchedEntityMigration(config);
 
-		var firstAttempt = await migration.BuildAsync([]);
-		var secondAttempt = await migration.BuildAsync(firstAttempt);
+		var firstAttempt = await migration.BuildAsync();
+		var secondAttempt = await migration.BuildAsync();
 
-		Assert.That(secondAttempt, Is.Empty);
+		Assert.That(secondAttempt, Is.EqualTo(firstAttempt));
 	}
 
 	[Test]
@@ -176,7 +173,7 @@ internal sealed class HomeAssistantVariableCatalogTests
 		await migration.MarkCompletedAsync();
 
 		Assert.That(await migration.HasRunAsync(), Is.True);
-		Assert.That(await migration.BuildAsync([]),
+		Assert.That(await migration.BuildAsync(),
 			Is.Empty,
 			"the watched-entities value was cleared once the migration completed");
 	}

@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Streamerbot.Actions;
 using MacroDeckHost.Integrations.Streamerbot.Protocol;
 using MacroDeck.Sdk;
@@ -13,6 +12,7 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Localization;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Streamerbot;
 
@@ -26,7 +26,6 @@ public sealed class StreamerbotIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.streamerbot";
@@ -39,7 +38,6 @@ public sealed class StreamerbotIntegration
 	private readonly StreamerbotVariableAccessor _variableAccessor = new();
 
 	private StreamerbotConnection? _connection;
-	private IVariableRefreshSignal? _refreshSignal;
 	private StreamerbotEventEmitter? _events;
 
 	public StreamerbotIntegration()
@@ -104,12 +102,11 @@ public sealed class StreamerbotIntegration
 
 	public byte[] GetIcon() => _icon;
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
 	public IConfigFlow CreateConfigFlow() => new StreamerbotConfigFlow();
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new StreamerbotEventEmitter(context.Events);
@@ -240,7 +237,7 @@ public sealed class StreamerbotIntegration
 			StreamerbotEndpoint.Build(host, port, endpoint),
 			password,
 			_events,
-			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
 		_connection.Start();
 	}
 

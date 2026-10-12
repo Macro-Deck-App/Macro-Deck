@@ -19,7 +19,7 @@ internal sealed class IntegrationHttpWireTests
 	public void SetUp()
 	{
 		_state = new HttpUserAgentState();
-		IntegrationHttp.Use(_state);
+		IntegrationHttp.Use(new HostHttp(_state));
 
 		var probe = new TcpListener(IPAddress.Loopback, 0);
 		probe.Start();
@@ -36,7 +36,7 @@ internal sealed class IntegrationHttpWireTests
 	public void TearDown()
 	{
 		_listener.Close();
-		IntegrationHttp.Use(new HttpUserAgentState());
+		IntegrationHttp.Use(new HostHttp(new HttpUserAgentState()));
 	}
 
 	[Test]

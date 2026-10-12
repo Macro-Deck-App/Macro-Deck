@@ -90,6 +90,7 @@ Every `StartAsync` and `SubmitAsync` returns a `ConfigFlowResult`:
 | `Error(step, message, fieldErrors)` | Shows `step` again with a general message and/or per-field messages keyed by field name. Values from this submit are discarded. |
 | `External(url, resumeStepId)` | Opens `url` in the browser, waits for the redirect callback, then submits `resumeStepId`. See [OAuth](#oauth). |
 | `Complete(title, values)` | Saves the entry: all collected form values plus the extra `values`. |
+| `CompleteWithoutEntry()` | Closes the dialog and stores nothing. See [Completing without an entry](#completing-without-an-entry). |
 
 ## Multi-step flows
 
@@ -254,6 +255,11 @@ provider's authorize URL and exchange the code; `AuthorizationCode` is `null` un
 arrived. Show `RedirectUri` as a copy value when the user has to register it with the provider. Do not
 start your own callback listener. The built-in Spotify integration is a complete example.
 
+A flow that talks to the service while it runs, to test a connection or exchange a code, should send the
+User-Agent the user configured: `context.Http.UserAgent`, the same value as `IIntegrationContext.Http`, also
+before the integration was ever initialized. See
+[Outgoing HTTP requests](/reference/plugin-hosting/#outgoing-http-requests).
+
 ## Reconfiguring an entry
 
 ```csharp
@@ -329,6 +335,30 @@ With `RequiresConfiguration` set to `false`:
 to 3.0.0-beta.14 ignore it and treat every flow as required, so on those the integration still waits for
 the flow to be completed once.
 
+## Completing without an entry
+
+Some integrations create their entries themselves, for example one per device as each device connects, so
+the dialog has nothing to store. Finish such a flow with `CompleteWithoutEntry()`:
+
+```csharp
+public Task<ConfigFlowResult> SubmitAsync(string stepId,
+	IReadOnlyDictionary<string, object?> input,
+	IConfigFlowContext context,
+	CancellationToken cancellationToken)
+	=> Task.FromResult(ConfigFlowResult.CompleteWithoutEntry());
+```
+
+The result's `Kind` is `Complete` and `StoresEntry` is `false`. Macro Deck closes the dialog, discards the
+collected values, creates or changes no entry and does not initialize the integration again. A flow that
+edits an existing entry leaves that entry as it is. If the user switched the integration off and it has no
+usable entry, completing the flow removes that stored choice: going through setup counts as wanting the
+integration again. An integration with a usable entry the user switched off stays off.
+
+A Macro Deck that predates `CompleteWithoutEntry` treats it like `Complete` without a title: it stores an
+entry from the collected values under the integration's name, enables the integration and initializes it
+again. If such an entry would break your integration, refuse it in `PrepareEntryAsync` or report it as not
+usable with `IsEntryUsableAsync`.
+
 ## Taking part in storing an entry
 
 A flow decides what an entry holds. To also decide whether it may be stored, report how each stored entry
@@ -386,6 +416,63 @@ Macro Deck handles one change at a time per integration, in this order:
    entry and delete those of a removed one.
 5. **`ReleasePreparationAsync`** ends the preparation, whether or not the entry was stored.
 
+### Synchronizing while the integration is off
+
+Entries change while an integration is off too: the user can delete one, and an entry can be created before
+the integration was ever initialized. Override the overload that takes the integration's own `IVariableApi`
+and use it instead of `context.Variables`; it works whether or not the integration is initialized:
+
+```csharp
+public async Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	IVariableApi variables,
+	CancellationToken cancellationToken)
+{
+	var keys = entries.Select(KeyOf).OfType<string>().ToHashSet();
+	foreach (var variable in await variables.GetAllAsync())
+	{
+		if (EntryKeyOf(variable.DefinitionId) is { } key && !keys.Contains(key))
+		{
+			await variables.DeleteAsync(variable.Id);
+		}
+	}
+
+	foreach (var key in keys)
+	{
+		await variables.CreateAsync(VariableDefinition.Eager($"server_{key}_status", VariableType.Text));
+	}
+}
+```
+
+Macro Deck calls this overload; its default calls the overload without `variables`, so an integration written
+before it keeps working unchanged. A Macro Deck that predates the overload calls the one without `variables`.
+Out of process, `MacroDeck.Plugin.Hosting` passes the plugin's own variable api.
+
+### Choosing another name when one is taken
+
+A name in `ReservedVariables` can be taken by a variable you cannot see from `Siblings`, such as a user
+variable. By default Macro Deck then refuses the entry with its own message. To pick another name instead,
+set `RetryOnConflict` on the result. Macro Deck then prepares the entry again, with every name it could not
+hold so far in `RejectedVariableNames`:
+
+```csharp
+var rejected = preparation.RejectedVariableNames.ToHashSet();
+var key = Candidates(preparation.Title)
+	.FirstOrDefault(candidate => !rejected.Contains($"server_{candidate}_status"));
+if (key is null)
+{
+	return Task.FromResult(ConfigEntryPreparationResult.Refuse(Strings.Setup.NoFreeName()));
+}
+
+return Task.FromResult(ConfigEntryPreparationResult.Accept(values,
+	[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]) with { RetryOnConflict = true });
+```
+
+`RejectedVariableNames` is empty on the first attempt and only grows within the same change, so the
+integration keeps no state of its own. Macro Deck stops after 32 attempts, or when an attempt adds no new
+rejected name, and refuses the entry with its own message. Refuse it yourself first when you run out of
+candidates, so the user sees your message. A Macro Deck that predates `RetryOnConflict` ignores it and
+refuses the entry on the first conflict.
+
 `GetEntryStatusAsync` is what the integration page shows next to each entry, and `IsEntryUsableAsync` says
 whether an entry can be used as it is. An integration whose flow is required is turned off when none of its
 entries is usable, and renaming an unusable entry stores the new title without running `PrepareEntryAsync`.
@@ -417,7 +504,10 @@ drives the same operations in tests - see [Testing](/features/testing/) and
 
 `IConfigEntryLifecycle` is the separate `config-entries` capability, driven by `prepare`, `status`,
 `usable`, `reload`, `synchronize` and `release`. The first integration of the plugin that implements it
-answers them. `PluginTestHarness.ConfigEntries` drives the same operations in tests.
+answers them. `prepare` carries the optional `rejectedVariableNames` and its result the optional
+`retryOnConflict`; a `Complete` result of `flow.submit` carries `withoutEntry: true` for
+`CompleteWithoutEntry()`. All three are left out when unused. `PluginTestHarness.ConfigEntries` drives the
+same operations in tests.
 
 ## See also
 

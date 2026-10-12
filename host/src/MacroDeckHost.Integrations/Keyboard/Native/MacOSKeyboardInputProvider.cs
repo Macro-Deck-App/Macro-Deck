@@ -191,7 +191,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			return true;
 		}
 
-		if (PhysicalKeys.TryGetMacKeyCode(key, out virtualKey))
+		if (NativeKeys.TryGetMacOSKeyCode(key, out virtualKey))
 		{
 			return true;
 		}

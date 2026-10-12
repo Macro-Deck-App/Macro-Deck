@@ -116,6 +116,14 @@
                   </span>
                 </div>
               }
+              @if (usesCompanionDevices()) {
+                <div class="detail-field">
+                  <span class="detail-label">{{ 'macrodeck.app:Plugins.UsesCompanionDevicesBadge' | translate }}</span>
+                  <span class="detail-value">
+                    <span class="icon icon-check icon-xs"></span>
+                  </span>
+                </div>
+              }
             </section>
 
             <section class="detail-card detail-card-wide">

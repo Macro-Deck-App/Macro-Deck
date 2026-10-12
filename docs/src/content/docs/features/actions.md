@@ -232,6 +232,30 @@ rest of the (possibly unfinished) draft and `Filter` the typed text.
 - **Give an optional dynamic choice a `placeholder`** ("First available"): options are only fetched when
   the list opens, so until then an empty field would read as "still to choose".
 
+## Options Macro Deck answers
+
+Some lists are Macro Deck's own. Name one of the ids in `HostOptionsSources` (`MacroDeck.Sdk.Actions`) as the
+parameter's `optionsSourceId`, and Macro Deck fills the list itself; `GetDynamicOptionsAsync` is not asked for
+that parameter:
+
+```csharp
+ActionParameter.Autocomplete("variable",
+	label: Strings.Parameters.SaveTo(),
+	optionsSourceId: HostOptionsSources.UserVariables,
+	required: true)
+```
+
+| Id | Lists | Option value |
+| --- | --- | --- |
+| `HostOptionsSources.Variables` | every variable, a typed name allowed | the canonical name |
+| `HostOptionsSources.UserVariables` | the user's own variables, a typed name allowed | the canonical name |
+| `HostOptionsSources.Devices` | the devices paired with Macro Deck | the device id |
+| `HostOptionsSources.AndroidDevices` | the connected Android devices, after an empty "default device" option | the serial |
+
+The ids are the strings Macro Deck has always answered, so a parameter declared with them works on every
+Macro Deck version; a version that does not know an id offers no options for it. Widget pickers use
+`WidgetOptionsSources` the same way.
+
 ## Configuring with a UI tree
 
 ```csharp

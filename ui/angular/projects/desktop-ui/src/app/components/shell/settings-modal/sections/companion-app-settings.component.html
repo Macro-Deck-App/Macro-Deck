@@ -84,6 +84,20 @@
     }
   </shared-settings-section>
 
+  @if (status(); as current) {
+    <shared-settings-section [heading]="'macrodeck.app:Settings.CompanionApp.PluginAccessHeading' | translate">
+      <shared-settings-row
+        [label]="'macrodeck.app:Settings.CompanionApp.AllowPluginsLabel' | translate"
+        [description]="'macrodeck.app:Settings.CompanionApp.AllowPluginsDescription' | translate">
+        <shared-toggle-switch
+          data-testid="companion-app-allow-plugins"
+          [busy]="allowPluginsBusy()"
+          [checked]="current.allowPlugins ?? false"
+          (changed)="setAllowPlugins($event)" />
+      </shared-settings-row>
+    </shared-settings-section>
+  }
+
   @if (status()?.adbEnabled) {
     <shared-settings-section [heading]="'macrodeck.app:Settings.CompanionApp.DevicesHeading' | translate">
       @if (status()!.devices.length === 0) {

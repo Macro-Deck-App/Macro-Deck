@@ -44,6 +44,69 @@ public class AdbStateDtoTests
 		});
 	}
 
+	[Test]
+	public void A_reader_built_before_usb_permission_and_the_default_device_reads_such_a_device_as_unauthorized()
+	{
+		const string push = """
+			{"access":"available","revision":4,"defaultDeviceSerial":"A1","adbUnavailable":true,"devices":[
+				{"serial":"A1","state":"unauthorized","lacksUsbPermission":true}]}
+			""";
+
+		var state = JsonSerializer.Deserialize<AdbStateBeforeStableId>(push, PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(state.Access, Is.EqualTo(AdbAccessStates.Available));
+			Assert.That(state.Devices.Single().State, Is.EqualTo(AdbDeviceStates.Unauthorized));
+		});
+	}
+
+	[Test]
+	public void Usb_permission_and_the_default_device_are_read_when_present_and_absent_from_an_older_host()
+	{
+		var current = JsonSerializer.Deserialize<AdbStateDto>(
+			"""{"access":"available","revision":2,"defaultDeviceSerial":"A1","devices":[{"serial":"A1","state":"unauthorized","lacksUsbPermission":true}]}""",
+			PluginProtocolJson.Options)!;
+		var older = JsonSerializer.Deserialize<AdbStateDto>(
+			"""{"access":"available","revision":1,"devices":[{"serial":"A1","state":"unauthorized"}]}""",
+			PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(current.DefaultDeviceSerial, Is.EqualTo("A1"));
+			Assert.That(current.Devices.Single().LacksUsbPermission, Is.True);
+			Assert.That(older.DefaultDeviceSerial, Is.Null);
+			Assert.That(older.Devices.Single().LacksUsbPermission, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_reader_built_before_device_modes_reads_a_device_in_recovery_as_offline()
+	{
+		const string push = """
+			{"access":"available","revision":5,"devices":[{"serial":"A1","state":"offline","mode":"recovery"}]}
+			""";
+
+		var older = JsonSerializer.Deserialize<AdbStateBeforeStableId>(push, PluginProtocolJson.Options)!;
+		var current = JsonSerializer.Deserialize<AdbStateDto>(push, PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(older.Devices.Single().State, Is.EqualTo(AdbDeviceStates.Offline));
+			Assert.That(current.Devices.Single().Mode, Is.EqualTo(AdbDeviceModes.Recovery));
+			Assert.That(current.AdbUnavailable, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_device_with_usb_permission_is_written_without_the_field()
+	{
+		var json = JsonSerializer.Serialize(new AdbDeviceStateDto { Serial = "A1", State = AdbDeviceStates.Online },
+			PluginProtocolJson.Options);
+
+		Assert.That(json, Does.Not.Contain("lacksUsbPermission"));
+	}
+
 	private sealed record AdbStateBeforeStableId
 	{
 		public string Access { get; init; } = AdbAccessStates.NotEnabled;

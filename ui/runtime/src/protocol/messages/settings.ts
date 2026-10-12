@@ -433,6 +433,7 @@ export interface CompanionAppStatus {
   checking: boolean;
   checkFailed: boolean;
   autoUpdate: boolean;
+  allowPlugins?: boolean;
   adbEnabled: boolean;
   devices: CompanionAppDevice[];
   connectedApps: CompanionAppConnectedApp[];

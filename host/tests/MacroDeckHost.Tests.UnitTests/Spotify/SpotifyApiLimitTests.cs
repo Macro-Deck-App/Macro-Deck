@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using MacroDeck.Sdk.Locale;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Integrations.Spotify;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -293,11 +294,9 @@ internal sealed class SpotifyApiLimitTests
 	public async Task The_api_limit_issue_shows_times_in_the_app_time_format()
 	{
 		var twelveHour = new TimeOfDayFormat(CultureInfo.GetCultureInfo("en-US"), HourCycles.H12);
-		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(),
-			new LimitedTransport(),
-			timeOfDayFormat: () => Task.FromResult(twelveHour));
+		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(), new LimitedTransport());
 		var config = new SpotifyConfigStub();
-		await integration.InitializeAsync(new SpotifyContextStub(config));
+		await integration.InitializeAsync(new SpotifyContextStub(config) { Locale = new FixedLocale(twelveHour) });
 
 		await integration.GetPlayer(config.EntryId.ToString())!.GetStateAsync();
 		var issues = await integration.GetIssuesAsync();

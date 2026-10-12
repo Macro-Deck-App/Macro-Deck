@@ -74,8 +74,6 @@ internal sealed class DisablingAnIntegrationTests
 			new StubEventBindingTracker(),
 			new IntegrationLifecycleTests.FakeNotificationStore(),
 			null!,
-			null!,
-			null!,
 			new VariableRefreshSignal(),
 			new FakeIntegrationHostIssueStore(),
 			layoutHost,

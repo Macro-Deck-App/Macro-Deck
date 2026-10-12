@@ -34,7 +34,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Setup_starts_at_the_code_using_macro_decks_own_application()
 	{
-		var result = await _flow.StartAsync(null!, CancellationToken.None);
+		var result = await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		var step = result.NextStep!;
 		var codeValue = step.Instructions.SelectMany(i => i.Values).Single();
@@ -53,7 +53,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task The_own_client_id_is_an_advanced_field_and_never_required()
 	{
-		var step = (await _flow.StartAsync(null!, CancellationToken.None)).NextStep!;
+		var step = (await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None)).NextStep!;
 
 		var field = step.AdvancedFields.Single();
 		Assert.Multiple(() =>
@@ -69,7 +69,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Every_step_keeps_the_advanced_field_reachable()
 	{
-		var started = (await _flow.StartAsync(null!, CancellationToken.None)).NextStep!;
+		var started = (await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None)).NextStep!;
 		var waiting = (await Submit()).NextStep!;
 		_client.DeviceCodeFailure = new TwitchOAuthTransientException("offline");
 		var retry = (await Submit("other-id")).NextStep!;
@@ -88,7 +88,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task A_pending_authorization_reshows_the_same_step_rather_than_erroring()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		var result = await Submit();
 
@@ -103,7 +103,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Polling_stays_within_its_budget()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		await Submit();
 
@@ -114,7 +114,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Slow_down_widens_the_interval()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.SlowDown));
 
 		await Submit();
@@ -125,7 +125,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task An_expired_device_code_is_replaced_by_a_fresh_one()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Expired));
 
 		var result = await Submit();
@@ -141,7 +141,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task A_declined_authorization_says_so()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Denied));
 
 		var result = await Submit();
@@ -156,7 +156,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task An_own_client_id_replaces_the_code_and_is_used_from_then_on()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		var result = await Submit("my-own-client-id");
 
@@ -174,7 +174,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Clearing_the_own_client_id_goes_back_to_macro_decks_application()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		await Submit("my-own-client-id");
 
 		await Submit(string.Empty);
@@ -191,7 +191,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task Keeping_the_same_own_client_id_keeps_polling_rather_than_restarting()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		await Submit("my-own-client-id");
 
 		await Submit("my-own-client-id");
@@ -202,7 +202,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task A_rejected_own_client_id_points_at_the_client_type_and_the_way_back()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.DeviceCodeFailure = new TwitchOAuthRejectedException("invalid client");
 
 		var result = await Submit("my-own-client-id");
@@ -220,7 +220,7 @@ internal sealed class TwitchConfigFlowTests
 	{
 		_client.DeviceCodeFailure = new TwitchOAuthRejectedException("invalid client");
 
-		var result = await _flow.StartAsync(null!, CancellationToken.None);
+		var result = await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -235,7 +235,7 @@ internal sealed class TwitchConfigFlowTests
 	{
 		_client.DeviceCodeFailure = new TwitchOAuthTransientException("offline");
 
-		var result = await _flow.StartAsync(null!, CancellationToken.None);
+		var result = await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -247,7 +247,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task An_approved_authorization_completes_with_the_tokens_stored_as_secrets()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Success,
 			FakeTwitchOAuthClient.Tokens("access", "refresh", TimeSpan.FromHours(4))));
 
@@ -268,7 +268,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task The_completed_entry_carries_the_identity_the_account_model_needs()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Success,
 			FakeTwitchOAuthClient.Tokens("access", "refresh", TimeSpan.FromHours(4))));
 
@@ -287,7 +287,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task The_completed_entry_records_which_application_authorized_it()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		await Submit("my-own-client-id");
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Success,
 			FakeTwitchOAuthClient.Tokens("access", "refresh", TimeSpan.FromHours(4))));
@@ -300,7 +300,7 @@ internal sealed class TwitchConfigFlowTests
 	[Test]
 	public async Task A_completed_default_setup_records_macro_decks_application()
 	{
-		await _flow.StartAsync(null!, CancellationToken.None);
+		await _flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		_client.PollResults.Enqueue(new TwitchTokenPollResult(TwitchTokenPollStatus.Success,
 			FakeTwitchOAuthClient.Tokens("access", "refresh", TimeSpan.FromHours(4))));
 

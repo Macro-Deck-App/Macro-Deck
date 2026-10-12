@@ -13782,6 +13782,13 @@
     <value>يحتاج {name} إلى ADB للعمل مع أجهزة Android الخاصة بك، لكن المكوّنات الإضافية غير مسموح لها حاليًا باستخدام ADB. هل تسمح للمكوّنات الإضافية باستخدام ADB؟</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequested" xml:space="preserve">
+    <value>يريد مكوّن إضافي استخدام أجهزة Companion الخاصة بك</value>
+  </data>
+  <data name="Notifications.PluginCompanionDevicesAccessRequestedMessage" xml:space="preserve">
+    <value>يريد {name} العمل مع الهواتف والأجهزة اللوحية المتصلة عبر Macro Deck Companion، لكن المكوّنات الإضافية غير مسموح لها حاليًا باستخدامها. هل تسمح للمكوّنات الإضافية باستخدام أجهزة Companion؟</value>
+    <comment>[name:string]</comment>
+  </data>
   <data name="Notifications.PluginIconPackKept" xml:space="preserve">
     <value>تم الاحتفاظ بحزمة الأيقونات</value>
   </data>
@@ -14022,6 +14029,12 @@
   </data>
   <data name="Plugins.UsesAdbNote" xml:space="preserve">
     <value>يستخدم هذا المكوّن الإضافي ADB للعمل مع أجهزة Android الخاصة بك. ويمكنه تشغيل الأوامر عليها ونسخ الملفات وتثبيت التطبيقات.</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesBadge" xml:space="preserve">
+    <value>يستخدم أجهزة Companion</value>
+  </data>
+  <data name="Plugins.UsesCompanionDevicesNote" xml:space="preserve">
+    <value>يستخدم هذا المكوّن الإضافي الأجهزة المتصلة عبر Macro Deck Companion. يمكنه قراءة ما تُبلغ عنه، مثل البطارية والشبكة، وإرسال أوامر إليها والتقاط لقطات شاشة. لا تزال لقطة الشاشة الكاملة تتطلب الموافقة على الجهاز.</value>
   </data>
   <data name="Plugins.VerifiedNoPublisherHint" xml:space="preserve">
     <value>راجعت بوابة مطوّري Macro Deck توقيع هذا المكوّن الإضافي، لكن بيانه لا يذكر أي مؤلف.</value>
@@ -15174,6 +15187,12 @@
   <data name="Settings.CompanionApp.AdbDisabled" xml:space="preserve">
     <value>يحتاج تثبيت التطبيق إلى ADB. فعّله من إعدادات ADB أولًا.</value>
   </data>
+  <data name="Settings.CompanionApp.AllowPluginsDescription" xml:space="preserve">
+    <value>يمكن للمكوّنات الإضافية التي تعلن الوصول إلى أجهزة Companion قراءة ما تُبلغ عنه أجهزة Companion الخاصة بك، وإرسال أوامر إليها والتقاط لقطات شاشة. لا تزال لقطة الشاشة الكاملة تتطلب الموافقة على الجهاز.</value>
+  </data>
+  <data name="Settings.CompanionApp.AllowPluginsLabel" xml:space="preserve">
+    <value>السماح للمكوّنات الإضافية باستخدام أجهزة Companion</value>
+  </data>
   <data name="Settings.CompanionApp.ApkSaved" xml:space="preserve">
     <value>تم حفظ ملف APK.</value>
   </data>
@@ -15291,6 +15310,9 @@
   </data>
   <data name="Settings.CompanionApp.OpenAdbSettings" xml:space="preserve">
     <value>فتح إعدادات ADB</value>
+  </data>
+  <data name="Settings.CompanionApp.PluginAccessHeading" xml:space="preserve">
+    <value>وصول المكوّنات الإضافية</value>
   </data>
   <data name="Settings.CompanionApp.SaveApk" xml:space="preserve">
     <value>حفظ APK</value>

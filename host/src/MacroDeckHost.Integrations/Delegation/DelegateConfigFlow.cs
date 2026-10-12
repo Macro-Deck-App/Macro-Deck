@@ -4,6 +4,7 @@ using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation;
 
@@ -28,7 +29,10 @@ public sealed class DelegateConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	}
 
 	public Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

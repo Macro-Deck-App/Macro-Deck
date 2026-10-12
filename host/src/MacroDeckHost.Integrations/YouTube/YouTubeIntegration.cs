@@ -14,6 +14,7 @@ using MacroDeckHost.Integrations.YouTube.Actions;
 using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube;
 
@@ -134,6 +135,7 @@ public sealed class YouTubeIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_context = context;
 		_pump.Start();
 		await _accounts.ReloadAsync(context.Config, new YouTubeEventEmitter(context.Events));

@@ -6,6 +6,7 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Weather;
 using Serilog;
 using MacroDeck.Localization;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Weather;
 
@@ -21,7 +22,10 @@ internal sealed class WeatherConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(LocationStep()));
+	{
+		IntegrationHttp.Use(context.Http);
+		return Task.FromResult(ConfigFlowResult.Step(LocationStep()));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,

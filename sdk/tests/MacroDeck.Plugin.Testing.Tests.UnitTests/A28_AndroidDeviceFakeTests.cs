@@ -15,6 +15,10 @@ public class A28_AndroidDeviceFakeTests
 {
 	private static readonly string[] _lifecycleEvents = ["connected:A1", "state:Connecting->Online", "disconnected:A1"];
 	private static readonly string[] _connectedAddress = ["192.168.1.20:5555"];
+	private static readonly string[] _keyArguments = ["Wakeup"];
+	private static readonly string[] _tapArguments = ["10", "20"];
+	private static readonly string[] _usbPermissionChange = ["Unauthorized->Unauthorized:True"];
+	private static readonly string[] _modeAndAdbEvents = ["state:Recovery", "access:True"];
 
 	private static readonly string[] _packageCalls =
 	[
@@ -134,6 +138,102 @@ public class A28_AndroidDeviceFakeTests
 			Assert.That(harness.Context.AndroidDevices.Access, Is.EqualTo(AndroidDeviceAccess.Unsupported));
 			Assert.That(((IIntegrationContext)withOwn.Context).AndroidDevices, Is.SameAs(own));
 			Assert.That(withOwn.Services.GetRequiredService<IAndroidDeviceManager>(), Is.SameAs(own));
+		});
+	}
+
+	[Test]
+	public async Task Typed_operations_are_recorded_and_return_the_scripted_screenshot_and_status()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var device = manager.AddDevice("A1");
+		device.Screenshot = [137, 80, 78, 71];
+		device.Status = new AndroidDeviceStatus { IsScreenOn = true, ForegroundPackage = "com.example.app" };
+
+		await device.SendKeyAsync(AndroidKey.Wakeup);
+		await device.TapAsync(10, 20);
+		await device.RebootAsync(AndroidRebootMode.Recovery);
+		var png = await device.CaptureScreenshotAsync();
+		var status = await device.GetStatusAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.Calls.Select(call => call.Operation),
+				Is.EqualTo(new[]
+				{
+					nameof(IAndroidDevice.SendKeyAsync), nameof(IAndroidDevice.TapAsync), nameof(IAndroidDevice.RebootAsync),
+					nameof(IAndroidDevice.CaptureScreenshotAsync), nameof(IAndroidDevice.GetStatusAsync)
+				}));
+			Assert.That(device.Calls[0].Arguments, Is.EqualTo(_keyArguments));
+			Assert.That(device.Calls[1].Arguments, Is.EqualTo(_tapArguments));
+			Assert.That(png, Is.EqualTo(new byte[] { 137, 80, 78, 71 }));
+			Assert.That(status, Is.EqualTo(device.Status));
+		});
+	}
+
+	[Test]
+	public void A_typed_operation_is_refused_like_every_other_without_access()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var device = manager.AddDevice("A1");
+		manager.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
+
+		var exception = Assert.ThrowsAsync<AndroidDeviceException>(() => device.SendKeyAsync(AndroidKey.Home));
+
+		Assert.That(exception!.ErrorCode, Is.EqualTo(AndroidDeviceErrorCode.AdbNotEnabled));
+	}
+
+	[Test]
+	public void The_default_device_is_the_configured_one_or_the_only_attached_device()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var a1 = manager.AddDevice("A1");
+		var single = manager.DefaultDevice;
+		manager.AddDevice("B2");
+		var ambiguous = manager.DefaultDevice;
+		manager.DefaultDeviceSerial = "A1";
+		manager.RemoveDevice("A1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(single, Is.SameAs(a1));
+			Assert.That(ambiguous, Is.Null);
+			Assert.That(manager.DefaultDevice, Is.SameAs(a1), "a configured default device is kept while it is away");
+		});
+	}
+
+	[Test]
+	public void A_device_mode_and_a_missing_adb_are_scriptable_and_raise_their_events()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var device = manager.AddDevice("A1", AndroidDeviceState.Offline);
+		var seen = new List<string>();
+		manager.DeviceStateChanged += (_, e) => seen.Add($"state:{e.Device.Mode}");
+		manager.AccessChanged += (_, _) => seen.Add($"access:{manager.IsAdbUnavailable}");
+
+		manager.SetDeviceMode("A1", AndroidDeviceMode.Recovery);
+		manager.SetAdbUnavailable(true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.Mode, Is.EqualTo(AndroidDeviceMode.Recovery));
+			Assert.That(seen, Is.EqualTo(_modeAndAdbEvents));
+		});
+	}
+
+	[Test]
+	public void Losing_usb_permission_raises_a_state_change_and_keeps_the_device_unauthorized()
+	{
+		var manager = new FakeAndroidDeviceManager();
+		var device = manager.AddDevice("A1", AndroidDeviceState.Unauthorized);
+		var seen = new List<string>();
+		manager.DeviceStateChanged += (_, e) => seen.Add($"{e.PreviousState}->{e.Device.State}:{e.Device.LacksUsbPermission}");
+
+		manager.SetLacksUsbPermission("A1", true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(device.LacksUsbPermission, Is.True);
+			Assert.That(seen, Is.EqualTo(_usbPermissionChange));
 		});
 	}
 }

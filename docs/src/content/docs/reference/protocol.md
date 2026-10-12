@@ -183,7 +183,10 @@ are listed in the descriptor's `capabilityKinds`:
 - `config-entries` was added as a new kind at capability version `1`, additively in major `3`, for a
   plugin taking part in how the host stores its configuration entries. A host that predates it rejects the
   declaration non-fatally and stores entries as it always did. See the
-  [WebSocket reference](/reference/websocket/#config-entries).
+  [WebSocket reference](/reference/websocket/#config-entries). Its `prepare` later gained the optional
+  `rejectedVariableNames` argument and `retryOnConflict` result field, and a `config-flow` `Complete` result
+  the optional `withoutEntry` flag, all within capability version `1`: a peer that predates them leaves them
+  out and the other side behaves as before.
 - `battery-provider` was added as a new kind at capability version `1`, additively in major `3`, together
   with the `batteries` host API. Its only operation is `describe`; devices travel the other way - see
   [`batteries`](/reference/websocket/#batteries) and [Batteries](/features/batteries/).
@@ -210,11 +213,19 @@ maps these to `IIntegrationContext`. Some synchronous-looking SDK state is serve
 `host.state` snapshot, so check [Capability parity](/reference/capability-parity/) before assuming
 in-process timing.
 
-`variables` gained `refresh`, `history.open`, `history.read` and `history.close`, `widgets` gained
+`variables` gained `refresh`, `history.open`, `history.read`, `history.close` and `bind`, `widgets` gained
 `get-data`, `ui` gained `origin.report-failure` and `origin.show-modal`, and the `weather` api with
 `snapshots-changed` was added, additively in major `3`. A host
 that predates them answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into a no-op,
-`false`, no widget data, an unsupported variable history or a cancellation.
+`false`, no widget data, an unsupported variable history, a `NotSupportedException` for bindings or a
+cancellation. `refresh` later gained an optional `definitionIds` argument, which a host that predates it
+ignores, reading every declared variable instead.
+
+The `locale` host API (`time-of-day-format`) and the push-only `http` host API were added the same way. A
+host that predates `locale` answers `CAPABILITY_UNSUPPORTED`, which `MacroDeck.Plugin.Hosting` turns into the
+plugin's current culture with a 24-hour clock; a host that predates `http` pushes nothing, so the SDK reports
+its default User-Agent. Integration storage is not a host API: the SDK keeps it in the plugin's own data
+directory.
 
 The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `clients` is one
 connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`
@@ -223,11 +234,25 @@ host restarts; hosts that predate it omit both fields, which read as an empty li
 arrive out of order, so apply one only when its revision is higher than the last one applied in this
 session, always apply revision 0, and reset the last applied revision when a session is not resumed.
 
-The `adb` snapshot, pushed per plugin, follows the same revision rule. It is the only host API a plugin
-may be refused by its manifest: see [the WebSocket reference](/reference/websocket/#adb).
+The `adb` snapshot, pushed per plugin, follows the same revision rule. It is one of the two host APIs a
+plugin may be refused by its manifest: see [the WebSocket reference](/reference/websocket/#adb).
 
-A callback can return bytes: an icon from the `devices` api's `icon` operation, or a widget's rendered
-action icon from its `widget-icon` operation. These travel over `host.asset.*`, a host-to-plugin
+The `companion-devices` host API (`wait`, `send`, `request`, `screenshot`) is the other, gated by
+`host:companion-devices` and the user's consent, and was added additively in major `3` with its own per-plugin
+snapshot under the same revision rule. A host that predates it answers `CAPABILITY_UNSUPPORTED` and pushes
+nothing, which `MacroDeck.Plugin.Hosting` reports as access `Unsupported`, a send that answers `false` and a
+request or screenshot that fails as not connected; an older plugin ignores the push. See
+[`companion-devices`](/reference/websocket/#companion-devices) and
+[Companion devices](/features/companion-devices/).
+
+The `music-players` host API (`album-color`) was added the same way, with a snapshot of every provider's
+players that every plugin receives under the same revision rule. It is not gated. A host that predates it
+answers `CAPABILITY_UNSUPPORTED` and pushes nothing, which `MacroDeck.Plugin.Hosting` reports as no players
+and no colour; an older plugin ignores the push. See [`music-players`](/reference/websocket/#music-players).
+
+A callback can return bytes: an icon from the `devices` api's `icon` operation, a widget's rendered
+action icon from its `widget-icon` operation, an Android screenshot from the `adb` api's `screenshot`
+operation, or a Companion device's screenshot from the `companion-devices` api's `screenshot` operation. These travel over `host.asset.*`, a host-to-plugin
 pipeline kept separate from the plugin-to-host `asset.*` types so those keep their major-1 direction.
 See [the WebSocket reference](/reference/websocket/#assets).
 
@@ -278,8 +303,10 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `ICON_PACK_INVALID` | The icon pack archive is not usable. |
 | `ICON_PACK_SYNC_NOT_ALLOWED` | Only a self-registered development session can sync bundled icon packs. |
 | `ICON_NOT_FOUND` | No installed icon pack contains an icon with this id. |
+| `COMPANION_DEVICES_NOT_ALLOWED` | This plugin is not allowed to use Companion devices. |
 
-The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API; see
+The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API, and
+`COMPANION_DEVICES_NOT_ALLOWED` only the `companion-devices` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic
 code, for example `developer_mode_disabled`, `host_locked`, one of the `adb_` reasons of `ADB_FAILED`, or
 one of the `video_stream_` reasons of `CAPABILITY_UNAVAILABLE` (see

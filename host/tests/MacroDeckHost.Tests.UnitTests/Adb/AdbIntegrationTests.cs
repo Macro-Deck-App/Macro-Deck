@@ -1,8 +1,10 @@
+using MacroDeckHost.Localization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Integrations.Adb;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -17,14 +19,14 @@ namespace MacroDeckHost.Tests.UnitTests.Adb;
 [TestFixture]
 internal sealed class AdbIntegrationTests
 {
-	private FakeAdbGateway _gateway = null!;
+	private ScriptedAndroidDevices _devices = null!;
 	private AdbIntegration _integration = null!;
 	private RecordingPublisher _publisher = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_gateway = new FakeAdbGateway();
+		_devices = new ScriptedAndroidDevices();
 		_integration = new AdbIntegration();
 		_publisher = new RecordingPublisher();
 	}
@@ -32,13 +34,7 @@ internal sealed class AdbIntegrationTests
 	[TearDown]
 	public void TearDown() => _integration.Dispose();
 
-	private static AdbGatewayDevice Device(
-		string serial = "ABC123",
-		AdbGatewayDeviceState state = AdbGatewayDeviceState.Device,
-		string? model = null)
-		=> new(serial, state, model, Manufacturer: null, TunnelEstablished: true);
-
-	private Task Initialize() => _integration.InitializeAsync(new FakeContext { Events = _publisher });
+	private Task Initialize() => _integration.InitializeAsync(new FakeContext { Events = _publisher, AndroidDevices = _devices });
 
 	[Test]
 	public void The_integration_is_identified()
@@ -112,20 +108,15 @@ internal sealed class AdbIntegrationTests
 	}
 
 	[Test]
-	public async Task GetIssuesAsync_before_a_gateway_is_bound_reports_nothing()
+	public async Task GetIssuesAsync_before_initialization_reports_nothing()
 	{
-		await Initialize();
-
-		// UseGateway was never called on this instance - the defensive path a badge poll could still
-		// hit if it races the host's own startup binding.
 		Assert.That(await _integration.GetIssuesAsync(), Is.Empty);
 	}
 
 	[Test]
 	public async Task GetIssuesAsync_reports_when_ADB_is_turned_off()
 	{
-		_gateway.IsEnabled = false;
-		_integration.UseGateway(_gateway);
+		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -141,7 +132,6 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_no_devices_connected()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -152,8 +142,7 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_does_not_report_no_devices_when_one_is_connected()
 	{
-		_gateway.Devices = [Device()];
-		_integration.UseGateway(_gateway);
+		_devices.Attach("ABC123", stableId: null);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -164,13 +153,9 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_one_issue_per_unauthorized_device()
 	{
-		_gateway.Devices =
-		[
-			Device("S1", AdbGatewayDeviceState.Unauthorized),
-			Device("S2", AdbGatewayDeviceState.NoPermissions),
-			Device("S3", AdbGatewayDeviceState.Device)
-		];
-		_integration.UseGateway(_gateway);
+		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Unauthorized);
+		_devices.Attach("S2", stableId: null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		_devices.Attach("S3", stableId: null, state: AndroidDeviceState.Online);
 		await Initialize();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -187,10 +172,44 @@ internal sealed class AdbIntegrationTests
 	}
 
 	[Test]
+	public async Task A_device_lacking_usb_permission_gets_the_usb_permission_description()
+	{
+		_devices.Attach("S1", stableId: null, state: AndroidDeviceState.Unauthorized);
+		_devices.Attach("S2", stableId: null, state: AndroidDeviceState.Unauthorized, lacksUsbPermission: true);
+		await Initialize();
+
+		var issues = await _integration.GetIssuesAsync();
+		string? Description(string serial)
+			=> TestLocalization.Resolve(issues.Single(issue => issue.Id == $"{AdbIntegration.UnauthorizedIssuePrefix}{serial}")
+				.Description);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Description("S2"),
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Integrations.Adb.Issues.NoPermissionsDescription())));
+			Assert.That(Description("S1"),
+				Is.EqualTo(TestLocalization.Resolve(AppStrings.Integrations.Adb.Issues.UnauthorizedDescription())));
+		});
+	}
+
+	[Test]
 	public async Task GetIssuesAsync_reports_executable_not_found_after_a_failing_action()
 	{
-		_gateway.NextResult = AdbGatewayResult.Fail(AdbGatewayFailureCode.ExecutableNotFound, "not found");
-		_integration.UseGateway(_gateway);
+		_devices.Attach("ABC123", stableId: null).NextFailure =
+			new AndroidDeviceException(AndroidDeviceErrorCode.AdbUnavailable, "not found");
+		await Initialize();
+
+		await RunWakeAction();
+
+		var issues = await _integration.GetIssuesAsync();
+
+		Assert.That(issues.Select(issue => issue.Id), Does.Contain(AdbIntegration.ExecutableNotFoundIssueId));
+	}
+
+	[Test]
+	public async Task Without_adb_and_without_any_device_an_action_still_reports_executable_not_found()
+	{
+		_devices.IsAdbUnavailable = true;
 		await Initialize();
 
 		await RunWakeAction();
@@ -203,12 +222,12 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_clears_executable_not_found_after_a_successful_action()
 	{
-		_gateway.NextResult = AdbGatewayResult.Fail(AdbGatewayFailureCode.ExecutableNotFound, "not found");
-		_integration.UseGateway(_gateway);
+		var device = _devices.Attach("ABC123", stableId: null);
+		device.NextFailure = new AndroidDeviceException(AndroidDeviceErrorCode.AdbUnavailable, "not found");
 		await Initialize();
 		await RunWakeAction();
 
-		_gateway.NextResult = AdbGatewayResult.Ok();
+		device.NextFailure = null;
 		await RunWakeAction();
 
 		var issues = await _integration.GetIssuesAsync();
@@ -227,10 +246,9 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task A_device_change_publishes_exactly_one_occurrence()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
-		_gateway.RaiseDeviceChanged(AdbGatewayDeviceChangeKind.Connected, Device());
+		_devices.Attach("ABC123", stableId: null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -238,12 +256,10 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task Reinitializing_without_shutting_down_first_still_delivers_exactly_one_occurrence()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
-		_gateway.RaiseDeviceChanged(AdbGatewayDeviceChangeKind.Connected, Device());
+		_devices.Attach("ABC123", stableId: null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -251,14 +267,11 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task Shutdown_then_reinitialize_delivers_exactly_one_occurrence()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 		await _integration.ShutdownAsync();
-
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
-		_gateway.RaiseDeviceChanged(AdbGatewayDeviceChangeKind.Connected, Device());
+		_devices.Attach("ABC123", stableId: null);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1));
 	}
@@ -266,11 +279,10 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task Shutdown_stops_delivering_events()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 		await _integration.ShutdownAsync();
 
-		_gateway.RaiseDeviceChanged(AdbGatewayDeviceChangeKind.Connected, Device());
+		_devices.Attach("ABC123", stableId: null);
 
 		Assert.That(_publisher.Published, Is.Empty);
 	}
@@ -278,7 +290,6 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task Dispose_is_idempotent()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
 		Assert.DoesNotThrow(() =>
@@ -291,13 +302,23 @@ internal sealed class AdbIntegrationTests
 	[Test]
 	public async Task Dispose_stops_delivering_events()
 	{
-		_integration.UseGateway(_gateway);
 		await Initialize();
 
 		_integration.Dispose();
-		_gateway.RaiseDeviceChanged(AdbGatewayDeviceChangeKind.Connected, Device());
+		_devices.Attach("ABC123", stableId: null);
 
 		Assert.That(_publisher.Published, Is.Empty);
+	}
+
+	[Test]
+	public async Task The_integration_reaches_adb_only_through_its_context()
+	{
+		_devices.Attach("ABC123", stableId: null);
+		await Initialize();
+
+		await RunWakeAction();
+
+		Assert.That(_devices.Calls, Is.EqualTo(new[] { "SendKey:ABC123:Wakeup" }));
 	}
 
 	private async Task RunWakeAction()
@@ -324,5 +345,7 @@ internal sealed class AdbIntegrationTests
 		public IEventPublisher Events { get; init; } = new RecordingPublisher();
 
 		public IUserNotifier Notifications => throw new NotSupportedException();
+
+		public IAndroidDeviceManager AndroidDevices { get; init; } = UnsupportedAndroidDeviceManager.Instance;
 	}
 }

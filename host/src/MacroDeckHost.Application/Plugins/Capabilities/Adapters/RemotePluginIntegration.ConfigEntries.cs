@@ -23,7 +23,10 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 					Values = preparation.Values,
 					Existing = preparation.Existing is null ? null : ToDto(preparation.Existing),
 					Siblings = [.. preparation.Siblings.Select(ToDto)],
-					TitleChanged = preparation.TitleChanged
+					TitleChanged = preparation.TitleChanged,
+					RejectedVariableNames = preparation.RejectedVariableNames.Count == 0
+						? null
+						: preparation.RejectedVariableNames
 				},
 				cancellationToken)
 			.ConfigureAwait(false);
@@ -42,7 +45,10 @@ public abstract partial class RemotePluginIntegration : IConfigEntryLifecycle
 						{
 							Id = variable.DefinitionId
 						})
-				])
+				]) with
+				{
+					RetryOnConflict = result.RetryOnConflict == true
+				}
 			: ConfigEntryPreparationResult.Refuse(result.Error ?? default);
 	}
 

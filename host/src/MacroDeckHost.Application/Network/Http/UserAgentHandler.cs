@@ -26,14 +26,3 @@ public sealed class UserAgentHandler : DelegatingHandler
 		return base.SendAsync(request, cancellationToken);
 	}
 }
-
-public static class UserAgentWebSocket
-{
-	public static void Apply(System.Net.WebSockets.ClientWebSocketOptions options, IHttpUserAgentSource source)
-	{
-		ArgumentNullException.ThrowIfNull(options);
-		ArgumentNullException.ThrowIfNull(source);
-
-		options.SetRequestHeader("User-Agent", source.Current);
-	}
-}

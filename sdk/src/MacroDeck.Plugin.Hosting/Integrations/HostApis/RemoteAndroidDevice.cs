@@ -15,15 +15,23 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 	private static readonly TimeSpan _shellTimeout = TimeSpan.FromSeconds(90);
 	private static readonly TimeSpan _transferTimeout = TimeSpan.FromMinutes(5.5);
 
+	private static readonly TimeSpan _commandTimeout = TimeSpan.FromSeconds(20);
+	private static readonly TimeSpan _rebootTimeout = TimeSpan.FromSeconds(40);
+	private static readonly TimeSpan _screenshotTimeout = TimeSpan.FromSeconds(40);
+
 	private readonly IHostInvoker _invoker;
+	private readonly IPluginHostAssetReceiver? _assets;
 	private readonly Lock _gate = new();
 	private AndroidDeviceInfo _info = new(null, null, null);
 	private AndroidDeviceState _state = AndroidDeviceState.Offline;
+	private bool _lacksUsbPermission;
+	private AndroidDeviceMode _mode;
 
-	public RemoteAndroidDevice(string serial, IHostInvoker invoker)
+	public RemoteAndroidDevice(string serial, IHostInvoker invoker, IPluginHostAssetReceiver? assets = null)
 	{
 		Serial = serial;
 		_invoker = invoker;
+		_assets = assets;
 	}
 
 	public string Serial { get; }
@@ -46,6 +54,28 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 			lock (_gate)
 			{
 				return _state;
+			}
+		}
+	}
+
+	public bool LacksUsbPermission
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _lacksUsbPermission;
+			}
+		}
+	}
+
+	public AndroidDeviceMode Mode
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return _mode;
 			}
 		}
 	}
@@ -141,14 +171,197 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 			.Installed;
 	}
 
-	internal void Update(AndroidDeviceInfo info, AndroidDeviceState state)
+	public Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default)
+		=> ToWireKey(key) is { } wireKey
+			? InvokeAsync(HostOperations.Adb.Key,
+				new AdbKeyArguments { Serial = Serial, Key = wireKey },
+				_commandTimeout,
+				cancellationToken)
+			: Task.FromException(new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument, $"Unknown key {key}."));
+
+	public Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
+		=> InvokeAsync(HostOperations.Adb.Tap,
+			new AdbTapArguments { Serial = Serial, X = x, Y = y },
+			_commandTimeout,
+			cancellationToken);
+
+	public Task SwipeAsync(int fromX,
+		int fromY,
+		int toX,
+		int toY,
+		TimeSpan duration,
+		CancellationToken cancellationToken = default)
+		=> InvokeAsync(HostOperations.Adb.Swipe,
+			new AdbSwipeArguments
+			{
+				Serial = Serial,
+				FromX = fromX,
+				FromY = fromY,
+				ToX = toX,
+				ToY = toY,
+				DurationMilliseconds = (int)Math.Clamp(Math.Round(duration.TotalMilliseconds), int.MinValue, int.MaxValue)
+			},
+			_commandTimeout,
+			cancellationToken);
+
+	public Task InputTextAsync(string text, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(text);
+		return InvokeAsync(HostOperations.Adb.InputText,
+			new AdbTextArguments { Serial = Serial, Text = text },
+			_commandTimeout,
+			cancellationToken);
+	}
+
+	public Task StartAppAsync(string packageName, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(packageName);
+		return InvokeAsync(HostOperations.Adb.StartApp,
+			new AdbPackageArguments { Serial = Serial, PackageName = packageName },
+			_commandTimeout,
+			cancellationToken);
+	}
+
+	public Task ForceStopAppAsync(string packageName, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(packageName);
+		return InvokeAsync(HostOperations.Adb.ForceStopApp,
+			new AdbPackageArguments { Serial = Serial, PackageName = packageName },
+			_commandTimeout,
+			cancellationToken);
+	}
+
+	public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(uri);
+		return InvokeAsync(HostOperations.Adb.OpenUri,
+			new AdbUriArguments { Serial = Serial, Uri = uri },
+			_commandTimeout,
+			cancellationToken);
+	}
+
+	public Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
+	{
+		string? wireMode = mode switch
+		{
+			AndroidRebootMode.Normal => AdbRebootModes.Normal,
+			AndroidRebootMode.Recovery => AdbRebootModes.Recovery,
+			AndroidRebootMode.Bootloader => AdbRebootModes.Bootloader,
+			_ => null
+		};
+
+		return wireMode is null
+			? Task.FromException(new AndroidDeviceException(AndroidDeviceErrorCode.InvalidArgument,
+				$"Unknown reboot mode {mode}."))
+			: InvokeAsync(HostOperations.Adb.Reboot,
+				new AdbRebootArguments { Serial = Serial, Mode = wireMode },
+				_rebootTimeout,
+				cancellationToken);
+	}
+
+	public async Task<byte[]> CaptureScreenshotAsync(CancellationToken cancellationToken = default)
+	{
+		if (_assets is null)
+		{
+			throw new AndroidDeviceException(AndroidDeviceErrorCode.Unsupported,
+				"This plugin host cannot receive a screenshot.");
+		}
+
+		var result = Read<AdbScreenshotResultDto>(await InvokeAsync(HostOperations.Adb.Screenshot,
+			new AdbDeviceArguments { Serial = Serial },
+			_screenshotTimeout,
+			cancellationToken));
+
+		if (string.IsNullOrEmpty(result.TransferId))
+		{
+			throw new AndroidDeviceException(AndroidDeviceErrorCode.Unknown, "The host sent no screenshot.");
+		}
+
+		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		timeout.CancelAfter(ProtocolTimeouts.AssetUpload);
+		HostAssetTransfer transfer;
+		try
+		{
+			transfer = await _assets.AwaitAsync(result.TransferId, timeout.Token).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+		{
+			throw new AndroidDeviceException(AndroidDeviceErrorCode.Timeout, "The screenshot did not arrive in time.");
+		}
+
+		return transfer.Accepted
+			? transfer.Content
+			: throw new AndroidDeviceException(AndroidDeviceErrorCode.Unknown, "The screenshot transfer failed.");
+	}
+
+	public async Task<AndroidDeviceStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
+	{
+		JsonElement? data;
+		try
+		{
+			data = await InvokeAsync(HostOperations.Adb.Status,
+				new AdbDeviceArguments { Serial = Serial },
+				ProtocolTimeouts.DefaultRequest,
+				cancellationToken);
+		}
+		catch (AndroidDeviceException exception) when (exception.ErrorCode == AndroidDeviceErrorCode.Unsupported &&
+			exception.InnerException is HostInvocationException { Code: ProtocolErrorCodes.CapabilityUnsupported })
+		{
+			return null;
+		}
+
+		if (data is not { ValueKind: JsonValueKind.Object })
+		{
+			return null;
+		}
+
+		var status = Read<AdbDeviceStatusDto>(data);
+		return new AndroidDeviceStatus
+		{
+			IsScreenOn = status.ScreenOn,
+			IsLocked = status.Locked,
+			ForegroundPackage = status.ForegroundPackage
+		};
+	}
+
+	internal void Update(AndroidDeviceInfo info,
+		AndroidDeviceState state,
+		bool lacksUsbPermission = false,
+		AndroidDeviceMode mode = AndroidDeviceMode.Normal)
 	{
 		lock (_gate)
 		{
 			_info = info;
 			_state = state;
+			_lacksUsbPermission = lacksUsbPermission;
+			_mode = mode;
 		}
 	}
+
+	private static string? ToWireKey(AndroidKey key) => key switch
+	{
+		AndroidKey.Home => AdbKeys.Home,
+		AndroidKey.Back => AdbKeys.Back,
+		AndroidKey.Enter => AdbKeys.Enter,
+		AndroidKey.Menu => AdbKeys.Menu,
+		AndroidKey.Search => AdbKeys.Search,
+		AndroidKey.VolumeUp => AdbKeys.VolumeUp,
+		AndroidKey.VolumeDown => AdbKeys.VolumeDown,
+		AndroidKey.VolumeMute => AdbKeys.VolumeMute,
+		AndroidKey.MediaPlayPause => AdbKeys.MediaPlayPause,
+		AndroidKey.MediaNext => AdbKeys.MediaNext,
+		AndroidKey.MediaPrevious => AdbKeys.MediaPrevious,
+		AndroidKey.Power => AdbKeys.Power,
+		AndroidKey.Sleep => AdbKeys.Sleep,
+		AndroidKey.Wakeup => AdbKeys.Wakeup,
+		AndroidKey.AppSwitch => AdbKeys.AppSwitch,
+		AndroidKey.DpadUp => AdbKeys.DpadUp,
+		AndroidKey.DpadDown => AdbKeys.DpadDown,
+		AndroidKey.DpadLeft => AdbKeys.DpadLeft,
+		AndroidKey.DpadRight => AdbKeys.DpadRight,
+		AndroidKey.DpadCenter => AdbKeys.DpadCenter,
+		_ => null
+	};
 
 	private async Task<JsonElement?> InvokeAsync(string operation,
 		object arguments,
@@ -215,6 +428,7 @@ internal sealed class RemoteAndroidDevice : IAndroidDevice
 			ProtocolErrorCodes.Timeout => AndroidDeviceErrorCode.Timeout,
 			ProtocolErrorCodes.RateLimited => AndroidDeviceErrorCode.RateLimited,
 			ProtocolErrorCodes.InvalidPayload => AndroidDeviceErrorCode.InvalidArgument,
+			ProtocolErrorCodes.PayloadTooLarge => AndroidDeviceErrorCode.CommandFailed,
 			_ => AndroidDeviceErrorCode.Unknown
 		};
 

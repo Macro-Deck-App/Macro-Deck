@@ -5,7 +5,7 @@ namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Assets;
 [TestFixture]
 public class UiResourceRulesTests
 {
-	private static readonly string[] _publishedKinds = ["icon", "artwork", "action-icon", "ui-resource", "icon-pack"];
+	private static readonly string[] _publishedKinds = ["icon", "artwork", "action-icon", "ui-resource", "icon-pack", "android-screenshot", "companion-screenshot"];
 
 	[TestCase("photo")]
 	[TestCase("a")]

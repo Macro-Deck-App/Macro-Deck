@@ -22,6 +22,8 @@ public sealed class FakeVariableApi : IVariableApi
 	private readonly Dictionary<string, List<double?>> _samples = new(StringComparer.Ordinal);
 	private readonly List<HistoryWindow> _historyWindows = [];
 	private readonly Dictionary<string, IVariableHistoryWindow> _wireWindows = new(StringComparer.Ordinal);
+	private readonly List<IReadOnlyList<string>> _definitionRefreshes = [];
+	private readonly List<VariableBindingRequest> _bindings = [];
 	private int _refreshRequests;
 	private int _declarationChanges;
 
@@ -137,6 +139,89 @@ public sealed class FakeVariableApi : IVariableApi
 		cancellationToken.ThrowIfCancellationRequested();
 		Interlocked.Increment(ref _refreshRequests);
 		return Task.CompletedTask;
+	}
+
+	/// <summary>The definition ids of every <see cref="RequestDefinitionRefreshAsync" /> call that named any,
+	/// one entry per call, in call order. Such a call does not count towards <see cref="RefreshRequests" />.</summary>
+	public IReadOnlyList<IReadOnlyList<string>> DefinitionRefreshRequests
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _definitionRefreshes];
+			}
+		}
+	}
+
+	/// <inheritdoc />
+	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(definitionIds);
+		cancellationToken.ThrowIfCancellationRequested();
+		if (definitionIds.Count > 0)
+		{
+			lock (_gate)
+			{
+				_definitionRefreshes.Add([.. definitionIds]);
+			}
+		}
+
+		return Task.CompletedTask;
+	}
+
+	/// <summary>Every binding <see cref="BindAsync" /> recorded, in call order. A request for a resource that
+	/// is already bound is not repeated here.</summary>
+	public IReadOnlyList<VariableBindingRequest> Bindings
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _bindings];
+			}
+		}
+	}
+
+	/// <summary>
+	/// Records bindings the way Macro Deck does: a resource already bound answers
+	/// <see cref="VariableBindingOutcome.AlreadyBound" />, and an invalid name rejects the whole call. Unlike Macro
+	/// Deck, it creates no variables later.
+	/// </summary>
+	/// <exception cref="ArgumentException">A name or resource id is invalid; nothing was recorded.</exception>
+	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(requests);
+		cancellationToken.ThrowIfCancellationRequested();
+		foreach (var request in requests)
+		{
+			if (request is null || string.IsNullOrWhiteSpace(request.LocalResourceId) || !VariableNames.IsValid(request.Name))
+			{
+				throw new ArgumentException($"'{request?.Name}' is not a valid binding.", nameof(requests));
+			}
+		}
+
+		lock (_gate)
+		{
+			var bound = _bindings.Select(binding => binding.LocalResourceId).ToHashSet(StringComparer.Ordinal);
+			var outcomes = new List<VariableBindingOutcome>(requests.Count);
+			foreach (var request in requests)
+			{
+				if (bound.Add(request.LocalResourceId))
+				{
+					_bindings.Add(request);
+					outcomes.Add(VariableBindingOutcome.Bound);
+				}
+				else
+				{
+					outcomes.Add(VariableBindingOutcome.AlreadyBound);
+				}
+			}
+
+			return Task.FromResult<IReadOnlyList<VariableBindingOutcome>>(outcomes);
+		}
 	}
 
 	/// <inheritdoc />

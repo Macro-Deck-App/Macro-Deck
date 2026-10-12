@@ -1,5 +1,4 @@
 using System.Globalization;
-using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Actions;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
 using MacroDeck.Localization;
@@ -13,6 +12,7 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop;
 
@@ -26,7 +26,6 @@ public sealed class StreamlabsDesktopIntegration
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.streamlabs-desktop";
@@ -39,7 +38,6 @@ public sealed class StreamlabsDesktopIntegration
 	private readonly VariableApiAccessor _variableAccessor = new();
 
 	private StreamlabsDesktopConnection? _connection;
-	private IVariableRefreshSignal? _refreshSignal;
 	private StreamlabsDesktopEventEmitter? _events;
 
 	public StreamlabsDesktopIntegration()
@@ -66,8 +64,6 @@ public sealed class StreamlabsDesktopIntegration
 	public bool AllowsMultipleConfigurations => false;
 
 	public byte[] GetIcon() => _icon;
-
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
 
 	public IConfigFlow CreateConfigFlow() => new StreamlabsDesktopConfigFlow();
 
@@ -97,6 +93,7 @@ public sealed class StreamlabsDesktopIntegration
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new StreamlabsDesktopEventEmitter(context.Events);
@@ -225,7 +222,7 @@ public sealed class StreamlabsDesktopIntegration
 			StreamlabsDesktopEndpoint.Create(host, port),
 			token,
 			_events,
-			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
 		_connection.Start();
 	}
 

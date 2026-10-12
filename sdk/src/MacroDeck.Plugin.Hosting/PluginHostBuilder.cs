@@ -19,6 +19,8 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Plugin.Hosting.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Handshake;
@@ -27,7 +29,9 @@ using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Colors;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Widgets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -502,6 +506,16 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<IColorApi>(provider => provider.GetRequiredService<RemoteColorApi>());
 		Services.TryAddSingleton<RemoteBatteryApi>();
 		Services.TryAddSingleton<IBatteryApi>(provider => provider.GetRequiredService<RemoteBatteryApi>());
+		Services.TryAddSingleton<RemoteMusicPlayerApi>();
+		Services.TryAddSingleton<IMusicPlayerApi>(provider => provider.GetRequiredService<RemoteMusicPlayerApi>());
+		Services.TryAddSingleton<RemoteLocaleApi>();
+		Services.TryAddSingleton<RemoteHostHttp>();
+		Services.TryAddSingleton<IHostHttp>(provider => provider.GetRequiredService<RemoteHostHttp>());
+		Services.TryAddSingleton<RemoteCompanionDeviceApi>();
+		Services.TryAddSingleton<ICompanionDeviceApi>(provider => provider.GetRequiredService<RemoteCompanionDeviceApi>());
+		Services.TryAddSingleton<IIntegrationStorage>(provider => PluginIntegrationStorage.Create(
+			provider.GetRequiredService<IOptions<PluginHostOptions>>().Value.DataDirectory,
+			provider.GetRequiredService<PluginMetadata>().Id));
 		Services.TryAddSingleton<RemoteBatteryProviderContext>();
 		Services.TryAddSingleton<IBatteryProviderContext>(provider
 			=> provider.GetRequiredService<RemoteBatteryProviderContext>());

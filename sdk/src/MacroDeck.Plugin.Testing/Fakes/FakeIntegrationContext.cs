@@ -2,12 +2,17 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Colors;
+using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Http;
+using MacroDeck.Sdk.Locale;
 using MacroDeck.Sdk.Messaging;
+using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Weather;
@@ -59,6 +64,11 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		BatteryProvider = new FakeBatteryProviderContext();
 		AndroidDevices = new FakeAndroidDeviceManager();
 		WeatherProvider = new FakeWeatherProviderApi();
+		Storage = new FakeIntegrationStorage();
+		Locale = new FakeLocaleApi();
+		Http = new FakeHostHttp();
+		CompanionDevices = new FakeCompanionDeviceApi();
+		MusicPlayers = new FakeMusicPlayerApi();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -198,6 +208,41 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	internal void UseRegisteredAndroidDevices(IAndroidDeviceManager androidDevices)
 		=> _registeredAndroidDevices = ReferenceEquals(androidDevices, AndroidDevices) ? null : androidDevices;
+
+	/// <summary>This integration's stored documents - see <see cref="FakeIntegrationStorage" />.</summary>
+	public FakeIntegrationStorage Storage { get; }
+
+	/// <inheritdoc />
+	IIntegrationStorage IIntegrationContext.Storage => Storage;
+
+	/// <summary>The user's language and time format - see <see cref="FakeLocaleApi" />.</summary>
+	public FakeLocaleApi Locale { get; }
+
+	/// <inheritdoc />
+	ILocaleApi IIntegrationContext.Locale => Locale;
+
+	/// <summary>What outgoing requests carry - see <see cref="FakeHostHttp" />.</summary>
+	public FakeHostHttp Http { get; }
+
+	/// <inheritdoc />
+	IHostHttp IIntegrationContext.Http => Http;
+
+	/// <summary>
+	/// The Companion devices - see <see cref="FakeCompanionDeviceApi" />. <see cref="PluginTestHarness" /> also
+	/// registers it as the plugin's <see cref="ICompanionDeviceApi" />, with access
+	/// <see cref="CompanionDeviceAccess.Unsupported" /> until the test calls
+	/// <see cref="FakeCompanionDeviceApi.SetAccess" />.
+	/// </summary>
+	public FakeCompanionDeviceApi CompanionDevices { get; }
+
+	/// <inheritdoc />
+	ICompanionDeviceApi IIntegrationContext.CompanionDevices => CompanionDevices;
+
+	/// <summary>The music players of every provider and their album colours - see <see cref="FakeMusicPlayerApi" />.</summary>
+	public FakeMusicPlayerApi MusicPlayers { get; }
+
+	/// <inheritdoc />
+	IMusicPlayerApi IIntegrationContext.MusicPlayers => MusicPlayers;
 
 	/// <inheritdoc />
 	IUiResourceRegistry IIntegrationContext.UiResources => UiResources;

@@ -1,10 +1,10 @@
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.MusicPlayer;
+using MacroDeck.Sdk.MusicPlayer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Tests.UnitTests.MusicPlayer;
@@ -47,7 +47,12 @@ internal sealed class MusicPlayerSystemIntegrationTests
 	private static async Task<IntegrationRegistry> Registry(Dictionary<string, bool> stored)
 	{
 		var integration = new MusicPlayerIntegration();
-		integration.UseAlbumColor(new FixedAlbumColor());
+		var players = new FixedMusicPlayerApi();
+		players.Players.Add(new MusicPlayerInstanceSnapshot
+		{
+			Id = "spotify::default", ProviderId = "spotify", ProviderName = "Spotify", DisplayName = "Spotify"
+		});
+		await integration.InitializeAsync(FixedMusicPlayerApi.ContextWith(players));
 		var registry = new IntegrationRegistry(
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			new StateStore(stored),
@@ -63,14 +68,5 @@ internal sealed class MusicPlayerSystemIntegrationTests
 		public void Save(IReadOnlyDictionary<string, bool> updated)
 		{
 		}
-	}
-
-	private sealed class FixedAlbumColor : IMusicPlayerAlbumColor
-	{
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
-			=> [new MusicPlayerInstanceDescriptor("spotify::default", "spotify", "Spotify", "Spotify", false)];
-
-		public Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>("#102030");
 	}
 }

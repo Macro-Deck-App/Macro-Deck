@@ -1,5 +1,3 @@
-using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Integrations.HomeAssistant.Actions;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeck.Localization;
@@ -7,12 +5,14 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
+using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
+using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.HomeAssistant;
 
@@ -25,9 +25,7 @@ public sealed class HomeAssistantIntegration
 		IEventProvider,
 		IDynamicEventOptionsProvider,
 		IIntegrationIssueProvider,
-		IHomeAssistantBindingStoreConsumer,
 		IMigrationProvider,
-		IVariableRefreshSignalConsumer,
 		IDisposable
 {
 	public const string IntegrationId = "app.macro-deck.homeassistant";
@@ -46,10 +44,8 @@ public sealed class HomeAssistantIntegration
 	private readonly HomeAssistantVariableCatalog _dynamicVariables;
 
 	private HomeAssistantConnection? _connection;
-	private IVariableRefreshSignal? _refreshSignal;
 	private HomeAssistantEventEmitter? _events;
 	private IIntegrationConfig? _config;
-	private IVariableBindingStore? _bindingStore;
 
 	public HomeAssistantIntegration()
 	{
@@ -109,8 +105,6 @@ public sealed class HomeAssistantIntegration
 
 	public byte[] GetIcon() => _icon;
 
-	public void UseVariableRefreshSignal(IVariableRefreshSignal signal) => _refreshSignal = signal;
-
 	public IConfigFlow CreateConfigFlow() => new HomeAssistantConfigFlow(() => new HomeAssistantClient());
 
 	public bool SupportsCatalog => true;
@@ -142,10 +136,9 @@ public sealed class HomeAssistantIntegration
 	public Task OnAttachedAsync(IVariableSink sink, CancellationToken cancellationToken = default)
 		=> _dynamicVariables.OnAttachedAsync(sink, cancellationToken);
 
-	public void UseBindingStore(IVariableBindingStore store) => _bindingStore = store;
-
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
+		IntegrationHttp.Use(context.Http);
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_events = new HomeAssistantEventEmitter(context.Events);
@@ -154,46 +147,50 @@ public sealed class HomeAssistantIntegration
 		// Must finish before ConnectFromConfig reads WatchedEntities: a successful migration clears that
 		// key, and the migration's own bindings - not the config-flow leftovers - are what should back the
 		// user's ha_* variables from here on.
-		await RunWatchedEntityMigrationAsync(context.Config);
+		await RunWatchedEntityMigrationAsync(context);
 
 		await ConnectFromConfig(context);
 		IsInitialized = true;
 	}
 
-	private async Task RunWatchedEntityMigrationAsync(IIntegrationConfig config)
+	private static async Task RunWatchedEntityMigrationAsync(IIntegrationContext context)
 	{
-		if (_bindingStore is not { } store)
-		{
-			// No caller has provided a binding store (e.g. a unit test constructing this integration
-			// directly, or a host build that has not wired IHomeAssistantBindingStoreConsumer yet). Nothing
-			// to migrate into, so this simply defers to the next start that does provide one.
-			return;
-		}
-
-		var migration = new HomeAssistantWatchedEntityMigration(config);
+		var migration = new HomeAssistantWatchedEntityMigration(context.Config);
 		if (await migration.HasRunAsync())
 		{
 			return;
 		}
 
-		// TryLoad, not Load: a transient read failure must not be mistaken for "no bindings" and overwrite
-		// whatever is already on disk. Simply retrying on the next start is safe either way, since
-		// HasRunAsync is never set below this point.
-		if (!store.TryLoad(out var existing))
+		var requests = new List<VariableBindingRequest>();
+		foreach (var request in await migration.BuildAsync())
 		{
-			return;
+			if (VariableNames.IsValid(request.Name) &&
+				MacroDeckId.IsValidLocalId(request.LocalResourceId, LocalIdKind.Resource))
+			{
+				requests.Add(request);
+			}
+			else
+			{
+				_logger.Warning("Home Assistant skipped watched entity resource {ResourceId} named {Name}: not bindable",
+					request.LocalResourceId,
+					request.Name);
+			}
 		}
 
-		var produced = await migration.BuildAsync(existing);
-		if (produced.Count > 0 && !store.Save(existing.Concat(produced).ToList()))
+		if (requests.Count > 0)
 		{
-			// The write did not durably land - leave HasRunAsync false so the next start retries from
-			// scratch rather than marking a migration complete that never actually persisted.
-			return;
+			try
+			{
+				await context.Variables.BindAsync(requests);
+			}
+			catch (Exception ex) when (ex is NotSupportedException or InvalidOperationException or ArgumentException)
+			{
+				// The old watched entities stay stored, so the next start tries again.
+				_logger.Warning(ex, "Home Assistant could not carry its watched entities over to variable bindings");
+				return;
+			}
 		}
 
-		// Only after the bindings are durably saved: a crash before this point simply leaves HasRunAsync
-		// false, and the next start re-runs BuildAsync, which skips everything already saved.
 		await migration.MarkCompletedAsync();
 	}
 
@@ -396,7 +393,7 @@ public sealed class HomeAssistantIntegration
 			watchedEntities,
 			_events,
 			_dynamicVariables,
-			onVariablesChanged: () => _refreshSignal?.RequestEagerRefresh(IntegrationId));
+			onVariablesChanged: () => _ = _variableAccessor.Current?.RequestRefreshAsync());
 		_connection.Start();
 	}
 }

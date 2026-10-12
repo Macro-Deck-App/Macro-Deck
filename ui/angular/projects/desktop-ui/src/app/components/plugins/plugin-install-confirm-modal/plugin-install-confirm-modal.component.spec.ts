@@ -390,6 +390,19 @@ describe('PluginInstallConfirmModalComponent', () => {
     expect(installButton().disabled).toBeFalse();
   });
 
+  it('tells the user what a plugin that uses Companion devices can do with them', async () => {
+    await setup(inspection({
+      warnings: [warning({
+        code: 'uses_companion_devices',
+        severity: 'advisory',
+        message: 'The plugin uses the devices connected through Macro Deck Companion.',
+      })],
+    }));
+
+    expect(text()).toContain('A full screen screenshot still has to be approved on the device.');
+    expect(installButton().disabled).toBeFalse();
+  });
+
   it('names the plugin from its manifest rather than only by its id', async () => {
     await setup(inspection());
 

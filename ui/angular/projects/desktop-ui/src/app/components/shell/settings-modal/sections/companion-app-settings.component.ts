@@ -70,6 +70,7 @@ export class CompanionAppSettingsComponent {
   readonly loadFailed = signal(false);
   readonly checking = signal(false);
   readonly autoUpdateBusy = signal(false);
+  readonly allowPluginsBusy = signal(false);
   readonly installingSerial = signal<string | null>(null);
   readonly savingApk = signal(false);
   readonly apkMessage = signal<string | null>(null);
@@ -120,6 +121,20 @@ export class CompanionAppSettingsComponent {
       this.loadFailed.set(true);
     } finally {
       this.autoUpdateBusy.set(false);
+    }
+  }
+
+  async setAllowPlugins(value: boolean): Promise<void> {
+    if (this.allowPluginsBusy()) {
+      return;
+    }
+    this.allowPluginsBusy.set(true);
+    try {
+      this.status.set(await this.api.updateCompanionAppPluginAccess(value));
+    } catch {
+      this.loadFailed.set(true);
+    } finally {
+      this.allowPluginsBusy.set(false);
     }
   }
 

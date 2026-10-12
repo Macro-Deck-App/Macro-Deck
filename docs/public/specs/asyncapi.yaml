@@ -45,6 +45,7 @@ x-macrodeck-error-codes:
   - ICON_PACK_INVALID
   - ICON_PACK_SYNC_NOT_ALLOWED
   - ICON_NOT_FOUND
+  - COMPANION_DEVICES_NOT_ALLOWED
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:
@@ -79,7 +80,7 @@ x-macrodeck-backpressure-exempt-types:
 # operation values a host.invoke may carry. A host that predates an api or operation answers
 # CAPABILITY_UNSUPPORTED.
 x-macrodeck-host-operations:
-  variables: [list, get, create, set, delete, refresh, history.open, history.read, history.close]
+  variables: [list, get, create, set, delete, refresh, history.open, history.read, history.close, bind]
   user-variables: [apply, create]
   config: [entries, get-string, get-secret, set-string, set-secret]
   deck: [change-folder, change-profile, parent, back]
@@ -95,13 +96,18 @@ x-macrodeck-host-operations:
   widget-types: [register, unregister]
   event-bindings: []
   screensavers: [register, unregister]
-  adb: [shell, battery, push, pull, install, uninstall, package-installed, connect]
+  adb: [shell, battery, push, pull, install, uninstall, package-installed, connect, key, tap, swipe, input-text,
+    start-app, force-stop-app, open-uri, reboot, screenshot, status]
   messaging: [publish, send, request, subscriptions]
   icon-packs: [sync-bundled, get-icon-resource, get-icon]
   video-streams: [providers-changed, streams-changed, session-update, session-close]
   colors: [resolve, watches]
   batteries: [publish, remove, sync, withdraw]
   weather: [snapshots-changed]
+  locale: [time-of-day-format]
+  http: []
+  companion-devices: [wait, send, request, screenshot]
+  music-players: [album-color]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:
@@ -110,6 +116,8 @@ x-macrodeck-asset-kinds:
   - action-icon
   - ui-resource
   - icon-pack
+  - android-screenshot
+  - companion-screenshot
 
 defaultContentType: application/json
 
@@ -791,7 +799,8 @@ components:
           description: >-
             The pushed state, shaped by the api. Absent when the api has nothing to push. For the
             colors api it is a ColorWatchStateDto, for the batteries api a BatteryStateDto, for the adb
-            api an AdbStateDto.
+            api an AdbStateDto, for the http api an HttpStateDto, for the companion-devices api a
+            CompanionDevicesStateDto, for the music-players api a MusicPlayersStateDto.
 
     ColorsResolveArguments:
       type: object
@@ -886,6 +895,17 @@ components:
           description: Empty unless access is available.
           items:
             $ref: "#/components/schemas/AdbDeviceStateDto"
+        defaultDeviceSerial:
+          type: string
+          description: >-
+            Optional. The serial of the device to use when none is chosen: the default device picked in
+            the ADB settings, or the only attached device when none is picked. It can name a device absent
+            from devices. Absent from older hosts, when there is none, and unless access is available.
+        adbUnavailable:
+          type: boolean
+          description: >-
+            Optional. True while access is available but the host cannot find the adb program, so every
+            operation fails with adb_executable_not_found. Absent from older hosts and otherwise.
         revision:
           type: integer
           format: int64
@@ -914,6 +934,18 @@ components:
             and Wi-Fi, and the local id the built-in ADB battery provider publishes the device under,
             so a host:adb plugin can match an adb device with its battery entry. Absent from older
             hosts and until the host has read it. The hardware serial itself is never sent.
+        lacksUsbPermission:
+          type: boolean
+          description: >-
+            Optional. True when the device is unauthorized because the host's computer lacks the USB
+            permissions to talk to it, rather than because the device has not authorized the computer.
+            Absent from older hosts and otherwise.
+        mode:
+          type: string
+          description: >-
+            Optional. For an offline device: bootloader, recovery, sideload, or unknown for a state adb
+            reported that the host does not recognise. Absent from older hosts and for a device running
+            Android normally. A reader treats a value it does not know as unknown.
 
     BatteryDeviceDto:
       type: object
@@ -951,6 +983,64 @@ components:
         health:
           type: string
           description: unknown, good, overheat, dead, over-voltage, cold or failure.
+
+    VariablesRefreshArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.VariablesRefreshArguments, the optional arguments of
+        variables/refresh. Without arguments, or with no definitionIds, every declared variable of the
+        calling plugin is read again; with definitionIds only those are. At most
+        maxVariableRefreshDefinitionIds ids. A host that predates definitionIds ignores them and reads
+        every declared variable.
+      properties:
+        definitionIds:
+          type: array
+          items:
+            type: string
+
+    VariablesBindArguments:
+      type: object
+      required: [bindings]
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.VariablesBindArguments, the arguments of
+        variables/bind. Records bindings from the calling plugin's own variable catalog resources to
+        variables; the owner is always the calling plugin. All or nothing: an invalid name, resource id or
+        type, or more than maxVariableBindingsPerCall bindings, is refused with INVALID_PAYLOAD and
+        nothing is recorded. Answered with a VariablesBindResult.
+      properties:
+        bindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/VariableBindingRequestDto"
+
+    VariableBindingRequestDto:
+      type: object
+      required: [localResourceId, name, type]
+      properties:
+        localResourceId:
+          type: string
+        name:
+          type: string
+          description: A canonical variable name, ^[a-z][a-z0-9_]*$.
+        type:
+          type: string
+          description: Text, Numeric, Boolean or Color.
+        decimalPlaces:
+          type: integer
+        migratedFrom:
+          type: string
+
+    VariablesBindResult:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.VariablesBindResult. One outcome per binding, in
+        request order: bound, or already-bound when the plugin already had a binding for that resource.
+      properties:
+        outcomes:
+          type: array
+          items:
+            type: string
+            enum: [bound, already-bound]
 
     BatteriesPublishArguments:
       type: object
@@ -994,6 +1084,257 @@ components:
         from them stay empty instead of being deleted. A provider sends it before it is initialized
         again within the same session; the SDK ignores a refused withdraw.
       type: "null"
+
+    LocaleTimeOfDayFormatResult:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.LocaleTimeOfDayFormatResult, the result of
+        locale/time-of-day-format, which takes no arguments: the culture of the Macro Deck interface and
+        the hour cycle the user chose, or the operating system's when the setting follows the system. A
+        culture the plugin cannot load, or an hour cycle it does not know, falls back to the plugin's
+        current culture and h23. A host that predates the api answers CAPABILITY_UNSUPPORTED.
+      required: [culture, hourCycle]
+      properties:
+        culture:
+          type: string
+        hourCycle:
+          type: string
+          enum: [h12, h23]
+
+    HttpStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.HttpStateDto, the data of an http host.state, sent on
+        registration and whenever the user changes it: the User-Agent the plugin's outgoing HTTP and
+        WebSocket requests should carry. A host that predates it pushes nothing, and an SDK that predates
+        it ignores the push.
+      required: [userAgent]
+      properties:
+        userAgent:
+          type: string
+
+    MusicPlayersStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.MusicPlayersStateDto, the data of a music-players
+        host.state, the same for every plugin: the players of all enabled providers. Sent on registration and
+        whenever the list changes. A push whose revision is at or below the last one applied in the same
+        session is stale and ignored. A host that predates the api pushes nothing, and an SDK that predates it
+        ignores the push.
+      required: [instances, revision]
+      properties:
+        instances:
+          type: array
+          items:
+            $ref: "#/components/schemas/MusicPlayerInstanceStateDto"
+        revision:
+          type: integer
+          format: int64
+
+    MusicPlayerInstanceStateDto:
+      type: object
+      description: One player in a MusicPlayersStateDto.
+      required: [id, providerId, displayName]
+      properties:
+        id:
+          type: string
+          description: The qualified providerId::instanceId.
+        providerId:
+          type: string
+        providerName:
+          description: A localized text, a plain string or a $localized reference.
+        displayName:
+          type: string
+
+    MusicPlayerAlbumColorArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.MusicPlayerAlbumColorArguments, the arguments of
+        music-players/album-color. Answered with a MusicPlayerAlbumColorResult. Not gated; runs off the
+        session's dispatch loop and shares the limit of 4 in-flight artwork lookups per plugin. A host that
+        predates the api answers CAPABILITY_UNSUPPORTED.
+      required: [instanceId]
+      properties:
+        instanceId:
+          type: string
+          minLength: 1
+          maxLength: 512
+
+    MusicPlayerAlbumColorResult:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.MusicPlayerAlbumColorResult: the average colour of the
+        player's cover as lowercase #rrggbb, or the last one derived while it shows none. Absent when the host
+        knows no colour for the player.
+      properties:
+        color:
+          type: string
+
+    CompanionDevicesStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.CompanionDevicesStateDto, the data of a
+        companion-devices host.state, per plugin: whether it may use the devices connected through the
+        Companion app, and those devices when it may. Sent on registration and whenever access or a device
+        changes. A push whose revision is at or below the last one applied in the same session is stale and
+        ignored. A host that predates the api pushes nothing.
+      required: [access, devices, revision]
+      properties:
+        access:
+          type: string
+          enum: [available, not-allowed]
+        devices:
+          type: array
+          description: Empty unless access is available. A device that left is absent.
+          items:
+            $ref: "#/components/schemas/CompanionDeviceStateDto"
+        revision:
+          type: integer
+          format: int64
+
+    CompanionDeviceStateDto:
+      type: object
+      description: >-
+        One device in a CompanionDevicesStateDto. A value the device does not report is absent;
+        percentages are 0 to 100 and texts at most 64 characters. A reader ignores capability names it does
+        not know.
+      required: [deviceId, readySequence]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        readySequence:
+          type: integer
+          format: int64
+          description: Changes exactly when the device becomes ready again after it was gone.
+        batteryLevelPercent:
+          type: integer
+        charging:
+          type: boolean
+        orientation:
+          type: string
+          enum: [portrait, landscape]
+        screenBrightnessPercent:
+          type: integer
+        model:
+          type: string
+        platform:
+          type: string
+        appVersion:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        requestableCapabilities:
+          type: array
+          items:
+            type: string
+        confirmsCommands:
+          type: boolean
+        inFocus:
+          type: boolean
+        networkType:
+          type: string
+          enum: [wifi, cellular, ethernet, vpn, none]
+        networkMetered:
+          type: boolean
+        networkValidated:
+          type: boolean
+        networkName:
+          type: string
+        cpuUsagePercent:
+          type: integer
+        memoryUsedPercent:
+          type: integer
+
+    CompanionDeviceCommandArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.CompanionDeviceCommandArguments, the arguments of
+        companion-devices/send and companion-devices/request. Every companion-devices operation is refused
+        with COMPANION_DEVICES_NOT_ALLOWED while the plugin's access is not available. send answers
+        CompanionDeviceSendResultDto, request a CompanionDeviceRequestResultDto.
+      required: [deviceId, command]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        command:
+          type: string
+          enum: [setBrightness, setOrientation, vibrate, screenOn, screenOff, focus]
+        brightnessPercent:
+          type: integer
+          description: 0 to 100, for setBrightness.
+        orientation:
+          type: string
+          enum: [automatic, portrait, landscape]
+          description: For setOrientation.
+
+    CompanionDeviceSendResultDto:
+      type: object
+      properties:
+        sent:
+          type: boolean
+          description: False when the device is not connected.
+
+    CompanionDeviceRequestResultDto:
+      type: object
+      required: [outcome]
+      properties:
+        outcome:
+          type: string
+          enum: [done, unconfirmed, failed]
+        failure:
+          type: string
+          description: >-
+            When outcome is failed: not-connected, removed, timed-out, consent-denied, unavailable or
+            failed. A reader treats a value it does not know as failed.
+
+    CompanionDeviceArguments:
+      type: object
+      description: >-
+        The arguments of companion-devices/wait, which waits a few seconds for a device that has just
+        connected to report its state and answers a CompanionDeviceWaitResultDto.
+      required: [deviceId]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+
+    CompanionDeviceWaitResultDto:
+      type: object
+      properties:
+        ready:
+          type: boolean
+
+    CompanionScreenshotArguments:
+      type: object
+      required: [deviceId, mode]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        mode:
+          type: string
+          enum: [deck, full]
+
+    CompanionScreenshotResultDto:
+      type: object
+      description: >-
+        The result of companion-devices/screenshot: a failure, or the PNG's description, whose bytes follow
+        over host.asset.* with the companion-screenshot asset kind and this transferId.
+      properties:
+        failure:
+          type: string
+        contentType:
+          type: string
+        byteLength:
+          type: integer
+        contentHash:
+          type: string
+        transferId:
+          type: string
 
     BatteryStateDto:
       type: object

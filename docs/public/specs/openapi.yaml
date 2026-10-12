@@ -69,6 +69,8 @@ x-macrodeck-limits:
   maxColorReferenceLength: 1024
   maxColorReferenceSteps: 32
   maxVariableValuesPerBatch: 128
+  maxVariableRefreshDefinitionIds: 1024
+  maxVariableBindingsPerCall: 512
   maxCalendarReplyBytes: 196608
   maxCalendarTitleLength: 256
   maxCalendarLocationLength: 512
@@ -176,6 +178,7 @@ x-macrodeck-error-codes:
   - ICON_PACK_INVALID
   - ICON_PACK_SYNC_NOT_ALLOWED
   - ICON_NOT_FOUND
+  - COMPANION_DEVICES_NOT_ALLOWED
 
 servers:
   - url: /
@@ -549,6 +552,7 @@ components:
         - ICON_PACK_INVALID
         - ICON_PACK_SYNC_NOT_ALLOWED
         - ICON_NOT_FOUND
+        - COMPANION_DEVICES_NOT_ALLOWED
 
     ProtocolError:
       type: object

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using MacroDeckHost.Integrations.Adb;
+using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -21,20 +22,31 @@ internal sealed partial class AdbVariablesTests
 		"adb_device_foreground_app"
 	];
 
-	private FakeAdbGateway _gateway = null!;
+	private ScriptedAndroidDevices _devices = null!;
+	private AdbDeviceTracker _tracker = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
-		_gateway = new FakeAdbGateway();
+		_devices = new ScriptedAndroidDevices();
+		_tracker = new AdbDeviceTracker(_devices, TimeProvider.System);
 	}
 
-	private static AdbGatewayDevice Device(
-		string serial,
-		AdbGatewayDeviceState state = AdbGatewayDeviceState.Device,
+	[TearDown]
+	public void TearDown() => _tracker.Dispose();
+
+	private ScriptedAndroidDevice Attach(string serial,
+		AndroidDeviceState state = AndroidDeviceState.Online,
 		string? model = null,
 		string? manufacturer = null)
-		=> new(serial, state, model, manufacturer, TunnelEstablished: true);
+	{
+		var device = _devices.Attach(serial, stableId: null, state: state, model: model);
+		device.Info = device.Info with { Manufacturer = manufacturer };
+		return device;
+	}
+
+	private ValueTask<VariableReading> Read(string localId)
+		=> AdbVariables.ReadAsync(_devices, _tracker, localId, CancellationToken.None);
 
 	[Test]
 	public void ProvidedVariables_is_exactly_the_documented_eleven_names()
@@ -44,12 +56,12 @@ internal sealed partial class AdbVariablesTests
 	}
 
 	[Test]
-	public void ProvidedVariables_is_constant_regardless_of_gateway_state()
+	public void ProvidedVariables_is_constant_regardless_of_device_state()
 	{
 		var beforeNames = AdbVariables.All.Select(variable => variable.Name).ToList();
 
-		_gateway.IsEnabled = false;
-		_gateway.Devices = [Device("S1")];
+		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
+		Attach("S1");
 
 		var afterNames = AdbVariables.All.Select(variable => variable.Name).ToList();
 
@@ -81,13 +93,13 @@ internal sealed partial class AdbVariablesTests
 	}
 
 	[Test]
-	public async Task A_null_gateway_makes_every_variable_unavailable()
+	public async Task Without_android_devices_every_variable_is_unavailable()
 	{
 		Assert.Multiple(async () =>
 		{
 			foreach (var variable in AdbVariables.All)
 			{
-				Assert.That((await AdbVariables.ReadAsync(null, variable.ResolvedId!, CancellationToken.None)).Value,
+				Assert.That((await AdbVariables.ReadAsync(null, null, variable.ResolvedId!, CancellationToken.None)).Value,
 					Is.Null,
 					variable.Name);
 			}
@@ -95,63 +107,52 @@ internal sealed partial class AdbVariablesTests
 	}
 
 	[Test]
-	public async Task A_disabled_gateway_makes_every_variable_unavailable_including_the_counts()
+	public async Task With_adb_turned_off_every_variable_is_unavailable_including_the_counts()
 	{
-		_gateway.IsEnabled = false;
-		_gateway.Devices = [Device("S1")];
+		Attach("S1");
+		_devices.SetAccess(AndroidDeviceAccess.AdbNotEnabled);
 
 		Assert.Multiple(async () =>
 		{
 			foreach (var variable in AdbVariables.All)
 			{
-				Assert.That(
-					(await AdbVariables.ReadAsync(_gateway, variable.ResolvedId!, CancellationToken.None)).Value,
-					Is.Null,
-					variable.Name);
+				Assert.That((await Read(variable.ResolvedId!)).Value, Is.Null, variable.Name);
 			}
 		});
 	}
 
 	[Test]
-	public async Task ReadAsync_never_calls_a_gateway_command_method()
+	public async Task ReadAsync_never_runs_a_device_command()
 	{
-		_gateway.Devices = [Device("S1")];
-		_gateway.DefaultDeviceSerial = "S1";
-		_gateway.NextProperties = new AdbGatewayProperties(80, true, false, "com.example.app");
+		var device = Attach("S1");
+		_devices.DefaultSerial = "S1";
+		device.Status = new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
 
 		foreach (var variable in AdbVariables.All)
 		{
-			_ = (await AdbVariables.ReadAsync(_gateway, variable.ResolvedId!, CancellationToken.None)).Value;
+			_ = (await Read(variable.ResolvedId!)).Value;
 		}
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_gateway.Calls, Has.Count.EqualTo(4));
-			Assert.That(_gateway.Calls,
-				Has.All.Matches<string>(call => call.StartsWith("GetProperties:", StringComparison.Ordinal)));
+			Assert.That(_devices.Calls, Has.Count.EqualTo(3));
+			Assert.That(_devices.Calls,
+				Has.All.Matches<string>(call => call.StartsWith("GetStatus:", StringComparison.Ordinal)));
 		});
 	}
 
 	[Test]
 	public async Task Device_counts_reflect_state_regardless_of_which_device_is_default()
 	{
-		_gateway.Devices =
-		[
-			Device("S1", AdbGatewayDeviceState.Device),
-			Device("S2", AdbGatewayDeviceState.Unauthorized),
-			Device("S3", AdbGatewayDeviceState.Disconnected)
-		];
+		Attach("S1", AndroidDeviceState.Online);
+		Attach("S2", AndroidDeviceState.Unauthorized);
+		Attach("S3", AndroidDeviceState.Online);
+		_devices.Detach("S3");
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.ConnectedDeviceCount, CancellationToken.None))
-				.Value,
-				Is.EqualTo(2));
-			Assert.That((await AdbVariables.ReadAsync(_gateway,
-					AdbVariables.AuthorizedDeviceCount,
-					CancellationToken.None)).Value,
-				Is.EqualTo(1));
+			Assert.That((await Read(AdbVariables.ConnectedDeviceCount)).Value, Is.EqualTo(2));
+			Assert.That((await Read(AdbVariables.AuthorizedDeviceCount)).Value, Is.EqualTo(1));
 		});
 	}
 
@@ -166,111 +167,104 @@ internal sealed partial class AdbVariablesTests
 	[Test]
 	public async Task Device_fields_resolve_the_explicitly_configured_default_device()
 	{
-		_gateway.Devices =
-		[
-			Device("S1", AdbGatewayDeviceState.Device, "Pixel 8", "Google"),
-			Device("S2", AdbGatewayDeviceState.Device, "Galaxy S24", "Samsung")
-		];
-		_gateway.DefaultDeviceSerial = "S2";
+		Attach("S1", AndroidDeviceState.Online, "Pixel 8", "Google");
+		Attach("S2", AndroidDeviceState.Online, "Galaxy S24", "Samsung");
+		_devices.DefaultSerial = "S2";
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceModel, CancellationToken.None)).Value,
-				Is.EqualTo("Galaxy S24"));
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceManufacturer, CancellationToken.None)).Value,
-				Is.EqualTo("Samsung"));
+			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.EqualTo("Galaxy S24"));
+			Assert.That((await Read(AdbVariables.DeviceManufacturer)).Value, Is.EqualTo("Samsung"));
 		});
 	}
 
 	[Test]
 	public async Task Device_fields_fall_back_to_the_single_connected_device_when_nothing_is_configured()
 	{
-		_gateway.Devices = [Device("S1", AdbGatewayDeviceState.Device, "Pixel 8")];
+		Attach("S1", AndroidDeviceState.Online, "Pixel 8");
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That((await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceConnected, CancellationToken.None))
-				.Value,
-				Is.True);
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceModel, CancellationToken.None)).Value,
-				Is.EqualTo("Pixel 8"));
+			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.True);
+			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.EqualTo("Pixel 8"));
 		});
 	}
 
 	[Test]
 	public async Task Device_fields_are_unavailable_when_several_devices_are_connected_and_none_is_configured()
 	{
-		_gateway.Devices =
-		[
-			Device("S1", AdbGatewayDeviceState.Device),
-			Device("S2", AdbGatewayDeviceState.Device)
-		];
+		Attach("S1");
+		Attach("S2");
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That((await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceConnected, CancellationToken.None))
-				.Value,
-				Is.Null);
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceModel, CancellationToken.None)).Value,
-				Is.Null);
+			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.Null);
+			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.Null);
 		});
 	}
 
 	[Test]
 	public async Task A_configured_but_now_disconnected_device_reads_connected_as_false_not_unavailable()
 	{
-		_gateway.Devices = [Device("S1", AdbGatewayDeviceState.Disconnected)];
-		_gateway.DefaultDeviceSerial = "S1";
-
-		Assert.That(
-			(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceConnected, CancellationToken.None)).Value,
-			Is.False);
-	}
-
-	[Test]
-	public async Task Property_backed_fields_read_through_GetPropertiesAsync()
-	{
-		_gateway.NextProperties = new AdbGatewayProperties(42, true, false, "com.example.app");
+		Attach("S1", model: "Pixel 8");
+		_devices.Detach("S1");
+		_devices.DefaultSerial = "S1";
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceBatteryLevel, CancellationToken.None)).Value,
-				Is.EqualTo(42));
-			Assert.That((await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceScreenOn, CancellationToken.None))
-				.Value,
-				Is.True);
-			Assert.That((await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceLocked, CancellationToken.None))
-				.Value,
-				Is.False);
-			Assert.That(
-				(await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceForegroundApp, CancellationToken.None))
-				.Value,
-				Is.EqualTo("com.example.app"));
+			Assert.That((await Read(AdbVariables.DeviceConnected)).Value, Is.False);
+			Assert.That((await Read(AdbVariables.DeviceAuthorized)).Value, Is.False);
+			Assert.That((await Read(AdbVariables.DeviceModel)).Value, Is.EqualTo("Pixel 8"));
 		});
 	}
 
 	[Test]
-	public async Task Property_backed_fields_are_unavailable_when_the_manager_has_no_sample_yet()
+	public async Task Status_backed_fields_read_the_default_devices_status_and_battery()
 	{
-		_gateway.NextProperties = null;
+		var device = Attach("S1");
+		device.Battery = device.Battery with { Level = 42 };
+		device.Status = new AndroidDeviceStatus { IsScreenOn = true, IsLocked = false, ForegroundPackage = "com.example.app" };
 
-		Assert.That((await AdbVariables.ReadAsync(_gateway, AdbVariables.DeviceBatteryLevel, CancellationToken.None))
-			.Value,
-			Is.Null);
+		Assert.Multiple(async () =>
+		{
+			Assert.That((await Read(AdbVariables.DeviceBatteryLevel)).Value, Is.EqualTo(42));
+			Assert.That((await Read(AdbVariables.DeviceScreenOn)).Value, Is.True);
+			Assert.That((await Read(AdbVariables.DeviceLocked)).Value, Is.False);
+			Assert.That((await Read(AdbVariables.DeviceForegroundApp)).Value, Is.EqualTo("com.example.app"));
+		});
+	}
+
+	[Test]
+	public async Task Status_backed_fields_are_unavailable_while_the_host_has_no_reading_yet()
+	{
+		Attach("S1").Status = null;
+
+		Assert.That(await Read(AdbVariables.DeviceScreenOn), Is.EqualTo(VariableReading.Unavailable));
+	}
+
+	[Test]
+	public async Task The_battery_level_is_unavailable_when_the_device_cannot_report_it()
+	{
+		Attach("S1").BatteryFailure = new AndroidDeviceException(AndroidDeviceErrorCode.Unsupported, "no battery");
+
+		Assert.That(await Read(AdbVariables.DeviceBatteryLevel), Is.EqualTo(VariableReading.Unavailable));
+	}
+
+	[Test]
+	public async Task Status_backed_fields_are_unavailable_without_a_default_device()
+	{
+		Attach("S1");
+		Attach("S2");
+
+		Assert.That(await Read(AdbVariables.DeviceForegroundApp), Is.EqualTo(VariableReading.Unavailable));
 	}
 
 	[Test]
 	public async Task An_unknown_variable_name_is_unavailable()
 	{
-		_gateway.Devices = [Device("S1")];
+		Attach("S1");
 
-		Assert.That((await AdbVariables.ReadAsync(_gateway, "not_a_real_variable", CancellationToken.None)).Value,
-			Is.Null);
+		Assert.That((await Read("not_a_real_variable")).Value, Is.Null);
 	}
 
 	[TestCase("ABC123", "abc123")]

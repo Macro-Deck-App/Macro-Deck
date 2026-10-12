@@ -33,4 +33,28 @@ public class IntegrationVariableRefreshTests
 
 		Assert.That(declarations.DrainStale(), Is.EqualTo(new[] { IntegrationId }));
 	}
+
+	[Test]
+	public async Task A_definition_refresh_makes_the_polling_loop_read_only_the_named_variables_again()
+	{
+		var refresh = new VariableRefreshSignal();
+		var api = new IntegrationVariableApi(IntegrationId, null!, refresh);
+
+		await api.RequestDefinitionRefreshAsync(["volume-percent", "muted"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(refresh.DrainDefinitionsFor(IntegrationId), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(refresh.DrainEagerRefreshRequested(IntegrationId), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_context_without_a_binding_store_reports_bindings_as_not_supported()
+	{
+		var api = new IntegrationVariableApi(IntegrationId, null!);
+
+		Assert.ThrowsAsync<NotSupportedException>(() => api.BindAsync(
+			[new MacroDeck.Sdk.Variables.VariableBindingRequest("a/b", "a_b", MacroDeck.Sdk.Variables.VariableType.Text)]));
+	}
 }

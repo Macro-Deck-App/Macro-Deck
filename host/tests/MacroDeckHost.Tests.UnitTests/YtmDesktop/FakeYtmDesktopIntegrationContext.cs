@@ -19,7 +19,9 @@ internal sealed class FakeYtmDesktopIntegrationContext : IIntegrationContext
 
 	public IEventPublisher Events => Publisher;
 
-	public IVariableApi Variables => throw new NotSupportedException();
+	public IVariableApi? VariableApi { get; init; }
+
+	public IVariableApi Variables => VariableApi ?? throw new NotSupportedException();
 	public IUserVariableApi UserVariables => throw new NotSupportedException();
 	public IDeckNavigator Deck => throw new NotSupportedException();
 	public IScriptApi Scripts => throw new NotSupportedException();

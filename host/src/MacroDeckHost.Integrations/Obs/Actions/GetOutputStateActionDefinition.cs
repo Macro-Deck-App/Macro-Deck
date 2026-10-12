@@ -1,7 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Obs.Actions;
@@ -32,7 +31,7 @@ internal sealed class GetOutputStateActionDefinition : IDynamicOptionsActionDefi
 		ActionParameter.Autocomplete(VariableParameter,
 			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
 			description: AppStrings.Integrations.Obs.Actions.GetOutputState.VariableDescription(),
-			optionsSourceId: VariableOptionsSourceIds.UserVariables,
+			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 

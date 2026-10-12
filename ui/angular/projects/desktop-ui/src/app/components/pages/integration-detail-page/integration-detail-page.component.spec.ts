@@ -506,6 +506,16 @@ describe('IntegrationDetailPageComponent', () => {
       fixture.destroy();
     });
 
+    it('lists Companion devices among the capabilities of a plugin that declares them', async () => {
+      installedPlugins.set([installedPlugin({ permissions: ['host:companion-devices'] })]);
+
+      const fixture = await createFixture();
+
+      expect(cardTitled(fixture, 'Capabilities')!.textContent).toContain('Uses Companion devices');
+      expect(cardTitled(fixture, 'Capabilities')!.textContent).not.toContain('Uses ADB');
+      fixture.destroy();
+    });
+
     it('does not mark a plugin that does not declare ADB', async () => {
       installedPlugins.set([installedPlugin({ permissions: ['host:deck'] })]);
 

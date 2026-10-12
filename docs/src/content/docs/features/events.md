@@ -217,6 +217,26 @@ as different modifiers, so a trigger bound as `Ctrl` does not fire for `RightCtr
 `FromMacOS` reads the input source with the Text Input Sources API, which Apple documents for the main thread. It
 has been exercised from a thread-pool thread, not from an event tap callback.
 
+To send a key the other way, from a `KeyCode` to the native code a synthetic key event needs, the letter,
+digit and punctuation keys of the main block have their US position on each platform:
+
+```csharp
+if (NativeKeys.IsPositional(key) && NativeKeys.TryGetWindowsScanCode(key, out var scan))
+{
+	// SendInput with KEYEVENTF_SCANCODE, so the key lands on the same position on any layout
+}
+```
+
+| Method | Answers |
+| --- | --- |
+| `NativeKeys.IsPositional(key)` | `true` for the punctuation keys, which type a different character on each layout and are best sent by position |
+| `NativeKeys.TryGetWindowsScanCode(key, out scan)` | The PC set-1 scan code; Linux evdev numbers these keys the same way |
+| `NativeKeys.TryGetMacOSKeyCode(key, out code)` | The `kVK_*` key code, with WebKit's ISO naming (`IntlBackslash` 10, `Backquote` 50) |
+| `NativeKeys.TryFromWindowsScanCode(scan, out key)` | The key at a scan code's US position, the inverse of `TryGetWindowsScanCode` |
+
+Each `TryGet` method returns `false` for keys outside that block (function, navigation, media and modifier
+keys), which a hook sends by their virtual key or key code instead.
+
 `GetBindings()` returns values exactly as the editor stored them, so a hook that swallows bound combos has
 to accept the older spellings too, not only the names in the table.
 

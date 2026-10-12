@@ -27,7 +27,7 @@ public class StreamlabsDesktopConfigFlowTests
 	{
 		var flow = new StreamlabsDesktopConfigFlow();
 
-		var result = await flow.StartAsync(null!, CancellationToken.None);
+		var result = await flow.StartAsync(NoOAuthConfigFlowContext.Instance, CancellationToken.None);
 		var step = result.NextStep!;
 
 		Assert.Multiple(() =>
