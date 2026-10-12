@@ -21,6 +21,21 @@ use folder buttons only, turn off **Navigation gestures** in the [app settings](
 
 Each press vibrates briefly, unless you turn off **Haptic feedback**. iPads have no vibration motor.
 
+## Messages from Macro Deck and plugins
+
+Macro Deck, its integrations and plugins can show short messages and ask questions on your devices. A message
+appears at the top of the deck and closes by itself or with its close button; at most three are shown at once and
+the rest follow. A question opens over the deck, sometimes with fields to fill in, and closes once you pick one
+of its buttons, or with the close button when it may be dismissed. If a question has no buttons of its own, **OK**
+closes it. Each one says where it comes from, so a plugin can never pass for Macro Deck itself.
+
+![Two messages from Macro Deck at the top of the deck on Android](../../../../assets/guide/companion/android-notifications.png)
+
+The first answer from any of your devices counts and closes the question everywhere. Messages wait while the deck
+is not shown, for example on the paywall or while the computer is locked, and appear once it is back. On iPhone and
+iPad a question takes the place of a dialog that was open and the messages at the top are hidden while any sheet
+is open.
+
 ## Several computers at once
 
 Leaving a deck does not close its connection. Every computer you opened stays connected while the app runs,
