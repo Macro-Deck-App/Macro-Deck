@@ -63,6 +63,7 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	public string AssetPluginId { get; set; } = string.Empty;
 
 	private bool _dropNextReply;
+	private string? _dropReplyToOperation;
 	private TaskCompletionSource? _heldReply;
 
 	public InMemoryPluginLink(string sessionId) => _sessionId = sessionId;
@@ -85,6 +86,14 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	public string? CloseDescription { get; private set; }
 
 	public void DropNextReply() => _dropNextReply = true;
+
+	public void DropReplyTo(string operation)
+	{
+		lock (_gate)
+		{
+			_dropReplyToOperation = operation;
+		}
+	}
 
 	public IDisposable HoldNextReply()
 	{
@@ -203,6 +212,11 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 			return;
 		}
 
+		if (TryConsumeDropFor(envelope))
+		{
+			return;
+		}
+
 		if (Interlocked.Exchange(ref _heldReply, null) is { } held)
 		{
 			await held.Task.ConfigureAwait(false);
@@ -277,6 +291,29 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 					PluginProtocolJson.Options)
 				: null
 		}));
+	}
+
+	private bool TryConsumeDropFor(ProtocolEnvelope result)
+	{
+		lock (_gate)
+		{
+			if (_dropReplyToOperation is not { } operation)
+			{
+				return false;
+			}
+
+			var invoke = _sentByHost.Find(sent =>
+				string.Equals(sent.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal) &&
+				string.Equals(sent.Id, result.CorrelationId, StringComparison.Ordinal));
+			var invoked = invoke?.Payload?.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options);
+			if (!string.Equals(invoked?.Operation, operation, StringComparison.Ordinal))
+			{
+				return false;
+			}
+
+			_dropReplyToOperation = null;
+			return true;
+		}
 	}
 
 	private void RespondWelcome(ProtocolEnvelope hello)
