@@ -8,9 +8,34 @@ after that, tap it to open its deck.
 
 ![The Connections list on Android: the trial banner and two saved computers, both connected](../../../../assets/guide/companion/android-connections.png)
 
-On first start the app says that Macro Deck 3 is in beta and where to report bugs. It asks for no
-permissions up front. On iPhone and iPad it asks for access to the local network the first time it looks
-for computers, and for the camera the first time you scan a code.
+## First start
+
+A new installation opens with three short steps before the Connections list:
+
+1. **Welcome to Macro Deck**: what the app is, with a note that Macro Deck 3 is in beta and links to report bugs
+   on Discord or GitHub.
+2. **Connect to your computer**: the app needs Macro Deck installed and running on your computer. **Get Macro
+   Deck** opens [macro-deck.app](https://macro-deck.app) if you do not have it yet.
+3. **Support Macro Deck's development**: Macro Deck itself and its web client are free and open source; the
+   optional Companion app is a one-time purchase after a free 7-day trial, with no automatic charges.
+
+**Next** and **Back** move between the steps, and Android's back gesture goes back one step too. If you close the
+app halfway, it opens on the step you left. On the last step:
+
+- **Start 7-day free trial** finishes and asks for the trial. The 7 days begin when you first connect to a
+  computer; see [The 7-day trial](/guide/companion-app/license/#the-7-day-trial).
+- **More information** opens the purchase screen with what the app adds over the web client and the price in your
+  store. Closing it returns to the last step; nothing is started or bought until you tap **Buy license** there.
+- **Continue without trial** finishes without starting the trial. You can still start it later from the paywall.
+
+![The last onboarding step on Android: Try it free for 7 days, No automatic charges, and the Start 7-day free trial, More information and Continue without trial buttons](../../../../assets/guide/companion/android-onboarding.png)
+
+The steps show only once, on a new installation. If you updated from an earlier version, or the device already
+holds a license or a trial (on iPhone and iPad these survive reinstalling the app), the app opens on the
+Connections list as before.
+
+The app asks for no permissions up front. On iPhone and iPad it asks for access to the local network the first
+time it looks for computers, after the first start, and for the camera the first time you scan a code.
 
 ## Add a computer
 
@@ -95,7 +120,8 @@ offers to add the new address to the existing connection.
 
 ## Open the deck
 
-Tap the computer. The first time, the app shows the paywall: start the free 7-day trial or buy the license.
+Tap the computer. Without a license or a running trial, the app shows the paywall: start the free 7-day trial,
+buy the license, or tap **Open web client** to use this computer's free web client in your browser instead.
 See [License and trial](/guide/companion-app/license/). Once your computer has a license, every device that
 connects to it gets it, and the deck opens straight away.
 
