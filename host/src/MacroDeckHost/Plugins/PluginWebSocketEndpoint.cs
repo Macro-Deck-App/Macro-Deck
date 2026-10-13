@@ -160,11 +160,16 @@ public sealed class PluginWebSocketEndpoint
 		var sessionId = authResult.Principal.FindFirst(PluginClaimTypes.SessionId)!.Value;
 
 		var socket = await context.WebSockets.AcceptWebSocketAsync(ProtocolConstants.WebSocketSubProtocol);
+		await RunConnectionAsync(socket, pluginId, sessionId);
+	}
+
+	internal async Task RunConnectionAsync(WebSocket socket, string pluginId, string sessionId)
+	{
 		var connection = new PluginWebSocketConnection(socket, Guid.NewGuid().ToString("N"), _timeProvider);
 
 		try
 		{
-			await RunAsync(context, socket, connection, pluginId, sessionId);
+			await RunAsync(socket, connection, pluginId, sessionId);
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
@@ -179,7 +184,6 @@ public sealed class PluginWebSocketEndpoint
 	}
 
 	private async Task RunAsync(
-		HttpContext context,
 		WebSocket socket,
 		PluginWebSocketConnection connection,
 		string pluginId,
@@ -192,21 +196,28 @@ public sealed class PluginWebSocketEndpoint
 		// until the process is shutting down or the socket itself ends the loop.
 		var hostCancellationToken = _lifetime.ApplicationStopping;
 
-		// Step 6: the handshake. A closed socket, a malformed body or a non-hello message all become
-		// the same "nothing usable arrived" outcome - there is deliberately no close code for this case.
-		using var handshakeCts = CancellationTokenSource.CreateLinkedTokenSource(hostCancellationToken);
-		handshakeCts.CancelAfter(ProtocolTimeouts.Handshake);
+		// Step 6: the handshake. Cancelling a pending receive aborts the socket, so the deadline races the
+		// receive instead and leaves the socket able to carry the protocol.error and the close.
+		var receiving = ReceiveMessageAsync(socket, hostCancellationToken);
+		bool timedOut;
+		using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(hostCancellationToken))
+		{
+			var expired = Task.Delay(ProtocolTimeouts.Handshake, _timeProvider, deadline.Token);
+			timedOut = await Task.WhenAny(receiving, expired) == expired && !expired.IsCanceled;
+			await deadline.CancelAsync();
+		}
+
+		if (timedOut)
+		{
+			await SendProtocolErrorAsync(connection, ProtocolErrorCodes.InvalidPayload, null, hostCancellationToken);
+			await CloseWithPendingReceiveAsync(socket, "Handshake timed out.", receiving);
+			return;
+		}
 
 		byte[]? message;
 		try
 		{
-			message = await ReceiveMessageAsync(socket, handshakeCts.Token);
-		}
-		catch (OperationCanceledException) when (!hostCancellationToken.IsCancellationRequested)
-		{
-			await SendProtocolErrorAsync(connection, ProtocolErrorCodes.InvalidPayload, null, hostCancellationToken);
-			await CloseNormallyAsync(socket, "Handshake timed out.", hostCancellationToken);
-			return;
+			message = await receiving;
 		}
 		catch (WebSocketException)
 		{
@@ -215,6 +226,7 @@ public sealed class PluginWebSocketEndpoint
 
 		if (message is null)
 		{
+			await EchoPeerCloseAsync(socket, connection);
 			return;
 		}
 
@@ -400,6 +412,7 @@ public sealed class PluginWebSocketEndpoint
 
 				if (message is null)
 				{
+					await EchoPeerCloseAsync(socket, connection);
 					break;
 				}
 
@@ -1277,6 +1290,58 @@ public sealed class PluginWebSocketEndpoint
 			or OperationCanceledException
 			or ObjectDisposedException)
 		{
+		}
+	}
+
+	private static async Task EchoPeerCloseAsync(WebSocket socket, PluginWebSocketConnection connection)
+	{
+		if (socket.State != WebSocketState.CloseReceived)
+		{
+			return;
+		}
+
+		using var budget = new CancellationTokenSource(ProtocolTimeouts.GracefulClose);
+		try
+		{
+			await connection.Close((int)(socket.CloseStatus ?? WebSocketCloseStatus.NormalClosure),
+				socket.CloseStatusDescription ?? string.Empty,
+				budget.Token);
+		}
+		catch (Exception exception) when (exception is OperationCanceledException
+			or WebSocketException
+			or ObjectDisposedException)
+		{
+		}
+	}
+
+	private static async Task CloseWithPendingReceiveAsync(WebSocket socket, string reason, Task<byte[]?> pendingReceive)
+	{
+		using var budget = new CancellationTokenSource(ProtocolTimeouts.GracefulClose);
+		try
+		{
+			if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+			{
+				await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason, budget.Token);
+			}
+
+			await pendingReceive.WaitAsync(budget.Token);
+			while (socket.State == WebSocketState.CloseSent)
+			{
+				await ReceiveMessageAsync(socket, budget.Token);
+			}
+		}
+		catch (Exception exception) when (exception is OperationCanceledException
+			or WebSocketException
+			or ObjectDisposedException)
+		{
+			socket.Abort();
+		}
+		finally
+		{
+			_ = pendingReceive.ContinueWith(static task => _ = task.Exception,
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
+				TaskScheduler.Default);
 		}
 	}
 
