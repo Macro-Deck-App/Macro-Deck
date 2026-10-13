@@ -855,6 +855,11 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		}
 		catch (JsonException)
 		{
+			hello = null;
+		}
+
+		if (hello is null)
+		{
 			await RejectHandshakeAsync(socket, envelope.Id, "Malformed session.hello.").ConfigureAwait(false);
 			return null;
 		}
@@ -863,7 +868,7 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 			DateTimeOffset.UtcNow - droppedAt <= _options.Timeouts.SessionResumeWindow;
 
 		var resumed = !record.Ended &&
-			SessionResumeRules.CanResume(hello?.ResumeSessionId, sessionExists: true, withinWindow);
+			SessionResumeRules.CanResume(hello.ResumeSessionId, sessionExists: true, withinWindow);
 
 		var welcome = new ProtocolEnvelope
 		{
