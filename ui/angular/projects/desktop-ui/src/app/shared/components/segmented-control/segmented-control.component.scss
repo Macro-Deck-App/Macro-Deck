@@ -84,6 +84,14 @@
   display: flex;
 }
 
+:host(.control-height) .seg {
+  height: var(--control-height);
+}
+
+:host(.control-height) .seg-option {
+  align-self: stretch;
+}
+
 :host(.stretch) .seg {
   flex: 1;
   min-width: 0;
