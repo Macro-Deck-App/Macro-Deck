@@ -16,6 +16,12 @@ public interface IShellNotificationBridge
 	bool IsAttached { get; }
 
 	/// <summary>
+	/// Raised when <see cref="IsAttached" /> flips: on the poll that attaches a bootstrapper, and once
+	/// the attachment window lapses without another poll. Raised on the polling or timer thread.
+	/// </summary>
+	event Action? AttachmentChanged;
+
+	/// <summary>
 	/// Queues a notification for the bootstrapper and waits for its result. Returns <c>false</c>
 	/// immediately when nothing is attached, and after the lease when the bootstrapper stays silent.
 	/// </summary>

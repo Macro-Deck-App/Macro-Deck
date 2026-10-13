@@ -8,8 +8,12 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeck.Sdk.Notifications;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Runtime;
+using MacroDeckHost.Infrastructure.Notifications;
+using MacroDeckHost.Infrastructure.Notifications.Shell;
+using MacroDeckHost.Platform.Notifications;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Adb;
+using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
@@ -74,6 +78,28 @@ public class PluginDesktopNotificationAccessTests
 	}
 
 	[Test]
+	public async Task A_connected_plugin_learns_when_the_desktop_shell_comes_and_goes_where_the_platform_cannot_notify()
+	{
+		var time = new FakeTimeProvider();
+		using var shell = new ShellNotificationBridge(time);
+		var notifier = new PlatformDesktopNotifier(new Lazy<IPlatformNotificationService>(() =>
+			new ShellFirstNotificationService(shell, new UnsupportedPlatformNotifications())));
+		var world = await World.ConnectAsync(PluginSessionOrigin.Managed,
+			[PluginPermissions.HostDesktopNotifications],
+			notifier: notifier,
+			shell: shell);
+		await world.Pusher.PushAllAsync(PluginId);
+
+		await PollAsync(shell);
+		await world.WaitForPushesAsync(2);
+		await PollAsync(shell);
+		time.Advance(ShellNotificationBridge.AttachmentWindow);
+		await world.WaitForPushesAsync(3);
+
+		Assert.That(world.PushedSupport(), Is.EqualTo(new[] { false, true, false }));
+	}
+
+	[Test]
 	public async Task A_show_without_arguments_is_an_invalid_payload()
 	{
 		var world = await World.ConnectAsync(PluginSessionOrigin.Managed, [PluginPermissions.HostDesktopNotifications]);
@@ -87,19 +113,30 @@ public class PluginDesktopNotificationAccessTests
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
 	}
 
+	private static async Task PollAsync(ShellNotificationBridge shell)
+	{
+		using var abandoned = new CancellationTokenSource();
+		await abandoned.CancelAsync();
+		await shell.WaitAsync(TimeSpan.FromSeconds(20), abandoned.Token);
+	}
+
 	private sealed class World
 	{
-		private World(IReadOnlyList<string>? permissions, bool supported)
+		private World(IReadOnlyList<string>? permissions,
+			bool supported,
+			IDesktopNotifier? notifier,
+			IShellNotificationBridge? shell)
 		{
 			Desktop = new RecordingDesktopNotifier(supported);
 			var policy = new PluginDesktopNotificationAccessPolicy(Sessions,
 				new SingleInstalledPlugin(permissions),
 				new FixedManifestReader(permissions));
-			Callbacks = new PluginDesktopNotificationCallbacks(Desktop, policy);
+			Callbacks = new PluginDesktopNotificationCallbacks(notifier ?? Desktop, policy);
 			Pusher = new HostStatePusher(Sessions, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
 				new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
 				new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled), Serilog.Core.Logger.None,
-				desktopNotifications: Callbacks);
+				desktopNotifications: Callbacks,
+				shellNotifications: shell);
 		}
 
 		public PluginSessionRegistry Sessions { get; } = new(TimeProvider.System, Serilog.Core.Logger.None);
@@ -114,9 +151,11 @@ public class PluginDesktopNotificationAccessTests
 
 		public static async Task<World> ConnectAsync(PluginSessionOrigin origin,
 			IReadOnlyList<string>? permissions,
-			bool supported = true)
+			bool supported = true,
+			IDesktopNotifier? notifier = null,
+			IShellNotificationBridge? shell = null)
 		{
-			var world = new World(permissions, supported);
+			var world = new World(permissions, supported, notifier, shell);
 			await world.Sessions.Create(new PluginSessionRecord
 			{
 				SessionId = "session-1",
@@ -147,6 +186,15 @@ public class PluginDesktopNotificationAccessTests
 			return Callbacks.Admit(PluginId) ?? await Callbacks.ExecuteAsync(payload, CancellationToken.None);
 		}
 
+		public async Task WaitForPushesAsync(int count)
+		{
+			var deadline = DateTime.UtcNow.AddSeconds(5);
+			while (DateTime.UtcNow < deadline && PushedSupport().Count < count)
+			{
+				await Task.Delay(10);
+			}
+		}
+
 		public List<bool> PushedSupport()
 			=> Connection.Sent.ToList()
 				.Where(envelope => envelope.Type == MessageTypes.HostState)
@@ -168,6 +216,14 @@ public class PluginDesktopNotificationAccessTests
 			Shown.Add((title, message));
 			return Task.CompletedTask;
 		}
+	}
+
+	private sealed class UnsupportedPlatformNotifications : IPlatformNotificationService
+	{
+		public bool IsSupported => false;
+
+		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
+			=> Task.CompletedTask;
 	}
 
 	private sealed class SingleInstalledPlugin(IReadOnlyList<string>? permissions) : IPluginInstallationCatalog

@@ -45,6 +45,12 @@ public class ShellFirstNotificationServiceTests
 	{
 		public bool IsAttached { get; init; }
 
+		public event Action? AttachmentChanged
+		{
+			add { }
+			remove { }
+		}
+
 		public bool Result { get; init; }
 
 		public Exception? Failure { get; init; }
