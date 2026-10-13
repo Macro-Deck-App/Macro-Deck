@@ -1,0 +1,427 @@
+{
+  "tree": "conformance-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.head": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 14.39,
+            "width": 211.19,
+            "height": 100.8
+          }
+        },
+        "conformance.head.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 14.39,
+            "y": 14.39,
+            "width": 0,
+            "height": 100.8
+          }
+        },
+        "conformance.head.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 157.98,
+            "y": 36.23,
+            "width": 67.59,
+            "height": 57.11
+          },
+          "texts": [
+            {
+              "text": "23°",
+              "naturalWidth": 67.59,
+              "givenWidth": 67.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 119.98,
+            "width": 211.19,
+            "height": 50.39
+          }
+        },
+        "conformance.rows.2026-07-20": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 119.98,
+            "width": 211.19,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-20.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 123.77,
+            "width": 23.94,
+            "height": 17.63
+          },
+          "texts": [
+            {
+              "text": "Mo",
+              "naturalWidth": 17.09,
+              "givenWidth": 23.94,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows.2026-07-20.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 43.13,
+            "y": 119.98,
+            "width": 20.16,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-20.bar": {
+          "type": "ui.range-bar",
+          "box": {
+            "x": 68.08,
+            "y": 119.98,
+            "width": 157.5,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-21": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 145.17,
+            "width": 211.19,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-21.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 148.95,
+            "width": 23.94,
+            "height": 17.63
+          },
+          "texts": [
+            {
+              "text": "Mo",
+              "naturalWidth": 17.09,
+              "givenWidth": 23.94,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows.2026-07-21.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 43.13,
+            "y": 145.17,
+            "width": 20.16,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-21.bar": {
+          "type": "ui.range-bar",
+          "box": {
+            "x": 68.08,
+            "y": 145.17,
+            "width": 157.5,
+            "height": 25.19
+          }
+        },
+        "conformance.state": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 175.17,
+            "width": 211.19,
+            "height": 50.39
+          }
+        },
+        "conformance.state.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 178.05,
+            "width": 211.19,
+            "height": 30.22
+          },
+          "texts": [
+            {
+              "text": "Location unavailable",
+              "naturalWidth": 207.95,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.state.future.fallback": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 201.08,
+            "width": 211.19,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Pick a location in the widget settings.",
+              "naturalWidth": 253.78,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.head": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 7.19,
+            "width": 105.59,
+            "height": 50.39
+          }
+        },
+        "conformance.head.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 7.19,
+            "y": 7.19,
+            "width": 0,
+            "height": 50.39
+          }
+        },
+        "conformance.head.temp": {
+          "type": "ui.text",
+          "box": {
+            "x": 78.98,
+            "y": 18.09,
+            "width": 33.8,
+            "height": 28.56
+          },
+          "texts": [
+            {
+              "text": "23°",
+              "naturalWidth": 33.8,
+              "givenWidth": 33.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 59.97,
+            "width": 105.59,
+            "height": 25.19
+          }
+        },
+        "conformance.rows.2026-07-20": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 59.97,
+            "width": 105.59,
+            "height": 12.59
+          }
+        },
+        "conformance.rows.2026-07-20.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 61.86,
+            "width": 11.97,
+            "height": 8.8
+          },
+          "texts": [
+            {
+              "text": "Mo",
+              "naturalWidth": 8.55,
+              "givenWidth": 11.97,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows.2026-07-20.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 21.55,
+            "y": 59.97,
+            "width": 10.08,
+            "height": 12.59
+          }
+        },
+        "conformance.rows.2026-07-20.bar": {
+          "type": "ui.range-bar",
+          "box": {
+            "x": 34.02,
+            "y": 59.97,
+            "width": 78.75,
+            "height": 12.59
+          }
+        },
+        "conformance.rows.2026-07-21": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 72.56,
+            "width": 105.59,
+            "height": 12.59
+          }
+        },
+        "conformance.rows.2026-07-21.day": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 74.45,
+            "width": 11.97,
+            "height": 8.8
+          },
+          "texts": [
+            {
+              "text": "Mo",
+              "naturalWidth": 8.55,
+              "givenWidth": 11.97,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.rows.2026-07-21.icon": {
+          "type": "ui.image",
+          "box": {
+            "x": 21.55,
+            "y": 72.56,
+            "width": 10.08,
+            "height": 12.59
+          }
+        },
+        "conformance.rows.2026-07-21.bar": {
+          "type": "ui.range-bar",
+          "box": {
+            "x": 34.02,
+            "y": 72.56,
+            "width": 78.75,
+            "height": 12.59
+          }
+        },
+        "conformance.state": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 87.55,
+            "width": 105.59,
+            "height": 25.19
+          }
+        },
+        "conformance.state.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 88.98,
+            "width": 105.59,
+            "height": 15.11
+          },
+          "texts": [
+            {
+              "text": "Location unavailable",
+              "naturalWidth": 103.98,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.state.future.fallback": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 100.5,
+            "width": 105.59,
+            "height": 10.08
+          },
+          "texts": [
+            {
+              "text": "Pick a location in the widget settings.",
+              "naturalWidth": 126.75,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

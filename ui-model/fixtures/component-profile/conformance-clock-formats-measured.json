@@ -1,0 +1,465 @@
+{
+  "tree": "conformance-clock-formats-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 480
+          }
+        },
+        "conformance.time12": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 62.7,
+            "width": 216,
+            "height": 40.3
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 137.69,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time12Padded": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 100.61,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "02:05 PM",
+              "naturalWidth": 87.95,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time24": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 127,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "14:05",
+              "naturalWidth": 48.23,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time24Unpadded": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 153.39,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "14:05",
+              "naturalWidth": 48.23,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateDayFirst": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 179.78,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "12/09/26",
+              "naturalWidth": 94.77,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateMonthFirst": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 206.17,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "09/12/26",
+              "naturalWidth": 94.77,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateIso": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 232.56,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "2026-09-12",
+              "naturalWidth": 110.09,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateWritten": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 258.95,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Saturday, September 12",
+              "naturalWidth": 214.66,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.offset": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 285.81,
+            "width": 216,
+            "height": 23.52
+          },
+          "texts": [
+            {
+              "text": "UTC-04:00",
+              "naturalWidth": 88.2,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.beyondFallback": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 309.33,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "2:05 PM",
+              "naturalWidth": 75.38,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dialTinted": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 12,
+            "y": 339.55,
+            "width": 216,
+            "height": 72
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.time12": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 31.27,
+            "width": 108,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 68.81,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time12Padded": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 50.23,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "02:05 PM",
+              "naturalWidth": 43.98,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time24": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 63.42,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "14:05",
+              "naturalWidth": 24.13,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.time24Unpadded": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 76.61,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "14:05",
+              "naturalWidth": 24.13,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateDayFirst": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 89.8,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "12/09/26",
+              "naturalWidth": 47.39,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateMonthFirst": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 102.98,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "09/12/26",
+              "naturalWidth": 47.39,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateIso": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 116.17,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "2026-09-12",
+              "naturalWidth": 55.05,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dateWritten": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 129.36,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Saturday, September 12",
+              "naturalWidth": 107.33,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.offset": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 142.78,
+            "width": 108,
+            "height": 11.97
+          },
+          "texts": [
+            {
+              "text": "UTC-04:00",
+              "naturalWidth": 44.02,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.beyondFallback": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 154.77,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "2:05 PM",
+              "naturalWidth": 37.69,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dialTinted": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 6,
+            "y": 169.86,
+            "width": 108,
+            "height": 36
+          }
+        }
+      }
+    }
+  ]
+}

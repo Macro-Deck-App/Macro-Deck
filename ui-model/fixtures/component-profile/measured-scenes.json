@@ -1,0 +1,56 @@
+{
+  "font": "docs/public/fonts/Anta-Regular.ttf",
+  "locale": "en-US",
+  "scenes": [
+    { "tree": "conformance-tree.json", "layout": "conformance-layout.json" },
+    { "tree": "conformance-action-button-tree.json", "layout": "conformance-action-button-layout.json" },
+    { "tree": "conformance-anchored-list-tree.json", "layout": "conformance-anchored-list-layout.json" },
+    { "tree": "conformance-building-blocks-tree.json", "layout": "conformance-building-blocks-layout.json" },
+    { "tree": "conformance-chat-tree.json", "layout": "conformance-chat-layout.json" },
+    { "tree": "conformance-clock-tree.json", "layout": "conformance-clock-layout.json" },
+    { "tree": "conformance-clock-formats-tree.json", "layout": "conformance-clock-formats-layout.json" },
+    { "tree": "conformance-container-length-tree.json", "layout": "conformance-container-length-layout.json" },
+    { "tree": "conformance-gauge-tree.json", "layout": "conformance-gauge-layout.json" },
+    { "tree": "conformance-history-graph-tree.json", "layout": "conformance-history-graph-layout.json" },
+    { "tree": "conformance-modifier-tree.json", "layout": "conformance-modifier-layout.json" },
+    { "tree": "conformance-music-player-tree.json", "layout": "conformance-music-player-layout.json" },
+    { "tree": "conformance-slider-tree.json", "layout": "conformance-slider-layout.json" },
+    { "tree": "conformance-video-stream-tree.json", "layout": "conformance-video-stream-layout.json" },
+    {
+      "tree": "conformance-responsive-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 240, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 240 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 },
+        { "tile": { "width": 240, "height": 240 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-first-fit-tree.json",
+      "cases": [
+        { "tile": { "width": 240, "height": 240 }, "basis": 240 },
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-picker-tree.json",
+      "cases": [{ "tile": { "width": 240, "height": 240 }, "basis": 240 }]
+    },
+    {
+      "tree": "conformance-text-fit-tree.json",
+      "cases": [
+        { "tile": { "width": 240, "height": 240 }, "basis": 240 },
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 200, "height": 240 }, "basis": 200 },
+        { "tile": { "width": 360, "height": 240 }, "basis": 240 }
+      ]
+    },
+    {
+      "tree": "conformance-todo-header-tree.json",
+      "cases": [{ "tile": { "width": 295, "height": 295 }, "basis": 295 }]
+    }
+  ]
+}

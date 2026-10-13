@@ -1,0 +1,185 @@
+{
+  "tree": "conformance-anchored-list-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.feed": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 96
+          }
+        },
+        "conformance.feed.ada": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 0.97,
+            "width": 215.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "ada: a message",
+              "naturalWidth": 142.8,
+              "givenWidth": 215.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.grace": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 22.56,
+            "width": 215.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "grace: a message",
+              "naturalWidth": 160.45,
+              "givenWidth": 215.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.linus": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 44.16,
+            "width": 215.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "linus: a message",
+              "naturalWidth": 151.55,
+              "givenWidth": 215.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.start": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 96,
+            "width": 240,
+            "height": 48
+          }
+        },
+        "conformance.start.ada": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 92.17,
+            "width": 225,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "ada: a message",
+              "naturalWidth": 142.8,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.unknown": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 144,
+            "width": 240,
+            "height": 48
+          }
+        },
+        "conformance.unknown.ada": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 140.17,
+            "width": 225,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "ada: a message",
+              "naturalWidth": 142.8,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.sideways": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 192,
+            "width": 240,
+            "height": 48
+          }
+        },
+        "conformance.sideways.ada": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 188.17,
+            "width": 142.8,
+            "height": 55.66
+          },
+          "texts": [
+            {
+              "text": "ada: a message",
+              "naturalWidth": 142.8,
+              "givenWidth": 142.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

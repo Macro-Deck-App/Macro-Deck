@@ -1,0 +1,377 @@
+{
+  "tree": "conformance-action-button-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.full": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 14.39,
+            "width": 211.19,
+            "height": 108.61
+          }
+        },
+        "conformance.full.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 26.39,
+            "y": 20.16,
+            "width": 187.19,
+            "height": 69.06
+          },
+          "texts": [
+            {
+              "text": "Run the wake-up scene",
+              "naturalWidth": 347.66,
+              "givenWidth": 187.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.full.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 26.39,
+            "y": 83.95,
+            "width": 187.19,
+            "height": 30.88
+          },
+          "texts": [
+            {
+              "text": "One press starts everything",
+              "naturalWidth": 252.86,
+              "givenWidth": 187.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.press": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 132.59,
+            "width": 211.19,
+            "height": 17.92
+          }
+        },
+        "conformance.press.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 124.44,
+            "width": 215.98,
+            "height": 34.23
+          },
+          "texts": [
+            {
+              "text": "Play",
+              "naturalWidth": 62.19,
+              "givenWidth": 215.98,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.boundary": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 160.11,
+            "width": 211.19,
+            "height": 16.44
+          }
+        },
+        "conformance.boundary.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 154.84,
+            "width": 211.19,
+            "height": 26.97
+          },
+          "texts": [
+            {
+              "text": "Hold to arm",
+              "naturalWidth": 142.83,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.silent": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 186.14,
+            "width": 211.19,
+            "height": 14.94
+          }
+        },
+        "conformance.silent.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 181.34,
+            "width": 211.19,
+            "height": 24.53
+          },
+          "texts": [
+            {
+              "text": "Snapshot",
+              "naturalWidth": 109.16,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.double": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 210.67,
+            "width": 211.19,
+            "height": 14.94
+          }
+        },
+        "conformance.double.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 205.88,
+            "width": 211.19,
+            "height": 24.53
+          },
+          "texts": [
+            {
+              "text": "Tap twice",
+              "naturalWidth": 107.58,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.full": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 7.19,
+            "width": 105.59,
+            "height": 54.31
+          }
+        },
+        "conformance.full.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 13.19,
+            "y": 10.08,
+            "width": 93.59,
+            "height": 34.53
+          },
+          "texts": [
+            {
+              "text": "Run the wake-up scene",
+              "naturalWidth": 173.83,
+              "givenWidth": 93.59,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.full.caption": {
+          "type": "ui.text",
+          "box": {
+            "x": 13.19,
+            "y": 41.98,
+            "width": 93.59,
+            "height": 15.42
+          },
+          "texts": [
+            {
+              "text": "One press starts everything",
+              "naturalWidth": 126.44,
+              "givenWidth": 93.59,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.press": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 66.3,
+            "width": 105.59,
+            "height": 8.97
+          }
+        },
+        "conformance.press.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 6,
+            "y": 62.22,
+            "width": 107.98,
+            "height": 17.13
+          },
+          "texts": [
+            {
+              "text": "Play",
+              "naturalWidth": 31.06,
+              "givenWidth": 107.98,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.boundary": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 80.06,
+            "width": 105.59,
+            "height": 8.22
+          }
+        },
+        "conformance.boundary.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 77.44,
+            "width": 105.59,
+            "height": 13.47
+          },
+          "texts": [
+            {
+              "text": "Hold to arm",
+              "naturalWidth": 71.38,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.silent": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 93.08,
+            "width": 105.59,
+            "height": 7.47
+          }
+        },
+        "conformance.silent.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 90.69,
+            "width": 105.59,
+            "height": 12.25
+          },
+          "texts": [
+            {
+              "text": "Snapshot",
+              "naturalWidth": 54.58,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.double": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 105.34,
+            "width": 105.59,
+            "height": 7.47
+          }
+        },
+        "conformance.double.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 102.95,
+            "width": 105.59,
+            "height": 12.25
+          },
+          "texts": [
+            {
+              "text": "Tap twice",
+              "naturalWidth": 53.8,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

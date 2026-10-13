@@ -1,0 +1,101 @@
+{
+  "tree": "conformance-video-stream-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 200,
+        "height": 400
+      },
+      "basis": 200,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 200,
+            "height": 400
+          }
+        },
+        "conformance.video": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 200,
+            "height": 300
+          }
+        },
+        "conformance.videoSized": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 300,
+            "width": 200,
+            "height": 60
+          }
+        },
+        "conformance.videoEmpty": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 360,
+            "width": 200,
+            "height": 40
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 100,
+        "height": 400
+      },
+      "basis": 100,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 100,
+            "height": 400
+          }
+        },
+        "conformance.video": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 100,
+            "height": 350
+          }
+        },
+        "conformance.videoSized": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 350,
+            "width": 100,
+            "height": 30
+          }
+        },
+        "conformance.videoEmpty": {
+          "type": "macrodeck.video-stream",
+          "box": {
+            "x": 0,
+            "y": 380,
+            "width": 100,
+            "height": 20
+          }
+        }
+      }
+    }
+  ]
+}

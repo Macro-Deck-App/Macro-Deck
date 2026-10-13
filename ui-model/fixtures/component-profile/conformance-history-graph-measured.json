@@ -1,0 +1,172 @@
+{
+  "tree": "conformance-history-graph-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 480,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.layer",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.dense": {
+          "type": "ui.chart",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.sparse": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.sparse.chart": {
+          "type": "ui.chart",
+          "box": {
+            "x": 0,
+            "y": 158.41,
+            "width": 480,
+            "height": 81.59
+          }
+        },
+        "conformance.empty": {
+          "type": "ui.chart",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.content": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.content.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 16.8,
+            "y": 14.2,
+            "width": 446.39,
+            "height": 18.19
+          },
+          "texts": [
+            {
+              "text": "CPU Load",
+              "naturalWidth": 60.69,
+              "givenWidth": 446.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.content.subtitle": {
+          "type": "ui.text",
+          "box": {
+            "x": 16.8,
+            "y": 28.36,
+            "width": 446.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Apple M3 Max",
+              "naturalWidth": 125.83,
+              "givenWidth": 446.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.value": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 480,
+            "height": 240
+          }
+        },
+        "conformance.value.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 103,
+            "width": 480,
+            "height": 34
+          }
+        },
+        "conformance.value.row.reading": {
+          "type": "ui.text",
+          "box": {
+            "x": 192.36,
+            "y": 96.2,
+            "width": 78,
+            "height": 47.59
+          },
+          "texts": [
+            {
+              "text": "73.4",
+              "naturalWidth": 73.95,
+              "givenWidth": 78,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.value.row.unit": {
+          "type": "ui.text",
+          "box": {
+            "x": 272.75,
+            "y": 117.11,
+            "width": 14.89,
+            "height": 20.28
+          },
+          "texts": [
+            {
+              "text": "%",
+              "naturalWidth": 14.89,
+              "givenWidth": 14.89,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "tree": "conformance-chat-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.feed": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 80
+          }
+        },
+        "conformance.feed.first": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 8.02,
+            "width": 230.39,
+            "height": 19.2
+          }
+        },
+        "conformance.feed.first.text": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 4.19,
+            "width": 230.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "grace: the oldest line",
+              "naturalWidth": 188.8,
+              "givenWidth": 230.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.fixed": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 29.61,
+            "width": 230.39,
+            "height": 24
+          }
+        },
+        "conformance.feed.fixed.text": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 25.78,
+            "width": 230.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "linus: a fixed line",
+              "naturalWidth": 149.5,
+              "givenWidth": 230.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 52.17,
+            "width": 230.39,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "ada: hi Kappa !",
+              "naturalWidth": 131.64,
+              "givenWidth": 230.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.shrinking": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 80,
+            "width": 240,
+            "height": 80
+          }
+        },
+        "conformance.shrinking.child": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 80,
+            "width": 240,
+            "height": 80
+          }
+        },
+        "conformance.unknown": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 160,
+            "width": 240,
+            "height": 80
+          }
+        },
+        "conformance.unknown.child": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 160,
+            "width": 240,
+            "height": 80
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.feed": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 40
+          }
+        },
+        "conformance.feed.first": {
+          "type": "ui.stack",
+          "box": {
+            "x": 2.39,
+            "y": 4.05,
+            "width": 115.19,
+            "height": 9.59
+          }
+        },
+        "conformance.feed.first.text": {
+          "type": "ui.text",
+          "box": {
+            "x": 2.39,
+            "y": 2.14,
+            "width": 115.19,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "grace: the oldest line",
+              "naturalWidth": 94.41,
+              "givenWidth": 115.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.fixed": {
+          "type": "ui.stack",
+          "box": {
+            "x": 2.39,
+            "y": 14.83,
+            "width": 115.19,
+            "height": 12
+          }
+        },
+        "conformance.feed.fixed.text": {
+          "type": "ui.text",
+          "box": {
+            "x": 2.39,
+            "y": 12.92,
+            "width": 115.19,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "linus: a fixed line",
+              "naturalWidth": 74.75,
+              "givenWidth": 115.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.feed.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 2.39,
+            "y": 26.11,
+            "width": 115.19,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "ada: hi Kappa !",
+              "naturalWidth": 65.84,
+              "givenWidth": 115.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.shrinking": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 40,
+            "width": 120,
+            "height": 40
+          }
+        },
+        "conformance.shrinking.child": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 40,
+            "width": 120,
+            "height": 40
+          }
+        },
+        "conformance.unknown": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 80,
+            "width": 120,
+            "height": 40
+          }
+        },
+        "conformance.unknown.child": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 80,
+            "width": 120,
+            "height": 40
+          }
+        }
+      }
+    }
+  ]
+}

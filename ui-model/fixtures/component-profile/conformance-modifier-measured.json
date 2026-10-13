@@ -1,0 +1,369 @@
+{
+  "tree": "conformance-modifier-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.card": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 37.25
+          }
+        },
+        "conformance.card.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -4.8,
+            "width": 240,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "Sunny",
+              "naturalWidth": 71.2,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.linear": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 37.25,
+            "width": 240,
+            "height": 14.89
+          }
+        },
+        "conformance.radial": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 52.14,
+            "width": 240,
+            "height": 14.89
+          }
+        },
+        "conformance.press": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 67.03,
+            "width": 240,
+            "height": 29.8
+          }
+        },
+        "conformance.wrapper": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 96.83,
+            "width": 216,
+            "height": 76.14
+          }
+        },
+        "conformance.wrapper.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 118.09,
+            "width": 192,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "Volume",
+              "naturalWidth": 82.02,
+              "givenWidth": 192,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.circle": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 172.97,
+            "width": 240,
+            "height": 37.23
+          }
+        },
+        "conformance.circle.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 174.78,
+            "width": 240,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "On",
+              "naturalWidth": 31.09,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.bounds": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 210.2,
+            "width": 240,
+            "height": 14.89
+          }
+        },
+        "conformance.bounds.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 205.41,
+            "width": 240,
+            "height": 24.48
+          },
+          "texts": [
+            {
+              "text": "Off",
+              "naturalWidth": 34.08,
+              "givenWidth": 240,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.stream": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 225.09,
+            "width": 240,
+            "height": 7.45
+          }
+        },
+        "conformance.tap": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 232.55,
+            "width": 240,
+            "height": 7.45
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "conformance.card": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 18.61
+          }
+        },
+        "conformance.card.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.39,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "Sunny",
+              "naturalWidth": 35.61,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.linear": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 18.61,
+            "width": 120,
+            "height": 7.45
+          }
+        },
+        "conformance.radial": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 26.06,
+            "width": 120,
+            "height": 7.45
+          }
+        },
+        "conformance.press": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 33.52,
+            "width": 120,
+            "height": 14.91
+          }
+        },
+        "conformance.wrapper": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 48.42,
+            "width": 108,
+            "height": 38.06
+          }
+        },
+        "conformance.wrapper.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 6,
+            "y": 59.06,
+            "width": 96,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "Volume",
+              "naturalWidth": 41.02,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.circle": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 86.48,
+            "width": 120,
+            "height": 18.63
+          }
+        },
+        "conformance.circle.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 87.41,
+            "width": 120,
+            "height": 16.78
+          },
+          "texts": [
+            {
+              "text": "On",
+              "naturalWidth": 15.55,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.bounds": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 0,
+            "y": 105.11,
+            "width": 120,
+            "height": 7.45
+          }
+        },
+        "conformance.bounds.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 102.72,
+            "width": 120,
+            "height": 12.23
+          },
+          "texts": [
+            {
+              "text": "Off",
+              "naturalWidth": 17.05,
+              "givenWidth": 120,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.stream": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 112.56,
+            "width": 120,
+            "height": 3.72
+          }
+        },
+        "conformance.tap": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 116.28,
+            "width": 120,
+            "height": 3.72
+          }
+        }
+      }
+    }
+  ]
+}

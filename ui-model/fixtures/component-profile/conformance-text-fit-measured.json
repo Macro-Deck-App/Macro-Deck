@@ -1,0 +1,1347 @@
+{
+  "tree": "conformance-text-fit-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "fit": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "fit.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 9.59,
+            "width": 220.8,
+            "height": 28.8
+          }
+        },
+        "fit.row.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 10.56,
+            "width": 186.45,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Weekend groceries list",
+              "naturalWidth": 203.5,
+              "givenWidth": 186.45,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.row.count": {
+          "type": "ui.text",
+          "box": {
+            "x": 203.23,
+            "y": 10.56,
+            "width": 27.16,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "128",
+              "naturalWidth": 31.11,
+              "givenWidth": 27.16,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 43.19,
+            "width": 220.8,
+            "height": 24
+          }
+        },
+        "fit.digits.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 41.75,
+            "width": 39.05,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "CPU",
+              "naturalWidth": 39.05,
+              "givenWidth": 39.05,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 173.78,
+            "y": 41.75,
+            "width": 56.61,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "7.5",
+              "naturalWidth": 28.86,
+              "givenWidth": 56.61,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.min": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 68.14,
+            "width": 220.8,
+            "height": 26.94
+          },
+          "texts": [
+            {
+              "text": "Living room temperature",
+              "naturalWidth": 220.8,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.single": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 92.2,
+            "width": 220.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Notifications and reminders for today",
+              "naturalWidth": 334.77,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.clamp": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 116.67,
+            "width": 220.8,
+            "height": 40.31
+          },
+          "texts": [
+            {
+              "text": "A longer message that wraps onto a second line and is clamped there before it ends",
+              "naturalWidth": 665.45,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.ticker": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 158.42,
+            "width": 220.8,
+            "height": 38.39
+          }
+        },
+        "fit.ticker.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 135.38,
+            "width": 220.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "the oldest entry",
+              "naturalWidth": 143.91,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 154.58,
+            "width": 220.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "a middle entry",
+              "naturalWidth": 127.13,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 173.78,
+            "width": 220.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "the newest entry",
+              "naturalWidth": 153.64,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 201.61,
+            "width": 220.8,
+            "height": 24
+          }
+        },
+        "fit.column.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 198.25,
+            "width": 220.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "First line",
+              "naturalWidth": 67.59,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 204.25,
+            "width": 220.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Second line",
+              "naturalWidth": 91.89,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.third": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 210.25,
+            "width": 220.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Third line",
+              "naturalWidth": 70.59,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.fourth": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 216.25,
+            "width": 220.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Fourth line",
+              "naturalWidth": 83.22,
+              "givenWidth": 220.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "fit": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "fit.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 4.8,
+            "width": 110.39,
+            "height": 14.39
+          }
+        },
+        "fit.row.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 5.28,
+            "width": 93.22,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Weekend groceries list",
+              "naturalWidth": 101.75,
+              "givenWidth": 93.22,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.row.count": {
+          "type": "ui.text",
+          "box": {
+            "x": 101.61,
+            "y": 5.28,
+            "width": 13.58,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "128",
+              "naturalWidth": 15.56,
+              "givenWidth": 13.58,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 21.58,
+            "width": 110.39,
+            "height": 12
+          }
+        },
+        "fit.digits.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 20.88,
+            "width": 19.53,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "CPU",
+              "naturalWidth": 19.53,
+              "givenWidth": 19.53,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 86.89,
+            "y": 20.88,
+            "width": 28.3,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "7.5",
+              "naturalWidth": 14.44,
+              "givenWidth": 28.3,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.min": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 34.05,
+            "width": 110.39,
+            "height": 13.47
+          },
+          "texts": [
+            {
+              "text": "Living room temperature",
+              "naturalWidth": 110.22,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.single": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 46.08,
+            "width": 110.39,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Notifications and reminders for today",
+              "naturalWidth": 167.39,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.clamp": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 58.3,
+            "width": 110.39,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "A longer message that wraps onto a second line and is clamped there before it ends",
+              "naturalWidth": 332.11,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.ticker": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 79.17,
+            "width": 110.39,
+            "height": 19.19
+          }
+        },
+        "fit.ticker.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 67.67,
+            "width": 110.39,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "the oldest entry",
+              "naturalWidth": 71.95,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 77.27,
+            "width": 110.39,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "a middle entry",
+              "naturalWidth": 63.56,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 86.86,
+            "width": 110.39,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "the newest entry",
+              "naturalWidth": 76.83,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column": {
+          "type": "ui.stack",
+          "box": {
+            "x": 4.8,
+            "y": 100.75,
+            "width": 110.39,
+            "height": 12
+          }
+        },
+        "fit.column.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 99.08,
+            "width": 110.39,
+            "height": 6.34
+          },
+          "texts": [
+            {
+              "text": "First line",
+              "naturalWidth": 33.73,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 102.08,
+            "width": 110.39,
+            "height": 6.34
+          },
+          "texts": [
+            {
+              "text": "Second line",
+              "naturalWidth": 45.86,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.third": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 105.08,
+            "width": 110.39,
+            "height": 6.34
+          },
+          "texts": [
+            {
+              "text": "Third line",
+              "naturalWidth": 35.23,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.fourth": {
+          "type": "ui.text",
+          "box": {
+            "x": 4.8,
+            "y": 108.08,
+            "width": 110.39,
+            "height": 6.34
+          },
+          "texts": [
+            {
+              "text": "Fourth line",
+              "naturalWidth": 41.55,
+              "givenWidth": 110.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 200,
+        "height": 240
+      },
+      "basis": 200,
+      "nodes": {
+        "fit": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 200,
+            "height": 240
+          }
+        },
+        "fit.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 8,
+            "y": 8,
+            "width": 184,
+            "height": 24
+          }
+        },
+        "fit.row.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 8.81,
+            "width": 155.36,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "Weekend groceries list",
+              "naturalWidth": 169.69,
+              "givenWidth": 155.36,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.row.count": {
+          "type": "ui.text",
+          "box": {
+            "x": 169.36,
+            "y": 8.81,
+            "width": 22.64,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "128",
+              "naturalWidth": 25.94,
+              "givenWidth": 22.64,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits": {
+          "type": "ui.stack",
+          "box": {
+            "x": 8,
+            "y": 36,
+            "width": 184,
+            "height": 20
+          }
+        },
+        "fit.digits.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 34.81,
+            "width": 32.56,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "CPU",
+              "naturalWidth": 32.56,
+              "givenWidth": 32.56,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 144.8,
+            "y": 34.81,
+            "width": 47.2,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "7.5",
+              "naturalWidth": 24.06,
+              "givenWidth": 47.2,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.min": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 56.8,
+            "width": 184,
+            "height": 22.45
+          },
+          "texts": [
+            {
+              "text": "Living room temperature",
+              "naturalWidth": 183.88,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.single": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 76.86,
+            "width": 184,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "Notifications and reminders for today",
+              "naturalWidth": 279.14,
+              "givenWidth": 184,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.clamp": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 97.25,
+            "width": 184,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "A longer message that wraps onto a second line and is clamped there before it ends",
+              "naturalWidth": 555.17,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.ticker": {
+          "type": "ui.stack",
+          "box": {
+            "x": 8,
+            "y": 132.05,
+            "width": 184,
+            "height": 32
+          }
+        },
+        "fit.ticker.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 112.86,
+            "width": 184,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "the oldest entry",
+              "naturalWidth": 120,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 128.86,
+            "width": 184,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "a middle entry",
+              "naturalWidth": 106,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 144.86,
+            "width": 184,
+            "height": 22.38
+          },
+          "texts": [
+            {
+              "text": "the newest entry",
+              "naturalWidth": 128.13,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column": {
+          "type": "ui.stack",
+          "box": {
+            "x": 8,
+            "y": 168.05,
+            "width": 184,
+            "height": 60
+          }
+        },
+        "fit.column.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 165.25,
+            "width": 184,
+            "height": 19.59
+          },
+          "texts": [
+            {
+              "text": "First line",
+              "naturalWidth": 56.39,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 179.25,
+            "width": 184,
+            "height": 19.59
+          },
+          "texts": [
+            {
+              "text": "Second line",
+              "naturalWidth": 76.66,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column.third": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 193.25,
+            "width": 184,
+            "height": 19.59
+          },
+          "texts": [
+            {
+              "text": "Third line",
+              "naturalWidth": 58.91,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column.fourth": {
+          "type": "ui.text",
+          "box": {
+            "x": 8,
+            "y": 207.25,
+            "width": 184,
+            "height": 19.59
+          },
+          "texts": [
+            {
+              "text": "Fourth line",
+              "naturalWidth": 69.44,
+              "givenWidth": 184,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 360,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "fit": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 360,
+            "height": 240
+          }
+        },
+        "fit.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 9.59,
+            "width": 340.8,
+            "height": 28.8
+          }
+        },
+        "fit.row.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 10.56,
+            "width": 305.16,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Weekend groceries list",
+              "naturalWidth": 203.5,
+              "givenWidth": 305.16,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.row.count": {
+          "type": "ui.text",
+          "box": {
+            "x": 321.94,
+            "y": 10.56,
+            "width": 28.45,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "128",
+              "naturalWidth": 31.11,
+              "givenWidth": 28.45,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 43.19,
+            "width": 340.8,
+            "height": 24
+          }
+        },
+        "fit.digits.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 41.75,
+            "width": 39.05,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "CPU",
+              "naturalWidth": 39.05,
+              "givenWidth": 39.05,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.digits.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 293.78,
+            "y": 41.75,
+            "width": 56.61,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "7.5",
+              "naturalWidth": 28.86,
+              "givenWidth": 56.61,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.min": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 67.19,
+            "width": 340.8,
+            "height": 33.59
+          },
+          "texts": [
+            {
+              "text": "Living room temperature",
+              "naturalWidth": 275.27,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.single": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 96.95,
+            "width": 340.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Notifications and reminders for today",
+              "naturalWidth": 334.77,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.clamp": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 121.42,
+            "width": 340.8,
+            "height": 40.31
+          },
+          "texts": [
+            {
+              "text": "A longer message that wraps onto a second line and is clamped there before it ends",
+              "naturalWidth": 665.45,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.ticker": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 163.17,
+            "width": 340.8,
+            "height": 38.39
+          }
+        },
+        "fit.ticker.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 140.13,
+            "width": 340.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "the oldest entry",
+              "naturalWidth": 143.91,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 159.33,
+            "width": 340.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "a middle entry",
+              "naturalWidth": 127.13,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.ticker.last": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 178.53,
+            "width": 340.8,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "the newest entry",
+              "naturalWidth": 153.64,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "fit.column": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 206.36,
+            "width": 340.8,
+            "height": 24
+          }
+        },
+        "fit.column.first": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 203,
+            "width": 340.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "First line",
+              "naturalWidth": 67.59,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.second": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 209,
+            "width": 340.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Second line",
+              "naturalWidth": 91.89,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.third": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 215,
+            "width": 340.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Third line",
+              "naturalWidth": 70.59,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "fit.column.fourth": {
+          "type": "ui.text",
+          "box": {
+            "x": 9.59,
+            "y": 221,
+            "width": 340.8,
+            "height": 12.72
+          },
+          "texts": [
+            {
+              "text": "Fourth line",
+              "naturalWidth": 83.22,
+              "givenWidth": 340.8,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,525 @@
+{
+  "tree": "conformance-music-player-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 480
+          }
+        },
+        "conformance.playing": {
+          "type": "ui.button",
+          "box": {
+            "x": 14.39,
+            "y": 14.39,
+            "width": 211.19,
+            "height": 49.08
+          }
+        },
+        "conformance.playing.badge": {
+          "type": "ui.image",
+          "box": {
+            "x": 28.78,
+            "y": 28.78,
+            "width": 182.39,
+            "height": 0
+          }
+        },
+        "conformance.playing.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 28.78,
+            "y": 25.19,
+            "width": 182.39,
+            "height": 19
+          },
+          "texts": [
+            {
+              "text": "Windowlicker",
+              "naturalWidth": 107.52,
+              "givenWidth": 182.39,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.playing.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 28.78,
+            "y": 40.59,
+            "width": 182.39,
+            "height": 0
+          }
+        },
+        "conformance.playing.times": {
+          "type": "ui.stack",
+          "box": {
+            "x": 28.78,
+            "y": 40.59,
+            "width": 182.39,
+            "height": 8.48
+          }
+        },
+        "conformance.playing.elapsed": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 28.78,
+            "y": 38.02,
+            "width": 28.45,
+            "height": 13.64
+          },
+          "texts": [
+            {
+              "text": "3:35",
+              "naturalWidth": 28.45,
+              "givenWidth": 28.45,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.playing.duration": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 182.72,
+            "y": 38.02,
+            "width": 28.45,
+            "height": 13.64
+          },
+          "texts": [
+            {
+              "text": "3:35",
+              "naturalWidth": 28.45,
+              "givenWidth": 28.45,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.paused": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 73.06,
+            "width": 211.19,
+            "height": 23.02
+          }
+        },
+        "conformance.paused.cover": {
+          "type": "ui.image",
+          "box": {
+            "x": 14.39,
+            "y": 73.06,
+            "width": 211.19,
+            "height": 0
+          }
+        },
+        "conformance.paused.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 14.39,
+            "y": 78.09,
+            "width": 211.19,
+            "height": 0
+          }
+        },
+        "conformance.paused.remaining": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 14.39,
+            "y": 80.55,
+            "width": 211.19,
+            "height": 18.11
+          },
+          "texts": [
+            {
+              "text": "2:04",
+              "naturalWidth": 28.45,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.stream": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 14.39,
+            "y": 102.8,
+            "width": 211.19,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "435:05:30",
+              "naturalWidth": 72.56,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.empty": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 129.67,
+            "width": 211.19,
+            "height": 21
+          }
+        },
+        "conformance.empty.mark": {
+          "type": "ui.image",
+          "box": {
+            "x": 14.39,
+            "y": 129.67,
+            "width": 211.19,
+            "height": 0
+          }
+        },
+        "conformance.empty.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 129.08,
+            "width": 211.19,
+            "height": 25.19
+          },
+          "texts": [
+            {
+              "text": "Nothing playing",
+              "naturalWidth": 129.36,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.loading": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 160.27,
+            "width": 211.19,
+            "height": 23.03
+          }
+        },
+        "conformance.loading.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 156.67,
+            "width": 211.19,
+            "height": 25.19
+          },
+          "texts": [
+            {
+              "text": "Loading playback…",
+              "naturalWidth": 158.98,
+              "givenWidth": 211.19,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.loading.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 14.39,
+            "y": 183.3,
+            "width": 211.19,
+            "height": 0
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.playing": {
+          "type": "ui.button",
+          "box": {
+            "x": 7.19,
+            "y": 7.19,
+            "width": 105.59,
+            "height": 24.53
+          }
+        },
+        "conformance.playing.badge": {
+          "type": "ui.image",
+          "box": {
+            "x": 14.38,
+            "y": 14.38,
+            "width": 91.19,
+            "height": 0
+          }
+        },
+        "conformance.playing.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.38,
+            "y": 12.58,
+            "width": 91.19,
+            "height": 9.5
+          },
+          "texts": [
+            {
+              "text": "Windowlicker",
+              "naturalWidth": 53.77,
+              "givenWidth": 91.19,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.playing.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 14.38,
+            "y": 20.28,
+            "width": 91.19,
+            "height": 0
+          }
+        },
+        "conformance.playing.times": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.38,
+            "y": 20.28,
+            "width": 91.19,
+            "height": 4.25
+          }
+        },
+        "conformance.playing.elapsed": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 14.38,
+            "y": 19,
+            "width": 14.23,
+            "height": 6.81
+          },
+          "texts": [
+            {
+              "text": "3:35",
+              "naturalWidth": 14.23,
+              "givenWidth": 14.23,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.playing.duration": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 91.33,
+            "y": 19,
+            "width": 14.23,
+            "height": 6.81
+          },
+          "texts": [
+            {
+              "text": "3:35",
+              "naturalWidth": 14.23,
+              "givenWidth": 14.23,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        },
+        "conformance.paused": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 36.52,
+            "width": 105.59,
+            "height": 11.52
+          }
+        },
+        "conformance.paused.cover": {
+          "type": "ui.image",
+          "box": {
+            "x": 7.19,
+            "y": 36.52,
+            "width": 105.59,
+            "height": 0
+          }
+        },
+        "conformance.paused.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 7.19,
+            "y": 39.03,
+            "width": 105.59,
+            "height": 0
+          }
+        },
+        "conformance.paused.remaining": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 7.19,
+            "y": 40.27,
+            "width": 105.59,
+            "height": 9.05
+          },
+          "texts": [
+            {
+              "text": "2:04",
+              "naturalWidth": 14.23,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.stream": {
+          "type": "macrodeck.progress-text",
+          "box": {
+            "x": 7.19,
+            "y": 51.39,
+            "width": 105.59,
+            "height": 10.08
+          },
+          "texts": [
+            {
+              "text": "435:05:30",
+              "naturalWidth": 36.28,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.empty": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 64.83,
+            "width": 105.59,
+            "height": 10.5
+          }
+        },
+        "conformance.empty.mark": {
+          "type": "ui.image",
+          "box": {
+            "x": 7.19,
+            "y": 64.83,
+            "width": 105.59,
+            "height": 0
+          }
+        },
+        "conformance.empty.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 64.53,
+            "width": 105.59,
+            "height": 12.59
+          },
+          "texts": [
+            {
+              "text": "Nothing playing",
+              "naturalWidth": 64.69,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.loading": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 80.13,
+            "width": 105.59,
+            "height": 11.52
+          }
+        },
+        "conformance.loading.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 78.33,
+            "width": 105.59,
+            "height": 12.59
+          },
+          "texts": [
+            {
+              "text": "Loading playback…",
+              "naturalWidth": 79.5,
+              "givenWidth": 105.59,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.loading.progress": {
+          "type": "macrodeck.progress-bar",
+          "box": {
+            "x": 7.19,
+            "y": 91.64,
+            "width": 105.59,
+            "height": 0
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "tree": "conformance-slider-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 480
+          }
+        },
+        "conformance.header": {
+          "type": "ui.stack",
+          "box": {
+            "x": 14.39,
+            "y": 14.39,
+            "width": 211.19,
+            "height": 28.8
+          }
+        },
+        "conformance.header.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 10.31,
+            "width": 90.22,
+            "height": 36.94
+          },
+          "texts": [
+            {
+              "text": "Volume",
+              "naturalWidth": 90.22,
+              "givenWidth": 90.22,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.header.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 188.3,
+            "y": 8.64,
+            "width": 37.28,
+            "height": 40.3
+          },
+          "texts": [
+            {
+              "text": "42",
+              "naturalWidth": 37.28,
+              "givenWidth": 37.28,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.track": {
+          "type": "ui.slider",
+          "box": {
+            "x": 14.39,
+            "y": 52.78,
+            "width": 211.19,
+            "height": 206.39
+          }
+        },
+        "conformance.column": {
+          "type": "ui.slider",
+          "box": {
+            "x": 14.39,
+            "y": 268.77,
+            "width": 211.19,
+            "height": 120
+          }
+        },
+        "conformance.plain": {
+          "type": "ui.slider",
+          "box": {
+            "x": 14.39,
+            "y": 398.36,
+            "width": 211.19,
+            "height": 0
+          }
+        },
+        "conformance.empty": {
+          "type": "ui.slider",
+          "box": {
+            "x": 14.39,
+            "y": 407.95,
+            "width": 211.19,
+            "height": 0
+          }
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.header": {
+          "type": "ui.stack",
+          "box": {
+            "x": 7.19,
+            "y": 7.19,
+            "width": 105.59,
+            "height": 14.41
+          }
+        },
+        "conformance.header.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 7.19,
+            "y": 5.16,
+            "width": 45.11,
+            "height": 18.45
+          },
+          "texts": [
+            {
+              "text": "Volume",
+              "naturalWidth": 45.11,
+              "givenWidth": 45.11,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.header.value": {
+          "type": "ui.text",
+          "box": {
+            "x": 94.14,
+            "y": 4.31,
+            "width": 18.64,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "42",
+              "naturalWidth": 18.64,
+              "givenWidth": 18.64,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.track": {
+          "type": "ui.slider",
+          "box": {
+            "x": 7.19,
+            "y": 26.39,
+            "width": 105.59,
+            "height": 103.19
+          }
+        },
+        "conformance.column": {
+          "type": "ui.slider",
+          "box": {
+            "x": 7.19,
+            "y": 134.38,
+            "width": 105.59,
+            "height": 60
+          }
+        },
+        "conformance.plain": {
+          "type": "ui.slider",
+          "box": {
+            "x": 7.19,
+            "y": 199.17,
+            "width": 105.59,
+            "height": 0
+          }
+        },
+        "conformance.empty": {
+          "type": "ui.slider",
+          "box": {
+            "x": 7.19,
+            "y": 203.97,
+            "width": 105.59,
+            "height": 0
+          }
+        }
+      }
+    }
+  ]
+}

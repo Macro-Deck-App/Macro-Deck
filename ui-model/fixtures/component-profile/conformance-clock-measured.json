@@ -1,0 +1,203 @@
+{
+  "tree": "conformance-clock-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "HeadlessChrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 480
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 480
+          }
+        },
+        "conformance.caption": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 13.89,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "New York",
+              "naturalWidth": 83.48,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dial": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 12,
+            "y": 44.11,
+            "width": 216,
+            "height": 230.39
+          }
+        },
+        "conformance.dialPlain": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 12,
+            "y": 281.69,
+            "width": 216,
+            "height": 100.8
+          }
+        },
+        "conformance.time": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 380.44,
+            "width": 216,
+            "height": 64.67
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 220.91,
+              "givenWidth": 216,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.date": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 12,
+            "y": 439.23,
+            "width": 216,
+            "height": 26.86
+          },
+          "texts": [
+            {
+              "text": "Sat, Sep 12",
+              "naturalWidth": 101.52,
+              "givenWidth": 216,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 240
+      },
+      "basis": 120,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 240
+          }
+        },
+        "conformance.caption": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 6.97,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "New York",
+              "naturalWidth": 41.75,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.dial": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 6,
+            "y": 22.06,
+            "width": 108,
+            "height": 115.19
+          }
+        },
+        "conformance.dialPlain": {
+          "type": "macrodeck.clock-dial",
+          "box": {
+            "x": 6,
+            "y": 140.84,
+            "width": 108,
+            "height": 50.39
+          }
+        },
+        "conformance.time": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 190.22,
+            "width": 108,
+            "height": 32.31
+          },
+          "texts": [
+            {
+              "text": "2:05:30 PM",
+              "naturalWidth": 110.45,
+              "givenWidth": 108,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.date": {
+          "type": "macrodeck.dynamic-text",
+          "box": {
+            "x": 6,
+            "y": 219.61,
+            "width": 108,
+            "height": 13.41
+          },
+          "texts": [
+            {
+              "text": "Sat, Sep 12",
+              "naturalWidth": 50.77,
+              "givenWidth": 108,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "tree": "conformance-picker-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "picker": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "picker.search": {
+          "type": "ui.text-field",
+          "box": {
+            "x": 4.8,
+            "y": 4.8,
+            "width": 230.39,
+            "height": 23.58
+          }
+        },
+        "picker.results": {
+          "type": "ui.list",
+          "box": {
+            "x": 4.8,
+            "y": 35.56,
+            "width": 230.39,
+            "height": 199.59
+          }
+        },
+        "picker.results.row": {
+          "type": "ui.stack",
+          "box": {
+            "x": 9.59,
+            "y": 40.36,
+            "width": 205.39,
+            "height": 18.72
+          }
+        },
+        "picker.results.row.title": {
+          "type": "ui.text",
+          "box": {
+            "x": 14.39,
+            "y": 43.34,
+            "width": 109.41,
+            "height": 12.75
+          },
+          "texts": [
+            {
+              "text": "National Anthem of USSR",
+              "naturalWidth": 109.41,
+              "givenWidth": 109.41,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
