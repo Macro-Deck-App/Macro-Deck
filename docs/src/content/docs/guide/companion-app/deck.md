@@ -21,6 +21,9 @@ use folder buttons only, turn off **Navigation gestures** in the [app settings](
 
 Each press vibrates briefly, unless you turn off **Haptic feedback**. iPads have no vibration motor.
 
+If what a press starts fails, or the computer refuses it, for example because it is locked, the app says why in a
+short message: a toast at the bottom on Android, a banner over the deck on iOS.
+
 ## Several computers at once
 
 Leaving a deck does not close its connection. Every computer you opened stays connected while the app runs,
