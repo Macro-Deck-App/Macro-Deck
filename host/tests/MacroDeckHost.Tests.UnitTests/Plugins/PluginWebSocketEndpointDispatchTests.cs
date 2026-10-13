@@ -33,7 +33,7 @@ using Serilog.Events;
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
 
 [TestFixture]
-public class PluginWebSocketEndpointDispatchTests
+public partial class PluginWebSocketEndpointDispatchTests
 {
 	private static (PluginWebSocketEndpoint Endpoint, FakePluginConnection Connection, FakePluginCapabilityInvoker
 		Invoker)
