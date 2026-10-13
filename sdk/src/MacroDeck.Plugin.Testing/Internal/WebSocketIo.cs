@@ -7,8 +7,8 @@ internal static class WebSocketIo
 {
 	private const int FrameBufferSize = 32 * 1024;
 
-	/// <summary>Returns the message bytes, or null when the peer closed the socket, sent something over
-	/// <paramref name="maxBytes" />, or <paramref name="cancellationToken" /> fired.</summary>
+	/// <summary>Returns the message bytes, or null when the peer closed the socket or sent something over
+	/// <paramref name="maxBytes" />. Cancelling <paramref name="cancellationToken" /> aborts the socket and throws.</summary>
 	public static async Task<byte[]?> ReceiveOneMessageAsync(WebSocket socket,
 		int maxBytes,
 		CancellationToken cancellationToken)

@@ -803,13 +803,36 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 	/// connection resumed, or null when the handshake failed (the socket has already been dealt with).</summary>
 	private async Task<bool?> PerformHandshakeAsync(WebSocket socket, SessionRecord record)
 	{
-		using var deadline = new CancellationTokenSource(_options.Timeouts.Handshake);
+		// Cancelling a pending receive aborts the socket, so the deadline races the receive instead and
+		// leaves the socket able to carry the protocol.error and the close the real host sends.
+		var receiving = WebSocketIo.ReceiveOneMessageAsync(socket, _options.Limits.MaxMessageBytes, CancellationToken.None);
 
-		var message = await WebSocketIo.ReceiveOneMessageAsync(socket, _options.Limits.MaxMessageBytes, deadline.Token)
-			.ConfigureAwait(false);
+		using (var timer = new CancellationTokenSource())
+		{
+			var expired = Task.Delay(_options.Timeouts.Handshake, timer.Token);
+
+			if (await Task.WhenAny(receiving, expired).ConfigureAwait(false) == expired)
+			{
+				await RejectHandshakeAsync(socket, null, "Handshake timed out.", receiving).ConfigureAwait(false);
+				return null;
+			}
+
+			await timer.CancelAsync().ConfigureAwait(false);
+		}
+
+		var message = await receiving.ConfigureAwait(false);
 
 		if (message is null)
 		{
+			if (socket.State == WebSocketState.Open)
+			{
+				await RejectHandshakeAsync(socket, null, "Expected session.hello.").ConfigureAwait(false);
+			}
+			else
+			{
+				await CloseHandshakeSocketAsync(socket, "Expected session.hello.").ConfigureAwait(false);
+			}
+
 			return null;
 		}
 
@@ -817,13 +840,24 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 
 		if (!read.Succeeded || read.Envelope is not { Type: MessageTypes.SessionHello } envelope)
 		{
+			await RejectHandshakeAsync(socket, read.Envelope?.Id, "Expected session.hello.").ConfigureAwait(false);
 			return null;
 		}
 
 		Messages.Record(ProtocolMessageDirection.FromPlugin, envelope);
 		await _fromPlugin.Writer.WriteAsync(envelope, CancellationToken.None).ConfigureAwait(false);
 
-		var hello = envelope.Payload?.Deserialize<SessionHelloPayload>(PluginProtocolJson.Options);
+		SessionHelloPayload? hello;
+
+		try
+		{
+			hello = envelope.Payload?.Deserialize<SessionHelloPayload>(PluginProtocolJson.Options);
+		}
+		catch (JsonException)
+		{
+			await RejectHandshakeAsync(socket, envelope.Id, "Malformed session.hello.").ConfigureAwait(false);
+			return null;
+		}
 
 		var withinWindow = record.DroppedAt is { } droppedAt &&
 			DateTimeOffset.UtcNow - droppedAt <= _options.Timeouts.SessionResumeWindow;
@@ -847,6 +881,90 @@ public sealed class MacroDeckTestHost : IAsyncDisposable
 		Messages.Record(ProtocolMessageDirection.ToPlugin, welcome);
 
 		return resumed;
+	}
+
+	private async Task RejectHandshakeAsync(WebSocket socket,
+		string? correlationId,
+		string reason,
+		Task<byte[]?>? pendingReceive = null)
+	{
+		var error = new ProtocolEnvelope
+		{
+			Type = MessageTypes.ProtocolError,
+			Id = Guid.CreateVersion7().ToString(),
+			CorrelationId = correlationId,
+			Error = new ProtocolError
+			{
+				Code = ProtocolErrorCodes.InvalidPayload,
+				Message = ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload),
+				Retryable = false
+			}
+		};
+
+		try
+		{
+			await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(error),
+					WebSocketMessageType.Text,
+					endOfMessage: true,
+					CancellationToken.None)
+				.ConfigureAwait(false);
+			Messages.Record(ProtocolMessageDirection.ToPlugin, error);
+		}
+		catch (Exception exception) when (exception is WebSocketException or ObjectDisposedException)
+		{
+		}
+
+		await CloseHandshakeSocketAsync(socket, reason, pendingReceive).ConfigureAwait(false);
+	}
+
+	private async Task CloseHandshakeSocketAsync(WebSocket socket, string reason, Task<byte[]?>? pendingReceive = null)
+	{
+		using var budget = new CancellationTokenSource(_options.Timeouts.GracefulClose);
+
+		try
+		{
+			if (socket.State == WebSocketState.CloseReceived)
+			{
+				await socket.CloseOutputAsync(socket.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+						socket.CloseStatusDescription,
+						budget.Token)
+					.ConfigureAwait(false);
+				return;
+			}
+
+			if (socket.State != WebSocketState.Open)
+			{
+				return;
+			}
+
+			Messages.RecordClose((int)WebSocketCloseStatus.NormalClosure);
+			await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason, budget.Token).ConfigureAwait(false);
+
+			if (pendingReceive is not null)
+			{
+				await pendingReceive.WaitAsync(budget.Token).ConfigureAwait(false);
+			}
+
+			var discard = new byte[4096];
+
+			while (socket.State == WebSocketState.CloseSent)
+			{
+				await socket.ReceiveAsync(discard, budget.Token).ConfigureAwait(false);
+			}
+		}
+		catch (Exception exception) when (exception is WebSocketException
+			or OperationCanceledException
+			or ObjectDisposedException)
+		{
+			socket.Abort();
+		}
+		finally
+		{
+			_ = pendingReceive?.ContinueWith(static task => _ = task.Exception,
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
+				TaskScheduler.Default);
+		}
 	}
 
 	private static async Task WaitUntilServingAsync(ExternalPlugin plugin)
