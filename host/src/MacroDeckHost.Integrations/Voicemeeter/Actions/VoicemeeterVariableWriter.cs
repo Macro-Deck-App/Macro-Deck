@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
-using MacroDeckHost.Integrations.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Voicemeeter.Actions;

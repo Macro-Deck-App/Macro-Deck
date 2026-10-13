@@ -7,7 +7,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Caching;
-using MacroDeckHost.Integrations.Variables;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Variables;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;

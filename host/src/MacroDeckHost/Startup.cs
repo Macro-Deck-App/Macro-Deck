@@ -175,7 +175,9 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Extensions;
 using Mediator;
 using MacroDeckHost.Application.Events;
-using MacroDeckHost.Integrations.System.Notifications;
+using MacroDeckHost.Infrastructure.Notifications.Shell;
+using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Platform.Notifications;
 using MacroDeckHost.Plugins.Pairing;
 using MacroDeckHost.Application.Announcements;
 using MacroDeckHost.Infrastructure.Announcements;
@@ -617,18 +619,22 @@ public class Startup
 		services.AddSingleton<IMessageBroker>(provider => provider.GetRequiredService<MessageBroker>());
 		services.AddSingleton<PluginMessagingRegistrations>();
 		services.AddSingleton<PluginMessagingInvokeRunner>();
-		// Mediator's source generator only runs over MacroDeckHost.Application, so a handler in this
-		// assembly is registered by hand - as HostStatePusher is below. This one has to live here rather
-		// than in Application: INotificationService is an Integrations type, which Application does not
-		// reference. The factory is deliberately lazy - LinuxNotificationService's constructor blocks for
-		// up to two seconds probing for notify-send, which must not sit in application startup.
-		services.AddSingleton<INotificationService>(_ => NotificationServiceFactory.Create());
-		// The same instance the factory hands to the built-in system integration, which is created by
-		// reflection and never sees this container.
-		services.AddSingleton<IShellNotificationBridge>(_ => ShellNotificationBridge.Instance);
+		services.AddSingleton<IShellNotificationBridge>(_ => new ShellNotificationBridge(TimeProvider.System));
+		// Lazy: LinuxNotificationService's constructor blocks for up to two seconds probing for notify-send,
+		// which must not sit in application startup.
+		services.AddSingleton<IPlatformNotificationService>(provider => new ShellFirstNotificationService(
+			provider.GetRequiredService<IShellNotificationBridge>(),
+			NotificationServiceFactory.Create(Serilog.Log.ForContext<ShellFirstNotificationService>())));
+		services.AddSingleton<MacroDeck.Sdk.Notifications.IDesktopNotifier>(provider => new PlatformDesktopNotifier(
+			new Lazy<IPlatformNotificationService>(provider.GetRequiredService<IPlatformNotificationService>)));
+		services.AddSingleton<IPluginDesktopNotificationAccessPolicy, PluginDesktopNotificationAccessPolicy>();
+		services.AddSingleton<PluginDesktopNotificationCallbacks>();
+		services.AddSingleton<PluginDesktopNotificationInvokeRunner>();
 		services.AddSingleton<INotificationHandler<PluginPairingRequestedNotification>,
 			PluginPairingSystemNotificationHandler>();
 		services.AddSingleton<INotificationHandler<DeviceRemovedNotification>, CompanionDeviceRemovedHandler>();
+		services.AddSingleton<INotificationHandler<IntegrationStateChangedNotification>,
+			CompanionDeviceEntriesOwnerHandler>();
 
 		services.AddSingleton<HostStatePusher>();
 		foreach (var handlerInterface in typeof(HostStatePusher).GetInterfaces()
@@ -831,7 +837,7 @@ public class Startup
 		services.AddScoped<IHttpSettingsService, HttpSettingsService>();
 		services.AddSingleton<IHostHttp>(provider => new HostHttp(provider.GetRequiredService<IHttpUserAgentSource>()));
 		services.AddSingleton<ISystemHourCycleReader>(
-			new SystemTimePatternHourCycleReader(Integrations.Native.SystemHourCycleReaderFactory.CreatePatternReader()));
+			new SystemTimePatternHourCycleReader(SystemHourCycleReaderFactory.CreatePatternReader()));
 		services.AddScoped<TimeFormatResolver>();
 		services.AddSingleton<ILocaleApi, HostLocaleApi>();
 		services.AddSingleton<IntegrationStorageProvider>();
@@ -900,6 +906,7 @@ public class Startup
 		services.AddSingleton<IProfileRegistry, ProfileRegistry>();
 		services.AddSingleton<IIntegrationStateStore, JsonIntegrationStateStore>();
 		services.AddSingleton<IIntegrationRegistry, IntegrationRegistry>();
+		services.AddSingleton<BuiltInIntegrationRegistration>();
 		services.AddSingleton<IIntegrationIssueService, IntegrationIssueService>();
 		services.AddSingleton<IIntegrationIssueBroadcastTrigger, IntegrationIssueBroadcastTrigger>();
 		services.AddSingleton<IIntegrationHostIssueStore, IntegrationHostIssueStore>();

@@ -3,7 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.HostLocking;
-using MacroDeckHost.Integrations.System.Lock;
+using MacroDeckHost.Platform.Lock;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -13,9 +13,6 @@ namespace MacroDeckHost.Tests.UnitTests.BackgroundServices;
 [TestFixture]
 internal sealed class HostLockStateBackgroundServiceTests
 {
-	[TearDown]
-	public void TearDown() => LockStateSnapshot.Current.Set(null);
-
 	[Test]
 	public async Task A_transition_publishes_exactly_once()
 	{

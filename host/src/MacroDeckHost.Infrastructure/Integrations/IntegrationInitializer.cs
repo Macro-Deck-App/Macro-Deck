@@ -23,6 +23,7 @@ using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Http;
 using MacroDeck.Sdk.Locale;
+using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
@@ -83,6 +84,7 @@ public sealed class IntegrationInitializer
 	private readonly ILocaleApi? _locale;
 	private readonly IHostHttp? _http;
 	private readonly ICompanionDeviceApi? _companionDevices;
+	private readonly IDesktopNotifier? _desktopNotifications;
 
 	private readonly ConcurrentDictionary<string, byte> _attempted = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, IntegrationEventPublisher> _eventPublishers = new(StringComparer.Ordinal);
@@ -134,8 +136,10 @@ public sealed class IntegrationInitializer
 		ICompanionDeviceApi? companionDevices = null,
 		IMusicPlayerRegistry? musicPlayerRegistry = null,
 		IMusicPlayerStateNotifier? musicPlayerNotifier = null,
-		EmailHostServices? emailServices = null)
+		EmailHostServices? emailServices = null,
+		IDesktopNotifier? desktopNotifications = null)
 	{
+		_desktopNotifications = desktopNotifications;
 		_weatherProvider = weatherTrigger is null ? null : new IntegrationWeatherProviderApi(weatherTrigger);
 		_musicPlayerRegistry = musicPlayerRegistry;
 		_musicPlayerNotifier = musicPlayerNotifier;
@@ -227,7 +231,8 @@ public sealed class IntegrationInitializer
 			_locale,
 			_http,
 			_companionDevices,
-			RenewMusicPlayerApi(integration.Id));
+			RenewMusicPlayerApi(integration.Id),
+			_desktopNotifications);
 
 		// IIntegration.IsInitialized has no setter, so it is the SDK's own word on whether initialization
 		// finished, not on whether it was attempted. Shutdown needs the latter to avoid leaking whatever a

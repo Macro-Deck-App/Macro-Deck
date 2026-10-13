@@ -3034,8 +3034,8 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>只有全局变量可以共享。</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>从另一个 Macro Deck 导入的变量无法共享。</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>此变量无法共享。</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>无法保存共享设置。</value>

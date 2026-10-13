@@ -2,7 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Application.Email;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations.Email;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Email;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Email;

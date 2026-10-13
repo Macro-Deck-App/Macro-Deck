@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
         <ProjectReference Include="..\..\src\MacroDeckHost.Infrastructure\MacroDeckHost.Infrastructure.csproj" />
         <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
         <!-- Reference-only, to guarantee build ordering: the kill-tree test locates and runs the

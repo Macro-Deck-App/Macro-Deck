@@ -12,6 +12,7 @@ using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
@@ -42,8 +43,17 @@ internal sealed class CompanionHarness
 {
 	public const string IntegrationId = CompanionIntegration.IntegrationId;
 
-	public CompanionHarness(bool storedOff = false, Func<int>? suffixFactory = null, bool register = true)
+	public CompanionHarness(bool storedOff = false,
+		Func<int>? suffixFactory = null,
+		bool register = true,
+		IPluginCompanionDeviceAccessPolicy? pluginAccess = null,
+		bool builtInsRegistered = true)
 	{
+		if (builtInsRegistered)
+		{
+			BuiltInRegistration.Complete();
+		}
+
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(Store);
 		services.AddSingleton<IDeviceRepository>(Devices);
@@ -85,12 +95,14 @@ internal sealed class CompanionHarness
 			() => Coordinator,
 			Transport,
 			Registry,
+			BuiltInRegistration,
 			Requests,
 			Interfaces,
 			HostNames,
 			Connections,
 			Time,
-			new LoggerConfiguration().WriteTo.Sink(Sink).CreateLogger());
+			new LoggerConfiguration().WriteTo.Sink(Sink).CreateLogger(),
+			pluginAccess);
 		UserVariables = new UserVariableWriter(ScopeFactory);
 		Context = new IntegrationContext(VariableApi,
 			UserVariables,
@@ -118,6 +130,7 @@ internal sealed class CompanionHarness
 	public MemoryStateStore StateStore { get; }
 	public IServiceScopeFactory ScopeFactory { get; }
 	public IntegrationRegistry Registry { get; }
+	public BuiltInIntegrationRegistration BuiltInRegistration { get; } = new();
 	public CompanionIntegration Integration { get; }
 	public VariableRegistry VariableRegistry { get; } = new();
 	public VariableRefreshSignal RefreshSignal { get; } = new();

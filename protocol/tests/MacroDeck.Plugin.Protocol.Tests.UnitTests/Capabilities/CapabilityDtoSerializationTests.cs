@@ -394,6 +394,30 @@ public class CapabilityDtoSerializationTests
 		Assert.That(withUnknownFieldToo!.ConfiguresWithUiTree, Is.False);
 	}
 
+	[Test]
+	public void ActionDescriptorDto_from_a_plugin_that_predates_roles_has_no_role()
+	{
+		const string json = "{\"localId\":\"play\",\"name\":\"Play\",\"description\":\"Plays.\",\"parameters\":[]}";
+
+		var descriptor = JsonSerializer.Deserialize<ActionDescriptorDto>(json, PluginProtocolJson.Options);
+
+		Assert.That(descriptor!.Role, Is.Null);
+	}
+
+	[Test]
+	public void ActionDescriptorDto_round_trips_its_role()
+	{
+		var dto = new ActionDescriptorDto
+		{
+			LocalId = "launch", Name = "Launch", Description = "Launches.", Parameters = [], Role = "launch-application"
+		};
+
+		var json = JsonSerializer.Serialize(dto, PluginProtocolJson.Options);
+		var actual = JsonSerializer.Deserialize<ActionDescriptorDto>(json, PluginProtocolJson.Options);
+
+		Assert.That(actual!.Role, Is.EqualTo("launch-application"));
+	}
+
 	private static string InjectUnknownField(string json)
 	{
 		var body = json[..^1]; // strip only the outermost closing brace, not nested ones

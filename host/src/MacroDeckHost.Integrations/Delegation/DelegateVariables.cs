@@ -14,7 +14,8 @@ internal static class DelegateVariables
 				refreshInterval: TimeSpan.FromSeconds(5)) with
 			{
 				DisplayName = MacroDeckStrings.Connection.Connected(),
-				Configuration = configuration
+				Configuration = configuration,
+				IsShareable = false
 			};
 
 	public static bool Read(DelegateRemote remote) => remote.IsReachable && !remote.CredentialsRejected;

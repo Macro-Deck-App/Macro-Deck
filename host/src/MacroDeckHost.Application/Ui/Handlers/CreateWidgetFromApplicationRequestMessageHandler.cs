@@ -11,6 +11,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeck.Localization;
+using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -19,10 +20,6 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class CreateWidgetFromApplicationRequestMessageHandler
 	: IUiTransportMessageHandler<CreateWidgetFromApplicationRequest, CreateWidgetResponse>
 {
-	private const string SystemIntegrationId = "app.macro-deck.system";
-
-	private const string LaunchApplicationActionId = "launch-application";
-
 	private static readonly TimeSpan _iconReadyTimeout = TimeSpan.FromSeconds(15);
 
 	private static readonly TimeSpan _iconPollInterval = TimeSpan.FromMilliseconds(100);
@@ -90,9 +87,8 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 					name: Path.GetFileName(IconImportFiles.TrimTrailingSeparators(request.Path))));
 		}
 
-		var action = _integrations.FindAction(SystemIntegrationId,
-			LaunchApplicationActionId);
-		if (action is null)
+		var launcher = FindLauncher();
+		if (launcher is not var (integrationId, action))
 		{
 			return Failed(WidgetError.ValidationError, AppStrings.Errors.Applications.LaunchActionUnavailable());
 		}
@@ -113,7 +109,7 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 			PositionY = request.PositionY,
 			Width = 1,
 			Height = 1,
-			Data = LaunchApplicationButtonJson.Build(SystemIntegrationId,
+			Data = LaunchApplicationButtonJson.Build(integrationId,
 				action,
 				values,
 				application.Name,
@@ -138,6 +134,17 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 
 		return new CreateWidgetResponse { Success = true, Widget = FolderDtoMapper.MapWidgetToDto(result.Data!) };
 	}
+
+	// Only a built-in integration may receive a dropped application path; a plugin declaring the role is
+	// never chosen. Enablement is ignored here as it is for any action lookup by id.
+	private (string IntegrationId, IActionDefinition Action)? FindLauncher()
+		=> _integrations.Integrations
+			.Where(integration => _integrations.GetOrigin(integration.Id) == IntegrationOrigin.BuiltIn)
+			.OrderBy(integration => integration.Id, StringComparer.Ordinal)
+			.SelectMany(integration => integration.Actions
+				.Where(action => action.Role == ActionRoles.LaunchApplication && action.RunsHere())
+				.Select(action => ((string IntegrationId, IActionDefinition Action)?)(integration.Id, action)))
+			.FirstOrDefault();
 
 	private static bool IsOccupied(FolderEntity folder, CreateWidgetFromApplicationRequest request)
 		=> folder.Widgets.Any(widget =>

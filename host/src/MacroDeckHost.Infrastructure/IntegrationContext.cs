@@ -43,8 +43,10 @@ public class IntegrationContext : IIntegrationContext
 		ILocaleApi? locale = null,
 		IHostHttp? http = null,
 		ICompanionDeviceApi? companionDevices = null,
-		IMusicPlayerApi? musicPlayers = null)
+		IMusicPlayerApi? musicPlayers = null,
+		IDesktopNotifier? desktopNotifications = null)
 	{
+		DesktopNotifications = desktopNotifications ?? UnsupportedDesktopNotifier.Instance;
 		WeatherProvider = weatherProvider ?? UnsupportedWeatherProviderApi.Instance;
 		MusicPlayers = musicPlayers ?? UnsupportedMusicPlayerApi.Instance;
 		CompanionDevices = companionDevices ?? UnsupportedCompanionDeviceApi.Instance;
@@ -124,4 +126,6 @@ public class IntegrationContext : IIntegrationContext
 	public ICompanionDeviceApi CompanionDevices { get; }
 
 	public IMusicPlayerApi MusicPlayers { get; }
+
+	public IDesktopNotifier DesktopNotifications { get; }
 }

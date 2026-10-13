@@ -115,6 +115,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IWeatherBroadcastTrigger? _weatherTrigger;
 	private readonly ILocaleApi? _locale;
 	private readonly IMusicPlayerAlbumColor? _albumColor;
+	private readonly PluginDesktopNotificationCallbacks? _desktopNotifications;
 
 	// Rate limiting alone does not bound this: an icon transfer outlives the call that started it, so a
 	// plugin fetching a full deck's icons at once would otherwise hold every image, and its base64 chunk
@@ -174,8 +175,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		IBatteryRegistry? batteries = null,
 		IWeatherBroadcastTrigger? weatherTrigger = null,
 		ILocaleApi? locale = null,
-		IMusicPlayerAlbumColor? albumColor = null)
+		IMusicPlayerAlbumColor? albumColor = null,
+		PluginDesktopNotificationCallbacks? desktopNotifications = null)
 	{
+		_desktopNotifications = desktopNotifications;
 		_weatherTrigger = weatherTrigger;
 		_albumColor = albumColor;
 		_locale = locale;
@@ -290,6 +293,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Weather => RouteWeather(pluginId, payload),
 				HostApis.Locale => await RouteLocaleAsync(cancellationToken),
 				HostApis.MusicPlayers => await RouteMusicPlayerAlbumColorAsync(payload, cancellationToken),
+				HostApis.DesktopNotifications => await RouteDesktopNotificationsAsync(pluginId, payload, cancellationToken),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -304,6 +308,20 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InternalError,
 				ProtocolErrorMessages.For(ProtocolErrorCodes.InternalError));
 		}
+	}
+
+	private async Task<HostCallbackResult> RouteDesktopNotificationsAsync(string pluginId,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		if (_desktopNotifications is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+				"This host cannot show desktop notifications for plugins.");
+		}
+
+		return _desktopNotifications.Admit(pluginId) ??
+			await _desktopNotifications.ExecuteAsync(payload, cancellationToken);
 	}
 
 	private async Task<HostCallbackResult> RouteLocaleAsync(CancellationToken cancellationToken)

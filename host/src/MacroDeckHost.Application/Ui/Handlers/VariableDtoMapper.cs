@@ -30,6 +30,7 @@ internal static class VariableDtoMapper
 			DecimalPlaces = entity.DecimalPlaces,
 			Unit = entity.Unit,
 			SemanticKind = entity.SemanticKind,
+			IsShareable = entity.IsShareable,
 			Attributes = entity.Attributes,
 			FileSource = entity.FileSource is { } source
 				? new VariableFileSourceDto { Path = source.Path, AllowWriteBack = source.AllowWriteBack }

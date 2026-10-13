@@ -3035,8 +3035,8 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Sdílet lze pouze globální proměnné.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Proměnnou importovanou z jiného Macro Decku nelze sdílet.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Tuto proměnnou nelze sdílet.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Nastavení sdílení se nepodařilo uložit.</value>

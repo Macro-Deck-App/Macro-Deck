@@ -1,7 +1,7 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Integrations.Steam.Actions;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Tests.UnitTests.System;
 
 namespace MacroDeckHost.Tests.UnitTests.Steam;
@@ -39,7 +39,7 @@ internal sealed class SteamLaunchTests
 	[TestCase("javascript:alert(1)")]
 	public void The_real_application_service_refuses_anything_but_steam_uris(string uri)
 	{
-		Assert.Throws<NotSupportedException>(() => ApplicationServiceFactory.Create().OpenUri(uri));
+		Assert.Throws<NotSupportedException>(() => ApplicationServiceFactory.Create(Serilog.Core.Logger.None).OpenUri(uri));
 	}
 
 	[Test]

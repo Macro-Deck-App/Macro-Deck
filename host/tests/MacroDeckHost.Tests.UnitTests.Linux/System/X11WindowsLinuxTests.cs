@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Linux.System;
 

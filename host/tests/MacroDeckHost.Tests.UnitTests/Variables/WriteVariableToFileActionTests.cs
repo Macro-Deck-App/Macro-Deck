@@ -1,6 +1,6 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Integrations.Variables;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Variables;
 

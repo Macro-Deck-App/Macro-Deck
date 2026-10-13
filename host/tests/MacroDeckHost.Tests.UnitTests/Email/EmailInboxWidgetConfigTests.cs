@@ -5,7 +5,7 @@ using MacroDeck.Ui.Testing;
 using MacroDeckHost.Application.Email;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations.Email;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Email;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets.EmailInbox;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTree;

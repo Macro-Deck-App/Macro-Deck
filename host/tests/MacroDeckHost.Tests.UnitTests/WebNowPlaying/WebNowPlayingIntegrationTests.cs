@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.WebNowPlaying;
 using MacroDeckHost.Tests.UnitTests.YtmDesktop;
 using MacroDeck.Sdk.Migration;
@@ -369,7 +369,7 @@ internal sealed class WebNowPlayingIntegrationTests
 	[Test]
 	public async Task Macro_Deck_2_WebNowPlaying_buttons_migrate_to_this_integration_with_a_setup_hint()
 	{
-		var claimants = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger)
+		var claimants = BuiltInIntegrations.Discover(Serilog.Log.Logger)
 			.OfType<IMigrationProvider>()
 			.Where(provider => provider.Migrations.Any(migration =>
 				migration.Source == MigrationSource.MacroDeck2 &&

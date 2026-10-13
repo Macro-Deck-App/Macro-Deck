@@ -1,7 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Integrations.System.Notifications;
+using MacroDeckHost.Platform.Notifications;
 using MacroDeckHost.Localization;
 using Mediator;
 using ILogger = Serilog.ILogger;
@@ -21,13 +21,13 @@ namespace MacroDeckHost.Plugins.Pairing;
 /// </summary>
 public sealed class PluginPairingSystemNotificationHandler : INotificationHandler<PluginPairingRequestedNotification>
 {
-	private readonly INotificationService _notifications;
+	private readonly IPlatformNotificationService _notifications;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILocalizationResolver _localization;
 	private readonly ILogger _logger;
 
 	public PluginPairingSystemNotificationHandler(
-		INotificationService notifications,
+		IPlatformNotificationService notifications,
 		IServiceScopeFactory scopeFactory,
 		ILocalizationResolver localization,
 		ILogger logger)

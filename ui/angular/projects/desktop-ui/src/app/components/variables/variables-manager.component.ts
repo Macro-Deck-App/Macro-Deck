@@ -79,8 +79,6 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
   widget: AppStrings.Variables.Manager.ClassificationWidget,
 };
 
-const DELEGATE_INTEGRATION_ID = 'app.macro-deck.delegate';
-
 const DEFAULT_COLOR_VALUE = '#000000';
 
 @Component({
@@ -980,7 +978,7 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   canShare(variable: Variable): boolean {
-    return variable.scope === 'global' && variable.ownerIntegrationId !== DELEGATE_INTEGRATION_ID;
+    return variable.scope === 'global' && variable.isShareable !== false;
   }
 
   formatValue(variable: Variable): string {

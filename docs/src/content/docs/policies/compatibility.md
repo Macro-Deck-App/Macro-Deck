@@ -18,7 +18,7 @@ under [behaviour changes that moved no version](/ui/reference/compatibility/#beh
 | UI model | `MacroDeck.Ui`, `MacroDeck.Ui.Model`, `MacroDeck.Ui.Testing` | Frozen like the SDK; the UI model's wire major is negotiated separately - see [the UI model majors](#ui-model-majors). |
 | Protocol | `MacroDeck.Plugin.Protocol`: the envelope, DTOs, message types, error codes | Append-only within a protocol major; a break needs a new major. |
 | Plugin HTTP and WebSocket | `/api/plugins/*`, `/plugins/ws` | Existing endpoints keep their shape and meaning - see [the protocol reference](/reference/protocol/). |
-| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `email-inbox`, `locale`, `companion-devices`, `music-players`, `event-bindings`, `http` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
+| Capability and host API catalogues | `device-provider`/`devices`, `layout-provider`/`layouts`, `folder-view-provider`/`folder-views`, `widget-type-provider`/`widget-types`, `screensaver-provider`/`screensavers`, `messaging`/`messaging`, `video-stream-provider`/`video-streams`, `calendar`, `config-entries`, `battery-provider`/`batteries`, `email-inbox`, `companion-device-entries`, `locale`, `companion-devices`, `music-players`, `desktop-notifications`, `event-bindings`, `http` | Names stay; see [capability operations](/reference/protocol/#capability-operations). |
 | Manifest and package format | `manifest.json`, the `.macroDeckPlugin` package | An existing manifest and package keep installing - see [the manifest reference](/reference/manifest/). |
 | Analyzer diagnostic ids | `MDP1001`, …, the `MDLOC` family `MDLOC001`-`MDLOC008` | An id keeps its meaning and is never reused - see [analyzers](/reference/analyzers/). |
 | Conformance check ids | `MDC0305`, … | Stable, so you can gate CI on them - see [conformance](/reference/conformance/). |
@@ -322,6 +322,17 @@ What did **not** need a major:
   implementation keeps compiling and loading and reports no players. An older host pushes nothing and answers
   `CAPABILITY_UNSUPPORTED`, which the SDK reports as no players and a `null` colour, without throwing; an
   older plugin ignores the push. Reading is not gated, like registering another player's artwork.
+- [Desktop notifications](/features/notifications/#desktop-notifications) added
+  `IIntegrationContext.DesktopNotifications`, the `MacroDeck.Sdk.Notifications` types `IDesktopNotifier` and
+  `UnsupportedDesktopNotifier`, the `desktop-notifications` host API (`show`) with a per-plugin `host.state`
+  push on registration, the error code `DESKTOP_NOTIFICATIONS_NOT_ALLOWED`, the permission
+  `host:desktop-notifications`, and `FakeDesktopNotifier` in `MacroDeck.Plugin.Testing`, all within major `3`.
+  `DesktopNotifications` is a default interface member returning `UnsupportedDesktopNotifier.Instance`, so an
+  existing `IIntegrationContext` implementation keeps compiling and loading and shows nothing. An older host
+  pushes nothing and answers `CAPABILITY_UNSUPPORTED`; the SDK then reports `IsSupported` as `false` and
+  `ShowAsync` completes without showing anything, without throwing. An older plugin ignores the push, and an
+  older host installs a manifest that declares `host:desktop-notifications` with the `unknown-permission`
+  warning. The permission is enforced from the start, which breaks no plugin because none used the API before.
 - Colour variables added `VariableType.Color`, whose values travel as an ordinary `text` value, and an
   optional `allowAlpha` field on `ActionParameterDto` (`ActionParameter.AllowAlpha`), all within major `3`.
 - [Batteries](/features/batteries/) added a capability kind, `battery-provider`, at capability version
@@ -351,6 +362,21 @@ What did **not** need a major:
   optional `searchable` field on `ActionParameterDto`, all within major `3`. An older host ignores it and
   draws the plain select; a parameter from an older plugin has no `searchable` and is not searchable. See
   [Letting the user search a long list](/features/actions/#letting-the-user-search-a-long-list).
+- Action roles added `IActionDefinition.Role`, a default interface member returning `null`, the
+  `ActionRoles` constants and an optional `role` field on `ActionDescriptorDto`, all within major `3` and
+  `actions` capability version `1`. An existing `IActionDefinition` keeps compiling and loading with no
+  role; an older host ignores the field. See [Declaring parameters](/features/actions/#declaring-parameters).
+- [Companion device entries](/features/companion-devices/#a-configuration-entry-per-device) added the
+  member-less `ICompanionDeviceConfigEntries` interface and a declarative capability kind,
+  `companion-device-entries`, at capability version `1` with the single operation `describe`, answered
+  without data, all within major `3`. A plugin that does not implement the interface never declares the kind
+  and is unaffected; an older host rejects the declaration non-fatally and creates no entries for the plugin.
+  The built-in Companion integration now reaches the same behaviour through the interface instead of being
+  named by host code, so its entries are created and removed exactly as before.
+- Shareability added `VariableDefinition.IsShareable` (default `true`) and an optional `isShareable` field
+  on `VariableDefinitionDto`, defaulting to `true` when absent, all within major `3` and without moving the
+  `variables` capability version: a definition from an older plugin stays shareable, and an older host
+  ignores the field. See [Defining a variable](/features/variables/#defining-a-variable).
 - Localization moved the **UI model** major, not this one - see [the localization major](#the-localization-major).
 
 **Negotiation happens exactly once**, in `POST /api/plugins/sessions`:

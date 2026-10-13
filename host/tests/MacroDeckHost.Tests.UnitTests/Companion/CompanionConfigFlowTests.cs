@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Integrations;
 using System.Text.Json;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
@@ -138,6 +139,7 @@ internal sealed class CompanionConfigFlowTests
 			new UserNotificationStore(),
 			initializer,
 			new RecordingMediator(),
+			new BuiltInIntegrationRegistration(),
 			TimeProvider.System,
 			CompanionHarness.Logger);
 

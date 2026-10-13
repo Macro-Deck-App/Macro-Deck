@@ -3034,8 +3034,8 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>केवल ग्लोबल वेरिएबल साझा किए जा सकते हैं।</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>किसी दूसरे Macro Deck से आयात किया गया वेरिएबल साझा नहीं किया जा सकता।</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>यह वेरिएबल साझा नहीं किया जा सकता।</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>साझाकरण सेटिंग सहेजी नहीं जा सकी।</value>

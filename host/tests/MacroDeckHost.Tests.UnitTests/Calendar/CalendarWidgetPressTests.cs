@@ -4,7 +4,7 @@ using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
-using MacroDeckHost.Integrations.Calendar;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Calendar;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets.Calendar;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTesting;

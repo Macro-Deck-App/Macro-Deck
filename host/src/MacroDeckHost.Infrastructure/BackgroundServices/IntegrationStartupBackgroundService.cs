@@ -3,7 +3,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeck.Sdk;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +19,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 	private readonly IUserNotificationStore _userNotificationStore;
 	private readonly IntegrationInitializer _initializer;
 	private readonly IMediator _mediator;
+	private readonly BuiltInIntegrationRegistration _builtInRegistration;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
@@ -29,6 +30,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 		IUserNotificationStore userNotificationStore,
 		IntegrationInitializer initializer,
 		IMediator mediator,
+		BuiltInIntegrationRegistration builtInRegistration,
 		TimeProvider timeProvider,
 		ILogger logger)
 		: base(lifetime)
@@ -38,6 +40,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 		_userNotificationStore = userNotificationStore;
 		_initializer = initializer;
 		_mediator = mediator;
+		_builtInRegistration = builtInRegistration;
 		_timeProvider = timeProvider;
 		_logger = logger;
 	}
@@ -46,14 +49,23 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 	{
 		_logger.Information("Starting integration discovery and initialization");
 
-		var integrations = IntegrationDiscovery.DiscoverIntegrations(_logger).AsEnumerable();
+		var integrations = BuiltInIntegrations.Discover(_logger).AsEnumerable();
 
 		if (!DeveloperIntegrationsEnabled())
 		{
 			integrations = integrations.Where(i => i is not ISampleIntegration);
 		}
 
-		var pending = await RegisterAllAsync(integrations);
+		IReadOnlyList<PendingIntegration> pending;
+		try
+		{
+			pending = await RegisterAllAsync(integrations);
+		}
+		finally
+		{
+			_builtInRegistration.Complete();
+		}
+
 		await InitializeAllAsync(pending, stoppingToken);
 
 		_logger.Information("All integrations initialized");

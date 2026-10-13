@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Threading.Channels;
+using MacroDeck.Plugin.Protocol.Handshake;
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Companion;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Integrations;
@@ -8,6 +10,7 @@ using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Network.Discovery;
 using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
 using MacroDeckHost.Application.Ui.Transport.Messages.Integrations;
@@ -19,7 +22,6 @@ namespace MacroDeckHost.Integrations;
 
 public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 {
-	private const string IntegrationId = "app.macro-deck.companion";
 	private const int MaximumTextLength = 64;
 
 	private static readonly HashSet<string> _knownCapabilities = new HashSet<string>(StringComparer.Ordinal)
@@ -48,6 +50,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	private readonly Func<IIntegrationConfigMutationCoordinator> _coordinator;
 	private readonly IUiTransport _transport;
 	private readonly IIntegrationRegistry _registry;
+	private readonly BuiltInIntegrationRegistration _builtInRegistration;
+	private readonly IPluginCompanionDeviceAccessPolicy? _pluginAccess;
 	private readonly CompanionCommandRequests _requests;
 	private readonly INetworkInterfaceSnapshotProvider _interfaces;
 	private readonly IHostNameProvider _hostNames;
@@ -61,19 +65,24 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _deviceGates = new();
 	private readonly ConcurrentDictionary<Guid, Task> _creations = new();
 	private readonly ConcurrentDictionary<Guid, bool> _failedCreations = new();
+	private readonly Lock _ownerGate = new();
+	private (string Id, bool IsPlugin)? _owner;
 
 	public CompanionDeviceRegistry(
 		IServiceScopeFactory scopeFactory,
 		Func<IIntegrationConfigMutationCoordinator> coordinator,
 		IUiTransport transport,
 		IIntegrationRegistry registry,
+		BuiltInIntegrationRegistration builtInRegistration,
 		CompanionCommandRequests requests,
 		INetworkInterfaceSnapshotProvider interfaces,
 		IHostNameProvider hostNames,
 		DeviceConnectionTracker deviceConnections,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		IPluginCompanionDeviceAccessPolicy? pluginAccess = null)
 	{
+		_pluginAccess = pluginAccess;
 		_hostNames = hostNames;
 		_deviceConnections = deviceConnections;
 		_timeProvider = timeProvider;
@@ -81,10 +90,19 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		_coordinator = coordinator;
 		_transport = transport;
 		_registry = registry;
+		_builtInRegistration = builtInRegistration;
 		_requests = requests;
 		_interfaces = interfaces;
 		_logger = logger;
 		_registry.AvailabilityChanged += OnAvailabilityChanged;
+		_ = _builtInRegistration.Completed.ContinueWith(_ => OnBuiltInRegistrationCompleted(),
+			CancellationToken.None,
+			TaskContinuationOptions.ExecuteSynchronously,
+			TaskScheduler.Default);
+		if (_pluginAccess is not null)
+		{
+			_pluginAccess.Changed += OnPluginAccessChanged;
+		}
 	}
 
 	public event EventHandler<CompanionDeviceEventArgs>? DeviceChanged;
@@ -414,11 +432,94 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 
 	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs change)
 	{
-		if (change.IsAvailable && string.Equals(change.IntegrationId, IntegrationId, StringComparison.Ordinal))
+		if (change.IsAvailable && string.Equals(change.IntegrationId, ResolveOwner(), StringComparison.Ordinal))
 		{
 			ScheduleCreationForConnectedDevices();
 		}
 	}
+
+	internal void IntegrationStateChanged(string integrationId)
+	{
+		string? before;
+		lock (_ownerGate)
+		{
+			before = _owner?.Id;
+		}
+
+		var owner = ResolveOwner();
+		if (owner is not null &&
+			(!string.Equals(owner, before, StringComparison.Ordinal) ||
+				(string.Equals(owner, integrationId, StringComparison.Ordinal) && OwnerIsPlugin())))
+		{
+			ScheduleCreationForConnectedDevices();
+		}
+	}
+
+	private void OnBuiltInRegistrationCompleted()
+	{
+		if (ResolveOwner() is not null)
+		{
+			ScheduleCreationForConnectedDevices();
+		}
+	}
+
+	private void OnPluginAccessChanged()
+	{
+		if (ResolveOwner() is not null && OwnerIsPlugin())
+		{
+			ScheduleCreationForConnectedDevices();
+		}
+	}
+
+	// Kept for this run only. Plugins register concurrently with the built-ins, so a plugin is only
+	// considered once every built-in has registered; a built-in owner is final.
+	private string? ResolveOwner()
+	{
+		var integrations = _registry.Integrations;
+		lock (_ownerGate)
+		{
+			if (_owner is { IsPlugin: false } fixedOwner)
+			{
+				return fixedOwner.Id;
+			}
+
+			if (integrations.FirstOrDefault(integration => !IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
+				is { } builtIn)
+			{
+				_owner = (builtIn.Id, false);
+			}
+			else if (_owner is null &&
+				_builtInRegistration.IsComplete &&
+				integrations.FirstOrDefault(integration => IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
+					is { } plugin)
+			{
+				_owner = (plugin.Id, true);
+			}
+
+			return _owner?.Id;
+		}
+	}
+
+	private bool OwnerIsPlugin()
+	{
+		lock (_ownerGate)
+		{
+			return _owner is { IsPlugin: true };
+		}
+	}
+
+	private static bool DeclaresDeviceEntries(IIntegration integration)
+		=> integration is IDeclaredCapabilityKinds declared
+			? declared.DeclaredCapabilityKinds.Contains(CapabilityKinds.CompanionDeviceEntries, StringComparer.Ordinal)
+			: integration is ICompanionDeviceConfigEntries;
+
+	private bool IsPlugin(string integrationId) => _registry.GetOrigin(integrationId) == IntegrationOrigin.Plugin;
+
+	private async Task<bool> OwnerMayUseDevicesAsync(string ownerId)
+		=> _registry.Integrations.Any(integration => string.Equals(integration.Id, ownerId, StringComparison.Ordinal)) &&
+			(!IsPlugin(ownerId) ||
+				(_pluginAccess is not null &&
+					await _pluginAccess.EvaluateAsync(ownerId) == PluginCompanionDeviceAccess.Available));
 
 	private void ScheduleCreationForConnectedDevices()
 	{
@@ -462,9 +563,9 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 				Raise(DeviceChanged, deviceId, null);
 			}
 
-			if (await FindEntryAsync(deviceId) is not null)
+			if (ResolveOwner() is { } ownerId && await FindEntryAsync(ownerId, deviceId) is not null)
 			{
-				await _coordinator().DeleteWithoutStoringDisabledAsync(IntegrationId, deviceId, cancellationToken);
+				await _coordinator().DeleteWithoutStoringDisabledAsync(ownerId, deviceId, cancellationToken);
 			}
 		}
 		finally
@@ -483,11 +584,17 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		await gate.WaitAsync();
 		try
 		{
+			if (ResolveOwner() is not { } ownerId)
+			{
+				return;
+			}
+
 			await using var scope = _scopeFactory.CreateAsyncScope();
 			var device = await scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetById(deviceId);
 			if (device is null ||
 				device.ClientType != DeviceClientType.Native ||
-				_registry.IsExplicitlyDisabled(IntegrationId))
+				_registry.IsExplicitlyDisabled(ownerId) ||
+				!await OwnerMayUseDevicesAsync(ownerId))
 			{
 				return;
 			}
@@ -495,26 +602,26 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			var coordinator = _coordinator();
 			var existing = await scope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>().Find(deviceId);
 			if (existing is not null &&
-				(await coordinator.DescribeAsync(IntegrationId, CancellationToken.None))
+				(await coordinator.DescribeAsync(ownerId, CancellationToken.None))
 				.Any(entry => entry.Id == deviceId && entry.Usable))
 			{
 				return;
 			}
 
-			var disabledVersion = _registry.DisabledVersion(IntegrationId);
-			if (_registry.IsExplicitlyDisabled(IntegrationId))
+			var disabledVersion = _registry.DisabledVersion(ownerId);
+			if (_registry.IsExplicitlyDisabled(ownerId))
 			{
 				return;
 			}
 
-			var outcome = await coordinator.CompleteUnlessDisabledAsync(IntegrationId,
+			var outcome = await coordinator.CompleteUnlessDisabledAsync(ownerId,
 				deviceId,
 				existing?.Title ?? device.Name,
 				new Dictionary<string, JsonElement>(),
 				CancellationToken.None);
 			if (!outcome.Success)
 			{
-				if (!_registry.IsExplicitlyDisabled(IntegrationId))
+				if (!_registry.IsExplicitlyDisabled(ownerId))
 				{
 					_failedCreations[deviceId] = true;
 					_logger.Warning("Could not create the Companion configuration for device {DeviceId}", deviceId);
@@ -524,12 +631,12 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			}
 
 			// CompleteAsync switches the integration on; a user who switched it off meanwhile keeps that choice.
-			if (_registry.DisabledVersion(IntegrationId) != disabledVersion)
+			if (_registry.DisabledVersion(ownerId) != disabledVersion)
 			{
 				await scope.ServiceProvider
 					.GetRequiredService<IUiTransportMessageHandler<SetIntegrationEnabledRequest,
 						SetIntegrationEnabledResponse>>()
-					.Handle(new SetIntegrationEnabledRequest { Id = IntegrationId, Enabled = false },
+					.Handle(new SetIntegrationEnabledRequest { Id = ownerId, Enabled = false },
 						CancellationToken.None);
 			}
 		}
@@ -544,11 +651,11 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		}
 	}
 
-	private async Task<ConfigEntryRecord?> FindEntryAsync(Guid deviceId)
+	private async Task<ConfigEntryRecord?> FindEntryAsync(string ownerId, Guid deviceId)
 	{
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var entry = await scope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>().Find(deviceId);
-		return entry is not null && string.Equals(entry.IntegrationId, IntegrationId, StringComparison.Ordinal)
+		return entry is not null && string.Equals(entry.IntegrationId, ownerId, StringComparison.Ordinal)
 			? entry
 			: null;
 	}

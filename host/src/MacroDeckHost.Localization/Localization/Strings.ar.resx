@@ -3034,8 +3034,8 @@
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>يمكن مشاركة المتغيرات العامة فقط.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>لا يمكن مشاركة متغير مستورد من Macro Deck آخر.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>لا يمكن مشاركة هذا المتغير.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>تعذّر حفظ إعداد المشاركة.</value>

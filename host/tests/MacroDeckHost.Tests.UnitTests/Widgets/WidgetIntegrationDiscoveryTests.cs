@@ -1,5 +1,5 @@
-using MacroDeckHost.Integrations;
-using MacroDeckHost.Integrations.Widgets;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Widgets;
 
@@ -9,7 +9,7 @@ internal sealed class WidgetIntegrationDiscoveryTests
 	[Test]
 	public void The_host_discovery_finds_the_widget_integration()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var widget = discovered.OfType<WidgetIntegration>().SingleOrDefault();
 		Assert.That(widget, Is.Not.Null, "the Widget integration was not discovered");

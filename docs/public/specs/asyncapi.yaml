@@ -46,6 +46,7 @@ x-macrodeck-error-codes:
   - ICON_PACK_SYNC_NOT_ALLOWED
   - ICON_NOT_FOUND
   - COMPANION_DEVICES_NOT_ALLOWED
+  - DESKTOP_NOTIFICATIONS_NOT_ALLOWED
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Errors.ProtocolCloseCodes
 x-macrodeck-close-codes:
@@ -108,6 +109,7 @@ x-macrodeck-host-operations:
   http: []
   companion-devices: [wait, send, request, screenshot]
   music-players: [album-color]
+  desktop-notifications: [show]
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Assets.AssetKinds.All - the kind values an asset.begin may carry.
 x-macrodeck-asset-kinds:
@@ -800,7 +802,8 @@ components:
             The pushed state, shaped by the api. Absent when the api has nothing to push. For the
             colors api it is a ColorWatchStateDto, for the batteries api a BatteryStateDto, for the adb
             api an AdbStateDto, for the http api an HttpStateDto, for the companion-devices api a
-            CompanionDevicesStateDto, for the music-players api a MusicPlayersStateDto.
+            CompanionDevicesStateDto, for the music-players api a MusicPlayersStateDto, for the
+            desktop-notifications api a DesktopNotificationsStateDto.
 
     ColorsResolveArguments:
       type: object
@@ -1111,6 +1114,33 @@ components:
       required: [userAgent]
       properties:
         userAgent:
+          type: string
+
+    DesktopNotificationsStateDto:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.DesktopNotificationsStateDto, the data of a
+        desktop-notifications host.state, per plugin, sent on registration: whether this plugin may show
+        notifications from the operating system of the computer Macro Deck runs on, meaning its manifest
+        declares host:desktop-notifications (or the session is self-registered) and the computer offers
+        them. A host that predates it pushes nothing, and an SDK that predates it ignores the push.
+      required: [supported]
+      properties:
+        supported:
+          type: boolean
+
+    DesktopNotificationShowArguments:
+      type: object
+      description: >-
+        Mirrors MacroDeck.Plugin.Protocol.Callbacks.DesktopNotificationShowArguments, the arguments of
+        desktop-notifications/show, which answers no data once the host handed the notification to the
+        operating system. Refused with DESKTOP_NOTIFICATIONS_NOT_ALLOWED unless the plugin may show
+        desktop notifications.
+      required: [title, message]
+      properties:
+        title:
+          type: string
+        message:
           type: string
 
     MusicPlayersStateDto:

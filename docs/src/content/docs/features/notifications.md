@@ -8,6 +8,16 @@ app, the web client and the Companion app. `IIntegrationContext.NotificationServ
 it. The older `IIntegrationContext.Notifications` (`IUserNotifier`) still works and only adds an entry to the
 notification list.
 
+A message for the person at the computer itself, shown by the operating system as a Windows toast, a macOS
+notification or a Linux desktop notification, goes through `IIntegrationContext.DesktopNotifications`
+instead; see [Desktop notifications](#desktop-notifications).
+
+| To | Use |
+| --- | --- |
+| Show a toast or dialog on the Macro Deck clients, or ask and wait for an answer | `NotificationService` (`INotificationService`) |
+| Leave an entry in Macro Deck's notification list | `NotificationService` with `Inbox`, or the older `Notifications` (`IUserNotifier`) |
+| Show a notification from the computer's operating system | `DesktopNotifications` (`IDesktopNotifier`) |
+
 ## Example
 
 ```csharp
@@ -174,6 +184,38 @@ by the request deadline. How the notification ended arrives later as a `ui` / `n
 kept and sent when it reattaches. A host that predates these operations answers `CAPABILITY_UNSUPPORTED`, which
 the SDK reports as `NotificationErrorCode.Unsupported`; a plugin written before them keeps working
 unchanged. See the [WebSocket reference](/reference/websocket/).
+
+## Desktop notifications
+
+```csharp
+if (_context.DesktopNotifications.IsSupported)
+{
+    await _context.DesktopNotifications.ShowAsync(MyStrings.RecordingStopped(), MyStrings.SavedTo(path), cancellationToken);
+}
+```
+
+`IDesktopNotifier.ShowAsync` hands a title and a message to the operating system of the computer Macro Deck
+runs on. Macro Deck shows it through its own app first, so the notification carries Macro Deck's name and
+icon, and falls back to the operating system's own tool when the app is not running. The System integration's
+**Send notification** action uses the same path.
+
+- **Best effort.** The call never throws because a notification could not be shown: while `IsSupported` is
+  `false`, or when Macro Deck refuses or fails, it completes without showing anything. The operating system
+  can still hide it, for example under a focus mode, and nothing is reported back. Only cancellation throws.
+- **`IsSupported`** is `false` on a computer without desktop notifications, such as Linux without
+  `notify-send`, and for a plugin that may not show them.
+- **Plugins declare `host:desktop-notifications`.** An installed plugin without it cannot show desktop
+  notifications; a session registered with a developer token or pairing counts as declaring it. An
+  integration built into Macro Deck always may. See [the manifest](/reference/manifest/) and
+  [the security model](/policies/security/#desktop-notifications).
+- **Older Macro Deck versions.** A plugin learns `IsSupported` when it registers. Macro Deck before
+  desktop notifications reports nothing, so `IsSupported` stays `false` and `ShowAsync` shows nothing. An
+  `IIntegrationContext` implemented against an older SDK inherits the same behaviour from
+  `UnsupportedDesktopNotifier`.
+
+On the wire this is the [`desktop-notifications`](/reference/websocket/#desktop-notifications) host API. In
+`MacroDeck.Plugin.Testing`, `FakeIntegrationContext.DesktopNotifications` is a `FakeDesktopNotifier` that
+records what it showed in `Shown`; set `IsSupported` to `false` to test the other case.
 
 ## Testing
 

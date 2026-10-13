@@ -3034,8 +3034,8 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Nur globale Variablen können geteilt werden.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Eine von einem anderen Macro Deck importierte Variable kann nicht geteilt werden.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Diese Variable kann nicht geteilt werden.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Die Freigabe konnte nicht gespeichert werden.</value>

@@ -189,6 +189,14 @@ public sealed record VariableDefinition
 	public bool IsBindable { get; init; } = true;
 
 	/// <summary>
+	/// Whether the user may share this variable with other Macro Decks. Defaults to <c>true</c>; set it
+	/// <c>false</c> for a variable that must stay on this Macro Deck, such as one that itself mirrors
+	/// another Macro Deck. When <c>false</c>, Macro Deck never shares the variable, even one a user shared
+	/// before the provider declared it non-shareable.
+	/// </summary>
+	public bool IsShareable { get; init; } = true;
+
+	/// <summary>
 	/// Non-null when the owner accepts <see cref="IVariableProvider.SetValueAsync"/> for this variable.
 	/// The host refuses a write to a definition that declares none without ever calling the provider, so
 	/// this is the single place "this can be set" is stated.

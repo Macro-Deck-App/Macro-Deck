@@ -43,6 +43,8 @@ public abstract class RemoteActionDefinition(
 	/// ask for.</summary>
 	public bool ProvidesIcon => Descriptor.ProvidesIcon;
 
+	public string? Role => Descriptor.Role;
+
 	public IActionExecutor CreateExecutor() => new RemoteActionExecutor(Invoker, PluginId, Descriptor.LocalId);
 
 	protected async Task<ActionStateSnapshot?> GetActionStateCoreAsync(

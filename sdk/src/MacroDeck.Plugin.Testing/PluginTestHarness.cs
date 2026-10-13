@@ -14,6 +14,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.Companion;
+using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Http;
 using MacroDeck.Sdk.Storage;
 using MacroDeck.Sdk.Messaging;
@@ -212,6 +213,7 @@ public sealed class PluginTestHarness : IAsyncDisposable, ICapabilityInvoker
 			services.AddSingleton<IBatteryProviderContext>(context.BatteryProvider);
 			services.AddSingleton<IIntegrationStorage>(context.Storage);
 			services.AddSingleton<IHostHttp>(context.Http);
+			services.AddSingleton<IDesktopNotifier>(context.DesktopNotifications);
 			if (services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(ICompanionDeviceApi)) is not
 				{ } registeredCompanion ||
 				(registeredCompanion.ImplementationType ?? registeredCompanion.ImplementationFactory?.Method.DeclaringType)

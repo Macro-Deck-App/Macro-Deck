@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Integrations.Keyboard.Native;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.MacOS.Keyboard;
 

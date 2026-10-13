@@ -17,6 +17,8 @@ public class IntegrationRegistry : IIntegrationRegistry
 	private readonly ConcurrentDictionary<string, long> _disabledVersions = new();
 	private readonly ConcurrentDictionary<string, IntegrationOrigin> _origins = new();
 	private readonly ConcurrentDictionary<string, IntegrationMetadata> _metadata = new();
+	private readonly ConcurrentDictionary<string, long> _registrationOrder = new();
+	private long _nextRegistration;
 	private readonly IServiceScopeFactory _serviceScopeFactory;
 	private readonly IIntegrationStateStore _stateStore;
 	private readonly ILogger _logger;
@@ -35,7 +37,10 @@ public class IntegrationRegistry : IIntegrationRegistry
 	public event EventHandler<IntegrationAvailabilityChangedEventArgs>? AvailabilityChanged;
 
 	public IReadOnlyList<IIntegration> Integrations =>
-		_integrations.Values.ToList().AsReadOnly();
+		_integrations.Values
+			.OrderBy(integration => _registrationOrder.GetValueOrDefault(integration.Id, long.MaxValue))
+			.ToList()
+			.AsReadOnly();
 
 	public IActionDefinition? FindAction(string integrationId, string actionId)
 	{
@@ -216,6 +221,7 @@ public class IntegrationRegistry : IIntegrationRegistry
 			return Task.FromResult(IntegrationRegistrationResult.DuplicateOwner);
 		}
 
+		_registrationOrder[integration.Id] = Interlocked.Increment(ref _nextRegistration);
 		_origins[integration.Id] = origin;
 		_metadata[integration.Id] = metadata ?? MetadataFromAttribute(integration);
 
@@ -232,6 +238,7 @@ public class IntegrationRegistry : IIntegrationRegistry
 		var removed = _integrations.TryRemove(integrationId, out _);
 		_origins.TryRemove(integrationId, out _);
 		_metadata.TryRemove(integrationId, out _);
+		_registrationOrder.TryRemove(integrationId, out _);
 
 		if (removed)
 		{

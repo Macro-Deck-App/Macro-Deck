@@ -16,6 +16,7 @@ public sealed partial class CompanionIntegration
 	: IIntegration,
 		IConfigFlowProvider,
 		IConfigEntryLifecycle,
+		ICompanionDeviceConfigEntries,
 		IVariableProvider,
 		IEventProvider,
 		IIntegrationIconProvider,

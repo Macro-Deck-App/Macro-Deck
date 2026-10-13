@@ -3,6 +3,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
+using MacroDeckHost.Platform.Processes;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Power;

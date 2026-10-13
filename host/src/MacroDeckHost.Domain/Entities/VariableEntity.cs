@@ -43,6 +43,8 @@ public class VariableEntity : BaseEntity
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public string? SemanticKind { get; set; }
 
+	public bool IsShareable { get; set; } = true;
+
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public IReadOnlyDictionary<string, string>? Attributes { get; set; }
 

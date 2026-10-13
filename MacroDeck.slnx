@@ -9,6 +9,7 @@
     <Project Path="host/src/MacroDeckHost.Infrastructure/MacroDeckHost.Infrastructure.csproj" />
     <Project Path="host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj" />
     <Project Path="host/src/MacroDeckHost.Localization/MacroDeckHost.Localization.csproj" />
+    <Project Path="host/src/MacroDeckHost.Platform/MacroDeckHost.Platform.csproj" />
     <Project Path="host/src/MacroDeckHost.Widgets/MacroDeckHost.Widgets.csproj" />
     <Project Path="host/src/MacroDeckHost/MacroDeckHost.csproj" />
   </Folder>

@@ -506,7 +506,7 @@ describe('VariablesManagerComponent', () => {
       fixture.componentRef.setInput('variables', [
         ...variables,
         dynamicVariable('d1', 'home-assistant'),
-        variable('imported', 'integration', 'app.macro-deck.delegate'),
+        { ...variable('imported', 'integration', 'any-plugin'), isShareable: false },
       ]);
       await fixture.whenStable();
       await flushViewport();
@@ -574,11 +574,15 @@ describe('VariablesManagerComponent', () => {
   describe('sharing a variable', () => {
     const shared: Variable = { ...variable('s1', 'integration', 'obs'), shared: true };
 
-    it('offers sharing for global variables but not for widget or imported ones', () => {
+    it('offers sharing for global variables but not for widget ones', () => {
       expect(component.canShare(variable('1', 'user'))).toBeTrue();
       expect(component.canShare(variable('3', 'integration', 'spotify'))).toBeTrue();
       expect(component.canShare(buttonVariable('b1', 'widget-1'))).toBeFalse();
-      expect(component.canShare(variable('i1', 'integration', 'app.macro-deck.delegate'))).toBeFalse();
+    });
+
+    it('offers no sharing for a variable its owner declared non-shareable, whoever owns it', () => {
+      expect(component.canShare({ ...variable('i1', 'integration', 'any-plugin'), isShareable: false })).toBeFalse();
+      expect(component.canShare({ ...variable('i2', 'integration', 'any-plugin'), isShareable: true })).toBeTrue();
     });
 
     it('turns sharing on for an unshared variable and off for a shared one', async () => {

@@ -1,5 +1,5 @@
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.System.Lock;
+using MacroDeckHost.Platform.Lock;
 
 namespace MacroDeckHost.Tests.UnitTests.MacOS.System;
 

@@ -6,7 +6,6 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Integrations.Delegation;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui;
@@ -140,22 +139,53 @@ internal sealed class SharedVariablesTests
 	}
 
 	[Test]
-	public async Task A_variable_imported_from_another_macro_deck_cannot_be_shared_again()
+	public async Task A_variable_its_provider_declared_non_shareable_cannot_be_shared()
 	{
-		var imported = (await _service.CreateIntegrationVariable(DelegateIntegration.IntegrationId,
-			"gaming_pc_obs_streaming",
-			VariableScope.Global,
-			null,
-			VariableType.Boolean,
-			true,
-			null)).Data!;
+		var mirrored = await CreateDeclared("mirrored", "mirrored", shareable: false);
 
-		var toggle = await SetShared(imported, true);
+		var toggle = await SetShared(mirrored, true);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(toggle.Success, Is.False);
 			Assert.That(toggle.Error!.Code, Is.EqualTo("NotEditable"));
+			Assert.That(TestLocalization.Resolve(toggle.Error.Message), Is.EqualTo("This variable cannot be shared."));
+			Assert.That(_store.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_variable_shared_before_its_provider_declared_it_non_shareable_is_never_served()
+	{
+		var scene = await CreateDeclared("obs_scene", "obs-scene", shareable: true);
+		await SetShared(scene, true);
+
+		var redeclared = await CreateDeclared("obs_scene", "obs-scene", shareable: false);
+		var listed = await ListAsync();
+		var write = await SetValue("obs_scene", "Main");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(redeclared.Id, Is.EqualTo(scene.Id));
+			Assert.That(listed, Is.Empty);
+			Assert.That(_shared.IsShared(redeclared), Is.False);
+			Assert.That(write.Success, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_share_stored_before_its_provider_declared_it_non_shareable_can_still_be_removed()
+	{
+		var scene = await CreateDeclared("obs_scene", "obs-scene", shareable: true);
+		await SetShared(scene, true);
+		await CreateDeclared("obs_scene", "obs-scene", shareable: false);
+
+		var toggle = await SetShared(scene, false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(toggle.Success, Is.True);
+			Assert.That(_store.Entries, Is.Empty);
 		});
 	}
 
@@ -303,6 +333,23 @@ internal sealed class SharedVariablesTests
 			true,
 			null,
 			definitionId)).Data!;
+
+	private async Task<VariableEntity> CreateDeclared(string name, string definitionId, bool shareable)
+	{
+		var definition = VariableDefinition.Eager(name, MacroDeck.Sdk.Variables.VariableType.Text) with
+		{
+			Id = definitionId, IsShareable = shareable
+		};
+		return (await _service.CreateIntegrationVariable(ObsIntegration,
+			name,
+			VariableScope.Global,
+			null,
+			VariableType.Text,
+			"Intro",
+			null,
+			definitionId,
+			VariableDeclarationFactory.From(definition))).Data!;
+	}
 
 	private async Task<SetVariableSharedResponse> SetShared(VariableEntity variable, bool shared)
 		=> await new SetVariableSharedRequestMessageHandler(_shared, _registry, _mediator)

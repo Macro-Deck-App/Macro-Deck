@@ -59,8 +59,8 @@ public sealed record PluginManifest
 	/// <summary>Null means "declares nothing", which is never the same as "incompatible".</summary>
 	public PluginCompatibility? Compatibility { get; init; }
 
-	/// <summary>Declared for disclosure. The host enforces only <c>host:adb</c> and <c>host:companion-devices</c>; see
-	/// <c>PluginPermissions</c>.</summary>
+	/// <summary>Declared for disclosure. The host enforces only <c>host:adb</c>, <c>host:companion-devices</c> and
+	/// <c>host:desktop-notifications</c>; see <c>PluginPermissions</c>.</summary>
 	public IReadOnlyList<string>? Permissions { get; init; }
 
 	/// <summary>The languages this plugin's own user-facing strings are available in, as BCP-47 tags

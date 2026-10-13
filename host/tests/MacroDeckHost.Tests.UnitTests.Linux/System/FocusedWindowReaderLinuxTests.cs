@@ -1,5 +1,5 @@
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.System.Focus;
+using MacroDeckHost.Platform.Focus;
 
 namespace MacroDeckHost.Tests.UnitTests.Linux.System;
 

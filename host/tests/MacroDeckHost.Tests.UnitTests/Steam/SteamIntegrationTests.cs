@@ -11,7 +11,7 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Steam;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
@@ -51,7 +51,7 @@ internal sealed class SteamIntegrationTests
 	[Test]
 	public void It_is_shipped_with_a_stable_id_and_is_found_by_discovery()
 	{
-		var ids = IntegrationDiscovery.DiscoverIntegrations(Log.Logger).Select(integration => integration.Id);
+		var ids = BuiltInIntegrations.Discover(Log.Logger).Select(integration => integration.Id);
 
 		Assert.That(ids, Does.Contain("app.macro-deck.steam"));
 	}

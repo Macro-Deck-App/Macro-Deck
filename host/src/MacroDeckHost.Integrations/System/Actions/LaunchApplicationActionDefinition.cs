@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -15,6 +15,7 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 	}
 
 	public string Id => "launch-application";
+	public string? Role => ActionRoles.LaunchApplication;
 	public LocalizedText Name => AppStrings.Integrations.System.Actions.LaunchApplication.Name();
 	public LocalizedText Description => AppStrings.Integrations.System.Actions.LaunchApplication.Description();
 

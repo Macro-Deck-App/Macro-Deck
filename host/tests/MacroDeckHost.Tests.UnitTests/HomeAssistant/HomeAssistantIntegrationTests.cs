@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.HomeAssistant.Protocol;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -42,7 +42,7 @@ internal sealed class HomeAssistantIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var homeAssistant = discovered.OfType<HomeAssistantIntegration>().SingleOrDefault();
 		Assert.That(homeAssistant, Is.Not.Null, "the Home Assistant integration was not discovered");

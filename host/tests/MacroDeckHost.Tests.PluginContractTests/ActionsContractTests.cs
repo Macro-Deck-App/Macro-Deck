@@ -104,6 +104,21 @@ internal sealed class ActionsContractTests : CapabilityContractFixture
 	}
 
 	[Test]
+	public async Task A_plugin_action_declaring_a_role_exposes_it_on_the_host()
+	{
+		var launcher = new TestRoleAction("launch", ActionRoles.LaunchApplication);
+		var plain = new TestRoleAction("plain", null);
+
+		var integration = await ConnectAsync(
+			[new ActionsCapabilityHandler([new TestIntegration(launcher, plain)])],
+			[Action("launch"), Action("plain")],
+			[CapabilityKinds.Actions]);
+
+		Assert.That(integration.Actions.ToDictionary(action => action.Id, action => action.Role),
+			Is.EqualTo(new Dictionary<string, string?> { ["launch"] = ActionRoles.LaunchApplication, ["plain"] = null }));
+	}
+
+	[Test]
 	public async Task An_icon_only_action_declares_icon_and_not_state()
 	{
 		var iconProvider = new TestIconProviderAction("provide-icon");

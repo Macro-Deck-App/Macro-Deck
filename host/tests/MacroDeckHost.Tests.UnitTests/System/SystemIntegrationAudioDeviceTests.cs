@@ -3,9 +3,6 @@ using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
-using MacroDeckHost.Integrations.System.Focus;
-using MacroDeckHost.Integrations.System.Notifications;
-using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -34,8 +31,6 @@ public class SystemIntegrationAudioDeviceTests
 		{
 			await integration.ShutdownAsync();
 		}
-
-		FocusedApplicationSnapshot.Current.Set(null);
 	}
 
 	private async Task<SystemIntegration> StartAsync(
@@ -46,7 +41,6 @@ public class SystemIntegrationAudioDeviceTests
 	{
 		var integration = new SystemIntegration(new FakeApplicationService { IsSupported = true },
 			volume,
-			new SilentNotificationService(),
 			new FakeSystemMetricsService(),
 			new FakePowerService(true));
 
@@ -529,14 +523,6 @@ public class SystemIntegrationAudioDeviceTests
 		public void MarkStale(string integrationId) => Count++;
 
 		public IReadOnlyCollection<string> DrainStale() => [];
-	}
-
-	private sealed class SilentNotificationService : INotificationService
-	{
-		public bool IsSupported => true;
-
-		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
 	}
 
 	private sealed class AudioTestContext(IVariableApi variables, IIntegrationStorage storage) : IIntegrationContext

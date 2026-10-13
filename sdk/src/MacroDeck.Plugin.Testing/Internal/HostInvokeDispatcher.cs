@@ -112,6 +112,8 @@ internal static class HostInvokeDispatcher
 				HostApis.Weather => await WeatherAsync(context, accepted, cancellationToken).ConfigureAwait(false),
 				HostApis.Locale => await LocaleAsync(context, cancellationToken).ConfigureAwait(false),
 				HostApis.MusicPlayers => await MusicPlayersAsync(context, payload, cancellationToken).ConfigureAwait(false),
+				HostApis.DesktopNotifications => await DesktopNotificationsAsync(context, payload, cancellationToken)
+					.ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIconResource
 					=> await PluginIconAsync(context, payload, cancellationToken).ConfigureAwait(false),
 				HostApis.IconPacks when payload.Operation == HostOperations.IconPacks.GetIcon
@@ -162,6 +164,16 @@ internal static class HostInvokeDispatcher
 	{
 		var format = await context.Locale.GetTimeOfDayFormatAsync(cancellationToken).ConfigureAwait(false);
 		return HostInvokeOutcome.Ok(new LocaleTimeOfDayFormatResult { Culture = format.Culture.Name, HourCycle = format.HourCycle });
+	}
+
+	private static async Task<HostInvokeOutcome> DesktopNotificationsAsync(FakeIntegrationContext context,
+		HostInvokePayload payload,
+		CancellationToken cancellationToken)
+	{
+		var arguments = Require<DesktopNotificationShowArguments>(payload);
+		await context.DesktopNotifications.ShowAsync(arguments.Title, arguments.Message, cancellationToken)
+			.ConfigureAwait(false);
+		return HostInvokeOutcome.Ok(null);
 	}
 
 	private static async Task<HostInvokeOutcome> MusicPlayersAsync(FakeIntegrationContext context,

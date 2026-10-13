@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.HostLocking;
-using MacroDeckHost.Integrations.System.Lock;
+using MacroDeckHost.Platform.Lock;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -153,7 +153,6 @@ public sealed class HostLockStateBackgroundService : HostReadyBackgroundService
 
 			_lastLocked = locked;
 			_state.IsLocked = locked;
-			LockStateSnapshot.Current.Set(locked);
 
 			var lockScreen = await _readLockScreenSettings();
 			await _mediator.Publish(

@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+      <InternalsVisibleTo Include="MacroDeckHost" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,6 +30,7 @@
       <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
       <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Signing\MacroDeck.Signing.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
     </ItemGroup>
 
     <ItemGroup>

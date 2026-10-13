@@ -58,6 +58,7 @@ public sealed class PluginWebSocketEndpoint
 	private readonly IPluginCallbackRouter _callbackRouter;
 	private readonly PluginAdbInvokeRunner? _adbInvokes;
 	private readonly PluginCompanionDeviceInvokeRunner? _companionInvokes;
+	private readonly PluginDesktopNotificationInvokeRunner? _desktopNotificationInvokes;
 	private readonly PluginMessagingInvokeRunner? _messagingInvokes;
 	private readonly ConcurrentDictionary<string, int> _artworkInvokesInFlight = new(StringComparer.Ordinal);
 	private readonly IPluginAssetReceiver _assetReceiver;
@@ -94,8 +95,10 @@ public sealed class PluginWebSocketEndpoint
 		PluginMessagingInvokeRunner? messagingInvokes = null,
 		VideoStreamPluginSessions? videoStreams = null,
 		PluginCompanionDeviceInvokeRunner? companionInvokes = null,
-		IEmailSyncSignal? emailSync = null)
+		IEmailSyncSignal? emailSync = null,
+		PluginDesktopNotificationInvokeRunner? desktopNotificationInvokes = null)
 	{
+		_desktopNotificationInvokes = desktopNotificationInvokes;
 		_companionInvokes = companionInvokes;
 		_videoStreams = videoStreams;
 		_emailSync = emailSync;
@@ -660,6 +663,7 @@ public sealed class PluginWebSocketEndpoint
 			case MessageTypes.HostCancel:
 				_adbInvokes?.Cancel(connection, envelope.CorrelationId);
 				_companionInvokes?.Cancel(connection, envelope.CorrelationId);
+				_desktopNotificationInvokes?.Cancel(connection, envelope.CorrelationId);
 				_messagingInvokes?.Cancel(connection, envelope.CorrelationId);
 				break;
 
@@ -926,6 +930,13 @@ public sealed class PluginWebSocketEndpoint
 			string.Equals(payload.Api, HostApis.CompanionDevices, StringComparison.Ordinal))
 		{
 			await _companionInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
+			return;
+		}
+
+		if (_desktopNotificationInvokes is not null &&
+			string.Equals(payload.Api, HostApis.DesktopNotifications, StringComparison.Ordinal))
+		{
+			await _desktopNotificationInvokes.StartAsync(connection, pluginId, envelope.Id, payload, cancellationToken);
 			return;
 		}
 

@@ -12,7 +12,7 @@ using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeckHost.Integrations.Steam.Widgets;
 using MacroDeckHost.Integrations.Steam.Actions;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam;
 using WidgetStrings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
@@ -56,7 +56,7 @@ public sealed partial class SteamIntegration
 	public SteamIntegration()
 		: this(new SystemSteamPlatform(),
 			key => new SteamWebApiClient(key),
-			ApplicationServiceFactory.Create(),
+			ApplicationServiceFactory.Create(IntegrationLog.For(IntegrationId)),
 			TimeProvider.System)
 	{
 	}

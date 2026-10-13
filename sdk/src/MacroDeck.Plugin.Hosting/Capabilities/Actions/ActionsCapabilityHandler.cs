@@ -315,7 +315,8 @@ internal sealed class ActionsCapabilityHandler(IEnumerable<IPluginIntegration> i
 			SupportsDynamicOptions = action is IDynamicOptionsActionDefinition,
 			ProvidesState = action is IStateProviderActionDefinition,
 			ConfiguresWithUiTree = action is IUiConfigurableActionDefinition,
-			ProvidesIcon = action is IIconProviderActionDefinition
+			ProvidesIcon = action is IIconProviderActionDefinition,
+			Role = action.Role
 		};
 
 	private static ActionParameterOptionDto ToDto(ActionParameterOption option)

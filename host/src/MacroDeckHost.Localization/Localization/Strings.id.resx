@@ -3034,8 +3034,8 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Hanya variabel global yang dapat dibagikan.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Variabel yang diimpor dari Macro Deck lain tidak dapat dibagikan.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Variabel ini tidak dapat dibagikan.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Pengaturan berbagi tidak dapat disimpan.</value>

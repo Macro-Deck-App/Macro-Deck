@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Integrations.System.DesktopEntries;
+using MacroDeckHost.Platform.DesktopEntries;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Infrastructure.Icons.AppIcons;

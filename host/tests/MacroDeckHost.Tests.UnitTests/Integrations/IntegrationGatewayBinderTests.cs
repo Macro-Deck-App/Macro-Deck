@@ -8,7 +8,7 @@ using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.MusicPlayer;
-using MacroDeckHost.Integrations.Calendar;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Calendar;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeck.Sdk;

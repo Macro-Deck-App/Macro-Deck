@@ -5,7 +5,6 @@ using MacroDeck.Sdk.Companion;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
-using MacroDeckHost.Integrations.Variables;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Companion.Actions;

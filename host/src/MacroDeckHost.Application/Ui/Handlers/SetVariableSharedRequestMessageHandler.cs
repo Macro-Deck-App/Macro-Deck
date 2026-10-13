@@ -43,7 +43,7 @@ public class SetVariableSharedRequestMessageHandler
 				VariableError.NotFound => Failed("NotFound", AppStrings.Errors.Variables.NotFound()),
 				VariableError.ValidationError => Failed("ValidationError",
 					AppStrings.Errors.Variables.OnlyGlobalCanBeShared()),
-				VariableError.NotEditable => Failed("NotEditable", AppStrings.Errors.Variables.ImportedCannotBeShared()),
+				VariableError.NotEditable => Failed("NotEditable", AppStrings.Errors.Variables.CannotBeShared()),
 				_ => Failed("InternalError", AppStrings.Errors.Variables.SharingNotSaved())
 			};
 		}

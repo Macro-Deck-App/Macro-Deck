@@ -1,5 +1,5 @@
 using MacroDeckHost.Integrations.System.Actions;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using MacroDeck.Sdk.Actions;
 
 namespace MacroDeckHost.Tests.UnitTests.System;

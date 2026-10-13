@@ -78,3 +78,8 @@ internal sealed class TestIconProviderAction(string id) : TestAction(id), IIconP
 		return Task.FromResult(ContentToReturn);
 	}
 }
+
+internal sealed class TestRoleAction(string id, string? role) : TestAction(id), IActionDefinition
+{
+	public string? Role { get; } = role;
+}

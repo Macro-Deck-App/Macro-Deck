@@ -14,16 +14,30 @@ An integration is a plain class that implements [`IIntegration`](https://github.
 
 ## Where an integration lives
 
-New integrations must be implemented inside the `MacroDeckHost.Integrations` project. That project references only the SDK and a small set of integration-specific NuGet packages:
+New integrations must be implemented inside the `MacroDeckHost.Integrations` project. That project references no host project (`MacroDeckHost`, `.Application`, `.Domain`, `.Infrastructure`, `.Widgets`), only the SDK, the UI DSL, localization, the platform library and a small set of integration-specific NuGet packages:
 
 ```xml
 <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+<ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
+<ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
+<ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
+<ProjectReference Include="..\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
 ```
 
-See [`MacroDeckHost.Integrations.csproj`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj). Two other project settings matter for integration authors:
+`ProjectReferenceTests` in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` fails the build if another Macro Deck project is referenced. See [`MacroDeckHost.Integrations.csproj`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj). Two other project settings matter for integration authors:
 
 - `*.svg` and `*.png` files are compiled in as `EmbeddedResource`. Brand icons are loaded from the assembly at runtime rather than from disk (see Step 5).
-- `InternalsVisibleTo` is granted to `MacroDeckHost.Tests.UnitTests`, so internal helpers can be tested directly.
+- `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants), so internal helpers can be tested directly, and to `MacroDeckHost` and `MacroDeckHost.Infrastructure`, which discover and host the integrations.
+
+### The platform library
+
+[`MacroDeckHost.Platform`](https://github.com/Macro-Deck-App/Macro-Deck/tree/main/host/src/MacroDeckHost.Platform) holds stateless platform code that both the host and integrations use: lock and focused-application watchers, application launching, desktop entries, OS notifications, process helpers and native interop. It references neither the SDK nor any host project and keeps no host state, so each consumer creates its own instances (the host and the System integration each run their own watcher). An extracted plugin would carry a copy of what it uses.
+
+One process fact does not survive extraction: on macOS some watchers rely on the host pumping the main run loop (`MacOsMainRunLoop`). Out of process nothing pumps it, and the watchers fall back to polling.
+
+### System integrations that need host services
+
+An `ISystemIntegration` is a host feature, exempt from the extractability rule. One that needs host services (Calendar, Email, Layouts, Migration, Variables, Widgets) lives in `host/src/MacroDeckHost.Infrastructure/SystemIntegrations/<Name>/`, not in `MacroDeckHost.Integrations`. `BuiltInIntegrations` in that folder lists both assemblies, and the startup service discovers integrations through it.
 
 Put your integration in its own folder, for example `host/src/MacroDeckHost.Integrations/MyThing/`, and keep all of its types (actions, config flow, clients) inside that folder.
 
@@ -68,7 +82,7 @@ The `IIntegration` contract ([`IIntegration.cs`](https://github.com/Macro-Deck-A
 
 Important details:
 
-- `[MacroDeckIntegration]` ([`MacroDeckIntegrationAttribute.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Sdk/MacroDeckIntegrationAttribute.cs)) is a bare discovery marker with no constructor arguments. The id, name, and version are the `Id`, `Name`, and `Version` properties, not attribute parameters.
+- `[MacroDeckIntegration]` ([`MacroDeckIntegrationAttribute.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Sdk/MacroDeckIntegrationAttribute.cs)) is the discovery marker. It takes no constructor arguments; its optional `Platforms` property narrows the operating systems the integration is discovered on, and `EnabledByDefault = false` keeps an integration that needs no setup but depends on separately installed software off until the user turns it on. The id, name, and version are the `Id`, `Name`, and `Version` properties, not attribute parameters.
 - The class must have a public parameterless constructor. The host instantiates it with `Activator.CreateInstance`, so constructor injection is not available; resolve runtime dependencies through the `IIntegrationContext` passed to `InitializeAsync` instead.
 - `ISampleIntegration` ([`ISampleIntegration.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/sdk/src/MacroDeck.Sdk/ISampleIntegration.cs)) is only for demo integrations. It keeps the class from loading in normal runs (see Step 3). Do not implement it on a real integration.
 - Expose the id as a `public const string IntegrationId` and return it from `Id`. Config entry ids, provider-local ids and the integration's logger all reference it, and a literal repeated across files is how those drift apart.
@@ -105,6 +119,8 @@ The host registries live under `host/src/MacroDeckHost.Application` (for example
 
 Deck navigation is not a provider interface: every integration receives an `IDeckNavigator` through `IIntegrationContext.Deck` and can use it directly. The same is true of scripts - `IIntegrationContext.Scripts` lists the user's scripts and runs one to completion.
 
+An action can declare a `Role` from `ActionRoles` so the host knows what it does without knowing which integration provides it. The host binds a role only to built-in actions: the application a user drags onto the deck becomes a button bound to the built-in action with the `ActionRoles.LaunchApplication` role, and a plugin declaring that role is never used for it. Extracting the System integration into a plugin therefore means revisiting drag-to-deck first.
+
 Capabilities compose freely. `ExampleIntegration` is both an `IVariableProvider` and an `IConfigFlowProvider`; `WeatherIntegration` is an `IWeatherProvider`, `IVariableProvider`, `IConfigFlowProvider`, and `IIntegrationIconProvider` at once. For the per-capability contracts (method signatures, lifecycle, threading expectations) see the [capabilities reference](https://docs.macro-deck.app/features/).
 
 ---
@@ -125,7 +141,7 @@ flowchart TD
 	H --> I[integration.InitializeAsync context]
 ```
 
-1. Discovery. [`IntegrationDiscovery.DiscoverIntegrations`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/IntegrationDiscovery.cs) reflects over the `MacroDeckHost.Integrations` assembly and selects every non-abstract class that carries `[MacroDeckIntegration]` and implements `IIntegration`, then instantiates each with `Activator.CreateInstance`. This is why the parameterless constructor and the attribute are mandatory.
+1. Discovery. [`IntegrationDiscovery.DiscoverIntegrations`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/IntegrationDiscovery.cs), called with the assemblies listed in `BuiltInIntegrations` (`MacroDeckHost.Integrations` and `MacroDeckHost.Infrastructure`), reflects over them and selects every non-abstract class that carries `[MacroDeckIntegration]` and implements `IIntegration`, then instantiates each with `Activator.CreateInstance`. This is why the parameterless constructor and the attribute are mandatory.
 2. Sample gate. Integrations that implement `ISampleIntegration` are dropped unless the `ENABLE_EXAMPLE_INTEGRATION` environment variable is `true`.
 3. Registration. Each discovered integration is added to the [`IntegrationRegistry`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Application/Integrations/IntegrationRegistry.cs) through `RegisterAsync`. Registration happens even for disabled integrations so that a config flow can still run for an integration the user has not enabled yet.
 4. Conditional initialization. If `IsEnabled(id)` is true, the service builds an `IntegrationContext` (variable API, config access, deck navigator) and calls `InitializeAsync`. Disabled integrations are registered but not initialized.
@@ -238,7 +254,7 @@ More on the test setup and commands is in [building and testing](https://github.
 Every integration contribution has to satisfy these constraints, all enforced by review:
 
 - Location. New integrations live in `MacroDeckHost.Integrations`, in their own folder, including their widget and dialog UI. Do not add integration logic to the host, application, infrastructure, or widgets projects.
-- No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck) and the SDK provider interfaces. Do not reach into host internals or persistence directly. If the SDK lacks something, it gains it for plugins too; the integration has to stay extractable into an out-of-process plugin ([ADR 0107](../decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
+- No bypassing SDK abstractions. Talk to the host only through `IIntegrationContext` (variables, config, deck, notifications, Companion devices) and the SDK provider interfaces. Do not reach into host internals or persistence directly. If the SDK lacks something, it gains it for plugins too; the integration has to stay extractable into an out-of-process plugin ([ADR 0107](../decisions/0107-built-in-integrations-are-built-as-extractable-plugins.md)).
 - Cross-platform. Macro Deck 3 runs on Linux, Windows, and macOS. Guard any OS-specific code (paths, process APIs, native calls) behind a platform check and use `Path.Combine` rather than hardcoded separators. The `System` integration's per-OS parsers and their tests are the reference for this.
 - Resource-conscious. The host is a long-lived background process. Prefer event-driven work over busy-polling, justify any timer interval, and dispose every timer, subscription, and background loop in `ShutdownAsync`. `WeatherIntegration` is the model: a single long-interval `PeriodicTimer` driven loop, a `CancellationTokenSource` that is cancelled and awaited on shutdown, and `IDisposable` cleanup.
 

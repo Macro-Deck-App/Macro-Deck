@@ -1,5 +1,5 @@
 using System.Text;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Meld;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -69,7 +69,7 @@ internal sealed class MeldIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var meld = discovered.OfType<MeldIntegration>().SingleOrDefault();
 		Assert.That(meld, Is.Not.Null, "the Meld Studio integration was not discovered");

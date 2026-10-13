@@ -601,6 +601,12 @@ public class RemoteIntegrationContextTests
 			covered.Add((HostApis.CompanionDevices, operation));
 		}
 
+		// desktop-notifications is covered by RemoteDesktopNotifierTests.
+		foreach (var operation in HostOperations.DesktopNotifications.All)
+		{
+			covered.Add((HostApis.DesktopNotifications, operation));
+		}
+
 		var declared = HostApis.All.SelectMany(api => HostOperations.For(api).Select(operation => (api, operation)));
 
 		Assert.That(declared, Is.SubsetOf(covered));

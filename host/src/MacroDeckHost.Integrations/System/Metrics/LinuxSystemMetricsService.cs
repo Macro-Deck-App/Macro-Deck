@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using MacroDeckHost.Platform.Processes;
 
 namespace MacroDeckHost.Integrations.System.Metrics;
 

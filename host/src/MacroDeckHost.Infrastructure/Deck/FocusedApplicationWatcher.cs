@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using MacroDeckHost.Application.Deck;
-using MacroDeckHost.Integrations.System.Focus;
+using MacroDeckHost.Platform.Focus;
 
 namespace MacroDeckHost.Infrastructure.Deck;
 
@@ -36,7 +36,6 @@ public sealed class FocusedApplicationWatcher : IApplicationFocusWatcher, IDispo
 		{
 			await foreach (var info in _watcher.WatchAsync(cancellationToken))
 			{
-				FocusedApplicationSnapshot.Current.Set(info);
 				yield return new FocusedApplication(info.ProcessId,
 					info.ExecutablePath,
 					info.ProcessName,

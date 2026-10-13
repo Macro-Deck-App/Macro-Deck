@@ -3034,8 +3034,8 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Спільними можна зробити лише глобальні змінні.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Змінну, імпортовану з іншого Macro Deck, не можна зробити спільною.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Цю змінну не можна зробити спільною.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Не вдалося зберегти налаштування спільного доступу.</value>

@@ -11,8 +11,6 @@ public sealed record SharedVariableEntry(string Name, VariableType Type, Variabl
 
 public sealed class SharedVariables
 {
-	public const string DelegateIntegrationId = "app.macro-deck.delegate";
-
 	private readonly object _lock = new();
 	private readonly VariableRegistry _registry;
 	private readonly ISharedVariableStore _store;
@@ -32,7 +30,7 @@ public sealed class SharedVariables
 	{
 		lock (_lock)
 		{
-			return Entries().Any(entry => Matches(entry, variable));
+			return variable.IsShareable && Entries().Any(entry => Matches(entry, variable));
 		}
 	}
 
@@ -50,10 +48,10 @@ public sealed class SharedVariables
 				"Only global variables can be shared");
 		}
 
-		if (string.Equals(variable.OwnerIntegrationId, DelegateIntegrationId, StringComparison.Ordinal))
+		if (shared && !variable.IsShareable)
 		{
 			return Result.Fail<VariableEntity, VariableError>(VariableError.NotEditable,
-				"Variables imported from another Macro Deck cannot be shared");
+				"The variable's owner declared it non-shareable");
 		}
 
 		lock (_lock)
@@ -92,6 +90,11 @@ public sealed class SharedVariables
 					: entry with { Name = variable.Name, Type = variable.Type };
 				changed |= current != entry;
 				refreshed.Add(current);
+				if (variable is { IsShareable: false })
+				{
+					continue;
+				}
+
 				result.Add(new SharedVariableEntry(current.Name, current.Type, variable));
 			}
 

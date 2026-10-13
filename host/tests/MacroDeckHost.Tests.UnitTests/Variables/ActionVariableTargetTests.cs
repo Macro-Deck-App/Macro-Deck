@@ -1,5 +1,5 @@
 using MacroDeckHost.Integrations.Streamerbot.Actions;
-using MacroDeckHost.Integrations.Variables;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using Serilog;

@@ -23,5 +23,13 @@ public interface IActionDefinition
 	/// </summary>
 	MacroDeckPlatform Platforms => MacroDeckPlatform.All;
 
+	/// <summary>
+	/// A well-known job this action performs for Macro Deck itself, one of the <see cref="ActionRoles" />
+	/// values, or <c>null</c> (the default) for an ordinary action. A role is a contract on the action's
+	/// parameters: see each role for the parameters it requires. Macro Deck decides which declaring
+	/// actions it uses for a role; declaring one does not by itself make Macro Deck call the action.
+	/// </summary>
+	string? Role => null;
+
 	IActionExecutor CreateExecutor();
 }

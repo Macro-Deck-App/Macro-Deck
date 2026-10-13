@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
@@ -13,7 +13,7 @@ public class FolderRevealService : IFolderRevealService
 	private readonly IApplicationService _applications;
 
 	public FolderRevealService()
-		: this(ApplicationServiceFactory.Create())
+		: this(ApplicationServiceFactory.Create(Log.ForContext<FolderRevealService>()))
 	{
 	}
 

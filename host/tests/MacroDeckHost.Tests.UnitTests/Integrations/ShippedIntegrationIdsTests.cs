@@ -1,5 +1,5 @@
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Identity;
 
@@ -9,7 +9,7 @@ namespace MacroDeckHost.Tests.UnitTests.Integrations;
 internal sealed class ShippedIntegrationIdsTests
 {
 	private static List<IIntegration> Discovered()
-		=> IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger).ToList();
+		=> BuiltInIntegrations.Discover(Serilog.Log.Logger).ToList();
 
 	[Test]
 	public void Discovery_returns_the_shipped_integrations()
