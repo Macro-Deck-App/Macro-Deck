@@ -194,6 +194,8 @@ function parameterFormatError(param: ActionBlockParameter): string | null {
   if (value === null || value === undefined || isVariableReference(value)) return null;
 
   if (typeof value === 'string' && value.trim() !== '') {
+    if (containsLiquid(value)) return null;
+
     if (param.validationRegex) {
       try {
         if (!new RegExp(param.validationRegex).test(value)) {
@@ -206,8 +208,6 @@ function parameterFormatError(param: ActionBlockParameter): string | null {
     if (param.maxLength && value.length > param.maxLength) {
       return `${param.label || param.name} exceeds ${param.maxLength} characters`;
     }
-
-    if (containsLiquid(value)) return null;
 
     switch (param.type) {
       case 'url':

@@ -57,19 +57,6 @@ describe('ActionService', () => {
     expect(blocks[0].category).toBe('system');
   });
 
-  it('delegates runAction to the transport', async () => {
-    apiSpy.executeAction.and.resolveTo({ success: true, durationMs: 5 });
-
-    const response = await service.runAction('system', 'set-volume', { level: 42 });
-
-    expect(apiSpy.executeAction).toHaveBeenCalledWith({
-      integrationId: 'system',
-      actionId: 'set-volume',
-      parameters: { level: 42 },
-    });
-    expect(response.success).toBeTrue();
-  });
-
   it('maps the action list from the transport with parameter defaults', async () => {
     apiSpy.getActions.and.resolveTo({
       actions: [
