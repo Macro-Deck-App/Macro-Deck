@@ -54,6 +54,7 @@ describe('DeveloperPageComponent', () => {
       'getPluginPairingRequests',
       'getPairedPlugins',
       'getStoreStatus',
+      'getVariableCatalogProviders',
     ]);
     apiSpy.onNotification.and.returnValue(new Subject().asObservable());
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal('disconnected') });
@@ -67,6 +68,7 @@ describe('DeveloperPageComponent', () => {
       developerMode: false,
       registry: { hasCatalog: false, sequence: 0, refreshing: false, stale: false },
     });
+    apiSpy.getVariableCatalogProviders.and.resolveTo({ providers: [] });
     apiSpy.getEventDefinitions.and.resolveTo({ events: [] });
     apiSpy.getVariables.and.resolveTo({ variables: [] });
     apiSpy.getIntegrations.and.resolveTo({

@@ -20,7 +20,7 @@
               [block]="testerBlock()"
               [param]="param"
               [nested]="true"
-              [allowReferences]="false"
+              [allowReferences]="true"
               (nestedChange)="setValue(param.name, $event)" />
             @if (fieldError(param.name); as error) {
               <p class="tester-field-error">{{ error }}</p>

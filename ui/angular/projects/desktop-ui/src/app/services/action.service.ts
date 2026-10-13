@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { ActionBlockDefinition, ActionBlockParameter, ActionDefinition, ActionParameterDef, ExecuteActionResponse, resolveLocalizedText } from '@macro-deck/runtime';
+import { ActionBlockDefinition, ActionBlockParameter, ActionDefinition, ActionParameterDef, resolveLocalizedText } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { mapActionParameterDef } from '../domain/action-parameter-mapping.util';
 import { IntegrationService } from './integration.service';
@@ -52,14 +52,6 @@ export class ActionService {
 
   blockParameterDefs(action: ActionDefinitionModel): Omit<ActionBlockParameter, 'value'>[] {
     return action.parameters.map(p => this.mapParameter(p));
-  }
-
-  runAction(
-    integrationId: string,
-    actionId: string,
-    parameters: Record<string, unknown>,
-  ): Promise<ExecuteActionResponse> {
-    return this.api.executeAction({ integrationId, actionId, parameters });
   }
 
   readonly actionBlockDefinitions = computed<ActionBlockDefinition[]>(() =>

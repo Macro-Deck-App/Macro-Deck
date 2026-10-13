@@ -22,7 +22,7 @@ describe('ActionRunnerComponent', () => {
   beforeEach(() => {
     const actionServiceSpy = jasmine.createSpyObj<ActionService>(
       'ActionService',
-      ['runAction', 'loadActions'],
+      ['loadActions'],
       { actions: signal(actions), isLoading: signal(false) },
     );
 

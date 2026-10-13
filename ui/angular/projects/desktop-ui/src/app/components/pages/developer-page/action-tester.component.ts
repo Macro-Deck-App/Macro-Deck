@@ -9,7 +9,8 @@ import {
   untracked,
 } from '@angular/core';
 import { ActionBlock, ActionBlockParameter, AppStrings, ParameterValue, ScriptInput, defaultParameterValue, isRunScriptActionRole, isScriptInputParam, parseScriptInputsMetadata, resolveLocalizedText, scriptInputDefaultValue, scriptInputParamName, scriptInputParameter } from '@macro-deck/runtime';
-import { LocalizationService } from '@shared';
+import { LocalizationService, VariableService } from '@shared';
+import { DEFAULT_TRIGGER_TYPE } from '../../action-builder/default-action-defs';
 import { ActionFlowStore } from '../../action-builder/services/action-flow.store';
 import { isParameterVisible } from '../../../domain/parameter-visibility.util';
 import { ActionOptionsService } from '../../../services/action-options.service';
@@ -18,6 +19,7 @@ import { ButtonComponent, TranslatePipe } from '@shared';
 import { ParamRowComponent } from '../../action-builder/action-card/param-list/param-row.component';
 
 const SCRIPT_ID_PARAMETER = 'scriptId';
+const TESTER_TRIGGER_ID = 'tester';
 
 interface RunResult {
   success: boolean;
@@ -40,6 +42,8 @@ export class ActionTesterComponent {
   private readonly localization = inject(LocalizationService);
   private readonly actionService = inject(ActionService);
   private readonly options = inject(ActionOptionsService);
+  private readonly store = inject(ActionFlowStore);
+  private readonly variableService = inject(VariableService);
 
   private readonly _action = signal<ActionDefinitionModel | null>(null);
 
@@ -116,6 +120,11 @@ export class ActionTesterComponent {
   });
 
   constructor() {
+    effect(() => {
+      const variables = this.variableService.visibleForContext('global');
+      untracked(() => this.store.variables.set(variables));
+    });
+
     // The declarations ride on the script picker's own options, the same way the flow editor gets
     // them - there is no separate endpoint to ask.
     effect(() => {
@@ -211,27 +220,25 @@ export class ActionTesterComponent {
 
     this.running.set(true);
     this.result.set(null);
+    this.store.flows.set([{
+      triggerId: TESTER_TRIGGER_ID,
+      triggerType: DEFAULT_TRIGGER_TYPE,
+      children: [this.testerBlock()],
+    }]);
+    this.store.selectedTriggerId.set(TESTER_TRIGGER_ID);
     try {
-      const response = await this.actionService.runAction(action.integrationId, action.id, this.values());
-      this.result.set({
-        success: response.success,
-        durationMs: response.durationMs ?? 0,
-        status: response.status,
-        error: response.error
-          ? { code: response.error.code, message: resolveLocalizedText(response.error.message, this.localization) }
-          : undefined,
-        at: new Date(),
-      });
-    } catch {
-      this.result.set({
-        success: false,
-        durationMs: 0,
-        error: {
-          code: 'NETWORK_ERROR',
-          message: this.localization.translateKey(AppStrings.Developer.HostUnreachableError),
-        },
-        at: new Date(),
-      });
+      const response = await this.store.runSelectedFlow();
+      if (response) {
+        this.result.set({
+          success: response.success,
+          durationMs: response.durationMs ?? 0,
+          status: response.status,
+          error: response.error
+            ? { code: response.error.code, message: resolveLocalizedText(response.error.message, this.localization) }
+            : undefined,
+          at: new Date(),
+        });
+      }
     } finally {
       this.running.set(false);
     }

@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY } from 'rxjs';
 import { ActionParameterType } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { ApiService, VariableService } from '@shared';
 import { mapActionParameterDef } from '../../../domain/action-parameter-mapping.util';
 import { ActionOptionsService } from '../../../services/action-options.service';
 import { ActionService } from '../../../services/action.service';
@@ -21,6 +21,17 @@ function action(parameters: ActionParameterDef[] = []): ActionDefinitionModel {
   };
 }
 
+const variableServiceStub = { visibleForContext: () => [] };
+
+function apiFake(): { onNotification: () => unknown; clientId: string; runActionFlow: jasmine.Spy } & Record<string, unknown> {
+  return {
+    onNotification: () => EMPTY,
+    clientId: 'client-1',
+    runActionFlow: jasmine.createSpy('runActionFlow'),
+    getVariableCatalogProviders: () => Promise.resolve({ providers: [] }),
+  };
+}
+
 const literalTranslator = { translate: (_scope: string, key: string) => key };
 
 function fakeBlockParameterDefs(a: ActionDefinitionModel): Omit<ActionBlockParameter, 'value'>[] {
@@ -31,17 +42,20 @@ describe('ActionTesterComponent', () => {
   let fixture: ComponentFixture<ActionTesterComponent>;
   let component: ActionTesterComponent;
   let actionServiceSpy: jasmine.SpyObj<ActionService>;
+  let api: ReturnType<typeof apiFake>;
 
   beforeEach(() => {
-    actionServiceSpy = jasmine.createSpyObj<ActionService>('ActionService', ['runAction', 'blockParameterDefs']);
+    actionServiceSpy = jasmine.createSpyObj<ActionService>('ActionService', ['blockParameterDefs']);
     actionServiceSpy.blockParameterDefs.and.callFake(fakeBlockParameterDefs);
+    api = apiFake();
 
     TestBed.configureTestingModule({
       imports: [ActionTesterComponent],
       providers: [
         provideZonelessChangeDetection(),
         { provide: ActionService, useValue: actionServiceSpy },
-        { provide: ApiService, useValue: { onNotification: () => EMPTY } },
+        { provide: ApiService, useValue: api },
+        { provide: VariableService, useValue: variableServiceStub },
       ],
     });
 
@@ -127,27 +141,61 @@ describe('ActionTesterComponent', () => {
 
     await component['run']();
 
-    expect(actionServiceSpy.runAction).not.toHaveBeenCalled();
+    expect(api.runActionFlow).not.toHaveBeenCalled();
     expect(component['fieldError']('message')).toBe('This parameter is required');
   });
 
-  it('runs the action with the entered values and surfaces a success result', async () => {
-    actionServiceSpy.runAction.and.resolveTo({
+  for (const type of [ActionParameterType.Password, ActionParameterType.Secret]) {
+    it(`keeps a required ${type} parameter blocking Run until it has a value`, () => {
+      setAction(action([{ name: 'token', type, description: '', required: true }]));
+
+      expect(component['canRun']()).toBeFalse();
+    });
+  }
+
+  it('offers the template builder on text parameters', () => {
+    setAction(action([{ name: 'message', type: ActionParameterType.String, description: '' }]));
+
+    expect(fixture.nativeElement.querySelector('shared-template-builder')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('shared-variable-text-input')).toBeTruthy();
+  });
+
+  it('does not offer the template builder on a choice parameter', () => {
+    setAction(action([
+      { name: 'level', type: ActionParameterType.Choice, description: '', options: [{ value: 'info' }] },
+    ]));
+
+    expect(fixture.nativeElement.querySelector('shared-template-builder')).toBeFalsy();
+  });
+
+  it('runs the entered template as a one-action flow so the host renders it', async () => {
+    api.runActionFlow.and.resolveTo({
       success: true, status: 'Succeeded', durationMs: 12, executionId: 'exec-1',
     });
     setAction(action([{ name: 'message', type: ActionParameterType.String, description: '' }]));
 
-    component['setValue']('message', 'hello');
+    component['setValue']('message', 'Game Change: {{ vars.category }}');
     await component['run']();
 
-    expect(actionServiceSpy.runAction).toHaveBeenCalledWith('example', 'log-info', { message: 'hello' });
+    const request = api.runActionFlow.calls.mostRecent().args[0];
+    const flows = JSON.parse(request.flows);
+    expect(flows.length).toBe(1);
+    expect(request.triggerId).toBe(flows[0].triggerId);
+    expect(request.scope).toBe('global');
+    expect(request.clientId).toBe('client-1');
+    expect(flows[0].children.length).toBe(1);
+    expect(flows[0].children[0].integrationId).toBe('example');
+    expect(flows[0].children[0].actionId).toBe('log-info');
+    expect(flows[0].children[0].parameters).toEqual([
+      jasmine.objectContaining({ name: 'message', type: 'string', value: 'Game Change: {{ vars.category }}' }),
+    ]);
     expect(component['result']()?.success).toBeTrue();
     expect(component['result']()?.durationMs).toBe(12);
     expect(component['result']()?.status).toBe('Succeeded');
   });
 
   it('surfaces the host error on a failed run', async () => {
-    actionServiceSpy.runAction.and.resolveTo({
+    api.runActionFlow.and.resolveTo({
       success: false,
       status: 'Failed',
       durationMs: 3,
@@ -164,17 +212,18 @@ describe('ActionTesterComponent', () => {
   });
 
   it('reports a network error when the call throws', async () => {
-    actionServiceSpy.runAction.and.rejectWith(new Error('down'));
+    api.runActionFlow.and.rejectWith(new Error('down'));
     setAction(action());
 
     await component['run']();
 
     expect(component['result']()?.success).toBeFalse();
     expect(component['result']()?.error?.code).toBe('NETWORK_ERROR');
+    expect(component['running']()).toBeFalse();
   });
 
   it('reseeds and clears the previous result when the action changes', async () => {
-    actionServiceSpy.runAction.and.resolveTo({ success: true, durationMs: 1 });
+    api.runActionFlow.and.resolveTo({ success: true, durationMs: 1 });
     setAction(action());
     await component['run']();
     expect(component['result']()).not.toBeNull();
@@ -208,7 +257,7 @@ describe('ActionTesterComponent with a script that declares inputs', () => {
   }
 
   beforeEach(() => {
-    const actionServiceSpy = jasmine.createSpyObj<ActionService>('ActionService', ['runAction', 'blockParameterDefs']);
+    const actionServiceSpy = jasmine.createSpyObj<ActionService>('ActionService', ['blockParameterDefs']);
     actionServiceSpy.blockParameterDefs.and.callFake(fakeBlockParameterDefs);
     optionsSpy = jasmine.createSpyObj<ActionOptionsService>('ActionOptionsService', ['getOptions']);
 
@@ -218,7 +267,8 @@ describe('ActionTesterComponent with a script that declares inputs', () => {
         provideZonelessChangeDetection(),
         { provide: ActionService, useValue: actionServiceSpy },
         { provide: ActionOptionsService, useValue: optionsSpy },
-        { provide: ApiService, useValue: { onNotification: () => EMPTY } },
+        { provide: ApiService, useValue: apiFake() },
+        { provide: VariableService, useValue: variableServiceStub },
       ],
     });
 
