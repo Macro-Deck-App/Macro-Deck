@@ -517,3 +517,61 @@ describe('ActionBuilderComponent event menu labels', () => {
     expect(component.selectedEventDefaultLabel()).toBe('Event 2');
   });
 });
+
+describe('ActionBuilderComponent action panel under overlay scrollbars', () => {
+  let fixture: ComponentFixture<ActionBuilderComponent>;
+  let scrollbarStyle: HTMLStyleElement;
+
+  beforeEach(async () => {
+    scrollbarStyle = document.createElement('style');
+    scrollbarStyle.textContent = '.action-panel::-webkit-scrollbar { width: 0; }';
+    document.head.append(scrollbarStyle);
+
+    await TestBed.configureTestingModule({
+      imports: [ActionBuilderComponent],
+      providers: [provideZonelessChangeDetection(), { provide: ApiService, useValue: fakeApiService() }],
+    })
+      .overrideComponent(ActionBuilderComponent, {
+        set: {
+          template: '<div class="action-panel" style="height: 200px"><div id="card" style="height: 1000px"></div></div>',
+          imports: [],
+        },
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(ActionBuilderComponent);
+    (fixture.nativeElement as HTMLElement).style.cssText = 'display: flex; flex-direction: column; width: 400px; height: 200px;';
+    document.body.append(fixture.nativeElement);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    document.documentElement.removeAttribute('data-overlay-scrollbars');
+    scrollbarStyle.remove();
+    (fixture.nativeElement as HTMLElement).remove();
+  });
+
+  const endClearance = (): number => {
+    const panel = (fixture.nativeElement as HTMLElement).querySelector('.action-panel')!;
+    const card = panel.querySelector('#card')!;
+    return panel.getBoundingClientRect().right - card.getBoundingClientRect().right;
+  };
+  const space4 = (): number => {
+    const probe = document.createElement('div');
+    probe.style.width = 'var(--space-4)';
+    document.body.append(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return width;
+  };
+
+  it('keeps the cards clear of a scrollbar drawn over the content', () => {
+    document.documentElement.setAttribute('data-overlay-scrollbars', '');
+
+    expect(endClearance()).toBeGreaterThanOrEqual(space4() - 0.5);
+  });
+
+  it('keeps the narrow end inset where scrollbars take their own gutter', () => {
+    expect(endClearance()).toBeLessThan(space4() - 0.5);
+  });
+});
