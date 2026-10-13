@@ -196,7 +196,7 @@ internal sealed class DescribeResultsRespectMessageSizeCheck() : ConformanceChec
 		{
 			return ConformanceCheckResult.Fail(
 				$"actions/describe replies promptly, with a reply whose envelope stays within MaxMessageBytes ({ProtocolLimits.MaxMessageBytes} bytes).",
-				"No reply arrived within 5 s - an oversize reply typically drops the connection rather than arriving.");
+				DescribeProbe.NoReplyObserved);
 		}
 
 		if (!outcome.Succeeded)
@@ -845,6 +845,9 @@ internal sealed class ActionIconContentIsAnswerableCheck() : ConformanceCheckBas
 /// "the reply did not arrive" and "the reply was an error" the same way.</summary>
 internal static class DescribeProbe
 {
+	internal const string NoReplyObserved =
+		"No reply arrived within 5 s - a reply over MaxMessageBytes is answered with MALFORMED_ENVELOPE and never arrives, so it may be oversize.";
+
 	// actions has no provider local id to address describe with - every declared local id belongs to a
 	// specific action - and every handler ignores the local id on describe anyway. See
 	// ActionsTestClient's identical remark on the value itself.
@@ -880,8 +883,7 @@ internal static class DescribeProbe
 				ConformanceCheckResult.Fail(
 					$"{kind}/describe replies promptly, with a reply whose envelope stays within " +
 					$"MaxMessageBytes ({ProtocolLimits.MaxMessageBytes} bytes).",
-					"No reply arrived within 5 s - an oversize reply typically drops the connection rather " +
-					"than arriving."));
+					NoReplyObserved));
 		}
 
 		return outcome.Succeeded
@@ -927,8 +929,7 @@ internal static class ActionStateProbe
 		{
 			return ([],
 				ConformanceCheckResult.Fail("actions/describe replies promptly.",
-					"No reply arrived within 5 s - an oversize reply typically drops the connection rather than " +
-					"arriving."));
+					DescribeProbe.NoReplyObserved));
 		}
 
 		if (!outcome.Succeeded)
@@ -1030,8 +1031,7 @@ internal static class ActionIconProbe
 		{
 			return ([],
 				ConformanceCheckResult.Fail("actions/describe replies promptly.",
-					"No reply arrived within 5 s - an oversize reply typically drops the connection rather than " +
-					"arriving."));
+					DescribeProbe.NoReplyObserved));
 		}
 
 		if (!outcome.Succeeded)

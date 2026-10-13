@@ -27,7 +27,7 @@ public class A42_CloseHandshakePathsTests
 	public async Task A_first_message_that_is_not_session_hello_gets_a_correlated_protocol_error_and_a_normal_close()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		using var socket = await ConnectRawAsync(host);
+		using var socket = (await ConnectRawAsync(host)).Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
 		var ping = new ProtocolEnvelope { Type = MessageTypes.SessionPing, Id = Guid.NewGuid().ToString() };
@@ -48,7 +48,7 @@ public class A42_CloseHandshakePathsTests
 	public async Task A_first_message_that_is_not_json_gets_a_protocol_error_and_a_normal_close()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		using var socket = await ConnectRawAsync(host);
+		using var socket = (await ConnectRawAsync(host)).Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
 		await socket.SendAsync(Encoding.UTF8.GetBytes("not json"), WebSocketMessageType.Text, true, deadline.Token);
@@ -66,7 +66,7 @@ public class A42_CloseHandshakePathsTests
 	public async Task A_session_hello_with_a_malformed_payload_gets_a_protocol_error_and_a_normal_close()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		using var socket = await ConnectRawAsync(host);
+		using var socket = (await ConnectRawAsync(host)).Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
 		var hello = new ProtocolEnvelope
@@ -93,7 +93,7 @@ public class A42_CloseHandshakePathsTests
 		{
 			Timeouts = ProtocolDescriptorFactory.CreateTimeoutsDescriptor() with { Handshake = TimeSpan.FromMilliseconds(300) }
 		});
-		using var socket = await ConnectRawAsync(host);
+		using var socket = (await ConnectRawAsync(host)).Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
 		var rejection = await ReadRejectionAsync(socket, deadline.Token);
@@ -105,7 +105,7 @@ public class A42_CloseHandshakePathsTests
 	public async Task An_oversized_first_message_gets_a_protocol_error_and_a_normal_close()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync(SmallMessageLimit());
-		using var socket = await ConnectRawAsync(host);
+		using var socket = (await ConnectRawAsync(host)).Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
 		await socket.SendAsync(new byte[64 * 1024], WebSocketMessageType.Text, true, deadline.Token);
@@ -119,10 +119,11 @@ public class A42_CloseHandshakePathsTests
 	public async Task A_close_the_plugin_starts_is_echoed_and_completes_the_handshake()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		using var socket = await ConnectRawAsync(host);
+		var connection = await ConnectRawAsync(host);
+		using var socket = connection.Socket;
 		using var deadline = new CancellationTokenSource(Deadline);
 
-		await socket.SendAsync(Envelope(MessageTypes.SessionHello), WebSocketMessageType.Text, true, deadline.Token);
+		await socket.SendAsync(Hello(connection.SessionId), WebSocketMessageType.Text, true, deadline.Token);
 		await host.WaitForSessionAsync();
 
 		await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Plugin stopping.", deadline.Token);
@@ -132,6 +133,86 @@ public class A42_CloseHandshakePathsTests
 			Assert.That(socket.State, Is.EqualTo(WebSocketState.Closed));
 			Assert.That(socket.CloseStatus, Is.EqualTo(WebSocketCloseStatus.NormalClosure));
 			Assert.That(host.Messages.Closes, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_session_hello_without_a_payload_is_rejected_with_a_correlated_protocol_error_and_a_normal_close()
+	{
+		await using var host = await MacroDeckTestHost.StartAsync();
+		using var socket = (await ConnectRawAsync(host)).Socket;
+		using var deadline = new CancellationTokenSource(Deadline);
+
+		var hello = new ProtocolEnvelope { Type = MessageTypes.SessionHello, Id = Guid.NewGuid().ToString() };
+		await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(hello), WebSocketMessageType.Text, true, deadline.Token);
+
+		await AssertHelloRejectedAsync(socket, hello.Id, deadline.Token);
+	}
+
+	[Test]
+	public async Task A_session_hello_with_a_null_payload_is_rejected_with_a_correlated_protocol_error_and_a_normal_close()
+	{
+		await using var host = await MacroDeckTestHost.StartAsync();
+		using var socket = (await ConnectRawAsync(host)).Socket;
+		using var deadline = new CancellationTokenSource(Deadline);
+
+		var id = Guid.NewGuid().ToString();
+		var raw = $$"""{"type":"{{MessageTypes.SessionHello}}","id":"{{id}}","payload":null}""";
+		await socket.SendAsync(Encoding.UTF8.GetBytes(raw), WebSocketMessageType.Text, true, deadline.Token);
+
+		await AssertHelloRejectedAsync(socket, id, deadline.Token);
+	}
+
+	[Test]
+	public async Task An_oversized_message_after_the_handshake_gets_a_malformed_envelope_error_and_the_session_continues()
+	{
+		await using var host = await MacroDeckTestHost.StartAsync(SmallMessageLimit());
+		var connection = await ConnectRawAsync(host);
+		using var socket = connection.Socket;
+		using var deadline = new CancellationTokenSource(Deadline);
+
+		await socket.SendAsync(Hello(connection.SessionId), WebSocketMessageType.Text, true, deadline.Token);
+		var welcome = await ReceiveEnvelopeAsync(socket, deadline.Token);
+
+		var oversized = new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionPing,
+			Id = Guid.NewGuid().ToString(),
+			Payload = JsonSerializer.SerializeToElement(new { padding = new string('x', 64 * 1024) })
+		};
+		await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(oversized), WebSocketMessageType.Text, true, deadline.Token);
+		var error = await ReceiveEnvelopeAsync(socket, deadline.Token);
+
+		var ping = new ProtocolEnvelope { Type = MessageTypes.SessionPing, Id = Guid.NewGuid().ToString() };
+		await socket.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(ping), WebSocketMessageType.Text, true, deadline.Token);
+		var pong = await ReceiveEnvelopeAsync(socket, deadline.Token);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(welcome?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
+			Assert.That(error?.Type, Is.EqualTo(MessageTypes.ProtocolError));
+			Assert.That(error?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.MalformedEnvelope));
+			Assert.That(error?.CorrelationId, Is.Null);
+			Assert.That(pong?.Type, Is.EqualTo(MessageTypes.SessionPong));
+			Assert.That(pong?.CorrelationId, Is.EqualTo(ping.Id));
+			Assert.That(socket.State, Is.EqualTo(WebSocketState.Open));
+			Assert.That(host.Messages.Closes, Is.Empty);
+		});
+	}
+
+	private static async Task AssertHelloRejectedAsync(ClientWebSocket socket, string helloId, CancellationToken cancellationToken)
+	{
+		var error = await ReceiveEnvelopeAsync(socket, cancellationToken);
+		var next = await ReceiveEnvelopeAsync(socket, cancellationToken);
+		await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(error?.Type, Is.EqualTo(MessageTypes.ProtocolError));
+			Assert.That(error?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(error?.CorrelationId, Is.EqualTo(helloId));
+			Assert.That(next, Is.Null, "session.hello without a payload must not be welcomed");
+			Assert.That(socket.CloseStatus, Is.EqualTo(WebSocketCloseStatus.NormalClosure));
 		});
 	}
 
@@ -166,7 +247,38 @@ public class A42_CloseHandshakePathsTests
 	private static MacroDeckTestHostOptions SmallMessageLimit()
 		=> new() { Limits = ProtocolDescriptorFactory.CreateLimitsDescriptor() with { MaxMessageBytes = 4096 } };
 
-	private static async Task<ClientWebSocket> ConnectRawAsync(MacroDeckTestHost host)
+	private static async Task<ProtocolEnvelope?> ReceiveEnvelopeAsync(ClientWebSocket socket, CancellationToken cancellationToken)
+	{
+		var buffer = new byte[64 * 1024];
+		using var message = new MemoryStream();
+
+		while (true)
+		{
+			var received = await socket.ReceiveAsync(buffer, cancellationToken);
+			if (received.MessageType == WebSocketMessageType.Close)
+			{
+				return null;
+			}
+
+			message.Write(buffer, 0, received.Count);
+			if (received.EndOfMessage)
+			{
+				return ProtocolEnvelopeReader.Read(message.ToArray()).Envelope;
+			}
+		}
+	}
+
+	private static byte[] Hello(string sessionId)
+		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionHello,
+			Id = Guid.NewGuid().ToString(),
+			Payload = JsonSerializer.SerializeToElement(
+				new SessionHelloPayload { ProtocolVersion = ProtocolVersions.Supported.Max(), SessionId = sessionId },
+				PluginProtocolJson.Options)
+		});
+
+	private static async Task<(ClientWebSocket Socket, string SessionId)> ConnectRawAsync(MacroDeckTestHost host)
 	{
 		using var http = new HttpClient { BaseAddress = new Uri(host.Url) };
 		using var request = new HttpRequestMessage(HttpMethod.Post, ProtocolConstants.SessionsPath)
@@ -196,9 +308,6 @@ public class A42_CloseHandshakePathsTests
 		var webSocketUri = new UriBuilder(host.Url) { Scheme = "ws", Path = ProtocolConstants.WebSocketPath }.Uri;
 		await socket.ConnectAsync(webSocketUri, CancellationToken.None);
 
-		return socket;
+		return (socket, session.SessionId);
 	}
-
-	private static byte[] Envelope(string type)
-		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope { Type = type, Id = Guid.NewGuid().ToString() });
 }

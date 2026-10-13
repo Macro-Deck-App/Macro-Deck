@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.WebSockets;
+using System.Text.Json;
 using MacroDeck.Plugin.Hosting;
 using MacroDeck.Plugin.Protocol;
 using MacroDeck.Plugin.Protocol.Auth;
@@ -141,10 +142,20 @@ public class A41_CloseHandshakeTests
 
 		var webSocketUri = new UriBuilder(host.Url) { Scheme = "ws", Path = ProtocolConstants.WebSocketPath }.Uri;
 		await socket.ConnectAsync(webSocketUri, CancellationToken.None);
-		await socket.SendAsync(Envelope(MessageTypes.SessionHello), WebSocketMessageType.Text, true, CancellationToken.None);
+		await socket.SendAsync(Hello(session.SessionId), WebSocketMessageType.Text, true, CancellationToken.None);
 
 		return socket;
 	}
+
+	private static byte[] Hello(string sessionId)
+		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope
+		{
+			Type = MessageTypes.SessionHello,
+			Id = Guid.NewGuid().ToString(),
+			Payload = JsonSerializer.SerializeToElement(
+				new SessionHelloPayload { ProtocolVersion = ProtocolVersions.Supported.Max(), SessionId = sessionId },
+				PluginProtocolJson.Options)
+		});
 
 	private static byte[] Envelope(string type)
 		=> ProtocolEnvelopeWriter.WriteToUtf8Bytes(new ProtocolEnvelope { Type = type, Id = Guid.NewGuid().ToString() });
