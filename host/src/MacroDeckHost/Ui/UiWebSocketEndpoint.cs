@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Channels;
 using MacroDeck.Localization;
@@ -32,6 +33,7 @@ public sealed class UiWebSocketEndpoint(
 	internal const string OversizedCode = "message_too_large";
 
 	private static readonly TimeSpan SendDeadline = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan GracefulClose = TimeSpan.FromSeconds(5);
 	private static readonly ILogger _logger = Log.ForContext<UiWebSocketEndpoint>();
 
 	public async Task HandleAsync(HttpContext context)
@@ -51,8 +53,13 @@ public sealed class UiWebSocketEndpoint(
 		}
 
 		using var socket = await context.WebSockets.AcceptWebSocketAsync(UiWebSocketProtocol.SubProtocol);
+		await RunConnectionAsync(socket, principal, context.RequestAborted);
+	}
+
+	internal async Task RunConnectionAsync(WebSocket socket, ClaimsPrincipal principal, CancellationToken requestAborted)
+	{
 		using var cancellation
-			= CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, connections.ShutdownToken);
+			= CancellationTokenSource.CreateLinkedTokenSource(requestAborted, connections.ShutdownToken);
 		var connectionId = Guid.NewGuid().ToString("N");
 		var outbound = Channel.CreateBounded<UiWebSocketEnvelope>(new BoundedChannelOptions(QueueLimit)
 		{
@@ -92,6 +99,12 @@ public sealed class UiWebSocketEndpoint(
 		{
 			var hello = await ReceiveAsync(socket, cancellation.Token);
 			Interlocked.Exchange(ref lastInbound, timeProvider.GetUtcNow().UtcTicks);
+			if (hello is null)
+			{
+				await EchoPeerCloseAsync(socket);
+				return;
+			}
+
 			if (hello is not { Kind: "hello", ProtocolVersion: UiWebSocketProtocol.Version } ||
 				!ValidId(hello.Id) ||
 				!ValidId(hello.CorrelationId))
@@ -125,6 +138,7 @@ public sealed class UiWebSocketEndpoint(
 				Interlocked.Exchange(ref lastInbound, timeProvider.GetUtcNow().UtcTicks);
 				if (envelope is null)
 				{
+					await EchoPeerCloseAsync(socket);
 					break;
 				}
 
@@ -463,6 +477,20 @@ public sealed class UiWebSocketEndpoint(
 		catch (Exception exception) when (exception is WebSocketException or OperationCanceledException)
 		{
 		}
+	}
+
+	private static async Task EchoPeerCloseAsync(WebSocket socket)
+	{
+		if (socket.State != WebSocketState.CloseReceived)
+		{
+			return;
+		}
+
+		using var budget = new CancellationTokenSource(GracefulClose);
+		await CloseAsync(socket,
+			socket.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+			socket.CloseStatusDescription ?? string.Empty,
+			budget.Token);
 	}
 
 	private static async Task IgnoreFailures(Task task)
