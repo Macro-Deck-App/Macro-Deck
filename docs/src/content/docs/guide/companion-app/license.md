@@ -8,9 +8,12 @@ purchase covers all your phones and tablets.
 
 ## One purchase for all your devices
 
-The license is a one-time purchase in the App Store or on Google Play, with no subscription. **Buy license**
+The license is a one-time purchase in the App Store or on Google Play with lifetime access: there is no subscription,
+it does not expire and it is never charged again. Only a license passed on to someone else can be revoked, see
+below. **Buy license**
 first shows what the app adds over the web client, the price in your store and these terms; nothing is bought
-until you confirm it there. The purchase supports the development and maintenance of Macro Deck, which stays free
+until you confirm it there. **How the license works**, on the paywall, the purchase screen and the last step of the
+first start, opens this page. The purchase supports the development and maintenance of Macro Deck, which stays free
 and open source. It does not stay
 on the phone you bought it on: the app hands it to your computer, and **Macro Deck gives it to every Companion
 app that connects**. Your other phones and tablets get it from there, whether they run Android or iOS, and
@@ -66,7 +69,7 @@ Each device can try the app for 7 days. Start the trial on the last step of the
 [first start](/guide/companion-app/setup/#first-start) or on the **Not licensed** banner of the Connections screen
 with **Start 7-day free trial**, or on the paywall of a deck with **Start 7-day trial**.
 
-![The paywall in the Android app, with the Start 7-day trial button](../../../../assets/guide/companion/android-paywall.png)
+![The paywall in the Android app, which calls the license a one-time purchase with lifetime access, with the Start 7-day trial button and the How the license works link](../../../../assets/guide/companion/android-paywall.png)
 
 The trial runs on your computer's clock, so it begins on the first connection: started from the first start or the
 banner, the Connections screen says **Your free trial is ready** until then, and the first computer you connect to starts it
