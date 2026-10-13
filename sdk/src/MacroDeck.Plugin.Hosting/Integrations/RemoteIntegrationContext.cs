@@ -49,7 +49,8 @@ internal sealed class RemoteIntegrationContext(
 	RemoteLocaleApi? locale = null,
 	RemoteHostHttp? http = null,
 	RemoteCompanionDeviceApi? companionDevices = null,
-	RemoteMusicPlayerApi? musicPlayers = null) : IIntegrationContext
+	RemoteMusicPlayerApi? musicPlayers = null,
+	RemoteDesktopNotifier? desktopNotifications = null) : IIntegrationContext
 {
 	public IVariableApi Variables { get; } = variables;
 
@@ -92,4 +93,7 @@ internal sealed class RemoteIntegrationContext(
 		companionDevices ?? (ICompanionDeviceApi)UnsupportedCompanionDeviceApi.Instance;
 
 	public IMusicPlayerApi MusicPlayers { get; } = musicPlayers?.Lifecycle ?? UnsupportedMusicPlayerApi.Instance;
+
+	public IDesktopNotifier DesktopNotifications { get; } =
+		desktopNotifications ?? (IDesktopNotifier)UnsupportedDesktopNotifier.Instance;
 }

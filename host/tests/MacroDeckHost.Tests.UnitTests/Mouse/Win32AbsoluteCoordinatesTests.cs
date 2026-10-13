@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Tests.UnitTests.Mouse;
 

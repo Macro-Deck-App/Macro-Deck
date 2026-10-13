@@ -22,7 +22,7 @@ If a formatter or analyzer can express a rule, configure it there instead of add
 
 ## Architecture
 
-The host keeps Domain, Application, Infrastructure, and Host responsibilities separate. Dependencies point inward. Built-in integrations live in `MacroDeckHost.Integrations` and consume host capabilities through the SDK or deliberately narrow ports.
+The host keeps Domain, Application, Infrastructure, and Host responsibilities separate. Dependencies point inward. Built-in integrations live in `MacroDeckHost.Integrations` and consume host capabilities through the SDK only.
 
 Expected failures use the repository `Result` types. Exceptions are for unexpected failures.
 

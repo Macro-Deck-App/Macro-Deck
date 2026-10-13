@@ -149,6 +149,12 @@ and **is still sent to the executor** - never infer anything from a field being 
 Set `Platforms` on the definition only when the capability does not exist on other platforms at all
 (hibernation on macOS); the action is then neither listed nor executable there.
 
+`Role` names a job the action does for Macro Deck itself, one of the `ActionRoles` values, and is `null`
+for an ordinary action. A role fixes the parameters: `ActionRoles.LaunchApplication` takes a required
+`path` and an optional `arguments`. When the user drops an application onto the deck, Macro Deck binds the
+new button to a built-in action with that role; a plugin's action with the role is never chosen, so a
+plugin never receives the dropped path. A Macro Deck release from before `Role` ignores it.
+
 ### Letting the user search a long list
 
 A `Choice` or `DynamicChoice` parameter draws a plain select. For a long list, call `AsSearchable()` on it

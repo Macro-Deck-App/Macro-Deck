@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Domain.Common;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 
 namespace MacroDeckHost.Infrastructure.Applications;
 
@@ -11,7 +11,7 @@ public sealed class ExternalUrlOpener : IExternalUrlOpener
 	private readonly IApplicationService _applications;
 
 	public ExternalUrlOpener(IHostLockState lockState)
-		: this(lockState, ApplicationServiceFactory.Create())
+		: this(lockState, ApplicationServiceFactory.Create(Serilog.Log.ForContext<ExternalUrlOpener>()))
 	{
 	}
 

@@ -1,7 +1,6 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Integrations.System.Metrics;
-using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Variables;
@@ -27,7 +26,6 @@ public class SystemIntegrationDiskTests
 		var metrics = new FakeSystemMetricsService(gpuCount: gpuCount);
 		var integration = new SystemIntegration(new FakeApplicationService { IsSupported = true },
 			volume ?? new FakeVolumeService(),
-			new SilentNotifications(),
 			metrics,
 			new FakePowerService(true));
 		var stale = new StaleCounter();
@@ -289,14 +287,6 @@ public class SystemIntegrationDiskTests
 
 		Assert.That(integration.Variables.Count(v => v.Materialization == VariableMaterialization.Eager),
 			Is.LessThanOrEqualTo(VariableLimits.MaxEagerVariablesPerProvider));
-	}
-
-	private sealed class SilentNotifications : INotificationService
-	{
-		public bool IsSupported => true;
-
-		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
 	}
 
 	private sealed class StaleCounter : IVariablePollingInvalidationSignal

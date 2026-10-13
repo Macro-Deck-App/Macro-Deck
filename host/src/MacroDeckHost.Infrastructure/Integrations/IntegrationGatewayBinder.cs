@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Application.Email;
-using MacroDeckHost.Integrations.Calendar;
-using MacroDeckHost.Integrations.Email;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Calendar;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Email;
 using MacroDeck.Sdk;
 
 namespace MacroDeckHost.Infrastructure.Integrations;

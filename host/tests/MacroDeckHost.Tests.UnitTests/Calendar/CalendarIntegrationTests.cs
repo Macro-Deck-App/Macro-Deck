@@ -2,7 +2,7 @@ using System.Text.Json;
 using MacroDeck.Sdk.Actions;
 using MacroDeckHost.Application.Calendar;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations.Calendar;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Calendar;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Timers;

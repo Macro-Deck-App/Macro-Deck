@@ -124,6 +124,7 @@ x-macrodeck-capability-kinds:
   - config-entries
   - battery-provider
   - email-inbox
+  - companion-device-entries
 
 # Drift anchor: MacroDeck.Plugin.Protocol.Compatibility.PluginCompatibilityStates.All (ascending severity)
 x-macrodeck-compatibility-states:
@@ -179,6 +180,7 @@ x-macrodeck-error-codes:
   - ICON_PACK_SYNC_NOT_ALLOWED
   - ICON_NOT_FOUND
   - COMPANION_DEVICES_NOT_ALLOWED
+  - DESKTOP_NOTIFICATIONS_NOT_ALLOWED
 
 servers:
   - url: /
@@ -553,6 +555,7 @@ components:
         - ICON_PACK_SYNC_NOT_ALLOWED
         - ICON_NOT_FOUND
         - COMPANION_DEVICES_NOT_ALLOWED
+        - DESKTOP_NOTIFICATIONS_NOT_ALLOWED
 
     ProtocolError:
       type: object

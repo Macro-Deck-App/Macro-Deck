@@ -1,5 +1,6 @@
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Capabilities.Calendar;
+using MacroDeck.Plugin.Hosting.Capabilities.CompanionDeviceEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigEntries;
 using MacroDeck.Plugin.Hosting.Capabilities.ConfigFlow;
 using MacroDeck.Plugin.Hosting.Capabilities.EmailInbox;
@@ -158,6 +159,26 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 			[CapabilityKinds.EmailInbox]);
 
 		await AssertNoneUnsupportedAsync(CapabilityKinds.EmailInbox, ProviderCapabilityId.LocalId);
+	}
+
+	[Test]
+	public async Task Every_companion_device_entries_operation_is_recognised()
+	{
+		await ConnectAsync([new CompanionDeviceEntriesCapabilityHandler([new CompanionDeviceEntriesIntegration()])],
+			[Provider(CapabilityKinds.CompanionDeviceEntries)],
+			[CapabilityKinds.CompanionDeviceEntries]);
+
+		await AssertNoneUnsupportedAsync(CapabilityKinds.CompanionDeviceEntries, ProviderCapabilityId.LocalId);
+	}
+
+	private sealed class CompanionDeviceEntriesIntegration : MacroDeck.Sdk.IPluginIntegration,
+		MacroDeck.Sdk.Companion.ICompanionDeviceConfigEntries
+	{
+		public IReadOnlyList<MacroDeck.Sdk.Actions.IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+
+		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 
 	[Test]

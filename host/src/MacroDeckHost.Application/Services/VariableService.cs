@@ -964,6 +964,7 @@ public class VariableService : IVariableService
 			Presentation = declaration?.Presentation,
 			Unit = declaration?.Unit,
 			SemanticKind = declaration?.SemanticKind,
+			IsShareable = declaration?.IsShareable ?? true,
 			Attributes = declaration?.Attributes,
 			Write = declaration?.Write,
 			Value = value,
@@ -985,6 +986,7 @@ public class VariableService : IVariableService
 			entity.DecimalPlaces != declaredPrecision ||
 			!string.Equals(entity.Unit, declaration?.Unit, StringComparison.Ordinal) ||
 			!string.Equals(entity.SemanticKind, declaration?.SemanticKind, StringComparison.Ordinal) ||
+			entity.IsShareable != (declaration?.IsShareable ?? true) ||
 			!AttributesEqual(entity.Attributes, declaration?.Attributes) ||
 			!Equals(entity.Write, declaration?.Write);
 
@@ -992,6 +994,7 @@ public class VariableService : IVariableService
 		entity.DecimalPlaces = declaredPrecision;
 		entity.Unit = declaration?.Unit;
 		entity.SemanticKind = declaration?.SemanticKind;
+		entity.IsShareable = declaration?.IsShareable ?? true;
 		entity.Attributes = declaration?.Attributes;
 		entity.Write = declaration?.Write;
 

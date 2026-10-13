@@ -69,6 +69,7 @@ anything else with `with { ... }`.
 | `Write` | Makes the variable writable - see [Writable variables](#writable-variables). | `new VariableWriteCapability()` |
 | `Attributes` | Free-form strings, readable as `vars.x.<key>`. Not interpreted by the host. | `new Dictionary<string, string> { ["room"] = "office" }` |
 | `Configuration` | Groups the variable under one configured instance (two OBS connections). | `new VariableConfiguration(entryId, "Studio PC")` |
+| `IsShareable` | `false` keeps the variable on this Macro Deck: the user cannot share it with other Macro Decks, and one shared earlier is no longer served. Defaults to `true`. | `false` for a variable that mirrors another Macro Deck |
 
 `SemanticKind` tells the host how to render a number; `Unit` is what it shows next to it:
 

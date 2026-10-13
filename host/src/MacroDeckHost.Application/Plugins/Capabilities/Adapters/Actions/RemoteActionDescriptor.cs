@@ -12,4 +12,5 @@ public sealed record RemoteActionDescriptor(
 	bool SupportsDynamicOptions,
 	bool ProvidesState,
 	bool ConfiguresWithUiTree = false,
-	bool ProvidesIcon = false);
+	bool ProvidesIcon = false,
+	string? Role = null);

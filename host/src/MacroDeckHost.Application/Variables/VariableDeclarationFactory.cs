@@ -35,6 +35,7 @@ public static class VariableDeclarationFactory
 			DecimalPlaces = definition.DecimalPlaces,
 			Unit = Trimmed(definition.Unit),
 			SemanticKind = Trimmed(definition.SemanticKind),
+			IsShareable = definition.IsShareable,
 			Attributes = Clamp(definition.Attributes),
 			Write = definition.Write
 		};

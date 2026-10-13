@@ -3034,8 +3034,8 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>共有できるのはグローバル変数のみです。</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>別の Macro Deck からインポートした変数は共有できません。</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>この変数は共有できません。</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>共有設定を保存できませんでした。</value>

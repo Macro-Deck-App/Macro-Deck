@@ -1,5 +1,5 @@
 using System.Text;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Streamerbot;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -47,7 +47,7 @@ internal sealed class StreamerbotIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var streamerbot = discovered.OfType<StreamerbotIntegration>().SingleOrDefault();
 		Assert.That(streamerbot, Is.Not.Null, "the Streamer.bot integration was not discovered");

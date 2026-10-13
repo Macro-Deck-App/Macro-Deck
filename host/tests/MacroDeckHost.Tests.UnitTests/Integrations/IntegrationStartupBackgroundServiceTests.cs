@@ -49,6 +49,7 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			new UserNotificationStore(),
 			EmptyInitializer(),
 			new RecordingMediator(),
+			new BuiltInIntegrationRegistration(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
 		var stopping = service.StopAsync(CancellationToken.None);
@@ -182,6 +183,7 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			new UserNotificationStore(),
 			initializer,
 			new RecordingMediator(),
+			new BuiltInIntegrationRegistration(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
 

@@ -1,6 +1,6 @@
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.Deck;
-using MacroDeckHost.Integrations.System.Focus;
+using MacroDeckHost.Platform.Focus;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.Hosting;
 using Serilog;

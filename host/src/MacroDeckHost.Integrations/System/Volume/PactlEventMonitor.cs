@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using MacroDeckHost.Platform.Processes;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.System.Volume;

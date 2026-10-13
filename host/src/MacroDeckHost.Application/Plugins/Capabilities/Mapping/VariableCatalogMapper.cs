@@ -39,6 +39,7 @@ public static class VariableCatalogMapper
 			ParentId = dto.ParentId,
 			IsContainer = dto.IsContainer,
 			IsBindable = dto.IsBindable,
+			IsShareable = dto.IsShareable,
 			Configuration = dto.ConfigurationKey is { } key
 				? new VariableConfiguration(key, dto.ConfigurationName ?? default)
 				: null,
@@ -68,6 +69,7 @@ public static class VariableCatalogMapper
 			ParentId = definition.ParentId,
 			IsContainer = definition.IsContainer,
 			IsBindable = definition.IsBindable,
+			IsShareable = definition.IsShareable,
 			ConfigurationKey = definition.Configuration?.Key,
 			ConfigurationName = definition.Configuration?.Name,
 			Write = definition.Write is null

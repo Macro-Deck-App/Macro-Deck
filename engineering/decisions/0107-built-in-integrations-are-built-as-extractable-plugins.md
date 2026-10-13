@@ -44,6 +44,9 @@ integration needs, and an integration cannot be moved out of the host or shipped
   gain them too. Each addition follows the compatibility rules of ADR 0026.
 - When the migration is complete, `MacroDeckHost.Integrations` no longer references `MacroDeckHost.Application`
   or `MacroDeckHost.Domain`.
+- Update 2026-10-13: done. `MacroDeckHost.Integrations` references no host project and the boundary baseline
+  is empty. System integrations that need host services moved to `MacroDeckHost.Infrastructure`, and stateless
+  platform code shared with the host moved to `MacroDeckHost.Platform`.
 
 ## References
 

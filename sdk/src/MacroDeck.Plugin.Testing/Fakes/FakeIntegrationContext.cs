@@ -69,6 +69,7 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 		Http = new FakeHostHttp();
 		CompanionDevices = new FakeCompanionDeviceApi();
 		MusicPlayers = new FakeMusicPlayerApi();
+		DesktopNotifications = new FakeDesktopNotifier();
 	}
 
 	/// <summary>The plugin's own variables - see <see cref="FakeVariableApi" />.</summary>
@@ -243,6 +244,13 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 
 	/// <inheritdoc />
 	IMusicPlayerApi IIntegrationContext.MusicPlayers => MusicPlayers;
+
+	/// <summary>The operating system notifications shown - see <see cref="FakeDesktopNotifier" />.
+	/// <see cref="PluginTestHarness" /> also registers it as the plugin's <see cref="IDesktopNotifier" />.</summary>
+	public FakeDesktopNotifier DesktopNotifications { get; }
+
+	/// <inheritdoc />
+	IDesktopNotifier IIntegrationContext.DesktopNotifications => DesktopNotifications;
 
 	/// <inheritdoc />
 	IUiResourceRegistry IIntegrationContext.UiResources => UiResources;

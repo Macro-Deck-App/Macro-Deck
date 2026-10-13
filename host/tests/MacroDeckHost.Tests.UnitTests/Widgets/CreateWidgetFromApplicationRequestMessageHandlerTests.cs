@@ -2,6 +2,7 @@ using System.Text.Json;
 using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -10,6 +11,9 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Domain.Icons;
+using MacroDeckHost.Integrations.System;
+using MacroDeckHost.Localization;
+using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -42,7 +46,10 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 			Result = new ResolvedApplication("/Applications/Calculator.app", "Calculator")
 		};
 		_integrations = new FakeIntegrationRegistry();
-		_integrations.Add(new SystemLikeIntegration());
+		_integrations.Add(new SystemIntegration(new FakeApplicationService { IsSupported = true },
+			new FakeVolumeService(),
+			new FakeSystemMetricsService(),
+			new FakePowerService(true)));
 		_extractor = new StubAppIconExtractor();
 		_iconImports = new StubIconImportService();
 		_iconCache = new StubIconPackCache();
@@ -109,7 +116,8 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 			Assert.That(path.GetProperty("type").GetString(), Is.EqualTo("file"));
 			Assert.That(mode.GetProperty("type").GetString(), Is.EqualTo("choice"));
 			Assert.That(mode.GetProperty("value").GetString(), Is.EqualTo("start"));
-			Assert.That(mode.GetProperty("options").EnumerateArray().Count(), Is.EqualTo(2));
+			Assert.That(mode.GetProperty("options").EnumerateArray().Select(o => o.GetProperty("value").GetString()),
+				Is.EqualTo(new[] { "start", "start-stop", "start-focus" }));
 		});
 	}
 
@@ -126,6 +134,47 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 		var arguments = parameters.EnumerateArray().Single(p => p.GetProperty("name").GetString() == "arguments");
 
 		Assert.That(arguments.GetProperty("value").GetString(), Is.EqualTo("--new-window"));
+	}
+
+	[Test]
+	public async Task Handle_NeverBindsTheButtonToAPluginActionDeclaringTheLaunchRole()
+	{
+		await _integrations.RegisterAsync(new RoleDeclaringIntegration("a.plugin.launcher"), IntegrationOrigin.Plugin);
+
+		await _handler.Handle(Request(), CancellationToken.None);
+
+		using var data = JsonDocument.Parse(_widgets.Created.Single().Data!);
+		using var flows = JsonDocument.Parse(data.RootElement.GetProperty("flows").GetString()!);
+		var block = flows.RootElement[0].GetProperty("children")[0];
+
+		Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo("app.macro-deck.system"));
+	}
+
+	[Test]
+	public async Task Handle_WithoutABuiltInLaunchAction_CreatesNothing()
+	{
+		_integrations = new FakeIntegrationRegistry();
+		await _integrations.RegisterAsync(new RoleDeclaringIntegration("a.plugin.launcher"), IntegrationOrigin.Plugin);
+		var handler = new CreateWidgetFromApplicationRequestMessageHandler(_resolver,
+			_integrations,
+			_extractor,
+			_iconImports,
+			_iconCache,
+			_folders,
+			_widgets,
+			TestLocalization.Preferences,
+			TestLocalization.Resolver,
+			new LoggerConfiguration().CreateLogger());
+
+		var response = await handler.Handle(Request(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Success, Is.False);
+			Assert.That(response.Error!.Message.Localized?.Key,
+				Is.EqualTo(AppStrings.Errors.Applications.LaunchActionUnavailable().Key));
+			Assert.That(_widgets.Created, Is.Empty);
+		});
 	}
 
 	[Test]
@@ -222,22 +271,23 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 		public ResolvedApplication? Resolve(string path) => Result;
 	}
 
-	private sealed class SystemLikeIntegration : IIntegration
+	private sealed class RoleDeclaringIntegration(string id) : IIntegration
 	{
-		public string Id => "app.macro-deck.system";
-		public LocalizedText Name => "System";
+		public string Id => id;
+		public LocalizedText Name => "Launcher";
 		public string Version => "1.0.0";
 		public bool IsInitialized => true;
-		public IReadOnlyList<IActionDefinition> Actions { get; } = [new LaunchApplicationLikeAction()];
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [new RoleDeclaringLaunchAction()];
 
 		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
 
 		public Task ShutdownAsync() => Task.CompletedTask;
 	}
 
-	private sealed class LaunchApplicationLikeAction : IActionDefinition
+	private sealed class RoleDeclaringLaunchAction : IActionDefinition
 	{
 		public string Id => "launch-application";
+		public string? Role => ActionRoles.LaunchApplication;
 		public LocalizedText Name => "Launch Application";
 		public LocalizedText Description => "Starts an application.";
 

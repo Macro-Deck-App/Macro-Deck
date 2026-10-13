@@ -3034,8 +3034,8 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Alleen globale variabelen kunnen worden gedeeld.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Een variabele die uit een andere Macro Deck is geïmporteerd, kan niet worden gedeeld.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Deze variabele kan niet worden gedeeld.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>De deelinstelling kon niet worden opgeslagen.</value>

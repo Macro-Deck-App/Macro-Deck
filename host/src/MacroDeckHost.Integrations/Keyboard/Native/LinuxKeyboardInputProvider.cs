@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Platform.Processes;
 
 namespace MacroDeckHost.Integrations.Keyboard.Native;
 

@@ -60,6 +60,10 @@ public sealed record VariableDefinitionDto
 
 	public bool IsBindable { get; init; } = true;
 
+	/// <summary>Mirrors <c>VariableDefinition.IsShareable</c>. Absent means <c>true</c>, which is what a
+	/// plugin built before this existed declares.</summary>
+	public bool IsShareable { get; init; } = true;
+
 	/// <summary>Mirrors <c>VariableConfiguration.Key</c>. Null when the variable has no configured
 	/// instance, or when produced by a plugin built before this existed.</summary>
 	public string? ConfigurationKey { get; init; }

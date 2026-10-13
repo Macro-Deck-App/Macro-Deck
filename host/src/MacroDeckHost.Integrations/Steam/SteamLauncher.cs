@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using MacroDeck.Sdk.Logging;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Steam;

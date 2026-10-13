@@ -1,16 +1,13 @@
 using System.Runtime.CompilerServices;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Infrastructure.Deck;
-using MacroDeckHost.Integrations.System.Focus;
+using MacroDeckHost.Platform.Focus;
 
 namespace MacroDeckHost.Tests.UnitTests.Deck;
 
 [TestFixture]
 public class FocusedApplicationWatcherTests
 {
-	[TearDown]
-	public void TearDown() => FocusedApplicationSnapshot.Current.Set(null);
-
 	[Test]
 	public async Task WatchAsync_MapsEveryFieldFromTheInnerWatcher()
 	{
@@ -39,22 +36,6 @@ public class FocusedApplicationWatcherTests
 			Assert.That(results[1].ProcessName, Is.Null);
 			Assert.That(results[1].BundleId, Is.Null);
 		});
-	}
-
-	[Test]
-	public async Task WatchAsync_UpdatesTheProcessWideSnapshotAsItYields()
-	{
-		var inner = new FakeFocusedApplicationWatcher([
-			new FocusedAppInfo(4242, "/usr/bin/foo", "procfoo", "com.example.foo")
-		]);
-		var watcher = new FocusedApplicationWatcher(inner);
-
-		await foreach (var _ in watcher.WatchAsync(CancellationToken.None))
-		{
-		}
-
-		Assert.That(FocusedApplicationSnapshot.Current.Value,
-			Is.EqualTo(new FocusedAppInfo(4242, "/usr/bin/foo", "procfoo", "com.example.foo")));
 	}
 
 	[Test]

@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Text;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -42,7 +42,7 @@ internal sealed class TwitchIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Log.Logger);
 
 		var twitch = discovered.OfType<TwitchIntegration>().SingleOrDefault();
 

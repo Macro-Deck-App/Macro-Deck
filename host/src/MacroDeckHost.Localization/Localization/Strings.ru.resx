@@ -3034,8 +3034,8 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Открыть общий доступ можно только для глобальных переменных.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Переменная, импортированная из другого Macro Deck, не может быть общей.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Эту переменную нельзя сделать общей.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Не удалось сохранить настройку общего доступа.</value>

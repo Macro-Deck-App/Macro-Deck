@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Serilog" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeckHost" />
+        <InternalsVisibleTo Include="MacroDeckHost.Infrastructure" />
+        <InternalsVisibleTo Include="MacroDeckHost.Integrations" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Windows" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.MacOS" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Linux" />
+    </ItemGroup>
+
+</Project>

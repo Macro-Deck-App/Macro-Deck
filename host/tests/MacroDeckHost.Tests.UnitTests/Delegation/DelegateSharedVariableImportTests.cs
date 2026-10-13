@@ -1,8 +1,12 @@
 using System.Globalization;
+using MacroDeckHost.Application.Ui.Handlers;
+using MacroDeckHost.Application.Ui.Transport.Messages.Variables;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.Delegation;
 using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Variables;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
@@ -372,6 +376,41 @@ internal sealed class DelegateSharedVariableImportTests
 		{
 			CultureInfo.CurrentCulture = previous;
 		}
+	}
+
+	[Test]
+	public async Task Neither_the_connection_variable_nor_an_imported_one_can_be_shared_onward()
+	{
+		Share(GamingPc, Boolean("obs_streaming", "true"));
+		AddEntry(GamingPc, "GAMING-PC", "inst-1", importShared: true);
+		await InitializeAsync();
+		await RefreshAsync();
+		var registry = new VariableRegistry();
+		var mediator = new RecordingMediator();
+		var service = TestVariableServices.Create(registry, new NullUserVariableStore(), mediator);
+		var shared = InMemorySharedVariableStore.For(registry);
+		var handler = new SetVariableSharedRequestMessageHandler(shared, registry, mediator);
+
+		var refusals = new List<string?>();
+		foreach (var name in new[] { "delegate_gaming_pc_connected", "gaming_pc_obs_streaming" })
+		{
+			var definition = Declared(name);
+			var variable = (await service.CreateIntegrationVariable(DelegateIntegration.IntegrationId,
+				definition.Name!,
+				MacroDeckHost.Domain.Enums.VariableScope.Global,
+				null,
+				SdkVariableTypeMapper.ToDomain(definition.Type),
+				null,
+				definition.DecimalPlaces,
+				definition.ResolvedId,
+				VariableDeclarationFactory.From(definition))).Data!;
+			var response = await handler.Handle(
+				new SetVariableSharedRequest { Id = variable.Id.ToString(), Shared = true },
+				CancellationToken.None);
+			refusals.Add(response.Success ? null : response.Error!.Code);
+		}
+
+		Assert.That(refusals, Is.EqualTo(new[] { "NotEditable", "NotEditable" }));
 	}
 
 	private static DelegateSharedVariable Boolean(string name, string value)

@@ -1,6 +1,6 @@
 using MacroDeckHost.Integrations.Keyboard.Actions;
 using MacroDeckHost.Integrations.Keyboard.Native;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;

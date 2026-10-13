@@ -35,7 +35,8 @@ public sealed class HostStatePusher(
 	ICompanionDeviceApi? companionDevices = null,
 	IPluginCompanionDeviceAccessPolicy? companionAccess = null,
 	IMusicPlayerRegistry? musicPlayers = null,
-	IMusicPlayerStateNotifier? musicPlayerNotifier = null) :
+	IMusicPlayerStateNotifier? musicPlayerNotifier = null,
+	PluginDesktopNotificationCallbacks? desktopNotifications = null) :
 	INotificationHandler<FolderCreatedNotification>,
 	INotificationHandler<FolderUpdatedNotification>,
 	INotificationHandler<FolderDeletedNotification>,
@@ -153,7 +154,8 @@ public sealed class HostStatePusher(
 			PushBatteriesAsync(pluginId, [], cancellationToken),
 			PushHttpAsync(pluginId, cancellationToken),
 			PushCompanionDevicesAsync(pluginId, always: true, cancellationToken),
-			PushMusicPlayersAsync(pluginId, cancellationToken));
+			PushMusicPlayersAsync(pluginId, cancellationToken),
+			PushDesktopNotificationsAsync(pluginId, cancellationToken));
 	}
 
 	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
@@ -655,6 +657,20 @@ public sealed class HostStatePusher(
 		=> musicPlayers is null
 			? []
 			: [.. MusicPlayerInstanceSnapshots.From(musicPlayers.GetInstances()).Select(MusicPlayerWire.ToDto)];
+
+	// Task.Run: the first support check probes the platform, which can block for seconds on Linux.
+	private async Task<bool> PushDesktopNotificationsAsync(string pluginId, CancellationToken cancellationToken)
+	{
+		if (desktopNotifications is null)
+		{
+			return false;
+		}
+
+		var supported = await Task.Run(() => desktopNotifications.IsSupportedFor(pluginId), cancellationToken);
+		return await sessionRegistry.SendToPlugin(pluginId,
+			BuildEnvelope(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = supported }),
+			cancellationToken);
+	}
 
 	private Task<bool> PushHttpAsync(string pluginId, CancellationToken cancellationToken)
 		=> userAgent is null

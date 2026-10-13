@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.Widgets;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;

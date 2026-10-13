@@ -1,6 +1,6 @@
 namespace MacroDeck.Plugin.Protocol.Handshake;
 
-/// <summary>The twenty-three capability kinds a plugin can declare.</summary>
+/// <summary>The twenty-four capability kinds a plugin can declare.</summary>
 public static class CapabilityKinds
 {
 	public const string Actions = "actions";
@@ -77,12 +77,19 @@ public static class CapabilityKinds
 	/// </summary>
 	public const string EmailInbox = "email-inbox";
 
+	/// <summary>
+	/// Asks the host to keep one configuration entry of this plugin per Companion device. Purely declarative:
+	/// its only operation is <c>describe</c>, answered without data. Declared at
+	/// <see cref="Capabilities.ProviderCapabilityId.LocalId" />.
+	/// </summary>
+	public const string CompanionDeviceEntries = "companion-device-entries";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
 		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar, ConfigEntries, BatteryProvider,
-		EmailInbox,
+		EmailInbox, CompanionDeviceEntries,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

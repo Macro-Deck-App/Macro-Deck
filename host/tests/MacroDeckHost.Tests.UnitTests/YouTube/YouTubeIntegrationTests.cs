@@ -9,7 +9,7 @@ using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Integrations.Streaming;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.YouTube;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Twitch;
@@ -25,7 +25,7 @@ internal sealed class YouTubeIntegrationTests
 	{
 		using var integration = new YouTubeIntegration();
 
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Log.Logger).OfType<YouTubeIntegration>();
+		var discovered = BuiltInIntegrations.Discover(Log.Logger).OfType<YouTubeIntegration>();
 
 		Assert.Multiple(() =>
 		{

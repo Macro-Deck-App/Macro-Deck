@@ -14,7 +14,8 @@ public static class ActionCatalogMapper
 			dto.SupportsDynamicOptions,
 			dto.ProvidesState,
 			dto.ConfiguresWithUiTree,
-			dto.ProvidesIcon);
+			dto.ProvidesIcon,
+			dto.Role);
 
 	public static IReadOnlyList<RemoteActionDescriptor> ToDomain(ActionCatalogPayload payload)
 		=> [.. payload.Actions.Select(ToDomain)];
@@ -30,7 +31,8 @@ public static class ActionCatalogMapper
 			SupportsDynamicOptions = descriptor.SupportsDynamicOptions,
 			ProvidesState = descriptor.ProvidesState,
 			ConfiguresWithUiTree = descriptor.ConfiguresWithUiTree,
-			ProvidesIcon = descriptor.ProvidesIcon
+			ProvidesIcon = descriptor.ProvidesIcon,
+			Role = descriptor.Role
 		};
 
 	public static ActionCatalogPayload ToDto(IReadOnlyList<RemoteActionDescriptor> descriptors)

@@ -66,6 +66,8 @@ public class Variable
 
 	public bool Shared { get; set; }
 
+	public bool IsShareable { get; set; } = true;
+
 	/// <summary>The catalog resource id this variable is bound to, set only when it was created by binding
 	/// one. Lets a variable row offer Unbind without a second round trip.</summary>
 	public string? DynamicResourceId { get; set; }

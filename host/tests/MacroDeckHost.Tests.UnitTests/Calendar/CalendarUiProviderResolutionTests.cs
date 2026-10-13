@@ -5,7 +5,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Ui;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Infrastructure.Integrations;
-using MacroDeckHost.Integrations.Calendar;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Calendar;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 using static MacroDeckHost.Tests.UnitTests.Calendar.CalendarTesting;

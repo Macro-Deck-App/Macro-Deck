@@ -8,7 +8,7 @@ using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Email;
-using MacroDeckHost.Integrations.Email;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Email;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using static MacroDeckHost.Tests.UnitTests.Email.EmailTesting;
 

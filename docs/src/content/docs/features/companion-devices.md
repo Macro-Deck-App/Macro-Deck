@@ -299,6 +299,41 @@ screenshots above, its variables read each device's `State`, and its **device re
 from `DeviceReady`, once per `ReadySequence`. See
 [`CompanionIntegration.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/Companion/CompanionIntegration.cs).
 
+## A configuration entry per device
+
+An integration whose configuration is per device can ask Macro Deck to keep one configuration entry for
+each Companion device by implementing the member-less `ICompanionDeviceConfigEntries` next to its config
+flow:
+
+```csharp
+public sealed class TabletIntegration : IPluginIntegration, IConfigFlowProvider, ICompanionDeviceConfigEntries
+{
+	// IPluginIntegration and IConfigFlowProvider members omitted.
+}
+```
+
+What Macro Deck does with it:
+
+- **Creates the entry when a device connects.** When a device running the Companion app connects and has no
+  usable entry yet, Macro Deck stores one with the device id as its id, the device's name as its title and
+  empty values. Storing it switches the integration on, as any stored entry does, unless the user switched
+  the integration off; a switch-off made while the entry is being created is kept.
+- **Deletes it when the device is removed** from Macro Deck, without recording that as a switch-off.
+- **One owner.** Only one integration gets these entries: the first integration built into Macro Deck that
+  implements the interface, or, when there is none, the first plugin that does, in the order they register.
+  Macro Deck keeps that choice in memory for as long as it runs and makes it again on every start. While the
+  built-in Companion integration is present a plugin never gets them. When the owner is switched off, no
+  entry is created for anyone.
+- **Your plugin needs access.** A plugin owner also needs `Access` to be `Available` (see
+  [Who decides](#who-decides)); without it no entry is created, and entries follow once the user allows it.
+- **Prepared like any entry.** If your plugin also implements `IConfigEntryLifecycle`, Macro Deck asks it to
+  prepare the entry first, exactly as for an entry the user completes. A refusal leaves the device without an
+  entry, and Macro Deck tries again with the device's next report.
+
+On the wire, implementing the interface declares the `companion-device-entries` capability. It is
+declarative: its only operation, `describe`, answers without data. A Macro Deck that predates it rejects the
+declaration non-fatally and creates no entries for your plugin.
+
 ## Older hosts
 
 On a Macro Deck that predates this API, `Access` stays `Unsupported`, `Devices` stays empty, no event is
@@ -355,6 +390,7 @@ device's own user to agree on the device. See
 | --- | --- | --- |
 | Plugin to host | `companion-devices` host API | `wait` (a device that just connected), `send` (fire and forget), `request` (wait for the answer), `screenshot` (the PNG follows over `host.asset.*` with kind `companion-screenshot`) |
 | Host to plugin | `host.state` for `companion-devices`, per plugin | `access` (`available` or `not-allowed`), the devices when available, and a revision |
+| Plugin to host | `companion-device-entries` capability, declared by `ICompanionDeviceConfigEntries` | `describe`, answered without data |
 
 A call while the plugin's access is not `available` is refused with `COMPANION_DEVICES_NOT_ALLOWED`. See
 [`companion-devices` in the WebSocket reference](/reference/websocket/#companion-devices).

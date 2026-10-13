@@ -62,6 +62,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.ConfigEntries] = (1, 1),
 			[CapabilityKinds.BatteryProvider] = (1, 1),
 			[CapabilityKinds.EmailInbox] = (1, 1),
+			[CapabilityKinds.CompanionDeviceEntries] = (1, 1),
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -82,6 +83,7 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.ConfigEntries,
 		CapabilityKinds.BatteryProvider,
 		CapabilityKinds.EmailInbox,
+		CapabilityKinds.CompanionDeviceEntries,
 	];
 
 	[Test]
@@ -148,7 +150,8 @@ public class CapabilityVersionStabilityTests
 			.RegisterIntegration(_ => new TestVideoIntegration())
 			.RegisterIntegration(_ => new TestConfigEntriesIntegration())
 			.RegisterIntegration(_ => new TestBatteryIntegration())
-			.RegisterIntegration(_ => new TestEmailInboxIntegration("Email", "work"));
+			.RegisterIntegration(_ => new TestEmailInboxIntegration("Email", "work"))
+			.RegisterIntegration(_ => new TestCompanionDeviceEntriesIntegration());
 
 		if (withCalendar)
 		{

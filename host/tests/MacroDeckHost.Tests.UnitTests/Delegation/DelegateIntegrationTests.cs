@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Delegation;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -31,7 +31,7 @@ internal sealed class DelegateIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var delegateIntegration = discovered.OfType<DelegateIntegration>().SingleOrDefault();
 

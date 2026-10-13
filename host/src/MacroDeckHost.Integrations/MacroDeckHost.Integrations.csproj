@@ -12,8 +12,7 @@
         <ProjectReference Include="..\..\..\ui-model\src\MacroDeck.Ui\MacroDeck.Ui.csproj" />
         <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Localization\MacroDeck.Localization.csproj" />
         <ProjectReference Include="..\MacroDeckHost.Localization\MacroDeckHost.Localization.csproj" />
-        <ProjectReference Include="..\MacroDeckHost.Domain\MacroDeckHost.Domain.csproj" />
-        <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
+        <ProjectReference Include="..\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,7 +37,8 @@
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Windows" />
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.MacOS" />
       <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Linux" />
-	  <InternalsVisibleTo Include="MacroDeckHost" />
+      <InternalsVisibleTo Include="MacroDeckHost" />
+      <InternalsVisibleTo Include="MacroDeckHost.Infrastructure" />
     </ItemGroup>
 
 </Project>

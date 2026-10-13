@@ -124,11 +124,20 @@ public static class HostApis
 	/// </summary>
 	public const string MusicPlayers = "music-players";
 
+	/// <summary>
+	/// The <c>desktop-notifications</c> host api: shows a notification from the operating system of the computer
+	/// Macro Deck runs on, plus a <c>host.state</c> push on registration of whether this plugin can, as
+	/// <see cref="DesktopNotificationsStateDto" />. Gated per plugin by <c>host:desktop-notifications</c>. A host
+	/// that predates it answers <c>CAPABILITY_UNSUPPORTED</c> and pushes nothing.
+	/// </summary>
+	public const string DesktopNotifications = "desktop-notifications";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
 		IconPacks, VideoStreams, Colors, Batteries, Weather, Locale, Http, CompanionDevices, MusicPlayers,
+		DesktopNotifications,
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

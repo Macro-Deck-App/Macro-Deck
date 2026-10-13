@@ -16,7 +16,7 @@ using MacroDeckHost.Infrastructure.Backups.Restore;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Infrastructure.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Logging;
 using Microsoft.AspNetCore.DataProtection;
 using Serilog;
@@ -260,7 +260,7 @@ public static class Program
 			await SeedHttpUserAgentAsync(host);
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
-			Integrations.Variables.VariablesIntegration.HostVariableReader
+			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
 				= (name, ownerWidgetId, _) => Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, ownerWidgetId);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to

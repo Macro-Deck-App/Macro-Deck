@@ -117,6 +117,28 @@ internal sealed class VariableCatalogContractTests : CapabilityContractFixture
 	}
 
 	[Test]
+	public async Task A_plugin_variable_declared_non_shareable_reaches_the_host_non_shareable()
+	{
+		var provider = new TestVariableCatalogIntegration("Home Assistant",
+			discover: (_, _) => ValueTask.FromResult(new VariableCatalogPage
+			{
+				Items =
+				[
+					OnDemand(StateId, "state", VariableType.Numeric) with { IsShareable = false },
+					OnDemand(UnitId, "unit_of_measurement", VariableType.Text)
+				]
+			}));
+
+		var integration = await ConnectAsync([Handler(provider)], NoDeclarations(), []);
+
+		var page = await ((IVariableProvider)integration).DiscoverAsync(new VariableCatalogQuery(),
+			CancellationToken.None);
+
+		Assert.That(page.Items.ToDictionary(item => item.Id!, item => item.IsShareable),
+			Is.EqualTo(new Dictionary<string, bool> { [StateId] = false, [UnitId] = true }));
+	}
+
+	[Test]
 	public async Task Paging_over_three_items_with_page_size_one_yields_three_pages_with_no_duplicates_or_omissions()
 	{
 		string[] ids = ["a", "b", "c"];

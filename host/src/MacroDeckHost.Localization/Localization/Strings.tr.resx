@@ -3034,8 +3034,8 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Yalnızca genel değişkenler paylaşılabilir.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Başka bir Macro Deck'ten içe aktarılan bir değişken paylaşılamaz.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Bu değişken paylaşılamaz.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Paylaşım ayarı kaydedilemedi.</value>

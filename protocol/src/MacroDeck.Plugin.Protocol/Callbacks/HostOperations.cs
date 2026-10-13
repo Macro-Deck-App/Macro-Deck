@@ -496,6 +496,18 @@ public static class HostOperations
 		public static readonly IReadOnlyList<string> All = [AlbumColor];
 	}
 
+	/// <summary>The <c>desktop-notifications</c> host api. Every operation is refused with
+	/// <c>DESKTOP_NOTIFICATIONS_NOT_ALLOWED</c> unless the plugin may show desktop notifications.</summary>
+	public static class DesktopNotifications
+	{
+		/// <summary>Shows a notification, see <see cref="DesktopNotificationShowArguments" />, and answers no data once
+		/// Macro Deck has handed it to the operating system. A computer without desktop notifications shows
+		/// nothing and still answers.</summary>
+		public const string Show = "show";
+
+		public static readonly IReadOnlyList<string> All = [Show];
+	}
+
 	/// <summary>The <c>event-bindings</c> host api is push-only, so it declares no operations.</summary>
 	public static class EventBindings
 	{
@@ -532,6 +544,7 @@ public static class HostOperations
 			[HostApis.Http] = Http.All,
 			[HostApis.CompanionDevices] = CompanionDevices.All,
 			[HostApis.MusicPlayers] = MusicPlayers.All,
+			[HostApis.DesktopNotifications] = DesktopNotifications.All,
 		};
 
 	public static IReadOnlyList<string> For(string api) => _byApi[api];

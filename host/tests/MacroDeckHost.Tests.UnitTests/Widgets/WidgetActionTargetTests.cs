@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Widgets;
-using MacroDeckHost.Integrations.Widgets;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;

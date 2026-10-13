@@ -75,6 +75,9 @@ so its PNG follows over `host.asset.*` with the new host-to-plugin asset kind `c
 - The host still creates the Companion integration's configuration entry for a newly connected device, which
   names that integration from host code; that line stays in the integration boundary baseline as debt.
   Before the integration's first initialization, its configuration entries report as disconnected.
+  Update 2026-10-13: the debt is paid. The integration declares the `companion-device-entries` capability
+  kind and the host creates entries for the first declaring integration, a plugin only once every built-in
+  has registered; the baseline line is gone.
 - A per-plugin grant is still left open, as in ADR 0092.
 
 ## Alternatives considered

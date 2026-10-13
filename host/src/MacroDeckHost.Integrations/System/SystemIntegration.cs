@@ -1,11 +1,10 @@
 using System.Globalization;
 using System.Threading.Channels;
 using MacroDeckHost.Integrations.System.Actions;
-using MacroDeckHost.Integrations.System.Application;
-using MacroDeckHost.Integrations.System.Focus;
-using MacroDeckHost.Integrations.System.Lock;
+using MacroDeckHost.Platform.Applications;
+using MacroDeckHost.Platform.Focus;
+using MacroDeckHost.Platform.Lock;
 using MacroDeckHost.Integrations.System.Metrics;
-using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Integrations.System.Power;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Localization;
@@ -81,15 +80,19 @@ public sealed class SystemIntegration
 
 	private readonly IApplicationService _applications;
 	private readonly IVolumeService _volume;
-	private readonly INotificationService _notifications;
 	private readonly ISystemMetricsService _metrics;
 	private readonly IPowerService _power;
 	private readonly ILockStateReader _lock;
+	private readonly Func<IFocusedApplicationWatcher> _createFocusWatcher;
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly NotificationServiceAccessor _notificationServiceAccessor = new();
+	private readonly DesktopNotifierAccessor _desktopNotifierAccessor = new();
 
 	private Channel<FocusedAppInfo?>? _focusChannel;
 	private Task? _focusWriterLoop;
+	private IFocusedApplicationWatcher? _focusWatcher;
+	private CancellationTokenSource? _focusCancellation;
+	private Task? _focusReaderLoop;
 	private VariableHandle? _focusedAppHandle;
 	private VariableHandle? _focusedAppPathHandle;
 	private VariableHandle? _focusedAppBundleIdHandle;
@@ -107,12 +110,12 @@ public sealed class SystemIntegration
 	private Task? _discoveryLoop;
 
 	public SystemIntegration()
-		: this(ApplicationServiceFactory.Create(),
+		: this(ApplicationServiceFactory.Create(IntegrationLog.For(IntegrationId)),
 			VolumeServiceFactory.Create(),
-			NotificationServiceFactory.Create(),
 			SystemMetricsServiceFactory.Create(),
 			PowerServiceFactory.Create(),
-			LockStateReaderFactory.Create())
+			LockStateReaderFactory.Create(),
+			FocusedApplicationWatcherFactory.Create)
 	{
 	}
 
@@ -120,17 +123,17 @@ public sealed class SystemIntegration
 	internal SystemIntegration(
 		IApplicationService applications,
 		IVolumeService volume,
-		INotificationService notifications,
 		ISystemMetricsService metrics,
 		IPowerService power,
-		ILockStateReader? lockStateReader = null)
+		ILockStateReader? lockStateReader = null,
+		Func<IFocusedApplicationWatcher>? focusWatcherFactory = null)
 	{
 		_applications = applications;
 		_volume = volume;
-		_notifications = notifications;
 		_metrics = metrics;
 		_power = power;
 		_lock = lockStateReader ?? new NullLockStateReader();
+		_createFocusWatcher = focusWatcherFactory ?? (() => new NullFocusedApplicationWatcher());
 
 		_fixedVariables = BuildVariables(_metrics.GpuCount);
 		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null);
@@ -147,7 +150,7 @@ public sealed class SystemIntegration
 			new DecreaseVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new MuteVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new SetVolumeActionDefinition(_volume, KnownAudioDeviceName),
-			new SendNotificationActionDefinition(_notifications),
+			new SendNotificationActionDefinition(_desktopNotifierAccessor),
 			new ShowNotificationActionDefinition(_notificationServiceAccessor),
 			new RunCommandActionDefinition(_variableAccessor),
 			new LockComputerActionDefinition(_power),
@@ -317,10 +320,12 @@ public sealed class SystemIntegration
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		await StopDiscoveryAsync();
+		await StopFocusWatcherAsync();
 
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_notificationServiceAccessor.Current = context.NotificationService;
+		_desktopNotifierAccessor.Current = context.DesktopNotifications;
 
 		_volume.Changed -= OnVolumeChanged;
 		_volume.Changed += OnVolumeChanged;
@@ -336,11 +341,15 @@ public sealed class SystemIntegration
 		});
 		_focusChannel = channel;
 
-		// Subscribed before the seed write below, so a focus change racing the seed is never lost - at
-		// worst the same value is written twice, which a capacity-1 drop-oldest channel already tolerates.
-		FocusedApplicationSnapshot.Current.Changed += OnFocusChanged;
 		_focusWriterLoop = Task.Run(() => RunFocusWriterLoopAsync(channel.Reader));
-		channel.Writer.TryWrite(FocusedApplicationSnapshot.Current.Value);
+		// Creates the variables from startup even where no focus watcher is supported.
+		channel.Writer.TryWrite(null);
+
+		var watcher = _createFocusWatcher();
+		var focusCancellation = new CancellationTokenSource();
+		_focusWatcher = watcher;
+		_focusCancellation = focusCancellation;
+		_focusReaderLoop = Task.Run(() => RunFocusReaderLoopAsync(watcher, channel.Writer, focusCancellation.Token));
 
 		await LoadKnownAudioDevicesAsync(context.Storage);
 		// IsInitialized is always true, so the poller may already have registered the fixed list; the
@@ -357,18 +366,62 @@ public sealed class SystemIntegration
 	{
 		await StopDiscoveryAsync();
 		_volume.Changed -= OnVolumeChanged;
-		FocusedApplicationSnapshot.Current.Changed -= OnFocusChanged;
-		_focusChannel?.Writer.TryComplete();
+		await StopFocusWatcherAsync();
+	}
 
-		if (_focusWriterLoop is { } loop)
+	private async Task StopFocusWatcherAsync()
+	{
+		if (_focusCancellation is { } cancellation)
 		{
-			await loop;
+			await cancellation.CancelAsync();
 		}
 
+		if (_focusReaderLoop is { } readerLoop)
+		{
+			await readerLoop;
+		}
+
+		_focusWatcher?.Dispose();
+		_focusCancellation?.Dispose();
+		_focusChannel?.Writer.TryComplete();
+
+		if (_focusWriterLoop is { } writerLoop)
+		{
+			await writerLoop;
+		}
+
+		_focusWatcher = null;
+		_focusCancellation = null;
+		_focusReaderLoop = null;
+		_focusChannel = null;
 		_focusWriterLoop = null;
 	}
 
-	private void OnFocusChanged(FocusedAppInfo? info) => _focusChannel?.Writer.TryWrite(info);
+	private static async Task RunFocusReaderLoopAsync(
+		IFocusedApplicationWatcher watcher,
+		ChannelWriter<FocusedAppInfo?> writer,
+		CancellationToken cancellationToken)
+	{
+		if (!watcher.IsSupported)
+		{
+			return;
+		}
+
+		try
+		{
+			await foreach (var info in watcher.WatchAsync(cancellationToken))
+			{
+				writer.TryWrite(info);
+			}
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+		}
+		catch (Exception ex)
+		{
+			_logger.Warning(ex, "The focused-application watcher stopped");
+		}
+	}
 
 	internal void UseVariables(IVariableApi variables) => _variableAccessor.Current = variables;
 
@@ -624,9 +677,8 @@ public sealed class SystemIntegration
 		HashSet<string> Present,
 		string? DefaultOutputId);
 
-	// One consumer draining a capacity-1 drop-oldest channel, rather than an unordered Task per focus
-	// change: the variable API is async and Changed fires synchronously on the focus pipeline's own
-	// thread, so writes must be serialised here or rapid alt-tabbing could race and leave a stale value.
+	// One consumer on a capacity-1 drop-oldest channel serialises the async variable writes, so rapid
+	// alt-tabbing can never race and leave a stale value.
 	private async Task RunFocusWriterLoopAsync(ChannelReader<FocusedAppInfo?> reader)
 	{
 		await foreach (var info in reader.ReadAllAsync())
@@ -694,10 +746,7 @@ public sealed class SystemIntegration
 			"system-day-of-week" => VariableReading.Of(DateTime.Now.DayOfWeek.ToString()),
 			"system-hour" => VariableReading.Of(DateTime.Now.Hour),
 			"system-minute" => VariableReading.Of(DateTime.Now.Minute),
-			// The state the host has already established, so this variable and the lock state pushed to
-			// clients can never momentarily disagree; the reader answers only until the first one lands.
-			"system-locked" when _lock.IsSupported =>
-				VariableReading.Of(LockStateSnapshot.Current.Value ?? _lock.IsLocked()),
+			"system-locked" when _lock.IsSupported => VariableReading.Of(_lock.IsLocked()),
 			_ when DiskVariables.TryParseId(localId, out var diskIndex, out var statistic) =>
 				await ReadDiskAsync(diskIndex, statistic, cancellationToken),
 			_ => await ReadIndexedGpuAsync(localId, cancellationToken)
@@ -887,7 +936,7 @@ public sealed class SystemIntegration
 			});
 		}
 
-		if (!_notifications.IsSupported)
+		if (_desktopNotifierAccessor.Current is { IsSupported: false })
 		{
 			issues.Add(new IntegrationIssue
 			{

@@ -404,6 +404,23 @@ internal sealed class PluginConnection : IAsyncDisposable
 					PluginProtocolJson.Options)
 			})
 			.ConfigureAwait(false);
+
+		// Macro Deck pushes this on registration. A test session is self-registered, which counts as declaring
+		// host:desktop-notifications.
+		await SendUnpromptedAsync(new ProtocolEnvelope
+			{
+				Type = MessageTypes.HostState,
+				Id = NewId(),
+				Payload = JsonSerializer.SerializeToElement(new HostStatePayload
+					{
+						Api = HostApis.DesktopNotifications,
+						Data = JsonSerializer.SerializeToElement(
+							new DesktopNotificationsStateDto { Supported = _context.DesktopNotifications.IsSupported },
+							PluginProtocolJson.Options)
+					},
+					PluginProtocolJson.Options)
+			})
+			.ConfigureAwait(false);
 	}
 
 	private void RecordEvent(ProtocolEnvelope envelope)

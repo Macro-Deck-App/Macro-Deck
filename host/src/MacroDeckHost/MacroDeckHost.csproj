@@ -85,6 +85,7 @@
       <ProjectReference Include="..\MacroDeckHost.Application\MacroDeckHost.Application.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Infrastructure\MacroDeckHost.Infrastructure.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Widgets\MacroDeckHost.Widgets.csproj" />
     </ItemGroup>
 

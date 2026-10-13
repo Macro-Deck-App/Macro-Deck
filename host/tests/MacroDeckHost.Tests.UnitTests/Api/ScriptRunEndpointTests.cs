@@ -7,7 +7,7 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Persistence;
-using MacroDeckHost.Integrations.Variables;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Variables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;

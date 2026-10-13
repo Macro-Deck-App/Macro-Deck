@@ -219,15 +219,17 @@ Recommended. Array of unique strings. Known vocabulary, one per host callback su
 
 | Group | Permissions |
 | --- | --- |
-| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications` (also covers interactive notifications), `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:event-bindings`, `host:screensavers`, `host:adb`, `host:messaging`, `host:video-streams`, `host:companion-devices` |
+| Host | `host:variables`, `host:user-variables`, `host:config`, `host:deck`, `host:scripts`, `host:widgets`, `host:notifications` (also covers interactive notifications), `host:action-interactions`, `host:devices`, `host:variable-values`, `host:layouts`, `host:folder-views`, `host:widget-types`, `host:event-bindings`, `host:screensavers`, `host:adb`, `host:messaging`, `host:video-streams`, `host:companion-devices`, `host:desktop-notifications` |
 | Other | `events:publish`, `assets:upload`, `net:outbound`, `fs:user-files`, `process:spawn`, `device:usb` |
 
 - Unknown permission: warning (`unknown-permission`), still installs. Not an enum on purpose.
 - Duplicate: rejected.
-- **Declared, validated, persisted and exposed.** The host enforces only `host:adb` and
-  `host:companion-devices`: an installed plugin that does not declare one cannot use the `adb` or the
-  `companion-devices` host API, see [Android devices](/features/android-devices/) and
-  [Companion devices](/features/companion-devices/). Every other permission is enforced nowhere. See
+- **Declared, validated, persisted and exposed.** The host enforces only `host:adb`,
+  `host:companion-devices` and `host:desktop-notifications`: an installed plugin that does not declare one
+  cannot use the `adb`, the `companion-devices` or the `desktop-notifications` host API, see
+  [Android devices](/features/android-devices/), [Companion devices](/features/companion-devices/) and
+  [Desktop notifications](/features/notifications/#desktop-notifications). Every other permission is
+  enforced nowhere. See
   [the security model](/policies/security/#permissions-declared-not-enforced).
 
 ## `languages`

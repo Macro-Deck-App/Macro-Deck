@@ -188,7 +188,7 @@ Capabilities are first declared on the `POST /api/plugins/sessions` request; `ca
 
 | Shape | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
-| `DeclaredCapability` | `kind` | string | yes | One of the twenty-three kinds below. |
+| `DeclaredCapability` | `kind` | string | yes | One of the twenty-four kinds below. |
 | | `localId` | string | yes | The capability's id within the plugin. |
 | | `versionRange` | `{minimum, maximum}` | yes | Integer capability versions the plugin serves. |
 | | `displayName` | string | no | Human-readable name. |
@@ -201,7 +201,7 @@ Negotiation fails **non-fatally**: an unsupported or unknown kind comes back rej
 
 One kind is used without being negotiated: when a session declared no `variables` capability, the host still sends `variables`/`describe` while it registers the plugin (with a 5 second deadline), because a provider with only a catalog or only on-demand variables has nothing to declare. When the answer carries variables or a catalog, the session uses `variables` from then on. A plugin without the capability answers `CAPABILITY_UNSUPPORTED`, as for any kind it does not implement. A `variables` capability that was declared and rejected stays unused.
 
-The twenty-three `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
+The twenty-four `kind` values: `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`, `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`, `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`, `video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`, `companion-device-entries`. `operation` comes from a fixed vocabulary per kind - see [capability operations](/reference/protocol/#capability-operations). Two more captured invokes:
 
 ```json
 {"type":"capability.invoke","id":"01a09528-bc57-7b85-bed4-952327ffedcd",
@@ -313,7 +313,7 @@ A failed or timed-out invoke counts as the default: the entry is stored as the f
 | `host.cancel` | plugin → host | `reason` - best-effort cancellation of a `host.invoke` |
 | `host.state` | host → plugin | `api` (required), `data` - the list a plugin's synchronous members serve from |
 
-APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, `batteries`, `weather`, `locale`, `companion-devices`, `music-players`, and the push-only `event-bindings` and `http`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
+APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `notifications`, `action-interactions`, `ui`, `devices`, `variable-values`, `layouts`, `folder-views`, `widget-types`, `screensavers`, `adb`, `messaging`, `icon-packs`, `video-streams`, `colors`, `batteries`, `weather`, `locale`, `companion-devices`, `music-players`, `desktop-notifications`, and the push-only `event-bindings` and `http`. There is no `events` api; use `event.publish`. A plugin ignores a `host.state` api it does not know.
 
 `host.state` for `config` has no `data`: it means "your config changed, re-read it". Built from the schema:
 
@@ -339,6 +339,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `weather` | Needs the `weather` capability kind - see [`weather`](#weather). |
 | `locale` | `time-of-day-format` takes no arguments and answers `culture`, the culture name of the Macro Deck interface, and `hourCycle`, `h12` or `h23`: the user's time format setting, or the operating system's when it follows the system. A plugin maps a culture it cannot load or an hour cycle it does not know to its current culture and `h23`. A host without the api answers `CAPABILITY_UNSUPPORTED`. See [Formatting a time of day](/features/localization/#formatting-a-time-of-day). |
 | `companion-devices` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`companion-devices`](#companion-devices). |
+| `desktop-notifications` | Gated per plugin by `host:desktop-notifications`, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`desktop-notifications`](#desktop-notifications). |
 | `music-players` | Not gated: every plugin reads every provider's players. `album-color` runs off the session's dispatch loop and shares the limit of 4 artwork lookups in flight per plugin - see [`music-players`](#music-players). |
 | `http` | Push-only `host.state`, no `host.invoke` operations. `data` carries `userAgent`, the User-Agent the user configured or the host's default, sent on registration and whenever the user changes it. See [Outgoing HTTP requests](/reference/plugin-hosting/#outgoing-http-requests). |
 
@@ -817,6 +818,43 @@ is simply absent. A value the device does not report is absent; percentages are 
 follows the same rule as the `deck` push: apply a push only when its revision is higher than the last one
 applied in this session. A host without this api never pushes it and answers every `companion-devices`
 invoke with `CAPABILITY_UNSUPPORTED`.
+
+#### `desktop-notifications`
+
+```json
+{"type":"host.invoke","id":"<uuid-v7>","deadlineMs":30000,
+ "payload":{"api":"desktop-notifications","operation":"show",
+   "arguments":{"title":"Build finished","message":"All green"}}}
+```
+
+Shows a notification from the operating system of the computer Macro Deck runs on, attributed to Macro Deck.
+Shapes are in
+[`DesktopNotificationsDtos.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Callbacks/DesktopNotificationsDtos.cs).
+The SDK side is [Desktop notifications](/features/notifications/#desktop-notifications).
+
+| Operation | Arguments | Result `data` |
+| --- | --- | --- |
+| `show` | `title`, `message` | none, once the host handed the notification to the operating system |
+
+- **Access is per plugin.** An installed plugin needs `host:desktop-notifications` in its manifest; a
+  self-registered session counts as declaring it. Without it a call is refused with
+  `DESKTOP_NOTIFICATIONS_NOT_ALLOWED`. There is no separate user setting.
+- **Best effort.** A computer without desktop notifications shows nothing and still answers; the operating
+  system may also hide a notification, and the host reports nothing about it. Missing arguments are
+  `INVALID_PAYLOAD`.
+- **At most 4 calls in flight per plugin.** A fifth is refused at once with a retryable `RATE_LIMITED`.
+  Calls also count toward the per-plugin callback throttle.
+
+The `desktop-notifications` `host.state` push is per plugin and sent on registration, as
+`DesktopNotificationsStateDto`:
+
+```json
+{"type":"host.state","id":"<uuid-v7>","payload":{"api":"desktop-notifications","data":{"supported":true}}}
+```
+
+`supported` is `true` when the plugin may show desktop notifications and the computer offers them. A host
+without this api never pushes it and answers every `desktop-notifications` invoke with
+`CAPABILITY_UNSUPPORTED`; the .NET SDK then reports `IsSupported` as `false` and does not call it.
 
 #### `music-players`
 

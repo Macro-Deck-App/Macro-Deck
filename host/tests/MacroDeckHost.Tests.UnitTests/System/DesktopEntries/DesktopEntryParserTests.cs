@@ -1,4 +1,4 @@
-using MacroDeckHost.Integrations.System.DesktopEntries;
+using MacroDeckHost.Platform.DesktopEntries;
 
 namespace MacroDeckHost.Tests.UnitTests.System.DesktopEntries;
 

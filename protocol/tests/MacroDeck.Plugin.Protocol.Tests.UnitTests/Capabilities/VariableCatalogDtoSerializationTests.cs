@@ -96,6 +96,27 @@ public class VariableCatalogDtoSerializationTests
 	}
 
 	[Test]
+	public void Definition_from_a_producer_that_predates_shareability_is_shareable()
+	{
+		const string json = """{"name":"cpu_temp","type":"Numeric"}""";
+
+		var actual = JsonSerializer.Deserialize<VariableDefinitionDto>(json, PluginProtocolJson.Options);
+
+		Assert.That(actual!.IsShareable, Is.True);
+	}
+
+	[Test]
+	public void Definition_declared_non_shareable_stays_non_shareable_across_the_wire()
+	{
+		var dto = new VariableDefinitionDto { Name = "mirrored", Type = "Text", IsShareable = false };
+
+		var json = JsonSerializer.Serialize(dto, PluginProtocolJson.Options);
+		var actual = JsonSerializer.Deserialize<VariableDefinitionDto>(json, PluginProtocolJson.Options);
+
+		Assert.That(actual!.IsShareable, Is.False);
+	}
+
+	[Test]
 	public void Discover_arguments_and_page_round_trip_and_tolerate_unknown_fields()
 	{
 		var arguments = new VariableDiscoverArguments

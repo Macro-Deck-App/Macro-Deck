@@ -47,6 +47,13 @@ public sealed record ActionDescriptorDto
 	/// protocol v1; never gated on the negotiated version.
 	/// </summary>
 	public bool ProvidesIcon { get; init; }
+
+	/// <summary>
+	/// Mirrors <c>IActionDefinition.Role</c>, one of the SDK's <c>ActionRoles</c> values or another string.
+	/// Additive within protocol v1: absent means no role, which is what a plugin built before this
+	/// existed sends.
+	/// </summary>
+	public string? Role { get; init; }
 }
 
 /// <summary>The full result of the <c>actions</c> capability's <c>describe</c> operation.</summary>

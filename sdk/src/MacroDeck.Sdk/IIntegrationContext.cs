@@ -139,4 +139,13 @@ public interface IIntegrationContext
 	/// not override this member, reports no players, never raises the event and knows no album colour.
 	/// </summary>
 	IMusicPlayerApi MusicPlayers => UnsupportedMusicPlayerApi.Instance;
+
+	/// <summary>
+	/// Shows notifications from the operating system of the computer Macro Deck runs on, see
+	/// <see cref="IDesktopNotifier" /> for when to use it rather than <see cref="NotificationService" /> or
+	/// <see cref="Notifications" />. In a plugin it is the same instance dependency injection resolves. A context
+	/// from a Macro Deck without desktop notifications, and any implementation that does not override this member,
+	/// reports <see cref="IDesktopNotifier.IsSupported" /> as <c>false</c> and shows nothing.
+	/// </summary>
+	IDesktopNotifier DesktopNotifications => UnsupportedDesktopNotifier.Instance;
 }

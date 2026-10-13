@@ -1,9 +1,10 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using MacroDeckHost.Integrations.Native;
-using Input = MacroDeckHost.Integrations.Native.Win32Input.Input;
-using InputUnion = MacroDeckHost.Integrations.Native.Win32Input.InputUnion;
-using Keybdinput = MacroDeckHost.Integrations.Native.Win32Input.Keybdinput;
+using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Platform.Processes;
+using Input = MacroDeckHost.Platform.Native.Win32Input.Input;
+using InputUnion = MacroDeckHost.Platform.Native.Win32Input.InputUnion;
+using Keybdinput = MacroDeckHost.Platform.Native.Win32Input.Keybdinput;
 
 namespace MacroDeckHost.Integrations.Keyboard.Native;
 

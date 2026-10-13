@@ -10,7 +10,7 @@ using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
 using MacroDeckHost.Infrastructure.Applications;
 using MacroDeckHost.Infrastructure.Lifecycle;
 using MacroDeckHost.Infrastructure.Notifications;
-using MacroDeckHost.Integrations.System.Notifications;
+using MacroDeckHost.Infrastructure.Notifications.Shell;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.AspNetCore.Http;

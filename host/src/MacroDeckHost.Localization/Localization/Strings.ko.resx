@@ -3034,8 +3034,8 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>전역 변수만 공유할 수 있습니다.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>다른 Macro Deck에서 가져온 변수는 공유할 수 없습니다.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>이 변수는 공유할 수 없습니다.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>공유 설정을 저장할 수 없습니다.</value>

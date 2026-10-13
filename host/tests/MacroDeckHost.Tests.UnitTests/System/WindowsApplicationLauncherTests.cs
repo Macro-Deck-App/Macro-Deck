@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using MacroDeckHost.Integrations.System.Application;
+using MacroDeckHost.Platform.Applications;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
 

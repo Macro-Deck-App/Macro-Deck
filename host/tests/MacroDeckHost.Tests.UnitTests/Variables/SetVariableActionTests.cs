@@ -1,5 +1,5 @@
 using System.Globalization;
-using MacroDeckHost.Integrations.Variables;
+using MacroDeckHost.Infrastructure.SystemIntegrations.Variables;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Variables;

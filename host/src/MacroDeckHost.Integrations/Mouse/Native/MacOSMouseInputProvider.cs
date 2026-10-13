@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Native;
+using MacroDeckHost.Platform.Native;
 
 namespace MacroDeckHost.Integrations.Mouse.Native;
 

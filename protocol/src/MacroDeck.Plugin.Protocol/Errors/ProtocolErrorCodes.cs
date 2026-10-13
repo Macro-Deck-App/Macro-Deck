@@ -88,6 +88,10 @@ public static class ProtocolErrorCodes
 	/// has not allowed plugins to use them, or the manifest does not declare <c>host:companion-devices</c>.</summary>
 	public const string CompanionDevicesNotAllowed = "COMPANION_DEVICES_NOT_ALLOWED";
 
+	/// <summary>A <c>desktop-notifications</c> call refused because the plugin's manifest does not declare
+	/// <c>host:desktop-notifications</c>.</summary>
+	public const string DesktopNotificationsNotAllowed = "DESKTOP_NOTIFICATIONS_NOT_ALLOWED";
+
 	public static readonly IReadOnlyList<string> All =
 	[
 		ProtocolVersionUnsupported, UnknownMessageType, MalformedEnvelope, InvalidPayload, Unauthenticated,
@@ -97,5 +101,6 @@ public static class ProtocolErrorCodes
 		Timeout, Cancelled, CorrelationUnknown, DuplicateIdempotencyKey, InternalError,
 		AdbNotEnabled, AdbNotAllowed, AdbFailed, UiResourceQuotaExceeded,
 		PluginIconNotFound, IconPackInvalid, IconPackSyncNotAllowed, IconNotFound, CompanionDevicesNotAllowed,
+		DesktopNotificationsNotAllowed,
 	];
 }

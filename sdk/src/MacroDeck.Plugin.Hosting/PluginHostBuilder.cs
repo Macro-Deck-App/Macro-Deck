@@ -30,6 +30,7 @@ using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.Companion;
+using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Messaging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Widgets;
@@ -513,6 +514,8 @@ public sealed class PluginHostBuilder
 		Services.TryAddSingleton<IHostHttp>(provider => provider.GetRequiredService<RemoteHostHttp>());
 		Services.TryAddSingleton<RemoteCompanionDeviceApi>();
 		Services.TryAddSingleton<ICompanionDeviceApi>(provider => provider.GetRequiredService<RemoteCompanionDeviceApi>());
+		Services.TryAddSingleton<RemoteDesktopNotifier>();
+		Services.TryAddSingleton<IDesktopNotifier>(provider => provider.GetRequiredService<RemoteDesktopNotifier>());
 		Services.TryAddSingleton<IIntegrationStorage>(provider => PluginIntegrationStorage.Create(
 			provider.GetRequiredService<IOptions<PluginHostOptions>>().Value.DataDirectory,
 			provider.GetRequiredService<PluginMetadata>().Id));

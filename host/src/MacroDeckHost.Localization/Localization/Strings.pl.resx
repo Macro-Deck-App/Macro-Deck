@@ -3035,8 +3035,8 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Udostępniać można tylko zmienne globalne.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Zmiennej zaimportowanej z innego Macro Decka nie można udostępnić.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Tej zmiennej nie można udostępnić.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Nie udało się zapisać ustawienia udostępniania.</value>

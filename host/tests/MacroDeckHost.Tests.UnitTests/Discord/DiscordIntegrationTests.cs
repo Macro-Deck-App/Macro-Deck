@@ -1,5 +1,5 @@
 using System.Reflection;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Discord;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk;
@@ -30,7 +30,7 @@ internal sealed class DiscordIntegrationTests
 	[Test]
 	public void The_host_discovery_finds_the_integration_and_can_construct_it()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var discord = discovered.OfType<DiscordIntegration>().SingleOrDefault();
 		Assert.That(discord, Is.Not.Null, "the Discord integration was not discovered");

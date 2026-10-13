@@ -463,6 +463,17 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All = [Describe, Inboxes, Snapshot];
 	}
 
+	/// <summary>
+	/// The declarative Companion device entries capability: the host only describes it, and the reply carries
+	/// no data. Everything else happens on the host.
+	/// </summary>
+	public static class CompanionDeviceEntries
+	{
+		public const string Describe = "describe";
+
+		public static readonly IReadOnlyList<string> All = [Describe];
+	}
+
 	private static readonly Dictionary<string, IReadOnlyList<string>> _byKind =
 		new(StringComparer.Ordinal)
 		{
@@ -489,6 +500,7 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.ConfigEntries] = ConfigEntries.All,
 			[Handshake.CapabilityKinds.BatteryProvider] = BatteryProvider.All,
 			[Handshake.CapabilityKinds.EmailInbox] = EmailInbox.All,
+			[Handshake.CapabilityKinds.CompanionDeviceEntries] = CompanionDeviceEntries.All,
 		};
 
 	public static IReadOnlyList<string> For(string kind) => _byKind[kind];

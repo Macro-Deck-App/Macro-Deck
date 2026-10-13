@@ -1,12 +1,13 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Integrations.System;
-using MacroDeckHost.Integrations.System.Focus;
-using MacroDeckHost.Integrations.System.Lock;
+using MacroDeckHost.Platform.Focus;
+using MacroDeckHost.Platform.Lock;
 using MacroDeckHost.Integrations.System.Metrics;
-using MacroDeckHost.Integrations.System.Notifications;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
-using INotificationService = MacroDeckHost.Integrations.System.Notifications.INotificationService;
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;
@@ -38,29 +39,22 @@ public class SystemIntegrationTests
 		"system_gpu_0_usage_percent", "system_gpu_0_name"
 	];
 
-	[TearDown]
-	public void TearDown()
-	{
-		FocusedApplicationSnapshot.Current.Set(null);
-		LockStateSnapshot.Current.Set(null);
-	}
-
 	private static SignalForwardingVariableApi Forwarding(IVariableRefreshSignal signal)
 		=> new(new RecordingVariableApi(), SystemIntegration.IntegrationId, signal);
 
 	private static SystemIntegration Create(
 		FakeVolumeService? volume = null,
 		bool applicationsSupported = true,
-		bool notificationsSupported = true,
 		FakeSystemMetricsService? metrics = null,
 		bool powerSupported = true,
-		FakeLockStateReader? lockStateReader = null)
+		FakeLockStateReader? lockStateReader = null,
+		FakeFocusedApplicationWatcher? focusWatcher = null)
 		=> new(new FakeApplicationService { IsSupported = applicationsSupported },
 			volume ?? new FakeVolumeService(),
-			new FakeNotificationService { IsSupported = notificationsSupported },
 			metrics ?? new FakeSystemMetricsService(),
 			new FakePowerService(powerSupported),
-			lockStateReader ?? new FakeLockStateReader());
+			lockStateReader ?? new FakeLockStateReader(),
+			() => focusWatcher ?? new FakeFocusedApplicationWatcher());
 
 	[Test]
 	public void Exposes_all_sixteen_actions_with_stable_ids()
@@ -309,14 +303,69 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task GetIssuesAsync_reports_warnings_for_unavailable_backends()
 	{
-		var integration = Create(new FakeVolumeService(supported: false),
-			notificationsSupported: false);
+		var integration = Create(new FakeVolumeService(supported: false));
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()),
+			new RecordingDesktopNotifier(supported: false)));
 
 		var issues = await integration.GetIssuesAsync();
 
 		Assert.That(issues.Select(i => i.Severity),
 			Has.All.EqualTo(IntegrationIssueSeverity.Warning));
 		Assert.That(issues, Has.Count.EqualTo(2));
+	}
+
+	[Test]
+	public async Task GetIssuesAsync_reports_notifications_unavailable_when_the_context_cannot_show_desktop_notifications()
+	{
+		var integration = Create();
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()),
+			new RecordingDesktopNotifier(supported: false)));
+
+		var issues = await integration.GetIssuesAsync();
+
+		Assert.That(issues.Select(issue => issue.Id), Is.EqualTo(new[] { "notifications-unavailable" }));
+	}
+
+	[Test]
+	public async Task GetIssuesAsync_reports_no_notifications_issue_before_initialization()
+	{
+		var integration = Create();
+
+		Assert.That(await integration.GetIssuesAsync(), Is.Empty);
+	}
+
+	[Test]
+	public async Task Send_notification_shows_through_the_contexts_desktop_notifications()
+	{
+		var integration = Create();
+		var desktop = new RecordingDesktopNotifier();
+		await integration.InitializeAsync(new FakeIntegrationContext(Forwarding(new VariableRefreshSignal()), desktop));
+		var action = integration.Actions.Single(candidate => candidate.Id == "send-notification");
+
+		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
+		{
+			Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(desktop.Shown, Is.EqualTo(new[] { ("Build finished", "All green") }));
+		});
+	}
+
+	[Test]
+	public async Task Send_notification_before_initialization_fails_as_unavailable()
+	{
+		var integration = Create();
+		var action = integration.Actions.Single(candidate => candidate.Id == "send-notification");
+
+		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
+		{
+			Parameters = new Dictionary<string, object> { ["title"] = "Build finished", ["message"] = "All green" }
+		});
+
+		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
 	}
 
 	[Test]
@@ -399,21 +448,26 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
-	public async Task ReadAsync_prefers_the_snapshot_over_the_reader_when_a_snapshot_value_is_set()
+	public async Task The_locked_variable_follows_the_lock_state_the_integration_reads_itself()
 	{
-		var integration = Create(lockStateReader: new FakeLockStateReader { IsSupported = true, Locked = false });
-		LockStateSnapshot.Current.Set(true);
+		var reader = new FakeLockStateReader { IsSupported = true, Locked = false };
+		var integration = Create(lockStateReader: reader);
 
-		var locked = (await integration.ReadAsync("system-locked", CancellationToken.None)).Value;
+		var beforeLocking = (await integration.ReadAsync("system-locked", CancellationToken.None)).Value;
+		reader.Locked = true;
+		var afterLocking = (await integration.ReadAsync("system-locked", CancellationToken.None)).Value;
 
-		Assert.That(locked, Is.EqualTo(true));
+		Assert.Multiple(() =>
+		{
+			Assert.That(beforeLocking, Is.EqualTo(false));
+			Assert.That(afterLocking, Is.EqualTo(true));
+		});
 	}
 
 	[Test]
-	public async Task ReadAsync_still_returns_unavailable_when_unsupported_even_with_a_snapshot_value()
+	public async Task ReadAsync_returns_unavailable_for_locked_when_the_reader_is_unsupported()
 	{
 		var integration = Create(lockStateReader: new FakeLockStateReader { IsSupported = false, Locked = true });
-		LockStateSnapshot.Current.Set(true);
 
 		var reading = await integration.ReadAsync("system-locked", CancellationToken.None);
 
@@ -438,8 +492,9 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task ReadAsync_returns_null_for_focused_app_fields_because_they_are_pushed_not_polled()
 	{
-		FocusedApplicationSnapshot.Current.Set(new FocusedAppInfo(4242, "/usr/bin/foo", "procfoo", "com.example.foo"));
-		var integration = Create();
+		var watcher = new FakeFocusedApplicationWatcher();
+		watcher.Publish(new FocusedAppInfo(4242, "/usr/bin/foo", "procfoo", "com.example.foo"));
+		var integration = Create(focusWatcher: watcher);
 
 		var processName = (await integration.ReadAsync("system-focused-app", CancellationToken.None)).Value;
 		var path = (await integration.ReadAsync("system-focused-app-path", CancellationToken.None)).Value;
@@ -454,9 +509,8 @@ public class SystemIntegrationTests
 	}
 
 	[Test]
-	public async Task InitializeAsync_publishes_the_current_snapshot_once_so_the_variables_exist_from_startup()
+	public async Task InitializeAsync_creates_the_focus_variables_so_they_exist_before_any_focus_change()
 	{
-		FocusedApplicationSnapshot.Current.Set(null);
 		var integration = Create();
 		var api = new RecordingVariableApi();
 		var written = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -493,8 +547,8 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task Focus_changes_are_pushed_to_the_variable_api_after_initialization()
 	{
-		FocusedApplicationSnapshot.Current.Set(null);
-		var integration = Create();
+		var watcher = new FakeFocusedApplicationWatcher();
+		var integration = Create(focusWatcher: watcher);
 		var api = new RecordingVariableApi();
 		var written = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 		api.OnSetValue = (name, value) =>
@@ -509,7 +563,7 @@ public class SystemIntegrationTests
 		{
 			await integration.InitializeAsync(new FakeIntegrationContext(api));
 
-			FocusedApplicationSnapshot.Current.Set(new FocusedAppInfo(99,
+			watcher.Publish(new FocusedAppInfo(99,
 				"/usr/bin/bar",
 				"procbar",
 				"com.example.bar"));
@@ -536,13 +590,14 @@ public class SystemIntegrationTests
 	[Test]
 	public async Task A_focus_change_to_null_fields_pushes_empty_strings_instead_of_a_stale_value()
 	{
-		FocusedApplicationSnapshot.Current.Set(new FocusedAppInfo(1, "/usr/bin/foo", "procfoo", "com.example.foo"));
-		var integration = Create();
+		var watcher = new FakeFocusedApplicationWatcher();
+		watcher.Publish(new FocusedAppInfo(1, "/usr/bin/foo", "procfoo", "com.example.foo"));
+		var integration = Create(focusWatcher: watcher);
 		var api = new RecordingVariableApi();
 		var seeded = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 		api.OnSetValue = (name, value) =>
 		{
-			if (name == "system_focused_app_bundle_id")
+			if (name == "system_focused_app_bundle_id" && Equals(value, "com.example.foo"))
 			{
 				seeded.TrySetResult(value);
 			}
@@ -565,7 +620,7 @@ public class SystemIntegrationTests
 				}
 			};
 
-			FocusedApplicationSnapshot.Current.Set(new FocusedAppInfo(2, null, null, null));
+			watcher.Publish(new FocusedAppInfo(2, null, null, null));
 
 			await written.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
@@ -584,6 +639,18 @@ public class SystemIntegrationTests
 		{
 			await integration.ShutdownAsync();
 		}
+	}
+
+	[Test]
+	public async Task Shutdown_releases_the_focus_watcher_the_integration_started()
+	{
+		var watcher = new FakeFocusedApplicationWatcher();
+		var integration = Create(focusWatcher: watcher);
+
+		await integration.InitializeAsync(new FakeIntegrationContext(new RecordingVariableApi()));
+		await integration.ShutdownAsync();
+
+		Assert.That(watcher.Disposed, Is.True);
 	}
 
 	[Test]
@@ -628,12 +695,17 @@ public class SystemIntegrationTests
 		Assert.That(signal.DrainDefinitionsFor(SystemIntegration.IntegrationId), Is.Empty);
 	}
 
-	private sealed class FakeNotificationService : INotificationService
+	private sealed class RecordingDesktopNotifier(bool supported = true) : IDesktopNotifier
 	{
-		public bool IsSupported { get; init; } = true;
+		public List<(string Title, string Message)> Shown { get; } = [];
+
+		public bool IsSupported => supported;
 
 		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			Shown.Add((title, message));
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeLockStateReader : ILockStateReader
@@ -642,14 +714,42 @@ public class SystemIntegrationTests
 
 		public string? UnsupportedReason => IsSupported ? null : "not supported in this test";
 
-		public bool? Locked { get; init; }
+		public bool? Locked { get; set; }
 
 		public bool? IsLocked() => Locked;
 	}
 
-	private sealed class FakeIntegrationContext(IVariableApi variables) : IIntegrationContext
+	private sealed class FakeFocusedApplicationWatcher : IFocusedApplicationWatcher
+	{
+		private readonly Channel<FocusedAppInfo> _focus = Channel.CreateUnbounded<FocusedAppInfo>();
+
+		public bool IsSupported => true;
+
+		public string? UnsupportedReason => null;
+
+		public bool Disposed { get; private set; }
+
+		public void Publish(FocusedAppInfo info) => _focus.Writer.TryWrite(info);
+
+		public async IAsyncEnumerable<FocusedAppInfo> WatchAsync(
+			[EnumeratorCancellation] CancellationToken cancellationToken)
+		{
+			await foreach (var info in _focus.Reader.ReadAllAsync(cancellationToken))
+			{
+				yield return info;
+			}
+		}
+
+		public void Dispose() => Disposed = true;
+	}
+
+	private sealed class FakeIntegrationContext(IVariableApi variables, IDesktopNotifier? desktopNotifications = null)
+		: IIntegrationContext
 	{
 		public IVariableApi Variables { get; } = variables;
+
+		public IDesktopNotifier DesktopNotifications { get; } =
+			desktopNotifications ?? new RecordingDesktopNotifier();
 
 		public IUserVariableApi UserVariables => null!;
 

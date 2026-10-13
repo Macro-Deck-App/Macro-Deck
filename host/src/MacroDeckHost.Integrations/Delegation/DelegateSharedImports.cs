@@ -107,6 +107,7 @@ internal sealed class DelegateSharedImports
 					remote.Instance.MachineName),
 				Write = variable.CanWrite
 					? new VariableWriteCapability { CommitOnRelease = variable.CommitOnRelease }
-					: null
+					: null,
+				IsShareable = false
 			};
 }

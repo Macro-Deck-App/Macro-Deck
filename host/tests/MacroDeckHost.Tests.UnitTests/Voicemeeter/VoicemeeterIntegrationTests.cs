@@ -1,5 +1,5 @@
 using MacroDeckHost.Application.Variables;
-using MacroDeckHost.Integrations;
+using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeckHost.Integrations.Voicemeeter;
 using MacroDeckHost.Tests.UnitTests.System;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -53,7 +53,7 @@ internal sealed class VoicemeeterIntegrationTests
 	[Platform("Win")]
 	public void The_host_discovery_finds_the_integration_on_Windows()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		var voicemeeter = discovered.OfType<VoicemeeterIntegration>().SingleOrDefault();
 		Assert.That(voicemeeter, Is.Not.Null, "the Voicemeeter integration was not discovered");
@@ -68,7 +68,7 @@ internal sealed class VoicemeeterIntegrationTests
 	[Platform(Exclude = "Win")]
 	public void The_host_discovery_skips_the_integration_off_Windows()
 	{
-		var discovered = IntegrationDiscovery.DiscoverIntegrations(Serilog.Log.Logger);
+		var discovered = BuiltInIntegrations.Discover(Serilog.Log.Logger);
 
 		Assert.That(discovered.OfType<VoicemeeterIntegration>(), Is.Empty);
 	}

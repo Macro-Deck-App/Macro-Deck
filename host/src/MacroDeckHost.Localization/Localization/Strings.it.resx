@@ -3035,8 +3035,8 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Variables.OnlyGlobalCanBeShared" xml:space="preserve">
     <value>Solo le variabili globali possono essere condivise.</value>
   </data>
-  <data name="Errors.Variables.ImportedCannotBeShared" xml:space="preserve">
-    <value>Una variabile importata da un altro Macro Deck non può essere condivisa.</value>
+  <data name="Errors.Variables.CannotBeShared" xml:space="preserve">
+    <value>Questa variabile non può essere condivisa.</value>
   </data>
   <data name="Errors.Variables.SharingNotSaved" xml:space="preserve">
     <value>Impossibile salvare l'impostazione di condivisione.</value>

@@ -1,10 +1,10 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Native;
-using Input = MacroDeckHost.Integrations.Native.Win32Input.Input;
-using InputUnion = MacroDeckHost.Integrations.Native.Win32Input.InputUnion;
-using Mouseinput = MacroDeckHost.Integrations.Native.Win32Input.Mouseinput;
+using MacroDeckHost.Platform.Native;
+using Input = MacroDeckHost.Platform.Native.Win32Input.Input;
+using InputUnion = MacroDeckHost.Platform.Native.Win32Input.InputUnion;
+using Mouseinput = MacroDeckHost.Platform.Native.Win32Input.Mouseinput;
 
 namespace MacroDeckHost.Integrations.Mouse.Native;
 

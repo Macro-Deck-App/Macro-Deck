@@ -7,11 +7,20 @@ namespace MacroDeckHost.Integrations;
 public static class IntegrationDiscovery
 {
 	public static IReadOnlyList<IIntegration> DiscoverIntegrations(
+		IEnumerable<Assembly> assemblies,
 		ILogger logger)
 	{
 		var integrations = new List<IIntegration>();
-		var assembly = Assembly.GetExecutingAssembly();
+		foreach (var assembly in assemblies)
+		{
+			Discover(assembly, logger, integrations);
+		}
 
+		return integrations.AsReadOnly();
+	}
+
+	private static void Discover(Assembly assembly, ILogger logger, List<IIntegration> integrations)
+	{
 		try
 		{
 			var types = assembly.GetTypes()
@@ -50,7 +59,5 @@ public static class IntegrationDiscovery
 		{
 			logger.Error(ex, "Failed to load types from assembly '{Assembly}'", assembly.GetName().Name);
 		}
-
-		return integrations.AsReadOnly();
 	}
 }

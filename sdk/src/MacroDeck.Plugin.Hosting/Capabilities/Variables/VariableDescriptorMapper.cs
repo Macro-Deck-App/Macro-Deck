@@ -28,6 +28,7 @@ internal static class VariableDescriptorMapper
 			ParentId = definition.ParentId,
 			IsContainer = definition.IsContainer,
 			IsBindable = definition.IsBindable,
+			IsShareable = definition.IsShareable,
 			ConfigurationKey = definition.Configuration?.Key,
 			ConfigurationName = definition.Configuration?.Name,
 			Write = definition.Write is null

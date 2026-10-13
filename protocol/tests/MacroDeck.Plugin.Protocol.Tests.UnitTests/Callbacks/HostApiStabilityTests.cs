@@ -19,6 +19,7 @@ public class HostApiStabilityTests
 		"companion-devices",
 		"config",
 		"deck",
+		"desktop-notifications",
 		"devices",
 		"event-bindings",
 		"folder-views",
@@ -85,6 +86,7 @@ public class HostApiStabilityTests
 			[HostApis.Http] = [],
 			[HostApis.CompanionDevices] = ["wait", "send", "request", "screenshot"],
 			[HostApis.MusicPlayers] = ["album-color"],
+			[HostApis.DesktopNotifications] = ["show"],
 		};
 
 	[Test]

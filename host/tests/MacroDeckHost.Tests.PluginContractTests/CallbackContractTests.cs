@@ -74,6 +74,8 @@ internal sealed class CallbackContractTests
 	private WeatherBroadcastTrigger _weatherTrigger = null!;
 	private RecordingWidgetDataReader _widgetData = null!;
 	private FixedVariableHistory _history = null!;
+	private RecordingDesktopNotifier _desktop = null!;
+	private SwitchableDesktopNotificationAccess _desktopAccess = null!;
 
 	[SetUp]
 	public async Task SetUp()
@@ -96,6 +98,8 @@ internal sealed class CallbackContractTests
 		_weatherTrigger = new WeatherBroadcastTrigger();
 		_widgetData = new RecordingWidgetDataReader();
 		_history = new FixedVariableHistory();
+		_desktop = new RecordingDesktopNotifier();
+		_desktopAccess = new SwitchableDesktopNotificationAccess();
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(_configStore);
@@ -132,7 +136,8 @@ internal sealed class CallbackContractTests
 			variableHistory: new PluginVariableHistoryWindows(
 				new OwnedVariableHistory(_history, new VariableRegistry()),
 				sessions),
-			locale: new FixedLocale(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)));
+			locale: new FixedLocale(new TimeOfDayFormat(CultureInfo.GetCultureInfo("de-DE"), HourCycles.H12)),
+			desktopNotifications: new PluginDesktopNotificationCallbacks(_desktop, _desktopAccess));
 
 		_state = new PluginConnectionState();
 		_hostInvoker = new HostInvoker(_state, TimeProvider.System, Serilog.Core.Logger.None);
@@ -685,6 +690,77 @@ internal sealed class CallbackContractTests
 			Assert.That(devices.FindDevice(phone)!.State.BatteryLevelPercent, Is.EqualTo(64));
 			Assert.That(devices.FindDevice(phone)!.State.Capabilities, Does.Contain("focus"));
 		});
+	}
+
+	[Test]
+	public async Task A_desktop_notification_a_permitted_plugin_shows_reaches_the_hosts_desktop_notifications()
+	{
+		_desktopAccess.Allowed = true;
+		var notifier = new RemoteDesktopNotifier(_hostInvoker, _stateCache, Serilog.Core.Logger.None);
+		_link.PushHostState(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = true });
+		await WaitForAsync(() => notifier.IsSupported);
+
+		await notifier.ShowAsync("Build finished", "All green");
+
+		Assert.That(_desktop.Shown, Is.EqualTo(new[] { ("Build finished", "All green") }));
+	}
+
+	[Test]
+	public async Task A_desktop_notification_from_a_plugin_without_the_permission_is_refused_without_failing_the_plugin()
+	{
+		_desktopAccess.Allowed = false;
+		var notifier = new RemoteDesktopNotifier(_hostInvoker, _stateCache, Serilog.Core.Logger.None);
+		_link.PushHostState(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = true });
+		await WaitForAsync(() => notifier.IsSupported);
+
+		await notifier.ShowAsync("Hello", "World");
+		var refusal = Assert.ThrowsAsync<HostInvocationException>(() => _hostInvoker.InvokeAsync(
+			HostApis.DesktopNotifications,
+			HostOperations.DesktopNotifications.Show,
+			new DesktopNotificationShowArguments { Title = "Hello", Message = "World" },
+			CancellationToken.None));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_desktop.Shown, Is.Empty);
+			Assert.That(refusal!.Code, Is.EqualTo("DESKTOP_NOTIFICATIONS_NOT_ALLOWED"));
+		});
+	}
+
+	private sealed class RecordingDesktopNotifier : IDesktopNotifier
+	{
+		private readonly Lock _gate = new();
+		private readonly List<(string Title, string Message)> _shown = [];
+
+		public IReadOnlyList<(string Title, string Message)> Shown
+		{
+			get
+			{
+				lock (_gate)
+				{
+					return [.. _shown];
+				}
+			}
+		}
+
+		public bool IsSupported => true;
+
+		public Task ShowAsync(string title, string message, CancellationToken cancellationToken = default)
+		{
+			lock (_gate)
+			{
+				_shown.Add((title, message));
+			}
+
+			return Task.CompletedTask;
+		}
+	}
+
+	private sealed class SwitchableDesktopNotificationAccess : IPluginDesktopNotificationAccessPolicy
+	{
+		public bool Allowed { get; set; }
+
+		public bool IsAllowed(string pluginId) => Allowed;
 	}
 
 	[Test]

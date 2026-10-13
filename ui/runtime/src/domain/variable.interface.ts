@@ -45,6 +45,7 @@ export interface Variable {
   canWrite?: boolean;
   commitOnRelease?: boolean;
   shared?: boolean;
+  isShareable?: boolean;
   fileSource?: VariableFileSource | null;
   templateSource?: VariableTemplateSource | null;
   templateError?: VariableTemplateError | null;

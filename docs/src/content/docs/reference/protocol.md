@@ -160,7 +160,8 @@ are listed in the descriptor's `capabilityKinds`:
 `actions`, `events`, `variables`, `icons`, `config-flow`, `music-player`, `weather`,
 `virtual-profiles`, `issues`, `ui`, `localization`, `device-provider`, `layout-provider`,
 `folder-view-provider`, `migration`, `widget-type-provider`, `screensaver-provider`, `messaging`,
-`video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`.
+`video-stream-provider`, `calendar`, `config-entries`, `battery-provider`, `email-inbox`,
+`companion-device-entries`.
 
 - **Do not invent operation names inside an existing kind.** Additions to the operation vocabulary are
   compatibility-sensitive protocol changes. Exact operations and payloads are in the protocol package
@@ -177,6 +178,10 @@ are listed in the descriptor's `capabilityKinds`:
   answers an identity, not bytes; `icon.content` fetches the bytes only when that identity changes,
   uploaded over the `asset.*` pipeline, never inside the capability reply. The `widgets` host API's
   `invalidate-icon` asks the host to re-read an action sooner than its next poll.
+- `ActionDescriptorDto` gained the optional `role` (`IActionDefinition.Role`) and `VariableDefinitionDto`
+  the optional `isShareable` (`VariableDefinition.IsShareable`), additively in major `3` and within each
+  kind's capability version. An absent `role` means no role and an absent `isShareable` means `true`,
+  which is what a plugin built before them sends; an older host ignores both.
 - `calendar` was added as a new kind at capability version `1`, additively in major `3`. A host that
   predates it rejects the declaration non-fatally (`accepted: false`) and the session goes on without it.
   Its operations and reply limits are in the [WebSocket reference](/reference/websocket/#calendar).
@@ -195,6 +200,10 @@ are listed in the descriptor's `capabilityKinds`:
   `state.update` with a `localId` names an inbox, not a declared capability: that inbox's content or status
   changed, and the host reads its `snapshot` again instead of re-describing the kind. Its operations and
   reply limits are in the [WebSocket reference](/reference/websocket/#email-inbox).
+- `companion-device-entries` was added as a new kind at capability version `1`, additively in major `3`. It
+  is declarative: declaring it asks the host to keep one configuration entry of the plugin per Companion
+  device, and its only operation, `describe`, answers without data. A host that predates it rejects the
+  declaration non-fatally. See [Companion devices](/features/companion-devices/#a-configuration-entry-per-device).
 
 See [capabilities](/features/) and [Capability parity](/reference/capability-parity/).
 
@@ -234,16 +243,24 @@ host restarts; hosts that predate it omit both fields, which read as an empty li
 arrive out of order, so apply one only when its revision is higher than the last one applied in this
 session, always apply revision 0, and reset the last applied revision when a session is not resumed.
 
-The `adb` snapshot, pushed per plugin, follows the same revision rule. It is one of the two host APIs a
+The `adb` snapshot, pushed per plugin, follows the same revision rule. It is one of the three host APIs a
 plugin may be refused by its manifest: see [the WebSocket reference](/reference/websocket/#adb).
 
-The `companion-devices` host API (`wait`, `send`, `request`, `screenshot`) is the other, gated by
+The `companion-devices` host API (`wait`, `send`, `request`, `screenshot`) is another, gated by
 `host:companion-devices` and the user's consent, and was added additively in major `3` with its own per-plugin
 snapshot under the same revision rule. A host that predates it answers `CAPABILITY_UNSUPPORTED` and pushes
 nothing, which `MacroDeck.Plugin.Hosting` reports as access `Unsupported`, a send that answers `false` and a
 request or screenshot that fails as not connected; an older plugin ignores the push. See
 [`companion-devices`](/reference/websocket/#companion-devices) and
 [Companion devices](/features/companion-devices/).
+
+The `desktop-notifications` host API (`show`) is the third, gated by `host:desktop-notifications` alone, and
+was added additively in major `3` with a per-plugin push, sent on registration, of whether the plugin may
+show notifications from the operating system. A host that predates it answers `CAPABILITY_UNSUPPORTED` and
+pushes nothing, which `MacroDeck.Plugin.Hosting` reports as `IsSupported` `false` and a `ShowAsync` that
+shows nothing; an older plugin ignores the push. See
+[`desktop-notifications`](/reference/websocket/#desktop-notifications) and
+[Desktop notifications](/features/notifications/#desktop-notifications).
 
 The `music-players` host API (`album-color`) was added the same way, with a snapshot of every provider's
 players that every plugin receives under the same revision rule. It is not gated. A host that predates it
@@ -304,9 +321,11 @@ keyed by `code`; localise from the code. `details` is a string-to-string map, at
 | `ICON_PACK_SYNC_NOT_ALLOWED` | Only a self-registered development session can sync bundled icon packs. |
 | `ICON_NOT_FOUND` | No installed icon pack contains an icon with this id. |
 | `COMPANION_DEVICES_NOT_ALLOWED` | This plugin is not allowed to use Companion devices. |
+| `DESKTOP_NOTIFICATIONS_NOT_ALLOWED` | This plugin is not allowed to show desktop notifications. |
 
 The list is append-only within a major. The three `ADB_*` codes answer only the `adb` host API, and
-`COMPANION_DEVICES_NOT_ALLOWED` only the `companion-devices` host API; see
+`COMPANION_DEVICES_NOT_ALLOWED` only the `companion-devices` host API, and
+`DESKTOP_NOTIFICATIONS_NOT_ALLOWED` only the `desktop-notifications` host API; see
 [the WebSocket reference](/reference/websocket/#adb). A `reason` in `details` refines a deliberately generic
 code, for example `developer_mode_disabled`, `host_locked`, one of the `adb_` reasons of `ADB_FAILED`, or
 one of the `video_stream_` reasons of `CAPABILITY_UNAVAILABLE` (see

@@ -44,6 +44,7 @@ internal sealed class IntegrationInitializerTests
 			new UserNotificationStore(),
 			initializer,
 			new RecordingMediator(),
+			new BuiltInIntegrationRegistration(),
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
 

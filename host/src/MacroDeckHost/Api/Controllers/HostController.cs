@@ -3,7 +3,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Host;
 using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
 using MacroDeckHost.Auth;
-using MacroDeckHost.Integrations.System.Notifications;
+using MacroDeckHost.Infrastructure.Notifications.Shell;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = Serilog.ILogger;
 

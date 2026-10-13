@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using MacroDeckHost.Application.Applications;
 using MacroDeckHost.Application.Icons;
-using MacroDeckHost.Integrations.System.DesktopEntries;
+using MacroDeckHost.Platform.DesktopEntries;
 
 namespace MacroDeckHost.Infrastructure.Applications;
 

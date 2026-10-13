@@ -19,6 +19,8 @@ public sealed record VariableDeclaration
 
 	public string? SemanticKind { get; init; }
 
+	public bool IsShareable { get; init; } = true;
+
 	public IReadOnlyDictionary<string, string>? Attributes { get; init; }
 
 	public VariableWriteCapability? Write { get; init; }

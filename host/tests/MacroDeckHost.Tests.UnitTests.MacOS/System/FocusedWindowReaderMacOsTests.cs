@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
-using MacroDeckHost.Integrations.System.Focus;
+using MacroDeckHost.Platform.Focus;
 
 namespace MacroDeckHost.Tests.UnitTests.MacOS.System;
 
