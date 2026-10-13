@@ -11,6 +11,17 @@ function channelOf(version) {
   return `${match[1]}.${match[2]}`;
 }
 
+function compareVersions(left, right) {
+  const a = left.split(/[.-]/).map(Number);
+  const b = right.split(/[.-]/).map(Number);
+  for (let index = 0; index < 3; index++) {
+    if (a[index] !== b[index]) {
+      return a[index] - b[index];
+    }
+  }
+  return 0;
+}
+
 function archiveName(rid) {
   return rid.startsWith('win-') ? `aspnetcore-runtime-${rid}.zip` : `aspnetcore-runtime-${rid}.tar.gz`;
 }
@@ -30,6 +41,14 @@ export function resolveDotnetRuntimes(config, releasesByChannel, sdkRuntimeVersi
     const wanted = channel === hostChannel ? sdkRuntimeVersion : document['latest-runtime'];
     const release = (document.releases ?? []).find((entry) => entry.runtime?.version === wanted);
     if (!release) {
+      const latest = document['latest-runtime'];
+      if (channel === hostChannel && typeof latest === 'string' && compareVersions(wanted, latest) > 0) {
+        throw new Error(
+          `the SDK runtime ${wanted} is newer than channel ${channel}'s release metadata (latest ${latest}); ` +
+            'Microsoft publishes the metadata hours after a release, so build with an SDK it already lists ' +
+            '(DOTNET_VERSION in the workflows, equal to global.json) instead of bundling a different runtime',
+        );
+      }
       throw new Error(`channel ${channel} has no release with runtime ${wanted}`);
     }
     const name = archiveName(rid);

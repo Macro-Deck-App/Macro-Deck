@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { resolveDotnetRuntimes } from './resolve-dotnet-runtime.mjs';
@@ -76,6 +77,27 @@ test('refuses to stage when the SDK runtime channel is not bundled', () => {
 
 test('refuses a runtime version the channel never released', () => {
   assert.throws(() => resolveDotnetRuntimes({ channels: ['10.0'] }, { '10.0': ten }, '10.0.13', 'osx-arm64'), /10\.0\.13/);
+});
+
+test('refuses to fall back to an older runtime when the SDK is newer than the release metadata', () => {
+  assert.throws(
+    () => resolveDotnetRuntimes({ channels: ['10.0'] }, { '10.0': ten }, '10.0.15', 'osx-arm64'),
+    (error) => /10\.0\.15/.test(error.message) && /newer than channel 10\.0's release metadata/.test(error.message),
+  );
+});
+
+test('every workflow installs exactly the SDK global.json pins', () => {
+  const globalJson = JSON.parse(readFileSync(fileURLToPath(new URL('../../global.json', import.meta.url)), 'utf8'));
+  const workflows = fileURLToPath(new URL('../../.github/workflows/', import.meta.url));
+  const pins = readdirSync(workflows)
+    .filter((name) => name.endsWith('.yml'))
+    .flatMap((name) =>
+      [...readFileSync(join(workflows, name), 'utf8').matchAll(/DOTNET_VERSION:\s*(\S+)/g)].map((match) => [name, match[1]]),
+    );
+  assert.ok(pins.length > 0, 'the workflows declare DOTNET_VERSION');
+  for (const [name, version] of pins) {
+    assert.equal(version, globalJson.sdk.version, `${name} pins DOTNET_VERSION to global.json's SDK`);
+  }
 });
 
 test('refuses a platform the release has no archive for', () => {
