@@ -20564,6 +20564,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
     <value>Sık kullanılan kaydedilemedi.</value>
   </data>
+  <data name="Widgets.TypeSelector.GroupBuiltIn" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupFavorites" xml:space="preserve">
+    <value>Favoriler</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupPlugins" xml:space="preserve">
+    <value>Eklentiler</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Widget türünü seçin</value>
   </data>
@@ -20579,6 +20588,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
     <value>Widget'larda ara…</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortAlphabetical" xml:space="preserve">
+    <value>Alfabetik</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortByType" xml:space="preserve">
+    <value>Türe göre</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortDefault" xml:space="preserve">
+    <value>Varsayılan</value>
   </data>
   <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
     <value>Karolar</value>

@@ -20543,6 +20543,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
     <value>Impossible d'enregistrer le favori.</value>
   </data>
+  <data name="Widgets.TypeSelector.GroupBuiltIn" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupFavorites" xml:space="preserve">
+    <value>Favoris</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupPlugins" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Sélectionner le type de widget</value>
   </data>
@@ -20557,6 +20566,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
     <value>Rechercher des widgets…</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortAlphabetical" xml:space="preserve">
+    <value>Alphabétique</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortByType" xml:space="preserve">
+    <value>Par type</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortDefault" xml:space="preserve">
+    <value>Par défaut</value>
   </data>
   <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
     <value>Tuiles</value>

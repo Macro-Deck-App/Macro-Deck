@@ -49,6 +49,7 @@ let nextSelectId = 0;
       role="combobox"
       aria-haspopup="listbox"
       [attr.aria-expanded]="isOpen()"
+      [attr.aria-labelledby]="ariaLabel ? nameId + ' ' + valueId : null"
       [attr.title]="showTitle ? selectedLabel() : null"
       [disabled]="disabled"
       (click)="toggle()"
@@ -57,11 +58,14 @@ let nextSelectId = 0;
       @if (selectedOption(); as selected) {
         <ng-container [ngTemplateOutlet]="leading" [ngTemplateOutletContext]="{ $implicit: selected }" />
       }
-      <span class="sel-label" [class.sel-placeholder]="selectedLabel() === null">
+      <span class="sel-label" [id]="valueId" [class.sel-placeholder]="selectedLabel() === null">
         {{ selectedLabel() ?? placeholder }}
       </span>
       <shared-select-caret />
     </button>
+    @if (ariaLabel) {
+      <span [id]="nameId" hidden>{{ ariaLabel }}</span>
+    }
 
     @if (showClear) {
       <!-- A sibling, not a child: the trigger is itself a button, and nesting one inside it is
@@ -178,6 +182,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() emptyText = '';
   @Input() fitContent = false;
   @Input() showTitle = false;
+  @Input() ariaLabel = '';
 
   @Output() readonly opened = new EventEmitter<void>();
 
@@ -186,6 +191,8 @@ export class SelectComponent implements ControlValueAccessor {
 
   private readonly idPrefix = `sel-${++nextSelectId}`;
   readonly listboxId = `${this.idPrefix}-listbox`;
+  readonly nameId = `${this.idPrefix}-name`;
+  readonly valueId = `${this.idPrefix}-value`;
   readonly query = signal('');
   readonly panelMinWidth = signal<number | null>(null);
 

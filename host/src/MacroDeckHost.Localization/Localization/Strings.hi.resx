@@ -20564,6 +20564,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
     <value>पसंदीदा सहेजा नहीं जा सका।</value>
   </data>
+  <data name="Widgets.TypeSelector.GroupBuiltIn" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupFavorites" xml:space="preserve">
+    <value>पसंदीदा</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupPlugins" xml:space="preserve">
+    <value>प्लगइन</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>विजेट प्रकार चुनें</value>
   </data>
@@ -20579,6 +20588,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
     <value>विजेट खोजें…</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortAlphabetical" xml:space="preserve">
+    <value>वर्णानुक्रम में</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortByType" xml:space="preserve">
+    <value>प्रकार के अनुसार</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortDefault" xml:space="preserve">
+    <value>डिफ़ॉल्ट</value>
   </data>
   <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
     <value>टाइल</value>

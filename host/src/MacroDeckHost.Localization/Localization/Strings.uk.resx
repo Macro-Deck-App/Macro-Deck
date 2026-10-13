@@ -20564,6 +20564,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
     <value>Не вдалося зберегти обране.</value>
   </data>
+  <data name="Widgets.TypeSelector.GroupBuiltIn" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupFavorites" xml:space="preserve">
+    <value>Обране</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupPlugins" xml:space="preserve">
+    <value>Плагіни</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Вибір типу віджета</value>
   </data>
@@ -20579,6 +20588,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
     <value>Пошук віджетів…</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortAlphabetical" xml:space="preserve">
+    <value>За абеткою</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortByType" xml:space="preserve">
+    <value>За типом</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortDefault" xml:space="preserve">
+    <value>За замовчуванням</value>
   </data>
   <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
     <value>Плитки</value>
