@@ -2,13 +2,22 @@ import { CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, signal } from '
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 
-import { ActionBlock, ActionBlockParameter, SCRIPT_INPUTS_METADATA_KEY, SCRIPT_RUNS_ON_WIDGET_METADATA_KEY, isScriptInputParam } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, RUN_REMOTE_SCRIPT_ACTION_ROLE, RUN_SCRIPT_ACTION_ROLE, SCRIPT_INPUTS_METADATA_KEY, SCRIPT_RUNS_ON_WIDGET_METADATA_KEY, isScriptInputParam } from '@macro-deck/runtime';
 import { ApiService, TranslatePipe } from '@shared';
 import type { ActionFlow, ScriptInput } from '@macro-deck/runtime';
 import { validateActionFlows } from '../../../../domain/action-flow-validation.util';
 import { ActionOptionsService } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { RunScriptInputFieldsComponent } from './run-script-input-fields.component';
+
+const ACTION_ROLES: Record<string, string> = {
+  'example.scripts/run-script': RUN_SCRIPT_ACTION_ROLE,
+  'example.remote-scripts/run-remote-script': RUN_REMOTE_SCRIPT_ACTION_ROLE,
+};
+
+function actionRole(integrationId: string | undefined, actionId: string | undefined): string | undefined {
+  return ACTION_ROLES[`${integrationId}/${actionId}`];
+}
 
 describe('RunScriptInputFieldsComponent', () => {
   let fixture: ComponentFixture<RunScriptInputFieldsComponent>;
@@ -33,10 +42,10 @@ describe('RunScriptInputFieldsComponent', () => {
     return {
       id: 'block-1',
       type: 'action',
-      blockType: 'app.macro-deck.scripts.run-script',
+      blockType: 'example.scripts.run-script',
       label: 'Run Script',
       color: '',
-      integrationId: 'app.macro-deck.scripts',
+      integrationId: 'example.scripts',
       actionId: 'run-script',
       parameters,
     };
@@ -70,6 +79,7 @@ describe('RunScriptInputFieldsComponent', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole,
             setBlockParameters: (_id: string, parameters: ActionBlockParameter[]) => {
               written = parameters;
             },
@@ -90,11 +100,22 @@ describe('RunScriptInputFieldsComponent', () => {
     await render(block([{ name: 'scriptId', type: 'dynamic-choice', label: 'Script', value: 's-1' }]));
 
     expect(options.getOptions).toHaveBeenCalledWith(jasmine.objectContaining({
-      integrationId: 'app.macro-deck.scripts',
+      integrationId: 'example.scripts',
       actionId: 'run-script',
       parameterName: 'scriptId',
     }));
     expect(options.getOptions.calls.mostRecent().args[0].filter).toBeUndefined();
+  });
+
+  it('ignores an action without a script role, whatever its id', async () => {
+    await render({
+      ...block([{ name: 'scriptId', type: 'dynamic-choice', label: 'Script', value: 's-1' }]),
+      blockType: 'example.other.run-script',
+      integrationId: 'example.other',
+    });
+
+    expect(options.getOptions).not.toHaveBeenCalled();
+    expect(written).toBeNull();
   });
 
   it('adds one parameter per declared input, named input:<name>', async () => {
@@ -196,6 +217,7 @@ describe('RunScriptInputFieldsComponent writes an edited value under its input: 
   function setUp(integrationId: string, actionId: string, blockType: string): void {
     updateParam = jasmine.createSpy('updateParam');
     const store = {
+      actionRole,
       updateParam,
       setBlockParameters: jasmine.createSpy('setBlockParameters'),
       hasOwnerWidget: () => false,
@@ -257,8 +279,8 @@ describe('RunScriptInputFieldsComponent writes an edited value under its input: 
     fixture.detectChanges();
   }
 
-  it('at the remote delegation call site (app.macro-deck.delegate)', async () => {
-    setUp('app.macro-deck.delegate', 'run-remote-script', 'app.macro-deck.delegate.run-remote-script');
+  it('at a run-remote-script call site', async () => {
+    setUp('example.remote-scripts', 'run-remote-script', 'example.remote-scripts.run-remote-script');
 
     await typeIntoScene('BRB');
 
@@ -268,8 +290,8 @@ describe('RunScriptInputFieldsComponent writes an edited value under its input: 
     expect(updateParam.calls.allArgs().some(a => a[1] === 'scene')).toBeFalse();
   });
 
-  it('at the direct Run Script call site (app.macro-deck.scripts), as the control case', async () => {
-    setUp('app.macro-deck.scripts', 'run-script', 'app.macro-deck.scripts.run-script');
+  it('at a run-script call site, as the control case', async () => {
+    setUp('example.scripts', 'run-script', 'example.scripts.run-script');
 
     await typeIntoScene('BRB');
 
@@ -289,10 +311,10 @@ describe('RunScriptInputFieldsComponent unresolved lookup (S4)', () => {
     return {
       id: 'block-1',
       type: 'action',
-      blockType: 'app.macro-deck.delegate.run-remote-script',
+      blockType: 'example.remote-scripts.run-remote-script',
       label: 'Run Remote Script',
       color: '',
-      integrationId: 'app.macro-deck.delegate',
+      integrationId: 'example.remote-scripts',
       actionId: 'run-remote-script',
       parameters: [
         { name: 'instance', type: 'string', label: 'Instance', value: 'inst-1' },
@@ -335,6 +357,7 @@ describe('RunScriptInputFieldsComponent unresolved lookup (S4)', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole,
             setBlockParameters: (_id: string, parameters: ActionBlockParameter[]) => {
               written = parameters;
             },
@@ -458,10 +481,10 @@ describe('RunScriptInputFieldsComponent widget target row', () => {
     return {
       id: 'block-1',
       type: 'action',
-      blockType: 'app.macro-deck.scripts.run-script',
+      blockType: 'example.scripts.run-script',
       label: 'Run Script',
       color: '',
-      integrationId: 'app.macro-deck.scripts',
+      integrationId: 'example.scripts',
       actionId: 'run-script',
       parameters,
     };
@@ -471,10 +494,10 @@ describe('RunScriptInputFieldsComponent widget target row', () => {
     return {
       id: 'block-1',
       type: 'action',
-      blockType: 'app.macro-deck.delegate.run-remote-script',
+      blockType: 'example.remote-scripts.run-remote-script',
       label: 'Run Remote Script',
       color: '',
-      integrationId: 'app.macro-deck.delegate',
+      integrationId: 'example.remote-scripts',
       actionId: 'run-remote-script',
       parameters,
     };
@@ -499,6 +522,7 @@ describe('RunScriptInputFieldsComponent widget target row', () => {
         {
           provide: ActionFlowStore,
           useValue: {
+            actionRole,
             setBlockParameters: (_id: string, parameters: ActionBlockParameter[]) => {
               written = parameters;
             },

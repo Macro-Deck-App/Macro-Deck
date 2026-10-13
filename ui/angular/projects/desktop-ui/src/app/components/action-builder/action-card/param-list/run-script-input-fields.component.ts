@@ -1,13 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, inject, signal } from '@angular/core';
 
-import { AppStrings, RUN_SCRIPT_WIDGET_PARAM, SCRIPT_CALL_SITES, SCRIPT_RUNS_ON_WIDGET_METADATA_KEY, WIDGET_TARGET_SELF, isScriptInputParam, parseScriptInputsMetadata, scriptInputDefaultValue, scriptInputParamName, scriptInputParameter } from '@macro-deck/runtime';
+import { AppStrings, RUN_REMOTE_SCRIPT_ACTION_ROLE, RUN_SCRIPT_WIDGET_PARAM, SCRIPT_RUNS_ON_WIDGET_METADATA_KEY, WIDGET_TARGET_SELF, isRunScriptActionRole, isScriptInputParam, parseScriptInputsMetadata, scriptInputDefaultValue, scriptInputParamName, scriptInputParameter } from '@macro-deck/runtime';
 import { LocalizationService, TranslatePipe } from '@shared';
 import type { ActionBlock, ActionBlockParameter, ScriptInput } from '@macro-deck/runtime';
 import { ActionOptionsService } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { ParamRowComponent } from './param-row.component';
-
-const REMOTE_SCRIPT_ACTION_ID = 'run-remote-script';
 
 const SCRIPT_ID_PARAMETER = 'scriptId';
 
@@ -64,6 +62,14 @@ export class RunScriptInputFieldsComponent implements OnChanges {
 
   private request = 0;
 
+  private role(): string | undefined {
+    return this.store.actionRole(this.block.integrationId, this.block.actionId);
+  }
+
+  private isRemote(): boolean {
+    return this.role() === RUN_REMOTE_SCRIPT_ACTION_ROLE;
+  }
+
   ngOnChanges(): void {
     void this.resolveDeclarations();
   }
@@ -81,13 +87,13 @@ export class RunScriptInputFieldsComponent implements OnChanges {
   }
 
   protected remoteWidgetNotice(): string | null {
-    if (this.block.actionId !== REMOTE_SCRIPT_ACTION_ID || !this.runsOnWidget()) return null;
+    if (!this.isRemote() || !this.runsOnWidget()) return null;
     return this.localization.translateKey(AppStrings.ActionBuilder.RunScript.RunsOnWidgetNotRemote);
   }
 
   private async resolveDeclarations(): Promise<void> {
-    const actionId = SCRIPT_CALL_SITES[this.block.integrationId ?? ''];
-    if (!actionId || this.block.actionId !== actionId) return;
+    const actionId = this.block.actionId;
+    if (!actionId || !isRunScriptActionRole(this.role())) return;
 
     const scriptId = this.stringParameter(SCRIPT_ID_PARAMETER);
     const instance = this.stringParameter('instance');
@@ -153,7 +159,7 @@ export class RunScriptInputFieldsComponent implements OnChanges {
   }
 
   private widgetTargetParameter(stored: ActionBlockParameter | undefined): ActionBlockParameter | null {
-    if (!this.runsOnWidget() || this.block.actionId === REMOTE_SCRIPT_ACTION_ID) return null;
+    if (!this.runsOnWidget() || this.isRemote()) return null;
 
     const parameter: ActionBlockParameter = {
       name: RUN_SCRIPT_WIDGET_PARAM,

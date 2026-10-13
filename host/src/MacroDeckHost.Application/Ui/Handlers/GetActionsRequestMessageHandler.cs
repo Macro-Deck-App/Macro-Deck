@@ -38,7 +38,8 @@ public class GetActionsRequestMessageHandler
 				IntegrationId = descriptor.OwnerId,
 				IntegrationName = descriptor.Owner.Name,
 				Name = action.Name,
-				Description = action.Description
+				Description = action.Description,
+				Role = action.Role
 			};
 
 			foreach (var param in action.Parameters)

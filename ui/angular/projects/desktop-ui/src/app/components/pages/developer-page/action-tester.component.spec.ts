@@ -198,6 +198,7 @@ describe('ActionTesterComponent with a script that declares inputs', () => {
     name: 'Run Script',
     description: 'Runs one of your scripts',
     parameters: [{ name: 'scriptId', type: ActionParameterType.DynamicChoice, description: '' }],
+    role: 'run-script',
   };
 
   function optionsFor(scriptId: string, inputs: unknown[]) {

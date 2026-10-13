@@ -12,17 +12,14 @@ export const SCRIPT_INPUTS_METADATA_KEY = 'scriptInputs';
 
 export const SCRIPT_RUNS_ON_WIDGET_METADATA_KEY = 'runsOnWidget';
 
-export const SCRIPT_CALL_SITES: Record<string, string> = {
-  'app.macro-deck.scripts': 'run-script',
-  'app.macro-deck.delegate': 'run-remote-script',
-};
+export const RUN_SCRIPT_ACTION_ROLE = 'run-script';
+
+export const RUN_REMOTE_SCRIPT_ACTION_ROLE = 'run-remote-script';
 
 export const RUN_SCRIPT_WIDGET_PARAM = 'widget';
 
-export function isRunScriptWidgetTargetParam(paramName: string, block: { integrationId?: string; actionId?: string } | undefined): boolean {
-  return paramName === RUN_SCRIPT_WIDGET_PARAM
-    && !!block?.integrationId
-    && SCRIPT_CALL_SITES[block.integrationId] === block.actionId;
+export function isRunScriptActionRole(role: string | undefined): boolean {
+  return role === RUN_SCRIPT_ACTION_ROLE || role === RUN_REMOTE_SCRIPT_ACTION_ROLE;
 }
 
 export type ScriptInputValue = string | number | boolean | null;

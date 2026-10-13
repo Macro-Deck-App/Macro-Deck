@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, forwardRef, inject, signal } from '@angular/core';
 
-import { SCRIPT_CALL_SITES, UiConfigEvents, WIDGET_INTEGRATION_ID, WIDGET_TARGET_SELF, isScriptInputParam, isWidgetAppearanceActionId } from '@macro-deck/runtime';
+import { UiConfigEvents, WIDGET_INTEGRATION_ID, WIDGET_TARGET_SELF, isRunScriptActionRole, isScriptInputParam, isWidgetAppearanceActionId } from '@macro-deck/runtime';
 import type { ActionBlock, ActionBlockParameter, ParameterValue, UiNode, UiNodeEvent } from '@macro-deck/runtime';
 import type { UiSessionHandle } from '@shared';
 import { ActionOptionsService } from '../../../../services/action-options.service';
@@ -101,8 +101,7 @@ export class ParamListComponent implements OnChanges {
   }
 
   protected get isRunScriptAction(): boolean {
-    const actionId = SCRIPT_CALL_SITES[this.block.integrationId ?? ''];
-    return actionId !== undefined && actionId === this.block.actionId;
+    return isRunScriptActionRole(this.store.actionRole(this.block.integrationId, this.block.actionId));
   }
 
   protected isScriptInputParameter(name: string): boolean {

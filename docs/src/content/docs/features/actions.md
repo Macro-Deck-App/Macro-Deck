@@ -155,6 +155,13 @@ for an ordinary action. A role fixes the parameters: `ActionRoles.LaunchApplicat
 new button to a built-in action with that role; a plugin's action with the role is never chosen, so a
 plugin never receives the dropped path. A Macro Deck release from before `Role` ignores it.
 
+`ActionRoles.RunScript` and `ActionRoles.RunRemoteScript` mark an action that runs a Macro Deck script, here
+or on another instance. Such an action takes a required dynamic-choice `scriptId`; an option may carry the
+metadata `scriptInputs` (the script's inputs as a JSON array) and `runsOnWidget` (`"true"`). The action
+editor then adds an `input:<name>` parameter per declared input and, for `RunScript` only, a `widget`
+target for a widget script. `RunRemoteScript` also takes an optional dynamic-choice `instance`, sent along
+when the editor lists the scripts. Any action with one of these roles, a plugin's included, gets this editor.
+
 ### Letting the user search a long list
 
 A `Choice` or `DynamicChoice` parameter draws a plain select. For a long list, call `AsSearchable()` on it

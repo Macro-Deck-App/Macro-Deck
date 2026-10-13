@@ -365,7 +365,8 @@ What did **not** need a major:
 - Action roles added `IActionDefinition.Role`, a default interface member returning `null`, the
   `ActionRoles` constants and an optional `role` field on `ActionDescriptorDto`, all within major `3` and
   `actions` capability version `1`. An existing `IActionDefinition` keeps compiling and loading with no
-  role; an older host ignores the field. See [Declaring parameters](/features/actions/#declaring-parameters).
+  role; an older host ignores the field. `ActionRoles.RunScript` and `ActionRoles.RunRemoteScript` were
+  added the same way; an older host's editor offers script inputs only for its own built-in script actions. See [Declaring parameters](/features/actions/#declaring-parameters).
 - [Companion device entries](/features/companion-devices/#a-configuration-entry-per-device) added the
   member-less `ICompanionDeviceConfigEntries` interface and a declarative capability kind,
   `companion-device-entries`, at capability version `1` with the single operation `describe`, answered
