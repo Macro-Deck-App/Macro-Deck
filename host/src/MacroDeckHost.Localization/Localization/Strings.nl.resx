@@ -20564,6 +20564,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.TypeSelector.FavoriteFailed" xml:space="preserve">
     <value>De favoriet kon niet worden opgeslagen.</value>
   </data>
+  <data name="Widgets.TypeSelector.GroupBuiltIn" xml:space="preserve">
+    <value>Macro Deck</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupFavorites" xml:space="preserve">
+    <value>Favorieten</value>
+  </data>
+  <data name="Widgets.TypeSelector.GroupPlugins" xml:space="preserve">
+    <value>Plug-ins</value>
+  </data>
   <data name="Widgets.TypeSelector.Heading" xml:space="preserve">
     <value>Widgettype kiezen</value>
   </data>
@@ -20579,6 +20588,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Widgets.TypeSelector.SearchPlaceholder" xml:space="preserve">
     <value>Widgets zoeken…</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortAlphabetical" xml:space="preserve">
+    <value>Alfabetisch</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortByType" xml:space="preserve">
+    <value>Op type</value>
+  </data>
+  <data name="Widgets.TypeSelector.SortDefault" xml:space="preserve">
+    <value>Standaard</value>
   </data>
   <data name="Widgets.TypeSelector.ViewGrid" xml:space="preserve">
     <value>Tegels</value>

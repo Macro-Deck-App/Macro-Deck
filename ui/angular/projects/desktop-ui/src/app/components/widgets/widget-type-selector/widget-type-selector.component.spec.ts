@@ -13,7 +13,11 @@ import {
   WidgetTypeFavoritesService,
   WidgetTypeInfo,
 } from '@shared';
-import { WIDGET_TYPE_SELECTOR_VIEW_KEY, WidgetTypeSelectorComponent } from './widget-type-selector.component';
+import {
+  WIDGET_TYPE_SELECTOR_SORT_KEY,
+  WIDGET_TYPE_SELECTOR_VIEW_KEY,
+  WidgetTypeSelectorComponent,
+} from './widget-type-selector.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
 const GAUGE_TYPE = 'com.example.gauges::gauge';
@@ -75,6 +79,26 @@ describe('WidgetTypeSelectorComponent', () => {
 
   async function switchView(label: 'Tiles' | 'List'): Promise<void> {
     root().querySelector<HTMLButtonElement>(`.view-toggle button[aria-label="${label}"]`)!.click();
+    await settle();
+  }
+
+  function typeIds(): string[] {
+    return visibleCards().map(card => card.querySelector<HTMLElement>('.type-favorite')?.dataset['typeId'] ?? '');
+  }
+
+  function headings(): string[] {
+    return Array.from(root().querySelectorAll<HTMLElement>('.type-group-heading'))
+      .filter(heading => getComputedStyle(heading).display !== 'none')
+      .map(heading => heading.textContent?.trim() ?? '');
+  }
+
+  async function chooseSort(label: 'Default' | 'Alphabetical' | 'By type'): Promise<void> {
+    root().querySelector<HTMLButtonElement>('.toolbar .sort button[role="combobox"]')!.click();
+    await settle();
+    const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'))
+      .find(candidate => candidate.textContent?.trim() === label);
+    if (!option) throw new Error(`no sort option ${label}`);
+    option.click();
     await settle();
   }
 
@@ -180,13 +204,18 @@ describe('WidgetTypeSelectorComponent', () => {
     }),
   ];
 
-  beforeEach(() => localStorage.removeItem(WIDGET_TYPE_SELECTOR_VIEW_KEY));
-  afterEach(() => localStorage.removeItem(WIDGET_TYPE_SELECTOR_VIEW_KEY));
+  function clearStoredPreferences(): void {
+    localStorage.removeItem(WIDGET_TYPE_SELECTOR_VIEW_KEY);
+    localStorage.removeItem(WIDGET_TYPE_SELECTOR_SORT_KEY);
+  }
+
+  beforeEach(clearStoredPreferences);
+  afterEach(clearStoredPreferences);
 
   describe('with only built-in types on offer', () => {
     beforeEach(() => createFixture(builtInCatalog));
 
-    it('offers one card per catalogue entry, in alphabetical order rather than catalogue order', () => {
+    it('offers one card per catalogue entry, in the default order rather than catalogue order', () => {
       expect(cardNames()).toEqual(['Action Button', 'Weather']);
     });
 
@@ -302,7 +331,7 @@ describe('WidgetTypeSelectorComponent', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
       await settle();
 
-      expect(cardNames()).toEqual(['Action Button', 'Gauge', 'Weather']);
+      expect(cardNames()).toEqual(['Action Button', 'Weather', 'Gauge']);
       expect(document.activeElement).toBe(cardNamed('Weather').querySelector('.type-favorite'));
     });
 
@@ -333,7 +362,7 @@ describe('WidgetTypeSelectorComponent', () => {
     it('offers a list view with the same order, badges, previews and selection', async () => {
       await switchView('List');
 
-      expect(rowNames()).toEqual(['Action Button', 'Gauge', 'Weather']);
+      expect(rowNames()).toEqual(['Action Button', 'Weather', 'Gauge']);
       expect(cardNamed('Gauge').querySelector('.type-provider')?.textContent?.trim()).toBe('Gauge Pack');
       expect(cardNamed('Weather').querySelector('.type-preview shared-ui-tree-widget')).not.toBeNull();
       expect(await select(cardNamed('Gauge'))).toEqual([GAUGE_TYPE]);
@@ -346,7 +375,7 @@ describe('WidgetTypeSelectorComponent', () => {
       fixture = TestBed.createComponent(WidgetTypeSelectorComponent);
       await settle();
 
-      expect(rowNames()).toEqual(['Action Button', 'Gauge', 'Weather']);
+      expect(rowNames()).toEqual(['Action Button', 'Weather', 'Gauge']);
     });
   });
 
@@ -366,15 +395,152 @@ describe('WidgetTypeSelectorComponent', () => {
   describe('with favorites', () => {
     beforeEach(() => createFixture(pluginCatalog, { favorites: [WidgetType.Weather, GAUGE_TYPE] }));
 
-    it('puts favorites first, each group in alphabetical order', () => {
+    it('puts favorites first in every sort, each part in that sort\'s order', async () => {
+      expect(cardNames()).toEqual(['Weather', 'Gauge', 'Action Button']);
+
+      await chooseSort('Alphabetical');
       expect(cardNames()).toEqual(['Gauge', 'Weather', 'Action Button']);
+
+      await chooseSort('By type');
+      expect(cardNames()).toEqual(['Gauge', 'Weather', 'Action Button']);
+      expect(headings()).toEqual(['Favorites', 'Macro Deck']);
     });
 
     it('moves a type to the front when it is starred', async () => {
       cardNamed('Action Button').querySelector<HTMLButtonElement>('.type-favorite')!.click();
       await settle();
 
-      expect(cardNames()).toEqual(['Action Button', 'Gauge', 'Weather']);
+      expect(cardNames()).toEqual(['Action Button', 'Weather', 'Gauge']);
+    });
+  });
+
+  describe('sorting', () => {
+    const CALENDAR_TYPE = 'app.macro-deck.calendar::calendar';
+    const TWITCH_CHAT_TYPE = 'app.macro-deck.twitch::chat';
+
+    function sortCatalog(names: Record<string, string>): WidgetTypeInfo[] {
+      const integration = (id: string, providerId: string) => catalogEntry({
+        id, providerId, isBuiltIn: false, isPluginProvided: false, name: names[id],
+      });
+      return [
+        catalogEntry({ id: WidgetType.Weather, name: names[WidgetType.Weather] }),
+        catalogEntry({ id: GAUGE_TYPE, providerId: 'com.example.gauges', isBuiltIn: false, isPluginProvided: true,
+          providerName: 'Gauge Pack', name: names[GAUGE_TYPE] }),
+        integration(TWITCH_CHAT_TYPE, 'app.macro-deck.twitch'),
+        catalogEntry({ id: WidgetType.Clock, name: names[WidgetType.Clock] }),
+        integration(CALENDAR_TYPE, 'app.macro-deck.calendar'),
+        catalogEntry({ id: WidgetType.Slider, name: names[WidgetType.Slider] }),
+        catalogEntry({ id: WidgetType.ActionButton, name: names[WidgetType.ActionButton] }),
+      ];
+    }
+
+    const english = {
+      [WidgetType.Weather]: 'Weather', [GAUGE_TYPE]: 'Gauge', [TWITCH_CHAT_TYPE]: 'Twitch Chat',
+      [WidgetType.Clock]: 'Clock', [CALENDAR_TYPE]: 'Calendar', [WidgetType.Slider]: 'Slider',
+      [WidgetType.ActionButton]: 'Action Button',
+    };
+    const german = {
+      [WidgetType.Weather]: 'Wetter', [GAUGE_TYPE]: 'Anzeige', [TWITCH_CHAT_TYPE]: 'Twitch-Chat',
+      [WidgetType.Clock]: 'Uhr', [CALENDAR_TYPE]: 'Kalender', [WidgetType.Slider]: 'Schieberegler',
+      [WidgetType.ActionButton]: 'Aktionsschaltfläche',
+    };
+    const defaultOrder = [WidgetType.ActionButton, WidgetType.Slider, WidgetType.Clock, CALENDAR_TYPE,
+      WidgetType.Weather, TWITCH_CHAT_TYPE, GAUGE_TYPE];
+
+    it('opens in the default order: built-ins in their fixed order, then integrations, then plugins', async () => {
+      await createFixture(sortCatalog(english));
+
+      expect(typeIds()).toEqual(defaultOrder);
+      expect(headings()).toEqual([]);
+    });
+
+    it('keeps the default order whatever language the names are in', async () => {
+      await createFixture(sortCatalog(german));
+
+      expect(typeIds()).toEqual(defaultOrder);
+    });
+
+    it('sorts by the localized name when Alphabetical is chosen', async () => {
+      await createFixture(sortCatalog(german));
+      await chooseSort('Alphabetical');
+
+      expect(cardNames()).toEqual(['Aktionsschaltfläche', 'Anzeige', 'Kalender', 'Schieberegler', 'Twitch-Chat',
+        'Uhr', 'Wetter']);
+    });
+
+    it('groups widgets that come with Macro Deck apart from plugin widgets when By type is chosen', async () => {
+      await createFixture(sortCatalog(english), { favorites: [WidgetType.Weather] });
+      await chooseSort('By type');
+
+      expect(headings()).toEqual(['Favorites', 'Macro Deck', 'Plugins']);
+      expect(cardNames()).toEqual(['Weather', 'Action Button', 'Calendar', 'Clock', 'Slider', 'Twitch Chat',
+        'Gauge']);
+    });
+
+    it('shows only the headings of groups the search still matches', async () => {
+      await createFixture(sortCatalog(english));
+      await chooseSort('By type');
+
+      await search('gauge');
+      expect(headings()).toEqual(['Plugins']);
+
+      await search('zzz');
+      expect(headings()).toEqual([]);
+      expect(root().querySelector('.no-matches')).not.toBeNull();
+    });
+
+    it('keeps the live preview of a type starred while grouped by type', async () => {
+      await createFixture(sortCatalog(english));
+      await chooseSort('By type');
+      const opened = opens.length;
+
+      cardNamed('Gauge').querySelector<HTMLButtonElement>('.type-favorite')!.click();
+      await settle();
+
+      expect(headings()).toEqual(['Favorites', 'Macro Deck']);
+      expect(cardNames()[0]).toBe('Gauge');
+      expect(opens.length).toBe(opened);
+    });
+
+    it('remembers the chosen sort for the next time the selector opens', async () => {
+      await createFixture(sortCatalog(english));
+      await chooseSort('Alphabetical');
+      fixture.destroy();
+
+      fixture = TestBed.createComponent(WidgetTypeSelectorComponent);
+      await settle();
+
+      expect(cardNames()).toEqual(['Action Button', 'Calendar', 'Clock', 'Gauge', 'Slider', 'Twitch Chat', 'Weather']);
+    });
+
+    it('falls back to the default order for a stored sort it does not know', async () => {
+      localStorage.setItem(WIDGET_TYPE_SELECTOR_SORT_KEY, 'popularity');
+      await createFixture(sortCatalog(english));
+
+      expect(typeIds()).toEqual(defaultOrder);
+    });
+
+    it('names the sort control so assistive technology announces what it sorts', async () => {
+      await createFixture(sortCatalog(english));
+      await settle();
+      const trigger = root().querySelector<HTMLButtonElement>('.toolbar .sort button[role="combobox"]')!;
+      const name = trigger.getAttribute('aria-labelledby')!.split(' ')
+        .map(id => root().querySelector(`[id="${id}"]`)?.textContent?.trim())
+        .join(' ');
+
+      expect(name).toBe('Sort by Default');
+    });
+  });
+
+  describe('toolbar', () => {
+    beforeEach(() => createFixture(builtInCatalog));
+
+    it('draws the view toggle exactly as tall as the search field', () => {
+      const field = root().querySelector<HTMLElement>('.toolbar .search input')!.getBoundingClientRect().height;
+      const toggle = root().querySelector<HTMLElement>('.toolbar .view-toggle .seg')!.getBoundingClientRect().height;
+
+      expect(field).toBeGreaterThan(0);
+      expect(toggle).toBeCloseTo(field, 1);
     });
   });
 

@@ -1,16 +1,31 @@
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
 }
 
 .toolbar .search {
-  flex: 1;
+  flex: 1 1 12rem;
   min-width: 0;
 }
 
-.type-card[hidden] {
+.toolbar .sort {
+  flex: 0 1 11rem;
+  min-width: 8rem;
+}
+
+.type-card[hidden],
+.type-group-heading[hidden] {
   display: none;
+}
+
+.type-group-heading {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
 }
 
 .widget-types {

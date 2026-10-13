@@ -121,6 +121,12 @@ from a plugin show the plugin's name as a badge; widgets that come with Macro De
 Calendar, show none. Click the **star** on a widget type to keep it at the top of the list for everyone who
 edits this Macro Deck, and switch between tiles and a compact list next to the search field.
 
+Next to the search field you also choose the order of the list. **Default** shows the most used widgets
+first, in the same order whatever language Macro Deck is in. **Alphabetical** sorts by name, and **By type**
+lists the widgets that come with Macro Deck and those from plugins under their own headings. Starred widgets
+stay at the top in every order. The order and the view are remembered on this device only, while stars are
+shared.
+
 ## Pinned widgets
 
 Pin a widget to show it in **every folder of the profile**, or in **a folder and its subfolders**.
