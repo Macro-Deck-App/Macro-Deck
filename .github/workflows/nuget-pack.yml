@@ -30,7 +30,9 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  DOTNET_VERSION: 10.0.x
+  # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
+  # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
+  DOTNET_VERSION: 10.0.401
   # The packages ship with the released product, so they are built with the release identity.
   BUILD_CHANNEL: Production
 

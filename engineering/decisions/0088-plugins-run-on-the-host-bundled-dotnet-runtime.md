@@ -25,7 +25,10 @@ had installed .NET themselves.
   [resolve-dotnet-runtime.mjs](../../ci/scripts/resolve-dotnet-runtime.mjs): the host's own major at the
   building SDK's `BundledNETCoreAppPackageVersion`, so the host is tested and shipped on the same patch,
   downloaded from builds.dotnet.microsoft.com and verified against the sha512 in Microsoft's release
-  metadata, failing closed.
+  metadata, failing closed. CI installs the exact SDK [global.json](../../global.json) pins
+  (`DOTNET_VERSION` in the workflows, moved by Renovate after its release age), never a floating
+  `10.0.x`: on a .NET patch day the new SDK is installable hours before its runtime appears in the
+  release metadata, and staging then fails rather than bundling an older runtime than the build used.
 - **Majors are only ever added.** [bundled-runtimes.json](../../ci/dotnet-runtime/bundled-runtimes.json)
   lists the channels to bundle. A new .NET major is appended beside the existing ones; a major that
   plugins may still target is never removed, and plugins are never rolled forward onto a major they did

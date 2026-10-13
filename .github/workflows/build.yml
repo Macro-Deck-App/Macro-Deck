@@ -31,7 +31,9 @@ permissions:
 env:
   # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
   NODE_VERSION: '^22.22.3'
-  DOTNET_VERSION: 10.0.x
+  # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
+  # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
+  DOTNET_VERSION: 10.0.401
   RUST_TOOLCHAIN: '1.98.1'
   # Release artifacts always use the production host and bootstrapper identity.
   # Beta is derived from the normalized version below, not a separate build mode.

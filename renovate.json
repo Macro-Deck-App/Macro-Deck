@@ -42,12 +42,24 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "rust-lang/rust"
+    },
+    {
+      "customType": "regex",
+      "description": "The exact .NET SDK CI installs; it has to equal global.json, so it moves with the dotnet-sdk manager's bump of that file.",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.yml$/"
+      ],
+      "matchStrings": [
+        "DOTNET_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "dotnet-version",
+      "depNameTemplate": "dotnet-sdk"
     }
   ],
   "packageRules": [
     {
-      "description": "The .NET SDK pin in global.json moves on its own, never bundled with packages.",
-      "matchManagers": [
+      "description": "The .NET SDK pins in global.json and the workflows move together on their own, never bundled with packages.",
+      "matchPackageNames": [
         "dotnet-sdk"
       ],
       "groupName": "dotnet sdk"
