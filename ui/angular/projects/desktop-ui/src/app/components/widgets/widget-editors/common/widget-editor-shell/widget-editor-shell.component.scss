@@ -114,8 +114,16 @@ $sidebar-width: 300px;
   padding: var(--space-4) var(--space-2);
   // WebKit puts both gutters of stable both-edges at the end edge, which leaves the content
   // visibly off-centre; the start edge mirrors the width the engine reserved, measured in the .ts.
-  scrollbar-gutter: stable;
   padding-inline-start: calc(var(--space-2) + var(--editor-sidebar-gutter, 0px));
+  @include ds.overlay-scrollbar-clearance;
+
+  @media (pointer: coarse) {
+    padding-inline-start: var(--space-4);
+  }
+
+  :host-context([data-overlay-scrollbars]) & {
+    padding-inline-start: var(--space-4);
+  }
 
   // Focused only programmatically (to park focus after a resize collapses the drawer); never a
   // tab stop of its own.

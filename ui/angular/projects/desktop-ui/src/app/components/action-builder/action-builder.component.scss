@@ -121,13 +121,12 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* Reserve a fixed gutter so the scrollbar never overlaps the cards. */
-  scrollbar-gutter: stable;
   padding-inline-end: var(--space-2);
   padding-bottom: var(--space-2);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  @include ds.overlay-scrollbar-clearance;
 }
 
 /* Event-only mode before the first trigger exists - there is no flow to author yet. */
@@ -153,9 +152,9 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  scrollbar-gutter: stable;
   padding-inline-end: var(--space-2);
   padding-bottom: var(--space-2);
+  @include ds.overlay-scrollbar-clearance;
 }
 
 /*

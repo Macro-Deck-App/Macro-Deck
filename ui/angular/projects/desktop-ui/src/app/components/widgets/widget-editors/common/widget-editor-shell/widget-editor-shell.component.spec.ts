@@ -232,6 +232,33 @@ describe('WidgetEditorShellComponent', () => {
     }
   });
 
+  it('keeps the sidebar content clear of a scrollbar drawn over it, still centred', () => {
+    const style = document.createElement('style');
+    style.textContent = '.editor-shell-sidebar-scroll::-webkit-scrollbar { width: 0; }';
+    document.head.append(style);
+    document.documentElement.setAttribute('data-overlay-scrollbars', '');
+
+    try {
+      apply(wideWidth());
+
+      const scroll = query('.editor-shell-sidebar-scroll') as HTMLElement;
+      const box = scroll.getBoundingClientRect();
+      const content = query('#projected-sidebar')!.getBoundingClientRect();
+      const probe = document.createElement('div');
+      probe.style.width = 'var(--space-4)';
+      document.body.append(probe);
+      const clearance = probe.getBoundingClientRect().width;
+      probe.remove();
+
+      expect(scroll.offsetWidth - scroll.clientWidth).toBe(0);
+      expect(box.right - content.right).toBeGreaterThanOrEqual(clearance - 0.5);
+      expect(content.left - box.left).toBeCloseTo(box.right - content.right, 0);
+    } finally {
+      document.documentElement.removeAttribute('data-overlay-scrollbars');
+      style.remove();
+    }
+  });
+
   it('contains vertical overflow inside the drawer at a short window height', () => {
     const shell = query('.editor-shell') as HTMLElement;
     shell.style.height = '420px';

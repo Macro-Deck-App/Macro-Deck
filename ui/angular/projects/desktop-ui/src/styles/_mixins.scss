@@ -254,14 +254,16 @@
   padding: $padding;
 }
 
-/// Vertical scroll container whose content sits close to the scrollport edge. Desktop
-/// scrollbars take layout space (plus a stable gutter while content toggles), but the
-/// overlay scrollbars on touch devices ignore `scrollbar-gutter` and draw on top of the
-/// content, so reserve a clearance strip there instead.
+/// Overlay scrollbars (touch, and desktops that report data-overlay-scrollbars) ignore the gutter
+/// and draw over the content. Component stylesheets only: it relies on :host-context.
 @mixin overlay-scrollbar-clearance($clearance: var(--space-4)) {
   scrollbar-gutter: stable;
 
   @media (pointer: coarse) {
+    padding-inline-end: $clearance;
+  }
+
+  :host-context([data-overlay-scrollbars]) & {
     padding-inline-end: $clearance;
   }
 }
