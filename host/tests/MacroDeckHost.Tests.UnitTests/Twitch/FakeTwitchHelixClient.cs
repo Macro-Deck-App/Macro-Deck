@@ -30,6 +30,8 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 
 	public TwitchUserInfo? User { get; set; }
 
+	public string? LastLookedUpLogin { get; private set; }
+
 	public IReadOnlyList<TwitchChatBadgeImage> GlobalBadges { get; set; } = [];
 
 	public IReadOnlyList<TwitchChatBadgeImage> ChannelBadges { get; set; } = [];
@@ -101,7 +103,10 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		=> Read("channelBadges", ChannelBadges);
 
 	public Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken)
-		=> Read("user", User);
+	{
+		LastLookedUpLogin = login;
+		return Read("user", User);
+	}
 
 	public Task ModifyChannelAsync(
 		string broadcasterId,

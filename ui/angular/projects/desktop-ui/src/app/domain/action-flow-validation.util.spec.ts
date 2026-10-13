@@ -1,4 +1,4 @@
-import { ActionBlock, ActionBranch, ActionFlow, ComparisonOperator, ConditionExpression, WIDGET_TARGET_SELF } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, ActionBranch, ActionFlow, ComparisonOperator, ConditionExpression, WIDGET_TARGET_SELF } from '@macro-deck/runtime';
 import { isConditionComplete, validateActionFlows } from './action-flow-validation.util';
 
 function block(overrides: Partial<ActionBlock> = {}): ActionBlock {
@@ -72,6 +72,33 @@ describe('validateActionFlows URL validation', () => {
 
   it('accepts a correctly formed HTTPS URL', () => {
     expect(validateActionFlows([urlFlow('https://macro-deck.app')]).valid).toBeTrue();
+  });
+});
+
+describe('validateActionFlows limits on templated text', () => {
+  function textFlow(value: string, extra: Partial<ActionBlockParameter>): ActionFlow {
+    return flow(block({
+      parameters: [{ name: 'description', type: 'string', label: 'Description', value, ...extra }],
+    }));
+  }
+
+  it('applies maxLength to plain text', () => {
+    const result = validateActionFlows([textFlow('x'.repeat(141), { maxLength: 140 })]);
+
+    expect(result.errors[0].message).toBe('Description exceeds 140 characters');
+  });
+
+  it('leaves the length of a template to the rendered value', () => {
+    const template = `{{ vars.${'a'.repeat(150)} }}`;
+
+    expect(validateActionFlows([textFlow(template, { maxLength: 140 })]).valid).toBeTrue();
+  });
+
+  it('applies validationRegex to plain text but not to a template', () => {
+    const digits = { validationRegex: '^[0-9]+$' };
+
+    expect(validateActionFlows([textFlow('abc', digits)]).valid).toBeFalse();
+    expect(validateActionFlows([textFlow('{{ vars.count }}', digits)]).valid).toBeTrue();
   });
 });
 
