@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -34,7 +34,7 @@
           "texts": [
             {
               "text": "2:05:30 PM",
-              "naturalWidth": 137.7,
+              "naturalWidth": 137.69,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -54,7 +54,7 @@
           "texts": [
             {
               "text": "02:05 PM",
-              "naturalWidth": 88.02,
+              "naturalWidth": 87.95,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -74,7 +74,7 @@
           "texts": [
             {
               "text": "14:05",
-              "naturalWidth": 48.27,
+              "naturalWidth": 48.23,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -94,7 +94,7 @@
           "texts": [
             {
               "text": "14:05",
-              "naturalWidth": 48.27,
+              "naturalWidth": 48.23,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -114,7 +114,7 @@
           "texts": [
             {
               "text": "12/09/26",
-              "naturalWidth": 94.83,
+              "naturalWidth": 94.77,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -134,7 +134,7 @@
           "texts": [
             {
               "text": "09/12/26",
-              "naturalWidth": 94.83,
+              "naturalWidth": 94.77,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -154,7 +154,7 @@
           "texts": [
             {
               "text": "2026-09-12",
-              "naturalWidth": 110.16,
+              "naturalWidth": 110.09,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -174,7 +174,7 @@
           "texts": [
             {
               "text": "Saturday, September 12",
-              "naturalWidth": 214.8,
+              "naturalWidth": 214.66,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -194,7 +194,7 @@
           "texts": [
             {
               "text": "UTC-04:00",
-              "naturalWidth": 88.25,
+              "naturalWidth": 88.2,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -214,7 +214,7 @@
           "texts": [
             {
               "text": "2:05 PM",
-              "naturalWidth": 75.42,
+              "naturalWidth": 75.38,
               "givenWidth": 216,
               "truncated": {
                 "x": false,
@@ -261,7 +261,7 @@
           "texts": [
             {
               "text": "2:05:30 PM",
-              "naturalWidth": 68.88,
+              "naturalWidth": 68.81,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -281,7 +281,7 @@
           "texts": [
             {
               "text": "02:05 PM",
-              "naturalWidth": 44.02,
+              "naturalWidth": 43.98,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -301,7 +301,7 @@
           "texts": [
             {
               "text": "14:05",
-              "naturalWidth": 24.14,
+              "naturalWidth": 24.13,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -321,7 +321,7 @@
           "texts": [
             {
               "text": "14:05",
-              "naturalWidth": 24.14,
+              "naturalWidth": 24.13,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -341,7 +341,7 @@
           "texts": [
             {
               "text": "12/09/26",
-              "naturalWidth": 47.42,
+              "naturalWidth": 47.39,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -361,7 +361,7 @@
           "texts": [
             {
               "text": "09/12/26",
-              "naturalWidth": 47.42,
+              "naturalWidth": 47.39,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -381,7 +381,7 @@
           "texts": [
             {
               "text": "2026-09-12",
-              "naturalWidth": 55.08,
+              "naturalWidth": 55.05,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -401,7 +401,7 @@
           "texts": [
             {
               "text": "Saturday, September 12",
-              "naturalWidth": 107.41,
+              "naturalWidth": 107.33,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -421,7 +421,7 @@
           "texts": [
             {
               "text": "UTC-04:00",
-              "naturalWidth": 44.09,
+              "naturalWidth": 44.02,
               "givenWidth": 108,
               "truncated": {
                 "x": false,
@@ -441,7 +441,7 @@
           "texts": [
             {
               "text": "2:05 PM",
-              "naturalWidth": 37.72,
+              "naturalWidth": 37.69,
               "givenWidth": 108,
               "truncated": {
                 "x": false,

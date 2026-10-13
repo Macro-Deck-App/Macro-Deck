@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -52,7 +52,7 @@
           "texts": [
             {
               "text": "grace: the oldest line",
-              "naturalWidth": 188.91,
+              "naturalWidth": 188.8,
               "givenWidth": 230.39,
               "truncated": {
                 "x": false,
@@ -81,7 +81,7 @@
           "texts": [
             {
               "text": "linus: a fixed line",
-              "naturalWidth": 149.61,
+              "naturalWidth": 149.5,
               "givenWidth": 230.39,
               "truncated": {
                 "x": false,
@@ -101,7 +101,7 @@
           "texts": [
             {
               "text": "ada: hi Kappa !",
-              "naturalWidth": 131.72,
+              "naturalWidth": 131.64,
               "givenWidth": 230.39,
               "truncated": {
                 "x": false,
@@ -193,7 +193,7 @@
           "texts": [
             {
               "text": "grace: the oldest line",
-              "naturalWidth": 94.45,
+              "naturalWidth": 94.41,
               "givenWidth": 115.19,
               "truncated": {
                 "x": false,
@@ -222,7 +222,7 @@
           "texts": [
             {
               "text": "linus: a fixed line",
-              "naturalWidth": 74.81,
+              "naturalWidth": 74.75,
               "givenWidth": 115.19,
               "truncated": {
                 "x": false,
@@ -242,7 +242,7 @@
           "texts": [
             {
               "text": "ada: hi Kappa !",
-              "naturalWidth": 65.86,
+              "naturalWidth": 65.84,
               "givenWidth": 115.19,
               "truncated": {
                 "x": false,

@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -37,14 +37,14 @@
           "box": {
             "x": 9.59,
             "y": 10.56,
-            "width": 186.44,
+            "width": 186.45,
             "height": 26.86
           },
           "texts": [
             {
               "text": "Weekend groceries list",
-              "naturalWidth": 203.63,
-              "givenWidth": 186.44,
+              "naturalWidth": 203.5,
+              "givenWidth": 186.45,
               "truncated": {
                 "x": true,
                 "y": false
@@ -55,16 +55,16 @@
         "fit.row.count": {
           "type": "ui.text",
           "box": {
-            "x": 203.22,
+            "x": 203.23,
             "y": 10.56,
-            "width": 27.17,
+            "width": 27.16,
             "height": 26.86
           },
           "texts": [
             {
               "text": "128",
-              "naturalWidth": 31.13,
-              "givenWidth": 27.17,
+              "naturalWidth": 31.11,
+              "givenWidth": 27.16,
               "truncated": {
                 "x": true,
                 "y": false
@@ -86,14 +86,14 @@
           "box": {
             "x": 9.59,
             "y": 41.75,
-            "width": 39.08,
+            "width": 39.05,
             "height": 26.86
           },
           "texts": [
             {
               "text": "CPU",
-              "naturalWidth": 39.08,
-              "givenWidth": 39.08,
+              "naturalWidth": 39.05,
+              "givenWidth": 39.05,
               "truncated": {
                 "x": false,
                 "y": false
@@ -104,16 +104,16 @@
         "fit.digits.value": {
           "type": "ui.text",
           "box": {
-            "x": 173.73,
+            "x": 173.78,
             "y": 41.75,
-            "width": 56.66,
+            "width": 56.61,
             "height": 26.86
           },
           "texts": [
             {
               "text": "7.5",
-              "naturalWidth": 28.88,
-              "givenWidth": 56.66,
+              "naturalWidth": 28.86,
+              "givenWidth": 56.61,
               "truncated": {
                 "x": false,
                 "y": false
@@ -152,7 +152,7 @@
           "texts": [
             {
               "text": "Notifications and reminders for today",
-              "naturalWidth": 334.97,
+              "naturalWidth": 334.77,
               "givenWidth": 220.8,
               "truncated": {
                 "x": true,
@@ -172,7 +172,7 @@
           "texts": [
             {
               "text": "A longer message that wraps onto a second line and is clamped there before it ends",
-              "naturalWidth": 665.8,
+              "naturalWidth": 665.45,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -201,7 +201,7 @@
           "texts": [
             {
               "text": "the oldest entry",
-              "naturalWidth": 144,
+              "naturalWidth": 143.91,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -221,7 +221,7 @@
           "texts": [
             {
               "text": "a middle entry",
-              "naturalWidth": 127.2,
+              "naturalWidth": 127.13,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -241,7 +241,7 @@
           "texts": [
             {
               "text": "the newest entry",
-              "naturalWidth": 153.75,
+              "naturalWidth": 153.64,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -270,7 +270,7 @@
           "texts": [
             {
               "text": "First line",
-              "naturalWidth": 67.63,
+              "naturalWidth": 67.59,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -290,7 +290,7 @@
           "texts": [
             {
               "text": "Second line",
-              "naturalWidth": 91.94,
+              "naturalWidth": 91.89,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -310,7 +310,7 @@
           "texts": [
             {
               "text": "Third line",
-              "naturalWidth": 70.64,
+              "naturalWidth": 70.59,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -330,7 +330,7 @@
           "texts": [
             {
               "text": "Fourth line",
-              "naturalWidth": 83.27,
+              "naturalWidth": 83.22,
               "givenWidth": 220.8,
               "truncated": {
                 "x": false,
@@ -377,7 +377,7 @@
           "texts": [
             {
               "text": "Weekend groceries list",
-              "naturalWidth": 101.81,
+              "naturalWidth": 101.75,
               "givenWidth": 93.22,
               "truncated": {
                 "x": true,
@@ -420,14 +420,14 @@
           "box": {
             "x": 4.8,
             "y": 20.88,
-            "width": 19.55,
+            "width": 19.53,
             "height": 13.41
           },
           "texts": [
             {
               "text": "CPU",
-              "naturalWidth": 19.55,
-              "givenWidth": 19.55,
+              "naturalWidth": 19.53,
+              "givenWidth": 19.53,
               "truncated": {
                 "x": false,
                 "y": false
@@ -438,16 +438,16 @@
         "fit.digits.value": {
           "type": "ui.text",
           "box": {
-            "x": 86.86,
+            "x": 86.89,
             "y": 20.88,
-            "width": 28.33,
+            "width": 28.3,
             "height": 13.41
           },
           "texts": [
             {
               "text": "7.5",
               "naturalWidth": 14.44,
-              "givenWidth": 28.33,
+              "givenWidth": 28.3,
               "truncated": {
                 "x": false,
                 "y": false
@@ -466,7 +466,7 @@
           "texts": [
             {
               "text": "Living room temperature",
-              "naturalWidth": 110.34,
+              "naturalWidth": 110.22,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -486,7 +486,7 @@
           "texts": [
             {
               "text": "Notifications and reminders for today",
-              "naturalWidth": 167.48,
+              "naturalWidth": 167.39,
               "givenWidth": 110.39,
               "truncated": {
                 "x": true,
@@ -506,7 +506,7 @@
           "texts": [
             {
               "text": "A longer message that wraps onto a second line and is clamped there before it ends",
-              "naturalWidth": 332.7,
+              "naturalWidth": 332.11,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -535,7 +535,7 @@
           "texts": [
             {
               "text": "the oldest entry",
-              "naturalWidth": 72,
+              "naturalWidth": 71.95,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -555,7 +555,7 @@
           "texts": [
             {
               "text": "a middle entry",
-              "naturalWidth": 63.61,
+              "naturalWidth": 63.56,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -575,7 +575,7 @@
           "texts": [
             {
               "text": "the newest entry",
-              "naturalWidth": 76.88,
+              "naturalWidth": 76.83,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -604,7 +604,7 @@
           "texts": [
             {
               "text": "First line",
-              "naturalWidth": 33.8,
+              "naturalWidth": 33.73,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -624,7 +624,7 @@
           "texts": [
             {
               "text": "Second line",
-              "naturalWidth": 45.94,
+              "naturalWidth": 45.86,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -644,7 +644,7 @@
           "texts": [
             {
               "text": "Third line",
-              "naturalWidth": 35.3,
+              "naturalWidth": 35.23,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -664,7 +664,7 @@
           "texts": [
             {
               "text": "Fourth line",
-              "naturalWidth": 41.61,
+              "naturalWidth": 41.55,
               "givenWidth": 110.39,
               "truncated": {
                 "x": false,
@@ -800,7 +800,7 @@
           "texts": [
             {
               "text": "Living room temperature",
-              "naturalWidth": 183.97,
+              "naturalWidth": 183.88,
               "givenWidth": 184,
               "truncated": {
                 "x": false,
@@ -1039,14 +1039,14 @@
           "box": {
             "x": 9.59,
             "y": 10.56,
-            "width": 305.14,
+            "width": 305.16,
             "height": 26.86
           },
           "texts": [
             {
               "text": "Weekend groceries list",
-              "naturalWidth": 203.63,
-              "givenWidth": 305.14,
+              "naturalWidth": 203.5,
+              "givenWidth": 305.16,
               "truncated": {
                 "x": false,
                 "y": false
@@ -1057,16 +1057,16 @@
         "fit.row.count": {
           "type": "ui.text",
           "box": {
-            "x": 321.92,
+            "x": 321.94,
             "y": 10.56,
-            "width": 28.47,
+            "width": 28.45,
             "height": 26.86
           },
           "texts": [
             {
               "text": "128",
-              "naturalWidth": 31.13,
-              "givenWidth": 28.47,
+              "naturalWidth": 31.11,
+              "givenWidth": 28.45,
               "truncated": {
                 "x": true,
                 "y": false
@@ -1088,14 +1088,14 @@
           "box": {
             "x": 9.59,
             "y": 41.75,
-            "width": 39.08,
+            "width": 39.05,
             "height": 26.86
           },
           "texts": [
             {
               "text": "CPU",
-              "naturalWidth": 39.08,
-              "givenWidth": 39.08,
+              "naturalWidth": 39.05,
+              "givenWidth": 39.05,
               "truncated": {
                 "x": false,
                 "y": false
@@ -1106,16 +1106,16 @@
         "fit.digits.value": {
           "type": "ui.text",
           "box": {
-            "x": 293.73,
+            "x": 293.78,
             "y": 41.75,
-            "width": 56.66,
+            "width": 56.61,
             "height": 26.86
           },
           "texts": [
             {
               "text": "7.5",
-              "naturalWidth": 28.88,
-              "givenWidth": 56.66,
+              "naturalWidth": 28.86,
+              "givenWidth": 56.61,
               "truncated": {
                 "x": false,
                 "y": false
@@ -1154,7 +1154,7 @@
           "texts": [
             {
               "text": "Notifications and reminders for today",
-              "naturalWidth": 334.97,
+              "naturalWidth": 334.77,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1174,7 +1174,7 @@
           "texts": [
             {
               "text": "A longer message that wraps onto a second line and is clamped there before it ends",
-              "naturalWidth": 665.8,
+              "naturalWidth": 665.45,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1203,7 +1203,7 @@
           "texts": [
             {
               "text": "the oldest entry",
-              "naturalWidth": 144,
+              "naturalWidth": 143.91,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1223,7 +1223,7 @@
           "texts": [
             {
               "text": "a middle entry",
-              "naturalWidth": 127.2,
+              "naturalWidth": 127.13,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1243,7 +1243,7 @@
           "texts": [
             {
               "text": "the newest entry",
-              "naturalWidth": 153.75,
+              "naturalWidth": 153.64,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1272,7 +1272,7 @@
           "texts": [
             {
               "text": "First line",
-              "naturalWidth": 67.63,
+              "naturalWidth": 67.59,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1292,7 +1292,7 @@
           "texts": [
             {
               "text": "Second line",
-              "naturalWidth": 91.94,
+              "naturalWidth": 91.89,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1312,7 +1312,7 @@
           "texts": [
             {
               "text": "Third line",
-              "naturalWidth": 70.64,
+              "naturalWidth": 70.59,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,
@@ -1332,7 +1332,7 @@
           "texts": [
             {
               "text": "Fourth line",
-              "naturalWidth": 83.27,
+              "naturalWidth": 83.22,
               "givenWidth": 340.8,
               "truncated": {
                 "x": false,

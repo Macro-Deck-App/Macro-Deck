@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -43,7 +43,7 @@
           "texts": [
             {
               "text": "Run the wake-up scene",
-              "naturalWidth": 347.8,
+              "naturalWidth": 347.66,
               "givenWidth": 187.19,
               "truncated": {
                 "x": false,
@@ -63,7 +63,7 @@
           "texts": [
             {
               "text": "One press starts everything",
-              "naturalWidth": 253.03,
+              "naturalWidth": 252.86,
               "givenWidth": 187.19,
               "truncated": {
                 "x": false,
@@ -121,7 +121,7 @@
           "texts": [
             {
               "text": "Hold to arm",
-              "naturalWidth": 142.88,
+              "naturalWidth": 142.83,
               "givenWidth": 211.19,
               "truncated": {
                 "x": false,
@@ -226,7 +226,7 @@
           "texts": [
             {
               "text": "Run the wake-up scene",
-              "naturalWidth": 173.91,
+              "naturalWidth": 173.83,
               "givenWidth": 93.59,
               "truncated": {
                 "x": false,
@@ -246,7 +246,7 @@
           "texts": [
             {
               "text": "One press starts everything",
-              "naturalWidth": 126.52,
+              "naturalWidth": 126.44,
               "givenWidth": 93.59,
               "truncated": {
                 "x": false,
@@ -275,7 +275,7 @@
           "texts": [
             {
               "text": "Play",
-              "naturalWidth": 31.08,
+              "naturalWidth": 31.06,
               "givenWidth": 107.98,
               "truncated": {
                 "x": false,
@@ -304,7 +304,7 @@
           "texts": [
             {
               "text": "Hold to arm",
-              "naturalWidth": 71.44,
+              "naturalWidth": 71.38,
               "givenWidth": 105.59,
               "truncated": {
                 "x": false,

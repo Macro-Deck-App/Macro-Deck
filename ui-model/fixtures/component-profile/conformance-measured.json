@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -44,16 +44,16 @@
         "conformance.head.temp": {
           "type": "ui.text",
           "box": {
-            "x": 157.97,
+            "x": 157.98,
             "y": 36.23,
-            "width": 67.61,
+            "width": 67.59,
             "height": 57.11
           },
           "texts": [
             {
               "text": "23°",
-              "naturalWidth": 67.61,
-              "givenWidth": 67.61,
+              "naturalWidth": 67.59,
+              "givenWidth": 67.59,
               "truncated": {
                 "x": false,
                 "y": false
@@ -184,7 +184,7 @@
           "texts": [
             {
               "text": "Location unavailable",
-              "naturalWidth": 208.02,
+              "naturalWidth": 207.95,
               "givenWidth": 211.19,
               "truncated": {
                 "x": false,
@@ -204,7 +204,7 @@
           "texts": [
             {
               "text": "Pick a location in the widget settings.",
-              "naturalWidth": 253.95,
+              "naturalWidth": 253.78,
               "givenWidth": 211.19,
               "truncated": {
                 "x": true,
@@ -252,16 +252,16 @@
         "conformance.head.temp": {
           "type": "ui.text",
           "box": {
-            "x": 78.97,
+            "x": 78.98,
             "y": 18.09,
-            "width": 33.81,
+            "width": 33.8,
             "height": 28.56
           },
           "texts": [
             {
               "text": "23°",
-              "naturalWidth": 33.81,
-              "givenWidth": 33.81,
+              "naturalWidth": 33.8,
+              "givenWidth": 33.8,
               "truncated": {
                 "x": false,
                 "y": false
@@ -392,7 +392,7 @@
           "texts": [
             {
               "text": "Location unavailable",
-              "naturalWidth": 104.02,
+              "naturalWidth": 103.98,
               "givenWidth": 105.59,
               "truncated": {
                 "x": false,
@@ -412,7 +412,7 @@
           "texts": [
             {
               "text": "Pick a location in the widget settings.",
-              "naturalWidth": 126.98,
+              "naturalWidth": 126.75,
               "givenWidth": 105.59,
               "truncated": {
                 "x": true,

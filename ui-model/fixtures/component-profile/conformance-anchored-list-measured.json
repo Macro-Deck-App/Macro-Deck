@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "Chrome/151.0.7922.138",
   "cases": [
     {
       "tile": {
@@ -43,7 +43,7 @@
           "texts": [
             {
               "text": "ada: a message",
-              "naturalWidth": 142.88,
+              "naturalWidth": 142.8,
               "givenWidth": 215.39,
               "truncated": {
                 "x": false,
@@ -63,7 +63,7 @@
           "texts": [
             {
               "text": "grace: a message",
-              "naturalWidth": 160.56,
+              "naturalWidth": 160.45,
               "givenWidth": 215.39,
               "truncated": {
                 "x": false,
@@ -83,7 +83,7 @@
           "texts": [
             {
               "text": "linus: a message",
-              "naturalWidth": 151.64,
+              "naturalWidth": 151.55,
               "givenWidth": 215.39,
               "truncated": {
                 "x": false,
@@ -112,7 +112,7 @@
           "texts": [
             {
               "text": "ada: a message",
-              "naturalWidth": 142.88,
+              "naturalWidth": 142.8,
               "givenWidth": 225,
               "truncated": {
                 "x": false,
@@ -141,7 +141,7 @@
           "texts": [
             {
               "text": "ada: a message",
-              "naturalWidth": 142.88,
+              "naturalWidth": 142.8,
               "givenWidth": 225,
               "truncated": {
                 "x": false,
@@ -164,14 +164,14 @@
           "box": {
             "x": 0,
             "y": 188.17,
-            "width": 142.88,
+            "width": 142.8,
             "height": 55.66
           },
           "texts": [
             {
               "text": "ada: a message",
-              "naturalWidth": 142.88,
-              "givenWidth": 142.88,
+              "naturalWidth": 142.8,
+              "givenWidth": 142.8,
               "truncated": {
                 "x": false,
                 "y": false
