@@ -47,6 +47,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 
 	private readonly FakeIntegrationContext _context = new();
 	private readonly CancellationTokenSource _stopping = new();
+	private readonly CancellationTokenSource _closeDrain = new();
 
 	public PluginConnection(
 		WebSocket socket,
@@ -92,7 +93,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 	/// <summary>Runs the receive loop until the socket closes or <paramref name="hostStopping" /> fires.</summary>
 	public async Task RunAsync(CancellationToken hostStopping)
 	{
-		using var linked = CancellationTokenSource.CreateLinkedTokenSource(hostStopping, _stopping.Token);
+		using var linked = CancellationTokenSource.CreateLinkedTokenSource(hostStopping, _stopping.Token, _closeDrain.Token);
 
 		try
 		{
@@ -214,6 +215,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 		{
 			await _socket.CloseOutputAsync((WebSocketCloseStatus)closeCode, reason, cancellationToken)
 				.ConfigureAwait(false);
+			_closeDrain.CancelAfter(_options.Timeouts.GracefulClose);
 		}
 		catch (WebSocketException)
 		{
@@ -239,12 +241,16 @@ internal sealed class PluginConnection : IAsyncDisposable
 	{
 		await _stopping.CancelAsync();
 		_stopping.Dispose();
+		_closeDrain.Dispose();
 		_sending.Dispose();
 	}
 
 	private async Task ReceiveLoopAsync(CancellationToken cancellationToken)
 	{
-		while (_socket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
+		// Keeps reading after this side's close until the peer closes too: releasing the socket with
+		// frames still unread makes Windows reset the connection, and the peer never sees the close code.
+		while (_socket.State is WebSocketState.Open or WebSocketState.CloseSent &&
+			!cancellationToken.IsCancellationRequested)
 		{
 			byte[]? message;
 
