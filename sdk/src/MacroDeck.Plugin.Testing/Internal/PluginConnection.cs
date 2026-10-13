@@ -98,6 +98,11 @@ internal sealed class PluginConnection : IAsyncDisposable
 		try
 		{
 			await ReceiveLoopAsync(linked.Token).ConfigureAwait(false);
+
+			if (!linked.IsCancellationRequested)
+			{
+				await EchoPeerCloseAsync().ConfigureAwait(false);
+			}
 		}
 		finally
 		{
@@ -227,6 +232,35 @@ internal sealed class PluginConnection : IAsyncDisposable
 		}
 
 		_messages.RecordClose(closeCode);
+	}
+
+	private async Task EchoPeerCloseAsync()
+	{
+		using var budget = new CancellationTokenSource(_options.Timeouts.GracefulClose);
+
+		try
+		{
+			await _sending.WaitAsync(budget.Token).ConfigureAwait(false);
+			try
+			{
+				if (_socket.State == WebSocketState.CloseReceived)
+				{
+					await _socket.CloseOutputAsync(_socket.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+							_socket.CloseStatusDescription,
+							budget.Token)
+						.ConfigureAwait(false);
+				}
+			}
+			finally
+			{
+				_sending.Release();
+			}
+		}
+		catch (Exception exception) when (exception is WebSocketException
+			or OperationCanceledException
+			or ObjectDisposedException)
+		{
+		}
 	}
 
 	/// <summary>Tells the plugin to hold back everything but pause-exempt traffic.</summary>
