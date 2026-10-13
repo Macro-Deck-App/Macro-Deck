@@ -122,7 +122,7 @@ class Browser {
 			'--no-first-run',
 			'--no-default-browser-check',
 			'about:blank',
-		], { stdio: 'ignore' });
+		], { stdio: 'ignore', detached: process.platform !== 'win32' });
 		const portFile = path.join(profile, 'DevToolsActivePort');
 		const started = Date.now();
 		while (!existsSync(portFile) || !readFileSync(portFile, 'utf8').includes('\n')) {
@@ -175,9 +175,15 @@ class Browser {
 	async close() {
 		this.socket.close();
 		const exited = new Promise(resolve => this.process.once('exit', resolve));
-		this.process.kill();
+		// Chrome's helpers outlive the main process and keep writing the profile, so stop the whole group.
+		if (process.platform === 'win32') this.process.kill();
+		else process.kill(-this.process.pid, 'SIGTERM');
 		await exited;
-		rmSync(this.profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+		try {
+			rmSync(this.profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+		} catch (error) {
+			console.warn(`could not remove the Chrome profile ${this.profile}: ${error.message}`);
+		}
 	}
 }
 
