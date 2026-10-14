@@ -11,7 +11,6 @@ using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Licensing;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.Licensing;
-using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
@@ -28,7 +27,7 @@ public class LegacyAppLicenseTransferEndpointTests
 	private const string TransferPath = "/api/legacy/md2-app/license-transfer";
 	private const string KeyId = "prod-test-md2";
 
-	private static readonly ECDsa ProductionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+	private static readonly ECDsa _productionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
 	private CompanionLicenseServiceTests.ScriptedPlatform _platform = null!;
 	private IHost _host = null!;
@@ -37,7 +36,10 @@ public class LegacyAppLicenseTransferEndpointTests
 	private string? _previousDataDir;
 
 	[OneTimeTearDown]
-	public static void DisposeKey() => ProductionKey.Dispose();
+	public static void DisposeKey()
+	{
+		_productionKey.Dispose();
+	}
 
 	[SetUp]
 	public async Task SetUp()
@@ -48,7 +50,7 @@ public class LegacyAppLicenseTransferEndpointTests
 		DatabaseMigrationHelper.MigrateDatabase(new MacroDeckPaths());
 
 		var platform = _platform = new CompanionLicenseServiceTests.ScriptedPlatform();
-		var parameters = ProductionKey.ExportParameters(false);
+		var parameters = _productionKey.ExportParameters(false);
 		var trustedKeys = new Dictionary<string, string>
 		{
 			[KeyId] = Convert.ToBase64String([0x04, .. parameters.Q.X!, .. parameters.Q.Y!])
@@ -90,14 +92,17 @@ public class LegacyAppLicenseTransferEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
 	[Test]
 	public async Task An_anonymous_transfer_is_answered_with_a_status_and_a_code()
 	{
-		var license = CompanionLicenseTokens.Sign(ProductionKey, KeyId, "license-md2", "app-store-legacy",
+		var license = CompanionLicenseTokens.Sign(_productionKey,
+			KeyId,
+			"license-md2",
+			"app-store-legacy",
 			DateTimeOffset.UtcNow);
 		_platform.Answer = _ => new PlatformLicenseIssueResult.Issued(license);
 
@@ -116,7 +121,10 @@ public class LegacyAppLicenseTransferEndpointTests
 	[Test]
 	public async Task A_host_that_holds_a_license_answers_already_transferred()
 	{
-		var license = CompanionLicenseTokens.Sign(ProductionKey, KeyId, "license-md2", "app-store-legacy",
+		var license = CompanionLicenseTokens.Sign(_productionKey,
+			KeyId,
+			"license-md2",
+			"app-store-legacy",
 			DateTimeOffset.UtcNow);
 		_platform.Answer = _ => new PlatformLicenseIssueResult.Issued(license);
 		await Send(Body(AppTransaction("com.suchbyte.macrodeck")));
@@ -163,7 +171,8 @@ public class LegacyAppLicenseTransferEndpointTests
 
 		var response = await _client.SendAsync(request);
 
-		Assert.That(response.Headers.GetValues("Access-Control-Allow-Origin"), Is.EqualTo(new[] { "http://phone.local" }));
+		Assert.That(response.Headers.GetValues("Access-Control-Allow-Origin"),
+			Is.EqualTo(new[] { "http://phone.local" }));
 	}
 
 	[Test]
@@ -179,7 +188,8 @@ public class LegacyAppLicenseTransferEndpointTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(statuses.Take(LegacyLicenseTransferRateLimit.PerAddressLimit), Has.All.EqualTo(HttpStatusCode.OK));
+			Assert.That(statuses.Take(LegacyLicenseTransferRateLimit.PerAddressLimit),
+				Has.All.EqualTo(HttpStatusCode.OK));
 			Assert.That(statuses[^1], Is.EqualTo(HttpStatusCode.TooManyRequests));
 			Assert.That(otherCaller.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		});
@@ -202,7 +212,9 @@ public class LegacyAppLicenseTransferEndpointTests
 	}
 
 	private Task<HttpResponseMessage> Send(object body, string? remoteIp = null)
-		=> _client.SendAsync(Request(body, remoteIp));
+	{
+		return _client.SendAsync(Request(body, remoteIp));
+	}
 
 	private static HttpRequestMessage Request(object body, string? remoteIp = null)
 	{
@@ -216,11 +228,18 @@ public class LegacyAppLicenseTransferEndpointTests
 	}
 
 	private static object Body(string signedPayload)
-		=> new { platform = "app-store-legacy", legacyKind = "appTransaction", signedPayload };
+	{
+		return new { platform = "app-store-legacy", legacyKind = "appTransaction", signedPayload };
+	}
 
 	private static string AppTransaction(string bundleId, string appTransactionId = "app-transaction-1")
-		=> $"eyJhbGciOiJFUzI1NiJ9.{Base64Url(JsonSerializer.SerializeToUtf8Bytes(new { appTransactionId, bundleId }))}.c2lnbmF0dXJl";
+	{
+		return
+			$"eyJhbGciOiJFUzI1NiJ9.{Base64Url(JsonSerializer.SerializeToUtf8Bytes(new { appTransactionId, bundleId }))}.c2lnbmF0dXJl";
+	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 }

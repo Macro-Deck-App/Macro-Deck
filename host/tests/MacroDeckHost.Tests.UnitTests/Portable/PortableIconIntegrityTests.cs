@@ -14,10 +14,16 @@ public class PortableIconIntegrityTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Import_ReusesAnIconFromAnyPack_NotJustTheImportedIconsPack()
@@ -51,7 +57,7 @@ public class PortableIconIntegrityTests
 	public async Task Import_DoesNotReuse_WhenOnlyTheDeclaredSourceHashMatches()
 	{
 		var pack = await _harness.Icons.CreatePack("My Pack");
-		var unrelated = await _harness.Icons.AddReadyIcon(pack.Id, "unrelated", [99, 99], source: [1, 1]);
+		var unrelated = await _harness.Icons.AddReadyIcon(pack.Id, "unrelated", [99, 99], [1, 1]);
 
 		var content = BundledIcon(out var files);
 		content.Icons[0].SourceContentHash = unrelated.SourceContentHash;
@@ -74,7 +80,7 @@ public class PortableIconIntegrityTests
 	public async Task Import_DoesNotReuse_WhenOnlyTheLegacyChecksumMatches()
 	{
 		var pack = await _harness.Icons.CreatePack("My Pack");
-		var unrelated = await _harness.Icons.AddReadyIcon(pack.Id, "unrelated", [99, 99], source: [1, 1]);
+		var unrelated = await _harness.Icons.AddReadyIcon(pack.Id, "unrelated", [99, 99], [1, 1]);
 
 		var content = BundledIcon(out var files);
 		content.Icons[0].Checksum = unrelated.SourceContentHash![ContentHash.Sha256Prefix.Length..];
@@ -104,7 +110,7 @@ public class PortableIconIntegrityTests
 	public async Task Import_SkipsAnIconWhoseBundledSizeVariantFailsItsDeclaredHash()
 	{
 		await _harness.Icons.CreatePack("My Pack");
-		var content = BundledIcon(out var files, withSize: true);
+		var content = BundledIcon(out var files, true);
 		content.Icons[0].FileContentHashes["128"] = ContentHash.Compute("something else"u8);
 
 		var idMap = await Import(content, files);
@@ -171,7 +177,8 @@ public class PortableIconIntegrityTests
 		var pack = await _harness.Icons.CreatePack("My Pack");
 		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128, 256]);
 
-		var bundle = await _harness.AssetManager.Collect([new PortableWidgetSource(Guid.NewGuid(), $"{{\"icon\":\"{icon.Id}\"}}")],
+		var bundle = await _harness.AssetManager.Collect(
+			[new PortableWidgetSource(Guid.NewGuid(), $"{{\"icon\":\"{icon.Id}\"}}")],
 			PortableExportOptions.Default,
 			CancellationToken.None);
 
@@ -187,7 +194,7 @@ public class PortableIconIntegrityTests
 	public async Task Import_OfABundleThatCarriesSizeVariants_KeepsOnlyTheMaster()
 	{
 		await _harness.Icons.CreatePack("My Pack");
-		var content = BundledIcon(out var files, withSize: true);
+		var content = BundledIcon(out var files, true);
 
 		var idMap = await Import(content, files);
 
@@ -200,7 +207,9 @@ public class PortableIconIntegrityTests
 	}
 
 	private Task<IReadOnlyDictionary<Guid, Guid>> Import(PortableContent content, List<PortableIconFile> files)
-		=> _harness.AssetManager.Import(content, files, [], CancellationToken.None);
+	{
+		return _harness.AssetManager.Import(content, files, [], CancellationToken.None);
+	}
 
 	private static PortableContent BundledIcon(out List<PortableIconFile> files, bool withSize = false)
 	{

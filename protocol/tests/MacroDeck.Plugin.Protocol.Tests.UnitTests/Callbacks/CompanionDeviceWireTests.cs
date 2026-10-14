@@ -27,7 +27,8 @@ public class CompanionDeviceWireTests
 							IsCharging = true,
 							Orientation = CompanionOrientations.Portrait,
 							Capabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenOn },
-							RequestableCapabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenshotFull },
+							RequestableCapabilities
+								= new HashSet<string> { CompanionDeviceCapabilities.ScreenshotFull },
 							ConfirmsCommands = true,
 							NetworkType = CompanionNetworkTypes.Wifi
 						}))
@@ -69,7 +70,9 @@ public class CompanionDeviceWireTests
 
 	[Test]
 	public void A_pushed_device_without_a_guid_is_skipped()
-		=> Assert.That(CompanionDeviceWire.ToDevice(new CompanionDeviceStateDto { DeviceId = "phone" }), Is.Null);
+	{
+		Assert.That(CompanionDeviceWire.ToDevice(new CompanionDeviceStateDto { DeviceId = "phone" }), Is.Null);
+	}
 
 	[Test]
 	public void Every_command_round_trips_through_its_wire_arguments()
@@ -84,8 +87,8 @@ public class CompanionDeviceWireTests
 			CompanionDeviceCommand.Focus
 		];
 
-		Assert.That(commands.Select(command => CompanionDeviceWire.ToCommand(
-				CompanionDeviceWire.ToArguments(_deviceId, command))),
+		Assert.That(commands.Select(command
+				=> CompanionDeviceWire.ToCommand(CompanionDeviceWire.ToArguments(_deviceId, command))),
 			Is.EqualTo(commands));
 	}
 
@@ -94,10 +97,12 @@ public class CompanionDeviceWireTests
 	[TestCase("setOrientation", null, "upside-down")]
 	[TestCase("screenshot", null, null)]
 	[TestCase("cancelRequest", null, null)]
-	public void A_command_the_host_does_not_offer_or_with_invalid_values_reads_as_none(string command,
+	public void A_command_the_host_does_not_offer_or_with_invalid_values_reads_as_none(
+		string command,
 		int? brightness,
 		string? orientation)
-		=> Assert.That(CompanionDeviceWire.ToCommand(new CompanionDeviceCommandArguments
+	{
+		Assert.That(CompanionDeviceWire.ToCommand(new CompanionDeviceCommandArguments
 			{
 				DeviceId = _deviceId.ToString("D"),
 				Command = command,
@@ -105,15 +110,18 @@ public class CompanionDeviceWireTests
 				Orientation = orientation
 			}),
 			Is.Null);
+	}
 
 	[Test]
 	public void A_failure_or_outcome_from_a_newer_host_reads_as_failed()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(CompanionDeviceWire.ToFailure("melted"), Is.EqualTo(CompanionDeviceFailure.Failed));
 			Assert.That(CompanionDeviceWire.ToResult(new CompanionDeviceRequestResultDto { Outcome = "maybe" }),
 				Is.EqualTo(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.Failed)));
 		});
+	}
 
 	[TestCase(CompanionDeviceFailure.NotConnected, "not-connected")]
 	[TestCase(CompanionDeviceFailure.Removed, "removed")]
@@ -122,15 +130,18 @@ public class CompanionDeviceWireTests
 	[TestCase(CompanionDeviceFailure.Unavailable, "unavailable")]
 	[TestCase(CompanionDeviceFailure.Failed, "failed")]
 	public void Failures_keep_their_frozen_wire_values(CompanionDeviceFailure failure, string wire)
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(CompanionDeviceWire.ToWire(failure), Is.EqualTo(wire));
 			Assert.That(CompanionDeviceWire.ToFailure(wire), Is.EqualTo(failure));
 		});
+	}
 
 	[Test]
 	public void Results_keep_their_outcome_across_the_wire()
-		=> Assert.That(new[]
+	{
+		Assert.That(new[]
 			{
 				CompanionDeviceCommandResult.Done,
 				CompanionDeviceCommandResult.Unconfirmed,
@@ -142,4 +153,5 @@ public class CompanionDeviceWireTests
 				CompanionDeviceCommandResult.Unconfirmed,
 				CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.ConsentDenied)
 			}));
+	}
 }

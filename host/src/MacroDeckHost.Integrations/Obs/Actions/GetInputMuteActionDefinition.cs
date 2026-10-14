@@ -36,16 +36,19 @@ internal sealed class GetInputMuteActionDefinition : IDynamicOptionsActionDefini
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(InputParameter,
-			label: AppStrings.Integrations.Obs.Params.Input(),
+			AppStrings.Integrations.Obs.Params.Input(),
 			required: true),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
-			description: AppStrings.Integrations.Obs.Actions.GetInputMute.VariableDescription(),
+			AppStrings.Integrations.Obs.Params.SaveToVariable(),
+			AppStrings.Integrations.Obs.Actions.GetInputMute.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -87,16 +90,16 @@ internal sealed class GetInputMuteActionDefinition : IDynamicOptionsActionDefini
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input ||
-				string.IsNullOrWhiteSpace(input))
+			if (context.Parameters.GetValueOrDefault(InputParameter) is not string input
+				|| string.IsNullOrWhiteSpace(input))
 			{
 				_logger.Warning("OBS get-mute action skipped: no input selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoInputSelected());
 			}
 
-			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable ||
-				string.IsNullOrWhiteSpace(variable))
+			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable
+				|| string.IsNullOrWhiteSpace(variable))
 			{
 				_logger.Warning("OBS get-mute action skipped: no target variable");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
@@ -108,7 +111,7 @@ internal sealed class GetInputMuteActionDefinition : IDynamicOptionsActionDefini
 			{
 				_logger.Warning("OBS get-mute action skipped: mute state unavailable for '{Input}'", input);
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Obs.Errors.InputNotFound(input: input));
+					AppStrings.Integrations.Obs.Errors.InputNotFound(input));
 			}
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
@@ -120,7 +123,7 @@ internal sealed class GetInputMuteActionDefinition : IDynamicOptionsActionDefini
 			return written
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable: variable));
+					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable));
 		}
 	}
 }

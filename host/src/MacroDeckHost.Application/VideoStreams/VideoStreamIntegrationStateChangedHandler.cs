@@ -5,13 +5,15 @@ using Mediator;
 
 namespace MacroDeckHost.Application.VideoStreams;
 
-public sealed class VideoStreamIntegrationStateChangedHandler : INotificationHandler<IntegrationStateChangedNotification>
+public sealed class
+	VideoStreamIntegrationStateChangedHandler : INotificationHandler<IntegrationStateChangedNotification>
 {
 	private readonly IVideoStreamSessionBroker _broker;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly VideoStreamProviderRegistry _registry;
 
-	public VideoStreamIntegrationStateChangedHandler(IIntegrationRegistry integrations,
+	public VideoStreamIntegrationStateChangedHandler(
+		IIntegrationRegistry integrations,
 		VideoStreamProviderRegistry registry,
 		IVideoStreamSessionBroker broker)
 	{
@@ -20,7 +22,8 @@ public sealed class VideoStreamIntegrationStateChangedHandler : INotificationHan
 		_broker = broker;
 	}
 
-	public async ValueTask Handle(IntegrationStateChangedNotification notification,
+	public async ValueTask Handle(
+		IntegrationStateChangedNotification notification,
 		CancellationToken cancellationToken)
 	{
 		if (!_registry.HasOwner(notification.IntegrationId))
@@ -30,7 +33,7 @@ public sealed class VideoStreamIntegrationStateChangedHandler : INotificationHan
 
 		if (!_integrations.IsEnabled(notification.IntegrationId))
 		{
-			_broker.CloseOwner(notification.IntegrationId, VideoStreamSessionReason.ProviderRemoved, notifyProvider: true);
+			_broker.CloseOwner(notification.IntegrationId, VideoStreamSessionReason.ProviderRemoved, true);
 		}
 
 		await _registry.PublishCatalogChangedAsync();

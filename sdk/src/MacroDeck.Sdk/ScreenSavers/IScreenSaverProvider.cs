@@ -46,5 +46,8 @@ public interface IScreenSaverProvider
 	/// The screensavers this provider currently offers. The host reads this to recover its catalog after a
 	/// reconnect; a provider that keeps no catalog of its own may return an empty list.
 	/// </summary>
-	IReadOnlyList<ScreenSaverDescriptor> GetScreenSavers() => [];
+	IReadOnlyList<ScreenSaverDescriptor> GetScreenSavers()
+	{
+		return [];
+	}
 }

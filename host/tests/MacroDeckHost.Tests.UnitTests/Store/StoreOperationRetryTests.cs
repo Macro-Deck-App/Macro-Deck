@@ -56,15 +56,18 @@ internal sealed class StoreOperationRetryTests
 		});
 	}
 
-	private static StoreOperation Failed(StoreOperationError error) => new()
+	private static StoreOperation Failed(StoreOperationError error)
 	{
-		Id = Guid.CreateVersion7(),
-		Kind = StoreOperationKind.Install,
-		ExtensionKind = StoreExtensionKind.Plugin,
-		PackageId = "com.acme.soundbox",
-		Version = "1.0.0",
-		DisplayName = "SoundBox",
-		State = StoreOperationState.Failed,
-		Error = error
-	};
+		return new StoreOperation
+		{
+			Id = Guid.CreateVersion7(),
+			Kind = StoreOperationKind.Install,
+			ExtensionKind = StoreExtensionKind.Plugin,
+			PackageId = "com.acme.soundbox",
+			Version = "1.0.0",
+			DisplayName = "SoundBox",
+			State = StoreOperationState.Failed,
+			Error = error
+		};
+	}
 }

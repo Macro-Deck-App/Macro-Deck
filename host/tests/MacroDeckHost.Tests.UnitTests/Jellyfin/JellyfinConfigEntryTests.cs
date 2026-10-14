@@ -27,7 +27,9 @@ internal sealed class JellyfinConfigEntryTests
 	{
 		_store = new MemoryConfigStore();
 		_variables = new VariableRegistry();
-		_integration = new JellyfinIntegration(_ => new FakeJellyfinClient(), timings: FastTimings, suffixFactory: () => 1234);
+		_integration = new JellyfinIntegration(_ => new FakeJellyfinClient(),
+			timings: FastTimings,
+			suffixFactory: () => 1234);
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IIntegrationConfigStore>(_store);
@@ -42,7 +44,10 @@ internal sealed class JellyfinConfigEntryTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public async Task Saving_an_edit_again_keeps_devices_learned_while_the_dialog_was_open_and_the_variable_key()
@@ -59,7 +64,9 @@ internal sealed class JellyfinConfigEntryTests
 			}));
 		foreach (var variable in JellyfinVariables.DeclareServer("home", entryId, "Home"))
 		{
-			OwnVariable(variable.Name!, variable.Id!, JellyfinIntegration.IntegrationId,
+			OwnVariable(variable.Name!,
+				variable.Id!,
+				JellyfinIntegration.IntegrationId,
 				SdkVariableTypeMapper.ToDomain(variable.Type));
 		}
 
@@ -109,13 +116,18 @@ internal sealed class JellyfinConfigEntryTests
 		_store.Entries.Add(Entry(Guid.NewGuid(), "Cabin", "cabin"));
 		_store.Entries.Add(Entry(entryId, "Home", "home"));
 
-		var outcome = await _coordinator.RenameAsync(JellyfinIntegration.IntegrationId, entryId, "Cabin", CancellationToken.None);
+		var outcome = await _coordinator.RenameAsync(JellyfinIntegration.IntegrationId,
+			entryId,
+			"Cabin",
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(outcome.Success, Is.True);
-			Assert.That(_store.Entries.Single(entry => entry.Id == entryId).Values[JellyfinIntegration.VariableKeyConfigKey]
-				.GetString(), Is.EqualTo("cabin_1234"));
+			Assert.That(_store.Entries.Single(entry => entry.Id == entryId)
+					.Values[JellyfinIntegration.VariableKeyConfigKey]
+					.GetString(),
+				Is.EqualTo("cabin_1234"));
 		});
 	}
 
@@ -127,19 +139,21 @@ internal sealed class JellyfinConfigEntryTests
 		var removed = Guid.NewGuid();
 		await context.Variables.CreateAsync(JellyfinVariables.DeclareServer("gone", removed, "Gone")[0]);
 		var known = new JellyfinDeviceRegistry();
-		known.Observe(JellyfinSessionMapper.Map([Session("tv", "Living Room TV")], "x"), DateTimeOffset.UtcNow, _ => false);
+		known.Observe(JellyfinSessionMapper.Map([Session("tv", "Living Room TV")], "x"),
+			DateTimeOffset.UtcNow,
+			_ => false);
 		var kept = Guid.NewGuid();
 
-		await _integration.SynchronizeEntriesAsync(
-		[
+		await _integration.SynchronizeEntriesAsync([
 			Stored(kept, "Home", "home", known.Serialize()),
-			Stored(Guid.NewGuid(), "Legacy", null, null),
+			Stored(Guid.NewGuid(), "Legacy", null, null)
 		]);
 
 		var names = context.OwnVariables.All.Select(variable => variable.Name).ToList();
 		Assert.Multiple(() =>
 		{
-			Assert.That(names, Is.SupersetOf(JellyfinVariables.DeclareServer("home", kept, "Home").Select(variable => variable.Name)));
+			Assert.That(names,
+				Is.SupersetOf(JellyfinVariables.DeclareServer("home", kept, "Home").Select(variable => variable.Name)));
 			Assert.That(names, Does.Contain(JellyfinVariables.DeviceVariableName("home", "living_room_tv", "title")));
 			Assert.That(names, Has.None.StartsWith("jellyfin_gone_"));
 			Assert.That(names, Has.None.Contains("legacy"));
@@ -160,7 +174,8 @@ internal sealed class JellyfinConfigEntryTests
 	}
 
 	private void OwnVariable(string name, string definitionId, string owner, DomainEnums.VariableType type)
-		=> _variables.Upsert(new VariableEntity
+	{
+		_variables.Upsert(new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -170,9 +185,11 @@ internal sealed class JellyfinConfigEntryTests
 			OwnerIntegrationId = owner,
 			DefinitionId = definitionId
 		});
+	}
 
 	private static ConfigEntryRecord Entry(Guid id, string title, string key)
-		=> new(id,
+	{
+		return new ConfigEntryRecord(id,
 			JellyfinIntegration.IntegrationId,
 			title,
 			DateTime.UtcNow,
@@ -180,6 +197,7 @@ internal sealed class JellyfinConfigEntryTests
 			{
 				[JellyfinIntegration.VariableKeyConfigKey] = JsonSerializer.SerializeToElement(key)
 			});
+	}
 
 	private static StoredConfigEntry Stored(Guid id, string title, string? key, string? devices)
 	{
@@ -200,10 +218,14 @@ internal sealed class JellyfinConfigEntryTests
 	private sealed class NoLifecycle : IIntegrationLifecycle
 	{
 		public Task ReinitializeAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task ShutdownAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class MemoryConfigStore : IIntegrationConfigStore
@@ -211,18 +233,25 @@ internal sealed class JellyfinConfigEntryTests
 		public List<ConfigEntryRecord> Entries { get; } = [];
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
 				.Where(entry => entry.IntegrationId == integrationId)
 				.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		{
+			return Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<bool> Create(Guid entryId,
+		public Task<bool> Create(
+			Guid entryId,
 			string integrationId,
 			string title,
 			IReadOnlyDictionary<string, JsonElement> values)
@@ -232,7 +261,9 @@ internal sealed class JellyfinConfigEntryTests
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{

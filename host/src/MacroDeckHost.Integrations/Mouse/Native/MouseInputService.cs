@@ -43,7 +43,9 @@ public sealed class MouseInputService : IMouseInputService
 	}
 
 	public Task RequestPermissionAsync(CancellationToken cancellationToken = default)
-		=> Task.Run(_provider.RequestPermission, cancellationToken);
+	{
+		return Task.Run(_provider.RequestPermission, cancellationToken);
+	}
 
 	public Task MoveAsync(MouseTarget target, CancellationToken cancellationToken = default)
 	{
@@ -304,7 +306,9 @@ public sealed class MouseInputService : IMouseInputService
 	}
 
 	private MousePoint? ResolveOrSkip(MouseTarget target)
-		=> TryResolve(target, out var point) == TargetResolution.Resolved ? point : null;
+	{
+		return TryResolve(target, out var point) == TargetResolution.Resolved ? point : null;
+	}
 
 	private TargetResolution TryResolve(MouseTarget target, out MousePoint point)
 	{
@@ -350,7 +354,9 @@ public sealed class MouseInputService : IMouseInputService
 	}
 
 	private MousePoint Clamp(MousePoint point)
-		=> _provider.TryGetDesktopBounds(out var bounds) ? bounds.Clamp(point) : point;
+	{
+		return _provider.TryGetDesktopBounds(out var bounds) ? bounds.Clamp(point) : point;
+	}
 
 	private void EnsureSupported()
 	{

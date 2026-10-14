@@ -53,7 +53,8 @@ public sealed class ConformanceRunner
 	/// own health endpoint). Propagated rather than reported: there is no running subject to build a
 	/// <see cref="ConformanceContext" /> around.
 	/// </exception>
-	public async Task<ConformanceReport> RunAsync(ConformanceSubject subject,
+	public async Task<ConformanceReport> RunAsync(
+		ConformanceSubject subject,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(subject);
@@ -112,8 +113,8 @@ public sealed class ConformanceRunner
 			var skipped = results.Count - passed - failed;
 
 			var conformant = results.All(result
-				=> result.Requirement != ConformanceRequirement.Required ||
-				result.Result.Outcome != ConformanceOutcome.Failed);
+				=> result.Requirement != ConformanceRequirement.Required
+				|| result.Result.Outcome != ConformanceOutcome.Failed);
 
 			return new ConformanceReport
 			{
@@ -146,7 +147,8 @@ public sealed class ConformanceRunner
 	/// entirely: without it, a single wedged check would hang the whole run, no matter how carefully the
 	/// token was threaded through <see cref="IConformanceCheck.RunAsync" />'s own implementation.
 	/// </summary>
-	private static async Task<ConformanceCheckResult> RunOneAsync(IConformanceCheck check,
+	private static async Task<ConformanceCheckResult> RunOneAsync(
+		IConformanceCheck check,
 		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
@@ -188,8 +190,8 @@ public sealed class ConformanceRunner
 				TaskScheduler.Default);
 
 			return ConformanceCheckResult
-				.Inconclusive($"The check did not return within its {perCheckTimeout} per-check timeout " +
-					$"and was abandoned after {stopwatch.Elapsed} of real time.")
+				.Inconclusive($"The check did not return within its {perCheckTimeout} per-check timeout "
+					+ $"and was abandoned after {stopwatch.Elapsed} of real time.")
 				.WithDuration(stopwatch.Elapsed);
 		}
 
@@ -210,8 +212,8 @@ public sealed class ConformanceRunner
 		{
 			return await check.RunAsync(context, linkedToken).ConfigureAwait(false);
 		}
-		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested &&
-			!cancellationToken.IsCancellationRequested)
+		catch (OperationCanceledException) when (timeoutSource.IsCancellationRequested
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			// The check itself observed the per-check timeout and unwound cleanly - still no verdict on
 			// the subject, so this is Inconclusive rather than Failed for the same reason the abandonment

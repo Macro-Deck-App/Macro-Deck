@@ -25,12 +25,12 @@ internal sealed class SetVoiceVolumeActionDefinition : IActionDefinition
 		[
 			DiscordActionParameters.VolumeModeSelector(),
 			ActionParameter.Slider(VolumeParameter,
-				min: 0,
-				max: _max,
-				label: AppStrings.Integrations.Discord.Actions.SetVoiceVolume.VolumeLabel(),
-				description: AppStrings.Integrations.Discord.Actions.SetVoiceVolume.VolumeDescription(),
-				step: 1,
-				defaultValue: 100d)
+				0,
+				_max,
+				AppStrings.Integrations.Discord.Actions.SetVoiceVolume.VolumeLabel(),
+				AppStrings.Integrations.Discord.Actions.SetVoiceVolume.VolumeDescription(),
+				1,
+				100d)
 		];
 	}
 
@@ -46,7 +46,10 @@ internal sealed class SetVoiceVolumeActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(Id, _resolver, _output, _max);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(Id, _resolver, _output, _max);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

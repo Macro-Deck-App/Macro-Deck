@@ -19,12 +19,12 @@ public sealed record ThirdPartyNoticesDocument(
 	private const int RuleWidth = 80;
 	private const string TextsHeading = "License and notice texts";
 
-	private static readonly (string Prefix, string Ecosystem)[] Sections =
+	private static readonly (string Prefix, string Ecosystem)[] _sections =
 	[
 		("NuGet packages", "nuget"),
 		("npm packages", "npm"),
 		("Rust crates", "cargo"),
-		("Bundled assets", "asset"),
+		("Bundled assets", "asset")
 	];
 
 	public static ThirdPartyNoticesDocument Parse(string text)
@@ -47,7 +47,9 @@ public sealed record ThirdPartyNoticesDocument(
 					break;
 				}
 
-				ecosystem = Sections.FirstOrDefault(section => heading.StartsWith(section.Prefix, StringComparison.Ordinal)).Ecosystem
+				ecosystem = _sections
+						.FirstOrDefault(section => heading.StartsWith(section.Prefix, StringComparison.Ordinal))
+						.Ecosystem
 					?? throw new FormatException($"unknown section '{heading}'");
 				continue;
 			}
@@ -61,7 +63,10 @@ public sealed record ThirdPartyNoticesDocument(
 			index++;
 		}
 
-		var texts = ReadTexts(lines, index, textRule, components.SelectMany(component => component.TextIds).DefaultIfEmpty().Max());
+		var texts = ReadTexts(lines,
+			index,
+			textRule,
+			components.SelectMany(component => component.TextIds).DefaultIfEmpty().Max());
 		return new ThirdPartyNoticesDocument(components, texts);
 	}
 
@@ -80,8 +85,7 @@ public sealed record ThirdPartyNoticesDocument(
 			index++;
 		}
 
-		components.Add(new ThirdPartyComponent(
-			name,
+		components.Add(new ThirdPartyComponent(name,
 			ecosystem,
 			Split(fields.GetValueOrDefault("License"), "; "),
 			Split(fields.GetValueOrDefault("Declared"), "; "),
@@ -89,7 +93,8 @@ public sealed record ThirdPartyNoticesDocument(
 			Split(fields.GetValueOrDefault("Platforms"), ", "),
 			fields.GetValueOrDefault("Note"),
 			Split(fields.GetValueOrDefault("Texts"), ", ")
-				.Select(reference => int.Parse(reference.Trim('[', ']'), System.Globalization.CultureInfo.InvariantCulture))
+				.Select(reference
+					=> int.Parse(reference.Trim('[', ']'), System.Globalization.CultureInfo.InvariantCulture))
 				.ToList()));
 		return index;
 	}
@@ -114,7 +119,8 @@ public sealed record ThirdPartyNoticesDocument(
 		var prefix = $"[{id}] ";
 		for (var index = start; index + 1 < lines.Length; index++)
 		{
-			if (lines[index].StartsWith(prefix, StringComparison.Ordinal) && lines[index + 1] == textRule
+			if (lines[index].StartsWith(prefix, StringComparison.Ordinal)
+				&& lines[index + 1] == textRule
 				&& (index == 0 || lines[index - 1].Length == 0))
 			{
 				return index;
@@ -124,6 +130,8 @@ public sealed record ThirdPartyNoticesDocument(
 		throw new FormatException($"license text [{id}] is missing");
 	}
 
-	private static List<string> Split(string? value, string separator) =>
-		string.IsNullOrEmpty(value) ? [] : [.. value.Split(separator, StringSplitOptions.RemoveEmptyEntries)];
+	private static List<string> Split(string? value, string separator)
+	{
+		return string.IsNullOrEmpty(value) ? [] : [.. value.Split(separator, StringSplitOptions.RemoveEmptyEntries)];
+	}
 }

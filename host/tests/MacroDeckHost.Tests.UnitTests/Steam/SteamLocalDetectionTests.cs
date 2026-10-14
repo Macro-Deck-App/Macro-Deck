@@ -9,10 +9,16 @@ internal sealed class SteamLocalDetectionTests
 	private SteamFolders _folders = null!;
 
 	[SetUp]
-	public void SetUp() => _folders = new SteamFolders();
+	public void SetUp()
+	{
+		_folders = new SteamFolders();
+	}
 
 	[TearDown]
-	public void TearDown() => _folders.Dispose();
+	public void TearDown()
+	{
+		_folders.Dispose();
+	}
 
 	[Test]
 	public void Fully_installed_games_are_listed_with_their_names_and_last_played_time()
@@ -36,7 +42,7 @@ internal sealed class SteamLocalDetectionTests
 	{
 		var steam = _folders.Make("Steam");
 		SteamFolders.WriteManifest(steam, 730, "Installed");
-		SteamFolders.WriteManifest(steam, 440, "Downloading", stateFlags: 1026);
+		SteamFolders.WriteManifest(steam, 440, "Downloading", 1026);
 
 		var games = new SteamLibrary(new FakeTimeProvider()).Scan(steam, []);
 
@@ -240,7 +246,8 @@ internal sealed class SteamLocalDetectionTests
 	[Test]
 	public void A_stale_registry_value_is_ignored_when_steam_is_not_running()
 	{
-		var platform = new FakeSteamPlatform { Os = SteamOs.Windows, RegistryRunningAppId = 730, SteamProcessRunning = false };
+		var platform = new FakeSteamPlatform
+			{ Os = SteamOs.Windows, RegistryRunningAppId = 730, SteamProcessRunning = false };
 
 		Assert.That(SteamRunningApp.Read(platform, null), Is.Null);
 	}
@@ -291,7 +298,8 @@ internal sealed class SteamLocalDetectionTests
 	[Test]
 	public void The_reaper_command_line_names_the_launched_app()
 	{
-		const string commandLine = "/home/u/.steam/ubuntu12_32/reaper\0SteamLaunch\0AppId=620\0--\0/path/proton\0waitforexitandrun";
+		const string commandLine
+			= "/home/u/.steam/ubuntu12_32/reaper\0SteamLaunch\0AppId=620\0--\0/path/proton\0waitforexitandrun";
 
 		Assert.That(SteamRunningApp.TryReadReaperAppId(commandLine), Is.EqualTo(620));
 	}

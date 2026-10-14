@@ -27,10 +27,12 @@ public class VariableBindingAppenderTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(outcomes, Is.EqualTo(new[] { VariableBindingOutcome.Bound, VariableBindingOutcome.Bound }));
-			Assert.That(store.Bindings.Select(b => (b.IntegrationId, b.LocalResourceId, b.Name, b.Type, b.MigratedFrom)),
+			Assert.That(
+				store.Bindings.Select(b => (b.IntegrationId, b.LocalResourceId, b.Name, b.Type, b.MigratedFrom)),
 				Is.EqualTo(new[]
 				{
-					("app.example.other", "entity/light.kitchen/state", "other", DomainVariableType.Text, (string?)null),
+					("app.example.other", "entity/light.kitchen/state", "other", DomainVariableType.Text,
+						(string?)null),
 					(HomeAssistant, "entity/light.kitchen/state", "ha_light_kitchen", DomainVariableType.Text, "v1"),
 					(HomeAssistant, "entity/switch.desk/state", "ha_switch_desk", DomainVariableType.Boolean, null)
 				}));
@@ -49,7 +51,8 @@ public class VariableBindingAppenderTests
 			Assert.That(outcomes,
 				Is.EqualTo(new[]
 				{
-					VariableBindingOutcome.AlreadyBound, VariableBindingOutcome.Bound, VariableBindingOutcome.AlreadyBound
+					VariableBindingOutcome.AlreadyBound, VariableBindingOutcome.Bound,
+					VariableBindingOutcome.AlreadyBound
 				}));
 			Assert.That(store.Bindings.Select(b => b.Name), Is.EqualTo(new[] { "renamed_by_user", "ha_switch_desk" }));
 		});
@@ -91,7 +94,8 @@ public class VariableBindingAppenderTests
 	}
 
 	private static VariableBinding Binding(string integrationId, string resourceId, string name)
-		=> new()
+	{
+		return new VariableBinding
 		{
 			Id = Guid.NewGuid(),
 			IntegrationId = integrationId,
@@ -99,6 +103,7 @@ public class VariableBindingAppenderTests
 			Name = name,
 			Type = DomainVariableType.Text
 		};
+	}
 
 	private sealed class MemoryBindingStore(params VariableBinding[] initial) : IVariableBindingStore
 	{
@@ -110,7 +115,10 @@ public class VariableBindingAppenderTests
 
 		public int Saves { get; private set; }
 
-		public IReadOnlyList<VariableBinding> Load() => Bindings;
+		public IReadOnlyList<VariableBinding> Load()
+		{
+			return Bindings;
+		}
 
 		public bool TryLoad(out IReadOnlyList<VariableBinding> bindings)
 		{

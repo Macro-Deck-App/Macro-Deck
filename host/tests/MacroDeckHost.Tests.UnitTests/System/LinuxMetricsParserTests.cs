@@ -8,8 +8,8 @@ public class LinuxMetricsParserTests
 	public void ParseProcStat_reads_aggregate_cpu_line()
 	{
 		const string content =
-			"cpu  10132153 290696 3084719 46828483 16683 0 25195 0 0 0\n" +
-			"cpu0 1393280 32966 572056 13343292 6130 0 17875 0 0 0\n";
+			"cpu  10132153 290696 3084719 46828483 16683 0 25195 0 0 0\n"
+			+ "cpu0 1393280 32966 572056 13343292 6130 0 17875 0 0 0\n";
 
 		var times = LinuxMetricsParser.ParseProcStat(content);
 
@@ -28,10 +28,10 @@ public class LinuxMetricsParserTests
 	public void ParseMemInfo_reads_total_and_available()
 	{
 		const string content =
-			"MemTotal:       16384256 kB\n" +
-			"MemFree:         8290312 kB\n" +
-			"MemAvailable:   12345678 kB\n" +
-			"Buffers:          517424 kB\n";
+			"MemTotal:       16384256 kB\n"
+			+ "MemFree:         8290312 kB\n"
+			+ "MemAvailable:   12345678 kB\n"
+			+ "Buffers:          517424 kB\n";
 
 		var memory = LinuxMetricsParser.ParseMemInfo(content);
 

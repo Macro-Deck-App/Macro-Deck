@@ -57,18 +57,23 @@ public class AccessoryCoordinatorTests
 			Assert.That(AndroidCandidateFilter.ClassifyDescriptors(phone, [_hid]), Is.Null);
 			Assert.That(AndroidCandidateFilter.ClassifyDescriptors(phone with { VendorId = 0x05AC }, [_mtp]), Is.Null);
 			Assert.That(AndroidCandidateFilter.ClassifyDescriptors(phone with { DeviceClass = 0x02 }, [_mtp]), Is.Null);
-			Assert.That(AndroidCandidateFilter.ClassifyDescriptors(phone with { DeviceClass = 0xEF }, [_mtp]), Is.Not.Null);
+			Assert.That(AndroidCandidateFilter.ClassifyDescriptors(phone with { DeviceClass = 0xEF }, [_mtp]),
+				Is.Not.Null);
 
 			var vendorMtp = AndroidCandidateFilter.ClassifyDescriptors(phone, [_vendorMtp])!;
 			Assert.That(AndroidCandidateFilter.AcceptStrings(vendorMtp,
-				new UsbDeviceStrings(null, "Phone", null, new Dictionary<byte, string> { [5] = "MTP" })), Is.True);
+					new UsbDeviceStrings(null, "Phone", null, new Dictionary<byte, string> { [5] = "MTP" })),
+				Is.True);
 			Assert.That(AndroidCandidateFilter.AcceptStrings(vendorMtp,
-				new UsbDeviceStrings(null, "Phone", null, new Dictionary<byte, string> { [5] = "Other" })), Is.False);
+					new UsbDeviceStrings(null, "Phone", null, new Dictionary<byte, string> { [5] = "Other" })),
+				Is.False);
 
 			var plain = AndroidCandidateFilter.ClassifyDescriptors(phone, [_mtp, _adb])!;
-			Assert.That(AndroidCandidateFilter.AcceptStrings(plain, new UsbDeviceStrings(null, "Car_Thing", null, noStrings)),
+			Assert.That(
+				AndroidCandidateFilter.AcceptStrings(plain, new UsbDeviceStrings(null, "Car_Thing", null, noStrings)),
 				Is.False);
-			Assert.That(AndroidCandidateFilter.AcceptStrings(plain, new UsbDeviceStrings(null, "superbird", null, noStrings)),
+			Assert.That(
+				AndroidCandidateFilter.AcceptStrings(plain, new UsbDeviceStrings(null, "superbird", null, noStrings)),
 				Is.False);
 		});
 	}
@@ -120,12 +125,13 @@ public class AccessoryCoordinatorTests
 	{
 		_usb.Plug(1, [_mtp]);
 
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
-		Assert.That(_usb.SentIdentifications.Single(), Is.EqualTo(new[]
-		{
-			"Macro Deck", "Macro Deck Companion", "Example-Mac", "1", "https://macro-deck.app", ""
-		}));
+		Assert.That(_usb.SentIdentifications.Single(),
+			Is.EqualTo(new[]
+			{
+				"Macro Deck", "Macro Deck Companion", "Example-Mac", "1", "https://macro-deck.app", ""
+			}));
 	}
 
 	[TestCase(null, "Macro Deck")]
@@ -164,7 +170,7 @@ public class AccessoryCoordinatorTests
 	{
 		_usb.Plug(1, [_mtp]);
 
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.That(_usb.Switched, Has.Count.EqualTo(1));
 	}
@@ -174,9 +180,9 @@ public class AccessoryCoordinatorTests
 	{
 		_usb.Plug(1, [_mtp]);
 
-		Poll(remembered: ["EXAMPLE0001"], bridge: false);
+		Poll(["EXAMPLE0001"], false);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"], bridge: false);
+		Poll(["EXAMPLE0001"], false);
 
 		Assert.Multiple(() =>
 		{
@@ -212,7 +218,7 @@ public class AccessoryCoordinatorTests
 	{
 		_usb.Plug(1, [_mtp, _adb]);
 
-		Poll(remembered: ["EXAMPLE0001"], adbSerials: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"], adbSerials: ["EXAMPLE0001"]);
 
 		Assert.That(_usb.Switched, Has.Count.EqualTo(1));
 	}
@@ -221,7 +227,7 @@ public class AccessoryCoordinatorTests
 	public void An_adb_only_phone_is_listed_while_host_adb_is_on_and_a_car_thing_never_is()
 	{
 		_usb.Plug(1, [_adb]);
-		_usb.Plug(1, [_adb], product: "Car_Thing", serial: "CARTHING01", plug: new UsbPlugKey(1, "5"));
+		_usb.Plug(1, [_adb], "Car_Thing", "CARTHING01", plug: new UsbPlugKey(1, "5"));
 
 		Poll(adbSerials: ["EXAMPLE0001", "CARTHING01"]);
 
@@ -231,8 +237,8 @@ public class AccessoryCoordinatorTests
 	[Test]
 	public void A_switched_phone_that_stays_in_normal_mode_is_no_longer_native_and_adb_reverse_resumes()
 	{
-		var paths = new MacroDeckHost.Tests.UnitTests.TestSupport.TestPaths();
-		var runner = new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbProcessRunner();
+		var paths = new TestSupport.TestPaths();
+		var runner = new Adb.FakeAdbProcessRunner();
 		var tunnels = new MacroDeckHost.Infrastructure.Adb.AdbTunnelCoordinator(runner,
 			new FakeHostListenerState(),
 			new MacroDeckHost.Infrastructure.Adb.AdbOwnershipMarker(paths, Logger.None),
@@ -240,13 +246,19 @@ public class AccessoryCoordinatorTests
 			_coordinator);
 		tunnels.SetExecutablePath("fake-adb");
 		var adbDevice = new MacroDeckHost.Application.Adb.AdbDevice("EXAMPLE0001",
-			MacroDeckHost.Application.Adb.AdbDeviceState.Device, "Phone", "Example", "phone", "1", null, _now);
+			Application.Adb.AdbDeviceState.Device,
+			"Phone",
+			"Example",
+			"phone",
+			"1",
+			null,
+			_now);
 		_usb.Plug(1, [_adb]);
 
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var nativeWhileSwitching = _coordinator.IsNative("EXAMPLE0001");
 		var duringSwitch = tunnels.ReconcileAsync([adbDevice], CancellationToken.None).GetAwaiter().GetResult();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var afterFallback = tunnels.ReconcileAsync([adbDevice], CancellationToken.None).GetAwaiter().GetResult();
 
 		Assert.Multiple(() =>
@@ -263,14 +275,14 @@ public class AccessoryCoordinatorTests
 	public void A_switched_or_linked_device_is_reported_as_native_until_it_is_unplugged()
 	{
 		_usb.Plug(1, [_adb]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var whileSwitching = _coordinator.IsNative("EXAMPLE0001");
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var inAccessoryMode = _coordinator.IsNative("EXAMPLE0001");
 		_usb.Unplug();
-		Poll(remembered: ["EXAMPLE0001"]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
@@ -285,24 +297,24 @@ public class AccessoryCoordinatorTests
 	public void A_phone_switched_but_never_linked_is_not_switched_again_until_it_is_unplugged()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.Plug(1, [_mtp]);
 
 		for (var poll = 0; poll < 60; poll++)
 		{
 			Advance(TimeSpan.FromSeconds(3));
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 		}
 
 		var switchesBeforeReplug = _usb.Switched.Count;
 		var stateBeforeReplug = _coordinator.Devices.Single().State;
 		_usb.Unplug();
-		Poll(remembered: ["EXAMPLE0001"]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
@@ -340,20 +352,20 @@ public class AccessoryCoordinatorTests
 	public void A_pick_cannot_override_the_app_closing_the_link_until_the_phone_is_unplugged()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var session = _sessions.Single();
 		session.Link();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		session.ByeReceived = true;
 		session.IsLinked = false;
 		session.End();
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		var pick = _coordinator.Pick(_coordinator.Devices.Single().Id);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
@@ -371,7 +383,8 @@ public class AccessoryCoordinatorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Encoding.UTF8.GetByteCount(description), Is.LessThanOrEqualTo(AccessoryProtocol.MaxDescriptionBytes));
+			Assert.That(Encoding.UTF8.GetByteCount(description),
+				Is.LessThanOrEqualTo(AccessoryProtocol.MaxDescriptionBytes));
 			Assert.That(description, Is.EqualTo(string.Concat(Enumerable.Repeat(emoji, 50))));
 			Assert.That(wide, Is.EqualTo(new string('\u65E5', 64)));
 		});
@@ -409,24 +422,24 @@ public class AccessoryCoordinatorTests
 	public void After_a_loss_without_bye_the_phone_is_switched_again_after_5_s_30_s_and_2_min_and_then_no_more()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var waits = new List<TimeSpan>();
 
 		for (var loss = 0; loss < 4; loss++)
 		{
 			_usb.SwitchToAccessoryMode();
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 			_sessions.Last().Link();
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 			_sessions.Last().End();
 			_usb.Plug(1, [_mtp]);
 			var lostAt = _now;
 			var switches = _usb.Switched.Count;
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 			while (_usb.Switched.Count == switches && _now - lostAt < TimeSpan.FromMinutes(10))
 			{
 				Advance(TimeSpan.FromSeconds(1));
-				Poll(remembered: ["EXAMPLE0001"]);
+				Poll(["EXAMPLE0001"]);
 			}
 
 			waits.Add(_now - lostAt);
@@ -434,10 +447,11 @@ public class AccessoryCoordinatorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(waits.Take(3), Is.EqualTo(new[]
-			{
-				TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2)
-			}));
+			Assert.That(waits.Take(3),
+				Is.EqualTo(new[]
+				{
+					TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(2)
+				}));
 			Assert.That(waits[3], Is.GreaterThanOrEqualTo(TimeSpan.FromMinutes(10)));
 			Assert.That(_usb.Switched, Has.Count.EqualTo(4));
 		});
@@ -447,12 +461,12 @@ public class AccessoryCoordinatorTests
 	public void After_the_app_says_bye_the_phone_is_not_switched_again_until_it_is_unplugged()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var session = _sessions.Single();
 		session.Link();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		session.ByeReceived = true;
 		session.IsLinked = false;
 		session.End();
@@ -461,7 +475,7 @@ public class AccessoryCoordinatorTests
 		for (var poll = 0; poll < 100; poll++)
 		{
 			Advance(TimeSpan.FromSeconds(3));
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 		}
 
 		Assert.Multiple(() =>
@@ -475,14 +489,14 @@ public class AccessoryCoordinatorTests
 	public void A_link_lost_while_the_phone_stays_in_accessory_mode_reopens_the_handle_without_switching()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_sessions.Single().Link();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		_sessions.Single().End();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
@@ -495,17 +509,17 @@ public class AccessoryCoordinatorTests
 	public void A_link_that_never_heard_the_app_is_reopened_only_after_a_backoff()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_sessions.Single().End();
 
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		Advance(AccessoryCoordinator.ReopenBackoff - TimeSpan.FromSeconds(1));
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var beforeBackoff = _sessions.Count;
 		Advance(TimeSpan.FromSeconds(1));
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
@@ -520,7 +534,7 @@ public class AccessoryCoordinatorTests
 	{
 		_sessionsEndWhenStopped = false;
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		_coordinator.StopAll();
 		var stopped = _coordinator.WhenStopped();
@@ -555,14 +569,15 @@ public class AccessoryCoordinatorTests
 		_usb.SwitchOutcome = AccessorySwitchOutcome.NotSupported;
 		_usb.Plug(1, [_mtp]);
 
-		Poll(remembered: ["EXAMPLE0001"]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_usb.Switched, Has.Count.EqualTo(1));
 			Assert.That(_coordinator.Devices.Single().State, Is.EqualTo(NativeUsbDeviceState.NotSupported));
-			Assert.That(_coordinator.Pick(_coordinator.Devices.Single().Id), Is.EqualTo(NativeUsbPickResult.NotAllowed));
+			Assert.That(_coordinator.Pick(_coordinator.Devices.Single().Id),
+				Is.EqualTo(NativeUsbPickResult.NotAllowed));
 			Assert.That(NativeUsbDeviceDto.From(_coordinator.Devices.Single()).CanConnect, Is.False);
 		});
 	}
@@ -596,7 +611,7 @@ public class AccessoryCoordinatorTests
 		Poll();
 		_usb.Unplug();
 		Poll();
-		_usb.Plug(1, [_mtp], product: "Another Phone", serial: "OTHER0002");
+		_usb.Plug(1, [_mtp], "Another Phone", "OTHER0002");
 		Poll();
 
 		var device = _coordinator.Devices.Single();
@@ -613,19 +628,19 @@ public class AccessoryCoordinatorTests
 	public void A_different_phone_after_a_linked_one_does_not_inherit_its_re_switch_history()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_sessions.Single().Link();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.Unplug();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.Plug(1, [_mtp], serial: "OTHER0002");
 
 		for (var poll = 0; poll < 60; poll++)
 		{
 			Advance(TimeSpan.FromSeconds(3));
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 		}
 
 		Assert.That(_usb.Switched, Has.Count.EqualTo(1));
@@ -635,22 +650,22 @@ public class AccessoryCoordinatorTests
 	public void After_a_bye_the_accessory_is_not_reopened_while_the_phone_stays_in_accessory_mode()
 	{
 		_usb.Plug(1, [_mtp]);
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		_usb.SwitchToAccessoryMode();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var session = _sessions.Single();
 		session.Link();
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		session.ByeReceived = true;
 		session.IsLinked = false;
-		Poll(remembered: ["EXAMPLE0001"]);
+		Poll(["EXAMPLE0001"]);
 		var stateWhileOpen = _coordinator.Devices.Single().State;
 		session.End();
 
 		for (var poll = 0; poll < 20; poll++)
 		{
 			Advance(TimeSpan.FromSeconds(3));
-			Poll(remembered: ["EXAMPLE0001"]);
+			Poll(["EXAMPLE0001"]);
 		}
 
 		Assert.Multiple(() =>
@@ -662,15 +677,24 @@ public class AccessoryCoordinatorTests
 	}
 
 	[TearDown]
-	public void DisposeUsb() => _usb.Dispose();
+	public void DisposeUsb()
+	{
+		_usb.Dispose();
+	}
 
-	private IReadOnlyList<RememberedUsbDevice> Poll(IReadOnlyCollection<string>? remembered = null,
+	private IReadOnlyList<RememberedUsbDevice> Poll(
+		IReadOnlyCollection<string>? remembered = null,
 		bool bridge = true,
 		IReadOnlyCollection<string>? adbSerials = null)
-		=> _coordinator.Poll(new AccessoryPollContext(bridge,
+	{
+		return _coordinator.Poll(new AccessoryPollContext(bridge,
 				(adbSerials ?? []).ToHashSet(),
 				(remembered ?? []).ToHashSet()),
 			_now);
+	}
 
-	private void Advance(TimeSpan by) => _now += by;
+	private void Advance(TimeSpan by)
+	{
+		_now += by;
+	}
 }

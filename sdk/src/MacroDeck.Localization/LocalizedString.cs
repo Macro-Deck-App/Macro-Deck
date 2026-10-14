@@ -47,8 +47,7 @@ public readonly record struct LocalizedString
 
 		foreach (var argument in Arguments)
 		{
-			if (!other.Arguments.TryGetValue(argument.Key, out var otherValue) ||
-				!Equals(argument.Value, otherValue))
+			if (!other.Arguments.TryGetValue(argument.Key, out var otherValue) || !Equals(argument.Value, otherValue))
 			{
 				return false;
 			}
@@ -72,5 +71,7 @@ public readonly record struct LocalizedString
 
 	/// <summary>Renders the key and, when present, its argument names - for diagnostics only.</summary>
 	public override string ToString()
-		=> Arguments.Count == 0 ? Key.ToString() : $"{Key}({string.Join(", ", Arguments.Keys)})";
+	{
+		return Arguments.Count == 0 ? Key.ToString() : $"{Key}({string.Join(", ", Arguments.Keys)})";
+	}
 }

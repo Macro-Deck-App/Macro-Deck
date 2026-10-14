@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Actions;
-using MacroDeck.Sdk.MusicPlayer;
 
 namespace MacroDeck.Plugin.Hosting.Capabilities.MusicPlayer;
 
@@ -10,14 +9,16 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.MusicPlayer;
 internal static partial class MusicPlayerOptionValues
 {
 	public static bool IsSupported(ActionParameter option)
-		=> option.Name is { } name &&
-			NamePattern().IsMatch(name) &&
-			option.Type switch
+	{
+		return option.Name is { } name
+			&& NamePattern().IsMatch(name)
+			&& option.Type switch
 			{
 				ActionParameterType.String or ActionParameterType.Number or ActionParameterType.Boolean => true,
 				ActionParameterType.Choice => !option.DynamicOptions && option.Options is { Count: > 0 },
 				_ => false
 			};
+	}
 
 	public static IReadOnlyList<ActionParameter> Supported(IReadOnlyList<ActionParameter>? declared)
 	{
@@ -65,12 +66,14 @@ internal static partial class MusicPlayerOptionValues
 	}
 
 	private static string StringValue(ActionParameter option, JsonElement value)
-		=> value.ValueKind switch
+	{
+		return value.ValueKind switch
 		{
 			JsonValueKind.String => value.GetString() ?? string.Empty,
 			JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => value.GetRawText(),
 			_ => Convert.ToString(option.DefaultValue, CultureInfo.InvariantCulture) ?? string.Empty
 		};
+	}
 
 	private static double NumberValue(ActionParameter option, JsonElement value)
 	{
@@ -100,11 +103,13 @@ internal static partial class MusicPlayerOptionValues
 	}
 
 	private static double DefaultNumber(ActionParameter option)
-		=> option.DefaultValue switch
+	{
+		return option.DefaultValue switch
 		{
 			IConvertible convertible when TryConvert(convertible, out var number) => number,
 			_ => option.Min ?? 0
 		};
+	}
 
 	private static bool TryConvert(IConvertible convertible, out double number)
 	{
@@ -121,13 +126,15 @@ internal static partial class MusicPlayerOptionValues
 	}
 
 	private static bool BooleanValue(ActionParameter option, JsonElement value)
-		=> value.ValueKind switch
+	{
+		return value.ValueKind switch
 		{
 			JsonValueKind.True => true,
 			JsonValueKind.False => false,
 			JsonValueKind.String when bool.TryParse(value.GetString(), out var parsed) => parsed,
 			_ => option.DefaultValue is bool fallback && fallback
 		};
+	}
 
 	private static string ChoiceValue(ActionParameter option, JsonElement value)
 	{
@@ -142,7 +149,9 @@ internal static partial class MusicPlayerOptionValues
 	}
 
 	private static bool IsChoice(IReadOnlyList<ActionParameterOption> choices, string? value)
-		=> choices.Any(choice => string.Equals(choice.Value, value, StringComparison.Ordinal));
+	{
+		return choices.Any(choice => string.Equals(choice.Value, value, StringComparison.Ordinal));
+	}
 
 	[GeneratedRegex(@"\A[A-Za-z0-9][A-Za-z0-9_-]{0,63}\z", RegexOptions.CultureInvariant)]
 	private static partial Regex NamePattern();

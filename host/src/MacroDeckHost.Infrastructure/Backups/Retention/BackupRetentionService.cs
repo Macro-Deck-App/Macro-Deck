@@ -15,7 +15,8 @@ public sealed class BackupRetentionService : IBackupRetentionService
 	private readonly IReadOnlyList<IBackupRetentionPolicy> _policies;
 	private readonly ILogger _logger;
 
-	public BackupRetentionService(IServiceScopeFactory scopeFactory,
+	public BackupRetentionService(
+		IServiceScopeFactory scopeFactory,
 		IBackupCatalog catalog,
 		IBackupStorageRegistry storageRegistry,
 		IEnumerable<IBackupRetentionPolicy> policies,
@@ -57,9 +58,11 @@ public sealed class BackupRetentionService : IBackupRetentionService
 	}
 
 	private IBackupRetentionPolicy? ResolvePolicy(string policyId)
-		=> _policies.FirstOrDefault(policy => string.Equals(policy.PolicyId, policyId, StringComparison.Ordinal)) ??
-			_policies.FirstOrDefault(policy =>
+	{
+		return _policies.FirstOrDefault(policy => string.Equals(policy.PolicyId, policyId, StringComparison.Ordinal))
+			?? _policies.FirstOrDefault(policy =>
 				string.Equals(policy.PolicyId, KeepLatestBackupRetentionPolicy.Id, StringComparison.Ordinal));
+	}
 
 	private async Task DeleteBackup(BackupDescriptor backup, CancellationToken cancellationToken)
 	{

@@ -7,7 +7,8 @@ public interface IStoreTestService
 {
 	Task<StoreTestListResult> GetTests(CancellationToken cancellationToken = default);
 
-	Task<StoreTestInstallResult> Install(string packageId,
+	Task<StoreTestInstallResult> Install(
+		string packageId,
 		Guid buildId,
 		bool consent,
 		CancellationToken cancellationToken = default);

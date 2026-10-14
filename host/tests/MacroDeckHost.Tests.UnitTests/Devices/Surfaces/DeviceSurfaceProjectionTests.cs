@@ -29,17 +29,23 @@ internal sealed class DeviceSurfaceProjectionTests
 	private DeviceSurfaceFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new DeviceSurfaceFixture();
+	public void SetUp()
+	{
+		_fixture = new DeviceSurfaceFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task The_first_snapshot_is_complete_and_costs_the_provider_no_further_calls()
 	{
 		_fixture.Home.Widgets.AddRange([
 			DeviceSurfaceFixture.Button("w1", 0, 0, label: "One"),
-			DeviceSurfaceFixture.Button("w2", 1, 0, width: 2, height: 1, label: "Two")
+			DeviceSurfaceFixture.Button("w2", 1, 0, 2, 1, "Two")
 		]);
 
 		var deviceId = await _fixture.OpenDeviceAsync();
@@ -313,7 +319,7 @@ internal sealed class DeviceSurfaceProjectionTests
 	[Test]
 	public async Task A_device_with_no_assigned_profile_still_gets_a_session_and_an_empty_surface()
 	{
-		var deviceId = await _fixture.OpenDeviceAsync("DeckA", profileId: null);
+		var deviceId = await _fixture.OpenDeviceAsync("DeckA", null);
 
 		var surface = _fixture.Provider.Latest(deviceId);
 		Assert.Multiple(() =>
@@ -329,7 +335,7 @@ internal sealed class DeviceSurfaceProjectionTests
 	[Test]
 	public async Task A_dangling_assigned_profile_is_the_same_as_none()
 	{
-		var deviceId = await _fixture.OpenDeviceAsync("DeckA", profileId: "deleted-profile");
+		var deviceId = await _fixture.OpenDeviceAsync("DeckA", "deleted-profile");
 
 		var surface = _fixture.Provider.Latest(deviceId);
 		Assert.Multiple(() =>
@@ -341,7 +347,8 @@ internal sealed class DeviceSurfaceProjectionTests
 	}
 
 	private static Widget Weather(string id, int x, int y, string backgroundColor)
-		=> new()
+	{
+		return new Widget
 		{
 			Id = id,
 			Type = WidgetTypeIds.Weather,
@@ -351,4 +358,5 @@ internal sealed class DeviceSurfaceProjectionTests
 			Height = 1,
 			Data = JsonSerializer.Serialize(new { backgroundColor })
 		};
+	}
 }

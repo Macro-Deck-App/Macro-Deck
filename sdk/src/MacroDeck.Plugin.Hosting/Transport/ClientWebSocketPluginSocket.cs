@@ -62,7 +62,9 @@ internal sealed class ClientWebSocketPluginSocket(ClientWebSocket socket, int ma
 	}
 
 	public Task SendAsync(ReadOnlyMemory<byte> utf8, CancellationToken cancellationToken)
-		=> socket.SendAsync(utf8, WebSocketMessageType.Text, endOfMessage: true, cancellationToken).AsTask();
+	{
+		return socket.SendAsync(utf8, WebSocketMessageType.Text, true, cancellationToken).AsTask();
+	}
 
 	public async Task<byte[]?> ReceiveAsync(CancellationToken cancellationToken)
 	{

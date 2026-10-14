@@ -59,8 +59,8 @@ internal static class MacroDeck2PluginDataReader
 
 			var lastWrite = new[] { setting?.LastWriteUtc, credential?.LastWriteUtc }
 					.Where(timestamp => timestamp.HasValue)
-					.Max() ??
-				DateTime.MinValue;
+					.Max()
+				?? DateTime.MinValue;
 
 			plugins.Add(new MacroDeck2PluginData(key,
 				setting?.Value ?? new Dictionary<string, string>(StringComparer.Ordinal),
@@ -87,13 +87,15 @@ internal static class MacroDeck2PluginDataReader
 			.SelectMany(set => set.Values)
 			.ToList();
 
-		return values.Count == 0 ||
-			values.Any(value => MacroDeck2StringCipher.TryDecrypt(value, candidate) is not null);
+		return values.Count == 0
+			|| values.Any(value => MacroDeck2StringCipher.TryDecrypt(value, candidate) is not null);
 	}
 
 	public static bool HasCredentials(MacroDeck2Paths paths)
-		=> Directory.Exists(paths.PluginCredentialsDirectory) &&
-			Directory.EnumerateFiles(paths.PluginCredentialsDirectory).Any();
+	{
+		return Directory.Exists(paths.PluginCredentialsDirectory)
+			&& Directory.EnumerateFiles(paths.PluginCredentialsDirectory).Any();
+	}
 
 	private static MigrationCredentialStatus ResolveStatus(
 		Dictionary<string, TimestampedFile<List<Dictionary<string, string>>>> encrypted,

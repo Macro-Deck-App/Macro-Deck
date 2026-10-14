@@ -20,13 +20,20 @@ public class EventsCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Events,
 			LocalId = localId,
@@ -37,9 +44,12 @@ public class EventsCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static EventDefinition SceneChanged()
-		=> new() { Id = "scene-changed", Name = "Scene changed" };
+	{
+		return new EventDefinition { Id = "scene-changed", Name = "Scene changed" };
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()

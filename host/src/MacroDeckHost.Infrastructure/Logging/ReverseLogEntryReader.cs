@@ -100,7 +100,9 @@ public sealed class ReverseLogEntryReader
 	}
 
 	public static string Unindent(string line)
-		=> line.StartsWith(' ') ? line[1..] : line;
+	{
+		return line.StartsWith(' ') ? line[1..] : line;
+	}
 
 	private static IEnumerable<LogFileLine> SafeLines(string path, long endOffset)
 	{

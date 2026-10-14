@@ -61,8 +61,7 @@ internal sealed class DiscordEventEmitter
 
 		PublishVoiceChannelChange(previous, current);
 
-		if (previous.VoiceConnectionState != current.VoiceConnectionState &&
-			current.VoiceConnectionState is not null)
+		if (previous.VoiceConnectionState != current.VoiceConnectionState && current.VoiceConnectionState is not null)
 		{
 			_publisher.Publish(DiscordEventIds.VoiceConnectionStateChanged,
 				new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -73,18 +72,24 @@ internal sealed class DiscordEventEmitter
 		}
 	}
 
-	public void Reset() => _previous = null;
+	public void Reset()
+	{
+		_previous = null;
+	}
 
 	public void PublishSpeaking(string userId, bool isSelf, bool speaking)
-		=> _publisher.Publish(speaking ? DiscordEventIds.SpeakingStarted : DiscordEventIds.SpeakingStopped,
+	{
+		_publisher.Publish(speaking ? DiscordEventIds.SpeakingStarted : DiscordEventIds.SpeakingStopped,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["userId"] = userId,
 				["isSelf"] = isSelf
 			});
+	}
 
 	public void PublishNotification(JsonElement data)
-		=> _publisher.Publish(DiscordEventIds.NotificationReceived,
+	{
+		_publisher.Publish(DiscordEventIds.NotificationReceived,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["title"] = DiscordStateMapper.ReadString(data, "title") ?? string.Empty,
@@ -92,6 +97,7 @@ internal sealed class DiscordEventEmitter
 				["channelId"] = DiscordStateMapper.ReadString(data, "channel_id") ?? string.Empty,
 				["iconUrl"] = DiscordStateMapper.ReadString(data, "icon_url") ?? string.Empty
 			});
+	}
 
 	private void PublishVoiceChannelChange(DiscordState previous, DiscordState current)
 	{

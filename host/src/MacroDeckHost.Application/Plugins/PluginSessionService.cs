@@ -49,11 +49,17 @@ public sealed record PluginSessionCreationResult
 	public PluginSessionResponse? Response { get; init; }
 
 	public static PluginSessionCreationResult Success(PluginSessionResponse response)
-		=> new() { Succeeded = true, Response = response };
+	{
+		return new PluginSessionCreationResult { Succeeded = true, Response = response };
+	}
 
-	public static PluginSessionCreationResult Fail(PluginSessionCreationError error,
+	public static PluginSessionCreationResult Fail(
+		PluginSessionCreationError error,
 		ProtocolVersionRange? hostVersionRange = null)
-		=> new() { Succeeded = false, Error = error, HostVersionRange = hostVersionRange };
+	{
+		return new PluginSessionCreationResult
+			{ Succeeded = false, Error = error, HostVersionRange = hostVersionRange };
+	}
 }
 
 public interface IPluginSessionService
@@ -84,11 +90,14 @@ public class PluginSessionService : IPluginSessionService
 
 	// Only names this host defines are kept, so an untrusted list cannot grow the session record.
 	private static IReadOnlyList<string> KnownFeatures(IReadOnlyList<string>? requested)
-		=> requested is null
+	{
+		return requested is null
 			? []
 			: [.. HostApiFeatures.All.Where(feature => requested.Contains(feature, StringComparer.Ordinal))];
+	}
 
-	public async Task<PluginSessionCreationResult> Create(PluginSessionIdentity identity,
+	public async Task<PluginSessionCreationResult> Create(
+		PluginSessionIdentity identity,
 		PluginSessionRequest request)
 	{
 		var versionOutcome = ProtocolVersionNegotiator.Negotiate(request.RequestedVersion);
@@ -120,9 +129,9 @@ public class PluginSessionService : IPluginSessionService
 			return PluginSessionCreationResult.Fail(PluginSessionCreationError.DeclaredVersionTooLong);
 		}
 
-		if (request.DeclaredName is { } declaredName &&
-			!string.IsNullOrWhiteSpace(declaredName) &&
-			(declaredName.Length > ProtocolLimits.MaxDeclaredNameLength || declaredName.Any(char.IsControl)))
+		if (request.DeclaredName is { } declaredName
+			&& !string.IsNullOrWhiteSpace(declaredName)
+			&& (declaredName.Length > ProtocolLimits.MaxDeclaredNameLength || declaredName.Any(char.IsControl)))
 		{
 			return PluginSessionCreationResult.Fail(PluginSessionCreationError.InvalidDeclaredName);
 		}

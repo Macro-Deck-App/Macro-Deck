@@ -25,25 +25,36 @@ internal sealed record StreamStatsViewState
 
 	public bool HasChart => Points.Count >= 2;
 
-	public string Value(string metric) => Metrics.TryGetValue(metric, out var value) ? value : Unavailable;
+	public string Value(string metric)
+	{
+		return Metrics.TryGetValue(metric, out var value) ? value : Unavailable;
+	}
 
 	public string Detail(string? detail)
-		=> detail is not null && Details.TryGetValue(detail, out var value) ? value : string.Empty;
+	{
+		return detail is not null && Details.TryGetValue(detail, out var value) ? value : string.Empty;
+	}
 
 	public bool Equals(StreamStatsViewState? other)
-		=> other is not null &&
-			HasAccount == other.HasAccount &&
-			IsLive == other.IsLive &&
-			ChannelName == other.ChannelName &&
-			SameEntries(Metrics, other.Metrics) &&
-			SameEntries(Details, other.Details) &&
-			Equals(Thumbnail, other.Thumbnail) &&
-			Points.SequenceEqual(other.Points);
+	{
+		return other is not null
+			&& HasAccount == other.HasAccount
+			&& IsLive == other.IsLive
+			&& ChannelName == other.ChannelName
+			&& SameEntries(Metrics, other.Metrics)
+			&& SameEntries(Details, other.Details)
+			&& Equals(Thumbnail, other.Thumbnail)
+			&& Points.SequenceEqual(other.Points);
+	}
 
 	public override int GetHashCode()
-		=> HashCode.Combine(HasAccount, IsLive, Metrics.Count, Details.Count, Points.Count);
+	{
+		return HashCode.Combine(HasAccount, IsLive, Metrics.Count, Details.Count, Points.Count);
+	}
 
 	private static bool SameEntries(IReadOnlyDictionary<string, string> left, IReadOnlyDictionary<string, string> right)
-		=> left.Count == right.Count &&
-			left.All(entry => right.TryGetValue(entry.Key, out var value) && value == entry.Value);
+	{
+		return left.Count == right.Count
+			&& left.All(entry => right.TryGetValue(entry.Key, out var value) && value == entry.Value);
+	}
 }

@@ -20,16 +20,20 @@ public class KeyVocabularyTests
 			{
 				Assert.That(NativeKeys.IsPositional(key), Is.True, key.ToString());
 				Assert.That(NativeKeys.TryGetWindowsScanCode(key, out var scan), Is.True, key.ToString());
-				Assert.That(NativeKeys.TryGetMacOSKeyCode(key, out _), Is.True, key.ToString());
-				Assert.That(NativeKeys.TryFromWindowsScanCode(scan, out var back) ? back : KeyCode.None, Is.EqualTo(key));
+				Assert.That(NativeKeys.TryGetMacOsKeyCode(key, out _), Is.True, key.ToString());
+				Assert.That(NativeKeys.TryFromWindowsScanCode(scan, out var back) ? back : KeyCode.None,
+					Is.EqualTo(key));
 			}
 		});
 	}
 
 	[Test]
 	public void Letters_digits_and_named_keys_are_not_positional()
-		=> Assert.That(new[] { KeyCode.A, KeyCode.Z, KeyCode.D1, KeyCode.Enter, KeyCode.Numpad1 }
-			.Where(NativeKeys.IsPositional), Is.Empty);
+	{
+		Assert.That(new[] { KeyCode.A, KeyCode.Z, KeyCode.D1, KeyCode.Enter, KeyCode.Numpad1 }
+				.Where(NativeKeys.IsPositional),
+			Is.Empty);
+	}
 
 	[TestCase(KeyCode.Minus, 0x0C, 27)]
 	[TestCase(KeyCode.BracketLeft, 0x1A, 33)]
@@ -40,7 +44,7 @@ public class KeyVocabularyTests
 	public void Physical_positions_are_the_us_keyboard_positions(KeyCode key, int scan, int macKeyCode)
 	{
 		NativeKeys.TryGetWindowsScanCode(key, out var actualScan);
-		NativeKeys.TryGetMacOSKeyCode(key, out var actualMac);
+		NativeKeys.TryGetMacOsKeyCode(key, out var actualMac);
 		Assert.Multiple(() =>
 		{
 			Assert.That(actualScan, Is.EqualTo(scan));

@@ -96,14 +96,14 @@ public class IconPackInitializerBackgroundService : HostReadyBackgroundService
 		{
 			foreach (var directory in Directory.EnumerateDirectories(_paths.IconsDirectory))
 			{
-				if (string.Equals(directory, _paths.IconPacksDirectory, StringComparison.Ordinal) ||
-					string.Equals(directory, _paths.IconStagingDirectory, StringComparison.Ordinal))
+				if (string.Equals(directory, _paths.IconPacksDirectory, StringComparison.Ordinal)
+					|| string.Equals(directory, _paths.IconStagingDirectory, StringComparison.Ordinal))
 				{
 					continue;
 				}
 
 				_logger.Information("Removing legacy icon directory {Directory}", directory);
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 		catch (Exception ex)

@@ -19,7 +19,8 @@ public class SetVariableValueRequestMessageHandler
 	private readonly SharedVariables _sharedVariables;
 	private readonly VariableOwnerNames _ownerNames;
 
-	public SetVariableValueRequestMessageHandler(IVariableService service,
+	public SetVariableValueRequestMessageHandler(
+		IVariableService service,
 		IHostLockState lockState,
 		VariableRegistry registry,
 		SharedVariables sharedVariables,
@@ -88,7 +89,9 @@ public class SetVariableValueRequestMessageHandler
 		{
 			Success = true,
 			Pending = entity.Classification == VariableClassification.Integration,
-			Variable = VariableDtoMapper.ToDto(result.Data, _registry.IsAvailable(result.Data.Id), null,
+			Variable = VariableDtoMapper.ToDto(result.Data,
+				_registry.IsAvailable(result.Data.Id),
+				null,
 				_sharedVariables.IsShared(result.Data))
 		};
 	}

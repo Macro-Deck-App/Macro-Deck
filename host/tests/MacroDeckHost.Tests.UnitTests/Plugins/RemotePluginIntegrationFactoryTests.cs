@@ -22,7 +22,8 @@ public class RemotePluginIntegrationFactoryTests
 	private static readonly IPluginAssetCache _assetCache = new InMemoryPluginAssetCache();
 
 	private static RemotePluginIntegration CreateIntegration(bool icon, bool configFlow, bool dynamicEventOptions)
-		=> RemotePluginIntegrationFactory.Create("com.example.plugin",
+	{
+		return RemotePluginIntegrationFactory.Create("com.example.plugin",
 			"Example",
 			"1.0.0",
 			RemotePluginCapabilitySnapshot.Empty("com.example.plugin"),
@@ -32,6 +33,7 @@ public class RemotePluginIntegrationFactoryTests
 			icon,
 			configFlow,
 			dynamicEventOptions);
+	}
 
 	[TestCase(false, false, false)]
 	[TestCase(true, false, false)]
@@ -68,7 +70,7 @@ public class RemotePluginIntegrationFactoryTests
 	[Test]
 	public void A_plugin_reporting_dynamic_event_options_gets_the_leaf_that_implements_the_interface()
 	{
-		var integration = CreateIntegration(icon: false, configFlow: false, dynamicEventOptions: true);
+		var integration = CreateIntegration(false, false, true);
 
 		Assert.That(integration, Is.InstanceOf<IDynamicEventOptionsProvider>());
 	}
@@ -76,13 +78,21 @@ public class RemotePluginIntegrationFactoryTests
 	[Test]
 	public void A_plugin_not_reporting_dynamic_event_options_does_not_get_that_leaf()
 	{
-		var integration = CreateIntegration(icon: false, configFlow: false, dynamicEventOptions: false);
+		var integration = CreateIntegration(false, false, false);
 
 		Assert.That(integration, Is.Not.InstanceOf<IDynamicEventOptionsProvider>());
 	}
 
 	private static RemoteActionDescriptor Descriptor(bool supportsDynamicOptions, bool providesState)
-		=> new("play", "Play", string.Empty, [], null, supportsDynamicOptions, providesState);
+	{
+		return new RemoteActionDescriptor("play",
+			"Play",
+			string.Empty,
+			[],
+			null,
+			supportsDynamicOptions,
+			providesState);
+	}
 
 	[TestCase(false, false)]
 	[TestCase(true, false)]
@@ -158,9 +168,9 @@ public class RemotePluginIntegrationFactoryTests
 			_invoker,
 			_connectionState,
 			_assetCache,
-			hasIcon: false,
-			hasConfigFlow: false,
-			hasDynamicEventOptions: false);
+			false,
+			false,
+			false);
 
 		Assert.Multiple(() =>
 		{
@@ -177,23 +187,34 @@ public class RemotePluginIntegrationFactoryTests
 
 	private sealed class ThrowingInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("Not exercised by the presence-matrix tests.");
+		{
+			throw new NotSupportedException("Not exercised by the presence-matrix tests.");
+		}
 
 		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope result)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, MacroDeck.Plugin.Protocol.Errors.ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class AlwaysDisconnected : IRemotePluginConnectionState
 	{
-		public bool IsConnected(string pluginId) => false;
+		public bool IsConnected(string pluginId)
+		{
+			return false;
+		}
 	}
 }

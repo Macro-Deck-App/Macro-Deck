@@ -10,8 +10,8 @@ internal sealed record YouTubeAccount(
 	DateTimeOffset ConnectedAt)
 {
 	public string Label
-		=> Handle is { Length: > 0 } handle &&
-			!string.Equals(Title, handle.TrimStart('@'), StringComparison.OrdinalIgnoreCase)
+		=> Handle is { Length: > 0 } handle
+			&& !string.Equals(Title, handle.TrimStart('@'), StringComparison.OrdinalIgnoreCase)
 				? $"{Title} (@{handle.TrimStart('@')})"
 				: Title;
 }

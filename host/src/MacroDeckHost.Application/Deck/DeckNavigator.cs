@@ -41,7 +41,8 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		remove => _clients.ClientChanged -= value;
 	}
 
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -49,9 +50,10 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		// no virtual profile's folders, and a device assigned one must still be able to navigate it.
 		if (DeviceOrigin.TryParse(originClientId, out var deviceId))
 		{
-			return _deviceSurfaces().NavigateAsync(deviceId,
-				DeckNavigationCommand.ChangeTo(folderId, profileId: null),
-				cancellationToken);
+			return _deviceSurfaces()
+				.NavigateAsync(deviceId,
+					DeckNavigationCommand.ChangeTo(folderId, null),
+					cancellationToken);
 		}
 
 		// A recursively deleted folder can still be the target of a stale "Change Folder" action
@@ -70,7 +72,8 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 			originClientId);
 	}
 
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -91,12 +94,17 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 	}
 
 	public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Publish(new FolderNavigationEvent { Command = "parent" }, originClientId);
+	{
+		return Publish(new FolderNavigationEvent { Command = "parent" }, originClientId);
+	}
 
 	public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Publish(new FolderNavigationEvent { Command = "back" }, originClientId);
+	{
+		return Publish(new FolderNavigationEvent { Command = "back" }, originClientId);
+	}
 
-	public async Task<bool> ChangeFolderOnDeviceAsync(Guid deviceId,
+	public async Task<bool> ChangeFolderOnDeviceAsync(
+		Guid deviceId,
 		Guid folderId,
 		Guid navigationToken,
 		CancellationToken cancellationToken)
@@ -106,7 +114,7 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		{
 			return await surfaces.NavigateAsync(deviceId,
 				DeckNavigationCommand.ChangeTo(folderId.ToString(),
-					profileId: null,
+					null,
 					navigationToken.ToString("D")),
 				cancellationToken);
 		}
@@ -130,7 +138,8 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		return true;
 	}
 
-	public async Task<bool> ChangeProfileOnDeviceAsync(Guid deviceId,
+	public async Task<bool> ChangeProfileOnDeviceAsync(
+		Guid deviceId,
 		string profileId,
 		CancellationToken cancellationToken)
 	{
@@ -179,13 +188,18 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 			.ToList();
 	}
 
-	public IReadOnlyList<DeckClient> GetClients() => _clients.Snapshot();
+	public IReadOnlyList<DeckClient> GetClients()
+	{
+		return _clients.Snapshot();
+	}
 
 	public IReadOnlyList<DeckProfile> GetProfiles()
-		=> _profileRegistry.GetProfiles()
+	{
+		return _profileRegistry.GetProfiles()
 			.Select(profile => new DeckProfile { Id = profile.Id, Label = profile.Name })
 			.OrderBy(profile => profile.Label, StringComparer.OrdinalIgnoreCase)
 			.ToList();
+	}
 
 	// A device origin never reaches the transport: the navigation is applied to that one session and is
 	// invisible to every WebSocket client, including the admin UI and any other device.
@@ -193,15 +207,16 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 	{
 		if (DeviceOrigin.TryParse(originClientId, out var deviceId))
 		{
-			return _deviceSurfaces().NavigateAsync(deviceId,
-				new DeckNavigationCommand
-				{
-					Command = navigation.Command,
-					FolderId = navigation.FolderId,
-					ProfileId = navigation.ProfileId,
-					NavigationToken = navigation.NavigationToken
-				},
-				CancellationToken.None);
+			return _deviceSurfaces()
+				.NavigateAsync(deviceId,
+					new DeckNavigationCommand
+					{
+						Command = navigation.Command,
+						FolderId = navigation.FolderId,
+						ProfileId = navigation.ProfileId,
+						NavigationToken = navigation.NavigationToken
+					},
+					CancellationToken.None);
 		}
 
 		return string.IsNullOrEmpty(originClientId)

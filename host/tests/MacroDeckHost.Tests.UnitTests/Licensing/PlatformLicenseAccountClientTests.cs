@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using MacroDeckHost.Application.Connect;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Infrastructure.Licensing;
@@ -16,7 +15,7 @@ namespace MacroDeckHost.Tests.UnitTests.Licensing;
 [TestFixture]
 internal sealed class PlatformLicenseAccountClientTests
 {
-	private static readonly StorePlatformOptions Options = new() { BaseUrl = new Uri("https://platform.test/") };
+	private static readonly StorePlatformOptions _options = new() { BaseUrl = new Uri("https://platform.test/") };
 
 	[Test]
 	public async Task The_account_license_is_read_as_the_signed_in_user_and_the_long_poll_names_the_revision()
@@ -24,8 +23,8 @@ internal sealed class PlatformLicenseAccountClientTests
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "a.b.c", "revision": 4 }"""));
 		using var client = Client(handler, out _);
 
-		var first = await client.GetAccountLicenseAsync(null, TimeSpan.FromSeconds(50), default);
-		var polled = await client.GetAccountLicenseAsync(4, TimeSpan.FromSeconds(50), default);
+		var first = await client.GetAccountLicenseAsync(null, TimeSpan.FromSeconds(50), CancellationToken.None);
+		var polled = await client.GetAccountLicenseAsync(4, TimeSpan.FromSeconds(50), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -47,7 +46,7 @@ internal sealed class PlatformLicenseAccountClientTests
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": null, "revision": 0 }"""));
 		using var client = Client(handler, out _);
 
-		var result = await client.StoreAccountLicenseAsync("a.b.c", default);
+		var result = await client.StoreAccountLicenseAsync("a.b.c", CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -64,9 +63,9 @@ internal sealed class PlatformLicenseAccountClientTests
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": null, "revision": 0 }"""));
 		var session = new FakeConnectSessionService();
 		using var client =
-			new PlatformLicenseAccountClient(handler, Options, session, new LoggerConfiguration().CreateLogger());
+			new PlatformLicenseAccountClient(handler, _options, session, new LoggerConfiguration().CreateLogger());
 
-		var result = await client.GetAccountLicenseAsync(null, TimeSpan.Zero, default);
+		var result = await client.GetAccountLicenseAsync(null, TimeSpan.Zero, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -90,13 +89,14 @@ internal sealed class PlatformLicenseAccountClientTests
 	[TestCase(HttpStatusCode.OK, """{ "license": "a.b.c" }""", "unavailable")]
 	[TestCase(HttpStatusCode.OK, "not json", "unavailable")]
 	[TestCase(HttpStatusCode.Conflict, """{ "code": "something-else" }""", "unavailable")]
-	public async Task Every_answer_maps_to_an_outcome_the_worker_can_act_on(HttpStatusCode status,
+	public async Task Every_answer_maps_to_an_outcome_the_worker_can_act_on(
+		HttpStatusCode status,
 		string body,
 		string expected)
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(status, body)), out _);
 
-		var result = await client.StoreAccountLicenseAsync("a.b.c", default);
+		var result = await client.StoreAccountLicenseAsync("a.b.c", CancellationToken.None);
 
 		Assert.That(Describe(result), Is.EqualTo(expected));
 	}
@@ -109,7 +109,7 @@ internal sealed class PlatformLicenseAccountClientTests
 				Json(HttpStatusCode.OK, $$"""{ "license": "{{padding}}", "revision": 1 }""")),
 			out _);
 
-		var result = await client.GetAccountLicenseAsync(null, TimeSpan.Zero, default);
+		var result = await client.GetAccountLicenseAsync(null, TimeSpan.Zero, CancellationToken.None);
 
 		Assert.That(result, Is.InstanceOf<PlatformAccountLicenseResult.Unavailable>());
 	}
@@ -119,9 +119,10 @@ internal sealed class PlatformLicenseAccountClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(HttpStatusCode.NotFound, "")), out var sink);
 
-		await client.StoreAccountLicenseAsync("secret.license.token", default);
+		await client.StoreAccountLicenseAsync("secret.license.token", CancellationToken.None);
 
-		var text = string.Join('\n', sink.Events.Select(logEvent => logEvent.RenderMessage(CultureInfo.InvariantCulture)));
+		var text = string.Join('\n',
+			sink.Events.Select(logEvent => logEvent.RenderMessage(CultureInfo.InvariantCulture)));
 		Assert.Multiple(() =>
 		{
 			Assert.That(sink.Events, Is.Not.Empty);
@@ -136,7 +137,7 @@ internal sealed class PlatformLicenseAccountClientTests
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "a.b.c", "revision": 1 }"""));
 		using var client = Client(handler, out _);
 
-		var result = await client.RedeemPromoCodeAsync("abcd-efgh-jkmn-pqrs", default);
+		var result = await client.RedeemPromoCodeAsync("abcd-efgh-jkmn-pqrs", CancellationToken.None);
 
 		var request = handler.Requests.Single();
 		Assert.Multiple(() =>
@@ -155,11 +156,11 @@ internal sealed class PlatformLicenseAccountClientTests
 	{
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, "{}"));
 		using var client = new PlatformLicenseAccountClient(handler,
-			Options,
+			_options,
 			new FakeConnectSessionService(),
 			new LoggerConfiguration().CreateLogger());
 
-		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+		var result = await client.RedeemPromoCodeAsync("ABCD", CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -185,13 +186,14 @@ internal sealed class PlatformLicenseAccountClientTests
 	[TestCase(HttpStatusCode.OK, """{ "revision": 1 }""", "unavailable")]
 	[TestCase(HttpStatusCode.OK, "not json", "unavailable")]
 	[TestCase(HttpStatusCode.Conflict, """{ "code": "account-license-exists" }""", "unavailable")]
-	public async Task Every_promo_code_answer_maps_to_an_outcome_the_ui_can_explain(HttpStatusCode status,
+	public async Task Every_promo_code_answer_maps_to_an_outcome_the_ui_can_explain(
+		HttpStatusCode status,
 		string body,
 		string expected)
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(status, body)), out _);
 
-		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+		var result = await client.RedeemPromoCodeAsync("ABCD", CancellationToken.None);
 
 		Assert.That(DescribePromo(result), Is.EqualTo(expected));
 	}
@@ -203,7 +205,7 @@ internal sealed class PlatformLicenseAccountClientTests
 		response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(120));
 		using var client = Client(new ScriptedHandler(_ => response), out _);
 
-		var result = await client.RedeemPromoCodeAsync("ABCD", default);
+		var result = await client.RedeemPromoCodeAsync("ABCD", CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(new PlatformPromoCodeResult.RateLimited(TimeSpan.FromSeconds(120))));
 	}
@@ -213,9 +215,10 @@ internal sealed class PlatformLicenseAccountClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(HttpStatusCode.ServiceUnavailable, "")), out var sink);
 
-		await client.RedeemPromoCodeAsync("SECRET-PROMO-CODE", default);
+		await client.RedeemPromoCodeAsync("SECRET-PROMO-CODE", CancellationToken.None);
 
-		var text = string.Join('\n', sink.Events.Select(logEvent => logEvent.RenderMessage(CultureInfo.InvariantCulture)));
+		var text = string.Join('\n',
+			sink.Events.Select(logEvent => logEvent.RenderMessage(CultureInfo.InvariantCulture)));
 		Assert.Multiple(() =>
 		{
 			Assert.That(sink.Events, Is.Not.Empty);
@@ -225,7 +228,8 @@ internal sealed class PlatformLicenseAccountClientTests
 	}
 
 	private static string DescribePromo(PlatformPromoCodeResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			PlatformPromoCodeResult.Redeemed redeemed => $"redeemed:{redeemed.License}",
 			PlatformPromoCodeResult.AccountLicenseExists existing => $"exists:{existing.License}",
@@ -236,9 +240,11 @@ internal sealed class PlatformLicenseAccountClientTests
 			PlatformPromoCodeResult.Unavailable => "unavailable",
 			_ => result.ToString()!
 		};
+	}
 
 	private static string Describe(PlatformAccountLicenseResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			PlatformAccountLicenseResult.Conflict { License: "x.y.z", Revision: 2 } => "conflict",
 			PlatformAccountLicenseResult.Refused refused => $"refused:{refused.Code}",
@@ -246,19 +252,22 @@ internal sealed class PlatformLicenseAccountClientTests
 			PlatformAccountLicenseResult.Unavailable => "unavailable",
 			_ => result.ToString()
 		};
+	}
 
 	private static PlatformLicenseAccountClient Client(ScriptedHandler handler, out CompanionHarness.CapturingSink sink)
 	{
 		sink = new CompanionHarness.CapturingSink();
 		var session = new FakeConnectSessionService { Current = FakeConnectSessionService.SignedIn(null) };
 		return new PlatformLicenseAccountClient(handler,
-			Options,
+			_options,
 			session,
 			new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger());
 	}
 
 	private static HttpResponseMessage Json(HttpStatusCode status, string body)
-		=> new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	{
+		return new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	}
 
 	private sealed class ScriptedHandler(Func<HttpRequestMessage, HttpResponseMessage> answer) : HttpMessageHandler
 	{
@@ -266,11 +275,14 @@ internal sealed class PlatformLicenseAccountClientTests
 
 		public List<string> Bodies { get; } = [];
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			Requests.Add(request);
-			Bodies.Add(request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken));
+			Bodies.Add(request.Content is null
+				? string.Empty
+				: await request.Content.ReadAsStringAsync(cancellationToken));
 			return answer(request);
 		}
 	}

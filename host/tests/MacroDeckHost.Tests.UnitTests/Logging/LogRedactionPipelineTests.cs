@@ -12,9 +12,9 @@ public class LogRedactionPipelineTests
 {
 	private const string Jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzY29wZSI6ImFkbWluIn0.dBjftJeZ4CVP-mB92K27uhbUJU1p";
 
-	private static readonly string[] ForeignFiles = ["/home/other-user/a.json", "/home/other-user/b.json"];
+	private static readonly string[] _foreignFiles = ["/home/other-user/a.json", "/home/other-user/b.json"];
 
-	private static readonly string[] ExpectedPropertyNames = ["Count", "Path", "At"];
+	private static readonly string[] _expectedPropertyNames = ["Count", "Path", "At"];
 
 	[Test]
 	public void AspNetCore_RequestLog_QueryString_Is_Redacted_In_The_Rendered_Message()
@@ -115,7 +115,7 @@ public class LogRedactionPipelineTests
 
 		logger.Information("Loaded {Path} and {Files}",
 			"/home/other-user/.config/md.json",
-			ForeignFiles);
+			_foreignFiles);
 
 		var path = ((ScalarValue)sink.Single.Properties["Path"]).Value as string;
 		var files = (SequenceValue)sink.Single.Properties["Files"];
@@ -146,11 +146,11 @@ public class LogRedactionPipelineTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(redacted.Level, Is.EqualTo(LogEventLevel.Warning));
-			Assert.That(redacted.Properties.Keys, Is.EquivalentTo(ExpectedPropertyNames));
+			Assert.That(redacted.Properties.Keys, Is.EquivalentTo(_expectedPropertyNames));
 			Assert.That(((ScalarValue)redacted.Properties["Count"]).Value, Is.EqualTo(42));
 			Assert.That(((ScalarValue)redacted.Properties["At"]).Value, Is.EqualTo(DateTimeOffset.UnixEpoch));
 			Assert.That(redacted.MessageTemplate.Tokens.OfType<PropertyToken>().Select(token => token.PropertyName),
-				Is.EquivalentTo(ExpectedPropertyNames));
+				Is.EquivalentTo(_expectedPropertyNames));
 		});
 	}
 

@@ -134,7 +134,8 @@ public class LogFileRedactionIntegrationTests
 				}))
 			.StartAsync())
 		{
-			Assert.That(host.Services.GetServices<ILoggerProvider>(), Is.Empty,
+			Assert.That(host.Services.GetServices<ILoggerProvider>(),
+				Is.Empty,
 				"Default providers, including Windows EventLog, must be removed.");
 			using var client = host.GetTestClient();
 			var outgoing = host.Services.GetRequiredService<ILoggerFactory>()
@@ -166,10 +167,13 @@ public class LogFileRedactionIntegrationTests
 			Assert.That(contents, Does.Contain("outgoing-debug"));
 			Assert.That(contents, Does.Contain("outgoing-warning"));
 			Assert.That(contents.Split('\n').Count(line => line.Contains("HTTP ", StringComparison.Ordinal)),
-				Is.EqualTo(1), "Only the Debug request should produce an outcome entry.");
+				Is.EqualTo(1),
+				"Only the Debug request should produce an outcome entry.");
 		});
 	}
 
 	private static string? ParsedMessage(string line)
-		=> HostLogParser.TryParseHeader(line, out var header) ? header.Message : null;
+	{
+		return HostLogParser.TryParseHeader(line, out var header) ? header.Message : null;
+	}
 }

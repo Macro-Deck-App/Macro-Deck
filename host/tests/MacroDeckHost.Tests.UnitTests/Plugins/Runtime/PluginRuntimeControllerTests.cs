@@ -73,8 +73,13 @@ internal sealed class PluginRuntimeControllerTests
 		PluginSupervisorError error,
 		string expectedCode)
 	{
-		var supervisor = new FakePluginSupervisor();
-		supervisor.StartResults["com.example.plugin"] = PluginSupervisorResult.Fail(error, "detail");
+		var supervisor = new FakePluginSupervisor
+		{
+			StartResults =
+			{
+				["com.example.plugin"] = PluginSupervisorResult.Fail(error, "detail")
+			}
+		};
 		var controller = new PluginRuntimeController(supervisor);
 
 		var response = await controller.Start("com.example.plugin", CancellationToken.None);

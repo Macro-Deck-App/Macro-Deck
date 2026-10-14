@@ -54,7 +54,8 @@ public class WindowsKeyMappingTests
 	{
 		var german = Load("00000407");
 
-		Assert.That(WindowsKeyboardInputProvider.TryMapKey(KeyCode.IntlBackslash, german, out var vk, out var scan), Is.True);
+		Assert.That(WindowsKeyboardInputProvider.TryMapKey(KeyCode.IntlBackslash, german, out var vk, out var scan),
+			Is.True);
 		Assert.Multiple(() =>
 		{
 			Assert.That(scan, Is.EqualTo(0x56));

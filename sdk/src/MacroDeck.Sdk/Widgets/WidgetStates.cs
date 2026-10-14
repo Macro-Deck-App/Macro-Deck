@@ -13,10 +13,14 @@ public static class WidgetStates
 	public const string All = "$all";
 
 	public static bool IsCurrent(string? value)
-		=> string.Equals(value?.Trim(), Current, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(value?.Trim(), Current, StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static bool IsAll(string? value)
-		=> string.Equals(value?.Trim(), All, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(value?.Trim(), All, StringComparison.OrdinalIgnoreCase);
+	}
 }
 
 /// <summary>One state a widget can be in, as exposed to integration pickers.</summary>

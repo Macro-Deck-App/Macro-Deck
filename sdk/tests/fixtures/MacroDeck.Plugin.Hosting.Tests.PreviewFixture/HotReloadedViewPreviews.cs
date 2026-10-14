@@ -16,7 +16,9 @@ public static class HotReloadedViewPreviews
 
 	[UiPreview("Default", View = View)]
 	public static UiTextRun Default()
-		=> Throws
+	{
+		return Throws
 			? throw new InvalidOperationException("The edited scenario does not build.")
 			: new UiTextRun { Key = "marker", Text = UiText.Of(Text) };
+	}
 }

@@ -9,10 +9,15 @@ internal static class WidgetText
 {
 	private static readonly LocalizationResolver _resolver = CreateResolver();
 
-	public static string Resolve(LocalizedString value, string? culture) => _resolver.Resolve(value, culture);
+	public static string Resolve(LocalizedString value, string? culture)
+	{
+		return _resolver.Resolve(value, culture);
+	}
 
 	public static string Resolve(LocalizedString value, UiSurface surface)
-		=> Resolve(value, UiWidgetSurface.Culture(surface));
+	{
+		return Resolve(value, UiWidgetSurface.Culture(surface));
+	}
 
 	private static LocalizationResolver CreateResolver()
 	{

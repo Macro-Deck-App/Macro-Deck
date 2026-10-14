@@ -94,7 +94,8 @@ internal sealed class SpotifyTokenPersister : IDisposable
 		return await PersistAsync(entryId, accessToken, refreshToken, expiresAtUtc);
 	}
 
-	private async Task<bool> PersistAsync(Guid entryId,
+	private async Task<bool> PersistAsync(
+		Guid entryId,
 		string accessToken,
 		string? refreshToken,
 		DateTime expiresAtUtc)

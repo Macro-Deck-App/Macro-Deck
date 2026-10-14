@@ -34,18 +34,18 @@ public class HistoryGraphWidgetSessionTests
 {
 	private static readonly object _config = new
 	{
-		valueVariable = Metric, title = "CPU Load", subtitle = "{{ vars.system_cpu_name }}", maxValue = 100,
+		valueVariable = Metric, title = "CPU Load", subtitle = "{{ vars.system_cpu_name }}", maxValue = 100
 	};
 
 	/// <summary>The card's root and its chart, named by the test rather than read back from the tree: a
 	/// renamed node has to fail here rather than quietly assert nothing.</summary>
-	private const string _graphNodeId = "historyGraph";
+	private const string GraphNodeId = "historyGraph";
 
-	private const string _chartNodeId = "historyGraph.chart";
+	private const string ChartNodeId = "historyGraph.chart";
 
 	/// <summary>A sample no worker ever pushes, so the tail assertion cannot be satisfied by an idle write.
 	/// </summary>
-	private const int _distinctSample = 12345;
+	private const int DistinctSample = 12345;
 
 	[Test]
 	public async Task A_new_sample_reaches_the_client_as_a_property_change_rather_than_a_new_tree()
@@ -154,7 +154,7 @@ public class HistoryGraphWidgetSessionTests
 
 		var start = fixture.Session.BuildTree();
 
-		Assert.That(Contains(start.Root, _graphNodeId),
+		Assert.That(Contains(start.Root, GraphNodeId),
 			Is.True,
 			"the dispatching worker below has to name a node this tree actually has");
 
@@ -189,7 +189,7 @@ public class HistoryGraphWidgetSessionTests
 				// threads write. That the node it names still exists is asserted above, single-threaded.
 				for (var index = 0; index < samples; index++)
 				{
-					fixture.Session.Dispatch(new UiEvent { NodeId = _graphNodeId, Name = "press" });
+					fixture.Session.Dispatch(new UiEvent { NodeId = GraphNodeId, Name = "press" });
 				}
 			},
 			() =>
@@ -227,12 +227,12 @@ public class HistoryGraphWidgetSessionTests
 
 		// The deterministic tail: a session left working still turns one distinct sample into one patch.
 		fixture.Session.DrainPatches();
-		fixture.Window.Push(_distinctSample);
+		fixture.Window.Push(DistinctSample);
 
 		var tail = fixture.Session.DrainPatches();
 
 		Assert.That(tail, Has.Count.EqualTo(1));
-		Assert.That(tail[0].Operations.Select(operation => operation.NodeId), Does.Contain(_chartNodeId));
+		Assert.That(tail[0].Operations.Select(operation => operation.NodeId), Does.Contain(ChartNodeId));
 	}
 
 	[Test]
@@ -244,7 +244,7 @@ public class HistoryGraphWidgetSessionTests
 		var variables = Registry();
 		var time = new FakeTimeProvider();
 		using var history = new VariableHistory(variables, time);
-		using var window = history.Open(Metric, capacity: 60);
+		using var window = history.Open(Metric, 60);
 
 		await using var fixture = new Fixture(_config, window);
 
@@ -254,7 +254,7 @@ public class HistoryGraphWidgetSessionTests
 
 		var start = fixture.Session.BuildTree();
 
-		Assert.That(Contains(start.Root, _graphNodeId),
+		Assert.That(Contains(start.Root, GraphNodeId),
 			Is.True,
 			"the dispatching worker below has to name a node this tree actually has");
 
@@ -290,7 +290,7 @@ public class HistoryGraphWidgetSessionTests
 				// threads write. That the node it names still exists is asserted above, single-threaded.
 				for (var index = 0; index < ticks; index++)
 				{
-					fixture.Session.Dispatch(new UiEvent { NodeId = _graphNodeId, Name = "press" });
+					fixture.Session.Dispatch(new UiEvent { NodeId = GraphNodeId, Name = "press" });
 				}
 			},
 			() =>
@@ -327,13 +327,13 @@ public class HistoryGraphWidgetSessionTests
 		});
 
 		fixture.Session.DrainPatches();
-		SetMetric(variables, _distinctSample);
+		SetMetric(variables, DistinctSample);
 		time.Advance(VariableHistory.SampleInterval);
 
 		var tail = fixture.Session.DrainPatches();
 
 		Assert.That(tail, Has.Count.EqualTo(1));
-		Assert.That(tail[0].Operations.Select(operation => operation.NodeId), Does.Contain(_chartNodeId));
+		Assert.That(tail[0].Operations.Select(operation => operation.NodeId), Does.Contain(ChartNodeId));
 	}
 
 	[Test]
@@ -373,8 +373,8 @@ public class HistoryGraphWidgetSessionTests
 			return true;
 		}
 
-		return node.Children.Any(child => Contains(child, id)) ||
-			(node.Fallback is not null && Contains(node.Fallback, id));
+		return node.Children.Any(child => Contains(child, id))
+			|| node.Fallback is not null && Contains(node.Fallback, id);
 	}
 
 	private static void SetMetric(VariableRegistry variables, double value)
@@ -391,13 +391,13 @@ public class HistoryGraphWidgetSessionTests
 	{
 		await using var fixture = new Fixture(_config);
 
-		var recoloured = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: "#ef4444"));
+		var recoloured = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, "#ef4444"));
 		var redColour = ChartColor(fixture);
 
-		var reset = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: null));
+		var reset = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, null));
 		var themedColour = ChartColor(fixture);
 
-		var retitled = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, accentColor: null, title: "GPU Load"));
+		var retitled = fixture.Signals.RaiseDataChanged(SavedGraph(fixture, null, "GPU Load"));
 
 		Assert.Multiple(() =>
 		{
@@ -412,26 +412,29 @@ public class HistoryGraphWidgetSessionTests
 	[Test]
 	public async Task A_colour_only_save_of_a_graph_with_stored_thresholds_still_repaints_in_place()
 	{
-		object Data(string? accentColor) => new
+		object Data(string? accentColor)
 		{
-			valueVariable = Metric,
-			maxValue = 100,
-			accentColor,
-			thresholdsEnabled = false,
-			thresholds = new
+			return new
 			{
-				bands = new object[]
+				valueVariable = Metric,
+				maxValue = 100,
+				accentColor,
+				thresholdsEnabled = false,
+				thresholds = new
 				{
-					new { id = "low", color = "#34c759" }, new { id = "high", color = "#ff3b30", from = 80 },
-				},
-			},
-		};
+					bands = new object[]
+					{
+						new { id = "low", color = "#34c759" }, new { id = "high", color = "#ff3b30", from = 80 }
+					}
+				}
+			};
+		}
 
 		await using var fixture = new Fixture(Data(null));
 
 		var recoloured = fixture.Signals.RaiseDataChanged(new WidgetEntity
 		{
-			Id = fixture.WidgetId, Type = WidgetTypeIds.HistoryGraph, Data = JsonSerializer.Serialize(Data("#ef4444")),
+			Id = fixture.WidgetId, Type = WidgetTypeIds.HistoryGraph, Data = JsonSerializer.Serialize(Data("#ef4444"))
 		});
 
 		Assert.Multiple(() =>
@@ -442,7 +445,8 @@ public class HistoryGraphWidgetSessionTests
 	}
 
 	private static WidgetEntity SavedGraph(Fixture fixture, string? accentColor, string title = "CPU Load")
-		=> new()
+	{
+		return new WidgetEntity
 		{
 			Id = fixture.WidgetId,
 			Type = WidgetTypeIds.HistoryGraph,
@@ -452,18 +456,22 @@ public class HistoryGraphWidgetSessionTests
 				title,
 				subtitle = "{{ vars.system_cpu_name }}",
 				maxValue = 100,
-				accentColor,
+				accentColor
 			})
 		};
+	}
 
 	private static string? ChartColor(Fixture fixture)
 	{
-		var chart = Nodes(fixture.Session.BuildTree().Root).Single(node => node.Id == _chartNodeId);
+		var chart = Nodes(fixture.Session.BuildTree().Root).Single(node => node.Id == ChartNodeId);
 
 		return chart.Properties.TryGetValue("color", out var color) ? color.GetString() : null;
 	}
 
-	private static IEnumerable<UiNode> Nodes(UiNode node) => node.Children.SelectMany(Nodes).Prepend(node);
+	private static IEnumerable<UiNode> Nodes(UiNode node)
+	{
+		return node.Children.SelectMany(Nodes).Prepend(node);
+	}
 
 	private sealed class Fixture : IAsyncDisposable
 	{
@@ -504,7 +512,10 @@ public class HistoryGraphWidgetSessionTests
 
 		public HistoryGraphWidgetSession Session { get; }
 
-		public ValueTask DisposeAsync() => Session.DisposeAsync();
+		public ValueTask DisposeAsync()
+		{
+			return Session.DisposeAsync();
+		}
 	}
 
 	private sealed class StubWindow : IVariableHistoryWindow
@@ -542,8 +553,14 @@ public class HistoryGraphWidgetSessionTests
 			Raise();
 		}
 
-		public void Raise() => Changed?.Invoke(this, EventArgs.Empty);
+		public void Raise()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 
-		public void Dispose() => IsDisposed = true;
+		public void Dispose()
+		{
+			IsDisposed = true;
+		}
 	}
 }

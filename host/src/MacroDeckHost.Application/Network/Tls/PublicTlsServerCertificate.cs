@@ -20,6 +20,6 @@ public static class PublicTlsServerCertificate
 
 		var pkcs12 = certificate.Export(X509ContentType.Pkcs12);
 
-		return X509CertificateLoader.LoadPkcs12(pkcs12, password: null, KeyStorageFlags);
+		return X509CertificateLoader.LoadPkcs12(pkcs12, null, KeyStorageFlags);
 	}
 }

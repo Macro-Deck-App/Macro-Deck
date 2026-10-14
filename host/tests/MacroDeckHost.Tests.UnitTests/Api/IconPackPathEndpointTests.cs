@@ -70,7 +70,7 @@ public class IconPackPathEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -192,7 +192,9 @@ public class IconPackPathEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -205,7 +207,8 @@ public class IconPackPathEndpointTests
 	private sealed class TrustedLoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -216,5 +219,6 @@ public class IconPackPathEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 }

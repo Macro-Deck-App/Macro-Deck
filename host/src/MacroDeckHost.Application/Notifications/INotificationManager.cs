@@ -8,18 +8,21 @@ public interface INotificationManager
 	// Subscribers run while the manager is locked and must only queue work.
 	event Action<NotificationEvent>? Published;
 
-	Task<NotificationShowOutcome> ShowAsync(NotificationOwner owner,
+	Task<NotificationShowOutcome> ShowAsync(
+		NotificationOwner owner,
 		NotificationOptions options,
 		CancellationToken cancellationToken = default);
 
-	Task UpdateAsync(NotificationOwner owner,
+	Task UpdateAsync(
+		NotificationOwner owner,
 		Guid id,
 		NotificationUpdate update,
 		CancellationToken cancellationToken = default);
 
 	void Close(NotificationOwner owner, Guid id);
 
-	NotificationRespondOutcome Respond(NotificationPrincipal principal,
+	NotificationRespondOutcome Respond(
+		NotificationPrincipal principal,
 		Guid id,
 		string? actionId,
 		IReadOnlyDictionary<string, JsonElement>? values);

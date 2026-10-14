@@ -10,7 +10,8 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 	private readonly string _integrationId;
 	private readonly VideoStreamProviderRegistry _registry;
 
-	public IntegrationVideoStreamProviderContext(string integrationId,
+	public IntegrationVideoStreamProviderContext(
+		string integrationId,
 		VideoStreamProviderRegistry registry,
 		IVideoStreamSessionBroker broker)
 	{
@@ -19,12 +20,17 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 		_broker = broker;
 	}
 
-	public Task<VideoStreamProviderRegistration> RegisterProviderAsync(IVideoStreamProvider provider,
+	public Task<VideoStreamProviderRegistration> RegisterProviderAsync(
+		IVideoStreamProvider provider,
 		CancellationToken cancellationToken = default)
-		=> _registry.RegisterInProcessAsync(_integrationId, provider);
+	{
+		return _registry.RegisterInProcessAsync(_integrationId, provider);
+	}
 
 	public Task UnregisterProviderAsync(string providerId, CancellationToken cancellationToken = default)
-		=> _registry.UnregisterInProcessAsync(_integrationId, providerId);
+	{
+		return _registry.UnregisterInProcessAsync(_integrationId, providerId);
+	}
 
 	public Task NotifyStreamsChangedAsync(string providerId, CancellationToken cancellationToken = default)
 	{
@@ -32,7 +38,8 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 		return _registry.RequestStreamsPullAsync(_integrationId, providerId);
 	}
 
-	public Task UpdateSessionAsync(string sessionId,
+	public Task UpdateSessionAsync(
+		string sessionId,
 		VideoStreamSessionState state,
 		VideoStreamSessionDescription? description = null,
 		VideoStreamSessionReason reason = VideoStreamSessionReason.None,
@@ -49,7 +56,8 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 		return Task.CompletedTask;
 	}
 
-	public Task CloseSessionAsync(string sessionId,
+	public Task CloseSessionAsync(
+		string sessionId,
 		VideoStreamSessionReason reason = VideoStreamSessionReason.ProviderClosed,
 		LocalizedText? message = null,
 		CancellationToken cancellationToken = default)
@@ -63,7 +71,10 @@ public sealed class IntegrationVideoStreamProviderContext : IVideoStreamProvider
 		return Task.CompletedTask;
 	}
 
-	private bool IsLive(string sessionId) => _registry.InProcessEndpoint(_integrationId)?.IsLive(sessionId) == true;
+	private bool IsLive(string sessionId)
+	{
+		return _registry.InProcessEndpoint(_integrationId)?.IsLive(sessionId) == true;
+	}
 
 	private static void Forward(Action apply)
 	{

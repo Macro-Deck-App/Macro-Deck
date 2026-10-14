@@ -27,15 +27,20 @@ internal abstract class ConformanceFixture
 	/// returns is disposed once by <see cref="DisposeSubjectAsync" />.
 	/// </summary>
 	protected virtual Task<ConformanceSubject> CreateSubjectAsync()
-		=> throw new NotSupportedException(
+	{
+		throw new NotSupportedException(
 			$"{GetType().Name} must override either {nameof(CreateSubjectAsync)} or {nameof(GetReportAsync)}.");
+	}
 
 	/// <summary>The completed report. Throws if accessed before <see cref="RunSuiteAsync" /> has run.</summary>
 	protected ConformanceReport Report =>
 		_report ?? throw new InvalidOperationException("The conformance suite has not run yet.");
 
 	[OneTimeSetUp]
-	public async Task RunSuiteAsync() => _report = await GetReportAsync();
+	public async Task RunSuiteAsync()
+	{
+		_report = await GetReportAsync();
+	}
 
 	/// <summary>
 	/// Produces the report <see cref="Report" /> exposes. The default builds a fresh subject through
@@ -95,8 +100,8 @@ internal abstract class ConformanceFixture
 	public void SubjectIsConformant()
 	{
 		var requiredFailures = Report.Results
-			.Where(result => result.Requirement == ConformanceRequirement.Required &&
-				result.Result.Outcome == ConformanceOutcome.Failed)
+			.Where(result => result.Requirement == ConformanceRequirement.Required
+				&& result.Result.Outcome == ConformanceOutcome.Failed)
 			.Select(result =>
 				$"{result.Id} {result.Title}: expected {result.Result.Expected}; actual {result.Result.Actual}")
 			.ToList();

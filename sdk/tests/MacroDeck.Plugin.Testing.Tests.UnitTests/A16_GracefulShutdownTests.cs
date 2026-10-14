@@ -9,7 +9,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// actually sees.
 /// </summary>
 [TestFixture]
-public class A16_GracefulShutdownTests
+public class A16GracefulShutdownTests
 {
 	[Test]
 	public async Task The_well_behaved_plugin_exits_gracefully_within_the_grace_period()
@@ -36,8 +36,8 @@ public class A16_GracefulShutdownTests
 		// SupervisorShutdown. An author whose cleanup runs on session.goodbye would get a false failure
 		// from a test host that only closed the socket - see StopGracefullyAsync's own remarks.
 		var goodbye = host.Messages.All.Single(message
-			=> message.Direction == ProtocolMessageDirection.ToPlugin &&
-			message.Envelope.Type == MessageTypes.SessionGoodbye);
+			=> message.Direction == ProtocolMessageDirection.ToPlugin
+			&& message.Envelope.Type == MessageTypes.SessionGoodbye);
 		var shutdownClose
 			= host.Messages.Closes.Single(close => close.CloseCode == ProtocolCloseCodes.SupervisorShutdown);
 

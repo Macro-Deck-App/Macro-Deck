@@ -213,9 +213,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 
 	public Task<bool> ConnectedAsync()
 	{
-		if (_lifetime.ApplicationStopping.IsCancellationRequested ||
-			_accessTokenCutoff.Rejects(_principal) ||
-			_deviceSessionGuard.Rejects(_principal))
+		if (_lifetime.ApplicationStopping.IsCancellationRequested
+			|| _accessTokenCutoff.Rejects(_principal)
+			|| _deviceSessionGuard.Rejects(_principal))
 		{
 			return Task.FromResult(false);
 		}
@@ -258,7 +258,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return Task.CompletedTask;
 	}
 
-	public async Task<JsonElement?> DispatchAsync(string type,
+	public async Task<JsonElement?> DispatchAsync(
+		string type,
 		JsonElement? payload,
 		CancellationToken cancellationToken)
 	{
@@ -279,26 +280,30 @@ public sealed class UiWebSocketDispatcher : IDisposable
 				"RenderLabelPreview" when IsAdmin => JsonSerializer.SerializeToElement<string?>(
 					await _labelText.ResolvePreview(Arg<LabelImagePreviewRequest>(payload, 0), cancellationToken),
 					UiWebSocketProtocol.Json),
-				"GetMusicPlayerInstances" => await _getMusicPlayerInstances.Handle(new(), cancellationToken),
-				"GetMusicPlayerState" => await _getMusicPlayerState.Handle(
-					new() { InstanceId = Arg<string?>(payload, 0) },
+				"GetMusicPlayerInstances" => await _getMusicPlayerInstances.Handle(new GetMusicPlayerInstancesRequest(),
 					cancellationToken),
-				"GetWeatherInstances" => await _getWeatherInstances.Handle(new(), cancellationToken),
-				"GetFolderViews" => await _getFolderViews.Handle(new(), cancellationToken),
-				"GetScreenSavers" => await _getScreenSavers.Handle(new(), cancellationToken),
+				"GetMusicPlayerState" => await _getMusicPlayerState.Handle(
+					new GetMusicPlayerStateRequest { InstanceId = Arg<string?>(payload, 0) },
+					cancellationToken),
+				"GetWeatherInstances" => await _getWeatherInstances.Handle(new GetWeatherInstancesRequest(),
+					cancellationToken),
+				"GetFolderViews" => await _getFolderViews.Handle(new GetFolderViewsRequest(), cancellationToken),
+				"GetScreenSavers" => await _getScreenSavers.Handle(new GetScreenSaversRequest(), cancellationToken),
 				"GetDeviceScreenSaver" => await _getDeviceScreenSaver.Handle(
 					new GetDeviceScreenSaverRequest { DeviceId = DeviceId() },
 					cancellationToken),
 				"GetDeviceClientSettings" => await _getDeviceClientSettings.Handle(
 					new GetDeviceClientSettingsRequest { DeviceId = DeviceId() },
 					cancellationToken),
-				"SetDeviceClientSettings" => await SetDeviceClientSettings(
-					Arg<DeviceClientSettingsChange?>(payload, 0),
+				"SetDeviceClientSettings" => await SetDeviceClientSettings(Arg<DeviceClientSettingsChange?>(payload, 0),
 					cancellationToken),
 				"OpenScreenSaverUiSession" => await _screenSaverUiSessions.OpenAsync(DeviceId(), cancellationToken),
-				"GetWeatherState" => await _getWeatherState.Handle(new() { InstanceId = Arg<string?>(payload, 0) },
+				"GetWeatherState" => await _getWeatherState.Handle(
+					new GetWeatherStateRequest { InstanceId = Arg<string?>(payload, 0) },
 					cancellationToken),
-				"GetVariableCatalogProviders" => await _getVariableCatalogProviders.Handle(new(), cancellationToken),
+				"GetVariableCatalogProviders" => await _getVariableCatalogProviders.Handle(
+					new GetVariableCatalogProvidersRequest(),
+					cancellationToken),
 				"DiscoverCatalogVariables" => await _discoverCatalogVariables.Handle(
 					Arg<DiscoverCatalogVariablesRequest>(payload, 0),
 					cancellationToken),
@@ -317,7 +322,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 					OwnerPrincipal()),
 				"OpenConfigUiSession" => OpenConfigUiSession(Arg<OpenConfigUiSessionRequest>(payload, 0)),
 				"OpenWidgetUiSession" => OpenWidgetUiSession(Arg<OpenWidgetUiSessionRequest>(payload, 0)),
-				"ListUiPreviews" when IsAdmin => await _listUiPreviews.Handle(new(), cancellationToken),
+				"ListUiPreviews" when IsAdmin => await _listUiPreviews.Handle(new ListUiPreviewsRequest(),
+					cancellationToken),
 				"OpenUiPreviewSession" when IsAdmin => OpenUiPreviewSession(
 					Arg<OpenUiPreviewSessionRequest>(payload, 0)),
 				"OpenFolderUiSession" => _folderUiSessions.Open(Arg<OpenFolderUiSessionRequest>(payload, 0),
@@ -359,7 +365,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		}
 	}
 
-	private async Task<LabelTextUpdatedEvent> SubscribeLabel(string widgetId,
+	private async Task<LabelTextUpdatedEvent> SubscribeLabel(
+		string widgetId,
 		string state,
 		CancellationToken cancellationToken)
 	{
@@ -380,7 +387,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return null;
 	}
 
-	private async Task<WidgetStateUpdatedEvent> SubscribeWidgetState(string widgetId,
+	private async Task<WidgetStateUpdatedEvent> SubscribeWidgetState(
+		string widgetId,
 		CancellationToken cancellationToken)
 	{
 		_widgetStateSubscriptions.Add(_connectionId, widgetId);
@@ -407,7 +415,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return _variableBroadcaster.Snapshot(names);
 	}
 
-	private async Task<ReportFolderChangedResponse> ReportFolderChanged(ReportFolderChangedRequest request,
+	private async Task<ReportFolderChangedResponse> ReportFolderChanged(
+		ReportFolderChangedRequest request,
 		CancellationToken cancellationToken)
 	{
 		request.DeviceId = Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var id) ? id : null;
@@ -434,10 +443,16 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	}
 
 	private ActiveNotificationsEvent ActiveNotifications()
-		=> new()
+	{
+		return new ActiveNotificationsEvent
 		{
-			Notifications = [.. _notifications.Snapshot(PrincipalForNotifications()).Select(n => ActiveNotificationDto.From(n, TimeProvider.System.GetUtcNow()))]
+			Notifications =
+			[
+				.. _notifications.Snapshot(PrincipalForNotifications())
+					.Select(n => ActiveNotificationDto.From(n, TimeProvider.System.GetUtcNow()))
+			]
 		};
+	}
 
 	private RespondToNotificationResponse RespondToNotification(RespondToNotificationRequest request)
 	{
@@ -460,9 +475,13 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		};
 	}
 
-	private NotificationPrincipal PrincipalForNotifications() => new(IsAdmin, DeviceId());
+	private NotificationPrincipal PrincipalForNotifications()
+	{
+		return new NotificationPrincipal(IsAdmin, DeviceId());
+	}
 
-	private async Task<object?> SubscribeLogs(GetLogsRequest? filter,
+	private async Task<object?> SubscribeLogs(
+		GetLogsRequest? filter,
 		string? tailAnchor,
 		CancellationToken cancellationToken)
 	{
@@ -518,7 +537,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return null;
 	}
 
-	private async Task<SetDeviceClientSettingsResponse> SetDeviceClientSettings(DeviceClientSettingsChange? change,
+	private async Task<SetDeviceClientSettingsResponse> SetDeviceClientSettings(
+		DeviceClientSettingsChange? change,
 		CancellationToken cancellationToken)
 	{
 		if (DeviceId() is not { } deviceId)
@@ -531,12 +551,13 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			return new SetDeviceClientSettingsResponse { Success = false };
 		}
 
-		return await _setDeviceClientSettings.Handle(
-			new SetDeviceClientSettingsRequest { DeviceId = deviceId, SettingsButtonHidden = change.SettingsButtonHidden },
+		return await _setDeviceClientSettings.Handle(new SetDeviceClientSettingsRequest
+				{ DeviceId = deviceId, SettingsButtonHidden = change.SettingsButtonHidden },
 			cancellationToken);
 	}
 
-	private async Task<SyncCompanionLicenseResponse> SyncCompanionLicense(SyncCompanionLicenseRequest? request,
+	private async Task<SyncCompanionLicenseResponse> SyncCompanionLicense(
+		SyncCompanionLicenseRequest? request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out _))
@@ -544,7 +565,9 @@ public sealed class UiWebSocketDispatcher : IDisposable
 			throw new UiWebSocketDispatchException("forbidden");
 		}
 
-		return await _licenses.SyncAsync(_connectionId, request ?? new SyncCompanionLicenseRequest(), cancellationToken);
+		return await _licenses.SyncAsync(_connectionId,
+			request ?? new SyncCompanionLicenseRequest(),
+			cancellationToken);
 	}
 
 	private OpenVideoStreamResponse OpenVideoStream(OpenVideoStreamRequest? request)
@@ -582,19 +605,31 @@ public sealed class UiWebSocketDispatcher : IDisposable
 	}
 
 	private static UiWebSocketDispatchException VideoStreamRefusal(VideoStreamBrokerException exception)
-		=> new(VideoStreamUiMapping.WireName(exception.Error), VideoStreamUiMapping.ErrorText(exception.Error));
+	{
+		return new UiWebSocketDispatchException(VideoStreamUiMapping.WireName(exception.Error),
+			VideoStreamUiMapping.ErrorText(exception.Error));
+	}
 
 	private bool IsAdmin => _principal.HasClaim(AuthDefaults.ScopeClaim, AuthDefaults.AdminScope);
-	private string OwnerPrincipal() => _principal.FindFirst(AuthDefaults.DeviceClaim)?.Value ?? string.Empty;
+
+	private string OwnerPrincipal()
+	{
+		return _principal.FindFirst(AuthDefaults.DeviceClaim)?.Value ?? string.Empty;
+	}
 
 	private Guid? DeviceId()
-		=> Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var id) ? id : null;
+	{
+		return Guid.TryParse(_principal.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var id) ? id : null;
+	}
 
-	private static bool IsKnown(string type) => type is "RenderLabelPreview"
-		or "SubscribeLogs"
-		or "UnsubscribeLogs"
-		or "ListUiPreviews"
-		or "OpenUiPreviewSession";
+	private static bool IsKnown(string type)
+	{
+		return type is "RenderLabelPreview"
+			or "SubscribeLogs"
+			or "UnsubscribeLogs"
+			or "ListUiPreviews"
+			or "OpenUiPreviewSession";
+	}
 
 	private static T Arg<T>(JsonElement? payload, int index)
 	{
@@ -607,5 +642,8 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		return item.Deserialize<T>(UiWebSocketProtocol.Json)!;
 	}
 
-	public void Dispose() => _dispatch.Dispose();
+	public void Dispose()
+	{
+		_dispatch.Dispose();
+	}
 }

@@ -23,16 +23,19 @@ public class CalendarAgendaDialogTests
 	{
 		var planning = Event("planning", Noon.AddHours(2), TimeSpan.FromHours(1), "team", "Planning", MeetingUrl) with
 		{
-			Location = "Room 4",
+			Location = "Room 4"
 		};
 		_harness = new CalendarWidgetHarness()
 			.With(Event("ended", Noon.AddHours(-3), TimeSpan.FromHours(1), title: "Ended"))
 			.With(Event("running", Noon.AddMinutes(-10), TimeSpan.FromMinutes(30), title: "Running"))
 			.With(planning)
-			.With(Event("holiday", new DateTimeOffset(Noon.Date, TimeSpan.Zero), TimeSpan.FromDays(1), title: "Holiday") with
-			{
-				IsAllDay = true,
-			})
+			.With(Event("holiday",
+					new DateTimeOffset(Noon.Date, TimeSpan.Zero),
+					TimeSpan.FromDays(1),
+					title: "Holiday") with
+				{
+					IsAllDay = true
+				})
 			.With(Event("retro", Noon.AddDays(1), TimeSpan.FromHours(1), title: "Retro"))
 			.With(Event("offsite", Noon.AddDays(3), TimeSpan.FromHours(1), title: "Offsite"));
 		_harness.Google.Details["planning"] = planning with { Description = "Bring the roadmap" };
@@ -42,7 +45,8 @@ public class CalendarAgendaDialogTests
 	[Test]
 	public async Task The_dialog_lists_the_upcoming_events_of_the_agenda_by_day_with_its_own_settings()
 	{
-		var widget = Agenda($$"""{"days":2,"showAllDay":false,"calendars":["{{CalendarWidgetHarness.CalendarKey()}}"]}""");
+		var widget = Agenda(
+			$$"""{"days":2,"showAllDay":false,"calendars":["{{CalendarWidgetHarness.CalendarKey()}}"]}""");
 
 		await using var dialog = await _harness.OpenAgendaDialogAsync(widget.Id);
 		var days = Days(dialog.BuildTree().Root);
@@ -59,7 +63,8 @@ public class CalendarAgendaDialogTests
 	[Test]
 	public async Task Days_without_events_are_left_out_of_the_list()
 	{
-		var widget = Agenda($$"""{"days":5,"showAllDay":false,"calendars":["{{CalendarWidgetHarness.CalendarKey()}}"]}""");
+		var widget = Agenda(
+			$$"""{"days":5,"showAllDay":false,"calendars":["{{CalendarWidgetHarness.CalendarKey()}}"]}""");
 
 		await using var dialog = await _harness.OpenAgendaDialogAsync(widget.Id);
 		var days = Days(dialog.BuildTree().Root);
@@ -91,8 +96,10 @@ public class CalendarAgendaDialogTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(details, Does.Contain("Planning"));
-			Assert.That(details, Does.Contain(Resolve(Strings.Details.TimedRange(date: "Thursday, January 1, 2026",
-				start: "14:00", end: "15:00"))));
+			Assert.That(details,
+				Does.Contain(Resolve(Strings.Details.TimedRange("Thursday, January 1, 2026",
+					"14:00",
+					"15:00"))));
 			Assert.That(details, Does.Contain("Room 4"));
 			Assert.That(details, Does.Not.Contain("Running"), "the list gives way to the event");
 			Assert.That(_harness.Interactions.Opened.Task.IsCompleted, Is.False, "no second dialog opens");
@@ -160,9 +167,15 @@ public class CalendarAgendaDialogTests
 		{
 			for (var index = 0; index < eventsPerDay; index++)
 			{
-				var start = Noon.AddDays(day).AddMinutes(10 + (index * 10));
-				_harness.With(Event($"busy-{day}-{index}", start, TimeSpan.FromMinutes(10), calendarId,
-					$"{day}-{index} " + new string(letter, 400)) with { Location = new string(letter, 800) });
+				var start = Noon.AddDays(day).AddMinutes(10 + index * 10);
+				_harness.With(Event($"busy-{day}-{index}",
+						start,
+						TimeSpan.FromMinutes(10),
+						calendarId,
+						$"{day}-{index} " + new string(letter, 400)) with
+					{
+						Location = new string(letter, 800)
+					});
 			}
 		}
 
@@ -172,11 +185,12 @@ public class CalendarAgendaDialogTests
 		await using var dialog = await _harness.OpenAgendaDialogAsync(widget.Id);
 		var tree = dialog.BuildTree();
 		var listed = Days(tree.Root).Sum(day => day.Titles.Count);
-		var upcoming = (busyDays * eventsPerDay) + upcomingFromSetUp;
+		var upcoming = busyDays * eventsPerDay + upcomingFromSetUp;
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
+			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length,
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
 			Assert.That(Flatten(tree.Root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 			Assert.That(Days(tree.Root), Has.Count.GreaterThan(1), "the list keeps its day sections");
 			Assert.That(listed, Is.LessThan(upcoming));
@@ -184,16 +198,33 @@ public class CalendarAgendaDialogTests
 		});
 	}
 
-	private WidgetEntity Agenda(string data) => _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutAgenda, data);
+	private WidgetEntity Agenda(string data)
+	{
+		return _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutAgenda, data);
+	}
 
 	private static void PressEvent(IUiSession dialog, string title)
-		=> Press(dialog, Flatten(dialog.BuildTree().Root).First(node => IsPressable(node) && Texts(node).Contains(title)));
+	{
+		Press(dialog, Flatten(dialog.BuildTree().Root).First(node => IsPressable(node) && Texts(node).Contains(title)));
+	}
 
 	private static List<(string Heading, List<string> Titles)> Days(UiNode root)
-		=> [.. Flatten(root)
-			.Where(node => node.Children.Any(child => child.Id.EndsWith(".heading", StringComparison.Ordinal)))
-			.Select(day => (Text(Get(day, "heading"))!, Titles(day)))];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Children.Any(child => child.Id.EndsWith(".heading", StringComparison.Ordinal)))
+				.Select(day => (Text(Get(day, "heading"))!, Titles(day)))
+		];
+	}
 
 	private static List<string> Titles(UiNode root)
-		=> [.. Flatten(root).Where(node => node.Id.EndsWith(".title", StringComparison.Ordinal)).Select(node => Text(node)!)];
+	{
+		return
+		[
+			.. Flatten(root)
+				.Where(node => node.Id.EndsWith(".title", StringComparison.Ordinal))
+				.Select(node => Text(node)!)
+		];
+	}
 }

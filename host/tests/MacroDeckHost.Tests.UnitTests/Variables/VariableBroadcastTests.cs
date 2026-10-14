@@ -127,7 +127,7 @@ public class VariableBroadcastTests
 		await broadcaster.Publish([a.Id], CancellationToken.None);
 
 		var broadcastDto = transport.Group().Single().Upserted.Single();
-		var readDto = VariableDtoMapper.ToDto(a, registry.IsAvailable(a.Id), null, shared: false);
+		var readDto = VariableDtoMapper.ToDto(a, registry.IsAvailable(a.Id), null, false);
 
 		Assert.Multiple(() =>
 		{
@@ -806,7 +806,7 @@ public class VariableBroadcastTests
 	public async Task A_bounds_only_reading_reaches_a_watching_connection_carrying_the_new_range()
 	{
 		var (service, registry, broadcaster, transport, _) = BoundsPipeline();
-		var id = await SeekVariable(service, max: 180);
+		var id = await SeekVariable(service, 180);
 		transport.Sent.Clear();
 
 		var result = await service.ReportIntegrationVariableValue("player",
@@ -831,7 +831,7 @@ public class VariableBroadcastTests
 	public async Task A_repeated_identical_reading_changes_nothing_and_publishes_nothing()
 	{
 		var pipeline = BoundsPipeline();
-		var id = await SeekVariable(pipeline.Service, max: 180);
+		var id = await SeekVariable(pipeline.Service, 180);
 		await pipeline.Service.ReportIntegrationVariableValue("player", id, 30d, new VariableBounds(0, 180, 1));
 		pipeline.Mediator.Published.Clear();
 
@@ -848,7 +848,7 @@ public class VariableBroadcastTests
 	public async Task A_reading_that_supplies_no_bounds_leaves_the_range_alone()
 	{
 		var (service, registry, _, _, _) = BoundsPipeline();
-		var id = await SeekVariable(service, max: 180);
+		var id = await SeekVariable(service, 180);
 
 		await service.ReportIntegrationVariableValue("player", id, 30d);
 
@@ -863,7 +863,7 @@ public class VariableBroadcastTests
 	public async Task Going_unavailable_leaves_the_range_alone()
 	{
 		var (service, registry, _, _, _) = BoundsPipeline();
-		var id = await SeekVariable(service, max: 180);
+		var id = await SeekVariable(service, 180);
 
 		await service.SetIntegrationVariableAvailability("player", id, false);
 
@@ -1045,13 +1045,16 @@ public class VariableBroadcastTests
 	private static VariableBroadcastBackgroundService NewService(
 		VariableBroadcastChannel channel,
 		VariableBroadcaster broadcaster)
-		=> new(new StartedHostLifetime(),
+	{
+		return new VariableBroadcastBackgroundService(new StartedHostLifetime(),
 			channel,
 			broadcaster,
 			Serilog.Core.Logger.None,
 			TimeSpan.FromMilliseconds(TestWindow));
+	}
 
-	private static void Change(VariableRegistry registry,
+	private static void Change(
+		VariableRegistry registry,
 		VariableBroadcastChannel channel,
 		VariableEntity v,
 		string value)
@@ -1104,7 +1107,8 @@ public class VariableBroadcastTests
 		string? scopeRefId = null,
 		VariableClassification classification = VariableClassification.User,
 		VariableType type = VariableType.Text)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -1113,8 +1117,9 @@ public class VariableBroadcastTests
 			Type = type,
 			Classification = classification,
 			Value = value,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	private static (VariableRegistry Registry, List<Guid> Ids) ManyVariables(int count)
 	{
@@ -1145,7 +1150,10 @@ public class VariableBroadcastTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -1163,7 +1171,9 @@ public class VariableBroadcastTests
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> throw new NotSupportedException("VariableBroadcaster only ever addresses a group or a connection.");
+		{
+			throw new NotSupportedException("VariableBroadcaster only ever addresses a group or a connection.");
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -1185,18 +1195,26 @@ public class VariableBroadcastTests
 		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public List<VariablesChangedEvent> To(string connectionId)
-			=> Sent.Where(s => s.Kind == "connection" && s.TargetId == connectionId).Select(s => s.Event).ToList();
+		{
+			return Sent.Where(s => s.Kind == "connection" && s.TargetId == connectionId).Select(s => s.Event).ToList();
+		}
 
 		public List<VariablesChangedEvent> Group()
-			=> Sent.Where(s => s.Kind == "group" && s.TargetId == VariableGroups.WatchAll)
+		{
+			return Sent.Where(s => s.Kind == "group" && s.TargetId == VariableGroups.WatchAll)
 				.Select(s => s.Event)
 				.ToList();
+		}
 	}
 
 	// A transport whose group send hangs until Release() is called, so a Publish() call can be driven
@@ -1209,11 +1227,16 @@ public class VariableBroadcastTests
 
 		public List<VariablesChangedEvent> Sent { get; } = [];
 
-		public void Release() => _gate.TrySetResult();
+		public void Release()
+		{
+			_gate.TrySetResult();
+		}
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public async Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -1228,13 +1251,19 @@ public class VariableBroadcastTests
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	// A hand-rolled fan-out that dispatches to exactly the handlers a test registers, instead of
@@ -1246,7 +1275,9 @@ public class VariableBroadcastTests
 
 		public void Register<T>(INotificationHandler<T> handler)
 			where T : INotification
-			=> _handlers.Add((notification, ct) => notification is T typed ? handler.Handle(typed, ct) : default);
+		{
+			_handlers.Add((notification, ct) => notification is T typed ? handler.Handle(typed, ct) : default);
+		}
 
 		public async ValueTask Publish<TNotification>(
 			TNotification notification,
@@ -1260,42 +1291,60 @@ public class VariableBroadcastTests
 		}
 
 		public ValueTask Publish(object notification, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public ValueTask<TResponse> Send<TResponse>(
 			IRequest<TResponse> request,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public ValueTask<TResponse> Send<TResponse>(
 			ICommand<TResponse> command,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public ValueTask<TResponse> Send<TResponse>(
 			IQuery<TResponse> query,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamRequest<TResponse> request,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamCommand<TResponse> command,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 			IStreamQuery<TResponse> query,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

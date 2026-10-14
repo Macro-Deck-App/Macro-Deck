@@ -45,7 +45,10 @@ public class WidgetServiceCreateManyTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task FreeRects_AreCreatedAtExactlyTheRequestedPositions_WithNewIdsNeverPinned()
@@ -268,30 +271,39 @@ public class WidgetServiceCreateManyTests
 		});
 	}
 
-	private FolderEntity Folder(Guid id, string name) => new()
+	private FolderEntity Folder(Guid id, string name)
 	{
-		Id = id,
-		ProfileId = _profileId,
-		Name = name,
-		Order = 0,
-		Rows = 4,
-		Columns = 4
-	};
+		return new FolderEntity
+		{
+			Id = id,
+			ProfileId = _profileId,
+			Name = name,
+			Order = 0,
+			Rows = 4,
+			Columns = 4
+		};
+	}
 
-	private static WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 
 	private sealed class RecordingWidgetSecretCloner : IWidgetSecretCloner
 	{
 		private readonly IWidgetSecretCloner _inner;
 
-		public RecordingWidgetSecretCloner(IWidgetSecretCloner inner) => _inner = inner;
+		public RecordingWidgetSecretCloner(IWidgetSecretCloner inner)
+		{
+			_inner = inner;
+		}
 
 		public int CallCount { get; private set; }
 

@@ -31,13 +31,14 @@ public class WidgetSecretCloner : IWidgetSecretCloner
 			return widgetData;
 		}
 
-		return SecretReferences.ReferenceRegex().Replace(widgetData,
-			match =>
-			{
-				var original = match.Groups[1].Value;
-				return Guid.TryParse(original, out var originalId) && idMap.TryGetValue(originalId, out var cloneId)
-					? match.Value.Replace(original, cloneId.ToString(), StringComparison.Ordinal)
-					: match.Value;
-			});
+		return SecretReferences.ReferenceRegex()
+			.Replace(widgetData,
+				match =>
+				{
+					var original = match.Groups[1].Value;
+					return Guid.TryParse(original, out var originalId) && idMap.TryGetValue(originalId, out var cloneId)
+						? match.Value.Replace(original, cloneId.ToString(), StringComparison.Ordinal)
+						: match.Value;
+				});
 	}
 }

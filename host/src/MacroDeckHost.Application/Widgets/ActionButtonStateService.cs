@@ -40,10 +40,12 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 		_reconciler = reconciler;
 	}
 
-	public Task<WidgetStateWriteResult> SetAsync(Guid widgetId,
+	public Task<WidgetStateWriteResult> SetAsync(
+		Guid widgetId,
 		string stateId,
 		CancellationToken cancellationToken = default)
-		=> Write(widgetId,
+	{
+		return Write(widgetId,
 			(data, model) =>
 			{
 				if (model.FindState(stateId) is null)
@@ -55,13 +57,16 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 				return (stateId, null);
 			},
 			cancellationToken);
+	}
 
 	public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Write(widgetId,
+	{
+		return Write(widgetId,
 			(data, _) => ActionButtonStateJson.AdvanceState(data) is { } next
 				? (next, null)
 				: (null, WidgetStateWriteError.UnknownState),
 			cancellationToken);
+	}
 
 	private async Task<WidgetStateWriteResult> Write(
 		Guid widgetId,

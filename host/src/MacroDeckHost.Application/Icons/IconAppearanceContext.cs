@@ -7,10 +7,12 @@ public sealed record IconAppearanceContext(string? ColorScheme, string? Motion)
 	public bool IsEmpty => ColorScheme is null && Motion is null;
 
 	public string? ValueOf(string trait)
-		=> trait switch
+	{
+		return trait switch
 		{
 			IconAppearanceTraits.ColorScheme => ColorScheme,
 			IconAppearanceTraits.Motion => Motion,
 			_ => null
 		};
+	}
 }

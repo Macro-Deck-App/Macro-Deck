@@ -29,7 +29,7 @@ internal sealed class PluginInstallationControllerTests
 	{
 		var installer = new FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, activated: false)
+			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, false)
 				with
 				{
 					Signature = PluginTrustResult.Of(verdict, message: "why")
@@ -50,7 +50,7 @@ internal sealed class PluginInstallationControllerTests
 	{
 		var installer = new FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, activated: false)
+			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, false)
 		};
 
 		var response = await Inspect(installer);
@@ -67,7 +67,7 @@ internal sealed class PluginInstallationControllerTests
 	{
 		var installer = new FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, activated: false)
+			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, false)
 				with
 				{
 					Publisher = new PluginPublisher
@@ -94,14 +94,14 @@ internal sealed class PluginInstallationControllerTests
 	{
 		var installer = new FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, activated: false)
+			ResultToReturn = PluginInstallResult.Ok("com.example.plugin", "1.0.0", null, false)
 		};
 		var controller = BuildController(installer);
 
 		await controller.Uninstall("com.example.plugin", CancellationToken.None);
 		var byDefault = installer.LastUninstallRequest;
 
-		await controller.Uninstall("com.example.plugin", CancellationToken.None, keepData: false);
+		await controller.Uninstall("com.example.plugin", CancellationToken.None, false);
 		var whenAsked = installer.LastUninstallRequest;
 
 		Assert.Multiple(() =>
@@ -117,10 +117,11 @@ internal sealed class PluginInstallationControllerTests
 	{
 		var installer = new FakePluginInstaller
 		{
-			ResultToReturn = PluginInstallResult.Fail(PluginInstallError.Failed, "diagnostic", "com.example.plugin") with
-			{
-				BlockedByDevelopmentTakeover = true
-			}
+			ResultToReturn
+				= PluginInstallResult.Fail(PluginInstallError.Failed, "diagnostic", "com.example.plugin") with
+				{
+					BlockedByDevelopmentTakeover = true
+				}
 		};
 
 		var response = await Inspect(installer);

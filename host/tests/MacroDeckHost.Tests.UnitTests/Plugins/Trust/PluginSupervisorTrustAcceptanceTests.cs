@@ -128,7 +128,10 @@ internal sealed class PluginSupervisorTrustAcceptanceTests
 	private PluginInstaller Installer { get; set; } = null!;
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	private async Task InstallTrusted(string version = "1.0.0")
 	{
@@ -435,16 +438,22 @@ internal sealed class PluginSupervisorTrustAcceptanceTests
 
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
-		public HttpClient CreateClient(string name) => throw new NotSupportedException();
+		public HttpClient CreateClient(string name)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class MutablePluginRevocationSource : IPluginRevocationSource
 	{
 		public PluginRevocationStatus Status { get; set; } = PluginRevocationStatus.NotRevoked;
 
-		public Task<PluginRevocationResult> CheckAsync(string certificateId,
+		public Task<PluginRevocationResult> CheckAsync(
+			string certificateId,
 			string? issuerCertificateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(new PluginRevocationResult(Status, null));
+		{
+			return Task.FromResult(new PluginRevocationResult(Status, null));
+		}
 	}
 }

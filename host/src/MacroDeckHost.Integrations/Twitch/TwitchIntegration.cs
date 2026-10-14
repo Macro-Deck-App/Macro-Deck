@@ -15,7 +15,6 @@ using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Twitch;
 
@@ -58,7 +57,8 @@ public sealed class TwitchIntegration
 	{
 	}
 
-	internal TwitchIntegration(TwitchAccountManager accounts,
+	internal TwitchIntegration(
+		TwitchAccountManager accounts,
 		IStreamChatImages? images = null,
 		TimeProvider? time = null)
 	{
@@ -70,7 +70,10 @@ public sealed class TwitchIntegration
 		Chat = new StreamChatHub(clock, _logger, images ?? _ownedImages);
 		_pump = new StreamPump(Chat);
 		_stats = new StreamStatsSource(ReadStats);
-		_thumbnails = new StreamThumbnailCache(TwitchStreamPlatform.Platform, () => _context?.UiResources, clock, _logger);
+		_thumbnails = new StreamThumbnailCache(TwitchStreamPlatform.Platform,
+			() => _context?.UiResources,
+			clock,
+			_logger);
 		_ui = new StreamWidgetsUiProvider(TwitchStreamPlatform.Platform,
 			Chat,
 			images ?? _ownedImages,
@@ -131,12 +134,20 @@ public sealed class TwitchIntegration
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new TwitchConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new TwitchConfigFlow();
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> _ui.CreateSessionAsync(request, cancellationToken);
+	{
+		return _ui.CreateSessionAsync(request, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -182,7 +193,9 @@ public sealed class TwitchIntegration
 	}
 
 	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
-		=> _accounts.Connections.Count == 0 ? [] : [ChatWidgetType(), StatsWidgetType()];
+	{
+		return _accounts.Connections.Count == 0 ? [] : [ChatWidgetType(), StatsWidgetType()];
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -221,15 +234,19 @@ public sealed class TwitchIntegration
 	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(_accounts.Issues());
+	{
+		return Task.FromResult(_accounts.Issues());
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId.StartsWith(TwitchAccountManager.TokenIssuePrefix, StringComparison.Ordinal) ||
-			issueId.StartsWith(TwitchAccountManager.MissingScopeIssuePrefix, StringComparison.Ordinal) ||
-			issueId.StartsWith(TwitchAccountManager.MissingChattersScopeIssuePrefix, StringComparison.Ordinal)
+	{
+		return Task.FromResult(issueId.StartsWith(TwitchAccountManager.TokenIssuePrefix, StringComparison.Ordinal)
+			|| issueId.StartsWith(TwitchAccountManager.MissingScopeIssuePrefix, StringComparison.Ordinal)
+			|| issueId.StartsWith(TwitchAccountManager.MissingChattersScopeIssuePrefix, StringComparison.Ordinal)
 				? IssueResolution.Ok(AppStrings.Integrations.Twitch.Issues.ReconnectAccountResolution(),
 					IssueResolutionFollowUp.StartConfigFlow)
 				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	public void Dispose()
 	{
@@ -240,9 +257,15 @@ public sealed class TwitchIntegration
 		_thumbnails.Dispose();
 	}
 
-	private static WidgetTypeDescriptor ChatWidgetType() => TwitchStreamPlatform.Platform.ChatWidgetDescriptor();
+	private static WidgetTypeDescriptor ChatWidgetType()
+	{
+		return TwitchStreamPlatform.Platform.ChatWidgetDescriptor();
+	}
 
-	private static WidgetTypeDescriptor StatsWidgetType() => TwitchStreamPlatform.Platform.StatsWidgetDescriptor();
+	private static WidgetTypeDescriptor StatsWidgetType()
+	{
+		return TwitchStreamPlatform.Platform.StatsWidgetDescriptor();
+	}
 
 	private object? ReadStats(StreamStatsAccount account, string name)
 	{
@@ -265,7 +288,8 @@ public sealed class TwitchIntegration
 	{
 		var assembly = typeof(TwitchIntegration).Assembly;
 		using var stream = assembly.GetManifestResourceStream(
-			$"{typeof(TwitchIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")!;
+				$"{typeof(TwitchIntegration).Namespace}.Icons.{StreamWidgetsUiProvider.IconFolder}.{StreamWidgetsUiProvider.LogoIcon}.svg")
+			!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

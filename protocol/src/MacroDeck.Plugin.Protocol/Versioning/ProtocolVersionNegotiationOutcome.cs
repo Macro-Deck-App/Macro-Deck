@@ -11,8 +11,13 @@ public sealed record ProtocolVersionNegotiationOutcome
 	public required ProtocolVersionRange HostRange { get; init; }
 
 	public static ProtocolVersionNegotiationOutcome Success(int negotiatedVersion, ProtocolVersionRange hostRange)
-		=> new() { Succeeded = true, NegotiatedVersion = negotiatedVersion, HostRange = hostRange };
+	{
+		return new ProtocolVersionNegotiationOutcome
+			{ Succeeded = true, NegotiatedVersion = negotiatedVersion, HostRange = hostRange };
+	}
 
 	public static ProtocolVersionNegotiationOutcome Failure(ProtocolVersionRange hostRange)
-		=> new() { Succeeded = false, HostRange = hostRange };
+	{
+		return new ProtocolVersionNegotiationOutcome { Succeeded = false, HostRange = hostRange };
+	}
 }

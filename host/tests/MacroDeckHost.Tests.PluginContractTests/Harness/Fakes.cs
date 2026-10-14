@@ -10,7 +10,10 @@ internal sealed class InMemoryIntegrationStateStore : IIntegrationStateStore
 {
 	private readonly Dictionary<string, bool> _states = new(StringComparer.Ordinal);
 
-	public IReadOnlyDictionary<string, bool> Load() => _states;
+	public IReadOnlyDictionary<string, bool> Load()
+	{
+		return _states;
+	}
 
 	public void Save(IReadOnlyDictionary<string, bool> states)
 	{
@@ -25,34 +28,56 @@ internal sealed class InMemoryIntegrationStateStore : IIntegrationStateStore
 
 internal sealed class EmptyPluginSupervisor : IPluginSupervisor
 {
-	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot() => [];
+	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot()
+	{
+		return [];
+	}
 
 	public Task<PluginSupervisorResult> Start(string pluginId, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<PluginSupervisorResult> Stop(string pluginId,
+	public Task<PluginSupervisorResult> Stop(
+		string pluginId,
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<PluginSupervisorResult> Restart(string pluginId, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task StopAll(PluginStopReason reason, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task Forget(string pluginId, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task Reconcile(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+	public Task Reconcile(CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class EmptyInstallationCatalog : IPluginInstallationCatalog
 {
-	public IReadOnlyList<InstalledPlugin> Discover() => [];
+	public IReadOnlyList<InstalledPlugin> Discover()
+	{
+		return [];
+	}
 
 	public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 	{
@@ -68,13 +93,18 @@ internal sealed class EmptyInstallationCatalog : IPluginInstallationCatalog
 internal sealed class NeverFindsManifest : IPluginManifestReader
 {
 	public PluginManifestReadResult Read(string manifestPath, string expectedPluginId, string expectedVersion)
-		=> PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+	{
+		return PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+	}
 
-	public PluginManifestReadResult ReadFromJson(string json,
+	public PluginManifestReadResult ReadFromJson(
+		string json,
 		string? versionDirectory,
 		string expectedPluginId,
 		string expectedVersion)
-		=> PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+	{
+		return PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+	}
 }
 
 internal sealed class RecordingNotificationStore : IUserNotificationStore
@@ -89,25 +119,55 @@ internal sealed class RecordingNotificationStore : IUserNotificationStore
 		return null;
 	}
 
-	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => Raise(draft);
+	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+	{
+		return Raise(draft);
+	}
 
-	public IReadOnlyList<UserNotification> Snapshot() => [];
+	public IReadOnlyList<UserNotification> Snapshot()
+	{
+		return [];
+	}
 
-	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress) => false;
+	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
+	{
+		return false;
+	}
 
-	public bool Dismiss(string id) => false;
+	public bool Dismiss(string id)
+	{
+		return false;
+	}
 
-	public bool DismissByKey(string dedupeKey) => false;
+	public bool DismissByKey(string dedupeKey)
+	{
+		return false;
+	}
 
-	public bool Retire(string dedupeKey) => false;
+	public bool Retire(string dedupeKey)
+	{
+		return false;
+	}
 
-	public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+	{
+		return null;
+	}
 
-	public bool MarkRead(string id) => false;
+	public bool MarkRead(string id)
+	{
+		return false;
+	}
 
-	public bool MarkAllRead() => false;
+	public bool MarkAllRead()
+	{
+		return false;
+	}
 
-	public bool DismissAll() => false;
+	public bool DismissAll()
+	{
+		return false;
+	}
 
 	public event Action? Changed
 	{
@@ -137,35 +197,53 @@ internal sealed class RecordingMediator : IMediator
 		return default;
 	}
 
-	public ValueTask<TResponse> Send<TResponse>(IRequest<TResponse> request,
+	public ValueTask<TResponse> Send<TResponse>(
+		IRequest<TResponse> request,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public ValueTask<TResponse> Send<TResponse>(ICommand<TResponse> command,
+	public ValueTask<TResponse> Send<TResponse>(
+		ICommand<TResponse> command,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public ValueTask<TResponse> Send<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamRequest<TResponse> request,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamCommand<TResponse> command,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
 		IStreamQuery<TResponse> query,
 		CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }

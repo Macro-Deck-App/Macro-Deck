@@ -32,7 +32,10 @@ public class ScriptRunnerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task RunAsync_SelectsTheOnRunFlowInGlobalScope()
@@ -98,7 +101,7 @@ public class ScriptRunnerTests
 	{
 		var script = await Store("[{\"triggerId\":\"onRun\",\"triggerType\":\"onRun\",\"children\":[]}]");
 
-		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, inheritedDepth: 10);
+		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 10);
 
 		Assert.Multiple(() =>
 		{
@@ -146,7 +149,7 @@ public class ScriptRunnerTests
 			};
 		};
 
-		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, inheritedDepth: 3);
+		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 3);
 
 		Assert.Multiple(() =>
 		{
@@ -242,7 +245,7 @@ public class ScriptRunnerTests
 	[Test]
 	public async Task RunAsync_failsWhenASuppliedValueDoesNotFitTheDeclaredType()
 	{
-		var script = await Store(OnRunFlow, Input("volume", type: ScriptInputType.Numeric));
+		var script = await Store(OnRunFlow, Input("volume", ScriptInputType.Numeric));
 
 		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, Supplied(("volume", "abc")));
 
@@ -258,7 +261,7 @@ public class ScriptRunnerTests
 	[Test]
 	public async Task RunAsync_failsWhenASuppliedValueIsNotABoolean()
 	{
-		var script = await Store(OnRunFlow, Input("muted", type: ScriptInputType.Boolean));
+		var script = await Store(OnRunFlow, Input("muted", ScriptInputType.Boolean));
 
 		var result = await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, Supplied(("muted", "maybe")));
 
@@ -377,10 +380,14 @@ public class ScriptRunnerTests
 		ScriptInputType type = ScriptInputType.Text,
 		bool required = false,
 		string? defaultValue = null)
-		=> new() { Name = name, Type = type, Required = required, DefaultValue = defaultValue };
+	{
+		return new ScriptInput { Name = name, Type = type, Required = required, DefaultValue = defaultValue };
+	}
 
 	private static Dictionary<string, object?> Supplied(params (string Name, object? Value)[] values)
-		=> values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	}
 
 	private async Task<ScriptEntity> Store(string flows, params ScriptInput[] inputs)
 	{
@@ -405,7 +412,8 @@ public class ScriptRunnerTests
 
 		public Func<Task<FlowExecutionResult>>? OnExecute { get; set; }
 
-		public async Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request,
+		public async Task<FlowExecutionResult> ExecuteAsync(
+			FlowExecutionRequest request,
 			CancellationToken cancellationToken)
 		{
 			lock (_gate)

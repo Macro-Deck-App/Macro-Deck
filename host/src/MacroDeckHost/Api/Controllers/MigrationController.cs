@@ -151,19 +151,23 @@ public class MigrationController : ControllerBase
 	}
 
 	private static MigrationRequestBody Body(string? sourceId, string path, string? decryptionKey, bool skip)
-		=> new()
+	{
+		return new MigrationRequestBody
 		{
 			SourceId = sourceId ?? MacroDeck2SourceId,
 			Path = path,
 			DecryptionKey = decryptionKey,
 			SkipDecryption = skip
 		};
+	}
 
 	private static MigrationRequest ToRequest(MigrationRequestBody body)
-		=> new(body.SourceId ?? string.Empty,
+	{
+		return new MigrationRequest(body.SourceId ?? string.Empty,
 			body.Path ?? string.Empty,
 			body.DecryptionKey,
 			body.SkipDecryption);
+	}
 }
 
 /// <summary>
@@ -215,7 +219,7 @@ internal sealed class StagedUpload : IDisposable
 
 		try
 		{
-			Directory.Delete(System.IO.Path.GetDirectoryName(Path)!, recursive: true);
+			Directory.Delete(System.IO.Path.GetDirectoryName(Path)!, true);
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
@@ -226,10 +230,13 @@ internal sealed class StagedUpload : IDisposable
 internal static class MigrationHttp
 {
 	public static TransportError ToTransportError(MigrationError error, string? message)
-		=> new() { Code = error.ToString(), Message = message ?? DefaultMessage(error) };
+	{
+		return new TransportError { Code = error.ToString(), Message = message ?? DefaultMessage(error) };
+	}
 
 	private static string DefaultMessage(MigrationError error)
-		=> error switch
+	{
+		return error switch
 		{
 			MigrationError.UnknownSource => "That migration source is not available",
 			MigrationError.SourceNotFound => "The folder does not contain a migratable installation",
@@ -241,4 +248,5 @@ internal static class MigrationHttp
 			MigrationError.DesktopOnly => "Migrating is only allowed from the desktop app.",
 			_ => "The migration failed"
 		};
+	}
 }

@@ -17,7 +17,7 @@ public class UiPointerEventDataTests
 			new UiStack
 			{
 				Key = "root",
-				Children = [new UiStack { Key = "pad", Events = [UiEventHandler.On(name, data => received = data)] }],
+				Children = [new UiStack { Key = "pad", Events = [UiEventHandler.On(name, data => received = data)] }]
 			});
 
 		using var document = JsonDocument.Parse(json);
@@ -83,7 +83,8 @@ public class UiPointerEventDataTests
 	[TestCase(UiComponentEvents.PointerDown, """{"id":1,"x":0,"y":0,"t":0}""")]
 	[TestCase(UiComponentEvents.PointerDown, """{"id":2147483648,"x":0,"y":0,"t":0,"width":1,"height":1}""")]
 	[TestCase(UiComponentEvents.PointerMove, """{"samples":{"id":1}}""")]
-	[TestCase(UiComponentEvents.PointerMove, """{"samples":[{"id":1,"x":0,"y":0,"t":0},{"id":1,"x":"0","y":0,"t":1}]}""")]
+	[TestCase(UiComponentEvents.PointerMove,
+		"""{"samples":[{"id":1,"x":0,"y":0,"t":0},{"id":1,"x":"0","y":0,"t":1}]}""")]
 	[TestCase(UiComponentEvents.PointerMove, """[{"id":1,"x":0,"y":0,"t":0}]""")]
 	[TestCase(UiComponentEvents.PointerUp, """{"id":1.5,"x":0,"y":0,"t":0}""")]
 	[TestCase(UiComponentEvents.Tap, """{"pointers":0}""")]
@@ -97,7 +98,7 @@ public class UiPointerEventDataTests
 			UiComponentEvents.PointerDown => data.TryGetPointerDown(out _),
 			UiComponentEvents.PointerMove => data.TryGetPointerSamples(out _),
 			UiComponentEvents.PointerUp => data.TryGetPointerUp(out _),
-			_ => data.TryGetTap(out _),
+			_ => data.TryGetTap(out _)
 		};
 
 		Assert.That(read, Is.False);

@@ -15,7 +15,7 @@ internal static class HistoryGraphWidgetSample
 		0.31, 0.34, 0.29, 0.36, 0.44, 0.41, 0.38, 0.47, 0.55, 0.62,
 		0.58, 0.51, 0.46, 0.49, 0.57, 0.66, 0.74, 0.71, 0.63, 0.56,
 		0.52, 0.48, 0.53, 0.61, 0.69, 0.77, 0.83, 0.79, 0.72, 0.64,
-		0.57, 0.5, 0.45, 0.42, 0.47, 0.54, 0.6, 0.55, 0.49, 0.42,
+		0.57, 0.5, 0.45, 0.42, 0.47, 0.54, 0.6, 0.55, 0.49, 0.42
 	];
 
 	private const double SampleValue = 42;
@@ -33,7 +33,7 @@ internal static class HistoryGraphWidgetSample
 		{
 			Title = title,
 			MaxValue = 100,
-			ShowSubtitle = true,
+			ShowSubtitle = true
 		};
 
 		var state = new HistoryGraphViewState
@@ -42,7 +42,7 @@ internal static class HistoryGraphWidgetSample
 			Unit = "%",
 			Digits = 3,
 			Subtitle = subtitle,
-			Points = _points,
+			Points = _points
 		};
 
 		return (sampleConfig, state);

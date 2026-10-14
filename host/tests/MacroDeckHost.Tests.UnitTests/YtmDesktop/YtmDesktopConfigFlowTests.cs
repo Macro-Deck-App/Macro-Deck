@@ -18,7 +18,10 @@ internal sealed class YtmDesktopConfigFlowTests
 	private YtmDesktopEndpoint? _requestedEndpoint;
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[SetUp]
 	public void SetUp()
@@ -133,9 +136,9 @@ internal sealed class YtmDesktopConfigFlowTests
 	[Test]
 	public async Task Localhost_is_stored_as_its_ipv4_literal()
 	{
-		await SubmitEnable(host: "localhost");
+		await SubmitEnable("localhost");
 
-		var result = await SubmitAuthorize(host: "localhost");
+		var result = await SubmitAuthorize("localhost");
 
 		Assert.Multiple(() =>
 		{
@@ -147,9 +150,9 @@ internal sealed class YtmDesktopConfigFlowTests
 	[Test]
 	public async Task A_host_of_its_own_ends_up_in_the_entry_title()
 	{
-		await SubmitEnable(host: "192.168.1.20");
+		await SubmitEnable("192.168.1.20");
 
-		var result = await SubmitAuthorize(host: "192.168.1.20");
+		var result = await SubmitAuthorize("192.168.1.20");
 
 		Assert.That(result.EntryTitle, Is.EqualTo("YouTube Music Desktop App (192.168.1.20)"));
 	}
@@ -240,19 +243,25 @@ internal sealed class YtmDesktopConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> SubmitEnable(string host = "127.0.0.1", int port = 9863)
-		=> _flow.SubmitAsync("enable",
+	{
+		return _flow.SubmitAsync("enable",
 			new Dictionary<string, object?> { ["host"] = host, ["port"] = port },
 			_context,
 			CancellationToken.None);
+	}
 
 	private Task<ConfigFlowResult> SubmitAuthorize(string host = "127.0.0.1", int port = 9863)
-		=> _flow.SubmitAsync("authorize",
+	{
+		return _flow.SubmitAsync("authorize",
 			new Dictionary<string, object?> { ["host"] = host, ["port"] = port },
 			_context,
 			CancellationToken.None);
+	}
 
 	private static YtmDesktopApiException Rejected(string code, HttpStatusCode status)
-		=> new(code, status, code);
+	{
+		return new YtmDesktopApiException(code, status, code);
+	}
 
 	private sealed class FakeConfigFlowContext : IConfigFlowContext
 	{

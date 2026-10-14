@@ -20,22 +20,33 @@ internal sealed class TestVariableIntegration(
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<VariableDefinition> Variables { get; } = variables;
 
 	public bool VariablesDependOnConfiguration { get; } = dependsOnConfiguration;
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> read?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult(VariableReading.Unavailable);
+	{
+		return read?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
 	public ValueTask<VariableWriteResult> SetValueAsync(
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> write?.Invoke(localId, value, cancellationToken) ?? ValueTask.FromResult(VariableWriteResult.NotWritable());
+	{
+		return write?.Invoke(localId, value, cancellationToken)
+			?? ValueTask.FromResult(VariableWriteResult.NotWritable());
+	}
 }
 
 internal sealed class TestVariableCatalogIntegration(
@@ -51,9 +62,15 @@ internal sealed class TestVariableCatalogIntegration(
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<VariableDefinition> Variables { get; } = [];
 
@@ -70,21 +87,30 @@ internal sealed class TestVariableCatalogIntegration(
 	public ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> discover?.Invoke(query, cancellationToken) ?? ValueTask.FromResult(VariableCatalogPage.Empty);
+	{
+		return discover?.Invoke(query, cancellationToken) ?? ValueTask.FromResult(VariableCatalogPage.Empty);
+	}
 
 	public ValueTask<VariableDefinition?> ResolveAsync(
 		string localId,
 		CancellationToken cancellationToken = default)
-		=> resolve?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult<VariableDefinition?>(null);
+	{
+		return resolve?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult<VariableDefinition?>(null);
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> read?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult(VariableReading.Unavailable);
+	{
+		return read?.Invoke(localId, cancellationToken) ?? ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
 	public ValueTask<VariableWriteResult> SetValueAsync(
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> write?.Invoke(localId, value, cancellationToken) ?? ValueTask.FromResult(VariableWriteResult.NotWritable());
+	{
+		return write?.Invoke(localId, value, cancellationToken)
+			?? ValueTask.FromResult(VariableWriteResult.NotWritable());
+	}
 
 	public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
 		IReadOnlyCollection<string> localIds,
@@ -92,8 +118,7 @@ internal sealed class TestVariableCatalogIntegration(
 	{
 		SubscribeCalls.Add(localIds);
 
-		return subscribe?.Invoke(localIds, cancellationToken) ??
-			ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
+		return subscribe?.Invoke(localIds, cancellationToken) ?? ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
 	}
 }
 
@@ -102,9 +127,15 @@ internal class TestEventIntegration(string providerName, params EventDefinition[
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
@@ -118,7 +149,8 @@ internal sealed class TestDynamicEventIntegration(string providerName, params Ev
 
 	public EventOptionsContext? LastContext { get; private set; }
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context,
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		LastContext = context;
@@ -133,16 +165,26 @@ internal sealed class TestIssueIntegration(
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> issues(cancellationToken);
+	{
+		return issues(cancellationToken);
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> resolve?.Invoke(issueId, cancellationToken) ??
-			Task.FromResult(IssueResolution.Failed("Not resolvable in this test."));
+	{
+		return resolve?.Invoke(issueId, cancellationToken)
+			?? Task.FromResult(IssueResolution.Failed("Not resolvable in this test."));
+	}
 }
 
 internal class TestMusicPlayer : IMusicPlayer
@@ -168,7 +210,9 @@ internal class TestMusicPlayer : IMusicPlayer
 	}
 
 	public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(ArtworkToReturn);
+	{
+		return Task.FromResult(ArtworkToReturn);
+	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
 	{
@@ -261,7 +305,9 @@ internal sealed class TestMusicPlayerWithDevices : TestMusicPlayer, IMusicPlayer
 	public Exception? ThrowOnDevices { get; set; }
 
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	{
+		return ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
 	{
@@ -304,7 +350,9 @@ internal sealed class TestMusicPlayerWithCatalogAndDevices : TestMusicPlayer, IC
 	}
 
 	public Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
-		=> ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	{
+		return ThrowOnDevices is not null ? throw ThrowOnDevices : Task.FromResult(DevicesToReturn);
+	}
 
 	public Task TransferPlaybackAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
 	{
@@ -318,16 +366,27 @@ internal sealed class TestMusicPlayerIntegration(string providerName, IReadOnlyD
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
-	public IReadOnlyList<MusicPlayerInstance> GetInstances() =>
-		[.. players.Keys.Select(id => new MusicPlayerInstance(id, id))];
+	public IReadOnlyList<MusicPlayerInstance> GetInstances()
+	{
+		return [.. players.Keys.Select(id => new MusicPlayerInstance(id, id))];
+	}
 
-	public IMusicPlayer? GetPlayer(string instanceId) => players.GetValueOrDefault(instanceId);
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return players.GetValueOrDefault(instanceId);
+	}
 }
 
 internal sealed class TestWeatherStation : IWeatherStation
@@ -336,8 +395,10 @@ internal sealed class TestWeatherStation : IWeatherStation
 
 	public Func<CancellationToken, Task<WeatherSnapshot>>? SnapshotOverride { get; set; }
 
-	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) =>
-		SnapshotOverride?.Invoke(ct) ?? Task.FromResult(SnapshotToReturn);
+	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+	{
+		return SnapshotOverride?.Invoke(ct) ?? Task.FromResult(SnapshotToReturn);
+	}
 }
 
 internal sealed class TestWeatherIntegration(string providerName, IReadOnlyDictionary<string, IWeatherStation> stations)
@@ -345,16 +406,27 @@ internal sealed class TestWeatherIntegration(string providerName, IReadOnlyDicti
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
 	public IReadOnlyList<WeatherStationInstance> GetInstances()
-		=> [.. stations.Keys.Select(id => new WeatherStationInstance(id, id))];
+	{
+		return [.. stations.Keys.Select(id => new WeatherStationInstance(id, id))];
+	}
 
-	public IWeatherStation? GetStation(string instanceId) => stations.GetValueOrDefault(instanceId);
+	public IWeatherStation? GetStation(string instanceId)
+	{
+		return stations.GetValueOrDefault(instanceId);
+	}
 }
 
 internal sealed class TestProfileIntegration(string providerName, IReadOnlyList<VirtualProfileDescriptor> profiles)
@@ -362,9 +434,15 @@ internal sealed class TestProfileIntegration(string providerName, IReadOnlyList<
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
@@ -374,9 +452,13 @@ internal sealed class TestProfileIntegration(string providerName, IReadOnlyList<
 		private set;
 	}
 
-	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => profiles;
+	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+	{
+		return profiles;
+	}
 
-	public Task HandleWidgetInteractionAsync(string profileId,
+	public Task HandleWidgetInteractionAsync(
+		string profileId,
 		string folderId,
 		string widgetId,
 		WidgetInteraction interaction)
@@ -421,14 +503,18 @@ internal sealed class TestConfigFlow : IConfigFlow
 internal sealed class ThrowingTestConfigFlow : IConfigFlow
 {
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> throw new InvalidOperationException("boom: token=abc123");
+	{
+		throw new InvalidOperationException("boom: token=abc123");
+	}
 
 	public Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> throw new InvalidOperationException("boom: token=abc123");
+	{
+		throw new InvalidOperationException("boom: token=abc123");
+	}
 }
 
 internal sealed class TestConfigFlowIntegration(
@@ -439,15 +525,24 @@ internal sealed class TestConfigFlowIntegration(
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public bool AllowsMultipleConfigurations { get; } = allowsMultipleConfigurations;
 
 	public bool RequiresConfiguration { get; } = requiresConfiguration;
 
-	public IConfigFlow CreateConfigFlow() => factory();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return factory();
+	}
 }
 
 internal sealed class TestConfigFlowContext : IConfigFlowContext
@@ -469,9 +564,15 @@ internal sealed class TestMigrationIntegration(params IIntegrationMigration[] mi
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = migrations;
 }
@@ -489,10 +590,14 @@ internal sealed class TestIntegrationMigration : IIntegrationMigration
 	public Func<ForeignPluginSettings, IReadOnlyList<MigratedConfiguration>>? TranslateConfiguration { get; init; }
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(TranslateAction is null ? null : TranslateAction(action));
+	{
+		return Task.FromResult(TranslateAction is null ? null : TranslateAction(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(TranslateConfiguration is null ? [] : TranslateConfiguration(settings));
+	{
+		return Task.FromResult(TranslateConfiguration is null ? [] : TranslateConfiguration(settings));
+	}
 }

@@ -105,7 +105,7 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 	[Test]
 	public async Task A_stream_that_faults_before_any_element_does_not_kill_the_host()
 	{
-		var watcher = new FaultingWatcher(itemsBeforeThrow: 0, items: []);
+		var watcher = new FaultingWatcher(0, []);
 		var coordinator = new RecordingApplicationFocusCoordinator();
 		var service = CreateService(watcher, coordinator, TimeSpan.FromMilliseconds(10));
 
@@ -128,8 +128,8 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 	[Test]
 	public async Task A_stream_that_faults_after_good_elements_keeps_what_was_already_forwarded()
 	{
-		var watcher = new FaultingWatcher(itemsBeforeThrow: 2, items: [App(100), App(200)]);
-		var coordinator = new CountdownApplicationFocusCoordinator(expectedCount: 2);
+		var watcher = new FaultingWatcher(2, [App(100), App(200)]);
+		var coordinator = new CountdownApplicationFocusCoordinator(2);
 		var service = CreateService(watcher, coordinator, TimeSpan.FromMilliseconds(10));
 
 		await service.StartAsync(CancellationToken.None);
@@ -185,13 +185,21 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 	private static ApplicationFocusBackgroundService CreateService(
 		IApplicationFocusWatcher watcher,
 		IApplicationFocusCoordinator coordinator)
-		=> new(new StartedHostLifetime(), watcher, coordinator, Log.Logger);
+	{
+		return new ApplicationFocusBackgroundService(new StartedHostLifetime(), watcher, coordinator, Log.Logger);
+	}
 
 	private static ApplicationFocusBackgroundService CreateService(
 		IApplicationFocusWatcher watcher,
 		IApplicationFocusCoordinator coordinator,
 		TimeSpan retryDelay)
-		=> new(new StartedHostLifetime(), watcher, coordinator, Log.Logger, retryDelay);
+	{
+		return new ApplicationFocusBackgroundService(new StartedHostLifetime(),
+			watcher,
+			coordinator,
+			Log.Logger,
+			retryDelay);
+	}
 
 	private static async Task RunToCompletion(ApplicationFocusBackgroundService service)
 	{
@@ -204,7 +212,10 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 		await service.StopAsync(CancellationToken.None);
 	}
 
-	private static FocusedApplication App(int pid) => new(pid, null, "app" + pid, null);
+	private static FocusedApplication App(int pid)
+	{
+		return new FocusedApplication(pid, null, "app" + pid, null);
+	}
 
 	private sealed class ChannelApplicationFocusWatcher : IApplicationFocusWatcher
 	{
@@ -214,12 +225,20 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 
 		public string? UnsupportedReason => null;
 
-		public void Enqueue(FocusedApplication app) => _channel.Writer.TryWrite(app);
+		public void Enqueue(FocusedApplication app)
+		{
+			_channel.Writer.TryWrite(app);
+		}
 
-		public void Complete() => _channel.Writer.TryComplete();
+		public void Complete()
+		{
+			_channel.Writer.TryComplete();
+		}
 
 		public IAsyncEnumerable<FocusedApplication> WatchAsync(CancellationToken cancellationToken)
-			=> _channel.Reader.ReadAllAsync(cancellationToken);
+		{
+			return _channel.Reader.ReadAllAsync(cancellationToken);
+		}
 	}
 
 	private sealed class UnsupportedWatcher : IApplicationFocusWatcher
@@ -291,7 +310,9 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 		: IAsyncEnumerable<FocusedApplication>
 	{
 		public IAsyncEnumerator<FocusedApplication> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-			=> new Enumerator(itemsBeforeThrow, items);
+		{
+			return new Enumerator(itemsBeforeThrow, items);
+		}
 
 		private sealed class Enumerator(int itemsBeforeThrow, IReadOnlyList<FocusedApplication> items)
 			: IAsyncEnumerator<FocusedApplication>
@@ -311,7 +332,10 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 				return ValueTask.FromResult(true);
 			}
 
-			public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+			public ValueTask DisposeAsync()
+			{
+				return ValueTask.CompletedTask;
+			}
 		}
 	}
 
@@ -327,9 +351,11 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 		public string? UnsupportedReason => null;
 
 		public IAsyncEnumerable<FocusedApplication> WatchAsync(CancellationToken cancellationToken)
-			=> Interlocked.Increment(ref _subscriptionCount) == 1
-				? new ThrowingAsyncEnumerable(itemsBeforeThrow: 0, items: [])
+		{
+			return Interlocked.Increment(ref _subscriptionCount) == 1
+				? new ThrowingAsyncEnumerable(0, [])
 				: YieldThenWait(cancellationToken);
+		}
 
 		private async IAsyncEnumerable<FocusedApplication> YieldThenWait(
 			[EnumeratorCancellation] CancellationToken cancellationToken)
@@ -357,16 +383,25 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 			return _inner.OnFocusChanged(app, cancellationToken);
 		}
 
-		public Task OnFolderReported(Guid deviceId,
+		public Task OnFolderReported(
+			Guid deviceId,
 			Guid folderId,
 			string? navigationToken,
 			bool isResync,
-			CancellationToken cancellationToken) => throw new NotSupportedException();
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task OnDevicePresenceChanged(Guid deviceId, bool online, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task OnRulesChanged(CancellationToken cancellationToken) => throw new NotSupportedException();
+		public Task OnRulesChanged(CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SignalingCoordinator : IApplicationFocusCoordinator
@@ -384,16 +419,25 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 			_firstCall.TrySetResult();
 		}
 
-		public Task OnFolderReported(Guid deviceId,
+		public Task OnFolderReported(
+			Guid deviceId,
 			Guid folderId,
 			string? navigationToken,
 			bool isResync,
-			CancellationToken cancellationToken) => throw new NotSupportedException();
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task OnDevicePresenceChanged(Guid deviceId, bool online, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task OnRulesChanged(CancellationToken cancellationToken) => throw new NotSupportedException();
+		public Task OnRulesChanged(CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	// Signals once a target number of elements has been forwarded, so a test can wait for "all the
@@ -417,16 +461,25 @@ internal sealed class ApplicationFocusBackgroundServiceTests
 			}
 		}
 
-		public Task OnFolderReported(Guid deviceId,
+		public Task OnFolderReported(
+			Guid deviceId,
 			Guid folderId,
 			string? navigationToken,
 			bool isResync,
-			CancellationToken cancellationToken) => throw new NotSupportedException();
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task OnDevicePresenceChanged(Guid deviceId, bool online, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task OnRulesChanged(CancellationToken cancellationToken) => throw new NotSupportedException();
+		public Task OnRulesChanged(CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime

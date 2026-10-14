@@ -10,7 +10,8 @@ internal static class HomeAssistantEventPayload
 		HomeAssistantEntityState? newState,
 		string? fromState,
 		string? area)
-		=> new Dictionary<string, object?>(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["entityId"] = entityId,
 			["domain"] = HomeAssistantEntityState.DomainOf(entityId),
@@ -21,12 +22,13 @@ internal static class HomeAssistantEventPayload
 			["unit"] = newState?.UnitOfMeasurement ?? string.Empty,
 			["attributes"] = newState?.AttributesJson ?? "{}"
 		};
+	}
 
 	public static IReadOnlyDictionary<string, object?> Event(string eventType, JsonElement data)
 	{
-		var entityId = data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty("entity_id", out var value) &&
-			value.ValueKind == JsonValueKind.String
+		var entityId = data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty("entity_id", out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
 

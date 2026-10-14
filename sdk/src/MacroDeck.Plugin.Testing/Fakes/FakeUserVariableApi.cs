@@ -240,7 +240,9 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 	}
 
 	private static string Canonical(string name)
-		=> name.StartsWith("vars.", StringComparison.Ordinal) ? name["vars.".Length..] : name;
+	{
+		return name.StartsWith("vars.", StringComparison.Ordinal) ? name["vars.".Length..] : name;
+	}
 
 	private VariableRecord? Resolve(string name, string? ownerWidgetId)
 	{
@@ -334,10 +336,14 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 	}
 
 	private static UserVariableWriteResult Invalid(string message)
-		=> UserVariableWriteResult.Failed(UserVariableWriteStatus.InvalidValue, message);
+	{
+		return UserVariableWriteResult.Failed(UserVariableWriteStatus.InvalidValue, message);
+	}
 
 	private static bool TryParseDecimal(string? text, out decimal parsed)
-		=> decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed);
+	{
+		return decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed);
+	}
 
 	// Deliberately stricter than a loose bool parse, so a typo is rejected rather than silently
 	// stored as false - mirrors the real host's own reasoning for the same choice.
@@ -398,12 +404,15 @@ public sealed partial class FakeUserVariableApi : IUserVariableApi
 		}
 	}
 
-	private static bool ToBoolOrFalse(object? value) => value switch
+	private static bool ToBoolOrFalse(object? value)
 	{
-		bool flag => flag,
-		string text => TryParseBoolean(text, out var parsed) && parsed,
-		_ => false
-	};
+		return value switch
+		{
+			bool flag => flag,
+			string text => TryParseBoolean(text, out var parsed) && parsed,
+			_ => false
+		};
+	}
 
 	// Mutable so an apply can update Value in place under _gate without a second dictionary write.
 	private sealed class VariableRecord(VariableType type, object? value, bool ownedByIntegration)

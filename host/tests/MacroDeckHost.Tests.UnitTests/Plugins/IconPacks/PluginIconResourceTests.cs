@@ -1,6 +1,7 @@
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Widgets.Icons;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
@@ -16,10 +17,16 @@ internal sealed class PluginIconResourceTests
 	private PluginIconPackTestHost _host = null!;
 
 	[SetUp]
-	public void SetUp() => _host = new PluginIconPackTestHost();
+	public void SetUp()
+	{
+		_host = new PluginIconPackTestHost();
+	}
 
 	[TearDown]
-	public void TearDown() => _host.Dispose();
+	public void TearDown()
+	{
+		_host.Dispose();
+	}
 
 	[Test]
 	public async Task A_plugin_icon_handle_is_served_by_the_resource_endpoint_from_a_fresh_store_and_is_not_webp()
@@ -66,7 +73,10 @@ internal sealed class PluginIconResourceTests
 	{
 		await _host.SyncDevelopment(PluginId, ("logos", await _host.BuildArchive("Logos", ("spotify", "green"))));
 
-		var foreign = await _host.UiResources.GetHandleAsync("com.example.other", "logos", "spotify", CancellationToken.None);
+		var foreign = await _host.UiResources.GetHandleAsync("com.example.other",
+			"logos",
+			"spotify",
+			CancellationToken.None);
 		var unknown = await _host.UiResources.GetHandleAsync(PluginId, "logos", "tidal", CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -112,7 +122,8 @@ internal sealed class PluginIconResourceTests
 		var unknown = Guid.NewGuid();
 
 		var handle = await _host.UiResources.GetHandleAsync(unknown, CancellationToken.None);
-		var content = await _host.UiResources.TryGetAsync(PluginIconReferences.ResourceId(unknown), CancellationToken.None);
+		var content = await _host.UiResources.TryGetAsync(PluginIconReferences.ResourceId(unknown),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -143,6 +154,10 @@ internal sealed class PluginIconResourceTests
 		return buffer.ToArray();
 	}
 
-	private MacroDeckHost.Application.Widgets.Icons.WidgetIconSourceRegistry WidgetIconSources()
-		=> new([new MacroDeckHost.Application.Widgets.Icons.IconPackWidgetIconSource(_host.Icons.Cache, _host.ScopeFactory)]);
+	private WidgetIconSourceRegistry WidgetIconSources()
+	{
+		return new WidgetIconSourceRegistry([
+			new IconPackWidgetIconSource(_host.Icons.Cache, _host.ScopeFactory)
+		]);
+	}
 }

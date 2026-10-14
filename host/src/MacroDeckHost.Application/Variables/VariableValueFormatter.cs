@@ -25,8 +25,8 @@ public static class VariableValueFormatter
 
 	public static FormattedVariableValue Format(VariableEntity entity)
 	{
-		if (entity.Type != VariableType.Numeric ||
-			!double.TryParse(entity.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+		if (entity.Type != VariableType.Numeric
+			|| !double.TryParse(entity.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
 		{
 			return new FormattedVariableValue(entity.Value, Unit(entity.Unit));
 		}
@@ -85,10 +85,14 @@ public static class VariableValueFormatter
 	}
 
 	private static LocalizedText Number(double value, int? decimalPlaces)
-		=> decimalPlaces is { } places
+	{
+		return decimalPlaces is { } places
 			? value.ToString("F" + places.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture)
 			: value.ToString(CultureInfo.InvariantCulture);
+	}
 
 	private static LocalizedText Unit(string? unit)
-		=> string.IsNullOrWhiteSpace(unit) ? default : LocalizedText.FromLiteral(unit);
+	{
+		return string.IsNullOrWhiteSpace(unit) ? default : LocalizedText.FromLiteral(unit);
+	}
 }

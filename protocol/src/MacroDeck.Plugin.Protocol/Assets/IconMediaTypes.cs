@@ -1,3 +1,4 @@
+// ReSharper disable CheckNamespace
 // Explicit, not implicit usings: this file is also linked into MacroDeck.Plugin.Analyzers, whose
 // netstandard2.0 target does not carry the same implicit using set.
 

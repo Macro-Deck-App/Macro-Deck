@@ -26,9 +26,14 @@ public readonly struct UiRawJson
 	// a double. Any of those would mean the client applies different bytes from the ones the
 	// provider produced.
 	public static UiRawJson FromElement(JsonElement element)
-		=> new(JsonMarshal.GetRawUtf8Value(element).ToArray());
+	{
+		return new UiRawJson(JsonMarshal.GetRawUtf8Value(element).ToArray());
+	}
 
-	public static UiRawJson FromUtf8(ReadOnlyMemory<byte> utf8) => new(utf8);
+	public static UiRawJson FromUtf8(ReadOnlyMemory<byte> utf8)
+	{
+		return new UiRawJson(utf8);
+	}
 
 	// Re-parses the payload. Only for a boundary that insists on a JsonElement;
 	// a relay path uses Utf8.
@@ -44,7 +49,10 @@ public readonly struct UiRawJson
 		return document.RootElement.Clone();
 	}
 
-	public override string ToString() => Encoding.UTF8.GetString(Utf8.Span);
+	public override string ToString()
+	{
+		return Encoding.UTF8.GetString(Utf8.Span);
+	}
 }
 
 internal sealed class UiRawJsonConverter : JsonConverter<UiRawJson>
@@ -65,6 +73,6 @@ internal sealed class UiRawJsonConverter : JsonConverter<UiRawJson>
 
 		// The bytes were validated on the way in; re-validating here would parse the payload a second
 		// time on the hot path for no additional guarantee.
-		writer.WriteRawValue(value.Utf8.Span, skipInputValidation: true);
+		writer.WriteRawValue(value.Utf8.Span, true);
 	}
 }

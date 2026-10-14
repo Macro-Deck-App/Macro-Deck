@@ -101,8 +101,9 @@ internal sealed class UiSessionLifecycleTests : UiSessionFixture
 		await WaitForMessagesAsync("c2", 1, "c2 never received its tree.");
 
 		await Broker.CloseAsync(sessionId, "done", CancellationToken.None);
-		await WaitForAsync(() => MessagesFor<UiSessionClosedEvent>("c1").Count == 1 &&
-				MessagesFor<UiSessionClosedEvent>("c2").Count == 1,
+		await WaitForAsync(()
+				=> MessagesFor<UiSessionClosedEvent>("c1").Count == 1
+				&& MessagesFor<UiSessionClosedEvent>("c2").Count == 1,
 			"A closed session left a client with no terminal message.");
 		await WaitForAsync(() => provider.CloseCalls == 1, "The provider was never told the session closed.");
 		await SettleAsync();

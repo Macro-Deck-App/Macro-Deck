@@ -148,10 +148,12 @@ public sealed class SecretServiceConnectCredentialStore : IConnectCredentialStor
 	}
 
 	private static async Task<DateTimeOffset?> ReadTimestamp(IAppPreferenceRepository preferences)
-		=> DateTimeOffset.TryParse(await ReadValue(preferences, AppPreferenceService.ConnectCredentialIssuedAtKey),
+	{
+		return DateTimeOffset.TryParse(await ReadValue(preferences, AppPreferenceService.ConnectCredentialIssuedAtKey),
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out var parsed)
 			? parsed
 			: null;
+	}
 }

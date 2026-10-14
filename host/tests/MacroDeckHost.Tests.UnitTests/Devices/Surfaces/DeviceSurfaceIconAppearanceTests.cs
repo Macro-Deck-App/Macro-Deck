@@ -33,7 +33,10 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[TestCase(true)]
 	[TestCase(false)]
@@ -50,7 +53,8 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 
 	[TestCase(false, "0198bbbb-1111-2222-3333-444444444444", "sha256:still")]
 	[TestCase(true, "0198aaaa-1111-2222-3333-444444444444", "sha256:animated")]
-	public async Task A_device_that_cannot_animate_gets_the_static_appearance(bool animatesIcons,
+	public async Task A_device_that_cannot_animate_gets_the_static_appearance(
+		bool animatesIcons,
 		string expectedId,
 		string expectedVersion)
 	{
@@ -95,8 +99,8 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 		fixture.Icons.Add(still);
 		fixture.Home.Widgets.Add(DeviceSurfaceFixture.Button("w1", 0, 0, iconId: icon.Id.ToString()));
 
-		var (deviceId, appearance) = await OpenWith(fixture, animatesIcons: false);
-		var image = await fixture.Service.GetIconAsync(deviceId, appearance.IconId!, size: 72);
+		var (deviceId, appearance) = await OpenWith(fixture, false);
+		var image = await fixture.Service.GetIconAsync(deviceId, appearance.IconId!, 72);
 
 		Assert.Multiple(() =>
 		{
@@ -108,7 +112,8 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 	}
 
 	private void AddStaticAppearance()
-		=> _fixture.Icons.Add(new IconEntity
+	{
+		_fixture.Icons.Add(new IconEntity
 		{
 			Id = _staticId,
 			PackId = Guid.Empty,
@@ -118,9 +123,12 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 			AppearanceOfId = _iconId,
 			AppearanceTraits = new Dictionary<string, string> { ["motion"] = "static" }
 		});
+	}
 
 	private async Task<MacroDeck.Sdk.Devices.DeviceSurfaceAppearance> OpenWith(bool animatesIcons)
-		=> (await OpenWith(_fixture, animatesIcons)).Appearance;
+	{
+		return (await OpenWith(_fixture, animatesIcons)).Appearance;
+	}
 
 	private static async Task<(Guid DeviceId, MacroDeck.Sdk.Devices.DeviceSurfaceAppearance Appearance)> OpenWith(
 		DeviceSurfaceFixture fixture,
@@ -130,7 +138,10 @@ internal sealed class DeviceSurfaceIconAppearanceTests
 		var device = fixture.Devices.Devices.Single(candidate => candidate.Id == deviceId);
 		device.LayoutSnapshot = LayoutSnapshotSerializer.Serialize(new LayoutDescriptor("deck",
 			"Deck",
-			[new LayoutRegion { Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = 2, Columns = 3 } }],
+			[
+				new LayoutRegion
+					{ Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = 2, Columns = 3 } }
+			],
 			new LayoutCapabilities
 			{
 				Visuals = LayoutVisualCapabilities.Full with { AnimatedIcons = animatesIcons }

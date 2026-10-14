@@ -4,8 +4,6 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Icons;
 using Serilog;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
-using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace MacroDeckHost.Tests.UnitTests.Icons;
@@ -86,13 +84,13 @@ public class AnimatedGifLoopCountTests
 	[Test]
 	public async Task A_gif_cached_before_the_loop_fix_is_not_served_again()
 	{
-		var icon = await ImportedIcon(Gif(loop: 1));
+		var icon = await ImportedIcon(Gif(1));
 		var directory = Path.Combine(_harness.Paths.IconsDirectory, "fallback-cache");
 		Directory.CreateDirectory(directory);
 		var staleName = $"{icon.Id:N}-{IconVariants.MasterToken(icon.MasterContentHash!)}-{IconVariants.Master}.gif";
-		await File.WriteAllBytesAsync(Path.Combine(directory, staleName), Gif(loop: null));
+		await File.WriteAllBytesAsync(Path.Combine(directory, staleName), Gif(null));
 
-		var served = await Serve(icon, size: null);
+		var served = await Serve(icon, null);
 
 		Assert.That(LoopOf(served), Is.EqualTo(1));
 	}
@@ -112,7 +110,7 @@ public class AnimatedGifLoopCountTests
 
 	private async Task<byte[]> Serve(IconEntity icon, int? size)
 	{
-		var result = await _service.GetImage(icon.Id, size, acceptWebp: false, staticFrame: false, CancellationToken.None);
+		var result = await _service.GetImage(icon.Id, size, false, false, CancellationToken.None);
 
 		Assert.That(result.Success, Is.True);
 		await using var content = result.Data!.Content;
@@ -157,8 +155,11 @@ public class AnimatedGifLoopCountTests
 	private static int? LoopOf(byte[] gif)
 	{
 		var name = gif.AsSpan().IndexOf("NETSCAPE2.0"u8);
-		return name < 0 ? null : gif[name + 13] | (gif[name + 14] << 8);
+		return name < 0 ? null : gif[name + 13] | gif[name + 14] << 8;
 	}
 
-	private static Rgba32 Color(int index) => new((byte)(40 + index * 80), 20, 200, 255);
+	private static Rgba32 Color(int index)
+	{
+		return new Rgba32((byte)(40 + index * 80), 20, 200, 255);
+	}
 }

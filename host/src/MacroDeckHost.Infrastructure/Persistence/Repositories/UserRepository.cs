@@ -13,9 +13,15 @@ public class UserRepository : IUserRepository
 		_context = context;
 	}
 
-	public Task<UserEntity?> GetSingle() => _context.Users.FirstOrDefaultAsync();
+	public Task<UserEntity?> GetSingle()
+	{
+		return _context.Users.FirstOrDefaultAsync();
+	}
 
-	public Task<bool> AnyExists() => _context.Users.AnyAsync();
+	public Task<bool> AnyExists()
+	{
+		return _context.Users.AnyAsync();
+	}
 
 	public async Task Create(UserEntity user)
 	{

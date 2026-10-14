@@ -5,9 +5,11 @@ namespace MacroDeckHost.Integrations.Adb.Actions;
 internal static class AdbActionValues
 {
 	public static string ReadString(IReadOnlyDictionary<string, object> parameters, string name)
-		=> parameters.TryGetValue(name, out var value) && value is not null
+	{
+		return parameters.TryGetValue(name, out var value) && value is not null
 			? value.ToString() ?? string.Empty
 			: string.Empty;
+	}
 
 	public static int ReadInt(IReadOnlyDictionary<string, object> parameters, string name, int fallback)
 	{

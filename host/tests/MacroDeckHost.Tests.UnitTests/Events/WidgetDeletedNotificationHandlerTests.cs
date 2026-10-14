@@ -34,60 +34,115 @@ public class WidgetDeletedNotificationHandlerTests
 
 	private sealed class UnusedFolderCache : IFolderCache
 	{
-		public Task InitializeCache() => throw new NotSupportedException();
+		public Task InitializeCache()
+		{
+			throw new NotSupportedException();
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => throw new NotSupportedException();
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetAllFolders() => throw new NotSupportedException();
+		public List<FolderEntity> GetAllFolders()
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdate(FolderEntity folder) => throw new NotSupportedException();
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => throw new NotSupportedException();
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId) => throw new NotSupportedException();
+		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void AddWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => throw new NotSupportedException();
+		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void UpdateWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void UpdateWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgetPositions(Guid folderId, IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidget(Guid folderId, Guid widgetId) => throw new NotSupportedException();
+		public void RemoveWidget(Guid folderId, Guid widgetId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds) => throw new NotSupportedException();
+		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class RecordingTransport : IUiTransport
 	{
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

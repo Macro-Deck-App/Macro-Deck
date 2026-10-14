@@ -157,21 +157,26 @@ public class WebClientTargetsController : ControllerBase
 	}
 
 	private ObjectResult? RefuseUnlessDesktop()
-		=> LoopbackConnection.IsTrusted(HttpContext)
+	{
+		return LoopbackConnection.IsTrusted(HttpContext)
 			? null
 			: Problem(statusCode: StatusCodes.Status403Forbidden,
 				title: "Device setup is only allowed from the desktop app.");
+	}
 
 	private static WebClientTargetProvisioningResultDto ToDto(WebClientTargetProvisioningResult result)
-		=> new()
+	{
+		return new WebClientTargetProvisioningResultDto
 		{
 			Kind = result.Kind.ToString(),
 			Step = result.Step is null ? null : ToDto(result.Step),
 			Message = result.Message
 		};
+	}
 
 	private static WebClientTargetProvisioningStepDto ToDto(WebClientTargetProvisioningStep step)
-		=> new()
+	{
+		return new WebClientTargetProvisioningStepDto
 		{
 			StepId = step.StepId,
 			Title = step.Title,
@@ -201,4 +206,5 @@ public class WebClientTargetsController : ControllerBase
 				.ToList(),
 			CanContinue = step.CanContinue
 		};
+	}
 }

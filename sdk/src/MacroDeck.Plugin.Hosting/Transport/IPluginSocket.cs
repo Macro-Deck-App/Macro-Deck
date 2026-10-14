@@ -50,7 +50,9 @@ internal sealed class PluginMessageTooLargeException : Exception
 {
 	public PluginMessageTooLargeException(int limit)
 		: base($"The peer sent a message larger than the {limit} byte limit.")
-		=> Limit = limit;
+	{
+		Limit = limit;
+	}
 
 	public PluginMessageTooLargeException()
 	{

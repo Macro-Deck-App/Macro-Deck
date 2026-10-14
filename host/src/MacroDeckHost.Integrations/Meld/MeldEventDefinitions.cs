@@ -36,16 +36,16 @@ internal static class MeldEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("layerId",
-					label: AppStrings.Integrations.Meld.Parameters.Layer(),
+					AppStrings.Integrations.Meld.Parameters.Layer(),
 					placeholder: AppStrings.Integrations.Meld.Parameters.AnyLayer())
 			],
 			PayloadParameters =
 			[
-				ActionParameter.DynamicChoice("layerId", label: AppStrings.Integrations.Meld.Parameters.LayerId()),
-				ActionParameter.Text("layerName", label: AppStrings.Integrations.Meld.Parameters.Layer()),
-				ActionParameter.DynamicChoice("sceneId", label: AppStrings.Integrations.Meld.Parameters.SceneId()),
-				ActionParameter.Text("sceneName", label: AppStrings.Integrations.Meld.Parameters.Scene()),
-				ActionParameter.Toggle("visible", label: AppStrings.Integrations.Meld.Parameters.Visible())
+				ActionParameter.DynamicChoice("layerId", AppStrings.Integrations.Meld.Parameters.LayerId()),
+				ActionParameter.Text("layerName", AppStrings.Integrations.Meld.Parameters.Layer()),
+				ActionParameter.DynamicChoice("sceneId", AppStrings.Integrations.Meld.Parameters.SceneId()),
+				ActionParameter.Text("sceneName", AppStrings.Integrations.Meld.Parameters.Scene()),
+				ActionParameter.Toggle("visible", AppStrings.Integrations.Meld.Parameters.Visible())
 			]
 		},
 		new()
@@ -57,17 +57,17 @@ internal static class MeldEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("effectId",
-					label: AppStrings.Integrations.Meld.Parameters.Effect(),
+					AppStrings.Integrations.Meld.Parameters.Effect(),
 					placeholder: AppStrings.Integrations.Meld.Parameters.AnyEffect())
 			],
 			PayloadParameters =
 			[
-				ActionParameter.DynamicChoice("effectId", label: AppStrings.Integrations.Meld.Parameters.EffectId()),
-				ActionParameter.Text("effectName", label: AppStrings.Integrations.Meld.Parameters.Effect()),
-				ActionParameter.DynamicChoice("layerId", label: AppStrings.Integrations.Meld.Parameters.LayerId()),
-				ActionParameter.Text("layerName", label: AppStrings.Integrations.Meld.Parameters.Layer()),
-				ActionParameter.DynamicChoice("sceneId", label: AppStrings.Integrations.Meld.Parameters.SceneId()),
-				ActionParameter.Toggle("enabled", label: AppStrings.Integrations.Meld.Parameters.Enabled())
+				ActionParameter.DynamicChoice("effectId", AppStrings.Integrations.Meld.Parameters.EffectId()),
+				ActionParameter.Text("effectName", AppStrings.Integrations.Meld.Parameters.Effect()),
+				ActionParameter.DynamicChoice("layerId", AppStrings.Integrations.Meld.Parameters.LayerId()),
+				ActionParameter.Text("layerName", AppStrings.Integrations.Meld.Parameters.Layer()),
+				ActionParameter.DynamicChoice("sceneId", AppStrings.Integrations.Meld.Parameters.SceneId()),
+				ActionParameter.Toggle("enabled", AppStrings.Integrations.Meld.Parameters.Enabled())
 			]
 		},
 		new()
@@ -79,14 +79,14 @@ internal static class MeldEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("trackId",
-					label: AppStrings.Integrations.Meld.Parameters.Track(),
+					AppStrings.Integrations.Meld.Parameters.Track(),
 					placeholder: AppStrings.Integrations.Meld.Parameters.AnyTrack())
 			],
 			PayloadParameters =
 			[
-				ActionParameter.DynamicChoice("trackId", label: AppStrings.Integrations.Meld.Parameters.TrackId()),
-				ActionParameter.Text("trackName", label: AppStrings.Integrations.Meld.Parameters.Track()),
-				ActionParameter.Toggle("muted", label: AppStrings.Integrations.Meld.Parameters.Muted())
+				ActionParameter.DynamicChoice("trackId", AppStrings.Integrations.Meld.Parameters.TrackId()),
+				ActionParameter.Text("trackName", AppStrings.Integrations.Meld.Parameters.Track()),
+				ActionParameter.Toggle("muted", AppStrings.Integrations.Meld.Parameters.Muted())
 			]
 		},
 		new()
@@ -98,14 +98,14 @@ internal static class MeldEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("trackId",
-					label: AppStrings.Integrations.Meld.Parameters.Track(),
+					AppStrings.Integrations.Meld.Parameters.Track(),
 					placeholder: AppStrings.Integrations.Meld.Parameters.AnyTrack())
 			],
 			PayloadParameters =
 			[
-				ActionParameter.DynamicChoice("trackId", label: AppStrings.Integrations.Meld.Parameters.TrackId()),
-				ActionParameter.Text("trackName", label: AppStrings.Integrations.Meld.Parameters.Track()),
-				ActionParameter.Toggle("monitoring", label: AppStrings.Integrations.Meld.Parameters.Monitoring())
+				ActionParameter.DynamicChoice("trackId", AppStrings.Integrations.Meld.Parameters.TrackId()),
+				ActionParameter.Text("trackName", AppStrings.Integrations.Meld.Parameters.Track()),
+				ActionParameter.Toggle("monitoring", AppStrings.Integrations.Meld.Parameters.Monitoring())
 			]
 		},
 		Simple(MeldEventIds.SessionChanged,
@@ -120,37 +120,43 @@ internal static class MeldEventDefinitions
 			AppStrings.Integrations.Meld.Events.ConnectionCategory())
 	];
 
-	private static EventDefinition SceneEvent(string id, LocalizedText name, LocalizedText description) => new()
+	private static EventDefinition SceneEvent(string id, LocalizedText name, LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = AppStrings.Integrations.Meld.Events.ScenesCategory(),
-		ConfigurationParameters =
-		[
-			ActionParameter.DynamicChoice("sceneId",
-				label: AppStrings.Integrations.Meld.Parameters.Scene(),
-				placeholder: AppStrings.Integrations.Meld.Parameters.AnyScene())
-		],
-		PayloadParameters =
-		[
-			ActionParameter.DynamicChoice("sceneId", label: AppStrings.Integrations.Meld.Parameters.SceneId()),
-			ActionParameter.Text("sceneName", label: AppStrings.Integrations.Meld.Parameters.Scene()),
-			ActionParameter.DynamicChoice("previousSceneId",
-				label: AppStrings.Integrations.Meld.Parameters.PreviousSceneId()),
-			ActionParameter.Text("previousSceneName", label: AppStrings.Integrations.Meld.Parameters.PreviousScene())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = AppStrings.Integrations.Meld.Events.ScenesCategory(),
+			ConfigurationParameters =
+			[
+				ActionParameter.DynamicChoice("sceneId",
+					AppStrings.Integrations.Meld.Parameters.Scene(),
+					placeholder: AppStrings.Integrations.Meld.Parameters.AnyScene())
+			],
+			PayloadParameters =
+			[
+				ActionParameter.DynamicChoice("sceneId", AppStrings.Integrations.Meld.Parameters.SceneId()),
+				ActionParameter.Text("sceneName", AppStrings.Integrations.Meld.Parameters.Scene()),
+				ActionParameter.DynamicChoice("previousSceneId",
+					AppStrings.Integrations.Meld.Parameters.PreviousSceneId()),
+				ActionParameter.Text("previousSceneName", AppStrings.Integrations.Meld.Parameters.PreviousScene())
+			]
+		};
+	}
 
 	private static EventDefinition Simple(
 		string id,
 		LocalizedText name,
 		LocalizedText category,
-		LocalizedText description = default) => new()
+		LocalizedText description = default)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = category
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = category
+		};
+	}
 }

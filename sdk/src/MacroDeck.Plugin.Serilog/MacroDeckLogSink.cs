@@ -146,7 +146,9 @@ internal sealed class MacroDeckLogSink : ILogEventSink
 	}
 
 	private static bool IsPriority(LogEventLevel level)
-		=> level is LogEventLevel.Warning or LogEventLevel.Error or LogEventLevel.Fatal;
+	{
+		return level is LogEventLevel.Warning or LogEventLevel.Error or LogEventLevel.Fatal;
+	}
 
 	/// <summary>Two-way merge of two already time-ordered lists. Each channel preserves its own write
 	/// order, and a <see cref="LogEvent" /> is timestamped by Serilog before it ever reaches this sink,
@@ -174,14 +176,17 @@ internal sealed class MacroDeckLogSink : ILogEventSink
 		return merged;
 	}
 
-	private static BoundedChannelOptions BoundedOptions(int capacity) => new(capacity)
+	private static BoundedChannelOptions BoundedOptions(int capacity)
 	{
-		// DropWrite, not Wait: Emit must never block the caller, and not a drop-oldest ring buffer
-		// either - dropping the newest write under pressure is what keeps a queue that is already
-		// full from doing extra work discarding what it already holds just to make room.
-		FullMode = BoundedChannelFullMode.DropWrite,
-		SingleReader = true
-	};
+		return new BoundedChannelOptions(capacity)
+		{
+			// DropWrite, not Wait: Emit must never block the caller, and not a drop-oldest ring buffer
+			// either - dropping the newest write under pressure is what keeps a queue that is already
+			// full from doing extra work discarding what it already holds just to make room.
+			FullMode = BoundedChannelFullMode.DropWrite,
+			SingleReader = true
+		};
+	}
 }
 
 /// <summary>One drain of <see cref="MacroDeckLogSink" />: the events to ship, and how many more were

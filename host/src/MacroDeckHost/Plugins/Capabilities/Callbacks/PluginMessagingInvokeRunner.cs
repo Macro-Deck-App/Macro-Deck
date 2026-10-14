@@ -21,21 +21,25 @@ public sealed class PluginMessagingInvokeRunner
 	private readonly HostCallbackThrottle _throttle;
 	private readonly ILogger _logger;
 	private readonly ConcurrentDictionary<string, int> _inFlightByPlugin = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<(IPluginConnection Connection, string CorrelationId), CancellationTokenSource> _running
-		= new();
 
-	public PluginMessagingInvokeRunner(IMessageBroker broker,
+	private readonly ConcurrentDictionary<(IPluginConnection Connection, string CorrelationId), CancellationTokenSource>
+		_running
+			= new();
+
+	public PluginMessagingInvokeRunner(
+		IMessageBroker broker,
 		PluginMessagingRegistrations registrations,
 		TimeProvider timeProvider,
 		ILogger logger)
 	{
 		_broker = broker;
 		_registrations = registrations;
-		_throttle = new HostCallbackThrottle(timeProvider, capacity: 100, refillPerSecond: 50);
+		_throttle = new HostCallbackThrottle(timeProvider, 100, 50);
 		_logger = logger.ForContext<PluginMessagingInvokeRunner>();
 	}
 
-	public async Task StartAsync(IPluginConnection connection,
+	public async Task StartAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string sessionId,
 		ProtocolEnvelope envelope,
@@ -97,12 +101,12 @@ public sealed class PluginMessagingInvokeRunner
 		}
 
 		// subscriptions is bounded by size, not rate: it replaces the whole set and the SDK sends one at a time.
-		if (!string.Equals(payload.Operation, HostOperations.Messaging.Subscriptions, StringComparison.Ordinal) &&
-			!_throttle.TryConsume(pluginId))
+		if (!string.Equals(payload.Operation, HostOperations.Messaging.Subscriptions, StringComparison.Ordinal)
+			&& !_throttle.TryConsume(pluginId))
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				"This plugin is sending messages too quickly.",
-				retryable: true);
+				true);
 		}
 
 		return null;
@@ -111,10 +115,10 @@ public sealed class PluginMessagingInvokeRunner
 	private HostCallbackResult Subscriptions(string pluginId, string sessionId, HostInvokePayload payload)
 	{
 		var arguments = Deserialize<MessagingSubscriptionsArguments>(payload);
-		if (arguments is null ||
-			arguments.Events.Count > MessagingLimits.MaxSubscriptionsPerKind ||
-			arguments.Commands.Count > MessagingLimits.MaxSubscriptionsPerKind ||
-			arguments.Requests.Count > MessagingLimits.MaxSubscriptionsPerKind)
+		if (arguments is null
+			|| arguments.Events.Count > MessagingLimits.MaxSubscriptionsPerKind
+			|| arguments.Commands.Count > MessagingLimits.MaxSubscriptionsPerKind
+			|| arguments.Requests.Count > MessagingLimits.MaxSubscriptionsPerKind)
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
 				$"subscriptions takes at most {MessagingLimits.MaxSubscriptionsPerKind} entries per list.");
@@ -128,7 +132,7 @@ public sealed class PluginMessagingInvokeRunner
 		{
 			PluginMessagingSyncOutcome.SessionNotCurrent => HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
 				"This session is no longer the plugin's current session.",
-				retryable: true),
+				true),
 			PluginMessagingSyncOutcome.NotDeclared => Reason(ProtocolErrorCodes.CapabilityUnavailable,
 				ProtocolErrorReasons.MessagingNotDeclared,
 				"This session did not declare the messaging capability."),
@@ -166,7 +170,8 @@ public sealed class PluginMessagingInvokeRunner
 		}
 	}
 
-	private HostCallbackResult? StartHandlerCall(IPluginConnection connection,
+	private HostCallbackResult? StartHandlerCall(
+		IPluginConnection connection,
 		string pluginId,
 		ProtocolEnvelope envelope,
 		HostInvokePayload payload,
@@ -181,7 +186,7 @@ public sealed class PluginMessagingInvokeRunner
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				$"This plugin is already waiting on {MaxInFlightPerPlugin} commands and requests.",
-				retryable: true);
+				true);
 		}
 
 		var cancellation = CancellationTokenSource.CreateLinkedTokenSource(connectionToken);
@@ -189,11 +194,13 @@ public sealed class PluginMessagingInvokeRunner
 		{
 			cancellation.Dispose();
 			Leave(pluginId);
-			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This correlation id is already in flight.");
+			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				"This correlation id is already in flight.");
 		}
 
 		var timeout = envelope.DeadlineMs is > 0
-			? TimeSpan.FromMilliseconds(Math.Min(envelope.DeadlineMs.Value, MessagingLimits.MaxHandlerTimeout.TotalMilliseconds))
+			? TimeSpan.FromMilliseconds(Math.Min(envelope.DeadlineMs.Value,
+				MessagingLimits.MaxHandlerTimeout.TotalMilliseconds))
 			: MessagingLimits.MaxHandlerTimeout;
 
 		_ = RunAsync(connection, pluginId, envelope.Id, payload.Operation, arguments, timeout, cancellation);
@@ -202,7 +209,8 @@ public sealed class PluginMessagingInvokeRunner
 
 	// Off the session's dispatch loop: a handler in this same plugin that calls back into the host would
 	// otherwise queue its host.invoke behind this call and never answer it.
-	private async Task RunAsync(IPluginConnection connection,
+	private async Task RunAsync(
+		IPluginConnection connection,
 		string pluginId,
 		string correlationId,
 		string operation,
@@ -263,7 +271,8 @@ public sealed class PluginMessagingInvokeRunner
 	}
 
 	private static HostCallbackResult ToResult(MessageChannelException exception)
-		=> exception.ErrorCode switch
+	{
+		return exception.ErrorCode switch
 		{
 			MessageChannelErrorCode.InvalidTopic => Reason(ProtocolErrorCodes.InvalidPayload,
 				ProtocolErrorReasons.MessagingInvalidTopic,
@@ -276,28 +285,36 @@ public sealed class PluginMessagingInvokeRunner
 			MessageChannelErrorCode.HandlerUnavailable => Reason(ProtocolErrorCodes.CapabilityUnavailable,
 				ProtocolErrorReasons.MessagingHandlerUnavailable,
 				exception.Message,
-				retryable: true),
+				true),
 			MessageChannelErrorCode.Timeout => HostCallbackResult.Fail(ProtocolErrorCodes.Timeout,
 				exception.Message,
-				retryable: true),
+				true),
 			MessageChannelErrorCode.RateLimited => HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				exception.Message,
-				retryable: true),
+				true),
 			_ => Reason(ProtocolErrorCodes.CapabilityUnavailable,
 				ProtocolErrorReasons.MessagingHandlerFailed,
 				exception.Message)
 		};
+	}
 
 	private static HostCallbackResult Reason(string code, string reason, string message, bool retryable = false)
-		=> HostCallbackResult.Fail(code, message, retryable, new Dictionary<string, string> { ["reason"] = reason });
+	{
+		return HostCallbackResult.Fail(code,
+			message,
+			retryable,
+			new Dictionary<string, string> { ["reason"] = reason });
+	}
 
 	private static string KindName(ChannelMessageKind kind)
-		=> kind switch
+	{
+		return kind switch
 		{
 			ChannelMessageKind.Command => "command",
 			ChannelMessageKind.Request => "request",
 			_ => "event"
 		};
+	}
 
 	private static T? Deserialize<T>(HostInvokePayload payload)
 		where T : class
@@ -329,13 +346,18 @@ public sealed class PluginMessagingInvokeRunner
 		}
 	}
 
-	private void Leave(string pluginId) => _inFlightByPlugin.AddOrUpdate(pluginId, 0, (_, current) => Math.Max(0, current - 1));
+	private void Leave(string pluginId)
+	{
+		_inFlightByPlugin.AddOrUpdate(pluginId, 0, (_, current) => Math.Max(0, current - 1));
+	}
 
-	private static Task SendAsync(IPluginConnection connection,
+	private static Task SendAsync(
+		IPluginConnection connection,
 		string correlationId,
 		HostCallbackResult result,
 		CancellationToken cancellationToken)
-		=> connection.Send(new ProtocolEnvelope
+	{
+		return connection.Send(new ProtocolEnvelope
 			{
 				Type = MessageTypes.HostResult,
 				Id = Guid.CreateVersion7().ToString(),
@@ -347,4 +369,5 @@ public sealed class PluginMessagingInvokeRunner
 					: null
 			},
 			cancellationToken);
+	}
 }

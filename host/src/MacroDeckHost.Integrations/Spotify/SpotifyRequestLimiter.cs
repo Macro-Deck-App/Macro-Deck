@@ -99,7 +99,7 @@ internal sealed class SpotifyRequestLimiter
 		}
 
 		_refilledAtUtc = now;
-		_permits = Math.Min(_burst, _permits + (elapsed.TotalSeconds * _permitsPerSecond));
+		_permits = Math.Min(_burst, _permits + elapsed.TotalSeconds * _permitsPerSecond);
 	}
 }
 
@@ -128,7 +128,10 @@ internal static class SpotifyRequestScope
 
 	private sealed class Restore(SpotifyRequestContext? previous) : IDisposable
 	{
-		public void Dispose() => _context.Value = previous;
+		public void Dispose()
+		{
+			_context.Value = previous;
+		}
 	}
 }
 

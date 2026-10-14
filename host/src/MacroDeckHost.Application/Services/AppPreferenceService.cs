@@ -94,8 +94,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	public const string LocalizationTimeFormatKey = "localization.timeFormat";
 
 	public const string TimeFormatSystem = "system";
-	public const string TimeFormat12h = "12h";
-	public const string TimeFormat24h = "24h";
+	public const string TimeFormat12H = "12h";
+	public const string TimeFormat24H = "24h";
 
 	public const string ExtensionsStoreEnabledKey = "extensions.storeEnabled";
 	public const string ExtensionsCheckForUpdatesKey = "extensions.checkForUpdates";
@@ -154,7 +154,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	private readonly IPublicTlsCertificateStore? _certificateStore;
 	private readonly IColorReferenceResolver _colors;
 
-	public AppPreferenceService(IAppPreferenceRepository repository,
+	public AppPreferenceService(
+		IAppPreferenceRepository repository,
 		IBuildEnvironment buildEnvironment,
 		IHostListenerState listenerState,
 		IColorReferenceResolver colors,
@@ -189,7 +190,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 		return new AppearanceSettings(themeMode, resolved, fontFamily, accentColor);
 	}
 
-	public async Task<AppearanceSettings> SetAppearance(string? themeMode,
+	public async Task<AppearanceSettings> SetAppearance(
+		string? themeMode,
 		string? accentColor,
 		string? fontFamily = null)
 	{
@@ -280,7 +282,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			NormalizeFlag(storedDiscoveryEnabled, true));
 	}
 
-	public async Task<NetworkSettings> SetNetwork(int? publicPort,
+	public async Task<NetworkSettings> SetNetwork(
+		int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
@@ -347,7 +350,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			NormalizeAdbFlag(allowPlugins, DefaultAdbAllowPlugins));
 	}
 
-	public async Task<AdbSettings> SetAdb(bool? enabled,
+	public async Task<AdbSettings> SetAdb(
+		bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
@@ -376,18 +380,22 @@ public partial class AppPreferenceService : IAppPreferenceService
 		var enabled = (await _repository.GetByKey(NativeUsbEnabledKey))?.Value;
 		var devices = (await _repository.GetByKey(NativeUsbDevicesKey))?.Value;
 
-		return new NativeUsbSettings(NormalizeAdbFlag(enabled, DefaultNativeUsbEnabled), ParseNativeUsbDevices(devices));
+		return new NativeUsbSettings(NormalizeAdbFlag(enabled, DefaultNativeUsbEnabled),
+			ParseNativeUsbDevices(devices));
 	}
 
-	public async Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+	public async Task<NativeUsbSettings> SetNativeUsb(
+		bool? enabled,
+		IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
 	{
 		var current = await GetNativeUsb();
 		var resolved = new NativeUsbSettings(enabled ?? current.Enabled,
 			NormalizeNativeUsbDevices(rememberedDevices ?? current.RememberedDevices));
 
 		await _repository.SetValue(NativeUsbEnabledKey, resolved.Enabled.ToString());
-		await _repository.SetValue(NativeUsbDevicesKey, JsonSerializer.Serialize(resolved.RememberedDevices
-			.Select(device => new StoredUsbDevice(device.Serial, device.Name))));
+		await _repository.SetValue(NativeUsbDevicesKey,
+			JsonSerializer.Serialize(resolved.RememberedDevices
+				.Select(device => new StoredUsbDevice(device.Serial, device.Name))));
 
 		return resolved;
 	}
@@ -443,7 +451,9 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	public async Task<BackupSettings> GetBackups()
-		=> new(NormalizeBackupFrequency((await _repository.GetByKey(BackupScheduleFrequencyKey))?.Value),
+	{
+		return new BackupSettings(
+			NormalizeBackupFrequency((await _repository.GetByKey(BackupScheduleFrequencyKey))?.Value),
 			NormalizeTimeOfDay((await _repository.GetByKey(BackupScheduleTimeOfDayKey))?.Value),
 			NormalizeDayOfWeek((await _repository.GetByKey(BackupScheduleDayOfWeekKey))?.Value),
 			NormalizeDayOfMonth((await _repository.GetByKey(BackupScheduleDayOfMonthKey))?.Value),
@@ -453,8 +463,10 @@ public partial class AppPreferenceService : IAppPreferenceService
 				DefaultBackupBeforeHostUpdate),
 			NormalizeFlag((await _repository.GetByKey(BackupBeforePluginUpdateKey))?.Value,
 				DefaultBackupBeforePluginUpdate));
+	}
 
-	public async Task<BackupSettings> SetBackups(string? scheduleFrequency,
+	public async Task<BackupSettings> SetBackups(
+		string? scheduleFrequency,
 		string? scheduleTimeOfDay,
 		string? scheduleDayOfWeek,
 		int? scheduleDayOfMonth,
@@ -509,7 +521,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 			NormalizeExtensionsFlag(askForRatings, DefaultExtensionsAskForRatings));
 	}
 
-	public async Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+	public async Task<ExtensionSettings> SetExtensions(
+		bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
@@ -578,7 +591,9 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	public async Task<string> GetTimeFormat()
-		=> NormalizeTimeFormat((await _repository.GetByKey(LocalizationTimeFormatKey))?.Value);
+	{
+		return NormalizeTimeFormat((await _repository.GetByKey(LocalizationTimeFormatKey))?.Value);
+	}
 
 	public async Task<string> SetTimeFormat(string? timeFormat)
 	{
@@ -588,51 +603,65 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	private static string NormalizeTimeFormat(string? value)
-		=> value?.Trim().ToLowerInvariant() switch
+	{
+		return value?.Trim().ToLowerInvariant() switch
 		{
-			TimeFormat12h => TimeFormat12h,
-			TimeFormat24h => TimeFormat24h,
+			TimeFormat12H => TimeFormat12H,
+			TimeFormat24H => TimeFormat24H,
 			_ => TimeFormatSystem
 		};
+	}
 
 	public async Task<DateTimeOffset?> GetBackupScheduleLastRun()
-		=> DateTimeOffset.TryParse((await _repository.GetByKey(BackupScheduleLastRunAtKey))?.Value,
+	{
+		return DateTimeOffset.TryParse((await _repository.GetByKey(BackupScheduleLastRunAtKey))?.Value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out var parsed)
 			? parsed
 			: null;
+	}
 
 	public Task SetBackupScheduleLastRun(DateTimeOffset value)
-		=> _repository.SetValue(BackupScheduleLastRunAtKey, value.ToString("O", CultureInfo.InvariantCulture));
+	{
+		return _repository.SetValue(BackupScheduleLastRunAtKey, value.ToString("O", CultureInfo.InvariantCulture));
+	}
 
 	private static string NormalizeBackupFrequency(string? value)
-		=> value?.Trim().ToLowerInvariant() switch
+	{
+		return value?.Trim().ToLowerInvariant() switch
 		{
 			BackupScheduleDaily => BackupScheduleDaily,
 			BackupScheduleWeekly => BackupScheduleWeekly,
 			BackupScheduleMonthly => BackupScheduleMonthly,
 			_ => BackupScheduleOff
 		};
+	}
 
 	private static string NormalizeTimeOfDay(string? value)
-		=> TimeOnly.TryParseExact(value?.Trim(),
+	{
+		return TimeOnly.TryParseExact(value?.Trim(),
 			"HH:mm",
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.None,
 			out var parsed)
 			? parsed.ToString("HH:mm", CultureInfo.InvariantCulture)
 			: DefaultBackupScheduleTimeOfDay;
+	}
 
 	private static DayOfWeek NormalizeDayOfWeek(string? value)
-		=> Enum.TryParse<DayOfWeek>(value?.Trim(), ignoreCase: true, out var parsed) && Enum.IsDefined(parsed)
+	{
+		return Enum.TryParse<DayOfWeek>(value?.Trim(), true, out var parsed) && Enum.IsDefined(parsed)
 			? parsed
 			: DefaultBackupScheduleDayOfWeek;
+	}
 
 	private static int NormalizeDayOfMonth(string? value)
-		=> int.TryParse(value?.Trim(), CultureInfo.InvariantCulture, out var parsed) && parsed is >= 1 and <= 31
+	{
+		return int.TryParse(value?.Trim(), CultureInfo.InvariantCulture, out var parsed) && parsed is >= 1 and <= 31
 			? parsed
 			: DefaultBackupScheduleDayOfMonth;
+	}
 
 	private static string NormalizeRetentionPolicy(string? value)
 	{
@@ -642,14 +671,19 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	private static int NormalizeKeepLatest(string? value)
-		=> int.TryParse(value?.Trim(), CultureInfo.InvariantCulture, out var parsed)
+	{
+		return int.TryParse(value?.Trim(), CultureInfo.InvariantCulture, out var parsed)
 			? Math.Clamp(parsed, MinBackupRetentionKeepLatest, MaxBackupRetentionKeepLatest)
 			: DefaultBackupRetentionKeepLatest;
+	}
 
 	private static bool NormalizeFlag(string? value, bool fallback)
-		=> bool.TryParse(value, out var parsed) ? parsed : fallback;
+	{
+		return bool.TryParse(value, out var parsed) ? parsed : fallback;
+	}
 
-	private NetworkSettings BuildNetworkSettings(int publicPort,
+	private NetworkSettings BuildNetworkSettings(
+		int publicPort,
 		bool tlsEnabled,
 		PublicTlsMode tlsMode,
 		int tlsHttpsPort,
@@ -694,59 +728,84 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	private static int NormalizePublicPort(string? value)
-		=> int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port) &&
-			PublicPortSelector.IsConfigurable(port)
+	{
+		return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port)
+			&& PublicPortSelector.IsConfigurable(port)
 				? port
 				: BuildConfig.DefaultPublicPort;
+	}
 
 	// Shares PublicTlsSelector's default so the reported configuration matches the listeners that were
 	// actually opened. Two defaults here would make a fresh install report HTTPS as off while serving it,
 	// which NetworkListenerIdentity reads as a pending change and turns into a restart prompt that
 	// restarting cannot clear.
-	private static bool NormalizeTlsEnabled(string? value) => PublicTlsSelector.IsTlsEnabled(value);
+	private static bool NormalizeTlsEnabled(string? value)
+	{
+		return PublicTlsSelector.IsTlsEnabled(value);
+	}
 
 	private static int NormalizeTlsHttpsPort(string? value)
-		=> int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port) &&
-			PublicPortSelector.IsConfigurable(port)
+	{
+		return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port)
+			&& PublicPortSelector.IsConfigurable(port)
 				? port
 				: BuildConfig.DefaultPublicHttpsPort;
+	}
 
 	// Developer Mode defaults to off: it is the kill switch for interactive plugin pairing, so an
 	// upgrade or a blank store must not turn it on by itself.
 	private static bool NormalizeDeveloperMode(string? value)
-		=> bool.TryParse(value, out var parsed) && parsed;
+	{
+		return bool.TryParse(value, out var parsed) && parsed;
+	}
 
 	private static bool NormalizeOnboardingPending(string? value)
-		=> bool.TryParse(value, out var parsed) && parsed;
+	{
+		return bool.TryParse(value, out var parsed) && parsed;
+	}
 
 	private static bool NormalizeLockScreenEnabled(string? value)
-		=> bool.TryParse(value, out var parsed) && parsed;
+	{
+		return bool.TryParse(value, out var parsed) && parsed;
+	}
 
 	private static bool NormalizeExtensionsFlag(string? value, bool fallback)
-		=> bool.TryParse(value, out var parsed) ? parsed : fallback;
+	{
+		return bool.TryParse(value, out var parsed) ? parsed : fallback;
+	}
 
 	private static int NormalizeRefreshIntervalMinutes(string? value)
-		=> int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var minutes)
+	{
+		return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var minutes)
 			? Math.Clamp(minutes, MinExtensionsRefreshIntervalMinutes, MaxExtensionsRefreshIntervalMinutes)
 			: DefaultExtensionsRefreshIntervalMinutes;
+	}
 
 	private static string NormalizeThemeMode(string? value)
-		=> value is not null && _validThemeModes.Contains(value) ? value : DefaultThemeMode;
+	{
+		return value is not null && _validThemeModes.Contains(value) ? value : DefaultThemeMode;
+	}
 
 	private static LogEntryLevel NormalizeLogLevel(string? value, LogEntryLevel fallback)
-		=> Enum.TryParse<LogEntryLevel>(value, ignoreCase: true, out var parsed) && Enum.IsDefined(parsed)
+	{
+		return Enum.TryParse<LogEntryLevel>(value, true, out var parsed) && Enum.IsDefined(parsed)
 			? parsed
 			: fallback;
+	}
 
 	private static string NormalizeAccentColor(string? value)
-		=> value is not null && (HexColorRegex().IsMatch(value) || ColorReference.TryParse(value, out _))
+	{
+		return value is not null && (HexColorRegex().IsMatch(value) || ColorReference.TryParse(value, out _))
 			? value
 			: DefaultAccentColor;
+	}
 
 	// Both adb flags default to off: adb spawns external processes and, once USB connections are
 	// enabled, opens a reverse tunnel, so an upgrade or a blank store must not turn either on by itself.
 	private static bool NormalizeAdbFlag(string? value, bool fallback = false)
-		=> bool.TryParse(value, out var parsed) ? parsed : fallback;
+	{
+		return bool.TryParse(value, out var parsed) ? parsed : fallback;
+	}
 
 	private static string? NormalizeAdbExecutablePath(string? value)
 	{
@@ -786,7 +845,8 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	private static List<RememberedUsbDevice> NormalizeNativeUsbDevices(IEnumerable<RememberedUsbDevice> devices)
-		=> devices.Select(device => NormalizeUsbSerial(device.Serial) is { } serial
+	{
+		return devices.Select(device => NormalizeUsbSerial(device.Serial) is { } serial
 				? new RememberedUsbDevice(serial, NormalizeUsbDeviceName(device.Name))
 				: null)
 			.OfType<RememberedUsbDevice>()
@@ -794,10 +854,12 @@ public partial class AppPreferenceService : IAppPreferenceService
 			.Select(group => group.Last())
 			.TakeLast(MaxNativeUsbRememberedDevices)
 			.ToList();
+	}
 
 	private static string? NormalizeUsbDeviceName(string? value)
 	{
-		var cleaned = new string((value ?? string.Empty).Where(character => !char.IsControl(character)).ToArray()).Trim();
+		var cleaned
+			= new string((value ?? string.Empty).Where(character => !char.IsControl(character)).ToArray()).Trim();
 		if (cleaned.Length == 0)
 		{
 			return null;
@@ -814,15 +876,17 @@ public partial class AppPreferenceService : IAppPreferenceService
 	}
 
 	private sealed record StoredUsbDevice(
-		[property: System.Text.Json.Serialization.JsonPropertyName("serial")] string Serial,
-		[property: System.Text.Json.Serialization.JsonPropertyName("name")] string? Name);
+		[property: System.Text.Json.Serialization.JsonPropertyName("serial")]
+		string Serial,
+		[property: System.Text.Json.Serialization.JsonPropertyName("name")]
+		string? Name);
 
 	private static string? NormalizeUsbSerial(string? value)
 	{
 		var trimmed = value?.Trim();
-		return !string.IsNullOrEmpty(trimmed) &&
-			trimmed.Length <= MaxAdbDeviceSerialLength &&
-			trimmed.All(character => character is >= '!' and <= '~')
+		return !string.IsNullOrEmpty(trimmed)
+			&& trimmed.Length <= MaxAdbDeviceSerialLength
+			&& trimmed.All(character => character is >= '!' and <= '~')
 				? trimmed
 				: null;
 	}

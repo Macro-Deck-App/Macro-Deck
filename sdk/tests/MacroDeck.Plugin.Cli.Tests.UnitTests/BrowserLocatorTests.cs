@@ -42,8 +42,12 @@ public class BrowserLocatorTests
 
 	[Test]
 	public void Nothing_is_found_when_nothing_exists()
-		=> Assert.That(BrowserLocator.Find(null, Env(("PATH", "/usr/bin")), _ => false), Is.Null);
+	{
+		Assert.That(BrowserLocator.Find(null, Env(("PATH", "/usr/bin")), _ => false), Is.Null);
+	}
 
 	private static Func<string, string?> Env(params (string Name, string Value)[] values)
-		=> name => values.FirstOrDefault(pair => pair.Name == name).Value;
+	{
+		return name => values.FirstOrDefault(pair => pair.Name == name).Value;
+	}
 }

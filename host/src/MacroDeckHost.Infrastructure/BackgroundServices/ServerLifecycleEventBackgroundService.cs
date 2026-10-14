@@ -30,7 +30,10 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 		_timeProvider = timeProvider;
 	}
 
-	public Task StartingAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StartingAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task StartAsync(CancellationToken cancellationToken)
 	{
@@ -38,7 +41,10 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 		return Task.CompletedTask;
 	}
 
-	public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StartedAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	public async Task StoppingAsync(CancellationToken cancellationToken)
 	{
@@ -55,9 +61,15 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 		}
 	}
 
-	public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StopAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StoppedAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	private async Task PublishWhenReady()
 	{
@@ -74,6 +86,8 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	}
 
 	private static EventOccurrence Occurrence(string eventId)
-		=> new(EventIds.Qualify(eventId),
+	{
+		return new EventOccurrence(EventIds.Qualify(eventId),
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["version"] = HostVersion.Current });
+	}
 }

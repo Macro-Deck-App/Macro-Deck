@@ -7,10 +7,12 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class AudioDeviceVariablesTests
 {
 	private static List<string> NamesFor(params AudioDevice[] devices)
-		=> AudioDeviceVariables.Merge([], devices)
+	{
+		return AudioDeviceVariables.Merge([], devices)
 			.SelectMany(AudioDeviceVariables.Declare)
 			.Select(variable => variable.Name!)
 			.ToList();
+	}
 
 	[Test]
 	public void A_device_name_starting_with_a_digit_gets_no_stray_prefix()
@@ -52,11 +54,11 @@ public class AudioDeviceVariablesTests
 	{
 		var present = new AudioDevice("present", "Present", AudioFlow.Output, true);
 		var known = AudioDeviceVariables.Merge([],
-			[
-				present,
-				.. Enumerable.Range(0, AudioDeviceVariables.MaxKnownDevices - 1)
-					.Select(i => new AudioDevice($"old-{i}", $"Old {i}", AudioFlow.Output, false))
-			]);
+		[
+			present,
+			.. Enumerable.Range(0, AudioDeviceVariables.MaxKnownDevices - 1)
+				.Select(i => new AudioDevice($"old-{i}", $"Old {i}", AudioFlow.Output, false))
+		]);
 		var newcomer = new AudioDevice("new", "New Headset", AudioFlow.Output, false);
 
 		var merged = AudioDeviceVariables.Merge(known, [present, newcomer]);

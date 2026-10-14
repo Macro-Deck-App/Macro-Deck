@@ -111,7 +111,8 @@ public interface IAppPreferenceService
 
 	// Unlike the TLS parameters, a null discoveryEnabled keeps the stored value, so a caller that only
 	// changes the port or TLS never switches network discovery on or off as a side effect.
-	Task<NetworkSettings> SetNetwork(int? publicPort,
+	Task<NetworkSettings> SetNetwork(
+		int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
@@ -120,7 +121,8 @@ public interface IAppPreferenceService
 	Task<AdbSettings> GetAdb();
 
 	// allowPlugins is not nullable: a null would land on the default, which silently re-grants plugin access.
-	Task<AdbSettings> SetAdb(bool? enabled,
+	Task<AdbSettings> SetAdb(
+		bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
@@ -145,7 +147,8 @@ public interface IAppPreferenceService
 
 	Task<BackupSettings> GetBackups();
 
-	Task<BackupSettings> SetBackups(string? scheduleFrequency,
+	Task<BackupSettings> SetBackups(
+		string? scheduleFrequency,
 		string? scheduleTimeOfDay,
 		string? scheduleDayOfWeek,
 		int? scheduleDayOfMonth,
@@ -159,7 +162,8 @@ public interface IAppPreferenceService
 	Task SetBackupScheduleLastRun(DateTimeOffset value);
 	Task<ExtensionSettings> GetExtensions();
 
-	Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+	Task<ExtensionSettings> SetExtensions(
+		bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,

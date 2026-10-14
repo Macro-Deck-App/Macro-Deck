@@ -102,8 +102,7 @@ public sealed class FakeWidgetApi : IWidgetApi
 
 		lock (_gate)
 		{
-			if (!_widgets.ContainsKey(request.WidgetId) ||
-				(request.Patch.IsEmpty && request.ClearProperties.Count == 0))
+			if (!_widgets.ContainsKey(request.WidgetId) || request.Patch.IsEmpty && request.ClearProperties.Count == 0)
 			{
 				return Task.FromResult(false);
 			}
@@ -137,7 +136,8 @@ public sealed class FakeWidgetApi : IWidgetApi
 	}
 
 	/// <inheritdoc />
-	public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+	public Task<WidgetStateWriteResult> AdvanceStateAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
 	{
 		lock (_gate)

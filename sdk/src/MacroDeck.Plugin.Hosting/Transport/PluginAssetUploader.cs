@@ -24,7 +24,8 @@ internal sealed class PluginAssetUploader(PluginConnectionState state, TimeProvi
 	private readonly ConcurrentDictionary<string, TaskCompletionSource<AssetAckPayload>> _pending
 		= new(StringComparer.Ordinal);
 
-	public async Task<string> UploadAsync(string kind,
+	public async Task<string> UploadAsync(
+		string kind,
 		string mimeType,
 		byte[] data,
 		CancellationToken cancellationToken)
@@ -39,8 +40,8 @@ internal sealed class PluginAssetUploader(PluginConnectionState state, TimeProvi
 				$"An asset of kind '{kind}' is {data.Length} bytes, over the {ProtocolLimits.MaxAssetBytes} byte limit.");
 		}
 
-		var connection = state.ActiveConnection ??
-			throw new AssetUploadException("There is no connection to the host.");
+		var connection = state.ActiveConnection
+			?? throw new AssetUploadException("There is no connection to the host.");
 
 		var assetId = Guid.CreateVersion7().ToString();
 		var contentHash = AssetContentHash.Compute(data);
@@ -163,8 +164,8 @@ internal sealed class PluginAssetUploader(PluginConnectionState state, TimeProvi
 		{
 			await connection.SendAsync(envelope, cancellationToken).ConfigureAwait(false);
 
-			using var registration = cancellationToken.Register(
-				static state => ((TaskCompletionSource<AssetAckPayload>)state!).TrySetCanceled(),
+			using var registration = cancellationToken.Register(static state
+					=> ((TaskCompletionSource<AssetAckPayload>)state!).TrySetCanceled(),
 				completion);
 
 			var ack = await completion.Task.ConfigureAwait(false);
@@ -181,8 +182,13 @@ internal sealed class PluginAssetUploader(PluginConnectionState state, TimeProvi
 		}
 	}
 
-	private static string NewId() => Guid.CreateVersion7().ToString();
+	private static string NewId()
+	{
+		return Guid.CreateVersion7().ToString();
+	}
 
-	private static JsonElement Serialize<T>(T value) =>
-		JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	private static JsonElement Serialize<T>(T value)
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 }

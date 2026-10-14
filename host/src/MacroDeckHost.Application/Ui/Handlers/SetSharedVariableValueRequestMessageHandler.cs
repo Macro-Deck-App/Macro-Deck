@@ -20,7 +20,8 @@ public class SetSharedVariableValueRequestMessageHandler
 	private readonly IHostLockState _lockState;
 	private readonly VariableOwnerNames _ownerNames;
 
-	public SetSharedVariableValueRequestMessageHandler(SharedVariables sharedVariables,
+	public SetSharedVariableValueRequestMessageHandler(
+		SharedVariables sharedVariables,
 		IVariableService service,
 		IHostLockState lockState,
 		VariableOwnerNames ownerNames)
@@ -86,5 +87,8 @@ public class SetSharedVariableValueRequestMessageHandler
 	}
 
 	private static SetSharedVariableValueResponse Failed(string code, LocalizedText message)
-		=> new() { Success = false, Error = new TransportError { Code = code, Message = message } };
+	{
+		return new SetSharedVariableValueResponse
+			{ Success = false, Error = new TransportError { Code = code, Message = message } };
+	}
 }

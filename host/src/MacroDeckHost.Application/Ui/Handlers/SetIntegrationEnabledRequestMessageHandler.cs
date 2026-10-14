@@ -41,7 +41,7 @@ public class SetIntegrationEnabledRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "NOT_FOUND",
-					Message = AppStrings.Errors.Integrations.NotFound(id: request.Id)
+					Message = AppStrings.Errors.Integrations.NotFound(request.Id)
 				}
 			};
 		}

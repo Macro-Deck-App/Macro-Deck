@@ -52,9 +52,15 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	{
 	}
 
-	public void KeyDown(KeyCode key) => SendKey(key, isPress: true);
+	public void KeyDown(KeyCode key)
+	{
+		SendKey(key, true);
+	}
 
-	public void KeyUp(KeyCode key) => SendKey(key, isPress: false);
+	public void KeyUp(KeyCode key)
+	{
+		SendKey(key, false);
+	}
 
 	public void TypeUnicode(string text)
 	{
@@ -69,8 +75,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			var keycode = XKeysymToKeycode(_display, keysym);
 			if (keycode != 0)
 			{
-				FakeKey(keycode, press: true);
-				FakeKey(keycode, press: false);
+				FakeKey(keycode, true);
+				FakeKey(keycode, false);
 				continue;
 			}
 
@@ -153,8 +159,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		_ = XChangeKeyboardMapping(_display, _spareKeycode, 2, symbols, 1);
 		_ = XFlush(_display);
 
-		FakeKey((uint)_spareKeycode, press: true);
-		FakeKey((uint)_spareKeycode, press: false);
+		FakeKey((uint)_spareKeycode, true);
+		FakeKey((uint)_spareKeycode, false);
 		_ = XFlush(_display);
 
 		var cleared = new nuint[] { 0, 0 };
@@ -180,7 +186,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	}
 
 	private void FakeKey(uint keycode, bool press)
-		=> _ = XTestFakeKeyEvent(_display, keycode, press, 0);
+	{
+		_ = XTestFakeKeyEvent(_display, keycode, press, 0);
+	}
 
 	private static IntPtr SafeOpenDisplay()
 	{
@@ -197,10 +205,10 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	internal static uint ResolveKeycode(KeyCode key, Func<nuint, uint> keysymToKeycode)
 	{
 		// X servers on the evdev/libinput driver (Xorg and XWayland) number keys as evdev code plus 8.
-		const uint EvdevOffset = 8;
+		const uint evdevOffset = 8;
 		if (NativeKeys.IsPositional(key))
 		{
-			return NativeKeys.TryGetWindowsScanCode(key, out var position) ? position + EvdevOffset : 0;
+			return NativeKeys.TryGetWindowsScanCode(key, out var position) ? position + evdevOffset : 0;
 		}
 
 		if (!TryGetKeysym(key, out var keysym))
@@ -209,9 +217,11 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		}
 
 		var keycode = keysymToKeycode(keysym);
-		if (keycode == 0 && key is >= KeyCode.A and <= KeyCode.Z && NativeKeys.TryGetWindowsScanCode(key, out var letter))
+		if (keycode == 0
+			&& key is >= KeyCode.A and <= KeyCode.Z
+			&& NativeKeys.TryGetWindowsScanCode(key, out var letter))
 		{
-			return letter + EvdevOffset;
+			return letter + evdevOffset;
 		}
 
 		return keycode;
@@ -425,9 +435,15 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 				: null;
 		}
 
-		public void KeyDown(KeyCode key) => Send(key, press: true);
+		public void KeyDown(KeyCode key)
+		{
+			Send(key, true);
+		}
 
-		public void KeyUp(KeyCode key) => Send(key, press: false);
+		public void KeyUp(KeyCode key)
+		{
+			Send(key, false);
+		}
 
 		public void TypeUnicode(string text)
 		{
@@ -442,8 +458,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 				foreach (var window in _windows)
 				{
-					SendKeyEvent(_display, _root, window, keycode, 0, press: true);
-					SendKeyEvent(_display, _root, window, keycode, 0, press: false);
+					SendKeyEvent(_display, _root, window, keycode, 0, true);
+					SendKeyEvent(_display, _root, window, keycode, 0, false);
 				}
 			}
 

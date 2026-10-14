@@ -14,13 +14,18 @@ public class PluginTrustRecordRepository : IPluginTrustRecordRepository
 	}
 
 	public Task<PluginTrustRecordEntity?> GetVersion(string pluginId, string version)
-		=> _context.PluginTrustRecords
+	{
+		return _context.PluginTrustRecords
 			.FirstOrDefaultAsync(r => r.PluginId == pluginId && r.Version == version);
+	}
 
 	public async Task<IReadOnlyList<PluginTrustRecordEntity>> GetForPlugin(string pluginId)
-		=> await _context.PluginTrustRecords.Where(r => r.PluginId == pluginId).ToListAsync();
+	{
+		return await _context.PluginTrustRecords.Where(r => r.PluginId == pluginId).ToListAsync();
+	}
 
-	public async Task Upsert(string pluginId,
+	public async Task Upsert(
+		string pluginId,
 		string version,
 		string admittedVerdict,
 		string? certificateId,
@@ -76,10 +81,14 @@ public class PluginTrustRecordRepository : IPluginTrustRecordRepository
 	}
 
 	public Task DeleteForPlugin(string pluginId)
-		=> _context.PluginTrustRecords.Where(r => r.PluginId == pluginId).ExecuteDeleteAsync();
+	{
+		return _context.PluginTrustRecords.Where(r => r.PluginId == pluginId).ExecuteDeleteAsync();
+	}
 
 	public Task DeleteVersion(string pluginId, string version)
-		=> _context.PluginTrustRecords
+	{
+		return _context.PluginTrustRecords
 			.Where(r => r.PluginId == pluginId && r.Version == version)
 			.ExecuteDeleteAsync();
+	}
 }

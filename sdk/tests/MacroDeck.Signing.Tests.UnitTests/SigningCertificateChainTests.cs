@@ -115,7 +115,7 @@ internal sealed class SigningCertificateChainTests
 	[Test]
 	public void Subject_kind_service_is_rejected_for_package_signing()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "service");
+		var issued = TestPki.IssueCertificate("service");
 
 		var result = SigningCertificateChain.Verify(issued.CertificateBytes,
 			issued.CertificateSignatureBytes,
@@ -133,7 +133,7 @@ internal sealed class SigningCertificateChainTests
 	[TestCase("organization")]
 	public void Creator_and_organization_subjects_are_accepted_for_package_signing(string subjectKind)
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: subjectKind);
+		var issued = TestPki.IssueCertificate(subjectKind);
 
 		var result = SigningCertificateChain.Verify(issued.CertificateBytes,
 			issued.CertificateSignatureBytes,
@@ -146,8 +146,8 @@ internal sealed class SigningCertificateChainTests
 	[Test]
 	public void A_service_subject_with_registry_key_usage_is_accepted_for_registry_signing()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage]);
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage]);
 
 		var result = SigningCertificateChain.Verify(issued.CertificateBytes,
 			issued.CertificateSignatureBytes,
@@ -160,8 +160,8 @@ internal sealed class SigningCertificateChainTests
 	[Test]
 	public void A_creator_subject_with_registry_key_usage_is_rejected_for_registry_signing()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "creator",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage]);
+		var issued = TestPki.IssueCertificate("creator",
+			[SigningCertificateChain.RegistryKeyUsage]);
 
 		var result = SigningCertificateChain.Verify(issued.CertificateBytes,
 			issued.CertificateSignatureBytes,

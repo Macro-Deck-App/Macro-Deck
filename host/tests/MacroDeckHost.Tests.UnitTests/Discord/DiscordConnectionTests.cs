@@ -40,7 +40,10 @@ internal sealed class DiscordConnectionTests
 	}
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[Test]
 	public async Task Connecting_authenticates_subscribes_and_seeds_the_state()
@@ -217,7 +220,7 @@ internal sealed class DiscordConnectionTests
 	[Test]
 	public async Task An_expired_access_token_is_refreshed_before_authenticating()
 	{
-		using var connection = Create(expiresAt: DateTimeOffset.UtcNow.AddMinutes(-1));
+		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1));
 		connection.Start();
 
 		await WaitForAsync(() => connection.State.IsConnected);
@@ -281,7 +284,7 @@ internal sealed class DiscordConnectionTests
 	[Test]
 	public async Task A_refused_endpoint_is_reported_as_a_privilege_problem()
 	{
-		_client.ConnectException = new DiscordIpcUnavailableException("refused", accessDenied: true);
+		_client.ConnectException = new DiscordIpcUnavailableException("refused", true);
 		using var connection = Create();
 		connection.Start();
 
@@ -341,7 +344,7 @@ internal sealed class DiscordConnectionTests
 		connection.Start();
 		await WaitForAsync(() => connection.State.IsConnected);
 
-		await connection.JoinVoiceChannelAsync("777", force: true);
+		await connection.JoinVoiceChannelAsync("777", true);
 
 		var call = _client.CallsTo("SELECT_VOICE_CHANNEL").Single();
 		Assert.That(call.ArgsJson, Is.EqualTo("""{"channel_id":"777","force":true}"""));
@@ -354,7 +357,7 @@ internal sealed class DiscordConnectionTests
 		connection.Start();
 		await WaitForAsync(() => connection.State.IsConnected);
 
-		await connection.SetActivityAsync(activity: null);
+		await connection.SetActivityAsync(null);
 
 		var call = _client.CallsTo("SET_ACTIVITY").Single();
 		Assert.That(call.ArgsJson, Does.Contain("\"activity\":null"));
@@ -605,7 +608,7 @@ internal sealed class DiscordConnectionTests
 		connection.Start();
 		await WaitForAsync(() => connection.State.IsConnected);
 
-		Assert.DoesNotThrowAsync(() => connection.SetActivityAsync(activity: null));
+		Assert.DoesNotThrowAsync(() => connection.SetActivityAsync(null));
 	}
 
 	[Test]
@@ -664,7 +667,8 @@ internal sealed class DiscordConnectionTests
 	}
 
 	private DiscordConnection Create(DateTimeOffset? expiresAt = null, TimeSpan? reconnectDelay = null)
-		=> new(() => _client,
+	{
+		return new DiscordConnection(() => _client,
 			_oauth,
 			"123456",
 			"secret",
@@ -674,8 +678,9 @@ internal sealed class DiscordConnectionTests
 				_persisted.Add(tokens);
 				return Task.CompletedTask;
 			},
-			events: null,
+			null,
 			reconnectDelay ?? TimeSpan.FromMinutes(5));
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{

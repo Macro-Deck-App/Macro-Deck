@@ -33,5 +33,8 @@ public sealed class CalendarSyncSignal : ICalendarSyncSignal, IDisposable
 		cancellationToken.ThrowIfCancellationRequested();
 	}
 
-	public void Dispose() => _pending.Dispose();
+	public void Dispose()
+	{
+		_pending.Dispose();
+	}
 }

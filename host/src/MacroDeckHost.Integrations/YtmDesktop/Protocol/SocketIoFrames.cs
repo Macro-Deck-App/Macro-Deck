@@ -176,24 +176,37 @@ internal static class SocketIoFrames
 		}
 	}
 
-	public static string Connect(string token) => $"40{Namespace},{{\"token\":{JsonSerializer.Serialize(token)}}}";
+	public static string Connect(string token)
+	{
+		return $"40{Namespace},{{\"token\":{JsonSerializer.Serialize(token)}}}";
+	}
 
-	public static string Disconnect() => $"41{Namespace},";
+	public static string Disconnect()
+	{
+		return $"41{Namespace},";
+	}
 
-	public static string Pong() => "3";
+	public static string Pong()
+	{
+		return "3";
+	}
 
-	public static bool IsRealtimeNamespace(string? ns) => string.Equals(ns, Namespace, StringComparison.Ordinal);
+	public static bool IsRealtimeNamespace(string? ns)
+	{
+		return string.Equals(ns, Namespace, StringComparison.Ordinal);
+	}
 
 	private static bool TryGetMilliseconds(JsonElement root, string property, out int milliseconds)
 	{
 		milliseconds = 0;
-		return root.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out milliseconds);
+		return root.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out milliseconds);
 	}
 
 	private static EngineIoType ParseEngineType(char c)
-		=> c switch
+	{
+		return c switch
 		{
 			'0' => EngineIoType.Open,
 			'1' => EngineIoType.Close,
@@ -202,9 +215,11 @@ internal static class SocketIoFrames
 			'4' => EngineIoType.Message,
 			_ => EngineIoType.Unknown
 		};
+	}
 
 	private static SocketIoType ParseSocketType(char c)
-		=> c switch
+	{
+		return c switch
 		{
 			'0' => SocketIoType.Connect,
 			'1' => SocketIoType.Disconnect,
@@ -213,4 +228,5 @@ internal static class SocketIoFrames
 			'4' => SocketIoType.ConnectError,
 			_ => SocketIoType.Unknown
 		};
+	}
 }

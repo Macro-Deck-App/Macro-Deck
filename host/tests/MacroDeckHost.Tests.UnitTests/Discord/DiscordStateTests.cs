@@ -26,12 +26,14 @@ internal sealed class DiscordStateTests
 		bool selfDeafened,
 		bool serverMuted,
 		bool serverDeafened)
-		=> State(selfMuted, selfDeafened, serverMuted, serverDeafened).EffectivelyMuted;
+	{
+		return State(selfMuted, selfDeafened, serverMuted, serverDeafened).EffectivelyMuted;
+	}
 
 	[Test]
 	public void Self_deafening_with_the_raw_mute_flag_false_silences_the_microphone()
 	{
-		var state = State(selfMuted: false, selfDeafened: true, serverMuted: false, serverDeafened: false);
+		var state = State(false, true, false, false);
 
 		Assert.That(state.EffectivelyMuted, Is.True);
 	}
@@ -39,7 +41,7 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void A_moderator_deafen_silences_the_microphone()
 	{
-		var state = State(selfMuted: false, selfDeafened: false, serverMuted: false, serverDeafened: true);
+		var state = State(false, false, false, true);
 
 		Assert.That(state.EffectivelyMuted, Is.True);
 	}
@@ -47,7 +49,7 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void Undeafening_leaves_the_microphone_silenced_while_a_raw_self_mute_remains()
 	{
-		var state = State(selfMuted: true, selfDeafened: false, serverMuted: false, serverDeafened: false);
+		var state = State(true, false, false, false);
 
 		Assert.That(state.EffectivelyMuted, Is.True);
 	}
@@ -55,7 +57,7 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void Undeafening_leaves_the_microphone_silenced_while_a_raw_server_mute_remains()
 	{
-		var state = State(selfMuted: false, selfDeafened: false, serverMuted: true, serverDeafened: false);
+		var state = State(false, false, true, false);
 
 		Assert.That(state.EffectivelyMuted, Is.True);
 	}
@@ -63,7 +65,7 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void Undeafening_reports_the_microphone_live_when_no_raw_mute_remains()
 	{
-		var state = State(selfMuted: false, selfDeafened: false, serverMuted: false, serverDeafened: false);
+		var state = State(false, false, false, false);
 
 		Assert.That(state.EffectivelyMuted, Is.False);
 	}
@@ -71,7 +73,7 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void The_raw_flags_never_follow_the_effective_state()
 	{
-		var state = State(selfMuted: false, selfDeafened: true, serverMuted: false, serverDeafened: false);
+		var state = State(false, true, false, false);
 
 		Assert.Multiple(() =>
 		{
@@ -102,12 +104,14 @@ internal sealed class DiscordStateTests
 		bool selfDeafened,
 		bool serverMuted,
 		bool serverDeafened)
-		=> State(selfMuted, selfDeafened, serverMuted, serverDeafened).EffectivelySelfMuted;
+	{
+		return State(selfMuted, selfDeafened, serverMuted, serverDeafened).EffectivelySelfMuted;
+	}
 
 	[Test]
 	public void WithoutVoiceChannel_clears_the_moderator_flags_out_of_the_effective_state()
 	{
-		var state = State(selfMuted: false, selfDeafened: false, serverMuted: true, serverDeafened: true)
+		var state = State(false, false, true, true)
 			.WithoutVoiceChannel();
 
 		Assert.That(state.EffectivelyMuted, Is.False);
@@ -116,14 +120,15 @@ internal sealed class DiscordStateTests
 	[Test]
 	public void WithoutVoiceChannel_stays_effectively_muted_when_also_self_muted()
 	{
-		var state = State(selfMuted: true, selfDeafened: false, serverMuted: true, serverDeafened: true)
+		var state = State(true, false, true, true)
 			.WithoutVoiceChannel();
 
 		Assert.That(state.EffectivelyMuted, Is.True);
 	}
 
 	private static DiscordState State(bool selfMuted, bool selfDeafened, bool serverMuted, bool serverDeafened)
-		=> new()
+	{
+		return new DiscordState
 		{
 			IsConnected = true,
 			SelfMuted = selfMuted,
@@ -131,4 +136,5 @@ internal sealed class DiscordStateTests
 			ServerMuted = serverMuted,
 			ServerDeafened = serverDeafened
 		};
+	}
 }

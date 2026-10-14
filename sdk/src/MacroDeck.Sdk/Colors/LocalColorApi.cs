@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 namespace MacroDeck.Sdk.Colors;
 
 // What a plugin gets when Macro Deck cannot resolve colours for it: a fixed colour still resolves, a
@@ -6,10 +8,16 @@ internal sealed class LocalColorApi : IColorApi
 {
 	public static readonly LocalColorApi Instance = new();
 
-	public Task<string?> ResolveAsync(string value, string? widgetId = null, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Resolve(value));
+	public Task<string?> ResolveAsync(
+		string value,
+		string? widgetId = null,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(Resolve(value));
+	}
 
-	public Task<IAsyncDisposable> WatchAsync(string value,
+	public Task<IAsyncDisposable> WatchAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId = null,
 		CancellationToken cancellationToken = default)
@@ -33,12 +41,18 @@ internal sealed class LocalColorApi : IColorApi
 		return Task.FromResult<IAsyncDisposable>(NoWatch.Instance);
 	}
 
-	public static string? Resolve(string? value) => ColorGrammar.IsReference(value) ? null : ColorGrammar.CanonicalLiteral(value);
+	public static string? Resolve(string? value)
+	{
+		return ColorGrammar.IsReference(value) ? null : ColorGrammar.CanonicalLiteral(value);
+	}
 
 	private sealed class NoWatch : IAsyncDisposable
 	{
 		public static readonly NoWatch Instance = new();
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

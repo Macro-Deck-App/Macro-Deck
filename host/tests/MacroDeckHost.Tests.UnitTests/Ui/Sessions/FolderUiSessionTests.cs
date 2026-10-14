@@ -59,7 +59,7 @@ internal sealed class FolderUiSessionTests
 	[Test]
 	public void AWidgetGridFolder_IsNeverOpenedAsASession()
 	{
-		var folder = _folders.Add(viewId: null);
+		var folder = _folders.Add(null);
 
 		var response = Open(folder.Id);
 
@@ -197,43 +197,63 @@ internal sealed class FolderUiSessionTests
 	}
 
 	private OpenFolderUiSessionResponse Open(Guid folderId)
-		=> _opener.Open(new OpenFolderUiSessionRequest { FolderId = folderId.ToString() }, DeviceA);
+	{
+		return _opener.Open(new OpenFolderUiSessionRequest { FolderId = folderId.ToString() }, DeviceA);
+	}
 
 	private static string? Attribute(UiSessionSnapshot session, string key)
-		=> session.Surface.Attributes[key].GetString();
+	{
+		return session.Surface.Attributes[key].GetString();
+	}
 
 	private sealed class StubProviderResolver : IUiSessionProviderResolver
 	{
 		private readonly string _providerId;
 
-		public StubProviderResolver(string providerId) => _providerId = providerId;
+		public StubProviderResolver(string providerId)
+		{
+			_providerId = providerId;
+		}
 
 		public IUiSessionProvider? Resolve(string providerId)
-			=> string.Equals(providerId, _providerId, StringComparison.Ordinal)
+		{
+			return string.Equals(providerId, _providerId, StringComparison.Ordinal)
 				? new StubFolderUiSessionProvider(providerId)
 				: null;
+		}
 	}
 
 	private sealed class StubFolderUiSessionProvider : IUiSessionProvider
 	{
-		public StubFolderUiSessionProvider(string providerId) => ProviderId = providerId;
+		public StubFolderUiSessionProvider(string providerId)
+		{
+			ProviderId = providerId;
+		}
 
 		public string ProviderId { get; }
 
 		public Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command, CancellationToken cancellationToken)
-			=> Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		{
+			return Task.FromResult(UiSessionOpenOutcome.Accept(command.UiModelVersion));
+		}
 
 		public Task CloseAsync(string sessionId, string reason, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RequestSnapshotAsync(string sessionId, CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task DispatchEventAsync(
 			string sessionId,
 			UiSessionEventCommand command,
 			CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeFolderViewFolderCache : IFolderCache
@@ -255,16 +275,45 @@ internal sealed class FolderUiSessionTests
 			return folder;
 		}
 
-		public List<FolderEntity> GetAllFolders() => _folders;
-		public FolderEntity? GetFolderById(Guid id) => _folders.Find(folder => folder.Id == id);
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => _folders;
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => _folders;
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return _folders;
+		}
+
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folders.Find(folder => folder.Id == id);
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return _folders;
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return _folders;
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

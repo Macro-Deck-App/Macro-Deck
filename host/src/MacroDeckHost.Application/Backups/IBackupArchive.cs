@@ -8,7 +8,8 @@ public sealed record BackupArchiveWriteRequest(
 
 public interface IBackupArchiveWriter
 {
-	Task<BackupContentIndex> Write(Stream destination,
+	Task<BackupContentIndex> Write(
+		Stream destination,
 		BackupArchiveWriteRequest request,
 		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
@@ -26,7 +27,8 @@ public interface IBackupArchiveReader
 	/// Decrypts and authenticates the whole payload into <paramref name="destinationPath"/>, verifying
 	/// every segment. Throws <c>BackupCryptoException</c> for an archive that fails authentication.
 	/// </summary>
-	Task DecryptPayload(Stream archive,
+	Task DecryptPayload(
+		Stream archive,
 		ReadOnlyMemory<byte> recoveryKey,
 		string destinationPath,
 		IProgress<long>? bytesProcessed = null,

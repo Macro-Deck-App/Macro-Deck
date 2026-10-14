@@ -29,12 +29,21 @@ internal sealed class ActionButtonConfigContext(
 
 	public CancellationToken SessionToken { get; } = sessionToken;
 
-	public string Resolve(LocalizedText text) => Localization.Resolve(text, Culture) ?? string.Empty;
+	public string Resolve(LocalizedText text)
+	{
+		return Localization.Resolve(text, Culture) ?? string.Empty;
+	}
 
 	// The view is built from the tree this context helps produce, so it can only be attached afterwards.
-	public void Attach(UiView view) => _view = view;
+	public void Attach(UiView view)
+	{
+		_view = view;
+	}
 
-	public IDisposable Batch() => _view?.Batch() ?? NoBatch.Instance;
+	public IDisposable Batch()
+	{
+		return _view?.Batch() ?? NoBatch.Instance;
+	}
 
 	private sealed class NoBatch : IDisposable
 	{

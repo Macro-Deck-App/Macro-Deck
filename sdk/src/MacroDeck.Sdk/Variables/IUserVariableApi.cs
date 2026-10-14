@@ -41,8 +41,10 @@ public interface IUserVariableApi
 		string? initialValue = null,
 		int? decimalPlaces = null,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(UserVariableCreateResult.Failed(UserVariableCreateStatus.NotSupported,
+	{
+		return Task.FromResult(UserVariableCreateResult.Failed(UserVariableCreateStatus.NotSupported,
 			"This host does not support creating user variables."));
+	}
 }
 
 /// <summary>Operations supported for user variables.</summary>
@@ -79,10 +81,15 @@ public enum UserVariableWriteStatus
 /// <summary>The outcome of <see cref="IUserVariableApi.ApplyAsync" />.</summary>
 public sealed record UserVariableWriteResult(UserVariableWriteStatus Status, string? Message = null)
 {
-	public static UserVariableWriteResult Applied() => new(UserVariableWriteStatus.Applied);
+	public static UserVariableWriteResult Applied()
+	{
+		return new UserVariableWriteResult(UserVariableWriteStatus.Applied);
+	}
 
 	public static UserVariableWriteResult Failed(UserVariableWriteStatus status, string message)
-		=> new(status, message);
+	{
+		return new UserVariableWriteResult(status, message);
+	}
 }
 
 /// <summary>Result status of a user-variable creation.</summary>
@@ -112,8 +119,13 @@ public enum UserVariableCreateStatus
 /// <summary>The outcome of <see cref="IUserVariableApi.CreateAsync" />.</summary>
 public sealed record UserVariableCreateResult(UserVariableCreateStatus Status, string? Message = null)
 {
-	public static UserVariableCreateResult Created() => new(UserVariableCreateStatus.Created);
+	public static UserVariableCreateResult Created()
+	{
+		return new UserVariableCreateResult(UserVariableCreateStatus.Created);
+	}
 
 	public static UserVariableCreateResult Failed(UserVariableCreateStatus status, string message)
-		=> new(status, message);
+	{
+		return new UserVariableCreateResult(status, message);
+	}
 }

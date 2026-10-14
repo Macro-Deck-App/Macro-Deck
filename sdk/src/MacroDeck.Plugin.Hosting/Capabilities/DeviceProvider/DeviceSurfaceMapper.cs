@@ -8,7 +8,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 internal static class DeviceSurfaceMapper
 {
 	public static DeviceSurface ToSurface(DeviceSurfaceDto dto)
-		=> new()
+	{
+		return new DeviceSurface
 		{
 			Revision = dto.Revision,
 			Profile = dto.Profile is { } profile ? new DeviceSurfaceProfile(profile.Id, profile.Name) : null,
@@ -26,9 +27,11 @@ internal static class DeviceSurfaceMapper
 			},
 			Widgets = [.. dto.Widgets.Select(ToWidget)]
 		};
+	}
 
 	public static DevicesInteractionArguments ToArguments(string sessionId, DeviceInteraction interaction)
-		=> new()
+	{
+		return new DevicesInteractionArguments
 		{
 			SessionId = sessionId,
 			Kind = interaction.Kind.ToString(),
@@ -38,9 +41,11 @@ internal static class DeviceSurfaceMapper
 			SurfaceRevision = interaction.SurfaceRevision,
 			Data = interaction.Data
 		};
+	}
 
 	private static DeviceSurfaceWidget ToWidget(DeviceSurfaceWidgetDto dto)
-		=> new()
+	{
+		return new DeviceSurfaceWidget
 		{
 			Id = dto.Id,
 			Type = dto.Type,
@@ -75,9 +80,10 @@ internal static class DeviceSurfaceMapper
 			SupportedInteractions =
 			[
 				.. dto.SupportedInteractions.Select(name
-					=> Enum.TryParse<DeviceInteractionKind>(name, ignoreCase: true, out var kind)
+					=> Enum.TryParse<DeviceInteractionKind>(name, true, out var kind)
 						? kind
 						: DeviceInteractionKind.Unknown)
 			]
 		};
+	}
 }

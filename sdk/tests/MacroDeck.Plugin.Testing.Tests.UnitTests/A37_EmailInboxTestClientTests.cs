@@ -14,7 +14,7 @@ using MacroDeck.Sdk.Email;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A37_EmailInboxTestClientTests
+public class A37EmailInboxTestClientTests
 {
 	private static readonly DateTimeOffset _now = new(2026, 10, 12, 9, 0, 0, TimeSpan.FromHours(2));
 
@@ -73,8 +73,8 @@ public class A37_EmailInboxTestClientTests
 		while (true)
 		{
 			var update = host.Messages.OfType(MessageTypes.StateUpdate)
-				.Select(message => message.Envelope.Payload!.Value.Deserialize<StateUpdatePayload>(
-					PluginProtocolJson.Options)!)
+				.Select(message
+					=> message.Envelope.Payload!.Value.Deserialize<StateUpdatePayload>(PluginProtocolJson.Options)!)
 				.FirstOrDefault(payload => payload.Kind == CapabilityKinds.EmailInbox);
 			if (update is not null)
 			{
@@ -114,18 +114,31 @@ public class A37_EmailInboxTestClientTests
 
 		public event EventHandler<EmailInboxChangedEventArgs>? Changed;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<EmailInbox> GetInboxes()
-			=> [new EmailInbox { Id = "work", DisplayName = "Work", Address = "alice@example.com" }];
+		{
+			return
+			[
+				new EmailInbox
+					{ Id = "work", DisplayName = "Work", Address = "alice@example.com" }
+			];
+		}
 
 		public Task<EmailInboxSnapshot> GetSnapshotAsync(
 			string inboxId,
 			EmailMessageQuery query,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new EmailInboxSnapshot
+		{
+			return Task.FromResult(new EmailInboxSnapshot
 			{
 				Status = EmailInboxStatus.Connected,
 				UnreadCount = 1,
@@ -136,7 +149,11 @@ public class A37_EmailInboxTestClientTests
 					.. _messages.Where(message => !query.UnreadOnly || !message.IsRead).Take(query.MaxMessages)
 				]
 			});
+		}
 
-		public void RaiseChanged(string? inboxId) => Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+		public void RaiseChanged(string? inboxId)
+		{
+			Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+		}
 	}
 }

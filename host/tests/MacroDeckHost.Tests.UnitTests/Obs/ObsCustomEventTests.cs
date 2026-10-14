@@ -54,7 +54,9 @@ internal sealed class ObsCustomEventTests
 	[TestCase("not json")]
 	[TestCase("{\"a\":")]
 	public void Text_that_is_not_json_is_dropped(string json)
-		=> Assert.That(ObsCustomEvent.Parse(json), Is.Null);
+	{
+		Assert.That(ObsCustomEvent.Parse(json), Is.Null);
+	}
 
 	[Test]
 	public void A_payload_of_exactly_the_limit_is_accepted_and_one_character_more_is_dropped()
@@ -82,15 +84,17 @@ internal sealed class ObsCustomEventTests
 	public void Hostile_field_names_are_skipped_and_hostile_values_arrive_verbatim()
 	{
 		const string json = """
-			{"__proto__":"x","../etc":"y","a b":"z","{{ vars.x }}":"w","configuration":"spoof","data":"spoof",
-			 "path":"../../etc/passwd","tpl":"{{ vars.secret }}"}
-			""";
+							{"__proto__":"x","../etc":"y","a b":"z","{{ vars.x }}":"w","configuration":"spoof","data":"spoof",
+							 "path":"../../etc/passwd","tpl":"{{ vars.secret }}"}
+							""";
 
 		var payload = ObsCustomEvent.Parse(json)!;
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(payload["field___proto__"], Is.EqualTo("x"), "a valid identifier keeps its prefix and never shadows");
+			Assert.That(payload["field___proto__"],
+				Is.EqualTo("x"),
+				"a valid identifier keeps its prefix and never shadows");
 			Assert.That(payload.Keys, Does.Not.Contain("field_../etc"));
 			Assert.That(payload.Keys, Does.Not.Contain("field_a b"));
 			Assert.That(payload.Keys.Any(key => key.Contains("{{", StringComparison.Ordinal)), Is.False);
@@ -131,7 +135,7 @@ internal sealed class ObsCustomEventTests
 	public void The_limiter_allows_a_burst_then_drops_and_recovers_with_time()
 	{
 		var time = new Delegation.FakeTimeProvider();
-		var limiter = new ObsCustomEventLimiter(time, perSecond: 10, burst: 5);
+		var limiter = new ObsCustomEventLimiter(time, 10, 5);
 
 		var accepted = Enumerable.Range(0, 20).Count(_ => limiter.TryAcquire(out _));
 		time.Advance(TimeSpan.FromSeconds(1));

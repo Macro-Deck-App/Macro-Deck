@@ -47,7 +47,7 @@ public class TouchPortalInfoParserTests
 	[Test]
 	public void Parse_HandlesUtf8WithBom()
 	{
-		using var stream = new MemoryStream([..Encoding.UTF8.GetPreamble(), ..Encoding.UTF8.GetBytes("name=Päck")]);
+		using var stream = new MemoryStream([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes("name=Päck")]);
 
 		var info = TouchPortalInfoParser.Parse(stream);
 
@@ -55,5 +55,7 @@ public class TouchPortalInfoParserTests
 	}
 
 	private static TouchPortalPackInfo Parse(string content)
-		=> TouchPortalInfoParser.Parse(new MemoryStream(Encoding.UTF8.GetBytes(content)));
+	{
+		return TouchPortalInfoParser.Parse(new MemoryStream(Encoding.UTF8.GetBytes(content)));
+	}
 }

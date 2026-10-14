@@ -80,7 +80,8 @@ public sealed class ExternalPlugin : PluginUnderTest
 	/// to <paramref name="grace" /> (default 10 seconds) for the process to exit on its own; if it has
 	/// not, kills it and waits once more for the same budget so the report reflects reality either way.
 	/// </summary>
-	public async Task<GracefulShutdownReport> StopGracefullyAsync(TimeSpan? grace = null,
+	public async Task<GracefulShutdownReport> StopGracefullyAsync(
+		TimeSpan? grace = null,
 		CancellationToken cancellationToken = default)
 	{
 		var budget = grace ?? TimeSpan.FromSeconds(10);
@@ -192,7 +193,8 @@ public sealed class ExternalPlugin : PluginUnderTest
 
 		try
 		{
-			await _process.WaitForExitAsync(cancellationToken).WaitAsync(timeout, cancellationToken)
+			await _process.WaitForExitAsync(cancellationToken)
+				.WaitAsync(timeout, cancellationToken)
 				.ConfigureAwait(false);
 			return true;
 		}
@@ -208,7 +210,7 @@ public sealed class ExternalPlugin : PluginUnderTest
 		{
 			if (!_process.HasExited)
 			{
-				_process.Kill(entireProcessTree: true);
+				_process.Kill(true);
 			}
 		}
 		catch (InvalidOperationException)

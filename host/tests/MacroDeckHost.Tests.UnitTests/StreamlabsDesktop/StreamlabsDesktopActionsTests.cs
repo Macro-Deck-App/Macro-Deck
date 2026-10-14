@@ -86,13 +86,14 @@ public class StreamlabsDesktopActionsTests
 
 		foreach (var action in actions)
 		{
-			var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				["scene"] = "Gameplay",
-				["source"] = "Webcam",
-				["variable"] = "v",
-				["volume"] = 50d
-			}));
+			var result = await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					["scene"] = "Gameplay",
+					["source"] = "Webcam",
+					["variable"] = "v",
+					["volume"] = 50d
+				}));
 
 			Assert.That(result.ErrorCode,
 				Is.EqualTo(ActionErrorCodes.NotConnected),
@@ -106,10 +107,11 @@ public class StreamlabsDesktopActionsTests
 		var client = StreamlabsJson.Seeded();
 		var action = await FindAsync<SetSceneActionDefinition>(client);
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName
+			}));
 
 		Assert.Multiple(() =>
 		{
@@ -125,10 +127,11 @@ public class StreamlabsDesktopActionsTests
 	{
 		var action = await FindAsync<SetSceneActionDefinition>(StreamlabsJson.Seeded());
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = "Nope"
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = "Nope"
+			}));
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
 	}
@@ -164,12 +167,13 @@ public class StreamlabsDesktopActionsTests
 		var client = StreamlabsJson.Seeded();
 		var action = await FindAsync<SourceVisibilityActionDefinition>(client);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = StreamlabsJson.CameraSourceName,
-			["mode"] = mode
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = StreamlabsJson.CameraSourceName,
+				["mode"] = mode
+			}));
 
 		Assert.That(client.Calls,
 			Does.Contain($"{StreamlabsJson.SceneItemResource}.{StreamlabsServices.SetVisibility}:{expected}"));
@@ -210,11 +214,12 @@ public class StreamlabsDesktopActionsTests
 		var client = StreamlabsJson.Seeded();
 		var action = await FindAsync<MuteAudioSourceActionDefinition>(client);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["source"] = StreamlabsJson.MicSourceName,
-			["mode"] = mode
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["source"] = StreamlabsJson.MicSourceName,
+				["mode"] = mode
+			}));
 
 		Assert.That(client.Calls,
 			Does.Contain($"{StreamlabsJson.MicResource}.{StreamlabsServices.SetMuted}:{expected}"));
@@ -243,12 +248,13 @@ public class StreamlabsDesktopActionsTests
 			var client = StreamlabsJson.Seeded();
 			var action = await FindAsync<SetAudioVolumeActionDefinition>(client);
 
-			await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-			{
-				["source"] = StreamlabsJson.MicSourceName,
-				["mode"] = "set",
-				["volume"] = "41.6"
-			}));
+			await action.CreateExecutor()
+				.ExecuteAsync(Context(new Dictionary<string, object>
+				{
+					["source"] = StreamlabsJson.MicSourceName,
+					["mode"] = "set",
+					["volume"] = "41.6"
+				}));
 
 			var deflection = client.Invocations
 				.Single(invocation => invocation.Method == StreamlabsServices.SetDeflection)
@@ -269,12 +275,13 @@ public class StreamlabsDesktopActionsTests
 		var action = await FindAsync<SetAudioVolumeActionDefinition>(client);
 		client.Calls.Clear();
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["source"] = StreamlabsJson.MicSourceName,
-			["mode"] = "decrease",
-			["volume"] = 30d
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["source"] = StreamlabsJson.MicSourceName,
+				["mode"] = "decrease",
+				["volume"] = 30d
+			}));
 
 		Assert.Multiple(() =>
 		{
@@ -289,14 +296,15 @@ public class StreamlabsDesktopActionsTests
 	{
 		var action = await FindAsync<GetAudioStateActionDefinition>(StreamlabsJson.Seeded());
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["source"] = StreamlabsJson.MicSourceName,
-			["state"] = "volume",
-			["variable"] = "mic_volume"
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["source"] = StreamlabsJson.MicSourceName,
+				["state"] = "volume",
+				["variable"] = "mic_volume"
+			}));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That((await _targets.Find("mic_volume"))!.Type, Is.EqualTo(DomainVariableType.Numeric));
@@ -309,18 +317,19 @@ public class StreamlabsDesktopActionsTests
 	{
 		var client = StreamlabsJson.Seeded();
 		client.Responses[$"{StreamlabsJson.MicResource}.{StreamlabsServices.GetModel}"] =
-			StreamlabsJson.AudioSource(muted: true);
+			StreamlabsJson.AudioSource(true);
 
 		var action = await FindAsync<GetAudioStateActionDefinition>(client);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["source"] = StreamlabsJson.MicSourceName,
-			["state"] = "muted",
-			["variable"] = "mic_muted"
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["source"] = StreamlabsJson.MicSourceName,
+				["state"] = "muted",
+				["variable"] = "mic_muted"
+			}));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _targets.Find("mic_muted"))!.Type, Is.EqualTo(DomainVariableType.Boolean));
 			Assert.That(await _targets.ValueOf("mic_muted"), Is.EqualTo(true));
@@ -332,14 +341,15 @@ public class StreamlabsDesktopActionsTests
 	{
 		var action = await FindAsync<GetSourceVisibilityActionDefinition>(StreamlabsJson.Seeded());
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = StreamlabsJson.CameraSourceName,
-			["variable"] = "cam_visible"
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = StreamlabsJson.CameraSourceName,
+				["variable"] = "cam_visible"
+			}));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _targets.Find("cam_visible"))!.Type, Is.EqualTo(DomainVariableType.Boolean));
 			Assert.That(await _targets.ValueOf("cam_visible"), Is.EqualTo(true));
@@ -351,12 +361,13 @@ public class StreamlabsDesktopActionsTests
 	{
 		var action = await FindAsync<GetSourceVisibilityActionDefinition>(StreamlabsJson.Seeded());
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = "Nope",
-			["variable"] = "v"
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = "Nope",
+				["variable"] = "v"
+			}));
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
 	}
@@ -367,13 +378,14 @@ public class StreamlabsDesktopActionsTests
 		var client = StreamlabsJson.Seeded();
 		var action = await FindAsync<SceneItemCommandActionDefinition>(client);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = StreamlabsJson.CameraSourceName,
-			["command"] = "fit-to-screen",
-			["degrees"] = 90d
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = StreamlabsJson.CameraSourceName,
+				["command"] = "fit-to-screen",
+				["degrees"] = 90d
+			}));
 
 		Assert.That(client.Calls,
 			Does.Contain($"{StreamlabsJson.SceneItemResource}.fitToScreen"),
@@ -386,13 +398,14 @@ public class StreamlabsDesktopActionsTests
 		var client = StreamlabsJson.Seeded();
 		var action = await FindAsync<SceneItemCommandActionDefinition>(client);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = StreamlabsJson.CameraSourceName,
-			["command"] = "rotate",
-			["degrees"] = 45d
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = StreamlabsJson.CameraSourceName,
+				["command"] = "rotate",
+				["degrees"] = 45d
+			}));
 
 		Assert.That(client.Calls, Does.Contain($"{StreamlabsJson.SceneItemResource}.rotate:45"));
 	}
@@ -402,12 +415,13 @@ public class StreamlabsDesktopActionsTests
 	{
 		var action = await FindAsync<SceneItemCommandActionDefinition>(StreamlabsJson.Seeded());
 
-		var result = await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["scene"] = StreamlabsJson.SceneName,
-			["source"] = StreamlabsJson.CameraSourceName,
-			["command"] = "explode"
-		}));
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["scene"] = StreamlabsJson.SceneName,
+				["source"] = StreamlabsJson.CameraSourceName,
+				["command"] = "explode"
+			}));
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
 	}
@@ -429,7 +443,9 @@ public class StreamlabsDesktopActionsTests
 	}
 
 	private static ActionExecutionContext Context(IReadOnlyDictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	private async Task<T> FindAsync<T>(FakeStreamlabsClient client)
 		where T : IActionDefinition
@@ -441,7 +457,7 @@ public class StreamlabsDesktopActionsTests
 	[Test]
 	public async Task ToggleStreaming_ReportsWhetherStreamlabsIsLive()
 	{
-		var provider = await ProviderAsync(StreamlabsJson.Seeded(streaming: "live"), "toggle-streaming");
+		var provider = await ProviderAsync(StreamlabsJson.Seeded("live"), "toggle-streaming");
 
 		var snapshot = await provider.GetActionStateAsync(_noParameters, CancellationToken.None);
 

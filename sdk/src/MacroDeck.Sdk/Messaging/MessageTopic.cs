@@ -20,7 +20,9 @@ public static class MessageTopic
 	private const string WildcardSuffix = ".*";
 
 	public static bool IsValidTopic(string? topic)
-		=> topic is { Length: > 0 and <= MaxLength } && SegmentsAreValid(topic, minimumSegments: 2);
+	{
+		return topic is { Length: > 0 and <= MaxLength } && SegmentsAreValid(topic, 2);
+	}
 
 	public static bool IsValidPattern(string? pattern)
 	{
@@ -30,8 +32,8 @@ public static class MessageTopic
 		}
 
 		return pattern.EndsWith(WildcardSuffix, StringComparison.Ordinal)
-			? SegmentsAreValid(pattern[..^WildcardSuffix.Length], minimumSegments: 1)
-			: SegmentsAreValid(pattern, minimumSegments: 2);
+			? SegmentsAreValid(pattern[..^WildcardSuffix.Length], 1)
+			: SegmentsAreValid(pattern, 2);
 	}
 
 	/// <summary>Whether <paramref name="topic" /> is delivered to a subscription on <paramref name="pattern" />.</summary>
@@ -56,10 +58,15 @@ public static class MessageTopic
 	}
 
 	private static bool IsValidSegment(string segment)
-		=> segment.Length > 0 &&
-			IsLetterOrDigit(segment[0]) &&
-			IsLetterOrDigit(segment[^1]) &&
-			segment.All(character => IsLetterOrDigit(character) || character is '-' or '_');
+	{
+		return segment.Length > 0
+			&& IsLetterOrDigit(segment[0])
+			&& IsLetterOrDigit(segment[^1])
+			&& segment.All(character => IsLetterOrDigit(character) || character is '-' or '_');
+	}
 
-	private static bool IsLetterOrDigit(char character) => character is >= 'a' and <= 'z' or >= '0' and <= '9';
+	private static bool IsLetterOrDigit(char character)
+	{
+		return character is >= 'a' and <= 'z' or >= '0' and <= '9';
+	}
 }

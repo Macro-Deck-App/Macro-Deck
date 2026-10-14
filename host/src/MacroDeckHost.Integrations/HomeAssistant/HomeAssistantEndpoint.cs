@@ -77,17 +77,17 @@ internal static class HomeAssistantEndpoint
 		}
 
 		var colon = authority.LastIndexOf(':');
-		return colon > 0 &&
-			int.TryParse(authority[(colon + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out _)
+		return colon > 0
+			&& int.TryParse(authority[(colon + 1)..], NumberStyles.Integer, CultureInfo.InvariantCulture, out _)
 				? authority[..colon]
 				: authority;
 	}
 
 	private static bool IsLocalName(string host)
 	{
-		if (host.Length == 0 ||
-			string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
-			IPAddress.TryParse(host, out _))
+		if (host.Length == 0
+			|| string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)
+			|| IPAddress.TryParse(host, out _))
 		{
 			return true;
 		}

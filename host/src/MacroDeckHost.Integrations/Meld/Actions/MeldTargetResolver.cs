@@ -33,7 +33,7 @@ internal static class MeldTargetResolver
 		if (string.IsNullOrWhiteSpace(value))
 		{
 			error = ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-				AppStrings.Integrations.Meld.Errors.NoTargetSelected(kind: kindNoun));
+				AppStrings.Integrations.Meld.Errors.NoTargetSelected(kindNoun));
 			return false;
 		}
 
@@ -52,10 +52,12 @@ internal static class MeldTargetResolver
 		}
 
 		error = ActionResult.Failed(ActionErrorCodes.NotFound,
-			AppStrings.Integrations.Meld.Errors.TargetNotFound(kind: kindNoun, value: value));
+			AppStrings.Integrations.Meld.Errors.TargetNotFound(kindNoun, value));
 		return false;
 	}
 
 	public static bool CurrentMuted(MeldConnection connection, MeldTrack track)
-		=> connection.TryGetGain(track.Id, out var gain) ? gain.Muted : track.Muted;
+	{
+		return connection.TryGetGain(track.Id, out var gain) ? gain.Muted : track.Muted;
+	}
 }

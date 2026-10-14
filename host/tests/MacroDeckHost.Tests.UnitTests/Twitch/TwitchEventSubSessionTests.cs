@@ -281,8 +281,8 @@ internal sealed class TwitchEventSubSessionTests
 		var authorizationLost = _authorizationLost;
 		var delays = _delays;
 
-		_session = new TwitchEventSubSession(
-			() => _clients.TryDequeue(out var client) ? client : new FakeEventSubClient(),
+		_session = new TwitchEventSubSession(()
+				=> _clients.TryDequeue(out var client) ? client : new FakeEventSubClient(),
 			new TwitchEventSubCallbacks((sessionId, _) =>
 				{
 					lock (subscribed)
@@ -354,5 +354,8 @@ internal sealed class TwitchEventSubSessionTests
 		Assert.Fail(because ?? "the expected state was never reached");
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

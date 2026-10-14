@@ -17,9 +17,9 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 	private const short PollErr = 0x8;
 	private const short PollHup = 0x10;
 
-	private static readonly Lazy<bool> Loadable = new(() =>
-		NativeLibrary.TryLoad(Library, out var handle) &&
-		NativeLibrary.TryGetExport(handle, "DNSServiceRegister", out _));
+	private static readonly Lazy<bool> _loadable = new(() =>
+		NativeLibrary.TryLoad(Library, out var handle)
+		&& NativeLibrary.TryGetExport(handle, "DNSServiceRegister", out _));
 
 	private readonly ILogger _logger = Log.ForContext<MacOsDnsSdServiceAdvertiser>();
 	private readonly HashSet<IntPtr> _failed = [];
@@ -30,7 +30,7 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 		_reply = OnReply;
 	}
 
-	public override bool IsAvailable => Loadable.Value;
+	public override bool IsAvailable => _loadable.Value;
 
 	// Replies are only ever dispatched here, on the caller's thread, so a reference is never deallocated
 	// while mDNSResponder's client library is still processing it.
@@ -98,9 +98,13 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 		DNSServiceRefDeallocate(registration.Reference);
 	}
 
-	protected override bool IsAlive(Registration registration) => !_failed.Contains(registration.Reference);
+	protected override bool IsAlive(Registration registration)
+	{
+		return !_failed.Contains(registration.Reference);
+	}
 
-	private void OnReply(IntPtr reference,
+	private void OnReply(
+		IntPtr reference,
 		uint flags,
 		int errorCode,
 		IntPtr name,
@@ -119,7 +123,8 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 	}
 
 	[DllImport(Library)]
-	private static extern int DNSServiceRegister(out IntPtr reference,
+	private static extern int DNSServiceRegister(
+		out IntPtr reference,
 		uint flags,
 		uint interfaceIndex,
 		IntPtr name,
@@ -145,7 +150,8 @@ internal sealed class MacOsDnsSdServiceAdvertiser
 	private static extern int Poll(ref PollDescriptor descriptors, uint count, int timeout);
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-	private delegate void RegisterReply(IntPtr reference,
+	private delegate void RegisterReply(
+		IntPtr reference,
 		uint flags,
 		int errorCode,
 		IntPtr name,

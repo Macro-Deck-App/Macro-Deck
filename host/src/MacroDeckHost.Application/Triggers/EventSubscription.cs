@@ -6,15 +6,18 @@ public static class EventFilterOperators
 {
 	public const string Default = "==";
 
-	public static string Normalize(string? candidate) => candidate switch
+	public static string Normalize(string? candidate)
 	{
-		"==" or "!=" or ">" or "<" or ">=" or "<=" => candidate,
+		return candidate switch
+		{
+			"==" or "!=" or ">" or "<" or ">=" or "<=" => candidate,
 
-		// The state vocabulary, kept as its own arm: these ask about the payload value's own state and
-		// carry no configured value of their own.
-		"isEmpty" or "isNotEmpty" or "isAvailable" or "isNotAvailable" => candidate,
-		_ => Default
-	};
+			// The state vocabulary, kept as its own arm: these ask about the payload value's own state and
+			// carry no configured value of their own.
+			"isEmpty" or "isNotEmpty" or "isAvailable" or "isNotAvailable" => candidate,
+			_ => Default
+		};
+	}
 }
 
 public sealed record EventConfigurationValue(JsonElement Value, string? Operator = null)

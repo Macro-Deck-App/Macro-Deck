@@ -27,17 +27,29 @@ internal sealed record DiscordVoiceSettingsResult
 
 	public bool IsConfirmed => Outcome is DiscordVoiceSettingsOutcome.Confirmed;
 
-	public static DiscordVoiceSettingsResult Confirmed() => new() { Outcome = DiscordVoiceSettingsOutcome.Confirmed };
+	public static DiscordVoiceSettingsResult Confirmed()
+	{
+		return new DiscordVoiceSettingsResult { Outcome = DiscordVoiceSettingsOutcome.Confirmed };
+	}
 
-	public static DiscordVoiceSettingsResult NotConnected() =>
-		new() { Outcome = DiscordVoiceSettingsOutcome.NotConnected };
+	public static DiscordVoiceSettingsResult NotConnected()
+	{
+		return new DiscordVoiceSettingsResult { Outcome = DiscordVoiceSettingsOutcome.NotConnected };
+	}
 
-	public static DiscordVoiceSettingsResult Rejected(string message) =>
-		new() { Outcome = DiscordVoiceSettingsOutcome.Rejected, Message = message };
+	public static DiscordVoiceSettingsResult Rejected(string message)
+	{
+		return new DiscordVoiceSettingsResult { Outcome = DiscordVoiceSettingsOutcome.Rejected, Message = message };
+	}
 
-	public static DiscordVoiceSettingsResult Failed(string message) =>
-		new() { Outcome = DiscordVoiceSettingsOutcome.Failed, Message = message };
+	public static DiscordVoiceSettingsResult Failed(string message)
+	{
+		return new DiscordVoiceSettingsResult { Outcome = DiscordVoiceSettingsOutcome.Failed, Message = message };
+	}
 
-	public static DiscordVoiceSettingsResult NotApplied(IReadOnlyList<DiscordUnappliedField> unappliedFields) =>
-		new() { Outcome = DiscordVoiceSettingsOutcome.NotApplied, UnappliedFields = unappliedFields };
+	public static DiscordVoiceSettingsResult NotApplied(IReadOnlyList<DiscordUnappliedField> unappliedFields)
+	{
+		return new DiscordVoiceSettingsResult
+			{ Outcome = DiscordVoiceSettingsOutcome.NotApplied, UnappliedFields = unappliedFields };
+	}
 }

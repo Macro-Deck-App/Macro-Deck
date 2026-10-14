@@ -4,10 +4,16 @@ namespace MacroDeck.Sdk.Android;
 public sealed class AndroidDeviceException : Exception
 {
 	public AndroidDeviceException(AndroidDeviceErrorCode errorCode, string message)
-		: base(message) => ErrorCode = errorCode;
+		: base(message)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public AndroidDeviceException(AndroidDeviceErrorCode errorCode, string message, Exception innerException)
-		: base(message, innerException) => ErrorCode = errorCode;
+		: base(message, innerException)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public AndroidDeviceException()
 	{

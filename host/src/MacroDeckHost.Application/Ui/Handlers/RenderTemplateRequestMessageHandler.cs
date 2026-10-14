@@ -15,7 +15,9 @@ public class RenderTemplateRequestMessageHandler
 	private readonly IVariableTemplateRenderer _renderer;
 	private readonly TemplateVariableSynchronizer _templates;
 
-	public RenderTemplateRequestMessageHandler(IVariableTemplateRenderer renderer, TemplateVariableSynchronizer templates)
+	public RenderTemplateRequestMessageHandler(
+		IVariableTemplateRenderer renderer,
+		TemplateVariableSynchronizer templates)
 	{
 		_renderer = renderer;
 		_templates = templates;
@@ -63,7 +65,7 @@ public class RenderTemplateRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "TEMPLATE_ERROR",
-					Message = AppStrings.Errors.Scripting.TemplateRenderFailed(details: ex.Message)
+					Message = AppStrings.Errors.Scripting.TemplateRenderFailed(ex.Message)
 				}
 			};
 		}

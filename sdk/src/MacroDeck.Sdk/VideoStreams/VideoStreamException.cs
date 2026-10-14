@@ -7,10 +7,16 @@ namespace MacroDeck.Sdk.VideoStreams;
 public sealed class VideoStreamException : Exception
 {
 	public VideoStreamException(VideoStreamErrorCode errorCode, string message)
-		: base(message) => ErrorCode = errorCode;
+		: base(message)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public VideoStreamException(VideoStreamErrorCode errorCode, string message, Exception innerException)
-		: base(message, innerException) => ErrorCode = errorCode;
+		: base(message, innerException)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public VideoStreamException()
 		: this(VideoStreamErrorCode.Failed, "The video stream operation failed.")

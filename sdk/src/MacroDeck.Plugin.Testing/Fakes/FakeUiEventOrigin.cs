@@ -20,7 +20,10 @@ public sealed class FakeUiEventOrigin : IUiEventOrigin
 	private readonly List<ModalDefinition> _modals = [];
 
 	/// <summary>Creates an origin for <paramref name="clientId" />.</summary>
-	public FakeUiEventOrigin(string? clientId = "test-client") => ClientId = clientId;
+	public FakeUiEventOrigin(string? clientId = "test-client")
+	{
+		ClientId = clientId;
+	}
 
 	/// <inheritdoc />
 	public string? ClientId { get; }
@@ -114,5 +117,8 @@ public sealed class FakeUiEventOrigin : IUiEventOrigin
 		return true;
 	}
 
-	private bool CanReach() => IsAttached && !string.IsNullOrEmpty(ClientId);
+	private bool CanReach()
+	{
+		return IsAttached && !string.IsNullOrEmpty(ClientId);
+	}
 }

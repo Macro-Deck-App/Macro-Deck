@@ -11,43 +11,72 @@ public sealed class ConfigEntriesTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal ConfigEntriesTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal ConfigEntriesTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>What this provider declares about itself.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Describe, null, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Describe, null, options);
+	}
 
 	/// <summary>Asks the plugin to check and adjust an entry about to be stored.</summary>
-	public Task<CapabilityInvocationOutcome> PrepareAsync(ConfigEntryPrepareArguments arguments,
+	public Task<CapabilityInvocationOutcome> PrepareAsync(
+		ConfigEntryPrepareArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Prepare, arguments, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Prepare, arguments, options);
+	}
 
 	/// <summary>Asks for the status of a stored entry.</summary>
-	public Task<CapabilityInvocationOutcome> GetStatusAsync(ConfigEntryArguments arguments,
+	public Task<CapabilityInvocationOutcome> GetStatusAsync(
+		ConfigEntryArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Status, arguments, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Status, arguments, options);
+	}
 
 	/// <summary>Asks whether a stored entry is usable.</summary>
-	public Task<CapabilityInvocationOutcome> IsUsableAsync(ConfigEntryArguments arguments,
+	public Task<CapabilityInvocationOutcome> IsUsableAsync(
+		ConfigEntryArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Usable, arguments, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Usable, arguments, options);
+	}
 
 	/// <summary>Asks the plugin to apply a stored change without being initialized again.</summary>
 	public Task<CapabilityInvocationOutcome> ReloadAsync(CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Reload, null, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Reload, null, options);
+	}
 
 	/// <summary>Hands the plugin every stored entry after a change.</summary>
-	public Task<CapabilityInvocationOutcome> SynchronizeAsync(ConfigEntrySynchronizeArguments arguments,
+	public Task<CapabilityInvocationOutcome> SynchronizeAsync(
+		ConfigEntrySynchronizeArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Synchronize, arguments, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Synchronize, arguments, options);
+	}
 
 	/// <summary>Ends a preparation, stored or not.</summary>
-	public Task<CapabilityInvocationOutcome> ReleaseAsync(ConfigEntryReleaseArguments arguments,
+	public Task<CapabilityInvocationOutcome> ReleaseAsync(
+		ConfigEntryReleaseArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> InvokeAsync(CapabilityOperations.ConfigEntries.Release, arguments, options);
+	{
+		return InvokeAsync(CapabilityOperations.ConfigEntries.Release, arguments, options);
+	}
 
-	private Task<CapabilityInvocationOutcome> InvokeAsync(string operation,
+	private Task<CapabilityInvocationOutcome> InvokeAsync(
+		string operation,
 		object? arguments,
 		CapabilityInvokeOptions? options)
-		=> _invoker.InvokeAsync(CapabilityKinds.ConfigEntries, ProviderCapabilityId.LocalId, operation, arguments, options);
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ConfigEntries,
+			ProviderCapabilityId.LocalId,
+			operation,
+			arguments,
+			options);
+	}
 }

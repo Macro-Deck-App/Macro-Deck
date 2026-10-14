@@ -11,13 +11,14 @@ using MacroDeck.Plugin.Testing.Tests.UnitTests.Support;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A32_UiPreviewClientTests
+public class A32UiPreviewClientTests
 {
 	[Test]
 	public async Task A_launched_plugin_lists_its_previews_and_serves_a_tree_for_each()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		await using var plugin = await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
+		await using var plugin
+			= await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
 		var session = await host.WaitForSessionAsync(TimeSpan.FromSeconds(30));
 
 		var previews = await session.Ui.GetPreviewsAsync();
@@ -40,7 +41,8 @@ public class A32_UiPreviewClientTests
 	public async Task The_widget_scenario_declares_the_widget_profile_and_serves_its_tree()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		await using var plugin = await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
+		await using var plugin
+			= await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
 		var session = await host.WaitForSessionAsync(TimeSpan.FromSeconds(30));
 
 		var tile = (await session.Ui.GetPreviewsAsync()).Single(preview => preview.Scenario == "Station tile");
@@ -57,7 +59,8 @@ public class A32_UiPreviewClientTests
 	public async Task An_unknown_preview_id_is_declined_with_the_plugins_reason()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		await using var plugin = await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
+		await using var plugin
+			= await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
 		var session = await host.WaitForSessionAsync(TimeSpan.FromSeconds(30));
 
 		var outcome = await session.Ui.OpenPreviewAsync("no-such-preview");
@@ -74,7 +77,8 @@ public class A32_UiPreviewClientTests
 	public async Task A_host_that_never_opened_a_preview_still_refuses_the_plugins_ui_pushes()
 	{
 		await using var host = await MacroDeckTestHost.StartAsync();
-		await using var plugin = await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
+		await using var plugin
+			= await host.LaunchAsync(PluginLaunchSpec.ForExecutable(PluginLocator.FindWellBehavedPluginExecutable()));
 		var session = await host.WaitForSessionAsync(TimeSpan.FromSeconds(30));
 		var previewId = (await session.Ui.GetPreviewsAsync())[0].Id;
 		var sessionId = Guid.NewGuid().ToString();
@@ -87,7 +91,8 @@ public class A32_UiPreviewClientTests
 				SessionId = sessionId,
 				SurfaceKind = UiSurfaceKinds.DeveloperPreview,
 				SessionMode = "exclusive",
-				SurfaceAttributes = JsonSerializer.SerializeToElement(new Dictionary<string, string> { ["previewId"] = previewId }),
+				SurfaceAttributes = JsonSerializer.SerializeToElement(new Dictionary<string, string>
+					{ ["previewId"] = previewId }),
 				UiModelVersion = UiModelVersions.Current
 			});
 		await session.InvokeAsync(CapabilityKinds.Ui,

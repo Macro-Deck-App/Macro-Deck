@@ -11,7 +11,10 @@ internal sealed record AdGuardHomeIconResources(
 {
 	public static readonly AdGuardHomeIconResources None = new(null, null, null, new Dictionary<string, UiResource>());
 
-	public UiResource? Statistic(string statistic) => Statistics.GetValueOrDefault(statistic);
+	public UiResource? Statistic(string statistic)
+	{
+		return Statistics.GetValueOrDefault(statistic);
+	}
 }
 
 internal static class AdGuardHomeWidgetIcons
@@ -26,10 +29,11 @@ internal static class AdGuardHomeWidgetIcons
 		[AdGuardHomeWidgetType.AverageProcessingTimeStatistic] = "processing-time",
 		[AdGuardHomeWidgetType.SafeBrowsingStatistic] = "safe-browsing",
 		[AdGuardHomeWidgetType.ParentalStatistic] = "parental",
-		[AdGuardHomeWidgetType.SafeSearchStatistic] = "safe-search",
+		[AdGuardHomeWidgetType.SafeSearchStatistic] = "safe-search"
 	};
 
-	public static async Task<AdGuardHomeIconResources> ResolveAsync(IUiResourceRegistry? resources,
+	public static async Task<AdGuardHomeIconResources> ResolveAsync(
+		IUiResourceRegistry? resources,
 		CancellationToken cancellationToken)
 	{
 		if (resources is null)
@@ -52,7 +56,8 @@ internal static class AdGuardHomeWidgetIcons
 			statistics);
 	}
 
-	private static async Task<UiResource?> IconAsync(IUiResourceRegistry resources,
+	private static async Task<UiResource?> IconAsync(
+		IUiResourceRegistry resources,
 		string name,
 		CancellationToken cancellationToken)
 	{

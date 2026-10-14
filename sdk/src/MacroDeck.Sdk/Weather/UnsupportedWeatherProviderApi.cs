@@ -9,5 +9,8 @@ public sealed class UnsupportedWeatherProviderApi : IWeatherProviderApi
 	{
 	}
 
-	public Task NotifySnapshotsChangedAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task NotifySnapshotsChangedAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 }

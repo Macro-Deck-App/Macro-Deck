@@ -17,10 +17,10 @@ public sealed class LabelSubscriptionTracker
 		{
 			var states = _connectionsByWidgetState.TryGetValue(widgetId, out var existingStates)
 				? existingStates
-				: _connectionsByWidgetState[widgetId] = new(StringComparer.Ordinal);
+				: _connectionsByWidgetState[widgetId] = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 			var connections = states.TryGetValue(state, out var existingConnections)
 				? existingConnections
-				: states[state] = new(StringComparer.Ordinal);
+				: states[state] = new HashSet<string>(StringComparer.Ordinal);
 			connections.Add(connectionId);
 
 			var keys = _keysByConnection.TryGetValue(connectionId, out var existingKeys)
@@ -60,9 +60,9 @@ public sealed class LabelSubscriptionTracker
 		state = LabelGroups.Normalize(state);
 		lock (_lock)
 		{
-			return _connectionsByWidgetState.TryGetValue(widgetId, out var states) &&
-				states.TryGetValue(state, out var connections) &&
-				connections.Count > 0;
+			return _connectionsByWidgetState.TryGetValue(widgetId, out var states)
+				&& states.TryGetValue(state, out var connections)
+				&& connections.Count > 0;
 		}
 	}
 
@@ -85,8 +85,8 @@ public sealed class LabelSubscriptionTracker
 
 	private void RemovePair(string connectionId, string widgetId, string state)
 	{
-		if (_connectionsByWidgetState.TryGetValue(widgetId, out var states) &&
-			states.TryGetValue(state, out var connections))
+		if (_connectionsByWidgetState.TryGetValue(widgetId, out var states)
+			&& states.TryGetValue(state, out var connections))
 		{
 			connections.Remove(connectionId);
 			if (connections.Count == 0)

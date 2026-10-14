@@ -68,8 +68,8 @@ public static class MacroDeckDataRootResolver
 
 		// An unmarked Production publish is a copied build folder, which ADR 0002 deliberately treats as
 		// portable. A Development build roots its data under the working directory instead.
-		return BuildConfig.Channel != BuildChannel.Development &&
-			!environment.FileExists(Path.Combine(environment.BaseDirectory, PackagedMarkerFileName));
+		return BuildConfig.Channel != BuildChannel.Development
+			&& !environment.FileExists(Path.Combine(environment.BaseDirectory, PackagedMarkerFileName));
 	}
 
 	private static string GetPlatformDataRoot(DataRootEnvironment environment)

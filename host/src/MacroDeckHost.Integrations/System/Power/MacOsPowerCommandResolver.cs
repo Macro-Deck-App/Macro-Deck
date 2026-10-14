@@ -3,7 +3,8 @@ namespace MacroDeckHost.Integrations.System.Power;
 internal static class MacOsPowerCommandResolver
 {
 	public static (string FileName, string[] Arguments) Resolve(PowerOperation operation, bool force)
-		=> operation switch
+	{
+		return operation switch
 		{
 			PowerOperation.Sleep => ("pmset", ["sleepnow"]),
 
@@ -13,4 +14,5 @@ internal static class MacOsPowerCommandResolver
 				("osascript", ["-e", "tell application \"System Events\" to shut down"]),
 			_ => throw new NotSupportedException($"{operation} has no macOS command.")
 		};
+	}
 }

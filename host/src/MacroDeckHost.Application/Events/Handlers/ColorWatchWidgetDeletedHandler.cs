@@ -11,13 +11,19 @@ public sealed class ColorWatchWidgetDeletedHandler(ColorChangeSignal signal) :
 	INotificationHandler<ProfileDeletedNotification>
 {
 	public ValueTask Handle(WidgetDeletedNotification notification, CancellationToken cancellationToken)
-		=> Raise();
+	{
+		return Raise();
+	}
 
 	public ValueTask Handle(WidgetsDeletedNotification notification, CancellationToken cancellationToken)
-		=> Raise();
+	{
+		return Raise();
+	}
 
 	public ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
-		=> Raise();
+	{
+		return Raise();
+	}
 
 	private ValueTask Raise()
 	{

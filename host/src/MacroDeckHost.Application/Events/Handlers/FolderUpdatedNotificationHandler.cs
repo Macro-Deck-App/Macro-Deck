@@ -13,7 +13,8 @@ public sealed class FolderUpdatedNotificationHandler : INotificationHandler<Fold
 	private readonly IUiSessionBroker _sessions;
 	private readonly IColorReferenceResolver _colors;
 
-	public FolderUpdatedNotificationHandler(IUiTransport uiTransport,
+	public FolderUpdatedNotificationHandler(
+		IUiTransport uiTransport,
 		IUiSessionBroker sessions,
 		IColorReferenceResolver colors)
 	{

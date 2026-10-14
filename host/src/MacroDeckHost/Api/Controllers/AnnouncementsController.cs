@@ -8,7 +8,9 @@ namespace MacroDeckHost.Api.Controllers;
 [Route("api/announcements")]
 public class AnnouncementsController : ControllerBase
 {
-	private readonly IUiTransportMessageHandler<GetPendingAnnouncementRequest, GetPendingAnnouncementResponse> _getPending;
+	private readonly IUiTransportMessageHandler<GetPendingAnnouncementRequest, GetPendingAnnouncementResponse>
+		_getPending;
+
 	private readonly IUiTransportMessageHandler<MarkAnnouncementSeenRequest, MarkAnnouncementSeenResponse> _markSeen;
 
 	public AnnouncementsController(
@@ -21,9 +23,13 @@ public class AnnouncementsController : ControllerBase
 
 	[HttpGet("pending")]
 	public Task<GetPendingAnnouncementResponse> GetPending(CancellationToken ct)
-		=> _getPending.Handle(new GetPendingAnnouncementRequest(), ct).AsTask();
+	{
+		return _getPending.Handle(new GetPendingAnnouncementRequest(), ct).AsTask();
+	}
 
 	[HttpPost("seen")]
 	public Task<MarkAnnouncementSeenResponse> MarkSeen(MarkAnnouncementSeenRequest body, CancellationToken ct)
-		=> _markSeen.Handle(body, ct).AsTask();
+	{
+		return _markSeen.Handle(body, ct).AsTask();
+	}
 }

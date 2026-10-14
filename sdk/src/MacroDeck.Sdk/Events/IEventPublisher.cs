@@ -13,7 +13,10 @@ public interface IEventPublisher
 	/// host's last push, so it is empty until the host has pushed once and stays empty on a host that
 	/// predates the feature.
 	/// </summary>
-	IReadOnlyList<EventBinding> GetBindings() => [];
+	IReadOnlyList<EventBinding> GetBindings()
+	{
+		return [];
+	}
 
 	/// <summary>
 	/// Raised on a thread-pool thread after <see cref="GetBindings" /> changed for this integration, and

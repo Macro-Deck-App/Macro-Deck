@@ -95,7 +95,7 @@ internal sealed class StreamerbotConnectionTests
 		_factory.Configure = client => client.Hello = new StreamerbotHello(_info,
 			new StreamerbotChallenge("c2FsdA==", "Y2hhbGxlbmdl"));
 
-		using var connection = Create(password: "streamer");
+		using var connection = Create("streamer");
 		connection.Start();
 
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
@@ -107,7 +107,7 @@ internal sealed class StreamerbotConnectionTests
 	[Test]
 	public async Task A_server_without_a_challenge_is_never_sent_a_password()
 	{
-		using var connection = Create(password: "streamer");
+		using var connection = Create("streamer");
 		connection.Start();
 
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
@@ -124,7 +124,7 @@ internal sealed class StreamerbotConnectionTests
 			client.FailingRequests.Add("Authenticate");
 		};
 
-		using var connection = Create(password: "wrong");
+		using var connection = Create("wrong");
 		connection.Start();
 
 		await WaitForAsync(() => connection.NeedsAuthentication, "the authentication failure to be reported");
@@ -316,7 +316,7 @@ internal sealed class StreamerbotConnectionTests
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
-		await connection.SendChatMessageAsync("twitch", "hi", asBot: false);
+		await connection.SendChatMessageAsync("twitch", "hi", false);
 
 		Assert.That(_factory.Last.RequestNames, Has.No.Member("SendMessage"));
 	}
@@ -327,11 +327,11 @@ internal sealed class StreamerbotConnectionTests
 		_factory.Configure = client => client.Hello = new StreamerbotHello(_info,
 			new StreamerbotChallenge("c2FsdA==", "Y2hhbGxlbmdl"));
 
-		using var connection = Create(password: "streamer");
+		using var connection = Create("streamer");
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
-		await connection.SendChatMessageAsync("twitch", "hi", asBot: true);
+		await connection.SendChatMessageAsync("twitch", "hi", true);
 
 		var payload = _factory.Last.PayloadOf("SendMessage");
 		Assert.Multiple(() =>
@@ -352,7 +352,7 @@ internal sealed class StreamerbotConnectionTests
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
-		var value = await connection.GetGlobalAsync("raidCount", persisted: true);
+		var value = await connection.GetGlobalAsync("raidCount", true);
 
 		Assert.That(value?.GetInt32(), Is.EqualTo(7));
 	}
@@ -362,7 +362,7 @@ internal sealed class StreamerbotConnectionTests
 	{
 		using var connection = Create();
 
-		var value = await connection.GetGlobalAsync("raidCount", persisted: true);
+		var value = await connection.GetGlobalAsync("raidCount", true);
 
 		Assert.That(value, Is.Null);
 	}
@@ -408,12 +408,14 @@ internal sealed class StreamerbotConnectionTests
 		string? password = null,
 		int reconnectDelayMs = 20,
 		Action? onVariablesChanged = null)
-		=> new(_factory.Create,
+	{
+		return new StreamerbotConnection(_factory.Create,
 			_uri,
 			password,
 			_emitter,
 			TimeSpan.FromMilliseconds(reconnectDelayMs),
 			onVariablesChanged);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition, string because)
 	{
@@ -474,6 +476,8 @@ internal sealed class StreamerbotConnectionTests
 		public IEnumerable<string> Ids => Published.Select(entry => entry.EventId);
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

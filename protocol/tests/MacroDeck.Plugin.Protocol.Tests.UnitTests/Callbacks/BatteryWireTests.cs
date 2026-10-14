@@ -49,10 +49,10 @@ public class BatteryWireTests
 	public void A_push_from_a_newer_host_reads_values_this_version_does_not_know_as_other_and_unknown()
 	{
 		var state = JsonSerializer.Deserialize<BatteryStateDto>("""
-			{"revision":3,"devices":[{"id":"p:cam","localId":"cam","providerId":"p","name":"Camera",
-			"kind":"camera","levelPercent":70,"chargeState":"wireless-charging","isConnected":true,
-			"health":"swollen","updatedAt":"2026-10-09T10:00:00+00:00","futureField":1}]}
-			""",
+																{"revision":3,"devices":[{"id":"p:cam","localId":"cam","providerId":"p","name":"Camera",
+																"kind":"camera","levelPercent":70,"chargeState":"wireless-charging","isConnected":true,
+																"health":"swollen","updatedAt":"2026-10-09T10:00:00+00:00","futureField":1}]}
+																""",
 			PluginProtocolJson.Options)!;
 
 		var snapshot = BatteryWire.ToSnapshot(state.Devices.Single());
@@ -88,13 +88,17 @@ public class BatteryWireTests
 	[TestCase(-1)]
 	[TestCase(101)]
 	public void A_published_level_outside_0_to_100_is_refused(int level)
-		=> Assert.That(() => BatteryWire.ToDevice(new BatteryDeviceDto { Id = "a", Name = "A", LevelPercent = level }),
+	{
+		Assert.That(() => BatteryWire.ToDevice(new BatteryDeviceDto { Id = "a", Name = "A", LevelPercent = level }),
 			Throws.InstanceOf<ArgumentOutOfRangeException>());
+	}
 
 	[Test]
 	public void A_published_device_without_a_name_is_refused()
-		=> Assert.That(() => BatteryWire.ToDevice(new BatteryDeviceDto { Id = "a", Name = " " }),
+	{
+		Assert.That(() => BatteryWire.ToDevice(new BatteryDeviceDto { Id = "a", Name = " " }),
 			Throws.InstanceOf<ArgumentException>());
+	}
 
 	[Test]
 	public void Every_charge_state_and_health_survives_the_round_trip()

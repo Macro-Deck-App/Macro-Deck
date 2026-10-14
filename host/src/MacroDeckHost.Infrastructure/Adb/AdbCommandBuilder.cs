@@ -49,9 +49,11 @@ internal static partial class AdbCommandBuilder
 	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildKeyEvent(AdbKeyEventCommand command)
-		=> KeyCodeFor(command.Key) is { } keyCode
+	{
+		return KeyCodeFor(command.Key) is { } keyCode
 			? Shell(command.Serial, $"input keyevent {keyCode}")
 			: Fail("Unknown key.");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildStartApp(AdbStartAppCommand command)
 	{
@@ -83,9 +85,9 @@ internal static partial class AdbCommandBuilder
 			return Fail("Uri is too long.");
 		}
 
-		if (!Uri.TryCreate(command.Uri, UriKind.Absolute, out var parsed) ||
-			parsed.Scheme.Equals("file", StringComparison.OrdinalIgnoreCase) ||
-			parsed.Scheme.Equals("content", StringComparison.OrdinalIgnoreCase))
+		if (!Uri.TryCreate(command.Uri, UriKind.Absolute, out var parsed)
+			|| parsed.Scheme.Equals("file", StringComparison.OrdinalIgnoreCase)
+			|| parsed.Scheme.Equals("content", StringComparison.OrdinalIgnoreCase))
 		{
 			return Fail("Uri must be absolute and must not use the file or content scheme.");
 		}
@@ -122,10 +124,10 @@ internal static partial class AdbCommandBuilder
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildSwipe(AdbSwipeCommand command)
 	{
-		if (!IsValidCoordinate(command.X1) ||
-			!IsValidCoordinate(command.Y1) ||
-			!IsValidCoordinate(command.X2) ||
-			!IsValidCoordinate(command.Y2))
+		if (!IsValidCoordinate(command.X1)
+			|| !IsValidCoordinate(command.Y1)
+			|| !IsValidCoordinate(command.X2)
+			|| !IsValidCoordinate(command.Y2))
 		{
 			return Fail("Swipe coordinates must be within 0..8192.");
 		}
@@ -152,7 +154,9 @@ internal static partial class AdbCommandBuilder
 	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildScreenshot(AdbScreenshotCommand command)
-		=> Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", command.Serial, "exec-out", "screencap -p"]);
+	{
+		return Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", command.Serial, "exec-out", "screencap -p"]);
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildPushFile(AdbPushFileCommand command)
 	{
@@ -175,13 +179,15 @@ internal static partial class AdbCommandBuilder
 	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildListServices(AdbListServicesCommand command)
-		=> command.Manager switch
+	{
+		return command.Manager switch
 		{
 			AdbServiceManager.Supervisord => Shell(command.Serial, "supervisorctl status"),
 			AdbServiceManager.Systemd => Shell(command.Serial, "systemctl list-units --type=service --no-pager"),
 			AdbServiceManager.SysVInit => Shell(command.Serial, "ls -1 /etc/init.d"),
 			_ => Fail("Unknown service manager.")
 		};
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildDirectoryExists(
 		AdbDirectoryExistsCommand command)
@@ -239,7 +245,9 @@ internal static partial class AdbCommandBuilder
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> BuildRemountRootWritable(
 		AdbRemountRootWritableCommand command)
-		=> Shell(command.Serial, "mount -o remount,rw /");
+	{
+		return Shell(command.Serial, "mount -o remount,rw /");
+	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPluginShell(string serial, string command)
 	{
@@ -250,10 +258,10 @@ internal static partial class AdbCommandBuilder
 		}
 
 		// adb reads a leading dash as one of its own shell options rather than as the command.
-		if (string.IsNullOrWhiteSpace(command) ||
-			command.Length > MaxPluginShellCommandLength ||
-			command.Contains('\0') ||
-			command.TrimStart().StartsWith('-'))
+		if (string.IsNullOrWhiteSpace(command)
+			|| command.Length > MaxPluginShellCommandLength
+			|| command.Contains('\0')
+			|| command.TrimStart().StartsWith('-'))
 		{
 			return Fail("The shell command is empty, too long, or starts with '-'.");
 		}
@@ -262,52 +270,71 @@ internal static partial class AdbCommandBuilder
 	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildBattery(string serial)
-		=> ValidateSerial(serial) ?? Shell(serial, "dumpsys battery");
+	{
+		return ValidateSerial(serial) ?? Shell(serial, "dumpsys battery");
+	}
 
-	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPush(string serial,
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPush(
+		string serial,
 		string localPath,
 		string remotePath)
-		=> ValidateSerial(serial) ??
-			ValidateLocalPath(localPath) ??
-			ValidateRemotePath(remotePath) ??
-			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "push", localPath, remotePath]);
+	{
+		return ValidateSerial(serial)
+			?? ValidateLocalPath(localPath)
+			?? ValidateRemotePath(remotePath)
+			?? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "push", localPath, remotePath]);
+	}
 
-	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPull(string serial,
+	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPull(
+		string serial,
 		string remotePath,
 		string localPath)
-		=> ValidateSerial(serial) ??
-			ValidateRemotePath(remotePath) ??
-			ValidateLocalPath(localPath) ??
-			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "pull", remotePath, localPath]);
+	{
+		return ValidateSerial(serial)
+			?? ValidateRemotePath(remotePath)
+			?? ValidateLocalPath(localPath)
+			?? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "pull", remotePath, localPath]);
+	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildInstall(string serial, string apkPath)
-		=> ValidateSerial(serial) ??
-			ValidateLocalPath(apkPath) ??
-			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "install", "-r", apkPath]);
+	{
+		return ValidateSerial(serial)
+			?? ValidateLocalPath(apkPath)
+			?? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "install", "-r", apkPath]);
+	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildUninstall(string serial, string packageName)
-		=> ValidateSerial(serial) ??
-			ValidatePackage(packageName) ??
-			Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "uninstall", packageName]);
+	{
+		return ValidateSerial(serial)
+			?? ValidatePackage(packageName)
+			?? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "uninstall", packageName]);
+	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildPackagePath(string serial, string packageName)
-		=> ValidateSerial(serial) ??
-			ValidatePackage(packageName) ??
-			Shell(serial, $"pm path {AdbShellQuote.Quote(packageName)}");
+	{
+		return ValidateSerial(serial)
+			?? ValidatePackage(packageName) ?? Shell(serial, $"pm path {AdbShellQuote.Quote(packageName)}");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> Shell(string serial, string shellCommand)
-		=> Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "shell", shellCommand]);
+	{
+		return Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["-s", serial, "shell", shellCommand]);
+	}
 
 	public static Result<IReadOnlyList<string>, AdbFailureCode> BuildConnect(string address)
-		=> address is not null &&
-			NetworkAddressRegex().Match(address) is { Success: true } match &&
-			int.TryParse(match.Groups["port"].Value, out var port) &&
-			port is >= 1 and <= 65535
+	{
+		return address is not null
+			&& NetworkAddressRegex().Match(address) is { Success: true } match
+			&& int.TryParse(match.Groups["port"].Value, out var port)
+			&& port is >= 1 and <= 65535
 				? Result.Ok<IReadOnlyList<string>, AdbFailureCode>(["connect", address])
 				: Fail("The address must be host:port, for example 192.168.1.20:5555.");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateSerial(string serial)
-		=> !string.IsNullOrWhiteSpace(serial) && SerialRegex().IsMatch(serial) ? null : Fail("Invalid serial.");
+	{
+		return !string.IsNullOrWhiteSpace(serial) && SerialRegex().IsMatch(serial) ? null : Fail("Invalid serial.");
+	}
 
 	/// <summary>
 	/// Absolute, traversal-free and drawn from a closed character set. A device path becomes a write
@@ -315,44 +342,64 @@ internal static partial class AdbCommandBuilder
 	/// the caller meant is refused rather than normalised.
 	/// </summary>
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateDevicePath(string devicePath)
-		=> devicePath.Length <= MaxDevicePathLength &&
-			devicePath.StartsWith('/') &&
-			!devicePath.Contains("..", StringComparison.Ordinal) &&
-			DevicePathRegex().IsMatch(devicePath)
+	{
+		return devicePath.Length <= MaxDevicePathLength
+			&& devicePath.StartsWith('/')
+			&& !devicePath.Contains("..", StringComparison.Ordinal)
+			&& DevicePathRegex().IsMatch(devicePath)
 				? null
 				: Fail("Invalid device path.");
+	}
 
 	// A fully qualified path never starts with '-', so adb cannot read it as one of its options.
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateLocalPath(string localPath)
-		=> !string.IsNullOrWhiteSpace(localPath) &&
-			localPath.Length <= MaxPluginPathLength &&
-			!HasControlCharacter(localPath) &&
-			Path.IsPathFullyQualified(localPath)
+	{
+		return !string.IsNullOrWhiteSpace(localPath)
+			&& localPath.Length <= MaxPluginPathLength
+			&& !HasControlCharacter(localPath)
+			&& Path.IsPathFullyQualified(localPath)
 				? null
 				: Fail("The local path must be an absolute path.");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateRemotePath(string remotePath)
-		=> !string.IsNullOrWhiteSpace(remotePath) &&
-			remotePath.Length <= MaxPluginPathLength &&
-			remotePath.StartsWith('/') &&
-			!HasControlCharacter(remotePath)
+	{
+		return !string.IsNullOrWhiteSpace(remotePath)
+			&& remotePath.Length <= MaxPluginPathLength
+			&& remotePath.StartsWith('/')
+			&& !HasControlCharacter(remotePath)
 				? null
 				: Fail("The device path must be an absolute path.");
+	}
 
-	private static bool HasControlCharacter(string value) => value.Any(char.IsControl);
+	private static bool HasControlCharacter(string value)
+	{
+		return value.Any(char.IsControl);
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidateServiceName(string serviceName)
-		=> serviceName.Length <= MaxServiceNameLength && ServiceNameRegex().IsMatch(serviceName)
+	{
+		return serviceName.Length <= MaxServiceNameLength && ServiceNameRegex().IsMatch(serviceName)
 			? null
 			: Fail("Invalid service name.");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode>? ValidatePackage(string package)
-		=> package.Length <= MaxPackageLength && PackageRegex().IsMatch(package) ? null : Fail("Invalid package name.");
+	{
+		return package.Length <= MaxPackageLength && PackageRegex().IsMatch(package)
+			? null
+			: Fail("Invalid package name.");
+	}
 
 	private static Result<IReadOnlyList<string>, AdbFailureCode> Fail(string message)
-		=> Result.Fail<IReadOnlyList<string>, AdbFailureCode>(AdbFailureCode.InvalidParameter, message);
+	{
+		return Result.Fail<IReadOnlyList<string>, AdbFailureCode>(AdbFailureCode.InvalidParameter, message);
+	}
 
-	private static bool IsValidCoordinate(int value) => value is >= 0 and <= MaxCoordinate;
+	private static bool IsValidCoordinate(int value)
+	{
+		return value is >= 0 and <= MaxCoordinate;
+	}
 
 	private static bool IsPrintableAscii(string value)
 	{
@@ -368,7 +415,8 @@ internal static partial class AdbCommandBuilder
 	}
 
 	private static string? KeyCodeFor(AdbKey key)
-		=> key switch
+	{
+		return key switch
 		{
 			AdbKey.Home => "KEYCODE_HOME",
 			AdbKey.Back => "KEYCODE_BACK",
@@ -392,11 +440,13 @@ internal static partial class AdbCommandBuilder
 			AdbKey.DpadCenter => "KEYCODE_DPAD_CENTER",
 			_ => null
 		};
+	}
 
 	[GeneratedRegex(@"^[A-Za-z0-9._:\-]{1,128}$")]
 	private static partial Regex SerialRegex();
 
-	[GeneratedRegex(@"^[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*:(?<port>[0-9]{1,5})$")]
+	[GeneratedRegex(
+		@"^[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*:(?<port>[0-9]{1,5})$")]
 	private static partial Regex NetworkAddressRegex();
 
 	[GeneratedRegex(@"^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$")]

@@ -51,8 +51,8 @@ internal static class MacroDeck2Color
 		Span<int> channels = stackalloc int[3];
 		for (var index = 0; index < 3; index++)
 		{
-			if (!int.TryParse(components[index], NumberStyles.Integer, CultureInfo.InvariantCulture, out var channel) ||
-				channel is < 0 or > 255)
+			if (!int.TryParse(components[index], NumberStyles.Integer, CultureInfo.InvariantCulture, out var channel)
+				|| channel is < 0 or > 255)
 			{
 				return null;
 			}

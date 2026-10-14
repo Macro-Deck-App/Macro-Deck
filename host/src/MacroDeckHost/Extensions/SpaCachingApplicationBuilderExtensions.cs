@@ -11,8 +11,8 @@ public static class SpaCachingApplicationBuilderExtensions
 			context.Response.OnStarting(() =>
 			{
 				var response = context.Response;
-				if (StaticAssetCachePolicy.IsHtmlContentType(response.ContentType) &&
-					!response.Headers.ContainsKey(HeaderNames.CacheControl))
+				if (StaticAssetCachePolicy.IsHtmlContentType(response.ContentType)
+					&& !response.Headers.ContainsKey(HeaderNames.CacheControl))
 				{
 					response.Headers.CacheControl = StaticAssetCachePolicy.NoCache;
 				}

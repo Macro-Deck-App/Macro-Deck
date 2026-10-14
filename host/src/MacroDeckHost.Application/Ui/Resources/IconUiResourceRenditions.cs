@@ -13,7 +13,8 @@ public sealed record SizedIconResource(UiResourceContent Content, bool Stable);
 
 public interface IIconUiResourceRenditions
 {
-	Task<SizedIconResource?> TryGetAsync(string resourceId,
+	Task<SizedIconResource?> TryGetAsync(
+		string resourceId,
 		int requestedSize,
 		CancellationToken cancellationToken,
 		IconAppearanceContext? context = null);
@@ -25,8 +26,10 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 
 	private readonly IReadOnlyList<IWidgetIconSource> _sources;
 	private readonly IIconPackCache _iconPackCache;
+
 	private readonly Dictionary<string, LinkedListNode<(string Key, UiResourceContent Content)>> _entries =
 		new(StringComparer.Ordinal);
+
 	private readonly LinkedList<(string Key, UiResourceContent Content)> _recency = new();
 	private readonly Lock _sync = new();
 	private long _cachedBytes;
@@ -37,7 +40,8 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 		_iconPackCache = iconPackCache;
 	}
 
-	public async Task<SizedIconResource?> TryGetAsync(string resourceId,
+	public async Task<SizedIconResource?> TryGetAsync(
+		string resourceId,
 		int requestedSize,
 		CancellationToken cancellationToken,
 		IconAppearanceContext? context = null)
@@ -99,16 +103,16 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 	{
 		if (PluginIconReferences.TryParseResourceId(resourceId, out var iconId, out var pluginAppearanceAware))
 		{
-			return _iconPackCache.GetIconById(iconId) is { } icon &&
-				_iconPackCache.GetPackById(icon.PackId) is not null &&
-				FindSource(WidgetIconReference.IconPackType) is { } iconPackSource
+			return _iconPackCache.GetIconById(iconId) is { } icon
+				&& _iconPackCache.GetPackById(icon.PackId) is not null
+				&& FindSource(WidgetIconReference.IconPackType) is { } iconPackSource
 					? (iconPackSource, iconId.ToString(), ProtocolLimits.MaxUiResourceBytes, pluginAppearanceAware)
 					: null;
 		}
 
 		var prefix = WidgetIconResources.OwnerId + ".";
-		if (!resourceId.StartsWith(prefix, StringComparison.Ordinal) ||
-			resourceId.EndsWith(WidgetIconResources.ProtocolNameSuffix, StringComparison.Ordinal))
+		if (!resourceId.StartsWith(prefix, StringComparison.Ordinal)
+			|| resourceId.EndsWith(WidgetIconResources.ProtocolNameSuffix, StringComparison.Ordinal))
 		{
 			return null;
 		}
@@ -122,8 +126,8 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 			}
 
 			var reference = resourceId[typePrefix.Length..];
-			var appearanceAware = source.Type == WidgetIconReference.IconPackType &&
-				reference.EndsWith(WidgetIconResources.AppearanceNameSuffix, StringComparison.Ordinal);
+			var appearanceAware = source.Type == WidgetIconReference.IconPackType
+				&& reference.EndsWith(WidgetIconResources.AppearanceNameSuffix, StringComparison.Ordinal);
 			return (source,
 				appearanceAware ? reference[..^WidgetIconResources.AppearanceNameSuffix.Length] : reference,
 				HostUiResourceLimits.MaxHostIconResourceBytes,
@@ -134,7 +138,9 @@ public sealed class IconUiResourceRenditions : IIconUiResourceRenditions
 	}
 
 	private IWidgetIconSource? FindSource(string type)
-		=> _sources.FirstOrDefault(source => string.Equals(source.Type, type, StringComparison.Ordinal));
+	{
+		return _sources.FirstOrDefault(source => string.Equals(source.Type, type, StringComparison.Ordinal));
+	}
 
 	private UiResourceContent? TryGetCached(string key)
 	{

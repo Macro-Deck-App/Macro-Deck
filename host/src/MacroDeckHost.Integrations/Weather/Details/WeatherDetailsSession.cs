@@ -19,7 +19,8 @@ internal sealed class WeatherDetailsSession : IUiSession
 	private Func<IUiResourceRegistry?>? _pendingIcons;
 	private bool _disposed;
 
-	public WeatherDetailsSession(UiSurface surface,
+	public WeatherDetailsSession(
+		UiSurface surface,
 		IWeatherStations stations,
 		WeatherDetailsStation station,
 		WeatherDetailsIcons icons,
@@ -47,9 +48,15 @@ internal sealed class WeatherDetailsSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
 	public void Dispatch(UiEvent uiEvent)
 	{

@@ -38,14 +38,18 @@ internal sealed class RemoteIntegrationConfig(IHostInvoker invoker) : IIntegrati
 	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Config,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Config,
 			HostOperations.Config.SetString,
 			new ConfigSetStringArguments { EntryId = entryId, Key = key, Value = value },
 			cancellationToken);
+	}
 
 	public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Config,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Config,
 			HostOperations.Config.SetSecret,
 			new ConfigSetSecretArguments { EntryId = entryId, Key = key, Value = value },
 			cancellationToken);
+	}
 }

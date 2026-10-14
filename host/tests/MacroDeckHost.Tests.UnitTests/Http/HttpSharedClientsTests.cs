@@ -8,8 +8,8 @@ internal sealed class HttpSharedClientsTests
 	[Test]
 	public void The_same_settings_pair_answers_with_the_same_client_instance()
 	{
-		var first = HttpSharedClients.Get(followRedirects: true, validateTls: true);
-		var second = HttpSharedClients.Get(followRedirects: true, validateTls: true);
+		var first = HttpSharedClients.Get(true, true);
+		var second = HttpSharedClients.Get(true, true);
 
 		Assert.That(second, Is.SameAs(first));
 	}

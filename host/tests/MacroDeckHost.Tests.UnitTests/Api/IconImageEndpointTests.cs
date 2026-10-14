@@ -37,7 +37,10 @@ public class IconImageEndpointTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task A_url_carrying_the_version_from_the_icon_listing_is_cached_for_good()
@@ -88,11 +91,11 @@ public class IconImageEndpointTests
 		var firstResult = await first.GetImage(icon.Id.ToString(), 128, null, CancellationToken.None);
 		var firstETag = first.Response.Headers.ETag.ToString();
 
-		var unchanged = Controller(ifNoneMatch: firstETag);
+		var unchanged = Controller(firstETag);
 		var unchangedResult = await unchanged.GetImage(icon.Id.ToString(), 128, null, CancellationToken.None);
 
 		await Replace(icon, _replacement);
-		var replaced = Controller(ifNoneMatch: firstETag);
+		var replaced = Controller(firstETag);
 		var replacedResult = await replaced.GetImage(icon.Id.ToString(), 128, null, CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -139,7 +142,8 @@ public class IconImageEndpointTests
 		{
 			Assert.That(CentrePixelOf(firstResult), Is.EqualTo(Color.Red.ToPixel<Rgba32>()));
 			Assert.That(CentrePixelOf(secondResult), Is.EqualTo(Color.Blue.ToPixel<Rgba32>()));
-			Assert.That(second.Response.Headers.ETag.ToString(), Is.Not.EqualTo(first.Response.Headers.ETag.ToString()));
+			Assert.That(second.Response.Headers.ETag.ToString(),
+				Is.Not.EqualTo(first.Response.Headers.ETag.ToString()));
 		});
 	}
 
@@ -180,7 +184,18 @@ public class IconImageEndpointTests
 			httpContext.Request.Headers.IfNoneMatch = ifNoneMatch;
 		}
 
-		return new IconsController(null!, null!, null!, null!, null!, null!, null!, null!, _service, null!, null!, _harness.Cache)
+		return new IconsController(null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			_service,
+			null!,
+			null!,
+			_harness.Cache)
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};

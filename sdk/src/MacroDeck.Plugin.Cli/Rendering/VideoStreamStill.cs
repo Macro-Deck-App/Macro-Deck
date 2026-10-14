@@ -35,7 +35,8 @@ internal static class VideoStreamStill
 
 			if (info.Length > MaxBytes)
 			{
-				console.WriteError(ErrorCode, $"--video-stream-image '{path}' is larger than {MaxBytes / (1024 * 1024)} MB.");
+				console.WriteError(ErrorCode,
+					$"--video-stream-image '{path}' is larger than {MaxBytes / (1024 * 1024)} MB.");
 				return false;
 			}
 
@@ -60,12 +61,15 @@ internal static class VideoStreamStill
 		return true;
 	}
 
-	private static bool Matches(string extension, string mediaType) => extension switch
+	private static bool Matches(string extension, string mediaType)
 	{
-		".png" => mediaType == "image/png",
-		".webp" => mediaType == "image/webp",
-		_ => mediaType == "image/jpeg"
-	};
+		return extension switch
+		{
+			".png" => mediaType == "image/png",
+			".webp" => mediaType == "image/webp",
+			_ => mediaType == "image/jpeg"
+		};
+	}
 
 	private static string? MediaType(byte[] bytes)
 	{
@@ -79,8 +83,10 @@ internal static class VideoStreamStill
 			return "image/jpeg";
 		}
 
-		return bytes.Length >= 12 && bytes.AsSpan(0, 4).SequenceEqual("RIFF"u8) && bytes.AsSpan(8, 4).SequenceEqual("WEBP"u8)
-			? "image/webp"
-			: null;
+		return bytes.Length >= 12
+			&& bytes.AsSpan(0, 4).SequenceEqual("RIFF"u8)
+			&& bytes.AsSpan(8, 4).SequenceEqual("WEBP"u8)
+				? "image/webp"
+				: null;
 	}
 }

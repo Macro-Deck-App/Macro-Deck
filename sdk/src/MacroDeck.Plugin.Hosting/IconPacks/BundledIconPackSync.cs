@@ -45,8 +45,8 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	private readonly Channel<bool> _requests = Channel.CreateBounded<bool>(
-		new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true });
+	private readonly Channel<bool> _requests = Channel.CreateBounded<bool>(new BoundedChannelOptions(1)
+		{ FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true });
 
 	private readonly CancellationTokenSource _stopping = new();
 	private readonly Lock _watchGate = new();
@@ -56,7 +56,8 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 	private Task _loop = Task.CompletedTask;
 	private bool _unsupported;
 
-	public BundledIconPackSync(IConfiguration configuration,
+	public BundledIconPackSync(
+		IConfiguration configuration,
 		IHostEnvironment environment,
 		IHostInvoker invoker,
 		IPluginAssetUploader uploader,
@@ -90,7 +91,9 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 
 		if (Mode == BundledIconPackSyncMode.Watch)
 		{
-			_debounceTimer = _timeProvider.CreateTimer(_ => Request(), null, Timeout.InfiniteTimeSpan,
+			_debounceTimer = _timeProvider.CreateTimer(_ => Request(),
+				null,
+				Timeout.InfiniteTimeSpan,
 				Timeout.InfiniteTimeSpan);
 			Watch([ManifestPath]);
 		}
@@ -127,16 +130,24 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 	}
 
 	private static BundledIconPackSyncMode ParseMode(string? value)
-		=> value?.Trim().ToLowerInvariant() switch
+	{
+		return value?.Trim().ToLowerInvariant() switch
 		{
 			"sync" => BundledIconPackSyncMode.Sync,
 			"watch" => BundledIconPackSyncMode.Watch,
 			_ => BundledIconPackSyncMode.Off
 		};
+	}
 
-	private void OnConnected(object? sender, PluginConnectedEventArgs e) => Request();
+	private void OnConnected(object? sender, PluginConnectedEventArgs e)
+	{
+		Request();
+	}
 
-	private void Request() => _requests.Writer.TryWrite(true);
+	private void Request()
+	{
+		_requests.Writer.TryWrite(true);
+	}
 
 	private async Task RunAsync(CancellationToken cancellationToken)
 	{
@@ -236,7 +247,8 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 		}
 	}
 
-	private async Task<IconPackSyncResult> SyncBundledAsync(IconPackSyncArguments arguments,
+	private async Task<IconPackSyncResult> SyncBundledAsync(
+		IconPackSyncArguments arguments,
 		CancellationToken cancellationToken)
 	{
 		var result = await _invoker.InvokeAsync(HostApis.IconPacks,
@@ -261,15 +273,17 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 		var entries = new List<DeclaredEntry>();
 		foreach (var entry in manifest.BundledIconPacks ?? [])
 		{
-			if (string.IsNullOrWhiteSpace(entry?.Key) || entry.Path is not { } path ||
-				!PluginManifestFileReader.IsSafeRelativeIconPath(path))
+			if (string.IsNullOrWhiteSpace(entry?.Key)
+				|| entry.Path is not { } path
+				|| !PluginManifestFileReader.IsSafeRelativeIconPath(path))
 			{
 				_logger.BundledIconPackSyncSkipped(
 					$"the manifest declares a bundled icon pack without a key or with an unsafe path '{entry?.Path}'.");
 				return null;
 			}
 
-			entries.Add(new DeclaredEntry(entry.Key, path,
+			entries.Add(new DeclaredEntry(entry.Key,
+				path,
 				Path.GetFullPath(Path.Combine(_contentRoot, path.Replace('/', Path.DirectorySeparatorChar)))));
 		}
 
@@ -288,15 +302,16 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 				var file = new FileInfo(entry.FullPath);
 				if (!file.Exists)
 				{
-					_logger.BundledIconPackSyncSkipped($"the bundled icon pack '{entry.Key}' at '{entry.Path}' does not exist.");
+					_logger.BundledIconPackSyncSkipped(
+						$"the bundled icon pack '{entry.Key}' at '{entry.Path}' does not exist.");
 					return null;
 				}
 
 				if (file.Length > ProtocolLimits.MaxAssetBytes)
 				{
 					_logger.BundledIconPackSyncSkipped(
-						$"the bundled icon pack '{entry.Key}' at '{entry.Path}' is {file.Length} bytes, over the " +
-						$"{ProtocolLimits.MaxAssetBytes} byte limit of a development sync. Install the built plugin instead.");
+						$"the bundled icon pack '{entry.Key}' at '{entry.Path}' is {file.Length} bytes, over the "
+						+ $"{ProtocolLimits.MaxAssetBytes} byte limit of a development sync. Install the built plugin instead.");
 					return null;
 				}
 
@@ -343,8 +358,10 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 				var watcher = new FileSystemWatcher(directory)
 				{
 					IncludeSubdirectories = false,
-					NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size |
-						NotifyFilters.CreationTime
+					NotifyFilter = NotifyFilters.FileName
+						| NotifyFilters.LastWrite
+						| NotifyFilters.Size
+						| NotifyFilters.CreationTime
 				};
 				watcher.Changed += OnFileEvent;
 				watcher.Created += OnFileEvent;
@@ -359,8 +376,8 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 	private void OnFileEvent(object sender, FileSystemEventArgs e)
 	{
 		var directory = ((FileSystemWatcher)sender).Path;
-		var relevant = IsWatched(Path.Combine(directory, e.Name ?? string.Empty)) ||
-			(e is RenamedEventArgs renamed && IsWatched(Path.Combine(directory, renamed.OldName ?? string.Empty)));
+		var relevant = IsWatched(Path.Combine(directory, e.Name ?? string.Empty))
+			|| e is RenamedEventArgs renamed && IsWatched(Path.Combine(directory, renamed.OldName ?? string.Empty));
 
 		if (relevant)
 		{

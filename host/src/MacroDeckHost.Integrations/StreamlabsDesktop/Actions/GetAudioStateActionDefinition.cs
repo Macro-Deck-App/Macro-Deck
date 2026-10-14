@@ -31,10 +31,9 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SourceParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
 			required: true),
 		ActionParameter.Choice(StateParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -45,16 +44,19 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 					Value = StateMuted, Label = AppStrings.Integrations.StreamlabsDesktop.Params.MutedLabel()
 				}
 			],
-			label: AppStrings.Integrations.StreamlabsDesktop.Actions.ReadLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Actions.ReadLabel(),
 			defaultValue: StateVolume),
 		ActionParameter.Autocomplete(StreamlabsActionValues.VariableParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableLabel(),
-			description: AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableDescription(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SaveToVariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -86,8 +88,9 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 				return StreamlabsActionResults.NotConnected;
 			}
 
-			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source ||
-				StreamlabsActionValues.ReadText(context, StreamlabsActionValues.VariableParameter) is not { } variable)
+			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source
+				|| StreamlabsActionValues.ReadText(context, StreamlabsActionValues.VariableParameter) is not
+					{ } variable)
 			{
 				return StreamlabsActionResults.MissingParameter(AppStrings.Integrations.StreamlabsDesktop.Errors
 					.AudioSourceAndVariableRequired());
@@ -104,7 +107,7 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 			if (value is null)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.StreamlabsDesktop.Errors.AudioSourceNotFound(source: source));
+					AppStrings.Integrations.StreamlabsDesktop.Errors.AudioSourceNotFound(source));
 			}
 
 			return await StreamlabsVariableWriter
@@ -116,7 +119,7 @@ internal sealed class GetAudioStateActionDefinition : IDynamicOptionsActionDefin
 				.ConfigureAwait(false)
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.StreamlabsDesktop.Errors.CouldNotWriteVariable(variable: variable));
+					AppStrings.Integrations.StreamlabsDesktop.Errors.CouldNotWriteVariable(variable));
 		}
 	}
 }

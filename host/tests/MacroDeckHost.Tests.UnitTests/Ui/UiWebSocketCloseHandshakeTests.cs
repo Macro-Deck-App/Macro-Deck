@@ -22,7 +22,7 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 [NonParallelizable]
 public class UiWebSocketCloseHandshakeTests
 {
-	private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(15);
+	private static readonly TimeSpan _testTimeout = TimeSpan.FromSeconds(15);
 
 	private IHost _host = null!;
 	private string _dataDir = null!;
@@ -62,7 +62,7 @@ public class UiWebSocketCloseHandshakeTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -77,7 +77,7 @@ public class UiWebSocketCloseHandshakeTests
 
 		var closing = pair.Plugin.CloseAsync((WebSocketCloseStatus)4001, "Client leaving.", Timeout());
 		await FinishAsync(running, pair.Host);
-		await closing.WaitAsync(TestTimeout);
+		await closing.WaitAsync(_testTimeout);
 
 		Assert.Multiple(() =>
 		{
@@ -95,7 +95,7 @@ public class UiWebSocketCloseHandshakeTests
 
 		var closing = pair.Plugin.CloseAsync((WebSocketCloseStatus)4000, "Not now.", Timeout());
 		await FinishAsync(running, pair.Host);
-		await closing.WaitAsync(TestTimeout);
+		await closing.WaitAsync(_testTimeout);
 
 		Assert.Multiple(() =>
 		{
@@ -118,9 +118,9 @@ public class UiWebSocketCloseHandshakeTests
 		await connect;
 		listener.Stop();
 		using var host = WebSocket.CreateFromStream(accepted.GetStream(),
-			isServer: true,
-			subProtocol: null,
-			keepAliveInterval: TimeSpan.FromMinutes(1));
+			true,
+			null,
+			TimeSpan.FromMinutes(1));
 		var stream = client.GetStream();
 		var running = Run(host);
 
@@ -166,20 +166,24 @@ public class UiWebSocketCloseHandshakeTests
 	}
 
 	private Task Run(WebSocket socket)
-		=> _host.Services.GetRequiredService<UiWebSocketEndpoint>()
+	{
+		return _host.Services.GetRequiredService<UiWebSocketEndpoint>()
 			.RunConnectionAsync(socket, new ClaimsPrincipal(new ClaimsIdentity()), CancellationToken.None);
+	}
 
 	private static async Task FinishAsync(Task running, WebSocket host)
 	{
-		await running.WaitAsync(TestTimeout);
+		await running.WaitAsync(_testTimeout);
 		host.Dispose();
 	}
 
 	private static async Task SendAsync(WebSocket socket, UiWebSocketEnvelope envelope)
-		=> await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(envelope, UiWebSocketProtocol.Json),
+	{
+		await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(envelope, UiWebSocketProtocol.Json),
 			WebSocketMessageType.Text,
-			endOfMessage: true,
+			true,
 			Timeout());
+	}
 
 	private static async Task<UiWebSocketEnvelope?> ReceiveEnvelopeAsync(WebSocket socket)
 	{
@@ -222,7 +226,10 @@ public class UiWebSocketCloseHandshakeTests
 		return (header[0], payload);
 	}
 
-	private static CancellationToken Timeout() => new CancellationTokenSource(TestTimeout).Token;
+	private static CancellationToken Timeout()
+	{
+		return new CancellationTokenSource(_testTimeout).Token;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{

@@ -38,7 +38,10 @@ public sealed class PluginDeviceSessionWatcher : IHostedService
 		return Task.CompletedTask;
 	}
 
-	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e) => _ = WithdrawAsync(e.PluginId);
+	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
+	{
+		_ = WithdrawAsync(e.PluginId);
+	}
 
 	private async Task WithdrawAsync(string pluginId)
 	{

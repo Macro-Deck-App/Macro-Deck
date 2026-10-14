@@ -37,18 +37,30 @@ public class UiSessionOriginCompatibilityTests
 			remove { }
 		}
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Revision = 1,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-			Root = new UiNode { Id = "root", Type = "stack" }
-		};
+			return new UiTree
+			{
+				Revision = 1,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+				Root = new UiNode { Id = "root", Type = "stack" }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
-		public void Dispatch(UiEvent uiEvent) => Received.Add(uiEvent);
+		public void Dispatch(UiEvent uiEvent)
+		{
+			Received.Add(uiEvent);
+		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 
 	private sealed class NowhereOrigin : IUiEventOrigin
@@ -56,13 +68,20 @@ public class UiSessionOriginCompatibilityTests
 		public string? ClientId => null;
 
 		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal,
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(ModalResult.FromCancellation<T>());
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
 	}
 }

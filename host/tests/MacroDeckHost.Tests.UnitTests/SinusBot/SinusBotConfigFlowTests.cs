@@ -9,15 +9,18 @@ internal sealed class SinusBotConfigFlowTests
 {
 	private static readonly IConfigFlowContext _context = new FakeConfigFlowContext();
 
-	private static Dictionary<string, object?> ConnectionInput(string? url = "http://bot:8087",
+	private static Dictionary<string, object?> ConnectionInput(
+		string? url = "http://bot:8087",
 		string? user = "admin",
 		string? password = "secret")
-		=> new()
+	{
+		return new Dictionary<string, object?>
 		{
 			[SinusBotConfigKeys.ServerUrl] = url,
 			[SinusBotConfigKeys.Username] = user,
 			[SinusBotConfigKeys.Password] = password
 		};
+	}
 
 	[Test]
 	public async Task SubmitConnection_MissingFields_ReturnsFieldErrors()

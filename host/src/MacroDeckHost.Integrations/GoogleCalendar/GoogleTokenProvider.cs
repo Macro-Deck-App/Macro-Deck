@@ -67,7 +67,10 @@ internal sealed class GoogleTokenProvider : IDisposable
 	}
 
 	// Only blocks new refreshes. Disposing the semaphore could race a refresh still releasing it.
-	public void Dispose() => Interlocked.Exchange(ref _stopping, 1);
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _stopping, 1);
+	}
 
 	private async Task<string> RefreshAsync(GoogleTokens observed, CancellationToken cancellationToken)
 	{
@@ -90,7 +93,10 @@ internal sealed class GoogleTokenProvider : IDisposable
 			GoogleTokenResponse response;
 			try
 			{
-				response = await _client.RefreshAsync(_clientId, _clientSecret, current.RefreshToken, cancellationToken);
+				response = await _client.RefreshAsync(_clientId,
+					_clientSecret,
+					current.RefreshToken,
+					cancellationToken);
 			}
 			catch (GoogleOAuthRejectedException ex)
 			{
@@ -101,8 +107,8 @@ internal sealed class GoogleTokenProvider : IDisposable
 				throw;
 			}
 
-			var rotated = !string.IsNullOrEmpty(response.RefreshToken) &&
-				!string.Equals(response.RefreshToken, current.RefreshToken, StringComparison.Ordinal);
+			var rotated = !string.IsNullOrEmpty(response.RefreshToken)
+				&& !string.Equals(response.RefreshToken, current.RefreshToken, StringComparison.Ordinal);
 			var refreshed = new GoogleTokens(response.AccessToken,
 				rotated ? response.RefreshToken! : current.RefreshToken,
 				_time.GetUtcNow() + response.ExpiresIn);

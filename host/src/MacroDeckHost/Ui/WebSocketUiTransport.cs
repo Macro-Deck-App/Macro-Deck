@@ -41,17 +41,24 @@ public sealed class WebSocketUiTransport : IUiTransport
 
 	public Task Send<T>(T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Send(SnapshotAll(), message, cancellationToken);
+	{
+		return Send(SnapshotAll(), message, cancellationToken);
+	}
 
 	public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Send(SnapshotGroup(group), message, cancellationToken);
+	{
+		return Send(SnapshotGroup(group), message, cancellationToken);
+	}
 
 	public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Send(SnapshotConnection(connectionId), message, cancellationToken);
+	{
+		return Send(SnapshotConnection(connectionId), message, cancellationToken);
+	}
 
-	public Task SendNotification(string connectionId,
+	public Task SendNotification(
+		string connectionId,
 		string type,
 		object payload,
 		CancellationToken cancellationToken = default)
@@ -63,13 +70,14 @@ public sealed class WebSocketUiTransport : IUiTransport
 		}
 
 		return connection.Send(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
-				"message",
-				type,
-				null,
-				null,
-				payload,
-				null),
-			cancellationToken).AsTask();
+					"message",
+					type,
+					null,
+					null,
+					payload,
+					null),
+				cancellationToken)
+			.AsTask();
 	}
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
@@ -126,7 +134,8 @@ public sealed class WebSocketUiTransport : IUiTransport
 		return Task.CompletedTask;
 	}
 
-	private static async Task Send<T>(IEnumerable<Connection> connections,
+	private static async Task Send<T>(
+		IEnumerable<Connection> connections,
 		T message,
 		CancellationToken cancellationToken)
 		where T : class

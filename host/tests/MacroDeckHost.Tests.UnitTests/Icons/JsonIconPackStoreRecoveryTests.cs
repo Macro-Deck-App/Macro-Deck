@@ -18,7 +18,10 @@ public class JsonIconPackStoreRecoveryTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void LoadAll_RecoversTheManifest_WhenPackJsonIsMissingButATemporaryFileIsValid()

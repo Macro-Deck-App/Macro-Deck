@@ -1,8 +1,8 @@
 using MacroDeck.LicenseTool;
 using MacroDeck.LicenseTool.Collectors;
 
-const string ThirdPartyNoticesFile = "THIRD-PARTY-NOTICES";
-const string NoticeFile = "NOTICE";
+const string thirdPartyNoticesFile = "THIRD-PARTY-NOTICES";
+const string noticeFile = "NOTICE";
 
 string? repository = null;
 var check = false;
@@ -37,7 +37,7 @@ try
 		return 1;
 	}
 
-	var outputs = new[] { (ThirdPartyNoticesFile, result.ThirdPartyNotices), (NoticeFile, result.Notice) };
+	var outputs = new[] { (thirdPartyNoticesFile, result.ThirdPartyNotices), (noticeFile, result.Notice) };
 	if (check)
 	{
 		var stale = outputs
@@ -47,11 +47,12 @@ try
 			.ToList();
 		if (stale.Count > 0)
 		{
-			Console.Error.WriteLine($"out of date: {string.Join(", ", stale)}; run: dotnet run --project tools/src/MacroDeck.LicenseTool");
+			Console.Error.WriteLine(
+				$"out of date: {string.Join(", ", stale)}; run: dotnet run --project tools/src/MacroDeck.LicenseTool");
 			return 1;
 		}
 
-		Console.WriteLine($"{ThirdPartyNoticesFile} and {NoticeFile} are up to date.");
+		Console.WriteLine($"{thirdPartyNoticesFile} and {noticeFile} are up to date.");
 		return 0;
 	}
 
@@ -60,7 +61,7 @@ try
 		File.WriteAllText(Path.Combine(repository, file), content);
 	}
 
-	Console.WriteLine($"Wrote {ThirdPartyNoticesFile} and {NoticeFile}.");
+	Console.WriteLine($"Wrote {thirdPartyNoticesFile} and {noticeFile}.");
 	return 0;
 }
 catch (ToolException exception)

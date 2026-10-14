@@ -42,8 +42,8 @@ internal sealed class RemoteMusicPlayerApi : IMusicPlayerApi, IDisposable
 
 	public event EventHandler? InstancesChanged
 	{
-		add => Subscribe(value, lifecycle: false);
-		remove => Unsubscribe(value, lifecycle: false);
+		add => Subscribe(value, false);
+		remove => Unsubscribe(value, false);
 	}
 
 	public async Task<string?> GetAlbumColorAsync(string instanceId, CancellationToken cancellationToken = default)
@@ -85,7 +85,10 @@ internal sealed class RemoteMusicPlayerApi : IMusicPlayerApi, IDisposable
 		}
 	}
 
-	public void Dispose() => _stateCache.MusicPlayersChanged -= OnMusicPlayersChanged;
+	public void Dispose()
+	{
+		_stateCache.MusicPlayersChanged -= OnMusicPlayersChanged;
+	}
 
 	private void OnMusicPlayersChanged()
 	{
@@ -192,11 +195,13 @@ internal sealed class RemoteMusicPlayerApi : IMusicPlayerApi, IDisposable
 
 		public event EventHandler? InstancesChanged
 		{
-			add => api.Subscribe(value, lifecycle: true);
-			remove => api.Unsubscribe(value, lifecycle: true);
+			add => api.Subscribe(value, true);
+			remove => api.Unsubscribe(value, true);
 		}
 
 		public Task<string?> GetAlbumColorAsync(string instanceId, CancellationToken cancellationToken = default)
-			=> api.GetAlbumColorAsync(instanceId, cancellationToken);
+		{
+			return api.GetAlbumColorAsync(instanceId, cancellationToken);
+		}
 	}
 }

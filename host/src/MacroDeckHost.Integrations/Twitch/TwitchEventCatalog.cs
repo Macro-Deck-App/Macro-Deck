@@ -181,13 +181,13 @@ internal static class TwitchEventCatalog
 			"1",
 			TwitchConditionKind.BroadcasterAndUser,
 			TwitchScopes.UserReadChat,
-			IsFeed: true),
+			true),
 		new(TwitchFeedIds.ChatUserMessagesCleared,
 			"channel.chat.clear_user_messages",
 			"1",
 			TwitchConditionKind.BroadcasterAndUser,
 			TwitchScopes.UserReadChat,
-			IsFeed: true),
+			true),
 		new(TwitchEventIds.ChatSettingsUpdated,
 			"channel.chat_settings.update",
 			"1",
@@ -199,7 +199,10 @@ internal static class TwitchEventCatalog
 	];
 
 	public static TwitchSubscriptionSpec? ForEvent(string eventId)
-		=> All.FirstOrDefault(spec => !spec.IsFeed && string.Equals(spec.EventId, eventId, StringComparison.Ordinal));
+	{
+		return All.FirstOrDefault(spec
+			=> !spec.IsFeed && string.Equals(spec.EventId, eventId, StringComparison.Ordinal));
+	}
 
 	public static TwitchSubscriptionSpec? ForType(string? subscriptionType, string? version)
 	{
@@ -228,7 +231,8 @@ internal static class TwitchEventCatalog
 	];
 
 	public static IReadOnlyDictionary<string, string> BuildCondition(TwitchConditionKind kind, string userId)
-		=> kind switch
+	{
+		return kind switch
 		{
 			TwitchConditionKind.Broadcaster => new Dictionary<string, string>(StringComparer.Ordinal)
 			{
@@ -254,4 +258,5 @@ internal static class TwitchEventCatalog
 			},
 			_ => new Dictionary<string, string>(StringComparer.Ordinal) { ["broadcaster_user_id"] = userId }
 		};
+	}
 }

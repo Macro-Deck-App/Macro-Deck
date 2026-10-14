@@ -10,14 +10,14 @@ public class PreviewSizeTests
 	[TestCase("3x2", 384, 252)]
 	public void Deck_cells_are_120_pixels_with_a_12_pixel_gap(string text, int width, int height)
 	{
-		Assert.That(PreviewSize.TryParse(text, cells: true, out var size), Is.True);
+		Assert.That(PreviewSize.TryParse(text, true, out var size), Is.True);
 		Assert.That(size, Is.EqualTo(new PreviewSize(width, height)));
 	}
 
 	[Test]
 	public void Pixel_sizes_are_taken_as_written()
 	{
-		Assert.That(PreviewSize.TryParse("420x200", cells: false, out var size), Is.True);
+		Assert.That(PreviewSize.TryParse("420x200", false, out var size), Is.True);
 		Assert.That(size, Is.EqualTo(new PreviewSize(420, 200)));
 	}
 
@@ -29,9 +29,13 @@ public class PreviewSizeTests
 	[TestCase("10x10x10")]
 	[TestCase("9000x10")]
 	public void A_malformed_or_oversized_size_is_rejected(string text)
-		=> Assert.That(PreviewSize.TryParse(text, cells: false, out _), Is.False);
+	{
+		Assert.That(PreviewSize.TryParse(text, false, out _), Is.False);
+	}
 
 	[Test]
 	public void An_oversized_cell_count_is_rejected()
-		=> Assert.That(PreviewSize.TryParse("100x1", cells: true, out _), Is.False);
+	{
+		Assert.That(PreviewSize.TryParse("100x1", true, out _), Is.False);
+	}
 }

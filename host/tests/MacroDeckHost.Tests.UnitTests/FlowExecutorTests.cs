@@ -18,30 +18,30 @@ public class FlowExecutorTests
 	private static readonly ILogger _logger = Log.Logger;
 	private static readonly string[] _expectedTags = ["a", "b"];
 
-	private const string _twoEventFlows = """
-										  {
-										    "flows": [
-										      {
-										        "triggerId": "event-a",
-										        "triggerType": "onEvent",
-										        "children": [
-										          { "id": "b1", "type": "action", "blockType": "integration.capture",
-										            "integrationId": "integration", "actionId": "capture",
-										            "parameters": [{ "name": "marker", "type": "string", "value": "a" }] }
-										        ]
-										      },
-										      {
-										        "triggerId": "event-b",
-										        "triggerType": "onEvent",
-										        "children": [
-										          { "id": "b2", "type": "action", "blockType": "integration.capture",
-										            "integrationId": "integration", "actionId": "capture",
-										            "parameters": [{ "name": "marker", "type": "string", "value": "b" }] }
-										        ]
-										      }
-										    ]
-										  }
-										  """;
+	private const string TwoEventFlows = """
+										 {
+										   "flows": [
+										     {
+										       "triggerId": "event-a",
+										       "triggerType": "onEvent",
+										       "children": [
+										         { "id": "b1", "type": "action", "blockType": "integration.capture",
+										           "integrationId": "integration", "actionId": "capture",
+										           "parameters": [{ "name": "marker", "type": "string", "value": "a" }] }
+										       ]
+										     },
+										     {
+										       "triggerId": "event-b",
+										       "triggerType": "onEvent",
+										       "children": [
+										         { "id": "b2", "type": "action", "blockType": "integration.capture",
+										           "integrationId": "integration", "actionId": "capture",
+										           "parameters": [{ "name": "marker", "type": "string", "value": "b" }] }
+										       ]
+										     }
+										   ]
+										 }
+										 """;
 
 	private FakeSecretService _secretService = null!;
 	private CapturingActionDefinition _action = null!;
@@ -83,28 +83,31 @@ public class FlowExecutorTests
 
 	// ---- host lock gating ----------------------------------------------------------------------
 
-	private const string _oneActionFlow = """
-										  {
-										    "flows": [
-										      {
-										        "triggerId": "t1",
-										        "triggerType": "onShortPress",
-										        "children": [
-										          { "id": "b1", "type": "action", "blockType": "integration.capture",
-										            "integrationId": "integration", "actionId": "capture", "parameters": [] }
-										        ]
-										      }
-										    ]
-										  }
-										  """;
+	private const string OneActionFlow = """
+										 {
+										   "flows": [
+										     {
+										       "triggerId": "t1",
+										       "triggerType": "onShortPress",
+										       "children": [
+										         { "id": "b1", "type": "action", "blockType": "integration.capture",
+										           "integrationId": "integration", "actionId": "capture", "parameters": [] }
+										       ]
+										     }
+										   ]
+										 }
+										 """;
 
-	private static FlowExecutionRequest OneActionRequest(ExecutionOrigin origin = ExecutionOrigin.Client) => new()
+	private static FlowExecutionRequest OneActionRequest(ExecutionOrigin origin = ExecutionOrigin.Client)
 	{
-		FlowsSource = _oneActionFlow,
-		Trigger = TriggerSelector.ByType("onShortPress"),
-		Scope = VariableScope.Widget,
-		Origin = origin
-	};
+		return new FlowExecutionRequest
+		{
+			FlowsSource = OneActionFlow,
+			Trigger = TriggerSelector.ByType("onShortPress"),
+			Scope = VariableScope.Widget,
+			Origin = origin
+		};
+	}
 
 	[Test]
 	public async Task Locked_client_origin_flow_is_refused_before_any_action_runs()
@@ -206,7 +209,10 @@ public class FlowExecutorTests
 	{
 		private readonly Task _releaseWhen;
 
-		public BlockingActionDefinition(Task releaseWhen) => _releaseWhen = releaseWhen;
+		public BlockingActionDefinition(Task releaseWhen)
+		{
+			_releaseWhen = releaseWhen;
+		}
 
 		public TaskCompletionSource Started { get; } = new();
 
@@ -216,13 +222,19 @@ public class FlowExecutorTests
 		public IReadOnlyList<ActionParameter> Parameters { get; init; } = [];
 		public MacroDeckPlatform Platforms { get; init; } = MacroDeckPlatform.All;
 
-		public IActionExecutor CreateExecutor() => new BlockingExecutor(this);
+		public IActionExecutor CreateExecutor()
+		{
+			return new BlockingExecutor(this);
+		}
 
 		private sealed class BlockingExecutor : IActionExecutor
 		{
 			private readonly BlockingActionDefinition _owner;
 
-			public BlockingExecutor(BlockingActionDefinition owner) => _owner = owner;
+			public BlockingExecutor(BlockingActionDefinition owner)
+			{
+				_owner = owner;
+			}
 
 			public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 			{
@@ -235,14 +247,16 @@ public class FlowExecutorTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -403,23 +417,25 @@ public class FlowExecutorTests
 	}
 
 	private static string ProviderButtonData(string providerBlockId)
-		=> $$"""
-			{
-			  "stateMode": true,
-			  "states": [{ "id": "off", "label": "Off" }, { "id": "on", "label": "On" }],
-			  "stateProvider": { "blockId": "{{providerBlockId}}", "integrationId": "provider", "actionId": "toggle" },
-			  "flows": [
-			    {
-			      "triggerId": "t1",
-			      "triggerType": "onShortPress",
-			      "children": [
-			        { "id": "b1", "type": "action", "blockType": "provider.toggle",
-			          "integrationId": "provider", "actionId": "toggle", "parameters": [] }
-			      ]
-			    }
-			  ]
-			}
-			""";
+	{
+		return $$"""
+				 {
+				   "stateMode": true,
+				   "states": [{ "id": "off", "label": "Off" }, { "id": "on", "label": "On" }],
+				   "stateProvider": { "blockId": "{{providerBlockId}}", "integrationId": "provider", "actionId": "toggle" },
+				   "flows": [
+				     {
+				       "triggerId": "t1",
+				       "triggerType": "onShortPress",
+				       "children": [
+				         { "id": "b1", "type": "action", "blockType": "provider.toggle",
+				           "integrationId": "provider", "actionId": "toggle", "parameters": [] }
+				       ]
+				     }
+				   ]
+				 }
+				 """;
+	}
 
 	private (FlowExecutor Executor, WidgetOptimisticStateStore OptimisticStates, WidgetStateEvalChannel EvalQueue)
 		CreateStateProviderExecutor(ActionResult result)
@@ -622,7 +638,7 @@ public class FlowExecutorTests
 	{
 		await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
-				FlowsSource = _twoEventFlows,
+				FlowsSource = TwoEventFlows,
 				Trigger = TriggerSelector.ById("event-b"),
 				Scope = VariableScope.Widget,
 				ScopeRefId = "widget-1"
@@ -641,7 +657,7 @@ public class FlowExecutorTests
 	{
 		await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
-				FlowsSource = _twoEventFlows,
+				FlowsSource = TwoEventFlows,
 				Trigger = TriggerSelector.ById("does-not-exist"),
 				Scope = VariableScope.Widget,
 				ScopeRefId = "widget-1"
@@ -1219,25 +1235,30 @@ public class FlowExecutorTests
 	}
 
 	private static string SingleActionBlock(string blockId, string integrationId, string actionId)
-		=> $$"""
-			 { "id": "{{blockId}}", "type": "action", "blockType": "{{integrationId}}.{{actionId}}",
-			   "integrationId": "{{integrationId}}", "actionId": "{{actionId}}", "parameters": [] }
-			 """;
+	{
+		return $$"""
+				 { "id": "{{blockId}}", "type": "action", "blockType": "{{integrationId}}.{{actionId}}",
+				   "integrationId": "{{integrationId}}", "actionId": "{{actionId}}", "parameters": [] }
+				 """;
+	}
 
 	private static string SingleAction(string blockId, string integrationId, string actionId)
-		=> $$"""
-			 {
-			   "flows": [
-			     {
-			       "triggerId": "t1", "triggerType": "onShortPress",
-			       "children": [ {{SingleActionBlock(blockId, integrationId, actionId)}} ]
-			     }
-			   ]
-			 }
-			 """;
+	{
+		return $$"""
+				 {
+				   "flows": [
+				     {
+				       "triggerId": "t1", "triggerType": "onShortPress",
+				       "children": [ {{SingleActionBlock(blockId, integrationId, actionId)}} ]
+				     }
+				   ]
+				 }
+				 """;
+	}
 
 	private Task<FlowExecutionResult> RunFlow(string widgetData)
-		=> _executor.ExecuteAsync(new FlowExecutionRequest
+	{
+		return _executor.ExecuteAsync(new FlowExecutionRequest
 			{
 				FlowsSource = widgetData,
 				Trigger = TriggerSelector.ByType("onShortPress"),
@@ -1245,4 +1266,5 @@ public class FlowExecutorTests
 				ScopeRefId = "widget-1"
 			},
 			CancellationToken.None);
+	}
 }

@@ -45,7 +45,8 @@ internal sealed class RecordingVariableApi : IVariableApi
 		return Task.CompletedTask;
 	}
 
-	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	public Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
 	{
 		lock (_definitionRefreshes)
@@ -65,10 +66,14 @@ internal sealed class RecordingVariableApi : IVariableApi
 	public Action<string, object?>? OnSetValue { get; set; }
 
 	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
-		=> Task.FromResult<IReadOnlyList<VariableHandle>>(_byId.Values.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<VariableHandle>>(_byId.Values.ToList());
+	}
 
 	public Task<VariableHandle?> GetByNameAsync(string name)
-		=> Task.FromResult(_byName.TryGetValue(name, out var id) ? _byId[id] : null);
+	{
+		return Task.FromResult(_byName.TryGetValue(name, out var id) ? _byId[id] : null);
+	}
 
 	public Task<VariableHandle> CreateAsync(
 		string name,

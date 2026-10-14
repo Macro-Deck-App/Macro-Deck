@@ -79,9 +79,12 @@ internal static partial class PactlOutputParser
 
 		void Flush()
 		{
-			if (section is not null && name is { Length: > 0 } && !name.EndsWith(MonitorSuffix, StringComparison.Ordinal))
+			if (section is not null
+				&& name is { Length: > 0 }
+				&& !name.EndsWith(MonitorSuffix, StringComparison.Ordinal))
 			{
-				section.Add(new PactlDevice(name, string.IsNullOrEmpty(description) ? name : description, muted, volume));
+				section.Add(
+					new PactlDevice(name, string.IsNullOrEmpty(description) ? name : description, muted, volume));
 			}
 
 			name = null;
@@ -113,7 +116,10 @@ internal static partial class PactlOutputParser
 
 	// A subscribe line reads "Event 'change' on sink #52". Only devices and the defaults matter here;
 	// clients, modules, cards and streams come and go with every pactl call, our own included.
-	public static bool IsAudioEvent(string line) => EventRegex().IsMatch(line);
+	public static bool IsAudioEvent(string line)
+	{
+		return EventRegex().IsMatch(line);
+	}
 
 	public static bool? ParseMute(string output)
 	{

@@ -39,7 +39,8 @@ internal sealed class PluginManifestLinksTests
 	public void Every_standard_type_is_valid_without_a_label()
 	{
 		var links = string.Join(",",
-			PluginManifestLinkTypes.Standard.Select(type => $$"""{ "type": "{{type}}", "url": "https://example.com/{{type}}" }"""));
+			PluginManifestLinkTypes.Standard.Select(type
+				=> $$"""{ "type": "{{type}}", "url": "https://example.com/{{type}}" }"""));
 
 		Assert.That(Validate($"[{links}]"), Is.Empty);
 	}
@@ -91,7 +92,10 @@ internal sealed class PluginManifestLinksTests
 	[Test]
 	public void A_custom_label_may_be_128_characters_but_not_129()
 	{
-		string Link(int length) => $$"""[{ "type": "custom", "label": "{{new string('a', length)}}", "url": "https://example.com" }]""";
+		string Link(int length)
+		{
+			return $$"""[{ "type": "custom", "label": "{{new string('a', length)}}", "url": "https://example.com" }]""";
+		}
 
 		Assert.Multiple(() =>
 		{
@@ -100,11 +104,20 @@ internal sealed class PluginManifestLinksTests
 		});
 	}
 
-	[TestCase("""{ "type": "wiki", "url": "https://example.com/a" }""", """{ "type": "support", "url": "https://example.com/a" }""", "url")]
-	[TestCase("""{ "type": "wiki", "url": "https://EXAMPLE.com/a" }""", """{ "type": "support", "url": "https://example.com/a" }""", "url")]
-	[TestCase("""{ "type": "community", "url": "https://discord.gg/a" }""", """{ "type": "community", "url": "https://reddit.com/r/a" }""", "type")]
-	[TestCase("""{ "type": "custom", "label": "Guide", "url": "https://example.com/a" }""", """{ "type": "custom", "label": " guide ", "url": "https://example.com/b" }""", "label")]
-	public void A_second_link_repeating_a_url_a_standard_type_or_a_custom_label_is_a_duplicate(string first,
+	[TestCase("""{ "type": "wiki", "url": "https://example.com/a" }""",
+		"""{ "type": "support", "url": "https://example.com/a" }""",
+		"url")]
+	[TestCase("""{ "type": "wiki", "url": "https://EXAMPLE.com/a" }""",
+		"""{ "type": "support", "url": "https://example.com/a" }""",
+		"url")]
+	[TestCase("""{ "type": "community", "url": "https://discord.gg/a" }""",
+		"""{ "type": "community", "url": "https://reddit.com/r/a" }""",
+		"type")]
+	[TestCase("""{ "type": "custom", "label": "Guide", "url": "https://example.com/a" }""",
+		"""{ "type": "custom", "label": " guide ", "url": "https://example.com/b" }""",
+		"label")]
+	public void A_second_link_repeating_a_url_a_standard_type_or_a_custom_label_is_a_duplicate(
+		string first,
 		string second,
 		string property)
 	{

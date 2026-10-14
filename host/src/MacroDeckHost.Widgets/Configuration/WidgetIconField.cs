@@ -4,7 +4,6 @@ using MacroDeck.Localization;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Config.Options;
 using MacroDeck.Ui.Dsl;
-using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Domain.Widgets;
@@ -18,13 +17,15 @@ internal static class WidgetIconField
 
 	// The whole icon object is bound at once so the client's draft carries the pinned appearance with it:
 	// an icon input alone composes only type and reference and would drop the pin on every save.
-	public static UiObjectInput Build(string key,
+	public static UiObjectInput Build(
+		string key,
 		LocalizedText label,
 		Func<WidgetIconReference?> read,
 		Action<WidgetIconReference?> write,
 		IIconPackCache icons,
 		UiValue<bool> disabled = default)
-		=> new()
+	{
+		return new UiObjectInput
 		{
 			Key = key,
 			Binding = Bind.Custom(() => ToElement(read()), value => write(FromElement(value, read()))),
@@ -36,7 +37,7 @@ internal static class WidgetIconField
 					Key = "reference",
 					Label = label,
 					Binding = Bind.Custom(() => ToUi(read())!, value => write(Pick(value, read()))),
-					Disabled = disabled,
+					Disabled = disabled
 				},
 				new UiWhen
 				{
@@ -48,14 +49,18 @@ internal static class WidgetIconField
 						Label = AppStrings.Widgets.Appearance.Icon.Appearance(),
 						Binding = Bind.Custom(() => read()?.Appearance ?? Automatic,
 							value => write(read() is { } current
-								? current with { Appearance = value == Automatic || string.IsNullOrEmpty(value) ? null : value }
+								? current with
+								{
+									Appearance = value == Automatic || string.IsNullOrEmpty(value) ? null : value
+								}
 								: null)),
 						Options = UiValue.From<IReadOnlyList<UiOption>>(() => Options(icons, read())),
-						Disabled = disabled,
-					},
-				},
-			],
+						Disabled = disabled
+					}
+				}
+			]
 		};
+	}
 
 	public static WidgetIconReference? Pick(UiIconReference? value, WidgetIconReference? current)
 	{
@@ -69,17 +74,21 @@ internal static class WidgetIconField
 	}
 
 	private static UiIconReference? ToUi(WidgetIconReference? reference)
-		=> reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+	{
+		return reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+	}
 
 	private static JsonElement ToElement(WidgetIconReference? reference)
-		=> reference is { } value
+	{
+		return reference is { } value
 			? JsonSerializer.SerializeToElement(value.ToJson())
 			: JsonSerializer.SerializeToElement<JsonNode?>(null);
+	}
 
 	private static WidgetIconReference? FromElement(JsonElement value, WidgetIconReference? current)
 	{
-		if (value.ValueKind != JsonValueKind.Object ||
-			WidgetIconReference.Read(JsonNode.Parse(value.GetRawText()), null) is not { } next)
+		if (value.ValueKind != JsonValueKind.Object
+			|| WidgetIconReference.Read(JsonNode.Parse(value.GetRawText()), null) is not { } next)
 		{
 			return null;
 		}
@@ -89,9 +98,9 @@ internal static class WidgetIconField
 
 	private static List<UiOption> Options(IIconPackCache icons, WidgetIconReference? reference)
 	{
-		if (reference is not { Type: WidgetIconReference.IconPackType } value ||
-			!Guid.TryParse(value.Reference, out var iconId) ||
-			icons.GetIconById(iconId) is not { AppearanceOfId: null } icon)
+		if (reference is not { Type: WidgetIconReference.IconPackType } value
+			|| !Guid.TryParse(value.Reference, out var iconId)
+			|| icons.GetIconById(iconId) is not { AppearanceOfId: null } icon)
 		{
 			return [];
 		}
@@ -105,12 +114,13 @@ internal static class WidgetIconField
 		var options = new List<UiOption>
 		{
 			UiOption.Of(Automatic, AppStrings.Widgets.Appearance.Icon.AppearanceAutomatic()),
-			UiOption.Of(WidgetIconReference.DefaultAppearance, AppStrings.IconPacks.Appearances.Default()),
+			UiOption.Of(WidgetIconReference.DefaultAppearance, AppStrings.IconPacks.Appearances.Default())
 		};
 
 		foreach (var appearance in appearances)
 		{
-			var appearanceKey = IconAppearanceTraits.ToKey(appearance.AppearanceTraits ?? new Dictionary<string, string>());
+			var appearanceKey
+				= IconAppearanceTraits.ToKey(appearance.AppearanceTraits ?? new Dictionary<string, string>());
 			options.Add(UiOption.Of(appearanceKey, KindLabel(appearanceKey)));
 		}
 
@@ -118,7 +128,8 @@ internal static class WidgetIconField
 	}
 
 	private static LocalizedText KindLabel(string key)
-		=> key switch
+	{
+		return key switch
 		{
 			"colorScheme=light" => AppStrings.IconPacks.Appearances.Kind.Light(),
 			"colorScheme=dark" => AppStrings.IconPacks.Appearances.Kind.Dark(),
@@ -128,7 +139,9 @@ internal static class WidgetIconField
 			"colorScheme=light;motion=animated" => AppStrings.IconPacks.Appearances.Kind.LightAnimated(),
 			"colorScheme=dark;motion=static" => AppStrings.IconPacks.Appearances.Kind.DarkStatic(),
 			"colorScheme=dark;motion=animated" => AppStrings.IconPacks.Appearances.Kind.DarkAnimated(),
-			_ when IconAppearanceTraits.TryGetVariantName(key, out var name) => AppStrings.IconPacks.Appearances.Kind.Named(name),
+			_ when IconAppearanceTraits.TryGetVariantName(key, out var name) => AppStrings.IconPacks.Appearances.Kind
+				.Named(name),
 			_ => AppStrings.IconPacks.Appearances.Kind.Custom(key)
 		};
+	}
 }

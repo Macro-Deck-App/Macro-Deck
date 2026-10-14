@@ -17,7 +17,8 @@ public class DeleteIconPackRequestMessageHandler
 		_iconPackService = iconPackService;
 	}
 
-	public async ValueTask<DeleteIconPackResponse> Handle(DeleteIconPackRequest request,
+	public async ValueTask<DeleteIconPackResponse> Handle(
+		DeleteIconPackRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.Id, out var packId))

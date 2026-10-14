@@ -190,7 +190,8 @@ public class PluginLaunchTokenService : IPluginLaunchTokenService
 		private int _state;
 		private string? _boundSessionId;
 
-		public LaunchEntry(string pluginId,
+		public LaunchEntry(
+			string pluginId,
 			string launchId,
 			string displayName,
 			string version,
@@ -221,13 +222,21 @@ public class PluginLaunchTokenService : IPluginLaunchTokenService
 
 		public string? BoundSessionId => Volatile.Read(ref _boundSessionId);
 
-		public bool TryMarkLive() => Interlocked.CompareExchange(ref _state, Live, Unused) == Unused;
+		public bool TryMarkLive()
+		{
+			return Interlocked.CompareExchange(ref _state, Live, Unused) == Unused;
+		}
 
-		public void Bind(string sessionId) => Volatile.Write(ref _boundSessionId, sessionId);
+		public void Bind(string sessionId)
+		{
+			Volatile.Write(ref _boundSessionId, sessionId);
+		}
 
 		public bool TryReclaim(string observedSessionId)
-			=> ReferenceEquals(Interlocked.CompareExchange(ref _boundSessionId, null, observedSessionId),
+		{
+			return ReferenceEquals(Interlocked.CompareExchange(ref _boundSessionId, null, observedSessionId),
 				observedSessionId);
+		}
 
 		public void MarkUnused()
 		{

@@ -28,13 +28,13 @@ public class UiComponentVocabularyTests
 		"ui.stack", "ui.text", "ui.image", "ui.range-bar", "ui.slider", "ui.button", "ui.layer",
 		"ui.chart", "ui.text-field", "ui.list", "ui.transform", "ui.shape", "ui.icon", "ui.grid", "ui.gauge",
 		"ui.toggle", "ui.segmented", "ui.dial",
-		"ui.modifier", "ui.responsive", "ui.first-fit",
+		"ui.modifier", "ui.responsive", "ui.first-fit"
 	];
 
 	private static readonly string[] _expectedModifierMembers =
 	[
 		"background", "radius", "borderWidth", "borderColor", "borderLine", "accessibilityLabel",
-		"accessibilityHint", "disabled",
+		"accessibilityHint", "disabled"
 	];
 
 	private static readonly string[] _expectedClips = ["bounds", "circle", "capsule"];
@@ -48,7 +48,7 @@ public class UiComponentVocabularyTests
 	private static readonly string[] _expectedMacroDeckComponents =
 	[
 		"macrodeck.dynamic-text", "macrodeck.clock-dial", "macrodeck.progress-bar",
-		"macrodeck.progress-text", "macrodeck.video-stream",
+		"macrodeck.progress-text", "macrodeck.video-stream"
 	];
 
 	private static readonly string[] _expectedProperties =
@@ -59,10 +59,11 @@ public class UiComponentVocabularyTests
 		"end", "startColor", "endColor", "marker", "thickness", "value", "format", "seconds", "level",
 		"step", "levelColor", "interaction", "borderStyle", "borderColor", "corner", "points", "plotTop", "digits",
 		"answer", "placeholder", "rotation", "originX", "originY", "shape", "cornerRadius", "strokeColor",
-		"strokeWidth", "path", "icon", "columns", "rows", "minCellSize", "columnSpan", "rowSpan", "startAngle", "endAngle",
+		"strokeWidth", "path", "icon", "columns", "rows", "minCellSize", "columnSpan", "rowSpan", "startAngle",
+		"endAngle",
 		"on", "selected",
 		"modifiers", "frame", "clip", "mask", "variants", "spans", "overflow", "anchor", "stream", "shadow",
-		"trackColor",
+		"trackColor"
 	];
 
 	private static readonly string[] _expectedIconsVersion1 =
@@ -76,13 +77,13 @@ public class UiComponentVocabularyTests
 		"layers", "list-play", "lock", "log-out", "message-square", "minus", "moon", "music-note",
 		"music-player-type", "pause", "pencil", "pin", "pin-off", "play", "plus", "power", "puzzle",
 		"refresh", "scissors", "search", "settings", "sidebar", "sliders", "star", "store", "sun",
-		"trash", "undo", "unlock", "upload", "user", "weather-type", "wifi", "x", "zap",
+		"trash", "undo", "unlock", "upload", "user", "weather-type", "wifi", "x", "zap"
 	];
 
 	private static readonly string[] _expectedIconsVersion2 =
 	[
 		"device-laptop", "device-watch", "device-headphones", "device-gamepad", "device-mouse",
-		"device-keyboard", "device-speaker", "battery", "battery-charging",
+		"device-keyboard", "device-speaker", "battery", "battery-charging"
 	];
 
 	private static readonly string[] _expectedShapes = ["rectangle", "rounded-rectangle", "circle", "capsule", "path"];
@@ -91,7 +92,7 @@ public class UiComponentVocabularyTests
 	[
 		"time", "date", "zone-name", "zone-offset",
 		"time-12h", "time-12h-padded", "time-24h", "time-24h-unpadded",
-		"date-day-first", "date-month-first", "date-iso", "date-long",
+		"date-day-first", "date-month-first", "date-iso", "date-long"
 	];
 
 	private static readonly string[] _expectedProgressFormats = ["elapsed", "remaining", "duration"];
@@ -108,17 +109,19 @@ public class UiComponentVocabularyTests
 
 	private static readonly string[] _expectedBorderStyles =
 	[
-		"static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb",
+		"static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb"
 	];
 
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "adjust", "press", "long-press", "press-start", "press-end", "reveal", "double-press", "drag",
-		"drag-end", "swipe", "pinch", "pinch-end", "pointer-down", "pointer-move", "pointer-up", "tap",
+		"drag-end", "swipe", "pinch", "pinch-end", "pointer-down", "pointer-move", "pointer-up", "tap"
 	];
 
 	private static UiSurface WidgetSurface()
-		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	}
 
 	[Test]
 	public void The_core_component_set_is_the_twenty_one_ui_names()
@@ -267,13 +270,15 @@ public class UiComponentVocabularyTests
 	[Test]
 	public void A_video_stream_puts_only_the_stream_reference_on_the_wire()
 	{
-		var tree = UiViewBuilder.Build(WidgetSurface(), new UiVideoStream
-		{
-			Key = "camera",
-			Stream = UiValue.Of(new UiVideoStreamReference { Provider = "com.example.obs::studio", Id = "Preview scene" }),
-			Fit = UiComponentImageFits.Cover,
-			Fill = true,
-		});
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiVideoStream
+			{
+				Key = "camera",
+				Stream = UiValue.Of(new UiVideoStreamReference
+					{ Provider = "com.example.obs::studio", Id = "Preview scene" }),
+				Fit = UiComponentImageFits.Cover,
+				Fill = true
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -324,8 +329,8 @@ public class UiComponentVocabularyTests
 				Children =
 				[
 					new UiTextRun { Key = "unclamped", Size = 0.17 },
-					new UiTextRun { Key = "clamped", Size = UiSize.FromBasis(0.06, 0.5) },
-				],
+					new UiTextRun { Key = "clamped", Size = UiSize.FromBasis(0.06, 0.5) }
+				]
 			});
 
 		var unclamped = tree.Root.Children[0].Properties["size"].GetRawText();
@@ -340,7 +345,8 @@ public class UiComponentVocabularyTests
 
 	/// <summary>One element of each of the eleven types, with every property the DSL exposes populated.</summary>
 	private static UiStack BuildEveryWidgetPrimitive()
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "root",
 			Direction = UiComponentDirections.Vertical,
@@ -358,10 +364,9 @@ public class UiComponentVocabularyTests
 				{
 					Key = "text",
 					Text = "Partly cloudy",
-					Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
-					[
+					Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>([
 						UiTextSpan.FromText("Partly ", "#ffcc00", UiComponentTextWeights.Bold),
-						UiTextSpan.FromText("cloudy"),
+						UiTextSpan.FromText("cloudy")
 					]),
 					Size = 0.11,
 					MinSize = 0.078,
@@ -376,7 +381,7 @@ public class UiComponentVocabularyTests
 					StrokeColor = "#000000",
 					StrokeWidth = 0.01,
 					MainSize = UiSize.FromBasis(0.144, 1.2),
-					Fill = false,
+					Fill = false
 				},
 				new UiImage
 				{
@@ -392,8 +397,8 @@ public class UiComponentVocabularyTests
 						ResourceId = "app.macro-deck.weather.clear-day",
 						ContentHash = "sha256:0000000000000000000000000000000000000000000000000000000000000000",
 						MediaType = "image/svg+xml",
-						ByteLength = 1024,
-					}),
+						ByteLength = 1024
+					})
 				},
 				new UiDynamicText
 				{
@@ -407,21 +412,22 @@ public class UiComponentVocabularyTests
 					Role = UiComponentTextRoles.Primary,
 					Align = UiComponentAlignments.Center,
 					MainSize = 0.3,
-					Fill = false,
+					Fill = false
 				},
 				new UiClockDial
 				{
 					Key = "clockDial",
 					Value = UiValue.Of(UiTimeReference.Now()),
 					Seconds = true,
-					Fill = true,
+					Fill = true
 				},
 				new UiVideoStream
 				{
 					Key = "videoStream",
-					Stream = UiValue.Of(new UiVideoStreamReference { Provider = "com.example.obs::studio", Id = "Program" }),
+					Stream = UiValue.Of(new UiVideoStreamReference
+						{ Provider = "com.example.obs::studio", Id = "Program" }),
 					Fit = UiComponentImageFits.Cover,
-					Size = 0.5,
+					Size = 0.5
 				},
 				new UiProgressBar
 				{
@@ -432,7 +438,7 @@ public class UiComponentVocabularyTests
 					StartColor = "#3aa0ff",
 					EndColor = "#ff5a3a",
 					Thickness = UiSize.FromBasis(0.03, 0.35),
-					Fill = true,
+					Fill = true
 				},
 				new UiProgressText
 				{
@@ -447,7 +453,7 @@ public class UiComponentVocabularyTests
 					Role = UiComponentTextRoles.Muted,
 					Align = UiComponentAlignments.End,
 					MainSize = 0.12,
-					Fill = false,
+					Fill = false
 				},
 				new UiRangeBar
 				{
@@ -458,7 +464,7 @@ public class UiComponentVocabularyTests
 					EndColor = "#ff5a3a",
 					Marker = 0.4,
 					Thickness = UiSize.FromBasis(0.03, 0.35),
-					Fill = true,
+					Fill = true
 				},
 				new UiSlider
 				{
@@ -470,7 +476,13 @@ public class UiComponentVocabularyTests
 					Interaction = UiComponentSliderInteractions.Relative,
 					Thickness = UiSize.FromBasis(0.12, 0.55),
 					Fill = true,
-					Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
+					Events =
+					[
+						UiEventHandler.On(UiComponentEvents.Change,
+							static () =>
+							{
+							})
+					]
 				},
 				new UiButton
 				{
@@ -486,7 +498,7 @@ public class UiComponentVocabularyTests
 						ResourceId = "app.macro-deck.button.sunrise",
 						ContentHash = "sha256:0000000000000000000000000000000000000000000000000000000000000000",
 						MediaType = "image/svg+xml",
-						ByteLength = 2048,
+						ByteLength = 2048
 					}),
 					Fit = UiComponentImageFits.Cover,
 					Zoom = 1.35,
@@ -501,10 +513,22 @@ public class UiComponentVocabularyTests
 					Fill = false,
 					Events =
 					[
-						UiEventHandler.On(UiComponentEvents.Press, static () => { }),
-						UiEventHandler.On(UiComponentEvents.LongPress, static () => { }),
-						UiEventHandler.On(UiComponentEvents.PressStart, static () => { }),
-						UiEventHandler.On(UiComponentEvents.PressEnd, static () => { }),
+						UiEventHandler.On(UiComponentEvents.Press,
+							static () =>
+							{
+							}),
+						UiEventHandler.On(UiComponentEvents.LongPress,
+							static () =>
+							{
+							}),
+						UiEventHandler.On(UiComponentEvents.PressStart,
+							static () =>
+							{
+							}),
+						UiEventHandler.On(UiComponentEvents.PressEnd,
+							static () =>
+							{
+							})
 					],
 					Children =
 					[
@@ -512,9 +536,9 @@ public class UiComponentVocabularyTests
 						{
 							Key = "buttonLabel",
 							Text = "Run scene",
-							Size = 0.11,
-						},
-					],
+							Size = 0.11
+						}
+					]
 				},
 				new UiLayer
 				{
@@ -527,16 +551,16 @@ public class UiComponentVocabularyTests
 							Points = UiValue.Of<IReadOnlyList<double>>([0.1, 0.4, 0.9]),
 							Color = "#4f9dff",
 							PlotTop = 0.66,
-							Thickness = UiSize.Capped(0.0167, 2),
+							Thickness = UiSize.Capped(0.0167, 2)
 						},
 						new UiTextRun
 						{
 							Key = "reading",
 							Text = "73.4",
 							Size = 0.26,
-							Digits = 3.5,
-						},
-					],
+							Digits = 3.5
+						}
+					]
 				},
 				new UiTransform
 				{
@@ -553,9 +577,9 @@ public class UiComponentVocabularyTests
 						{
 							Key = "needleGlyph",
 							Text = "|",
-							Size = 0.2,
-						},
-					],
+							Size = 0.2
+						}
+					]
 				},
 				new UiGrid
 				{
@@ -577,7 +601,7 @@ public class UiComponentVocabularyTests
 							StrokeWidth = UiSize.Capped(0.01, 2),
 							Path = "M0 0 L1 0 L0.5 1 Z",
 							ColumnSpan = 2,
-							RowSpan = 2,
+							RowSpan = 2
 						},
 						new UiIcon
 						{
@@ -585,21 +609,27 @@ public class UiComponentVocabularyTests
 							Icon = UiIcons.Play,
 							Size = 0.2,
 							Role = UiComponentTextRoles.Secondary,
-							Color = "#ffcc00",
+							Color = "#ffcc00"
 						},
 						new UiSegmented
 						{
 							Key = "segmented",
 							Selected = 1,
 							LevelColor = "#34c759",
-							Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
+							Events =
+							[
+								UiEventHandler.On(UiComponentEvents.Change,
+									static () =>
+									{
+									})
+							],
 							Children =
 							[
 								new UiTextRun { Key = "day", Text = "Day" },
-								new UiTextRun { Key = "night", Text = "Night" },
-							],
-						},
-					],
+								new UiTextRun { Key = "night", Text = "Night" }
+							]
+						}
+					]
 				},
 				new UiGauge
 				{
@@ -609,7 +639,7 @@ public class UiComponentVocabularyTests
 					EndAngle = 120,
 					LevelColor = "#ff9500",
 					TrackColor = "#3A3A3C",
-					Thickness = 0.06,
+					Thickness = 0.06
 				},
 				new UiToggle
 				{
@@ -617,7 +647,13 @@ public class UiComponentVocabularyTests
 					On = true,
 					LevelColor = "#34c759",
 					Size = 0.12,
-					Events = [UiEventHandler.On(UiComponentEvents.Change, static () => { })],
+					Events =
+					[
+						UiEventHandler.On(UiComponentEvents.Change,
+							static () =>
+							{
+							})
+					]
 				},
 				new UiDial
 				{
@@ -628,7 +664,13 @@ public class UiComponentVocabularyTests
 					EndAngle = 360,
 					LevelColor = "#5856d6",
 					Thickness = 0.05,
-					Events = [UiEventHandler.On(UiComponentEvents.Adjust, static () => { })],
+					Events =
+					[
+						UiEventHandler.On(UiComponentEvents.Adjust,
+							static () =>
+							{
+							})
+					]
 				},
 				new UiModifier
 				{
@@ -640,7 +682,7 @@ public class UiComponentVocabularyTests
 						new UiMaskStop { Offset = 1, Opacity = 0 }),
 					Frame = new UiFrame { AspectRatio = 1 },
 					Radius = 0.05,
-					Child = new UiTextRun { Key = "framedLabel", Text = "Framed" },
+					Child = new UiTextRun { Key = "framedLabel", Text = "Framed" }
 				},
 				new UiResponsive
 				{
@@ -651,9 +693,9 @@ public class UiComponentVocabularyTests
 						new UiResponsiveVariant
 						{
 							MinWidth = 1.5,
-							Content = new UiTextRun { Key = "wideLabel", Text = "21° Sunny" },
-						},
-					],
+							Content = new UiTextRun { Key = "wideLabel", Text = "21° Sunny" }
+						}
+					]
 				},
 				new UiFirstFit
 				{
@@ -661,15 +703,15 @@ public class UiComponentVocabularyTests
 					Children =
 					[
 						new UiTextRun { Key = "longLabel", Text = "21° Sunny" },
-						new UiTextRun { Key = "shortLabel", Text = "21°" },
-					],
+						new UiTextRun { Key = "shortLabel", Text = "21°" }
+					]
 				},
 				new UiTextField
 				{
 					Key = "search",
 					Text = "anthem",
 					Placeholder = "Search...",
-					Size = 0.045,
+					Size = 0.045
 				},
 				new UiList
 				{
@@ -684,12 +726,13 @@ public class UiComponentVocabularyTests
 						{
 							Key = "row",
 							Answer = "track-7",
-							Children = [new UiTextRun { Key = "title", Text = "A track" }],
-						},
-					],
-				},
-			],
+							Children = [new UiTextRun { Key = "title", Text = "A track" }]
+						}
+					]
+				}
+			]
 		};
+	}
 
 	[Test]
 	public void The_shape_set_is_frozen()
@@ -745,8 +788,8 @@ public class UiComponentVocabularyTests
 				Children =
 				[
 					new UiTextRun { Key = "plain", Text = "a" },
-					new UiStack { Key = "wide", ColumnSpan = 2, RowSpan = 3 },
-				],
+					new UiStack { Key = "wide", ColumnSpan = 2, RowSpan = 3 }
+				]
 			});
 
 		var plain = tree.Root.Children[0].Properties;
@@ -775,12 +818,13 @@ public class UiComponentVocabularyTests
 					{
 						Key = "row",
 						Direction = UiComponentDirections.Horizontal,
-						Children = [new UiTextRun { Key = "b", Text = "b" }],
-					},
-				],
+						Children = [new UiTextRun { Key = "b", Text = "b" }]
+					}
+				]
 			});
 
-		var lists = Walk(tree.Root).Where(node => node.Type == "ui.list")
+		var lists = Walk(tree.Root)
+			.Where(node => node.Type == "ui.list")
 			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
 
 		Assert.Multiple(() =>
@@ -800,11 +844,12 @@ public class UiComponentVocabularyTests
 				Children =
 				[
 					new UiGauge { Key = "themed", Level = 0.85, LevelColor = "#FFFFFF" },
-					new UiGauge { Key = "custom", Level = 0.85, LevelColor = "#FFFFFF", TrackColor = "#3A3A3C" },
-				],
+					new UiGauge { Key = "custom", Level = 0.85, LevelColor = "#FFFFFF", TrackColor = "#3A3A3C" }
+				]
 			});
 
-		var gauges = Walk(tree.Root).Where(node => node.Type == "ui.gauge")
+		var gauges = Walk(tree.Root)
+			.Where(node => node.Type == "ui.gauge")
 			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
 
 		Assert.Multiple(() =>
@@ -829,10 +874,11 @@ public class UiComponentVocabularyTests
 						Key = "chat",
 						Anchor = UiComponentListAnchors.End,
 						RequiredComponentVersion = 3,
-						Fallback = new UiList { Key = "newestFirst", Children = [new UiTextRun { Key = "c", Text = "c" }] },
-						Children = [new UiTextRun { Key = "b", Text = "b" }],
-					},
-				],
+						Fallback = new UiList
+							{ Key = "newestFirst", Children = [new UiTextRun { Key = "c", Text = "c" }] },
+						Children = [new UiTextRun { Key = "b", Text = "b" }]
+					}
+				]
 			});
 
 		var plain = tree.Root.Children[0];
@@ -851,14 +897,15 @@ public class UiComponentVocabularyTests
 	public void A_reader_whose_list_stops_at_version_2_draws_the_fallback_of_an_anchored_list()
 	{
 		var chat = UiViewBuilder.Build(WidgetSurface(),
-			new UiList
-			{
-				Key = "chat",
-				Anchor = UiComponentListAnchors.End,
-				RequiredComponentVersion = 3,
-				Fallback = new UiList { Key = "newestFirst", Children = [new UiTextRun { Key = "b", Text = "b" }] },
-				Children = [new UiTextRun { Key = "a", Text = "a" }],
-			}).Root;
+				new UiList
+				{
+					Key = "chat",
+					Anchor = UiComponentListAnchors.End,
+					RequiredComponentVersion = 3,
+					Fallback = new UiList { Key = "newestFirst", Children = [new UiTextRun { Key = "b", Text = "b" }] },
+					Children = [new UiTextRun { Key = "a", Text = "a" }]
+				})
+			.Root;
 		var older = new UiCapabilities
 		{
 			UiProtocol = new UiVersionRange { Minimum = 3, Maximum = 4 },
@@ -866,13 +913,14 @@ public class UiComponentVocabularyTests
 			Components = new Dictionary<string, UiVersionRange>
 			{
 				["ui.list"] = new() { Minimum = 1, Maximum = 2 },
-				["ui.text"] = new() { Minimum = 1, Maximum = 1 },
-			},
+				["ui.text"] = new() { Minimum = 1, Maximum = 1 }
+			}
 		};
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(UiCapabilityNegotiator.NegotiateComponent(chat, older).IsSupported, Is.False,
+			Assert.That(UiCapabilityNegotiator.NegotiateComponent(chat, older).IsSupported,
+				Is.False,
 				"a version 2 list would ignore the anchor and leave a feed scrolled away from its newest row");
 			Assert.That(UiCapabilityNegotiator.NegotiateComponent(chat.Fallback!, older).IsSupported, Is.True);
 		});
@@ -884,7 +932,7 @@ public class UiComponentVocabularyTests
 		var emote = new UiResource
 		{
 			ResourceId = "acme.emote-25",
-			ContentHash = "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+			ContentHash = "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 		};
 		var tree = UiViewBuilder.Build(WidgetSurface(),
 			new UiStack
@@ -898,14 +946,13 @@ public class UiComponentVocabularyTests
 					{
 						Key = "rich",
 						Text = "hi Kappa",
-						Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>(
-						[
+						Spans = UiValue.Of<IReadOnlyList<UiTextSpan>>([
 							UiTextSpan.FromText("hi ", "#9146ff", UiComponentTextWeights.Bold),
 							UiTextSpan.FromImage(emote, "Kappa"),
-							UiTextSpan.FromImage(emote),
-						]),
-					},
-				],
+							UiTextSpan.FromImage(emote)
+						])
+					}
+				]
 			});
 
 		var plainStack = tree.Root.Children[0];
@@ -918,10 +965,10 @@ public class UiComponentVocabularyTests
 			Assert.That(plainStack.Properties.ContainsKey("overflow"), Is.False);
 			Assert.That(plain.Properties.ContainsKey("spans"), Is.False);
 			Assert.That(rich.Properties["text"].GetString(), Is.EqualTo("hi Kappa"));
-			Assert.That(rich.Properties["spans"].GetRawText(), Is.EqualTo(
-				"""[{"text":"hi ","color":"#9146ff","weight":"bold"},""" +
-				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"alt":"Kappa"},""" +
-				"""{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"}}]"""));
+			Assert.That(rich.Properties["spans"].GetRawText(),
+				Is.EqualTo("""[{"text":"hi ","color":"#9146ff","weight":"bold"},"""
+					+ """{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},"alt":"Kappa"},"""
+					+ """{"image":{"resourceId":"acme.emote-25","contentHash":"sha256:0000000000000000000000000000000000000000000000000000000000000000"}}]"""));
 		});
 	}
 
@@ -941,9 +988,9 @@ public class UiComponentVocabularyTests
 						Text = "b",
 						Shadow = false,
 						StrokeColor = "#112233",
-						StrokeWidth = 0.02,
-					},
-				],
+						StrokeWidth = 0.02
+					}
+				]
 			});
 
 		var plain = tree.Root.Children[0];

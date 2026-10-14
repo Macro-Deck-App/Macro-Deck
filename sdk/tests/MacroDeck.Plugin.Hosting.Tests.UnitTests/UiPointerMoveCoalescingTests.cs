@@ -92,11 +92,13 @@ public class UiPointerMoveCoalescingTests
 		return handler;
 	}
 
-	private static Task<CapabilityInvocationResult> SendAsync(UiCapabilityHandler handler,
+	private static Task<CapabilityInvocationResult> SendAsync(
+		UiCapabilityHandler handler,
 		string name,
 		string tag,
 		string? clientId)
-		=> handler.InvokeAsync(Invocation(CapabilityOperations.Ui.SessionEvent,
+	{
+		return handler.InvokeAsync(Invocation(CapabilityOperations.Ui.SessionEvent,
 				new UiSessionEventArguments
 				{
 					SessionId = "s1",
@@ -106,9 +108,11 @@ public class UiPointerMoveCoalescingTests
 					ClientId = clientId
 				}),
 			CancellationToken.None);
+	}
 
 	private static CapabilityInvocation Invocation(string operation, object arguments)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Ui,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -117,21 +121,31 @@ public class UiPointerMoveCoalescingTests
 			CorrelationId = "c1",
 			Services = new EmptyServiceProvider()
 		};
+	}
 
 	private sealed class EmptyServiceProvider : IServiceProvider
 	{
-		public object? GetService(Type serviceType) => null;
+		public object? GetService(Type serviceType)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NoOpHostInvoker : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<JsonElement?>(null);
+		{
+			return Task.FromResult<JsonElement?>(null);
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class Integration(SlowSession session) : IPluginIntegration, IUiProvider
@@ -141,12 +155,20 @@ public class UiPointerMoveCoalescingTests
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
 			[new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared }];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(session);
+		{
+			return Task.FromResult<IUiSession?>(session);
+		}
 	}
 
 	private sealed class SlowSession : IUiSession
@@ -166,14 +188,20 @@ public class UiPointerMoveCoalescingTests
 			remove { }
 		}
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Revision = 1,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-			Root = new UiNode { Id = "pad", Type = UiComponents.Stack }
-		};
+			return new UiTree
+			{
+				Revision = 1,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+				Root = new UiNode { Id = "pad", Type = UiComponents.Stack }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
 		public void Dispatch(UiEvent uiEvent)
 		{
@@ -186,7 +214,10 @@ public class UiPointerMoveCoalescingTests
 			}
 		}
 
-		public void Emit() => Changed?.Invoke(this, EventArgs.Empty);
+		public void Emit()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 
 		public async Task<IReadOnlyList<string>> WaitForAsync(int count)
 		{
@@ -209,6 +240,9 @@ public class UiPointerMoveCoalescingTests
 			}
 		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

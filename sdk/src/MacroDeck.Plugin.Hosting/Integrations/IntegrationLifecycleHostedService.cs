@@ -88,7 +88,7 @@ internal sealed class IntegrationLifecycleHostedService(
 		await _gate.WaitAsync(CancellationToken.None);
 		try
 		{
-			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: false));
+			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(false));
 			await ShutdownAllAsync();
 		}
 		finally
@@ -97,7 +97,10 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 	}
 
-	private void OnConnected(object? sender, PluginConnectedEventArgs e) => _ = HandleConnectedAsync(e.Resumed);
+	private void OnConnected(object? sender, PluginConnectedEventArgs e)
+	{
+		_ = HandleConnectedAsync(e.Resumed);
+	}
 
 	/// <summary>
 	/// The subscriber for <see cref="HostStateCache.ConfigChanged" /> (issue #413's config-change gap):
@@ -107,7 +110,10 @@ internal sealed class IntegrationLifecycleHostedService(
 	/// <c>RemotePluginIntegration.InitializeAsync</c> stays a no-op; this is the loop that actually
 	/// re-reads the config now.
 	/// </summary>
-	private void OnConfigChanged() => _ = HandleConnectedAsync(resumed: false);
+	private void OnConfigChanged()
+	{
+		_ = HandleConnectedAsync(false);
+	}
 
 	private async Task HandleConnectedAsync(bool resumed)
 	{
@@ -130,7 +136,7 @@ internal sealed class IntegrationLifecycleHostedService(
 			colors?.ReleaseLifecycleWatches();
 			batteries?.ReleaseLifecycleHandlers();
 			musicPlayers?.ReleaseLifecycleHandlers();
-			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(notifyHost: true));
+			await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAllAsync(true));
 
 			if (_initialized.Count > 0)
 			{
@@ -174,8 +180,8 @@ internal sealed class IntegrationLifecycleHostedService(
 						await screenSaverProvider.InitializeAsync(screenSaverContext);
 					}
 
-					if (integration is IVideoStreamIntegration videoStreamIntegration &&
-						services.GetService<VideoStreamProviderRegistry>() is { } videoStreams)
+					if (integration is IVideoStreamIntegration videoStreamIntegration
+						&& services.GetService<VideoStreamProviderRegistry>() is { } videoStreams)
 					{
 						await videoStreamIntegration.InitializeAsync(videoStreams.ContextFor(integration));
 					}
@@ -187,8 +193,8 @@ internal sealed class IntegrationLifecycleHostedService(
 						await provider.InitializeAsync(deviceContext);
 					}
 
-					if (integration is IBatteryProvider batteryProvider &&
-						services.GetService<IBatteryProviderContext>() is { } batteryContext)
+					if (integration is IBatteryProvider batteryProvider
+						&& services.GetService<IBatteryProviderContext>() is { } batteryContext)
 					{
 						await batteryProvider.InitializeAsync(batteryContext);
 					}
@@ -201,8 +207,8 @@ internal sealed class IntegrationLifecycleHostedService(
 					// this plugin actually implements IVariableProvider, so this resolves it through the
 					// container rather than taking it as a required constructor dependency - a plugin with
 					// no such provider must build with no trace of this capability at all.
-					if (integration is IVariableProvider { SupportsCatalog: true, SupportsPush: true } catalog &&
-						services.GetService<VariableSubscriptions>() is { } subscriptions)
+					if (integration is IVariableProvider { SupportsCatalog: true, SupportsPush: true } catalog
+						&& services.GetService<VariableSubscriptions>() is { } subscriptions)
 					{
 						var sink = new RemoteVariableSink(hostInvoker, subscriptions, logger);
 						await catalog.OnAttachedAsync(sink);
@@ -214,7 +220,7 @@ internal sealed class IntegrationLifecycleHostedService(
 				catch (Exception exception) when (exception is not OutOfMemoryException)
 				{
 					_logger.IntegrationInitializationFailed(metadata.Id, integration.GetType().Name, exception);
-					await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAsync(integration, notifyHost: true));
+					await ReleaseVideoStreamsAsync(videoStreams => videoStreams.ReleaseAsync(integration, true));
 				}
 			}
 
@@ -301,5 +307,8 @@ internal sealed class IntegrationLifecycleHostedService(
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 }

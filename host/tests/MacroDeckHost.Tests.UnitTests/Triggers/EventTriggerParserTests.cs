@@ -34,9 +34,11 @@ public class EventTriggerParserTests
 	}
 
 	private static EventConfigurationValue Configured(string value, string? op)
-		=> EventTriggerParser.ParseFlows(EventTriggerOwner.ForWidget(Guid.NewGuid()), Flow(value, op))
+	{
+		return EventTriggerParser.ParseFlows(EventTriggerOwner.ForWidget(Guid.NewGuid()), Flow(value, op))
 			.Single()
 			.Configuration["sceneName"];
+	}
 
 	[Test]
 	public void An_authored_operator_reaches_the_configuration_value()
@@ -104,7 +106,8 @@ public class EventTriggerParserTests
 	public void A_stored_trigger_with_a_split_provider_and_event_id_produces_the_qualified_id()
 	{
 		var subscription = EventTriggerParser.ParseFlows(EventTriggerOwner.ForWidget(Guid.NewGuid()),
-			Flow("Live", ">")).Single();
+				Flow("Live", ">"))
+			.Single();
 
 		Assert.That(subscription.EventId, Is.EqualTo("obs::scene-changed"));
 	}

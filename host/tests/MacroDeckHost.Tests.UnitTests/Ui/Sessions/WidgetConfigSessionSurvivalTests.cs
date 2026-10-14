@@ -30,8 +30,8 @@ internal sealed class WidgetConfigSessionSurvivalTests : UiSessionFixture
 				"A tile drawing the reconfigured widget has to be built again.");
 			Assert.That(Registry.Find(editor)?.State,
 				Is.EqualTo(UiSessionState.Open),
-				"The save that reconfigured the widget came from this editor - tearing it down mid-edit is " +
-				"exactly what the invalidation must not do.");
+				"The save that reconfigured the widget came from this editor - tearing it down mid-edit is "
+				+ "exactly what the invalidation must not do.");
 		});
 	}
 
@@ -61,7 +61,8 @@ internal sealed class WidgetConfigSessionSurvivalTests : UiSessionFixture
 	}
 
 	private static UiSurface WidgetSurface()
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Widget,
 			SessionMode = UiSessionModes.Shared,
@@ -70,9 +71,11 @@ internal sealed class WidgetConfigSessionSurvivalTests : UiSessionFixture
 				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widgetId.ToString())
 			}
 		};
+	}
 
 	private static UiSurface ConfigSurface()
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -83,4 +86,5 @@ internal sealed class WidgetConfigSessionSurvivalTests : UiSessionFixture
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widgetId.ToString())
 			}
 		};
+	}
 }

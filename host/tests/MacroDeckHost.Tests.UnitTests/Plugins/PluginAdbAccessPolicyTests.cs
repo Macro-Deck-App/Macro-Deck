@@ -2,7 +2,6 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Plugins;
-using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Tests.UnitTests.Adb;
@@ -79,7 +78,10 @@ public class PluginAdbAccessPolicyTests
 	{
 		private readonly Lazy<PluginAdbAccessPolicy> _policy;
 
-		public World() => _policy = new Lazy<PluginAdbAccessPolicy>(Build);
+		public World()
+		{
+			_policy = new Lazy<PluginAdbAccessPolicy>(Build);
+		}
 
 		public bool AdbEnabled { get; init; } = true;
 
@@ -128,13 +130,17 @@ public class PluginAdbAccessPolicyTests
 
 	private sealed class SingleInstalledPlugin(IReadOnlyList<string>? permissions) : IPluginInstallationCatalog
 	{
-		public IReadOnlyList<InstalledPlugin> Discover() => [];
+		public IReadOnlyList<InstalledPlugin> Discover()
+		{
+			return [];
+		}
 
 		public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 		{
 			version = permissions is null
 				? null
-				: new InstalledPluginVersion { Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
+				: new InstalledPluginVersion
+					{ Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
 			return version is not null;
 		}
 
@@ -146,7 +152,8 @@ public class PluginAdbAccessPolicyTests
 	private sealed class FixedManifestReader(IReadOnlyList<string>? permissions) : IPluginManifestReader
 	{
 		public PluginManifestReadResult Read(string manifestPath, string expectedPluginId, string expectedVersion)
-			=> PluginManifestReadResult.Ok(new PluginManifest
+		{
+			return PluginManifestReadResult.Ok(new PluginManifest
 			{
 				ManifestVersion = 1,
 				Id = expectedPluginId,
@@ -155,11 +162,15 @@ public class PluginAdbAccessPolicyTests
 				Entrypoints = new Dictionary<string, PluginEntrypoint>(),
 				Permissions = permissions
 			});
+		}
 
-		public PluginManifestReadResult ReadFromJson(string json,
+		public PluginManifestReadResult ReadFromJson(
+			string json,
 			string? versionDirectory,
 			string expectedPluginId,
 			string expectedVersion)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

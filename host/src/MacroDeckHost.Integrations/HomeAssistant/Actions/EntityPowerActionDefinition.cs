@@ -41,18 +41,25 @@ internal sealed class EntityPowerActionDefinition : IDynamicOptionsActionDefinit
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_service, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_service, _resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(HomeAssistantActionStates.Snapshot(_resolver(),
 			HomeAssistantActionValues.ReadList(parameters.GetValueOrDefault(EntitiesParameterName))));
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

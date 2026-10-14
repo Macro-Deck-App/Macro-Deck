@@ -33,7 +33,7 @@ public sealed class UnroutedCapabilityHandlerAnalyzer : DiagnosticAnalyzer
 			var macroDeckExtensionsType =
 				compilation.GetTypeByMetadataName(WellKnownTypeNames.MacroDeckServiceCollectionExtensions);
 
-			if (handlerType is null || (addExtensionsType is null && tryAddExtensionsType is null))
+			if (handlerType is null || addExtensionsType is null && tryAddExtensionsType is null)
 			{
 				return;
 			}
@@ -49,20 +49,20 @@ public sealed class UnroutedCapabilityHandlerAnalyzer : DiagnosticAnalyzer
 						var method = invocation.TargetMethod;
 
 						var isSingletonFamily =
-							(method.Name == "AddSingleton" &&
-								SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType)) ||
-							(method.Name == "TryAddSingleton" &&
-								SymbolEqualityComparer.Default.Equals(method.ContainingType, tryAddExtensionsType));
+							method.Name == "AddSingleton"
+							&& SymbolEqualityComparer.Default.Equals(method.ContainingType, addExtensionsType)
+							|| method.Name == "TryAddSingleton"
+							&& SymbolEqualityComparer.Default.Equals(method.ContainingType, tryAddExtensionsType);
 
 						if (isSingletonFamily)
 						{
-							if (method.TypeArguments.Length == 1 &&
-								method.TypeArguments[0].ImplementsInterface(handlerType))
+							if (method.TypeArguments.Length == 1
+								&& method.TypeArguments[0].ImplementsInterface(handlerType))
 							{
 								selfRegistrations.Add((method.TypeArguments[0], invocation));
 							}
-							else if (method.TypeArguments.Length == 2 &&
-								SymbolEqualityComparer.Default.Equals(method.TypeArguments[0], handlerType))
+							else if (method.TypeArguments.Length == 2
+								&& SymbolEqualityComparer.Default.Equals(method.TypeArguments[0], handlerType))
 							{
 								routedImplementations.Add(method.TypeArguments[1]);
 							}
@@ -70,10 +70,10 @@ public sealed class UnroutedCapabilityHandlerAnalyzer : DiagnosticAnalyzer
 							return;
 						}
 
-						if (macroDeckExtensionsType is not null &&
-							method.Name == "AddMacroDeckCapabilityHandler" &&
-							method.TypeArguments.Length == 1 &&
-							SymbolEqualityComparer.Default.Equals(method.ContainingType, macroDeckExtensionsType))
+						if (macroDeckExtensionsType is not null
+							&& method.Name == "AddMacroDeckCapabilityHandler"
+							&& method.TypeArguments.Length == 1
+							&& SymbolEqualityComparer.Default.Equals(method.ContainingType, macroDeckExtensionsType))
 						{
 							routedImplementations.Add(method.TypeArguments[0]);
 						}

@@ -6,7 +6,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Meld;
 
@@ -45,12 +44,14 @@ public sealed class MeldConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			ConnectionStepId => await SubmitConnection(input, cancellationToken).ConfigureAwait(false),
 			RemoteWarningStepId => await SubmitRemoteWarning(input, cancellationToken).ConfigureAwait(false),
 			_ => ConfigFlowResult.Error(ConnectionStep(), AppStrings.Integrations.Meld.Config.UnknownStep())
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnection(
 		IReadOnlyDictionary<string, object?> input,
@@ -66,7 +67,7 @@ public sealed class MeldConfigFlow : IConfigFlow
 				fieldErrors: new Dictionary<string, LocalizedText>(StringComparer.Ordinal)
 				{
 					[MeldConfigKeys.Port] =
-						AppStrings.Integrations.Meld.Config.EnterValidPort(defaultPort: MeldEndpoint.DefaultPort)
+						AppStrings.Integrations.Meld.Config.EnterValidPort(MeldEndpoint.DefaultPort)
 				});
 		}
 
@@ -153,8 +154,8 @@ public sealed class MeldConfigFlow : IConfigFlow
 			// from "nothing is there", because the fix (check what is actually listening) differs.
 			return objects.ContainsKey(MeldObjects.Object)
 				? null
-				: AppStrings.Integrations.Meld.Config.NotMeldStudio(host: endpoint.Host,
-					port: endpoint.Port);
+				: AppStrings.Integrations.Meld.Config.NotMeldStudio(endpoint.Host,
+					endpoint.Port);
 		}
 		catch (OperationCanceledException)
 		{
@@ -181,72 +182,86 @@ public sealed class MeldConfigFlow : IConfigFlow
 	}
 
 	private static LocalizedText Unreachable(Uri endpoint)
-		=> AppStrings.Integrations.Meld.Config.Unreachable(host: endpoint.Host, port: endpoint.Port);
-
-	private static bool ReadBool(object? value) => value switch
 	{
-		bool b => b,
-		string s => bool.TryParse(s, out var parsed) && parsed,
-		_ => false
-	};
+		return AppStrings.Integrations.Meld.Config.Unreachable(endpoint.Host, endpoint.Port);
+	}
 
-	private static int? ParsePort(object? value) => value switch
+	private static bool ReadBool(object? value)
 	{
-		null => MeldEndpoint.DefaultPort,
-		int i => i,
-		long l => (int)l,
-		double d => (int)d,
-		string s when string.IsNullOrWhiteSpace(s) => MeldEndpoint.DefaultPort,
-		string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
-		_ => null
-	};
+		return value switch
+		{
+			bool b => b,
+			string s => bool.TryParse(s, out var parsed) && parsed,
+			_ => false
+		};
+	}
 
-	private static ConfigFlowStep ConnectionStep() => new()
+	private static int? ParsePort(object? value)
 	{
-		StepId = ConnectionStepId,
-		Title = AppStrings.Integrations.Meld.Config.ConnectTitle(),
-		Description = AppStrings.Integrations.Meld.Config.ConnectDescription(),
-		Instructions =
-		[
-			new ConfigFlowInstruction { Text = AppStrings.Integrations.Meld.Config.InstructionOpenSettings() },
-			new ConfigFlowInstruction { Text = AppStrings.Integrations.Meld.Config.InstructionEnableWebSocket() }
-		],
-		Links =
-		[
-			new ConfigFlowLink
-			{
-				Label = AppStrings.Integrations.Meld.Config.SettingsDocumentationLink(),
-				Url = "https://meldstudio.co/docs/settings/"
-			}
-		],
-		Fields = [],
-		AdvancedFields =
-		[
-			ActionParameter.Text(MeldConfigKeys.Host,
-				label: AppStrings.Integrations.Meld.Config.HostLabel(),
-				description: AppStrings.Integrations.Meld.Config.HostDescription(),
-				placeholder: MeldEndpoint.DefaultHost),
-			new ActionParameter
-			{
-				Name = MeldConfigKeys.Port,
-				Type = ActionParameterType.Number,
-				Label = AppStrings.Integrations.Meld.Config.PortLabel(),
-				Description = AppStrings.Integrations.Meld.Config.PortDescription(),
-				Min = 1,
-				Max = 65535,
-				Placeholder = MeldEndpoint.DefaultPort.ToString(CultureInfo.InvariantCulture)
-			}
-		]
-	};
+		return value switch
+		{
+			null => MeldEndpoint.DefaultPort,
+			int i => i,
+			long l => (int)l,
+			double d => (int)d,
+			string s when string.IsNullOrWhiteSpace(s) => MeldEndpoint.DefaultPort,
+			string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
+			_ => null
+		};
+	}
 
-	private static ConfigFlowStep RemoteWarningStep(string host, int port) => new()
+	private static ConfigFlowStep ConnectionStep()
 	{
-		StepId = RemoteWarningStepId,
-		Title = AppStrings.Integrations.Meld.Config.RemoteWarningTitle(),
-		Description = AppStrings.Integrations.Meld.Config.RemoteWarningDescription(host: host, port: port),
-		Fields =
-		[
-			ActionParameter.Toggle(ConfirmField, label: AppStrings.Integrations.Meld.Config.ConfirmRiskLabel())
-		]
-	};
+		return new ConfigFlowStep
+		{
+			StepId = ConnectionStepId,
+			Title = AppStrings.Integrations.Meld.Config.ConnectTitle(),
+			Description = AppStrings.Integrations.Meld.Config.ConnectDescription(),
+			Instructions =
+			[
+				new ConfigFlowInstruction { Text = AppStrings.Integrations.Meld.Config.InstructionOpenSettings() },
+				new ConfigFlowInstruction { Text = AppStrings.Integrations.Meld.Config.InstructionEnableWebSocket() }
+			],
+			Links =
+			[
+				new ConfigFlowLink
+				{
+					Label = AppStrings.Integrations.Meld.Config.SettingsDocumentationLink(),
+					Url = "https://meldstudio.co/docs/settings/"
+				}
+			],
+			Fields = [],
+			AdvancedFields =
+			[
+				ActionParameter.Text(MeldConfigKeys.Host,
+					AppStrings.Integrations.Meld.Config.HostLabel(),
+					AppStrings.Integrations.Meld.Config.HostDescription(),
+					MeldEndpoint.DefaultHost),
+				new ActionParameter
+				{
+					Name = MeldConfigKeys.Port,
+					Type = ActionParameterType.Number,
+					Label = AppStrings.Integrations.Meld.Config.PortLabel(),
+					Description = AppStrings.Integrations.Meld.Config.PortDescription(),
+					Min = 1,
+					Max = 65535,
+					Placeholder = MeldEndpoint.DefaultPort.ToString(CultureInfo.InvariantCulture)
+				}
+			]
+		};
+	}
+
+	private static ConfigFlowStep RemoteWarningStep(string host, int port)
+	{
+		return new ConfigFlowStep
+		{
+			StepId = RemoteWarningStepId,
+			Title = AppStrings.Integrations.Meld.Config.RemoteWarningTitle(),
+			Description = AppStrings.Integrations.Meld.Config.RemoteWarningDescription(host, port),
+			Fields =
+			[
+				ActionParameter.Toggle(ConfirmField, AppStrings.Integrations.Meld.Config.ConfirmRiskLabel())
+			]
+		};
+	}
 }

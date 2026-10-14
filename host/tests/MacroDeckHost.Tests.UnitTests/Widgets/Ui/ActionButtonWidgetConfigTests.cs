@@ -30,8 +30,8 @@ public class ActionButtonWidgetConfigTests
 		states = new object[]
 		{
 			new { id = "off", label = "Off" },
-			new { id = "on", label = "On" },
-		},
+			new { id = "on", label = "On" }
+		}
 	};
 
 	[Test]
@@ -150,7 +150,7 @@ public class ActionButtonWidgetConfigTests
 		// Reorder: "on" first. The whole-array binding is what a drag-reorder renderer would drive.
 		var reordered = new JsonArray
 		{
-			JsonNode.Parse(onAfterEdit.GetRawText()), JsonNode.Parse(offBeforeReorder.GetRawText()),
+			JsonNode.Parse(onAfterEdit.GetRawText()), JsonNode.Parse(offBeforeReorder.GetRawText())
 		};
 		host.ById("states").Change(JsonSerializer.Deserialize<JsonElement>(reordered.ToJsonString()));
 
@@ -187,15 +187,16 @@ public class ActionButtonWidgetConfigTests
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			stateMapping = new
 			{
-				rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "on",
-			},
+				rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "on"
+			}
 		});
 
 		host.ById("activeStateId").Change("on");
 		host.ById("root.properties.state-row.manageState.deleteState").Activate();
 
 		var mapping = host.ById("stateMapping").Property(UiConfigProperties.Value)!.Value;
-		var stillReferencesOn = mapping.GetProperty("rules").EnumerateArray()
+		var stillReferencesOn = mapping.GetProperty("rules")
+			.EnumerateArray()
 			.Any(r => r.GetProperty("stateId").GetString() == "on");
 
 		Assert.That(stillReferencesOn, Is.False);
@@ -235,7 +236,9 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	private static string? Background(JsonElement state)
-		=> state.GetProperty("appearance").GetProperty("backgroundColor").GetString();
+	{
+		return state.GetProperty("appearance").GetProperty("backgroundColor").GetString();
+	}
 
 	// Turning state mode off leaves the states dormant in the stored data rather than deleting them, so
 	// turning it back on must read them back instead of overwriting the user's work with the defaults.
@@ -245,7 +248,7 @@ public class ActionButtonWidgetConfigTests
 		var host = Render(new
 		{
 			stateMode = false,
-			states = new object[] { new { id = "s1", label = "Armed" }, new { id = "s2", label = "Idle" } },
+			states = new object[] { new { id = "s1", label = "Armed" }, new { id = "s2", label = "Idle" } }
 		});
 
 		host.ById("stateMode").Change(true);
@@ -301,7 +304,7 @@ public class ActionButtonWidgetConfigTests
 
 		var mapping = new
 		{
-			rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "off",
+			rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "off"
 		};
 		node.Change(mapping);
 
@@ -319,7 +322,7 @@ public class ActionButtonWidgetConfigTests
 	{
 		var soloHost = Render(new
 		{
-			stateMode = true, states = new object[] { new { id = "solo", label = "Solo" } },
+			stateMode = true, states = new object[] { new { id = "solo", label = "Solo" } }
 		});
 		var twoStateHost = Render(_twoStates);
 
@@ -339,7 +342,7 @@ public class ActionButtonWidgetConfigTests
 			states = new object[] { new { id = "muted", label = "Muted" }, new { id = "unmuted", label = "Unmuted" } },
 			activeStateId = "muted",
 			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
-			flows = FlowWith("b1"),
+			flows = FlowWith("b1")
 		});
 
 		host.ById("activeStateId").Change("unmuted");
@@ -367,7 +370,7 @@ public class ActionButtonWidgetConfigTests
 		var offHost = Render(new
 		{
 			stateMode = false, iconProvider = new { blockId = "b1", integrationId = "int", actionId = "act" },
-			flows = FlowWith("b1"),
+			flows = FlowWith("b1")
 		});
 
 		var onHost = Render(new
@@ -375,7 +378,7 @@ public class ActionButtonWidgetConfigTests
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			iconProvider = new { blockId = "b1", integrationId = "int", actionId = "act" },
-			flows = FlowWith("b1"),
+			flows = FlowWith("b1")
 		});
 
 		Assert.Multiple(() =>
@@ -400,10 +403,10 @@ public class ActionButtonWidgetConfigTests
 				states = new object[]
 				{
 					new { id = "off", label = "Off", appearance = new { backgroundColor = "#000000" } },
-					new { id = "on", label = "On" },
+					new { id = "on", label = "On" }
 				},
-				activeStateId = "off",
-			},
+				activeStateId = "off"
+			}
 		});
 
 		host.ById("root.properties.stateProviderStatus.removeStateProvider").Activate();
@@ -418,6 +421,39 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(host.FindById("root.properties.stateProviderStatus.removeStateProvider"),
 				Is.Null,
 				"No provider is active any more.");
+		});
+	}
+
+	[Test]
+	public void Removing_a_state_provider_brings_back_the_manual_mapping_rules()
+	{
+		var host = Render(new
+		{
+			stateMode = true,
+			states = new object[] { new { id = "muted", label = "Muted" }, new { id = "unmuted", label = "Unmuted" } },
+			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
+			flows = FlowWith("b1"),
+			manualStateBackup = new
+			{
+				states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
+				stateMapping = new
+				{
+					rules = new object[] { new { id = "r1", stateId = "on", when = new { } } },
+					fallbackStateId = "off"
+				},
+				activeStateId = "off"
+			}
+		});
+
+		host.ById("root.properties.stateProviderStatus.removeStateProvider").Activate();
+
+		var mapping = host.ById("stateMapping").Property(UiConfigProperties.Value)!.Value;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(mapping.GetProperty("rules").EnumerateArray().Select(r => r.GetProperty("stateId").GetString()),
+				Is.EqualTo(new[] { "on" }));
+			Assert.That(mapping.GetProperty("fallbackStateId").GetString(), Is.EqualTo("off"));
 		});
 	}
 
@@ -542,15 +578,15 @@ public class ActionButtonWidgetConfigTests
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			stateMapping = new
 			{
-				rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "off",
-			},
+				rules = new object[] { new { id = "r1", stateId = "on", when = new { } } }, fallbackStateId = "off"
+			}
 		});
 		var provided = Render(new
 		{
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
-			flows = FlowWith("b1"),
+			flows = FlowWith("b1")
 		});
 
 		Assert.Multiple(() =>
@@ -646,7 +682,8 @@ public class ActionButtonWidgetConfigTests
 				Is.SupersetOf(new[]
 				{
 					"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
-					"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor", "labelBoxBorderWidth",
+					"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor",
+					"labelBoxBorderWidth"
 				}));
 			Assert.That(labelIds, Has.No.Member("backgroundColor"));
 			Assert.That(labelIds, Has.No.Member("icon"));
@@ -810,7 +847,7 @@ public class ActionButtonWidgetConfigTests
 				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
 				"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor", "labelBoxBorderWidth",
 				"backgroundColor", "icon",
-				"iconDisplay", "iconColor", "border",
+				"iconDisplay", "iconColor", "border"
 			}),
 			"Only real schema keys should appear in the draft - no heading or tab contributed one.");
 	}
@@ -829,13 +866,13 @@ public class ActionButtonWidgetConfigTests
 	// ---- font row (issue #837): Font full width, then Style and Size sharing a row -------------------------
 
 	private static readonly FontFaceInfo _interRegular =
-		new("inter-400", "Inter", 400, 5, "upright", "Regular", RemoteRenderable: true);
+		new("inter-400", "Inter", 400, 5, "upright", "Regular", true);
 
 	private static readonly FontFaceInfo _interBold =
-		new("inter-700", "Inter", 700, 5, "upright", "Bold", RemoteRenderable: true);
+		new("inter-700", "Inter", 700, 5, "upright", "Bold", true);
 
 	private static readonly FontFaceInfo _acmeRegular =
-		new("acme-400", "Acme", 400, 5, "upright", "Regular", RemoteRenderable: true);
+		new("acme-400", "Acme", 400, 5, "upright", "Regular", true);
 
 	[Test]
 	public void The_font_family_control_is_transient_and_offers_every_family()
@@ -850,7 +887,8 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(family.Flag(UiConfigProperties.Transient), Is.True);
 			Assert.That(family.Text(UiConfigProperties.Value), Is.EqualTo("Inter"));
 			var familyNames = family.Property(UiConfigProperties.Options)!.Value.EnumerateArray()
-				.Select(o => o.GetProperty("value").GetString()).ToList();
+				.Select(o => o.GetProperty("value").GetString())
+				.ToList();
 			Assert.That(familyNames, Is.EquivalentTo(new[] { "", "Inter", "Acme" }));
 		});
 	}
@@ -866,11 +904,12 @@ public class ActionButtonWidgetConfigTests
 			.ToDictionary(o => o.GetProperty("value").GetString()!,
 				o => o.GetProperty("metadata").GetProperty("fontFaceId").GetString());
 
-		Assert.That(previews, Is.EquivalentTo(new Dictionary<string, string?>
-		{
-			["Inter"] = "inter-400",
-			["Acme"] = "acme-400"
-		}));
+		Assert.That(previews,
+			Is.EquivalentTo(new Dictionary<string, string?>
+			{
+				["Inter"] = "inter-400",
+				["Acme"] = "acme-400"
+			}));
 	}
 
 	[Test]
@@ -897,7 +936,8 @@ public class ActionButtonWidgetConfigTests
 			fonts: new FakeFontCatalog(_interRegular, _interBold, _acmeRegular));
 
 		var styleOptions = host.ById("fontFaceId").Property(UiConfigProperties.Options)!.Value.EnumerateArray()
-			.Select(o => o.GetProperty("value").GetString()).ToList();
+			.Select(o => o.GetProperty("value").GetString())
+			.ToList();
 
 		Assert.That(styleOptions, Is.EquivalentTo(new[] { "inter-400", "inter-700" }));
 	}
@@ -971,8 +1011,8 @@ public class ActionButtonWidgetConfigTests
 		host.ById("states.on.appearance.fontFamily").Change("");
 
 		var on = ReadStates(host).First(s => Id(s) == "on");
-		var hasOwnFont = on.TryGetProperty("appearance", out var appearance) &&
-			appearance.TryGetProperty("fontFaceId", out _);
+		var hasOwnFont = on.TryGetProperty("appearance", out var appearance)
+			&& appearance.TryGetProperty("fontFaceId", out _);
 		Assert.That(hasOwnFont, Is.False);
 	}
 
@@ -996,10 +1036,11 @@ public class ActionButtonWidgetConfigTests
 				Is.EqualTo("""{"$localized":{"scope":"macrodeck.app","key":"Widgets.Editor.ManageThisState"}}"""));
 			Assert.That(manage.Children.Select(child => child.Id),
 				Is.EqualTo(new[]
-				{
-					"root.properties.state-row.manageState.renameState",
-					"root.properties.state-row.manageState.deleteState",
-				}).AsCollection);
+					{
+						"root.properties.state-row.manageState.renameState",
+						"root.properties.state-row.manageState.deleteState"
+					})
+					.AsCollection);
 		});
 	}
 
@@ -1133,7 +1174,8 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
-	public void A_new_button_starts_with_the_shadow_on_and_offers_outline_widths_up_to_three_and_box_borders_up_to_five()
+	public void
+		A_new_button_starts_with_the_shadow_on_and_offers_outline_widths_up_to_three_and_box_borders_up_to_five()
 	{
 		var host = Render(new { });
 
@@ -1151,7 +1193,8 @@ public class ActionButtonWidgetConfigTests
 	public void The_shadow_comes_first_and_each_stroke_width_shares_one_line_with_its_colour()
 	{
 		var host = Render(new { });
-		var labelTab = host.SingleByType(UiConfigPrimitives.Tabs).Children
+		var labelTab = host.SingleByType(UiConfigPrimitives.Tabs)
+			.Children
 			.First(t => DescendantIds(t).Contains("label"));
 		var order = DescendantIds(labelTab);
 
@@ -1206,7 +1249,7 @@ public class ActionButtonWidgetConfigTests
 			labelShadow = false,
 			labelOutlineColor = "#111111",
 			labelOutlineWidth = 2d,
-			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
+			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } }
 		});
 
 		host.ById("activeStateId").Change("on");
@@ -1230,7 +1273,7 @@ public class ActionButtonWidgetConfigTests
 			stateMode = true,
 			labelOutlineColor = "#111111",
 			labelOutlineWidth = 2d,
-			states = new object[] { new { id = "on", appearance = JsonNode.Parse(on.GetRawText()) } },
+			states = new object[] { new { id = "on", appearance = JsonNode.Parse(on.GetRawText()) } }
 		});
 		var resolved = ActionButtonWidgetData.Parse(data).Resolve("on");
 
@@ -1285,7 +1328,7 @@ public class ActionButtonWidgetConfigTests
 			null!,
 			null!,
 			TimeProvider.System,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache());
 
 		var surface = ConfigSurface(WidgetTypeIds.Clock, "{}");
 
@@ -1306,10 +1349,10 @@ public class ActionButtonWidgetConfigTests
 		var stored = new
 		{
 			icon = new { type = "icon-pack", reference = "bolt" },
-			iconDisplay = new { fit = "contain", zoom = 100, offsetX = 0, offsetY = 0, opacity = 100 },
+			iconDisplay = new { fit = "contain", zoom = 100, offsetX = 0, offsetY = 0, opacity = 100 }
 		};
 
-		var wide = Render(stored, aspectRatio: 2);
+		var wide = Render(stored, 2);
 		var square = Render(stored);
 
 		Assert.Multiple(() =>
@@ -1344,12 +1387,13 @@ public class ActionButtonWidgetConfigTests
 				TestLocalization.Resolver,
 				"en",
 				clock,
-				new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache(),
+				new Devices.Surfaces.StubIconPackCache(),
 				CancellationToken.None)));
 	}
 
 	private static object[] FlowWith(params string[] blockIds)
-		=>
+	{
+		return
 		[
 			new
 			{
@@ -1357,19 +1401,26 @@ public class ActionButtonWidgetConfigTests
 				triggerType = "short-press",
 				children = blockIds
 					.Select(id => new { id, integrationId = "int", actionId = "act", label = string.Empty })
-					.ToArray(),
-			},
+					.ToArray()
+			}
 		];
+	}
 
-	private static object StatesData(int count) => new
+	private static object StatesData(int count)
 	{
-		stateMode = true,
-		states = Enumerable.Range(0, count)
-			.Select(i => new { id = $"s{i}", label = $"State {i}" })
-			.ToArray()
-	};
+		return new
+		{
+			stateMode = true,
+			states = Enumerable.Range(0, count)
+				.Select(i => new { id = $"s{i}", label = $"State {i}" })
+				.ToArray()
+		};
+	}
 
-	private static string Id(JsonElement state) => state.GetProperty("id").GetString()!;
+	private static string Id(JsonElement state)
+	{
+		return state.GetProperty("id").GetString()!;
+	}
 
 	/// <summary>This node's own id plus every descendant's, depth-first - used to check which tab a control
 	/// landed in without depending on how deep the chrome nests it.</summary>
@@ -1386,9 +1437,11 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	private static UiTestNode? ParentOf(UiTestNode node, string childId)
-		=> node.Children.Any(c => c.Id == childId)
+	{
+		return node.Children.Any(c => c.Id == childId)
 			? node
 			: node.Children.Select(c => ParentOf(c, childId)).FirstOrDefault(p => p is not null);
+	}
 
 	private static List<JsonElement> ReadStates(UiTestHost host)
 	{
@@ -1441,8 +1494,8 @@ public class ActionButtonWidgetConfigTests
 			["border"] = new Dictionary<string, object?>
 			{
 				["style"] = host.ById("border.style").Text(UiConfigProperties.Value),
-				["color"] = host.ById("border.color").Text(UiConfigProperties.Value),
-			},
+				["color"] = host.ById("border.color").Text(UiConfigProperties.Value)
+			}
 		};
 
 		return JsonSerializer.SerializeToElement(data);
@@ -1456,7 +1509,7 @@ public class ActionButtonWidgetConfigTests
 			// control's string value ("multi") shows up here rather than being papered over.
 			["stateMode"]
 				= JsonNode.Parse(host.ById("stateMode").Property(UiConfigProperties.Value)!.Value.GetRawText()),
-			["states"] = JsonNode.Parse(host.ById("states").Property(UiConfigProperties.Value)!.Value.GetRawText()),
+			["states"] = JsonNode.Parse(host.ById("states").Property(UiConfigProperties.Value)!.Value.GetRawText())
 		};
 
 		if (host.FindById("stateMapping")?.Property(UiConfigProperties.Value) is { } mapping)
@@ -1481,7 +1534,8 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -1491,18 +1545,28 @@ public class ActionButtonWidgetConfigTests
 					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData)
+			}
 		};
+	}
 
 	private sealed class FakeFontCatalog : IFontCatalog
 	{
 		private readonly List<FontFaceInfo> _faces;
 
-		public FakeFontCatalog(params FontFaceInfo[] faces) => _faces = faces.ToList();
+		public FakeFontCatalog(params FontFaceInfo[] faces)
+		{
+			_faces = faces.ToList();
+		}
 
-		public IReadOnlyList<FontFaceInfo> GetFaces() => _faces;
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return _faces;
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 }

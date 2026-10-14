@@ -101,13 +101,18 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	private Task<string> TrustedArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			pluginId,
 			version,
 			fileName: $"trusted-{pluginId}-{version}-{Guid.NewGuid():N}.macroDeckPlugin");
+	}
 
 	private async Task<string> SignatureInvalidArtifact(string version = "1.0.0", string pluginId = PluginId)
 	{
@@ -119,25 +124,31 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 	}
 
 	private Task<string> UntrustedRootArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			pluginId,
 			version,
 			fileName: $"untrusted-root-{pluginId}-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
 			signingRoot: TestPki.OtherRoot);
+	}
 
 	private Task<string> WrongCertificatePurposeArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			pluginId,
 			version,
 			fileName: $"wrong-purpose-{pluginId}-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
 			keyUsage: ["something-else"]);
+	}
 
 	private Task<string> NotYetValidArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			pluginId,
 			version,
 			fileName: $"not-yet-valid-{pluginId}-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
 			notBefore: DateTimeOffset.UtcNow.AddDays(30));
+	}
 
 	private async Task<string> MalformedArtifact(string version = "1.0.0", string pluginId = PluginId)
 	{
@@ -146,12 +157,13 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		return artifact;
 	}
 
-	private Task<string> UnsignedArtifact(string version = "1.0.0",
+	private Task<string> UnsignedArtifact(
+		string version = "1.0.0",
 		string pluginId = PluginId,
 		string content = "binary")
 	{
 		return Task.FromResult(new PluginArtifactBuilder()
-			.WithManifest(ManifestJson.Build(version, pluginId, extraBlocks: null))
+			.WithManifest(ManifestJson.Build(version, pluginId, null))
 			.WithFile(ManifestJson.EntrypointExecutable, content)
 			.WriteTo(_sourceDirectory, $"unsigned-{pluginId}-{version}-{Guid.NewGuid():N}.macroDeckPlugin"));
 	}
@@ -173,7 +185,8 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		return node.ToJsonString();
 	}
 
-	private async Task<PluginInstallResult> InstallFromKind(PluginArtifactSourceKind kind,
+	private async Task<PluginInstallResult> InstallFromKind(
+		PluginArtifactSourceKind kind,
 		string artifactPath,
 		PluginInstallRequest request)
 	{
@@ -198,7 +211,8 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 				_httpClientFactory.Body = bytes;
 				var url = new Uri($"https://staging.example/{Path.GetFileName(artifactPath)}");
 				return await _installer.Install(PluginArtifactSource.FromTestBuild(url,
-						"sha256:" + Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(bytes))),
+						"sha256:"
+						+ Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(bytes))),
 					request);
 			}
 			default:
@@ -207,7 +221,9 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 	}
 
 	private bool PluginTreeExists(string pluginId = PluginId)
-		=> Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, pluginId));
+	{
+		return Directory.Exists(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, pluginId));
+	}
 
 	[Test]
 	public async Task S18_a_tampered_signed_package_with_consent_leaves_no_plugin_tree_at_all()
@@ -452,22 +468,27 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		Assert.That(result.Error, Is.EqualTo(PluginInstallError.UnsignedNotPermitted));
 	}
 
-	private void LoadRegistry(params string[] revokedKeyIds) =>
+	private void LoadRegistry(params string[] revokedKeyIds)
+	{
 		_storeCatalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [], RevokedKeyIds = revokedKeyIds });
+	}
 
 	private Task<string> IssuerSignedArtifact(TestPki.IssuedCertificate issuer, string version = "1.0.0")
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			PluginId,
 			version,
 			fileName: $"issuer-signed-{version}-{Guid.NewGuid():N}.macroDeckPlugin",
 			issuer: issuer);
+	}
 
 	[Test]
 	public async Task A_plugin_signed_through_an_issuer_installs_as_trusted()
 	{
 		LoadRegistry();
 
-		var install = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
+		var install = await _installer.Install(
+			PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
 			new PluginInstallRequest());
 
 		Assert.Multiple(() =>
@@ -518,7 +539,8 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		var issuer = TestPki.IssueIssuer();
 		LoadRegistry(issuer.CertificateId);
 
-		var update = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(issuer, "1.1.0")),
+		var update = await _installer.Install(
+			PluginArtifactSource.FromPath(await IssuerSignedArtifact(issuer, "1.1.0")),
 			new PluginInstallRequest());
 
 		Assert.Multiple(() =>
@@ -546,7 +568,8 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 	[Test]
 	public async Task Without_a_loaded_registry_revocation_cannot_be_checked_and_does_not_block_install()
 	{
-		var install = await _installer.Install(PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
+		var install = await _installer.Install(
+			PluginArtifactSource.FromPath(await IssuerSignedArtifact(TestPki.IssueIssuer())),
 			new PluginInstallRequest());
 
 		Assert.Multiple(() =>

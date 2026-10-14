@@ -132,13 +132,14 @@ public class PluginLogRateLimiterTests
 			Assert.That(admittedUnderFirstSession, Is.EqualTo(500), "the burst bounds the first session");
 			Assert.That(sink.Events,
 				Is.Empty,
-				"a reconnect must not buy a flooding plugin a fresh budget - keying the bucket by session " +
-				"instead of plugin id would reopen exactly this bypass");
+				"a reconnect must not buy a flooding plugin a fresh budget - keying the bucket by session "
+				+ "instead of plugin id would reopen exactly this bypass");
 		});
 	}
 
 	private static List<LogEventDto> Batch(int count)
-		=> Enumerable.Range(0, count)
+	{
+		return Enumerable.Range(0, count)
 			.Select(i => new LogEventDto
 			{
 				Timestamp = DateTimeOffset.UtcNow,
@@ -147,12 +148,16 @@ public class PluginLogRateLimiterTests
 				RenderedMessage = $"event {i}"
 			})
 			.ToList();
+	}
 
 	private sealed class CapturingRateLimitSink : Serilog.Core.ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 
 	[Test]

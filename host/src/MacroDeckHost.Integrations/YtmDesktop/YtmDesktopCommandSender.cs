@@ -54,7 +54,9 @@ internal sealed class YtmDesktopCommandSender : IDisposable
 	}
 
 	public async Task SendAsync(string command, object? data, CancellationToken cancellationToken)
-		=> await _send(command, data, cancellationToken).ConfigureAwait(false);
+	{
+		await _send(command, data, cancellationToken).ConfigureAwait(false);
+	}
 
 	public void Dispose()
 	{

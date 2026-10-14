@@ -11,7 +11,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Trusted,
 			"cert-1",
 			PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-1"),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.True);
 	}
@@ -24,7 +24,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Trusted,
 			"cert-1",
 			PluginTrustResult.Of(onDiskVerdict),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.False);
 	}
@@ -35,7 +35,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Trusted,
 			"cert-1",
 			PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-2"),
-			baselineExists: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -53,7 +53,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Unsigned,
 			null,
 			PluginTrustResult.Of(PluginTrustVerdict.Unsigned),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.True);
 		Assert.That(decision.Action, Is.EqualTo(PluginTrustGateAction.None));
@@ -65,7 +65,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Unsigned,
 			null,
 			PluginTrustResult.Of(PluginTrustVerdict.ContentMismatch),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.False);
 	}
@@ -76,7 +76,7 @@ internal sealed class PluginTrustGateTests
 		var decision = PluginTrustGate.Evaluate(PluginTrustVerdict.Unsigned,
 			null,
 			PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-1"),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.True);
 		Assert.That(decision.Action, Is.EqualTo(PluginTrustGateAction.Upgrade));
@@ -86,10 +86,10 @@ internal sealed class PluginTrustGateTests
 	[TestCase(PluginTrustVerdict.Unsigned)]
 	public void A_missing_record_before_the_baseline_launches_and_backfills(PluginTrustVerdict onDiskVerdict)
 	{
-		var decision = PluginTrustGate.Evaluate(admittedVerdict: null,
-			admittedCertificateId: null,
+		var decision = PluginTrustGate.Evaluate(null,
+			null,
 			PluginTrustResult.Of(onDiskVerdict, onDiskVerdict == PluginTrustVerdict.Trusted ? "cert-1" : null),
-			baselineExists: false);
+			false);
 
 		Assert.That(decision.Permitted, Is.True);
 		Assert.That(decision.Action, Is.EqualTo(PluginTrustGateAction.Backfill));
@@ -98,10 +98,10 @@ internal sealed class PluginTrustGateTests
 	[Test]
 	public void A_missing_record_after_the_baseline_is_anomalous_and_is_refused()
 	{
-		var decision = PluginTrustGate.Evaluate(admittedVerdict: null,
-			admittedCertificateId: null,
+		var decision = PluginTrustGate.Evaluate(null,
+			null,
 			PluginTrustResult.Of(PluginTrustVerdict.Trusted, "cert-1"),
-			baselineExists: true);
+			true);
 
 		Assert.That(decision.Permitted, Is.False);
 	}
@@ -113,11 +113,11 @@ internal sealed class PluginTrustGateTests
 		var trustedRecordDecision = PluginTrustGate.Evaluate(PluginTrustVerdict.Trusted,
 			"cert-1",
 			PluginTrustResult.Of(onDiskVerdict),
-			baselineExists: true);
+			true);
 		var unsignedRecordDecision = PluginTrustGate.Evaluate(PluginTrustVerdict.Unsigned,
 			null,
 			PluginTrustResult.Of(onDiskVerdict),
-			baselineExists: true);
+			true);
 
 		Assert.Multiple(() =>
 		{

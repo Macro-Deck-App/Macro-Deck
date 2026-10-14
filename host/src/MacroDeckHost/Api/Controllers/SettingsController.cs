@@ -184,147 +184,225 @@ public class SettingsController : ControllerBase
 	[HttpGet("appearance")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetAppearanceSettingsResponse> GetAppearance(CancellationToken ct)
-		=> _getAppearance.Handle(new GetAppearanceSettingsRequest(), ct).AsTask();
+	{
+		return _getAppearance.Handle(new GetAppearanceSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("appearance")]
-	public Task<UpdateAppearanceSettingsResponse> UpdateAppearance(UpdateAppearanceSettingsRequest body,
+	public Task<UpdateAppearanceSettingsResponse> UpdateAppearance(
+		UpdateAppearanceSettingsRequest body,
 		CancellationToken ct)
-		=> _updateAppearance.Handle(body, ct).AsTask();
+	{
+		return _updateAppearance.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("autostart")]
 	public Task<GetAutostartSettingsResponse> GetAutostart(CancellationToken ct)
-		=> _getAutostart.Handle(new GetAutostartSettingsRequest(), ct).AsTask();
+	{
+		return _getAutostart.Handle(new GetAutostartSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("autostart")]
-	public Task<UpdateAutostartSettingsResponse> UpdateAutostart(UpdateAutostartSettingsRequest body,
+	public Task<UpdateAutostartSettingsResponse> UpdateAutostart(
+		UpdateAutostartSettingsRequest body,
 		CancellationToken ct)
-		=> _updateAutostart.Handle(body, ct).AsTask();
+	{
+		return _updateAutostart.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("network")]
 	public Task<GetNetworkSettingsResponse> GetNetwork(CancellationToken ct)
-		=> _getNetwork.Handle(new GetNetworkSettingsRequest(), ct).AsTask();
+	{
+		return _getNetwork.Handle(new GetNetworkSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("network")]
-	public Task<UpdateNetworkSettingsResponse> UpdateNetwork(UpdateNetworkSettingsRequest body,
+	public Task<UpdateNetworkSettingsResponse> UpdateNetwork(
+		UpdateNetworkSettingsRequest body,
 		CancellationToken ct)
-		=> _updateNetwork.Handle(body, ct).AsTask();
+	{
+		return _updateNetwork.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut("network/tls/certificate")]
-	public Task<UpdateNetworkSettingsResponse> UpdateNetworkTlsCertificate(UpdateNetworkTlsCertificateRequest body,
+	public Task<UpdateNetworkSettingsResponse> UpdateNetworkTlsCertificate(
+		UpdateNetworkTlsCertificateRequest body,
 		CancellationToken ct)
-		=> _updateNetworkTlsCertificate.Handle(body, ct).AsTask();
+	{
+		return _updateNetworkTlsCertificate.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("network/tls/certificate/reissue")]
 	public Task<UpdateNetworkSettingsResponse> ReissueTlsCertificate(CancellationToken ct)
-		=> _reissueTlsCertificate.Handle(new ReissueTlsCertificateRequest(), ct).AsTask();
+	{
+		return _reissueTlsCertificate.Handle(new ReissueTlsCertificateRequest(), ct).AsTask();
+	}
 
 	[HttpPost("network/tls/certificate-authority/regenerate")]
 	public Task<UpdateNetworkSettingsResponse> RegenerateTlsCertificateAuthority(CancellationToken ct)
-		=> _regenerateTlsCertificateAuthority.Handle(new RegenerateTlsCertificateAuthorityRequest(), ct).AsTask();
+	{
+		return _regenerateTlsCertificateAuthority.Handle(new RegenerateTlsCertificateAuthorityRequest(), ct).AsTask();
+	}
 
 	[HttpGet("http")]
 	public Task<GetHttpSettingsResponse> GetHttp(CancellationToken ct)
-		=> _getHttp.Handle(new GetHttpSettingsRequest(), ct).AsTask();
+	{
+		return _getHttp.Handle(new GetHttpSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("http")]
 	public Task<UpdateHttpSettingsResponse> UpdateHttp(UpdateHttpSettingsRequest body, CancellationToken ct)
-		=> _updateHttp.Handle(body, ct).AsTask();
+	{
+		return _updateHttp.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("logging")]
 	public Task<GetLoggingSettingsResponse> GetLogging(CancellationToken ct)
-		=> _getLogging.Handle(new GetLoggingSettingsRequest(), ct).AsTask();
+	{
+		return _getLogging.Handle(new GetLoggingSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("logging")]
-	public Task<UpdateLoggingSettingsResponse> UpdateLogging(UpdateLoggingSettingsRequest body,
+	public Task<UpdateLoggingSettingsResponse> UpdateLogging(
+		UpdateLoggingSettingsRequest body,
 		CancellationToken ct)
-		=> _updateLogging.Handle(body, ct).AsTask();
+	{
+		return _updateLogging.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("adb")]
 	public Task<GetAdbSettingsResponse> GetAdb(CancellationToken ct)
-		=> _getAdb.Handle(new GetAdbSettingsRequest(), ct).AsTask();
+	{
+		return _getAdb.Handle(new GetAdbSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("adb")]
 	public Task<UpdateAdbSettingsResponse> UpdateAdb(UpdateAdbSettingsRequest body, CancellationToken ct)
-		=> _updateAdb.Handle(body, ct).AsTask();
+	{
+		return _updateAdb.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("adb/restart-server")]
 	public Task<RestartAdbServerResponse> RestartAdbServer(CancellationToken ct)
-		=> _restartAdbServer.Handle(new RestartAdbServerRequest(), ct).AsTask();
+	{
+		return _restartAdbServer.Handle(new RestartAdbServerRequest(), ct).AsTask();
+	}
 
 	[HttpPost("adb/connect")]
 	public Task<ConnectAdbDeviceResponse> ConnectAdbDevice(ConnectAdbDeviceRequest body, CancellationToken ct)
-		=> _connectAdbDevice.Handle(body, ct).AsTask();
+	{
+		return _connectAdbDevice.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("adb/download-platform-tools")]
 	public Task<DownloadAdbPlatformToolsResponse> DownloadAdbPlatformTools(CancellationToken ct)
-		=> _downloadAdbPlatformTools.Handle(new DownloadAdbPlatformToolsRequest(), ct).AsTask();
+	{
+		return _downloadAdbPlatformTools.Handle(new DownloadAdbPlatformToolsRequest(), ct).AsTask();
+	}
 
 	[HttpGet("usb")]
 	public Task<GetNativeUsbSettingsResponse> GetNativeUsb(CancellationToken ct)
-		=> _getNativeUsb.Handle(new GetNativeUsbSettingsRequest(), ct).AsTask();
+	{
+		return _getNativeUsb.Handle(new GetNativeUsbSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("usb")]
-	public Task<UpdateNativeUsbSettingsResponse> UpdateNativeUsb(UpdateNativeUsbSettingsRequest body,
+	public Task<UpdateNativeUsbSettingsResponse> UpdateNativeUsb(
+		UpdateNativeUsbSettingsRequest body,
 		CancellationToken ct)
-		=> _updateNativeUsb.Handle(body, ct).AsTask();
+	{
+		return _updateNativeUsb.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("usb/refresh")]
 	public Task<GetNativeUsbSettingsResponse> RefreshNativeUsb(CancellationToken ct)
-		=> _refreshNativeUsb.Handle(new RefreshNativeUsbSettingsRequest(), ct).AsTask();
+	{
+		return _refreshNativeUsb.Handle(new RefreshNativeUsbSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPost("usb/connect")]
-	public Task<ConnectNativeUsbDeviceResponse> ConnectNativeUsbDevice(ConnectNativeUsbDeviceRequest body,
+	public Task<ConnectNativeUsbDeviceResponse> ConnectNativeUsbDevice(
+		ConnectNativeUsbDeviceRequest body,
 		CancellationToken ct)
-		=> _connectNativeUsbDevice.Handle(body, ct).AsTask();
+	{
+		return _connectNativeUsbDevice.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("usb/forget")]
-	public Task<ForgetNativeUsbDeviceResponse> ForgetNativeUsbDevice(ForgetNativeUsbDeviceRequest body,
+	public Task<ForgetNativeUsbDeviceResponse> ForgetNativeUsbDevice(
+		ForgetNativeUsbDeviceRequest body,
 		CancellationToken ct)
-		=> _forgetNativeUsbDevice.Handle(body, ct).AsTask();
+	{
+		return _forgetNativeUsbDevice.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("developer")]
 	public Task<GetDeveloperSettingsResponse> GetDeveloper(CancellationToken ct)
-		=> _getDeveloper.Handle(new GetDeveloperSettingsRequest(), ct).AsTask();
+	{
+		return _getDeveloper.Handle(new GetDeveloperSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("developer")]
-	public Task<UpdateDeveloperSettingsResponse> UpdateDeveloper(UpdateDeveloperSettingsRequest body,
+	public Task<UpdateDeveloperSettingsResponse> UpdateDeveloper(
+		UpdateDeveloperSettingsRequest body,
 		CancellationToken ct)
-		=> _updateDeveloper.Handle(body, ct).AsTask();
+	{
+		return _updateDeveloper.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("onboarding")]
 	public Task<GetOnboardingStateResponse> GetOnboarding(CancellationToken ct)
-		=> _getOnboarding.Handle(new GetOnboardingStateRequest(), ct).AsTask();
+	{
+		return _getOnboarding.Handle(new GetOnboardingStateRequest(), ct).AsTask();
+	}
 
 	[HttpPost("onboarding/complete")]
 	public Task<CompleteOnboardingResponse> CompleteOnboarding(CancellationToken ct)
-		=> _completeOnboarding.Handle(new CompleteOnboardingRequest(), ct).AsTask();
+	{
+		return _completeOnboarding.Handle(new CompleteOnboardingRequest(), ct).AsTask();
+	}
 
 	[HttpGet("lock-screen")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetLockScreenSettingsResponse> GetLockScreen(CancellationToken ct)
-		=> _getLockScreen.Handle(new GetLockScreenSettingsRequest(), ct).AsTask();
+	{
+		return _getLockScreen.Handle(new GetLockScreenSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("lock-screen")]
-	public Task<UpdateLockScreenSettingsResponse> UpdateLockScreen(UpdateLockScreenSettingsRequest body,
+	public Task<UpdateLockScreenSettingsResponse> UpdateLockScreen(
+		UpdateLockScreenSettingsRequest body,
 		CancellationToken ct)
-		=> _updateLockScreen.Handle(body, ct).AsTask();
+	{
+		return _updateLockScreen.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("extensions")]
 	public Task<GetExtensionSettingsResponse> GetExtensions(CancellationToken ct)
-		=> _getExtensions.Handle(new GetExtensionSettingsRequest(), ct).AsTask();
+	{
+		return _getExtensions.Handle(new GetExtensionSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("extensions")]
-	public Task<UpdateExtensionSettingsResponse> UpdateExtensions(UpdateExtensionSettingsRequest body,
+	public Task<UpdateExtensionSettingsResponse> UpdateExtensions(
+		UpdateExtensionSettingsRequest body,
 		CancellationToken ct)
-		=> _updateExtensions.Handle(body, ct).AsTask();
+	{
+		return _updateExtensions.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("localization")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetLocalizationSettingsResponse> GetLocalization(CancellationToken ct)
-		=> _getLocalization.Handle(new GetLocalizationSettingsRequest(), ct).AsTask();
+	{
+		return _getLocalization.Handle(new GetLocalizationSettingsRequest(), ct).AsTask();
+	}
 
 	[HttpPut("localization")]
-	public Task<UpdateLocalizationSettingsResponse> UpdateLocalization(UpdateLocalizationSettingsRequest body,
+	public Task<UpdateLocalizationSettingsResponse> UpdateLocalization(
+		UpdateLocalizationSettingsRequest body,
 		CancellationToken ct)
-		=> _updateLocalization.Handle(body, ct).AsTask();
+	{
+		return _updateLocalization.Handle(body, ct).AsTask();
+	}
 }

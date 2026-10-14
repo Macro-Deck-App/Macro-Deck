@@ -24,7 +24,7 @@ internal static class GaugesWidgetSample
 			("cpu", cpu, IncludedIconPack.Cpu, 42, null),
 			("ram", memory, IncludedIconPack.MemoryStick, 71, null),
 			("gpu", gpu, IncludedIconPack.Gpu, 18, null),
-			("battery", battery, IncludedIconPack.Battery, 86, "#34c759"),
+			("battery", battery, IncludedIconPack.Battery, 86, "#34c759")
 		];
 
 		var sampleConfig = config with
@@ -37,9 +37,9 @@ internal static class GaugesWidgetSample
 					Name = sample.Name,
 					Icon = WidgetIconReference.IconPack(IncludedIconPack.IconId(sample.Icon).ToString()),
 					Max = 100,
-					Color = sample.Color,
+					Color = sample.Color
 				})
-				.ToList(),
+				.ToList()
 		};
 
 		IReadOnlyList<UiState<GaugeFace>> faces = samples
@@ -49,7 +49,7 @@ internal static class GaugesWidgetSample
 				Value = sample.Value.ToString("0", CultureInfo.InvariantCulture),
 				Name = sample.Name,
 				Unit = "%",
-				Color = sample.Color,
+				Color = sample.Color
 			}))
 			.ToList();
 

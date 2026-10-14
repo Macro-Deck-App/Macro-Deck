@@ -9,7 +9,12 @@ internal sealed class CargoMetadataBuilder(FixtureRepository repository)
 	private readonly JsonArray _packages = [];
 	private readonly Dictionary<string, JsonArray> _dependencies = new(StringComparer.Ordinal) { [RootId] = [] };
 
-	public string Crate(string name, string version, string license, IReadOnlyDictionary<string, string> files, bool procMacro = false)
+	public string Crate(
+		string name,
+		string version,
+		string license,
+		IReadOnlyDictionary<string, string> files,
+		bool procMacro = false)
 	{
 		var id = $"{name} {version}";
 		var directory = repository.CrateDirectory(name, version);
@@ -28,18 +33,21 @@ internal sealed class CargoMetadataBuilder(FixtureRepository repository)
 			["repository"] = $"https://example.com/{name}",
 			["authors"] = new JsonArray($"{name} developers"),
 			["manifest_path"] = Path.Combine(directory, "Cargo.toml"),
-			["targets"] = new JsonArray(new JsonObject { ["kind"] = new JsonArray(procMacro ? "proc-macro" : "lib") }),
+			["targets"] = new JsonArray(new JsonObject { ["kind"] = new JsonArray(procMacro ? "proc-macro" : "lib") })
 		});
 		_dependencies[id] = [];
 		return id;
 	}
 
-	public void Depend(string from, string to, string? kind = null) =>
-		_dependencies[from].Add(new JsonObject
-		{
-			["pkg"] = to,
-			["dep_kinds"] = new JsonArray(new JsonObject { ["kind"] = kind }),
-		});
+	public void Depend(string from, string to, string? kind = null)
+	{
+		_dependencies[from]
+			.Add(new JsonObject
+			{
+				["pkg"] = to,
+				["dep_kinds"] = new JsonArray(new JsonObject { ["kind"] = kind })
+			});
+	}
 
 	public static string Root => RootId;
 
@@ -52,7 +60,7 @@ internal sealed class CargoMetadataBuilder(FixtureRepository repository)
 			["name"] = "app",
 			["version"] = "0.1.0",
 			["manifest_path"] = "/nonexistent/app/Cargo.toml",
-			["targets"] = new JsonArray(new JsonObject { ["kind"] = new JsonArray("bin") }),
+			["targets"] = new JsonArray(new JsonObject { ["kind"] = new JsonArray("bin") })
 		});
 		var nodes = new JsonArray();
 		foreach (var (id, deps) in _dependencies)
@@ -64,7 +72,7 @@ internal sealed class CargoMetadataBuilder(FixtureRepository repository)
 		{
 			["packages"] = packages,
 			["workspace_members"] = new JsonArray(RootId),
-			["resolve"] = new JsonObject { ["root"] = RootId, ["nodes"] = nodes },
+			["resolve"] = new JsonObject { ["root"] = RootId, ["nodes"] = nodes }
 		}.ToJsonString();
 	}
 }

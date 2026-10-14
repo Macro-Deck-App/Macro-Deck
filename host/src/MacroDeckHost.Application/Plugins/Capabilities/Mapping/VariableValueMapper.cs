@@ -7,21 +7,26 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class VariableValueMapper
 {
 	public static object? ToDomain(VariableValueDto? dto)
-		=> dto?.Kind switch
+	{
+		return dto?.Kind switch
 		{
 			"text" => dto.Text,
 			"number" => dto.Number,
 			"boolean" => dto.Boolean,
 			_ => null
 		};
+	}
 
 	public static VariableReading ToDomain(VariableReadingDto? dto)
-		=> dto is null
+	{
+		return dto is null
 			? VariableReading.Unavailable
 			: VariableReading.Of(ToDomain(dto.Value), dto.Min, dto.Max, dto.Step);
+	}
 
 	public static VariableValueDto ToDto(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => VariableValueDto.Unavailable,
 			string text => new VariableValueDto { Kind = "text", Text = text },
@@ -33,4 +38,5 @@ public static class VariableValueMapper
 				},
 			_ => VariableValueDto.Unavailable
 		};
+	}
 }

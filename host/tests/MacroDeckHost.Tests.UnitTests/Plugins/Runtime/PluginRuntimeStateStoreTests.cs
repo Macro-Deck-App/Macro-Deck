@@ -10,10 +10,16 @@ internal sealed class PluginRuntimeStateStoreTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void A_saved_state_round_trips_through_a_fresh_store()

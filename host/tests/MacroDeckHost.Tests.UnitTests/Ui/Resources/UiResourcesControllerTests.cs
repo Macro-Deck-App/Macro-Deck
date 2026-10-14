@@ -13,7 +13,7 @@ namespace MacroDeckHost.Tests.UnitTests.Ui.Resources;
 [TestFixture]
 public class UiResourcesControllerTests
 {
-	private const string _svg = """<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>""";
+	private const string Svg = """<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>""";
 
 	private static UiResourceStore StoreWith(out string resourceId, string name = "clear-day")
 	{
@@ -24,7 +24,7 @@ public class UiResourcesControllerTests
 			OwnerId = "app.macro-deck.weather",
 			Name = name,
 			MediaType = "image/svg+xml",
-			Content = Encoding.UTF8.GetBytes(_svg),
+			Content = Encoding.UTF8.GetBytes(Svg)
 		});
 
 		resourceId = handle.ResourceId;
@@ -43,7 +43,7 @@ public class UiResourcesControllerTests
 
 		return new UiResourcesController(store)
 		{
-			ControllerContext = new ControllerContext { HttpContext = httpContext },
+			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};
 	}
 
@@ -90,7 +90,7 @@ public class UiResourcesControllerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ContentType, Is.EqualTo("image/svg+xml"));
-			Assert.That(Encoding.UTF8.GetString(result.FileContents), Is.EqualTo(_svg));
+			Assert.That(Encoding.UTF8.GetString(result.FileContents), Is.EqualTo(Svg));
 			Assert.That(controller.Response.Headers.ETag.ToString(), Is.EqualTo(expected));
 			Assert.That(controller.Response.Headers.ETag.ToString(),
 				Does.Not.StartWith("W/"),
@@ -103,7 +103,7 @@ public class UiResourcesControllerTests
 	public async Task A_matching_if_none_match_is_answered_with_304_and_no_body()
 	{
 		var store = StoreWith(out var resourceId);
-		var etag = $"\"sha256:{Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(_svg)))}\"";
+		var etag = $"\"sha256:{Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(Svg)))}\"";
 		var controller = Controller(store, etag);
 
 		var result = await controller.Get(resourceId);
@@ -168,13 +168,15 @@ public class UiResourcesControllerTests
 	}
 
 	private static MacroDeck.Ui.Model.Resources.UiResource Register(UiResourceStore store, string svg)
-		=> store.Register(new UiResourceRegistration
+	{
+		return store.Register(new UiResourceRegistration
 		{
 			OwnerId = "plugin-0123456789abcdef",
 			Name = "photo",
 			MediaType = "image/svg+xml",
-			Content = Encoding.UTF8.GetBytes(svg),
+			Content = Encoding.UTF8.GetBytes(svg)
 		});
+	}
 
 	[TestCase("app.macro-deck.weather.does-not-exist")]
 	[TestCase("../../appsettings.json")]

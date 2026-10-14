@@ -18,7 +18,10 @@ public sealed record WidgetIconResolution(bool IsActive, UiResource? Resource)
 
 	public static readonly WidgetIconResolution Blank = new(true, null);
 
-	public static WidgetIconResolution Active(UiResource resource) => new(true, resource);
+	public static WidgetIconResolution Active(UiResource resource)
+	{
+		return new WidgetIconResolution(true, resource);
+	}
 }
 
 /// <summary>
@@ -37,7 +40,10 @@ public interface IWidgetIconService
 	/// </summary>
 	Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default);
 
-	Task<WidgetIconResolution> Resolve(Guid widgetId, WidgetIconLimit limit, CancellationToken cancellationToken = default);
+	Task<WidgetIconResolution> Resolve(
+		Guid widgetId,
+		WidgetIconLimit limit,
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// How often the widget's icon-provider action asked to be polled, or null when the widget has no

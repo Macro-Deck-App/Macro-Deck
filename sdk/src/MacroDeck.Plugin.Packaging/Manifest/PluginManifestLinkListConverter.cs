@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Packaging.Manifest;
 // (PluginManifestValidationLevel.Development), so every shape degrades instead of throwing.
 internal sealed class PluginManifestLinkListConverter : JsonConverter<IReadOnlyList<PluginManifestLink>?>
 {
-	public override IReadOnlyList<PluginManifestLink>? Read(ref Utf8JsonReader reader,
+	public override IReadOnlyList<PluginManifestLink>? Read(
+		ref Utf8JsonReader reader,
 		Type typeToConvert,
 		JsonSerializerOptions options)
 	{
@@ -31,7 +32,8 @@ internal sealed class PluginManifestLinkListConverter : JsonConverter<IReadOnlyL
 
 	// Null members are omitted whatever the options say: a "label": null on a standard type would make the
 	// packed manifest fail the published schema.
-	public override void Write(Utf8JsonWriter writer,
+	public override void Write(
+		Utf8JsonWriter writer,
 		IReadOnlyList<PluginManifestLink>? value,
 		JsonSerializerOptions options)
 	{

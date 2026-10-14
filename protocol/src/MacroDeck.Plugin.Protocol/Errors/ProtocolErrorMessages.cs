@@ -39,12 +39,16 @@ public static class ProtocolErrorMessages
 			[ProtocolErrorCodes.AdbFailed] = "The ADB operation failed.",
 			[ProtocolErrorCodes.PluginIconNotFound] = "The plugin's bundled icon packs contain no such icon.",
 			[ProtocolErrorCodes.IconPackInvalid] = "The icon pack archive is not usable.",
-			[ProtocolErrorCodes.IconPackSyncNotAllowed] = "Only a self-registered development session can sync bundled icon packs.",
+			[ProtocolErrorCodes.IconPackSyncNotAllowed]
+				= "Only a self-registered development session can sync bundled icon packs.",
 			[ProtocolErrorCodes.IconNotFound] = "No installed icon pack contains an icon with this id.",
 			[ProtocolErrorCodes.CompanionDevicesNotAllowed] = "This plugin is not allowed to use Companion devices.",
-			[ProtocolErrorCodes.DesktopNotificationsNotAllowed] = "This plugin is not allowed to show desktop notifications.",
+			[ProtocolErrorCodes.DesktopNotificationsNotAllowed]
+				= "This plugin is not allowed to show desktop notifications."
 		};
 
 	public static string For(string code)
-		=> _messages.TryGetValue(code, out var message) ? message : FallbackMessage;
+	{
+		return _messages.TryGetValue(code, out var message) ? message : FallbackMessage;
+	}
 }

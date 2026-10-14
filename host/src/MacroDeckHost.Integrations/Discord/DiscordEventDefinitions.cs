@@ -70,16 +70,16 @@ internal static class DiscordEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("channelName",
-					label: AppStrings.Integrations.Discord.Events.ChannelLabel(),
-					description: AppStrings.Integrations.Discord.Events.ChannelFilterDescription())
+					AppStrings.Integrations.Discord.Events.ChannelLabel(),
+					AppStrings.Integrations.Discord.Events.ChannelFilterDescription())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("channelName",
-					label: AppStrings.Integrations.Discord.Events.ChannelLabel()),
-				ActionParameter.Text("channelId", label: AppStrings.Integrations.Discord.Events.ChannelIdLabel()),
-				ActionParameter.Text("guildName", label: AppStrings.Integrations.Discord.Events.ServerLabel()),
-				ActionParameter.Text("guildId", label: AppStrings.Integrations.Discord.Events.ServerIdLabel())
+					AppStrings.Integrations.Discord.Events.ChannelLabel()),
+				ActionParameter.Text("channelId", AppStrings.Integrations.Discord.Events.ChannelIdLabel()),
+				ActionParameter.Text("guildName", AppStrings.Integrations.Discord.Events.ServerLabel()),
+				ActionParameter.Text("guildId", AppStrings.Integrations.Discord.Events.ServerIdLabel())
 			]
 		},
 		new()
@@ -91,8 +91,8 @@ internal static class DiscordEventDefinitions
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("channelName",
-					label: AppStrings.Integrations.Discord.Events.ChannelLabel()),
-				ActionParameter.Text("channelId", label: AppStrings.Integrations.Discord.Events.ChannelIdLabel())
+					AppStrings.Integrations.Discord.Events.ChannelLabel()),
+				ActionParameter.Text("channelId", AppStrings.Integrations.Discord.Events.ChannelIdLabel())
 			]
 		},
 		new()
@@ -104,13 +104,13 @@ internal static class DiscordEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.Text("state",
-					label: AppStrings.Integrations.Discord.Events.StateLabel(),
-					description: AppStrings.Integrations.Discord.Events.StateFilterDescription())
+					AppStrings.Integrations.Discord.Events.StateLabel(),
+					AppStrings.Integrations.Discord.Events.StateFilterDescription())
 			],
 			PayloadParameters =
 			[
-				ActionParameter.Text("state", label: AppStrings.Integrations.Discord.Events.StateLabel()),
-				ActionParameter.Number("averagePing", label: AppStrings.Integrations.Discord.Events.AveragePingLabel())
+				ActionParameter.Text("state", AppStrings.Integrations.Discord.Events.StateLabel()),
+				ActionParameter.Number("averagePing", AppStrings.Integrations.Discord.Events.AveragePingLabel())
 			]
 		},
 
@@ -125,34 +125,41 @@ internal static class DiscordEventDefinitions
 			Category = AppStrings.Integrations.Discord.Events.NotificationsCategory(),
 			PayloadParameters =
 			[
-				ActionParameter.Text("title", label: AppStrings.Integrations.Discord.Events.TitleLabel()),
-				ActionParameter.Text("body", label: AppStrings.Integrations.Discord.Events.BodyLabel()),
-				ActionParameter.Text("channelId", label: AppStrings.Integrations.Discord.Events.ChannelIdLabel()),
-				ActionParameter.Text("iconUrl", label: AppStrings.Integrations.Discord.Events.IconUrlLabel())
+				ActionParameter.Text("title", AppStrings.Integrations.Discord.Events.TitleLabel()),
+				ActionParameter.Text("body", AppStrings.Integrations.Discord.Events.BodyLabel()),
+				ActionParameter.Text("channelId", AppStrings.Integrations.Discord.Events.ChannelIdLabel()),
+				ActionParameter.Text("iconUrl", AppStrings.Integrations.Discord.Events.IconUrlLabel())
 			]
 		}
 	];
 
-	private static EventDefinition Speaking(string id, LocalizedText name) => new()
+	private static EventDefinition Speaking(string id, LocalizedText name)
 	{
-		Id = id,
-		Name = name,
-		Category = AppStrings.Integrations.Discord.Events.VoiceActivityCategory(),
-		PayloadParameters =
-		[
-			ActionParameter.Text("userId", label: AppStrings.Integrations.Discord.Events.UserIdLabel()),
-			ActionParameter.Toggle("isSelf", label: AppStrings.Integrations.Discord.Events.IsSelfLabel())
-		]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = AppStrings.Integrations.Discord.Events.VoiceActivityCategory(),
+			PayloadParameters =
+			[
+				ActionParameter.Text("userId", AppStrings.Integrations.Discord.Events.UserIdLabel()),
+				ActionParameter.Toggle("isSelf", AppStrings.Integrations.Discord.Events.IsSelfLabel())
+			]
+		};
+	}
 
-	private static EventDefinition Simple(string id,
+	private static EventDefinition Simple(
+		string id,
 		LocalizedText name,
 		LocalizedText category,
-		LocalizedText description) => new()
+		LocalizedText description)
 	{
-		Id = id,
-		Name = name,
-		Description = description,
-		Category = category
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Description = description,
+			Category = category
+		};
+	}
 }

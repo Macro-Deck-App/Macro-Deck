@@ -48,11 +48,21 @@ internal sealed class IconTestHarness : IDisposable
 	public IconPackRestoreService RestoreService { get; }
 
 	public IconPackRestoreService CreateRestoreService(IIconPackOwnerRegistry? ownerRegistry = null)
-		=> new(Cache, Storage, PackStore, Paths, Mediator, ownerRegistry ?? new IconPackOwnerRegistry([]), Logger);
+	{
+		return new IconPackRestoreService(Cache,
+			Storage,
+			PackStore,
+			Paths,
+			Mediator,
+			ownerRegistry ?? new IconPackOwnerRegistry([]),
+			Logger);
+	}
 
-	public IconImportService CreateImportService(IAppIconExtractor? appIconExtractor = null,
+	public IconImportService CreateImportService(
+		IAppIconExtractor? appIconExtractor = null,
 		IIconPackOwnerRegistry? ownerRegistry = null)
-		=> new(Cache,
+	{
+		return new IconImportService(Cache,
 			Storage,
 			BatchTracker,
 			BatchFinalizer,
@@ -64,10 +74,15 @@ internal sealed class IconTestHarness : IDisposable
 			Mediator,
 			ownerRegistry ?? new IconPackOwnerRegistry([]),
 			Logger);
+	}
 
-	public IconPackExportService CreateExportService() => new(Cache, Storage, Paths, Logger);
+	public IconPackExportService CreateExportService()
+	{
+		return new IconPackExportService(Cache, Storage, Paths, Logger);
+	}
 
-	public async Task<IconPackEntity> CreatePack(string name = "Test Pack",
+	public async Task<IconPackEntity> CreatePack(
+		string name = "Test Pack",
 		bool isDefault = false,
 		bool isReadOnly = false)
 	{

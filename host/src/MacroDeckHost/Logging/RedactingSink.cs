@@ -10,7 +10,10 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 {
 	private readonly ILogEventSink _inner = inner ?? throw new ArgumentNullException(nameof(inner));
 
-	public void Emit(LogEvent logEvent) => _inner.Emit(Redact(logEvent));
+	public void Emit(LogEvent logEvent)
+	{
+		_inner.Emit(Redact(logEvent));
+	}
 
 	public static LogEvent Redact(LogEvent logEvent)
 	{
@@ -170,7 +173,10 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 
 	// Redact before neutralising: the secret patterns allow whitespace after the separator,
 	// which neutralising would rewrite.
-	private static string Sanitize(string text) => LogText.Neutralize(LogRedactor.Redact(text))!;
+	private static string Sanitize(string text)
+	{
+		return LogText.Neutralize(LogRedactor.Redact(text))!;
+	}
 
 	private static ScalarValue NeutralizeScalar(ScalarValue scalar)
 	{
@@ -180,11 +186,13 @@ public sealed class RedactingSink(ILogEventSink inner) : ILogEventSink
 	}
 
 	private static ScalarValue NeutralizeKey(ScalarValue key)
-		=> key.Value is string text
+	{
+		return key.Value is string text
 			? LogText.Neutralize(text) is { } neutralized && !string.Equals(neutralized, text, StringComparison.Ordinal)
 				? new ScalarValue(neutralized)
 				: key
 			: NeutralizeScalar(key);
+	}
 
 	private static List<LogEventPropertyValue> RedactMany(
 		IReadOnlyList<LogEventPropertyValue> values,
@@ -237,5 +245,8 @@ internal sealed class RedactedException(string text) : Exception(text)
 {
 	private readonly string _text = text;
 
-	public override string ToString() => _text;
+	public override string ToString()
+	{
+		return _text;
+	}
 }

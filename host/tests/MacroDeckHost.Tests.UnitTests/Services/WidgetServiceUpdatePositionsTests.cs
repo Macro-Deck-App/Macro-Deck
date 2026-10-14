@@ -58,7 +58,10 @@ public class WidgetServiceUpdatePositionsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task UnknownFolder_FailsWithFolderNotFound()
@@ -229,16 +232,21 @@ public class WidgetServiceUpdatePositionsTests
 		});
 	}
 
-	private static WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 
 	private static WidgetPlacement Placement(WidgetEntity widget, int x, int y)
-		=> new(widget.Id, x, y, widget.Width, widget.Height);
+	{
+		return new WidgetPlacement(widget.Id, x, y, widget.Width, widget.Height);
+	}
 }

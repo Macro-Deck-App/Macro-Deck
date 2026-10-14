@@ -12,7 +12,8 @@ public interface IStoreRegistryRefreshTracker
 
 	void ReportProgress(int filesCompleted, int filesTotal);
 
-	void Finish(StoreRegistryRefreshRunState state,
+	void Finish(
+		StoreRegistryRefreshRunState state,
 		RegistryRefreshError? failure,
 		string? detail,
 		StoreRegistryStatus status);

@@ -145,8 +145,8 @@ public class ProfileServiceDuplicateTests
 				Type = WidgetTypeIds.ActionButton,
 				PositionX = 0,
 				PositionY = 0,
-				Data = $"{{\"openFolder\":\"{_subId}\",\"toggles\":\"{_micWidgetId}\"," +
-					$"\"switchProfile\":\"{_profileId}\",\"outside\":\"{_otherProfileFolderId}\"}}"
+				Data = $"{{\"openFolder\":\"{_subId}\",\"toggles\":\"{_micWidgetId}\","
+					+ $"\"switchProfile\":\"{_profileId}\",\"outside\":\"{_otherProfileFolderId}\"}}"
 			});
 		_cache.AddWidget(_homeId,
 			new WidgetEntity
@@ -173,7 +173,10 @@ public class ProfileServiceDuplicateTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Duplicate_CreatesANewProfileWithTheSameSettingsNamedAsACopy()
@@ -359,7 +362,10 @@ public class ProfileServiceDuplicateTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

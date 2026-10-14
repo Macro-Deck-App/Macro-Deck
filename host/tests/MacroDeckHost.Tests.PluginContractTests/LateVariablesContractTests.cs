@@ -1,7 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Capabilities;
 using MacroDeck.Plugin.Hosting.Capabilities.Variables;
-using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Variables;
@@ -17,7 +16,7 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 {
 	private const string LevelId = "late-level";
 
-	private static readonly VariableDefinition Level = VariableDefinition.Eager("late_level", VariableType.Numeric)
+	private static readonly VariableDefinition _level = VariableDefinition.Eager("late_level", VariableType.Numeric)
 		with
 		{
 			Id = LevelId,
@@ -30,7 +29,7 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 		var provider = new LateVariableIntegration();
 		await ConnectAsTheSdkDeclaresAsync([Handler(provider)]);
 
-		provider.Add(Level);
+		provider.Add(_level);
 		await AnnounceAsync(CapabilityKinds.Variables);
 
 		var owner = new VariableCatalogProviders(IntegrationRegistry).ResolveOwner(PluginId);
@@ -52,10 +51,10 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 		var actions = new BlockingActionsHandler();
 
 		await ConnectAsTheSdkDeclaresAsync([Handler(provider), actions],
-			duringRegister: async () =>
+			async () =>
 			{
 				await actions.Describing.Task.WaitAsync(TimeSpan.FromSeconds(10));
-				provider.Add(Level);
+				provider.Add(_level);
 				await AnnounceAsync(CapabilityKinds.Variables);
 				actions.Release.SetResult();
 			});
@@ -78,7 +77,7 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 	{
 		var provider = new LateVariableIntegration();
 		await ConnectAsTheSdkDeclaresAsync([Handler(provider)]);
-		provider.Add(Level);
+		provider.Add(_level);
 		await AnnounceAsync(CapabilityKinds.Variables);
 
 		Assert.That(await Registrar.RegisterAsync(PluginId, CancellationToken.None), Is.True);
@@ -122,7 +121,7 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 
 		await ConnectAsync([Handler(provider)], [unsupported], []);
 
-		provider.Add(Level);
+		provider.Add(_level);
 		await AnnounceAsync(CapabilityKinds.Variables);
 
 		Assert.That(new VariableCatalogProviders(IntegrationRegistry).ResolveOwner(PluginId), Is.Null);
@@ -138,10 +137,12 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 	}
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
-		=> new([provider],
+	{
+		return new VariablesCapabilityHandler([provider],
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	private sealed class LateVariableIntegration : IPluginIntegration, IVariableProvider
 	{
@@ -153,14 +154,25 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 
 		public IReadOnlyList<VariableDefinition> Variables => [.. _variables];
 
-		public void Add(VariableDefinition variable) => _variables.Add(variable);
+		public void Add(VariableDefinition variable)
+		{
+			_variables.Add(variable);
+		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Of(1.0));
+		{
+			return ValueTask.FromResult(VariableReading.Of(1.0));
+		}
 
 		public ValueTask<VariableWriteResult> SetValueAsync(
 			string localId,
@@ -184,7 +196,8 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 		public string Kind => CapabilityKinds.Actions;
 
 		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-			=>
+		{
+			return
 			[
 				new DeclaredCapability
 				{
@@ -193,6 +206,7 @@ internal sealed class LateVariablesContractTests : CapabilityContractFixture
 					VersionRange = new CapabilityVersionRange { Minimum = 3, Maximum = 3 }
 				}
 			];
+		}
 
 		public async Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,

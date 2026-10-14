@@ -20,9 +20,15 @@ public interface IWidgetVariableIndex
 
 	bool StateMappingReferences(Guid widgetId, string variableName);
 
-	IReadOnlyList<Guid> FindColorReferences(string variableName) => [];
+	IReadOnlyList<Guid> FindColorReferences(string variableName)
+	{
+		return [];
+	}
 
-	bool ColorReferences(Guid widgetId, string variableName) => false;
+	bool ColorReferences(Guid widgetId, string variableName)
+	{
+		return false;
+	}
 
 	void Rebuild();
 
@@ -44,10 +50,14 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 	}
 
 	public IReadOnlyList<Guid> FindLabelReferences(string variableName)
-		=> _snapshot.ByLabelName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	{
+		return _snapshot.ByLabelName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	}
 
 	public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
-		=> _snapshot.ByStateMappingName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	{
+		return _snapshot.ByStateMappingName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	}
 
 	public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
 	{
@@ -78,18 +88,26 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 	}
 
 	public bool LabelReferences(Guid widgetId, string variableName)
-		=> _snapshot.ByWidget.TryGetValue(widgetId, out var references) &&
-			references.LabelNames.Contains(variableName);
+	{
+		return _snapshot.ByWidget.TryGetValue(widgetId, out var references)
+			&& references.LabelNames.Contains(variableName);
+	}
 
 	public bool StateMappingReferences(Guid widgetId, string variableName)
-		=> _snapshot.ByWidget.TryGetValue(widgetId, out var references) &&
-			references.StateMappingNames.Contains(variableName);
+	{
+		return _snapshot.ByWidget.TryGetValue(widgetId, out var references)
+			&& references.StateMappingNames.Contains(variableName);
+	}
 
 	public IReadOnlyList<Guid> FindColorReferences(string variableName)
-		=> _snapshot.ByColorName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	{
+		return _snapshot.ByColorName.TryGetValue(variableName, out var widgets) ? widgets : [];
+	}
 
 	public bool ColorReferences(Guid widgetId, string variableName)
-		=> _snapshot.ColorsByWidget.TryGetValue(widgetId, out var names) && names.Contains(variableName);
+	{
+		return _snapshot.ColorsByWidget.TryGetValue(widgetId, out var names) && names.Contains(variableName);
+	}
 
 	public void Rebuild()
 	{
@@ -131,10 +149,10 @@ public sealed class WidgetVariableIndex : IWidgetVariableIndex
 		{
 			var current = _snapshot.ByWidget;
 			var currentColors = _snapshot.ColorsByWidget;
-			if (references.IsEmpty &&
-				!current.ContainsKey(widgetId) &&
-				colors.Count == 0 &&
-				!currentColors.ContainsKey(widgetId))
+			if (references.IsEmpty
+				&& !current.ContainsKey(widgetId)
+				&& colors.Count == 0
+				&& !currentColors.ContainsKey(widgetId))
 			{
 				return;
 			}

@@ -18,7 +18,8 @@ internal sealed record EmailInboxWidgetSettings(
 	public bool IsList => Mode == EmailWidgetTypes.ModeList;
 
 	public static EmailInboxWidgetSettings Parse(JsonElement data)
-		=> new(ReadInboxes(data),
+	{
+		return new EmailInboxWidgetSettings(ReadInboxes(data),
 			WidgetConfigJson.ReadString(data, EmailWidgetTypes.ModeKey) == EmailWidgetTypes.ModeList
 				? EmailWidgetTypes.ModeList
 				: EmailWidgetTypes.ModeCount,
@@ -31,12 +32,13 @@ internal sealed record EmailInboxWidgetSettings(
 			WidgetConfigJson.ReadBool(data, EmailWidgetTypes.ShowPreviewKey) ?? false,
 			WidgetConfigJson.ReadBool(data, EmailWidgetTypes.ShowTimestampKey) ?? true,
 			WidgetColor.NormalizeBackground(WidgetConfigJson.ReadString(data, "backgroundColor")));
+	}
 
 	private static IReadOnlyList<string> ReadInboxes(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(EmailWidgetTypes.InboxesKey, out var inboxes) ||
-			inboxes.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(EmailWidgetTypes.InboxesKey, out var inboxes)
+			|| inboxes.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -47,7 +49,7 @@ internal sealed record EmailInboxWidgetSettings(
 				.Where(item => item.ValueKind == JsonValueKind.String)
 				.Select(item => item.GetString()!)
 				.Where(inboxRef => inboxRef.Length > 0)
-				.Distinct(StringComparer.Ordinal),
+				.Distinct(StringComparer.Ordinal)
 		];
 	}
 }

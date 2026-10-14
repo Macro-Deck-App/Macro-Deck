@@ -127,9 +127,12 @@ public static class ProvidedCapabilityCatalog
 		return capabilities;
 	}
 
-	private static bool IsIconProviderAction(IActionDefinition action) => action switch
+	private static bool IsIconProviderAction(IActionDefinition action)
 	{
-		RemoteActionDefinition remote => remote.ProvidesIcon,
-		_ => action is IIconProviderActionDefinition
-	};
+		return action switch
+		{
+			RemoteActionDefinition remote => remote.ProvidesIcon,
+			_ => action is IIconProviderActionDefinition
+		};
+	}
 }

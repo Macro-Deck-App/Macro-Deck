@@ -21,7 +21,8 @@ internal static class PluginBuilder
 	private static readonly JsonSerializerOptions _stagedManifestWriteOptions =
 		new(PluginManifestJson.Options) { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
-	public static async Task<PluginBuildResult> BuildAsync(PluginBuildRequest request,
+	public static async Task<PluginBuildResult> BuildAsync(
+		PluginBuildRequest request,
 		IPluginBuildRunner runner,
 		Action<string>? onProgress = null,
 		CancellationToken cancellationToken = default)
@@ -76,15 +77,15 @@ internal static class PluginBuilder
 			.OrderBy(key => key, StringComparer.Ordinal))
 		{
 			warnings.Add(new CliDiagnostic("target-not-configured",
-				$"The manifest declares '{unselected}', which has no target in " +
-				$"'{PluginBuildConfigReader.FileName}'. It was not requested by this build."));
+				$"The manifest declares '{unselected}', which has no target in "
+				+ $"'{PluginBuildConfigReader.FileName}'. It was not requested by this build."));
 		}
 
 		foreach (var selected in selectedRids.Where(selected => !targets.ContainsKey(selected)))
 		{
 			return PluginBuildResult.Fail(PluginBuildFailureReason.TargetNotConfigured,
-				$"The manifest declares '{selected}', but '{PluginBuildConfigReader.FileName}' has no target " +
-				"for it. A declared runtime identifier is never silently skipped.",
+				$"The manifest declares '{selected}', but '{PluginBuildConfigReader.FileName}' has no target "
+				+ "for it. A declared runtime identifier is never silently skipped.",
 				warnings: warnings);
 		}
 
@@ -150,9 +151,9 @@ internal static class PluginBuilder
 
 				var declared = configRead.Include.ToList();
 
-				if (manifest.Icon is { } icon &&
-					PluginBuildConfigReader.IsContainedRelativePath(icon, sourceRoot) &&
-					File.Exists(Path.Combine(sourceRoot, icon)))
+				if (manifest.Icon is { } icon
+					&& PluginBuildConfigReader.IsContainedRelativePath(icon, sourceRoot)
+					&& File.Exists(Path.Combine(sourceRoot, icon)))
 				{
 					declared.Add(icon);
 				}
@@ -160,8 +161,8 @@ internal static class PluginBuilder
 				var missingPacks = new List<string>();
 				foreach (var bundled in manifest.BundledIconPacks ?? [])
 				{
-					if (PluginBuildConfigReader.IsContainedRelativePath(bundled.Path, sourceRoot) &&
-						File.Exists(Path.Combine(sourceRoot, bundled.Path)))
+					if (PluginBuildConfigReader.IsContainedRelativePath(bundled.Path, sourceRoot)
+						&& File.Exists(Path.Combine(sourceRoot, bundled.Path)))
 					{
 						declared.Add(bundled.Path);
 					}
@@ -186,8 +187,8 @@ internal static class PluginBuilder
 				if (skipped.Count > 0)
 				{
 					warnings.Add(new CliDiagnostic("include-not-packaged",
-						"Declared but not packaged, because build output directories, project and source files, " +
-						$"Properties/ and dot-prefixed paths are never staged: {PathList(skipped)}."));
+						"Declared but not packaged, because build output directories, project and source files, "
+						+ $"Properties/ and dot-prefixed paths are never staged: {PathList(skipped)}."));
 				}
 
 				foreach (var selected in selectedRids)
@@ -207,8 +208,8 @@ internal static class PluginBuilder
 				if (unpackaged.Count > 0)
 				{
 					warnings.Add(new CliDiagnostic("file-not-packaged",
-						"Not packaged, because neither the manifest nor 'include' in " +
-						$"'{PluginBuildConfigReader.FileName}' declares them: {PathList(unpackaged)}."));
+						"Not packaged, because neither the manifest nor 'include' in "
+						+ $"'{PluginBuildConfigReader.FileName}' declares them: {PathList(unpackaged)}."));
 				}
 			}
 			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -246,8 +247,8 @@ internal static class PluginBuilder
 			if (missing.Count > 0)
 			{
 				return PluginBuildResult.Fail(PluginBuildFailureReason.EntrypointMissing,
-					"The build finished, but a requested runtime identifier did not produce the entrypoint its " +
-					"manifest declares.",
+					"The build finished, but a requested runtime identifier did not produce the entrypoint its "
+					+ "manifest declares.",
 					string.Join(Environment.NewLine, missing.Select(problem => problem.Message)),
 					warnings);
 			}
@@ -276,7 +277,9 @@ internal static class PluginBuilder
 	}
 
 	private static string PathList(IReadOnlyList<string> paths)
-		=> string.Join(", ", paths.Take(10)) + (paths.Count > 10 ? $" and {paths.Count - 10} more" : string.Empty);
+	{
+		return string.Join(", ", paths.Take(10)) + (paths.Count > 10 ? $" and {paths.Count - 10} more" : string.Empty);
+	}
 
 	private static string ArtifactFileName(PluginManifest manifest, string? rid)
 	{
@@ -289,7 +292,8 @@ internal static class PluginBuilder
 
 	/// <summary>Two selected targets writing into the same directory - or one into a parent of another -
 	/// would make each runtime identifier's staged payload depend on build order.</summary>
-	private static string? DuplicateOutput(IReadOnlyDictionary<string, PluginBuildTarget> targets,
+	private static string? DuplicateOutput(
+		IReadOnlyDictionary<string, PluginBuildTarget> targets,
 		IReadOnlyList<string> selectedRids,
 		string sourceRoot)
 	{
@@ -304,16 +308,16 @@ internal static class PluginBuilder
 			{
 				if (path.Equals(otherPath, StringComparison.Ordinal))
 				{
-					return $"Targets '{rid}' and '{otherRid}' share the output directory " +
-						$"'{targets[rid].Output}'. Each runtime identifier needs its own.";
+					return $"Targets '{rid}' and '{otherRid}' share the output directory "
+						+ $"'{targets[rid].Output}'. Each runtime identifier needs its own.";
 				}
 
 				if (otherPath.StartsWith(
 					path.EndsWith(Path.DirectorySeparatorChar) ? path : path + Path.DirectorySeparatorChar,
 					StringComparison.Ordinal))
 				{
-					return $"Target '{otherRid}' writes inside target '{rid}'s output directory " +
-						$"'{targets[rid].Output}'. Each runtime identifier needs its own.";
+					return $"Target '{otherRid}' writes inside target '{rid}'s output directory "
+						+ $"'{targets[rid].Output}'. Each runtime identifier needs its own.";
 				}
 			}
 		}
@@ -341,7 +345,8 @@ internal static class PluginBuilder
 		}
 	}
 
-	private static async Task<PluginBuildResult?> RunTargetAsync(PluginBuildTarget target,
+	private static async Task<PluginBuildResult?> RunTargetAsync(
+		PluginBuildTarget target,
 		string sourceRoot,
 		IPluginBuildRunner runner,
 		IReadOnlyList<CliDiagnostic> warnings,
@@ -360,8 +365,8 @@ internal static class PluginBuilder
 		catch (ProcessLaunchException ex)
 		{
 			return PluginBuildResult.Fail(PluginBuildFailureReason.BuildToolNotFound,
-				$"Could not launch '{ex.FileName}' to build '{target.Rid}'. Install it and ensure it is on PATH, " +
-				"or build this runtime identifier on a machine whose toolchain supports it.",
+				$"Could not launch '{ex.FileName}' to build '{target.Rid}'. Install it and ensure it is on PATH, "
+				+ "or build this runtime identifier on a machine whose toolchain supports it.",
 				warnings: warnings);
 		}
 
@@ -391,7 +396,8 @@ internal static class PluginBuilder
 	/// identically named executables - from colliding. Thin wrapper over <see cref="EntrypointLayout" />,
 	/// which <see cref="ManifestValidator" /> shares, so the two commands can never disagree about the same
 	/// manifest.</summary>
-	private static Dictionary<string, string> ResolveStagingDestinations(PluginManifest manifest,
+	private static Dictionary<string, string> ResolveStagingDestinations(
+		PluginManifest manifest,
 		IReadOnlyList<string> selectedRids,
 		out string? failure)
 	{
@@ -406,7 +412,8 @@ internal static class PluginBuilder
 	/// design (#617). A targeted build additionally narrows <c>entrypoints</c> to what it actually built, so
 	/// the artifact is an honest single-platform package rather than one claiming platforms it never
 	/// produced.</summary>
-	private static PluginManifest StageManifest(PluginManifest manifest,
+	private static PluginManifest StageManifest(
+		PluginManifest manifest,
 		IReadOnlyList<string> selectedRids,
 		bool narrowEntrypoints,
 		IReadOnlyList<string> languages)

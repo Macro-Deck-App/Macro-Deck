@@ -90,7 +90,10 @@ internal sealed class ImapAccountConnection : IAsyncDisposable
 		}
 	}
 
-	public void Start() => _loop ??= Task.Run(() => RunAsync(_stop.Token), CancellationToken.None);
+	public void Start()
+	{
+		_loop ??= Task.Run(() => RunAsync(_stop.Token), CancellationToken.None);
+	}
 
 	public async Task<EmailInboxSnapshot> GetSnapshotAsync(EmailMessageQuery query, CancellationToken cancellationToken)
 	{
@@ -288,23 +291,24 @@ internal sealed class ImapAccountConnection : IAsyncDisposable
 			};
 		}
 
-		throw new InvalidOperationException(
-			$"IMAP inbox '{InboxId}' has no data yet; the connection is {reported}.");
+		throw new InvalidOperationException($"IMAP inbox '{InboxId}' has no data yet; the connection is {reported}.");
 	}
 
 	private string? StatusMessage(EmailInboxStatus status, ImapFailure? failure)
-		=> status switch
+	{
+		return status switch
 		{
 			EmailInboxStatus.Connected => null,
-			EmailInboxStatus.Connecting => ImapText.Resolve(Strings.Status.Connecting(host: Settings.Host)),
+			EmailInboxStatus.Connecting => ImapText.Resolve(Strings.Status.Connecting(Settings.Host)),
 			EmailInboxStatus.Error => ImapText.Resolve(Strings.Status.SignInFailed()),
 			_ => failure switch
 			{
-				ImapFailure.Certificate => ImapText.Resolve(Strings.Status.CertificateFailed(host: Settings.Host)),
-				ImapFailure.FolderNotFound => ImapText.Resolve(Strings.Status.FolderNotFound(folder: Settings.Folder)),
-				_ => ImapText.Resolve(Strings.Status.Unreachable(host: Settings.Host))
+				ImapFailure.Certificate => ImapText.Resolve(Strings.Status.CertificateFailed(Settings.Host)),
+				ImapFailure.FolderNotFound => ImapText.Resolve(Strings.Status.FolderNotFound(Settings.Folder)),
+				_ => ImapText.Resolve(Strings.Status.Unreachable(Settings.Host))
 			}
 		};
+	}
 
 	private async Task RunAsync(CancellationToken cancellationToken)
 	{

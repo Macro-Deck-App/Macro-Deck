@@ -105,15 +105,25 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 
 		public IReadOnlyList<UsbDeviceInfo> Devices => [];
 
-		public IReadOnlyList<UsbInterfaceInfo>? ReadInterfaces(UsbDeviceInfo device) => null;
+		public IReadOnlyList<UsbInterfaceInfo>? ReadInterfaces(UsbDeviceInfo device)
+		{
+			return null;
+		}
 
 		public UsbDeviceStrings? ReadStrings(UsbDeviceInfo device, IReadOnlyCollection<byte> interfaceNameIndexes)
-			=> null;
+		{
+			return null;
+		}
 
 		public AccessorySwitchOutcome SwitchToAccessory(UsbDeviceInfo device, IReadOnlyList<string> identification)
-			=> AccessorySwitchOutcome.Failed;
+		{
+			return AccessorySwitchOutcome.Failed;
+		}
 
-		public IUsbBulkPipe? OpenAccessory(UsbDeviceInfo device) => null;
+		public IUsbBulkPipe? OpenAccessory(UsbDeviceInfo device)
+		{
+			return null;
+		}
 
 		public void Dispose()
 		{
@@ -138,13 +148,15 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 		public IReadOnlyList<UsbDeviceInfo> Devices { get; }
 
 		public IReadOnlyList<UsbInterfaceInfo>? ReadInterfaces(UsbDeviceInfo device)
-			=> ReadConfiguration(_pointers[device.Index])?.Interfaces;
+		{
+			return ReadConfiguration(_pointers[device.Index])?.Interfaces;
+		}
 
 		public UsbDeviceStrings? ReadStrings(UsbDeviceInfo device, IReadOnlyCollection<byte> interfaceNameIndexes)
 		{
 			var pointer = _pointers[device.Index];
-			if (LibUsbNative.GetDeviceDescriptor(pointer, out var descriptor) != LibUsbNative.Success ||
-				LibUsbNative.Open(pointer, out var handle) != LibUsbNative.Success)
+			if (LibUsbNative.GetDeviceDescriptor(pointer, out var descriptor) != LibUsbNative.Success
+				|| LibUsbNative.Open(pointer, out var handle) != LibUsbNative.Success)
 			{
 				return null;
 			}
@@ -181,13 +193,20 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 			try
 			{
 				var version = new byte[2];
-				if (LibUsbNative.ControlTransfer(handle, AccessoryProtocol.VendorIn, AccessoryProtocol.GetProtocolRequest,
-						0, 0, version, (ushort)version.Length, ControlTimeoutMilliseconds) < version.Length)
+				if (LibUsbNative.ControlTransfer(handle,
+						AccessoryProtocol.VendorIn,
+						AccessoryProtocol.GetProtocolRequest,
+						0,
+						0,
+						version,
+						(ushort)version.Length,
+						ControlTimeoutMilliseconds)
+					< version.Length)
 				{
 					return AccessorySwitchOutcome.Failed;
 				}
 
-				if ((version[0] | (version[1] << 8)) < 1)
+				if ((version[0] | version[1] << 8) < 1)
 				{
 					return AccessorySwitchOutcome.NotSupported;
 				}
@@ -195,17 +214,31 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 				for (var index = 0; index < identification.Count; index++)
 				{
 					var value = Encoding.UTF8.GetBytes(identification[index] + "\0");
-					if (LibUsbNative.ControlTransfer(handle, AccessoryProtocol.VendorOut, AccessoryProtocol.SendStringRequest,
-							0, (ushort)index, value, (ushort)value.Length, ControlTimeoutMilliseconds) < 0)
+					if (LibUsbNative.ControlTransfer(handle,
+							AccessoryProtocol.VendorOut,
+							AccessoryProtocol.SendStringRequest,
+							0,
+							(ushort)index,
+							value,
+							(ushort)value.Length,
+							ControlTimeoutMilliseconds)
+						< 0)
 					{
 						return AccessorySwitchOutcome.Failed;
 					}
 				}
 
-				return LibUsbNative.ControlTransfer(handle, AccessoryProtocol.VendorOut, AccessoryProtocol.StartRequest,
-					0, 0, null, 0, ControlTimeoutMilliseconds) < 0
-					? AccessorySwitchOutcome.Failed
-					: AccessorySwitchOutcome.Switched;
+				return LibUsbNative.ControlTransfer(handle,
+						AccessoryProtocol.VendorOut,
+						AccessoryProtocol.StartRequest,
+						0,
+						0,
+						null,
+						0,
+						ControlTimeoutMilliseconds)
+					< 0
+						? AccessorySwitchOutcome.Failed
+						: AccessorySwitchOutcome.Switched;
 			}
 			finally
 			{
@@ -216,8 +249,8 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 		public IUsbBulkPipe? OpenAccessory(UsbDeviceInfo device)
 		{
 			var pointer = _pointers[device.Index];
-			if (ReadConfiguration(pointer)?.AccessoryEndpoints is not { } endpoints ||
-				LibUsbNative.Open(pointer, out var handle) != LibUsbNative.Success)
+			if (ReadConfiguration(pointer)?.AccessoryEndpoints is not { } endpoints
+				|| LibUsbNative.Open(pointer, out var handle) != LibUsbNative.Success)
 			{
 				return null;
 			}
@@ -234,7 +267,10 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 			}
 
 			Interlocked.Increment(ref _host._openPipes);
-			return new LibUsbBulkPipe(handle, endpoints.In, endpoints.Out, () => Interlocked.Decrement(ref _host._openPipes));
+			return new LibUsbBulkPipe(handle,
+				endpoints.In,
+				endpoints.Out,
+				() => Interlocked.Decrement(ref _host._openPipes));
 		}
 
 		public void Dispose()
@@ -275,7 +311,8 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 				var interfaceSize = Marshal.SizeOf<LibUsbNative.Interface>();
 				for (var index = 0; index < config.NumInterfaces; index++)
 				{
-					var entry = Marshal.PtrToStructure<LibUsbNative.Interface>(config.Interfaces + (index * interfaceSize));
+					var entry = Marshal.PtrToStructure<LibUsbNative.Interface>(
+						config.Interfaces + index * interfaceSize);
 					if (entry.NumAltSettings < 1 || entry.AltSettings == IntPtr.Zero)
 					{
 						continue;
@@ -309,7 +346,7 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 			for (var index = 0; index < descriptor.NumEndpoints; index++)
 			{
 				var endpoint = Marshal.PtrToStructure<LibUsbNative.EndpointDescriptor>(
-					descriptor.Endpoints + (index * endpointSize));
+					descriptor.Endpoints + index * endpointSize);
 				if ((endpoint.Attributes & 0x03) != BulkTransferType)
 				{
 					continue;
@@ -350,10 +387,14 @@ internal sealed class LibUsbHost : IUsbHost, IDisposable
 		}
 
 		public UsbTransferResult Read(byte[] buffer, int timeoutMilliseconds)
-			=> Transfer(_inEndpoint, buffer, 0, buffer.Length, timeoutMilliseconds);
+		{
+			return Transfer(_inEndpoint, buffer, 0, buffer.Length, timeoutMilliseconds);
+		}
 
 		public UsbTransferResult Write(byte[] buffer, int offset, int count, int timeoutMilliseconds)
-			=> Transfer(_outEndpoint, buffer, offset, count, timeoutMilliseconds);
+		{
+			return Transfer(_outEndpoint, buffer, offset, count, timeoutMilliseconds);
+		}
 
 		public void Dispose()
 		{

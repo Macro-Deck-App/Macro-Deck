@@ -15,10 +15,17 @@ internal static class ScreenSaverDrift
 		[UiComponentAlignments.Start, UiComponentAlignments.Center, UiComponentAlignments.End];
 
 	public static UiValue<string> Justify(UiState<int> position)
-		=> UiValue.From(() => _justify[Slot(position.Value) / 3]);
+	{
+		return UiValue.From(() => _justify[Slot(position.Value) / 3]);
+	}
 
 	public static UiValue<string> Align(UiState<int> position)
-		=> UiValue.From(() => _align[Slot(position.Value) % 3]);
+	{
+		return UiValue.From(() => _align[Slot(position.Value) % 3]);
+	}
 
-	private static int Slot(int position) => ((position % PositionCount) + PositionCount) % PositionCount;
+	private static int Slot(int position)
+	{
+		return (position % PositionCount + PositionCount) % PositionCount;
+	}
 }

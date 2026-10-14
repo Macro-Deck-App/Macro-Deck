@@ -244,7 +244,7 @@ internal sealed class IntegrationInitializerTests
 		var outcomeTask = initializer.InitializeAsync(integration, "slow", cts.Token);
 		await started.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
-		cts.Cancel();
+		await cts.CancelAsync();
 		var outcome = await outcomeTask.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
@@ -289,7 +289,7 @@ internal sealed class IntegrationInitializerTests
 		await initializer.InitializeAsync(integration, "Hotkeys");
 		index.ReindexAutomation(Guid.NewGuid(),
 			EventBindingTrackerTests.Flows(integration.Id, "hotkey-pressed", EventBindingTrackerTests.Combo("F3")),
-			enabled: true);
+			true);
 		await tracker.FlushAsync();
 		await integration.FirstRaise.Task.WaitAsync(TimeSpan.FromSeconds(5));
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
@@ -329,12 +329,20 @@ internal sealed class IntegrationInitializerTests
 
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
-			=> context.RegisterProviderAsync(new ScriptedVideoProvider("front", "main"), cancellationToken);
+		{
+			return context.RegisterProviderAsync(new ScriptedVideoProvider("front", "main"), cancellationToken);
+		}
 	}
 
 	[Test]
@@ -358,10 +366,13 @@ internal sealed class IntegrationInitializerTests
 			await integration.Context!.Storage.WriteAsync("state.json", "{}");
 			userAgent.Apply("Custom/2.0");
 
-			Assert.Multiple(async () =>
+			await Assert.MultipleAsync(async () =>
 			{
-				Assert.That(File.Exists(Path.Combine(paths.DataDirectory, "integration-data", "com.example.context",
-					"state.json")), Is.True);
+				Assert.That(File.Exists(Path.Combine(paths.DataDirectory,
+						"integration-data",
+						"com.example.context",
+						"state.json")),
+					Is.True);
 				Assert.That(await integration.Context.Locale.GetTimeOfDayFormatAsync(), Is.SameAs(format));
 				Assert.That(integration.Context.Http.UserAgent, Is.EqualTo("Custom/2.0"));
 			});
@@ -375,7 +386,9 @@ internal sealed class IntegrationInitializerTests
 	private sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
 	{
 		public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(format);
+		{
+			return Task.FromResult(format);
+		}
 	}
 
 	private static IntegrationInitializer CreateInitializer(
@@ -387,7 +400,8 @@ internal sealed class IntegrationInitializerTests
 		IntegrationStorageProvider? storage = null,
 		ILocaleApi? locale = null,
 		IHostHttp? http = null)
-		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+	{
+		return new IntegrationInitializer(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
 			new FakeWidgetApi(),
@@ -412,13 +426,16 @@ internal sealed class IntegrationInitializerTests
 			storage: storage,
 			locale: locale,
 			http: http);
+	}
 
 	private static ServiceProvider BuildScopeServices()
-		=> new ServiceCollection()
+	{
+		return new ServiceCollection()
 			.AddSingleton<IVariableService>(new ThrowingVariableService())
 			.AddSingleton(TestLocalization.Resolver)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+	}
 
 	private sealed class BindingAwareIntegration : IIntegration
 	{
@@ -440,7 +457,10 @@ internal sealed class IntegrationInitializerTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		private void OnBindingsChanged()
 		{
@@ -470,6 +490,9 @@ internal sealed class IntegrationInitializerTests
 			return task;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

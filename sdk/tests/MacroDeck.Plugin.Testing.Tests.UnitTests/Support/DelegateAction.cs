@@ -18,10 +18,16 @@ internal sealed class DelegateAction(
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = parameters ?? [];
 
-	public IActionExecutor CreateExecutor() => new Executor(execute);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(execute);
+	}
 
 	private sealed class Executor(Func<ActionExecutionContext, Task<ActionResult>> execute) : IActionExecutor
 	{
-		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context) => execute(context);
+		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+		{
+			return execute(context);
+		}
 	}
 }

@@ -16,7 +16,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// those endpoints enforce proof of possession on redemption.
 /// </summary>
 [TestFixture]
-public class A22_InteractivePairingTests
+public class A22InteractivePairingTests
 {
 	[Test]
 	public async Task Pairing_credentials_pair_interactively_and_persist_for_reuse_without_pairing_again()
@@ -25,7 +25,7 @@ public class A22_InteractivePairingTests
 		using var stateDirectory = new TempStateDirectory();
 
 		const string pluginId = "test.a22.pairing";
-		using var manifest = new PluginTestManifest(id: pluginId);
+		using var manifest = new PluginTestManifest(pluginId);
 		var credentials = PluginTestCredentials.Pairing;
 
 		PluginHostBuilder Build()
@@ -127,5 +127,7 @@ public class A22_InteractivePairingTests
 	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 }

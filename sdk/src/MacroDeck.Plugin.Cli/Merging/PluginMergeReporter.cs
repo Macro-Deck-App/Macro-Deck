@@ -6,7 +6,8 @@ namespace MacroDeck.Plugin.Cli.Merging;
 
 internal static class PluginMergeReporter
 {
-	public static async Task<int> ReportAsync(CliConsole console,
+	public static async Task<int> ReportAsync(
+		CliConsole console,
 		PluginMergeResult result,
 		CancellationToken cancellationToken = default)
 	{
@@ -40,31 +41,37 @@ internal static class PluginMergeReporter
 			console.Info($"Merged {string.Join(", ", result.MergedRids)}.");
 		}
 
-		return await PluginPackReporter.ReportAsync(console, pack, showDigest: false, cancellationToken)
+		return await PluginPackReporter.ReportAsync(console, pack, false, cancellationToken)
 			.ConfigureAwait(false);
 	}
 
-	public static string Code(PluginMergeFailureReason reason) => reason switch
+	public static string Code(PluginMergeFailureReason reason)
 	{
-		PluginMergeFailureReason.ArtifactRejected => "artifact-rejected",
-		PluginMergeFailureReason.IdentityMismatch => "identity-mismatch",
-		PluginMergeFailureReason.ManifestMismatch => "manifest-mismatch",
-		PluginMergeFailureReason.DuplicateRid => "duplicate-rid",
-		PluginMergeFailureReason.FileConflict => "file-conflict",
-		PluginMergeFailureReason.OutputExists => "output-exists",
-		PluginMergeFailureReason.StagingFailed => "staging-failed",
-		_ => "merge-failed"
-	};
+		return reason switch
+		{
+			PluginMergeFailureReason.ArtifactRejected => "artifact-rejected",
+			PluginMergeFailureReason.IdentityMismatch => "identity-mismatch",
+			PluginMergeFailureReason.ManifestMismatch => "manifest-mismatch",
+			PluginMergeFailureReason.DuplicateRid => "duplicate-rid",
+			PluginMergeFailureReason.FileConflict => "file-conflict",
+			PluginMergeFailureReason.OutputExists => "output-exists",
+			PluginMergeFailureReason.StagingFailed => "staging-failed",
+			_ => "merge-failed"
+		};
+	}
 
-	public static int ExitCodeFor(PluginMergeFailureReason reason) => reason switch
+	public static int ExitCodeFor(PluginMergeFailureReason reason)
 	{
-		PluginMergeFailureReason.ArtifactRejected => ExitCode.SubjectInvalid,
-		PluginMergeFailureReason.IdentityMismatch => ExitCode.SubjectInvalid,
-		PluginMergeFailureReason.ManifestMismatch => ExitCode.SubjectInvalid,
-		PluginMergeFailureReason.DuplicateRid => ExitCode.SubjectInvalid,
-		PluginMergeFailureReason.FileConflict => ExitCode.SubjectInvalid,
-		PluginMergeFailureReason.OutputExists => ExitCode.UsageError,
-		PluginMergeFailureReason.StagingFailed => ExitCode.InternalError,
-		_ => ExitCode.InternalError
-	};
+		return reason switch
+		{
+			PluginMergeFailureReason.ArtifactRejected => ExitCode.SubjectInvalid,
+			PluginMergeFailureReason.IdentityMismatch => ExitCode.SubjectInvalid,
+			PluginMergeFailureReason.ManifestMismatch => ExitCode.SubjectInvalid,
+			PluginMergeFailureReason.DuplicateRid => ExitCode.SubjectInvalid,
+			PluginMergeFailureReason.FileConflict => ExitCode.SubjectInvalid,
+			PluginMergeFailureReason.OutputExists => ExitCode.UsageError,
+			PluginMergeFailureReason.StagingFailed => ExitCode.InternalError,
+			_ => ExitCode.InternalError
+		};
+	}
 }

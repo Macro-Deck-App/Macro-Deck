@@ -50,7 +50,11 @@ internal sealed class StoreControllerTests
 		_catalog = new StoreCatalog();
 		var installations = new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None);
 		var plugins = new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
-		_catalogQuery = new StoreCatalogQueryService(_catalog, plugins, installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+		_catalogQuery = new StoreCatalogQueryService(_catalog,
+			plugins,
+			installations,
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 		_tracker = new StoreOperationTracker(new InMemoryStoreOperationStore(), TimeProvider.System);
 		_installCoordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,
@@ -66,12 +70,17 @@ internal sealed class StoreControllerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
-	private StoreController CreateController(IStoreRegistryRefresher refresher,
+	private StoreController CreateController(
+		IStoreRegistryRefresher refresher,
 		IStoreRegistryRefreshTracker refreshTracker,
-		IStoreArtifactDownloader? downloader = null) =>
-		new(_catalogQuery,
+		IStoreArtifactDownloader? downloader = null)
+	{
+		return new StoreController(_catalogQuery,
 			refresher,
 			_installCoordinator,
 			_tracker,
@@ -93,6 +102,7 @@ internal sealed class StoreControllerTests
 				HttpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext()
 			}
 		};
+	}
 
 	[Test]
 	public async Task A_refresh_requested_while_one_runs_joins_it_and_every_session_sees_the_same_run()
@@ -100,7 +110,7 @@ internal sealed class StoreControllerTests
 		Directory.CreateDirectory(_paths.StoreRegistryDirectory);
 		Directory.CreateDirectory(_paths.StoreRegistryStagingDirectory);
 		var fixture = new StoreRegistryFixture { SignedAt = DateTimeOffset.UtcNow };
-		fixture.AddPackage("plugin", PluginId, "1.0.0", name: "Hue Bridge");
+		fixture.AddPackage("plugin", PluginId, "1.0.0", "Hue Bridge");
 		fixture.ManifestHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		var refreshTracker = new StoreRegistryRefreshTracker(TimeProvider.System);
 		using var lifetime = new StubHostApplicationLifetime();
@@ -135,7 +145,9 @@ internal sealed class StoreControllerTests
 			Assert.That(status.RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Running));
 			Assert.That(status.Registry.Refreshing, Is.True);
 			Assert.That(responses.Select(response => response.RefreshRun!.Id), Is.All.EqualTo(status.RefreshRun.Id));
-			Assert.That(responses.Select(response => response.Success), Is.All.True, responses[0].Error?.Message.ToString());
+			Assert.That(responses.Select(response => response.Success),
+				Is.All.True,
+				responses[0].Error?.Message.ToString());
 			Assert.That(responses[0].RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
 		});
 	}
@@ -143,7 +155,7 @@ internal sealed class StoreControllerTests
 	[Test]
 	public async Task An_uninitialised_registry_answers_registry_unavailable_not_an_empty_catalog()
 	{
-		var response = await _controller.GetCatalog(kind: null, search: null, section: null);
+		var response = await _controller.GetCatalog(null, null, null);
 
 		Assert.Multiple(() =>
 		{
@@ -157,9 +169,9 @@ internal sealed class StoreControllerTests
 	{
 		SeedBrowseCatalog();
 
-		var response = await _controller.GetCatalog(kind: null,
-			search: null,
-			section: StoreCatalogSection.Name,
+		var response = await _controller.GetCatalog(null,
+			null,
+			StoreCatalogSection.Name,
 			kinds: [StoreExtensionKind.Plugin, StoreExtensionKind.IconPack]);
 
 		Assert.Multiple(() =>
@@ -185,9 +197,9 @@ internal sealed class StoreControllerTests
 			]
 		});
 
-		var response = await _controller.GetCatalog(kind: null,
-			search: null,
-			section: StoreCatalogSection.Name,
+		var response = await _controller.GetCatalog(null,
+			null,
+			StoreCatalogSection.Name,
 			publisher: "pyflat");
 
 		Assert.Multiple(() =>
@@ -202,10 +214,10 @@ internal sealed class StoreControllerTests
 	{
 		SeedBrowseCatalog();
 
-		var plugins = await _controller.GetCatalog(kind: StoreExtensionKind.Plugin, search: null, section: null);
-		var templates = await _controller.GetCatalog(kind: StoreExtensionKind.ProfileTemplate,
-			search: null,
-			section: null);
+		var plugins = await _controller.GetCatalog(StoreExtensionKind.Plugin, null, null);
+		var templates = await _controller.GetCatalog(StoreExtensionKind.ProfileTemplate,
+			null,
+			null);
 
 		Assert.Multiple(() =>
 		{
@@ -221,11 +233,11 @@ internal sealed class StoreControllerTests
 	{
 		SeedBrowseCatalog();
 
-		var response = await _controller.GetCatalog(kind: null,
-			search: null,
-			section: StoreCatalogSection.Name,
-			skip: 0,
-			take: 2);
+		var response = await _controller.GetCatalog(null,
+			null,
+			StoreCatalogSection.Name,
+			0,
+			2);
 
 		Assert.Multiple(() =>
 		{
@@ -239,9 +251,9 @@ internal sealed class StoreControllerTests
 	{
 		SeedBrowseCatalog();
 
-		var response = await _controller.GetCatalog(kind: null,
-			search: null,
-			section: StoreCatalogSection.Featured);
+		var response = await _controller.GetCatalog(null,
+			null,
+			StoreCatalogSection.Featured);
 
 		Assert.Multiple(() =>
 		{
@@ -274,7 +286,7 @@ internal sealed class StoreControllerTests
 	{
 		SeedPlugin();
 
-		var response = await _controller.GetCatalog(kind: null, search: null, section: null);
+		var response = await _controller.GetCatalog(null, null, null);
 		var json = JsonSerializer.Serialize(response);
 
 		Assert.That(json, Does.Not.Contain("cdn.example"));
@@ -287,7 +299,7 @@ internal sealed class StoreControllerTests
 
 		var result = await _controller.GetScreenshot(StoreExtensionKind.Plugin,
 			PluginId,
-			index: 5,
+			5,
 			CancellationToken.None);
 
 		Assert.That(result, Is.InstanceOf<NotFoundResult>());
@@ -350,7 +362,7 @@ internal sealed class StoreControllerTests
 	[Test]
 	public void The_detail_body_reports_the_download_size_and_the_operating_systems_a_package_supports()
 	{
-		SeedPlugin(supportedRids: _appleAndWindowsRids, size: 435318);
+		SeedPlugin(_appleAndWindowsRids, 435318);
 
 		var response = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId);
 
@@ -524,7 +536,7 @@ internal sealed class StoreControllerTests
 			PluginId,
 			0,
 			CancellationToken.None,
-			v: digest.ToUpperInvariant());
+			digest.ToUpperInvariant());
 		var namedPolicy = _controller.Response.Headers.CacheControl.ToString();
 		var unnamed = (FileContentResult)await _controller.GetScreenshot(StoreExtensionKind.Plugin,
 			PluginId,
@@ -535,7 +547,7 @@ internal sealed class StoreControllerTests
 			PluginId,
 			0,
 			CancellationToken.None,
-			v: new string('0', 64));
+			new string('0', 64));
 		var stalePolicy = _controller.Response.Headers.CacheControl.ToString();
 
 		Assert.Multiple(() =>
@@ -583,7 +595,10 @@ internal sealed class StoreControllerTests
 			Is.EqualTo(Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(svg))));
 	}
 
-	private static byte[] Png(byte marker) => [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, marker];
+	private static byte[] Png(byte marker)
+	{
+		return [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, marker];
+	}
 
 	private string[] SeedPluginWithScreenshots(params byte[][] screenshots)
 	{
@@ -648,13 +663,15 @@ internal sealed class StoreControllerTests
 					LatestRelease = new StoreReleaseManifest
 					{
 						Version = "1.0.0",
-						ArtifactUrl = new Uri($"https://store-assets.macro-deck.app/plugins/{PluginId}/1.0.0/hue.macroDeckPlugin"),
+						ArtifactUrl = new Uri(
+							$"https://store-assets.macro-deck.app/plugins/{PluginId}/1.0.0/hue.macroDeckPlugin"),
 						Sha256 = new string('a', 64),
 						Size = 16,
 						Icon = new StoreMediaAsset
 						{
 							Url = new Uri($"https://store-assets.macro-deck.app/plugins/{PluginId}/1.0.0/icon.svg"),
-							Sha256 = Convert.ToHexStringLower(global::System.Security.Cryptography.SHA256.HashData(iconBytes)),
+							Sha256 = Convert.ToHexStringLower(
+								global::System.Security.Cryptography.SHA256.HashData(iconBytes)),
 							Size = iconBytes.LongLength,
 							ContentType = "image/svg+xml"
 						}
@@ -716,7 +733,7 @@ internal sealed class StoreControllerTests
 		_reviews.Counts["p2"] = 12;
 		_reviews.Counts["t1"] = 3;
 
-		var response = await _controller.GetCatalog(kind: null, search: null, section: StoreCatalogSection.Popular);
+		var response = await _controller.GetCatalog(null, null, StoreCatalogSection.Popular);
 
 		Assert.Multiple(() =>
 		{
@@ -740,8 +757,8 @@ internal sealed class StoreControllerTests
 
 		foreach (var section in new StoreCatalogSection?[] { null, StoreCatalogSection.Popular })
 		{
-			var filtered = await _controller.GetCatalog(kind: null, search: null, section: section, supportedOnly: true);
-			var unfiltered = await _controller.GetCatalog(kind: null, search: null, section: section);
+			var filtered = await _controller.GetCatalog(null, null, section, supportedOnly: true);
+			var unfiltered = await _controller.GetCatalog(null, null, section);
 
 			Assert.Multiple(() =>
 			{
@@ -755,9 +772,9 @@ internal sealed class StoreControllerTests
 	[Test]
 	public async Task A_card_and_the_detail_page_name_the_first_screenshot_of_the_latest_release_as_the_preview()
 	{
-		SeedPluginVersions(screenshots: ["BBBB", "cccc"]);
+		SeedPluginVersions(["BBBB", "cccc"]);
 
-		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+		var card = (await _controller.GetCatalog(null, null, null)).Items.Single();
 		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!;
 
 		Assert.Multiple(() =>
@@ -772,7 +789,7 @@ internal sealed class StoreControllerTests
 	{
 		SeedPlugin();
 
-		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+		var card = (await _controller.GetCatalog(null, null, null)).Items.Single();
 
 		Assert.That(card.PreviewScreenshotSha256, Is.Null);
 	}
@@ -810,7 +827,8 @@ internal sealed class StoreControllerTests
 	[Test]
 	public void A_withdrawn_version_is_listed_as_not_installable_while_the_clean_ones_stay_installable()
 	{
-		SeedPluginVersions(removed: [new StoreRemovedPackage { Id = PluginId, Version = "1.0.0", Reason = "Compromised" }]);
+		SeedPluginVersions(removed:
+			[new StoreRemovedPackage { Id = PluginId, Version = "1.0.0", Reason = "Compromised" }]);
 
 		var detail = _controller.GetExtension(StoreExtensionKind.Plugin, PluginId).Extension!;
 
@@ -833,7 +851,8 @@ internal sealed class StoreControllerTests
 	{
 		SeedPluginVersions(removed:
 			[
-				new StoreRemovedPackage { Id = PluginId, Version = "2.0.0", Reason = "Malware", Replacement = "com.acme.safe" }
+				new StoreRemovedPackage
+					{ Id = PluginId, Version = "2.0.0", Reason = "Malware", Replacement = "com.acme.safe" }
 			],
 			kind: StoreExtensionKind.IconPack);
 		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
@@ -845,7 +864,7 @@ internal sealed class StoreControllerTests
 		});
 
 		var detail = _controller.GetExtension(StoreExtensionKind.IconPack, PluginId).Extension!;
-		var installed = (await _controller.GetCatalog(kind: null, search: null, section: null, installed: true)).Items.Single();
+		var installed = (await _controller.GetCatalog(null, null, null, installed: true)).Items.Single();
 
 		Assert.Multiple(() =>
 		{
@@ -866,7 +885,11 @@ internal sealed class StoreControllerTests
 	[Test]
 	public async Task An_installed_withdrawn_version_is_reported_with_the_registrys_reason()
 	{
-		SeedPluginVersions(removed: [new StoreRemovedPackage { Id = PluginId, Version = "1.0.0", Reason = "Compromised", Replacement = "com.acme.safe" }],
+		SeedPluginVersions(removed:
+			[
+				new StoreRemovedPackage
+					{ Id = PluginId, Version = "1.0.0", Reason = "Compromised", Replacement = "com.acme.safe" }
+			],
 			kind: StoreExtensionKind.IconPack);
 		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
 		{
@@ -876,7 +899,7 @@ internal sealed class StoreControllerTests
 			Version = "1.0.0"
 		});
 
-		var card = (await _controller.GetCatalog(kind: null, search: null, section: null)).Items.Single();
+		var card = (await _controller.GetCatalog(null, null, null)).Items.Single();
 
 		Assert.Multiple(() =>
 		{
@@ -947,18 +970,22 @@ internal sealed class StoreControllerTests
 		});
 	}
 
-	private void SeedPluginVersions(string[]? screenshots = null,
+	private void SeedPluginVersions(
+		string[]? screenshots = null,
 		string[]? supportedRids = null,
 		IReadOnlyList<StoreRemovedPackage>? removed = null,
 		StoreExtensionKind kind = StoreExtensionKind.Plugin)
 	{
-		StoreReleaseManifest Release(string version, long size) => new()
+		StoreReleaseManifest Release(string version, long size)
 		{
-			Version = version,
-			ArtifactUrl = new Uri($"https://cdn.example/hue-{version}.macroDeckPlugin"),
-			Sha256 = new string('a', 64),
-			Size = size
-		};
+			return new StoreReleaseManifest
+			{
+				Version = version,
+				ArtifactUrl = new Uri($"https://cdn.example/hue-{version}.macroDeckPlugin"),
+				Sha256 = new string('a', 64),
+				Size = size
+			};
+		}
 
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
@@ -975,13 +1002,13 @@ internal sealed class StoreControllerTests
 					LatestRelease = Release("2.0.0", 200) with
 					{
 						Screenshots = (screenshots ?? [])
-							.Select(sha => new StoreMediaAsset
-							{
-								Url = new Uri($"https://cdn.example/{sha}.png"),
-								Sha256 = sha,
-								Size = 4
-							})
-							.ToList()
+						.Select(sha => new StoreMediaAsset
+						{
+							Url = new Uri($"https://cdn.example/{sha}.png"),
+							Sha256 = sha,
+							Size = 4
+						})
+						.ToList()
 					},
 					Releases = [Release("2.0.0", 200), Release("1.0.0", 100)],
 					History =
@@ -996,7 +1023,8 @@ internal sealed class StoreControllerTests
 		});
 	}
 
-	private void SeedBrowseCatalog() =>
+	private void SeedBrowseCatalog()
+	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
@@ -1008,9 +1036,11 @@ internal sealed class StoreControllerTests
 				BrowseEntry("t1", "Template", StoreExtensionKind.ProfileTemplate)
 			]
 		});
+	}
 
-	private static StoreCatalogEntry BrowseEntry(string id, string name, StoreExtensionKind kind) =>
-		new()
+	private static StoreCatalogEntry BrowseEntry(string id, string name, StoreExtensionKind kind)
+	{
+		return new StoreCatalogEntry
 		{
 			Kind = kind,
 			Id = id,
@@ -1024,8 +1054,10 @@ internal sealed class StoreControllerTests
 				Size = 16
 			}
 		};
+	}
 
-	private void SeedPlugin(string[]? supportedRids = null,
+	private void SeedPlugin(
+		string[]? supportedRids = null,
 		long size = 16,
 		IReadOnlyList<StoreExtensionLink>? additionalLinks = null,
 		PackageAiDeclaration? ai = null,
@@ -1067,14 +1099,22 @@ internal sealed class FakeStoreRegistryRefresher : IStoreRegistryRefresher
 {
 	public StoreRegistryStatus Status => StoreRegistryStatus.Unavailable;
 
-	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
+	public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
-		CancellationToken cancellationToken = default) =>
+	public Task<Result<RegistryRefreshError>> Refresh(
+		StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task LoadCachedRegistry(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task LoadCachedRegistry(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class FakeStoreUpdateDetector : IStoreUpdateDetector
@@ -1090,22 +1130,28 @@ internal sealed class FakeStoreUpdateDetector : IStoreUpdateDetector
 
 internal sealed class ThrowingStoreArtifactDownloader : IStoreArtifactDownloader
 {
-	public Task<StoreArtifactDownloadResult> Download(Uri artifactUrl,
+	public Task<StoreArtifactDownloadResult> Download(
+		Uri artifactUrl,
 		string expectedSha256Hex,
 		long expectedSize,
 		Guid operationId,
 		StoreDownloadMetadata? downloadMetadata,
 		IProgress<StoreArtifactDownloadProgress>? progress,
-		CancellationToken cancellationToken = default) =>
+		CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 }
 
 internal sealed class FakeStoreUninstallService : IStoreUninstallService
 {
 	public Result<StoreUninstallError> Next { get; set; } = Result.Ok<StoreUninstallError>();
 
-	public Task<Result<StoreUninstallError>> Uninstall(StoreExtensionKind kind,
+	public Task<Result<StoreUninstallError>> Uninstall(
+		StoreExtensionKind kind,
 		string packageId,
-		CancellationToken cancellationToken = default) =>
-		Task.FromResult(Next);
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(Next);
+	}
 }

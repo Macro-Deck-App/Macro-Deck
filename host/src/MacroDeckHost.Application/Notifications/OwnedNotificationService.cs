@@ -13,14 +13,16 @@ public sealed class OwnedNotificationService : INotificationService
 		_manager = manager;
 	}
 
-	public async Task<INotificationHandle> ShowAsync(NotificationOptions options,
+	public async Task<INotificationHandle> ShowAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		var outcome = await _manager.ShowAsync(_owner, options, cancellationToken).ConfigureAwait(false);
 		return new Handle(_owner, _manager, outcome);
 	}
 
-	public async Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+	public async Task<NotificationResult> ShowForResultAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		var handle = await ShowAsync(options, cancellationToken).ConfigureAwait(false);
@@ -44,7 +46,9 @@ public sealed class OwnedNotificationService : INotificationService
 		public Task<NotificationResult> Completion => outcome.Completion;
 
 		public Task UpdateAsync(NotificationUpdate update, CancellationToken cancellationToken = default)
-			=> manager.UpdateAsync(owner, outcome.Id, update, cancellationToken);
+		{
+			return manager.UpdateAsync(owner, outcome.Id, update, cancellationToken);
+		}
 
 		public Task DismissAsync(CancellationToken cancellationToken = default)
 		{

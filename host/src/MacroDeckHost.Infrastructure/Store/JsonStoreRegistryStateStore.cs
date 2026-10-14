@@ -21,7 +21,8 @@ public sealed class JsonStoreRegistryStateStore : IStoreRegistryStateStore
 	private readonly string _path;
 	private readonly DurableJsonFile _files;
 
-	public JsonStoreRegistryStateStore(IMacroDeckPaths paths,
+	public JsonStoreRegistryStateStore(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{

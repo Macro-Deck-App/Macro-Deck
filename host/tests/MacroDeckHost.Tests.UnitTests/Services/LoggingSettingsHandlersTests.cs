@@ -16,7 +16,9 @@ public class LoggingSettingsHandlersTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -35,10 +37,12 @@ public class LoggingSettingsHandlersTests
 	}
 
 	private static AppPreferenceService CreateService(BuildChannel channel = BuildChannel.Production)
-		=> new(new FakeAppPreferenceRepository(),
+	{
+		return new AppPreferenceService(new FakeAppPreferenceRepository(),
 			new FakeBuildEnvironment { Channel = channel },
 			new FakeHostListenerState(),
 			TestColors.None);
+	}
 
 	[Test]
 	public async Task Get_handler_returns_the_channel_default_when_unset()

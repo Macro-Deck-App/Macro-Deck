@@ -126,10 +126,10 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		try
 		{
 			var icon = _iconPackCache.GetIconById(iconId);
-			if (icon is null ||
-				icon.ProcessingState is not IconProcessingState.Pending
-					and not IconProcessingState.Processing ||
-				icon.ImportBatchId is null)
+			if (icon is null
+				|| icon.ProcessingState is not IconProcessingState.Pending
+					and not IconProcessingState.Processing
+				|| icon.ImportBatchId is null)
 			{
 				return;
 			}
@@ -166,7 +166,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 				}
 			}
 
-			await ReportProgress(batchId, mediator, force: false, cancellationToken);
+			await ReportProgress(batchId, mediator, false, cancellationToken);
 			await _batchFinalizer.TryFinalize(batchId, mediator, cancellationToken);
 		}
 		finally
@@ -176,7 +176,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		}
 	}
 
-	private async Task StoreProcessedIcon(IconEntity icon,
+	private async Task StoreProcessedIcon(
+		IconEntity icon,
 		ProcessedIconResult processed,
 		IMediator mediator,
 		CancellationToken cancellationToken)
@@ -215,13 +216,14 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		if (icon.ImportBatchId is not null)
 		{
-			_batchTracker.IncrementProcessed(icon.ImportBatchId.Value, appearance: icon.AppearanceOfId is not null);
+			_batchTracker.IncrementProcessed(icon.ImportBatchId.Value, icon.AppearanceOfId is not null);
 		}
 
 		await PublishUpdated(icon, mediator, cancellationToken);
 	}
 
-	private async Task MarkFailed(IconEntity icon,
+	private async Task MarkFailed(
+		IconEntity icon,
 		string error,
 		IMediator mediator,
 		CancellationToken cancellationToken)
@@ -232,7 +234,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		if (icon.ImportBatchId is not null)
 		{
-			_batchTracker.IncrementFailed(icon.ImportBatchId.Value, appearance: icon.AppearanceOfId is not null);
+			_batchTracker.IncrementFailed(icon.ImportBatchId.Value, icon.AppearanceOfId is not null);
 		}
 
 		_logger.Warning("Icon {IconName} ({IconId}) failed to process: {Error}", icon.Name, icon.Id, error);
@@ -337,11 +339,12 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 			return;
 		}
 
-		await ReportProgress(batchId, mediator, force: true, cancellationToken);
+		await ReportProgress(batchId, mediator, true, cancellationToken);
 		await _batchFinalizer.TryFinalize(batchId, mediator, cancellationToken);
 	}
 
-	private async Task ExtractArchive(IconImportBatchEntity batch,
+	private async Task ExtractArchive(
+		IconImportBatchEntity batch,
 		string archivePath,
 		HashSet<string> existingKeys,
 		IMediator mediator,
@@ -417,8 +420,10 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 				if (claim == IconImportAppearanceClaim.Refused)
 				{
-					var packId = parent?.PackId ??
-						(packResolver is null ? batch.PackId : await packResolver(appearance.Item, cancellationToken));
+					var packId = parent?.PackId
+						?? (packResolver is null
+							? batch.PackId
+							: await packResolver(appearance.Item, cancellationToken));
 					var (staged, _) = await StageArchiveEntry(batch,
 						appearance.Item,
 						appearanceKey,
@@ -467,7 +472,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		await CommitChunk(batch, chunk, mediator, cancellationToken);
 	}
 
-	private async Task<(IconEntity? Staged, Guid? DuplicateOf)> StageArchiveEntry(IconImportBatchEntity batch,
+	private async Task<(IconEntity? Staged, Guid? DuplicateOf)> StageArchiveEntry(
+		IconImportBatchEntity batch,
 		ZipArchiveEntry entry,
 		string key,
 		Guid packId,
@@ -496,8 +502,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 				cancellationToken);
 		}
 
-		var duplicateOf = _iconPackCache.FindBySourceContentHash(sourceHash, packId)?.Id ??
-			_coalescer.TryReserve(packId, sourceHash, icon.Id);
+		var duplicateOf = _iconPackCache.FindBySourceContentHash(sourceHash, packId)?.Id
+			?? _coalescer.TryReserve(packId, sourceHash, icon.Id);
 		if (duplicateOf is not null)
 		{
 			_storage.DeleteStagedOriginal(batch.Id, icon.Id);
@@ -522,10 +528,13 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 	}
 
 	private IconEntity? CommittedIcon(Guid batchId, string key)
-		=> _iconPackCache.GetIconsByBatchId(batchId)
+	{
+		return _iconPackCache.GetIconsByBatchId(batchId)
 			.FirstOrDefault(icon => icon.AppearanceOfId is null && icon.OriginalFileName == key);
+	}
 
-	private async Task CommitChunk(IconImportBatchEntity batch,
+	private async Task CommitChunk(
+		IconImportBatchEntity batch,
 		List<IconEntity> chunk,
 		IMediator mediator,
 		CancellationToken cancellationToken)
@@ -555,7 +564,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 			_processingChannel.Enqueue(new ProcessIconWorkItem(icon.Id));
 		}
 
-		await ReportProgress(batch.Id, mediator, force: false, cancellationToken);
+		await ReportProgress(batch.Id, mediator, false, cancellationToken);
 	}
 
 
@@ -578,9 +587,9 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 				{
 					return await ResolvePack(string.Empty,
 						fallbackName,
-						author: null,
-						description: null,
-						version: null,
+						null,
+						null,
+						null,
 						IconPackSourceType.TouchPortalImport,
 						cancellationToken);
 				}
@@ -589,7 +598,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 					info.Name ?? topFolder,
 					info.Author,
 					info.Link,
-					version: null,
+					null,
 					IconPackSourceType.TouchPortalImport,
 					cancellationToken);
 			};
@@ -601,7 +610,7 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 			return (_, cancellationToken) => ResolvePack(string.Empty,
 				metadata.Name ?? fallbackName,
 				metadata.Author,
-				description: null,
+				null,
 				metadata.Version,
 				IconPackSourceType.StreamDeckImport,
 				cancellationToken);
@@ -609,13 +618,14 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 
 		return (_, cancellationToken) => ResolvePack(string.Empty,
 			fallbackName,
-			author: null,
-			description: null,
-			version: null,
+			null,
+			null,
+			null,
 			IconPackSourceType.User,
 			cancellationToken);
 
-		async Task<Guid> ResolvePack(string localKey,
+		async Task<Guid> ResolvePack(
+			string localKey,
 			string name,
 			string? author,
 			string? description,
@@ -645,7 +655,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		}
 	}
 
-	private async Task<IconPackEntity> ResolveOrCreateImportPack(IconImportBatchEntity batch,
+	private async Task<IconPackEntity> ResolveOrCreateImportPack(
+		IconImportBatchEntity batch,
 		string sourceId,
 		string name,
 		string? author,
@@ -685,7 +696,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		return pack;
 	}
 
-	private (string? Name, string? Author, string? Version) TryParseStreamDeckManifest(ZipArchive archive,
+	private (string? Name, string? Author, string? Version) TryParseStreamDeckManifest(
+		ZipArchive archive,
 		Guid batchId)
 	{
 		try
@@ -724,15 +736,16 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		return separator > 0 ? normalized[..separator] : null;
 	}
 
-	private async Task AdoptStreamDeckPackMetadata(IconImportBatchEntity batch,
+	private async Task AdoptStreamDeckPackMetadata(
+		IconImportBatchEntity batch,
 		IReadOnlyList<string> archivePaths,
 		IMediator mediator,
 		CancellationToken cancellationToken)
 	{
-		if (batch.ExplicitDestination ||
-			archivePaths.Count != 1 ||
-			!IconImportFiles.IsStreamDeckIconPack(archivePaths[0]) ||
-			_iconPackCache.GetIconsByBatchId(batch.Id).Count > 0)
+		if (batch.ExplicitDestination
+			|| archivePaths.Count != 1
+			|| !IconImportFiles.IsStreamDeckIconPack(archivePaths[0])
+			|| _iconPackCache.GetIconsByBatchId(batch.Id).Count > 0)
 		{
 			return;
 		}
@@ -803,8 +816,10 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 	}
 
 	private static string IconName(ZipArchiveEntry entry, Dictionary<string, string>? iconNames)
-		=> iconNames?.GetValueOrDefault(Path.GetFileName(entry.FullName)) ??
-			Path.GetFileNameWithoutExtension(entry.Name);
+	{
+		return iconNames?.GetValueOrDefault(Path.GetFileName(entry.FullName))
+			?? Path.GetFileNameWithoutExtension(entry.Name);
+	}
 
 	private static Dictionary<string, string>? ParseStreamDeckIconNames(ZipArchive archive)
 	{
@@ -872,7 +887,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 	}
 
 
-	private async Task ReportProgress(Guid batchId,
+	private async Task ReportProgress(
+		Guid batchId,
 		IMediator mediator,
 		bool force,
 		CancellationToken cancellationToken)
@@ -992,8 +1008,8 @@ public class IconProcessingBackgroundService : HostReadyBackgroundService
 		}
 
 		var kept = icons
-			.Where(icon => !toRemove.Contains(icon.Id) &&
-				!(icon.AppearanceOfId is { } parentId && toRemove.Contains(parentId)))
+			.Where(icon => !toRemove.Contains(icon.Id)
+				&& !(icon.AppearanceOfId is { } parentId && toRemove.Contains(parentId)))
 			.ToList();
 		var appearanceTotal = kept.Count(icon => icon.AppearanceOfId is not null);
 		var total = batch.State == IconImportBatchState.Discovering

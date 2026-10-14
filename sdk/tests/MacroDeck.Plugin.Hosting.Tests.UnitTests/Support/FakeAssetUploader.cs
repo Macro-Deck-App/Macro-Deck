@@ -20,5 +20,8 @@ internal sealed class FakeAssetUploader : IPluginAssetUploader
 		return Task.FromResult(hash);
 	}
 
-	public bool TryComplete(ProtocolEnvelope ack) => false;
+	public bool TryComplete(ProtocolEnvelope ack)
+	{
+		return false;
+	}
 }

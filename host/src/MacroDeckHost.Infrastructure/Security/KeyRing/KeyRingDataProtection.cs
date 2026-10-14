@@ -23,7 +23,8 @@ public static class KeyRingDataProtection
 	/// builds before the container exists, and the one Startup.cs adds - so the two cannot drift into
 	/// disagreeing about how the ring on disk is protected.
 	/// </summary>
-	public static IDataProtectionBuilder Configure(IDataProtectionBuilder builder,
+	public static IDataProtectionBuilder Configure(
+		IDataProtectionBuilder builder,
 		KeyRingKekHolder holder,
 		KeyRingProtectionMode mode)
 	{

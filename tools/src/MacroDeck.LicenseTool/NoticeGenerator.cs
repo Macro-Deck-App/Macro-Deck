@@ -38,12 +38,25 @@ internal static class NoticeGenerator
 			CargoCollector.Collect(repositoryRoot, source, cargoMetadata, components, problems);
 		}
 
-		var policy = new LicensePolicy(configuration.Tool.Policy.AllowedLicenses, configuration.Tool.Policy.AllowedExceptions);
+		var policy = new LicensePolicy(configuration.Tool.Policy.AllowedLicenses,
+			configuration.Tool.Policy.AllowedExceptions);
 		var notices = new List<(string Title, string Text)>();
 		var reviewed = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 
-		ApplyOverrides(repositoryRoot, configuration.Overrides, components, notices, reviewed, policy, incomplete, problems);
-		var attributedFiles = AddAttributions(repositoryRoot, configuration.Attributions, components, notices, reviewed, problems);
+		ApplyOverrides(repositoryRoot,
+			configuration.Overrides,
+			components,
+			notices,
+			reviewed,
+			policy,
+			incomplete,
+			problems);
+		var attributedFiles = AddAttributions(repositoryRoot,
+			configuration.Attributions,
+			components,
+			notices,
+			reviewed,
+			problems);
 		if (configuration.Tool.Assets is { } assets)
 		{
 			AssetPolicy.Check(repositoryRoot, assets, attributedFiles, problems);
@@ -56,10 +69,12 @@ internal static class NoticeGenerator
 			AddFallbackTexts(repositoryRoot, component, problems);
 		}
 
-		foreach (var component in components.All.Where(component => component.SelectedLicenses.Any(license => license.Contains("Apache-2.0", StringComparison.Ordinal))))
+		foreach (var component in components.All.Where(component
+			=> component.SelectedLicenses.Any(license => license.Contains("Apache-2.0", StringComparison.Ordinal))))
 		{
 			notices.AddRange(component.Texts
-				.Where(text => text.Kind == LicenseTextKind.Notice && text.Title.StartsWith("NOTICE", StringComparison.OrdinalIgnoreCase))
+				.Where(text => text.Kind == LicenseTextKind.Notice
+					&& text.Title.StartsWith("NOTICE", StringComparison.OrdinalIgnoreCase))
 				.Select(text => (component.Name, text.Content)));
 		}
 
@@ -68,8 +83,7 @@ internal static class NoticeGenerator
 			.Select(target => target.Platform)
 			.ToHashSet(StringComparer.Ordinal);
 
-		return new GenerationResult(
-			ThirdPartyNoticesWriter.Write(components.All, allPlatforms),
+		return new GenerationResult(ThirdPartyNoticesWriter.Write(components.All, allPlatforms),
 			NoticeWriter.Write(configuration.Tool.NoticeHeader, notices),
 			problems.Messages);
 	}
@@ -86,9 +100,10 @@ internal static class NoticeGenerator
 	{
 		foreach (var entry in overrides.Packages)
 		{
-			if (!Enum.TryParse<Ecosystem>(entry.Ecosystem, ignoreCase: true, out var ecosystem) || ecosystem == Ecosystem.Asset)
+			if (!Enum.TryParse<Ecosystem>(entry.Ecosystem, true, out var ecosystem) || ecosystem == Ecosystem.Asset)
 			{
-				problems.Add($"overrides.yml: {entry.Name}: unknown ecosystem '{entry.Ecosystem}' (nuget, npm or cargo)");
+				problems.Add(
+					$"overrides.yml: {entry.Name}: unknown ecosystem '{entry.Ecosystem}' (nuget, npm or cargo)");
 				continue;
 			}
 
@@ -97,7 +112,8 @@ internal static class NoticeGenerator
 			{
 				if (!incomplete.Contains(ecosystem))
 				{
-					problems.Add($"overrides.yml: {entry.Ecosystem} {entry.Name} matches no shipped component; remove the stale override");
+					problems.Add(
+						$"overrides.yml: {entry.Ecosystem} {entry.Name} matches no shipped component; remove the stale override");
 				}
 
 				continue;
@@ -127,7 +143,11 @@ internal static class NoticeGenerator
 			if (entry.LicenseFile is not null)
 			{
 				component.Texts.RemoveAll(text => text.Kind == LicenseTextKind.License);
-				AddRepositoryText(repositoryRoot, component, entry.LicenseFile, Path.GetFileName(entry.LicenseFile), problems);
+				AddRepositoryText(repositoryRoot,
+					component,
+					entry.LicenseFile,
+					Path.GetFileName(entry.LicenseFile),
+					problems);
 			}
 
 			component.Url = entry.Url ?? component.Url;
@@ -139,7 +159,11 @@ internal static class NoticeGenerator
 
 			foreach (var additional in entry.AdditionalLicenses)
 			{
-				var selected = Select(policy, additional.License, [], problems, $"overrides.yml: {entry.Name}: {additional.Title}");
+				var selected = Select(policy,
+					additional.License,
+					[],
+					problems,
+					$"overrides.yml: {entry.Name}: {additional.Title}");
 				if (selected is null)
 				{
 					continue;
@@ -152,7 +176,9 @@ internal static class NoticeGenerator
 				{
 					var header = additional.Copyright is null ? "" : $"Copyright: {additional.Copyright}\n\n";
 					component.AddText(new LicenseText($"{additional.Title} ({string.Join(" AND ", selected)})",
-						$"{additional.Title}\n\n{header}{content}", LicenseTextKind.License, IsAdditional: true));
+						$"{additional.Title}\n\n{header}{content}",
+						LicenseTextKind.License,
+						true));
 				}
 			}
 		}
@@ -174,7 +200,8 @@ internal static class NoticeGenerator
 				var matches = Glob.Expand(repositoryRoot, pattern);
 				if (matches.Count == 0)
 				{
-					problems.Add($"attributions.yml: {asset.Name}: path '{pattern}' matches no file; update or remove the attribution");
+					problems.Add(
+						$"attributions.yml: {asset.Name}: path '{pattern}' matches no file; update or remove the attribution");
 				}
 
 				foreach (var match in matches)
@@ -192,7 +219,7 @@ internal static class NoticeGenerator
 			{
 				Url = asset.Url,
 				Copyright = asset.Copyright,
-				Note = asset.Note,
+				Note = asset.Note
 			};
 			component.DeclaredLicenses.Add(asset.License);
 			if (asset.Reviewed is not null)
@@ -202,7 +229,11 @@ internal static class NoticeGenerator
 
 			if (asset.LicenseFile is not null)
 			{
-				AddRepositoryText(repositoryRoot, component, asset.LicenseFile, Path.GetFileName(asset.LicenseFile), problems);
+				AddRepositoryText(repositoryRoot,
+					component,
+					asset.LicenseFile,
+					Path.GetFileName(asset.LicenseFile),
+					problems);
 			}
 
 			if (asset.Notice is not null)
@@ -216,12 +247,17 @@ internal static class NoticeGenerator
 		return owners.Keys.ToHashSet(StringComparer.Ordinal);
 	}
 
-	private static void SelectLicenses(Component component, LicensePolicy policy, HashSet<string> reviewed, Problems problems)
+	private static void SelectLicenses(
+		Component component,
+		LicensePolicy policy,
+		HashSet<string> reviewed,
+		Problems problems)
 	{
 		var label = $"{component.Ecosystem.ToString().ToLowerInvariant()} {component.Name}";
 		if (component.DeclaredLicenses.Count == 0)
 		{
-			problems.Add($"{label}: no license metadata; add an override with license (and licenseFile) to third-party/overrides.yml");
+			problems.Add(
+				$"{label}: no license metadata; add an override with license (and licenseFile) to third-party/overrides.yml");
 			return;
 		}
 
@@ -247,14 +283,16 @@ internal static class NoticeGenerator
 			var selected = policy.Select(expression, reviewed);
 			if (selected is null)
 			{
-				problems.Add($"{label}: license '{expression}' is not allowed by third-party/config.yml; review it and add an override with reviewed: to third-party/overrides.yml, or replace the dependency");
+				problems.Add(
+					$"{label}: license '{expression}' is not allowed by third-party/config.yml; review it and add an override with reviewed: to third-party/overrides.yml, or replace the dependency");
 			}
 
 			return selected;
 		}
 		catch (FormatException exception)
 		{
-			problems.Add($"{label}: {exception.Message}; add an override with an SPDX license to third-party/overrides.yml");
+			problems.Add(
+				$"{label}: {exception.Message}; add an override with an SPDX license to third-party/overrides.yml");
 			return null;
 		}
 	}
@@ -271,13 +309,16 @@ internal static class NoticeGenerator
 			return [];
 		}
 
-		static IEnumerable<string> Collect(SpdxExpression expression) => expression switch
+		static IEnumerable<string> Collect(SpdxExpression expression)
 		{
-			SpdxLicense license => [license.Id],
-			SpdxAnd and => and.Operands.SelectMany(Collect),
-			SpdxOr or => or.Operands.SelectMany(Collect),
-			_ => [],
-		};
+			return expression switch
+			{
+				SpdxLicense license => [license.Id],
+				SpdxAnd and => and.Operands.SelectMany(Collect),
+				SpdxOr or => or.Operands.SelectMany(Collect),
+				_ => []
+			};
+		}
 	}
 
 	private static void PruneTexts(Component component)
@@ -348,7 +389,12 @@ internal static class NoticeGenerator
 		return string.Join("\n\n", parts);
 	}
 
-	private static void AddRepositoryText(string repositoryRoot, Component component, string relativePath, string title, Problems problems)
+	private static void AddRepositoryText(
+		string repositoryRoot,
+		Component component,
+		string relativePath,
+		string title,
+		Problems problems)
 	{
 		if (ReadRepositoryFile(repositoryRoot, relativePath, problems) is { } content)
 		{

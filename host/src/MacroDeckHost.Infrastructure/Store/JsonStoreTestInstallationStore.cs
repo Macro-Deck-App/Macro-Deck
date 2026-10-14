@@ -14,7 +14,8 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 	private readonly string _path;
 	private readonly DurableJsonFile _files;
 
-	public JsonStoreTestInstallationStore(IMacroDeckPaths paths,
+	public JsonStoreTestInstallationStore(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
@@ -59,9 +60,13 @@ public sealed class JsonStoreTestInstallationStore : IStoreTestInstallationStore
 		}
 	}
 
-	private List<StoreTestInstallationRecord> Read() =>
-		_files.Read<List<StoreTestInstallationRecord>>(_path) ?? [];
+	private List<StoreTestInstallationRecord> Read()
+	{
+		return _files.Read<List<StoreTestInstallationRecord>>(_path) ?? [];
+	}
 
-	private static bool Same(StoreTestInstallationRecord record, string pluginId) =>
-		string.Equals(record.PluginId, pluginId, StringComparison.OrdinalIgnoreCase);
+	private static bool Same(StoreTestInstallationRecord record, string pluginId)
+	{
+		return string.Equals(record.PluginId, pluginId, StringComparison.OrdinalIgnoreCase);
+	}
 }

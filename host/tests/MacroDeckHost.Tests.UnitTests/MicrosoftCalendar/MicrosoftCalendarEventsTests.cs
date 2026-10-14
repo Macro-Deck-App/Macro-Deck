@@ -22,18 +22,22 @@ internal sealed class MicrosoftCalendarEventsTests
 		_harness = new MicrosoftCalendarHarness();
 		_harness.Calendars(MicrosoftCalendarHarness.Calendar("cal-1", "Calendar", isDefault: true),
 			MicrosoftCalendarHarness.Calendar("cal-2", "Birthdays", hexColor: ""),
-			MicrosoftCalendarHarness.Calendar("cal-3", "Team", ownerAddress: "alex@contoso.com", ownerName: "Alex Wilber"));
+			MicrosoftCalendarHarness.Calendar("cal-3", "Team", "alex@contoso.com", "Alex Wilber"));
 		_account = _harness.AddAccount(Email, ["cal-1", "cal-3"]).ToString("D");
 		await _harness.StartAsync();
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task A_timed_meeting_carries_its_times_place_teams_link_organizer_and_attendees()
 	{
-		_harness.Events("cal-1", """
+		_harness.Events("cal-1",
+			"""
 			{
 			  "id": "AAMkAGIAAAoZDOFAAA=",
 			  "subject": "Plan summer company picnic",
@@ -96,24 +100,34 @@ internal sealed class MicrosoftCalendarEventsTests
 	public async Task Without_a_teams_meeting_the_online_meeting_url_is_the_meeting_link()
 	{
 		_harness.Events("cal-1",
-			Event("e1", "2026-01-05T09:00:00.0000000", "2026-01-05T10:00:00.0000000",
-				extra: """ "onlineMeeting": null, "onlineMeetingUrl": "https://zoom.us/j/123" """));
+			Event("e1",
+				"2026-01-05T09:00:00.0000000",
+				"2026-01-05T10:00:00.0000000",
+				""" "onlineMeeting": null, "onlineMeetingUrl": "https://zoom.us/j/123" """));
 
 		Assert.That((await ReadAsync(["cal-1"])).Single().MeetingUrl, Is.EqualTo("https://zoom.us/j/123"));
 	}
 
-	[TestCase("2026-01-05T00:00:00.0000000", "2026-01-06T00:00:00.0000000", "W. Europe Standard Time",
+	[TestCase("2026-01-05T00:00:00.0000000",
+		"2026-01-06T00:00:00.0000000",
+		"W. Europe Standard Time",
 		TestName = "An all-day event returned as a floating midnight keeps its date")]
-	[TestCase("2026-01-04T23:00:00.0000000", "2026-01-05T23:00:00.0000000", "W. Europe Standard Time",
+	[TestCase("2026-01-04T23:00:00.0000000",
+		"2026-01-05T23:00:00.0000000",
+		"W. Europe Standard Time",
 		TestName = "An all-day event of a zone east of UTC keeps its date")]
-	[TestCase("2026-01-05T08:00:00.0000000", "2026-01-06T08:00:00.0000000", "Pacific Standard Time",
+	[TestCase("2026-01-05T08:00:00.0000000",
+		"2026-01-06T08:00:00.0000000",
+		"Pacific Standard Time",
 		TestName = "An all-day event of a zone west of UTC keeps its date")]
-	[TestCase("2026-01-04T23:00:00.0000000", "2026-01-05T23:00:00.0000000", "tzone://Microsoft/Custom",
+	[TestCase("2026-01-04T23:00:00.0000000",
+		"2026-01-05T23:00:00.0000000",
+		"tzone://Microsoft/Custom",
 		TestName = "An all-day event of an unknown zone keeps its date")]
 	public async Task All_day_events_cover_their_dates_with_an_exclusive_end(string start, string end, string zone)
 	{
 		_harness.Events("cal-1",
-			Event("day", start, end, extra: $$""" "isAllDay": true, "originalStartTimeZone": "{{zone}}" """));
+			Event("day", start, end, $$""" "isAllDay": true, "originalStartTimeZone": "{{zone}}" """));
 
 		var day = (await ReadAsync(["cal-1"])).Single();
 
@@ -129,12 +143,18 @@ internal sealed class MicrosoftCalendarEventsTests
 	public async Task Each_occurrence_of_a_recurring_meeting_is_its_own_event()
 	{
 		_harness.Events("cal-1",
-			Event("occ-1", "2026-01-05T09:00:00.0000000", "2026-01-05T09:15:00.0000000",
-				extra: """ "type": "occurrence", "seriesMasterId": "master" """),
-			Event("occ-2", "2026-01-06T09:00:00.0000000", "2026-01-06T09:15:00.0000000",
-				extra: """ "type": "exception", "seriesMasterId": "master" """),
-			Event("occ-3", "2026-01-07T09:00:00.0000000", "2026-01-07T09:15:00.0000000",
-				extra: """ "type": "occurrence", "seriesMasterId": "master" """));
+			Event("occ-1",
+				"2026-01-05T09:00:00.0000000",
+				"2026-01-05T09:15:00.0000000",
+				""" "type": "occurrence", "seriesMasterId": "master" """),
+			Event("occ-2",
+				"2026-01-06T09:00:00.0000000",
+				"2026-01-06T09:15:00.0000000",
+				""" "type": "exception", "seriesMasterId": "master" """),
+			Event("occ-3",
+				"2026-01-07T09:00:00.0000000",
+				"2026-01-07T09:15:00.0000000",
+				""" "type": "occurrence", "seriesMasterId": "master" """));
 
 		var events = await ReadAsync(["cal-1"]);
 
@@ -146,8 +166,10 @@ internal sealed class MicrosoftCalendarEventsTests
 	{
 		_harness.Events("cal-1",
 			Event("kept", "2026-01-05T09:00:00.0000000", "2026-01-05T10:00:00.0000000"),
-			Event("gone", "2026-01-06T09:00:00.0000000", "2026-01-06T10:00:00.0000000",
-				extra: """ "isCancelled": true """));
+			Event("gone",
+				"2026-01-06T09:00:00.0000000",
+				"2026-01-06T10:00:00.0000000",
+				""" "isCancelled": true """));
 
 		Assert.That((await ReadAsync(["cal-1"])).Select(e => e.Id), Is.EqualTo(new[] { "kept" }));
 	}
@@ -187,7 +209,8 @@ internal sealed class MicrosoftCalendarEventsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(calendars.Select(c => (c.Id, c.Name, c.Color, c.IsPrimary)),
-				Is.EqualTo(new[] { ("cal-1", "Calendar", (string?)"#E3008C", true), ("cal-3", "Team", "#E3008C", false) }));
+				Is.EqualTo(new[]
+					{ ("cal-1", "Calendar", (string?)"#E3008C", true), ("cal-3", "Team", "#E3008C", false) }));
 			Assert.That(all.Select(e => e.Id), Is.EquivalentTo(new[] { "mine", "team" }));
 			Assert.That(explicitDeselected, Is.Empty);
 			Assert.That(_harness.Server.To(MicrosoftCalendarHarness.CalendarViewPath("cal-2")), Is.Empty);
@@ -249,10 +272,10 @@ internal sealed class MicrosoftCalendarEventsTests
 		var whileMissing = await _harness.Integration.GetIssuesAsync();
 
 		_harness.Calendars(MicrosoftCalendarHarness.Calendar("cal-1", "Calendar", isDefault: true),
-			MicrosoftCalendarHarness.Calendar("cal-3", "Team", ownerAddress: "alex@contoso.com"));
+			MicrosoftCalendarHarness.Calendar("cal-3", "Team", "alex@contoso.com"));
 		await _harness.Integration.GetCalendarsAsync(_account, CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(whileMissing.Select(i => i.Severity), Is.EqualTo(new[] { IntegrationIssueSeverity.Warning }));
 			Assert.That(await _harness.Integration.GetIssuesAsync(), Is.Empty);
@@ -274,8 +297,10 @@ internal sealed class MicrosoftCalendarEventsTests
 	{
 		_harness.Server.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.EventPath("cal-3", "ev"),
 			HttpStatusCode.OK,
-			Event("ev", "2026-01-05T09:00:00.0000000", "2026-01-05T10:00:00.0000000",
-				extra: """ "body": { "contentType": "text", "content": "  Agenda: budget\n" } """));
+			Event("ev",
+				"2026-01-05T09:00:00.0000000",
+				"2026-01-05T10:00:00.0000000",
+				""" "body": { "contentType": "text", "content": "  Agenda: budget\n" } """));
 
 		var details = await _harness.Integration.GetEventAsync(_account, "cal-3", "ev", CancellationToken.None);
 		var request = _harness.Server.To(MicrosoftCalendarHarness.EventPath("cal-3", "ev")).Single();
@@ -299,7 +324,7 @@ internal sealed class MicrosoftCalendarEventsTests
 	[Test]
 	public async Task An_event_of_a_calendar_that_was_not_chosen_is_not_read()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _harness.Integration.GetEventAsync(_account, "cal-2", "ev", CancellationToken.None),
 				Is.Null);
@@ -308,14 +333,18 @@ internal sealed class MicrosoftCalendarEventsTests
 	}
 
 	private Task<IReadOnlyList<CalendarEvent>> ReadAsync(string[] calendarIds)
-		=> _harness.Integration.GetEventsAsync(_account,
+	{
+		return _harness.Integration.GetEventsAsync(_account,
 			new CalendarEventQuery { From = _from, To = _to, CalendarIds = calendarIds },
 			CancellationToken.None);
+	}
 
 	private static string Event(string id, string start, string end, string extra = "")
-		=> $$"""
-			{"id":"{{id}}","subject":"{{id}}",
-			 "start":{"dateTime":"{{start}}","timeZone":"UTC"},"end":{"dateTime":"{{end}}","timeZone":"UTC"}
-			 {{(extra.Length > 0 ? "," + extra : "")}} }
-			""";
+	{
+		return $$"""
+				 {"id":"{{id}}","subject":"{{id}}",
+				  "start":{"dateTime":"{{start}}","timeZone":"UTC"},"end":{"dateTime":"{{end}}","timeZone":"UTC"}
+				  {{(extra.Length > 0 ? "," + extra : "")}} }
+				 """;
+	}
 }

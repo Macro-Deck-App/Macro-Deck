@@ -22,7 +22,8 @@ public sealed record PluginArtifactAcquisition
 
 	public string? ErrorMessage { get; init; }
 
-	public static PluginArtifactAcquisition Ok(string artifactPath,
+	public static PluginArtifactAcquisition Ok(
+		string artifactPath,
 		string sha256,
 		bool hostOwned,
 		PluginArtifactSourceKind sourceKind)
@@ -45,7 +46,8 @@ public sealed record PluginArtifactAcquisition
 
 public interface IPluginArtifactAcquirer
 {
-	Task<PluginArtifactAcquisition> Acquire(PluginArtifactSource source,
+	Task<PluginArtifactAcquisition> Acquire(
+		PluginArtifactSource source,
 		string stagingDirectory,
 		CancellationToken cancellationToken = default);
 }
@@ -64,7 +66,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	public PluginArtifactAcquirer(IHttpClientFactory httpClientFactory,
+	public PluginArtifactAcquirer(
+		IHttpClientFactory httpClientFactory,
 		PluginInstallerOptions options,
 		ILogger logger,
 		TimeProvider? timeProvider = null)
@@ -75,7 +78,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 		_logger = logger.ForContext<PluginArtifactAcquirer>();
 	}
 
-	public async Task<PluginArtifactAcquisition> Acquire(PluginArtifactSource source,
+	public async Task<PluginArtifactAcquisition> Acquire(
+		PluginArtifactSource source,
 		string stagingDirectory,
 		CancellationToken cancellationToken = default)
 	{
@@ -98,7 +102,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 	// hostOwned: false. The caller's path is outside the host's control between here and promotion, so
 	// reading it twice (once to verify, once to extract) would let it be swapped in between; copying it
 	// once, under a hash computed from the copy's own bytes, closes that window.
-	private async Task<PluginArtifactAcquisition> AcquireLocalPath(PluginArtifactSource source,
+	private async Task<PluginArtifactAcquisition> AcquireLocalPath(
+		PluginArtifactSource source,
 		string stagingDirectory,
 		CancellationToken cancellationToken)
 	{
@@ -129,8 +134,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 				var written = await CopyBounded(stream,
 					stagedPath,
 					PluginArtifactLimits.MaxArchiveBytes,
-					progress: null,
-					totalBytes: null,
+					null,
+					null,
 					cancellationToken);
 				if (written is not { } computed)
 				{
@@ -153,22 +158,24 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 		}
 	}
 
-	private static PluginArtifactAcquisition AcquireLocalPathResult(PluginArtifactSource source,
+	private static PluginArtifactAcquisition AcquireLocalPathResult(
+		PluginArtifactSource source,
 		string stagedPath,
 		string sha256)
 	{
-		if (source.ExpectedSha256 is { } expected &&
-			!string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
+		if (source.ExpectedSha256 is { } expected
+			&& !string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
 		{
 			TryDeleteFile(stagedPath);
 			return PluginArtifactAcquisition.Fail(PluginInstallError.HashMismatch,
 				$"The artifact hashes to '{sha256}', not the expected '{expected}'.");
 		}
 
-		return PluginArtifactAcquisition.Ok(stagedPath, sha256, hostOwned: true, PluginArtifactSourceKind.LocalPath);
+		return PluginArtifactAcquisition.Ok(stagedPath, sha256, true, PluginArtifactSourceKind.LocalPath);
 	}
 
-	private async Task<PluginArtifactAcquisition> AcquireUpload(PluginArtifactSource source,
+	private async Task<PluginArtifactAcquisition> AcquireUpload(
+		PluginArtifactSource source,
 		string stagingDirectory,
 		CancellationToken cancellationToken)
 	{
@@ -185,8 +192,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 			var written = await CopyBounded(source.Content,
 				stagedPath,
 				PluginArtifactLimits.MaxArchiveBytes,
-				progress: null,
-				totalBytes: null,
+				null,
+				null,
 				cancellationToken);
 			if (written is not { } sha256)
 			{
@@ -195,15 +202,15 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 					$"The uploaded artifact exceeds the {PluginArtifactLimits.MaxArchiveBytes}-byte limit.");
 			}
 
-			if (source.ExpectedSha256 is { } expected &&
-				!string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
+			if (source.ExpectedSha256 is { } expected
+				&& !string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
 			{
 				TryDeleteFile(stagedPath);
 				return PluginArtifactAcquisition.Fail(PluginInstallError.HashMismatch,
 					$"The uploaded artifact hashes to '{sha256}', not the expected '{expected}'.");
 			}
 
-			return PluginArtifactAcquisition.Ok(stagedPath, sha256, hostOwned: true, PluginArtifactSourceKind.Upload);
+			return PluginArtifactAcquisition.Ok(stagedPath, sha256, true, PluginArtifactSourceKind.Upload);
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
@@ -214,7 +221,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 		}
 	}
 
-	private async Task<PluginArtifactAcquisition> AcquireUrl(PluginArtifactSource source,
+	private async Task<PluginArtifactAcquisition> AcquireUrl(
+		PluginArtifactSource source,
 		string stagingDirectory,
 		CancellationToken cancellationToken)
 	{
@@ -264,15 +272,15 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 					$"The downloaded artifact exceeds the {PluginArtifactLimits.MaxArchiveBytes}-byte limit.");
 			}
 
-			if (source.ExpectedSha256 is { } expected &&
-				!string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
+			if (source.ExpectedSha256 is { } expected
+				&& !string.Equals(expected, sha256, StringComparison.OrdinalIgnoreCase))
 			{
 				TryDeleteFile(stagedPath);
 				return PluginArtifactAcquisition.Fail(PluginInstallError.HashMismatch,
 					$"The downloaded artifact hashes to '{sha256}', not the expected '{expected}'.");
 			}
 
-			return PluginArtifactAcquisition.Ok(stagedPath, sha256, hostOwned: true, source.Kind);
+			return PluginArtifactAcquisition.Ok(stagedPath, sha256, true, source.Kind);
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
@@ -292,7 +300,8 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 		}
 	}
 
-	private async Task<string?> CopyBounded(Stream source,
+	private async Task<string?> CopyBounded(
+		Stream source,
 		string destinationPath,
 		long limit,
 		IProgress<PluginArtifactDownloadProgress>? progress,
@@ -318,9 +327,9 @@ public sealed class PluginArtifactAcquirer : IPluginArtifactAcquirer
 			incrementalHash.AppendData(chunk, 0, read);
 			await destination.WriteAsync(chunk.AsMemory(0, read), cancellationToken);
 
-			if (progress is not null &&
-				(total - lastReportedBytes >= ProgressByteInterval ||
-					_timeProvider.GetElapsedTime(lastReportedAt) >= _progressTimeInterval))
+			if (progress is not null
+				&& (total - lastReportedBytes >= ProgressByteInterval
+					|| _timeProvider.GetElapsedTime(lastReportedAt) >= _progressTimeInterval))
 			{
 				progress.Report(new PluginArtifactDownloadProgress(total, totalBytes));
 				lastReportedBytes = total;

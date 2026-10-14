@@ -21,8 +21,12 @@ internal sealed class IntegrationLayoutProviderContext : ILayoutProviderContext
 	public Task<LayoutRegistration> RegisterLayoutAsync(
 		LayoutDescriptor layout,
 		CancellationToken cancellationToken = default)
-		=> _registry.Register(_integrationId, layout, cancellationToken);
+	{
+		return _registry.Register(_integrationId, layout, cancellationToken);
+	}
 
 	public Task UnregisterLayoutAsync(string layoutId, CancellationToken cancellationToken = default)
-		=> _registry.Unregister(_integrationId, layoutId, cancellationToken);
+	{
+		return _registry.Unregister(_integrationId, layoutId, cancellationToken);
+	}
 }

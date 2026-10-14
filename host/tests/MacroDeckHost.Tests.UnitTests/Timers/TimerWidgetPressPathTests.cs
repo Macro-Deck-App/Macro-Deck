@@ -32,12 +32,15 @@ public class TimerWidgetPressPathTests
 	}
 
 	[TearDown]
-	public async Task TearDown() => await _harness.DisposeAsync();
+	public async Task TearDown()
+	{
+		await _harness.DisposeAsync();
+	}
 
 	[Test]
 	public async Task A_hardware_or_rest_short_press_starts_a_fixed_countdown_and_is_accepted()
 	{
-		var widget = await _harness.AddCountdownAsync(seconds: 30);
+		var widget = await _harness.AddCountdownAsync(30);
 		var deviceId = Guid.NewGuid();
 
 		var response = await _handler.Handle(Request(widget, WidgetTriggerTypes.ShortPress, deviceId: deviceId),
@@ -87,8 +90,11 @@ public class TimerWidgetPressPathTests
 	{
 		var widget = await _harness.AddCountdownAsync(ask: true);
 
-		var response = await _handler.Handle(Request(widget, WidgetTriggerTypes.ShortPress, clientId: null,
-			deviceId: Guid.NewGuid()), CancellationToken.None);
+		var response = await _handler.Handle(Request(widget,
+				WidgetTriggerTypes.ShortPress,
+				null,
+				Guid.NewGuid()),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -113,28 +119,42 @@ public class TimerWidgetPressPathTests
 		});
 	}
 
-	private static ExecuteActionButtonTriggerRequest Request(WidgetEntity widget,
+	private static ExecuteActionButtonTriggerRequest Request(
+		WidgetEntity widget,
 		string triggerType,
 		string? clientId = "client-1",
 		Guid? deviceId = null)
-		=> new()
+	{
+		return new ExecuteActionButtonTriggerRequest
 		{
 			TriggerType = triggerType,
 			WidgetId = widget.Id.ToString(),
 			FolderId = widget.FolderId.ToString(),
 			ClientId = clientId,
-			OriginDeviceId = deviceId,
+			OriginDeviceId = deviceId
 		};
+	}
 
 	private sealed class NoProfiles : IProfileRegistry
 	{
-		public IReadOnlyList<Profile> GetProfiles() => [];
+		public IReadOnlyList<Profile> GetProfiles()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId) => [];
+		public IReadOnlyList<Folder> GetFoldersForProfile(string profileId)
+		{
+			return [];
+		}
 
-		public bool IsVirtual(string profileId) => false;
+		public bool IsVirtual(string profileId)
+		{
+			return false;
+		}
 
 		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 }

@@ -80,12 +80,15 @@ internal sealed class PluginInstallerEnrollmentClaimTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	private string BuildArtifact(string pluginId = PluginId, string version = "1.0.0")
 	{
 		return new PluginArtifactBuilder()
-			.WithManifest(ManifestJson.Build(version, pluginId, extraBlocks: null))
+			.WithManifest(ManifestJson.Build(version, pluginId, null))
 			.WithFile(ManifestJson.EntrypointExecutable, "binary")
 			.WriteTo(_sourceDirectory, $"{pluginId}.macroDeckPlugin");
 	}
@@ -145,7 +148,7 @@ internal sealed class PluginInstallerEnrollmentClaimTests
 		await _sessionRegistry.Create(record);
 
 		var connection = new FakePluginConnection();
-		_sessionRegistry.TryAttach(sessionId, connection, instanceId: null);
+		_sessionRegistry.TryAttach(sessionId, connection, null);
 		return connection;
 	}
 
@@ -198,6 +201,8 @@ internal sealed class PluginInstallerEnrollmentClaimTests
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
 		public HttpClient CreateClient(string name)
-			=> throw new InvalidOperationException("A unit test must not reach the network.");
+		{
+			throw new InvalidOperationException("A unit test must not reach the network.");
+		}
 	}
 }

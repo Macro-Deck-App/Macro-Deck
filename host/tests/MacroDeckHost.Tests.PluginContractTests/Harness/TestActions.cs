@@ -8,9 +8,15 @@ internal sealed class TestIntegration(params IActionDefinition[] actions) : IPlu
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = actions;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal class TestAction(string id, Func<ActionExecutionContext, Task<ActionResult>>? execute = null)
@@ -26,7 +32,10 @@ internal class TestAction(string id, Func<ActionExecutionContext, Task<ActionRes
 
 	public ActionExecutionContext? LastContext { get; private set; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this, execute);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this, execute);
+	}
 
 	private sealed class Executor(TestAction action, Func<ActionExecutionContext, Task<ActionResult>>? execute)
 		: IActionExecutor
@@ -43,9 +52,12 @@ internal sealed class TestDynamicOptionsAction(string id) : TestAction(id), IDyn
 {
 	public DynamicOptionsResult ResultToReturn { get; set; } = new() { Options = [] };
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(ResultToReturn);
+	{
+		return Task.FromResult(ResultToReturn);
+	}
 }
 
 internal sealed class TestStateProviderAction(string id) : TestAction(id), IStateProviderActionDefinition
@@ -53,9 +65,12 @@ internal sealed class TestStateProviderAction(string id) : TestAction(id), IStat
 	public ActionStateSnapshot? SnapshotToReturn { get; set; } =
 		new(new[] { new ActionStateDefinition("off", "Off"), new ActionStateDefinition("on", "On") }, "on");
 
-	public Task<ActionStateSnapshot?> GetActionStateAsync(IReadOnlyDictionary<string, object?> parameters,
+	public Task<ActionStateSnapshot?> GetActionStateAsync(
+		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(SnapshotToReturn);
+	{
+		return Task.FromResult(SnapshotToReturn);
+	}
 }
 
 internal sealed class TestIconProviderAction(string id) : TestAction(id), IIconProviderActionDefinition
@@ -66,11 +81,15 @@ internal sealed class TestIconProviderAction(string id) : TestAction(id), IIconP
 
 	public int ContentCallCount { get; private set; }
 
-	public Task<ActionIconSnapshot?> GetActionIconAsync(IReadOnlyDictionary<string, object?> parameters,
+	public Task<ActionIconSnapshot?> GetActionIconAsync(
+		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(SnapshotToReturn);
+	{
+		return Task.FromResult(SnapshotToReturn);
+	}
 
-	public Task<ActionIconContent?> GetActionIconContentAsync(IReadOnlyDictionary<string, object?> parameters,
+	public Task<ActionIconContent?> GetActionIconContentAsync(
+		IReadOnlyDictionary<string, object?> parameters,
 		string version,
 		CancellationToken cancellationToken)
 	{

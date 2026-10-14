@@ -25,9 +25,15 @@ public sealed class ConfigFlowUiProviderRegistry
 		_logger = logger;
 	}
 
-	public static string ProviderIdFor(Guid flowId) => $"config-flow:{flowId:N}";
+	public static string ProviderIdFor(Guid flowId)
+	{
+		return $"config-flow:{flowId:N}";
+	}
 
-	public void Register(Guid flowId, IUiConfigFlow flow) => _flows[ProviderIdFor(flowId)] = flow;
+	public void Register(Guid flowId, IUiConfigFlow flow)
+	{
+		_flows[ProviderIdFor(flowId)] = flow;
+	}
 
 	public void Unregister(Guid flowId)
 	{
@@ -74,6 +80,8 @@ public sealed class ConfigFlowUiProviderRegistry
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces => [];
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> flow.CreateUiSessionAsync(request, cancellationToken);
+		{
+			return flow.CreateUiSessionAsync(request, cancellationToken);
+		}
 	}
 }

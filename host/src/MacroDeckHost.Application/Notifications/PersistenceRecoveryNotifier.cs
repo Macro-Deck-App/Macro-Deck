@@ -19,7 +19,8 @@ public sealed class PersistenceRecoveryNotifier : IPersistenceRecoveryReporter
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILocalizationResolver _localization;
 
-	public PersistenceRecoveryNotifier(IUserNotificationStore notifications,
+	public PersistenceRecoveryNotifier(
+		IUserNotificationStore notifications,
 		IServiceScopeFactory scopeFactory,
 		ILocalizationResolver localization)
 	{
@@ -46,11 +47,10 @@ public sealed class PersistenceRecoveryNotifier : IPersistenceRecoveryReporter
 		}
 
 		var culture = ActiveCulture();
-		var message = _localization.Resolve(AppStrings.Notifications.FilesRecoveredMessage(count: count), culture);
+		var message = _localization.Resolve(AppStrings.Notifications.FilesRecoveredMessage(count), culture);
 		if (anyCorruptPreserved)
 		{
-			message += " " +
-				_localization.Resolve(AppStrings.Notifications.FilesRecoveredCorruptCopiesKept(), culture);
+			message += " " + _localization.Resolve(AppStrings.Notifications.FilesRecoveredCorruptCopiesKept(), culture);
 		}
 
 		_notifications.Raise(new UserNotificationDraft
@@ -59,7 +59,7 @@ public sealed class PersistenceRecoveryNotifier : IPersistenceRecoveryReporter
 			Kind = UserNotificationKind.General,
 			Title = _localization.Resolve(AppStrings.Notifications.FilesRecovered(), culture),
 			Message = message,
-			DedupeKey = RecoveredDedupeKey,
+			DedupeKey = RecoveredDedupeKey
 		});
 	}
 
@@ -83,8 +83,8 @@ public sealed class PersistenceRecoveryNotifier : IPersistenceRecoveryReporter
 			Severity = UserNotificationSeverity.Error,
 			Kind = UserNotificationKind.Error,
 			Title = _localization.Resolve(AppStrings.Notifications.FilesUnreadable(), culture),
-			Message = _localization.Resolve(AppStrings.Notifications.FilesUnreadableMessage(count: count), culture),
-			DedupeKey = UnrecoverableDedupeKey,
+			Message = _localization.Resolve(AppStrings.Notifications.FilesUnreadableMessage(count), culture),
+			DedupeKey = UnrecoverableDedupeKey
 		});
 	}
 

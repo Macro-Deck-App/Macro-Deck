@@ -15,7 +15,8 @@ internal static class TwitchChatMessageParser
 		string? subscriptionType,
 		JsonElement payload,
 		TwitchChatBadgeMap badges)
-		=> subscriptionType switch
+	{
+		return subscriptionType switch
 		{
 			MessageType => Parse(payload, badges) is { } message
 				? new ChatMessageReceived(accountId, message)
@@ -29,12 +30,13 @@ internal static class TwitchChatMessageParser
 				: null,
 			_ => null
 		};
+	}
 
 	public static ChatMessage? Parse(JsonElement payload, TwitchChatBadgeMap badges)
 	{
-		if (payload.ValueKind is not JsonValueKind.Object ||
-			ReadString(payload, "message_id") is not { Length: > 0 } messageId ||
-			ReadString(payload, "chatter_user_id") is not { Length: > 0 } chatterId)
+		if (payload.ValueKind is not JsonValueKind.Object
+			|| ReadString(payload, "message_id") is not { Length: > 0 } messageId
+			|| ReadString(payload, "chatter_user_id") is not { Length: > 0 } chatterId)
 		{
 			return null;
 		}
@@ -112,8 +114,8 @@ internal static class TwitchChatMessageParser
 
 		return ReadString(fragment, "type") switch
 		{
-			"emote" when fragment.TryGetProperty("emote", out var emote) &&
-				ReadString(emote, "id") is { Length: > 0 } emoteId
+			"emote" when fragment.TryGetProperty("emote", out var emote)
+				&& ReadString(emote, "id") is { Length: > 0 } emoteId
 				=> new ChatFragment(ChatFragmentKind.Emote, text, emoteId),
 			"mention" => new ChatFragment(ChatFragmentKind.Mention, text),
 			"cheermote" => new ChatFragment(ChatFragmentKind.Cheermote, text),
@@ -122,11 +124,13 @@ internal static class TwitchChatMessageParser
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind is JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind is JsonValueKind.String
+	{
+		return element.ValueKind is JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind is JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }
 
 internal sealed class TwitchChatBadgeMap
@@ -148,5 +152,8 @@ internal sealed class TwitchChatBadgeMap
 		}
 	}
 
-	public string? Find(string setId, string id) => _urls.GetValueOrDefault((setId, id));
+	public string? Find(string setId, string id)
+	{
+		return _urls.GetValueOrDefault((setId, id));
+	}
 }

@@ -33,7 +33,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	private MessagingSubscriptionsResult? _lastResult;
 	private bool _hostHasEntries;
 
-	public RemoteMessageChannel(IHostInvoker invoker,
+	public RemoteMessageChannel(
+		IHostInvoker invoker,
 		PluginConnectionState state,
 		PluginMetadata metadata,
 		TimeProvider timeProvider,
@@ -57,38 +58,57 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	}
 
 	public Task PublishAsync(string topic, JsonElement? payload = null, CancellationToken cancellationToken = default)
-		=> InvokeAsync(HostOperations.Messaging.Publish, topic, payload, null, cancellationToken);
+	{
+		return InvokeAsync(HostOperations.Messaging.Publish, topic, payload, null, cancellationToken);
+	}
 
-	public Task SendAsync(string topic,
-		JsonElement? payload = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> InvokeAsync(HostOperations.Messaging.Send, topic, payload, ValidTimeout(timeout), cancellationToken);
-
-	public async Task<JsonElement?> RequestAsync(string topic,
+	public Task SendAsync(
+		string topic,
 		JsonElement? payload = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
-		var data = await InvokeAsync(HostOperations.Messaging.Request, topic, payload, ValidTimeout(timeout), cancellationToken)
+		return InvokeAsync(HostOperations.Messaging.Send, topic, payload, ValidTimeout(timeout), cancellationToken);
+	}
+
+	public async Task<JsonElement?> RequestAsync(
+		string topic,
+		JsonElement? payload = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var data = await InvokeAsync(HostOperations.Messaging.Request,
+				topic,
+				payload,
+				ValidTimeout(timeout),
+				cancellationToken)
 			.ConfigureAwait(false);
 		return data?.Deserialize<MessagingReplyPayload>(PluginProtocolJson.Options)?.Payload;
 	}
 
-	public Task<IAsyncDisposable> SubscribeAsync(string topicPattern,
+	public Task<IAsyncDisposable> SubscribeAsync(
+		string topicPattern,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
-		=> RegisterAsync(ChannelMessageKind.Event, topicPattern, handler, lifecycle: false, cancellationToken);
+	{
+		return RegisterAsync(ChannelMessageKind.Event, topicPattern, handler, false, cancellationToken);
+	}
 
-	public Task<IAsyncDisposable> HandleCommandsAsync(string topic,
+	public Task<IAsyncDisposable> HandleCommandsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task> handler,
 		CancellationToken cancellationToken = default)
-		=> RegisterAsync(ChannelMessageKind.Command, topic, handler, lifecycle: false, cancellationToken);
+	{
+		return RegisterAsync(ChannelMessageKind.Command, topic, handler, false, cancellationToken);
+	}
 
-	public Task<IAsyncDisposable> HandleRequestsAsync(string topic,
+	public Task<IAsyncDisposable> HandleRequestsAsync(
+		string topic,
 		Func<ChannelMessage, CancellationToken, Task<JsonElement?>> handler,
 		CancellationToken cancellationToken = default)
-		=> RegisterAsync(ChannelMessageKind.Request, topic, handler, lifecycle: false, cancellationToken);
+	{
+		return RegisterAsync(ChannelMessageKind.Request, topic, handler, false, cancellationToken);
+	}
 
 	// Pending entries keep being synced, so the host holds this plugin's claims while its integrations
 	// shut down and initialize again; a re-registration during that pass takes the entry over.
@@ -121,7 +141,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		}
 	}
 
-	public async Task<CapabilityInvocationResult> DeliverAsync(string operation,
+	public async Task<CapabilityInvocationResult> DeliverAsync(
+		string operation,
 		MessagingDeliveryArguments arguments,
 		CancellationToken cancellationToken)
 	{
@@ -152,8 +173,9 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		bool pending;
 		lock (_lock)
 		{
-			var candidates = _entries.Where(entry => entry.Kind == kind &&
-				string.Equals(entry.Topic, arguments.Topic, StringComparison.Ordinal)).ToList();
+			var candidates = _entries.Where(entry
+					=> entry.Kind == kind && string.Equals(entry.Topic, arguments.Topic, StringComparison.Ordinal))
+				.ToList();
 			handler = candidates.FirstOrDefault(entry => !entry.PendingRelease);
 			pending = candidates.Count > 0;
 		}
@@ -161,7 +183,7 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		if (handler is null)
 		{
 			return pending
-				? Failure(ProtocolErrorReasons.MessagingHandlerUnavailable, "The handler is being reinitialized.", retryable: true)
+				? Failure(ProtocolErrorReasons.MessagingHandlerUnavailable, "The handler is being reinitialized.", true)
 				: Failure(ProtocolErrorReasons.MessagingNoHandler, "Nothing in this plugin handles the topic.");
 		}
 
@@ -175,10 +197,12 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 			}
 			else if (handler.Handler is Func<ChannelMessage, CancellationToken, Task> commandHandler)
 			{
-				await Task.Run(() => commandHandler(message, cancellationToken), cancellationToken).ConfigureAwait(false);
+				await Task.Run(() => commandHandler(message, cancellationToken), cancellationToken)
+					.ConfigureAwait(false);
 			}
 
-			if (reply is { } element && Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
+			if (reply is { } element
+				&& Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
 			{
 				_logger.Warning("The reply to {Topic} exceeds {MaxBytes} bytes and was not sent",
 					arguments.Topic,
@@ -209,9 +233,10 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		{
 			matching =
 			[
-				.. _entries.Where(entry => entry.Kind == ChannelMessageKind.Event &&
-					!entry.PendingRelease &&
-					MessageTopic.Matches(entry.Topic, message.Topic))
+				.. _entries.Where(entry
+					=> entry.Kind == ChannelMessageKind.Event
+					&& !entry.PendingRelease
+					&& MessageTopic.Matches(entry.Topic, message.Topic))
 			];
 		}
 
@@ -219,7 +244,9 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		{
 			try
 			{
-				await Task.Run(() => ((Func<ChannelMessage, CancellationToken, Task>)entry.Handler)(message, cancellationToken),
+				await Task.Run(()
+							=> ((Func<ChannelMessage, CancellationToken, Task>)entry.Handler)(message,
+								cancellationToken),
 						cancellationToken)
 					.ConfigureAwait(false);
 			}
@@ -230,7 +257,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		}
 	}
 
-	private async Task<IAsyncDisposable> RegisterAsync(ChannelMessageKind kind,
+	private async Task<IAsyncDisposable> RegisterAsync(
+		ChannelMessageKind kind,
 		string topic,
 		Delegate handler,
 		bool lifecycle,
@@ -238,10 +266,14 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(handler);
 
-		var valid = kind == ChannelMessageKind.Event ? MessageTopic.IsValidPattern(topic) : MessageTopic.IsValidTopic(topic);
+		var valid = kind == ChannelMessageKind.Event
+			? MessageTopic.IsValidPattern(topic)
+			: MessageTopic.IsValidTopic(topic);
 		if (!valid)
 		{
-			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 		}
 
 		ThrowIfUnsupported(topic);
@@ -251,8 +283,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		{
 			if (kind != ChannelMessageKind.Event)
 			{
-				var existing = _entries.FirstOrDefault(other => other.Kind == kind &&
-					string.Equals(other.Topic, topic, StringComparison.Ordinal));
+				var existing = _entries.FirstOrDefault(other
+					=> other.Kind == kind && string.Equals(other.Topic, topic, StringComparison.Ordinal));
 				if (existing is { PendingRelease: false })
 				{
 					throw new MessageChannelException(MessageChannelErrorCode.TopicAlreadyHandled,
@@ -288,8 +320,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 			throw;
 		}
 
-		var rejection = result?.Rejected.FirstOrDefault(rejected => rejected.Kind == KindName(kind) &&
-			string.Equals(rejected.Topic, topic, StringComparison.Ordinal));
+		var rejection = result?.Rejected.FirstOrDefault(rejected
+			=> rejected.Kind == KindName(kind) && string.Equals(rejected.Topic, topic, StringComparison.Ordinal));
 		if (rejection is not null)
 		{
 			RemoveEntry(entry);
@@ -298,7 +330,9 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 					topic,
 					$"'{topic}' is already handled by {rejection.Owner}.",
 					rejection.Owner)
-				: new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+				: new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+					topic,
+					$"'{topic}' is not a valid topic.");
 		}
 
 		return new Registration(this, entry);
@@ -357,7 +391,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 
 			foreach (var rejected in result.Rejected)
 			{
-				_logger.Warning("Macro Deck no longer accepts {Kind} topic {Topic} from this plugin ({Reason}, handled by {Owner})",
+				_logger.Warning(
+					"Macro Deck no longer accepts {Kind} topic {Topic} from this plugin ({Reason}, handled by {Owner})",
 					rejected.Kind,
 					rejected.Topic,
 					rejected.Reason,
@@ -365,8 +400,10 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 
 				lock (_lock)
 				{
-					if (_entries.RemoveAll(entry => KindName(entry.Kind) == rejected.Kind &&
-						string.Equals(entry.Topic, rejected.Topic, StringComparison.Ordinal)) > 0)
+					if (_entries.RemoveAll(entry
+							=> KindName(entry.Kind) == rejected.Kind
+							&& string.Equals(entry.Topic, rejected.Topic, StringComparison.Ordinal))
+						> 0)
 					{
 						_version++;
 					}
@@ -404,7 +441,7 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 			}
 
 			var empty = table.Events.Count == 0 && table.Commands.Count == 0 && table.Requests.Count == 0;
-			if (_state.ActiveConnection is null || !_state.MessagingAccepted || (empty && !_hostHasEntries))
+			if (_state.ActiveConnection is null || !_state.MessagingAccepted || empty && !_hostHasEntries)
 			{
 				return null;
 			}
@@ -419,8 +456,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 							cancellationToken)
 						.ConfigureAwait(false);
 
-					var result = data?.Deserialize<MessagingSubscriptionsResult>(PluginProtocolJson.Options) ??
-						new MessagingSubscriptionsResult();
+					var result = data?.Deserialize<MessagingSubscriptionsResult>(PluginProtocolJson.Options)
+						?? new MessagingSubscriptionsResult();
 					lock (_lock)
 					{
 						_syncedVersion = version;
@@ -430,10 +467,10 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 					_hostHasEntries = !empty;
 					return result;
 				}
-				catch (HostInvocationException exception) when (exception.Retryable &&
-					!string.Equals(exception.Code, ProtocolErrorCodes.SessionNotFound, StringComparison.Ordinal) &&
-					_state.ActiveConnection is not null &&
-					attempt < _retryDelays.Length)
+				catch (HostInvocationException exception) when (exception.Retryable
+					&& !string.Equals(exception.Code, ProtocolErrorCodes.SessionNotFound, StringComparison.Ordinal)
+					&& _state.ActiveConnection is not null
+					&& attempt < _retryDelays.Length)
 				{
 					await Task.Delay(_retryDelays[attempt], _timeProvider, cancellationToken).ConfigureAwait(false);
 				}
@@ -458,7 +495,8 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	}
 
 	private MessagingSubscriptionsArguments Table()
-		=> new()
+	{
+		return new MessagingSubscriptionsArguments
 		{
 			Events =
 			[
@@ -466,11 +504,19 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 					.Select(entry => entry.Topic)
 					.Distinct(StringComparer.Ordinal)
 			],
-			Commands = [.. _entries.Where(entry => entry.Kind == ChannelMessageKind.Command).Select(entry => entry.Topic)],
-			Requests = [.. _entries.Where(entry => entry.Kind == ChannelMessageKind.Request).Select(entry => entry.Topic)]
+			Commands =
+			[
+				.. _entries.Where(entry => entry.Kind == ChannelMessageKind.Command).Select(entry => entry.Topic)
+			],
+			Requests =
+			[
+				.. _entries.Where(entry => entry.Kind == ChannelMessageKind.Request).Select(entry => entry.Topic)
+			]
 		};
+	}
 
-	private async Task<JsonElement?> InvokeAsync(string operation,
+	private async Task<JsonElement?> InvokeAsync(
+		string operation,
 		string topic,
 		JsonElement? payload,
 		TimeSpan? timeout,
@@ -478,10 +524,13 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	{
 		if (!MessageTopic.IsValidTopic(topic))
 		{
-			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic, topic, $"'{topic}' is not a valid topic.");
+			throw new MessageChannelException(MessageChannelErrorCode.InvalidTopic,
+				topic,
+				$"'{topic}' is not a valid topic.");
 		}
 
-		if (payload is { } element && Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
+		if (payload is { } element
+			&& Encoding.UTF8.GetByteCount(element.GetRawText()) > MessagingLimits.MaxPayloadBytes)
 		{
 			throw new MessageChannelException(MessageChannelErrorCode.PayloadTooLarge,
 				topic,
@@ -501,9 +550,17 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 		try
 		{
 			return timeout is { } deadline
-				? await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Messaging, operation, arguments, deadline, deadline + _replyMargin, cancellationToken)
+				? await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Messaging,
+						operation,
+						arguments,
+						deadline,
+						deadline + _replyMargin,
+						cancellationToken)
 					.ConfigureAwait(false)
-				: await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Messaging, operation, arguments, cancellationToken)
+				: await _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Messaging,
+						operation,
+						arguments,
+						cancellationToken)
 					.ConfigureAwait(false);
 		}
 		catch (HostInvocationException exception)
@@ -523,15 +580,20 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	}
 
 	private static bool IsUnsupported(HostInvocationException exception)
-		=> string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal) ||
-			string.Equals(exception.Details.GetValueOrDefault("reason"), ProtocolErrorReasons.MessagingNotDeclared,
+	{
+		return string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal)
+			|| string.Equals(exception.Details.GetValueOrDefault("reason"),
+				ProtocolErrorReasons.MessagingNotDeclared,
 				StringComparison.Ordinal);
+	}
 
 	private static MessageChannelException Map(HostInvocationException exception, string topic)
 	{
 		if (IsUnsupported(exception))
 		{
-			return new MessageChannelException(MessageChannelErrorCode.Unsupported, topic, "This Macro Deck offers no message channel.");
+			return new MessageChannelException(MessageChannelErrorCode.Unsupported,
+				topic,
+				"This Macro Deck offers no message channel.");
 		}
 
 		var code = exception.Details.GetValueOrDefault("reason") switch
@@ -562,21 +624,25 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 	}
 
 	private static CapabilityInvocationResult Failure(string reason, string message, bool retryable = false)
-		=> CapabilityInvocationResult.Failed(new ProtocolError
+	{
+		return CapabilityInvocationResult.Failed(new ProtocolError
 		{
 			Code = ProtocolErrorCodes.CapabilityUnavailable,
 			Message = message,
 			Retryable = retryable,
 			Details = new Dictionary<string, string>(StringComparer.Ordinal) { ["reason"] = reason }
 		});
+	}
 
 	private static string KindName(ChannelMessageKind kind)
-		=> kind switch
+	{
+		return kind switch
 		{
 			ChannelMessageKind.Command => "command",
 			ChannelMessageKind.Request => "request",
 			_ => "event"
 		};
+	}
 
 	private sealed class Entry(ChannelMessageKind kind, string topic, Delegate handler, bool lifecycle)
 	{
@@ -606,34 +672,66 @@ internal sealed class RemoteMessageChannel : IMessageChannel, IDisposable
 
 	private sealed class LifecycleView(RemoteMessageChannel channel) : IMessageChannel
 	{
-		public Task PublishAsync(string topic, JsonElement? payload = null, CancellationToken cancellationToken = default)
-			=> channel.PublishAsync(topic, payload, cancellationToken);
+		public Task PublishAsync(
+			string topic,
+			JsonElement? payload = null,
+			CancellationToken cancellationToken = default)
+		{
+			return channel.PublishAsync(topic, payload, cancellationToken);
+		}
 
-		public Task SendAsync(string topic,
+		public Task SendAsync(
+			string topic,
 			JsonElement? payload = null,
 			TimeSpan? timeout = null,
 			CancellationToken cancellationToken = default)
-			=> channel.SendAsync(topic, payload, timeout, cancellationToken);
+		{
+			return channel.SendAsync(topic, payload, timeout, cancellationToken);
+		}
 
-		public Task<JsonElement?> RequestAsync(string topic,
+		public Task<JsonElement?> RequestAsync(
+			string topic,
 			JsonElement? payload = null,
 			TimeSpan? timeout = null,
 			CancellationToken cancellationToken = default)
-			=> channel.RequestAsync(topic, payload, timeout, cancellationToken);
+		{
+			return channel.RequestAsync(topic, payload, timeout, cancellationToken);
+		}
 
-		public Task<IAsyncDisposable> SubscribeAsync(string topicPattern,
+		public Task<IAsyncDisposable> SubscribeAsync(
+			string topicPattern,
 			Func<ChannelMessage, CancellationToken, Task> handler,
 			CancellationToken cancellationToken = default)
-			=> channel.RegisterAsync(ChannelMessageKind.Event, topicPattern, handler, lifecycle: true, cancellationToken);
+		{
+			return channel.RegisterAsync(ChannelMessageKind.Event,
+				topicPattern,
+				handler,
+				true,
+				cancellationToken);
+		}
 
-		public Task<IAsyncDisposable> HandleCommandsAsync(string topic,
+		public Task<IAsyncDisposable> HandleCommandsAsync(
+			string topic,
 			Func<ChannelMessage, CancellationToken, Task> handler,
 			CancellationToken cancellationToken = default)
-			=> channel.RegisterAsync(ChannelMessageKind.Command, topic, handler, lifecycle: true, cancellationToken);
+		{
+			return channel.RegisterAsync(ChannelMessageKind.Command,
+				topic,
+				handler,
+				true,
+				cancellationToken);
+		}
 
-		public Task<IAsyncDisposable> HandleRequestsAsync(string topic,
+		public Task<IAsyncDisposable> HandleRequestsAsync(
+			string topic,
 			Func<ChannelMessage, CancellationToken, Task<JsonElement?>> handler,
 			CancellationToken cancellationToken = default)
-			=> channel.RegisterAsync(ChannelMessageKind.Request, topic, handler, lifecycle: true, cancellationToken);
+		{
+			return channel.RegisterAsync(ChannelMessageKind.Request,
+				topic,
+				handler,
+				true,
+				cancellationToken);
+		}
 	}
 }

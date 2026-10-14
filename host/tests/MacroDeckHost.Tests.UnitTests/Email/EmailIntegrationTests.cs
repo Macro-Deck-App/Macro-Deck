@@ -11,7 +11,8 @@ namespace MacroDeckHost.Tests.UnitTests.Email;
 public class EmailIntegrationTests
 {
 	[Test]
-	public async Task One_email_inbox_widget_type_is_registered_under_its_frozen_id_and_starts_as_an_unread_counter_for_every_inbox()
+	public async Task
+		One_email_inbox_widget_type_is_registered_under_its_frozen_id_and_starts_as_an_unread_counter_for_every_inbox()
 	{
 		var registry = TestWidgetTypeProviders.Registry();
 		var host = new WidgetTypeProviderHost(registry, TimeProvider.System, Serilog.Core.Logger.None);
@@ -22,12 +23,15 @@ public class EmailIntegrationTests
 		using var defaults = JsonDocument.Parse(inbox.Descriptor.DefaultData!);
 		Assert.Multiple(() =>
 		{
-			Assert.That(registry.All.Where(entry => entry.ProviderId == inbox.ProviderId).Select(entry => entry.WidgetTypeId),
+			Assert.That(registry.All.Where(entry => entry.ProviderId == inbox.ProviderId)
+					.Select(entry => entry.WidgetTypeId),
 				Is.EqualTo(new[] { "app.macro-deck.email::inbox" }));
 			Assert.That(inbox.Descriptor.HasConfiguration, Is.True);
 			Assert.That(inbox.Descriptor.SupportsFlows, Is.True);
 			Assert.That(defaults.RootElement.GetProperty("mode").GetString(), Is.EqualTo("count"));
-			Assert.That(defaults.RootElement.GetProperty("inboxes").GetArrayLength(), Is.Zero, "no selection means every inbox");
+			Assert.That(defaults.RootElement.GetProperty("inboxes").GetArrayLength(),
+				Is.Zero,
+				"no selection means every inbox");
 			Assert.That(defaults.RootElement.GetProperty("maxMessages").GetInt32(), Is.EqualTo(5));
 		});
 	}
@@ -63,7 +67,9 @@ public class EmailIntegrationTests
 	}
 
 	private static Task<ActionResult> Execute(EmailIntegration integration)
-		=> integration.Actions.Single(action => action.Id == "refresh-inboxes")
+	{
+		return integration.Actions.Single(action => action.Id == "refresh-inboxes")
 			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+	}
 }

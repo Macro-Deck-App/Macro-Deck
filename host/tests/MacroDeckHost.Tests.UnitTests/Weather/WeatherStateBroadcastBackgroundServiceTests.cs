@@ -93,38 +93,59 @@ internal sealed class WeatherStateBroadcastBackgroundServiceTests
 	}
 
 	private static List<WeatherInstancesChangedNotification> InstanceBroadcasts(RecordingUiTransport transport)
-		=> transport.Broadcasts.OfType<WeatherInstancesChangedNotification>().ToList();
+	{
+		return transport.Broadcasts.OfType<WeatherInstancesChangedNotification>().ToList();
+	}
 
 	private static WeatherStateBroadcastBackgroundService CreateService(
 		IWeatherRegistry registry,
 		IUiTransport transport)
-		=> new(new StartedHostLifetime(),
+	{
+		return new WeatherStateBroadcastBackgroundService(new StartedHostLifetime(),
 			registry,
 			new NoOpBroadcastTrigger(),
 			transport,
 			new WeatherStateNotifier(),
 			SilentLogger());
+	}
 
 	private static FakeWeatherRegistry RegistryWith(string instanceId, string displayName)
 	{
-		var registry = new FakeWeatherRegistry { Instances = InstancesOf(instanceId, displayName) };
-		registry.Stations[instanceId] = new FakeWeatherStation(displayName);
+		var registry = new FakeWeatherRegistry
+		{
+			Instances = InstancesOf(instanceId, displayName),
+			Stations =
+			{
+				[instanceId] = new FakeWeatherStation(displayName)
+			}
+		};
 		return registry;
 	}
 
 	private static IReadOnlyList<WeatherStationDescriptor> InstancesOf(string instanceId, string displayName)
-		=> [new(instanceId, "app.weather", "Open-Meteo", displayName, false)];
+	{
+		return [new WeatherStationDescriptor(instanceId, "app.weather", "Open-Meteo", displayName, false)];
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private sealed class FakeWeatherRegistry : IWeatherRegistry
 	{
 		public IReadOnlyList<WeatherStationDescriptor> Instances { get; set; } = [];
 		public Dictionary<string, IWeatherStation> Stations { get; } = new(StringComparer.Ordinal);
 
-		public IReadOnlyList<WeatherStationDescriptor> GetInstances() => Instances;
+		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
+		{
+			return Instances;
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => Stations.GetValueOrDefault(instanceId);
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return Stations.GetValueOrDefault(instanceId);
+		}
 
 		public IWeatherStation? DefaultStation => Instances.Count > 0 ? GetStation(Instances[0].InstanceId) : null;
 	}
@@ -136,7 +157,9 @@ internal sealed class WeatherStateBroadcastBackgroundServiceTests
 		}
 
 		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime

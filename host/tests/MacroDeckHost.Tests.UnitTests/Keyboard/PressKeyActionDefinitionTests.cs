@@ -9,7 +9,8 @@ namespace MacroDeckHost.Tests.UnitTests.Keyboard;
 public class PressKeyActionDefinitionTests
 {
 	private static Dictionary<string, object> BackgroundParameters(string key, params string[] modifiers)
-		=> new()
+	{
+		return new Dictionary<string, object>
 		{
 			["combo"] = new Dictionary<string, object?>
 			{
@@ -19,9 +20,12 @@ public class PressKeyActionDefinitionTests
 			["targetProcess"] = "code",
 			["targetMode"] = "background"
 		};
+	}
 
 	private static FakeKeyboardInputService PlatformWithoutBackgroundModifiers()
-		=> new() { BackgroundModifiers = KeyModifier.None };
+	{
+		return new FakeKeyboardInputService { BackgroundModifiers = KeyModifier.None };
+	}
 
 	private static Dictionary<string, object> ComboParameters(string targetProcess = "", string targetMode = "")
 	{
@@ -45,10 +49,11 @@ public class PressKeyActionDefinitionTests
 		var input = new FakeKeyboardInputService();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters()
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters()
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -69,13 +74,15 @@ public class PressKeyActionDefinitionTests
 		var input = new FakeKeyboardInputService();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["combo"] = new Dictionary<string, object?> { ["modifiers"] = new List<object?> { modifier }, ["key"] = key }
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["combo"] = new Dictionary<string, object?>
+						{ ["modifiers"] = new List<object?> { modifier }, ["key"] = key }
+				}
+			});
 
 		Assert.That(input.Calls, Does.Contain(expected));
 	}
@@ -90,10 +97,11 @@ public class PressKeyActionDefinitionTests
 		};
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters("code", "focused")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters("code", "focused")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -112,10 +120,11 @@ public class PressKeyActionDefinitionTests
 		};
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters("code", "focus-send")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters("code", "focus-send")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -134,10 +143,11 @@ public class PressKeyActionDefinitionTests
 		};
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters("code", "focus-send")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters("code", "focus-send")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -156,10 +166,11 @@ public class PressKeyActionDefinitionTests
 		};
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters("code", "background")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters("code", "background")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -174,10 +185,11 @@ public class PressKeyActionDefinitionTests
 		var input = PlatformWithoutBackgroundModifiers();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = BackgroundParameters("F3", "Ctrl", "Shift")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = BackgroundParameters("F3", "Ctrl", "Shift")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -197,10 +209,11 @@ public class PressKeyActionDefinitionTests
 		input.UnavailableReason = KeyboardSessionUnavailableReason.TargetNotFound;
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = BackgroundParameters("F3", "Ctrl", "Shift")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = BackgroundParameters("F3", "Ctrl", "Shift")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -216,10 +229,11 @@ public class PressKeyActionDefinitionTests
 		var input = PlatformWithoutBackgroundModifiers();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = BackgroundParameters("B")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = BackgroundParameters("B")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -234,10 +248,11 @@ public class PressKeyActionDefinitionTests
 		var input = PlatformWithoutBackgroundModifiers();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = BackgroundParameters("LeftShift")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = BackgroundParameters("LeftShift")
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -253,10 +268,11 @@ public class PressKeyActionDefinitionTests
 		var input = PlatformWithoutBackgroundModifiers();
 		var action = new PressKeyActionDefinition(input, new KeyboardLayoutService());
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = ComboParameters("code", "focus-send")
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = ComboParameters("code", "focus-send")
+			});
 
 		Assert.Multiple(() =>
 		{

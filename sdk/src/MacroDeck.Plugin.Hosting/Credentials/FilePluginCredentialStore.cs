@@ -84,7 +84,7 @@ internal sealed class FilePluginCredentialStore : IPluginCredentialStore
 				await JsonSerializer.SerializeAsync(stream, credentials, _json, cancellationToken);
 			}
 
-			File.Move(temporary, _path, overwrite: true);
+			File.Move(temporary, _path, true);
 			RestrictToOwner(_path);
 		}
 		catch

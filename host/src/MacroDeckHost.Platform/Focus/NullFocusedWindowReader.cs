@@ -6,5 +6,8 @@ public sealed class NullFocusedWindowReader : IFocusedWindowReader
 
 	public string? UnsupportedReason => "Focused-application detection is not supported on this operating system.";
 
-	public FocusedAppInfo? Read() => null;
+	public FocusedAppInfo? Read()
+	{
+		return null;
+	}
 }

@@ -4,7 +4,8 @@ public interface IPluginAssetReceiver
 {
 	event EventHandler<AssetCommittedEventArgs>? AssetCommitted;
 
-	AssetOperationResult Begin(string pluginId,
+	AssetOperationResult Begin(
+		string pluginId,
 		string assetId,
 		string kind,
 		string mimeType,
@@ -20,10 +21,15 @@ public interface IPluginAssetReceiver
 
 public sealed record AssetOperationResult(bool Accepted, string? ErrorCode = null, string? ErrorMessage = null)
 {
-	public static AssetOperationResult Ok() => new(true);
+	public static AssetOperationResult Ok()
+	{
+		return new AssetOperationResult(true);
+	}
 
-	public static AssetOperationResult Fail(string errorCode, string errorMessage) =>
-		new(false, errorCode, errorMessage);
+	public static AssetOperationResult Fail(string errorCode, string errorMessage)
+	{
+		return new AssetOperationResult(false, errorCode, errorMessage);
+	}
 }
 
 public sealed class AssetCommittedEventArgs(

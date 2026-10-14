@@ -11,18 +11,25 @@ public class WindowsGpuSnapshotBuilderTests
 		ulong shared = 8UL * 1024 * 1024 * 1024,
 		bool software = false,
 		uint deviceId = 0)
-		=> new(name, 0, luidLow, dedicated, shared, software) { DeviceId = deviceId };
+	{
+		return new WindowsGpuAdapter(name, 0, luidLow, dedicated, shared, software) { DeviceId = deviceId };
+	}
 
 	private static string Instance(uint luidLow, int engine, string engineType, int pid = 1234)
-		=> $"pid_{pid}_luid_0x00000000_0x{luidLow:X8}_phys_0_eng_{engine}_engtype_{engineType}";
+	{
+		return $"pid_{pid}_luid_0x00000000_0x{luidLow:X8}_phys_0_eng_{engine}_engtype_{engineType}";
+	}
 
-	private static CounterReadResult.Instances Counters(params CounterEntry[] entries) => new(entries);
+	private static CounterReadResult.Instances Counters(params CounterEntry[] entries)
+	{
+		return new CounterReadResult.Instances(entries);
+	}
 
 	[Test]
 	public void Discrete_gpus_come_first()
 	{
-		var integrated = Adapter("Integrated", 0x1, dedicated: 1024 * 1024 * 1024);
-		var discrete = Adapter("Discrete", 0x2, dedicated: 4UL * 1024 * 1024 * 1024);
+		var integrated = Adapter("Integrated", 0x1, 1024 * 1024 * 1024);
+		var discrete = Adapter("Discrete", 0x2, 4UL * 1024 * 1024 * 1024);
 
 		var surviving = WindowsGpuSnapshotBuilder.Surviving([integrated, discrete]);
 
@@ -34,7 +41,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var real = Adapter("Radeon", 0x1);
 		var software = Adapter("Microsoft Basic Render Driver", 0x2, software: true);
-		var virtualDisplay = Adapter("Remote Display Adapter", 0x3, dedicated: 0, shared: 0);
+		var virtualDisplay = Adapter("Remote Display Adapter", 0x3, 0, 0);
 
 		var surviving = WindowsGpuSnapshotBuilder.Surviving([real, software, virtualDisplay]);
 
@@ -46,7 +53,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var surviving = WindowsGpuSnapshotBuilder.Surviving([
 			Adapter("NVIDIA GeForce RTX 4070", 0x2, deviceId: 0x2786),
-			Adapter("AMD Radeon(TM) Graphics", 0x1, dedicated: 512 * 1024 * 1024, deviceId: 0x164E),
+			Adapter("AMD Radeon(TM) Graphics", 0x1, 512 * 1024 * 1024, deviceId: 0x164E),
 			Adapter("NVIDIA GeForce RTX 4070", 0x3, deviceId: 0x2786)
 		]);
 
@@ -59,7 +66,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		var surviving = WindowsGpuSnapshotBuilder.Surviving([
 			Adapter("NVIDIA GeForce RTX 4070", 0x2, deviceId: 0x2786),
-			Adapter("AMD Radeon(TM) Graphics", 0x1, dedicated: 512 * 1024 * 1024, deviceId: 0x164E),
+			Adapter("AMD Radeon(TM) Graphics", 0x1, 512 * 1024 * 1024, deviceId: 0x164E),
 			Adapter("NVIDIA GeForce RTX 4070", 0x3, deviceId: 0x2786)
 		]);
 
@@ -125,8 +132,8 @@ public class WindowsGpuSnapshotBuilderTests
 		var adapter = Adapter("Radeon", 0xAB);
 
 		var samples = WindowsGpuSnapshotBuilder.Build([adapter],
-			Counters(new CounterEntry(Instance(0xAB, 0, "3D", pid: 1), 70),
-				new CounterEntry(Instance(0xAB, 0, "3D", pid: 2), 60)),
+			Counters(new CounterEntry(Instance(0xAB, 0, "3D", 1), 70),
+				new CounterEntry(Instance(0xAB, 0, "3D", 2), 60)),
 			null,
 			out _);
 
@@ -136,8 +143,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void Each_adapter_gets_its_own_value()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, dedicated: 1)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, 1)],
 			Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 80),
 				new CounterEntry(Instance(0xCD, 0, "3D"), 20)),
 			null,
@@ -154,8 +160,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void An_adapter_without_instances_among_busy_ones_reads_zero()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, dedicated: 1)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, 1)],
 			Counters(new CounterEntry(Instance(0xCD, 0, "3D"), 20)),
 			null,
 			out _);
@@ -194,8 +199,7 @@ public class WindowsGpuSnapshotBuilderTests
 	[Test]
 	public void A_luid_that_matches_nothing_leaves_several_adapters_unavailable()
 	{
-		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, dedicated: 1)],
+		var samples = WindowsGpuSnapshotBuilder.Build([Adapter("Discrete", 0xAB), Adapter("Integrated", 0xCD, 1)],
 			Counters(new CounterEntry(Instance(0xFFFF, 0, "3D"), 55)),
 			null,
 			out _);
@@ -235,7 +239,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)],
 				new CounterReadResult.FirstCollect(),
-				hasNvidiaSmi: true),
+				true),
 			Is.False);
 	}
 
@@ -244,15 +248,14 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)],
 				new CounterReadResult.Failed(),
-				hasNvidiaSmi: true),
+				true),
 			Is.True);
 	}
 
 	[Test]
 	public void An_empty_counter_array_reaches_nvidia_smi()
 	{
-		Assert.That(
-			WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)], Counters(), hasNvidiaSmi: true),
+		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("GeForce", 0xAB)], Counters(), true),
 			Is.True);
 	}
 
@@ -261,7 +264,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([],
 				Counters(new CounterEntry(Instance(0xAB, 0, "3D"), 10)),
-				hasNvidiaSmi: true),
+				true),
 			Is.True);
 	}
 
@@ -270,7 +273,7 @@ public class WindowsGpuSnapshotBuilderTests
 	{
 		Assert.That(WindowsGpuSnapshotBuilder.NeedsNvidiaFallback([Adapter("Radeon", 0xAB)],
 				new CounterReadResult.Failed(),
-				hasNvidiaSmi: false),
+				false),
 			Is.False);
 	}
 
@@ -278,7 +281,7 @@ public class WindowsGpuSnapshotBuilderTests
 	public void The_nvidia_fallback_supplies_usage_without_moving_names_or_changing_the_count()
 	{
 		var samples = WindowsGpuSnapshotBuilder.Build(
-			[Adapter("NVIDIA GeForce RTX 4070", 0xAB), Adapter("Intel UHD Graphics", 0xCD, dedicated: 1)],
+			[Adapter("NVIDIA GeForce RTX 4070", 0xAB), Adapter("Intel UHD Graphics", 0xCD, 1)],
 			new CounterReadResult.Failed(),
 			"0, NVIDIA GeForce RTX 4070, 42\n",
 			out _);

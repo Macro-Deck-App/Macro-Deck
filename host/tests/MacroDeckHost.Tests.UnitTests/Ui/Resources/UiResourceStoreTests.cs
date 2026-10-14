@@ -7,13 +7,16 @@ namespace MacroDeckHost.Tests.UnitTests.Ui.Resources;
 [TestFixture]
 public class UiResourceStoreTests
 {
-	private static UiResourceRegistration Registration(string name, string content) => new()
+	private static UiResourceRegistration Registration(string name, string content)
 	{
-		OwnerId = "app.macro-deck.weather",
-		Name = name,
-		MediaType = "image/svg+xml",
-		Content = Encoding.UTF8.GetBytes(content),
-	};
+		return new UiResourceRegistration
+		{
+			OwnerId = "app.macro-deck.weather",
+			Name = name,
+			MediaType = "image/svg+xml",
+			Content = Encoding.UTF8.GetBytes(content)
+		};
+	}
 
 	[Test]
 	public void Identical_bytes_registered_twice_share_one_id_and_one_hash()
@@ -59,7 +62,7 @@ public class UiResourceStoreTests
 			OwnerId = "app.macro-deck.weather",
 			Name = "huge",
 			MediaType = "image/svg+xml",
-			Content = new byte[ProtocolLimits.MaxUiResourceBytes + 1],
+			Content = new byte[ProtocolLimits.MaxUiResourceBytes + 1]
 		};
 
 		Assert.That(() => store.Register(oversized), Throws.ArgumentException);
@@ -69,14 +72,18 @@ public class UiResourceStoreTests
 	public void A_host_icon_may_exceed_the_protocol_limit_up_to_the_host_limit()
 	{
 		var store = new UiResourceStore();
-		UiResourceRegistration Of(int bytes, int maxBytes) => new()
+
+		UiResourceRegistration Of(int bytes, int maxBytes)
 		{
-			OwnerId = "app.macro-deck.widget-icon",
-			Name = $"icon-{bytes}",
-			MediaType = "image/gif",
-			Content = new byte[bytes],
-			MaxBytes = maxBytes,
-		};
+			return new UiResourceRegistration
+			{
+				OwnerId = "app.macro-deck.widget-icon",
+				Name = $"icon-{bytes}",
+				MediaType = "image/gif",
+				Content = new byte[bytes],
+				MaxBytes = maxBytes
+			};
+		}
 
 		var large = ProtocolLimits.MaxUiResourceBytes * 2;
 

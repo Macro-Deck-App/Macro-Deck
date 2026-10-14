@@ -28,23 +28,30 @@ internal static class VoicemeeterActionValues
 	];
 
 	public static double? ReadNumber(IReadOnlyDictionary<string, object> parameters, string name)
-		=> ReadNumber(parameters.GetValueOrDefault(name));
-
-	public static double? ReadNumber(object? raw) => raw switch
 	{
-		double value => value,
-		float value => value,
-		int value => value,
-		long value => value,
-		decimal value => (double)value,
-		bool value => value ? 1d : 0d,
-		string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) =>
-			parsed,
-		_ => null
-	};
+		return ReadNumber(parameters.GetValueOrDefault(name));
+	}
+
+	public static double? ReadNumber(object? raw)
+	{
+		return raw switch
+		{
+			double value => value,
+			float value => value,
+			int value => value,
+			long value => value,
+			decimal value => (double)value,
+			bool value => value ? 1d : 0d,
+			string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) =>
+				parsed,
+			_ => null
+		};
+	}
 
 	public static int? ReadChannelIndex(IReadOnlyDictionary<string, object> parameters, string name)
-		=> ReadChannelIndex(parameters.GetValueOrDefault(name));
+	{
+		return ReadChannelIndex(parameters.GetValueOrDefault(name));
+	}
 
 	public static int? ReadChannelIndex(object? raw)
 	{
@@ -60,17 +67,22 @@ internal static class VoicemeeterActionValues
 	}
 
 	public static SwitchMode ReadSwitchMode(IReadOnlyDictionary<string, object> parameters)
-		=> ReadText(parameters, ModeParameter) switch
+	{
+		return ReadText(parameters, ModeParameter) switch
 		{
 			"on" => SwitchMode.On,
 			"off" => SwitchMode.Off,
 			_ => SwitchMode.Toggle
 		};
+	}
 
-	public static bool? Resolve(this SwitchMode mode, Func<bool?> currentValue) => mode switch
+	public static bool? Resolve(this SwitchMode mode, Func<bool?> currentValue)
 	{
-		SwitchMode.On => true,
-		SwitchMode.Off => false,
-		_ => currentValue() is { } current ? !current : null
-	};
+		return mode switch
+		{
+			SwitchMode.On => true,
+			SwitchMode.Off => false,
+			_ => currentValue() is { } current ? !current : null
+		};
+	}
 }

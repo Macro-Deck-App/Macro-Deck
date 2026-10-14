@@ -63,8 +63,8 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 	{
 		lock (_sync)
 		{
-			if (_cache.TryGetValue(widgetId, out var cached) &&
-				string.Equals(cached.Version, version, StringComparison.Ordinal))
+			if (_cache.TryGetValue(widgetId, out var cached)
+				&& string.Equals(cached.Version, version, StringComparison.Ordinal))
 			{
 				return cached.Resource;
 			}
@@ -136,7 +136,7 @@ public sealed class WidgetIconProviderResources : IWidgetIconProviderResources
 			OwnerId = OwnerId,
 			Name = widgetId.ToString("N"),
 			MediaType = content.MediaType,
-			Content = content.Data,
+			Content = content.Data
 		});
 	}
 }

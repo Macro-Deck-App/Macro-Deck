@@ -20,7 +20,9 @@ public class AppearanceSettingsHandlersTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -40,24 +42,41 @@ public class AppearanceSettingsHandlersTests
 
 	private sealed class FakeFontCatalog : IFontCatalog
 	{
-		public IReadOnlyList<FontFaceInfo> GetFaces() =>
-		[
-			new("inter-400", "Inter", 400, 5, "upright", "Regular", RemoteRenderable: true),
-			new("inter-700", "Inter", 700, 5, "upright", "Bold", RemoteRenderable: true),
-			new("locked-400", "Locked", 400, 5, "upright", "Regular", RemoteRenderable: false),
-			new("imported-400", "Imported", 400, 5, "upright", "Regular", RemoteRenderable: true) { UserImported = true },
-		];
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return
+			[
+				new FontFaceInfo("inter-400", "Inter", 400, 5, "upright", "Regular", true),
+				new FontFaceInfo("inter-700", "Inter", 700, 5, "upright", "Bold", true),
+				new FontFaceInfo("locked-400", "Locked", 400, 5, "upright", "Regular", false),
+				new FontFaceInfo("imported-400", "Imported", 400, 5, "upright", "Regular", true)
+					{ UserImported = true }
+			];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 
 	private static AppPreferenceService CreateService()
-		=> new(new FakeAppPreferenceRepository(), new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+	{
+		return new AppPreferenceService(new FakeAppPreferenceRepository(),
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
+	}
 
 	private static UpdateAppearanceSettingsRequestMessageHandler CreateUpdateHandler(
 		IAppPreferenceService service,
 		RecordingMediator? mediator = null)
-		=> new(service, mediator ?? new RecordingMediator(), new FakeFontCatalog(), TestColors.None);
+	{
+		return new UpdateAppearanceSettingsRequestMessageHandler(service,
+			mediator ?? new RecordingMediator(),
+			new FakeFontCatalog(),
+			TestColors.None);
+	}
 
 	[Test]
 	public async Task Get_handler_returns_persisted_settings()
@@ -227,9 +246,10 @@ public class AppearanceSettingsHandlersTests
 		var service = new AppPreferenceService(new FakeAppPreferenceRepository(),
 			new FakeBuildEnvironment(),
 			new FakeHostListenerState(),
-			colors: colors);
+			colors);
 		var mediator = new RecordingMediator();
-		return (service, new UpdateAppearanceSettingsRequestMessageHandler(service, mediator, new FakeFontCatalog(), colors),
+		return (service,
+			new UpdateAppearanceSettingsRequestMessageHandler(service, mediator, new FakeFontCatalog(), colors),
 			mediator);
 	}
 
@@ -259,7 +279,8 @@ public class AppearanceSettingsHandlersTests
 	public async Task A_client_that_only_changes_the_theme_keeps_the_accent_reference()
 	{
 		var (_, update, _) = WithBrandVariable();
-		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+		await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColorSource = AccentReference },
 			CancellationToken.None);
 
 		var updated = await update.Handle(new UpdateAppearanceSettingsRequest
@@ -277,10 +298,12 @@ public class AppearanceSettingsHandlersTests
 	public async Task A_different_accent_replaces_the_reference()
 	{
 		var (_, update, _) = WithBrandVariable();
-		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+		await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColorSource = AccentReference },
 			CancellationToken.None);
 
-		var updated = await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6" },
+		var updated = await update.Handle(
+			new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColor = "#3b82f6" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -294,7 +317,8 @@ public class AppearanceSettingsHandlersTests
 	public async Task An_explicit_fixed_source_detaches_even_at_the_same_colour()
 	{
 		var (_, update, _) = WithBrandVariable();
-		await update.Handle(new UpdateAppearanceSettingsRequest { ThemeMode = "dark", AccentColorSource = AccentReference },
+		await update.Handle(new UpdateAppearanceSettingsRequest
+				{ ThemeMode = "dark", AccentColorSource = AccentReference },
 			CancellationToken.None);
 
 		var updated = await update.Handle(new UpdateAppearanceSettingsRequest

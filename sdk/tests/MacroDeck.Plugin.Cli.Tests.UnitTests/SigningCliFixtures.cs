@@ -81,7 +81,8 @@ internal static class SigningCliFixtures
 		return (certificatePath, certificateSignaturePath, privateKeyPath);
 	}
 
-	public static string WriteRootPublicKeyFile(string directory,
+	public static string WriteRootPublicKeyFile(
+		string directory,
 		byte[]? publicKey = null,
 		string fileName = "root.public")
 	{
@@ -95,7 +96,8 @@ internal static class SigningCliFixtures
 	/// <summary>Writes an unsigned <c>.macroDeckPlugin</c> archive, hand-built with
 	/// <see cref="ZipArchive" /> - never through <c>PluginPacker</c> - so a CLI test built from one can never
 	/// merely confirm the CLI agrees with the rest of the codebase.</summary>
-	public static string CreatePluginArchive(string path,
+	public static string CreatePluginArchive(
+		string path,
 		string id = "com.example.test",
 		string version = "1.0.0",
 		IReadOnlyList<DeclaredFile>? files = null)
@@ -110,11 +112,12 @@ internal static class SigningCliFixtures
 			["version"] = version,
 			["entrypoints"] = new JsonObject { ["linux-x64"] = new JsonObject { ["executable"] = "app" } },
 			["files"] = new JsonArray(files.Select(file => (JsonNode)new JsonObject
-			{
-				["path"] = file.Path,
-				["sha256"] = "sha256:" + Sha256Hex(file.Content),
-				["size"] = Encoding.UTF8.GetByteCount(file.Content)
-			}).ToArray())
+				{
+					["path"] = file.Path,
+					["sha256"] = "sha256:" + Sha256Hex(file.Content),
+					["size"] = Encoding.UTF8.GetByteCount(file.Content)
+				})
+				.ToArray())
 		};
 
 		using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
@@ -148,12 +151,14 @@ internal static class SigningCliFixtures
 	private static void WriteEntry(ZipArchive archive, string entryName, string content)
 	{
 		var entry = archive.CreateEntry(entryName, CompressionLevel.NoCompression);
-		using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+		using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));
 		writer.Write(content);
 	}
 
-	private static string Sha256Hex(string content) =>
-		Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+	private static string Sha256Hex(string content)
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+	}
 
 	private static byte[] SignAsBase64Text(byte[] rawPrivateKey, byte[] payload)
 	{

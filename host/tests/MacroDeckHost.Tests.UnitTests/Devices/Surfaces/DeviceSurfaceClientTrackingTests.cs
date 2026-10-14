@@ -8,12 +8,21 @@ internal sealed class DeviceSurfaceClientTrackingTests
 	private DeviceSurfaceFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new DeviceSurfaceFixture();
+	public void SetUp()
+	{
+		_fixture = new DeviceSurfaceFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
-	private IReadOnlyList<MacroDeck.Sdk.Decks.DeckClient> Listed() => _fixture.DeckClients.Snapshot();
+	private IReadOnlyList<MacroDeck.Sdk.Decks.DeckClient> Listed()
+	{
+		return _fixture.DeckClients.Snapshot();
+	}
 
 	[Test]
 	public async Task A_freshly_opened_device_is_listed_on_its_start_folder_without_navigating()
@@ -60,7 +69,7 @@ internal sealed class DeviceSurfaceClientTrackingTests
 		var deviceId = await _fixture.OpenDeviceAsync();
 
 		await _fixture.Service.InvalidateAsync();
-		await _fixture.Service.CloseAsync(deviceId, reason: null);
+		await _fixture.Service.CloseAsync(deviceId, null);
 		await _fixture.SettleAsync();
 
 		Assert.That(Listed(), Is.Empty);
@@ -71,11 +80,13 @@ internal sealed class DeviceSurfaceClientTrackingTests
 	{
 		var deviceId = await _fixture.OpenDeviceAsync();
 
-		await _fixture.Service.SetPresenceAsync(deviceId, online: false);
+		await _fixture.Service.SetPresenceAsync(deviceId, false);
 		var listedWhileOffline = Listed();
-		await _fixture.MutateAsync(() => { });
+		await _fixture.MutateAsync(() =>
+		{
+		});
 		var listedAfterRebuild = Listed();
-		await _fixture.Service.SetPresenceAsync(deviceId, online: true);
+		await _fixture.Service.SetPresenceAsync(deviceId, true);
 
 		Assert.Multiple(() =>
 		{
@@ -89,7 +100,7 @@ internal sealed class DeviceSurfaceClientTrackingTests
 	public async Task A_device_opened_while_offline_is_not_listed()
 	{
 		var deviceId = _fixture.AddDevice("DeckB");
-		_fixture.Presence.Set(deviceId, online: false);
+		_fixture.Presence.Set(deviceId, false);
 
 		await _fixture.Service.OpenAsync(deviceId, _fixture.Provider.ProviderId, "DeckB");
 
@@ -99,7 +110,7 @@ internal sealed class DeviceSurfaceClientTrackingTests
 	[Test]
 	public async Task A_device_whose_profile_does_not_resolve_is_not_listed()
 	{
-		await _fixture.OpenDeviceAsync("DeckC", profileId: "no-such-profile");
+		await _fixture.OpenDeviceAsync("DeckC", "no-such-profile");
 
 		Assert.That(Listed(), Is.Empty);
 	}

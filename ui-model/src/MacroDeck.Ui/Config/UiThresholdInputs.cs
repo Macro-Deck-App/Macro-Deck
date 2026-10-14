@@ -82,7 +82,10 @@ public sealed partial record UiThresholds
 
 	/// <summary>The colour of the band <paramref name="value" /> falls in, or <c>null</c> for NaN and for a band
 	/// without a colour of its own. See <see cref="BandAt" />.</summary>
-	public string? ColorAt(double value) => BandAt(value)?.Color is { Length: > 0 } color ? color : null;
+	public string? ColorAt(double value)
+	{
+		return BandAt(value)?.Color is { Length: > 0 } color ? color : null;
+	}
 
 	/// <summary>Reads a value from JSON in the shape a <see cref="UiThresholdsInput" /> sends and Macro
 	/// Deck stores. Returns <c>false</c> for anything that is not a valid value, including JSON null.
@@ -109,7 +112,10 @@ public sealed partial record UiThresholds
 	}
 
 	/// <inheritdoc />
-	public bool Equals(UiThresholds? other) => other is not null && Bands.SequenceEqual(other.Bands);
+	public bool Equals(UiThresholds? other)
+	{
+		return other is not null && Bands.SequenceEqual(other.Bands);
+	}
 
 	/// <inheritdoc />
 	public override int GetHashCode()
@@ -124,7 +130,9 @@ public sealed partial record UiThresholds
 		return hash.ToHashCode();
 	}
 
-	internal static string? Normalize(IReadOnlyList<UiThresholdBand> bands, out IReadOnlyList<UiThresholdBand> normalized)
+	internal static string? Normalize(
+		IReadOnlyList<UiThresholdBand> bands,
+		out IReadOnlyList<UiThresholdBand> normalized)
 	{
 		normalized = [];
 
@@ -155,10 +163,7 @@ public sealed partial record UiThresholds
 				return "The first band starts with the range, so it carries no 'from'.";
 			}
 
-			if (i > 0 &&
-				(band.From is not { } from ||
-					!double.IsFinite(from) ||
-					(i > 1 && from <= bands[i - 1].From)))
+			if (i > 0 && (band.From is not { } from || !double.IsFinite(from) || i > 1 && from <= bands[i - 1].From))
 			{
 				return $"Band '{band.Id}' needs a finite 'from' above the previous band's.";
 			}
@@ -173,8 +178,8 @@ public sealed partial record UiThresholds
 
 	private static string? NormalizeColor(string? color)
 	{
-		if (color is not null &&
-			(color.Length == 0 || (color.Length <= MaxReferenceLength && ReferencePattern().IsMatch(color))))
+		if (color is not null
+			&& (color.Length == 0 || color.Length <= MaxReferenceLength && ReferencePattern().IsMatch(color)))
 		{
 			return color;
 		}
@@ -190,7 +195,7 @@ public sealed partial record UiThresholds
 		{
 			3 => string.Create(CultureInfo.InvariantCulture, $"#{hex[0]}{hex[0]}{hex[1]}{hex[1]}{hex[2]}{hex[2]}"),
 			8 when hex.EndsWith("ff", StringComparison.Ordinal) => "#" + hex[..6],
-			_ => "#" + hex,
+			_ => "#" + hex
 		};
 	}
 
@@ -201,17 +206,18 @@ public sealed partial record UiThresholds
 
 	// The same grammar and bounds the host resolves: a Color variable, then at most 32 known colour
 	// modifiers, in at most MaxReferenceLength characters.
-	[GeneratedRegex("""\A\s*\{\{\s*vars\.[a-z][a-z0-9_]*\s*\|\s*color\s*(?:\|\s*(?:color_(?:lighten|darken|saturate|desaturate|opacity|increase_opacity|reduce_opacity|hue)\s*:\s*-?\d+(?:\.\d+)?|color_mix\s*:\s*(?:vars\.[a-z][a-z0-9_]*|"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})")\s*,\s*-?\d+(?:\.\d+)?)\s*){0,32}\}\}\s*\z""",
+	[GeneratedRegex(
+		"""\A\s*\{\{\s*vars\.[a-z][a-z0-9_]*\s*\|\s*color\s*(?:\|\s*(?:color_(?:lighten|darken|saturate|desaturate|opacity|increase_opacity|reduce_opacity|hue)\s*:\s*-?\d+(?:\.\d+)?|color_mix\s*:\s*(?:vars\.[a-z][a-z0-9_]*|"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})")\s*,\s*-?\d+(?:\.\d+)?)\s*){0,32}\}\}\s*\z""",
 		RegexOptions.CultureInvariant)]
 	private static partial Regex ReferencePattern();
 }
 
 internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 {
-	private const string _bands = "bands";
-	private const string _id = "id";
-	private const string _color = "color";
-	private const string _from = "from";
+	private const string Bands = "bands";
+	private const string Id = "id";
+	private const string Color = "color";
+	private const string From = "from";
 
 	public override UiThresholds Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
@@ -227,7 +233,7 @@ internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 			var name = reader.GetString();
 			reader.Read();
 
-			if (name == _bands)
+			if (name == Bands)
 			{
 				bands = ReadBands(ref reader);
 			}
@@ -253,17 +259,17 @@ internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 	public override void Write(Utf8JsonWriter writer, UiThresholds value, JsonSerializerOptions options)
 	{
 		writer.WriteStartObject();
-		writer.WriteStartArray(_bands);
+		writer.WriteStartArray(Bands);
 
 		foreach (var band in value.Bands)
 		{
 			writer.WriteStartObject();
-			writer.WriteString(_id, band.Id);
-			writer.WriteString(_color, band.Color);
+			writer.WriteString(Id, band.Id);
+			writer.WriteString(Color, band.Color);
 
 			if (band.From is { } from)
 			{
-				writer.WriteNumber(_from, from);
+				writer.WriteNumber(From, from);
 			}
 
 			writer.WriteEndObject();
@@ -313,21 +319,21 @@ internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 
 			switch (name)
 			{
-				case _id:
+				case Id:
 					id = ReadString(ref reader, name);
 
 					break;
-				case _color:
+				case Color:
 					color = ReadString(ref reader, name);
 
 					break;
-				case _from when reader.TokenType is JsonTokenType.Null:
+				case From when reader.TokenType is JsonTokenType.Null:
 					break;
-				case _from when reader.TokenType is JsonTokenType.Number:
+				case From when reader.TokenType is JsonTokenType.Number:
 					from = reader.GetDouble();
 
 					break;
-				case _from:
+				case From:
 					throw new JsonException("A band's 'from' is a number.");
 				default:
 					reader.Skip();
@@ -345,9 +351,11 @@ internal sealed class UiThresholdsJsonConverter : JsonConverter<UiThresholds>
 	}
 
 	private static string ReadString(ref Utf8JsonReader reader, string? name)
-		=> reader.TokenType is JsonTokenType.String
+	{
+		return reader.TokenType is JsonTokenType.String
 			? reader.GetString()!
 			: throw new JsonException($"A band's '{name}' is a string.");
+	}
 }
 
 /// <summary>
@@ -419,7 +427,7 @@ public sealed record UiThresholdsInput : UiInput<UiThresholds>
 		properties.Set(UiConfigProperties.AllowVariables, AllowVariables);
 	}
 
-	private protected override bool AcceptsValue(UiThresholds? value, out string? rejection)
+	protected private override bool AcceptsValue(UiThresholds? value, out string? rejection)
 	{
 		rejection = null;
 
@@ -439,19 +447,19 @@ public sealed record UiThresholdsInput : UiInput<UiThresholds>
 		var defaults = DefaultValue.TryEvaluate(out var declared) ? declared : null;
 		var count = value.Bands.Count;
 
-		if (MaxCount.TryEvaluate(out var maxCount) &&
-			count > maxCount &&
-			count > ((current ?? defaults)?.Bands.Count ?? 0))
+		if (MaxCount.TryEvaluate(out var maxCount)
+			&& count > maxCount
+			&& count > ((current ?? defaults)?.Bands.Count ?? 0))
 		{
 			rejection = $"At most {maxCount} bands may be added.";
 
 			return false;
 		}
 
-		if (FixedCount.TryEvaluate(out var fixedCount) &&
-			fixedCount &&
-			(defaults ?? current) is { } counted &&
-			count != counted.Bands.Count)
+		if (FixedCount.TryEvaluate(out var fixedCount)
+			&& fixedCount
+			&& (defaults ?? current) is { } counted
+			&& count != counted.Bands.Count)
 		{
 			rejection = $"The number of bands is fixed at {counted.Bands.Count}.";
 
@@ -462,8 +470,8 @@ public sealed record UiThresholdsInput : UiInput<UiThresholds>
 		{
 			foreach (var band in value.Bands)
 			{
-				if (reference.Bands.FirstOrDefault(candidate => candidate.Id == band.Id) is not { } kept ||
-					kept.Color != band.Color)
+				if (reference.Bands.FirstOrDefault(candidate => candidate.Id == band.Id) is not { } kept
+					|| kept.Color != band.Color)
 				{
 					rejection = $"Band colours are fixed, so band '{band.Id}' cannot be added or recoloured.";
 

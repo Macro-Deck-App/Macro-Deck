@@ -28,13 +28,15 @@ internal sealed class PluginIconPackTestHost : IDisposable
 {
 	private readonly ServiceProvider _services;
 
-	public PluginIconPackTestHost(IPluginInstallationCatalog? catalog = null,
+	public PluginIconPackTestHost(
+		IPluginInstallationCatalog? catalog = null,
 		bool ready = true,
 		TimeSpan? readinessBound = null)
 	{
 		Catalog = catalog ?? new FakePluginInstallationCatalog();
 		Sessions = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
-		Declarations = new PluginBundledIconPackDeclarations(Catalog, new PluginManifestReader(), Serilog.Core.Logger.None);
+		Declarations
+			= new PluginBundledIconPackDeclarations(Catalog, new PluginManifestReader(), Serilog.Core.Logger.None);
 		Owner = new PluginIconPackOwner(Declarations);
 		OwnerRegistry = new IconPackOwnerRegistry([Owner]);
 		Restore = Icons.CreateRestoreService(OwnerRegistry);
@@ -48,7 +50,9 @@ internal sealed class PluginIconPackTestHost : IDisposable
 		_services = services.BuildServiceProvider();
 		UiResources = new PluginIconUiResources(Icons.Cache,
 			Resolver,
-			new WidgetIconSourceRegistry([new IconPackWidgetIconSource(Icons.Cache, _services.GetRequiredService<IServiceScopeFactory>())]));
+			new WidgetIconSourceRegistry([
+				new IconPackWidgetIconSource(Icons.Cache, _services.GetRequiredService<IServiceScopeFactory>())
+			]));
 
 		if (ready)
 		{
@@ -105,34 +109,49 @@ internal sealed class PluginIconPackTestHost : IDisposable
 	public PluginIconPackSync Sync { get; }
 
 	public Task<PluginIconPackSyncResult> SyncDevelopment(string pluginId, params (string Key, byte[] Archive)[] packs)
-		=> Sync.SyncDevelopmentAsync(pluginId,
+	{
+		return Sync.SyncDevelopmentAsync(pluginId,
 			"session-1",
 			"Test Plugin",
-			packs.Select(pack => new DevelopmentIconPack(pack.Key, AssetContentHash.Compute(pack.Archive), pack.Archive)).ToList(),
+			packs.Select(pack
+					=> new DevelopmentIconPack(pack.Key, AssetContentHash.Compute(pack.Archive), pack.Archive))
+				.ToList(),
 			CancellationToken.None);
+	}
 
 	public IconPackEntity? PluginPack(string pluginId, string key)
-		=> Icons.Cache.GetAllPacks()
-			.SingleOrDefault(pack => pack.SourceType == IconPackSourceType.Plugin &&
-				pack.SourceId == PluginIconReferences.SourceId(pluginId, key));
+	{
+		return Icons.Cache.GetAllPacks()
+			.SingleOrDefault(pack
+				=> pack.SourceType == IconPackSourceType.Plugin
+				&& pack.SourceId == PluginIconReferences.SourceId(pluginId, key));
+	}
 
 	public IconEntity Icon(IconPackEntity pack, string name)
-		=> Icons.Cache.GetIconsByPackId(pack.Id).Single(icon => icon.Name == name);
+	{
+		return Icons.Cache.GetIconsByPackId(pack.Id).Single(icon => icon.Name == name);
+	}
 
-	public IconPackService PackService() => new(Icons.Cache,
-		Icons.BatchTracker,
-		Icons.Storage,
-		Icons.Mediator,
-		OwnerRegistry,
-		Icons.Logger);
+	public IconPackService PackService()
+	{
+		return new IconPackService(Icons.Cache,
+			Icons.BatchTracker,
+			Icons.Storage,
+			Icons.Mediator,
+			OwnerRegistry,
+			Icons.Logger);
+	}
 
-	public IconService IconService() => new(Icons.Cache,
-		Icons.Storage,
-		Icons.FallbackStore,
-		Icons.VariantDeriver,
-		Icons.Coalescer,
-		Icons.Mediator,
-		OwnerRegistry);
+	public IconService IconService()
+	{
+		return new IconService(Icons.Cache,
+			Icons.Storage,
+			Icons.FallbackStore,
+			Icons.VariantDeriver,
+			Icons.Coalescer,
+			Icons.Mediator,
+			OwnerRegistry);
+	}
 
 	public async Task<byte[]> BuildArchive(string packName, params (string Name, string Body)[] icons)
 	{
@@ -172,7 +191,7 @@ internal sealed class PluginIconPackTestHost : IDisposable
 
 	private static async Task<byte[]> WebpFor(string body)
 	{
-		var seed = (byte)(body.Aggregate(17, (hash, character) => (hash * 31) + character) & 0xFF);
+		var seed = (byte)(body.Aggregate(17, (hash, character) => hash * 31 + character) & 0xFF);
 		using var image = new Image<Rgba32>(4, 4, new Rgba32(seed, (byte)(255 - seed), 64, 255));
 		using var buffer = new MemoryStream();
 		await image.SaveAsWebpAsync(buffer);
@@ -184,7 +203,10 @@ internal sealed class FixedIconUsage : IIconUsageScanner
 {
 	public HashSet<Guid> InUse { get; } = [];
 
-	public IReadOnlySet<Guid> FindReferencedIconIds() => InUse;
+	public IReadOnlySet<Guid> FindReferencedIconIds()
+	{
+		return InUse;
+	}
 }
 
 internal sealed class IconProviderSnapshots : IRemotePluginSnapshotStore
@@ -192,15 +214,27 @@ internal sealed class IconProviderSnapshots : IRemotePluginSnapshotStore
 	private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
 	public void DeclareIconProvider(string pluginId, string actionId)
-		=> _byPluginId[pluginId] = RemotePluginCapabilitySnapshot.Empty(pluginId) with
+	{
+		_byPluginId[pluginId] = RemotePluginCapabilitySnapshot.Empty(pluginId) with
 		{
-			Actions = [new RemoteActionDescriptor(actionId, "Action", string.Empty, [], null, false, false, false, true)]
+			Actions =
+			[
+				new RemoteActionDescriptor(actionId, "Action", string.Empty, [], null, false, false, false, true)
+			]
 		};
+	}
 
 	public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-		=> _byPluginId.TryGetValue(pluginId, out var snapshot) ? snapshot : RemotePluginCapabilitySnapshot.Empty(pluginId);
+	{
+		return _byPluginId.TryGetValue(pluginId, out var snapshot)
+			? snapshot
+			: RemotePluginCapabilitySnapshot.Empty(pluginId);
+	}
 
-	public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+	public bool Has(string pluginId)
+	{
+		return _byPluginId.ContainsKey(pluginId);
+	}
 
 	public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 	{

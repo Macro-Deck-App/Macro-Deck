@@ -39,7 +39,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task ObsoleteCurrentSelector_TargetsTheActiveState()
 	{
-		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", active: "crit"));
+		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", "crit"));
 
 		var applied = await fixture.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"changed"},"state":{{SelectorCurrent}},"clearProperties":[]}""");
@@ -57,7 +57,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 	public async Task ObsoleteOnOffSelectors_PreferLiteralIdsThenFallBackToFirstAndSecondState()
 	{
 		// (a) literal ids win, even with a third state present.
-		var literal = new Fixture(ThreeStateData("off", "on", "away", active: "off"));
+		var literal = new Fixture(ThreeStateData("off", "on", "away", "off"));
 		var literalApplied = await literal.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"changed"},"state":{{SelectorOn}},"clearProperties":[]}""");
 		Assert.Multiple(() =>
@@ -69,7 +69,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 
 		// (b) no literal "on"/"off" ids - falls back positionally: off -> first, on -> second, mirroring
 		// the order the two selectors had when every button was exactly [off, on].
-		var positional = new Fixture(ThreeStateData("warn", "crit", "ok", active: "warn"));
+		var positional = new Fixture(ThreeStateData("warn", "crit", "ok", "warn"));
 		var positionalApplied = await positional.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"changed"},"state":{{SelectorOn}},"clearProperties":[]}""");
 		Assert.Multiple(() =>
@@ -79,7 +79,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 			Assert.That(positional.StateLabel("warn"), Is.Null, "On must not land on the first state");
 		});
 
-		var positionalOff = new Fixture(ThreeStateData("warn", "crit", "ok", active: "warn"));
+		var positionalOff = new Fixture(ThreeStateData("warn", "crit", "ok", "warn"));
 		var positionalOffApplied = await positionalOff.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"changed"},"state":{{SelectorOff}},"clearProperties":[]}""");
 		Assert.Multiple(() =>
@@ -105,7 +105,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task ObsoleteBothSelector_AppliesToEveryStateIncludingTheThird()
 	{
-		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", active: "warn"));
+		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", "warn"));
 
 		var applied = await fixture.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"backgroundColor":"#ff00ff"},"state":{{SelectorBoth}},"clearProperties":[]}""");
@@ -124,12 +124,12 @@ internal sealed class WidgetStateCompatibilityContractTests
 	{
 		// $current and $all pass straight through the v2 wire shape (WidgetsApplyArgumentsV2 carries no
 		// legacy selector at all).
-		var current = new Fixture(ThreeStateData("warn", "crit", "ok", active: "crit"), negotiatedVersion: 2);
+		var current = new Fixture(ThreeStateData("warn", "crit", "ok", "crit"), 2);
 		await current.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"changed"},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
 		Assert.That(current.StateLabel("crit"), Is.EqualTo("changed"));
 
-		var all = new Fixture(ThreeStateData("warn", "crit", "ok", active: "crit"), negotiatedVersion: 2);
+		var all = new Fixture(ThreeStateData("warn", "crit", "ok", "crit"), 2);
 		await all.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"backgroundColor":"#00ff00"},"stateIds":["{{WidgetStates.All}}"],"clearProperties":[]}""");
 		Assert.Multiple(() =>
@@ -156,7 +156,7 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task UnknownStateIdInStateIds_IsANoOpRatherThanACreate()
 	{
-		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", active: "crit"), negotiatedVersion: 2);
+		var fixture = new Fixture(ThreeStateData("warn", "crit", "ok", "crit"), 2);
 		var before = fixture.Widget.Data;
 
 		var applied = await fixture.InvokeV2(
@@ -172,15 +172,15 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task AccentColorField_RecoloursASliderOnBothWireShapes_AndClearingItByOrdinalRemovesIt()
 	{
-		var v1 = new Fixture("{}", negotiatedVersion: 1, type: WidgetTypeIds.Slider);
+		var v1 = new Fixture("{}", 1, WidgetTypeIds.Slider);
 		var v1Applied = await v1.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"accentColor":"#ef4444"},"state":{{SelectorCurrent}},"clearProperties":[]}""");
 
-		var v2 = new Fixture("""{"color":"#3b82f6"}""", negotiatedVersion: 2, type: WidgetTypeIds.Slider);
+		var v2 = new Fixture("""{"color":"#3b82f6"}""", 2, WidgetTypeIds.Slider);
 		var v2Applied = await v2.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"accentColor":"#ef4444"},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
 
-		var cleared = new Fixture("""{"color":"#3b82f6"}""", negotiatedVersion: 2, type: WidgetTypeIds.Slider);
+		var cleared = new Fixture("""{"color":"#3b82f6"}""", 2, WidgetTypeIds.Slider);
 		var clearApplied = await cleared.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[{{(int)WidgetAppearanceProperty.AccentColor}}]}""");
 
@@ -198,8 +198,9 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task APatchFromAPluginThatPredatesAccentColor_LeavesASlidersColourAlone()
 	{
-		var fixture = new Fixture("""{"label":"Mic","color":"#3b82f6"}""", negotiatedVersion: 1,
-			type: WidgetTypeIds.Slider);
+		var fixture = new Fixture("""{"label":"Mic","color":"#3b82f6"}""",
+			1,
+			WidgetTypeIds.Slider);
 
 		var applied = await fixture.InvokeV1(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Mic Gain","backgroundColor":null,"borderColor":null},"state":{{SelectorCurrent}},"clearProperties":[]}""");
@@ -215,12 +216,12 @@ internal sealed class WidgetStateCompatibilityContractTests
 	[Test]
 	public async Task IconAppearanceField_PinsTheIcon_AndClearingItByOrdinalReturnsToAutomatic()
 	{
-		var pinned = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1"}}""", negotiatedVersion: 2);
+		var pinned = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1"}}""", 2);
 		var pinApplied = await pinned.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"iconAppearance":"colorScheme=dark"},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
 
 		var cleared = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1","appearance":"colorScheme=dark"}}""",
-			negotiatedVersion: 2);
+			2);
 		var clearApplied = await cleared.InvokeV2(
 			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[{{(int)WidgetAppearanceProperty.IconAppearance}}]}""");
 
@@ -250,17 +251,24 @@ internal sealed class WidgetStateCompatibilityContractTests
 	}
 
 	private static string ThreeStateData(string first, string second, string third, string active)
-		=> "{\"stateMode\":true,\"states\":[" +
-			$"{{\"id\":\"{first}\",\"label\":\"{Capitalize(first)}\",\"appearance\":{{}}}}," +
-			$"{{\"id\":\"{second}\",\"label\":\"{Capitalize(second)}\",\"appearance\":{{}}}}," +
-			$"{{\"id\":\"{third}\",\"label\":\"{Capitalize(third)}\",\"appearance\":{{}}}}]," +
-			$"\"activeStateId\":\"{active}\"}}";
+	{
+		return "{\"stateMode\":true,\"states\":["
+			+ $"{{\"id\":\"{first}\",\"label\":\"{Capitalize(first)}\",\"appearance\":{{}}}},"
+			+ $"{{\"id\":\"{second}\",\"label\":\"{Capitalize(second)}\",\"appearance\":{{}}}},"
+			+ $"{{\"id\":\"{third}\",\"label\":\"{Capitalize(third)}\",\"appearance\":{{}}}}],"
+			+ $"\"activeStateId\":\"{active}\"}}";
+	}
 
 	private static string SingleStateData(string id)
-		=>
+	{
+		return
 			$"{{\"stateMode\":true,\"states\":[{{\"id\":\"{id}\",\"label\":\"{Capitalize(id)}\",\"appearance\":{{}}}}]}}";
+	}
 
-	private static string Capitalize(string id) => char.ToUpperInvariant(id[0]) + id[1..];
+	private static string Capitalize(string id)
+	{
+		return char.ToUpperInvariant(id[0]) + id[1..];
+	}
 
 	private sealed class Fixture
 	{
@@ -314,31 +322,37 @@ internal sealed class WidgetStateCompatibilityContractTests
 			// Every dependency but the session registry and widget api belongs to a route this fixture
 			// never exercises - passing null keeps the test honest about which collaborator matters here.
 			_router = new PluginCallbackRouter(sessionRegistry,
-				invoker: null!,
-				scopeFactory: null!,
-				notificationStore: null!,
-				deckNavigator: null!,
-				scriptApi: null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
 				new DirectWidgetApi(appearanceService),
-				widgetIconInvalidator: null!,
-				userVariableApi: null!,
-				actionInteractions: null!,
-				uiSessions: null!,
-				deviceRegistry: null!,
-				layoutRegistry: null!,
-				folderViewRegistry: null!,
-				widgetTypeRegistry: null!,
-				screenSaverRegistry: null!,
-				modals: null!,
-				transport: null!,
-				throttle: new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
-				lockState: null!,
-				logger: Log.Logger);
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				null!,
+				new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
+				null!,
+				Log.Logger);
 		}
 
-		public Task<bool> InvokeV1(string argumentsJson) => InvokeCore(argumentsJson);
+		public Task<bool> InvokeV1(string argumentsJson)
+		{
+			return InvokeCore(argumentsJson);
+		}
 
-		public Task<bool> InvokeV2(string argumentsJson) => InvokeCore(argumentsJson);
+		public Task<bool> InvokeV2(string argumentsJson)
+		{
+			return InvokeCore(argumentsJson);
+		}
 
 		private async Task<bool> InvokeCore(string argumentsJson)
 		{
@@ -357,42 +371,73 @@ internal sealed class WidgetStateCompatibilityContractTests
 			return result.Data!.Value.GetBoolean();
 		}
 
-		public string? StateLabel(string stateId) => Appearance(stateId)?["label"]?.GetValue<string>();
+		public string? StateLabel(string stateId)
+		{
+			return Appearance(stateId)?["label"]?.GetValue<string>();
+		}
 
-		public string? StateColor(string stateId) => Appearance(stateId)?["backgroundColor"]?.GetValue<string>();
+		public string? StateColor(string stateId)
+		{
+			return Appearance(stateId)?["backgroundColor"]?.GetValue<string>();
+		}
 
-		public string? StoredString(string key) => JsonNode.Parse(Widget.Data!)![key]?.GetValue<string>();
+		public string? StoredString(string key)
+		{
+			return JsonNode.Parse(Widget.Data!)![key]?.GetValue<string>();
+		}
 
-		public JsonObject? StoredIcon() => JsonNode.Parse(Widget.Data!)!["icon"] as JsonObject;
+		public JsonObject? StoredIcon()
+		{
+			return JsonNode.Parse(Widget.Data!)!["icon"] as JsonObject;
+		}
 
 		private JsonObject? Appearance(string stateId)
-			=> ((JsonObject)JsonNode.Parse(Widget.Data!)!)["states"]!.AsArray()
+		{
+			return ((JsonObject)JsonNode.Parse(Widget.Data!)!)["states"]!.AsArray()
 				.OfType<JsonObject>()
-				.FirstOrDefault(e => e["id"]!.GetValue<string>() == stateId)?["appearance"]?.AsObject();
+				.FirstOrDefault(e => e["id"]!.GetValue<string>() == stateId)?["appearance"]
+				?.AsObject();
+		}
 	}
 
 	private sealed class DirectWidgetApi : IWidgetApi
 	{
 		private readonly IWidgetAppearanceService _inner;
 
-		public DirectWidgetApi(IWidgetAppearanceService inner) => _inner = inner;
+		public DirectWidgetApi(IWidgetAppearanceService inner)
+		{
+			_inner = inner;
+		}
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => _inner.GetWidgets();
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return _inner.GetWidgets();
+		}
 
-		public bool Exists(string widgetId) => _inner.Exists(widgetId);
+		public bool Exists(string widgetId)
+		{
+			return _inner.Exists(widgetId);
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> _inner.ApplyAsync(request, cancellationToken);
+		{
+			return _inner.ApplyAsync(request, cancellationToken);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class RecordingWriteLock : IWidgetDataWriteLock
@@ -400,66 +445,119 @@ internal sealed class WidgetStateCompatibilityContractTests
 		private readonly WidgetDataWriteLock _inner = new();
 
 		public Task<IDisposable> AcquireAsync(Guid widgetId, CancellationToken cancellationToken = default)
-			=> _inner.AcquireAsync(widgetId, cancellationToken);
+		{
+			return _inner.AcquireAsync(widgetId, cancellationToken);
+		}
 	}
 
 	private sealed class RecordingWidgetService : IWidgetService
 	{
 		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
-			=> Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
+		{
+			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SingleFolderCache : IFolderCache
 	{
 		private readonly FolderEntity _folder;
 
-		public SingleFolderCache(FolderEntity folder) => _folder = folder;
+		public SingleFolderCache(FolderEntity folder)
+		{
+			_folder = folder;
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -498,20 +596,46 @@ internal sealed class WidgetStateCompatibilityContractTests
 	{
 		private readonly ProfileEntity _profile;
 
-		public SingleProfileCache(Guid id, string name) => _profile = new ProfileEntity { Id = id, Name = name };
+		public SingleProfileCache(Guid id, string name)
+		{
+			_profile = new ProfileEntity { Id = id, Name = name };
+		}
 
 		public bool HadUnreadableProfiles => false;
-		public ProfileEntity? GetById(Guid id) => id == _profile.Id ? _profile : null;
-		public List<ProfileEntity> GetAll() => [_profile];
-		public Task InitializeCache() => Task.CompletedTask;
-		public Task AddOrUpdate(ProfileEntity profile) => Task.CompletedTask;
+
+		public ProfileEntity? GetById(Guid id)
+		{
+			return id == _profile.Id ? _profile : null;
+		}
+
+		public List<ProfileEntity> GetAll()
+		{
+			return [_profile];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdate(ProfileEntity profile)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IReadOnlyList<ProfileEntity>> ApplyOrders(IReadOnlyDictionary<Guid, int> orders)
-			=> Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<ProfileEntity>>([]);
+		}
 
 		public Task AddOrUpdateAggregate(ProfileEntity profile, IReadOnlyCollection<FolderEntity> folders)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task Remove(Guid id) => Task.CompletedTask;
+		public Task Remove(Guid id)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

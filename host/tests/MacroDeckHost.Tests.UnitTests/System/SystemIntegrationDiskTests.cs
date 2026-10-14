@@ -9,15 +9,20 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 
 public class SystemIntegrationDiskTests
 {
-	private static readonly DiskSample _system = Disk("/", "Macintosh HD", total: 1000, free: 250,
+	private static readonly DiskSample _system = Disk("/",
+		"Macintosh HD",
+		1000,
+		250,
 		new DiskActivity(2048, 512, 40, 60));
 
-	private static readonly DiskSample _stick = Disk("/Volumes/STICK", "STICK", total: 64, free: 32, activity: null);
+	private static readonly DiskSample _stick = Disk("/Volumes/STICK", "STICK", 64, 32, null);
 
-	private static readonly DiskSample _backup = Disk("/Volumes/Backup", "Backup", total: 500, free: 100, activity: null);
+	private static readonly DiskSample _backup = Disk("/Volumes/Backup", "Backup", 500, 100, null);
 
 	private static DiskSample Disk(string mountPoint, string name, long total, long free, DiskActivity? activity)
-		=> new(mountPoint, name, "apfs", total, free, activity);
+	{
+		return new DiskSample(mountPoint, name, "apfs", total, free, activity);
+	}
 
 	private static (SystemIntegration Integration, FakeSystemMetricsService Metrics, StaleCounter Stale) Create(
 		FakeVolumeService? volume = null,
@@ -36,7 +41,9 @@ public class SystemIntegrationDiskTests
 	}
 
 	private static async Task<object?> Read(SystemIntegration integration, string name)
-		=> (await integration.ReadAsync(name.Replace('_', '-'))).Value;
+	{
+		return (await integration.ReadAsync(name.Replace('_', '-'))).Value;
+	}
 
 	[Test]
 	public async Task Each_disk_gets_indexed_variables_with_its_statistics()
@@ -45,16 +52,17 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Add(_system);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That(integration.Variables.Select(v => v.Name), Is.SupersetOf(new[]
-			{
-				"system_disk_0_name", "system_disk_0_mount_point", "system_disk_0_file_system",
-				"system_disk_0_total_bytes", "system_disk_0_used_bytes", "system_disk_0_free_bytes",
-				"system_disk_0_usage_percent", "system_disk_0_read_bytes_per_second",
-				"system_disk_0_write_bytes_per_second", "system_disk_0_read_usage_percent",
-				"system_disk_0_write_usage_percent"
-			}));
+			Assert.That(integration.Variables.Select(v => v.Name),
+				Is.SupersetOf(new[]
+				{
+					"system_disk_0_name", "system_disk_0_mount_point", "system_disk_0_file_system",
+					"system_disk_0_total_bytes", "system_disk_0_used_bytes", "system_disk_0_free_bytes",
+					"system_disk_0_usage_percent", "system_disk_0_read_bytes_per_second",
+					"system_disk_0_write_bytes_per_second", "system_disk_0_read_usage_percent",
+					"system_disk_0_write_usage_percent"
+				}));
 			Assert.That(await Read(integration, "system_disk_0_name"), Is.EqualTo("Macintosh HD"));
 			Assert.That(await Read(integration, "system_disk_0_mount_point"), Is.EqualTo("/"));
 			Assert.That(await Read(integration, "system_disk_0_file_system"), Is.EqualTo("apfs"));
@@ -76,12 +84,16 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Add(_system);
 		await integration.RefreshDisksAsync();
 
-		string? KindOf(string name) => integration.Variables.Single(v => v.Name == name).SemanticKind;
+		string? KindOf(string name)
+		{
+			return integration.Variables.Single(v => v.Name == name).SemanticKind;
+		}
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(KindOf("system_disk_0_free_bytes"), Is.EqualTo(VariableSemanticKinds.Bytes));
-			Assert.That(KindOf("system_disk_0_read_bytes_per_second"), Is.EqualTo(VariableSemanticKinds.BytesPerSecond));
+			Assert.That(KindOf("system_disk_0_read_bytes_per_second"),
+				Is.EqualTo(VariableSemanticKinds.BytesPerSecond));
 			Assert.That(KindOf("system_disk_0_usage_percent"), Is.EqualTo(VariableSemanticKinds.Percentage));
 			Assert.That(KindOf("system_disk_0_write_usage_percent"), Is.EqualTo(VariableSemanticKinds.Percentage));
 		});
@@ -94,7 +106,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Add(_stick);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await Read(integration, "system_disk_0_free_bytes"), Is.EqualTo(32));
 			Assert.That(await Read(integration, "system_disk_0_read_bytes_per_second"), Is.Null);
@@ -109,7 +121,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.AddRange([_stick, _backup, _system]);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await Read(integration, "system_disk_0_mount_point"), Is.EqualTo("/"));
 			Assert.That(await Read(integration, "system_disk_1_mount_point"), Is.EqualTo("/Volumes/Backup"));
@@ -127,7 +139,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Remove(_backup);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_disk_1_free_bytes"));
 			Assert.That(await Read(integration, "system_disk_1_free_bytes"), Is.Null);
@@ -152,7 +164,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Add(camera);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await Read(integration, "system_disk_1_name"), Is.EqualTo("CAMERA"));
 			Assert.That(await Read(integration, "system_disk_2_name"), Is.EqualTo("STICK"));
@@ -200,7 +212,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.AddRange([_backup, _stick, _system]);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await Read(integration, "system_disk_0_name"), Is.EqualTo("Backup"));
 			Assert.That(await Read(integration, "system_disk_1_name"), Is.EqualTo("STICK"));
@@ -219,7 +231,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Add(_stick);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(integration.Variables.Select(v => v.Name), Does.Contain("system_disk_1_name"));
 			Assert.That(await Read(integration, "system_disk_1_name"), Is.EqualTo("STICK"));
@@ -241,7 +253,7 @@ public class SystemIntegrationDiskTests
 		metrics.Disks.Remove(disks[3]);
 		await integration.RefreshDisksAsync();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(withoutNinth, Has.None.StartsWith("system_disk_8_"));
 			Assert.That(await Read(integration, "system_disk_3_name"), Is.EqualTo("D8"));
@@ -267,8 +279,9 @@ public class SystemIntegrationDiskTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(names, Does.Contain("system_disk_0_name").And.Contain("system_disk_1_name"));
-			Assert.That(names, Does.Contain("system_audio_output_speakers_volume_percent")
-				.And.Contain("system_audio_output_headset_volume_percent"));
+			Assert.That(names,
+				Does.Contain("system_audio_output_speakers_volume_percent")
+					.And.Contain("system_audio_output_headset_volume_percent"));
 			Assert.That(names, Does.Contain("system_cpu_usage_percent"));
 		});
 	}
@@ -279,7 +292,7 @@ public class SystemIntegrationDiskTests
 		var volume = new FakeVolumeService();
 		volume.Devices.AddRange(Enumerable.Range(0, AudioDeviceVariables.MaxKnownDevices)
 			.Select(i => new AudioDevice($"device-{i}", $"Device {i}", AudioFlow.Output, i == 0)));
-		var (integration, metrics, _) = Create(volume, gpuCount: 64);
+		var (integration, metrics, _) = Create(volume, 64);
 		metrics.Disks.AddRange(Enumerable.Range(0, 20).Select(i => Disk($"/Volumes/D{i}", $"D{i}", 10, 5, null)));
 
 		await integration.RefreshAudioDevicesAsync();
@@ -293,8 +306,14 @@ public class SystemIntegrationDiskTests
 	{
 		public int Count { get; private set; }
 
-		public void MarkStale(string integrationId) => Count++;
+		public void MarkStale(string integrationId)
+		{
+			Count++;
+		}
 
-		public IReadOnlyCollection<string> DrainStale() => [];
+		public IReadOnlyCollection<string> DrainStale()
+		{
+			return [];
+		}
 	}
 }

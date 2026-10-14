@@ -87,6 +87,8 @@ h4.md-heading {
   td {
     padding: var(--space-1) var(--space-2);
     border: 1px solid var(--color-border);
+    // An inherited overflow-wrap: anywhere lets auto table layout squeeze a column to one letter.
+    overflow-wrap: normal;
   }
 
   th {

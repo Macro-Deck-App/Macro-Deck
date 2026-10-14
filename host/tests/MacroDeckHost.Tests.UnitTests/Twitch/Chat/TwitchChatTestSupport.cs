@@ -9,7 +9,8 @@ namespace MacroDeckHost.Tests.UnitTests.Twitch.Chat;
 internal static class TwitchChatTestSupport
 {
 	public static void AddAccount(RecordingIntegrationConfig config, string userId, string login)
-		=> config.AddEntry($"Twitch ({login})",
+	{
+		config.AddEntry($"Twitch ({login})",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[TwitchConfigKeys.ClientId] = "client-id",
@@ -25,6 +26,7 @@ internal static class TwitchChatTestSupport
 				[TwitchConfigKeys.AccessToken] = "access",
 				[TwitchConfigKeys.RefreshToken] = "refresh"
 			});
+	}
 }
 
 internal sealed class RecordingTwitchChatSink : IStreamChatSink
@@ -33,9 +35,15 @@ internal sealed class RecordingTwitchChatSink : IStreamChatSink
 
 	public List<ChatEvent> Posted { get; } = [];
 
-	public void SetAccounts(IReadOnlyList<ChatAccount> accounts) => AccountLists.Add(accounts);
+	public void SetAccounts(IReadOnlyList<ChatAccount> accounts)
+	{
+		AccountLists.Add(accounts);
+	}
 
-	public void Post(ChatEvent chatEvent) => Posted.Add(chatEvent);
+	public void Post(ChatEvent chatEvent)
+	{
+		Posted.Add(chatEvent);
+	}
 }
 
 internal sealed class RecordingTwitchEventPublisher : IEventPublisher
@@ -43,5 +51,7 @@ internal sealed class RecordingTwitchEventPublisher : IEventPublisher
 	public List<string> Published { get; } = [];
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-		=> Published.Add(eventId);
+	{
+		Published.Add(eventId);
+	}
 }

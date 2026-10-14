@@ -18,7 +18,7 @@ internal sealed class IconPackArchiveTests
 	[Test]
 	public void A_well_formed_pack_reports_its_name_version_ai_and_icons()
 	{
-		using var pack = Pack(_allNames, ai: new JsonObject { ["generatedAssets"] = true });
+		using var pack = Pack(_allNames, new JsonObject { ["generatedAssets"] = true });
 
 		var result = IconPackArchive.Read(pack);
 
@@ -94,7 +94,7 @@ internal sealed class IconPackArchiveTests
 	public void An_archive_without_a_pack_manifest_is_rejected()
 	{
 		var stream = new MemoryStream();
-		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			using var entry = archive.CreateEntry($"icons/{Guid.NewGuid()}/master.webp").Open();
 			entry.Write("bytes"u8);
@@ -131,14 +131,15 @@ internal sealed class IconPackArchiveTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Success, Is.False);
-			Assert.That(result.Error, Does.Contain(IconPackArchiveLimits.MaxEntries.ToString(CultureInfo.InvariantCulture)));
+			Assert.That(result.Error,
+				Does.Contain(IconPackArchiveLimits.MaxEntries.ToString(CultureInfo.InvariantCulture)));
 		});
 	}
 
 	[Test]
 	public void A_pack_json_larger_than_the_plugin_manifest_bound_is_read()
 	{
-		using var pack = PaddedPack(2, manifestPadding: 20 * 1024 * 1024);
+		using var pack = PaddedPack(2, 20 * 1024 * 1024);
 
 		var result = IconPackArchive.Read(pack);
 
@@ -148,7 +149,7 @@ internal sealed class IconPackArchiveTests
 	[Test]
 	public void A_pack_json_above_the_manifest_bound_is_rejected()
 	{
-		using var pack = PaddedPack(2, manifestPadding: IconPackArchiveLimits.MaxManifestBytes);
+		using var pack = PaddedPack(2, IconPackArchiveLimits.MaxManifestBytes);
 
 		var result = IconPackArchive.Read(pack);
 
@@ -173,8 +174,7 @@ internal sealed class IconPackArchiveTests
 			{
 				["id"] = parentId.ToString(),
 				["name"] = "spotify",
-				["appearances"] = new JsonArray(
-					new JsonObject
+				["appearances"] = new JsonArray(new JsonObject
 					{
 						["id"] = darkId.ToString(),
 						["name"] = "spotify",
@@ -190,7 +190,7 @@ internal sealed class IconPackArchiveTests
 		};
 
 		var stream = new MemoryStream();
-		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			using (var writer = new StreamWriter(archive.CreateEntry("pack.json").Open()))
 			{
@@ -230,7 +230,7 @@ internal sealed class IconPackArchiveTests
 		};
 
 		var stream = new MemoryStream();
-		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			using (var writer = new StreamWriter(archive.CreateEntry("pack.json").Open()))
 			{
@@ -270,7 +270,7 @@ internal sealed class IconPackArchiveTests
 		}
 
 		var stream = new MemoryStream();
-		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			using (var writer = new StreamWriter(archive.CreateEntry("pack.json").Open()))
 			{

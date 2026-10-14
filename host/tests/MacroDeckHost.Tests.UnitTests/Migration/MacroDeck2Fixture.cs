@@ -115,7 +115,8 @@ internal sealed class MacroDeck2Fixture : IDisposable
 	}
 
 	public static JsonObject Folder(string folderId, string displayName, JsonArray buttons, params string[] children)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["FolderId"] = folderId,
 			["DisplayName"] = displayName,
@@ -123,6 +124,7 @@ internal sealed class MacroDeck2Fixture : IDisposable
 			["ActionButtons"] = buttons,
 			["ApplicationsFocusDevices"] = new JsonArray()
 		};
+	}
 
 	public static JsonObject Button(
 		int x,
@@ -139,7 +141,8 @@ internal sealed class MacroDeck2Fixture : IDisposable
 		JsonArray? actionsLongPress = null,
 		JsonArray? actionsLongPressRelease = null,
 		int keyCode = 0)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["Guid"] = Guid.NewGuid().ToString(),
 			["State"] = false,
@@ -159,9 +162,11 @@ internal sealed class MacroDeck2Fixture : IDisposable
 			["ModifierKeyCodes"] = 0,
 			["KeyCode"] = keyCode
 		};
+	}
 
 	public static JsonObject Label(string text, int position = 2, string color = "White", double size = 10)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["LabelText"] = text,
 			["LabelPosition"] = position,
@@ -170,9 +175,11 @@ internal sealed class MacroDeck2Fixture : IDisposable
 			["FontFamily"] = "Impact",
 			["LabelBase64"] = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA="
 		};
+	}
 
 	public static JsonObject Action(string type, string? configuration = null, string? name = null)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["$type"] = type,
 			["Name"] = name,
@@ -180,6 +187,7 @@ internal sealed class MacroDeck2Fixture : IDisposable
 			["Configuration"] = configuration,
 			["ConfigurationSummary"] = configuration
 		};
+	}
 
 	/// <summary>
 	/// Packs the built directory the way a Macro Deck 2 backup is packed: the data directory at the root
@@ -209,7 +217,7 @@ internal sealed class MacroDeck2Fixture : IDisposable
 		{
 			if (Directory.Exists(Root))
 			{
-				Directory.Delete(Root, recursive: true);
+				Directory.Delete(Root, true);
 			}
 		}
 		catch (IOException)

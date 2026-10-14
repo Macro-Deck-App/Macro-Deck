@@ -12,7 +12,9 @@ namespace MacroDeckHost.Tests.UnitTests.Obs;
 internal sealed class ObsActionStatesTests
 {
 	private static FakeObsClient Running(ObsStatus? status = null)
-		=> new() { IsConnected = true, Status = status ?? new ObsStatus() };
+	{
+		return new FakeObsClient { IsConnected = true, Status = status ?? new ObsStatus() };
+	}
 
 	private static ObsConnection Connect(FakeObsClient client)
 	{
@@ -26,12 +28,16 @@ internal sealed class ObsActionStatesTests
 	}
 
 	private static IStateProviderActionDefinition Toggle(string id, ObsConnection connection)
-		=> (IStateProviderActionDefinition)ObsActions
+	{
+		return (IStateProviderActionDefinition)ObsActions
 			.Create(() => connection, new VariableApiAccessor())
 			.Single(action => action.Id == id);
+	}
 
 	private static IActionDefinition Action(string id, ObsConnection connection)
-		=> ObsActions.Create(() => connection, new VariableApiAccessor()).Single(action => action.Id == id);
+	{
+		return ObsActions.Create(() => connection, new VariableApiAccessor()).Single(action => action.Id == id);
+	}
 
 	private static readonly Dictionary<string, object?> _noParameters = new();
 
@@ -45,13 +51,14 @@ internal sealed class ObsActionStatesTests
 		var action = Action("set-input-mute", connection);
 		var mic = new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic" };
 
-		var before = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, default);
+		var before = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, CancellationToken.None);
 		client.MutedInputs["Mic"] = true;
-		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object> { [MuteInputActionDefinition.InputParameter] = "Mic" }
-		});
-		var after = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, default);
+		await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object> { [MuteInputActionDefinition.InputParameter] = "Mic" }
+			});
+		var after = await ((IStateProviderActionDefinition)action).GetActionStateAsync(mic, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -68,10 +75,10 @@ internal sealed class ObsActionStatesTests
 		var provider = (IStateProviderActionDefinition)Action("set-input-mute", connection);
 		var mic = new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic" };
 
-		var before = await provider.GetActionStateAsync(mic, default);
+		var before = await provider.GetActionStateAsync(mic, CancellationToken.None);
 		client.MutedInputs["Mic"] = true;
 		client.RaiseInputMuteChanged("Mic", true);
-		var after = await provider.GetActionStateAsync(mic, default);
+		var after = await provider.GetActionStateAsync(mic, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -88,10 +95,10 @@ internal sealed class ObsActionStatesTests
 		var provider = (IStateProviderActionDefinition)Action("set-profile", connection);
 		var streaming = new Dictionary<string, object?> { [ProfileActionDefinition.ProfileParameter] = "Streaming" };
 
-		var before = await provider.GetActionStateAsync(streaming, default);
+		var before = await provider.GetActionStateAsync(streaming, CancellationToken.None);
 		client.Status = new ObsStatus { CurrentProfile = "Recording" };
 		client.RaiseStateChanged();
-		var after = await provider.GetActionStateAsync(streaming, default);
+		var after = await provider.GetActionStateAsync(streaming, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -107,7 +114,7 @@ internal sealed class ObsActionStatesTests
 		using var connection = Connect(Running(new ObsStatus { CurrentProfile = "Streaming" }));
 		var provider = (IStateProviderActionDefinition)Action("set-profile", connection);
 
-		var snapshot = await provider.GetActionStateAsync(_noParameters, default);
+		var snapshot = await provider.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot, Is.Null);
 	}
@@ -117,7 +124,8 @@ internal sealed class ObsActionStatesTests
 	{
 		using var connection = Connect(Running(new ObsStatus { IsRecording = true }));
 
-		var snapshot = await Toggle("toggle-recording", connection).GetActionStateAsync(_noParameters, default);
+		var snapshot = await Toggle("toggle-recording", connection)
+			.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("recording"));
 	}
@@ -127,7 +135,8 @@ internal sealed class ObsActionStatesTests
 	{
 		using var connection = Connect(Running(new ObsStatus { IsRecording = true, RecordingPaused = true }));
 
-		var snapshot = await Toggle("toggle-recording", connection).GetActionStateAsync(_noParameters, default);
+		var snapshot = await Toggle("toggle-recording", connection)
+			.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("paused"));
 	}
@@ -141,7 +150,7 @@ internal sealed class ObsActionStatesTests
 
 		client.Status = new ObsStatus { IsRecording = false };
 		client.RaiseStateChanged();
-		var snapshot = await provider.GetActionStateAsync(_noParameters, default);
+		var snapshot = await provider.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("not-recording"));
 	}
@@ -151,7 +160,8 @@ internal sealed class ObsActionStatesTests
 	{
 		using var connection = Connect(Running(new ObsStatus { IsStreaming = true }));
 
-		var snapshot = await Toggle("toggle-streaming", connection).GetActionStateAsync(_noParameters, default);
+		var snapshot = await Toggle("toggle-streaming", connection)
+			.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("streaming"));
 	}
@@ -161,7 +171,8 @@ internal sealed class ObsActionStatesTests
 	{
 		using var connection = Connect(Running(new ObsStatus { StudioModeActive = true }));
 
-		var snapshot = await Toggle("toggle-studio-mode", connection).GetActionStateAsync(_noParameters, default);
+		var snapshot = await Toggle("toggle-studio-mode", connection)
+			.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("on"));
 	}
@@ -172,7 +183,8 @@ internal sealed class ObsActionStatesTests
 		var client = new FakeObsClient { IsConnected = false };
 		using var connection = new ObsConnection(client, "ws://localhost:4455", null);
 
-		var snapshot = await Toggle("toggle-recording", connection).GetActionStateAsync(_noParameters, default);
+		var snapshot = await Toggle("toggle-recording", connection)
+			.GetActionStateAsync(_noParameters, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -190,10 +202,10 @@ internal sealed class ObsActionStatesTests
 
 		var active = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [SceneActionDefinition.SceneParameter] = "Gameplay" },
-			default);
+			CancellationToken.None);
 		var inactive = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [SceneActionDefinition.SceneParameter] = "Intro" },
-			default);
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -210,7 +222,7 @@ internal sealed class ObsActionStatesTests
 
 		var snapshot = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [SceneActionDefinition.SceneParameter] = "Intro" },
-			default);
+			CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("active"));
 	}
@@ -221,7 +233,7 @@ internal sealed class ObsActionStatesTests
 		using var connection = Connect(Running(new ObsStatus { CurrentScene = "Gameplay" }));
 		var provider = (IStateProviderActionDefinition)Action("set-scene", connection);
 
-		var snapshot = await provider.GetActionStateAsync(new Dictionary<string, object?>(), default);
+		var snapshot = await provider.GetActionStateAsync(new Dictionary<string, object?>(), CancellationToken.None);
 
 		Assert.That(snapshot, Is.Null);
 	}
@@ -236,7 +248,7 @@ internal sealed class ObsActionStatesTests
 
 		var snapshot = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic/Aux" },
-			default);
+			CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("muted"));
 	}
@@ -249,9 +261,9 @@ internal sealed class ObsActionStatesTests
 		var provider = (IStateProviderActionDefinition)Action("set-input-mute", connection);
 		var parameters = new Dictionary<string, object?> { [MuteInputActionDefinition.InputParameter] = "Mic/Aux" };
 
-		await provider.GetActionStateAsync(parameters, default);
-		await provider.GetActionStateAsync(parameters, default);
-		await provider.GetActionStateAsync(parameters, default);
+		await provider.GetActionStateAsync(parameters, CancellationToken.None);
+		await provider.GetActionStateAsync(parameters, CancellationToken.None);
+		await provider.GetActionStateAsync(parameters, CancellationToken.None);
 
 		Assert.That(client.Calls.Count(call => call == "GetInputMuted:Mic/Aux"), Is.EqualTo(1));
 	}
@@ -269,7 +281,7 @@ internal sealed class ObsActionStatesTests
 				[SourceVisibilityActionDefinition.SceneParameter] = "Gameplay",
 				[SourceVisibilityActionDefinition.SourceParameter] = "Webcam"
 			},
-			default);
+			CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("visible"));
 	}
@@ -282,7 +294,7 @@ internal sealed class ObsActionStatesTests
 
 		var snapshot = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [SourceVisibilityActionDefinition.SceneParameter] = "Gameplay" },
-			default);
+			CancellationToken.None);
 
 		Assert.That(snapshot, Is.Null);
 	}
@@ -300,7 +312,7 @@ internal sealed class ObsActionStatesTests
 				[SetSourceFilterActionDefinition.SourceParameter] = "Webcam",
 				[SetSourceFilterActionDefinition.FilterParameter] = "Blur"
 			},
-			default);
+			CancellationToken.None);
 
 		Assert.That(snapshot!.ActiveStateId, Is.EqualTo("enabled"));
 	}

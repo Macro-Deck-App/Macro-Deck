@@ -32,7 +32,9 @@ public sealed class VariableCatalogProviders
 	// The catalog provider for integrationId, or null when it is not currently available - unregistered,
 	// disabled, not yet initialized, not declaring the capability, or declaring no catalog.
 	public IVariableProvider? Resolve(string integrationId)
-		=> ResolveOwner(integrationId) is { SupportsCatalog: true } provider ? provider : null;
+	{
+		return ResolveOwner(integrationId) is { SupportsCatalog: true } provider ? provider : null;
+	}
 
 	/// <summary>The variable provider that owns <paramref name="integrationId"/>'s variables, catalog or
 	/// not, or null when it is not currently available.</summary>
@@ -58,14 +60,20 @@ public sealed class VariableCatalogProviders
 	}
 
 	private IIntegration? Find(string integrationId)
-		=> _integrations.Integrations.FirstOrDefault(i =>
+	{
+		return _integrations.Integrations.FirstOrDefault(i =>
 			string.Equals(i.Id, integrationId, StringComparison.Ordinal));
+	}
 
 	private bool IsAvailable(IIntegration integration)
-		=> _integrations.IsEnabled(integration.Id) && integration.IsInitialized && IsDeclaredProvider(integration);
+	{
+		return _integrations.IsEnabled(integration.Id) && integration.IsInitialized && IsDeclaredProvider(integration);
+	}
 
 	private static bool IsDeclaredProvider(IIntegration integration)
-		=> integration is IDeclaredCapabilityKinds declared
+	{
+		return integration is IDeclaredCapabilityKinds declared
 			? declared.DeclaredCapabilityKinds.Contains(CapabilityKinds.Variables, StringComparer.Ordinal)
 			: integration is IVariableProvider;
+	}
 }

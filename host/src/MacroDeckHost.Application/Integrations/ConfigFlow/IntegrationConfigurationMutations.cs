@@ -77,7 +77,9 @@ public interface IIntegrationConfigMutationCoordinator
 		string integrationId,
 		Guid entryId,
 		CancellationToken cancellationToken)
-		=> DeleteAsync(integrationId, entryId, confirmed: true, cancellationToken);
+	{
+		return DeleteAsync(integrationId, entryId, true, cancellationToken);
+	}
 
 	Task<IntegrationConfigMutationOutcome> CompleteUnlessDisabledAsync(
 		string integrationId,
@@ -85,7 +87,9 @@ public interface IIntegrationConfigMutationCoordinator
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
-		=> CompleteAsync(integrationId, entryId, title, values, cancellationToken);
+	{
+		return CompleteAsync(integrationId, entryId, title, values, cancellationToken);
+	}
 }
 
 public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMutationCoordinator
@@ -127,7 +131,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
-		=> Complete(integrationId, entryId, title, values, unlessDisabled: false, cancellationToken);
+	{
+		return Complete(integrationId, entryId, title, values, false, cancellationToken);
+	}
 
 	// Checked in the same serialized section as a user's delete, so an entry the host creates on its own
 	// never follows the deletion of the last one.
@@ -137,7 +143,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values,
 		CancellationToken cancellationToken)
-		=> Complete(integrationId, entryId, title, values, unlessDisabled: true, cancellationToken);
+	{
+		return Complete(integrationId, entryId, title, values, true, cancellationToken);
+	}
 
 	private Task<IntegrationConfigMutationOutcome> Complete(
 		string integrationId,
@@ -146,7 +154,8 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		IReadOnlyDictionary<string, JsonElement> values,
 		bool unlessDisabled,
 		CancellationToken cancellationToken)
-		=> Serialized(integrationId,
+	{
+		return Serialized(integrationId,
 			async store =>
 			{
 				if (unlessDisabled && _registry.IsExplicitlyDisabled(integrationId))
@@ -197,13 +206,15 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 			},
 			cancellationToken);
+	}
 
 	public Task<IntegrationConfigMutationOutcome> RenameAsync(
 		string integrationId,
 		Guid entryId,
 		string title,
 		CancellationToken cancellationToken)
-		=> Serialized(integrationId,
+	{
+		return Serialized(integrationId,
 			async store =>
 			{
 				var existing = await store.Find(entryId);
@@ -261,6 +272,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				}
 			},
 			cancellationToken);
+	}
 
 	public Task<IntegrationConfigMutationOutcome> DeleteAsync(
 		string integrationId,
@@ -274,7 +286,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				Error: AppStrings.Errors.Config.DeleteConfirmationRequired()));
 		}
 
-		return Delete(integrationId, entryId, storeDisabled: true, cancellationToken);
+		return Delete(integrationId, entryId, true, cancellationToken);
 	}
 
 	// For an entry the host removes on its own: nobody chose "off", so only a stored "on" is cleared, and
@@ -283,7 +295,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		string integrationId,
 		Guid entryId,
 		CancellationToken cancellationToken)
-		=> Delete(integrationId, entryId, storeDisabled: false, cancellationToken);
+	{
+		return Delete(integrationId, entryId, false, cancellationToken);
+	}
 
 	private Task<IntegrationConfigMutationOutcome> Delete(
 		string integrationId,
@@ -303,8 +317,8 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 				await store.Delete(entryId);
 				var remaining = await LoadRecords(store, integrationId);
 				await SynchronizeVariables(integrationId, remaining, cancellationToken);
-				if (RequiresConfiguration(integrationId) &&
-					!await AnyUsableAsync(integrationId, remaining, cancellationToken))
+				if (RequiresConfiguration(integrationId)
+					&& !await AnyUsableAsync(integrationId, remaining, cancellationToken))
 				{
 					if (storeDisabled)
 					{
@@ -342,7 +356,8 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		return await Task.WhenAll(entries.Select(entry => DescribeAsync(integrationId, entry, cancellationToken)));
 	}
 
-	private async Task<IntegrationConfigEntryDescription> DescribeAsync(string integrationId,
+	private async Task<IntegrationConfigEntryDescription> DescribeAsync(
+		string integrationId,
 		ConfigEntryRecord entry,
 		CancellationToken cancellationToken)
 	{
@@ -377,10 +392,12 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 	}
 
 	private LifecycleConfigEntryBinding? Binding(string integrationId)
-		=> _registry.Integrations.FirstOrDefault(candidate =>
-				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is IConfigEntryLifecycle lifecycle
+	{
+		return _registry.Integrations.FirstOrDefault(candidate =>
+			string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is IConfigEntryLifecycle lifecycle
 			? new LifecycleConfigEntryBinding(integrationId, lifecycle, _variableRegistry, _lifecycleReservations)
 			: null;
+	}
 
 	private Task<IntegrationConfigMutationPreparationResult> PrepareAsync(
 		string integrationId,
@@ -391,7 +408,8 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		IReadOnlyList<ConfigEntryRecord> siblings,
 		bool titleChanged,
 		CancellationToken cancellationToken)
-		=> Binding(integrationId) is { } binding
+	{
+		return Binding(integrationId) is { } binding
 			? binding.PrepareAsync(new IntegrationConfigMutationPreparation(integrationId,
 					entryId,
 					title,
@@ -401,6 +419,7 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 					titleChanged),
 				cancellationToken)
 			: Task.FromResult(new IntegrationConfigMutationPreparationResult(true, values));
+	}
 
 	private async Task SynchronizeVariables(
 		string integrationId,
@@ -419,7 +438,9 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 	}
 
 	private Task ReleasePreparationAsync(string integrationId, Guid entryId, CancellationToken cancellationToken)
-		=> Binding(integrationId)?.ReleasePreparationAsync(entryId, cancellationToken) ?? Task.CompletedTask;
+	{
+		return Binding(integrationId)?.ReleasePreparationAsync(entryId, cancellationToken) ?? Task.CompletedTask;
+	}
 
 	private async Task ReloadAndPublish(string integrationId, CancellationToken cancellationToken)
 	{
@@ -448,21 +469,29 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 		await _mediator.Publish(new IntegrationStateChangedNotification(integrationId), cancellationToken);
 	}
 
-	private Task<IntegrationConfigEntryStatus> StatusAsync(string integrationId,
+	private Task<IntegrationConfigEntryStatus> StatusAsync(
+		string integrationId,
 		ConfigEntryRecord entry,
 		CancellationToken cancellationToken)
-		=> Binding(integrationId)?.GetStatusAsync(entry, cancellationToken) ??
-			Task.FromResult(IntegrationConfigEntryStatus.Ready);
+	{
+		return Binding(integrationId)?.GetStatusAsync(entry, cancellationToken)
+			?? Task.FromResult(IntegrationConfigEntryStatus.Ready);
+	}
 
 	private bool RequiresConfiguration(string integrationId)
-		=> _registry.Integrations.FirstOrDefault(candidate =>
-				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is not { } integration ||
-			integration.RequiresConfiguration();
+	{
+		return _registry.Integrations.FirstOrDefault(candidate =>
+				string.Equals(candidate.Id, integrationId, StringComparison.Ordinal)) is not { } integration
+			|| integration.RequiresConfiguration();
+	}
 
 	private Task<bool> IsUsableAsync(string integrationId, ConfigEntryRecord entry, CancellationToken cancellationToken)
-		=> Binding(integrationId)?.IsUsableAsync(entry, cancellationToken) ?? Task.FromResult(true);
+	{
+		return Binding(integrationId)?.IsUsableAsync(entry, cancellationToken) ?? Task.FromResult(true);
+	}
 
-	private async Task<bool> AnyUsableAsync(string integrationId,
+	private async Task<bool> AnyUsableAsync(
+		string integrationId,
 		IReadOnlyList<ConfigEntryRecord> entries,
 		CancellationToken cancellationToken)
 	{
@@ -495,8 +524,12 @@ public sealed class IntegrationConfigMutationCoordinator : IIntegrationConfigMut
 	}
 
 	private static bool OwnedBy(ConfigEntryRecord? entry, string integrationId)
-		=> entry is not null && string.Equals(entry.IntegrationId, integrationId, StringComparison.Ordinal);
+	{
+		return entry is not null && string.Equals(entry.IntegrationId, integrationId, StringComparison.Ordinal);
+	}
 
 	private static IntegrationConfigMutationOutcome MissingEntry()
-		=> new(false, Error: AppStrings.Errors.Config.EntryNotFound());
+	{
+		return new IntegrationConfigMutationOutcome(false, Error: AppStrings.Errors.Config.EntryNotFound());
+	}
 }

@@ -61,20 +61,31 @@ internal sealed class MusicPlayerOptionsContractTests : CapabilityContractFixtur
 
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<MusicPlayerInstance> GetInstances() =>
-		[
-			new MusicPlayerInstance(InstanceId, "Any app")
-			{
-				Options = [ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10)]
-			}
-		];
+		public IReadOnlyList<MusicPlayerInstance> GetInstances()
+		{
+			return
+			[
+				new MusicPlayerInstance(InstanceId, "Any app")
+				{
+					Options = [ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10)]
+				}
+			];
+		}
 
 		public IMusicPlayer? GetPlayer(string instanceId)
-			=> instanceId == InstanceId ? Player("current app", 0) : null;
+		{
+			return instanceId == InstanceId ? Player("current app", 0) : null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(MusicPlayerOptionsRequest request)
 		{
@@ -85,10 +96,12 @@ internal sealed class MusicPlayerOptionsContractTests : CapabilityContractFixtur
 		}
 
 		private static TestMusicPlayer Player(string track, byte cover)
-			=> new()
+		{
+			return new TestMusicPlayer
 			{
 				StateToReturn = new MusicPlayerState { IsConnected = true, TrackName = track },
 				ArtworkToReturn = new MusicPlayerArtwork([cover], "image/png")
 			};
+		}
 	}
 }

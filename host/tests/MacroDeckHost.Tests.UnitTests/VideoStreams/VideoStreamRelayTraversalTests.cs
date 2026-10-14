@@ -23,9 +23,12 @@ internal sealed class VideoStreamRelayTraversalTests
 		_upstream = await ScriptedUpstream.StartAsync();
 		_upstream.Handler = RelayScripts.Reply("image/jpeg", "FRAME");
 		_host = await RelayTestHost.StartAsync();
-		_prefix = _host.Arm("s", _upstream.Origin + "/live/cam.jpg", "mjpeg")[..(VideoStreamRelay.PathPrefix.Length + 43)];
+		_prefix = _host.Arm("s", _upstream.Origin + "/live/cam.jpg", "mjpeg")[
+			..(VideoStreamRelay.PathPrefix.Length + 43)];
 		_kestrel = await RelayTestHost.StartAsync(kestrel: true);
-		_kestrelPrefix = _kestrel.Arm("s", _upstream.Origin + "/live/cam.jpg", "mjpeg")[..(VideoStreamRelay.PathPrefix.Length + 43)];
+		_kestrelPrefix
+			= _kestrel.Arm("s", _upstream.Origin + "/live/cam.jpg", "mjpeg")[
+				..(VideoStreamRelay.PathPrefix.Length + 43)];
 	}
 
 	[OneTimeTearDown]
@@ -37,7 +40,10 @@ internal sealed class VideoStreamRelayTraversalTests
 	}
 
 	[SetUp]
-	public void SetUp() => _upstream.Requests.Clear();
+	public void SetUp()
+	{
+		_upstream.Requests.Clear();
+	}
 
 	[TestCase("/live/%2e%2e/secret", TestName = "A_dot_segment_spelled_with_percent_escapes_is_refused")]
 	[TestCase("/live/%2E%2E/secret", TestName = "A_dot_segment_with_uppercase_escapes_is_refused")]
@@ -63,12 +69,18 @@ internal sealed class VideoStreamRelayTraversalTests
 		});
 	}
 
-	[TestCase("//evil.example/x", "//evil.example/x", TestName = "A_path_that_starts_with_two_slashes_stays_a_path_on_the_pinned_origin")]
+	[TestCase("//evil.example/x",
+		"//evil.example/x",
+		TestName = "A_path_that_starts_with_two_slashes_stays_a_path_on_the_pinned_origin")]
 	[TestCase("/live/a%3Fb", "/live/a%3Fb", TestName = "An_encoded_question_mark_stays_part_of_the_path")]
 	[TestCase("/live/a%23b", "/live/a%23b", TestName = "An_encoded_hash_stays_part_of_the_path")]
 	[TestCase("/live/a b", "/live/a%20b", TestName = "A_space_is_sent_encoded")]
-	[TestCase("/live/%252e%252e/x", "/live/%252e%252e/x", TestName = "A_double_encoded_dot_segment_reaches_the_upstream_as_the_literal_name_it_is")]
-	public async Task A_path_the_relay_accepts_arrives_upstream_on_the_pinned_origin_as_sent(string tail, string expectedTarget)
+	[TestCase("/live/%252e%252e/x",
+		"/live/%252e%252e/x",
+		TestName = "A_double_encoded_dot_segment_reaches_the_upstream_as_the_literal_name_it_is")]
+	public async Task A_path_the_relay_accepts_arrives_upstream_on_the_pinned_origin_as_sent(
+		string tail,
+		string expectedTarget)
 	{
 		var context = await _host.SendRawPathAsync(_prefix + tail);
 
@@ -105,7 +117,8 @@ internal sealed class VideoStreamRelayTraversalTests
 		});
 	}
 
-	[TestCase("/live/%252e%252e/secret", TestName = "Kestrel_hands_a_double_encoded_dot_segment_on_as_a_single_encoded_one_and_it_is_refused")]
+	[TestCase("/live/%252e%252e/secret",
+		TestName = "Kestrel_hands_a_double_encoded_dot_segment_on_as_a_single_encoded_one_and_it_is_refused")]
 	[TestCase("/live/a%2Fb", TestName = "Kestrel_keeps_an_encoded_slash_and_it_is_refused")]
 	[TestCase("/live/a%252Fb", TestName = "Kestrel_turns_a_double_encoded_slash_into_an_encoded_one_and_it_is_refused")]
 	[TestCase("/live/a%5Cb", TestName = "Kestrel_decodes_an_encoded_backslash_and_it_is_refused")]
@@ -131,7 +144,8 @@ internal sealed class VideoStreamRelayTraversalTests
 	}
 
 	[Test]
-	public async Task A_request_line_with_a_double_slash_reaches_the_pinned_origin_and_nothing_else_through_a_real_listener()
+	public async Task
+		A_request_line_with_a_double_slash_reaches_the_pinned_origin_and_nothing_else_through_a_real_listener()
 	{
 		var status = await SendRawRequestAsync(_kestrel.Listener!, _kestrelPrefix + "//evil.example/x");
 
@@ -146,7 +160,8 @@ internal sealed class VideoStreamRelayTraversalTests
 	{
 		using var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 		await socket.ConnectAsync(endpoint);
-		await socket.SendAsync(Encoding.ASCII.GetBytes($"GET {target} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"));
+		await socket.SendAsync(
+			Encoding.ASCII.GetBytes($"GET {target} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"));
 		var received = new StringBuilder();
 		var buffer = new byte[4096];
 		using var timeout = new CancellationTokenSource(RelayScripts.Soon);

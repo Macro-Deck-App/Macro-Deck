@@ -35,7 +35,7 @@ public class VerifyCommandTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 

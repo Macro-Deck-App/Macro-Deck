@@ -32,7 +32,10 @@ internal sealed class SizedIconResourceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _host.Dispose();
+	public void TearDown()
+	{
+		_host.Dispose();
+	}
 
 	[TestCase("128", 128)]
 	[TestCase("512", 512)]
@@ -137,7 +140,8 @@ internal sealed class SizedIconResourceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(current.Response.Headers.CacheControl.ToString(), Is.EqualTo("private, max-age=31536000, immutable"));
+			Assert.That(current.Response.Headers.CacheControl.ToString(),
+				Is.EqualTo("private, max-age=31536000, immutable"));
 			Assert.That(stale.Response.Headers.CacheControl.ToString(), Is.EqualTo("no-store"));
 			Assert.That(EdgeOf(staleServed), Is.EqualTo(128));
 			Assert.That(unversioned.Response.Headers.CacheControl.ToString(), Is.EqualTo("private, no-cache"));
@@ -153,8 +157,9 @@ internal sealed class SizedIconResourceTests
 		var widgetIcons = new WidgetIconResources(new WidgetIconSourceRegistry([_iconPackSource]),
 			store,
 			Serilog.Core.Logger.None,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
-		var handle = await widgetIcons.ResolveAsync(WidgetIconReference.IconPack(icon.Id.ToString()), CancellationToken.None);
+			new Devices.Surfaces.StubIconPackCache());
+		var handle = await widgetIcons.ResolveAsync(WidgetIconReference.IconPack(icon.Id.ToString()),
+			CancellationToken.None);
 
 		var served = await Controller(store).Get(handle!.ResourceId, handle.ContentHash, "128") as FileContentResult;
 
@@ -252,16 +257,20 @@ internal sealed class SizedIconResourceTests
 		return handle.Handle!;
 	}
 
-	private static async Task<MacroDeck.Ui.Model.Resources.UiResource> RegisterFake(UiResourceStore store, FakeSource source)
+	private static async Task<MacroDeck.Ui.Model.Resources.UiResource> RegisterFake(
+		UiResourceStore store,
+		FakeSource source)
 	{
 		var widgetIcons = new WidgetIconResources(new WidgetIconSourceRegistry([source]),
 			store,
 			Serilog.Core.Logger.None,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
-		return (await widgetIcons.ResolveAsync(new WidgetIconReference(FakeSource.SourceType, "logo"), CancellationToken.None))!;
+			new Devices.Surfaces.StubIconPackCache());
+		return (await widgetIcons.ResolveAsync(new WidgetIconReference(FakeSource.SourceType, "logo"),
+			CancellationToken.None))!;
 	}
 
-	private UiResourcesController Controller(IUiResourceStore? store = null,
+	private UiResourcesController Controller(
+		IUiResourceStore? store = null,
 		string? ifNoneMatch = null,
 		IWidgetIconSource[]? sources = null)
 	{
@@ -306,9 +315,13 @@ internal sealed class SizedIconResourceTests
 
 		public string Type { get; init; } = SourceType;
 
-		public string? GetVersion(string reference) => "v1";
+		public string? GetVersion(string reference)
+		{
+			return "v1";
+		}
 
-		public async Task<WidgetIconImage?> GetImageAsync(string reference,
+		public async Task<WidgetIconImage?> GetImageAsync(
+			string reference,
 			int size,
 			bool acceptWebp,
 			bool staticFrame,

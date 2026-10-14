@@ -28,7 +28,7 @@ public class SessionRecoveryTests
 	public async Task TearDown()
 	{
 		await _host.DisposeAsync();
-		Directory.Delete(_stateDirectory, recursive: true);
+		Directory.Delete(_stateDirectory, true);
 	}
 
 	[Test]
@@ -73,8 +73,8 @@ public class SessionRecoveryTests
 
 		await PumpUntilAsync(time,
 			_longStep,
-			() => time.GetUtcNow() - droppedAt > ProtocolTimeouts.SessionResumeWindow + _longStep &&
-				state.ReconnectAttempt >= 3);
+			() => time.GetUtcNow() - droppedAt > ProtocolTimeouts.SessionResumeWindow + _longStep
+				&& state.ReconnectAttempt >= 3);
 
 		SetOutage(refuseHandshake, false);
 		await PumpUntilAsync(time, _shortStep, () => state.IsReady);
@@ -239,12 +239,14 @@ public class SessionRecoveryTests
 	}
 
 	private static Task PumpUntilAsync(ManualTimeProvider time, TimeSpan step, Func<bool> condition)
-		=> Wait.UntilAsync(() =>
+	{
+		return Wait.UntilAsync(() =>
 			{
 				time.Advance(step);
 				return condition();
 			},
 			_pumpBudget);
+	}
 
 	private PluginHostBuilder Builder(TimeProvider time)
 	{

@@ -74,18 +74,22 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 	}
 
 	public Task ReleaseAsync(string widgetId)
-		=> Take(widgetId) is { } state
-			? Settle(state, FinishAsync(widgetId, state, released: true))
+	{
+		return Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, true))
 			: Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Ends a press the device never released - navigation away, the device going offline, the session
 	/// closing. Emits <c>onTouchEnd</c> only, and disarms the timer so no phantom long press fires later.
 	/// </summary>
 	public Task CancelAsync(string widgetId)
-		=> Take(widgetId) is { } state
-			? Settle(state, FinishAsync(widgetId, state, released: false))
+	{
+		return Take(widgetId) is { } state
+			? Settle(state, FinishAsync(widgetId, state, false))
 			: Task.CompletedTask;
+	}
 
 	public async Task CancelAllAsync()
 	{
@@ -119,7 +123,10 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 
 	// A plugin's device reports and its tile's tree share one serial connection, so a press that waited
 	// here for the tree would starve the very tree it waits for. The phases still run in order behind it.
-	private static Task Settle(PressState state, Task work) => state.Claim.IsCompleted ? work : Task.CompletedTask;
+	private static Task Settle(PressState state, Task work)
+	{
+		return state.Claim.IsCompleted ? work : Task.CompletedTask;
+	}
 
 	private static async Task CloseAfterAsync(Task tail, PressState state)
 	{
@@ -160,7 +167,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 					(true, true, _) => TapCompletion.Double,
 					(false, true, _) => TapCompletion.Held,
 					(_, _, true) => TapCompletion.Single,
-					_ => TapCompletion.None,
+					_ => TapCompletion.None
 				};
 
 				if (completion == TapCompletion.Held)
@@ -229,7 +236,9 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 		(Task Previous, TaskCompletionSource Done) slot;
 		lock (_sync)
 		{
-			if (!_taps.TryGetValue(widgetId, out var current) || !ReferenceEquals(current, tap) || tap.Second is not null)
+			if (!_taps.TryGetValue(widgetId, out var current)
+				|| !ReferenceEquals(current, tap)
+				|| tap.Second is not null)
 			{
 				return;
 			}
@@ -341,7 +350,7 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 		None,
 		Single,
 		Double,
-		Held,
+		Held
 	}
 
 	private sealed class TapState(PressState first)
@@ -366,7 +375,10 @@ public sealed class DeviceSurfacePressTracker : IDisposable
 
 		public bool LongPressFired;
 
-		public void Resolve(Task<DevicePressClaim> claim) => _ = ResolveAsync(claim);
+		public void Resolve(Task<DevicePressClaim> claim)
+		{
+			_ = ResolveAsync(claim);
+		}
 
 		private async Task ResolveAsync(Task<DevicePressClaim> claim)
 		{

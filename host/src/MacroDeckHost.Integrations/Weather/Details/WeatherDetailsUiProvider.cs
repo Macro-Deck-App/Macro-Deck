@@ -32,7 +32,7 @@ internal sealed class WeatherDetailsUiProvider : IUiProvider
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
-		new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -40,8 +40,8 @@ internal sealed class WeatherDetailsUiProvider : IUiProvider
 		ArgumentNullException.ThrowIfNull(request);
 
 		var surface = request.Surface;
-		if (surface.Kind is not UiSurfaceKinds.Dialog ||
-			ReadString(surface.Attributes, UiDialogSurfaceAttributes.ViewId) != DetailsViewId)
+		if (surface.Kind is not UiSurfaceKinds.Dialog
+			|| ReadString(surface.Attributes, UiDialogSurfaceAttributes.ViewId) != DetailsViewId)
 		{
 			return null;
 		}
@@ -59,9 +59,9 @@ internal sealed class WeatherDetailsUiProvider : IUiProvider
 
 	private static WeatherDetailsStation RequestedStation(UiSurface surface)
 	{
-		if (!surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.Data, out var data) ||
-			data.ValueKind != JsonValueKind.Object ||
-			ReadString(data, InstanceIdKey) is not { } requested)
+		if (!surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.Data, out var data)
+			|| data.ValueKind != JsonValueKind.Object
+			|| ReadString(data, InstanceIdKey) is not { } requested)
 		{
 			return WeatherDetailsStation.Default;
 		}
@@ -77,16 +77,20 @@ internal sealed class WeatherDetailsUiProvider : IUiProvider
 	}
 
 	private static string? ReadString(IReadOnlyDictionary<string, JsonElement> attributes, string key)
-		=> attributes.TryGetValue(key, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return attributes.TryGetValue(key, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static string? ReadString(JsonElement data, string key)
-		=> data.TryGetProperty(key, out var value) &&
-			value.ValueKind == JsonValueKind.String &&
-			value.GetString() is { Length: > 0 } text
+	{
+		return data.TryGetProperty(key, out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& value.GetString() is { Length: > 0 } text
 				? text
 				: null;
+	}
 }
 
 internal sealed record WeatherDetailsStation(string? StationId, bool IsForeign)
@@ -95,5 +99,8 @@ internal sealed record WeatherDetailsStation(string? StationId, bool IsForeign)
 
 	public static readonly WeatherDetailsStation Unknown = new(null, true);
 
-	public static WeatherDetailsStation Of(string stationId) => new(stationId, false);
+	public static WeatherDetailsStation Of(string stationId)
+	{
+		return new WeatherDetailsStation(stationId, false);
+	}
 }

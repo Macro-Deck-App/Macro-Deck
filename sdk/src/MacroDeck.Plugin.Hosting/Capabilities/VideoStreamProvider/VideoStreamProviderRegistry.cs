@@ -24,7 +24,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 	private readonly PluginConnectionState _state;
 	private readonly TimeProvider _time;
 
-	public VideoStreamProviderRegistry(IHostInvoker invoker,
+	public VideoStreamProviderRegistry(
+		IHostInvoker invoker,
 		PluginConnectionState state,
 		PluginMetadata metadata,
 		TimeProvider timeProvider,
@@ -50,9 +51,14 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 	}
 
 	public IVideoStreamProviderContext ContextFor(object? owner)
-		=> new Integrations.HostApis.RemoteVideoStreamProviderContext(this, owner);
+	{
+		return new Integrations.HostApis.RemoteVideoStreamProviderContext(this, owner);
+	}
 
-	public string QualifiedIdFor(string providerId) => _metadata.Id + QualifiedId.Separator + providerId;
+	public string QualifiedIdFor(string providerId)
+	{
+		return _metadata.Id + QualifiedId.Separator + providerId;
+	}
 
 	public IReadOnlyList<Registration> Snapshot()
 	{
@@ -78,7 +84,9 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 	}
 
 	public bool IsCurrent(Registration registration)
-		=> TryGet(registration.ProviderId, out var current) && ReferenceEquals(current, registration);
+	{
+		return TryGet(registration.ProviderId, out var current) && ReferenceEquals(current, registration);
+	}
 
 	public Registration Add(IVideoStreamProvider provider, object? owner)
 	{
@@ -91,7 +99,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 
 		if (provider.Name.IsEmpty)
 		{
-			throw new ArgumentException($"The name of video stream provider '{id}' must not be empty.", nameof(provider));
+			throw new ArgumentException($"The name of video stream provider '{id}' must not be empty.",
+				nameof(provider));
 		}
 
 		lock (_gate)
@@ -116,19 +125,32 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 	}
 
 	public Task UnregisterAsync(string providerId, CancellationToken cancellationToken)
-		=> WithdrawAsync(registration => string.Equals(registration.ProviderId, providerId, StringComparison.Ordinal),
-			notifyHost: true,
+	{
+		return WithdrawAsync(registration
+				=> string.Equals(registration.ProviderId, providerId, StringComparison.Ordinal),
+			true,
 			cancellationToken);
+	}
 
 	public Task WithdrawAsync(Registration registration, bool notifyHost)
-		=> WithdrawAsync(candidate => ReferenceEquals(candidate, registration), notifyHost, CancellationToken.None);
+	{
+		return WithdrawAsync(candidate => ReferenceEquals(candidate, registration), notifyHost, CancellationToken.None);
+	}
 
 	public Task ReleaseAsync(object owner, bool notifyHost)
-		=> WithdrawAsync(registration => ReferenceEquals(registration.Owner, owner), notifyHost, CancellationToken.None);
+	{
+		return WithdrawAsync(registration => ReferenceEquals(registration.Owner, owner),
+			notifyHost,
+			CancellationToken.None);
+	}
 
-	public Task ReleaseAllAsync(bool notifyHost) => WithdrawAsync(_ => true, notifyHost, CancellationToken.None);
+	public Task ReleaseAllAsync(bool notifyHost)
+	{
+		return WithdrawAsync(_ => true, notifyHost, CancellationToken.None);
+	}
 
-	public async Task SendToSessionAsync(string sessionId,
+	public async Task SendToSessionAsync(
+		string sessionId,
 		string operation,
 		object arguments,
 		CancellationToken cancellationToken)
@@ -150,7 +172,7 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 			await lane.Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
 			try
 			{
-				await InvokeWithRetryAsync(operation, arguments, ignoreUnknownSession: true, cancellationToken)
+				await InvokeWithRetryAsync(operation, arguments, true, cancellationToken)
 					.ConfigureAwait(false);
 			}
 			finally
@@ -171,12 +193,14 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 		}
 	}
 
-	public async Task CloseAsync(VideoStreamSessionTable<VideoStreamSessionReason, IVideoStreamProvider>.Closing closing)
+	public async Task CloseAsync(
+		VideoStreamSessionTable<VideoStreamSessionReason, IVideoStreamProvider>.Closing closing)
 	{
 		using var timeout = new CancellationTokenSource(ProtocolTimeouts.CapabilityInvoke);
 		try
 		{
-			await Task.Run(() => closing.Provider.CloseAsync(closing.SessionId, closing.Reason, timeout.Token), timeout.Token)
+			await Task.Run(() => closing.Provider.CloseAsync(closing.SessionId, closing.Reason, timeout.Token),
+					timeout.Token)
 				.ConfigureAwait(false);
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
@@ -188,7 +212,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 		}
 	}
 
-	public async Task<bool> InvokeWithRetryAsync(string operation,
+	public async Task<bool> InvokeWithRetryAsync(
+		string operation,
 		object? arguments,
 		bool ignoreUnknownSession,
 		CancellationToken cancellationToken)
@@ -232,7 +257,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 		}
 	}
 
-	private async Task<bool> InvokeHostAsync(string operation,
+	private async Task<bool> InvokeHostAsync(
+		string operation,
 		object? arguments,
 		bool ignoreUnknownSession,
 		CancellationToken cancellationToken)
@@ -247,8 +273,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 		{
 			return false;
 		}
-		catch (HostInvocationException exception) when (ignoreUnknownSession &&
-			string.Equals(exception.Details.GetValueOrDefault("reason"),
+		catch (HostInvocationException exception) when (ignoreUnknownSession
+			&& string.Equals(exception.Details.GetValueOrDefault("reason"),
 				ProtocolErrorReasons.VideoStreamUnknownSession,
 				StringComparison.Ordinal))
 		{
@@ -274,9 +300,12 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 
 	private Task CloseAllAsync(
 		IReadOnlyList<VideoStreamSessionTable<VideoStreamSessionReason, IVideoStreamProvider>.Closing> closings)
-		=> Task.WhenAll(closings.Select(CloseAsync));
+	{
+		return Task.WhenAll(closings.Select(CloseAsync));
+	}
 
-	private async Task WithdrawAsync(Func<Registration, bool> predicate,
+	private async Task WithdrawAsync(
+		Func<Registration, bool> predicate,
 		bool notifyHost,
 		CancellationToken cancellationToken)
 	{
@@ -316,14 +345,14 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 						{
 							SessionId = closing.SessionId, Reason = nameof(VideoStreamSessionReason.ProviderRemoved)
 						},
-						ignoreUnknownSession: true,
+						true,
 						cancellationToken)
 					.ConfigureAwait(false);
 			}
 
 			await InvokeWithRetryAsync(HostOperations.VideoStreams.ProvidersChanged,
 					null,
-					ignoreUnknownSession: false,
+					false,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
@@ -349,7 +378,8 @@ internal sealed class VideoStreamProviderRegistry : IDisposable
 	{
 		ForgetUnsentCloses();
 		var ended = Sessions.CurrentEpoch;
-		_ = Task.Run(() => CloseAllAsync(Sessions.CloseOlderThan(ended + 1, VideoStreamSessionReason.HostDisconnected)));
+		_ = Task.Run(()
+			=> CloseAllAsync(Sessions.CloseOlderThan(ended + 1, VideoStreamSessionReason.HostDisconnected)));
 	}
 
 	private sealed class SendLane

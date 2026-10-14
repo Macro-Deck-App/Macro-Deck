@@ -17,10 +17,10 @@ internal sealed class LinuxAvahiServiceAdvertiser : IServiceAdvertiser
 	private const int GroupStateFailure = 4;
 	private const int ProtocolInet = 0;
 
-	private static readonly Lazy<bool> Loadable = new(() =>
-		NativeLibrary.TryLoad(ClientLibrary, out var client) &&
-		NativeLibrary.TryLoad(CommonLibrary, out _) &&
-		NativeLibrary.TryGetExport(client, "avahi_entry_group_add_service_strlst", out _));
+	private static readonly Lazy<bool> _loadable = new(() =>
+		NativeLibrary.TryLoad(ClientLibrary, out var client)
+		&& NativeLibrary.TryLoad(CommonLibrary, out _)
+		&& NativeLibrary.TryGetExport(client, "avahi_entry_group_add_service_strlst", out _));
 
 	private readonly StateCallback _clientCallback;
 	private readonly StateCallback _groupCallback;
@@ -42,7 +42,7 @@ internal sealed class LinuxAvahiServiceAdvertiser : IServiceAdvertiser
 
 	public event Action? StateChanged;
 
-	public bool IsAvailable => Loadable.Value;
+	public bool IsAvailable => _loadable.Value;
 
 	public bool NeedsRepublish => _stale || _collision || _clientFailed;
 
@@ -282,7 +282,9 @@ internal sealed class LinuxAvahiServiceAdvertiser : IServiceAdvertiser
 	}
 
 	private static InvalidOperationException Failure(string operation, int error)
-		=> new($"{operation} failed: {Marshal.PtrToStringUTF8(avahi_strerror(error))}");
+	{
+		return new InvalidOperationException($"{operation} failed: {Marshal.PtrToStringUTF8(avahi_strerror(error))}");
+	}
 
 	[DllImport(CommonLibrary)]
 	private static extern IntPtr avahi_threaded_poll_new();
@@ -321,7 +323,8 @@ internal sealed class LinuxAvahiServiceAdvertiser : IServiceAdvertiser
 	private static extern IntPtr avahi_strerror(int error);
 
 	[DllImport(ClientLibrary)]
-	private static extern IntPtr avahi_client_new(IntPtr poll,
+	private static extern IntPtr avahi_client_new(
+		IntPtr poll,
 		int flags,
 		StateCallback callback,
 		IntPtr userData,
@@ -346,7 +349,8 @@ internal sealed class LinuxAvahiServiceAdvertiser : IServiceAdvertiser
 	private static extern int avahi_entry_group_commit(IntPtr group);
 
 	[DllImport(ClientLibrary)]
-	private static extern int avahi_entry_group_add_service_strlst(IntPtr group,
+	private static extern int avahi_entry_group_add_service_strlst(
+		IntPtr group,
 		int interfaceIndex,
 		int protocol,
 		int flags,

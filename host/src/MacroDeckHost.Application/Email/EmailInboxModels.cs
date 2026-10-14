@@ -40,17 +40,19 @@ public sealed record EmailInboxState
 	public bool IsConnected => Status == EmailInboxStatus.Connected;
 
 	public bool SameContentAs(EmailInboxState? other)
-		=> other is not null &&
-			Inbox == other.Inbox &&
-			Slug == other.Slug &&
-			Status == other.Status &&
-			StatusMessage == other.StatusMessage &&
-			UnreadCount == other.UnreadCount &&
-			TotalCount == other.TotalCount &&
-			SyncedAt == other.SyncedAt &&
-			IsStale == other.IsStale &&
-			Latest.SequenceEqual(other.Latest) &&
-			LatestUnread.SequenceEqual(other.LatestUnread);
+	{
+		return other is not null
+			&& Inbox == other.Inbox
+			&& Slug == other.Slug
+			&& Status == other.Status
+			&& StatusMessage == other.StatusMessage
+			&& UnreadCount == other.UnreadCount
+			&& TotalCount == other.TotalCount
+			&& SyncedAt == other.SyncedAt
+			&& IsStale == other.IsStale
+			&& Latest.SequenceEqual(other.Latest)
+			&& LatestUnread.SequenceEqual(other.LatestUnread);
+	}
 }
 
 public sealed record EmailInboxesSnapshot(IReadOnlyList<EmailInboxState> Inboxes)
@@ -58,11 +60,15 @@ public sealed record EmailInboxesSnapshot(IReadOnlyList<EmailInboxState> Inboxes
 	public static readonly EmailInboxesSnapshot Empty = new([]);
 
 	public EmailInboxState? Find(string inboxRef)
-		=> Inboxes.FirstOrDefault(state => string.Equals(state.Ref, inboxRef, StringComparison.Ordinal));
+	{
+		return Inboxes.FirstOrDefault(state => string.Equals(state.Ref, inboxRef, StringComparison.Ordinal));
+	}
 
 	public bool SameContentAs(EmailInboxesSnapshot other)
-		=> Inboxes.Count == other.Inboxes.Count &&
-			Inboxes.Zip(other.Inboxes).All(pair => pair.First.SameContentAs(pair.Second));
+	{
+		return Inboxes.Count == other.Inboxes.Count
+			&& Inboxes.Zip(other.Inboxes).All(pair => pair.First.SameContentAs(pair.Second));
+	}
 
 	public EmailInboxAggregate Aggregate(IReadOnlyCollection<string> inboxRefs)
 	{
@@ -79,11 +85,17 @@ public sealed record EmailInboxesSnapshot(IReadOnlyList<EmailInboxState> Inboxes
 
 	private static IReadOnlyList<EmailInboxMessage> Merge(
 		IEnumerable<(EmailInboxState Inbox, IReadOnlyList<EmailMessage> Messages)> sources)
-		=> [.. sources
-			.SelectMany(source => source.Messages.Select(message => new EmailInboxMessage(source.Inbox.Inbox, message)))
-			.OrderByDescending(entry => entry.Message.ReceivedAt)
-			.ThenBy(entry => entry.Inbox.Ref, StringComparer.Ordinal)
-			.Take(EmailInboxCache.WindowSize)];
+	{
+		return
+		[
+			.. sources
+				.SelectMany(source
+					=> source.Messages.Select(message => new EmailInboxMessage(source.Inbox.Inbox, message)))
+				.OrderByDescending(entry => entry.Message.ReceivedAt)
+				.ThenBy(entry => entry.Inbox.Ref, StringComparer.Ordinal)
+				.Take(EmailInboxCache.WindowSize)
+		];
+	}
 }
 
 public sealed record EmailInboxMessage(EmailInboxDescriptor Inbox, EmailMessage Message);

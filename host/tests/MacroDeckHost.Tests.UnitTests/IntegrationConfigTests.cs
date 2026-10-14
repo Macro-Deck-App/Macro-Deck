@@ -111,12 +111,16 @@ public class IntegrationConfigTests
 
 		public Task<IReadOnlyList<Domain.Entities.IntegrationConfigEntryEntity>> GetByIntegrationId(
 			string integrationId)
-			=> Task.FromResult<IReadOnlyList<Domain.Entities.IntegrationConfigEntryEntity>>(_entries
+		{
+			return Task.FromResult<IReadOnlyList<Domain.Entities.IntegrationConfigEntryEntity>>(_entries
 				.Where(e => e.IntegrationId == integrationId)
 				.ToList());
+		}
 
 		public Task<Domain.Entities.IntegrationConfigEntryEntity?> GetById(Guid id)
-			=> Task.FromResult(_entries.FirstOrDefault(e => e.Id == id));
+		{
+			return Task.FromResult(_entries.FirstOrDefault(e => e.Id == id));
+		}
 
 		public Task Create(Domain.Entities.IntegrationConfigEntryEntity entry)
 		{
@@ -124,7 +128,10 @@ public class IntegrationConfigTests
 			return Task.CompletedTask;
 		}
 
-		public Task Update(Domain.Entities.IntegrationConfigEntryEntity entry) => Task.CompletedTask;
+		public Task Update(Domain.Entities.IntegrationConfigEntryEntity entry)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task TryDeleteById(Guid id)
 		{

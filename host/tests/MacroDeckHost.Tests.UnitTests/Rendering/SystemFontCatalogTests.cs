@@ -27,10 +27,10 @@ public partial class SystemFontCatalogTests
 		var collection = BuildCollection(ExtractStandalone(styles, fixture.RegularIndex),
 			ExtractStandalone(styles, fixture.BoldIndex));
 
-		using var atIndexZero = SKTypeface.FromStream(new MemoryStream(collection), index: 0);
+		using var atIndexZero = SKTypeface.FromStream(new MemoryStream(collection), 0);
 		Assert.That(atIndexZero, Is.Not.Null, "the synthetic collection must itself be a readable font collection");
 
-		using var bold = SKTypeface.FromStream(new MemoryStream(collection), index: 1);
+		using var bold = SKTypeface.FromStream(new MemoryStream(collection), 1);
 		if (bold is null)
 		{
 			Assert.Ignore("This platform's Skia backend cannot open a font collection at a non-zero index.");
@@ -59,7 +59,7 @@ public partial class SystemFontCatalogTests
 		var faces = catalog.GetFaces();
 
 		var mismatched = faces
-			.Where(face => face.RemoteRenderable != (catalog.GetFaceFile(face.FaceId) is not null))
+			.Where(face => face.RemoteRenderable != catalog.GetFaceFile(face.FaceId) is not null)
 			.Select(face => $"{face.FaceId} (remoteRenderable={face.RemoteRenderable})")
 			.ToList();
 
@@ -113,8 +113,8 @@ public partial class SystemFontCatalogTests
 			.Where(face =>
 			{
 				var expected = $"-{face.Weight}-{face.Width}-{face.Slant}";
-				return !face.FaceId.EndsWith(expected, StringComparison.Ordinal) &&
-					!face.FaceId.Contains($"{expected}-", StringComparison.Ordinal);
+				return !face.FaceId.EndsWith(expected, StringComparison.Ordinal)
+					&& !face.FaceId.Contains($"{expected}-", StringComparison.Ordinal);
 			})
 			.Select(face => face.FaceId)
 			.ToList();
@@ -138,9 +138,9 @@ public partial class SystemFontCatalogTests
 		// itself for a family this machine does not have.
 		var regulars = faces
 			.Where(face =>
-				face.Weight == RegularWeight &&
-				face.Width == FontFaceIdentity.NormalWidth &&
-				face.Slant == FontFaceIdentity.UprightSlant)
+				face.Weight == RegularWeight
+				&& face.Width == FontFaceIdentity.NormalWidth
+				&& face.Slant == FontFaceIdentity.UprightSlant)
 			.GroupBy(face => face.Family, StringComparer.Ordinal)
 			.Where(group => group.Count() == 1)
 			.Select(group => group.Single())
@@ -152,7 +152,7 @@ public partial class SystemFontCatalogTests
 			.ToList();
 
 		var disagreeing = regulars
-			.Where(face => !string.Equals(FontFaceIdentity.BuildLegacy(face.Family, bold: false, italic: false),
+			.Where(face => !string.Equals(FontFaceIdentity.BuildLegacy(face.Family, false, false),
 				face.FaceId,
 				StringComparison.Ordinal))
 			.Select(face => $"{face.Family} -> {face.FaceId}")
@@ -190,8 +190,8 @@ public partial class SystemFontCatalogTests
 
 			// A variable font reports both weights but carries one set of tables, which would make the
 			// collection's two members identical and the index-1 assertion meaningless.
-			if (WeightOf(ExtractStandalone(styles, regular)) != RegularWeight ||
-				WeightOf(ExtractStandalone(styles, bold)) != BoldWeight)
+			if (WeightOf(ExtractStandalone(styles, regular)) != RegularWeight
+				|| WeightOf(ExtractStandalone(styles, bold)) != BoldWeight)
 			{
 				continue;
 			}
@@ -238,9 +238,9 @@ public partial class SystemFontCatalogTests
 		ArgumentNullException.ThrowIfNull(first);
 		ArgumentNullException.ThrowIfNull(second);
 
-		var header = 12 + (2 * 4);
-		var firstOffset = (header + 3) & ~3;
-		var secondOffset = (firstOffset + first.Length + 3) & ~3;
+		var header = 12 + 2 * 4;
+		var firstOffset = header + 3 & ~3;
+		var secondOffset = firstOffset + first.Length + 3 & ~3;
 
 		var collection = new byte[secondOffset + second.Length];
 		var span = collection.AsSpan();
@@ -263,7 +263,7 @@ public partial class SystemFontCatalogTests
 		var tableCount = BinaryPrimitives.ReadUInt16BigEndian(collection[(offset + 4)..]);
 		for (var table = 0; table < tableCount; table++)
 		{
-			var entry = collection[(offset + 12 + (table * 16) + 8)..];
+			var entry = collection[(offset + 12 + table * 16 + 8)..];
 			BinaryPrimitives.WriteUInt32BigEndian(entry, BinaryPrimitives.ReadUInt32BigEndian(entry) + (uint)offset);
 		}
 	}

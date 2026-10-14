@@ -11,7 +11,10 @@ public sealed class UnsupportedBatteryApi : IBatteryApi
 
 	public IReadOnlyList<BatteryDeviceSnapshot> Devices => [];
 
-	public BatteryDeviceSnapshot? Find(string id) => null;
+	public BatteryDeviceSnapshot? Find(string id)
+	{
+		return null;
+	}
 
 	public event EventHandler<BatteryDevicesChangedEventArgs>? Changed
 	{

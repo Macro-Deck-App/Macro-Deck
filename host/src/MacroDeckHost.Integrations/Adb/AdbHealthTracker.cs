@@ -8,5 +8,8 @@ internal sealed class AdbHealthTracker
 
 	public AndroidDeviceErrorCode? LastFailure => _lastFailure;
 
-	public void Record(AdbOutcome outcome) => _lastFailure = outcome.Failure;
+	public void Record(AdbOutcome outcome)
+	{
+		_lastFailure = outcome.Failure;
+	}
 }

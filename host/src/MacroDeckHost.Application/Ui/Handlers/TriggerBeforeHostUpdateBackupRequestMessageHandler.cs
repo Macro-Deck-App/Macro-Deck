@@ -10,7 +10,9 @@ public sealed class TriggerBeforeHostUpdateBackupRequestMessageHandler
 	private readonly IPreUpdateBackupCoordinator _coordinator;
 
 	public TriggerBeforeHostUpdateBackupRequestMessageHandler(IPreUpdateBackupCoordinator coordinator)
-		=> _coordinator = coordinator;
+	{
+		_coordinator = coordinator;
+	}
 
 	public async ValueTask<TriggerBeforeHostUpdateBackupResponse> Handle(
 		TriggerBeforeHostUpdateBackupRequest request,

@@ -30,7 +30,8 @@ public static class PortableArchiveCrypto
 	private static ReadOnlySpan<byte> Magic => "MDPE"u8;
 
 	public static PortableEncryptionInfo CreateParameters()
-		=> new()
+	{
+		return new PortableEncryptionInfo
 		{
 			Cipher = PortableEncryptionInfo.Aes256Gcm,
 			Kdf = new PortableKdfInfo
@@ -40,8 +41,10 @@ public static class PortableArchiveCrypto
 				Salt = Convert.ToBase64String(RandomNumberGenerator.GetBytes(SaltBytes))
 			}
 		};
+	}
 
-	public static byte[] Encrypt(byte[] plaintext,
+	public static byte[] Encrypt(
+		byte[] plaintext,
 		string password,
 		PortableEncryptionInfo info,
 		ReadOnlySpan<byte> associatedData)
@@ -92,7 +95,8 @@ public static class PortableArchiveCrypto
 		}
 	}
 
-	public static PortableDecryptResult TryDecrypt(byte[] payload,
+	public static PortableDecryptResult TryDecrypt(
+		byte[] payload,
 		PortableEncryptionInfo info,
 		ReadOnlySpan<byte> associatedData,
 		string password,
@@ -162,7 +166,9 @@ public static class PortableArchiveCrypto
 	}
 
 	private static bool IsKnownAlgorithm(PortableEncryptionInfo info)
-		=> info.Cipher == PortableEncryptionInfo.Aes256Gcm && info.Kdf?.Id == PortableKdfInfo.Pbkdf2HmacSha256;
+	{
+		return info.Cipher == PortableEncryptionInfo.Aes256Gcm && info.Kdf?.Id == PortableKdfInfo.Pbkdf2HmacSha256;
+	}
 
 	private static bool TryReadParameters(PortableEncryptionInfo info, out byte[] salt, out int iterations)
 	{

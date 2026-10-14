@@ -18,7 +18,10 @@ internal sealed class InMemoryScriptStore : IScriptStore
 	public int SaveCount { get; private set; }
 	public int DeleteCount { get; private set; }
 
-	public IReadOnlyList<ScriptFile> LoadAll() => _files.Values.ToList();
+	public IReadOnlyList<ScriptFile> LoadAll()
+	{
+		return _files.Values.ToList();
+	}
 
 	public void Save(ScriptFile script)
 	{
@@ -32,5 +35,8 @@ internal sealed class InMemoryScriptStore : IScriptStore
 		DeleteCount++;
 	}
 
-	public ScriptFile? Get(Guid id) => _files.TryGetValue(id, out var file) ? file : null;
+	public ScriptFile? Get(Guid id)
+	{
+		return _files.TryGetValue(id, out var file) ? file : null;
+	}
 }

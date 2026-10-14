@@ -202,16 +202,19 @@ public class PluginLaunchTokenServiceTests
 		Assert.That(_service.HasActiveLaunch("com.example.plugin"), Is.False);
 	}
 
-	private PluginSessionRecord Session(string sessionId, string pluginId) => new()
+	private PluginSessionRecord Session(string sessionId, string pluginId)
 	{
-		SessionId = sessionId,
-		PluginId = pluginId,
-		DisplayName = pluginId,
-		Origin = PluginSessionOrigin.Managed,
-		NegotiatedVersion = 1,
-		Capabilities = new Dictionary<string, CapabilityNegotiationResult>(StringComparer.Ordinal),
-		DeclaredCapabilities = [],
-		State = PluginSessionState.Awaiting,
-		CreatedAt = _time.GetUtcNow()
-	};
+		return new PluginSessionRecord
+		{
+			SessionId = sessionId,
+			PluginId = pluginId,
+			DisplayName = pluginId,
+			Origin = PluginSessionOrigin.Managed,
+			NegotiatedVersion = 1,
+			Capabilities = new Dictionary<string, CapabilityNegotiationResult>(StringComparer.Ordinal),
+			DeclaredCapabilities = [],
+			State = PluginSessionState.Awaiting,
+			CreatedAt = _time.GetUtcNow()
+		};
+	}
 }

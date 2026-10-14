@@ -28,14 +28,14 @@ internal static class JsonFrame
 	public static IReadOnlyList<string> Keys(JsonElement element)
 	{
 		var keys = new List<string>();
-		Walk(element, keys, values: null);
+		Walk(element, keys, null);
 		return keys;
 	}
 
 	public static IReadOnlyList<string> StringValues(JsonElement element)
 	{
 		var values = new List<string>();
-		Walk(element, keys: null, values);
+		Walk(element, null, values);
 		return values;
 	}
 
@@ -86,12 +86,19 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 
 	public DeviceWidgetIconImage? NextWidgetIcon { get; set; }
 
-	public bool IsOpen(Guid deviceId) => true;
+	public bool IsOpen(Guid deviceId)
+	{
+		return true;
+	}
 
-	public Task OpenAsync(Guid deviceId,
+	public Task OpenAsync(
+		Guid deviceId,
 		string providerId,
 		string providerDeviceId,
-		CancellationToken cancellationToken = default) => Task.CompletedTask;
+		CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
 	{
@@ -99,11 +106,16 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 		return Task.CompletedTask;
 	}
 
-	public Task<bool> NavigateAsync(Guid deviceId,
+	public Task<bool> NavigateAsync(
+		Guid deviceId,
 		DeckNavigationCommand command,
-		CancellationToken cancellationToken = default) => Task.FromResult(true);
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(true);
+	}
 
-	public Task<DeviceInteractionOutcome> SubmitInteractionAsync(Guid deviceId,
+	public Task<DeviceInteractionOutcome> SubmitInteractionAsync(
+		Guid deviceId,
 		DeviceInteraction interaction,
 		CancellationToken cancellationToken = default)
 	{
@@ -111,7 +123,8 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 		return Task.FromResult(NextOutcome);
 	}
 
-	public Task<DeviceIconImage?> GetIconAsync(Guid deviceId,
+	public Task<DeviceIconImage?> GetIconAsync(
+		Guid deviceId,
 		string iconId,
 		int? size = null,
 		string? knownETag = null,
@@ -121,7 +134,8 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 		return Task.FromResult(NextIcon);
 	}
 
-	public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(Guid deviceId,
+	public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(
+		Guid deviceId,
 		string widgetId,
 		string? knownETag = null,
 		CancellationToken cancellationToken = default)
@@ -130,12 +144,20 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 		return Task.FromResult(NextWidgetIcon);
 	}
 
-	public Task InvalidateAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task InvalidateAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task InvalidateAsync(Guid deviceId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task InvalidateAsync(Guid deviceId, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SetPresenceAsync(Guid deviceId, bool online, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>A one-profile, one-folder deck the real <see cref="DeviceSurfaceBuilder" /> can project.</summary>
@@ -144,19 +166,35 @@ internal sealed class ContractProfileRegistry : IProfileRegistry
 	private readonly List<Profile> _profiles = [];
 	private readonly Dictionary<string, List<Folder>> _folders = new(StringComparer.Ordinal);
 
-	public void AddProfile(Profile profile) => _profiles.Add(profile);
+	public void AddProfile(Profile profile)
+	{
+		_profiles.Add(profile);
+	}
 
-	public void SetFolders(string profileId, params Folder[] folders) => _folders[profileId] = [.. folders];
+	public void SetFolders(string profileId, params Folder[] folders)
+	{
+		_folders[profileId] = [.. folders];
+	}
 
-	public IReadOnlyList<Profile> GetProfiles() => _profiles;
+	public IReadOnlyList<Profile> GetProfiles()
+	{
+		return _profiles;
+	}
 
 	public IReadOnlyList<Folder> GetFoldersForProfile(string profileId)
-		=> _folders.TryGetValue(profileId, out var folders) ? folders : [];
+	{
+		return _folders.TryGetValue(profileId, out var folders) ? folders : [];
+	}
 
-	public bool IsVirtual(string profileId) => profileId.Contains("::", StringComparison.Ordinal);
+	public bool IsVirtual(string profileId)
+	{
+		return profileId.Contains("::", StringComparison.Ordinal);
+	}
 
 	public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 }
 
 internal sealed class ContractWidgetStates : IWidgetStateService
@@ -164,175 +202,349 @@ internal sealed class ContractWidgetStates : IWidgetStateService
 	private readonly Dictionary<Guid, WidgetStateResolution> _states = [];
 
 	public void Set(Guid widgetId, string stateId, string label)
-		=> _states[widgetId] = new WidgetStateResolution(stateId,
+	{
+		_states[widgetId] = new WidgetStateResolution(stateId,
 			LocalizedText.FromLiteral(label),
 			[],
-			ProviderSetChanged: false);
+			false);
+	}
 
 	public Task<WidgetStateResolution?> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_states.GetValueOrDefault(widgetId));
+	{
+		return Task.FromResult(_states.GetValueOrDefault(widgetId));
+	}
 
-	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+	public TimeSpan? GetProviderPollInterval(Guid widgetId)
+	{
+		return null;
+	}
 }
 
 internal sealed class ContractWidgetIcons : IWidgetIconService
 {
 	private readonly Dictionary<Guid, WidgetIconResolution> _resolutions = [];
 
-	public void Set(Guid widgetId, WidgetIconResolution resolution) => _resolutions[widgetId] = resolution;
+	public void Set(Guid widgetId, WidgetIconResolution resolution)
+	{
+		_resolutions[widgetId] = resolution;
+	}
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_resolutions.GetValueOrDefault(widgetId, WidgetIconResolution.Inactive));
+	{
+		return Task.FromResult(_resolutions.GetValueOrDefault(widgetId, WidgetIconResolution.Inactive));
+	}
 
-	public Task<WidgetIconResolution> Resolve(Guid widgetId,
+	public Task<WidgetIconResolution> Resolve(
+		Guid widgetId,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken = default)
-		=> Resolve(widgetId, cancellationToken);
+	{
+		return Resolve(widgetId, cancellationToken);
+	}
 
-	public TimeSpan? GetProviderPollInterval(Guid widgetId) => null;
+	public TimeSpan? GetProviderPollInterval(Guid widgetId)
+	{
+		return null;
+	}
 }
 
 internal sealed class ContractLabelText : ILabelTextService
 {
 	public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 
 	public Task<string?> ResolvePreview(LabelImagePreviewRequest request, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 }
 
-internal sealed class ContractNoDefaultShortPress : MacroDeckHost.Application.Widgets.IWidgetDefaultShortPress
+internal sealed class ContractNoDefaultShortPress : IWidgetDefaultShortPress
 {
-	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice) => null;
+	public string? FlowsSourceFor(WidgetEntity widget, bool fromDevice)
+	{
+		return null;
+	}
 
-	public bool RunsOnDevices(string widgetType) => false;
+	public bool RunsOnDevices(string widgetType)
+	{
+		return false;
+	}
 }
 
 internal sealed class ContractIconPacks : IIconPackCache
 {
-	public Task InitializeCache() => Task.CompletedTask;
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public IconPackEntity? GetPackById(Guid id) => null;
+	public IconPackEntity? GetPackById(Guid id)
+	{
+		return null;
+	}
 
-	public List<IconPackEntity> GetAllPacks() => [];
+	public List<IconPackEntity> GetAllPacks()
+	{
+		return [];
+	}
 
-	public IconPackEntity? GetDefaultPack() => null;
+	public IconPackEntity? GetDefaultPack()
+	{
+		return null;
+	}
 
-	public Task AddOrUpdatePack(IconPackEntity pack) => Task.CompletedTask;
+	public Task AddOrUpdatePack(IconPackEntity pack)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemovePack(Guid id) => Task.CompletedTask;
+	public Task RemovePack(Guid id)
+	{
+		return Task.CompletedTask;
+	}
 
-	public IconEntity? GetIconById(Guid iconId) => null;
+	public IconEntity? GetIconById(Guid iconId)
+	{
+		return null;
+	}
 
-	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+	public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+	{
+		return [];
+	}
 
-	public List<IconEntity> GetIconsByPackId(Guid packId) => [];
+	public List<IconEntity> GetIconsByPackId(Guid packId)
+	{
+		return [];
+	}
 
-	public List<IconEntity> GetIconsByBatchId(Guid batchId) => [];
+	public List<IconEntity> GetIconsByBatchId(Guid batchId)
+	{
+		return [];
+	}
 
-	public List<IconEntity> GetIconsByState(params IconProcessingState[] states) => [];
+	public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
+	{
+		return [];
+	}
 
-	public int GetIconCount(Guid packId) => 0;
+	public int GetIconCount(Guid packId)
+	{
+		return 0;
+	}
 
-	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null) => null;
+	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
+	{
+		return null;
+	}
 
-	public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null) => null;
+	public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
+	{
+		return null;
+	}
 
-	public List<IconEntity> GetIconsMissingMasterContentHash() => [];
+	public List<IconEntity> GetIconsMissingMasterContentHash()
+	{
+		return [];
+	}
 
-	public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons) => Task.CompletedTask;
+	public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task UpdateIcon(IconEntity icon) => Task.CompletedTask;
+	public Task UpdateIcon(IconEntity icon)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemoveIcon(Guid iconId) => Task.CompletedTask;
+	public Task RemoveIcon(Guid iconId)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => Task.CompletedTask;
+	public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task FlushPendingWrites() => Task.CompletedTask;
+	public Task FlushPendingWrites()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>Answers the active culture and refuses everything else, so a preference reached by accident
 /// fails loudly instead of quietly standing in for something.</summary>
 internal sealed class ContractAppPreferences : IAppPreferenceService
 {
-	public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings("en"));
+	public Task<LocalizationSettings> GetLocalization()
+	{
+		return Task.FromResult(new LocalizationSettings("en"));
+	}
 
-	public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+	public Task<LocalizationSettings> SetLocalization(string? culture)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+	public Task<string> GetTimeFormat()
+	{
+		return Task.FromResult(AppPreferenceService.TimeFormatSystem);
+	}
 
-	public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+	public Task<string> SetTimeFormat(string? timeFormat)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
+	public Task<AppearanceSettings> GetAppearance()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Guid> GetInstallationId() => throw new NotSupportedException();
+	public Task<Guid> GetInstallationId()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+	public Task<byte[]> GetAdbDeviceIdKey()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
+	public Task<LoggingSettings> GetLogging()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel) => throw new NotSupportedException();
+	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<NetworkSettings> GetNetwork() => throw new NotSupportedException();
+	public Task<NetworkSettings> GetNetwork()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<NetworkSettings> SetNetwork(int? publicPort,
+	public Task<NetworkSettings> SetNetwork(
+		int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
-		bool? discoveryEnabled = null) => throw new NotSupportedException();
+		bool? discoveryEnabled = null)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<AdbSettings> GetAdb() => throw new NotSupportedException();
+	public Task<AdbSettings> GetAdb()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<AdbSettings> SetAdb(bool? enabled,
+	public Task<AdbSettings> SetAdb(
+		bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
 		bool? stopServerOnExit,
-		bool allowPlugins) => throw new NotSupportedException();
+		bool allowPlugins)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+	public Task<NativeUsbSettings> GetNativeUsb()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
+	public Task<DeveloperSettings> GetDeveloper()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<DeveloperSettings> SetDeveloper(bool? enabled) => throw new NotSupportedException();
+	public Task<DeveloperSettings> SetDeveloper(bool? enabled)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
+	public Task<OnboardingSettings> GetOnboarding()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<OnboardingSettings> SetOnboarding(bool? pending) => throw new NotSupportedException();
+	public Task<OnboardingSettings> SetOnboarding(bool? pending)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LockScreenSettings> GetLockScreen() => throw new NotSupportedException();
+	public Task<LockScreenSettings> GetLockScreen()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LockScreenSettings> SetLockScreen(bool? enabled) => throw new NotSupportedException();
+	public Task<LockScreenSettings> SetLockScreen(bool? enabled)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<BackupSettings> GetBackups() => throw new NotSupportedException();
+	public Task<BackupSettings> GetBackups()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<BackupSettings> SetBackups(string? scheduleFrequency,
+	public Task<BackupSettings> SetBackups(
+		string? scheduleFrequency,
 		string? scheduleTimeOfDay,
 		string? scheduleDayOfWeek,
 		int? scheduleDayOfMonth,
 		string? retentionPolicy,
 		int? retentionKeepLatest,
 		bool? beforeHostUpdate,
-		bool? beforePluginUpdate) => throw new NotSupportedException();
+		bool? beforePluginUpdate)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<DateTimeOffset?> GetBackupScheduleLastRun() => throw new NotSupportedException();
+	public Task<DateTimeOffset?> GetBackupScheduleLastRun()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task SetBackupScheduleLastRun(DateTimeOffset value) => throw new NotSupportedException();
+	public Task SetBackupScheduleLastRun(DateTimeOffset value)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<ExtensionSettings> GetExtensions() => throw new NotSupportedException();
+	public Task<ExtensionSettings> GetExtensions()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+	public Task<ExtensionSettings> SetExtensions(
+		bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
 		bool? autoUpdate = null,
-		bool? askForRatings = null) => throw new NotSupportedException();
+		bool? askForRatings = null)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 /// <summary>The deck the contract tests project: one profile, one folder, and a widget whose stored data
@@ -386,10 +598,14 @@ internal static class ContractDeck
 			}
 		});
 
-	public static DeviceSurfaceBuilder Builder() => Builder(Registry());
+	public static DeviceSurfaceBuilder Builder()
+	{
+		return Builder(Registry());
+	}
 
 	public static DeviceSurfaceBuilder Builder(ContractProfileRegistry profiles, IColorReferenceResolver? colors = null)
-		=> new(profiles,
+	{
+		return new DeviceSurfaceBuilder(profiles,
 			new ContractWidgetStates(),
 			new ContractWidgetIcons(),
 			new ContractLabelText(),
@@ -398,6 +614,7 @@ internal static class ContractDeck
 			new ContractIconPacks(),
 			new ContractNoDefaultShortPress(),
 			colors ?? new ColorReferenceResolver(new VariableRegistry()));
+	}
 
 	/// <summary>The deck itself: a Studio profile whose default grid is 3x5, a Home folder that inherits
 	/// it, and a Lights folder to navigate to.</summary>
@@ -441,7 +658,8 @@ internal static class ContractDeck
 	}
 
 	public static DeviceEntity Device(Guid deviceId, string providerId, string providerDeviceId)
-		=> new()
+	{
+		return new DeviceEntity
 		{
 			Id = deviceId,
 			SecretHash = string.Empty,
@@ -454,4 +672,5 @@ internal static class ContractDeck
 			CreatedAt = DateTime.UnixEpoch,
 			LastSeenAt = DateTime.UnixEpoch
 		};
+	}
 }

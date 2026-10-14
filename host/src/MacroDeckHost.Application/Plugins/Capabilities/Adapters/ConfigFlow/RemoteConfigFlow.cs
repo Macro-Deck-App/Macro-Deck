@@ -105,10 +105,12 @@ internal sealed class RemoteConfigFlow(string pluginId, IPluginCapabilityInvoker
 	}
 
 	private static ConfigFlowOAuthContextDto ToDto(IOAuthSession session)
-		=> new()
+	{
+		return new ConfigFlowOAuthContextDto
 		{
 			RedirectUri = session.RedirectUri, State = session.State, AuthorizationCode = session.AuthorizationCode
 		};
+	}
 
 	private static Dictionary<string, JsonElement> ToWireInput(IReadOnlyDictionary<string, object?> input)
 	{

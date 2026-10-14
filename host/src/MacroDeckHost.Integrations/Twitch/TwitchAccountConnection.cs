@@ -58,8 +58,8 @@ internal sealed class TwitchAccountConnection : IDisposable
 	public IReadOnlyList<string> MissingScopeEvents => _missingScopeEvents;
 
 	public bool MissesChattersScope
-		=> Tokens.Scopes is { Count: > 0 } granted &&
-			!granted.Contains(TwitchScopes.ModeratorReadChatters, StringComparer.Ordinal);
+		=> Tokens.Scopes is { Count: > 0 } granted
+			&& !granted.Contains(TwitchScopes.ModeratorReadChatters, StringComparer.Ordinal);
 
 	public bool NeedsReauthorization => Tokens.NeedsReauthorization || _authorizationLost;
 
@@ -146,10 +146,10 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	private void LoadBadgesIfMissing()
 	{
-		if (_chatSink is null ||
-			Volatile.Read(ref _stopped) == 1 ||
-			!ReferenceEquals(_badges, TwitchChatBadgeMap.Empty) ||
-			Interlocked.Exchange(ref _badgesLoading, 1) == 1)
+		if (_chatSink is null
+			|| Volatile.Read(ref _stopped) == 1
+			|| !ReferenceEquals(_badges, TwitchChatBadgeMap.Empty)
+			|| Interlocked.Exchange(ref _badgesLoading, 1) == 1)
 		{
 			return;
 		}
@@ -164,10 +164,11 @@ internal sealed class TwitchAccountConnection : IDisposable
 			return;
 		}
 
-		_ = LoadBadgesAsync(stopping).ContinueWith(_ => Interlocked.Exchange(ref _badgesLoading, 0),
-			CancellationToken.None,
-			TaskContinuationOptions.ExecuteSynchronously,
-			TaskScheduler.Default);
+		_ = LoadBadgesAsync(stopping)
+			.ContinueWith(_ => Interlocked.Exchange(ref _badgesLoading, 0),
+				CancellationToken.None,
+				TaskContinuationOptions.ExecuteSynchronously,
+				TaskScheduler.Default);
 	}
 
 	internal void HandleNotification(TwitchEventSubMessage message)
@@ -178,10 +179,10 @@ internal sealed class TwitchAccountConnection : IDisposable
 			ApplyToState(message);
 		}
 
-		if (_chatSink is not null &&
-			message.Payload.ValueKind is JsonValueKind.Object &&
-			message.Payload.TryGetProperty("event", out var payload) &&
-			TwitchChatMessageParser.ToChatEvent(Account.UserId, message.SubscriptionType, payload, _badges) is
+		if (_chatSink is not null
+			&& message.Payload.ValueKind is JsonValueKind.Object
+			&& message.Payload.TryGetProperty("event", out var payload)
+			&& TwitchChatMessageParser.ToChatEvent(Account.UserId, message.SubscriptionType, payload, _badges) is
 				{ } chatEvent)
 		{
 			_chatSink.Post(chatEvent);
@@ -219,8 +220,8 @@ internal sealed class TwitchAccountConnection : IDisposable
 
 	private void ApplyToState(TwitchEventSubMessage message)
 	{
-		if (message.Payload.ValueKind is not JsonValueKind.Object ||
-			!message.Payload.TryGetProperty("event", out var payload))
+		if (message.Payload.ValueKind is not JsonValueKind.Object
+			|| !message.Payload.TryGetProperty("event", out var payload))
 		{
 			return;
 		}
@@ -289,32 +290,42 @@ internal sealed class TwitchAccountConnection : IDisposable
 	}
 
 	private static TwitchChatSettings ReadChatSettings(JsonElement payload, TwitchChatSettings? previous)
-		=> new(ReadBool(payload, "emote_mode") ?? previous?.EmoteOnly,
+	{
+		return new TwitchChatSettings(ReadBool(payload, "emote_mode") ?? previous?.EmoteOnly,
 			ReadBool(payload, "follower_mode") ?? previous?.FollowersOnly,
 			ReadInt(payload, "follower_mode_duration_minutes") ?? previous?.FollowersOnlyDurationMinutes,
 			ReadBool(payload, "slow_mode") ?? previous?.SlowMode,
 			ReadInt(payload, "slow_mode_wait_time_seconds") ?? previous?.SlowModeWaitSeconds,
 			ReadBool(payload, "subscriber_mode") ?? previous?.SubscriberOnly,
 			ReadBool(payload, "unique_chat_mode") ?? previous?.UniqueChat);
+	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return element.TryGetProperty(property, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	private static int? ReadInt(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) &&
-			value.ValueKind is JsonValueKind.Number &&
-			value.TryGetInt32(out var parsed)
+	{
+		return element.TryGetProperty(property, out var value)
+			&& value.ValueKind is JsonValueKind.Number
+			&& value.TryGetInt32(out var parsed)
 				? parsed
 				: null;
+	}
 
 	private static DateTimeOffset? ReadTime(JsonElement element, string property)
-		=> DateTimeOffset.TryParse(ReadString(element, property), out var parsed) ? parsed : null;
+	{
+		return DateTimeOffset.TryParse(ReadString(element, property), out var parsed) ? parsed : null;
+	}
 }

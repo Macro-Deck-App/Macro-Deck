@@ -32,6 +32,8 @@ public class UserVariableApiCompatibilityTests
 			UserVariableOperation operation,
 			string? value,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(UserVariableWriteResult.Applied());
+		{
+			return Task.FromResult(UserVariableWriteResult.Applied());
+		}
 	}
 }

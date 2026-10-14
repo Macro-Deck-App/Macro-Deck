@@ -1,4 +1,3 @@
-
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
 internal sealed class AdGuardHomeException : Exception

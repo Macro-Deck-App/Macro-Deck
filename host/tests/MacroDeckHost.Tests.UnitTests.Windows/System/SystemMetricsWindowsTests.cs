@@ -50,7 +50,8 @@ public class SystemMetricsWindowsTests
 			await metrics.GetDisksAsync();
 			await Task.Delay(TimeSpan.FromSeconds(1.6));
 			var drive = (await metrics.GetDisksAsync())
-				.SingleOrDefault(disk => string.Equals(disk.MountPoint, systemDrive, StringComparison.OrdinalIgnoreCase));
+				.SingleOrDefault(disk
+					=> string.Equals(disk.MountPoint, systemDrive, StringComparison.OrdinalIgnoreCase));
 
 			Assert.That(drive, Is.Not.Null);
 			Assert.Multiple(() =>

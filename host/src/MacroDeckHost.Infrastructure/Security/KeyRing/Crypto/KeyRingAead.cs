@@ -14,7 +14,8 @@ public static class KeyRingAead
 	public const int NonceBytes = 12;
 	public const int TagBytes = 16;
 
-	public static KeyRingSealed Seal(ReadOnlySpan<byte> key,
+	public static KeyRingSealed Seal(
+		ReadOnlySpan<byte> key,
 		ReadOnlySpan<byte> plaintext,
 		ReadOnlySpan<byte> associatedData)
 	{
@@ -34,9 +35,9 @@ public static class KeyRingAead
 	/// </summary>
 	public static byte[]? TryOpen(ReadOnlySpan<byte> key, KeyRingSealed sealedValue, ReadOnlySpan<byte> associatedData)
 	{
-		if (key.Length != KeyRingKeyDerivation.KekBytes ||
-			sealedValue.Nonce.Length != NonceBytes ||
-			sealedValue.Tag.Length != TagBytes)
+		if (key.Length != KeyRingKeyDerivation.KekBytes
+			|| sealedValue.Nonce.Length != NonceBytes
+			|| sealedValue.Tag.Length != TagBytes)
 		{
 			return null;
 		}

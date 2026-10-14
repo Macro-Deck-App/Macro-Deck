@@ -10,8 +10,10 @@ public sealed class IntegrationVariableApiFactory(
 	IVariablePollingInvalidationSignal? declarations = null) : IIntegrationVariableApiFactory
 {
 	public IVariableApi Create(string integrationId, IServiceProvider scopedServices)
-		=> new IntegrationVariableApi(integrationId,
+	{
+		return new IntegrationVariableApi(integrationId,
 			scopedServices.GetRequiredService<IVariableService>(),
 			refresh,
 			declarations);
+	}
 }

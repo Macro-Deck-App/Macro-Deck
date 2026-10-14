@@ -134,7 +134,8 @@ public class PluginNotificationResultDeliveryTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_invoker.Delivered.Single().Arguments.NotificationId, Is.EqualTo(shown.Id));
-			Assert.That(_invoker.Delivered.Single().Arguments.CloseReason, Is.EqualTo(NotificationsWire.CloseReason.Programmatic));
+			Assert.That(_invoker.Delivered.Single().Arguments.CloseReason,
+				Is.EqualTo(NotificationsWire.CloseReason.Programmatic));
 		});
 	}
 
@@ -163,16 +164,19 @@ public class PluginNotificationResultDeliveryTests
 	}
 
 	private Task<NotificationShowOutcome> ShowDialog(NotificationOwner owner)
-		=> _manager.ShowAsync(owner,
+	{
+		return _manager.ShowAsync(owner,
 			new NotificationOptions
 			{
 				Title = "Question",
 				Popup = NotificationPopup.Dialog,
 				Actions = [new NotificationAction { Id = "yes", Label = "Yes" }]
 			});
+	}
 
 	private static PluginSessionRecord Session(string sessionId)
-		=> new()
+	{
+		return new PluginSessionRecord
 		{
 			SessionId = sessionId,
 			PluginId = _plugin.Id,
@@ -184,6 +188,7 @@ public class PluginNotificationResultDeliveryTests
 			State = PluginSessionState.Awaiting,
 			CreatedAt = DateTimeOffset.UtcNow
 		};
+	}
 
 	private sealed class RecordingInvoker : IPluginCapabilityInvoker
 	{
@@ -206,7 +211,8 @@ public class PluginNotificationResultDeliveryTests
 			}
 		}
 
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -221,8 +227,9 @@ public class PluginNotificationResultDeliveryTests
 
 			Assert.That(request.Kind, Is.EqualTo(CapabilityKinds.Ui));
 			Assert.That(request.Operation, Is.EqualTo(CapabilityOperations.Ui.NotificationResult));
-			var arguments = ((JsonElement)request.Arguments!).Deserialize<UiNotificationResultArguments>(
-				PluginProtocolJson.Options)!;
+			var arguments
+				= ((JsonElement)request.Arguments!).Deserialize<UiNotificationResultArguments>(PluginProtocolJson
+					.Options)!;
 			lock (_gate)
 			{
 				_delivered.Add((pluginId, arguments));
@@ -231,12 +238,18 @@ public class PluginNotificationResultDeliveryTests
 			return Task.FromResult<JsonElement?>(null);
 		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

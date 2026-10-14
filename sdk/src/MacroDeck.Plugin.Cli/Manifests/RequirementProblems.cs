@@ -14,7 +14,8 @@ internal static class RequirementProblems
 	/// project - see <see cref="ManifestValidator.HasProjectFile" />. Gates <c>generated-field-authored</c>
 	/// only; an unsatisfied <see cref="PluginManifestFieldRequirement.Publication" /> field is reported
 	/// regardless.</param>
-	public static IReadOnlyList<ManifestProblem> From(IReadOnlyList<PluginManifestRequirementViolation> violations,
+	public static IReadOnlyList<ManifestProblem> From(
+		IReadOnlyList<PluginManifestRequirementViolation> violations,
 		PluginManifestValidationLevel level,
 		bool looksLikeSourceTree)
 	{
@@ -60,11 +61,13 @@ internal static class RequirementProblems
 	/// <summary>The publication-readiness subset of <see cref="From" />, as plain warnings - what
 	/// <c>pack</c> and <c>build</c> append to their own warnings collections. Both commands always evaluate
 	/// at publication readiness; neither exposes a <c>--level</c> flag.</summary>
-	public static IReadOnlyList<CliDiagnostic> PublicationWarnings(PluginManifest manifest) =>
-		PluginManifestRequirements.Evaluate(manifest, PluginManifestValidationLevel.Publication)
+	public static IReadOnlyList<CliDiagnostic> PublicationWarnings(PluginManifest manifest)
+	{
+		return PluginManifestRequirements.Evaluate(manifest, PluginManifestValidationLevel.Publication)
 			.Where(violation => violation.Requirement == PluginManifestFieldRequirement.Publication)
 			.Select(violation => new CliDiagnostic("publication-metadata-missing", violation.Message))
 			.ToList();
+	}
 
 	/// <summary>The generated-field subset, silent unless <paramref name="looksLikeSourceTree" /> - see
 	/// <see cref="ManifestValidator.HasProjectFile" />.</summary>

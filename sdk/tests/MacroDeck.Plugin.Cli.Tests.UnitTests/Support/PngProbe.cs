@@ -25,7 +25,10 @@ internal sealed class PngProbe
 
 	public byte[] FirstPixel => PixelAt(0, 0);
 
-	public byte[] PixelAt(int x, int y) => _pixels.AsSpan(((y * Width) + x) * _bytesPerPixel, _bytesPerPixel).ToArray();
+	public byte[] PixelAt(int x, int y)
+	{
+		return _pixels.AsSpan((y * Width + x) * _bytesPerPixel, _bytesPerPixel).ToArray();
+	}
 
 	public static PngProbe Read(string path)
 	{
@@ -60,9 +63,9 @@ internal sealed class PngProbe
 
 			for (var index = 0; index < stride; index++)
 			{
-				var left = index >= bytesPerPixel ? pixels[(y * stride) + index - bytesPerPixel] : 0;
-				var up = y > 0 ? pixels[((y - 1) * stride) + index] : 0;
-				var upLeft = y > 0 && index >= bytesPerPixel ? pixels[((y - 1) * stride) + index - bytesPerPixel] : 0;
+				var left = index >= bytesPerPixel ? pixels[y * stride + index - bytesPerPixel] : 0;
+				var up = y > 0 ? pixels[(y - 1) * stride + index] : 0;
+				var upLeft = y > 0 && index >= bytesPerPixel ? pixels[(y - 1) * stride + index - bytesPerPixel] : 0;
 				var predicted = row[0] switch
 				{
 					1 => left,
@@ -71,7 +74,7 @@ internal sealed class PngProbe
 					4 => Paeth(left, up, upLeft),
 					_ => 0
 				};
-				pixels[(y * stride) + index] = (byte)(row[index + 1] + predicted);
+				pixels[y * stride + index] = (byte)(row[index + 1] + predicted);
 			}
 		}
 

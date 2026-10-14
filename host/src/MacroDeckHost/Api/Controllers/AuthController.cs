@@ -53,7 +53,8 @@ public record TokenResponse(
 	string Scope,
 	string Username,
 	DeviceCredential? Device = null,
-	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? HostKey = null);
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	string? HostKey = null);
 
 public record HostIdentityChallenge(string? Nonce);
 
@@ -181,7 +182,7 @@ public class AuthController : ControllerBase
 			var culture = (await _preferences.GetLocalization()).Culture;
 			var remoteIp = BridgedConnectionStamp.DeviceKey(HttpContext) is { } deviceKey
 				? _localization.Resolve(
-					AppStrings.Notifications.FailedLoginOverUsb(serial: BridgedConnectionStamp.MaskedDevice(deviceKey)),
+					AppStrings.Notifications.FailedLoginOverUsb(BridgedConnectionStamp.MaskedDevice(deviceKey)),
 					culture)
 				: HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 			_userNotificationStore.Raise(new UserNotificationDraft
@@ -189,9 +190,9 @@ public class AuthController : ControllerBase
 				Severity = UserNotificationSeverity.Warning,
 				Kind = UserNotificationKind.Security,
 				Title = _localization.Resolve(AppStrings.Notifications.FailedLogin(), culture),
-				Message = _localization.Resolve(AppStrings.Notifications.FailedLoginMessage(count: failureCount,
-						username: attemptedUsername,
-						ip: remoteIp),
+				Message = _localization.Resolve(AppStrings.Notifications.FailedLoginMessage(failureCount,
+						attemptedUsername,
+						remoteIp),
 					culture),
 				Action = new UserNotificationAction(UserNotificationActionKind.OpenLogs, null),
 				DedupeKey = FailedLoginDedupeKey
@@ -231,10 +232,16 @@ public class AuthController : ControllerBase
 	}
 
 	[HttpGet("pairing-code")]
-	public IActionResult GetPairingCode() => PairingCodeResult(rotate: false);
+	public IActionResult GetPairingCode()
+	{
+		return PairingCodeResult(false);
+	}
 
 	[HttpPost("pairing-code")]
-	public IActionResult RotatePairingCode() => PairingCodeResult(rotate: true);
+	public IActionResult RotatePairingCode()
+	{
+		return PairingCodeResult(true);
+	}
 
 	/// <summary>
 	/// Spends an enrollment credential for an ordinary client session. Anonymous by necessity - the
@@ -446,7 +453,8 @@ public class AuthController : ControllerBase
 		{
 			return Convert.ToBase64String(await _hostIdentity.GetPublicKey());
 		}
-		catch (Exception e) when (e is HostIdentityUnavailableException or ObjectDisposedException
+		catch (Exception e) when (e is HostIdentityUnavailableException
+			or ObjectDisposedException
 			or OperationCanceledException)
 		{
 			return null;
@@ -455,7 +463,16 @@ public class AuthController : ControllerBase
 
 	/// <summary>A device that told us nothing about itself still gets registered, as an unknown one.</summary>
 	private static DeviceRegistration UnknownDeviceRegistration()
-		=> new(null, null, DeviceClientType.Unknown, null, null, null, DeviceFormFactor.Unknown, null);
+	{
+		return new DeviceRegistration(null,
+			null,
+			DeviceClientType.Unknown,
+			null,
+			null,
+			null,
+			DeviceFormFactor.Unknown,
+			null);
+	}
 
 	private static DeviceRegistration? ToDeviceRegistration(DeviceLoginInfo? device)
 	{
@@ -475,22 +492,26 @@ public class AuthController : ControllerBase
 	}
 
 	private static DeviceClientType ParseClientType(string? value)
-		=> value switch
+	{
+		return value switch
 		{
 			"web-client" => DeviceClientType.WebClient,
 			"admin-ui" => DeviceClientType.AdminUi,
 			"native" => DeviceClientType.Native,
 			_ => DeviceClientType.Unknown
 		};
+	}
 
 	private static DeviceFormFactor ParseFormFactor(string? value)
-		=> value switch
+	{
+		return value switch
 		{
 			"desktop" => DeviceFormFactor.Desktop,
 			"tablet" => DeviceFormFactor.Tablet,
 			"phone" => DeviceFormFactor.Phone,
 			_ => DeviceFormFactor.Unknown
 		};
+	}
 
 	private void SetAuthCookies(LoginResult login)
 	{
@@ -533,7 +554,9 @@ public class AuthController : ControllerBase
 	}
 
 	private static TimeSpan Remaining(DateTime expiresAt, DateTime now)
-		=> expiresAt > now ? expiresAt - now : TimeSpan.Zero;
+	{
+		return expiresAt > now ? expiresAt - now : TimeSpan.Zero;
+	}
 
 	private void DeleteAuthCookies()
 	{
@@ -566,7 +589,9 @@ public class AuthController : ControllerBase
 	}
 
 	private static string Truncate(string value, int maxLength)
-		=> value.Length <= maxLength ? value : value[..maxLength];
+	{
+		return value.Length <= maxLength ? value : value[..maxLength];
+	}
 
 	private static bool TryParseScope(string value, out AuthScope scope)
 	{

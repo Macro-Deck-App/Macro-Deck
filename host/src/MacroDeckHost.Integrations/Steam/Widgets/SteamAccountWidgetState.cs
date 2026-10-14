@@ -22,17 +22,25 @@ internal sealed record SteamFriendsWidgetState(
 {
 	public static SteamFriendsWidgetState Empty { get; } = new(SteamWidgetStatus.Unavailable, 0, 0, [], null);
 
-	public IReadOnlyList<SteamFriendRow> Take(int count) => [.. Rows.Take(count)];
+	public IReadOnlyList<SteamFriendRow> Take(int count)
+	{
+		return [.. Rows.Take(count)];
+	}
 
 	public bool Equals(SteamFriendsWidgetState? other)
-		=> other is not null &&
-			Status == other.Status &&
-			Online == other.Online &&
-			InGame == other.InGame &&
-			Equals(Glyph, other.Glyph) &&
-			Rows.SequenceEqual(other.Rows);
+	{
+		return other is not null
+			&& Status == other.Status
+			&& Online == other.Online
+			&& InGame == other.InGame
+			&& Equals(Glyph, other.Glyph)
+			&& Rows.SequenceEqual(other.Rows);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Status, Online, InGame, Rows.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Status, Online, InGame, Rows.Count);
+	}
 }
 
 internal sealed record SteamLibraryGame(string Key, int AppId, string Name, UiResource? Cover, LocalizedText Detail);
@@ -49,19 +57,27 @@ internal sealed record SteamLibraryWidgetState(
 	public static SteamLibraryWidgetState Empty { get; } =
 		new(SteamWidgetStatus.Unavailable, false, 0, string.Empty, string.Empty, [], null);
 
-	public IReadOnlyList<SteamLibraryGame> Take(int count) => [.. Recent.Take(count)];
+	public IReadOnlyList<SteamLibraryGame> Take(int count)
+	{
+		return [.. Recent.Take(count)];
+	}
 
 	public bool Equals(SteamLibraryWidgetState? other)
-		=> other is not null &&
-			Status == other.Status &&
-			FromAccount == other.FromAccount &&
-			GameCount == other.GameCount &&
-			TotalHours == other.TotalHours &&
-			RecentHours == other.RecentHours &&
-			Equals(Glyph, other.Glyph) &&
-			Recent.SequenceEqual(other.Recent);
+	{
+		return other is not null
+			&& Status == other.Status
+			&& FromAccount == other.FromAccount
+			&& GameCount == other.GameCount
+			&& TotalHours == other.TotalHours
+			&& RecentHours == other.RecentHours
+			&& Equals(Glyph, other.Glyph)
+			&& Recent.SequenceEqual(other.Recent);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Status, FromAccount, GameCount, TotalHours, Recent.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Status, FromAccount, GameCount, TotalHours, Recent.Count);
+	}
 }
 
 internal static class SteamAccountWidgetStates
@@ -112,7 +128,11 @@ internal static class SteamAccountWidgetStates
 			})
 			.ToList();
 
-		return new SteamFriendsWidgetState(SteamWidgetStatus.Ready, account.FriendsOnline, account.FriendsInGame, rows, glyph);
+		return new SteamFriendsWidgetState(SteamWidgetStatus.Ready,
+			account.FriendsOnline,
+			account.FriendsInGame,
+			rows,
+			glyph);
 	}
 
 	public static SteamLibraryWidgetState Library(
@@ -142,9 +162,12 @@ internal static class SteamAccountWidgetStates
 		{
 			var recent = owner.OwnedGames.Where(game => game.LastPlayed is not null)
 				.Take(MaxRecentGames)
-				.Select(game => Game(game.AppId, game.Name, artwork, game.RecentMinutes > 0
-					? Strings.RecentPlaytime(hours: Hours(game.RecentMinutes))
-					: Strings.TotalPlaytime(hours: Hours(game.PlaytimeMinutes))))
+				.Select(game => Game(game.AppId,
+					game.Name,
+					artwork,
+					game.RecentMinutes > 0
+						? Strings.RecentPlaytime(Hours(game.RecentMinutes))
+						: Strings.TotalPlaytime(Hours(game.PlaytimeMinutes))))
 				.ToList();
 
 			return new SteamLibraryWidgetState(SteamWidgetStatus.Ready,
@@ -167,7 +190,8 @@ internal static class SteamAccountWidgetStates
 			.Select(game => Game(game.AppId, game.Name, artwork, default))
 			.ToList();
 
-		return new SteamLibraryWidgetState(snapshot.Games.Count == 0 ? SteamWidgetStatus.NoGames : SteamWidgetStatus.Ready,
+		return new SteamLibraryWidgetState(
+			snapshot.Games.Count == 0 ? SteamWidgetStatus.NoGames : SteamWidgetStatus.Ready,
 			false,
 			snapshot.Games.Count,
 			string.Empty,
@@ -218,7 +242,8 @@ internal static class SteamAccountWidgetStates
 	}
 
 	private static LocalizedText Status(SteamFriend friend)
-		=> friend.GameName is { Length: > 0 } game
+	{
+		return friend.GameName is { Length: > 0 } game
 			? game
 			: friend.PersonaState switch
 			{
@@ -230,11 +255,14 @@ internal static class SteamAccountWidgetStates
 				SteamPersona.Offline => Strings.Persona.Offline(),
 				_ => Strings.Persona.Online()
 			};
+	}
 
 	private static string Initial(string name)
-		=> name.Trim() is { Length: > 0 } trimmed
+	{
+		return name.Trim() is { Length: > 0 } trimmed
 			? char.IsSurrogate(trimmed[0]) && trimmed.Length > 1
 				? trimmed[..2]
 				: trimmed[..1].ToUpperInvariant()
 			: "?";
+	}
 }

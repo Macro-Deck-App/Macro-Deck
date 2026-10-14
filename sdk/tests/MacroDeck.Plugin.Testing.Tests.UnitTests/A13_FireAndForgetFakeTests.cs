@@ -11,7 +11,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// actually report it.
 /// </summary>
 [TestFixture]
-public class A13_FireAndForgetFakeTests
+public class A13FireAndForgetFakeTests
 {
 	[Test]
 	public void FakeUserNotifier_replaces_under_the_same_key_and_tolerates_an_unknown_dismiss()
@@ -120,7 +120,7 @@ public class A13_FireAndForgetFakeTests
 		var interactions = new FakeActionInteractions();
 
 		Assert.DoesNotThrow(() => interactions.RequestItemPicker(null, "instance-1", MusicPlayerCatalogItemKind.Track));
-		Assert.DoesNotThrow(() => interactions.RequestDevicePicker(null, "instance-1", startPlayback: true));
+		Assert.DoesNotThrow(() => interactions.RequestDevicePicker(null, "instance-1", true));
 
 		Assert.Multiple(() =>
 		{

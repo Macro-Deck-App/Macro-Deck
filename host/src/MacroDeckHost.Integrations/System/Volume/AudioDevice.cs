@@ -21,13 +21,16 @@ public readonly record struct AudioTarget(AudioFlow Flow, string? DeviceId)
 
 	public bool IsDefault => DeviceId is null;
 
-	public string ToParameterValue() => (Flow, DeviceId) switch
+	public string ToParameterValue()
 	{
-		(AudioFlow.Output, null) => DefaultOutputValue,
-		(AudioFlow.Input, null) => DefaultInputValue,
-		(AudioFlow.Output, var id) => OutputPrefix + id,
-		(_, var id) => InputPrefix + id
-	};
+		return (Flow, DeviceId) switch
+		{
+			(AudioFlow.Output, null) => DefaultOutputValue,
+			(AudioFlow.Input, null) => DefaultInputValue,
+			(AudioFlow.Output, var id) => OutputPrefix + id,
+			var (_, id) => InputPrefix + id
+		};
+	}
 
 	// A missing value is how every action saved before device selection existed reads, so it has to mean
 	// the default output. Anything else unrecognised is refused rather than guessed.
@@ -45,8 +48,8 @@ public readonly record struct AudioTarget(AudioFlow Flow, string? DeviceId)
 			return true;
 		}
 
-		if (TryDevice(value, OutputPrefix, AudioFlow.Output, out target) ||
-			TryDevice(value, InputPrefix, AudioFlow.Input, out target))
+		if (TryDevice(value, OutputPrefix, AudioFlow.Output, out target)
+			|| TryDevice(value, InputPrefix, AudioFlow.Input, out target))
 		{
 			return true;
 		}

@@ -23,9 +23,13 @@ public class EventsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetEventDefinitionsResponse> GetAll(CancellationToken ct)
-		=> _getDefinitions.Handle(new GetEventDefinitionsRequest(), ct).AsTask();
+	{
+		return _getDefinitions.Handle(new GetEventDefinitionsRequest(), ct).AsTask();
+	}
 
 	[HttpPost("trigger")]
 	public Task<TriggerEventResponse> Trigger(TriggerEventRequest body, CancellationToken ct)
-		=> _trigger.Handle(body, ct).AsTask();
+	{
+		return _trigger.Handle(body, ct).AsTask();
+	}
 }

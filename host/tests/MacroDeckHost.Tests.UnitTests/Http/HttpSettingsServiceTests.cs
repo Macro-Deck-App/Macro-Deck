@@ -14,7 +14,9 @@ internal sealed class HttpSettingsServiceTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{

@@ -13,7 +13,8 @@ public class StoreReviewsController : ControllerBase
 	private readonly IStoreRatingPromptService _ratingPrompt;
 	private readonly IStoreReviewAvatarProxy _avatars;
 
-	public StoreReviewsController(IStoreReviewService reviews,
+	public StoreReviewsController(
+		IStoreReviewService reviews,
 		IStoreRatingPromptService ratingPrompt,
 		IStoreReviewAvatarProxy avatars)
 	{
@@ -51,52 +52,72 @@ public class StoreReviewsController : ControllerBase
 	}
 
 	[HttpGet("catalog/{kind}/{id}/rating")]
-	public Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind, string id, CancellationToken ct) =>
-		_reviews.GetRating(kind, id, ct);
+	public Task<GetStoreRatingResponse> GetRating(StoreExtensionKind kind, string id, CancellationToken ct)
+	{
+		return _reviews.GetRating(kind, id, ct);
+	}
 
 	[HttpGet("catalog/{kind}/{id}/reviews")]
-	public Task<GetStoreReviewsResponse> GetReviews(StoreExtensionKind kind,
+	public Task<GetStoreReviewsResponse> GetReviews(
+		StoreExtensionKind kind,
 		string id,
 		CancellationToken ct,
 		[FromQuery] int page = 1,
 		[FromQuery] int pageSize = 20,
 		[FromQuery] StoreReviewSortOrder sort = StoreReviewSortOrder.Newest,
-		[FromQuery] int? rating = null) =>
-		_reviews.GetReviews(kind, id, page, pageSize, sort, rating, ct);
+		[FromQuery] int? rating = null)
+	{
+		return _reviews.GetReviews(kind, id, page, pageSize, sort, rating, ct);
+	}
 
 	[HttpGet("catalog/{kind}/{id}/reviews/me")]
-	public Task<GetStoreOwnReviewResponse> GetOwnReview(StoreExtensionKind kind, string id, CancellationToken ct) =>
-		_reviews.GetOwnReview(kind, id, ct);
+	public Task<GetStoreOwnReviewResponse> GetOwnReview(StoreExtensionKind kind, string id, CancellationToken ct)
+	{
+		return _reviews.GetOwnReview(kind, id, ct);
+	}
 
 	[HttpPut("catalog/{kind}/{id}/reviews/me")]
-	public Task<StoreOwnReviewWriteResponse> PutOwnReview(StoreExtensionKind kind,
+	public Task<StoreOwnReviewWriteResponse> PutOwnReview(
+		StoreExtensionKind kind,
 		string id,
 		PutStoreOwnReviewRequest body,
-		CancellationToken ct) =>
-		_reviews.PutOwnReview(kind, id, body, ct);
+		CancellationToken ct)
+	{
+		return _reviews.PutOwnReview(kind, id, body, ct);
+	}
 
 	[HttpDelete("catalog/{kind}/{id}/reviews/me")]
-	public Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind, string id, CancellationToken ct) =>
-		_reviews.DeleteOwnReview(kind, id, ct);
+	public Task<StoreOwnReviewWriteResponse> DeleteOwnReview(StoreExtensionKind kind, string id, CancellationToken ct)
+	{
+		return _reviews.DeleteOwnReview(kind, id, ct);
+	}
 
 	[HttpPost("catalog/{kind}/{id}/report")]
-	public Task<StoreReportResponse> ReportEntry(StoreExtensionKind kind,
+	public Task<StoreReportResponse> ReportEntry(
+		StoreExtensionKind kind,
 		string id,
 		ReportStoreContentRequest body,
-		CancellationToken ct) =>
-		_reviews.ReportEntry(kind, id, body, ct);
+		CancellationToken ct)
+	{
+		return _reviews.ReportEntry(kind, id, body, ct);
+	}
 
 	[HttpPost("catalog/{kind}/{id}/reviews/{reviewId:guid}/report")]
-	public Task<StoreReportResponse> ReportReview(StoreExtensionKind kind,
+	public Task<StoreReportResponse> ReportReview(
+		StoreExtensionKind kind,
 		string id,
 		Guid reviewId,
 		ReportStoreContentRequest body,
-		CancellationToken ct) =>
-		_reviews.ReportReview(kind, id, reviewId, body, ct);
+		CancellationToken ct)
+	{
+		return _reviews.ReportReview(kind, id, reviewId, body, ct);
+	}
 
 	[HttpGet("rating-prompt")]
-	public Task<GetStoreRatingPromptResponse> GetRatingPrompt(CancellationToken ct) =>
-		_ratingPrompt.GetPrompt(ct);
+	public Task<GetStoreRatingPromptResponse> GetRatingPrompt(CancellationToken ct)
+	{
+		return _ratingPrompt.GetPrompt(ct);
+	}
 
 	[HttpPost("rating-prompt/shown")]
 	public async Task<IActionResult> MarkRatingPromptShown(MarkStoreRatingPromptShownRequest body, CancellationToken ct)
@@ -106,8 +127,10 @@ public class StoreReviewsController : ControllerBase
 	}
 
 	[HttpGet("creator-guidelines")]
-	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken ct) =>
-		_reviews.GetCreatorGuidelines(ct);
+	public Task<GetStoreCreatorGuidelinesResponse> GetCreatorGuidelines(CancellationToken ct)
+	{
+		return _reviews.GetCreatorGuidelines(ct);
+	}
 
 	[HttpGet("review-avatars")]
 	public async Task<IActionResult> GetAvatar([FromQuery] string? src, CancellationToken ct)
@@ -122,9 +145,11 @@ public class StoreReviewsController : ControllerBase
 		return File(avatar.Content, avatar.ContentType);
 	}
 
-	private static List<string> ParseIds(string? ids) =>
-		(ids ?? string.Empty)
+	private static List<string> ParseIds(string? ids)
+	{
+		return (ids ?? string.Empty)
 			.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
 			.Distinct(StringComparer.Ordinal)
 			.ToList();
+	}
 }

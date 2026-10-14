@@ -80,8 +80,8 @@ public class UpdateDeveloperSettingsRequestMessageHandler
 	private async Task DropDevelopmentSessions(CancellationToken cancellationToken)
 	{
 		var pluginIds = _sessionRegistry.Snapshot()
-			.Where(session => session.Origin == PluginSessionOrigin.SelfRegistered &&
-				session.State != PluginSessionState.Dropped)
+			.Where(session => session.Origin == PluginSessionOrigin.SelfRegistered
+				&& session.State != PluginSessionState.Dropped)
 			.Select(session => session.PluginId)
 			.Distinct(StringComparer.Ordinal)
 			.ToList();

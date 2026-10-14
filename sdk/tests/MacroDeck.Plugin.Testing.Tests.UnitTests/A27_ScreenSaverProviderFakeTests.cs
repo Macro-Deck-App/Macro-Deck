@@ -9,10 +9,12 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// host does, so a plugin author's green test against it is not lying about what a real host would do.
 /// </summary>
 [TestFixture]
-public class A27_ScreenSaverProviderFakeTests
+public class A27ScreenSaverProviderFakeTests
 {
 	private static ScreenSaverDescriptor ScreenSaver(string id, bool interactive = false)
-		=> new(id, LocalizedText.FromLiteral("Clock"), Interactive: interactive);
+	{
+		return new ScreenSaverDescriptor(id, LocalizedText.FromLiteral("Clock"), Interactive: interactive);
+	}
 
 	[Test]
 	public async Task Registering_the_same_local_id_again_replaces_rather_than_duplicates()
@@ -20,7 +22,7 @@ public class A27_ScreenSaverProviderFakeTests
 		var context = new FakeScreenSaverProviderContext();
 
 		await context.RegisterScreenSaverAsync(ScreenSaver("clock"));
-		await context.RegisterScreenSaverAsync(ScreenSaver("clock", interactive: true));
+		await context.RegisterScreenSaverAsync(ScreenSaver("clock", true));
 
 		Assert.Multiple(() =>
 		{

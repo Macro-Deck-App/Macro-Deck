@@ -75,7 +75,10 @@ public sealed class FakeCompanionDeviceApi : ICompanionDeviceApi
 	}
 
 	/// <inheritdoc />
-	public CompanionDevice? FindDevice(Guid deviceId) => Devices.FirstOrDefault(device => device.Id == deviceId);
+	public CompanionDevice? FindDevice(Guid deviceId)
+	{
+		return Devices.FirstOrDefault(device => device.Id == deviceId);
+	}
 
 	/// <summary>Changes <see cref="Access" /> and raises <see cref="AccessChanged" /> when it changed.</summary>
 	public void SetAccess(CompanionDeviceAccess access)
@@ -150,10 +153,13 @@ public sealed class FakeCompanionDeviceApi : ICompanionDeviceApi
 
 	/// <inheritdoc />
 	public Task<bool> WaitForDeviceAsync(Guid deviceId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(FindDevice(deviceId) is not null);
+	{
+		return Task.FromResult(FindDevice(deviceId) is not null);
+	}
 
 	/// <inheritdoc />
-	public Task<bool> SendAsync(Guid deviceId,
+	public Task<bool> SendAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -163,7 +169,8 @@ public sealed class FakeCompanionDeviceApi : ICompanionDeviceApi
 	}
 
 	/// <inheritdoc />
-	public Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	public Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -180,7 +187,8 @@ public sealed class FakeCompanionDeviceApi : ICompanionDeviceApi
 	}
 
 	/// <inheritdoc />
-	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	public Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default)
 	{
@@ -192,16 +200,19 @@ public sealed class FakeCompanionDeviceApi : ICompanionDeviceApi
 
 		return Task.FromResult(FindDevice(deviceId) is null
 			? CompanionScreenshotResult.Failed(CompanionDeviceFailure.NotConnected)
-			: OnScreenshot?.Invoke(deviceId, mode) ??
-			CompanionScreenshotResult.Failed(CompanionDeviceFailure.Unavailable));
+			: OnScreenshot?.Invoke(deviceId, mode)
+			?? CompanionScreenshotResult.Failed(CompanionDeviceFailure.Unavailable));
 	}
 
-	private CompanionDeviceFailure? Refusal() => Access switch
+	private CompanionDeviceFailure? Refusal()
 	{
-		CompanionDeviceAccess.Available => null,
-		CompanionDeviceAccess.NotAllowed => CompanionDeviceFailure.NotAllowed,
-		_ => CompanionDeviceFailure.NotConnected
-	};
+		return Access switch
+		{
+			CompanionDeviceAccess.Available => null,
+			CompanionDeviceAccess.NotAllowed => CompanionDeviceFailure.NotAllowed,
+			_ => CompanionDeviceFailure.NotConnected
+		};
+	}
 
 	private void Record(FakeCompanionDeviceCall call)
 	{

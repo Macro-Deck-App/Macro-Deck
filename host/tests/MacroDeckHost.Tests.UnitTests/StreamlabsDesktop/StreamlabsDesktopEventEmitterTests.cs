@@ -126,9 +126,9 @@ public class StreamlabsDesktopEventEmitterTests
 	[Test]
 	public void RepeatedMutePushes_PublishOnlyOnTheChange()
 	{
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: true);
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: true);
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: false);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", true);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", true);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", false);
 
 		Assert.Multiple(() =>
 		{
@@ -141,8 +141,8 @@ public class StreamlabsDesktopEventEmitterTests
 	[Test]
 	public void TwoItemsSharingASourceName_DeduplicateIndependently()
 	{
-		_emitter.PublishSourceVisibilityChanged("scene", "item-a", "Gameplay", "Webcam", visible: false);
-		_emitter.PublishSourceVisibilityChanged("scene", "item-b", "Gameplay", "Webcam", visible: false);
+		_emitter.PublishSourceVisibilityChanged("scene", "item-a", "Gameplay", "Webcam", false);
+		_emitter.PublishSourceVisibilityChanged("scene", "item-b", "Gameplay", "Webcam", false);
 
 		Assert.That(_publisher.Published,
 			Has.Count.EqualTo(2),
@@ -152,10 +152,10 @@ public class StreamlabsDesktopEventEmitterTests
 	[Test]
 	public void Reset_ClosesTheGate()
 	{
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: true);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", true);
 		_emitter.Reset();
 
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: false);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", false);
 
 		Assert.That(_publisher.Published, Has.Count.EqualTo(1), "nothing is published while the gate is closed");
 	}
@@ -163,11 +163,11 @@ public class StreamlabsDesktopEventEmitterTests
 	[Test]
 	public void Reset_ClearsTheDeduplicationTables()
 	{
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: true);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", true);
 		_emitter.Reset();
 		_emitter.MarkReady();
 
-		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", muted: true);
+		_emitter.PublishSourceMuteChanged("mic", "Mic/Aux", true);
 
 		Assert.That(_publisher.Published,
 			Has.Count.EqualTo(2),
@@ -198,13 +198,18 @@ public class StreamlabsDesktopEventEmitterTests
 		});
 	}
 
-	private string[] Ids() => _publisher.Published.Select(entry => entry.EventId).ToArray();
+	private string[] Ids()
+	{
+		return _publisher.Published.Select(entry => entry.EventId).ToArray();
+	}
 
 	private sealed class RecordingPublisher : IEventPublisher
 	{
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Published { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

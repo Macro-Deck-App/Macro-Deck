@@ -25,7 +25,7 @@ public class RedactedSinkFanOutTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -92,5 +92,8 @@ public class RedactedSinkFanOutTests
 		});
 	}
 
-	private static string Unquote(string text) => text.Replace("\"", string.Empty, StringComparison.Ordinal);
+	private static string Unquote(string text)
+	{
+		return text.Replace("\"", string.Empty, StringComparison.Ordinal);
+	}
 }

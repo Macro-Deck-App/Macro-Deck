@@ -10,10 +10,11 @@ public class WidgetDataAndVariableHistoryWireTests
 	[Test]
 	public void A_widget_data_request_and_answer_keep_their_shape()
 	{
-		var request = JsonSerializer.Serialize(new WidgetsGetDataArguments { WidgetId = "w1" }, PluginProtocolJson.Options);
+		var request = JsonSerializer.Serialize(new WidgetsGetDataArguments { WidgetId = "w1" },
+			PluginProtocolJson.Options);
 		using var data = JsonDocument.Parse("""{"account":"111"}""");
-		var answer = JsonSerializer.Serialize(
-			new WidgetDataDto { WidgetId = "w1", WidgetTypeId = "com.example::chat", Data = data.RootElement },
+		var answer = JsonSerializer.Serialize(new WidgetDataDto
+				{ WidgetId = "w1", WidgetTypeId = "com.example::chat", Data = data.RootElement },
 			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
@@ -29,7 +30,8 @@ public class WidgetDataAndVariableHistoryWireTests
 	{
 		var open = JsonSerializer.Serialize(new VariablesHistoryOpenArguments { Name = "viewer_count", Capacity = 40 },
 			PluginProtocolJson.Options);
-		var opened = JsonSerializer.Serialize(new VariablesHistoryOpenResult { WindowId = "w" }, PluginProtocolJson.Options);
+		var opened = JsonSerializer.Serialize(new VariablesHistoryOpenResult { WindowId = "w" },
+			PluginProtocolJson.Options);
 		var window = JsonSerializer.Serialize(new VariablesHistoryWindowArguments { WindowId = "w" },
 			PluginProtocolJson.Options);
 		var read = JsonSerializer.Serialize(new VariablesHistoryReadResult { Values = [1.5, null, 3] },

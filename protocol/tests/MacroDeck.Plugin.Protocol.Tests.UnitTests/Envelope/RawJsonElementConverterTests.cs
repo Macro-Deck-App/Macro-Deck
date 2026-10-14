@@ -15,7 +15,8 @@ public class RawJsonElementConverterTests
 {
 	[Test]
 	public void The_protocol_parser_stays_strict_enough_for_the_unvalidated_write_path()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(PluginProtocolJson.Options.ReadCommentHandling,
 				Is.EqualTo(JsonCommentHandling.Disallow),
@@ -24,6 +25,7 @@ public class RawJsonElementConverterTests
 				Is.False,
 				"A tolerated trailing comma survives in an element's raw text and would be written into the envelope.");
 		});
+	}
 
 	[Test]
 	public void A_leniently_parsed_element_keeps_the_text_a_strict_reader_would_reject()

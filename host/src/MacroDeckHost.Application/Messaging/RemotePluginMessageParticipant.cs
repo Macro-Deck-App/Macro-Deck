@@ -21,15 +21,20 @@ public sealed class RemotePluginMessageParticipant(
 			return;
 		}
 
-		await invoker.InvokeAsync(pluginId, Request(CapabilityOperations.Messaging.Event, message, null), cancellationToken)
+		await invoker.InvokeAsync(pluginId,
+				Request(CapabilityOperations.Messaging.Event, message, null),
+				cancellationToken)
 			.ConfigureAwait(false);
 	}
 
 	public async Task HandleCommandAsync(MessageDelivery message, TimeSpan timeout, CancellationToken cancellationToken)
-		=> await InvokeHandlerAsync(CapabilityOperations.Messaging.Command, message, timeout, cancellationToken)
+	{
+		await InvokeHandlerAsync(CapabilityOperations.Messaging.Command, message, timeout, cancellationToken)
 			.ConfigureAwait(false);
+	}
 
-	public async Task<JsonElement?> HandleRequestAsync(MessageDelivery message,
+	public async Task<JsonElement?> HandleRequestAsync(
+		MessageDelivery message,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
 	{
@@ -45,7 +50,8 @@ public sealed class RemotePluginMessageParticipant(
 		}
 	}
 
-	private async Task<JsonElement?> InvokeHandlerAsync(string operation,
+	private async Task<JsonElement?> InvokeHandlerAsync(
+		string operation,
 		MessageDelivery message,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
@@ -72,7 +78,8 @@ public sealed class RemotePluginMessageParticipant(
 
 		return (exception.Code, reason) switch
 		{
-			(_, ProtocolErrorReasons.MessagingNoHandler) => new MessageChannelException(MessageChannelErrorCode.NoHandler,
+			(_, ProtocolErrorReasons.MessagingNoHandler) => new MessageChannelException(
+				MessageChannelErrorCode.NoHandler,
 				topic,
 				$"Nothing handles '{topic}'."),
 			(_, ProtocolErrorReasons.MessagingHandlerFailed) => HandlerFailed(topic),
@@ -80,23 +87,35 @@ public sealed class RemotePluginMessageParticipant(
 			(ProtocolErrorCodes.Timeout, _) => new MessageChannelException(MessageChannelErrorCode.Timeout,
 				topic,
 				$"The handler of '{topic}' did not answer in time."),
-			(ProtocolErrorCodes.PayloadTooLarge, _) => new MessageChannelException(MessageChannelErrorCode.PayloadTooLarge,
+			(ProtocolErrorCodes.PayloadTooLarge, _) => new MessageChannelException(
+				MessageChannelErrorCode.PayloadTooLarge,
 				topic,
 				$"The reply of '{topic}' is too large."),
-			(ProtocolErrorCodes.CapabilityUnavailable or ProtocolErrorCodes.RateLimited or ProtocolErrorCodes.QueueOverflow, _)
+			(ProtocolErrorCodes.CapabilityUnavailable
+				or ProtocolErrorCodes.RateLimited
+				or ProtocolErrorCodes.QueueOverflow, _)
 				=> Unavailable(topic),
 			_ => HandlerFailed(topic)
 		};
 	}
 
 	private static MessageChannelException Unavailable(string topic)
-		=> new(MessageChannelErrorCode.HandlerUnavailable, topic, $"The handler of '{topic}' cannot be reached right now.");
+	{
+		return new MessageChannelException(MessageChannelErrorCode.HandlerUnavailable,
+			topic,
+			$"The handler of '{topic}' cannot be reached right now.");
+	}
 
 	private static MessageChannelException HandlerFailed(string topic)
-		=> new(MessageChannelErrorCode.HandlerFailed, topic, $"The handler of '{topic}' failed.");
+	{
+		return new MessageChannelException(MessageChannelErrorCode.HandlerFailed,
+			topic,
+			$"The handler of '{topic}' failed.");
+	}
 
 	private static CapabilityInvokeRequest Request(string operation, MessageDelivery message, TimeSpan? timeout)
-		=> new()
+	{
+		return new CapabilityInvokeRequest
 		{
 			Kind = CapabilityKinds.Messaging,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -111,4 +130,5 @@ public sealed class RemotePluginMessageParticipant(
 				Payload = message.Payload
 			}
 		};
+	}
 }

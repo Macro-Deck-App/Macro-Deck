@@ -5,7 +5,9 @@ public static class CalendarTime
 	public static readonly TimeSpan PollInterval = TimeSpan.FromMinutes(5);
 
 	public static DateOnly LocalDate(DateTimeOffset instant, TimeZoneInfo timeZone)
-		=> DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, timeZone).DateTime);
+	{
+		return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, timeZone).DateTime);
+	}
 
 	public static DateTimeOffset StartOfDay(DateOnly date, TimeZoneInfo timeZone)
 	{
@@ -28,7 +30,9 @@ public static class CalendarTime
 	}
 
 	public static DateTimeOffset NextMidnight(DateTimeOffset now, TimeZoneInfo timeZone)
-		=> StartOfDay(LocalDate(now, timeZone).AddDays(1), timeZone);
+	{
+		return StartOfDay(LocalDate(now, timeZone).AddDays(1), timeZone);
+	}
 
 	public static TimeSpan NextSyncDelay(DateTimeOffset now, TimeZoneInfo timeZone)
 	{

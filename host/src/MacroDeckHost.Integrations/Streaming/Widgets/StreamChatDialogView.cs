@@ -61,9 +61,9 @@ internal static class StreamChatDialogView
 	private static readonly UiSize _closeWidth = UiSize.FromBasis(0.25);
 
 	public static StreamChatLineLayout Layout { get; } = new(line => Row(line, null),
-		line => Row(line, null, fallback: true),
-		MaxMessages: 100,
-		MaxBytes: 96 * 1024,
+		line => Row(line, null, true),
+		100,
+		96 * 1024,
 		FallbackMessages);
 
 	public static UiElement Build(
@@ -86,32 +86,33 @@ internal static class StreamChatDialogView
 				{
 					Key = "offlineGate",
 					Condition = () => state.Value.Chat.Status == StreamChatStatus.Offline,
-					Content = () => Notice("offline", platform.Chat.Offline()),
+					Content = () => Notice("offline", platform.Chat.Offline())
 				},
 				new UiWhen
 				{
 					Key = "emptyGate",
 					Condition = () => state.Value.Chat.Status == StreamChatStatus.Empty,
-					Content = () => Notice("empty", AppStrings.Integrations.StreamChat.Widget.Empty()),
+					Content = () => Notice("empty", AppStrings.Integrations.StreamChat.Widget.Empty())
 				},
 				new UiWhen
 				{
 					Key = "messagesGate",
 					Condition = () => state.Value.Chat.Status == StreamChatStatus.Messages,
-					Content = () => Log(state, actions),
+					Content = () => Log(state, actions)
 				},
 				new UiWhen
 				{
 					Key = "panelGate",
 					Condition = () => state.Value.Selection is not null,
-					Content = () => Panel(platform, state, actions),
-				},
-			],
+					Content = () => Panel(platform, state, actions)
+				}
+			]
 		};
 	}
 
 	private static UiList Log(UiState<StreamChatDialogState> state, StreamChatDialogActions actions)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "log",
 			Fill = true,
@@ -125,8 +126,8 @@ internal static class StreamChatDialogView
 					Key = "messages",
 					Items = UiValue.From(() => state.Value.Chat.Lines),
 					KeySelector = line => line.Key,
-					Template = (line, _) => Row(line, state.Value.CanModerate ? actions : null),
-				},
+					Template = (line, _) => Row(line, state.Value.CanModerate ? actions : null)
+				}
 			],
 			Fallback = new UiList
 			{
@@ -141,18 +142,22 @@ internal static class StreamChatDialogView
 						Items = UiValue.From<IReadOnlyList<StreamChatLine>>(() =>
 							[.. state.Value.Chat.FallbackLines.Reverse()]),
 						KeySelector = line => line.FallbackKey,
-						Template = (line, _) => Row(line, state.Value.CanModerate ? actions : null, fallback: true),
-					},
-				],
-			},
+						Template = (line, _) => Row(line, state.Value.CanModerate ? actions : null, true)
+					}
+				]
+			}
 		};
+	}
 
 	private static UiStack Row(StreamChatLine line, StreamChatDialogActions? actions, bool fallback = false)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = fallback ? line.FallbackKey : line.Key,
 			Padding = _rowPadding,
-			Events = actions is null ? [] : [UiEventHandler.On(UiComponentEvents.Press, () => actions.Select(line.Key))],
+			Events = actions is null
+				? []
+				: [UiEventHandler.On(UiComponentEvents.Press, () => actions.Select(line.Key))],
 			Children =
 			[
 				new UiTextRun
@@ -161,16 +166,18 @@ internal static class StreamChatDialogView
 					Text = line.Text,
 					Spans = UiValue.Of(line.Spans),
 					Size = _textSize,
-					Wrap = true,
-				},
-			],
+					Wrap = true
+				}
+			]
 		};
+	}
 
 	private static UiStack Panel(
 		StreamPlatform platform,
 		UiState<StreamChatDialogState> state,
 		StreamChatDialogActions actions)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "panel",
 			Direction = UiComponentDirections.Vertical,
@@ -193,27 +200,27 @@ internal static class StreamChatDialogView
 							Size = _buttonTextSize,
 							Wrap = true,
 							MaxLines = 2,
-							Fill = true,
+							Fill = true
 						},
 						Button("close", MacroDeckStrings.Common.Close(), actions.Deselect) with
 						{
 							Fill = false,
-							MainSize = _closeWidth,
-						},
-					],
+							MainSize = _closeWidth
+						}
+					]
 				},
 				new UiWhen
 				{
 					Key = "noteGate",
 					Condition = () => NoteOf(platform, state.Value.Selection) is not null,
 					Content = () => Notice("note",
-						UiText.FromLocalized(() => NoteOf(platform, state.Value.Selection)!.Value)),
+						UiText.FromLocalized(() => NoteOf(platform, state.Value.Selection)!.Value))
 				},
 				new UiWhen
 				{
 					Key = "actionsGate",
-					Condition = () => NoteOf(platform, state.Value.Selection) is null &&
-						state.Value.Step is StreamChatDialogStep.Actions or StreamChatDialogStep.Busy,
+					Condition = () => NoteOf(platform, state.Value.Selection) is null
+						&& state.Value.Step is StreamChatDialogStep.Actions or StreamChatDialogStep.Busy,
 					Content = () => new UiModifier
 					{
 						Key = "actionsState",
@@ -226,7 +233,8 @@ internal static class StreamChatDialogView
 							Children =
 							[
 								ButtonRow("moderate",
-									Button("delete", AppStrings.Integrations.StreamChat.Dialog.DeleteMessage(),
+									Button("delete",
+										AppStrings.Integrations.StreamChat.Dialog.DeleteMessage(),
 										actions.Delete),
 									Button("unban", AppStrings.Integrations.StreamChat.Dialog.Unban(), actions.Unban),
 									Button("ban", AppStrings.Integrations.StreamChat.Dialog.Ban(), actions.AskBan)),
@@ -239,10 +247,10 @@ internal static class StreamChatDialogView
 										ct => actions.Timeout(600, ct)),
 									Button("timeout1h",
 										AppStrings.Integrations.StreamChat.Dialog.Timeout1Hour(),
-										ct => actions.Timeout(3600, ct))),
-							],
-						},
-					},
+										ct => actions.Timeout(3600, ct)))
+							]
+						}
+					}
 				},
 				new UiWhen
 				{
@@ -258,53 +266,64 @@ internal static class StreamChatDialogView
 							new UiTextRun
 							{
 								Key = "confirmText",
-								Text = UiText.FromLocalized(() => AppStrings.Integrations.StreamChat.Dialog.ConfirmBan(
-									name: state.Value.Selection?.AuthorName ?? string.Empty)),
+								Text = UiText.FromLocalized(()
+									=> AppStrings.Integrations.StreamChat.Dialog.ConfirmBan(
+										state.Value.Selection?.AuthorName ?? string.Empty)),
 								Size = _textSize,
-								Wrap = true,
+								Wrap = true
 							},
 							ButtonRow("confirmButtons",
 								Button("confirmBan", AppStrings.Integrations.StreamChat.Dialog.Ban(), actions.Ban),
-								Button("cancelBan", MacroDeckStrings.Common.Cancel(), actions.CancelBan)),
-						],
-					},
+								Button("cancelBan", MacroDeckStrings.Common.Cancel(), actions.CancelBan))
+						]
+					}
 				},
 				new UiWhen
 				{
 					Key = "resultGate",
 					Condition = () => state.Value.Result is not null,
-					Content = () => Notice("result", UiText.FromLocalized(() => state.Value.Result!.Value)),
-				},
-			],
+					Content = () => Notice("result", UiText.FromLocalized(() => state.Value.Result!.Value))
+				}
+			]
 		};
+	}
 
 	private static LocalizedString? NoteOf(StreamPlatform platform, StreamChatSelection? selection)
-		=> selection?.Note switch
+	{
+		return selection?.Note switch
 		{
 			StreamChatSelectionNote.OwnMessage => AppStrings.Integrations.StreamChat.Dialog.OwnMessage(),
 			StreamChatSelectionNote.SharedChat when platform.Chat.SharedChat is { } sharedChat
 				=> sharedChat(selection.SourceChannel ?? string.Empty),
-			_ => null,
+			_ => null
 		};
+	}
 
 	private static UiStack ButtonRow(string key, params UiElement[] buttons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
 			Gap = _gap,
 			MainSize = _buttonRowHeight,
-			Children = buttons,
+			Children = buttons
 		};
+	}
 
 	private static UiButton Button(string key, LocalizedString label, Action press)
-		=> Button(key, label, UiEventHandler.On(UiComponentEvents.Press, press));
+	{
+		return Button(key, label, UiEventHandler.On(UiComponentEvents.Press, press));
+	}
 
 	private static UiButton Button(string key, LocalizedString label, Func<CancellationToken, Task> press)
-		=> Button(key, label, UiEventHandler.OnAsync(UiComponentEvents.Press, press));
+	{
+		return Button(key, label, UiEventHandler.OnAsync(UiComponentEvents.Press, press));
+	}
 
 	private static UiButton Button(string key, LocalizedString label, UiEventHandler handler)
-		=> new()
+	{
+		return new UiButton
 		{
 			Key = key,
 			Fill = true,
@@ -320,19 +339,22 @@ internal static class StreamChatDialogView
 					Size = _buttonTextSize,
 					Weight = UiComponentTextWeights.Medium,
 					Align = UiComponentAlignments.Center,
-					MaxLines = 1,
-				},
-			],
+					MaxLines = 1
+				}
+			]
 		};
+	}
 
 	private static UiTextRun Notice(string key, UiText text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = _textSize,
 			Role = UiComponentTextRoles.Secondary,
 			Wrap = true,
-			MaxLines = 3,
+			MaxLines = 3
 		};
+	}
 }

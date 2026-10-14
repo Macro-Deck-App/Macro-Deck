@@ -56,7 +56,7 @@ internal sealed class HttpClientReadTests
 	{
 		var latin1 = Encoding.GetEncoding("iso-8859-1");
 		var body = latin1.GetBytes("café");
-		var client = ClientReturning(body, contentType: "text/plain; charset=\"iso-8859-1\"");
+		var client = ClientReturning(body, "text/plain; charset=\"iso-8859-1\"");
 
 		var outcome = await client.SendAsync(Spec(), CancellationToken.None);
 
@@ -67,7 +67,7 @@ internal sealed class HttpClientReadTests
 	public async Task An_unsupported_charset_falls_back_to_utf8()
 	{
 		var body = Encoding.UTF8.GetBytes("hello");
-		var client = ClientReturning(body, contentType: "text/plain; charset=windows-1252");
+		var client = ClientReturning(body, "text/plain; charset=windows-1252");
 
 		var outcome = await client.SendAsync(Spec(), CancellationToken.None);
 
@@ -78,8 +78,8 @@ internal sealed class HttpClientReadTests
 	public async Task Response_content_headers_appear_in_the_merged_header_map()
 	{
 		var client = ClientReturning([],
-			contentType: "application/json",
-			headers: [("X-Custom", "abc")]);
+			"application/json",
+			[("X-Custom", "abc")]);
 
 		var outcome = await client.SendAsync(Spec(), CancellationToken.None);
 
@@ -116,7 +116,7 @@ internal sealed class HttpClientReadTests
 		var client = new HttpRequestClient((_, _) =>
 			new HttpClient(FakeHttpMessageHandler.NeverAnswers()) { Timeout = Timeout.InfiniteTimeSpan });
 
-		var outcome = await client.SendAsync(Spec(timeout: TimeSpan.FromMilliseconds(50)), CancellationToken.None);
+		var outcome = await client.SendAsync(Spec(TimeSpan.FromMilliseconds(50)), CancellationToken.None);
 
 		Assert.That(outcome.Failure, Is.EqualTo(HttpFailureKind.Timeout));
 	}
@@ -138,13 +138,17 @@ internal sealed class HttpClientReadTests
 		byte[] body,
 		string? contentType = null,
 		IEnumerable<(string Name, string Value)>? headers = null)
-		=> new((_, _) => new HttpClient(new FakeHttpMessageHandler(body, contentType: contentType, headers: headers))
-		{
-			Timeout = Timeout.InfiniteTimeSpan
-		});
+	{
+		return new HttpRequestClient((_, _)
+			=> new HttpClient(new FakeHttpMessageHandler(body, contentType: contentType, headers: headers))
+			{
+				Timeout = Timeout.InfiniteTimeSpan
+			});
+	}
 
 	private static HttpRequestSpec Spec(TimeSpan? timeout = null, long maxResponseBytes = 262_144)
-		=> new("GET",
+	{
+		return new HttpRequestSpec("GET",
 			new Uri("https://example.invalid/"),
 			new Dictionary<string, string>(StringComparer.Ordinal),
 			HttpAuth.None,
@@ -153,4 +157,5 @@ internal sealed class HttpClientReadTests
 			true,
 			true,
 			maxResponseBytes);
+	}
 }

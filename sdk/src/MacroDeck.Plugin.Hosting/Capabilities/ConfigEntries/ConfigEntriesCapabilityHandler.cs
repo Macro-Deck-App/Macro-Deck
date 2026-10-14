@@ -21,7 +21,8 @@ internal sealed class ConfigEntriesCapabilityHandler(
 	public string Kind => CapabilityKinds.ConfigEntries;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _lifecycle is null
+	{
+		return _lifecycle is null
 			? []
 			:
 			[
@@ -32,8 +33,10 @@ internal sealed class ConfigEntriesCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
-	public async Task<CapabilityInvocationResult> InvokeAsync(CapabilityInvocation invocation,
+	public async Task<CapabilityInvocationResult> InvokeAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(invocation);
@@ -43,8 +46,8 @@ internal sealed class ConfigEntriesCapabilityHandler(
 			return CapabilityInvocationResult.Ok();
 		}
 
-		if (_lifecycle is null ||
-			!string.Equals(invocation.LocalId, ProviderCapabilityId.LocalId, StringComparison.Ordinal))
+		if (_lifecycle is null
+			|| !string.Equals(invocation.LocalId, ProviderCapabilityId.LocalId, StringComparison.Ordinal))
 		{
 			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 				$"No config-entries provider '{invocation.LocalId}' is registered in this plugin.");
@@ -81,11 +84,12 @@ internal sealed class ConfigEntriesCapabilityHandler(
 					ReservedVariables =
 					[
 						.. result.ReservedVariables
-							.Where(variable => !string.IsNullOrEmpty(variable.Name) &&
-								!string.IsNullOrEmpty(variable.ResolvedId))
+							.Where(variable
+								=> !string.IsNullOrEmpty(variable.Name) && !string.IsNullOrEmpty(variable.ResolvedId))
 							.Select(variable => new ConfigEntryReservedVariableDto
 							{
-								Name = variable.Name!, DefinitionId = variable.ResolvedId!, Type = variable.Type.ToString()
+								Name = variable.Name!, DefinitionId = variable.ResolvedId!,
+								Type = variable.Type.ToString()
 							})
 					]
 				});
@@ -155,7 +159,9 @@ internal sealed class ConfigEntriesCapabilityHandler(
 	}
 
 	private static StoredConfigEntry ToEntry(ConfigEntryDto dto)
-		=> new() { Id = dto.Id, Title = dto.Title, CreatedAt = dto.CreatedAt, Values = dto.Values };
+	{
+		return new StoredConfigEntry { Id = dto.Id, Title = dto.Title, CreatedAt = dto.CreatedAt, Values = dto.Values };
+	}
 
 	private static T? Arguments<T>(CapabilityInvocation invocation)
 		where T : class
@@ -171,6 +177,8 @@ internal sealed class ConfigEntriesCapabilityHandler(
 	}
 
 	private static CapabilityInvocationResult MissingArguments(string operation)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
 			$"The {operation} operation requires valid arguments.");
+	}
 }

@@ -49,7 +49,10 @@ internal sealed class WindowsGpuInterop : IDisposable
 		}
 	}
 
-	~WindowsGpuInterop() => Close();
+	~WindowsGpuInterop()
+	{
+		Close();
+	}
 
 	public void Dispose()
 	{
@@ -174,9 +177,9 @@ internal sealed class WindowsGpuInterop : IDisposable
 				PdhFmtDouble | PdhFmtNoCap100,
 				ref bufferSize,
 				out itemCount,
-				nint.Zero) !=
-			PdhMoreData ||
-			bufferSize == 0)
+				nint.Zero)
+			!= PdhMoreData
+			|| bufferSize == 0)
 		{
 			return [];
 		}
@@ -188,8 +191,8 @@ internal sealed class WindowsGpuInterop : IDisposable
 					PdhFmtDouble | PdhFmtNoCap100,
 					ref bufferSize,
 					out itemCount,
-					buffer) !=
-				0)
+					buffer)
+				!= 0)
 			{
 				return [];
 			}
@@ -198,7 +201,7 @@ internal sealed class WindowsGpuInterop : IDisposable
 			var itemSize = Marshal.SizeOf<PdhFmtCounterValueItem>();
 			for (var i = 0; i < itemCount; i++)
 			{
-				var item = Marshal.PtrToStructure<PdhFmtCounterValueItem>(buffer + (i * itemSize));
+				var item = Marshal.PtrToStructure<PdhFmtCounterValueItem>(buffer + i * itemSize);
 				if (item.CStatus is not (PdhCStatusValidData or PdhCStatusNewData) || item.Name == nint.Zero)
 				{
 					continue;

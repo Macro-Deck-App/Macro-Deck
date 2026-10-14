@@ -153,7 +153,7 @@ internal sealed class DiscordIpcTransport : IDiscordIpcTransport
 		{
 			await socket.ConnectAsync(new UnixDomainSocketEndPoint(candidate.Target), timeoutCts.Token)
 				.ConfigureAwait(false);
-			return new NetworkStream(socket, ownsSocket: true);
+			return new NetworkStream(socket, true);
 		}
 		catch
 		{

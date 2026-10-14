@@ -42,7 +42,9 @@ public class ConnectController : ControllerBase
 	[HttpGet("session")]
 	[Authorize(Policy = AuthPolicies.Admin)]
 	public Task<GetConnectSessionResponse> GetSession(CancellationToken ct)
-		=> _getSession.Handle(new GetConnectSessionRequest(), ct).AsTask();
+	{
+		return _getSession.Handle(new GetConnectSessionRequest(), ct).AsTask();
+	}
 
 	[HttpGet("avatar")]
 	[Authorize(Policy = AuthPolicies.Admin)]
@@ -69,15 +71,21 @@ public class ConnectController : ControllerBase
 	[HttpPost("signin/start")]
 	[Authorize(Policy = AuthPolicies.Admin)]
 	public Task<StartConnectSignInResponse> StartSignIn(CancellationToken ct)
-		=> _startSignIn.Handle(new StartConnectSignInRequest(), ct).AsTask();
+	{
+		return _startSignIn.Handle(new StartConnectSignInRequest(), ct).AsTask();
+	}
 
 	[HttpPost("signin/cancel")]
 	[Authorize(Policy = AuthPolicies.Admin)]
 	public Task<CancelConnectSignInResponse> CancelSignIn(CancellationToken ct)
-		=> _cancelSignIn.Handle(new CancelConnectSignInRequest(), ct).AsTask();
+	{
+		return _cancelSignIn.Handle(new CancelConnectSignInRequest(), ct).AsTask();
+	}
 
 	[HttpPost("signout")]
 	[Authorize(Policy = AuthPolicies.Admin)]
 	public Task<SignOutConnectResponse> SignOut(CancellationToken ct)
-		=> _signOut.Handle(new SignOutConnectRequest(), ct).AsTask();
+	{
+		return _signOut.Handle(new SignOutConnectRequest(), ct).AsTask();
+	}
 }

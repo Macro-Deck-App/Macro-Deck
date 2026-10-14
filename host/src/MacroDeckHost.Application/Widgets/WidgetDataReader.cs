@@ -30,9 +30,9 @@ public sealed class WidgetDataReader : IWidgetDataReader
 
 		var widget = _folders.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == id);
 
-		if (widget is null ||
-			!QualifiedId.TryParse(widget.Type, out var type) ||
-			!string.Equals(type.OwnerId, ownerId, StringComparison.Ordinal))
+		if (widget is null
+			|| !QualifiedId.TryParse(widget.Type, out var type)
+			|| !string.Equals(type.OwnerId, ownerId, StringComparison.Ordinal))
 		{
 			return null;
 		}

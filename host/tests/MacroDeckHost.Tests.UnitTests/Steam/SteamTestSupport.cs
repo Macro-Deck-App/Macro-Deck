@@ -20,13 +20,25 @@ internal sealed class FakeSteamPlatform : ISteamPlatform
 
 	public List<int> LaunchedAppIds { get; } = [];
 
-	public string? ReadRegistrySteamPath() => RegistrySteamPath;
+	public string? ReadRegistrySteamPath()
+	{
+		return RegistrySteamPath;
+	}
 
-	public int? ReadRegistryRunningAppId() => RegistryRunningAppId;
+	public int? ReadRegistryRunningAppId()
+	{
+		return RegistryRunningAppId;
+	}
 
-	public bool IsSteamProcessRunning() => SteamProcessRunning;
+	public bool IsSteamProcessRunning()
+	{
+		return SteamProcessRunning;
+	}
 
-	public IReadOnlyList<int> FindLaunchedAppIds() => LaunchedAppIds;
+	public IReadOnlyList<int> FindLaunchedAppIds()
+	{
+		return LaunchedAppIds;
+	}
 
 	public bool CanCloseGames { get; set; } = true;
 
@@ -71,7 +83,10 @@ internal sealed class FakeSteamPlatform : ISteamPlatform
 		return true;
 	}
 
-	public bool IsRunning(SteamGameProcess process) => GameProcesses.Contains(process);
+	public bool IsRunning(SteamGameProcess process)
+	{
+		return GameProcesses.Contains(process);
+	}
 }
 
 internal sealed class SteamFolders : IDisposable
@@ -100,45 +115,45 @@ internal sealed class SteamFolders : IDisposable
 		string? installDir = null)
 	{
 		var text = $$"""
-			"AppState"
-			{
-				"appid"		"{{appId.ToString(CultureInfo.InvariantCulture)}}"
-				"name"		"{{name}}"
-				"StateFlags"		"{{stateFlags.ToString(CultureInfo.InvariantCulture)}}"
-				"LastPlayed"		"{{(lastPlayed ?? 0).ToString(CultureInfo.InvariantCulture)}}"
-				"installdir"		"{{installDir ?? string.Empty}}"
-			}
-			""";
+					 "AppState"
+					 {
+					 	"appid"		"{{appId.ToString(CultureInfo.InvariantCulture)}}"
+					 	"name"		"{{name}}"
+					 	"StateFlags"		"{{stateFlags.ToString(CultureInfo.InvariantCulture)}}"
+					 	"LastPlayed"		"{{(lastPlayed ?? 0).ToString(CultureInfo.InvariantCulture)}}"
+					 	"installdir"		"{{installDir ?? string.Empty}}"
+					 }
+					 """;
 		File.WriteAllText(Path.Combine(library, "steamapps", $"appmanifest_{appId}.acf"), text);
 	}
 
 	public static void WriteLibraryFolders(string steamRoot, params string[] others)
 	{
 		var entries = string.Concat(others.Select((path, index) => $$"""
-				"{{index + 1}}"
-				{
-					"path"		"{{path.Replace("\\", "\\\\", StringComparison.Ordinal)}}"
-					"label"		""
-				}
+																	 	"{{index + 1}}"
+																	 	{
+																	 		"path"		"{{path.Replace("\\", "\\\\", StringComparison.Ordinal)}}"
+																	 		"label"		""
+																	 	}
 
-			"""));
+																	 """));
 		File.WriteAllText(Path.Combine(steamRoot, "steamapps", "libraryfolders.vdf"),
 			$$"""
-			"libraryfolders"
-			{
-				"0"
-				{
-					"path"		"{{steamRoot.Replace("\\", "\\\\", StringComparison.Ordinal)}}"
-				}
-			{{entries}}}
-			""");
+			  "libraryfolders"
+			  {
+			  	"0"
+			  	{
+			  		"path"		"{{steamRoot.Replace("\\", "\\\\", StringComparison.Ordinal)}}"
+			  	}
+			  {{entries}}}
+			  """);
 	}
 
 	public void Dispose()
 	{
 		try
 		{
-			Directory.Delete(Root, recursive: true);
+			Directory.Delete(Root, true);
 		}
 		catch (IOException)
 		{
@@ -185,25 +200,35 @@ internal sealed class ScriptedWebApi : ISteamWebApiClient
 	public SteamWebFailure? FriendsFailure { get; set; }
 
 	public Task<SteamPlayerSummary?> GetPlayerSummaryAsync(string steamId, CancellationToken cancellationToken)
-		=> SelfFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(Self);
+	{
+		return SelfFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(Self);
+	}
 
 	public Task<IReadOnlyList<SteamPlayerSummary>> GetPlayerSummariesAsync(
 		IReadOnlyList<string> steamIds,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(Friends);
+	{
+		return Task.FromResult(Friends);
+	}
 
 	public Task<IReadOnlyList<string>?> GetFriendIdsAsync(string steamId, CancellationToken cancellationToken)
-		=> FriendsFailure is { } failure
+	{
+		return FriendsFailure is { } failure
 			? throw new SteamWebApiException(failure)
 			: Task.FromResult<IReadOnlyList<string>?>([.. Friends.Select(friend => friend.SteamId)]);
+	}
 
 	public Task<string?> ResolveVanityUrlAsync(string vanityName, CancellationToken cancellationToken)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 
 	public IReadOnlyList<SteamOwnedGame>? OwnedGames { get; set; } = [];
 
 	public SteamWebFailure? OwnedFailure { get; set; }
 
 	public Task<IReadOnlyList<SteamOwnedGame>?> GetOwnedGamesAsync(string steamId, CancellationToken cancellationToken)
-		=> OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
+	{
+		return OwnedFailure is { } failure ? throw new SteamWebApiException(failure) : Task.FromResult(OwnedGames);
+	}
 }

@@ -11,13 +11,13 @@ namespace MacroDeckHost.Tests.UnitTests.Logging;
 [TestFixture]
 public class LogControlCharacterTests
 {
-	private static readonly char Escape = (char)0x1B;
+	private static readonly char _escape = (char)0x1B;
 
 	[Test]
 	public void An_untrusted_property_value_cannot_forge_a_line_or_carry_a_terminal_escape()
 	{
 		var rendered = RenderThroughSink(logger => logger.Warning("Report from {UserAgent}",
-			$"ua\n2026-09-30 00:00:00.000 +00:00 [ERR] [Host] forged{Escape}[31m"));
+			$"ua\n2026-09-30 00:00:00.000 +00:00 [ERR] [Host] forged{_escape}[31m"));
 
 		AssertClean(rendered);
 	}
@@ -25,7 +25,8 @@ public class LogControlCharacterTests
 	[Test]
 	public void Untrusted_text_inside_the_message_template_is_neutralised_too()
 	{
-		var template = new MessageTemplate([new TextToken($"plugin says {{not a hole}}\n[ERR] [Host] forged{Escape}")]);
+		var template
+			= new MessageTemplate([new TextToken($"plugin says {{not a hole}}\n[ERR] [Host] forged{_escape}")]);
 		var logEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null, template, []);
 
 		var rendered = Render(sink => new RedactingSink(sink).Emit(logEvent));
@@ -40,7 +41,7 @@ public class LogControlCharacterTests
 	[Test]
 	public void Values_nested_in_collections_and_dictionary_keys_are_neutralised()
 	{
-		var data = new Dictionary<string, string[]> { [$"key\n[ERR]{Escape}"] = ["a\nb", $"c{Escape}"] };
+		var data = new Dictionary<string, string[]> { [$"key\n[ERR]{_escape}"] = ["a\nb", $"c{_escape}"] };
 
 		var rendered = RenderThroughSink(logger => logger.Information("Data {Data}", data));
 
@@ -64,9 +65,9 @@ public class LogControlCharacterTests
 	[Test]
 	public void Char_and_uri_values_are_neutralised_and_unaffected_ones_keep_their_reference()
 	{
-		var forged = new Uri($"http://example.test/a{Escape}b");
+		var forged = new Uri($"http://example.test/a{_escape}b");
 		var clean = new Uri("http://example.test/ok");
-		Assume.That(forged.ToString().Contains(Escape), Is.True);
+		Assume.That(forged.ToString().Contains(_escape), Is.True);
 		var logEvent = new LogEvent(DateTimeOffset.UtcNow,
 			LogEventLevel.Information,
 			null,
@@ -103,7 +104,7 @@ public class LogControlCharacterTests
 	[Test]
 	public void An_exception_loses_terminal_escapes_but_keeps_its_line_breaks()
 	{
-		var exception = new InvalidOperationException($"bad{Escape}[31m\nsecond line");
+		var exception = new InvalidOperationException($"bad{_escape}[31m\nsecond line");
 		var events = new List<LogEvent>();
 
 		using (var logger = new LoggerConfiguration()
@@ -116,13 +117,14 @@ public class LogControlCharacterTests
 		var text = events.Single().Exception!.ToString();
 		Assert.Multiple(() =>
 		{
-			Assert.That(text.Contains(Escape), Is.False);
+			Assert.That(text.Contains(_escape), Is.False);
 			Assert.That(text, Does.Contain("\nsecond line"));
 		});
 	}
 
 	private static string RenderThroughSink(Action<ILogger> log)
-		=> Render(sink =>
+	{
+		return Render(sink =>
 		{
 			using var logger = new LoggerConfiguration()
 				.MinimumLevel.Verbose()
@@ -130,6 +132,7 @@ public class LogControlCharacterTests
 				.CreateLogger();
 			log(logger);
 		});
+	}
 
 	private static string Render(Action<ILogEventSink> emit)
 	{
@@ -140,5 +143,7 @@ public class LogControlCharacterTests
 	}
 
 	private static void AssertClean(string rendered)
-		=> Assert.That(rendered.Any(c => char.IsControl(c) && c != '\t'), Is.False, rendered);
+	{
+		Assert.That(rendered.Any(c => char.IsControl(c) && c != '\t'), Is.False, rendered);
+	}
 }

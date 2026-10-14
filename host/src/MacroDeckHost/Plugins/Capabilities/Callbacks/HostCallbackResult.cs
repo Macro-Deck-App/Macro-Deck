@@ -11,11 +11,18 @@ public sealed record HostCallbackResult
 	public ProtocolError? Error { get; private init; }
 
 	public static HostCallbackResult Ok(object? data = null)
-		=> new() { Data = data is null ? null : JsonSerializer.SerializeToElement(data, PluginProtocolJson.Options) };
+	{
+		return new HostCallbackResult
+			{ Data = data is null ? null : JsonSerializer.SerializeToElement(data, PluginProtocolJson.Options) };
+	}
 
-	public static HostCallbackResult Fail(string code,
+	public static HostCallbackResult Fail(
+		string code,
 		string message,
 		bool retryable = false,
 		IReadOnlyDictionary<string, string>? details = null)
-		=> new() { Error = new ProtocolError { Code = code, Message = message, Retryable = retryable, Details = details } };
+	{
+		return new HostCallbackResult
+			{ Error = new ProtocolError { Code = code, Message = message, Retryable = retryable, Details = details } };
+	}
 }

@@ -23,13 +23,25 @@ internal sealed class StubAutomationCache : IAutomationCache
 		return automation;
 	}
 
-	public void Clear() => _automations.Clear();
+	public void Clear()
+	{
+		_automations.Clear();
+	}
 
-	public Task InitializeCache() => Task.CompletedTask;
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public AutomationEntity? GetById(Guid id) => _automations.GetValueOrDefault(id);
+	public AutomationEntity? GetById(Guid id)
+	{
+		return _automations.GetValueOrDefault(id);
+	}
 
-	public List<AutomationEntity> GetAll() => _automations.Values.ToList();
+	public List<AutomationEntity> GetAll()
+	{
+		return _automations.Values.ToList();
+	}
 
 	public Task AddOrUpdate(AutomationEntity automation)
 	{

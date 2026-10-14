@@ -23,7 +23,10 @@ public sealed class KeyboardInputIntegration : IIntegration, IIntegrationIssuePr
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public KeyboardInputIntegration()
 	{
@@ -62,7 +65,10 @@ public sealed class KeyboardInputIntegration : IIntegration, IIntegrationIssuePr
 		}
 	}
 
-	public Task ShutdownAsync() => _input.ReleaseAllAsync();
+	public Task ShutdownAsync()
+	{
+		return _input.ReleaseAllAsync();
+	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
 	{

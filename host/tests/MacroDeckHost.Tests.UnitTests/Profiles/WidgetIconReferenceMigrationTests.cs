@@ -187,5 +187,7 @@ public class WidgetIconReferenceMigrationTests
 	}
 
 	private static WidgetEntity ActionButtonWidget(string data)
-		=> new() { Id = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	{
+		return new WidgetEntity { Id = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data };
+	}
 }

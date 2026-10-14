@@ -29,7 +29,10 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		_scopeFactory = scopeFactory;
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	public async Task<UserVariableWriteResult> ApplyAsync(
 		string name,
@@ -74,8 +77,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 			// Add/Toggle/Append compute from the value the host last saw. For a variable whose owner is
 			// not the host that is a reading the owner may already have moved on from, so an increment
 			// against one would silently be lost - Set is the only operation that survives the trip.
-			if (entity.Classification != VariableClassification.User &&
-				operation != UserVariableOperation.Set)
+			if (entity.Classification != VariableClassification.User && operation != UserVariableOperation.Set)
 			{
 				return UserVariableWriteResult.Failed(UserVariableWriteStatus.NotEditable,
 					$"'{canonical}' is managed by the app and only accepts being set.");
@@ -147,7 +149,7 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		}
 
 		var name = await services.GetRequiredService<VariableOwnerNames>().Resolve(ownerIntegrationId);
-		return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.OwnerUnavailable(integration: name));
+		return await ActiveLocalization.Resolve(services, AppStrings.Errors.Variables.OwnerUnavailable(name));
 	}
 
 	public async Task<UserVariableCreateResult> CreateAsync(
@@ -181,8 +183,8 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 
 			// The caller supplies the widget id, so an unchecked one would let a plugin create a variable
 			// under a widget that does not exist - or under an id it simply guessed.
-			if (widgetScoped &&
-				!scope.ServiceProvider.GetRequiredService<IWidgetAppearanceService>().Exists(ownerWidgetId!))
+			if (widgetScoped
+				&& !scope.ServiceProvider.GetRequiredService<IWidgetAppearanceService>().Exists(ownerWidgetId!))
 			{
 				return UserVariableCreateResult.Failed(UserVariableCreateStatus.UnknownWidget,
 					$"No widget with id '{ownerWidgetId}' exists.");
@@ -208,12 +210,15 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 		}
 	}
 
-	private static UserVariableCreateStatus CreateStatusOf(VariableError? error) => error switch
+	private static UserVariableCreateStatus CreateStatusOf(VariableError? error)
 	{
-		VariableError.AlreadyExists => UserVariableCreateStatus.AlreadyExists,
-		VariableError.InvalidName => UserVariableCreateStatus.InvalidName,
-		_ => UserVariableCreateStatus.InvalidValue
-	};
+		return error switch
+		{
+			VariableError.AlreadyExists => UserVariableCreateStatus.AlreadyExists,
+			VariableError.InvalidName => UserVariableCreateStatus.InvalidName,
+			_ => UserVariableCreateStatus.InvalidValue
+		};
+	}
 
 	private static ComputedValue ParseInitialValue(DomainVariableType type, string? initialValue)
 	{
@@ -246,14 +251,18 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 	}
 
 	private static ComputedValue ParseColor(string text)
-		=> RgbaColor.Canonicalize(text) is { } color
+	{
+		return RgbaColor.Canonicalize(text) is { } color
 			? ComputedValue.Ok(color)
 			: ComputedValue.Invalid($"'{text}' is not a color.");
+	}
 
 	private static Task<VariableEntity?> Resolve(IVariableService service, string name, string? ownerWidgetId)
-		=> string.IsNullOrWhiteSpace(ownerWidgetId)
+	{
+		return string.IsNullOrWhiteSpace(ownerWidgetId)
 			? service.Resolve(name, VariableScope.Global, null)
 			: service.Resolve(name, VariableScope.Widget, ownerWidgetId);
+	}
 
 	private static ComputedValue Compute(VariableEntity entity, UserVariableOperation operation, string? value)
 	{
@@ -318,7 +327,9 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 	}
 
 	private static bool TryParseDecimal(string? value, out decimal parsed)
-		=> decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed);
+	{
+		return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed);
+	}
 
 	// Deliberately stricter than VariableValueSerializer, which reads anything that is not "true"/"1"
 	// as false - so a typo would be stored as a value the user never asked for.
@@ -342,8 +353,14 @@ public sealed class UserVariableWriter : IUserVariableApi, IDisposable
 
 	private readonly record struct ComputedValue(bool Success, object? Value, string? Message)
 	{
-		public static ComputedValue Ok(object value) => new(true, value, null);
+		public static ComputedValue Ok(object value)
+		{
+			return new ComputedValue(true, value, null);
+		}
 
-		public static ComputedValue Invalid(string message) => new(false, null, message);
+		public static ComputedValue Invalid(string message)
+		{
+			return new ComputedValue(false, null, message);
+		}
 	}
 }

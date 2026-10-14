@@ -79,8 +79,8 @@ public class ProfileService : IProfileService
 		}
 
 		EmptyCellStyle? emptyCellStyle = null;
-		if (defaultEmptyCellStyle is not null &&
-			!EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
+		if (defaultEmptyCellStyle is not null
+			&& !EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
 		{
 			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
 				"Default empty cell style must be visible or transparent");
@@ -163,25 +163,25 @@ public class ProfileService : IProfileService
 				"Default columns must be at least 1");
 		}
 
-		if (defaultWidgetSpacing.HasValue &&
-			defaultWidgetSpacing.Value != -1 &&
-			(defaultWidgetSpacing.Value < 0 || defaultWidgetSpacing.Value > 40))
+		if (defaultWidgetSpacing.HasValue
+			&& defaultWidgetSpacing.Value != -1
+			&& (defaultWidgetSpacing.Value < 0 || defaultWidgetSpacing.Value > 40))
 		{
 			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
 				"Default widget spacing must be between 0 and 40");
 		}
 
-		if (defaultWidgetBorderRadius.HasValue &&
-			defaultWidgetBorderRadius.Value != -1 &&
-			(defaultWidgetBorderRadius.Value < 0 || defaultWidgetBorderRadius.Value > 60))
+		if (defaultWidgetBorderRadius.HasValue
+			&& defaultWidgetBorderRadius.Value != -1
+			&& (defaultWidgetBorderRadius.Value < 0 || defaultWidgetBorderRadius.Value > 60))
 		{
 			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
 				"Default widget border radius must be between 0 and 60");
 		}
 
 		EmptyCellStyle? emptyCellStyle = null;
-		if (defaultEmptyCellStyle is not null &&
-			!EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
+		if (defaultEmptyCellStyle is not null
+			&& !EmptyCellStyleText.TryParseUpdate(defaultEmptyCellStyle, out emptyCellStyle))
 		{
 			return Result.Fail<ProfileEntity, ProfileError>(ProfileError.ValidationError,
 				"Default empty cell style must be visible or transparent");
@@ -273,7 +273,8 @@ public class ProfileService : IProfileService
 		return Result.Ok<ProfileEntity, ProfileError>(profile);
 	}
 
-	public async Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(Guid id,
+	public async Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(
+		Guid id,
 		Guid targetId,
 		ProfileMovePosition position)
 	{
@@ -295,8 +296,8 @@ public class ProfileService : IProfileService
 		var targetIndex = ordered.FindIndex(existing => existing.Id == targetId);
 		ordered.Insert(position == ProfileMovePosition.After ? targetIndex + 1 : targetIndex, profile);
 
-		var changed = await _profileCache.ApplyOrders(
-			ordered.Select((existing, index) => (existing.Id, index)).ToDictionary(entry => entry.Id, entry => entry.index));
+		var changed = await _profileCache.ApplyOrders(ordered.Select((existing, index) => (existing.Id, index))
+			.ToDictionary(entry => entry.Id, entry => entry.index));
 
 		if (changed.Count > 0)
 		{

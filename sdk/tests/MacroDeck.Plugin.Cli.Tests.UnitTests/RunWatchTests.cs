@@ -46,12 +46,13 @@ public class RunWatchTests
 				Assert.That(Path.GetFileNameWithoutExtension(launch.FileName), Is.EqualTo("dotnet"));
 				Assert.That(launch.WorkingDirectory, Is.EqualTo(directory));
 				Assert.That(launch.Arguments,
-					Is.EqualTo(new[] { "watch", "--non-interactive", "--project", project, "run", "--no-launch-profile" }));
+					Is.EqualTo(new[]
+						{ "watch", "--non-interactive", "--project", project, "run", "--no-launch-profile" }));
 			});
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -66,7 +67,7 @@ public class RunWatchTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 }

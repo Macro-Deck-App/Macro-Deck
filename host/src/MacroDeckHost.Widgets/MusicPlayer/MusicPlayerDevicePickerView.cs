@@ -59,12 +59,13 @@ internal static class MusicPlayerDevicePickerView
 			Direction = UiComponentDirections.Vertical,
 			Gap = UiSize.FromBasis(0.03),
 			Padding = UiSize.FromBasis(0.02),
-			Children = [Results(state)],
+			Children = [Results(state)]
 		};
 	}
 
 	private static UiList Results(UiState<MusicPlayerDevicePickerState> state)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "results",
 			Fill = true,
@@ -85,13 +86,15 @@ internal static class MusicPlayerDevicePickerView
 					Key = "rows",
 					Items = UiValue.From<IReadOnlyList<MusicPlayerDevice>>(() => state.Value.Devices),
 					KeySelector = device => device.Id,
-					Template = (device, _) => Row(device),
-				},
-			],
+					Template = (device, _) => Row(device)
+				}
+			]
 		};
+	}
 
 	private static UiWhen Message(string key, Func<bool> when, LocalizedText text)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = $"{key}When",
 			Condition = when,
@@ -110,16 +113,18 @@ internal static class MusicPlayerDevicePickerView
 						Size = UiSize.FromBasis(0.04),
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center,
-						Wrap = true,
-					},
-				],
-			},
+						Wrap = true
+					}
+				]
+			}
 		};
+	}
 
 	private static UiStack Row(MusicPlayerDevice device)
 		// A stack rather than a button, for the reason the item picker's rows are: the affordance follows
 		// the declared events, and a button's absent background is the accent colour.
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = device.Id,
 			Answer = UiValue.Of(device.Id),
@@ -144,7 +149,7 @@ internal static class MusicPlayerDevicePickerView
 							Key = "name",
 							Text = device.Name,
 							Size = UiSize.FromBasis(0.038),
-							Weight = UiComponentTextWeights.Medium,
+							Weight = UiComponentTextWeights.Medium
 						},
 						new UiWhen
 						{
@@ -155,10 +160,10 @@ internal static class MusicPlayerDevicePickerView
 								Key = "type",
 								Text = device.Type,
 								Size = UiSize.FromBasis(0.032),
-								Role = UiComponentTextRoles.Secondary,
-							},
-						},
-					],
+								Role = UiComponentTextRoles.Secondary
+							}
+						}
+					]
 				},
 				new UiWhen
 				{
@@ -169,8 +174,8 @@ internal static class MusicPlayerDevicePickerView
 						Key = "active",
 						Text = AppStrings.Dialogs.DevicePicker.Active(),
 						Size = UiSize.FromBasis(0.03),
-						Weight = UiComponentTextWeights.Medium,
-					},
+						Weight = UiComponentTextWeights.Medium
+					}
 				},
 				new UiWhen
 				{
@@ -183,16 +188,19 @@ internal static class MusicPlayerDevicePickerView
 						Key = "volume",
 						Text = Volume(device),
 						Size = UiSize.FromBasis(0.03),
-						Role = UiComponentTextRoles.Secondary,
-					},
-				},
-			],
+						Role = UiComponentTextRoles.Secondary
+					}
+				}
+			]
 		};
+	}
 
 	private static string Volume(MusicPlayerDevice device)
-		=> device.VolumePercent.HasValue
+	{
+		return device.VolumePercent.HasValue
 			? device.VolumePercent.Value.ToString(CultureInfo.CurrentCulture) + "%"
 			: string.Empty;
+	}
 
 	/// <summary>
 	/// Declared so the row is pressable, and deliberately empty: the answer settles the dialog on the

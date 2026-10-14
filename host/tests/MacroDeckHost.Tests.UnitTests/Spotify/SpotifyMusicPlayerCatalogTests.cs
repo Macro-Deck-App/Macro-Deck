@@ -72,9 +72,13 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 		var spotify = new FakeSpotifyCatalog { LikedSongs = 120 };
 		var player = CreatePlayer(spotify);
 
-		var items = await player.GetCatalogAsync("entry", MusicPlayerCatalogItemKind.Track, null, CancellationToken.None);
+		var items = await player.GetCatalogAsync("entry",
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None);
 
-		Assert.That(items.Select(i => i.Id).ToList(), Is.EqualTo(Enumerable.Range(0, 120).Select(n => $"liked-{n}").ToList()));
+		Assert.That(items.Select(i => i.Id).ToList(),
+			Is.EqualTo(Enumerable.Range(0, 120).Select(n => $"liked-{n}").ToList()));
 	}
 
 	[Test]
@@ -88,7 +92,8 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 			null,
 			CancellationToken.None);
 
-		Assert.That(items.Select(i => i.Id).ToList(), Is.EqualTo(Enumerable.Range(0, 75).Select(n => $"playlist-{n}").ToList()));
+		Assert.That(items.Select(i => i.Id).ToList(),
+			Is.EqualTo(Enumerable.Range(0, 75).Select(n => $"playlist-{n}").ToList()));
 	}
 
 	[TestCase(MusicPlayerCatalogItemKind.Track)]
@@ -109,7 +114,10 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 		var spotify = new FakeSpotifyCatalog { LikedSongs = 5000 };
 		var player = CreatePlayer(spotify);
 
-		var items = await player.GetCatalogAsync("entry", MusicPlayerCatalogItemKind.Track, null, CancellationToken.None);
+		var items = await player.GetCatalogAsync("entry",
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -126,7 +134,10 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 		var spotify = new FakeSpotifyCatalog { LikedSongs = 100 };
 		var player = CreatePlayer(spotify);
 
-		var items = await player.GetCatalogAsync("entry", MusicPlayerCatalogItemKind.Track, null, CancellationToken.None);
+		var items = await player.GetCatalogAsync("entry",
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -141,7 +152,10 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 		var spotify = new FakeSpotifyCatalog { LikedSongs = 120, LikedWhileReading = true };
 		var player = CreatePlayer(spotify);
 
-		var items = await player.GetCatalogAsync("entry", MusicPlayerCatalogItemKind.Track, null, CancellationToken.None);
+		var items = await player.GetCatalogAsync("entry",
+			MusicPlayerCatalogItemKind.Track,
+			null,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -258,15 +272,24 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 			if (path.EndsWith("me/tracks", StringComparison.Ordinal))
 			{
 				var shift = LikedWhileReading && catalogRequests > 1 ? 1 : 0;
-				return Page(request, LibraryDefaultLimit, LibraryMaxLimit, LikedSongs + shift, n => new
-				{
-					added_at = "2026-01-01T00:00:00Z", track = Track(n - shift < 0 ? "just-liked" : $"liked-{n - shift}")
-				});
+				return Page(request,
+					LibraryDefaultLimit,
+					LibraryMaxLimit,
+					LikedSongs + shift,
+					n => new
+					{
+						added_at = "2026-01-01T00:00:00Z",
+						track = Track(n - shift < 0 ? "just-liked" : $"liked-{n - shift}")
+					});
 			}
 
 			if (path.EndsWith("me/playlists", StringComparison.Ordinal))
 			{
-				return Page(request, LibraryDefaultLimit, LibraryMaxLimit, OwnPlaylists, n => Playlist($"playlist-{n}"));
+				return Page(request,
+					LibraryDefaultLimit,
+					LibraryMaxLimit,
+					OwnPlaylists,
+					n => Playlist($"playlist-{n}"));
 			}
 
 			if (path.EndsWith("search", StringComparison.Ordinal))
@@ -286,11 +309,18 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 		}
 
 		internal static int Offset(IRequest request)
-			=> request.Parameters.TryGetValue("offset", out var offset)
+		{
+			return request.Parameters.TryGetValue("offset", out var offset)
 				? int.Parse(offset, CultureInfo.InvariantCulture)
 				: 0;
+		}
 
-		private static Response Page(IRequest request, int defaultLimit, int maxLimit, int total, Func<int, object> item)
+		private static Response Page(
+			IRequest request,
+			int defaultLimit,
+			int maxLimit,
+			int total,
+			Func<int, object> item)
 		{
 			var limit = request.Parameters.TryGetValue("limit", out var l)
 				? int.Parse(l, CultureInfo.InvariantCulture)
@@ -304,11 +334,13 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 			var items = Enumerable.Range(offset, Math.Max(0, Math.Min(limit, total - offset))).Select(item).ToList();
 			var next = offset + items.Count < total ? "https://api.spotify.com/v1/next" : null;
 			return Json(HttpStatusCode.OK,
-				JsonSerializer.Serialize(new { href = "https://api.spotify.com/v1/page", items, limit, offset, total, next }));
+				JsonSerializer.Serialize(new
+					{ href = "https://api.spotify.com/v1/page", items, limit, offset, total, next }));
 		}
 
 		private static object Track(string id)
-			=> new
+		{
+			return new
 			{
 				type = "track",
 				id,
@@ -318,16 +350,24 @@ internal sealed class SpotifyMusicPlayerCatalogTests
 				artists = Array.Empty<object>(),
 				album = new { name = "Album", images = Array.Empty<object>() }
 			};
+		}
 
 		private static object Playlist(string id)
-			=> new { type = "playlist", id, uri = $"spotify:playlist:{id}", name = id, images = Array.Empty<object>() };
+		{
+			return new
+			{
+				type = "playlist", id, uri = $"spotify:playlist:{id}", name = id, images = Array.Empty<object>()
+			};
+		}
 
 		private static Response Json(HttpStatusCode statusCode, string body)
-			=> new(new Dictionary<string, string>())
+		{
+			return new Response(new Dictionary<string, string>())
 			{
 				StatusCode = statusCode,
 				ContentType = "application/json",
 				Body = body
 			};
+		}
 	}
 }

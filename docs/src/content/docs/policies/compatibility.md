@@ -248,7 +248,7 @@ What did **not** need a major:
   reports the bindings as not supported. Two limits were added: `maxVariableRefreshDefinitionIds` and
   `maxVariableBindingsPerCall`.
 - `VariableNames` (`MacroDeck.Sdk.Variables`), `HostOptionsSources` (`MacroDeck.Sdk.Actions`) and the
-  `NativeKeys` members `IsPositional`, `TryGetWindowsScanCode`, `TryGetMacOSKeyCode` and
+  `NativeKeys` members `IsPositional`, `TryGetWindowsScanCode`, `TryGetMacOsKeyCode` and
   `TryFromWindowsScanCode` are new SDK helpers. They need no host support: the option source ids are the
   values every Macro Deck already answers, and the name rules are the ones every Macro Deck already applies.
 - `IIntegrationContext` gained `Storage`, `Locale` and `Http`, and `IConfigFlowContext` gained `Http`, each a

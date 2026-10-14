@@ -8,7 +8,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.MusicPlayer;
 internal static class MusicPlayerDescriptorMapper
 {
 	public static MusicPlayerInstanceDto ToDto(MusicPlayerInstance instance, IMusicPlayer? player)
-		=> new()
+	{
+		return new MusicPlayerInstanceDto
 		{
 			Id = instance.Id,
 			DisplayName = instance.DisplayName,
@@ -16,9 +17,11 @@ internal static class MusicPlayerDescriptorMapper
 			HasDevices = player is IMusicPlayerDeviceProvider,
 			Options = [.. MusicPlayerOptionValues.Supported(instance.Options).Select(ActionParameterMapper.ToDto)]
 		};
+	}
 
 	public static MusicPlayerStateDto ToDto(MusicPlayerState state)
-		=> new()
+	{
+		return new MusicPlayerStateDto
 		{
 			IsConnected = state.IsConnected,
 			IsUnavailable = state.IsUnavailable,
@@ -37,9 +40,11 @@ internal static class MusicPlayerDescriptorMapper
 			DeviceType = state.DeviceType,
 			Badge = state.Badge
 		};
+	}
 
 	public static MusicPlayerCatalogItemDto ToDto(MusicPlayerCatalogItem item)
-		=> new()
+	{
+		return new MusicPlayerCatalogItemDto
 		{
 			Id = item.Id,
 			Title = item.Title,
@@ -48,10 +53,11 @@ internal static class MusicPlayerDescriptorMapper
 			ArtworkId = item.ArtworkId,
 			DurationSeconds = item.Duration?.TotalSeconds
 		};
+	}
 
 	public static MusicPlayerCatalogItem ToDomain(MusicPlayerCatalogItemDto dto)
 	{
-		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(dto.Kind, ignoreCase: false, out var kind))
+		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(dto.Kind, false, out var kind))
 		{
 			throw new InvalidOperationException($"Unknown music player catalog item kind '{dto.Kind}'.");
 		}
@@ -65,7 +71,8 @@ internal static class MusicPlayerDescriptorMapper
 	}
 
 	public static MusicPlayerDeviceDto ToDto(MusicPlayerDevice device)
-		=> new()
+	{
+		return new MusicPlayerDeviceDto
 		{
 			Id = device.Id,
 			Name = device.Name,
@@ -73,4 +80,5 @@ internal static class MusicPlayerDescriptorMapper
 			IsActive = device.IsActive,
 			VolumePercent = device.VolumePercent
 		};
+	}
 }

@@ -17,20 +17,24 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class DeviceProviderContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.DeviceProvider,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static DeviceDescriptor Deck()
-		=> new("SERIAL-1",
+	{
+		return new DeviceDescriptor("SERIAL-1",
 			"Stream Deck XL",
 			"Stream Deck XL",
 			"Elgato",
 			"com.example.contract::xl",
 			new DeviceCapabilities { KeyCount = 32, DialCount = 4, SupportsImages = true });
+	}
 
 	[Test]
 	public async Task Declaring_the_capability_registers_an_adapter_the_validator_accepts()
@@ -115,17 +119,31 @@ internal sealed class DeviceProviderContractTests : CapabilityContractFixture
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName { get; } = providerName;
 
 		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeviceDescriptor> GetDevices() => devices;
+		public IReadOnlyList<DeviceDescriptor> GetDevices()
+		{
+			return devices;
+		}
 	}
 }

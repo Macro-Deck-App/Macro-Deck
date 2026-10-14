@@ -7,8 +7,8 @@ namespace MacroDeck.Localization.Tests.UnitTests;
 [TestFixture]
 public class ScopeIsolationTests
 {
-	private const string _spotify = "com.example.spotify";
-	private const string _obs = "com.example.obs";
+	private const string Spotify = "com.example.spotify";
+	private const string Obs = "com.example.obs";
 
 	private static LocalizationCatalog Catalog(string scope, params (string Key, string Value)[] entries)
 	{
@@ -23,7 +23,7 @@ public class ScopeIsolationTests
 			"en",
 			new Dictionary<string, IReadOnlyDictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
 			{
-				["en"] = templates,
+				["en"] = templates
 			});
 	}
 
@@ -31,17 +31,17 @@ public class ScopeIsolationTests
 	public void Two_plugins_and_Macro_Deck_can_all_define_the_same_short_key()
 	{
 		var registry = new LocalizationCatalogRegistry();
-		registry.Register(Catalog(LocalizationScope.ForPlugin(_spotify), ("Connect", "Connect to Spotify")));
-		registry.Register(Catalog(LocalizationScope.ForPlugin(_obs), ("Connect", "Connect to OBS")));
+		registry.Register(Catalog(LocalizationScope.ForPlugin(Spotify), ("Connect", "Connect to Spotify")));
+		registry.Register(Catalog(LocalizationScope.ForPlugin(Obs), ("Connect", "Connect to OBS")));
 		registry.Register(Catalog(LocalizationScope.MacroDeck, ("Connect", "Connect")));
 
 		var resolver = new LocalizationResolver(registry);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(resolver.Resolve(new LocalizedString(LocalizationKey.Plugin(_spotify, "Connect")), "en"),
+			Assert.That(resolver.Resolve(new LocalizedString(LocalizationKey.Plugin(Spotify, "Connect")), "en"),
 				Is.EqualTo("Connect to Spotify"));
-			Assert.That(resolver.Resolve(new LocalizedString(LocalizationKey.Plugin(_obs, "Connect")), "en"),
+			Assert.That(resolver.Resolve(new LocalizedString(LocalizationKey.Plugin(Obs, "Connect")), "en"),
 				Is.EqualTo("Connect to OBS"));
 			Assert.That(resolver.Resolve(new LocalizedString(LocalizationKey.MacroDeck("Connect")), "en"),
 				Is.EqualTo("Connect"));
@@ -54,12 +54,12 @@ public class ScopeIsolationTests
 	public void A_plugin_without_a_key_never_borrows_another_plugins_text()
 	{
 		var registry = new LocalizationCatalogRegistry();
-		registry.Register(Catalog(LocalizationScope.ForPlugin(_spotify), ("Connect", "Connect to Spotify")));
-		registry.Register(Catalog(LocalizationScope.ForPlugin(_obs), ("Disconnect", "Disconnect from OBS")));
+		registry.Register(Catalog(LocalizationScope.ForPlugin(Spotify), ("Connect", "Connect to Spotify")));
+		registry.Register(Catalog(LocalizationScope.ForPlugin(Obs), ("Disconnect", "Disconnect from OBS")));
 		registry.Register(Catalog(LocalizationScope.MacroDeck, ("Connect", "Connect")));
 
 		var resolved = new LocalizationResolver(registry)
-			.Resolve(new LocalizedString(LocalizationKey.Plugin(_obs, "Connect")), "en");
+			.Resolve(new LocalizedString(LocalizationKey.Plugin(Obs, "Connect")), "en");
 
 		Assert.That(resolved, Is.EqualTo("[[plugin:com.example.obs:Connect]]"));
 	}
@@ -68,14 +68,14 @@ public class ScopeIsolationTests
 	public void Unregistering_a_plugin_takes_its_scope_with_it()
 	{
 		var registry = new LocalizationCatalogRegistry();
-		registry.Register(Catalog(LocalizationScope.ForPlugin(_spotify), ("Connect", "Connect to Spotify")));
+		registry.Register(Catalog(LocalizationScope.ForPlugin(Spotify), ("Connect", "Connect to Spotify")));
 
 		var resolver = new LocalizationResolver(registry);
-		var key = new LocalizedString(LocalizationKey.Plugin(_spotify, "Connect"));
+		var key = new LocalizedString(LocalizationKey.Plugin(Spotify, "Connect"));
 
 		Assert.That(resolver.Resolve(key, "en"), Is.EqualTo("Connect to Spotify"));
 
-		registry.Unregister(LocalizationScope.ForPlugin(_spotify));
+		registry.Unregister(LocalizationScope.ForPlugin(Spotify));
 
 		Assert.That(resolver.Resolve(key, "en"), Is.EqualTo("[[plugin:com.example.spotify:Connect]]"));
 	}
@@ -86,7 +86,7 @@ public class ScopeIsolationTests
 	[Test]
 	public void Replacing_a_catalog_swaps_it_whole_rather_than_mutating_it()
 	{
-		var scope = LocalizationScope.ForPlugin(_spotify);
+		var scope = LocalizationScope.ForPlugin(Spotify);
 		var registry = new LocalizationCatalogRegistry();
 		registry.Register(Catalog(scope, ("A", "one"), ("B", "two")));
 
@@ -115,8 +115,8 @@ public class ScopeIsolationTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(registry.Find(LocalizationScope.ForPlugin(_spotify)), Is.Null);
-			Assert.That(registry.Unregister(LocalizationScope.ForPlugin(_spotify)), Is.False);
+			Assert.That(registry.Find(LocalizationScope.ForPlugin(Spotify)), Is.Null);
+			Assert.That(registry.Unregister(LocalizationScope.ForPlugin(Spotify)), Is.False);
 			Assert.That(registry.Scopes, Is.Empty);
 		});
 	}

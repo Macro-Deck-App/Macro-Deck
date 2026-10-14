@@ -23,15 +23,18 @@ namespace MacroDeckHost.Tests.UnitTests.BackgroundServices;
 [TestFixture]
 internal sealed class WidgetIconProviderPollServiceTests
 {
-	private static WidgetEntity Button(Guid id) => new()
+	private static WidgetEntity Button(Guid id)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		// Only the text prefilter cares about this: it must mention "iconProvider" or EnqueueDueProviders
-		// rules the widget out before ever asking the icon service for its poll interval.
-		Data = """{"iconProvider":{"blockId":"blk-1"}}"""
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			// Only the text prefilter cares about this: it must mention "iconProvider" or EnqueueDueProviders
+			// rules the widget out before ever asking the icon service for its poll interval.
+			Data = """{"iconProvider":{"blockId":"blk-1"}}"""
+		};
+	}
 
 	// Acceptance Group F, scenario 24 (counterexample): InvalidateIconAsync fans out by action id to
 	// exactly the matching widgets, promptly - not everything, not only the first match, and the queue is
@@ -43,9 +46,14 @@ internal sealed class WidgetIconProviderPollServiceTests
 		var w2 = Guid.NewGuid();
 		var w3 = Guid.NewGuid();
 
-		var variableIndex = new FakeWidgetVariableIndex();
-		variableIndex.IconProviderReferencesByAction[("spotify", "current-track")] = [w1, w2];
-		variableIndex.IconProviderReferencesByAction[("spotify", "weather-icon")] = [w3];
+		var variableIndex = new FakeWidgetVariableIndex
+		{
+			IconProviderReferencesByAction =
+			{
+				[("spotify", "current-track")] = [w1, w2],
+				[("spotify", "weather-icon")] = [w3]
+			}
+		};
 
 		var queue = new WidgetIconEvalChannel();
 		var invalidator = new WidgetIconInvalidator(variableIndex, queue);
@@ -75,8 +83,13 @@ internal sealed class WidgetIconProviderPollServiceTests
 	public void NothingSubscribed_MeansTheNextPollBacksOffToTheIdleFloor_RatherThanStayingDueEveryTick()
 	{
 		var widgetId = Guid.NewGuid();
-		var iconService = new FakeWidgetIconServiceForPoll();
-		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromMilliseconds(1);
+		var iconService = new FakeWidgetIconServiceForPoll
+		{
+			PollIntervalByWidget =
+			{
+				[widgetId] = TimeSpan.FromMilliseconds(1)
+			}
+		};
 
 		var queue = new WidgetIconEvalChannel();
 		var folderCache = new FakeFolderCache(Button(widgetId));
@@ -130,8 +143,13 @@ internal sealed class WidgetIconProviderPollServiceTests
 	public void WidgetPolledWhileHidden_IsPolledOnTheNextTickOnceSomethingDisplaysIt()
 	{
 		var widgetId = Guid.NewGuid();
-		var iconService = new FakeWidgetIconServiceForPoll();
-		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromSeconds(5);
+		var iconService = new FakeWidgetIconServiceForPoll
+		{
+			PollIntervalByWidget =
+			{
+				[widgetId] = TimeSpan.FromSeconds(5)
+			}
+		};
 		var queue = new WidgetIconEvalChannel();
 		var subscriptions = new WidgetStateSubscriptionTracker();
 		var time = new FakeTimeProvider();
@@ -151,8 +169,13 @@ internal sealed class WidgetIconProviderPollServiceTests
 	public void DisplayedWidget_IsPolledAtItsDeclaredInterval_EvenWhenTheTickLandsSlightlyEarly()
 	{
 		var widgetId = Guid.NewGuid();
-		var iconService = new FakeWidgetIconServiceForPoll();
-		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromSeconds(2);
+		var iconService = new FakeWidgetIconServiceForPoll
+		{
+			PollIntervalByWidget =
+			{
+				[widgetId] = TimeSpan.FromSeconds(2)
+			}
+		};
 		var queue = new WidgetIconEvalChannel();
 		var subscriptions = new WidgetStateSubscriptionTracker();
 		subscriptions.Add("deck", widgetId.ToString());
@@ -176,8 +199,13 @@ internal sealed class WidgetIconProviderPollServiceTests
 	public void DisplayedWidget_IsNeverPolledFasterThanDeclared()
 	{
 		var widgetId = Guid.NewGuid();
-		var iconService = new FakeWidgetIconServiceForPoll();
-		iconService.PollIntervalByWidget[widgetId] = TimeSpan.FromMilliseconds(1500);
+		var iconService = new FakeWidgetIconServiceForPoll
+		{
+			PollIntervalByWidget =
+			{
+				[widgetId] = TimeSpan.FromMilliseconds(1500)
+			}
+		};
 		var queue = new WidgetIconEvalChannel();
 		var subscriptions = new WidgetStateSubscriptionTracker();
 		subscriptions.Add("deck", widgetId.ToString());
@@ -248,18 +276,45 @@ internal sealed class WidgetIconProviderPollServiceTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -296,10 +351,13 @@ internal sealed class WidgetIconProviderPollServiceTests
 
 	private sealed class FakeWidgetIconServiceForPoll : IWidgetIconService
 	{
-		public Task<WidgetIconResolution> Resolve(Guid widgetId,
+		public Task<WidgetIconResolution> Resolve(
+			Guid widgetId,
 			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
 			CancellationToken cancellationToken = default)
-			=> Resolve(widgetId, cancellationToken);
+		{
+			return Resolve(widgetId, cancellationToken);
+		}
 
 		public Dictionary<Guid, TimeSpan> PollIntervalByWidget { get; } = new();
 		public Dictionary<Guid, int> ResolveCallCounts { get; } = new();
@@ -311,7 +369,9 @@ internal sealed class WidgetIconProviderPollServiceTests
 		}
 
 		public TimeSpan? GetProviderPollInterval(Guid widgetId)
-			=> PollIntervalByWidget.TryGetValue(widgetId, out var interval) ? interval : null;
+		{
+			return PollIntervalByWidget.TryGetValue(widgetId, out var interval) ? interval : null;
+		}
 	}
 
 	private sealed class FakeWidgetVariableIndex : IWidgetVariableIndex
@@ -321,11 +381,20 @@ internal sealed class WidgetIconProviderPollServiceTests
 			get;
 		} = new();
 
-		public IReadOnlyList<Guid> FindLabelReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindLabelReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
 		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null)
 		{
@@ -343,9 +412,15 @@ internal sealed class WidgetIconProviderPollServiceTests
 				: [];
 		}
 
-		public bool LabelReferences(Guid widgetId, string variableName) => false;
+		public bool LabelReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
-		public bool StateMappingReferences(Guid widgetId, string variableName) => false;
+		public bool StateMappingReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
 		public void Rebuild()
 		{
@@ -362,7 +437,7 @@ internal sealed class WidgetIconProviderPollServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping => CancellationToken.None;
 		public CancellationToken ApplicationStopped => CancellationToken.None;
 

@@ -9,7 +9,10 @@ public enum StoreLinkOutcome
 	RegistryUnavailable
 }
 
-public sealed record StoreLinkResolution(StoreLinkOutcome Outcome, StoreExtensionKind Kind = default, string? Id = null);
+public sealed record StoreLinkResolution(
+	StoreLinkOutcome Outcome,
+	StoreExtensionKind Kind = default,
+	string? Id = null);
 
 public interface IStoreLinkResolver
 {
@@ -47,8 +50,8 @@ public sealed class StoreLinkResolver : IStoreLinkResolver
 		}
 
 		var matches = snapshot.Entries
-			.Where(candidate => string.Equals(candidate.Id, packageId, StringComparison.Ordinal) &&
-				snapshot.FindWithdrawal(candidate) is null)
+			.Where(candidate => string.Equals(candidate.Id, packageId, StringComparison.Ordinal)
+				&& snapshot.FindWithdrawal(candidate) is null)
 			.Take(2)
 			.ToList();
 

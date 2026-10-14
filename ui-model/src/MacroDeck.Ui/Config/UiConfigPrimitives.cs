@@ -239,6 +239,6 @@ public static class UiConfigPrimitives
 		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Thresholds, Flow, Step, Stack, Tabs,
 		Tab, Heading, Prose, Instructions, Instruction, CopyValue, Link, AdvancedSection, Divider, Banner,
 		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor, Status,
-		Menu, Dialog,
+		Menu, Dialog
 	];
 }

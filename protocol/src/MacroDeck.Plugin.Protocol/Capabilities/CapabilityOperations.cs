@@ -173,7 +173,7 @@ public static class CapabilityOperations
 		public static readonly IReadOnlyList<string> All =
 		[
 			Describe, Instances, State, Artwork, Play, PlayItem, Pause, Toggle, Next, Previous, Seek,
-			Volume, Shuffle, Repeat, Catalog, Devices, Transfer,
+			Volume, Shuffle, Repeat, Catalog, Devices, Transfer
 		];
 	}
 
@@ -500,14 +500,19 @@ public static class CapabilityOperations
 			[Handshake.CapabilityKinds.ConfigEntries] = ConfigEntries.All,
 			[Handshake.CapabilityKinds.BatteryProvider] = BatteryProvider.All,
 			[Handshake.CapabilityKinds.EmailInbox] = EmailInbox.All,
-			[Handshake.CapabilityKinds.CompanionDeviceEntries] = CompanionDeviceEntries.All,
+			[Handshake.CapabilityKinds.CompanionDeviceEntries] = CompanionDeviceEntries.All
 		};
 
-	public static IReadOnlyList<string> For(string kind) => _byKind[kind];
+	public static IReadOnlyList<string> For(string kind)
+	{
+		return _byKind[kind];
+	}
 
 	public static bool IsKnown(string? kind, string? operation)
-		=> kind is not null &&
-			operation is not null &&
-			_byKind.TryGetValue(kind, out var operations) &&
-			operations.Contains(operation, StringComparer.Ordinal);
+	{
+		return kind is not null
+			&& operation is not null
+			&& _byKind.TryGetValue(kind, out var operations)
+			&& operations.Contains(operation, StringComparer.Ordinal);
+	}
 }

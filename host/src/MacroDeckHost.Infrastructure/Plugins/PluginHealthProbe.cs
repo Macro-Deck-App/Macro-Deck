@@ -10,7 +10,8 @@ public static class PluginHealthProbeHttpClient
 
 public interface IPluginHealthProbe
 {
-	Task<bool> Probe(int port,
+	Task<bool> Probe(
+		int port,
 		string path,
 		TimeSpan timeout,
 		string pluginId,
@@ -28,7 +29,8 @@ public sealed class PluginHealthProbe : IPluginHealthProbe
 		_logger = logger.ForContext<PluginHealthProbe>();
 	}
 
-	public async Task<bool> Probe(int port,
+	public async Task<bool> Probe(
+		int port,
 		string path,
 		TimeSpan timeout,
 		string pluginId,

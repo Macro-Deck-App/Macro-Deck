@@ -26,7 +26,7 @@ public class GetFilesystemEntriesRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "DIRECTORY_NOT_FOUND",
-					Message = AppStrings.Errors.Filesystem.DirectoryNotFound(path: fullPath)
+					Message = AppStrings.Errors.Filesystem.DirectoryNotFound(fullPath)
 				}
 			});
 		}
@@ -91,7 +91,7 @@ public class GetFilesystemEntriesRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "ACCESS_DENIED",
-					Message = AppStrings.Errors.Filesystem.AccessDenied(path: fullPath)
+					Message = AppStrings.Errors.Filesystem.AccessDenied(fullPath)
 				}
 			});
 		}

@@ -27,21 +27,27 @@ public sealed record PluginRegistrationResult
 	public string? PluginSecret { get; init; }
 
 	public static PluginRegistrationResult Success(PluginRegistrationEntity registration, string secret)
-		=> new() { Succeeded = true, Registration = registration, PluginSecret = secret };
+	{
+		return new PluginRegistrationResult { Succeeded = true, Registration = registration, PluginSecret = secret };
+	}
 
 	public static PluginRegistrationResult Fail(PluginRegistrationError error, string? detail = null)
-		=> new() { Succeeded = false, Error = error, ErrorDetail = detail };
+	{
+		return new PluginRegistrationResult { Succeeded = false, Error = error, ErrorDetail = detail };
+	}
 }
 
 public interface IPluginRegistrationService
 {
-	Task<PluginRegistrationResult> Register(string pluginId,
+	Task<PluginRegistrationResult> Register(
+		string pluginId,
 		string displayName,
 		Guid? accessTokenId,
 		string origin,
 		bool allowInstalledId = false);
 
-	Task<PluginRegistrationResult> ReplaceSecret(string pluginId,
+	Task<PluginRegistrationResult> ReplaceSecret(
+		string pluginId,
 		string displayName,
 		Guid? accessTokenId,
 		string origin);
@@ -79,7 +85,8 @@ public class PluginRegistrationService : IPluginRegistrationService
 		_timeProvider = timeProvider;
 	}
 
-	public async Task<PluginRegistrationResult> Register(string pluginId,
+	public async Task<PluginRegistrationResult> Register(
+		string pluginId,
 		string displayName,
 		Guid? accessTokenId,
 		string origin,
@@ -90,9 +97,10 @@ public class PluginRegistrationService : IPluginRegistrationService
 			return PluginRegistrationResult.Fail(PluginRegistrationError.InvalidPluginId, validationError);
 		}
 
-		if (!allowInstalledId &&
-			_catalog.Discover().Any(plugin =>
-				string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0))
+		if (!allowInstalledId
+			&& _catalog.Discover()
+				.Any(plugin =>
+					string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0))
 		{
 			return PluginRegistrationResult.Fail(PluginRegistrationError.PluginInstalled);
 		}
@@ -162,7 +170,8 @@ public class PluginRegistrationService : IPluginRegistrationService
 		return PluginRegistrationResult.Success(registration, secret);
 	}
 
-	public async Task<PluginRegistrationResult> ReplaceSecret(string pluginId,
+	public async Task<PluginRegistrationResult> ReplaceSecret(
+		string pluginId,
 		string displayName,
 		Guid? accessTokenId,
 		string origin)

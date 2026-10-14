@@ -21,7 +21,7 @@ public class VerifyExitCodeTableTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -283,7 +283,8 @@ public class VerifyExitCodeTableTests
 			certificateId);
 	}
 
-	private async Task<string> SignUnderCustomRootAsync(SigningCliFixtures.IssuedCertificate issued,
+	private async Task<string> SignUnderCustomRootAsync(
+		SigningCliFixtures.IssuedCertificate issued,
 		(byte[] PrivateKey, byte[] PublicKey) signingRoot,
 		string packageName)
 	{

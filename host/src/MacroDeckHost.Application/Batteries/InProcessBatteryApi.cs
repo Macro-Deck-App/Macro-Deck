@@ -21,7 +21,10 @@ public sealed class InProcessBatteryApi : IBatteryApi, IDisposable
 
 	public IReadOnlyList<BatteryDeviceSnapshot> Devices => _registry.Devices;
 
-	public BatteryDeviceSnapshot? Find(string id) => _registry.Find(id);
+	public BatteryDeviceSnapshot? Find(string id)
+	{
+		return _registry.Find(id);
+	}
 
 	public event EventHandler<BatteryDevicesChangedEventArgs>? Changed
 	{

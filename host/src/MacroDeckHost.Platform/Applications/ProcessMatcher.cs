@@ -21,13 +21,13 @@ internal static class ProcessMatcher
 		foreach (var process in Process.GetProcesses())
 		{
 			var executablePath = TryGetExecutablePath(process);
-			if (executablePath is not null &&
-				string.Equals(Normalize(executablePath), normalizedPath, StringComparison.OrdinalIgnoreCase))
+			if (executablePath is not null
+				&& string.Equals(Normalize(executablePath), normalizedPath, StringComparison.OrdinalIgnoreCase))
 			{
 				byPath.Add(process);
 			}
-			else if (!string.IsNullOrEmpty(nameFallback) &&
-				string.Equals(process.ProcessName, nameFallback, StringComparison.OrdinalIgnoreCase))
+			else if (!string.IsNullOrEmpty(nameFallback)
+				&& string.Equals(process.ProcessName, nameFallback, StringComparison.OrdinalIgnoreCase))
 			{
 				byName.Add(process);
 			}
@@ -36,7 +36,10 @@ internal static class ProcessMatcher
 		return byPath.Count > 0 ? byPath : byName;
 	}
 
-	public static bool IsRunning(string configuredPath) => Find(configuredPath).Count > 0;
+	public static bool IsRunning(string configuredPath)
+	{
+		return Find(configuredPath).Count > 0;
+	}
 
 	public static string? TryGetExecutablePath(Process process)
 	{

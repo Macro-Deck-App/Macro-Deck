@@ -28,7 +28,10 @@ internal sealed class SendRequestActionTests
 	}
 
 	[TearDown]
-	public void TearDown() => _targets.Dispose();
+	public void TearDown()
+	{
+		_targets.Dispose();
+	}
 
 	[Test]
 	public async Task A_200_response_with_the_default_2xx_expectation_succeeds()
@@ -126,12 +129,12 @@ internal sealed class SendRequestActionTests
 	[Test]
 	public async Task A_capture_miss_does_not_fail_the_action()
 	{
-		_client.Enqueue(Succeeded(200, body: "{}"));
+		_client.Enqueue(Succeeded(200, "{}"));
 
 		var result = await Execute(Parameters(("url", "https://example.invalid/"),
 			("captures", Captures(("missing", "$.nonexistent")))));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await _targets.Find("missing"), Is.Null);
@@ -164,19 +167,27 @@ internal sealed class SendRequestActionTests
 	}
 
 	private Task<ActionResult> Execute(Dictionary<string, object> parameters)
-		=> _executor.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	{
+		return _executor.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 
 	private static HttpSendOutcome Succeeded(int statusCode, string body = "{}")
-		=> HttpSendOutcome.Succeeded(new HttpResponseSnapshot(statusCode,
+	{
+		return HttpSendOutcome.Succeeded(new HttpResponseSnapshot(statusCode,
 			new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
 			body,
 			false,
 			"application/json",
 			5));
+	}
 
 	private static Dictionary<string, string> Captures(params (string Name, string Selector)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Selector, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Selector, StringComparer.Ordinal);
+	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

@@ -24,7 +24,7 @@ public class NullPowerServiceTests
 	[Test]
 	public async Task ExecuteAsync_fails_with_a_reason()
 	{
-		var result = await new NullPowerService().ExecuteAsync(PowerOperation.Lock, force: false);
+		var result = await new NullPowerService().ExecuteAsync(PowerOperation.Lock, false);
 
 		Assert.Multiple(() =>
 		{

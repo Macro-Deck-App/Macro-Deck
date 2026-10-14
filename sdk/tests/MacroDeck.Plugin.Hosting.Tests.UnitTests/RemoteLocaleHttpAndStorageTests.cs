@@ -91,7 +91,10 @@ public class RemoteLocaleHttpAndStorageTests
 			Assert.Multiple(() =>
 			{
 				Assert.That(read.Content, Is.EqualTo("{\"a\":1}"));
-				Assert.That(File.Exists(Path.Combine(dataDirectory, "integration-data", "com.example.storage", "state.json")),
+				Assert.That(File.Exists(Path.Combine(dataDirectory,
+						"integration-data",
+						"com.example.storage",
+						"state.json")),
 					Is.True);
 			});
 		}
@@ -99,7 +102,7 @@ public class RemoteLocaleHttpAndStorageTests
 		{
 			if (Directory.Exists(dataDirectory))
 			{
-				Directory.Delete(dataDirectory, recursive: true);
+				Directory.Delete(dataDirectory, true);
 			}
 		}
 	}
@@ -111,14 +114,16 @@ public class RemoteLocaleHttpAndStorageTests
 
 		Assert.Multiple(async () =>
 		{
-			Assert.That((await storage.ReadAsync("state.json")).Status, Is.EqualTo(IntegrationStorageReadStatus.Missing));
+			Assert.That((await storage.ReadAsync("state.json")).Status,
+				Is.EqualTo(IntegrationStorageReadStatus.Missing));
 			Assert.ThrowsAsync<InvalidOperationException>(() => storage.WriteAsync("state.json", "{}"));
 			Assert.DoesNotThrowAsync(() => storage.DeleteAsync("state.json"));
 		});
 	}
 
 	private static ProtocolEnvelope StatePush(string api, object? data)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -129,6 +134,7 @@ public class RemoteLocaleHttpAndStorageTests
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private sealed class AnsweringHost(object? answer) : IHostInvoker
 	{
@@ -136,7 +142,11 @@ public class RemoteLocaleHttpAndStorageTests
 
 		public Exception? Failure { get; init; }
 
-		public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
+		public Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
 		{
 			Calls.Add((api, operation));
 			if (Failure is { } failure)
@@ -149,6 +159,9 @@ public class RemoteLocaleHttpAndStorageTests
 				: JsonSerializer.SerializeToElement(answer, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

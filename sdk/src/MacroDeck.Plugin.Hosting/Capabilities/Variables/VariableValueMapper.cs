@@ -13,7 +13,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Variables;
 internal static class VariableValueMapper
 {
 	public static VariableValueDto ToDto(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => VariableValueDto.Unavailable,
 			string text => new VariableValueDto { Kind = "text", Text = text },
@@ -25,12 +26,15 @@ internal static class VariableValueMapper
 				},
 			_ => VariableValueDto.Unavailable
 		};
+	}
 
 	public static VariableReadingDto ToDto(VariableReading reading)
-		=> new()
+	{
+		return new VariableReadingDto
 		{
 			Value = ToDto(reading.Value), Min = reading.Min, Max = reading.Max, Step = reading.Step
 		};
+	}
 
 	/// <summary>
 	/// The CLR value a <c>set</c> carries, in the three shapes <see cref="ToDto(object?)" /> produces.

@@ -30,7 +30,6 @@ internal sealed class SetChannelGainActionDefinition : IDynamicOptionsActionDefi
 		[
 			target.Picker(),
 			ActionParameter.Choice(VoicemeeterActionValues.ModeParameter,
-				options:
 				[
 					new ActionParameterOption
 					{
@@ -47,21 +46,21 @@ internal sealed class SetChannelGainActionDefinition : IDynamicOptionsActionDefi
 						Label = AppStrings.Integrations.Voicemeeter.Actions.SetGain.ModeDecrease()
 					}
 				],
-				label: AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
+				AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
 				defaultValue: ModeSet),
 			ActionParameter.Slider(VoicemeeterActionValues.GainParameter,
-				min: MinimumGain,
-				max: MaximumGain,
-				label: AppStrings.Integrations.Voicemeeter.Common.GainLabel(),
-				description: AppStrings.Integrations.Voicemeeter.Actions.SetGain.GainDescription(),
-				step: GainStep,
-				defaultValue: 0d),
+				MinimumGain,
+				MaximumGain,
+				AppStrings.Integrations.Voicemeeter.Common.GainLabel(),
+				AppStrings.Integrations.Voicemeeter.Actions.SetGain.GainDescription(),
+				GainStep,
+				0d),
 			ActionParameter.Duration(VoicemeeterActionValues.FadeParameter,
-				label: AppStrings.Integrations.Voicemeeter.Actions.SetGain.FadeLabel(),
-				description: AppStrings.Integrations.Voicemeeter.Actions.SetGain.FadeDescription(),
-				min: 0,
-				max: 60_000,
-				defaultMilliseconds: 0)
+				AppStrings.Integrations.Voicemeeter.Actions.SetGain.FadeLabel(),
+				AppStrings.Integrations.Voicemeeter.Actions.SetGain.FadeDescription(),
+				0,
+				60_000,
+				0)
 		];
 	}
 
@@ -77,7 +76,10 @@ internal sealed class SetChannelGainActionDefinition : IDynamicOptionsActionDefi
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_target, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_target, _resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -116,7 +118,7 @@ internal sealed class SetChannelGainActionDefinition : IDynamicOptionsActionDefi
 			{
 				_logger.Warning("Voicemeeter gain action skipped: no {Target} selected", _target.Title);
 				return Task.FromResult(ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(target: _target.NounText)));
+					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(_target.NounText)));
 			}
 
 			var amount
@@ -146,8 +148,8 @@ internal sealed class SetChannelGainActionDefinition : IDynamicOptionsActionDefi
 			target = Math.Clamp(target, MinimumGain, MaximumGain);
 
 			var fade = (int)(VoicemeeterActionValues.ReadNumber(context.Parameters,
-					VoicemeeterActionValues.FadeParameter) ??
-				0d);
+					VoicemeeterActionValues.FadeParameter)
+				?? 0d);
 			if (fade > 0)
 			{
 				connection.SetParameter(_target.Parameter(index.Value, VoicemeeterParameters.FadeTo),

@@ -17,7 +17,8 @@ public sealed class KeyRingProtectionStartupService : BackgroundService
 	private readonly IKeyRingProtectionService _keyRing;
 	private readonly ILogger _logger;
 
-	public KeyRingProtectionStartupService(IServiceScopeFactory scopeFactory,
+	public KeyRingProtectionStartupService(
+		IServiceScopeFactory scopeFactory,
 		IKeyRingProtectionService keyRing,
 		ILogger logger)
 	{
@@ -43,9 +44,9 @@ public sealed class KeyRingProtectionStartupService : BackgroundService
 			return;
 		}
 
-		if (status.State != KeyRingProtectionState.Unprotected ||
-			!status.RecoveryKeyExported ||
-			status.UnprotectedReason is KeyRingUnprotectedReason.Portable or KeyRingUnprotectedReason.NoKeystore)
+		if (status.State != KeyRingProtectionState.Unprotected
+			|| !status.RecoveryKeyExported
+			|| status.UnprotectedReason is KeyRingUnprotectedReason.Portable or KeyRingUnprotectedReason.NoKeystore)
 		{
 			return;
 		}

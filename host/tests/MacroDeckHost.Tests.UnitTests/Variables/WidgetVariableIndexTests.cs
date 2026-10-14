@@ -14,13 +14,16 @@ public class WidgetVariableIndexTests
 	private const string BoundOnCpu =
 		"{\"stateBinding\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"right\":80}}";
 
-	private static WidgetEntity Widget(string? data, string type = WidgetTypeIds.ActionButton) => new()
+	private static WidgetEntity Widget(string? data, string type = WidgetTypeIds.ActionButton)
 	{
-		Id = Guid.NewGuid(),
-		FolderId = Guid.Empty,
-		Type = type,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = Guid.Empty,
+			Type = type,
+			Data = data
+		};
+	}
 
 	[Test]
 	public void Rebuild_indexesOnlyReferencingActionButtons()

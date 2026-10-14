@@ -4,7 +4,6 @@ using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
-using MacroDeckHost.Integrations.Streaming.Widgets;
 using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Tests.UnitTests.Calendar;
 using MacroDeckHost.Tests.UnitTests.Streaming;
@@ -50,7 +49,10 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 	}
 
 	[TearDown]
-	public void TearDownTwitchChat() => _hub.Dispose();
+	public void TearDownTwitchChat()
+	{
+		_hub.Dispose();
+	}
 
 	[Test]
 	public async Task A_placed_chat_widget_opens_and_shows_the_chat()
@@ -71,7 +73,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 	[Test]
 	public async Task The_picker_sample_opens_without_live_chat()
 	{
-		var tree = await OpenTreeAsync(WidgetSurface(UiSurfaceKinds.Preview, sample: true));
+		var tree = await OpenTreeAsync(WidgetSurface(UiSurfaceKinds.Preview, true));
 
 		Assert.Multiple(() =>
 		{
@@ -92,7 +94,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" }),
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "" })
 			}
 		};
 
@@ -118,7 +120,8 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new { account = "", textSize = 150 }),
+				[UiConfigSurfaceAttributes.WidgetData]
+					= JsonSerializer.SerializeToElement(new { account = "", textSize = 150 })
 			}
 		};
 
@@ -143,8 +146,8 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 				[UiConfigSurfaceAttributes.EntryPoint] = Json(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = Json(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(
-					new { account = "", messageColor = "#ffcc00", nameColor = "#00ff00" }),
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.SerializeToElement(new
+					{ account = "", messageColor = "#ffcc00", nameColor = "#00ff00" })
 			}
 		};
 
@@ -174,7 +177,8 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 			Assert.That(response.Accepted, Is.True);
 			Assert.That(Interactions.Opened.Single().IntegrationId, Is.EqualTo(TwitchIntegration.IntegrationId));
 			Assert.That(Interactions.Opened.Single().ClientId, Is.EqualTo(ClientId));
-			Assert.That(Interactions.Opened.Single().Modal.ViewId, Is.EqualTo(TwitchStreamPlatform.Platform.DialogViewId));
+			Assert.That(Interactions.Opened.Single().Modal.ViewId,
+				Is.EqualTo(TwitchStreamPlatform.Platform.DialogViewId));
 		});
 	}
 
@@ -220,7 +224,7 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 		{
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
-				[UiWidgetSurfaceAttributes.WidgetType] = Json("app.macro-deck.twitch::other"),
+				[UiWidgetSurfaceAttributes.WidgetType] = Json("app.macro-deck.twitch::other")
 			}
 		};
 
@@ -252,15 +256,22 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 		return (ticket.SessionId, root);
 	}
 
-	private UiSendEventResponse Press(string sessionId, UiNode node) => Press(sessionId, node.Id);
+	private UiSendEventResponse Press(string sessionId, UiNode node)
+	{
+		return Press(sessionId, node.Id);
+	}
 
 	private UiSendEventResponse Press(string sessionId, string nodeId)
-		=> Broker.SendEvent(new UiSendEventRequest { SessionId = sessionId, NodeId = nodeId, Name = UiComponentEvents.Press },
+	{
+		return Broker.SendEvent(new UiSendEventRequest
+				{ SessionId = sessionId, NodeId = nodeId, Name = UiComponentEvents.Press },
 			Connection,
 			ClientId);
+	}
 
 	private static UiSurface DialogSurface()
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Dialog,
 			SessionMode = UiSessionModes.Exclusive,
@@ -270,19 +281,23 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 				[UiDialogSurfaceAttributes.ViewId] = Json(TwitchStreamPlatform.Platform.DialogViewId),
 				[UiDialogSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new Dictionary<string, string>
 				{
-					["account"] = "111", ["widgetId"] = "4f0f9c56-5b8b-4d93-a3a9-2f7f3bd6a1e2",
-				}),
-			},
+					["account"] = "111", ["widgetId"] = "4f0f9c56-5b8b-4d93-a3a9-2f7f3bd6a1e2"
+				})
+			}
 		};
+	}
 
-	private static JsonElement Json<T>(T value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement Json<T>(T value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static UiSurface WidgetSurface(string kind, bool sample = false, Guid? widgetId = null)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = Json(TwitchStreamPlatform.Platform.ChatWidgetTypeId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" }),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { account = "" })
 		};
 
 		if (sample)
@@ -304,7 +319,8 @@ internal sealed class TwitchChatWidgetSessionTests : UiSessionFixture
 
 		public int Calls => Volatile.Read(ref _calls);
 
-		public Task<ChatModerationResult> ModerateAsync(string accountId,
+		public Task<ChatModerationResult> ModerateAsync(
+			string accountId,
 			ChatModerationRequest request,
 			CancellationToken cancellationToken)
 		{

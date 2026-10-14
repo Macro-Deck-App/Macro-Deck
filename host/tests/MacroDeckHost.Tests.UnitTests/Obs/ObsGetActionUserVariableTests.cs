@@ -26,7 +26,10 @@ internal sealed class ObsGetActionUserVariableTests
 	}
 
 	[TearDown]
-	public void TearDown() => _targets.Dispose();
+	public void TearDown()
+	{
+		_targets.Dispose();
+	}
 
 	[TestCase("test_boolean")]
 	[TestCase("vars.test_boolean")]
@@ -34,10 +37,10 @@ internal sealed class ObsGetActionUserVariableTests
 	{
 		await _targets.CreateUserVariable("test_boolean", DomainVariableType.Boolean, false);
 
-		var result = await GetInputMute(muted: true, target);
+		var result = await GetInputMute(true, target);
 
 		var variable = await _targets.Find("test_boolean");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await _targets.ValueOf("test_boolean"), Is.EqualTo(true));
@@ -48,10 +51,10 @@ internal sealed class ObsGetActionUserVariableTests
 	[Test]
 	public async Task A_missing_target_becomes_a_user_variable_of_the_action_type()
 	{
-		var result = await GetInputMute(muted: true, "mic_muted");
+		var result = await GetInputMute(true, "mic_muted");
 
 		var variable = await _targets.Find("mic_muted");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(variable, Is.Not.Null);
@@ -66,10 +69,10 @@ internal sealed class ObsGetActionUserVariableTests
 	{
 		await _targets.IntegrationVariables.CreateAsync("mic_muted", SdkVariableType.Boolean, false);
 
-		var result = await GetInputMute(muted: true, "mic_muted");
+		var result = await GetInputMute(true, "mic_muted");
 
 		var variable = await _targets.Find("mic_muted");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await _targets.ValueOf("mic_muted"), Is.EqualTo(true));
@@ -82,9 +85,9 @@ internal sealed class ObsGetActionUserVariableTests
 	{
 		await _targets.CreateUserVariable("counter", DomainVariableType.Numeric, 3);
 
-		var result = await GetInputMute(muted: true, "counter");
+		var result = await GetInputMute(true, "counter");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderError));
@@ -107,18 +110,25 @@ internal sealed class ObsGetActionUserVariableTests
 
 	private async Task<ActionResult> GetInputMute(bool muted, string target)
 	{
-		var client = new FakeObsClient { IsConnected = true };
-		client.MutedInputs["Mic"] = muted;
+		var client = new FakeObsClient
+		{
+			IsConnected = true,
+			MutedInputs =
+			{
+				["Mic"] = muted
+			}
+		};
 		using var connection = new ObsConnection(client, "ws://localhost:4455", null);
 		var action = new GetInputMuteActionDefinition(() => connection, _accessor);
 
-		return await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		return await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				[GetInputMuteActionDefinition.InputParameter] = "Mic",
-				[GetInputMuteActionDefinition.VariableParameter] = target
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					[GetInputMuteActionDefinition.InputParameter] = "Mic",
+					[GetInputMuteActionDefinition.VariableParameter] = target
+				}
+			});
 	}
 }

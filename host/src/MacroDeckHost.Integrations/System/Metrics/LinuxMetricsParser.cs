@@ -84,8 +84,8 @@ internal static class LinuxMetricsParser
 	private static long? ParseMemInfoValue(string line)
 	{
 		var fields = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-		if (fields.Length < 2 ||
-			!long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var value))
+		if (fields.Length < 2
+			|| !long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var value))
 		{
 			return null;
 		}

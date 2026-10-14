@@ -14,10 +14,16 @@ public class HostDiscoveryTests
 	private string _directory = null!;
 
 	[SetUp]
-	public void SetUp() => _directory = Directory.CreateTempSubdirectory("macrodeck-host-discovery-").FullName;
+	public void SetUp()
+	{
+		_directory = Directory.CreateTempSubdirectory("macrodeck-host-discovery-").FullName;
+	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_directory, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_directory, true);
+	}
 
 	[Test]
 	public void No_port_file_means_no_host()

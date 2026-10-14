@@ -13,10 +13,10 @@ internal static class SliderWidgetView
 	// The brand accent from ui/angular/projects/desktop-ui/src/styles/_themes.scss, used by the range-bar
 	// fallback when no colour is configured - a range bar's colours are literals, never a role, so there is
 	// no theme accent for it to fall back on the way the interactive slider's own LevelColor does.
-	private const string _defaultAccent = "#2196f3";
+	private const string DefaultAccent = "#2196f3";
 
 	// The retired client's PREVIEW_PERCENTAGE: what an unbound slider showed in the editor.
-	private const double _unboundPreviewLevel = 0.65;
+	private const double UnboundPreviewLevel = 0.65;
 
 	public static UiElement Build(
 		SliderWidgetData config,
@@ -43,16 +43,18 @@ internal static class SliderWidgetView
 			Padding = WidgetSafeArea.For(cornerRadius),
 			Gap = 0.04,
 			Background = ColorValue(config.BackgroundColor),
-			Children = children,
+			Children = children
 		};
 	}
 
 	/// <summary>The filled fraction of the track, computed out of a state read so that a value change is a
 	/// <c>set-properties</c> patch rather than a structural reconcile.</summary>
 	internal static double ComputeLevel(SliderWidgetReadout readout)
-		=> readout.Max <= readout.Min
+	{
+		return readout.Max <= readout.Min
 			? 0
 			: Math.Clamp((readout.Value - readout.Min) / (readout.Max - readout.Min), 0, 1);
+	}
 
 	/// <summary>The track's granularity in the same fraction space as <see cref="ComputeLevel" />, or
 	/// <c>null</c> when the range is degenerate, the variable declares no step, or the step would not even
@@ -106,11 +108,11 @@ internal static class SliderWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Justify = justify,
-				Children = headerChildren,
+				Children = headerChildren
 			});
 		}
 
-		children.Add(Track(config, state, sliderEvents, accent, isVertical: false));
+		children.Add(Track(config, state, sliderEvents, accent, false));
 
 		return children;
 	}
@@ -133,11 +135,11 @@ internal static class SliderWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Justify = UiComponentJustify.Center,
-				Children = [Lead(config, icon, label)],
+				Children = [Lead(config, icon, label)]
 			});
 		}
 
-		children.Add(Track(config, state, sliderEvents, accent, isVertical: true));
+		children.Add(Track(config, state, sliderEvents, accent, true));
 
 		if (config.ShowValue)
 		{
@@ -148,7 +150,9 @@ internal static class SliderWidgetView
 	}
 
 	private static bool HasLead(SliderWidgetData config, UiResource? icon)
-		=> icon is not null || (config.ShowLabel && config.Label is not null);
+	{
+		return icon is not null || config.ShowLabel && config.Label is not null;
+	}
 
 	private static UiStack Lead(SliderWidgetData config, UiResource? icon, SliderLabelBinding? labelBinding)
 	{
@@ -161,7 +165,7 @@ internal static class SliderWidgetView
 				Key = "icon",
 				Size = 0.16,
 				Source = UiValue.Of(resolvedIcon),
-				Tint = ColorValue(config.IconColor),
+				Tint = ColorValue(config.IconColor)
 			});
 		}
 
@@ -175,7 +179,7 @@ internal static class SliderWidgetView
 				MinSize = 0.075,
 				Weight = UiComponentTextWeights.Medium,
 				Role = UiComponentTextRoles.Secondary,
-				Color = ColorValue(config.LabelColor),
+				Color = ColorValue(config.LabelColor)
 			});
 		}
 
@@ -185,15 +189,17 @@ internal static class SliderWidgetView
 			Direction = UiComponentDirections.Horizontal,
 			Gap = 0.03,
 			Align = UiComponentAlignments.Center,
-			Children = children,
+			Children = children
 		};
 	}
 
-	private static UiTextRun ValueText(SliderWidgetData config,
+	private static UiTextRun ValueText(
+		SliderWidgetData config,
 		UiState<SliderWidgetReadout> state,
 		string key,
 		string align)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = UiText.Optional(() => ValueDisplayText(config, state.Value)),
@@ -202,8 +208,9 @@ internal static class SliderWidgetView
 			Weight = UiComponentTextWeights.SemiBold,
 			Role = UiComponentTextRoles.Primary,
 			Align = align,
-			Color = ColorValue(config.LabelColor),
+			Color = ColorValue(config.LabelColor)
 		};
+	}
 
 	/// <summary>The reading spelled out beside the track, formatted the way the variable's own semantic kind
 	/// and unit say it means something - so a seek slider reads <c>03:07</c> rather than <c>187</c>, without
@@ -236,7 +243,7 @@ internal static class SliderWidgetView
 		// across, so a heavier track would swallow it.
 		var thickness = isVertical ? UiSize.FromBasis(0.11, 0.35) : UiSize.FromBasis(0.09, 0.4);
 		var level = LevelValue(config, state);
-		var fallbackColor = UiValue.From(() => TrackColor(config, state.Value, accent.Value) ?? _defaultAccent);
+		var fallbackColor = UiValue.From(() => TrackColor(config, state.Value, accent.Value) ?? DefaultAccent);
 
 		return new UiSlider
 		{
@@ -258,8 +265,8 @@ internal static class SliderWidgetView
 				Start = 0,
 				End = level,
 				StartColor = fallbackColor,
-				EndColor = fallbackColor,
-			},
+				EndColor = fallbackColor
+			}
 		};
 	}
 
@@ -272,7 +279,7 @@ internal static class SliderWidgetView
 
 		if (!IsBound(config))
 		{
-			var preview = config.Min + (_unboundPreviewLevel * (config.Max - config.Min));
+			var preview = config.Min + UnboundPreviewLevel * (config.Max - config.Min);
 
 			return WidgetThresholds.Effective(config.Thresholds, config.Min, config.Max).ColorAt(preview) ?? accent;
 		}
@@ -283,18 +290,27 @@ internal static class SliderWidgetView
 	}
 
 	private static UiValue<double> LevelValue(SliderWidgetData config, UiState<SliderWidgetReadout> state)
-		=> IsBound(config) ? UiValue.From(() => ComputeLevel(state.Value)) : UiValue.Of(_unboundPreviewLevel);
+	{
+		return IsBound(config) ? UiValue.From(() => ComputeLevel(state.Value)) : UiValue.Of(UnboundPreviewLevel);
+	}
 
 	private static UiValue<double> StepValue(SliderWidgetData config, UiState<SliderWidgetReadout> state)
-		=> IsBound(config)
+	{
+		return IsBound(config)
 			? UiValue.Optional(()
 				=> ComputeStepFraction(state.Value) is { } fraction ? UiValue.Of(fraction) : UiValue.None<double>())
 			: UiValue.None<double>();
+	}
 
 	/// <summary>Whether the slider follows a variable at all, as opposed to the unbound-preview level every
 	/// editor showed before one was chosen.</summary>
-	private static bool IsBound(SliderWidgetData config) => config.ValueVariable is not null;
+	private static bool IsBound(SliderWidgetData config)
+	{
+		return config.ValueVariable is not null;
+	}
 
-	private static UiValue<string> ColorValue(string? color) =>
-		color is { } value ? UiValue.Of(value) : UiValue.None<string>();
+	private static UiValue<string> ColorValue(string? color)
+	{
+		return color is { } value ? UiValue.Of(value) : UiValue.None<string>();
+	}
 }

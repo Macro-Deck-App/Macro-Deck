@@ -20,23 +20,26 @@ public class GetActionsRequestMessageHandlerTests
 		public IReadOnlyList<ActionParameter> Parameters { get; } =
 		[
 			ActionParameter.Slider("volume",
-				min: 0,
-				max: 100,
+				0,
+				100,
 				step: 5,
 				label: "Volume",
 				description: "Loudness",
 				defaultValue: 50),
 			ActionParameter.Choice("mode",
-				options: [new ActionParameterOption { Value = "a", Label = "Alpha" }],
-				label: "Mode",
+				[new ActionParameterOption { Value = "a", Label = "Alpha" }],
+				"Mode",
 				defaultValue: "a",
 				required: true),
 			ActionParameter.Object("advanced",
-				children: [ActionParameter.Text("host", label: "Host")]),
-			ActionParameter.Array("urls", itemTemplate: ActionParameter.Url("url", autoPrefixHttps: true))
+				[ActionParameter.Text("host", "Host")]),
+			ActionParameter.Array("urls", ActionParameter.Url("url", autoPrefixHttps: true))
 		];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class ScriptActionDefinition : IActionDefinition
@@ -46,7 +49,11 @@ public class GetActionsRequestMessageHandlerTests
 		public LocalizedText Description => "Runs a script";
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 		public string? Role => ActionRoles.RunScript;
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	[Test]

@@ -108,7 +108,9 @@ public sealed class SharedVariables
 	}
 
 	public VariableEntity? FindShared(string name)
-		=> List().FirstOrDefault(entry => string.Equals(entry.Name, name, StringComparison.Ordinal))?.Variable;
+	{
+		return List().FirstOrDefault(entry => string.Equals(entry.Name, name, StringComparison.Ordinal))?.Variable;
+	}
 
 	public void Forget(VariableEntity variable)
 	{
@@ -165,20 +167,21 @@ public sealed class SharedVariables
 			return null;
 		}
 
-		if (entry.DefinitionId is { } definitionId &&
-			QualifiedId.TryCreate(entry.OwnerIntegrationId, definitionId, LocalIdKind.Resource, out var qualified))
+		if (entry.DefinitionId is { } definitionId
+			&& QualifiedId.TryCreate(entry.OwnerIntegrationId, definitionId, LocalIdKind.Resource, out var qualified))
 		{
 			return _registry.FindByDefinition(qualified);
 		}
 
-		return _registry.FindByName(VariableScope.Global, null, entry.Name) is { } byName &&
-			string.Equals(byName.OwnerIntegrationId, entry.OwnerIntegrationId, StringComparison.Ordinal)
+		return _registry.FindByName(VariableScope.Global, null, entry.Name) is { } byName
+			&& string.Equals(byName.OwnerIntegrationId, entry.OwnerIntegrationId, StringComparison.Ordinal)
 				? byName
 				: null;
 	}
 
 	private static SharedVariable EntryFor(VariableEntity variable)
-		=> variable.Classification == VariableClassification.User
+	{
+		return variable.Classification == VariableClassification.User
 			? new SharedVariable { UserVariableId = variable.Id, Name = variable.Name, Type = variable.Type }
 			: new SharedVariable
 			{
@@ -187,6 +190,7 @@ public sealed class SharedVariables
 				Name = variable.Name,
 				Type = variable.Type
 			};
+	}
 
 	private static bool Matches(SharedVariable entry, VariableEntity variable)
 	{
@@ -200,8 +204,8 @@ public sealed class SharedVariables
 			return variable.Classification == VariableClassification.User && variable.Id == userId;
 		}
 
-		if (variable.Classification == VariableClassification.User ||
-			!string.Equals(entry.OwnerIntegrationId, variable.OwnerIntegrationId, StringComparison.Ordinal))
+		if (variable.Classification == VariableClassification.User
+			|| !string.Equals(entry.OwnerIntegrationId, variable.OwnerIntegrationId, StringComparison.Ordinal))
 		{
 			return false;
 		}

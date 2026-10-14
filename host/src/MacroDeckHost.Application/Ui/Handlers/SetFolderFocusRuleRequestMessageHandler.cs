@@ -26,7 +26,8 @@ public class SetFolderFocusRuleRequestMessageHandler
 		_deviceRepository = deviceRepository;
 	}
 
-	public async ValueTask<SetFolderFocusRuleResponse> Handle(SetFolderFocusRuleRequest request,
+	public async ValueTask<SetFolderFocusRuleResponse> Handle(
+		SetFolderFocusRuleRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.FolderId, out var folderId))
@@ -77,9 +78,11 @@ public class SetFolderFocusRuleRequestMessageHandler
 	}
 
 	private static SetFolderFocusRuleResponse Fail(FolderError error, string? message)
-		=> new()
+	{
+		return new SetFolderFocusRuleResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = error.ToString(), Message = message ?? string.Empty }
 		};
+	}
 }

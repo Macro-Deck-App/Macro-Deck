@@ -72,8 +72,8 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 		ArgumentNullException.ThrowIfNull(widget);
 		ArgumentException.ThrowIfNullOrWhiteSpace(triggerType);
 
-		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase) &&
-			CyclesStatesOnPress(widget))
+		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase)
+			&& CyclesStatesOnPress(widget))
 		{
 			// Advance before the flow runs so the flow's own vars.state and any onStateChange handler
 			// observe the state this press just switched to. Never linked to the caller's token and never
@@ -99,25 +99,28 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 		}
 
 		var flowsSource = IsShortPress(triggerType)
-			? _defaultShortPress.FlowsSourceFor(widget, fromDevice: originDeviceId is not null) ?? widget.Data
+			? _defaultShortPress.FlowsSourceFor(widget, originDeviceId is not null) ?? widget.Data
 			: widget.Data;
 
 		return await _coordinator.RunBoundedAsync(new FlowExecutionRequest
-			{
-				FlowsSource = flowsSource,
-				Trigger = TriggerSelector.ByType(triggerType),
-				Scope = VariableScope.Widget,
-				ScopeRefId = widget.Id.ToString(),
-				OwnerWidgetId = widget.Id,
-				OriginClientId = originClientId,
-				OriginDeviceId = originDeviceId
-			},
-			_pressBound,
-			cancellationToken).ConfigureAwait(false);
+				{
+					FlowsSource = flowsSource,
+					Trigger = TriggerSelector.ByType(triggerType),
+					Scope = VariableScope.Widget,
+					ScopeRefId = widget.Id.ToString(),
+					OwnerWidgetId = widget.Id,
+					OriginClientId = originClientId,
+					OriginDeviceId = originDeviceId
+				},
+				_pressBound,
+				cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	internal static bool IsShortPress(string triggerType)
-		=> string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase);
+	}
 
 	/// <summary>
 	/// Whether this press is the button's own way of stepping to its next state. Mirrors

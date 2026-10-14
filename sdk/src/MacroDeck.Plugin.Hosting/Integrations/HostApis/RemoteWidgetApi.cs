@@ -15,11 +15,15 @@ internal sealed class RemoteWidgetApi(
 	PluginConnectionState connectionState,
 	HostStateCache stateCache) : IWidgetApi
 {
-	public IReadOnlyList<WidgetTargetInfo> GetWidgets() =>
-		stateCache.GetList<WidgetTargetInfo>(Protocol.Callbacks.HostApis.Widgets);
+	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+	{
+		return stateCache.GetList<WidgetTargetInfo>(Protocol.Callbacks.HostApis.Widgets);
+	}
 
 	public bool Exists(string widgetId)
-		=> GetWidgets().Any(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal));
+	{
+		return GetWidgets().Any(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal));
+	}
 
 	public async Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
 	{
@@ -41,12 +45,15 @@ internal sealed class RemoteWidgetApi(
 	// surface this change does not touch. A remote plugin influences state by providing it instead.
 
 	public Task InvalidateIconAsync(string actionId, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Widgets,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Widgets,
 			HostOperations.Widgets.InvalidateIcon,
 			new WidgetsInvalidateIconArguments { ActionId = actionId },
 			cancellationToken);
+	}
 
-	public async Task<WidgetDataSnapshot?> GetWidgetDataAsync(string widgetId,
+	public async Task<WidgetDataSnapshot?> GetWidgetDataAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(widgetId);
@@ -72,25 +79,30 @@ internal sealed class RemoteWidgetApi(
 	}
 
 	private static WidgetsApplyArgumentsV1 ToV1(WidgetAppearanceRequest request)
-		=> new()
+	{
+		return new WidgetsApplyArgumentsV1
 		{
 			WidgetId = request.WidgetId,
 			Patch = ToPatchDto(request.Patch),
 			State = StateSelectorOf(request.ResolveStateIds()),
 			ClearProperties = [.. request.ClearProperties.Select(property => (int)property)]
 		};
+	}
 
 	private static WidgetsApplyArgumentsV2 ToV2(WidgetAppearanceRequest request)
-		=> new()
+	{
+		return new WidgetsApplyArgumentsV2
 		{
 			WidgetId = request.WidgetId,
 			Patch = ToPatchDto(request.Patch),
 			StateIds = request.ResolveStateIds(),
 			ClearProperties = [.. request.ClearProperties.Select(property => (int)property)]
 		};
+	}
 
 	private static WidgetAppearancePatchDto ToPatchDto(WidgetAppearancePatch patch)
-		=> new()
+	{
+		return new WidgetAppearancePatchDto
 		{
 			Label = patch.Label,
 			BackgroundColor = patch.BackgroundColor,
@@ -111,6 +123,7 @@ internal sealed class RemoteWidgetApi(
 			AccentColor = patch.AccentColor,
 			IconAppearance = patch.IconAppearance
 		};
+	}
 
 	/// <summary>
 	/// The closest a v1 wire request can come to <paramref name="stateIds" />: the legacy selector has no

@@ -273,7 +273,7 @@ public class FileHostIdentityKeyProviderTests
 
 		_time.Advance(FileHostIdentityKeyProvider.RetryInterval);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await provider.GetPublicKey(), Is.EqualTo(original));
 			Assert.That(Directory.GetFiles(_paths.KeysDirectory, "*.tmp"), Is.Empty);
@@ -299,7 +299,9 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	private FileStream HoldLock()
-		=> new($"{KeyPath}.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+	{
+		return new FileStream($"{KeyPath}.lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+	}
 
 	[Test]
 	public async Task A_signature_verifies_with_the_published_point()
@@ -322,19 +324,23 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	private ServiceProvider NewServices()
-		=> new ServiceCollection()
+	{
+		return new ServiceCollection()
 			.AddSingleton<IAppPreferenceRepository>(_preferences)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+	}
 
 	private FileHostIdentityKeyProvider NewProvider(ServiceProvider? services = null)
-		=> new(_protection,
+	{
+		return new FileHostIdentityKeyProvider(_protection,
 			_paths,
 			(services ?? NewServices()).GetRequiredService<IServiceScopeFactory>(),
 			_notifications,
 			TestLocalization.Resolver,
 			_time,
 			new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Sink(_log).CreateLogger());
+	}
 
 	// Background bookkeeping waits on the fake clock, so each round advances it past any retry delay.
 	private async Task Eventually(Func<bool> condition)
@@ -409,8 +415,10 @@ public class FileHostIdentityKeyProviderTests
 	}
 
 	private static DbUpdateException Locked()
-		=> new("An error occurred while saving the entity changes.",
+	{
+		return new DbUpdateException("An error occurred while saving the entity changes.",
 			new InvalidOperationException("SQLite Error 5: 'database is locked'."));
+	}
 
 	private sealed class ErrorCountingSink : ILogEventSink
 	{

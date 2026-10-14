@@ -10,9 +10,12 @@ namespace MacroDeck.Plugin.Cli;
 /// </summary>
 internal static class ConformanceReportExitCode
 {
-	public static int For(ConformanceReport report) => report.Conformant switch
+	public static int For(ConformanceReport report)
 	{
-		true => ExitCode.Success,
-		false => ExitCode.SubjectInvalid
-	};
+		return report.Conformant switch
+		{
+			true => ExitCode.Success,
+			false => ExitCode.SubjectInvalid
+		};
+	}
 }

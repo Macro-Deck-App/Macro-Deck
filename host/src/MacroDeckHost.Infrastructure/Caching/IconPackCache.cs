@@ -88,9 +88,15 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 		return pack;
 	}
 
-	public List<IconPackEntity> GetAllPacks() => _packs.Values.ToList();
+	public List<IconPackEntity> GetAllPacks()
+	{
+		return _packs.Values.ToList();
+	}
 
-	public IconPackEntity? GetDefaultPack() => _packs.Values.FirstOrDefault(p => p.IsDefault);
+	public IconPackEntity? GetDefaultPack()
+	{
+		return _packs.Values.FirstOrDefault(p => p.IsDefault);
+	}
 
 	public async Task AddOrUpdatePack(IconPackEntity pack)
 	{
@@ -160,31 +166,46 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 	}
 
 	public List<IconEntity> GetIconsByPackId(Guid packId)
-		=> _icons.Values
+	{
+		return _icons.Values
 			.Where(i => i.PackId == packId && i.AppearanceOfId is null)
 			.OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
 			.ToList();
+	}
 
 	public List<IconEntity> GetIconsByBatchId(Guid batchId)
-		=> _icons.Values.Where(i => i.ImportBatchId == batchId).ToList();
+	{
+		return _icons.Values.Where(i => i.ImportBatchId == batchId).ToList();
+	}
 
 	public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
-		=> _icons.Values.Where(i => states.Contains(i.ProcessingState)).ToList();
+	{
+		return _icons.Values.Where(i => states.Contains(i.ProcessingState)).ToList();
+	}
 
-	public int GetIconCount(Guid packId) => _icons.Values.Count(i => i.PackId == packId && i.AppearanceOfId is null);
+	public int GetIconCount(Guid packId)
+	{
+		return _icons.Values.Count(i => i.PackId == packId && i.AppearanceOfId is null);
+	}
 
 	public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
-		=> ResolveIndexed(_sourceIndex, hash.Value, withinPackId);
+	{
+		return ResolveIndexed(_sourceIndex, hash.Value, withinPackId);
+	}
 
 	public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
-		=> ResolveIndexed(_masterIndex, hash.Value, withinPackId);
+	{
+		return ResolveIndexed(_masterIndex, hash.Value, withinPackId);
+	}
 
 	public List<IconEntity> GetIconsMissingMasterContentHash()
-		=> _icons.Values
+	{
+		return _icons.Values
 			.Where(icon => icon.ProcessingState == IconProcessingState.Ready && icon.MasterContentHash is null)
 			.OrderBy(icon => icon.CreatedAt)
 			.ThenBy(icon => icon.Id)
 			.ToList();
+	}
 
 	public async Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
 	{
@@ -340,10 +361,12 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 	}
 
 	private bool IsOrphanedAppearance(IconEntity icon)
-		=> icon.AppearanceOfId is { } parentId &&
-			(!_icons.TryGetValue(parentId, out var parent) ||
-				parent.AppearanceOfId is not null ||
-				parent.PackId != icon.PackId);
+	{
+		return icon.AppearanceOfId is { } parentId
+			&& (!_icons.TryGetValue(parentId, out var parent)
+				|| parent.AppearanceOfId is not null
+				|| parent.PackId != icon.PackId);
+	}
 
 	private void RemoveAppearancesOf(IReadOnlyList<Guid> parentIds)
 	{
@@ -362,10 +385,10 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 
 		foreach (var assetId in assetIds)
 		{
-			if (_icons.TryGetValue(assetId, out var asset) &&
-				asset.AppearanceOfId is { } parentId &&
-				removed.Contains(parentId) &&
-				_icons.TryRemove(assetId, out _))
+			if (_icons.TryGetValue(assetId, out var asset)
+				&& asset.AppearanceOfId is { } parentId
+				&& removed.Contains(parentId)
+				&& _icons.TryRemove(assetId, out _))
 			{
 				_iconStorage.DeleteIconFiles(asset.PackId, asset.Id);
 			}
@@ -392,8 +415,8 @@ public sealed class IconPackCache : IIconPackCache, IDisposable
 	{
 		lock (_appearanceSync)
 		{
-			if (_parentByAppearance.Remove(icon.Id, out var previousParentId) &&
-				_appearancesByParent.TryGetValue(previousParentId, out var previous))
+			if (_parentByAppearance.Remove(icon.Id, out var previousParentId)
+				&& _appearancesByParent.TryGetValue(previousParentId, out var previous))
 			{
 				previous.Remove(icon.Id);
 				if (previous.Count == 0)

@@ -29,23 +29,23 @@ internal sealed class SelectChannelActionDefinition : IDynamicOptionsActionDefin
 			?
 			[
 				ActionParameter.DynamicChoice(GuildParameter,
-					label: AppStrings.Integrations.Discord.Actions.SelectChannel.ServerLabel(),
+					AppStrings.Integrations.Discord.Actions.SelectChannel.ServerLabel(),
 					required: true),
 				ActionParameter.DynamicChoice(ChannelParameter,
-					label: AppStrings.Integrations.Discord.Actions.SelectChannel.VoiceChannelLabel(),
+					AppStrings.Integrations.Discord.Actions.SelectChannel.VoiceChannelLabel(),
 					required: true),
 				ActionParameter.Toggle(ForceParameter,
-					label: AppStrings.Integrations.Discord.Actions.SelectChannel.ForceLabel(),
-					description: AppStrings.Integrations.Discord.Actions.SelectChannel.ForceDescription(),
-					defaultValue: true)
+					AppStrings.Integrations.Discord.Actions.SelectChannel.ForceLabel(),
+					AppStrings.Integrations.Discord.Actions.SelectChannel.ForceDescription(),
+					true)
 			]
 			:
 			[
 				ActionParameter.DynamicChoice(GuildParameter,
-					label: AppStrings.Integrations.Discord.Actions.SelectChannel.ServerLabel(),
+					AppStrings.Integrations.Discord.Actions.SelectChannel.ServerLabel(),
 					required: true),
 				ActionParameter.DynamicChoice(ChannelParameter,
-					label: AppStrings.Integrations.Discord.Actions.SelectChannel.TextChannelLabel(),
+					AppStrings.Integrations.Discord.Actions.SelectChannel.TextChannelLabel(),
 					required: true)
 			];
 	}
@@ -62,7 +62,10 @@ internal sealed class SelectChannelActionDefinition : IDynamicOptionsActionDefin
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _voice);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _voice);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -97,8 +100,8 @@ internal sealed class SelectChannelActionDefinition : IDynamicOptionsActionDefin
 			return [];
 		}
 
-		if (context.CurrentParameters.GetValueOrDefault(GuildParameter) is not string guildId ||
-			string.IsNullOrWhiteSpace(guildId))
+		if (context.CurrentParameters.GetValueOrDefault(GuildParameter) is not string guildId
+			|| string.IsNullOrWhiteSpace(guildId))
 		{
 			return [];
 		}
@@ -132,8 +135,8 @@ internal sealed class SelectChannelActionDefinition : IDynamicOptionsActionDefin
 					AppStrings.Integrations.Discord.Errors.NotSetUp());
 			}
 
-			if (context.Parameters.GetValueOrDefault(ChannelParameter) is not string channelId ||
-				string.IsNullOrWhiteSpace(channelId))
+			if (context.Parameters.GetValueOrDefault(ChannelParameter) is not string channelId
+				|| string.IsNullOrWhiteSpace(channelId))
 			{
 				_logger.Warning("Discord channel action skipped: no channel selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

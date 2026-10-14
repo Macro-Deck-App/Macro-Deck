@@ -11,15 +11,27 @@ public sealed class NullKekStore : IKekStore
 {
 	private readonly string _reason;
 
-	public NullKekStore(string reason) => _reason = reason;
+	public NullKekStore(string reason)
+	{
+		_reason = reason;
+	}
 
 	public KeyRingBackend Backend => KeyRingBackend.None;
 
 	public KekStoreAvailability Availability => new(false, _reason);
 
-	public KekStoreReadResult Read(KekStoreIdentity identity) => KekStoreReadResult.Unavailable(_reason);
+	public KekStoreReadResult Read(KekStoreIdentity identity)
+	{
+		return KekStoreReadResult.Unavailable(_reason);
+	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek) => KekStoreStatus.Unavailable;
+	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	{
+		return KekStoreStatus.Unavailable;
+	}
 
-	public KekStoreStatus Delete(KekStoreIdentity identity) => KekStoreStatus.Unavailable;
+	public KekStoreStatus Delete(KekStoreIdentity identity)
+	{
+		return KekStoreStatus.Unavailable;
+	}
 }

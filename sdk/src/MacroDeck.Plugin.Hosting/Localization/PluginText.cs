@@ -43,7 +43,10 @@ internal static class PluginText
 	}
 
 	/// <summary>Records what the handshake settled on, deciding whether references may cross the wire.</summary>
-	internal static void Negotiated(int protocolVersion) => _negotiatedVersion = protocolVersion;
+	internal static void Negotiated(int protocolVersion)
+	{
+		_negotiatedVersion = protocolVersion;
+	}
 
 	/// <summary>The text a descriptor field carries. Empty for an unset property.</summary>
 	public static LocalizedText ToWire(LocalizedText text)
@@ -63,7 +66,10 @@ internal static class PluginText
 	/// so the "unset" branch yields an empty value wrapped in a non-null nullable, and every optional
 	/// descriptor field ships as present-but-blank instead of absent.
 	/// </remarks>
-	public static LocalizedText? ToWireOrNull(LocalizedText text) => text.IsEmpty ? (LocalizedText?)null : ToWire(text);
+	public static LocalizedText? ToWireOrNull(LocalizedText text)
+	{
+		return text.IsEmpty ? (LocalizedText?)null : ToWire(text);
+	}
 
 	/// <summary>
 	/// Flattens unconditionally, for the fields the protocol still types as a plain string: the
@@ -71,5 +77,7 @@ internal static class PluginText
 	/// error envelope, which is shared with transport-level failures rather than owned by this plugin.
 	/// </summary>
 	public static string ToLiteral(LocalizedText text)
-		=> text.IsLocalized ? _resolver?.Resolve(text, _culture) ?? string.Empty : text.Literal ?? string.Empty;
+	{
+		return text.IsLocalized ? _resolver?.Resolve(text, _culture) ?? string.Empty : text.Literal ?? string.Empty;
+	}
 }

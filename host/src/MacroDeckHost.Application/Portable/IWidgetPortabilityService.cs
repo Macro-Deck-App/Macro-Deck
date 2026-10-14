@@ -6,12 +6,14 @@ namespace MacroDeckHost.Application.Portable;
 
 public interface IWidgetPortabilityService
 {
-	Task<Result<byte[], PortabilityError>> Export(Guid folderId,
+	Task<Result<byte[], PortabilityError>> Export(
+		Guid folderId,
 		IReadOnlyList<Guid> widgetIds,
 		PortableExportOptions options,
 		CancellationToken cancellationToken);
 
-	Task<Result<IReadOnlyList<WidgetEntity>, PortabilityError>> Import(Guid folderId,
+	Task<Result<IReadOnlyList<WidgetEntity>, PortabilityError>> Import(
+		Guid folderId,
 		int anchorX,
 		int anchorY,
 		byte[] archiveBytes,

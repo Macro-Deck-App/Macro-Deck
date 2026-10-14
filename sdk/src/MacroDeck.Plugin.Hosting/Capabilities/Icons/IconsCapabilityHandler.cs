@@ -31,9 +31,11 @@ internal sealed class IconsCapabilityHandler(IconAssetSource iconSource) : ICapa
 	public string Kind => CapabilityKinds.Icons;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> iconSource.HasIcon
+	{
+		return iconSource.HasIcon
 			? [new DeclaredCapability { Kind = CapabilityKinds.Icons, LocalId = LocalId, VersionRange = _version }]
 			: [];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -115,8 +117,8 @@ internal sealed class IconAssetSource
 		var mimeType = IconMediaTypes.ForExtension(iconPath);
 		if (mimeType is null)
 		{
-			problems.Add($"The manifest's icon '{iconPath}' is not a supported image type. " +
-				$"Use one of {string.Join(", ", IconMediaTypes.SupportedExtensions)}.");
+			problems.Add($"The manifest's icon '{iconPath}' is not a supported image type. "
+				+ $"Use one of {string.Join(", ", IconMediaTypes.SupportedExtensions)}.");
 			return None;
 		}
 
@@ -150,8 +152,8 @@ internal sealed class IconAssetSource
 
 		if (bytes.Length > ProtocolLimits.MaxAssetBytes)
 		{
-			problems.Add($"The manifest's icon '{iconPath}' is {bytes.Length} bytes, over the " +
-				$"{ProtocolLimits.MaxAssetBytes} byte limit for an asset.");
+			problems.Add($"The manifest's icon '{iconPath}' is {bytes.Length} bytes, over the "
+				+ $"{ProtocolLimits.MaxAssetBytes} byte limit for an asset.");
 			return None;
 		}
 

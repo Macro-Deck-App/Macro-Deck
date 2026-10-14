@@ -11,7 +11,8 @@ internal static class MusicPlayerWidgetSample
 	private const long DurationMs = 214_000;
 	private const long PositionMs = 78_000;
 
-	internal static async ValueTask<MusicPlayerViewState> BuildAsync(IWidgetSampleTextResolver text,
+	internal static async ValueTask<MusicPlayerViewState> BuildAsync(
+		IWidgetSampleTextResolver text,
 		TimeProvider timeProvider)
 	{
 		var track = await text.ResolveAsync(AppStrings.Widgets.SamplePreview.MusicTrack()).ConfigureAwait(false);
@@ -29,7 +30,7 @@ internal static class MusicPlayerWidgetSample
 			// No artwork: cover art is whatever the connected player happens to be showing, and the widget
 			// already draws its own spinning disc in its place - which is the honest sample of a playing
 			// track whose cover has not arrived.
-			Position = UiProgressReference.Advancing(PositionMs, timeProvider.GetUtcNow(), DurationMs),
+			Position = UiProgressReference.Advancing(PositionMs, timeProvider.GetUtcNow(), DurationMs)
 		};
 	}
 }

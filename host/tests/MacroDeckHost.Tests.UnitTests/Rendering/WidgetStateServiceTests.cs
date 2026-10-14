@@ -26,32 +26,39 @@ public class WidgetStateServiceTests
 {
 	private static readonly string[] _offlineAndOn = ["offline", "on"];
 
-	private static WidgetEntity Button(Guid id, string? data) => new()
+	private static WidgetEntity Button(Guid id, string? data)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			Data = data
+		};
+	}
 
-	private static VariableEntity Cpu(string value) => new()
+	private static VariableEntity Cpu(string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = "cpu",
-		Scope = VariableScope.Global,
-		Type = VariableType.Numeric,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "cpu",
+			Scope = VariableScope.Global,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private sealed class Fixture
 	{
 		public Fixture(WidgetEntity widget, WidgetDerivedStateStore? derivedStore = null, params VariableEntity[] vars)
-			: this(widget, derivedStore, optimisticStates: null, vars)
+			: this(widget, derivedStore, null, vars)
 		{
 		}
 
-		public Fixture(WidgetEntity widget,
+		public Fixture(
+			WidgetEntity widget,
 			WidgetOptimisticStateStore optimisticStates,
 			WidgetDerivedStateStore? derivedStore = null,
 			params VariableEntity[] vars)
@@ -59,7 +66,8 @@ public class WidgetStateServiceTests
 		{
 		}
 
-		private Fixture(WidgetEntity widget,
+		private Fixture(
+			WidgetEntity widget,
 			WidgetDerivedStateStore? derivedStore,
 			WidgetOptimisticStateStore? optimisticStates,
 			IReadOnlyList<VariableEntity> vars)
@@ -103,17 +111,17 @@ public class WidgetStateServiceTests
 	public async Task MappingRules_FirstMatchWins_AndReorderingChangesTheOutcome()
 	{
 		const string ruleCritFirst =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"}," +
-			"{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":[" +
-			"{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}," +
-			"{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}]," +
-			"\"fallbackStateId\":\"ok\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"},"
+			+ "{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":["
+			+ "{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}},"
+			+ "{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}],"
+			+ "\"fallbackStateId\":\"ok\"}}";
 		const string ruleWarnFirst =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"}," +
-			"{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":[" +
-			"{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}," +
-			"{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}]," +
-			"\"fallbackStateId\":\"ok\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"},"
+			+ "{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":["
+			+ "{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}},"
+			+ "{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}],"
+			+ "\"fallbackStateId\":\"ok\"}}";
 
 		var critFirst = Button(Guid.NewGuid(), ruleCritFirst);
 		var warnFirst = Button(Guid.NewGuid(), ruleWarnFirst);
@@ -135,11 +143,11 @@ public class WidgetStateServiceTests
 	public async Task MappingWithNoMatchingRule_ResolvesToTheFallbackState()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"}," +
-			"{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":[" +
-			"{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}," +
-			"{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}]," +
-			"\"fallbackStateId\":\"ok\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"warn\",\"label\":\"Warn\"},{\"id\":\"crit\",\"label\":\"Crit\"},"
+			+ "{\"id\":\"ok\",\"label\":\"OK\"}],\"stateMapping\":{\"rules\":["
+			+ "{\"id\":\"r1\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}},"
+			+ "{\"id\":\"r2\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}],"
+			+ "\"fallbackStateId\":\"ok\"}}";
 		var widget = Button(Guid.NewGuid(), data);
 		var fixture = new Fixture(widget, vars: Cpu("10"));
 
@@ -152,11 +160,11 @@ public class WidgetStateServiceTests
 	public async Task MappingRuleTargetingADeletedState_NeverResolvesToADanglingStateId()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"crit\",\"label\":\"Crit\"},{\"id\":\"ok\",\"label\":\"OK\"}]," +
-			"\"stateMapping\":{\"rules\":[" +
-			"{\"id\":\"r1\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}," +
-			"{\"id\":\"r2\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}]," +
-			"\"fallbackStateId\":\"ok\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"crit\",\"label\":\"Crit\"},{\"id\":\"ok\",\"label\":\"OK\"}],"
+			+ "\"stateMapping\":{\"rules\":["
+			+ "{\"id\":\"r1\",\"stateId\":\"warn\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}},"
+			+ "{\"id\":\"r2\",\"stateId\":\"crit\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":50}}],"
+			+ "\"fallbackStateId\":\"ok\"}}";
 		var widget = Button(Guid.NewGuid(), data);
 		var fixture = new Fixture(widget, vars: Cpu("95"));
 
@@ -178,8 +186,8 @@ public class WidgetStateServiceTests
 	public async Task DegenerateMappingWithNoRules_NeverOverridesTheExplicitActiveState()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}]," +
-			"\"activeStateId\":\"b\",\"stateMapping\":{\"rules\":[],\"fallbackStateId\":\"a\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"a\",\"label\":\"A\"},{\"id\":\"b\",\"label\":\"B\"}],"
+			+ "\"activeStateId\":\"b\",\"stateMapping\":{\"rules\":[],\"fallbackStateId\":\"a\"}}";
 		var widget = Button(Guid.NewGuid(), data);
 		var fixture = new Fixture(widget);
 
@@ -195,11 +203,11 @@ public class WidgetStateServiceTests
 	public async Task StateMapping_WithAStateOperatorRule_ReachesTheSameVerdictAsAConditionEvaluator()
 	{
 		const string data =
-			"{\"stateMode\":true,\"states\":[{\"id\":\"unknown\",\"label\":\"Unknown\"},{\"id\":\"known\",\"label\":\"Known\"}]," +
-			"\"stateMapping\":{\"rules\":[" +
-			"{\"id\":\"m1\",\"stateId\":\"unknown\"," +
-			"\"when\":{\"kind\":\"compare\",\"id\":\"m1\",\"left\":{\"$var\":\"artist\"},\"operator\":\"isNotAvailable\",\"right\":\"\"}}]," +
-			"\"fallbackStateId\":\"known\"}}";
+			"{\"stateMode\":true,\"states\":[{\"id\":\"unknown\",\"label\":\"Unknown\"},{\"id\":\"known\",\"label\":\"Known\"}],"
+			+ "\"stateMapping\":{\"rules\":["
+			+ "{\"id\":\"m1\",\"stateId\":\"unknown\","
+			+ "\"when\":{\"kind\":\"compare\",\"id\":\"m1\",\"left\":{\"$var\":\"artist\"},\"operator\":\"isNotAvailable\",\"right\":\"\"}}],"
+			+ "\"fallbackStateId\":\"known\"}}";
 
 		var declaredWidget = Button(Guid.NewGuid(), data);
 		var artist = new VariableEntity
@@ -234,15 +242,15 @@ public class WidgetStateServiceTests
 				"unavailable")
 		};
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\"," +
-			"\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[]}]}]";
-		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"live\",\"label\":\"Live\"}]," +
-			"\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"states\":[{\"id\":\"live\",\"label\":\"Live\"}]}," +
-			"\"flows\":" +
-			flows +
-			"}";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\","
+			+ "\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[]}]}]";
+		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"live\",\"label\":\"Live\"}],"
+			+ "\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"states\":[{\"id\":\"live\",\"label\":\"Live\"}]},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var fixture = new Fixture(widget);
 		fixture.Integrations.Add(new FakeIntegration { Id = "integration", Actions = [action] });
@@ -262,23 +270,23 @@ public class WidgetStateServiceTests
 	{
 		var action = new FakeStateProviderAction { Id = "provide", SnapshotToReturn = null };
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\"," +
-			"\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[]}]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\","
+			+ "\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[]}]}]";
 		// A stashed mapping that WOULD match (cpu=95 -> "on" per its rule) sits alongside the provider,
 		// exactly as provider adoption leaves it (issue #612 resolution 4). The provider is authoritative
 		// unconditionally - even quiet - so this must never be consulted.
-		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"}," +
-			"{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}]}," +
-			"\"manualStateBackup\":{\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\"," +
-			"\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}]," +
-			"\"fallbackStateId\":\"offline\"}}," +
-			"\"flows\":" +
-			flows +
-			"}";
+		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},"
+			+ "{\"id\":\"on\",\"label\":\"On\"}],"
+			+ "\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}]},"
+			+ "\"manualStateBackup\":{\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}],"
+			+ "\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\","
+			+ "\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}],"
+			+ "\"fallbackStateId\":\"offline\"}},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var derivedStore = new WidgetDerivedStateStore();
 		derivedStore.GetAndSet(widget.Id, "offline"); // as if a prior successful reconcile had run
@@ -314,19 +322,19 @@ public class WidgetStateServiceTests
 	{
 		var action = new FakeStateProviderAction { Id = "provide", SnapshotToReturn = null };
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\"," +
-			"\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[]}]}]";
-		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"}," +
-			"{\"id\":\"on\",\"label\":\"On\"}]," +
-			"\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}]}," +
-			"\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\"," +
-			"\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}]," +
-			"\"fallbackStateId\":\"on\"}," +
-			"\"flows\":" +
-			flows +
-			"}";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\","
+			+ "\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[]}]}]";
+		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},"
+			+ "{\"id\":\"on\",\"label\":\"On\"}],"
+			+ "\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"states\":[{\"id\":\"offline\",\"label\":\"Offline\"},{\"id\":\"on\",\"label\":\"On\"}]},"
+			+ "\"stateMapping\":{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\","
+			+ "\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}],"
+			+ "\"fallbackStateId\":\"on\"},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var derivedStore = new WidgetDerivedStateStore();
 		derivedStore.GetAndSet(widget.Id, "offline");
@@ -464,31 +472,39 @@ public class WidgetStateServiceTests
 		});
 	}
 
-	private static FakeStateProviderAction ProviderAction(string activeStateId) => new()
+	private static FakeStateProviderAction ProviderAction(string activeStateId)
 	{
-		Id = "provide", SnapshotToReturn = ProviderSnapshot(activeStateId)
-	};
+		return new FakeStateProviderAction
+		{
+			Id = "provide", SnapshotToReturn = ProviderSnapshot(activeStateId)
+		};
+	}
 
-	private static ActionStateSnapshot ProviderSnapshot(string activeStateId) => new(
-		[new ActionStateDefinition("unmuted", "Unmuted"), new ActionStateDefinition("muted", "Muted")],
-		activeStateId);
+	private static ActionStateSnapshot ProviderSnapshot(string activeStateId)
+	{
+		return new ActionStateSnapshot(
+			[new ActionStateDefinition("unmuted", "Unmuted"), new ActionStateDefinition("muted", "Muted")],
+			activeStateId);
+	}
 
 	private static WidgetOptimisticStateIdentity ProviderIdentity(Guid widgetId)
-		=> new(widgetId, "blk-1", "integration", "provide");
+	{
+		return new WidgetOptimisticStateIdentity(widgetId, "blk-1", "integration", "provide");
+	}
 
 	private static WidgetEntity ProviderWidget()
 	{
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onShortPress\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\"," +
-			"\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"parameters\":[]}]}]";
-		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"unmuted\",\"label\":\"Unmuted\"}," +
-			"{\"id\":\"muted\",\"label\":\"Muted\"}]," +
-			"\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\"," +
-			"\"states\":[{\"id\":\"unmuted\",\"label\":\"Unmuted\"},{\"id\":\"muted\",\"label\":\"Muted\"}]}," +
-			"\"flows\":" +
-			flows +
-			"}";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onShortPress\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\","
+			+ "\"blockType\":\"integration.provide\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"parameters\":[]}]}]";
+		var data = "{\"stateMode\":true,\"states\":[{\"id\":\"unmuted\",\"label\":\"Unmuted\"},"
+			+ "{\"id\":\"muted\",\"label\":\"Muted\"}],"
+			+ "\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"integration\",\"actionId\":\"provide\","
+			+ "\"states\":[{\"id\":\"unmuted\",\"label\":\"Unmuted\"},{\"id\":\"muted\",\"label\":\"Muted\"}]},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		return Button(Guid.NewGuid(), data);
 	}
 
@@ -501,18 +517,45 @@ public class WidgetStateServiceTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

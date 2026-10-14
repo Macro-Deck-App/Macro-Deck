@@ -7,9 +7,16 @@ namespace MacroDeckHost.Application.Plugins.IconPacks;
 
 public sealed record DeclaredIconPack(string Key, string Revision, Func<Stream> Open);
 
-public sealed record DeclaredIconPackSet(string PluginId, string PluginName, bool Development, IReadOnlyList<DeclaredIconPack> Packs)
+public sealed record DeclaredIconPackSet(
+	string PluginId,
+	string PluginName,
+	bool Development,
+	IReadOnlyList<DeclaredIconPack> Packs)
 {
-	public bool Declares(string key) => Packs.Any(pack => string.Equals(pack.Key, key, StringComparison.Ordinal));
+	public bool Declares(string key)
+	{
+		return Packs.Any(pack => string.Equals(pack.Key, key, StringComparison.Ordinal));
+	}
 }
 
 public sealed record DevelopmentIconPack(string Key, string ContentHash, byte[] Content);
@@ -50,7 +57,8 @@ public sealed class PluginBundledIconPackDeclarations(
 			return null;
 		}
 
-		if (_installed.TryGetValue(pluginId, out var cached) && string.Equals(cached.Version, active.Version, StringComparison.Ordinal))
+		if (_installed.TryGetValue(pluginId, out var cached)
+			&& string.Equals(cached.Version, active.Version, StringComparison.Ordinal))
 		{
 			return cached.Set;
 		}
@@ -60,20 +68,33 @@ public sealed class PluginBundledIconPackDeclarations(
 		return set;
 	}
 
-	public void SetDevelopment(string pluginId, string sessionId, string pluginName, IReadOnlyList<DevelopmentIconPack> packs)
-		=> _development[pluginId] = (sessionId,
+	public void SetDevelopment(
+		string pluginId,
+		string sessionId,
+		string pluginName,
+		IReadOnlyList<DevelopmentIconPack> packs)
+	{
+		_development[pluginId] = (sessionId,
 			new DeclaredIconPackSet(pluginId,
 				pluginName,
-				Development: true,
-				packs.Select(pack => new DeclaredIconPack(pack.Key, pack.ContentHash, () => new MemoryStream(pack.Content, writable: false)))
+				true,
+				packs.Select(pack => new DeclaredIconPack(pack.Key,
+						pack.ContentHash,
+						() => new MemoryStream(pack.Content, false)))
 					.ToList()));
+	}
 
 	public bool ClearDevelopment(string pluginId, string sessionId)
-		=> _development.TryGetValue(pluginId, out var current) &&
-			string.Equals(current.SessionId, sessionId, StringComparison.Ordinal) &&
-			_development.TryRemove(new KeyValuePair<string, (string, DeclaredIconPackSet)>(pluginId, current));
+	{
+		return _development.TryGetValue(pluginId, out var current)
+			&& string.Equals(current.SessionId, sessionId, StringComparison.Ordinal)
+			&& _development.TryRemove(new KeyValuePair<string, (string, DeclaredIconPackSet)>(pluginId, current));
+	}
 
-	public void Invalidate(string pluginId) => _installed.TryRemove(pluginId, out _);
+	public void Invalidate(string pluginId)
+	{
+		_installed.TryRemove(pluginId, out _);
+	}
 
 	private DeclaredIconPackSet? ReadInstalled(string pluginId, InstalledPluginVersion active)
 	{
@@ -88,11 +109,13 @@ public sealed class PluginBundledIconPackDeclarations(
 		foreach (var declared in manifest.BundledIconPacks ?? [])
 		{
 			// Only a file the signature covers may be read: the key to path mapping sits outside the digest.
-			var signed = manifest.Files?.FirstOrDefault(file => string.Equals(file.Path, declared.Path, StringComparison.Ordinal));
+			var signed = manifest.Files?.FirstOrDefault(file
+				=> string.Equals(file.Path, declared.Path, StringComparison.Ordinal));
 			var path = Path.GetFullPath(Path.Combine(root, declared.Path));
 			if (signed is null || !path.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
 			{
-				_logger.Warning("Plugin {PluginId} declares bundled icon pack {Key} at {Path}, which its signed files do not list; skipping",
+				_logger.Warning(
+					"Plugin {PluginId} declares bundled icon pack {Key} at {Path}, which its signed files do not list; skipping",
 					pluginId,
 					declared.Key,
 					declared.Path);
@@ -102,6 +125,6 @@ public sealed class PluginBundledIconPackDeclarations(
 			packs.Add(new DeclaredIconPack(declared.Key, signed.Sha256, () => File.OpenRead(path)));
 		}
 
-		return new DeclaredIconPackSet(pluginId, manifest.Name, Development: false, packs);
+		return new DeclaredIconPackSet(pluginId, manifest.Name, false, packs);
 	}
 }

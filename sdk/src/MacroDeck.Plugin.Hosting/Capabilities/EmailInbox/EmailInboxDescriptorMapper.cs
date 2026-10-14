@@ -11,12 +11,14 @@ internal static class EmailInboxDescriptorMapper
 	private const int ResultFramingBytes = 64;
 
 	public static EmailInboxDto ToDto(Sdk.Email.EmailInbox inbox)
-		=> new()
+	{
+		return new EmailInboxDto
 		{
 			Id = inbox.Id,
 			DisplayName = Clip(inbox.DisplayName, ProtocolLimits.MaxEmailSenderLength),
 			Address = ClipOptional(inbox.Address, ProtocolLimits.MaxEmailSenderLength)
 		};
+	}
 
 	public static EmailInboxSnapshotResult ToSnapshotResult(EmailInboxSnapshot snapshot, int maxMessages)
 	{
@@ -56,7 +58,8 @@ internal static class EmailInboxDescriptorMapper
 	}
 
 	private static EmailMessageDto ToDto(EmailMessage message)
-		=> new()
+	{
+		return new EmailMessageDto
 		{
 			Id = message.Id,
 			SenderName = ClipOptional(message.SenderName, ProtocolLimits.MaxEmailSenderLength),
@@ -66,11 +69,17 @@ internal static class EmailInboxDescriptorMapper
 			ReceivedAt = message.ReceivedAt,
 			IsRead = message.IsRead
 		};
+	}
 
 	private static int SerializedSize<T>(T value)
-		=> JsonSerializer.SerializeToUtf8Bytes(value, PluginProtocolJson.Options).Length;
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(value, PluginProtocolJson.Options).Length;
+	}
 
-	private static string? ClipOptional(string? text, int maxLength) => text is null ? null : Clip(text, maxLength);
+	private static string? ClipOptional(string? text, int maxLength)
+	{
+		return text is null ? null : Clip(text, maxLength);
+	}
 
 	private static string Clip(string text, int maxLength)
 	{

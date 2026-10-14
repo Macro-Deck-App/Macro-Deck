@@ -64,7 +64,8 @@ public class WidgetsController : ControllerBase
 		IUiTransportMessageHandler<DeleteWidgetsRequest, DeleteWidgetsResponse> deleteWidgets,
 		IUiTransportMessageHandler<SetWidgetsPinnedRequest, SetWidgetsPinnedResponse> setWidgetsPinned,
 		IWidgetPortabilityService portability,
-		IUiTransportMessageHandler<GetWidgetTypeFavoritesRequest, GetWidgetTypeFavoritesResponse> getWidgetTypeFavorites,
+		IUiTransportMessageHandler<GetWidgetTypeFavoritesRequest, GetWidgetTypeFavoritesResponse>
+			getWidgetTypeFavorites,
 		IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse> setWidgetTypeFavorite)
 	{
 		_createWidget = createWidget;
@@ -87,44 +88,64 @@ public class WidgetsController : ControllerBase
 
 	[HttpGet("schemas")]
 	public Task<GetWidgetDataSchemasResponse> GetDataSchemas(CancellationToken ct)
-		=> _getWidgetDataSchemas.Handle(new GetWidgetDataSchemasRequest(), ct).AsTask();
+	{
+		return _getWidgetDataSchemas.Handle(new GetWidgetDataSchemasRequest(), ct).AsTask();
+	}
 
 	[HttpGet("types")]
 	public Task<GetWidgetTypesResponse> GetTypes(CancellationToken ct)
-		=> _getWidgetTypes.Handle(new GetWidgetTypesRequest(), ct).AsTask();
+	{
+		return _getWidgetTypes.Handle(new GetWidgetTypesRequest(), ct).AsTask();
+	}
 
 	[HttpGet("types/favorites")]
 	public Task<GetWidgetTypeFavoritesResponse> GetTypeFavorites(CancellationToken ct)
-		=> _getWidgetTypeFavorites.Handle(new GetWidgetTypeFavoritesRequest(), ct).AsTask();
+	{
+		return _getWidgetTypeFavorites.Handle(new GetWidgetTypeFavoritesRequest(), ct).AsTask();
+	}
 
 	[HttpPut("types/favorites")]
 	public Task<SetWidgetTypeFavoriteResponse> SetTypeFavorite(SetWidgetTypeFavoriteRequest body, CancellationToken ct)
-		=> _setWidgetTypeFavorite.Handle(body, ct).AsTask();
+	{
+		return _setWidgetTypeFavorite.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateWidgetResponse> Create(CreateWidgetRequest body, CancellationToken ct)
-		=> _createWidget.Handle(body, ct).AsTask();
+	{
+		return _createWidget.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("batch")]
 	public Task<CreateWidgetsResponse> CreateMany(CreateWidgetsRequest body, CancellationToken ct)
-		=> _createWidgets.Handle(body, ct).AsTask();
+	{
+		return _createWidgets.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("from-application")]
-	public Task<CreateWidgetResponse> CreateFromApplication(CreateWidgetFromApplicationRequest body,
+	public Task<CreateWidgetResponse> CreateFromApplication(
+		CreateWidgetFromApplicationRequest body,
 		CancellationToken ct)
-		=> _createWidgetFromApplication.Handle(body, ct).AsTask();
+	{
+		return _createWidgetFromApplication.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut]
 	public Task<UpdateWidgetResponse> Update(UpdateWidgetRequest body, CancellationToken ct)
-		=> _updateWidget.Handle(body, ct).AsTask();
+	{
+		return _updateWidget.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut("positions")]
 	public Task<UpdateWidgetPositionsResponse> UpdatePositions(UpdateWidgetPositionsRequest body, CancellationToken ct)
-		=> _updateWidgetPositions.Handle(body, ct).AsTask();
+	{
+		return _updateWidgetPositions.Handle(body, ct).AsTask();
+	}
 
 	[HttpPatch("{widgetId}/state")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public Task<UpdateWidgetStateResponse> UpdateState(string widgetId,
+	public Task<UpdateWidgetStateResponse> UpdateState(
+		string widgetId,
 		UpdateWidgetStateRequest body,
 		CancellationToken ct)
 	{
@@ -134,7 +155,8 @@ public class WidgetsController : ControllerBase
 
 	[HttpPatch("{widgetId}/data")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public Task<UpdateWidgetDataResponse> UpdateData(string widgetId,
+	public Task<UpdateWidgetDataResponse> UpdateData(
+		string widgetId,
 		UpdateWidgetDataRequest body,
 		CancellationToken ct)
 	{
@@ -143,7 +165,8 @@ public class WidgetsController : ControllerBase
 	}
 
 	[HttpPut("{widgetId}/pinned")]
-	public Task<SetWidgetPinnedResponse> SetPinned(string widgetId,
+	public Task<SetWidgetPinnedResponse> SetPinned(
+		string widgetId,
 		SetWidgetPinnedRequest body,
 		CancellationToken ct)
 	{
@@ -153,15 +176,21 @@ public class WidgetsController : ControllerBase
 
 	[HttpPut("pinned/batch")]
 	public Task<SetWidgetsPinnedResponse> SetPinnedMany(SetWidgetsPinnedRequest body, CancellationToken ct)
-		=> _setWidgetsPinned.Handle(body, ct).AsTask();
+	{
+		return _setWidgetsPinned.Handle(body, ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DeleteWidgetResponse> Delete(string id, [FromQuery] string folderId, CancellationToken ct)
-		=> _deleteWidget.Handle(new DeleteWidgetRequest { Id = id, FolderId = folderId }, ct).AsTask();
+	{
+		return _deleteWidget.Handle(new DeleteWidgetRequest { Id = id, FolderId = folderId }, ct).AsTask();
+	}
 
 	[HttpPost("batch/delete")]
 	public Task<DeleteWidgetsResponse> DeleteMany(DeleteWidgetsRequest body, CancellationToken ct)
-		=> _deleteWidgets.Handle(body, ct).AsTask();
+	{
+		return _deleteWidgets.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("export")]
 	public async Task<IActionResult> Export(ExportWidgetsRequest body, CancellationToken ct)
@@ -192,7 +221,8 @@ public class WidgetsController : ControllerBase
 
 	[HttpPost("import")]
 	[RequestSizeLimit(PortabilityHttp.MaxRequestBytes)]
-	public async Task<ImportWidgetsResponse> Import([FromForm] IFormFile? file,
+	public async Task<ImportWidgetsResponse> Import(
+		[FromForm] IFormFile? file,
 		[FromForm] string folderId,
 		[FromForm] int anchorX,
 		[FromForm] int anchorY,
@@ -239,7 +269,8 @@ public class WidgetsController : ControllerBase
 		return await Import(targetFolderId, body.AnchorX, body.AnchorY, bytes.Data!, body.Password, ct);
 	}
 
-	private async Task<ImportWidgetsResponse> Import(Guid folderId,
+	private async Task<ImportWidgetsResponse> Import(
+		Guid folderId,
 		int anchorX,
 		int anchorY,
 		byte[] archiveBytes,
@@ -260,9 +291,11 @@ public class WidgetsController : ControllerBase
 	}
 
 	private static ImportWidgetsResponse Fail(Domain.Enums.PortabilityError error, string? message)
-		=> new()
+	{
+		return new ImportWidgetsResponse
 		{
 			Success = false,
 			Error = PortabilityHttp.ToTransportError(error, message)
 		};
+	}
 }

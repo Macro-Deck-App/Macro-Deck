@@ -15,7 +15,10 @@ namespace MacroDeckHost.Widgets.Preview;
 public static class WidgetSamplePreview
 {
 	/// <summary>Whether this surface asks for the sample rather than live state.</summary>
-	public static bool IsRequested(UiSurface surface) => UiWidgetSurface.IsSampleRequested(surface);
+	public static bool IsRequested(UiSurface surface)
+	{
+		return UiWidgetSurface.IsSampleRequested(surface);
+	}
 }
 
 /// <summary>

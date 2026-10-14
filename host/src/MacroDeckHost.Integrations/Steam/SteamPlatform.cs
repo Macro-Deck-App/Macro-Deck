@@ -71,13 +71,18 @@ internal sealed class SystemSteamPlatform : ISteamPlatform
 			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
 		];
 
-	public string? ReadRegistrySteamPath() => OperatingSystem.IsWindows() ? ReadValue("SteamPath") : null;
+	public string? ReadRegistrySteamPath()
+	{
+		return OperatingSystem.IsWindows() ? ReadValue("SteamPath") : null;
+	}
 
 	public int? ReadRegistryRunningAppId()
-		=> OperatingSystem.IsWindows() &&
-			int.TryParse(ReadValue("RunningAppID"), NumberStyles.None, CultureInfo.InvariantCulture, out var appId)
+	{
+		return OperatingSystem.IsWindows()
+			&& int.TryParse(ReadValue("RunningAppID"), NumberStyles.None, CultureInfo.InvariantCulture, out var appId)
 				? appId
 				: null;
+	}
 
 	public bool IsSteamProcessRunning()
 	{
@@ -101,7 +106,8 @@ internal sealed class SystemSteamPlatform : ISteamPlatform
 
 			return running;
 		}
-		catch (Exception exception) when (exception is InvalidOperationException or PlatformNotSupportedException
+		catch (Exception exception) when (exception is InvalidOperationException
+			or PlatformNotSupportedException
 			or Win32Exception)
 		{
 			return false;
@@ -111,16 +117,26 @@ internal sealed class SystemSteamPlatform : ISteamPlatform
 	public bool CanCloseGames => OperatingSystem.IsWindows();
 
 	public IReadOnlyList<SteamGameProcess> FindGameProcesses(int appId, string? installDirectory)
-		=> OperatingSystem.IsWindows() && installDirectory is not null
+	{
+		return OperatingSystem.IsWindows() && installDirectory is not null
 			? SteamGameProcesses.FindOnWindows(installDirectory)
 			: [];
+	}
 
 	public bool RequestClose(SteamGameProcess process)
-		=> OperatingSystem.IsWindows() && SteamGameProcesses.RequestClose(process);
+	{
+		return OperatingSystem.IsWindows() && SteamGameProcesses.RequestClose(process);
+	}
 
-	public bool Kill(SteamGameProcess process) => OperatingSystem.IsWindows() && SteamGameProcesses.Kill(process);
+	public bool Kill(SteamGameProcess process)
+	{
+		return OperatingSystem.IsWindows() && SteamGameProcesses.Kill(process);
+	}
 
-	public bool IsRunning(SteamGameProcess process) => SteamGameProcesses.IsRunning(process);
+	public bool IsRunning(SteamGameProcess process)
+	{
+		return SteamGameProcesses.IsRunning(process);
+	}
 
 	public IReadOnlyList<int> FindLaunchedAppIds()
 	{
@@ -190,7 +206,8 @@ internal sealed class SystemSteamPlatform : ISteamPlatform
 			using var key = Registry.CurrentUser.OpenSubKey(SteamKey);
 			return key?.GetValue(name)?.ToString();
 		}
-		catch (Exception exception) when (exception is UnauthorizedAccessException or IOException
+		catch (Exception exception) when (exception is UnauthorizedAccessException
+			or IOException
 			or SecurityException)
 		{
 			return null;

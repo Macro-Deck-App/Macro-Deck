@@ -47,8 +47,8 @@ public class GetActionProviderIconRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "ACTION_NOT_FOUND",
-					Message = AppStrings.Errors.Actions.ActionNotFound(integrationId: request.IntegrationId,
-						actionId: request.ActionId)
+					Message = AppStrings.Errors.Actions.ActionNotFound(request.IntegrationId,
+						request.ActionId)
 				}
 			};
 		}

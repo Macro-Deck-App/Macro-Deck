@@ -67,9 +67,9 @@ public class WeatherDetailsViewTests
 		var host = Render(Sample());
 
 		var rows = Walk(host.Root)
-			.Where(node => node.Type == UiComponents.Stack &&
-				node.Text(UiComponentProperties.Direction) == UiComponentDirections.Horizontal &&
-				node.Children.Any(child => child.Flag(UiComponentProperties.Fill) == true))
+			.Where(node => node.Type == UiComponents.Stack
+				&& node.Text(UiComponentProperties.Direction) == UiComponentDirections.Horizontal
+				&& node.Children.Any(child => child.Flag(UiComponentProperties.Fill) == true))
 			.ToList();
 
 		Assert.That(rows, Is.Not.Empty, "No row mixes a filling child with siblings, so nothing was checked.");
@@ -84,8 +84,8 @@ public class WeatherDetailsViewTests
 
 				Assert.That(child.HasProperty(UiComponentProperties.MainSize),
 					Is.True,
-					$"'{child.Id}' shares a row with a filling sibling but declares no main size, " +
-					"so the filling sibling is handed its width too.");
+					$"'{child.Id}' shares a row with a filling sibling but declares no main size, "
+					+ "so the filling sibling is handed its width too.");
 			}
 		});
 	}
@@ -95,9 +95,13 @@ public class WeatherDetailsViewTests
 	{
 		var host = Render(Sample());
 
-		UiTestNode Measurement(string key) => Walk(host.Root).Single(node =>
-			node.Id.EndsWith($".{key}", StringComparison.Ordinal) &&
-			node.Parent?.Parent?.Id.EndsWith(".measurements", StringComparison.Ordinal) == true);
+		UiTestNode Measurement(string key)
+		{
+			return Walk(host.Root)
+				.Single(node =>
+					node.Id.EndsWith($".{key}", StringComparison.Ordinal)
+					&& node.Parent?.Parent?.Id.EndsWith(".measurements", StringComparison.Ordinal) == true);
+		}
 
 		var wind = Measurement("wind");
 		var sunrise = Measurement("sunrise");
@@ -140,39 +144,45 @@ public class WeatherDetailsViewTests
 		var node = new UiNode
 			{ Id = strip.Id, Type = strip.Type, RequiredComponentVersion = strip.RequiredComponentVersion };
 
-		UiNegotiationResult Negotiate(int maximum) => UiCapabilityNegotiator.NegotiateComponent(node,
-			new UiCapabilities
-			{
-				UiProtocol = new UiVersionRange { Minimum = 1, Maximum = 1 },
-				SupportsAllComponents = false,
-				Components = new Dictionary<string, UiVersionRange>
+		UiNegotiationResult Negotiate(int maximum)
+		{
+			return UiCapabilityNegotiator.NegotiateComponent(node,
+				new UiCapabilities
 				{
-					[UiComponents.List] = new() { Minimum = 1, Maximum = maximum },
-					[UiComponents.Stack] = new() { Minimum = 1, Maximum = 1 },
-				},
-			});
+					UiProtocol = new UiVersionRange { Minimum = 1, Maximum = 1 },
+					SupportsAllComponents = false,
+					Components = new Dictionary<string, UiVersionRange>
+					{
+						[UiComponents.List] = new() { Minimum = 1, Maximum = maximum },
+						[UiComponents.Stack] = new() { Minimum = 1, Maximum = 1 }
+					}
+				});
+		}
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(Negotiate(1).IsSupported, Is.False, "A version 1 reader would draw the strip as a column.");
 			Assert.That(Negotiate(2).IsSupported, Is.True);
 			Assert.That(UiCapabilityNegotiator.NegotiateComponent(
-					new UiNode { Id = strip.Fallback!.Id, Type = strip.Fallback.Type },
-					new UiCapabilities
-					{
-						UiProtocol = new UiVersionRange { Minimum = 1, Maximum = 1 },
-						SupportsAllComponents = false,
-						Components = new Dictionary<string, UiVersionRange>
+						new UiNode { Id = strip.Fallback!.Id, Type = strip.Fallback.Type },
+						new UiCapabilities
 						{
-							[UiComponents.Stack] = new() { Minimum = 1, Maximum = 1 },
-						},
-					}).IsSupported,
+							UiProtocol = new UiVersionRange { Minimum = 1, Maximum = 1 },
+							SupportsAllComponents = false,
+							Components = new Dictionary<string, UiVersionRange>
+							{
+								[UiComponents.Stack] = new() { Minimum = 1, Maximum = 1 }
+							}
+						})
+					.IsSupported,
 				Is.True);
 		});
 	}
 
 	private static UiTestNode HourlyStrip(UiTestHost host)
-		=> Walk(host.Root).Single(node => node.Id.EndsWith(".hourly.hours", StringComparison.Ordinal));
+	{
+		return Walk(host.Root).Single(node => node.Id.EndsWith(".hourly.hours", StringComparison.Ordinal));
+	}
 
 	private static WeatherDetailsState WithHours(int count)
 	{
@@ -200,9 +210,9 @@ public class WeatherDetailsViewTests
 	public void The_hours_follow_the_app_time_format()
 	{
 		var culture = CultureInfo.GetCultureInfo("en-US");
-		var twelveHour = Render(Sample(), new WeatherDetailsTimeFormat(culture, TwelveHour: true).Format);
-		var twentyFourHour = Render(Sample(), new WeatherDetailsTimeFormat(culture, TwelveHour: false).Format);
-		var expected = new WeatherDetailsTimeFormat(culture, TwelveHour: true).Format(new TimeOnly(14, 0));
+		var twelveHour = Render(Sample(), new WeatherDetailsTimeFormat(culture, true).Format);
+		var twentyFourHour = Render(Sample(), new WeatherDetailsTimeFormat(culture, false).Format);
+		var expected = new WeatherDetailsTimeFormat(culture, true).Format(new TimeOnly(14, 0));
 
 		Assert.Multiple(() =>
 		{
@@ -214,13 +224,14 @@ public class WeatherDetailsViewTests
 	}
 
 	private static WeatherDetailsIcons Icons()
-		=> WeatherDetailsIcons.ResolveAsync(
-				new BuiltInUiResources(WeatherIntegration.IntegrationId,
+	{
+		return WeatherDetailsIcons.ResolveAsync(new BuiltInUiResources(WeatherIntegration.IntegrationId,
 					new UiResourceStore(),
 					typeof(WeatherIntegration)),
 				CancellationToken.None)
 			.GetAwaiter()
 			.GetResult();
+	}
 
 	[TestCase("clear", true)]
 	[TestCase("clear", false)]
@@ -248,25 +259,28 @@ public class WeatherDetailsViewTests
 			new UiSurface { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive });
 	}
 
-	private static WeatherDetailsState Sample() => new()
+	private static WeatherDetailsState Sample()
 	{
-		IsAvailable = true,
-		StationExists = true,
-		LocationName = "Niederkassel, Germany",
-		Temperature = 23,
-		Condition = "partly-cloudy",
-		IsDay = true,
-		Unit = "celsius",
-		Days =
-		[
-			new WeatherDetailsDay { Date = "2026-07-20", Condition = "partly-cloudy", Min = 12, Max = 24 },
-			new WeatherDetailsDay { Date = "2026-07-21", Condition = "rain", Min = 10, Max = 19 },
-		],
-		Hours =
-		[
-			new WeatherDetailsHour { Time = "14:00", Condition = "partly-cloudy", Temperature = 23 },
-			new WeatherDetailsHour { Time = "15:00", Condition = "rain", Temperature = 22 },
-			new WeatherDetailsHour { Time = "16:00", Condition = "rain", Temperature = 21 },
-		],
-	};
+		return new WeatherDetailsState
+		{
+			IsAvailable = true,
+			StationExists = true,
+			LocationName = "Niederkassel, Germany",
+			Temperature = 23,
+			Condition = "partly-cloudy",
+			IsDay = true,
+			Unit = "celsius",
+			Days =
+			[
+				new WeatherDetailsDay { Date = "2026-07-20", Condition = "partly-cloudy", Min = 12, Max = 24 },
+				new WeatherDetailsDay { Date = "2026-07-21", Condition = "rain", Min = 10, Max = 19 }
+			],
+			Hours =
+			[
+				new WeatherDetailsHour { Time = "14:00", Condition = "partly-cloudy", Temperature = 23 },
+				new WeatherDetailsHour { Time = "15:00", Condition = "rain", Temperature = 22 },
+				new WeatherDetailsHour { Time = "16:00", Condition = "rain", Temperature = 21 }
+			]
+		};
+	}
 }

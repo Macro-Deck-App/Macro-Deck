@@ -33,5 +33,8 @@ public static class UiPatchOperations
 
 	/// <summary>True when <paramref name="op" /> is exactly one of the five frozen names. Never throws,
 	/// including on <c>null</c>.</summary>
-	public static bool IsKnown(string? op) => op is not null && _known.Contains(op);
+	public static bool IsKnown(string? op)
+	{
+		return op is not null && _known.Contains(op);
+	}
 }

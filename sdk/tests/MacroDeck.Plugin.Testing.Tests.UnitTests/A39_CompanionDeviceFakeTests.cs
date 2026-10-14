@@ -6,7 +6,7 @@ using MacroDeck.Sdk.Companion;
 namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 
 [TestFixture]
-public class A39_CompanionDeviceFakeTests
+public class A39CompanionDeviceFakeTests
 {
 	private static readonly Guid _phone = Guid.NewGuid();
 
@@ -98,6 +98,9 @@ public class A39_CompanionDeviceFakeTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

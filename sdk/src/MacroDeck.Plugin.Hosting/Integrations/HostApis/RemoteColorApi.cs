@@ -29,7 +29,8 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 	private bool _hostHasEntries;
 	private object? _unsupportedOn;
 
-	public RemoteColorApi(IHostInvoker invoker,
+	public RemoteColorApi(
+		IHostInvoker invoker,
 		PluginConnectionState state,
 		HostStateCache stateCache,
 		ILogger logger)
@@ -52,7 +53,10 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 		_syncGate.Dispose();
 	}
 
-	public async Task<string?> ResolveAsync(string value, string? widgetId = null, CancellationToken cancellationToken = default)
+	public async Task<string?> ResolveAsync(
+		string value,
+		string? widgetId = null,
+		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(value);
 
@@ -82,11 +86,14 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 		}
 	}
 
-	public Task<IAsyncDisposable> WatchAsync(string value,
+	public Task<IAsyncDisposable> WatchAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId = null,
 		CancellationToken cancellationToken = default)
-		=> AddAsync(value, onChanged, widgetId, lifecycle: false, cancellationToken);
+	{
+		return AddAsync(value, onChanged, widgetId, false, cancellationToken);
+	}
 
 	public void ReleaseLifecycleWatches()
 	{
@@ -111,7 +118,8 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 		}
 	}
 
-	private async Task<IAsyncDisposable> AddAsync(string value,
+	private async Task<IAsyncDisposable> AddAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId,
 		bool lifecycle,
@@ -213,7 +221,7 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 			}
 
 			var connection = _state.ActiveConnection;
-			if (connection is null || (table.Watches.Count == 0 && !_hostHasEntries))
+			if (connection is null || table.Watches.Count == 0 && !_hostHasEntries)
 			{
 				return;
 			}
@@ -248,15 +256,16 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 					DeliverLocally();
 					return;
 				}
-				catch (HostInvocationException exception) when (exception.Retryable &&
-					_state.ActiveConnection is not null &&
-					attempt < _retryDelays.Length)
+				catch (HostInvocationException exception) when (exception.Retryable
+					&& _state.ActiveConnection is not null
+					&& attempt < _retryDelays.Length)
 				{
 					await Task.Delay(_retryDelays[attempt], cancellationToken).ConfigureAwait(false);
 				}
 				catch (HostInvocationException exception)
 				{
-					_logger.Debug("Colour watches stay unsynced until the next change or connect ({Code})", exception.Code);
+					_logger.Debug("Colour watches stay unsynced until the next change or connect ({Code})",
+						exception.Code);
 					ResolveUndelivered();
 					return;
 				}
@@ -346,10 +355,17 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 	}
 
 	private static bool IsUnsupported(HostInvocationException exception)
-		=> string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal);
+	{
+		return string.Equals(exception.Code, ProtocolErrorCodes.CapabilityUnsupported, StringComparison.Ordinal);
+	}
 
-	private sealed class Entry(RemoteColorApi owner, string id, string value, string? widgetId,
-		Func<string?, CancellationToken, Task> onChanged, bool lifecycle)
+	private sealed class Entry(
+		RemoteColorApi owner,
+		string id,
+		string value,
+		string? widgetId,
+		Func<string?, CancellationToken, Task> onChanged,
+		bool lifecycle)
 	{
 		private readonly Lock _chain = new();
 		private Task _tail = Task.CompletedTask;
@@ -382,8 +398,7 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 			await Task.Yield();
 			try
 			{
-				if (!owner.IsActive(this) ||
-					(_delivered && string.Equals(color, _last, StringComparison.Ordinal)))
+				if (!owner.IsActive(this) || _delivered && string.Equals(color, _last, StringComparison.Ordinal))
 				{
 					return;
 				}
@@ -414,13 +429,21 @@ internal sealed class RemoteColorApi : IColorApi, IDisposable
 
 	private sealed class LifecycleView(RemoteColorApi api) : IColorApi
 	{
-		public Task<string?> ResolveAsync(string value, string? widgetId = null, CancellationToken cancellationToken = default)
-			=> api.ResolveAsync(value, widgetId, cancellationToken);
+		public Task<string?> ResolveAsync(
+			string value,
+			string? widgetId = null,
+			CancellationToken cancellationToken = default)
+		{
+			return api.ResolveAsync(value, widgetId, cancellationToken);
+		}
 
-		public Task<IAsyncDisposable> WatchAsync(string value,
+		public Task<IAsyncDisposable> WatchAsync(
+			string value,
 			Func<string?, CancellationToken, Task> onChanged,
 			string? widgetId = null,
 			CancellationToken cancellationToken = default)
-			=> api.AddAsync(value, onChanged, widgetId, lifecycle: true, cancellationToken);
+		{
+			return api.AddAsync(value, onChanged, widgetId, true, cancellationToken);
+		}
 	}
 }

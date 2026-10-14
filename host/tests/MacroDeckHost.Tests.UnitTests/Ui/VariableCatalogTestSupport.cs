@@ -36,11 +36,18 @@ internal sealed class FakeVariableProviderIntegration : IIntegration, IVariableP
 
 	public List<VariableCatalogQuery> ReceivedQueries { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
-	public ValueTask<VariableCatalogPage> DiscoverAsync(VariableCatalogQuery query,
+	public ValueTask<VariableCatalogPage> DiscoverAsync(
+		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
 	{
 		ReceivedQueries.Add(query);
@@ -58,16 +65,23 @@ internal sealed class FakeVariableProviderIntegration : IIntegration, IVariableP
 	}
 
 	public ValueTask<VariableDefinition?> ResolveAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(ResolveHandler is not null
+	{
+		return ValueTask.FromResult(ResolveHandler is not null
 			? ResolveHandler(localId)
 			: AllItems.FirstOrDefault(i => i.Id == localId));
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableReading.Unavailable);
+	{
+		return ValueTask.FromResult(VariableReading.Unavailable);
+	}
 
-	public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(IReadOnlyCollection<string> localIds,
+	public ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
+		IReadOnlyCollection<string> localIds,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
+	{
+		return ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
+	}
 }
 
 /// <summary>An <see cref="IVariableBindingService"/> whose every outcome a test dictates directly,
@@ -89,21 +103,29 @@ internal sealed class FakeVariableBindingService : IVariableBindingService
 		string? requestedName,
 		DomainVariableType? typeOverride,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(OnBind?.Invoke(integrationId, localResourceId, requestedName, typeOverride) ??
-			Result.Fail<VariableEntity, VariableBindingError>(VariableBindingError.ProviderUnavailable));
+	{
+		return Task.FromResult(OnBind?.Invoke(integrationId, localResourceId, requestedName, typeOverride)
+			?? Result.Fail<VariableEntity, VariableBindingError>(VariableBindingError.ProviderUnavailable));
+	}
 
-	public Task<Result<VariableBindingError>> UnbindAsync(Guid variableId,
+	public Task<Result<VariableBindingError>> UnbindAsync(
+		Guid variableId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(OnUnbind?.Invoke(variableId) ??
-			Result.Fail(VariableBindingError.NotFound, "not found"));
+	{
+		return Task.FromResult(OnUnbind?.Invoke(variableId) ?? Result.Fail(VariableBindingError.NotFound, "not found"));
+	}
 
-	public Task<Result<VariableBindingError>> RenameAsync(Guid variableId,
+	public Task<Result<VariableBindingError>> RenameAsync(
+		Guid variableId,
 		string name,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(OnRename?.Invoke(variableId, name) ??
-			Result.Fail(VariableBindingError.NotFound, "not found"));
+	{
+		return Task.FromResult(OnRename?.Invoke(variableId, name)
+			?? Result.Fail(VariableBindingError.NotFound, "not found"));
+	}
 
-	public Task<Result<VariableBindingError>> RemoveIntegrationAsync(string integrationId,
+	public Task<Result<VariableBindingError>> RemoveIntegrationAsync(
+		string integrationId,
 		CancellationToken cancellationToken = default)
 	{
 		RemovedIntegrations.Add(integrationId);
@@ -112,10 +134,15 @@ internal sealed class FakeVariableBindingService : IVariableBindingService
 
 	public List<string> RemovedIntegrations { get; } = [];
 
-	public IReadOnlyList<VariableBinding> GetBindings() => Bindings;
+	public IReadOnlyList<VariableBinding> GetBindings()
+	{
+		return Bindings;
+	}
 
 	public VariableBinding? FindByVariableId(Guid variableId)
-		=> OnFindByVariableId is not null
+	{
+		return OnFindByVariableId is not null
 			? OnFindByVariableId(variableId)
 			: Bindings.FirstOrDefault(b => false);
+	}
 }

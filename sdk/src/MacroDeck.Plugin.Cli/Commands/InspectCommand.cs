@@ -23,8 +23,8 @@ internal static class InspectCommand
 			{ Description = "A version directory containing manifest.json." };
 		var showDigestOption = new Option<bool>("--show-digest")
 		{
-			Description = "Also print the manifest's signable digest, base64-encoded - the exact bytes a " +
-				"signature is computed over."
+			Description = "Also print the manifest's signable digest, base64-encoded - the exact bytes a "
+				+ "signature is computed over."
 		};
 		var outputFormatOption = GlobalOptions.CreateOutputFormatOption();
 
@@ -65,7 +65,8 @@ internal static class InspectCommand
 		return command;
 	}
 
-	private static async Task<int> InspectArtifactAsync(CliConsole console,
+	private static async Task<int> InspectArtifactAsync(
+		CliConsole console,
 		string artifactPath,
 		bool showDigest,
 		CliOutputFormat outputFormat,
@@ -112,7 +113,8 @@ internal static class InspectCommand
 		return ExitCode.Success;
 	}
 
-	private static Task<int> InspectDirectoryAsync(CliConsole console,
+	private static Task<int> InspectDirectoryAsync(
+		CliConsole console,
 		string versionDirectory,
 		bool showDigest,
 		CliOutputFormat outputFormat,
@@ -152,7 +154,7 @@ internal static class InspectCommand
 		var report = PluginInspectionReport.From(manifest,
 			entryCount,
 			totalBytes,
-			archiveBytes: null,
+			null,
 			presentEntryNames,
 			"directory",
 			BundledIconPackInspection.InspectDirectory(manifest, versionDirectory));

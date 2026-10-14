@@ -14,10 +14,16 @@ public class FolderPortabilityServiceTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task GetExportFileName_UsesTheFolderName()
@@ -53,7 +59,7 @@ public class FolderPortabilityServiceTests
 
 		Assert.That(export.Success, Is.True);
 		using var zip = new ZipArchive(new MemoryStream(export.Data!), ZipArchiveMode.Read);
-		using var reader = new StreamReader(zip.GetEntry("content.json")!.Open(), Encoding.UTF8);
+		using var reader = new StreamReader(await zip.GetEntry("content.json")!.OpenAsync(), Encoding.UTF8);
 		Assert.That(await reader.ReadToEndAsync(), Does.Not.Contain("isDefault"));
 	}
 
@@ -75,7 +81,7 @@ public class FolderPortabilityServiceTests
 
 		Assert.That(export.Success, Is.True);
 		using var zip = new ZipArchive(new MemoryStream(export.Data!), ZipArchiveMode.Read);
-		using var reader = new StreamReader(zip.GetEntry("content.json")!.Open(), Encoding.UTF8);
+		using var reader = new StreamReader(await zip.GetEntry("content.json")!.OpenAsync(), Encoding.UTF8);
 		Assert.That(await reader.ReadToEndAsync(), Does.Not.Contain("focusRules"));
 	}
 
@@ -94,7 +100,7 @@ public class FolderPortabilityServiceTests
 		await _harness.FolderCache.AddOrUpdate(source);
 
 		var export = await Export(source.Id);
-		var import = await Import(profile.Id, parentFolderId: null, export.Data!);
+		var import = await Import(profile.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		Assert.That(import.Data!.Single().FocusRules, Is.Empty);
@@ -104,18 +110,18 @@ public class FolderPortabilityServiceTests
 	public async Task Export_ThenImport_RecreatesTheFolder_ReusingTheIcon()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (profile, root, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Lights", rows: 4, columns: 6);
 		var widget = _harness.AddWidget(source.Id,
 			$"{{\"states\":{{\"off\":{{\"iconId\":\"{icon.Id}\"}}}}}}",
-			x: 2,
-			y: 1);
+			2,
+			1);
 
 		var export = await Export(source.Id);
 		Assert.That(export.Success, Is.True);
 
-		var import = await Import(profile.Id, parentFolderId: root.Id, export.Data!);
+		var import = await Import(profile.Id, root.Id, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!.Single();
@@ -146,7 +152,7 @@ public class FolderPortabilityServiceTests
 	public async Task Export_PinsAnInheritedGridToItsResolvedValue_AndImportKeepsItInADifferentProfile()
 	{
 		var (profile, root, _) = await _harness.SeedProfile(null); // root has an explicit 3 x 5 grid
-		var child = await _harness.AddFolder(profile.Id, "Lights", parentId: root.Id);
+		var child = await _harness.AddFolder(profile.Id, "Lights", root.Id);
 		child.Rows = null;
 		child.Columns = null;
 		await _harness.FolderCache.AddOrUpdate(child);
@@ -173,13 +179,13 @@ public class FolderPortabilityServiceTests
 	{
 		var (profile, _, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Music");
-		var child = await _harness.AddFolder(profile.Id, "Playlists", parentId: source.Id);
-		var grandChild = await _harness.AddFolder(profile.Id, "Favourites", parentId: child.Id);
+		var child = await _harness.AddFolder(profile.Id, "Playlists", source.Id);
+		var grandChild = await _harness.AddFolder(profile.Id, "Favourites", child.Id);
 		// A sibling of the exported folder must not be dragged in.
 		await _harness.AddFolder(profile.Id, "Unrelated");
 
-		var export = await Export(source.Id, includeSubfolders: true);
-		var import = await Import(profile.Id, parentFolderId: null, export.Data!);
+		var export = await Export(source.Id, true);
+		var import = await Import(profile.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!;
@@ -204,10 +210,10 @@ public class FolderPortabilityServiceTests
 	{
 		var (profile, _, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Music");
-		await _harness.AddFolder(profile.Id, "Playlists", parentId: source.Id);
+		await _harness.AddFolder(profile.Id, "Playlists", source.Id);
 
 		var export = await Export(source.Id);
-		var import = await Import(profile.Id, parentFolderId: null, export.Data!);
+		var import = await Import(profile.Id, null, export.Data!);
 
 		Assert.Multiple(() =>
 		{
@@ -222,11 +228,11 @@ public class FolderPortabilityServiceTests
 	{
 		var (profile, _, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Music");
-		var child = await _harness.AddFolder(profile.Id, "Playlists", parentId: source.Id);
+		var child = await _harness.AddFolder(profile.Id, "Playlists", source.Id);
 		_harness.AddWidget(source.Id, $"{{\"targetFolderId\":\"{child.Id}\"}}");
 
-		var export = await Export(source.Id, includeSubfolders: true);
-		var import = await Import(profile.Id, parentFolderId: null, export.Data!);
+		var export = await Export(source.Id, true);
+		var import = await Import(profile.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var importedChild = import.Data!.Single(folder => folder.Name == "Playlists");
@@ -244,7 +250,7 @@ public class FolderPortabilityServiceTests
 		await _harness.AddFolder(target.Id, "Existing", order: 7);
 
 		var export = await Export(sourceRoot.Id);
-		var import = await Import(target.Id, parentFolderId: null, export.Data!);
+		var import = await Import(target.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!.Single();
@@ -271,7 +277,7 @@ public class FolderPortabilityServiceTests
 		await _harness.AddFolder(target.Id, "Existing");
 
 		var export = await Export(source.Id);
-		var import = await Import(target.Id, parentFolderId: null, export.Data!);
+		var import = await Import(target.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!.Single();
@@ -289,14 +295,14 @@ public class FolderPortabilityServiceTests
 		var (profile, root, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Lights", rows: 2, columns: 2);
 		_harness.AddWidget(source.Id, "{\"label\":\"a\"}");
-		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", x: 1);
+		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", 1);
 
 		var target = await _harness.AddProfile("Target");
 		var targetRoot = await _harness.AddFolder(target.Id, "Home", rows: 4, columns: 4);
-		_harness.AddWidget(targetRoot.Id, "{\"label\":\"pinned\"}", x: 3, y: 3, isPinned: true);
+		_harness.AddWidget(targetRoot.Id, "{\"label\":\"pinned\"}", 3, 3, isPinned: true);
 
 		var export = await Export(source.Id);
-		var import = await Import(target.Id, parentFolderId: null, export.Data!);
+		var import = await Import(target.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!.Single();
@@ -316,14 +322,14 @@ public class FolderPortabilityServiceTests
 		var (profile, _, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Lights", rows: 1, columns: 3);
 		_harness.AddWidget(source.Id, "{\"label\":\"a\"}");
-		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", x: 1);
+		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", 1);
 
 		var target = await _harness.AddProfile("Target");
 		var targetRoot = await _harness.AddFolder(target.Id, "Home", rows: 1, columns: 3);
 		_harness.AddWidget(targetRoot.Id, "{\"label\":\"pinned\"}", isPinned: true);
 
 		var export = await Export(source.Id);
-		var import = await Import(target.Id, parentFolderId: null, export.Data!);
+		var import = await Import(target.Id, null, export.Data!);
 
 		Assert.That(import.Success, Is.True);
 		var placements = import.Data!
@@ -341,14 +347,14 @@ public class FolderPortabilityServiceTests
 		var (profile, _, _) = await _harness.SeedProfile(null);
 		var source = await _harness.AddFolder(profile.Id, "Lights", rows: 1, columns: 2);
 		_harness.AddWidget(source.Id, "{\"label\":\"a\"}");
-		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", x: 1);
+		_harness.AddWidget(source.Id, "{\"label\":\"b\"}", 1);
 
 		var target = await _harness.AddProfile("Target");
 		var targetRoot = await _harness.AddFolder(target.Id, "Home", rows: 1, columns: 2);
 		_harness.AddWidget(targetRoot.Id, "{\"label\":\"pinned\"}", isPinned: true);
 
 		var export = await Export(source.Id);
-		var import = await Import(target.Id, parentFolderId: null, export.Data!);
+		var import = await Import(target.Id, null, export.Data!);
 
 		Assert.Multiple(() =>
 		{
@@ -382,11 +388,11 @@ public class FolderPortabilityServiceTests
 		var archiveChild = await _harness.AddFolder(archiveProfile.Id,
 			"ArchiveChild",
 			archiveRoot.Id,
-			rows: 4,
-			columns: 4);
+			4,
+			4);
 		_harness.AddWidget(archiveChild.Id, "{\"label\":\"a\"}");
 
-		var export = await Export(archiveRoot.Id, includeSubfolders: true);
+		var export = await Export(archiveRoot.Id, true);
 		var import = await Import(profile.Id, target.Id, export.Data!);
 
 		Assert.That(import.Success, Is.True);
@@ -395,8 +401,8 @@ public class FolderPortabilityServiceTests
 
 		Assert.That((importedWidget.PositionX, importedWidget.PositionY),
 			Is.Not.EqualTo((0, 0)),
-			"Target's pin reaches two levels down through the freshly minted ArchiveRoot, so the widget must " +
-			"be placed around it rather than on top of it");
+			"Target's pin reaches two levels down through the freshly minted ArchiveRoot, so the widget must "
+			+ "be placed around it rather than on top of it");
 	}
 
 	[Test]
@@ -405,7 +411,7 @@ public class FolderPortabilityServiceTests
 		var (_, root, _) = await _harness.SeedProfile(null);
 		var export = await Export(root.Id);
 
-		var import = await Import(Guid.NewGuid(), parentFolderId: null, export.Data!);
+		var import = await Import(Guid.NewGuid(), null, export.Data!);
 
 		Assert.Multiple(() =>
 		{
@@ -420,7 +426,7 @@ public class FolderPortabilityServiceTests
 		var (profile, root, _) = await _harness.SeedProfile(null);
 		var export = await Export(root.Id);
 
-		var import = await Import(profile.Id, parentFolderId: Guid.NewGuid(), export.Data!);
+		var import = await Import(profile.Id, Guid.NewGuid(), export.Data!);
 
 		Assert.Multiple(() =>
 		{
@@ -563,18 +569,24 @@ public class FolderPortabilityServiceTests
 		Assert.That(import.Error, Is.EqualTo(PortabilityError.InvalidArchive));
 	}
 
-	private Task<Domain.Common.Result<byte[], PortabilityError>> Export(Guid folderId,
+	private Task<Domain.Common.Result<byte[], PortabilityError>> Export(
+		Guid folderId,
 		bool includeSubfolders = false)
-		=> _harness.FolderService.Export(folderId,
+	{
+		return _harness.FolderService.Export(folderId,
 			PortableExportOptions.Default with { IncludeSubfolders = includeSubfolders },
 			CancellationToken.None);
+	}
 
-	private Task<Domain.Common.Result<IReadOnlyList<FolderEntity>, PortabilityError>> Import(Guid profileId,
+	private Task<Domain.Common.Result<IReadOnlyList<FolderEntity>, PortabilityError>> Import(
+		Guid profileId,
 		Guid? parentFolderId,
 		byte[] archiveBytes)
-		=> _harness.FolderService.Import(profileId,
+	{
+		return _harness.FolderService.Import(profileId,
 			parentFolderId,
 			archiveBytes,
-			password: null,
+			null,
 			CancellationToken.None);
+	}
 }

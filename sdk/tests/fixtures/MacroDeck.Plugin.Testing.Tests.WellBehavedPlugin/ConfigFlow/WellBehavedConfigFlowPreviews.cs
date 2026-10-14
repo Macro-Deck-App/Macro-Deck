@@ -6,13 +6,21 @@ namespace MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin.ConfigFlow;
 internal static class WellBehavedConfigFlowPreviews
 {
 	[UiPreview("Default")]
-	public static UiElement Default() => WellBehavedConfigFlow.BuildTree("Berlin, Germany");
+	public static UiElement Default()
+	{
+		return WellBehavedConfigFlow.BuildTree("Berlin, Germany");
+	}
 
 	[UiPreview("Empty")]
-	public static UiElement Empty() => WellBehavedConfigFlow.BuildTree(string.Empty);
+	public static UiElement Empty()
+	{
+		return WellBehavedConfigFlow.BuildTree(string.Empty);
+	}
 
 	[UiPreview("Long text")]
 	public static UiElement LongText()
-		=> WellBehavedConfigFlow.BuildTree(
+	{
+		return WellBehavedConfigFlow.BuildTree(
 			"Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch, Isle of Anglesey, Wales");
+	}
 }

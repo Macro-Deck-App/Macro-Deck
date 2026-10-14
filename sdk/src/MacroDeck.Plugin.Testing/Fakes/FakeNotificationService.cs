@@ -11,6 +11,7 @@ namespace MacroDeck.Plugin.Testing.Fakes;
 public sealed class FakeNotification : INotificationHandle
 {
 	private readonly Lock _gate = new();
+
 	private readonly TaskCompletionSource<NotificationResult> _completion =
 		new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -61,20 +62,25 @@ public sealed class FakeNotification : INotificationHandle
 	}
 
 	/// <summary>Presses an action as a user would. Returns false when the notification was already closed.</summary>
-	public bool Respond(string actionId,
+	public bool Respond(
+		string actionId,
 		IReadOnlyDictionary<string, JsonElement>? values = null,
 		string clientId = "admin")
-		=> _completion.TrySetResult(new NotificationResult
+	{
+		return _completion.TrySetResult(new NotificationResult
 		{
 			CloseReason = NotificationCloseReason.Action,
 			ActionId = actionId,
 			ClientId = clientId,
 			Values = values ?? new Dictionary<string, JsonElement>()
 		});
+	}
 
 	/// <summary>Closes the notification the way the host would, for example by timeout.</summary>
 	public bool Close(NotificationCloseReason reason)
-		=> _completion.TrySetResult(new NotificationResult { CloseReason = reason });
+	{
+		return _completion.TrySetResult(new NotificationResult { CloseReason = reason });
+	}
 }
 
 /// <summary>In-memory <see cref="INotificationService" />. Nothing is validated, nothing times out.</summary>
@@ -98,7 +104,8 @@ public sealed class FakeNotificationService : INotificationService
 	/// <summary>The notifications that have not closed yet.</summary>
 	public IReadOnlyList<FakeNotification> Open => [.. Shown.Where(n => n.IsOpen)];
 
-	public Task<INotificationHandle> ShowAsync(NotificationOptions options,
+	public Task<INotificationHandle> ShowAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(options);
@@ -112,7 +119,8 @@ public sealed class FakeNotificationService : INotificationService
 		return Task.FromResult<INotificationHandle>(notification);
 	}
 
-	public async Task<NotificationResult> ShowForResultAsync(NotificationOptions options,
+	public async Task<NotificationResult> ShowForResultAsync(
+		NotificationOptions options,
 		CancellationToken cancellationToken = default)
 	{
 		var handle = await ShowAsync(options, cancellationToken).ConfigureAwait(false);

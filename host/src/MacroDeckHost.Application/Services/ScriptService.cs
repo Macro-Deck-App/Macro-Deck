@@ -22,12 +22,17 @@ public class ScriptService : IScriptService
 		_mediator = mediator;
 	}
 
-	public IReadOnlyList<ScriptEntity> GetAll() =>
-		_scriptCache.GetAll()
+	public IReadOnlyList<ScriptEntity> GetAll()
+	{
+		return _scriptCache.GetAll()
 			.OrderBy(script => script.Name, StringComparer.CurrentCultureIgnoreCase)
 			.ToList();
+	}
 
-	public ScriptEntity? GetById(Guid id) => _scriptCache.GetById(id);
+	public ScriptEntity? GetById(Guid id)
+	{
+		return _scriptCache.GetById(id);
+	}
 
 	public async Task<Result<ScriptEntity, ScriptError>> Create(
 		string name,

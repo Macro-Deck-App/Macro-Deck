@@ -97,7 +97,7 @@ public class ImageSharpIconProcessorTests
 	[Test]
 	public async Task Process_AnimatedGif_ProducesAnimatedWebpWithDelays()
 	{
-		var gif = await CreateAnimatedGif(300, 300, frameCount: 3, frameDelayCentiseconds: 20);
+		var gif = await CreateAnimatedGif(300, 300, 3, 20);
 
 		var result = await _processor.Process(new MemoryStream(gif), "animated.gif", CancellationToken.None);
 
@@ -122,8 +122,8 @@ public class ImageSharpIconProcessorTests
 	[Test]
 	public async Task Process_TransparentAnimatedGif_HasNoGhostTrailsAndKeepsExactColors()
 	{
-		using var gifImage = BuildFrame(100, 40, xStart: 0);
-		using (var second = BuildFrame(100, 40, xStart: 80))
+		using var gifImage = BuildFrame(100, 40, 0);
+		using (var second = BuildFrame(100, 40, 80))
 		{
 			gifImage.Frames.AddFrame(second.Frames.RootFrame);
 		}
@@ -163,7 +163,7 @@ public class ImageSharpIconProcessorTests
 		// A dithered animation is where a rendition can outgrow the master: resampling turns the
 		// palette's flat patterns into noise, and a 256px rendition of a 400px 180-frame GIF once came
 		// out at 11.7 MB, larger than the master it was cut from - and far too large for a deck to draw.
-		var gif = await CreateDitheredAnimatedGif(400, 400, frameCount: 24);
+		var gif = await CreateDitheredAnimatedGif(400, 400, 24);
 
 		var result = await _processor.Process(new MemoryStream(gif), "long.gif", CancellationToken.None);
 
@@ -234,8 +234,8 @@ public class ImageSharpIconProcessorTests
 	public async Task Process_GifWithFrameOverflowingCanvas_FallsBackToLenientDecoder()
 	{
 		var bytes = Convert.FromBase64String(
-			"R0lGODlhCAAIAIEAAAAA/wAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAACAAIAAAIDwABCBxI" +
-			"sKDBgwgTKkwYEAAh+QQFCgABACwAAAQACAAIAIH/AAAAAAAAAAAAAAAIDwABCBxIsKDBgwgTKkwYEAA7");
+			"R0lGODlhCAAIAIEAAAAA/wAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAACAAIAAAIDwABCBxI"
+			+ "sKDBgwgTKkwYEAAh+QQFCgABACwAAAQACAAIAIH/AAAAAAAAAAAAAAAIDwABCBxIsKDBgwgTKkwYEAA7");
 
 		var result = await _processor.Process(new MemoryStream(bytes), "overflow.gif", CancellationToken.None);
 
@@ -358,7 +358,8 @@ public class ImageSharpIconProcessorTests
 		return stream.ToArray();
 	}
 
-	private static async Task<byte[]> CreateAnimatedGif(int width,
+	private static async Task<byte[]> CreateAnimatedGif(
+		int width,
 		int height,
 		int frameCount,
 		int frameDelayCentiseconds)

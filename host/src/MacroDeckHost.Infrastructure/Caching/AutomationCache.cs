@@ -59,7 +59,10 @@ public sealed class AutomationCache : IAutomationCache, IDisposable
 		return automation;
 	}
 
-	public List<AutomationEntity> GetAll() => _automations.Values.ToList();
+	public List<AutomationEntity> GetAll()
+	{
+		return _automations.Values.ToList();
+	}
 
 	public async Task AddOrUpdate(AutomationEntity automation)
 	{
@@ -103,25 +106,31 @@ public sealed class AutomationCache : IAutomationCache, IDisposable
 		_updateLock.Dispose();
 	}
 
-	private static AutomationEntity ToEntity(AutomationFile file) => new()
+	private static AutomationEntity ToEntity(AutomationFile file)
 	{
-		Id = file.Id,
-		Name = file.Name,
-		Description = file.Description,
-		Enabled = file.Enabled,
-		Flows = file.Flows,
-		CreatedAt = file.CreatedAt,
-		UpdatedAt = file.UpdatedAt
-	};
+		return new AutomationEntity
+		{
+			Id = file.Id,
+			Name = file.Name,
+			Description = file.Description,
+			Enabled = file.Enabled,
+			Flows = file.Flows,
+			CreatedAt = file.CreatedAt,
+			UpdatedAt = file.UpdatedAt
+		};
+	}
 
-	private static AutomationFile ToFile(AutomationEntity automation) => new()
+	private static AutomationFile ToFile(AutomationEntity automation)
 	{
-		Id = automation.Id,
-		Name = automation.Name,
-		Description = automation.Description,
-		Enabled = automation.Enabled,
-		Flows = automation.Flows,
-		CreatedAt = automation.CreatedAt,
-		UpdatedAt = automation.UpdatedAt
-	};
+		return new AutomationFile
+		{
+			Id = automation.Id,
+			Name = automation.Name,
+			Description = automation.Description,
+			Enabled = automation.Enabled,
+			Flows = automation.Flows,
+			CreatedAt = automation.CreatedAt,
+			UpdatedAt = automation.UpdatedAt
+		};
+	}
 }

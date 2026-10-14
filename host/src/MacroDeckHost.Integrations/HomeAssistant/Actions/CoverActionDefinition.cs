@@ -29,7 +29,7 @@ internal sealed class CoverActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Cover.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Cover.EntityLabel(),
 			required: true),
 		ActionParameter.Choice(CommandParameterName,
 			[
@@ -56,28 +56,33 @@ internal sealed class CoverActionDefinition : IDynamicOptionsActionDefinition
 					Label = AppStrings.Integrations.HomeAssistant.Actions.Cover.CommandSetTiltPosition()
 				}
 			],
-			label: AppStrings.Integrations.HomeAssistant.Actions.Cover.CommandLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Cover.CommandLabel(),
 			defaultValue: "open",
 			required: true),
 		ActionParameter.Number(PositionParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Cover.PositionLabel(),
-				description: AppStrings.Integrations.HomeAssistant.Actions.Cover.PositionDescription(),
-				min: 0,
-				max: 100)
+				AppStrings.Integrations.HomeAssistant.Actions.Cover.PositionLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Cover.PositionDescription(),
+				0,
+				100)
 			.OnlyWhen(CommandParameterName, "set_position"),
 		ActionParameter.Number(TiltPositionParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Cover.TiltPositionLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Cover.TiltPositionLabel(),
 				min: 0,
 				max: 100)
 			.OnlyWhen(CommandParameterName, "set_tilt_position")
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, CoverDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, CoverDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -123,8 +128,8 @@ internal sealed class CoverActionDefinition : IDynamicOptionsActionDefinition
 				case "set_tilt_position":
 					service = "set_cover_tilt_position";
 					data["tilt_position"] =
-						HomeAssistantActionValues.ReadNumber(context.Parameters, TiltPositionParameterName, 0, 100) ??
-						0d;
+						HomeAssistantActionValues.ReadNumber(context.Parameters, TiltPositionParameterName, 0, 100)
+						?? 0d;
 					break;
 				default:
 					service = "open_cover";

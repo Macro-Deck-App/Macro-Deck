@@ -41,11 +41,17 @@ public static class UiCanonicalJson
 
 	/// <summary>Serializes <paramref name="value" /> to a canonical JSON string. Equivalent to
 	/// <c>JsonSerializer.Serialize(value, Options)</c>.</summary>
-	public static string Serialize<T>(T value) => JsonSerializer.Serialize(value, Options);
+	public static string Serialize<T>(T value)
+	{
+		return JsonSerializer.Serialize(value, Options);
+	}
 
 	/// <summary>Serializes <paramref name="value" /> to canonical UTF-8 JSON bytes, with no byte order
 	/// mark.</summary>
-	public static byte[] SerializeToUtf8Bytes<T>(T value) => JsonSerializer.SerializeToUtf8Bytes(value, Options);
+	public static byte[] SerializeToUtf8Bytes<T>(T value)
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(value, Options);
+	}
 
 	/// <summary>
 	/// Serializes <paramref name="value" /> to a <see cref="JsonElement" /> using the same options, for
@@ -53,7 +59,10 @@ public static class UiCanonicalJson
 	/// an otherwise-opaque property value uses this rather than building a <see cref="JsonElement" />
 	/// some other way.
 	/// </summary>
-	public static JsonElement ToElement<T>(T value) => JsonSerializer.SerializeToElement(value, Options);
+	public static JsonElement ToElement<T>(T value)
+	{
+		return JsonSerializer.SerializeToElement(value, Options);
+	}
 
 	private static JsonSerializerOptions BuildOptions()
 	{
@@ -67,7 +76,7 @@ public static class UiCanonicalJson
 			ReadCommentHandling = JsonCommentHandling.Disallow,
 			MaxDepth = MaxDepth,
 			UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
-			WriteIndented = false,
+			WriteIndented = false
 		};
 
 		options.Converters.Add(new OrdinalKeyOrderedMapConverter());
@@ -75,7 +84,7 @@ public static class UiCanonicalJson
 		// populateMissingResolver: true - this options instance never set a TypeInfoResolver of its
 		// own (there is no source-generated context here), so MakeReadOnly needs the reflection-based
 		// default resolver filled in before it can lock the instance.
-		options.MakeReadOnly(populateMissingResolver: true);
+		options.MakeReadOnly(true);
 
 		return options;
 	}

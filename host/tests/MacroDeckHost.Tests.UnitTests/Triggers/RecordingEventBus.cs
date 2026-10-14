@@ -11,5 +11,8 @@ internal sealed class RecordingEventBus : IEventBus
 
 	public ChannelReader<EventOccurrence> Reader => _channel.Reader;
 
-	public void Publish(EventOccurrence occurrence) => Published.Add(occurrence);
+	public void Publish(EventOccurrence occurrence)
+	{
+		Published.Add(occurrence);
+	}
 }

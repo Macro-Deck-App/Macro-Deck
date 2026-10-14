@@ -25,7 +25,10 @@ internal class TestIntegration : IPluginIntegration, IEventProvider, IVariablePr
 	private readonly List<VariableDefinition> _variables = [];
 	private readonly Dictionary<string, Func<object?>> _variableValues = new(StringComparer.Ordinal);
 
-	public TestIntegration(string id = "test.harness.integration") => _id = id;
+	public TestIntegration(string id = "test.harness.integration")
+	{
+		_id = id;
+	}
 
 	/// <summary>How many times <see cref="InitializeAsync" /> has run - a resumed reconnect must not add to this.</summary>
 	public int InitializeCount { get; private set; }
@@ -48,7 +51,10 @@ internal class TestIntegration : IPluginIntegration, IEventProvider, IVariablePr
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	// ----- IEventProvider -----
 
@@ -74,9 +80,11 @@ internal class TestIntegration : IPluginIntegration, IEventProvider, IVariablePr
 	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(_variableValues.TryGetValue(localId, out var value)
+	{
+		return ValueTask.FromResult(_variableValues.TryGetValue(localId, out var value)
 			? VariableReading.Of(value())
 			: VariableReading.Unavailable);
+	}
 }
 
 /// <summary>

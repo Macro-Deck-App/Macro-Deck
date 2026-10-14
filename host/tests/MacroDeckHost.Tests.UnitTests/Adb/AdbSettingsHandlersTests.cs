@@ -23,7 +23,9 @@ public class AdbSettingsHandlersTests
 		public int Writes { get; private set; }
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -33,7 +35,9 @@ public class AdbSettingsHandlersTests
 		}
 
 		public void Seed(string key, string value)
-			=> _store[key] = new AppPreferenceEntity { Key = key, Value = value };
+		{
+			_store[key] = new AppPreferenceEntity { Key = key, Value = value };
+		}
 	}
 
 	private sealed class FakeBuildEnvironment : IBuildEnvironment
@@ -59,7 +63,8 @@ public class AdbSettingsHandlersTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		var listenerState = new FakeHostListenerState { PublicPort = ActivePort };
-		var preferences = new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState, TestColors.None);
+		var preferences
+			= new AppPreferenceService(repository, new FakeBuildEnvironment(), listenerState, TestColors.None);
 		var adbManager = new FakeAdbManager();
 		var installer = new FakeAdbPlatformToolsInstaller();
 		var mediator = new RecordingMediator();
@@ -74,7 +79,8 @@ public class AdbSettingsHandlersTests
 			new DownloadAdbPlatformToolsRequestMessageHandler(preferences, adbManager, installer, listenerState));
 	}
 
-	private static AdbStatus SampleStatus(bool enabled = true,
+	private static AdbStatus SampleStatus(
+		bool enabled = true,
 		string? resolvedExecutablePath = "/usr/local/bin/adb",
 		AdbExecutableSource executableSource = AdbExecutableSource.Configured,
 		string? adbVersion = "1.0.41",
@@ -82,33 +88,38 @@ public class AdbSettingsHandlersTests
 		string? defaultDeviceSerial = null,
 		bool supported = true,
 		string? lastFailureMessage = null)
-		=> new(enabled,
-			UsbConnectionsEnabled: true,
-			Supported: supported,
-			ResolvedExecutablePath: resolvedExecutablePath,
-			ExecutableSource: executableSource,
-			AdbVersion: adbVersion,
-			ServerReachable: serverReachable,
-			ServerStartedByMacroDeck: false,
-			DefaultDeviceSerial: defaultDeviceSerial,
-			LastFailure: null,
-			LastFailureMessage: lastFailureMessage,
-			LastFailureAt: null,
-			PreviousShutdownWasUnclean: false,
-			StaleTunnelsCleaned: 0);
+	{
+		return new AdbStatus(enabled,
+			true,
+			supported,
+			resolvedExecutablePath,
+			executableSource,
+			adbVersion,
+			serverReachable,
+			false,
+			defaultDeviceSerial,
+			null,
+			lastFailureMessage,
+			null,
+			false,
+			0);
+	}
 
-	private static AdbDevice SampleDevice(string serial,
+	private static AdbDevice SampleDevice(
+		string serial,
 		AdbDeviceState state = AdbDeviceState.Device,
 		string? model = "Pixel 7",
 		AdbTunnel? tunnel = null)
-		=> new(serial,
+	{
+		return new AdbDevice(serial,
 			state,
 			model,
-			Manufacturer: "Google",
-			Product: "panther",
-			TransportId: "1",
-			Tunnel: tunnel,
-			LastSeenAt: DateTimeOffset.UtcNow);
+			"Google",
+			"panther",
+			"1",
+			tunnel,
+			DateTimeOffset.UtcNow);
+	}
 
 	[Test]
 	public async Task Get_projects_settings_status_and_devices()
@@ -123,7 +134,7 @@ public class AdbSettingsHandlersTests
 		fixture.AdbManager.Devices =
 		[
 			SampleDevice("R58M12ABCDE", tunnel: new AdbTunnel(true, 8193, 55001, null, null)),
-			SampleDevice("OTHERSERIAL", state: AdbDeviceState.Unauthorized)
+			SampleDevice("OTHERSERIAL", AdbDeviceState.Unauthorized)
 		];
 
 		var response = await fixture.Get.Handle(new GetAdbSettingsRequest(), CancellationToken.None);
@@ -456,7 +467,8 @@ public class AdbSettingsHandlersTests
 		fixture.AdbManager.Status = SampleStatus();
 		var operations = new Plugins.FakeAdbDeviceOperations
 		{
-			Connect = _ => Result.Fail<string, AdbFailureCode>(AdbFailureCode.Timeout, "Connecting to the device timed out.")
+			Connect = _ => Result.Fail<string, AdbFailureCode>(AdbFailureCode.Timeout,
+				"Connecting to the device timed out.")
 		};
 		var handler = new ConnectAdbDeviceRequestMessageHandler(new AppPreferenceService(fixture.Repository,
 				new FakeBuildEnvironment(),
@@ -466,10 +478,12 @@ public class AdbSettingsHandlersTests
 			new FakeHostListenerState { PublicPort = ActivePort },
 			operations);
 
-		var failed = await handler.Handle(new ConnectAdbDeviceRequest { Address = " 192.168.1.20:5555 " }, CancellationToken.None);
+		var failed = await handler.Handle(new ConnectAdbDeviceRequest { Address = " 192.168.1.20:5555 " },
+			CancellationToken.None);
 		operations.Connect = address => Result.Ok<string, AdbFailureCode>(address);
 		fixture.AdbManager.Devices = [SampleDevice("192.168.1.20:5555")];
-		var connected = await handler.Handle(new ConnectAdbDeviceRequest { Address = "192.168.1.20:5555" }, CancellationToken.None);
+		var connected = await handler.Handle(new ConnectAdbDeviceRequest { Address = "192.168.1.20:5555" },
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{

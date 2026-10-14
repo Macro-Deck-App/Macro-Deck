@@ -24,9 +24,11 @@ internal sealed class LoopbackBridgeDialer : ILinkStreamDialer
 	// Always a public listener, never the loopback listener: a bridged phone must log in like any client
 	// (ADR 0030, ADR 0095). The companion app speaks plain HTTP over the link, hence no HTTPS target.
 	public static IPEndPoint? Target(PublicEndpointSet endpoints)
-		=> endpoints.HasPublicListener && endpoints.LocalClientEndpoint is { Ssl: false } endpoint
+	{
+		return endpoints.HasPublicListener && endpoints.LocalClientEndpoint is { Ssl: false } endpoint
 			? new IPEndPoint(IPAddress.Loopback, endpoint.Port)
 			: null;
+	}
 
 	public async ValueTask<Stream?> DialAsync(string deviceKey, CancellationToken cancellationToken)
 	{
@@ -63,10 +65,11 @@ internal sealed class LoopbackBridgeDialer : ILinkStreamDialer
 		private readonly BridgedConnections _bridgedConnections;
 		private int _released;
 
-		public BridgedStream(Socket socket,
+		public BridgedStream(
+			Socket socket,
 			BridgedConnectionRegistration registration,
 			BridgedConnections bridgedConnections)
-			: base(socket, ownsSocket: true)
+			: base(socket, true)
 		{
 			_registration = registration;
 			_bridgedConnections = bridgedConnections;

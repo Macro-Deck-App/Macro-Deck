@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Steam;
 
@@ -137,8 +136,8 @@ public sealed class SteamConfigFlow : IConfigFlow
 			(client as IDisposable)?.Dispose();
 		}
 
-		var title = existingTitle ??
-			(name.Length > 0 ? name : string.IsNullOrWhiteSpace(personaName) ? DefaultTitle : personaName.Trim());
+		var title = existingTitle
+			?? (name.Length > 0 ? name : string.IsNullOrWhiteSpace(personaName) ? DefaultTitle : personaName.Trim());
 
 		values[SteamConfigKeys.SteamId] = ConfigFlowValue.Plain(steamId);
 		values[SteamConfigKeys.ApiKey] = ConfigFlowValue.Secret(apiKey);
@@ -170,14 +169,18 @@ public sealed class SteamConfigFlow : IConfigFlow
 		[
 			.. candidates.Select(folder => folder.Trim())
 				.Where(folder => folder.Length > 0)
-				.Distinct(StringComparer.Ordinal),
+				.Distinct(StringComparer.Ordinal)
 		];
 	}
 
 	private static string KeyFor(IReadOnlyDictionary<string, object?> input, string title)
-		=> input.GetValueOrDefault(SteamConfigKeys.VariableKey) is string { Length: > 0 } stored
+	{
+		return input.GetValueOrDefault(SteamConfigKeys.VariableKey) is string { Length: > 0 } stored
 			? stored
-			: SteamVariables.Slugify(title) is { Length: > 0 } slug ? slug : "account";
+			: SteamVariables.Slugify(title) is { Length: > 0 } slug
+				? slug
+				: "account";
+	}
 
 	private static ConfigFlowStep SettingsStep(IConfigFlowContext context)
 	{
@@ -185,19 +188,18 @@ public sealed class SteamConfigFlow : IConfigFlow
 		if ((context as IConfigFlowEntryContext)?.EntryTitle is null)
 		{
 			fields.Add(ActionParameter.Text(SteamConfigKeys.Name,
-				label: AppStrings.Integrations.Detail.ConfigurationNameLabel(),
+				AppStrings.Integrations.Detail.ConfigurationNameLabel(),
 				placeholder: Strings.NamePlaceholder()));
 		}
 
-		fields.AddRange(
-		[
+		fields.AddRange([
 			ActionParameter.Text(SteamConfigKeys.SteamId,
-				label: Strings.SteamIdLabel(),
-				description: Strings.SteamIdDescription(),
-				placeholder: Strings.SteamIdPlaceholder()),
+				Strings.SteamIdLabel(),
+				Strings.SteamIdDescription(),
+				Strings.SteamIdPlaceholder()),
 			ActionParameter.Secret(SteamConfigKeys.ApiKey,
-				label: Strings.ApiKeyLabel(),
-				description: Strings.ApiKeyDescription())
+				Strings.ApiKeyLabel(),
+				Strings.ApiKeyDescription())
 		]);
 
 		return new ConfigFlowStep
@@ -215,9 +217,9 @@ public sealed class SteamConfigFlow : IConfigFlow
 			AdvancedFields =
 			[
 				ActionParameter.Array(SteamConfigKeys.LibraryFolders,
-					ActionParameter.Folder("folder", label: Strings.LibraryFolderLabel()),
-					label: Strings.LibraryFoldersLabel(),
-					description: Strings.LibraryFoldersDescription())
+					ActionParameter.Folder("folder", Strings.LibraryFolderLabel()),
+					Strings.LibraryFoldersLabel(),
+					Strings.LibraryFoldersDescription())
 			]
 		};
 	}

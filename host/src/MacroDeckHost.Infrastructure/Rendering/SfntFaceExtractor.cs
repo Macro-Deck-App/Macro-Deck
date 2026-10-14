@@ -22,7 +22,7 @@ internal static class SfntFaceExtractor
 
 	// A face whose glyphs live in none of these cannot be rendered by any sfnt consumer we serve.
 	// macOS 15 system faces such as PingFang carry their outlines in Apple's private 'hvgl' table.
-	private static readonly uint[] GlyphSourceTags =
+	private static readonly uint[] _glyphSourceTags =
 	[
 		0x676C7966, // glyf
 		CffTag,
@@ -39,9 +39,9 @@ internal static class SfntFaceExtractor
 			return false;
 		}
 
-		return Array.IndexOf(tags, MaxpTag) >= 0 &&
-			Array.Exists(GlyphSourceTags, tag => Array.IndexOf(tags, tag) >= 0) &&
-			typeface.GetTableSize(HeadTag) >= MinimumHeadLength;
+		return Array.IndexOf(tags, MaxpTag) >= 0
+			&& Array.Exists(_glyphSourceTags, tag => Array.IndexOf(tags, tag) >= 0)
+			&& typeface.GetTableSize(HeadTag) >= MinimumHeadLength;
 	}
 
 	public static byte[]? Extract(SKTypeface typeface)
@@ -106,7 +106,7 @@ internal static class SfntFaceExtractor
 
 	private static byte[] Assemble(uint[] tags, byte[][] tables, int headIndex)
 	{
-		var directoryLength = OffsetTableLength + (tags.Length * DirectoryEntryLength);
+		var directoryLength = OffsetTableLength + tags.Length * DirectoryEntryLength;
 		var total = directoryLength;
 		foreach (var table in tables)
 		{
@@ -120,7 +120,7 @@ internal static class SfntFaceExtractor
 		BinaryPrimitives.WriteUInt32BigEndian(span, hasCffOutlines ? CffOutlineVersion : TrueTypeOutlineVersion);
 
 		var entrySelector = 0;
-		while (1 << (entrySelector + 1) <= tags.Length)
+		while (1 << entrySelector + 1 <= tags.Length)
 		{
 			entrySelector++;
 		}
@@ -129,14 +129,14 @@ internal static class SfntFaceExtractor
 		BinaryPrimitives.WriteUInt16BigEndian(span[4..], (ushort)tags.Length);
 		BinaryPrimitives.WriteUInt16BigEndian(span[6..], (ushort)searchRange);
 		BinaryPrimitives.WriteUInt16BigEndian(span[8..], (ushort)entrySelector);
-		BinaryPrimitives.WriteUInt16BigEndian(span[10..], (ushort)((tags.Length * DirectoryEntryLength) - searchRange));
+		BinaryPrimitives.WriteUInt16BigEndian(span[10..], (ushort)(tags.Length * DirectoryEntryLength - searchRange));
 
 		var offset = directoryLength;
 		for (var i = 0; i < tags.Length; i++)
 		{
 			tables[i].CopyTo(span[offset..]);
 
-			var entry = OffsetTableLength + (i * DirectoryEntryLength);
+			var entry = OffsetTableLength + i * DirectoryEntryLength;
 			BinaryPrimitives.WriteUInt32BigEndian(span[entry..], tags[i]);
 			BinaryPrimitives.WriteUInt32BigEndian(span[(entry + 4)..],
 				Checksum(span.Slice(offset, Aligned(tables[i].Length))));
@@ -170,7 +170,10 @@ internal static class SfntFaceExtractor
 		return tags.Length <= ushort.MaxValue && Array.IndexOf(tags, HeadTag) >= 0;
 	}
 
-	private static int Aligned(int length) => (length + 3) & ~3;
+	private static int Aligned(int length)
+	{
+		return length + 3 & ~3;
+	}
 
 	private static uint Checksum(ReadOnlySpan<byte> data)
 	{
@@ -186,7 +189,7 @@ internal static class SfntFaceExtractor
 			uint tail = 0;
 			for (var j = 0; j < 4; j++)
 			{
-				tail = (tail << 8) | (i + j < data.Length ? data[i + j] : 0u);
+				tail = tail << 8 | (i + j < data.Length ? data[i + j] : 0u);
 			}
 
 			sum = unchecked(sum + tail);

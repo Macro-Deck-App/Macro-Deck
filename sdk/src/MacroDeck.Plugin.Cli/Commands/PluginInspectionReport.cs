@@ -144,11 +144,14 @@ internal sealed record PluginInspectionReport
 	/// code.</summary>
 	public IReadOnlyList<CliDiagnostic> Warnings { get; init; } = [];
 
-	public static PluginInspectionReport From(PluginManifest manifest,
+	public static PluginInspectionReport From(
+		PluginManifest manifest,
 		int entryCount,
 		long totalUncompressedBytes,
 		long? archiveBytes)
-		=> From(manifest, entryCount, totalUncompressedBytes, archiveBytes, presentEntryNames: null);
+	{
+		return From(manifest, entryCount, totalUncompressedBytes, archiveBytes, null);
+	}
 
 	/// <param name="presentEntryNames">The artifact's or directory's own entry names, already normalized
 	/// and <see cref="StringComparer.OrdinalIgnoreCase" />. <c>null</c> means "not checked" - every
@@ -157,7 +160,8 @@ internal sealed record PluginInspectionReport
 	/// <param name="subjectNoun">What <paramref name="presentEntryNames" /> represents in a warning message
 	/// - <c>"artifact"</c> for <c>--artifact</c>, <c>"directory"</c> for <c>--directory</c>. Unused when
 	/// <paramref name="presentEntryNames" /> is <c>null</c>.</param>
-	public static PluginInspectionReport From(PluginManifest manifest,
+	public static PluginInspectionReport From(
+		PluginManifest manifest,
 		int entryCount,
 		long totalUncompressedBytes,
 		long? archiveBytes,
@@ -238,5 +242,8 @@ internal sealed record PluginInspectionReport
 	}
 
 	private static InspectedRelationship ToRelationship(PluginDependency dependency)
-		=> new() { Id = dependency.Id, VersionRange = dependency.VersionRange, Optional = dependency.Optional };
+	{
+		return new InspectedRelationship
+			{ Id = dependency.Id, VersionRange = dependency.VersionRange, Optional = dependency.Optional };
+	}
 }

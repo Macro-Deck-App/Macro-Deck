@@ -21,7 +21,10 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = BuildParameters();
 
-	public IActionExecutor CreateExecutor() => new Executor(_applications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_applications);
+	}
 
 	private static List<ActionParameter> BuildParameters()
 	{
@@ -32,17 +35,16 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 		var parameters = new List<ActionParameter>
 		{
 			ActionParameter.File("path",
-				label: AppStrings.Integrations.System.Actions.LaunchApplication.PathLabel(),
+				AppStrings.Integrations.System.Actions.LaunchApplication.PathLabel(),
 				required: true,
 				fileExtensions: pathExtensions),
 			ActionParameter.Text("arguments",
-				label: AppStrings.Integrations.System.Actions.LaunchApplication.ArgumentsLabel(),
-				description: AppStrings.Integrations.System.Actions.SupportsVariablesHint()),
+				AppStrings.Integrations.System.Actions.LaunchApplication.ArgumentsLabel(),
+				AppStrings.Integrations.System.Actions.SupportsVariablesHint()),
 			ActionParameter.Folder("workingDirectory",
-				label: AppStrings.Integrations.System.Actions.WorkingDirectoryLabel(),
-				description: AppStrings.Integrations.System.Actions.LaunchApplication.WorkingDirectoryDescription()),
+				AppStrings.Integrations.System.Actions.WorkingDirectoryLabel(),
+				AppStrings.Integrations.System.Actions.LaunchApplication.WorkingDirectoryDescription()),
 			ActionParameter.Choice("mode",
-				options:
 				[
 					new ActionParameterOption
 					{
@@ -59,26 +61,29 @@ internal sealed class LaunchApplicationActionDefinition : IActionDefinition
 						Label = AppStrings.Integrations.System.Actions.LaunchApplication.ModeStartFocus()
 					}
 				],
-				label: AppStrings.Integrations.System.Actions.LaunchApplication.ModeLabel(),
+				AppStrings.Integrations.System.Actions.LaunchApplication.ModeLabel(),
 				defaultValue: "start")
 		};
 
 		if (OperatingSystem.IsWindows())
 		{
 			parameters.Add(ActionParameter.Toggle("runAsAdmin",
-				label: AppStrings.Integrations.System.Actions.LaunchApplication.RunAsAdminLabel(),
-				description: AppStrings.Integrations.System.Actions.LaunchApplication.RunAsAdminDescription()));
+				AppStrings.Integrations.System.Actions.LaunchApplication.RunAsAdminLabel(),
+				AppStrings.Integrations.System.Actions.LaunchApplication.RunAsAdminDescription()));
 		}
 
 		return parameters;
 	}
 
-	internal static LaunchMode ParseMode(string mode) => mode switch
+	internal static LaunchMode ParseMode(string mode)
 	{
-		"start-stop" => LaunchMode.StartStop,
-		"start-focus" => LaunchMode.StartFocus,
-		_ => LaunchMode.Start
-	};
+		return mode switch
+		{
+			"start-stop" => LaunchMode.StartStop,
+			"start-focus" => LaunchMode.StartFocus,
+			_ => LaunchMode.Start
+		};
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

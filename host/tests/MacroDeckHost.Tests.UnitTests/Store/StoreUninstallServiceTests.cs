@@ -319,15 +319,18 @@ internal sealed class StoreUninstallServiceTests
 		return packId;
 	}
 
-	private static StoreInstallationRecord TemplateRecord(Guid profileId) => new()
+	private static StoreInstallationRecord TemplateRecord(Guid profileId)
 	{
-		Origin = "official",
-		Kind = StoreExtensionKind.ProfileTemplate,
-		PackageId = ProfileTemplatePackageId,
-		Version = "1.0.0",
-		InstalledAt = DateTimeOffset.UtcNow,
-		TargetIds = [profileId]
-	};
+		return new StoreInstallationRecord
+		{
+			Origin = "official",
+			Kind = StoreExtensionKind.ProfileTemplate,
+			PackageId = ProfileTemplatePackageId,
+			Version = "1.0.0",
+			InstalledAt = DateTimeOffset.UtcNow,
+			TargetIds = [profileId]
+		};
+	}
 }
 
 /// <summary>Mutates its <see cref="Installed" /> set only on a successful uninstall, matching the real
@@ -343,20 +346,29 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 	public PluginUninstallRequest? LastRequest { get; private set; }
 
 	public Task<PluginInstallResult>
-		Inspect(PluginArtifactSource source, CancellationToken cancellationToken = default) =>
+		Inspect(PluginArtifactSource source, CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task<PluginInstallResult> Install(PluginArtifactSource source,
+	public Task<PluginInstallResult> Install(
+		PluginArtifactSource source,
 		PluginInstallRequest request,
-		CancellationToken cancellationToken = default) =>
+		CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task<PluginInstallResult> Activate(string pluginId,
+	public Task<PluginInstallResult> Activate(
+		string pluginId,
 		string version,
-		CancellationToken cancellationToken = default) =>
+		CancellationToken cancellationToken = default)
+	{
 		throw new NotSupportedException();
+	}
 
-	public Task<PluginInstallResult> Uninstall(string pluginId,
+	public Task<PluginInstallResult> Uninstall(
+		string pluginId,
 		PluginUninstallRequest request,
 		CancellationToken cancellationToken = default)
 	{
@@ -377,7 +389,7 @@ internal sealed class FakePluginInstaller : IPluginInstaller
 		}
 
 		Installed.Remove(pluginId);
-		return Task.FromResult(PluginInstallResult.Ok(pluginId, "1.0.0", previousVersion: null, activated: false));
+		return Task.FromResult(PluginInstallResult.Ok(pluginId, "1.0.0", null, false));
 	}
 }
 
@@ -388,14 +400,23 @@ internal sealed class FakeStoreOperationTracker : IStoreOperationTracker
 {
 	public StoreOperation? Live { get; set; }
 
-	public StoreOperation? FindLive(StoreExtensionKind kind, string packageId) =>
-		Live is not null && Live.ExtensionKind == kind && Live.PackageId == packageId ? Live : null;
+	public StoreOperation? FindLive(StoreExtensionKind kind, string packageId)
+	{
+		return Live is not null && Live.ExtensionKind == kind && Live.PackageId == packageId ? Live : null;
+	}
 
-	public IReadOnlyList<StoreOperation> Snapshot() => throw new NotSupportedException();
+	public IReadOnlyList<StoreOperation> Snapshot()
+	{
+		throw new NotSupportedException();
+	}
 
-	public StoreOperation? Find(Guid operationId) => throw new NotSupportedException();
+	public StoreOperation? Find(Guid operationId)
+	{
+		throw new NotSupportedException();
+	}
 
-	public StoreOperation Create(StoreOperationKind kind,
+	public StoreOperation Create(
+		StoreOperationKind kind,
 		StoreExtensionKind extensionKind,
 		string packageId,
 		string version,
@@ -403,21 +424,34 @@ internal sealed class FakeStoreOperationTracker : IStoreOperationTracker
 		string? previousVersion,
 		Guid? retryOf = null,
 		StoreTestBuildReference? testBuild = null,
-		bool versionPinned = false) =>
+		bool versionPinned = false)
+	{
 		throw new NotSupportedException();
+	}
 
-	public StoreOperation? Transition(Guid operationId,
+	public StoreOperation? Transition(
+		Guid operationId,
 		StoreOperationState state,
 		StoreOperationError? failure = null,
-		string? errorMessage = null) =>
+		string? errorMessage = null)
+	{
 		throw new NotSupportedException();
+	}
 
-	public void ReportProgress(Guid operationId, long bytesDownloaded, long? totalBytes) =>
+	public void ReportProgress(Guid operationId, long bytesDownloaded, long? totalBytes)
+	{
 		throw new NotSupportedException();
+	}
 
-	public bool Dismiss(Guid operationId) => throw new NotSupportedException();
+	public bool Dismiss(Guid operationId)
+	{
+		throw new NotSupportedException();
+	}
 
-	public void Restore(IReadOnlyList<StoreOperation> operations) => throw new NotSupportedException();
+	public void Restore(IReadOnlyList<StoreOperation> operations)
+	{
+		throw new NotSupportedException();
+	}
 
 	public event Action<StoreOperation>? Changed
 	{

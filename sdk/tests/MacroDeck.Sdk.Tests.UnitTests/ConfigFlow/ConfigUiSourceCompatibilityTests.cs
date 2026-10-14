@@ -75,7 +75,8 @@ public class ConfigUiSourceCompatibilityTests
 		{
 			Assert.That(((IConfigFlowProvider)integration).RequiresConfiguration, Is.True);
 			Assert.That(result.Data!.Value.Deserialize<ConfigFlowDescribePayload>(PluginProtocolJson.Options)!
-				.RequiresConfiguration, Is.True);
+					.RequiresConfiguration,
+				Is.True);
 		});
 	}
 
@@ -107,11 +108,20 @@ public class ConfigUiSourceCompatibilityTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => new PreExistingConfigFlow();
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new PreExistingConfigFlow();
+		}
 
 		public bool AllowsMultipleConfigurations => true;
 	}
@@ -119,17 +129,21 @@ public class ConfigUiSourceCompatibilityTests
 	private sealed class PreExistingConfigFlow : IConfigFlow
 	{
 		public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+		{
+			return Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
 			{
-				StepId = "one", Fields = [ActionParameter.Secret("apiKey", label: "API key", required: true)]
+				StepId = "one", Fields = [ActionParameter.Secret("apiKey", "API key", required: true)]
 			}));
+		}
 
 		public Task<ConfigFlowResult> SubmitAsync(
 			string stepId,
 			IReadOnlyDictionary<string, object?> input,
 			IConfigFlowContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(ConfigFlowResult.Complete("Entry"));
+		{
+			return Task.FromResult(ConfigFlowResult.Complete("Entry"));
+		}
 	}
 
 	private sealed class PreExistingConfigFlowContext : IConfigFlowContext
@@ -156,11 +170,17 @@ public class ConfigUiSourceCompatibilityTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [ActionParameter.Text("value")];
 
-		public IActionExecutor CreateExecutor() => new Executor();
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor();
+		}
 
 		private sealed class Executor : IActionExecutor
 		{
-			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context) => ActionResult.SucceededTask;
+			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+			{
+				return ActionResult.SucceededTask;
+			}
 		}
 	}
 
@@ -168,8 +188,14 @@ public class ConfigUiSourceCompatibilityTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [action];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

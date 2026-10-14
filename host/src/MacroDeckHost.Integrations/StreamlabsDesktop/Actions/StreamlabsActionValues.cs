@@ -20,24 +20,29 @@ internal static class StreamlabsActionValues
 	}
 
 	public static string ReadMode(ActionExecutionContext context, string fallback)
-		=> context.Parameters.GetValueOrDefault(ModeParameter) as string is { Length: > 0 } mode
+	{
+		return context.Parameters.GetValueOrDefault(ModeParameter) as string is { Length: > 0 } mode
 			? mode
 			: fallback;
+	}
 
-	public static double? ReadNumber(object? raw) => raw switch
+	public static double? ReadNumber(object? raw)
 	{
-		null => null,
-		double value => value,
-		float value => value,
-		int value => value,
-		long value => value,
-		decimal value => (double)value,
-		string text when double.TryParse(text,
-			NumberStyles.Float,
-			CultureInfo.InvariantCulture,
-			out var parsed) => parsed,
-		_ => null
-	};
+		return raw switch
+		{
+			null => null,
+			double value => value,
+			float value => value,
+			int value => value,
+			long value => value,
+			decimal value => (double)value,
+			string text when double.TryParse(text,
+				NumberStyles.Float,
+				CultureInfo.InvariantCulture,
+				out var parsed) => parsed,
+			_ => null
+		};
+	}
 
 	public static async Task<DynamicOptionsResult> SceneOrSourceOptionsAsync(
 		StreamlabsDesktopConnection? connection,
@@ -47,9 +52,9 @@ internal static class StreamlabsActionValues
 
 		if (connection is not null)
 		{
-			if (context.ParameterName == SourceParameter &&
-				context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene &&
-				!string.IsNullOrWhiteSpace(scene))
+			if (context.ParameterName == SourceParameter
+				&& context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene
+				&& !string.IsNullOrWhiteSpace(scene))
 			{
 				values = await connection.GetSceneItemNamesAsync(scene).ConfigureAwait(false);
 			}
@@ -62,9 +67,12 @@ internal static class StreamlabsActionValues
 		return Options(values);
 	}
 
-	public static DynamicOptionsResult Options(IReadOnlyList<string> values) => new()
+	public static DynamicOptionsResult Options(IReadOnlyList<string> values)
 	{
-		Options = values.Select(value => new ActionParameterOption { Value = value, Label = value }).ToList(),
-		CacheSeconds = 5
-	};
+		return new DynamicOptionsResult
+		{
+			Options = values.Select(value => new ActionParameterOption { Value = value, Label = value }).ToList(),
+			CacheSeconds = 5
+		};
+	}
 }

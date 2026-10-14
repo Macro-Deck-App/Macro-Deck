@@ -17,7 +17,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 	private readonly TimeProvider _timeProvider;
 	private readonly IBuildEnvironment _buildEnvironment;
 
-	public StoreOperationTracker(IStoreOperationStore store,
+	public StoreOperationTracker(
+		IStoreOperationStore store,
 		TimeProvider timeProvider,
 		IBuildEnvironment? buildEnvironment = null)
 	{
@@ -28,20 +29,27 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 
 	public event Action<StoreOperation>? Changed;
 
-	public IReadOnlyList<StoreOperation> Snapshot() =>
-		_operations.Values.OrderBy(operation => operation.StartedAt).ToList();
+	public IReadOnlyList<StoreOperation> Snapshot()
+	{
+		return _operations.Values.OrderBy(operation => operation.StartedAt).ToList();
+	}
 
-	public StoreOperation? Find(Guid operationId) =>
-		_operations.TryGetValue(operationId, out var operation) ? operation : null;
+	public StoreOperation? Find(Guid operationId)
+	{
+		return _operations.TryGetValue(operationId, out var operation) ? operation : null;
+	}
 
-	public StoreOperation? FindLive(StoreExtensionKind kind, string packageId) =>
-		_operations.Values
-			.Where(operation => operation.ExtensionKind == kind &&
-				string.Equals(operation.PackageId, packageId, StringComparison.OrdinalIgnoreCase) &&
-				!operation.IsTerminal)
+	public StoreOperation? FindLive(StoreExtensionKind kind, string packageId)
+	{
+		return _operations.Values
+			.Where(operation => operation.ExtensionKind == kind
+				&& string.Equals(operation.PackageId, packageId, StringComparison.OrdinalIgnoreCase)
+				&& !operation.IsTerminal)
 			.MaxBy(operation => operation.StartedAt);
+	}
 
-	public StoreOperation Create(StoreOperationKind kind,
+	public StoreOperation Create(
+		StoreOperationKind kind,
 		StoreExtensionKind extensionKind,
 		string packageId,
 		string version,
@@ -79,7 +87,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		return operation;
 	}
 
-	public StoreOperation? Transition(Guid operationId,
+	public StoreOperation? Transition(
+		Guid operationId,
 		StoreOperationState state,
 		StoreOperationError? failure = null,
 		string? errorMessage = null)
@@ -138,8 +147,8 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 
 	public void ReportProgress(Guid operationId, long bytesDownloaded, long? totalBytes)
 	{
-		if (!_operations.TryGetValue(operationId, out var current) ||
-			current.State is not (StoreOperationState.Queued or StoreOperationState.Downloading))
+		if (!_operations.TryGetValue(operationId, out var current)
+			|| current.State is not (StoreOperationState.Queued or StoreOperationState.Downloading))
 		{
 			return;
 		}
@@ -234,13 +243,15 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 
 	// A refusal because of the Macro Deck version is only true for the version that refused it, so after
 	// an update the package is offered for install again instead of showing a stale failure.
-	private bool NoLongerApplies(StoreOperation operation) =>
-		operation is
-		{
-			State: StoreOperationState.Failed,
-			Error: StoreOperationError.RequiresNewerMacroDeck or StoreOperationError.Incompatible
-		} &&
-		!string.Equals(operation.HostVersion, _buildEnvironment.Version, StringComparison.Ordinal);
+	private bool NoLongerApplies(StoreOperation operation)
+	{
+		return operation is
+			{
+				State: StoreOperationState.Failed,
+				Error: StoreOperationError.RequiresNewerMacroDeck or StoreOperationError.Incompatible
+			}
+			&& !string.Equals(operation.HostVersion, _buildEnvironment.Version, StringComparison.Ordinal);
+	}
 
 	private void Prune()
 	{
@@ -257,7 +268,10 @@ public sealed class StoreOperationTracker : IStoreOperationTracker
 		}
 	}
 
-	private void Persist() => _store.SaveAll(Snapshot());
+	private void Persist()
+	{
+		_store.SaveAll(Snapshot());
+	}
 
 	private sealed record RateSample(DateTimeOffset At, long Bytes);
 }

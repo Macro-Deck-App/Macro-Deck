@@ -14,30 +14,40 @@ public sealed class WeatherTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal WeatherTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal WeatherTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>What this provider declares about itself.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Weather,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Weather,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Weather.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>The station instances currently available.</summary>
 	public Task<CapabilityInvocationOutcome> GetInstancesAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Weather,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Weather,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Weather.Instances,
 			null,
 			options);
+	}
 
 	/// <summary>A station's current reading.</summary>
-	public Task<CapabilityInvocationOutcome> GetSnapshotAsync(WeatherInstanceArguments arguments,
+	public Task<CapabilityInvocationOutcome> GetSnapshotAsync(
+		WeatherInstanceArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Weather,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Weather,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.Weather.Snapshot,
 			arguments,
 			options);
+	}
 }

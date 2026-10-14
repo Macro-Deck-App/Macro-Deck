@@ -28,7 +28,10 @@ internal sealed class StoreOfficialPackagesTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Only_packages_recorded_from_the_official_registry_count_as_installed()
@@ -36,7 +39,11 @@ internal sealed class StoreOfficialPackagesTests
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
-			Entries = [Entry("com.acme.icons", StoreExtensionKind.IconPack), Entry("com.other.icons", StoreExtensionKind.IconPack)]
+			Entries =
+			[
+				Entry("com.acme.icons", StoreExtensionKind.IconPack),
+				Entry("com.other.icons", StoreExtensionKind.IconPack)
+			]
 		});
 		Record("com.acme.icons", StoreRegistryOptions.OfficialOrigin);
 		Record("com.other.icons", "https://registry.example/");
@@ -50,7 +57,8 @@ internal sealed class StoreOfficialPackagesTests
 	[Test]
 	public void A_store_plugin_removed_outside_the_store_no_longer_counts_as_installed()
 	{
-		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin)] });
+		_catalog.Swap(new StoreCatalogSnapshot
+			{ Sequence = 1, Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin)] });
 		_installations.Save(new StoreInstallationRecord
 		{
 			Origin = StoreRegistryOptions.OfficialOrigin,
@@ -67,7 +75,8 @@ internal sealed class StoreOfficialPackagesTests
 	[Test]
 	public void A_non_official_registry_offers_no_ratings_at_all()
 	{
-		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = [Entry("com.acme.icons", StoreExtensionKind.IconPack)] });
+		_catalog.Swap(new StoreCatalogSnapshot
+			{ Sequence = 1, Entries = [Entry("com.acme.icons", StoreExtensionKind.IconPack)] });
 		Record("com.acme.icons", "https://registry.example/");
 		var packages = Create(new StoreRegistryOptions { BaseUrl = new Uri("https://registry.example/") });
 
@@ -85,22 +94,30 @@ internal sealed class StoreOfficialPackagesTests
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
-			Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin), Entry("com.acme.gone", StoreExtensionKind.Plugin)],
+			Entries =
+			[
+				Entry("com.acme.hue", StoreExtensionKind.Plugin), Entry("com.acme.gone", StoreExtensionKind.Plugin)
+			],
 			RemovedPackages = [new StoreRemovedPackage { Id = "com.acme.gone" }]
 		});
 
-		var listed = Create(StoreRegistryOptions.Default).ListedPackageIds(["COM.ACME.HUE", "com.acme.gone", "com.nope"]);
+		var listed = Create(StoreRegistryOptions.Default)
+			.ListedPackageIds(["COM.ACME.HUE", "com.acme.gone", "com.nope"]);
 
 		Assert.That(listed, Is.EqualTo(new[] { "com.acme.hue" }));
 	}
 
 	[Test]
-	public void Withdrawing_an_older_version_keeps_the_package_listed_and_withdrawing_the_latest_unlists_it_even_when_installed()
+	public void
+		Withdrawing_an_older_version_keeps_the_package_listed_and_withdrawing_the_latest_unlists_it_even_when_installed()
 	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
-			Entries = [Entry("com.acme.hue", StoreExtensionKind.Plugin), Entry("com.acme.gone", StoreExtensionKind.Plugin)],
+			Entries =
+			[
+				Entry("com.acme.hue", StoreExtensionKind.Plugin), Entry("com.acme.gone", StoreExtensionKind.Plugin)
+			],
 			RemovedPackages =
 			[
 				new StoreRemovedPackage { Id = "com.acme.hue", Version = "0.9.0" },
@@ -112,7 +129,8 @@ internal sealed class StoreOfficialPackagesTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(packages.ListedPackageIds(["com.acme.hue", "com.acme.gone"]), Is.EqualTo(new[] { "com.acme.hue" }));
+			Assert.That(packages.ListedPackageIds(["com.acme.hue", "com.acme.gone"]),
+				Is.EqualTo(new[] { "com.acme.hue" }));
 			Assert.That(packages.ResolveListed(StoreExtensionKind.Plugin, "com.acme.hue"), Is.EqualTo("com.acme.hue"));
 			Assert.That(packages.ResolveListed(StoreExtensionKind.Plugin, "com.acme.gone"), Is.Null);
 			Assert.That(packages.InstalledPackageIds(), Is.Empty);
@@ -133,32 +151,47 @@ internal sealed class StoreOfficialPackagesTests
 	[TestCase(BuildChannel.Development, "http://platform.test", "https://api.macro-deck.app/")]
 	[TestCase(BuildChannel.Production, "http://127.0.0.1:5199", "https://api.macro-deck.app/")]
 	[TestCase(BuildChannel.Development, null, "https://api.macro-deck.app/")]
-	public void The_platform_address_can_only_be_redirected_by_a_development_build(BuildChannel channel,
+	public void The_platform_address_can_only_be_redirected_by_a_development_build(
+		BuildChannel channel,
 		string? value,
-		string expected) =>
+		string expected)
+	{
 		Assert.That(StorePlatformOptions.Resolve(channel, value).BaseUrl.ToString(), Is.EqualTo(expected));
+	}
 
-	private StoreOfficialPackages Create(StoreRegistryOptions options) =>
-		new(_catalog,
-			new StoreCatalogQueryService(_catalog, new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None), _installations, new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+	private StoreOfficialPackages Create(StoreRegistryOptions options)
+	{
+		return new StoreOfficialPackages(_catalog,
+			new StoreCatalogQueryService(_catalog,
+				new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
+				_installations,
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_installations,
 			options);
+	}
 
-	private void Record(string packageId, string origin) =>
+	private void Record(string packageId, string origin)
+	{
 		_installations.Save(new StoreInstallationRecord
 		{
 			Origin = origin, Kind = StoreExtensionKind.IconPack, PackageId = packageId, Version = "1.0.0"
 		});
+	}
 
-	private static StoreCatalogEntry Entry(string id, StoreExtensionKind kind) => new()
+	private static StoreCatalogEntry Entry(string id, StoreExtensionKind kind)
 	{
-		Kind = kind,
-		Id = id,
-		Name = id,
-		LatestVersion = "1.0.0",
-		LatestRelease = new StoreReleaseManifest
+		return new StoreCatalogEntry
 		{
-			Version = "1.0.0", ArtifactUrl = new Uri($"https://cdn.example/{id}.bin"), Sha256 = new string('a', 64), Size = 16
-		}
-	};
+			Kind = kind,
+			Id = id,
+			Name = id,
+			LatestVersion = "1.0.0",
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = "1.0.0", ArtifactUrl = new Uri($"https://cdn.example/{id}.bin"), Sha256 = new string('a', 64),
+				Size = 16
+			}
+		};
+	}
 }

@@ -45,12 +45,15 @@ public class FolderServiceRecursiveDeleteTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Delete_ThreeLevelSubtreeWithWidgetsAtEveryLevel_RemovesEverythingFromCacheAndPersistedFile()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 		var grandchild = await AddFolder("Grandchild", child.Id);
 		AddWidget(root.Id);
@@ -76,7 +79,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_PublishesOneWidgetDeletedNotificationPerWidgetAndOneFolderDeletedNotificationPerFolder()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 		var rootWidget = AddWidget(root.Id);
 		var childWidget = AddWidget(child.Id);
@@ -96,7 +99,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_PublishesFolderDeletionsChildBeforeParent()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 		var grandchild = await AddFolder("Grandchild", child.Id);
 		await AddFolder("Survivor", null);
@@ -112,8 +115,8 @@ public class FolderServiceRecursiveDeleteTests
 	{
 		var root = await AddFolder("Root",
 			null,
-			isDefault: true,
-			createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+			true,
+			new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 		var replacement = await AddFolder("Replacement",
 			null,
 			createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
@@ -138,7 +141,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_ScrubsSecretsForSubtreeWidgetsButNotSurvivors()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var survivor = await AddFolder("Survivor", null);
 		var subtreeSecret = _secrets.Store("subtree-secret");
 		var survivingSecret = _secrets.Store("surviving-secret");
@@ -159,8 +162,8 @@ public class FolderServiceRecursiveDeleteTests
 	{
 		var root = await AddFolder("Root",
 			null,
-			isDefault: true,
-			createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+			true,
+			new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 		var replacement = await AddFolder("Replacement",
 			null,
 			createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
@@ -179,7 +182,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_TheOnlyFolder_IsRejectedAsTheLastFolderWithNoNotifications()
 	{
-		var only = await AddFolder("Only", null, isDefault: true);
+		var only = await AddFolder("Only", null, true);
 
 		var result = await _service.Delete(only.Id);
 
@@ -195,7 +198,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_SubtreeSpanningTheWholeProfile_IsRejectedAsTheLastFolder()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 
 		var result = await _service.Delete(root.Id);
@@ -213,7 +216,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_OnlyRootStartFolderWithNoValidReplacementRoot_IsRejected()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		// A dangling parent reference (pre-existing data corruption) is not itself a root, so it cannot
 		// replace the start folder even though more than one folder exists in the profile.
 		await AddFolder("Orphan", Guid.NewGuid());
@@ -232,7 +235,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_Subtree_PersistsWithExactlyOneSave()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 		AddWidget(root.Id);
 		AddWidget(child.Id);
@@ -247,7 +250,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_PersistFailure_RestoresFoldersAndMarkersAndScrubsNoSecretsAndPublishesNothing()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var child = await AddFolder("Child", root.Id);
 		var secretId = _secrets.Store("s");
 		AddWidget(child.Id, $"{{\"$secret\":\"{secretId}\"}}");
@@ -274,7 +277,7 @@ public class FolderServiceRecursiveDeleteTests
 	[Test]
 	public async Task Delete_LeafFolder_RemovesOnlyThatFolderAndItsOwnWidgets()
 	{
-		var root = await AddFolder("Root", null, isDefault: true);
+		var root = await AddFolder("Root", null, true);
 		var leaf = await AddFolder("Leaf", root.Id);
 		var widget = AddWidget(leaf.Id);
 
@@ -292,7 +295,8 @@ public class FolderServiceRecursiveDeleteTests
 		});
 	}
 
-	private async Task<FolderEntity> AddFolder(string name,
+	private async Task<FolderEntity> AddFolder(
+		string name,
 		Guid? parentId,
 		bool isDefault = false,
 		DateTime? createdAt = null)

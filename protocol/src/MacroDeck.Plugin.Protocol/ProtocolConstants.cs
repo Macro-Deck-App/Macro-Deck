@@ -24,6 +24,6 @@ public static class ProtocolConstants
 
 	public static readonly IReadOnlyList<string> All =
 	[
-		ApiBasePath, ProtocolDiscoveryPath, RegistrationPath, PairingPath, SessionsPath, WebSocketPath,
+		ApiBasePath, ProtocolDiscoveryPath, RegistrationPath, PairingPath, SessionsPath, WebSocketPath
 	];
 }

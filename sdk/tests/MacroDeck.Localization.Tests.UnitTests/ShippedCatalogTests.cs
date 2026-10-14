@@ -19,7 +19,7 @@ public class ShippedCatalogTests
 	private static readonly (string Scope, string[] Directory)[] _catalogs =
 	[
 		(LocalizationScope.MacroDeck, ["sdk", "src", "MacroDeck.Localization", "Resources"]),
-		("macrodeck.app", ["host", "src", "MacroDeckHost.Localization", "Localization"]),
+		("macrodeck.app", ["host", "src", "MacroDeckHost.Localization", "Localization"])
 	];
 
 	public static IEnumerable<TestCaseData> Catalogs()
@@ -102,7 +102,8 @@ public class ShippedCatalogTests
 
 		Assert.Multiple(() =>
 		{
-			foreach (var culture in result.Cultures.Where(culture => !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
+			foreach (var culture in result.Cultures.Where(culture
+				=> !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
 			{
 				var translated = result.Catalog[culture];
 				foreach (var (key, defaultText) in byDefault)
@@ -112,14 +113,17 @@ public class ShippedCatalogTests
 
 					if (IsPluralForm(byDefault, key))
 					{
-						Assert.That(actual, Is.SubsetOf(FamilyPlaceholders(byDefault, key)),
+						Assert.That(actual,
+							Is.SubsetOf(FamilyPlaceholders(byDefault, key)),
 							$"'{scope}:{key}' in {culture} introduces a placeholder the default text does not have");
-						Assert.That(expected.Where(name => name != "count"), Is.SubsetOf(actual),
+						Assert.That(expected.Where(name => name != "count"),
+							Is.SubsetOf(actual),
 							$"'{scope}:{key}' in {culture} drops a placeholder the default text shows");
 					}
 					else
 					{
-						Assert.That(actual, Is.EqualTo(expected),
+						Assert.That(actual,
+							Is.EqualTo(expected),
 							$"'{scope}:{key}' in {culture} must use the same placeholders as the default text");
 					}
 				}
@@ -135,12 +139,15 @@ public class ShippedCatalogTests
 
 		Assert.Multiple(() =>
 		{
-			foreach (var culture in result.Cultures.Where(culture => !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
+			foreach (var culture in result.Cultures.Where(culture
+				=> !string.Equals(culture, result.DefaultCulture, StringComparison.OrdinalIgnoreCase)))
 			{
 				var translated = result.Catalog[culture];
-				var untouched = byDefault.Count(entry => translated.TryGetValue(entry.Key, out var text) && text == entry.Value);
+				var untouched = byDefault.Count(entry
+					=> translated.TryGetValue(entry.Key, out var text) && text == entry.Value);
 
-				Assert.That(untouched, Is.LessThan(byDefault.Count / 10),
+				Assert.That(untouched,
+					Is.LessThan(byDefault.Count / 10),
 					$"{untouched} of {byDefault.Count} '{scope}' texts in {culture} are identical to English");
 			}
 		});
@@ -174,7 +181,9 @@ public class ShippedCatalogTests
 			var served = LocalizationCultureChain.For(systemCulture, result.DefaultCulture)
 				.First(culture => result.Cultures.Contains(culture, StringComparer.OrdinalIgnoreCase));
 
-			Assert.That(served, Is.EqualTo("zh-TW"), $"'{catalog.Scope}' must serve {systemCulture} in Traditional Chinese");
+			Assert.That(served,
+				Is.EqualTo("zh-TW"),
+				$"'{catalog.Scope}' must serve {systemCulture} in Traditional Chinese");
 		}
 	}
 
@@ -199,11 +208,13 @@ public class ShippedCatalogTests
 	}
 
 	private static string[] Placeholders(string text)
-		=> Regex.Matches(text, @"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+	{
+		return Regex.Matches(text, @"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 			.Select(match => match.Groups[1].Value)
 			.Distinct()
 			.Order(StringComparer.Ordinal)
 			.ToArray();
+	}
 
 	private static string[] FamilyPlaceholders(Dictionary<string, string> templates, string formKey)
 	{
@@ -219,11 +230,15 @@ public class ShippedCatalogTests
 	private static bool IsPluralForm(Dictionary<string, string> templates, string key)
 	{
 		var separator = key.LastIndexOf('.');
-		return separator > 0 && key[(separator + 1)..] is "One" or "Other" && IsPluralFamily(templates, key[..separator]);
+		return separator > 0
+			&& key[(separator + 1)..] is "One" or "Other"
+			&& IsPluralFamily(templates, key[..separator]);
 	}
 
 	private static bool IsPluralFamily(Dictionary<string, string> templates, string baseKey)
-		=> templates.ContainsKey(baseKey + ".Other");
+	{
+		return templates.ContainsKey(baseKey + ".Other");
+	}
 
 	private static LocalizationCompilationResult Compile(string scope, string[] directory)
 	{

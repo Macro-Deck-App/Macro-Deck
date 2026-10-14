@@ -18,7 +18,8 @@ public class MusicPlayerInstanceDto
 	public bool HasIcon { get; set; }
 
 	public static MusicPlayerInstanceDto From(MusicPlayerInstanceDescriptor descriptor)
-		=> new()
+	{
+		return new MusicPlayerInstanceDto
 		{
 			InstanceId = descriptor.InstanceId,
 			IntegrationId = descriptor.IntegrationId,
@@ -26,6 +27,7 @@ public class MusicPlayerInstanceDto
 			DisplayName = descriptor.DisplayName,
 			HasIcon = descriptor.HasIcon
 		};
+	}
 }
 
 public class GetMusicPlayerInstancesResponse

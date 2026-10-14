@@ -55,8 +55,8 @@ public class PluginScaffoldValidationTests
 		Assert.That(error, Is.Not.Null);
 		Assert.That(error!.Value.Code, Is.EqualTo("unknown-platform"));
 		Assert.That(error.Value.Message,
-			Is.EqualTo("'win-x86' is not a supported target platform. Supported: win-x64, win-arm64, osx-arm64, " +
-				"osx-x64, linux-x64, linux-arm64."));
+			Is.EqualTo("'win-x86' is not a supported target platform. Supported: win-x64, win-arm64, osx-arm64, "
+				+ "osx-x64, linux-x64, linux-arm64."));
 	}
 
 	[Test]

@@ -4,7 +4,6 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Streamerbot.Protocol;
 
@@ -196,15 +195,15 @@ internal sealed class StreamerbotClient : IStreamerbotClient
 
 	private static void ThrowIfNotOk(string request, JsonElement response)
 	{
-		if (!response.TryGetProperty("status", out var status) ||
-			status.ValueKind != JsonValueKind.String ||
-			string.Equals(status.GetString(), "ok", StringComparison.Ordinal))
+		if (!response.TryGetProperty("status", out var status)
+			|| status.ValueKind != JsonValueKind.String
+			|| string.Equals(status.GetString(), "ok", StringComparison.Ordinal))
 		{
 			return;
 		}
 
-		var error = response.TryGetProperty("error", out var errorElement) &&
-			errorElement.ValueKind == JsonValueKind.String
+		var error = response.TryGetProperty("error", out var errorElement)
+			&& errorElement.ValueKind == JsonValueKind.String
 				? errorElement.GetString()
 				: null;
 
@@ -214,8 +213,8 @@ internal sealed class StreamerbotClient : IStreamerbotClient
 	private static StreamerbotHello ParseHello(JsonElement root)
 	{
 		StreamerbotChallenge? challenge = null;
-		if (root.TryGetProperty("authentication", out var authentication) &&
-			authentication.ValueKind == JsonValueKind.Object)
+		if (root.TryGetProperty("authentication", out var authentication)
+			&& authentication.ValueKind == JsonValueKind.Object)
 		{
 			var salt = ReadString(authentication, "salt");
 			var value = ReadString(authentication, "challenge");
@@ -229,11 +228,14 @@ internal sealed class StreamerbotClient : IStreamerbotClient
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
-	private async Task SendAsync(WebSocket socket,
+	private async Task SendAsync(
+		WebSocket socket,
 		Dictionary<string, object?> body,
 		CancellationToken cancellationToken)
 	{
@@ -243,7 +245,7 @@ internal sealed class StreamerbotClient : IStreamerbotClient
 		try
 		{
 			await socket
-				.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+				.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally
@@ -332,10 +334,10 @@ internal sealed class StreamerbotClient : IStreamerbotClient
 				return;
 			}
 
-			if (root.TryGetProperty("event", out var eventElement) &&
-				eventElement.ValueKind == JsonValueKind.Object &&
-				ReadString(eventElement, "source") is { } source &&
-				ReadString(eventElement, "type") is { } type)
+			if (root.TryGetProperty("event", out var eventElement)
+				&& eventElement.ValueKind == JsonValueKind.Object
+				&& ReadString(eventElement, "source") is { } source
+				&& ReadString(eventElement, "type") is { } type)
 			{
 				var data = root.TryGetProperty("data", out var dataElement) ? dataElement.Clone() : default;
 				EventReceived?.Invoke(this, new StreamerbotEventMessage(source, type, data));

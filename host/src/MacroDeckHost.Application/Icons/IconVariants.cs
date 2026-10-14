@@ -10,7 +10,9 @@ public static class IconVariants
 	public static readonly int[] TargetSizes = [128, 256, 512];
 
 	public static string Derived(int size, string masterContentHash)
-		=> $"{size.ToString(CultureInfo.InvariantCulture)}-{MasterToken(masterContentHash)}";
+	{
+		return $"{size.ToString(CultureInfo.InvariantCulture)}-{MasterToken(masterContentHash)}";
+	}
 
 	public static string MasterToken(string masterContentHash)
 	{

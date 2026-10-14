@@ -26,7 +26,8 @@ internal sealed class WidgetTypeProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.WidgetTypeProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -36,6 +37,7 @@ internal sealed class WidgetTypeProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -51,8 +53,8 @@ internal sealed class WidgetTypeProviderCapabilityHandler(
 			return Task.FromResult(CapabilityInvocationResult.Ok(new WidgetTypeProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name,
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name,
 				WidgetTypes = WidgetTypes()
 			}));
 		}
@@ -76,5 +78,10 @@ internal sealed class WidgetTypeProviderCapabilityHandler(
 	}
 
 	private IReadOnlyList<WidgetTypeDescriptorDto> WidgetTypes()
-		=> [.. _providers.SelectMany(provider => provider.GetWidgetTypes()).Select(WidgetTypeDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetWidgetTypes()).Select(WidgetTypeDescriptorMapper.ToDto)
+		];
+	}
 }

@@ -48,7 +48,10 @@ public class CalendarIntegrationTests
 	public async Task Join_meeting_opens_the_link_of_the_running_event()
 	{
 		_provider.WithEvent("alice",
-			Event("standup", Noon.AddMinutes(-10), TimeSpan.FromMinutes(30), meetingUrl: "https://meet.example.com/standup"));
+			Event("standup",
+				Noon.AddMinutes(-10),
+				TimeSpan.FromMinutes(30),
+				meetingUrl: "https://meet.example.com/standup"));
 
 		var result = await JoinAsync();
 
@@ -63,7 +66,10 @@ public class CalendarIntegrationTests
 	public async Task Join_meeting_opens_an_event_starting_within_the_window()
 	{
 		_provider.WithEvent("alice",
-			Event("review", Noon.AddMinutes(10), TimeSpan.FromMinutes(30), meetingUrl: "https://meet.example.com/review"));
+			Event("review",
+				Noon.AddMinutes(10),
+				TimeSpan.FromMinutes(30),
+				meetingUrl: "https://meet.example.com/review"));
 
 		var result = await JoinAsync();
 
@@ -80,7 +86,11 @@ public class CalendarIntegrationTests
 		_provider.WithEvent("alice",
 				Event("main-call", Noon, TimeSpan.FromMinutes(30), meetingUrl: "https://meet.example.com/main"))
 			.WithEvent("alice",
-				Event("team-call", Noon.AddMinutes(5), TimeSpan.FromMinutes(30), "team", meetingUrl: "https://meet.example.com/team"));
+				Event("team-call",
+					Noon.AddMinutes(5),
+					TimeSpan.FromMinutes(30),
+					"team",
+					meetingUrl: "https://meet.example.com/team"));
 
 		var result = await JoinAsync(calendarKey: CalendarKeys.Calendar("app.google::alice", "team"));
 
@@ -95,10 +105,13 @@ public class CalendarIntegrationTests
 	public async Task Join_meeting_fails_with_a_message_when_nothing_starts_within_the_window()
 	{
 		_provider.WithEvent("alice",
-				Event("later", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), meetingUrl: "https://meet.example.com/later"))
+				Event("later",
+					Noon.AddMinutes(30),
+					TimeSpan.FromMinutes(30),
+					meetingUrl: "https://meet.example.com/later"))
 			.WithEvent("alice", Event("no-link", Noon, TimeSpan.FromMinutes(30)));
 
-		var result = await JoinAsync(windowMilliseconds: TimeSpan.FromMinutes(15).TotalMilliseconds);
+		var result = await JoinAsync(TimeSpan.FromMinutes(15).TotalMilliseconds);
 
 		Assert.Multiple(() =>
 		{
@@ -152,7 +165,8 @@ public class CalendarIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
-			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Is.EqualTo("Some calendars couldn't be updated"));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage),
+				Is.EqualTo("Some calendars couldn't be updated"));
 		});
 	}
 
@@ -166,8 +180,10 @@ public class CalendarIntegrationTests
 		var held = new TaskCompletionSource();
 		_provider.ReadsHeldBy = held.Task;
 
-		var first = action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
-		var second = action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+		var first = action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
+		var second = action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
 		held.SetResult();
 		var results = await Task.WhenAll(first, second);
 

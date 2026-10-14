@@ -56,8 +56,8 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 			result.Add(new PluginRuntimeSnapshot
 			{
 				PluginId = session.PluginId,
-				DisplayName = PluginDisplayNameResolver.Resolve(session, manifestName: null, session.PluginId),
-				Version = PluginVersionResolver.Resolve(installedVersion: null, session.DeclaredVersion),
+				DisplayName = PluginDisplayNameResolver.Resolve(session, null, session.PluginId),
+				Version = PluginVersionResolver.Resolve(null, session.DeclaredVersion),
 				State = connected ? PluginRuntimeState.Running : PluginRuntimeState.Stopped,
 				Health = connected ? PluginHealthState.Healthy : PluginHealthState.Unknown,
 				Managed = false,
@@ -81,7 +81,8 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 		return Task.FromResult(PluginSupervisorResult.Ok());
 	}
 
-	public Task<PluginSupervisorResult> Stop(string pluginId,
+	public Task<PluginSupervisorResult> Stop(
+		string pluginId,
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default)
 	{
@@ -105,7 +106,9 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 	}
 
 	public Task<PluginSupervisorResult> Restart(string pluginId, CancellationToken cancellationToken = default)
-		=> Start(pluginId, cancellationToken);
+	{
+		return Start(pluginId, cancellationToken);
+	}
 
 	public Task StopAll(PluginStopReason reason, CancellationToken cancellationToken = default)
 	{
@@ -113,7 +116,10 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 		return Task.CompletedTask;
 	}
 
-	public Task Reconcile(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task Reconcile(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
 	{
@@ -122,8 +128,11 @@ internal sealed class FakeInstallSupervisor : IPluginSupervisor
 	}
 
 	public bool IsRunning(string pluginId)
-		=> Snapshot().Any(snapshot => string.Equals(snapshot.PluginId, pluginId, StringComparison.Ordinal) &&
-			snapshot.State == PluginRuntimeState.Running);
+	{
+		return Snapshot()
+			.Any(snapshot => string.Equals(snapshot.PluginId, pluginId, StringComparison.Ordinal)
+				&& snapshot.State == PluginRuntimeState.Running);
+	}
 
 	private PluginRuntimeSnapshot ManagedSnapshot(string pluginId)
 	{

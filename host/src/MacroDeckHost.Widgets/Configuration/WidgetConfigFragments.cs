@@ -25,13 +25,13 @@ internal static class WidgetConfigFragments
 		UiOption.Of(UiComponentBorderStyles.Comet, AppStrings.Widgets.Appearance.Border.Comet()),
 		UiOption.Of(UiComponentBorderStyles.Ants, AppStrings.Widgets.Appearance.Border.MarchingAnts()),
 		UiOption.Of(UiComponentBorderStyles.HueShift, AppStrings.Widgets.Appearance.Border.HueShift()),
-		UiOption.Of(UiComponentBorderStyles.Rgb, AppStrings.Widgets.Appearance.Border.Rgb()),
+		UiOption.Of(UiComponentBorderStyles.Rgb, AppStrings.Widgets.Appearance.Border.Rgb())
 	];
 
 	private static readonly IReadOnlyList<string> _colorBorderStyles =
 	[
 		UiComponentBorderStyles.Static, UiComponentBorderStyles.Heartbeat, UiComponentBorderStyles.Breathing,
-		UiComponentBorderStyles.Blink, UiComponentBorderStyles.Comet, UiComponentBorderStyles.Ants,
+		UiComponentBorderStyles.Blink, UiComponentBorderStyles.Comet, UiComponentBorderStyles.Ants
 	];
 
 	/// <summary>The <c>border</c> object: a <c>style</c> choice over the nine styles the widget profile draws
@@ -63,7 +63,7 @@ internal static class WidgetConfigFragments
 					Key = "style",
 					Label = AppStrings.Widgets.Appearance.Border.StyleLabel(),
 					Binding = style,
-					Options = UiValue.Of(_borderStyleOptions),
+					Options = UiValue.Of(_borderStyleOptions)
 				},
 				new UiColorInput
 				{
@@ -80,10 +80,10 @@ internal static class WidgetConfigFragments
 					VisibleWhen = new UiVisibleWhen
 					{
 						ParameterName = "style",
-						Values = _colorBorderStyles,
-					},
-				},
-			],
+						Values = _colorBorderStyles
+					}
+				}
+			]
 		};
 
 		// Set rather than blanked: a label the DSL never saw is absent, where an empty one is a text with
@@ -99,7 +99,8 @@ internal static class WidgetConfigFragments
 	}
 
 	public static UiColorInput Background(UiBinding<string> color)
-		=> new()
+	{
+		return new UiColorInput
 		{
 			Key = "backgroundColor",
 			Label = AppStrings.Widgets.Editor.BackgroundColor(),
@@ -107,8 +108,9 @@ internal static class WidgetConfigFragments
 			SupportsReset = true,
 			DefaultValue = string.Empty,
 			AllowTransparent = true,
-			AllowVariables = true,
+			AllowVariables = true
 		};
+	}
 
 	/// <summary>The widget's specialized region, holding only the press-trigger flows editor - the room every
 	/// widget but Slider needs and nothing more.</summary>
@@ -121,7 +123,7 @@ internal static class WidgetConfigFragments
 			Key = "editor",
 			// CanRun: these are a placed widget's own actions, so the editor may run them against it -
 			// the affordance a template being authored against no widget would not get.
-			Children = [new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true }],
+			Children = [new UiActionsListEditor { Key = "flows", Binding = Bind.To(flows), CanRun = true }]
 		};
 	}
 }

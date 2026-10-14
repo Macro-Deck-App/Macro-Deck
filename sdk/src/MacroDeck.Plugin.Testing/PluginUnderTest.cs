@@ -30,16 +30,16 @@ public abstract class PluginUnderTest : IAsyncDisposable
 	/// </summary>
 	public async Task<PluginHealthReport> ProbeHealthAsync(TimeSpan? timeout = null)
 	{
-		var live = await TryGetAsync("/_macrodeck/health", timeout, expectOk: true).ConfigureAwait(false);
+		var live = await TryGetAsync("/_macrodeck/health", timeout, true).ConfigureAwait(false);
 
 		if (live is null)
 		{
 			return new PluginHealthReport { Live = false, Ready = false };
 		}
 
-		var ready = await TryGetAsync("/_macrodeck/ready", timeout, expectOk: true).ConfigureAwait(false);
-		var info = await TryGetAsync("/_macrodeck/info", timeout, expectOk: true).ConfigureAwait(false);
-		var diagnostics = await TryGetAsync("/_macrodeck/diagnostics", timeout, expectOk: true).ConfigureAwait(false);
+		var ready = await TryGetAsync("/_macrodeck/ready", timeout, true).ConfigureAwait(false);
+		var info = await TryGetAsync("/_macrodeck/info", timeout, true).ConfigureAwait(false);
+		var diagnostics = await TryGetAsync("/_macrodeck/diagnostics", timeout, true).ConfigureAwait(false);
 
 		return new PluginHealthReport
 		{
@@ -63,7 +63,10 @@ public abstract class PluginUnderTest : IAsyncDisposable
 	/// <summary>Disposes the shared <see cref="HttpClient" /> <see cref="ProbeHealthAsync" /> uses. Every
 	/// override of <see cref="DisposeAsync" /> must call this too - there is no base implementation to
 	/// chain to, since each subclass owns different unmanaged resources of its own.</summary>
-	protected private void DisposeHttpClient() => _httpClient.Dispose();
+	protected private void DisposeHttpClient()
+	{
+		_httpClient.Dispose();
+	}
 
 	private async Task<JsonElement?> TryGetAsync(string path, TimeSpan? timeout, bool expectOk)
 	{
@@ -101,12 +104,16 @@ public abstract class PluginUnderTest : IAsyncDisposable
 file static class JsonElementExtensions
 {
 	public static string? GetOrNull(this JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	public static int? GetIntOrNull(this JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.Number
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.Number
 			? value.GetInt32()
 			: null;
+	}
 }

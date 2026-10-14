@@ -23,7 +23,10 @@ public class JsonProfileStoreRecoveryTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Save_KeepsThePreviousVersionAsABackup_OnTheSecondSave()
@@ -390,7 +393,13 @@ public class JsonProfileStoreRecoveryTests
 		});
 	}
 
-	private string PrimaryPathFor(Guid id) => Path.Combine(_paths.ProfilesDirectory, id + ".json");
+	private string PrimaryPathFor(Guid id)
+	{
+		return Path.Combine(_paths.ProfilesDirectory, id + ".json");
+	}
 
-	private static string ProfileJson(Guid id, string name) => $$"""{"id":"{{id}}","name":"{{name}}"}""";
+	private static string ProfileJson(Guid id, string name)
+	{
+		return $$"""{"id":"{{id}}","name":"{{name}}"}""";
+	}
 }

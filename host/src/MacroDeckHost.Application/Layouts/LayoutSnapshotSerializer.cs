@@ -8,7 +8,10 @@ public static class LayoutSnapshotSerializer
 {
 	private static readonly JsonSerializerOptions _options = new(JsonSerializerDefaults.Web) { WriteIndented = false };
 
-	public static string Serialize(LayoutDescriptor layout) => JsonSerializer.Serialize(layout, _options);
+	public static string Serialize(LayoutDescriptor layout)
+	{
+		return JsonSerializer.Serialize(layout, _options);
+	}
 
 	/// <summary>A snapshot that fails to deserialize is treated as absent, never as a fault - it may
 	/// predate a contract change in a layout a provider has not re-registered since.</summary>

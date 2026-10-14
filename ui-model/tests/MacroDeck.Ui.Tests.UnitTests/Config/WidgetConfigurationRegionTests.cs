@@ -19,7 +19,9 @@ public class WidgetConfigurationRegionTests
 	private static readonly string[] _bareInputIds = ["label", "flows"];
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	[Test]
 	public void A_configuration_serves_its_two_regions_as_the_roots_children_in_order()
@@ -31,13 +33,13 @@ public class WidgetConfigurationRegionTests
 				Properties = new UiWidgetProperties
 				{
 					Key = "properties",
-					Children = [new UiStringInput { Key = "label" }],
+					Children = [new UiStringInput { Key = "label" }]
 				},
 				Editor = new UiWidgetEditor
 				{
 					Key = "editor",
-					Children = [new UiActionsListEditor { Key = "flows" }],
-				},
+					Children = [new UiActionsListEditor { Key = "flows" }]
+				}
 			});
 
 		Assert.Multiple(() =>
@@ -58,8 +60,8 @@ public class WidgetConfigurationRegionTests
 				Properties = new UiWidgetProperties
 				{
 					Key = "properties",
-					Children = [new UiStringInput { Key = "label" }],
-				},
+					Children = [new UiStringInput { Key = "label" }]
+				}
 			});
 
 		Assert.Multiple(() =>
@@ -84,7 +86,7 @@ public class WidgetConfigurationRegionTests
 			{
 				Key = "root",
 				Editor = new UiWidgetEditor { Key = "editor" },
-				Properties = new UiWidgetProperties { Key = "properties" },
+				Properties = new UiWidgetProperties { Key = "properties" }
 			});
 
 		Assert.That(editorFirst.Root.Children.Select(child => child.Type),
@@ -106,13 +108,13 @@ public class WidgetConfigurationRegionTests
 				Properties = new UiWidgetProperties
 				{
 					Key = "properties",
-					Children = [new UiStringInput { Key = "label" }],
+					Children = [new UiStringInput { Key = "label" }]
 				},
 				Editor = new UiWidgetEditor
 				{
 					Key = "editor",
-					Children = [new UiActionsListEditor { Key = "flows" }],
-				},
+					Children = [new UiActionsListEditor { Key = "flows" }]
+				}
 			});
 
 		var inputIds = Walk(tree.Root)

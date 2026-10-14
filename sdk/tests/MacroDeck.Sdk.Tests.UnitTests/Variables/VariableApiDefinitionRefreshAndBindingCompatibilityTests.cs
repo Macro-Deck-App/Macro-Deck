@@ -38,20 +38,35 @@ public class VariableApiDefinitionRefreshAndBindingCompatibilityTests
 	{
 		public int RefreshRequests { get; private set; }
 
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new NotSupportedException();
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<VariableHandle> CreateAsync(string name,
+		public Task<VariableHandle> CreateAsync(
+			string name,
 			VariableType type,
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task DeleteAsync(Guid variableId) => throw new NotSupportedException();
+		public Task DeleteAsync(Guid variableId)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
 		{

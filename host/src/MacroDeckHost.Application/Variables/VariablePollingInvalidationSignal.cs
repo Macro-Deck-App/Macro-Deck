@@ -6,7 +6,10 @@ public sealed class VariablePollingInvalidationSignal : IVariablePollingInvalida
 {
 	private readonly ConcurrentDictionary<string, byte> _stale = new(StringComparer.Ordinal);
 
-	public void MarkStale(string integrationId) => _stale.TryAdd(integrationId, 0);
+	public void MarkStale(string integrationId)
+	{
+		_stale.TryAdd(integrationId, 0);
+	}
 
 	public IReadOnlyCollection<string> DrainStale()
 	{

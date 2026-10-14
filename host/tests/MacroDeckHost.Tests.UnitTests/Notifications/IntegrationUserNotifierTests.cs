@@ -134,28 +134,59 @@ public class IntegrationUserNotifierTests
 			remove { }
 		}
 
-		public UserNotification? Raise(UserNotificationDraft draft) => throw new InvalidOperationException("boom");
+		public UserNotification? Raise(UserNotificationDraft draft)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
 		public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
-			=> throw new InvalidOperationException("boom");
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public IReadOnlyList<UserNotification> Snapshot() => [];
+		public IReadOnlyList<UserNotification> Snapshot()
+		{
+			return [];
+		}
 
-		public bool Dismiss(string id) => throw new InvalidOperationException("boom");
+		public bool Dismiss(string id)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public bool DismissByKey(string dedupeKey) => throw new InvalidOperationException("boom");
+		public bool DismissByKey(string dedupeKey)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+		public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+		{
+			return null;
+		}
 
-		public bool MarkRead(string id) => false;
+		public bool MarkRead(string id)
+		{
+			return false;
+		}
 
-		public bool MarkAllRead() => false;
+		public bool MarkAllRead()
+		{
+			return false;
+		}
 
-		public bool DismissAll() => throw new InvalidOperationException("boom");
+		public bool DismissAll()
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public bool Retire(string dedupeKey) => throw new InvalidOperationException("boom");
+		public bool Retire(string dedupeKey)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
 		public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
-			=> throw new InvalidOperationException("boom");
+		{
+			throw new InvalidOperationException("boom");
+		}
 	}
 }

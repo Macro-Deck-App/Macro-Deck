@@ -12,13 +12,18 @@ public interface ISystemHourCycleReader
 
 public sealed class SystemTimePatternHourCycleReader(Func<string?> readPattern) : ISystemHourCycleReader
 {
-	public string? Read() => HourCyclePatterns.FromPattern(readPattern());
+	public string? Read()
+	{
+		return HourCyclePatterns.FromPattern(readPattern());
+	}
 }
 
 public sealed class HostLocaleApi(IServiceScopeFactory scopeFactory) : ILocaleApi
 {
 	public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-		=> TimeFormatResolver.ResolveAsync(scopeFactory);
+	{
+		return TimeFormatResolver.ResolveAsync(scopeFactory);
+	}
 }
 
 public static class HourCyclePatterns
@@ -80,18 +85,23 @@ public sealed class TimeFormatResolver
 	{
 		var culture = CultureInfo.GetCultureInfo((await _preferences.GetLocalization()).Culture);
 
-		return new TimeOfDayFormat(culture, ResolveHourCycle(await _preferences.GetTimeFormat(), culture, _systemReader));
+		return new TimeOfDayFormat(culture,
+			ResolveHourCycle(await _preferences.GetTimeFormat(), culture, _systemReader));
 	}
 
 	public static string ResolveHourCycle(string timeFormat, CultureInfo culture, ISystemHourCycleReader systemReader)
-		=> timeFormat switch
+	{
+		return timeFormat switch
 		{
-			AppPreferenceService.TimeFormat12h => HourCycles.H12,
-			AppPreferenceService.TimeFormat24h => HourCycles.H23,
-			_ => systemReader.Read() ??
-				HourCyclePatterns.FromPattern(culture.DateTimeFormat.ShortTimePattern) ??
-				HourCycles.H23
+			AppPreferenceService.TimeFormat12H => HourCycles.H12,
+			AppPreferenceService.TimeFormat24H => HourCycles.H23,
+			_ => systemReader.Read()
+				?? HourCyclePatterns.FromPattern(culture.DateTimeFormat.ShortTimePattern) ?? HourCycles.H23
 		};
+	}
 
-	public async Task<string> ResolveHourCycle() => (await ResolveAsync()).HourCycle;
+	public async Task<string> ResolveHourCycle()
+	{
+		return (await ResolveAsync()).HourCycle;
+	}
 }

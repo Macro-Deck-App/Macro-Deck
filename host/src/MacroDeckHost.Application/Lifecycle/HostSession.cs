@@ -11,5 +11,8 @@ public sealed class HostSession
 
 	public bool RestoreApplied { get; private set; }
 
-	public void MarkRestoreApplied() => RestoreApplied = true;
+	public void MarkRestoreApplied()
+	{
+		RestoreApplied = true;
+	}
 }

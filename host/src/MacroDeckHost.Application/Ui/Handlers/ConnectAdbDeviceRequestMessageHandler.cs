@@ -14,7 +14,8 @@ public class ConnectAdbDeviceRequestMessageHandler
 	private readonly IHostListenerState _listenerState;
 	private readonly IAdbDeviceOperations _operations;
 
-	public ConnectAdbDeviceRequestMessageHandler(IAppPreferenceService preferences,
+	public ConnectAdbDeviceRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IAdbManager adbManager,
 		IHostListenerState listenerState,
 		IAdbDeviceOperations operations)
@@ -25,7 +26,8 @@ public class ConnectAdbDeviceRequestMessageHandler
 		_listenerState = listenerState;
 	}
 
-	public async ValueTask<ConnectAdbDeviceResponse> Handle(ConnectAdbDeviceRequest request,
+	public async ValueTask<ConnectAdbDeviceResponse> Handle(
+		ConnectAdbDeviceRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _operations.ConnectAsync((request.Address ?? string.Empty).Trim(), cancellationToken);

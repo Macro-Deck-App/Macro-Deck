@@ -50,11 +50,11 @@ internal static class ManifestPeek
 			// Every kind is checked before it is read: TryGetProperty and TryGetInt32 throw rather than return
 			// false when the element is the wrong kind, and a manifest shaped like `"shutdown": null` must
 			// leave this peek with nothing to say rather than take run down before it launches anything.
-			if (root.TryGetProperty("shutdown", out var shutdown) &&
-				shutdown.ValueKind == JsonValueKind.Object &&
-				shutdown.TryGetProperty("gracefulTimeoutSeconds", out var seconds) &&
-				seconds.ValueKind == JsonValueKind.Number &&
-				seconds.TryGetInt32(out var value))
+			if (root.TryGetProperty("shutdown", out var shutdown)
+				&& shutdown.ValueKind == JsonValueKind.Object
+				&& shutdown.TryGetProperty("gracefulTimeoutSeconds", out var seconds)
+				&& seconds.ValueKind == JsonValueKind.Number
+				&& seconds.TryGetInt32(out var value))
 			{
 				grace = TimeSpan.FromSeconds(Math.Clamp(value, 1, 60));
 			}
@@ -71,8 +71,8 @@ internal static class ManifestPeek
 	{
 		foreach (var property in element.EnumerateObject())
 		{
-			if (string.Equals(property.Name, name, StringComparison.OrdinalIgnoreCase) &&
-				property.Value.ValueKind == JsonValueKind.String)
+			if (string.Equals(property.Name, name, StringComparison.OrdinalIgnoreCase)
+				&& property.Value.ValueKind == JsonValueKind.String)
 			{
 				return property.Value.GetString();
 			}

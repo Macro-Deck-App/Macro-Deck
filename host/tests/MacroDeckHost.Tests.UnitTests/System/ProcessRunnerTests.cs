@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using MacroDeckHost.Integrations.System;
 using MacroDeckHost.Platform.Processes;
 
 namespace MacroDeckHost.Tests.UnitTests.System;

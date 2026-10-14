@@ -96,9 +96,7 @@ internal static class LocalizationTemplate
 					var name = template.Substring(index + 1, closing - index - 1);
 					object? value = null;
 
-					if (IsPlaceholderName(name) &&
-						arguments != null &&
-						arguments.TryGetValue(name, out value))
+					if (IsPlaceholderName(name) && arguments != null && arguments.TryGetValue(name, out value))
 					{
 						builder.Append(ToInvariantText(value));
 					}

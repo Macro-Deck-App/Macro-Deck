@@ -38,7 +38,8 @@ public sealed class PluginPairingSystemNotificationHandler : INotificationHandle
 		_logger = logger;
 	}
 
-	public async ValueTask Handle(PluginPairingRequestedNotification notification,
+	public async ValueTask Handle(
+		PluginPairingRequestedNotification notification,
 		CancellationToken cancellationToken)
 	{
 		if (!_notifications.IsSupported)
@@ -48,13 +49,15 @@ public sealed class PluginPairingSystemNotificationHandler : INotificationHandle
 
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
 		var title = _localization.Resolve(notification.TakesOverInstalledPlugin
-				? AppStrings.Notifications.PluginTakeoverRequested()
-				: AppStrings.Notifications.PluginPairingRequested(),
-			culture) ?? notification.DisplayName;
+					? AppStrings.Notifications.PluginTakeoverRequested()
+					: AppStrings.Notifications.PluginPairingRequested(),
+				culture)
+			?? notification.DisplayName;
 		var message = _localization.Resolve(notification.TakesOverInstalledPlugin
-				? AppStrings.Notifications.PluginTakeoverRequestedMessage(name: notification.DisplayName)
-				: AppStrings.Notifications.PluginPairingRequestedMessage(name: notification.DisplayName),
-			culture) ?? notification.DisplayName;
+					? AppStrings.Notifications.PluginTakeoverRequestedMessage(notification.DisplayName)
+					: AppStrings.Notifications.PluginPairingRequestedMessage(notification.DisplayName),
+				culture)
+			?? notification.DisplayName;
 
 		_ = Task.Run(async () =>
 			{

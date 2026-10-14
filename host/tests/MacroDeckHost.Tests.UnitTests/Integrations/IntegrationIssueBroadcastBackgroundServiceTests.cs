@@ -24,7 +24,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_sends_one_event_with_count_and_max_severity_when_issues_first_appear()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one",
 			Issue("a", IntegrationIssueSeverity.Warning),
@@ -48,7 +48,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_sends_nothing_when_the_issue_list_is_unchanged()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one", Issue("a", IntegrationIssueSeverity.Warning));
 		var transport = new RecordingUiTransport();
@@ -64,7 +64,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_sends_again_when_the_issues_change()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one", Issue("a", IntegrationIssueSeverity.Warning));
 		var transport = new RecordingUiTransport();
@@ -89,7 +89,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_sends_exactly_one_final_empty_event_when_issues_resolve()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one", Issue("a", IntegrationIssueSeverity.Warning));
 		var transport = new RecordingUiTransport();
@@ -114,7 +114,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_sends_a_final_empty_event_when_a_reporting_integration_is_disabled()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one", Issue("a", IntegrationIssueSeverity.Warning));
 		var transport = new RecordingUiTransport();
@@ -133,7 +133,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public void An_integration_with_no_issues_and_never_tracked_never_sends()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.clean", enabled: true);
+		registry.Add("app.test.clean", true);
 		var issueService = new FakeIssueService();
 		var transport = new RecordingUiTransport();
 		var service = CreateService(registry, issueService, transport);
@@ -150,7 +150,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_raises_a_notification_once_for_a_new_error_issue_but_not_for_warning_or_info()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one",
 			Issue("info-issue", IntegrationIssueSeverity.Info),
@@ -179,7 +179,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_raises_again_when_an_error_issue_resolves_and_recurs()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one", Issue("error-issue", IntegrationIssueSeverity.Error));
 		var store = new UserNotificationStore();
@@ -207,7 +207,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task Tick_notifies_for_a_host_issue_on_an_integration_that_is_not_an_issue_provider()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.AddPlain("app.test.plain", enabled: true);
+		registry.AddPlain("app.test.plain", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.plain", Issue(IntegrationHostIssueIds.Startup, IntegrationIssueSeverity.Error));
 		var store = new CountingUserNotificationStore();
@@ -222,16 +222,16 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		// counts the calls themselves instead.
 		Assert.That(store.CallCount("integration-issue:app.test.plain:host.startup"),
 			Is.EqualTo(1),
-			"a non-provider integration's host issue still notifies exactly once, now that Tick no longer " +
-			"filters on IIntegrationIssueProvider");
+			"a non-provider integration's host issue still notifies exactly once, now that Tick no longer "
+			+ "filters on IIntegrationIssueProvider");
 	}
 
 	[Test]
 	public async Task A_failing_integration_does_not_stop_the_next_one_from_broadcasting()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.broken", enabled: true);
-		registry.Add("app.test.fine", enabled: true);
+		registry.Add("app.test.broken", true);
+		registry.Add("app.test.fine", true);
 		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
 		issueService.Set("app.test.fine", Issue("a", IntegrationIssueSeverity.Warning));
 		var transport = new RecordingUiTransport();
@@ -246,8 +246,8 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task A_repeating_failure_is_logged_once_per_integration_until_it_recovers()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.broken", enabled: true);
-		registry.Add("app.test.other", enabled: true);
+		registry.Add("app.test.broken", true);
+		registry.Add("app.test.other", true);
 		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
 		var logged = new List<LogEvent>();
 		var service = CreateService(registry, issueService, new RecordingUiTransport(), logger: LoggerInto(logged));
@@ -257,7 +257,8 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 			await service.Tick(CancellationToken.None);
 		}
 
-		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error), Is.EqualTo(1),
+		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error),
+			Is.EqualTo(1),
 			"five identical failing ticks must not write five error entries");
 
 		issueService.FailingIntegrationId = null;
@@ -265,7 +266,8 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		issueService.FailingIntegrationId = "app.test.broken";
 		await service.Tick(CancellationToken.None);
 
-		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error), Is.EqualTo(2),
+		Assert.That(logged.Count(e => e.Level == LogEventLevel.Error),
+			Is.EqualTo(2),
 			"a failure after a recovery is news again");
 	}
 
@@ -273,7 +275,7 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task The_failure_log_names_the_integration()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.broken", enabled: true);
+		registry.Add("app.test.broken", true);
 		var issueService = new FakeIssueService { FailingIntegrationId = "app.test.broken" };
 		var logged = new List<LogEvent>();
 		var service = CreateService(registry, issueService, new RecordingUiTransport(), logger: LoggerInto(logged));
@@ -287,10 +289,11 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	public async Task An_issue_whose_text_is_a_default_localized_reference_is_broadcast_instead_of_failing()
 	{
 		var registry = new FakeIssueRegistry();
-		registry.Add("app.test.one", enabled: true);
+		registry.Add("app.test.one", true);
 		var issueService = new FakeIssueService();
 		issueService.Set("app.test.one",
-			new IntegrationIssue { Id = "a", Title = default(LocalizedString), Severity = IntegrationIssueSeverity.Warning });
+			new IntegrationIssue
+				{ Id = "a", Title = default(LocalizedString), Severity = IntegrationIssueSeverity.Warning });
 		var transport = new RecordingUiTransport();
 		var logged = new List<LogEvent>();
 		var service = CreateService(registry, issueService, transport, logger: LoggerInto(logged));
@@ -305,13 +308,19 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 	}
 
 	private static Logger LoggerInto(List<LogEvent> logged)
-		=> new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(logged.Add)).CreateLogger();
+	{
+		return new LoggerConfiguration().WriteTo.Sink(new DelegatingLogSink(logged.Add)).CreateLogger();
+	}
 
 	private static IntegrationIssue Issue(string id, IntegrationIssueSeverity severity)
-		=> new() { Id = id, Title = id, Severity = severity };
+	{
+		return new IntegrationIssue { Id = id, Title = id, Severity = severity };
+	}
 
 	private static List<IntegrationIssuesChangedEvent> Events(RecordingUiTransport transport)
-		=> transport.Broadcasts.OfType<IntegrationIssuesChangedEvent>().ToList();
+	{
+		return transport.Broadcasts.OfType<IntegrationIssuesChangedEvent>().ToList();
+	}
 
 	private static IntegrationIssueBroadcastBackgroundService CreateService(
 		IIntegrationRegistry registry,
@@ -319,7 +328,8 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		RecordingUiTransport transport,
 		IUserNotificationStore? userNotificationStore = null,
 		Logger? logger = null)
-		=> new(new StartedHostLifetime(),
+	{
+		return new IntegrationIssueBroadcastBackgroundService(new StartedHostLifetime(),
 			registry,
 			issueService,
 			new NoOpBroadcastTrigger(),
@@ -327,8 +337,12 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 			userNotificationStore ?? new UserNotificationStore(),
 			TestLocalization.ScopeFactory,
 			logger ?? SilentLogger());
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private sealed class FakeIssueService : IIntegrationIssueService
 	{
@@ -336,20 +350,27 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 
 		public string? FailingIntegrationId { get; set; }
 
-		public void Set(string integrationId, params IntegrationIssue[] issues) => _issues[integrationId] = issues;
+		public void Set(string integrationId, params IntegrationIssue[] issues)
+		{
+			_issues[integrationId] = issues;
+		}
 
 		public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(
 			string integrationId,
 			CancellationToken cancellationToken = default)
-			=> integrationId == FailingIntegrationId
+		{
+			return integrationId == FailingIntegrationId
 				? throw new InvalidOperationException("provider exploded")
 				: Task.FromResult(_issues.GetValueOrDefault(integrationId, []));
+		}
 
 		public Task<IssueResolution?> ResolveAsync(
 			string integrationId,
 			string issueId,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException("Not exercised by the broadcast service.");
+		{
+			throw new NotSupportedException("Not exercised by the broadcast service.");
+		}
 	}
 
 	private sealed class FakeIssueRegistry : IIntegrationRegistry
@@ -389,25 +410,48 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 			}
 		}
 
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => null;
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
 
-		public bool IsEnabled(string integrationId) => _enabled.Contains(integrationId);
+		public bool IsEnabled(string integrationId)
+		{
+			return _enabled.Contains(integrationId);
+		}
 
-		public void SetEnabled(string integrationId, bool enabled) => SetEnabledForTest(integrationId, enabled);
+		public void SetEnabled(string integrationId, bool enabled)
+		{
+			SetEnabledForTest(integrationId, enabled);
+		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<IntegrationRegistrationResult> RegisterAsync(
 			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
-			=> Task.FromResult(IntegrationRegistrationResult.Success);
+		{
+			return Task.FromResult(IntegrationRegistrationResult.Success);
+		}
 
-		public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+		public Task<bool> UnregisterAsync(string integrationId)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class FakeIssueIntegration : IIntegration, IIntegrationIssueProvider
@@ -423,15 +467,25 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakePlainIntegration : IIntegration
@@ -447,9 +501,15 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class NoOpBroadcastTrigger : IIntegrationIssueBroadcastTrigger
@@ -459,7 +519,9 @@ internal sealed class IntegrationIssueBroadcastBackgroundServiceTests
 		}
 
 		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime

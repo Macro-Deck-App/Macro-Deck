@@ -8,7 +8,10 @@ internal sealed class SpotifyRequestLimiterTests
 	private DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
 	[SetUp]
-	public void Reset() => _now = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+	public void Reset()
+	{
+		_now = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+	}
 
 	[Test]
 	public void Polls_stop_at_the_interactive_reserve()
@@ -16,7 +19,7 @@ internal sealed class SpotifyRequestLimiterTests
 		var limiter = Limiter();
 
 		var granted = 0;
-		while (limiter.Reserve(droppable: true) is not null)
+		while (limiter.Reserve(true) is not null)
 		{
 			granted++;
 		}
@@ -25,7 +28,7 @@ internal sealed class SpotifyRequestLimiterTests
 		{
 			Assert.That(granted, Is.EqualTo(5));
 
-			Assert.That(limiter.Reserve(droppable: false), Is.EqualTo(TimeSpan.Zero));
+			Assert.That(limiter.Reserve(false), Is.EqualTo(TimeSpan.Zero));
 		});
 	}
 
@@ -33,29 +36,29 @@ internal sealed class SpotifyRequestLimiterTests
 	public void An_interactive_request_waits_rather_than_being_dropped()
 	{
 		var limiter = Limiter();
-		while (limiter.Reserve(droppable: true) is not null)
+		while (limiter.Reserve(true) is not null)
 		{
 		}
 
 		for (var i = 0; i < 4; i++)
 		{
-			limiter.Reserve(droppable: false);
+			limiter.Reserve(false);
 		}
 
-		Assert.That(limiter.Reserve(droppable: false), Is.GreaterThan(TimeSpan.Zero));
+		Assert.That(limiter.Reserve(false), Is.GreaterThan(TimeSpan.Zero));
 	}
 
 	[Test]
 	public void Permits_refill_at_the_sustained_rate()
 	{
 		var limiter = Limiter();
-		while (limiter.Reserve(droppable: true) is not null)
+		while (limiter.Reserve(true) is not null)
 		{
 		}
 
 		_now += TimeSpan.FromSeconds(1);
 
-		Assert.That(limiter.Reserve(droppable: true), Is.EqualTo(TimeSpan.Zero));
+		Assert.That(limiter.Reserve(true), Is.EqualTo(TimeSpan.Zero));
 	}
 
 	[Test]
@@ -67,7 +70,7 @@ internal sealed class SpotifyRequestLimiterTests
 		_now += TimeSpan.FromHours(8);
 
 		var granted = 0;
-		while (limiter.Reserve(droppable: true) is not null)
+		while (limiter.Reserve(true) is not null)
 		{
 			granted++;
 		}
@@ -100,7 +103,7 @@ internal sealed class SpotifyRequestLimiterTests
 		var limiter = Limiter();
 		limiter.NoteRefused();
 
-		Assert.That(limiter.Reserve(droppable: true), Is.Null);
+		Assert.That(limiter.Reserve(true), Is.Null);
 	}
 
 	[Test]
@@ -119,5 +122,8 @@ internal sealed class SpotifyRequestLimiterTests
 		Assert.That(SpotifyRequestScope.IsDroppable, Is.False);
 	}
 
-	private SpotifyRequestLimiter Limiter() => new(utcNow: () => _now);
+	private SpotifyRequestLimiter Limiter()
+	{
+		return new SpotifyRequestLimiter(utcNow: () => _now);
+	}
 }

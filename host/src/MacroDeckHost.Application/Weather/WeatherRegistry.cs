@@ -31,8 +31,8 @@ public sealed class WeatherRegistry : IWeatherRegistry
 			{
 				if (!QualifiedId.TryCreate(integration.Id, instance.Id, out var id))
 				{
-					_logger.Warning("Integration {IntegrationId} announced an invalid weather station id {LocalId}; " +
-						"skipping it",
+					_logger.Warning("Integration {IntegrationId} announced an invalid weather station id {LocalId}; "
+						+ "skipping it",
 						integration.Id,
 						instance.Id);
 					continue;
@@ -41,8 +41,8 @@ public sealed class WeatherRegistry : IWeatherRegistry
 				var instanceId = id.ToString();
 				if (!seen.Add(instanceId))
 				{
-					_logger.Warning("Integration {IntegrationId} announced weather station {LocalId} more than once; " +
-						"skipping the duplicate",
+					_logger.Warning("Integration {IntegrationId} announced weather station {LocalId} more than once; "
+						+ "skipping the duplicate",
 						integration.Id,
 						instance.Id);
 					continue;
@@ -79,6 +79,9 @@ public sealed class WeatherRegistry : IWeatherRegistry
 		}
 	}
 
-	private IEnumerable<IIntegration> EnabledProviders() => _integrations.Integrations
-		.Where(integration => integration is IWeatherProvider && _integrations.IsEnabled(integration.Id));
+	private IEnumerable<IIntegration> EnabledProviders()
+	{
+		return _integrations.Integrations
+			.Where(integration => integration is IWeatherProvider && _integrations.IsEnabled(integration.Id));
+	}
 }

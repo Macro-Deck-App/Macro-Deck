@@ -16,16 +16,19 @@ public interface IPortableAssetManager
 {
 	// Takes widget ids (not just widget data) so a new archive kind cannot compile without supplying
 	// them - the widget-scoped variables collected here need to know which widget they belong to.
-	Task<PortableAssetBundle> Collect(IReadOnlyList<PortableWidgetSource> widgets,
+	Task<PortableAssetBundle> Collect(
+		IReadOnlyList<PortableWidgetSource> widgets,
 		PortableExportOptions options,
 		CancellationToken cancellationToken);
 
-	Task<IReadOnlyDictionary<Guid, Guid>> Import(PortableContent content,
+	Task<IReadOnlyDictionary<Guid, Guid>> Import(
+		PortableContent content,
 		IReadOnlyList<PortableIconFile> iconFiles,
 		IReadOnlyList<PortableFontFile> fontFiles,
 		CancellationToken cancellationToken);
 
-	Task RestoreWidgetVariables(PortableContent content,
+	Task RestoreWidgetVariables(
+		PortableContent content,
 		IReadOnlyDictionary<Guid, Guid> widgetIdMap,
 		CancellationToken cancellationToken);
 }

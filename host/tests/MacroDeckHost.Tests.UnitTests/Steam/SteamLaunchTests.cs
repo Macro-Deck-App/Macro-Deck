@@ -39,7 +39,8 @@ internal sealed class SteamLaunchTests
 	[TestCase("javascript:alert(1)")]
 	public void The_real_application_service_refuses_anything_but_steam_uris(string uri)
 	{
-		Assert.Throws<NotSupportedException>(() => ApplicationServiceFactory.Create(Serilog.Core.Logger.None).OpenUri(uri));
+		Assert.Throws<NotSupportedException>(()
+			=> ApplicationServiceFactory.Create(Serilog.Core.Logger.None).OpenUri(uri));
 	}
 
 	[Test]
@@ -87,10 +88,11 @@ internal sealed class SteamLaunchTests
 	[Test]
 	public async Task A_failure_to_open_the_uri_is_reported()
 	{
-		var applications = new FakeApplicationService { OpenUriException = new InvalidOperationException("no handler") };
+		var applications = new FakeApplicationService
+			{ OpenUriException = new InvalidOperationException("no handler") };
 
-		var outcome = await new SteamLauncher(applications).ExecuteAsync(
-			new SteamCommand(SteamCommandKind.LaunchSteam), CancellationToken.None);
+		var outcome = await new SteamLauncher(applications).ExecuteAsync(new SteamCommand(SteamCommandKind.LaunchSteam),
+			CancellationToken.None);
 
 		Assert.That(outcome, Is.EqualTo(SteamCommandOutcome.Failed));
 	}
@@ -134,11 +136,12 @@ internal sealed class SteamLaunchTests
 			Assert.That(typed.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(garbage.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(missing.Status, Is.EqualTo(ActionResultStatus.Failed));
-			Assert.That(target.Commands, Is.EqualTo(new[]
-			{
-				new SteamCommand(SteamCommandKind.LaunchGame, 730),
-				new SteamCommand(SteamCommandKind.LaunchGame, 220)
-			}));
+			Assert.That(target.Commands,
+				Is.EqualTo(new[]
+				{
+					new SteamCommand(SteamCommandKind.LaunchGame, 730),
+					new SteamCommand(SteamCommandKind.LaunchGame, 220)
+				}));
 		});
 	}
 
@@ -176,11 +179,12 @@ internal sealed class SteamLaunchTests
 		var action = (IDynamicOptionsActionDefinition)SteamActions.Create(target).Single(a => a.Id == "launch-game");
 
 		var result = await action.GetDynamicOptionsAsync(new DynamicOptionsContext
-		{
-			ParameterName = "game",
-			Filter = "half",
-			CurrentParameters = new Dictionary<string, object?>()
-		}, CancellationToken.None);
+			{
+				ParameterName = "game",
+				Filter = "half",
+				CurrentParameters = new Dictionary<string, object?>()
+			},
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -197,15 +201,18 @@ internal sealed class SteamLaunchTests
 		var target = new RecordingTarget { Outcome = outcome };
 		var action = SteamActions.Create(target).Single(candidate => candidate.Id == "launch-steam");
 
-		Assert.That((await action.CreateExecutor().ExecuteAsync(Context())).Status, Is.EqualTo(ActionResultStatus.Failed));
+		Assert.That((await action.CreateExecutor().ExecuteAsync(Context())).Status,
+			Is.EqualTo(ActionResultStatus.Failed));
 	}
 
 	private static ActionExecutionContext Context(params (string Name, object Value)[] parameters)
-		=> new()
+	{
+		return new ActionExecutionContext
 		{
 			Parameters = parameters.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal),
 			CancellationToken = CancellationToken.None
 		};
+	}
 
 	private sealed class RecordingTarget : ISteamSource
 	{

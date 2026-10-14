@@ -56,10 +56,21 @@ public sealed class StreamStatsDescriptor
 	public IReadOnlyList<string> DetailIds => [.. Details.Select(detail => detail.Id)];
 
 	public StreamStatsMetric? Metric(string? id)
-		=> id is null ? null : Metrics.FirstOrDefault(metric => string.Equals(metric.Id, id, StringComparison.Ordinal));
+	{
+		return id is null
+			? null
+			: Metrics.FirstOrDefault(metric => string.Equals(metric.Id, id, StringComparison.Ordinal));
+	}
 
 	public StreamStatsDetail? Detail(string? id)
-		=> id is null ? null : Details.FirstOrDefault(detail => string.Equals(detail.Id, id, StringComparison.Ordinal));
+	{
+		return id is null
+			? null
+			: Details.FirstOrDefault(detail => string.Equals(detail.Id, id, StringComparison.Ordinal));
+	}
 
-	public string NormalizeMetric(string? id) => Metric(id)?.Id ?? DefaultMetric;
+	public string NormalizeMetric(string? id)
+	{
+		return Metric(id)?.Id ?? DefaultMetric;
+	}
 }

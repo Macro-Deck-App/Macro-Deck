@@ -143,7 +143,10 @@ internal sealed class StubUiSessionProvider : IUiSessionProvider
 {
 	private readonly Lock _gate = new();
 
-	public StubUiSessionProvider(string providerId) => ProviderId = providerId;
+	public StubUiSessionProvider(string providerId)
+	{
+		ProviderId = providerId;
+	}
 
 	public string ProviderId { get; }
 
@@ -173,7 +176,8 @@ internal sealed class StubUiSessionProvider : IUiSessionProvider
 
 	public int SnapshotRequests => CountOf("snapshot");
 
-	public async Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command,
+	public async Task<UiSessionOpenOutcome> OpenAsync(
+		UiSessionOpenCommand command,
 		CancellationToken cancellationToken)
 	{
 		Record("open");
@@ -198,7 +202,8 @@ internal sealed class StubUiSessionProvider : IUiSessionProvider
 		}
 	}
 
-	public async Task DispatchEventAsync(string sessionId,
+	public async Task DispatchEventAsync(
+		string sessionId,
 		UiSessionEventCommand command,
 		CancellationToken cancellationToken)
 	{
@@ -217,7 +222,10 @@ internal sealed class StubUiSessionProvider : IUiSessionProvider
 		await WaitOnGateAsync().ConfigureAwait(false);
 	}
 
-	private Task WaitOnGateAsync() => Gate is { } gate ? gate.Task : Task.CompletedTask;
+	private Task WaitOnGateAsync()
+	{
+		return Gate is { } gate ? gate.Task : Task.CompletedTask;
+	}
 
 	private void Record(string call)
 	{
@@ -244,16 +252,24 @@ internal sealed class StubUiSessionProviderResolver : IUiSessionProviderResolver
 	/// reached exactly the way the host reaches it.</summary>
 	public IUiSessionProviderResolver? Fallback { get; set; }
 
-	public void Add(IUiSessionProvider provider) => _providers[provider.ProviderId] = provider;
+	public void Add(IUiSessionProvider provider)
+	{
+		_providers[provider.ProviderId] = provider;
+	}
 
 	public IUiSessionProvider? Resolve(string providerId)
-		=> _providers.GetValueOrDefault(providerId) ?? Fallback?.Resolve(providerId);
+	{
+		return _providers.GetValueOrDefault(providerId) ?? Fallback?.Resolve(providerId);
+	}
 }
 
 /// <summary>An in-process integration that serves UI trees, driven by delegates the test supplies.</summary>
 internal sealed class StubUiIntegration : IIntegration, IUiProvider
 {
-	public StubUiIntegration(string id) => Id = id;
+	public StubUiIntegration(string id)
+	{
+		Id = id;
+	}
 
 	public string Id { get; }
 
@@ -273,12 +289,20 @@ internal sealed class StubUiIntegration : IIntegration, IUiProvider
 			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> Task.FromResult<IUiSession?>(Session);
+	{
+		return Task.FromResult<IUiSession?>(Session);
+	}
 }
 
 internal sealed class StubUiSession : IUiSession
@@ -303,7 +327,10 @@ internal sealed class StubUiSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => Tree();
+	public UiTree BuildTree()
+	{
+		return Tree();
+	}
 
 	public IReadOnlyList<UiPatch> DrainPatches()
 	{
@@ -336,7 +363,10 @@ internal sealed class StubUiSession : IUiSession
 		Changed?.Invoke(this, EventArgs.Empty);
 	}
 
-	public void Fault() => Faulted?.Invoke(this, new UiSessionFaultedEventArgs("gone"));
+	public void Fault()
+	{
+		Faulted?.Invoke(this, new UiSessionFaultedEventArgs("gone"));
+	}
 
 	public ValueTask DisposeAsync()
 	{
@@ -354,15 +384,30 @@ internal sealed class StubIntegrationRegistry : IIntegrationRegistry
 
 	public IReadOnlyList<IIntegration> Integrations => _integrations;
 
-	public void Add(IIntegration integration) => _integrations.Add(integration);
+	public void Add(IIntegration integration)
+	{
+		_integrations.Add(integration);
+	}
 
-	public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+	public IActionDefinition? FindAction(string integrationId, string actionId)
+	{
+		return null;
+	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => null;
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return null;
+	}
 
-	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+	{
+		return [];
+	}
 
-	public bool IsEnabled(string integrationId) => !_disabled.Contains(integrationId);
+	public bool IsEnabled(string integrationId)
+	{
+		return !_disabled.Contains(integrationId);
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
@@ -382,9 +427,12 @@ internal sealed class StubIntegrationRegistry : IIntegrationRegistry
 	public HashSet<string> PluginOrigins { get; } = new(StringComparer.Ordinal);
 
 	public IntegrationOrigin GetOrigin(string integrationId)
-		=> PluginOrigins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
+	{
+		return PluginOrigins.Contains(integrationId) ? IntegrationOrigin.Plugin : IntegrationOrigin.BuiltIn;
+	}
 
-	public Task<IntegrationRegistrationResult> RegisterAsync(IIntegration integration,
+	public Task<IntegrationRegistrationResult> RegisterAsync(
+		IIntegration integration,
 		IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 		IntegrationMetadata? metadata = null)
 	{
@@ -411,19 +459,21 @@ internal static class UiPayloads
 	public static byte[] Tree(int revision, int extraNodes = 0, string? padding = null)
 	{
 		var children = string.Join(',',
-			Enumerable.Range(0, extraNodes).Select(index => Node($"n{index}", padding: null)));
+			Enumerable.Range(0, extraNodes).Select(index => Node($"n{index}", null)));
 
-		var root = "{\"id\":\"root\",\"type\":\"panel\",\"properties\":{" +
-			(padding is null ? string.Empty : $"\"pad\":\"{padding}\"") +
-			"},\"children\":[" +
-			children +
-			"]}";
+		var root = "{\"id\":\"root\",\"type\":\"panel\",\"properties\":{"
+			+ (padding is null ? string.Empty : $"\"pad\":\"{padding}\"")
+			+ "},\"children\":["
+			+ children
+			+ "]}";
 
 		return Encoding.UTF8.GetBytes($"{{\"revision\":{revision},\"surface\":{Surface},\"root\":{root}}}");
 	}
 
 	public static byte[] TreeWithRoot(int revision, string rootJson)
-		=> Encoding.UTF8.GetBytes($"{{\"revision\":{revision},\"surface\":{Surface},\"root\":{rootJson}}}");
+	{
+		return Encoding.UTF8.GetBytes($"{{\"revision\":{revision},\"surface\":{Surface},\"root\":{rootJson}}}");
+	}
 
 	public static string Node(string id, string? padding = null, string? extraProperties = null)
 	{
@@ -442,29 +492,37 @@ internal static class UiPayloads
 	}
 
 	public static byte[] Patch(int fromRevision, int toRevision, string? operations = null)
-		=> Encoding.UTF8.GetBytes("{\"fromRevision\":" +
-			fromRevision +
-			",\"toRevision\":" +
-			toRevision +
-			",\"operations\":[" +
-			(operations ?? DefaultOperation) +
-			"]}");
+	{
+		return Encoding.UTF8.GetBytes("{\"fromRevision\":"
+			+ fromRevision
+			+ ",\"toRevision\":"
+			+ toRevision
+			+ ",\"operations\":["
+			+ (operations ?? DefaultOperation)
+			+ "]}");
+	}
 
 	public static byte[] PatchWithoutOperations(int fromRevision, int toRevision)
-		=> Encoding.UTF8.GetBytes("{\"fromRevision\":" +
-			fromRevision +
-			",\"toRevision\":" +
-			toRevision +
-			",\"operations\":[]}");
+	{
+		return Encoding.UTF8.GetBytes("{\"fromRevision\":"
+			+ fromRevision
+			+ ",\"toRevision\":"
+			+ toRevision
+			+ ",\"operations\":[]}");
+	}
 
 	public const string DefaultOperation =
 		"{\"op\":\"set-properties\",\"nodeId\":\"root\",\"properties\":{\"title\":\"x\"}}";
 
 	public static string InsertOperation(string nodeJson, string nodeId)
-		=> "{\"op\":\"insert-node\",\"nodeId\":\"" + nodeId + "\",\"parentId\":\"root\",\"node\":" + nodeJson + "}";
+	{
+		return "{\"op\":\"insert-node\",\"nodeId\":\"" + nodeId + "\",\"parentId\":\"root\",\"node\":" + nodeJson + "}";
+	}
 
 	public static string Resource(long byteLength)
-		=> "\"source\":{\"resourceId\":\"r1\",\"byteLength\":" + byteLength + "}";
+	{
+		return "\"source\":{\"resourceId\":\"r1\",\"byteLength\":" + byteLength + "}";
+	}
 
 	/// <summary>A tree padded to an exact UTF-8 byte length using two-byte characters, so a test can put
 	/// a payload on either side of a byte limit while keeping its character count far below it.</summary>
@@ -489,7 +547,10 @@ internal static class UiPayloads
 		return payload;
 	}
 
-	public static int CharCountOf(byte[] payload) => Encoding.UTF8.GetString(payload).Length;
+	public static int CharCountOf(byte[] payload)
+	{
+		return Encoding.UTF8.GetString(payload).Length;
+	}
 
 	public static int RevisionOf(byte[] payload)
 	{
@@ -504,7 +565,8 @@ internal sealed class RecordingCapabilityInvoker : IPluginCapabilityInvoker
 {
 	public List<(string PluginId, string Kind, string Operation)> Invocations { get; } = [];
 
-	public Task<JsonElement?> InvokeAsync(string pluginId,
+	public Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -512,24 +574,37 @@ internal sealed class RecordingCapabilityInvoker : IPluginCapabilityInvoker
 		return Task.FromResult<JsonElement?>(null);
 	}
 
-	public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+	public bool TryComplete(string pluginId, ProtocolEnvelope result)
+	{
+		return false;
+	}
 
 	public void AbortAll(string pluginId, ProtocolError reason)
 	{
 	}
 
-	public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+	public bool IsLiveActionExecute(string pluginId, string correlationId)
+	{
+		return false;
+	}
 }
 
 internal sealed class EmptyRemotePluginSnapshotStore : IRemotePluginSnapshotStore
 {
 	public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-		=> RemotePluginCapabilitySnapshot.Empty(pluginId);
+	{
+		return RemotePluginCapabilitySnapshot.Empty(pluginId);
+	}
 
-	public bool Has(string pluginId) => false;
+	public bool Has(string pluginId)
+	{
+		return false;
+	}
 
 	public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }
 
 /// <summary>
@@ -557,62 +632,110 @@ internal sealed class ReplayablePluginSessionRegistry : IPluginSessionRegistry
 	}
 
 	public void RaiseSessionEnded(string pluginId, string sessionId, PluginSessionEndReason reason)
-		=> SessionEnded?.Invoke(this,
+	{
+		SessionEnded?.Invoke(this,
 			new PluginSessionEndedEventArgs { PluginId = pluginId, SessionId = sessionId, Reason = reason });
+	}
 
-	public Task Create(PluginSessionRecord record) => _inner.Create(record);
+	public Task Create(PluginSessionRecord record)
+	{
+		return _inner.Create(record);
+	}
 
 	public bool TryAttach(string sessionId, IPluginConnection connection, string? instanceId)
-		=> _inner.TryAttach(sessionId, connection, instanceId);
+	{
+		return _inner.TryAttach(sessionId, connection, instanceId);
+	}
 
-	public void Detach(string sessionId, DateTimeOffset at) => _inner.Detach(sessionId, at);
+	public void Detach(string sessionId, DateTimeOffset at)
+	{
+		_inner.Detach(sessionId, at);
+	}
 
 	public void ReleaseConnection(string sessionId, IPluginConnection connection)
-		=> _inner.ReleaseConnection(sessionId, connection);
+	{
+		_inner.ReleaseConnection(sessionId, connection);
+	}
 
 	public bool TryResume(string pluginId, string? resumeSessionId, DateTimeOffset at, out PluginSessionRecord? record)
-		=> _inner.TryResume(pluginId, resumeSessionId, at, out record);
+	{
+		return _inner.TryResume(pluginId, resumeSessionId, at, out record);
+	}
 
-	public void MakeNonResumable(string sessionId) => _inner.MakeNonResumable(sessionId);
+	public void MakeNonResumable(string sessionId)
+	{
+		_inner.MakeNonResumable(sessionId);
+	}
 
-	public void Touch(string sessionId, DateTimeOffset at) => _inner.Touch(sessionId, at);
+	public void Touch(string sessionId, DateTimeOffset at)
+	{
+		_inner.Touch(sessionId, at);
+	}
 
-	public Task<bool> SendToPlugin(string pluginId,
+	public Task<bool> SendToPlugin(
+		string pluginId,
 		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken = default)
-		=> _inner.SendToPlugin(pluginId, envelope, cancellationToken);
+	{
+		return _inner.SendToPlugin(pluginId, envelope, cancellationToken);
+	}
 
 	public bool IsCurrentConnection(string sessionId, IPluginConnection connection)
-		=> _inner.IsCurrentConnection(sessionId, connection);
+	{
+		return _inner.IsCurrentConnection(sessionId, connection);
+	}
 
 	public Task<bool> Terminate(string sessionId, int closeCode, string reason)
-		=> _inner.Terminate(sessionId, closeCode, reason);
+	{
+		return _inner.Terminate(sessionId, closeCode, reason);
+	}
 
 	public Task<bool> TerminateForPlugin(string pluginId, int closeCode, string reason)
-		=> _inner.TerminateForPlugin(pluginId, closeCode, reason);
+	{
+		return _inner.TerminateForPlugin(pluginId, closeCode, reason);
+	}
 
 	public Task<bool> TerminateManagedForPlugin(string pluginId, int closeCode, string reason)
-		=> _inner.TerminateManagedForPlugin(pluginId, closeCode, reason);
+	{
+		return _inner.TerminateManagedForPlugin(pluginId, closeCode, reason);
+	}
 
-	public IReadOnlyList<PluginSessionSnapshot> Snapshot() => _inner.Snapshot();
+	public IReadOnlyList<PluginSessionSnapshot> Snapshot()
+	{
+		return _inner.Snapshot();
+	}
 
-	public void SetPaused(string sessionId, bool paused) => _inner.SetPaused(sessionId, paused);
+	public void SetPaused(string sessionId, bool paused)
+	{
+		_inner.SetPaused(sessionId, paused);
+	}
 
-	public PluginSessionCapabilities? GetCapabilities(string pluginId) => _inner.GetCapabilities(pluginId);
+	public PluginSessionCapabilities? GetCapabilities(string pluginId)
+	{
+		return _inner.GetCapabilities(pluginId);
+	}
 
-	public int? GetNegotiatedVersion(string pluginId) => _inner.GetNegotiatedVersion(pluginId);
+	public int? GetNegotiatedVersion(string pluginId)
+	{
+		return _inner.GetNegotiatedVersion(pluginId);
+	}
 
 	public IReadOnlyDictionary<string, CapabilityNegotiationResult>? UpdateDeclaredCapabilities(
 		string pluginId,
 		IReadOnlyList<DeclaredCapability> declaredCapabilities)
-		=> _inner.UpdateDeclaredCapabilities(pluginId, declaredCapabilities);
+	{
+		return _inner.UpdateDeclaredCapabilities(pluginId, declaredCapabilities);
+	}
 }
 
-internal sealed class NoPluginConnections : MacroDeckHost.Application.Plugins.Capabilities.IRemotePluginConnectionState
+internal sealed class NoPluginConnections : IRemotePluginConnectionState
 {
 	public HashSet<string> Connected { get; } = new(StringComparer.Ordinal);
 
-	public bool IsConnected(string pluginId) => Connected.Contains(pluginId);
+	public bool IsConnected(string pluginId)
+	{
+		return Connected.Contains(pluginId);
+	}
 }
 
 internal sealed class RecordingUiInteractionsFactory : MacroDeckHost.Application.Ui.Modals.IUiInteractionsFactory
@@ -631,11 +754,15 @@ internal sealed class RecordingUiInteractionsFactory : MacroDeckHost.Application
 		}
 	}
 
-	public IUiInteractions ForIntegration(string integrationId) => new Interactions(this, integrationId);
+	public IUiInteractions ForIntegration(string integrationId)
+	{
+		return new Interactions(this, integrationId);
+	}
 
 	private sealed class Interactions(RecordingUiInteractionsFactory owner, string integrationId) : IUiInteractions
 	{
-		public Task<bool> ShowModalAsync(string? originClientId,
+		public Task<bool> ShowModalAsync(
+			string? originClientId,
 			ModalDefinition modal,
 			CancellationToken cancellationToken = default)
 		{
@@ -647,7 +774,8 @@ internal sealed class RecordingUiInteractionsFactory : MacroDeckHost.Application
 			return Task.FromResult(true);
 		}
 
-		public async Task<ModalResult<T>> ShowModalAsync<T>(string? originClientId,
+		public async Task<ModalResult<T>> ShowModalAsync<T>(
+			string? originClientId,
 			ModalDefinition modal,
 			CancellationToken cancellationToken = default)
 		{

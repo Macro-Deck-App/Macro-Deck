@@ -13,10 +13,12 @@ internal sealed class OptionalConfigurationRemovalTests
 	[Test]
 	public async Task Removing_the_only_entry_of_an_optional_configuration_keeps_the_integration_running()
 	{
-		var harness = new Harness(requiresConfiguration: false);
+		var harness = new Harness(false);
 		var entryId = harness.AddEntry();
 
-		var outcome = await harness.Coordinator.DeleteAsync(Harness.IntegrationId, entryId, confirmed: true,
+		var outcome = await harness.Coordinator.DeleteAsync(Harness.IntegrationId,
+			entryId,
+			true,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -31,10 +33,12 @@ internal sealed class OptionalConfigurationRemovalTests
 	[Test]
 	public async Task Removing_the_only_entry_of_a_required_configuration_stops_the_integration()
 	{
-		var harness = new Harness(requiresConfiguration: true);
+		var harness = new Harness(true);
 		var entryId = harness.AddEntry();
 
-		var outcome = await harness.Coordinator.DeleteAsync(Harness.IntegrationId, entryId, confirmed: true,
+		var outcome = await harness.Coordinator.DeleteAsync(Harness.IntegrationId,
+			entryId,
+			true,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -81,7 +85,10 @@ internal sealed class OptionalConfigurationRemovalTests
 		public Guid AddEntry()
 		{
 			var id = Guid.NewGuid();
-			_store.Entries.Add(new ConfigEntryRecord(id, IntegrationId, "Settings", DateTime.UtcNow,
+			_store.Entries.Add(new ConfigEntryRecord(id,
+				IntegrationId,
+				"Settings",
+				DateTime.UtcNow,
 				new Dictionary<string, JsonElement> { ["cycling"] = JsonSerializer.SerializeToElement("true") }));
 			return id;
 		}
@@ -111,22 +118,32 @@ internal sealed class OptionalConfigurationRemovalTests
 		public List<ConfigEntryRecord> Entries { get; } = [];
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
 				.Where(entry => entry.IntegrationId == integrationId)
 				.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		{
+			return Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task Delete(Guid entryId)
 		{

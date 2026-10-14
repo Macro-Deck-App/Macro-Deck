@@ -32,15 +32,14 @@ internal sealed class SetMacroButtonActionDefinition : IActionDefinition, IState
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Number(ButtonParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonDescription(),
-			min: 0,
-			max: VoicemeeterConnection.MacroButtonCount - 1,
-			step: 1,
-			defaultValue: 0,
-			required: true),
+			AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonDescription(),
+			0,
+			VoicemeeterConnection.MacroButtonCount - 1,
+			1,
+			0,
+			true),
 		ActionParameter.Choice(VoicemeeterActionValues.ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -53,14 +52,17 @@ internal sealed class SetMacroButtonActionDefinition : IActionDefinition, IState
 				new ActionParameterOption
 					{ Value = "off", Label = AppStrings.Integrations.Voicemeeter.Common.OffOption() }
 			],
-			label: AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
+			AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
 			defaultValue: ModePress),
 		ActionParameter.Toggle(StateOnlyParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.StateOnlyLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.StateOnlyDescription())
+			AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.StateOnlyLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.StateOnlyDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -112,17 +114,17 @@ internal sealed class SetMacroButtonActionDefinition : IActionDefinition, IState
 					AppStrings.Integrations.Voicemeeter.Errors.NoMacroButtonSelected());
 			}
 
-			var mode = context.Parameters.GetValueOrDefault(VoicemeeterActionValues.ModeParameter) as string ??
-				ModePress;
+			var mode = context.Parameters.GetValueOrDefault(VoicemeeterActionValues.ModeParameter) as string
+				?? ModePress;
 			var buttonMode = VoicemeeterActionValues.ReadNumber(context.Parameters, StateOnlyParameter) > 0
 				? VoicemeeterMacroButtonMode.StateOnly
 				: VoicemeeterMacroButtonMode.PushRelease;
 
 			if (mode == ModePress)
 			{
-				connection.SetMacroButton(button.Value, buttonMode, state: true);
+				connection.SetMacroButton(button.Value, buttonMode, true);
 				await Task.Delay(_pressDuration, context.CancellationToken);
-				connection.SetMacroButton(button.Value, buttonMode, state: false);
+				connection.SetMacroButton(button.Value, buttonMode, false);
 				return ActionResult.Success();
 			}
 

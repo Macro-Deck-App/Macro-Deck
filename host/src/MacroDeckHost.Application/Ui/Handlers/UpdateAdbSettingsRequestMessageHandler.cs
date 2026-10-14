@@ -16,7 +16,8 @@ public class UpdateAdbSettingsRequestMessageHandler
 	private readonly IHostListenerState _listenerState;
 	private readonly IMediator _mediator;
 
-	public UpdateAdbSettingsRequestMessageHandler(IAppPreferenceService preferences,
+	public UpdateAdbSettingsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IAdbManager adbManager,
 		IHostListenerState listenerState,
 		IMediator mediator)
@@ -27,7 +28,8 @@ public class UpdateAdbSettingsRequestMessageHandler
 		_mediator = mediator;
 	}
 
-	public async ValueTask<UpdateAdbSettingsResponse> Handle(UpdateAdbSettingsRequest request,
+	public async ValueTask<UpdateAdbSettingsResponse> Handle(
+		UpdateAdbSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
 		var current = await _preferences.GetAdb();

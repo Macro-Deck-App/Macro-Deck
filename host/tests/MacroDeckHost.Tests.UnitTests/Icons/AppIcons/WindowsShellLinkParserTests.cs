@@ -341,14 +341,14 @@ public class WindowsShellLinkParserTests
 
 		public byte[] Build()
 		{
-			var flags = (IdList is not null ? HasLinkTargetIdListFlag : 0u) |
-				(LocalBasePath is not null ? HasLinkInfoFlag : 0u) |
-				(Name is not null ? HasNameFlag : 0u) |
-				(RelativePath is not null ? HasRelativePathFlag : 0u) |
-				(WorkingDir is not null ? HasWorkingDirFlag : 0u) |
-				(Arguments is not null ? HasArgumentsFlag : 0u) |
-				(IconLocation is not null ? HasIconLocationFlag : 0u) |
-				(UnicodeStringData ? IsUnicodeFlag : 0u);
+			var flags = (IdList is not null ? HasLinkTargetIdListFlag : 0u)
+				| (LocalBasePath is not null ? HasLinkInfoFlag : 0u)
+				| (Name is not null ? HasNameFlag : 0u)
+				| (RelativePath is not null ? HasRelativePathFlag : 0u)
+				| (WorkingDir is not null ? HasWorkingDirFlag : 0u)
+				| (Arguments is not null ? HasArgumentsFlag : 0u)
+				| (IconLocation is not null ? HasIconLocationFlag : 0u)
+				| (UnicodeStringData ? IsUnicodeFlag : 0u);
 
 			using var stream = new MemoryStream();
 			using var writer = new BinaryWriter(stream, Encoding.Unicode);

@@ -7,7 +7,6 @@ using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Licensing;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Companion.Actions;
 using MacroDeckHost.Ui;
 
@@ -29,7 +28,7 @@ internal sealed class CompanionStateAndActionsTests
 		var batteryWhileOneRemains = await harness.ReadAsync(device, "battery_level_percent");
 		harness.DeviceRegistry.Disconnected("connection-2");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(connectedWhileOneRemains.Value, Is.EqualTo(true));
 			Assert.That(batteryWhileOneRemains.Value, Is.EqualTo(80));
@@ -46,9 +45,9 @@ internal sealed class CompanionStateAndActionsTests
 	{
 		var harness = new CompanionHarness();
 		var device = harness.AddDevice("Phone");
-		await harness.ReportAsync("connection-1", device, CompanionHarness.Report(appVersion: "1.0.0"));
+		await harness.ReportAsync("connection-1", device, CompanionHarness.Report("1.0.0"));
 
-		await harness.ReportAsync("connection-1", device, CompanionHarness.Report(appVersion: "1.1.0"));
+		await harness.ReportAsync("connection-1", device, CompanionHarness.Report("1.1.0"));
 
 		Assert.That((await harness.ReadAsync(device, "app_version")).Value, Is.EqualTo("1.1.0"));
 	}
@@ -160,7 +159,8 @@ internal sealed class CompanionStateAndActionsTests
 		});
 	}
 
-	internal static async Task<ActionResult> ExecuteAsync(CompanionHarness harness,
+	internal static async Task<ActionResult> ExecuteAsync(
+		CompanionHarness harness,
 		string actionId,
 		Guid device,
 		params (string Name, object Value)[] parameters)
@@ -176,8 +176,10 @@ internal sealed class CompanionStateAndActionsTests
 		return await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = values });
 	}
 
-	internal static JsonElement Payload(object value) =>
-		JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
+	internal static JsonElement Payload(object value)
+	{
+		return JsonSerializer.SerializeToElement(value, UiWebSocketProtocol.Json);
+	}
 
 	internal static DeviceSessionGuard GuardFor(IEnumerable<Claim> claims)
 	{
@@ -193,52 +195,57 @@ internal sealed class CompanionStateAndActionsTests
 		return guard;
 	}
 
-	internal static UiWebSocketDispatcher Dispatcher(CompanionHarness harness,
+	internal static UiWebSocketDispatcher Dispatcher(
+		CompanionHarness harness,
 		ClaimsPrincipal principal,
 		ICompanionLicenseService? licenses = null)
-		=> new(connectionId: "connection-1",
-			principal: principal,
-			abort: static () => { },
-			labelText: null!,
-			subscriptions: null!,
-			widgetState: null!,
-			widgetStateSubscriptions: null!,
-			variableInterest: null!,
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
-			getFolderViews: null!,
-			getScreenSavers: null!,
-			getDeviceScreenSaver: null!,
-			getDeviceClientSettings: null!,
-			setDeviceClientSettings: null!,
-			screenSaverUiSessions: null!,
-			getWeatherState: null!,
-			getVariableCatalogProviders: null!,
-			discoverCatalogVariables: null!,
-			resolveCatalogVariable: null!,
-			reportFolderChanged: null!,
-			listUiPreviews: null!,
-			logSubscriptions: null!,
-			logFileReader: null!,
-			deviceConnections: null!,
-			musicPlayerClientSync: null!,
-			uiSessions: null!,
-			configUiSessions: null!,
-			widgetUiSessions: null!,
-			uiPreviewSessions: null!,
-			folderUiSessions: null!,
-			modalUiSessions: null!,
-			lifetime: null!,
-			transport: null!,
-			webSocketTransport: null!,
-			companions: harness.DeviceRegistry,
-			licenses: licenses!,
-			accessTokenCutoff: new AccessTokenCutoff(),
-			deviceSessionGuard: GuardFor(principal.Claims),
-			videoStreams: null!,
-			videoStreamProviders: null!,
-			notifications: new NullNotificationManager(),
-			connectionCancellation: CancellationToken.None);
+	{
+		return new UiWebSocketDispatcher("connection-1",
+			principal,
+			static () =>
+			{
+			},
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			harness.DeviceRegistry,
+			licenses!,
+			new AccessTokenCutoff(),
+			GuardFor(principal.Claims),
+			null!,
+			null!,
+			new NullNotificationManager(),
+			CancellationToken.None);
+	}
 }

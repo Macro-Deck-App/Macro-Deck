@@ -10,7 +10,8 @@ public class UiWidgetSurfaceTests
 	private const string WidgetType = "com.example.plugin::counter";
 
 	private static UiSurface Surface(string kind, params (string Key, object Value)[] attributes)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = kind,
 			SessionMode = UiSessionModes.Shared,
@@ -18,6 +19,7 @@ public class UiWidgetSurfaceTests
 				attribute => JsonSerializer.SerializeToElement(attribute.Value),
 				StringComparer.Ordinal)
 		};
+	}
 
 	[Test]
 	public void A_widget_or_preview_surface_is_for_the_widget_type_it_names()
@@ -25,13 +27,21 @@ public class UiWidgetSurfaceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiWidgetSurface.IsFor(Surface(UiSurfaceKinds.Widget,
-				(UiWidgetSurfaceAttributes.WidgetType, WidgetType)), WidgetType), Is.True);
+						(UiWidgetSurfaceAttributes.WidgetType, WidgetType)),
+					WidgetType),
+				Is.True);
 			Assert.That(UiWidgetSurface.IsFor(Surface(UiSurfaceKinds.Preview,
-				(UiWidgetSurfaceAttributes.WidgetType, WidgetType)), WidgetType), Is.True);
+						(UiWidgetSurfaceAttributes.WidgetType, WidgetType)),
+					WidgetType),
+				Is.True);
 			Assert.That(UiWidgetSurface.IsFor(Surface(UiSurfaceKinds.Widget,
-				(UiWidgetSurfaceAttributes.WidgetType, "com.example.plugin::other")), WidgetType), Is.False);
+						(UiWidgetSurfaceAttributes.WidgetType, "com.example.plugin::other")),
+					WidgetType),
+				Is.False);
 			Assert.That(UiWidgetSurface.IsFor(Surface(UiSurfaceKinds.Dialog,
-				(UiWidgetSurfaceAttributes.WidgetType, WidgetType)), WidgetType), Is.False);
+						(UiWidgetSurfaceAttributes.WidgetType, WidgetType)),
+					WidgetType),
+				Is.False);
 		});
 	}
 
@@ -94,10 +104,12 @@ public class UiWidgetSurfaceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiWidgetSurface.IsSampleRequested(Surface(UiSurfaceKinds.Preview,
-				(UiWidgetSurfaceAttributes.Sample, true))), Is.True);
+					(UiWidgetSurfaceAttributes.Sample, true))),
+				Is.True);
 			Assert.That(UiWidgetSurface.IsSampleRequested(Surface(UiSurfaceKinds.Preview)), Is.False);
 			Assert.That(UiWidgetSurface.IsSampleRequested(Surface(UiSurfaceKinds.Widget,
-				(UiWidgetSurfaceAttributes.Sample, true))), Is.False);
+					(UiWidgetSurfaceAttributes.Sample, true))),
+				Is.False);
 		});
 	}
 
@@ -107,10 +119,12 @@ public class UiWidgetSurfaceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiWidgetSurface.Culture(Surface(UiSurfaceKinds.Preview,
-				(UiWidgetSurfaceAttributes.Culture, "pt-BR"))), Is.EqualTo("pt-BR"));
+					(UiWidgetSurfaceAttributes.Culture, "pt-BR"))),
+				Is.EqualTo("pt-BR"));
 			Assert.That(UiWidgetSurface.Culture(Surface(UiSurfaceKinds.Widget)), Is.Null);
 			Assert.That(UiWidgetSurface.Culture(Surface(UiSurfaceKinds.Widget,
-				(UiWidgetSurfaceAttributes.Culture, 42))), Is.Null);
+					(UiWidgetSurfaceAttributes.Culture, 42))),
+				Is.Null);
 			Assert.That(UiWidgetSurfaceAttributes.Culture, Is.EqualTo("culture"));
 		});
 	}
@@ -128,7 +142,7 @@ public class UiWidgetSurfaceTests
 			Assert.That(UiWidgetSafeArea.LengthFor(0).MaxOfCell!.Value * MacroDeck.Ui.Components.UiLength.Cell,
 				Is.EqualTo(UiWidgetSafeArea.BreathingRoom).Within(0.001));
 			Assert.That(UiWidgetSafeArea.LengthFor(120).MaxOfCell!.Value * MacroDeck.Ui.Components.UiLength.Cell,
-				Is.EqualTo(120 * (1 - (1 / Math.Sqrt(2)))).Within(0.001));
+				Is.EqualTo(120 * (1 - 1 / Math.Sqrt(2))).Within(0.001));
 		});
 	}
 }

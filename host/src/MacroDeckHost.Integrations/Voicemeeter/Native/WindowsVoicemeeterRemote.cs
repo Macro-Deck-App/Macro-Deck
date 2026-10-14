@@ -34,7 +34,7 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 
 		if (!NativeLibrary.TryLoad(path, out _library))
 		{
-			UnavailableReason = AppStrings.Integrations.Voicemeeter.Issues.LibraryLoadFailedReason(path: path);
+			UnavailableReason = AppStrings.Integrations.Voicemeeter.Issues.LibraryLoadFailedReason(path);
 			return;
 		}
 
@@ -43,7 +43,7 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 			NativeLibrary.Free(_library);
 			_library = nint.Zero;
 			UnavailableReason =
-				AppStrings.Integrations.Voicemeeter.Issues.LibraryMissingExportReason(export: missingExport);
+				AppStrings.Integrations.Voicemeeter.Issues.LibraryMissingExportReason(missingExport);
 			return;
 		}
 
@@ -55,7 +55,10 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 
 	public LocalizedText? UnavailableReason { get; }
 
-	public VoicemeeterResult Login() => Invoke(e => e.Login());
+	public VoicemeeterResult Login()
+	{
+		return Invoke(e => e.Login());
+	}
 
 	public void Logout()
 	{
@@ -70,7 +73,10 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 		}
 	}
 
-	public VoicemeeterResult RunVoicemeeter(int runType) => Invoke(e => e.RunVoicemeeter(runType));
+	public VoicemeeterResult RunVoicemeeter(int runType)
+	{
+		return Invoke(e => e.RunVoicemeeter(runType));
+	}
 
 	public VoicemeeterResult GetVoicemeeterType(out int rawType)
 	{
@@ -88,7 +94,10 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 		return result;
 	}
 
-	public bool IsParametersDirty() => InvokeRaw(e => e.IsParametersDirty()) > 0;
+	public bool IsParametersDirty()
+	{
+		return InvokeRaw(e => e.IsParametersDirty()) > 0;
+	}
 
 	public VoicemeeterResult GetParameter(string name, out float value)
 	{
@@ -107,10 +116,14 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 	}
 
 	public VoicemeeterResult SetParameter(string name, float value)
-		=> Invoke(e => e.SetParameterFloat(Ansi(name), value));
+	{
+		return Invoke(e => e.SetParameterFloat(Ansi(name), value));
+	}
 
 	public VoicemeeterResult SetParameter(string name, string value)
-		=> Invoke(e => e.SetParameterStringW(Ansi(name), NullTerminated(value)));
+	{
+		return Invoke(e => e.SetParameterStringW(Ansi(name), NullTerminated(value)));
+	}
 
 	public VoicemeeterResult RunScript(string script)
 	{
@@ -124,7 +137,10 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 		return ToResult(raw);
 	}
 
-	public bool IsMacroButtonDirty() => InvokeRaw(e => e.MacroButtonIsDirty()) > 0;
+	public bool IsMacroButtonDirty()
+	{
+		return InvokeRaw(e => e.MacroButtonIsDirty()) > 0;
+	}
 
 	public VoicemeeterResult GetMacroButton(int button, VoicemeeterMacroButtonMode mode, out bool state)
 	{
@@ -135,7 +151,9 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 	}
 
 	public VoicemeeterResult SetMacroButton(int button, VoicemeeterMacroButtonMode mode, bool state)
-		=> Invoke(e => e.MacroButtonSetStatus(button, state ? 1f : 0f, (int)mode));
+	{
+		return Invoke(e => e.MacroButtonSetStatus(button, state ? 1f : 0f, (int)mode));
+	}
 
 	public void Dispose()
 	{
@@ -155,9 +173,15 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 		}
 	}
 
-	private static byte[] Ansi(string value) => Encoding.ASCII.GetBytes(value + '\0');
+	private static byte[] Ansi(string value)
+	{
+		return Encoding.ASCII.GetBytes(value + '\0');
+	}
 
-	private static char[] NullTerminated(string value) => (value + '\0').ToCharArray();
+	private static char[] NullTerminated(string value)
+	{
+		return (value + '\0').ToCharArray();
+	}
 
 	private static string ReadNullTerminated(char[] buffer)
 	{
@@ -166,9 +190,14 @@ internal sealed class WindowsVoicemeeterRemote : IVoicemeeterRemote
 	}
 
 	private static VoicemeeterResult ToResult(int raw)
-		=> Enum.IsDefined((VoicemeeterResult)raw) ? (VoicemeeterResult)raw : VoicemeeterResult.Error;
+	{
+		return Enum.IsDefined((VoicemeeterResult)raw) ? (VoicemeeterResult)raw : VoicemeeterResult.Error;
+	}
 
-	private VoicemeeterResult Invoke(Func<Exports, int> call) => ToResult(InvokeRaw(call));
+	private VoicemeeterResult Invoke(Func<Exports, int> call)
+	{
+		return ToResult(InvokeRaw(call));
+	}
 
 	private int InvokeRaw(Func<Exports, int> call)
 	{

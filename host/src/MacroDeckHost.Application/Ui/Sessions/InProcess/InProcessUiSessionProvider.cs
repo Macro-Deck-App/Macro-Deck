@@ -20,7 +20,8 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 
 	private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.Ordinal);
 
-	public InProcessUiSessionProvider(string providerId,
+	public InProcessUiSessionProvider(
+		string providerId,
 		IUiProvider provider,
 		IUiSessionSink sink,
 		ILogger logger,
@@ -39,7 +40,8 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 
 	public bool GatedByHostLock { get; }
 
-	public async Task<UiSessionOpenOutcome> OpenAsync(UiSessionOpenCommand command,
+	public async Task<UiSessionOpenOutcome> OpenAsync(
+		UiSessionOpenCommand command,
 		CancellationToken cancellationToken)
 	{
 		var session = await _provider.CreateSessionAsync(
@@ -77,7 +79,8 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		return Task.CompletedTask;
 	}
 
-	public Task DispatchEventAsync(string sessionId,
+	public Task DispatchEventAsync(
+		string sessionId,
 		UiSessionEventCommand command,
 		CancellationToken cancellationToken)
 	{
@@ -108,21 +111,30 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 	}
 
 	private IUiEventOrigin OriginFor(string sessionId, string eventName, string? clientId)
-		=> _origins?.Invoke()?.Create(ProviderId, sessionId, clientId, eventName) ?? new DetachedOrigin(clientId);
+	{
+		return _origins?.Invoke()?.Create(ProviderId, sessionId, clientId, eventName) ?? new DetachedOrigin(clientId);
+	}
 
 	private sealed class DetachedOrigin(string? clientId) : IUiEventOrigin
 	{
 		public string? ClientId { get; } = string.IsNullOrEmpty(clientId) ? null : clientId;
 
 		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal,
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(ModalResult.FromCancellation<T>());
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
 	}
 
 	private enum WorkKind
@@ -160,7 +172,10 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null, null));
+		public void RequestSnapshot()
+		{
+			_work.Write((WorkKind.Snapshot, null, null));
+		}
 
 		public void Dispatch(UiEvent uiEvent, string? originClientId)
 		{

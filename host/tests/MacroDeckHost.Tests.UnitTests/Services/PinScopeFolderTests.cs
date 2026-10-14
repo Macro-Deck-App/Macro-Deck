@@ -1,4 +1,5 @@
 using MacroDeckHost.Domain.Common;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -11,10 +12,16 @@ public class PinScopeFolderTests
 	private PinScopeFixture _fixture = null!;
 
 	[SetUp]
-	public void SetUp() => _fixture = new PinScopeFixture();
+	public void SetUp()
+	{
+		_fixture = new PinScopeFixture();
+	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task D1_Move_Inside_IntoASubtreePinsReach_IsRejectedAndInert()
@@ -58,7 +65,7 @@ public class PinScopeFolderTests
 	{
 		var z = _fixture.AddWidget(_fixture.Main, 3, 3);
 		await _fixture.WidgetService.SetPinned(_fixture.Main.Id, z.Id, true, PinScope.Subtree);
-		var small = _fixture.AddFolder("Small", null, rows: 2, columns: 2);
+		var small = _fixture.AddFolder("Small", null, 2, 2);
 
 		var result = await _fixture.FolderService.Move(small.Id, _fixture.Main.Id, FolderMovePosition.Inside);
 
@@ -265,13 +272,16 @@ public class PinScopeFolderTests
 		});
 	}
 
-	private static Domain.Entities.WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

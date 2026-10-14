@@ -114,39 +114,58 @@ public class GetActionProviderIconRequestMessageHandlerTests
 
 	private sealed class EmptySnapshotStore : IRemotePluginSnapshotStore
 	{
-		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId) =>
-			RemotePluginCapabilitySnapshot.Empty(pluginId);
+		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
+		{
+			return RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => false;
+		public bool Has(string pluginId)
+		{
+			return false;
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnusedInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("No test in this file resolves through the remote registry.");
+		{
+			throw new NotSupportedException("No test in this file resolves through the remote registry.");
+		}
 
 		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope result)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, MacroDeck.Plugin.Protocol.Errors.ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class EmptyAssetCache : IPluginAssetCache
 	{
 		public void Write(string contentHash, string mimeType, byte[] bytes)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public bool TryRead(string contentHash, out byte[] bytes, out string mimeType)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakeIconProviderAction : IActionDefinition, IIconProviderActionDefinition
@@ -170,13 +189,19 @@ public class GetActionProviderIconRequestMessageHandlerTests
 			return Task.FromResult(SnapshotToReturn);
 		}
 
-		public IActionExecutor CreateExecutor() => new Executor(this);
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor(this);
+		}
 
 		private sealed class Executor : IActionExecutor
 		{
 			private readonly FakeIconProviderAction _owner;
 
-			public Executor(FakeIconProviderAction owner) => _owner = owner;
+			public Executor(FakeIconProviderAction owner)
+			{
+				_owner = owner;
+			}
 
 			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 			{

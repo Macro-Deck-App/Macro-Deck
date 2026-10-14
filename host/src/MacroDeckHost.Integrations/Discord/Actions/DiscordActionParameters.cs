@@ -20,20 +20,21 @@ internal static class DiscordActionParameters
 	public const string ModeDecrease = "decrease";
 
 	public static ActionParameter StateSelector(LocalizedText onLabel, LocalizedText offLabel)
-		=> ActionParameter.Choice(StateParameter,
-			options:
+	{
+		return ActionParameter.Choice(StateParameter,
 			[
 				new ActionParameterOption
 					{ Value = StateToggle, Label = AppStrings.Integrations.Discord.Actions.VoiceToggle.ToggleOption() },
 				new ActionParameterOption { Value = StateOn, Label = onLabel },
 				new ActionParameterOption { Value = StateOff, Label = offLabel }
 			],
-			label: AppStrings.Integrations.Discord.Actions.VoiceToggle.ActionLabel(),
+			AppStrings.Integrations.Discord.Actions.VoiceToggle.ActionLabel(),
 			defaultValue: StateToggle);
+	}
 
 	public static ActionParameter VolumeModeSelector()
-		=> ActionParameter.Choice(ModeParameter,
-			options:
+	{
+		return ActionParameter.Choice(ModeParameter,
 			[
 				new ActionParameterOption
 					{ Value = ModeSet, Label = AppStrings.Integrations.Discord.Actions.SetVoiceVolume.SetToOption() },
@@ -48,36 +49,49 @@ internal static class DiscordActionParameters
 					Label = AppStrings.Integrations.Discord.Actions.SetVoiceVolume.DecreaseByOption()
 				}
 			],
-			label: AppStrings.Integrations.Discord.Actions.SetVoiceVolume.ModeLabel(),
+			AppStrings.Integrations.Discord.Actions.SetVoiceVolume.ModeLabel(),
 			defaultValue: ModeSet);
+	}
 
 	public static bool ResolveState(object? raw, bool current)
-		=> (raw as string) switch
+	{
+		return (raw as string) switch
 		{
 			StateOn => true,
 			StateOff => false,
 			_ => !current
 		};
+	}
 
-	public static string ReadMode(object? raw) => raw as string ?? ModeSet;
-
-	public static double ReadNumber(object? raw, double fallback = 0d) => raw switch
+	public static string ReadMode(object? raw)
 	{
-		double d => d,
-		float f => f,
-		int i => i,
-		long l => l,
-		decimal m => (double)m,
-		string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) => parsed,
-		_ => fallback
-	};
+		return raw as string ?? ModeSet;
+	}
 
-	public static bool ReadBool(object? raw) => raw switch
+	public static double ReadNumber(object? raw, double fallback = 0d)
 	{
-		bool b => b,
-		string s => bool.TryParse(s, out var parsed) && parsed,
-		_ => false
-	};
+		return raw switch
+		{
+			double d => d,
+			float f => f,
+			int i => i,
+			long l => l,
+			decimal m => (double)m,
+			string s when double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) =>
+				parsed,
+			_ => fallback
+		};
+	}
+
+	public static bool ReadBool(object? raw)
+	{
+		return raw switch
+		{
+			bool b => b,
+			string s => bool.TryParse(s, out var parsed) && parsed,
+			_ => false
+		};
+	}
 
 	public static string? ReadText(object? raw)
 	{

@@ -71,7 +71,10 @@ public sealed class HostStatePusher(
 	private long _batteriesRevision;
 	private readonly SemaphoreSlim _companionPush = new(1, 1);
 	private long _companionRevision;
-	private readonly Dictionary<string, PluginCompanionDeviceAccess> _companionAccessPushed = new(StringComparer.Ordinal);
+
+	private readonly Dictionary<string, PluginCompanionDeviceAccess> _companionAccessPushed
+		= new(StringComparer.Ordinal);
+
 	private readonly SemaphoreSlim _musicPlayersPush = new(1, 1);
 	private readonly Lock _musicPlayersGate = new();
 	private long _musicPlayersRevision;
@@ -168,9 +171,9 @@ public sealed class HostStatePusher(
 			PushAdbAsync(pluginId, cancellationToken),
 			PushBatteriesAsync(pluginId, [], cancellationToken),
 			PushHttpAsync(pluginId, cancellationToken),
-			PushCompanionDevicesAsync(pluginId, always: true, cancellationToken),
+			PushCompanionDevicesAsync(pluginId, true, cancellationToken),
 			PushMusicPlayersAsync(pluginId, cancellationToken),
-			PushDesktopNotificationsAsync(pluginId, always: true, cancellationToken));
+			PushDesktopNotificationsAsync(pluginId, true, cancellationToken));
 	}
 
 	public ValueTask Handle(AdbSettingsChangedNotification notification, CancellationToken cancellationToken)
@@ -180,55 +183,89 @@ public sealed class HostStatePusher(
 	}
 
 	public ValueTask Handle(FolderCreatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(FolderUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(FolderDeletedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(FoldersReorderedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ProfileCreatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ProfileUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastDeckAsync(cancellationToken);
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ScriptCreatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastScriptsAsync(cancellationToken);
+	{
+		return BroadcastScriptsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ScriptUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastScriptsAsync(cancellationToken);
+	{
+		return BroadcastScriptsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(ScriptDeletedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastScriptsAsync(cancellationToken);
+	{
+		return BroadcastScriptsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetCreatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetDeletedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetPositionsUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetsCreatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetsUpdatedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	public ValueTask Handle(WidgetsDeletedNotification notification, CancellationToken cancellationToken)
-		=> BroadcastWidgetsAsync(cancellationToken);
+	{
+		return BroadcastWidgetsAsync(cancellationToken);
+	}
 
 	// The registry publishes this while a plugin registers its types, so a slow or failing send to another
 	// plugin must not hold up or fail that registration.
@@ -260,9 +297,11 @@ public sealed class HostStatePusher(
 	}
 
 	private ProtocolEnvelope ScriptsEnvelope(string pluginId, IReadOnlyList<Script> scripts)
-		=> BuildEnvelope(HostApis.Scripts,
+	{
+		return BuildEnvelope(HostApis.Scripts,
 			ScriptWireCompatibility.ToWirePayload(scripts,
 				sessionRegistry.HasHostApiFeature(pluginId, HostApiFeatures.ScriptInputColor)));
+	}
 
 	// Widgets differ by negotiated version (see WidgetStateWireCompatibility), so unlike
 	// BroadcastDeckAsync this builds one envelope per plugin instead of sharing one.
@@ -284,19 +323,27 @@ public sealed class HostStatePusher(
 	}
 
 	private Task<bool> PushDeckAsync(string pluginId, CancellationToken cancellationToken)
-		=> sessionRegistry.SendToPlugin(pluginId,
+	{
+		return sessionRegistry.SendToPlugin(pluginId,
 			BuildEnvelope(HostApis.Deck, BuildDeckState()),
 			cancellationToken);
+	}
 
 	private Task<bool> PushScriptsAsync(string pluginId, CancellationToken cancellationToken)
-		=> sessionRegistry.SendToPlugin(pluginId, ScriptsEnvelope(pluginId, scriptApi.GetScripts()), cancellationToken);
+	{
+		return sessionRegistry.SendToPlugin(pluginId,
+			ScriptsEnvelope(pluginId, scriptApi.GetScripts()),
+			cancellationToken);
+	}
 
 	private Task<bool> PushWidgetsAsync(string pluginId, CancellationToken cancellationToken)
-		=> sessionRegistry.SendToPlugin(pluginId,
+	{
+		return sessionRegistry.SendToPlugin(pluginId,
 			BuildEnvelope(HostApis.Widgets,
 				WidgetStateWireCompatibility.ToWirePayload(widgetApi.GetWidgets(),
 					sessionRegistry.GetNegotiatedVersion(pluginId))),
 			cancellationToken);
+	}
 
 	private Task PushEventBindingsIfConnectedAsync(string pluginId, IReadOnlyList<EventBindingDto> _)
 	{
@@ -340,17 +387,25 @@ public sealed class HostStatePusher(
 	}
 
 	private static DeckClientDto ToDto(DeckClient client)
-		=> new()
+	{
+		return new DeckClientDto
 		{
 			ClientId = client.ClientId,
 			DeviceId = client.DeviceId,
 			ProfileId = client.ProfileId,
 			FolderId = client.FolderId
 		};
+	}
 
-	private void OnDeckClientsChanged() => _ = PushDeckClientsAsync();
+	private void OnDeckClientsChanged()
+	{
+		_ = PushDeckClientsAsync();
+	}
 
-	private void OnAdbSnapshotChanged(object? sender, EventArgs e) => _ = PushAdbChangeAsync();
+	private void OnAdbSnapshotChanged(object? sender, EventArgs e)
+	{
+		_ = PushAdbChangeAsync();
+	}
 
 	private async Task PushAdbChangeAsync()
 	{
@@ -420,7 +475,8 @@ public sealed class HostStatePusher(
 		};
 	}
 
-	private static string? DefaultDeviceSerial(string? configured,
+	private static string? DefaultDeviceSerial(
+		string? configured,
 		IReadOnlyList<AdbDevice> devices,
 		List<AdbDevice> attached)
 	{
@@ -435,7 +491,8 @@ public sealed class HostStatePusher(
 	}
 
 	private static AdbDeviceStateDto ToDto(AdbDevice device)
-		=> new()
+	{
+		return new AdbDeviceStateDto
 		{
 			Serial = device.Serial,
 			State = device.State switch
@@ -459,9 +516,12 @@ public sealed class HostStatePusher(
 				_ => null
 			}
 		};
+	}
 
 	private void OnBatteriesChanged(object? sender, BatteryDevicesChangedEventArgs e)
-		=> _ = PushBatteriesChangeAsync(e.RemovedIds);
+	{
+		_ = PushBatteriesChangeAsync(e.RemovedIds);
+	}
 
 	// Every connected plugin gets every provider's devices, ADB phones included: reading battery devices
 	// is deliberately unrestricted (see the batteries ADR), so there is no per-plugin filter here.
@@ -497,7 +557,8 @@ public sealed class HostStatePusher(
 	}
 
 	// Serialized like the adb push, so a push built from an older device list never carries the higher revision.
-	private async Task<bool> PushBatteriesAsync(string pluginId,
+	private async Task<bool> PushBatteriesAsync(
+		string pluginId,
 		IReadOnlyList<string> removedIds,
 		CancellationToken cancellationToken)
 	{
@@ -516,7 +577,9 @@ public sealed class HostStatePusher(
 				Revision = ++_batteriesRevision
 			};
 
-			return await sessionRegistry.SendToPlugin(pluginId, BuildEnvelope(HostApis.Batteries, state), cancellationToken);
+			return await sessionRegistry.SendToPlugin(pluginId,
+				BuildEnvelope(HostApis.Batteries, state),
+				cancellationToken);
 		}
 		finally
 		{
@@ -525,9 +588,14 @@ public sealed class HostStatePusher(
 	}
 
 	private void OnCompanionDeviceChanged(object? sender, CompanionDeviceEventArgs e)
-		=> _ = BroadcastCompanionDevicesAsync(accessChanged: false);
+	{
+		_ = BroadcastCompanionDevicesAsync(false);
+	}
 
-	private void OnCompanionAccessChanged() => _ = BroadcastCompanionDevicesAsync(accessChanged: true);
+	private void OnCompanionAccessChanged()
+	{
+		_ = BroadcastCompanionDevicesAsync(true);
+	}
 
 	private async Task BroadcastCompanionDevicesAsync(bool accessChanged)
 	{
@@ -552,7 +620,10 @@ public sealed class HostStatePusher(
 
 	// Serialized like the adb push. A plugin that may not use Companion devices learns that once, not on
 	// every state report of every device.
-	private async Task<bool> PushCompanionDevicesAsync(string pluginId, bool always, CancellationToken cancellationToken)
+	private async Task<bool> PushCompanionDevicesAsync(
+		string pluginId,
+		bool always,
+		CancellationToken cancellationToken)
 	{
 		if (companionDevices is null || companionAccess is null)
 		{
@@ -563,10 +634,10 @@ public sealed class HostStatePusher(
 		try
 		{
 			var access = await companionAccess.EvaluateAsync(pluginId, cancellationToken);
-			if (!always &&
-				access == PluginCompanionDeviceAccess.NotAllowed &&
-				_companionAccessPushed.TryGetValue(pluginId, out var pushed) &&
-				pushed == PluginCompanionDeviceAccess.NotAllowed)
+			if (!always
+				&& access == PluginCompanionDeviceAccess.NotAllowed
+				&& _companionAccessPushed.TryGetValue(pluginId, out var pushed)
+				&& pushed == PluginCompanionDeviceAccess.NotAllowed)
 			{
 				return false;
 			}
@@ -593,7 +664,10 @@ public sealed class HostStatePusher(
 		}
 	}
 
-	private void OnMusicPlayersChanged(object? sender, EventArgs e) => _ = BroadcastMusicPlayersAsync();
+	private void OnMusicPlayersChanged(object? sender, EventArgs e)
+	{
+		_ = BroadcastMusicPlayersAsync();
+	}
 
 	// Every plugin reads every provider's players, as with artwork, so there is no per-plugin filter. The
 	// notifier also fires when only widget options changed, which this push does not carry.
@@ -669,12 +743,17 @@ public sealed class HostStatePusher(
 	}
 
 	private IReadOnlyList<MusicPlayerInstanceStateDto> MusicPlayerInstances()
-		=> musicPlayers is null
+	{
+		return musicPlayers is null
 			? []
 			: [.. MusicPlayerInstanceSnapshots.From(musicPlayers.GetInstances()).Select(MusicPlayerWire.ToDto)];
+	}
 
 	// Where the platform cannot show notifications, support depends on the desktop shell being attached.
-	private void OnShellAttachmentChanged() => _ = BroadcastDesktopNotificationsAsync();
+	private void OnShellAttachmentChanged()
+	{
+		_ = BroadcastDesktopNotificationsAsync();
+	}
 
 	private async Task BroadcastDesktopNotificationsAsync()
 	{
@@ -688,18 +767,22 @@ public sealed class HostStatePusher(
 
 			foreach (var pluginId in pluginIds)
 			{
-				await PushDesktopNotificationsAsync(pluginId, always: false, CancellationToken.None);
+				await PushDesktopNotificationsAsync(pluginId, false, CancellationToken.None);
 			}
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
-			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push desktop notification support to plugins");
+			logger.ForContext<HostStatePusher>()
+				.Error(exception, "Failed to push desktop notification support to plugins");
 		}
 	}
 
 	// Serialized so a push read before a shell change never lands after the one read after it.
 	// Task.Run: the first support check probes the platform, which can block for seconds on Linux.
-	private async Task<bool> PushDesktopNotificationsAsync(string pluginId, bool always, CancellationToken cancellationToken)
+	private async Task<bool> PushDesktopNotificationsAsync(
+		string pluginId,
+		bool always,
+		CancellationToken cancellationToken)
 	{
 		if (desktopNotifications is null)
 		{
@@ -710,16 +793,15 @@ public sealed class HostStatePusher(
 		try
 		{
 			var supported = await Task.Run(() => desktopNotifications.IsSupportedFor(pluginId), cancellationToken);
-			if (!always &&
-				_desktopNotificationsPushed.TryGetValue(pluginId, out var pushed) &&
-				pushed == supported)
+			if (!always && _desktopNotificationsPushed.TryGetValue(pluginId, out var pushed) && pushed == supported)
 			{
 				return false;
 			}
 
 			_desktopNotificationsPushed[pluginId] = supported;
 			return await sessionRegistry.SendToPlugin(pluginId,
-				BuildEnvelope(HostApis.DesktopNotifications, new DesktopNotificationsStateDto { Supported = supported }),
+				BuildEnvelope(HostApis.DesktopNotifications,
+					new DesktopNotificationsStateDto { Supported = supported }),
 				cancellationToken);
 		}
 		finally
@@ -729,14 +811,21 @@ public sealed class HostStatePusher(
 	}
 
 	private Task<bool> PushHttpAsync(string pluginId, CancellationToken cancellationToken)
-		=> userAgent is null
+	{
+		return userAgent is null
 			? Task.FromResult(false)
 			: sessionRegistry.SendToPlugin(pluginId, HttpEnvelope(), cancellationToken);
+	}
 
 	private ProtocolEnvelope HttpEnvelope()
-		=> BuildEnvelope(HostApis.Http, new HttpStateDto { UserAgent = userAgent?.Current ?? string.Empty });
+	{
+		return BuildEnvelope(HostApis.Http, new HttpStateDto { UserAgent = userAgent?.Current ?? string.Empty });
+	}
 
-	private void OnUserAgentChanged() => _ = PushUserAgentChangeAsync();
+	private void OnUserAgentChanged()
+	{
+		_ = PushUserAgentChangeAsync();
+	}
 
 	private async Task PushUserAgentChangeAsync()
 	{
@@ -768,7 +857,8 @@ public sealed class HostStatePusher(
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
-			logger.ForContext<HostStatePusher>().Error(exception, "Failed to push widgets to plugins after a widget type change");
+			logger.ForContext<HostStatePusher>()
+				.Error(exception, "Failed to push widgets to plugins after a widget type change");
 		}
 	}
 
@@ -800,7 +890,8 @@ public sealed class HostStatePusher(
 	}
 
 	private static ProtocolEnvelope BuildEnvelope(string api, object? data)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.CreateVersion7().ToString(),
@@ -811,4 +902,5 @@ public sealed class HostStatePusher(
 				},
 				PluginProtocolJson.Options)
 		};
+	}
 }

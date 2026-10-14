@@ -13,7 +13,10 @@ public sealed class PluginProcessJobFactory : IPluginProcessJobFactory
 
 	private readonly ILogger _logger;
 
-	public PluginProcessJobFactory(ILogger logger) => _logger = logger.ForContext<PluginProcessJobFactory>();
+	public PluginProcessJobFactory(ILogger logger)
+	{
+		_logger = logger.ForContext<PluginProcessJobFactory>();
+	}
 
 	public IPluginProcessJob Create()
 	{

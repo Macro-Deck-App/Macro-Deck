@@ -8,5 +8,8 @@ internal sealed class FakeUrlHttpClientFactory : IHttpClientFactory
 {
 	public byte[] Body { get; set; } = [];
 
-	public HttpClient CreateClient(string name) => new(new FakeHttpMessageHandler(Body));
+	public HttpClient CreateClient(string name)
+	{
+		return new HttpClient(new FakeHttpMessageHandler(Body));
+	}
 }

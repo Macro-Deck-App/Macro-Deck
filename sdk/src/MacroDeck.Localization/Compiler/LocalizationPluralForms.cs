@@ -39,14 +39,22 @@ internal static class LocalizationPluralForms
 
 	/// <summary>Whether <paramref name="segment" /> names a plural form.</summary>
 	public static bool IsForm(string? segment)
-		=> string.Equals(segment, One, StringComparison.Ordinal) ||
-			string.Equals(segment, Other, StringComparison.Ordinal);
+	{
+		return string.Equals(segment, One, StringComparison.Ordinal)
+			|| string.Equals(segment, Other, StringComparison.Ordinal);
+	}
 
 	/// <summary>The form <paramref name="count" /> selects.</summary>
-	public static string FormOf(object? count) => IsOne(count) ? One : Other;
+	public static string FormOf(object? count)
+	{
+		return IsOne(count) ? One : Other;
+	}
 
 	/// <summary>The key one form of <paramref name="baseKey" /> is stored under.</summary>
-	public static string FormKey(string baseKey, string form) => baseKey + "." + form;
+	public static string FormKey(string baseKey, string form)
+	{
+		return baseKey + "." + form;
+	}
 
 	/// <summary>Splits a form key into its family and its form, or returns <c>false</c> when it is not one.</summary>
 	public static bool TrySplit(string key, out string baseKey, out string form)
@@ -90,8 +98,8 @@ internal static class LocalizationPluralForms
 			case decimal value:
 				return value == 1m;
 			case string text:
-				return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) &&
-					parsed is 1d;
+				return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+					&& parsed is 1d;
 			case IConvertible convertible:
 				try
 				{

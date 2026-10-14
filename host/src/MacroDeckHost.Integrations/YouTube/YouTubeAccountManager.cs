@@ -41,8 +41,8 @@ internal sealed class YouTubeAccountManager : IDisposable
 		_logger = logger;
 		_budgets = budgets ?? YouTubeQuotaBudgets.Shared;
 		_options = options ?? new YouTubePollerOptions();
-		_apiFactory = apiFactory ??
-			((_, tokens, budget) => new YouTubeApiClient(tokens.GetAsync,
+		_apiFactory = apiFactory
+			?? ((_, tokens, budget) => new YouTubeApiClient(tokens.GetAsync,
 				tokens.ForceRefreshAsync,
 				budget,
 				logger));
@@ -50,15 +50,25 @@ internal sealed class YouTubeAccountManager : IDisposable
 
 	public IReadOnlyList<YouTubeAccountConnection> Connections => _connections;
 
-	public void UseChatSink(IStreamChatSink? chatSink) => _chatSink = chatSink;
+	public void UseChatSink(IStreamChatSink? chatSink)
+	{
+		_chatSink = chatSink;
+	}
 
 	public IReadOnlyList<ChatAccount> ChatAccounts()
-		=> [.. _connections.Select(c => new ChatAccount(c.Account.ChannelId, c.Account.Label))];
+	{
+		return [.. _connections.Select(c => new ChatAccount(c.Account.ChannelId, c.Account.Label))];
+	}
 
 	public IReadOnlyList<StreamStatsAccount> StatsAccounts()
-		=> [.. _connections.Select(c => new StreamStatsAccount(c.Account.ChannelId,
-			c.Account.Label,
-			YouTubeVariables.AccountPrefix(c.Account.VariableKey)))];
+	{
+		return
+		[
+			.. _connections.Select(c => new StreamStatsAccount(c.Account.ChannelId,
+				c.Account.Label,
+				YouTubeVariables.AccountPrefix(c.Account.VariableKey)))
+		];
+	}
 
 	public async Task ReloadAsync(
 		IIntegrationConfig config,
@@ -118,9 +128,11 @@ internal sealed class YouTubeAccountManager : IDisposable
 	}
 
 	public IReadOnlyList<ActionParameterOption> AccountOptions()
-		=> _connections
+	{
+		return _connections
 			.Select(c => new ActionParameterOption { Value = c.Account.ChannelId, Label = c.Account.Label })
 			.ToList();
+	}
 
 	public IReadOnlyList<IntegrationIssue> Issues()
 	{
@@ -131,7 +143,7 @@ internal sealed class YouTubeAccountManager : IDisposable
 			issues.Add(new IntegrationIssue
 			{
 				Id = TokenIssuePrefix + connection.Account.ChannelId,
-				Title = AppStrings.Integrations.YouTube.Issues.SignInExpiredTitle(account: connection.Account.Label),
+				Title = AppStrings.Integrations.YouTube.Issues.SignInExpiredTitle(connection.Account.Label),
 				Description = AppStrings.Integrations.YouTube.Issues.SignInExpiredDescription(),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.YouTube.Issues.ReconnectAction()
@@ -157,7 +169,7 @@ internal sealed class YouTubeAccountManager : IDisposable
 			{
 				Id = DuplicateIssuePrefix + stale.ChannelId,
 				Title = AppStrings.Integrations.YouTube.Issues.DuplicateChannelTitle(),
-				Description = AppStrings.Integrations.YouTube.Issues.DuplicateChannelDescription(title: stale.Title),
+				Description = AppStrings.Integrations.YouTube.Issues.DuplicateChannelDescription(stale.Title),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -233,11 +245,11 @@ internal sealed class YouTubeAccountManager : IDisposable
 		var accessToken = await config.GetSecretAsync(entry.Id, YouTubeConfigKeys.AccessToken, cancellationToken);
 		var refreshToken = await config.GetSecretAsync(entry.Id, YouTubeConfigKeys.RefreshToken, cancellationToken);
 
-		if (string.IsNullOrEmpty(clientId) ||
-			string.IsNullOrEmpty(channelId) ||
-			string.IsNullOrEmpty(clientSecret) ||
-			string.IsNullOrEmpty(accessToken) ||
-			string.IsNullOrEmpty(refreshToken))
+		if (string.IsNullOrEmpty(clientId)
+			|| string.IsNullOrEmpty(channelId)
+			|| string.IsNullOrEmpty(clientSecret)
+			|| string.IsNullOrEmpty(accessToken)
+			|| string.IsNullOrEmpty(refreshToken))
 		{
 			_logger.Warning("YouTube config entry {EntryId} is incomplete; skipping", entry.Id);
 			return null;
@@ -315,17 +327,21 @@ internal sealed class YouTubeAccountManager : IDisposable
 	}
 
 	private static int ParseQuota(string? value)
-		=> int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed > 0
+	{
+		return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed > 0
 			? parsed
 			: YouTubeQuotaBudget.DefaultDailyLimit;
+	}
 
 	private static DateTimeOffset? ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value,
+	{
+		return DateTimeOffset.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.RoundtripKind,
 			out var parsed)
 			? parsed
 			: null;
+	}
 
 	private sealed record Candidate(
 		Guid EntryId,

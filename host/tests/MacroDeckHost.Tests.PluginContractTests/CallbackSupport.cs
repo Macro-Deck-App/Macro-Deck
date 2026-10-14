@@ -8,7 +8,6 @@ using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Events;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Serialization;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Plugins.Capabilities;
@@ -26,6 +25,7 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.HostLocking;
 using DomainVariableType = MacroDeckHost.Domain.Enums.VariableType;
 using SdkVariableType = MacroDeck.Sdk.Variables.VariableType;
 
@@ -42,20 +42,33 @@ internal sealed class CallbackFakeVariableService : IVariableService
 {
 	private readonly Dictionary<Guid, VariableEntity> _byId = [];
 
-	public string? ValueOf(Guid id) => _byId.TryGetValue(id, out var entity) ? entity.Value : null;
+	public string? ValueOf(Guid id)
+	{
+		return _byId.TryGetValue(id, out var entity) ? entity.Value : null;
+	}
 
-	public Task<IReadOnlyList<VariableEntity>> GetAll() =>
-		Task.FromResult<IReadOnlyList<VariableEntity>>([.. _byId.Values]);
+	public Task<IReadOnlyList<VariableEntity>> GetAll()
+	{
+		return Task.FromResult<IReadOnlyList<VariableEntity>>([.. _byId.Values]);
+	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByScope(VariableScope scope, string? scopeRefId)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<VariableEntity?> GetById(Guid id) => Task.FromResult(_byId.GetValueOrDefault(id));
+	public Task<VariableEntity?> GetById(Guid id)
+	{
+		return Task.FromResult(_byId.GetValueOrDefault(id));
+	}
 
 	public Task<VariableEntity?> Resolve(string name, VariableScope contextScope, string? contextScopeRefId)
-		=> Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+	{
+		return Task.FromResult(_byId.Values.FirstOrDefault(entity => entity.Name == name));
+	}
 
-	public Task<Result<VariableEntity, VariableError>> CreateUserVariable(string name,
+	public Task<Result<VariableEntity, VariableError>> CreateUserVariable(
+		string name,
 		VariableScope scope,
 		string? scopeRefId,
 		DomainVariableType type,
@@ -63,20 +76,32 @@ internal sealed class CallbackFakeVariableService : IVariableService
 		int? decimalPlaces,
 		VariableFileSource? fileSource = null,
 		VariableTemplateSource? templateSource = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> SetValue(Guid id,
+	public Task<Result<VariableEntity, VariableError>> SetValue(
+		Guid id,
 		object? value,
-		CancellationToken cancellationToken = default) => throw new NotSupportedException();
+		CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(Guid id,
+	public Task<Result<VariableEntity, VariableError>> UpdateUserVariable(
+		Guid id,
 		string? name,
 		int? decimalPlaces,
 		VariableFileSource? fileSource = null,
 		VariableTemplateSource? templateSource = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableError>> DeleteUserVariable(Guid id) => throw new NotSupportedException();
+	public Task<Result<VariableError>> DeleteUserVariable(Guid id)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<Result<VariableEntity, VariableError>> CreateIntegrationVariable(
 		string integrationId,
@@ -112,18 +137,24 @@ internal sealed class CallbackFakeVariableService : IVariableService
 		return Task.FromResult(Result.Ok<VariableEntity, VariableError>(entity));
 	}
 
-	public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(string integrationId,
+	public Task<Result<VariableEntity, VariableError>> MaterializeCatalogVariable(
+		string integrationId,
 		string resourceId,
 		string name,
 		Domain.Enums.VariableType type,
 		int? decimalPlaces,
-		VariableDeclaration? declaration = null) =>
+		VariableDeclaration? declaration = null)
+	{
 		throw new NotSupportedException();
+	}
 
 	public Task<VariableEntity?> GetByDefinition(MacroDeck.Sdk.Identity.QualifiedId definitionId)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(string integrationId,
+	public Task<Result<VariableEntity, VariableError>> ReportIntegrationVariableValue(
+		string integrationId,
 		Guid id,
 		object? value,
 		VariableBounds? bounds = null)
@@ -143,7 +174,9 @@ internal sealed class CallbackFakeVariableService : IVariableService
 	}
 
 	public Task<Result<VariableError>> SetIntegrationVariableAvailability(string integrationId, Guid id, bool available)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<Result<VariableError>> DeleteIntegrationVariable(string integrationId, Guid id)
 	{
@@ -162,20 +195,31 @@ internal sealed class CallbackFakeVariableService : IVariableService
 	}
 
 	public Task<IReadOnlyList<VariableEntity>> GetByOwnerIntegration(string integrationId)
-		=> Task.FromResult<IReadOnlyList<VariableEntity>>([
+	{
+		return Task.FromResult<IReadOnlyList<VariableEntity>>([
 			.. _byId.Values.Where(entity => entity.OwnerIntegrationId == integrationId)
 		]);
+	}
 
-	public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId) => throw new NotSupportedException();
+	public Task DeleteByScopeInstance(VariableScope scope, string scopeRefId)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task UpsertWidgetVariable(VariableScope scope,
+	public Task UpsertWidgetVariable(
+		VariableScope scope,
 		string scopeRefId,
 		string name,
 		DomainVariableType type,
-		object? value) => throw new NotSupportedException();
+		object? value)
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task RemoveWidgetVariable(VariableScope scope, string scopeRefId, string name)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class CallbackFakeUserVariableApi : IUserVariableApi
@@ -190,7 +234,8 @@ internal sealed class CallbackFakeUserVariableApi : IUserVariableApi
 
 	public UserVariableCreateResult CreateResultToReturn { get; set; } = UserVariableCreateResult.Created();
 
-	public Task<UserVariableWriteResult> ApplyAsync(string name,
+	public Task<UserVariableWriteResult> ApplyAsync(
+		string name,
 		string? ownerWidgetId,
 		UserVariableOperation operation,
 		string? value,
@@ -200,7 +245,8 @@ internal sealed class CallbackFakeUserVariableApi : IUserVariableApi
 		return Task.FromResult(ResultToReturn);
 	}
 
-	public Task<UserVariableCreateResult> CreateAsync(string name,
+	public Task<UserVariableCreateResult> CreateAsync(
+		string name,
 		string? ownerWidgetId,
 		SdkVariableType type,
 		string? initialValue = null,
@@ -223,7 +269,8 @@ internal sealed class CallbackFakeDeckNavigator : IDeckNavigator
 {
 	public List<string> ChangedFolders { get; } = [];
 
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -231,19 +278,33 @@ internal sealed class CallbackFakeDeckNavigator : IDeckNavigator
 		return Task.CompletedTask;
 	}
 
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
-		CancellationToken cancellationToken = default) => Task.CompletedTask;
+		CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public IReadOnlyList<DeckFolder> GetFolders() => [];
+	public IReadOnlyList<DeckFolder> GetFolders()
+	{
+		return [];
+	}
 
-	public IReadOnlyList<DeckProfile> GetProfiles() => [];
+	public IReadOnlyList<DeckProfile> GetProfiles()
+	{
+		return [];
+	}
 }
 
 internal sealed class CallbackFakeScriptApi : IScriptApi
@@ -252,9 +313,13 @@ internal sealed class CallbackFakeScriptApi : IScriptApi
 
 	public ActionResult ResultToReturn { get; set; } = ActionResult.Success();
 
-	public IReadOnlyList<Script> GetScripts() => [];
+	public IReadOnlyList<Script> GetScripts()
+	{
+		return [];
+	}
 
-	public Task<ActionResult> RunAsync(string scriptId,
+	public Task<ActionResult> RunAsync(
+		string scriptId,
 		IReadOnlyDictionary<string, object?>? inputs = null,
 		string? ownerWidgetId = null,
 		string? originClientId = null,
@@ -271,9 +336,15 @@ internal sealed class CallbackFakeWidgetApi : IWidgetApi
 
 	public bool ResultToReturn { get; set; } = true;
 
-	public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+	{
+		return [];
+	}
 
-	public bool Exists(string widgetId) => false;
+	public bool Exists(string widgetId)
+	{
+		return false;
+	}
 
 	public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
 	{
@@ -285,18 +356,26 @@ internal sealed class CallbackFakeWidgetApi : IWidgetApi
 		string widgetId,
 		string stateId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 
-	public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+	public Task<WidgetStateWriteResult> AdvanceStateAsync(
+		string widgetId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	{
+		return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+	}
 }
 
 internal sealed class CallbackFakeWidgetIconInvalidator : IWidgetIconInvalidator
 {
 	public List<(string IntegrationId, string ActionId)> Invalidations { get; } = [];
 
-	public void Invalidate(string integrationId, string actionId) => Invalidations.Add((integrationId, actionId));
+	public void Invalidate(string integrationId, string actionId)
+	{
+		Invalidations.Add((integrationId, actionId));
+	}
 }
 
 internal sealed class CallbackFakeNotificationStore : IUserNotificationStore
@@ -313,11 +392,20 @@ internal sealed class CallbackFakeNotificationStore : IUserNotificationStore
 		return null;
 	}
 
-	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => Raise(draft);
+	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+	{
+		return Raise(draft);
+	}
 
-	public IReadOnlyList<UserNotification> Snapshot() => [];
+	public IReadOnlyList<UserNotification> Snapshot()
+	{
+		return [];
+	}
 
-	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress) => false;
+	public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
+	{
+		return false;
+	}
 
 	public bool DismissByKey(string dedupeKey)
 	{
@@ -325,17 +413,35 @@ internal sealed class CallbackFakeNotificationStore : IUserNotificationStore
 		return true;
 	}
 
-	public bool Dismiss(string id) => false;
+	public bool Dismiss(string id)
+	{
+		return false;
+	}
 
-	public bool Retire(string dedupeKey) => false;
+	public bool Retire(string dedupeKey)
+	{
+		return false;
+	}
 
-	public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+	{
+		return null;
+	}
 
-	public bool MarkRead(string id) => false;
+	public bool MarkRead(string id)
+	{
+		return false;
+	}
 
-	public bool MarkAllRead() => false;
+	public bool MarkAllRead()
+	{
+		return false;
+	}
 
-	public bool DismissAll() => false;
+	public bool DismissAll()
+	{
+		return false;
+	}
 
 	public event Action? Changed
 	{
@@ -354,36 +460,50 @@ internal sealed class CallbackFakeActionInteractions : IActionInteractions
 		get;
 	} = [];
 
-	public void RequestItemPicker(string? originClientId,
+	public void RequestItemPicker(
+		string? originClientId,
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? prompt = null)
-		=> ItemPickerRequests.Add((originClientId, instanceId, kind, prompt));
+	{
+		ItemPickerRequests.Add((originClientId, instanceId, kind, prompt));
+	}
 
-	public void RequestDevicePicker(string? originClientId,
+	public void RequestDevicePicker(
+		string? originClientId,
 		string instanceId,
 		bool startPlayback,
 		string? prompt = null)
-		=> DevicePickerRequests.Add((originClientId, instanceId, startPlayback, prompt));
+	{
+		DevicePickerRequests.Add((originClientId, instanceId, startPlayback, prompt));
+	}
 }
 
 internal sealed class CallbackFakeCapabilityInvoker : IPluginCapabilityInvoker
 {
 	public HashSet<(string PluginId, string CorrelationId)> LiveExecuteCorrelations { get; } = [];
 
-	public Task<JsonElement?> InvokeAsync(string pluginId,
+	public Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken)
-		=> throw new NotSupportedException("Not exercised by the callback direction.");
+	{
+		throw new NotSupportedException("Not exercised by the callback direction.");
+	}
 
-	public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+	public bool TryComplete(string pluginId, ProtocolEnvelope result)
+	{
+		return false;
+	}
 
 	public void AbortAll(string pluginId, ProtocolError reason)
 	{
 	}
 
 	public bool IsLiveActionExecute(string pluginId, string correlationId)
-		=> LiveExecuteCorrelations.Contains((pluginId, correlationId));
+	{
+		return LiveExecuteCorrelations.Contains((pluginId, correlationId));
+	}
 }
 
 internal sealed class CallbackFakeEventBus : IEventBus
@@ -413,15 +533,22 @@ internal sealed class CallbackFakeConfigStore : IIntegrationConfigStore
 	}
 
 	public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>([
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>([
 			.. _byId.Values.Where(e => e.IntegrationId == integrationId)
 				.Select(e => new ConfigEntrySummary(e.Id, e.IntegrationId, e.Title, e.CreatedAt))
 		]);
+	}
 
-	public Task<ConfigEntryRecord?> Find(Guid entryId) => Task.FromResult(_byId.GetValueOrDefault(entryId));
+	public Task<ConfigEntryRecord?> Find(Guid entryId)
+	{
+		return Task.FromResult(_byId.GetValueOrDefault(entryId));
+	}
 
 	public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> Task.FromResult(Seed(integrationId, title, values));
+	{
+		return Task.FromResult(Seed(integrationId, title, values));
+	}
 
 	public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
 	{
@@ -435,9 +562,14 @@ internal sealed class CallbackFakeConfigStore : IIntegrationConfigStore
 	}
 
 	public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task Delete(Guid entryId) => throw new NotSupportedException();
+	public Task Delete(Guid entryId)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class CallbackFakeSecretService : ISecretService
@@ -462,7 +594,10 @@ internal sealed class CallbackFakeSecretService : ISecretService
 		return Task.FromResult(true);
 	}
 
-	public Task<bool> Delete(Guid id) => Task.FromResult(_byId.Remove(id));
+	public Task<bool> Delete(Guid id)
+	{
+		return Task.FromResult(_byId.Remove(id));
+	}
 
 	public Task<Guid?> Clone(Guid id)
 	{
@@ -476,11 +611,20 @@ internal sealed class CallbackFakeSecretService : ISecretService
 		return Task.FromResult<Guid?>(clone);
 	}
 
-	public Task<string?> Reveal(Guid id) => Task.FromResult(_byId.GetValueOrDefault(id));
+	public Task<string?> Reveal(Guid id)
+	{
+		return Task.FromResult(_byId.GetValueOrDefault(id));
+	}
 
-	public Task<string?> Resolve(Guid id) => Task.FromResult(_byId.GetValueOrDefault(id));
+	public Task<string?> Resolve(Guid id)
+	{
+		return Task.FromResult(_byId.GetValueOrDefault(id));
+	}
 
-	public Task<SecretMaterial?> ExportForArchive(Guid id) => throw new NotSupportedException();
+	public Task<SecretMaterial?> ExportForArchive(Guid id)
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class CallbackHostLink(
@@ -545,7 +689,8 @@ internal sealed class CallbackHostLink(
 	}
 
 	public void PushHostState(string api, object? data)
-		=> Push(new ProtocolEnvelope
+	{
+		Push(new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.CreateVersion7().ToString(),
@@ -556,6 +701,7 @@ internal sealed class CallbackHostLink(
 				},
 				PluginProtocolJson.Options)
 		});
+	}
 
 	public Task CloseOutputAsync(WebSocketCloseStatus status, string? description, CancellationToken cancellationToken)
 	{
@@ -673,6 +819,8 @@ internal sealed class CallbackHostLink(
 		});
 	}
 
-	private void Push(ProtocolEnvelope envelope) =>
+	private void Push(ProtocolEnvelope envelope)
+	{
 		_toPlugin.Writer.TryWrite(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope));
+	}
 }

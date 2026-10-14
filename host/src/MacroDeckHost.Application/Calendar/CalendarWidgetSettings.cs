@@ -12,13 +12,15 @@ public sealed record CalendarAgendaSettings(
 	bool ShowDate)
 {
 	public static CalendarAgendaSettings Parse(JsonElement data)
-		=> new(CalendarWidgetData.Calendars(data),
+	{
+		return new CalendarAgendaSettings(CalendarWidgetData.Calendars(data),
 			CalendarWidgetData.Days(data),
 			CalendarWidgetData.ReadBool(data, CalendarWidgetTypes.ShowAllDayKey) ?? true,
 			CalendarWidgetData.ReadBool(data, CalendarWidgetTypes.ShowTimeKey) ?? true,
 			CalendarWidgetData.ReadBool(data, CalendarWidgetTypes.ShowLocationKey) ?? false,
 			CalendarWidgetData.ReadBool(data, CalendarWidgetTypes.ShowCalendarKey) ?? false,
 			CalendarWidgetData.ShowDate(data));
+	}
 }
 
 public sealed record CalendarNextEventSettings(
@@ -28,10 +30,12 @@ public sealed record CalendarNextEventSettings(
 	bool ShowDate)
 {
 	public static CalendarNextEventSettings Parse(JsonElement data)
-		=> new(CalendarWidgetData.Calendars(data),
+	{
+		return new CalendarNextEventSettings(CalendarWidgetData.Calendars(data),
 			CalendarWidgetData.ReadBool(data, CalendarWidgetTypes.ShowAllDayKey) ?? false,
 			CalendarWidgetData.WhenStarted(data) == CalendarWidgetTypes.WhenStartedNext,
 			CalendarWidgetData.ShowDate(data));
+	}
 }
 
 public static class CalendarWidgetData
@@ -56,9 +60,9 @@ public static class CalendarWidgetData
 
 	public static IReadOnlyList<string> Calendars(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(CalendarWidgetTypes.CalendarsKey, out var calendars) ||
-			calendars.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(CalendarWidgetTypes.CalendarsKey, out var calendars)
+			|| calendars.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -69,55 +73,73 @@ public static class CalendarWidgetData
 				.Where(item => item.ValueKind == JsonValueKind.String)
 				.Select(item => item.GetString()!)
 				.Where(key => key.Length > 0)
-				.Distinct(StringComparer.Ordinal),
+				.Distinct(StringComparer.Ordinal)
 		];
 	}
 
 	public static string Layout(JsonElement data)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(CalendarWidgetTypes.LayoutKey, out var value) &&
-			value.ValueKind == JsonValueKind.String &&
-			value.GetString() == CalendarWidgetTypes.LayoutNextEvent
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(CalendarWidgetTypes.LayoutKey, out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& value.GetString() == CalendarWidgetTypes.LayoutNextEvent
 				? CalendarWidgetTypes.LayoutNextEvent
 				: CalendarWidgetTypes.LayoutAgenda;
+	}
 
-	public static bool IsNextEvent(JsonElement data) => Layout(data) == CalendarWidgetTypes.LayoutNextEvent;
+	public static bool IsNextEvent(JsonElement data)
+	{
+		return Layout(data) == CalendarWidgetTypes.LayoutNextEvent;
+	}
 
-	public static bool ShowDate(JsonElement data) => ReadBool(data, CalendarWidgetTypes.ShowDateKey) ?? true;
+	public static bool ShowDate(JsonElement data)
+	{
+		return ReadBool(data, CalendarWidgetTypes.ShowDateKey) ?? true;
+	}
 
 	public static int Days(JsonElement data)
-		=> ReadNumber(data, CalendarWidgetTypes.DaysKey) is { } days
+	{
+		return ReadNumber(data, CalendarWidgetTypes.DaysKey) is { } days
 			? (int)Math.Clamp(Math.Round(days), CalendarWidgetTypes.MinDays, CalendarWidgetTypes.MaxDays)
 			: CalendarWidgetTypes.MinDays;
+	}
 
 	public static int LeadTimeMinutes(JsonElement data)
-		=> ReadNumber(data, CalendarWidgetTypes.LeadTimeKey) is { } minutes
+	{
+		return ReadNumber(data, CalendarWidgetTypes.LeadTimeKey) is { } minutes
 			? (int)Math.Clamp(Math.Round(minutes),
 				CalendarWidgetTypes.MinLeadTimeMinutes,
 				CalendarWidgetTypes.MaxLeadTimeMinutes)
 			: CalendarWidgetTypes.DefaultLeadTimeMinutes;
+	}
 
 	public static string WhenStarted(JsonElement data)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(CalendarWidgetTypes.WhenStartedKey, out var value) &&
-			value.ValueKind == JsonValueKind.String &&
-			value.GetString() == CalendarWidgetTypes.WhenStartedNext
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(CalendarWidgetTypes.WhenStartedKey, out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& value.GetString() == CalendarWidgetTypes.WhenStartedNext
 				? CalendarWidgetTypes.WhenStartedNext
 				: CalendarWidgetTypes.WhenStartedNow;
+	}
 
 	public static bool? ReadBool(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	private static double? ReadNumber(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 }

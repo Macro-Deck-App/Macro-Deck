@@ -7,7 +7,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 
@@ -29,9 +28,15 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 		return id;
 	}
 
-	public void Connect(YtmDesktopConnection connection) => _connection = connection;
+	public void Connect(YtmDesktopConnection connection)
+	{
+		_connection = connection;
+	}
 
-	public void Disconnect() => _connection = null;
+	public void Disconnect()
+	{
+		_connection = null;
+	}
 
 	public YtmDesktopSnapshot Snapshot => _connection?.Snapshot ?? YtmDesktopSnapshot.Disconnected;
 
@@ -79,19 +84,29 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.Play, null, "play", cancellationToken);
+	{
+		return GuardCommand(YtmCommands.Play, null, "play", cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.Pause, null, "pause", cancellationToken);
+	{
+		return GuardCommand(YtmCommands.Pause, null, "pause", cancellationToken);
+	}
 
 	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.PlayPause, null, "toggle play/pause", cancellationToken);
+	{
+		return GuardCommand(YtmCommands.PlayPause, null, "toggle play/pause", cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.Next, null, "next", cancellationToken);
+	{
+		return GuardCommand(YtmCommands.Next, null, "next", cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.Previous, null, "previous", cancellationToken);
+	{
+		return GuardCommand(YtmCommands.Previous, null, "previous", cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
 	{
@@ -138,10 +153,12 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> GuardCommand(YtmCommands.RepeatMode,
+	{
+		return GuardCommand(YtmCommands.RepeatMode,
 			YtmDesktopStateMapper.ToCompanionRepeatMode(mode),
 			"set repeat mode",
 			cancellationToken);
+	}
 
 	public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
 	{
@@ -237,7 +254,7 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 				break;
 			default:
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.YtmDesktop.Errors.UnknownRatingMode(mode: mode));
+					AppStrings.Integrations.YtmDesktop.Errors.UnknownRatingMode(mode));
 		}
 
 		if (command is null)
@@ -276,15 +293,15 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 				if (muted is null)
 				{
 					_logger.Warning(
-						"YouTube Music Desktop App did not report the mute state; muting instead of toggling. " +
-						"Reporting it needs version 2.0.1 or newer");
+						"YouTube Music Desktop App did not report the mute state; muting instead of toggling. "
+						+ "Reporting it needs version 2.0.1 or newer");
 				}
 
 				command = muted == true ? YtmCommands.Unmute : YtmCommands.Mute;
 				break;
 			default:
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.YtmDesktop.Errors.UnknownMuteMode(mode: mode));
+					AppStrings.Integrations.YtmDesktop.Errors.UnknownMuteMode(mode));
 		}
 
 		return await SendActionCommandAsync(connection, command, null, cancellationToken);
@@ -343,8 +360,7 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 		{
 			var needle = filter.Trim();
 			queue = queue.Where(item =>
-				Contains(item.Title, needle) ||
-				Contains(item.Author, needle));
+				Contains(item.Title, needle) || Contains(item.Author, needle));
 		}
 
 		return queue
@@ -376,7 +392,9 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private static bool Contains(string? haystack, string needle)
-		=> !string.IsNullOrEmpty(haystack) && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+	{
+		return !string.IsNullOrEmpty(haystack) && haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private async Task GuardCommand(
 		string command,
@@ -427,7 +445,7 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 		{
 			_logger.Warning("YouTube Music Desktop App rejected {Command}: {Message}", command, ex.Message);
 			return ActionResult.Failed(ToErrorCode(ex),
-				AppStrings.Integrations.YtmDesktop.Errors.ApiRejected(details: ex.Message));
+				AppStrings.Integrations.YtmDesktop.Errors.ApiRejected(ex.Message));
 		}
 		catch (Exception ex)
 		{
@@ -438,7 +456,8 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 	}
 
 	private static string ToErrorCode(YtmDesktopApiException ex)
-		=> ex.ErrorCode switch
+	{
+		return ex.ErrorCode switch
 		{
 			YtmErrorCodes.Unauthenticated => ActionErrorCodes.PermissionDenied,
 			YtmErrorCodes.YoutubeMusicUnavailable or YtmErrorCodes.YoutubeMusicTimeOut => ActionErrorCodes.Unavailable,
@@ -449,6 +468,7 @@ internal sealed class YtmDesktopMusicPlayer : ICatalogMusicPlayer
 				or YtmErrorCodes.InvalidChangeRequest => ActionErrorCodes.InvalidParameter,
 			_ => (int)ex.StatusCode == 429 ? ActionErrorCodes.Timeout : ActionErrorCodes.ProviderError
 		};
+	}
 
 	private static string Hash(string value)
 	{

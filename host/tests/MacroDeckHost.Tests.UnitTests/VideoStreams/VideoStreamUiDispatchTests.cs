@@ -31,8 +31,8 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 	{
 		_world = new VideoStreamWorld(inProcessTimeout: TimeSpan.FromMinutes(5));
 		_provider = new ScriptedVideoProvider("front", "main", "hung");
-		_hungOpen = new TaskCompletionSource<VideoStreamSessionDescription>(
-			TaskCreationOptions.RunContinuationsAsynchronously);
+		_hungOpen = new TaskCompletionSource<VideoStreamSessionDescription>(TaskCreationOptions
+			.RunContinuationsAsynchronously);
 		_provider.OnOpen = (request, _) => request.StreamId == "hung"
 			? _hungOpen.Task
 			: Task.FromResult(VideoStreamSessionDescription.Hls("https://camera.local/" + request.StreamId));
@@ -80,7 +80,9 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			"KeepAliveVideoStream",
 			new KeepAliveVideoStreamRequest { SessionId = open.SessionId }));
 		await DispatchAsync(stranger, "CloseVideoStream", new CloseVideoStreamRequest { SessionId = open.SessionId });
-		await DispatchAsync(owner, "KeepAliveVideoStream", new KeepAliveVideoStreamRequest { SessionId = open.SessionId });
+		await DispatchAsync(owner,
+			"KeepAliveVideoStream",
+			new KeepAliveVideoStreamRequest { SessionId = open.SessionId });
 
 		Assert.Multiple(() =>
 		{
@@ -115,7 +117,11 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 	[Test]
 	public void Every_refusal_has_its_own_text_in_every_shipped_language()
 	{
-		string[] cultures = ["en", "de", "it", "cs", "pl", "es", "fr", "zh", "ru", "uk", "ja", "ko", "pt-BR", "ar", "hi", "tr", "nl", "id", "zh-TW"];
+		string[] cultures =
+		[
+			"en", "de", "it", "cs", "pl", "es", "fr", "zh", "ru", "uk", "ja", "ko", "pt-BR", "ar", "hi", "tr", "nl",
+			"id", "zh-TW"
+		];
 		var errors = Enum.GetValues<VideoStreamError>();
 
 		var english = errors.Select(error => Text(error, "en")).ToList();
@@ -128,13 +134,16 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			Assert.That(texts, Is.Unique, $"Two refusals read the same in {culture}.");
 			if (culture != "en")
 			{
-				Assert.That(texts.Where((text, index) => text == english[index]), Is.Empty,
+				Assert.That(texts.Where((text, index) => text == english[index]),
+					Is.Empty,
 					$"{culture} falls back to English.");
 			}
 		}
 
 		static string? Text(VideoStreamError error, string culture)
-			=> TestLocalization.Resolver.Resolve(VideoStreamUiMapping.ErrorText(error), culture);
+		{
+			return TestLocalization.Resolver.Resolve(VideoStreamUiMapping.ErrorText(error), culture);
+		}
 	}
 
 	[Test]
@@ -156,46 +165,60 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			Assert.That(_provider.Closes,
 				Is.EqualTo(new[] { (mine.SessionId, VideoStreamSessionReason.ConsumerDisconnected) }));
 			Assert.That(_world.Publisher.Of<VideoStreamSessionClosedNotification>()
-				.Select(closed => closed.SessionId), Is.EqualTo(new[] { mine.SessionId }));
+					.Select(closed => closed.SessionId),
+				Is.EqualTo(new[] { mine.SessionId }));
 		});
 	}
 
 	private static async Task<OpenVideoStreamResponse> OpenAsync(UiWebSocketDispatcher dispatcher, string streamId)
 	{
 		var result = await DispatchAsync(dispatcher,
-			"OpenVideoStream",
-			new OpenVideoStreamRequest { ProviderId = Front, StreamId = streamId, AcceptedTransports = ["hls", "mjpeg"] })
+				"OpenVideoStream",
+				new OpenVideoStreamRequest
+					{ ProviderId = Front, StreamId = streamId, AcceptedTransports = ["hls", "mjpeg"] })
 			.WaitAsync(TimeSpan.FromSeconds(10));
 		return result!.Value.Deserialize<OpenVideoStreamResponse>(UiWebSocketProtocol.Json)!;
 	}
 
 	private static Task<JsonElement?> DispatchAsync(UiWebSocketDispatcher dispatcher, string type, object request)
-		=> dispatcher.DispatchAsync(type,
+	{
+		return dispatcher.DispatchAsync(type,
 			JsonSerializer.SerializeToElement(new[] { request }, UiWebSocketProtocol.Json),
 			CancellationToken.None);
+	}
 
 	private static ClaimsPrincipal Device()
-		=> new(new ClaimsIdentity([new Claim(AuthDefaults.DeviceClaim, Guid.NewGuid().ToString())], "test"));
+	{
+		return new ClaimsPrincipal(new ClaimsIdentity([new Claim(AuthDefaults.DeviceClaim, Guid.NewGuid().ToString())],
+			"test"));
+	}
 
 	private UiWebSocketDispatcher DispatcherFor(string connectionId)
-		=> Build(connectionId, null);
+	{
+		return Build(connectionId, null);
+	}
 
 	private UiWebSocketDispatcher DisconnectableDispatcherFor(string connectionId, CompanionHarness companion)
-		=> Build(connectionId, companion);
+	{
+		return Build(connectionId, companion);
+	}
 
 	private UiWebSocketDispatcher Build(string connectionId, CompanionHarness? companion)
-		=> new(connectionId: connectionId,
-			principal: Device(),
-			abort: static () => { },
-			labelText: null!,
-			subscriptions: new LabelSubscriptionTracker(),
-			widgetState: null!,
-			widgetStateSubscriptions: new WidgetStateSubscriptionTracker(),
-			variableInterest: new VariableInterestTracker(),
-			variableBroadcaster: null!,
-			getMusicPlayerInstances: null!,
-			getMusicPlayerState: null!,
-			getWeatherInstances: null!,
+	{
+		return new UiWebSocketDispatcher(connectionId,
+			Device(),
+			static () =>
+			{
+			},
+			null!,
+			new LabelSubscriptionTracker(),
+			null!,
+			new WidgetStateSubscriptionTracker(),
+			new VariableInterestTracker(),
+			null!,
+			null!,
+			null!,
+			null!,
 			getWeatherState: null!,
 			getVariableCatalogProviders: null!,
 			discoverCatalogVariables: null!,
@@ -231,4 +254,5 @@ internal sealed class VideoStreamUiDispatchTests : UiSessionFixture
 			videoStreamProviders: _world.Registry,
 			notifications: new NullNotificationManager(),
 			connectionCancellation: CancellationToken.None);
+	}
 }

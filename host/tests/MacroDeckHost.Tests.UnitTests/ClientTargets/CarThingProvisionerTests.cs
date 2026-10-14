@@ -55,7 +55,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: model, tunnelPort: 8193)]
+			Devices = [Device(model, 8193)]
 		};
 		var provisioner = Create(manager);
 
@@ -76,9 +76,9 @@ public class CarThingProvisionerTests
 			Status = _ready,
 			Devices =
 			[
-				Device(model: "Car_Thing",
-					tunnelPort: null,
-					state: AdbDeviceState.Unauthorized)
+				Device("Car_Thing",
+					null,
+					AdbDeviceState.Unauthorized)
 			]
 		};
 		var provisioner = Create(manager);
@@ -109,8 +109,8 @@ public class CarThingProvisionerTests
 			Status = _ready,
 			Devices =
 			[
-				Device(model: "Pixel 8",
-					tunnelPort: 8193,
+				Device("Pixel 8",
+					8193,
 					manufacturer: "/bin/sh: getprop: not found")
 			]
 		};
@@ -129,7 +129,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Pixel 8", tunnelPort: 8193)]
+			Devices = [Device("Pixel 8", 8193)]
 		};
 		var provisioner = Create(manager);
 
@@ -152,7 +152,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Superbird", tunnelPort: null)]
+			Devices = [Device("Superbird", null)]
 		};
 		var provisioner = Create(manager);
 
@@ -176,7 +176,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Superbird", tunnelPort: 8195)]
+			Devices = [Device("Superbird", 8195)]
 		};
 		var provisioner = Create(manager, scratch);
 
@@ -210,7 +210,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Superbird", tunnelPort: 8193)]
+			Devices = [Device("Superbird", 8193)]
 		};
 		var provisioner = Create(manager);
 
@@ -241,7 +241,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)]
+			Devices = [Device("Car_Thing", 8193)]
 		};
 		var provisioner = Create(manager);
 
@@ -265,7 +265,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)],
+			Devices = [Device("Car_Thing", 8193)],
 			QueryResultFor = command => command switch
 			{
 				AdbListServicesCommand => Result.Ok<string, AdbFailureCode>(
@@ -300,7 +300,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)],
+			Devices = [Device("Car_Thing", 8193)],
 			QueryResultFor = command => command switch
 			{
 				AdbListServicesCommand => Result.Ok<string, AdbFailureCode>(
@@ -320,7 +320,8 @@ public class CarThingProvisionerTests
 			CancellationToken.None);
 
 		var webRoot = result.Step!.Fields
-			.Single(field => field.FieldId == CarThingProvisioner.FieldWebRoot).DefaultValue;
+			.Single(field => field.FieldId == CarThingProvisioner.FieldWebRoot)
+			.DefaultValue;
 		Assert.That(webRoot, Is.EqualTo("/var/www"));
 	}
 
@@ -332,7 +333,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)],
+			Devices = [Device("Car_Thing", 8193)],
 			QueryResultFor = command => command is AdbListServicesCommand
 				? Result.Ok<string, AdbFailureCode>("chromium   RUNNING\n")
 				: Result.Ok<string, AdbFailureCode>(string.Empty)
@@ -359,7 +360,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)],
+			Devices = [Device("Car_Thing", 8193)],
 			QueryResultFor = _ => Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed, "nope")
 		};
 		var provisioner = Create(manager);
@@ -384,7 +385,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)]
+			Devices = [Device("Car_Thing", 8193)]
 		};
 		var provisioner = Create(manager, scratch, auth);
 
@@ -410,7 +411,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)]
+			Devices = [Device("Car_Thing", 8193)]
 		};
 		var provisioner = Create(manager, scratch, auth);
 
@@ -438,7 +439,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Car_Thing", tunnelPort: 8193)]
+			Devices = [Device("Car_Thing", 8193)]
 		};
 		var provisioner = Create(manager, scratch);
 
@@ -467,7 +468,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Superbird", tunnelPort: 8193)],
+			Devices = [Device("Superbird", 8193)],
 			ExecuteResultFor = command => command is AdbRestartServiceCommand
 				? Result.Fail<AdbFailureCode>(AdbFailureCode.CommandFailed, "no such service")
 				: Result.Ok<AdbFailureCode>()
@@ -497,7 +498,7 @@ public class CarThingProvisionerTests
 		var manager = new FakeAdbManager
 		{
 			Status = _ready,
-			Devices = [Device(model: "Superbird", tunnelPort: 8193)]
+			Devices = [Device("Superbird", 8193)]
 		};
 		var provisioner = Create(manager, scratch);
 
@@ -540,10 +541,12 @@ public class CarThingProvisionerTests
 		FakeAdbManager manager,
 		FakeScratchWriter? scratch = null,
 		FakeEnrollmentAuthService? authService = null)
-		=> new(manager,
+	{
+		return new CarThingProvisioner(manager,
 			scratch ?? new FakeScratchWriter(),
 			authService ?? new FakeEnrollmentAuthService(),
 			ScopeFactory());
+	}
 
 	/// <summary>Just enough container for the one thing provisioning resolves: the waiting text.</summary>
 	private static IServiceScopeFactory ScopeFactory()
@@ -559,12 +562,14 @@ public class CarThingProvisionerTests
 		int? tunnelPort,
 		AdbDeviceState state = AdbDeviceState.Device,
 		string? manufacturer = "Spotify")
-		=> new(Serial,
+	{
+		return new AdbDevice(Serial,
 			state,
 			model,
-			Manufacturer: manufacturer,
-			Product: model,
-			TransportId: "1",
-			Tunnel: tunnelPort is { } port ? new AdbTunnel(true, port, 8194, null, null) : null,
-			LastSeenAt: DateTimeOffset.UnixEpoch);
+			manufacturer,
+			model,
+			"1",
+			tunnelPort is { } port ? new AdbTunnel(true, port, 8194, null, null) : null,
+			DateTimeOffset.UnixEpoch);
+	}
 }

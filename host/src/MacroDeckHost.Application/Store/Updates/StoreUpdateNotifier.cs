@@ -19,7 +19,8 @@ public sealed class StoreUpdateNotifier : IDisposable
 	private string? _entryId;
 	private string? _lastText;
 
-	public StoreUpdateNotifier(IUserNotificationStore store,
+	public StoreUpdateNotifier(
+		IUserNotificationStore store,
 		StoreAutoUpdater autoUpdater,
 		IServiceScopeFactory scopeFactory)
 	{
@@ -56,10 +57,10 @@ public sealed class StoreUpdateNotifier : IDisposable
 			var keys = relevant.Select(StoreUpdateScope.Key).ToList();
 			var hasNew = keys.Any(key => !_notified.Contains(key));
 			var title = await ActiveLocalization.Resolve(_scopeFactory,
-				AppStrings.Notifications.StoreUpdatesAvailable(count: relevant.Count));
+				AppStrings.Notifications.StoreUpdatesAvailable(relevant.Count));
 			var message = await ActiveLocalization.Resolve(_scopeFactory,
-				AppStrings.Notifications.StoreUpdatesAvailableMessage(
-					names: string.Join(", ", relevant.Select(update => update.Name))));
+				AppStrings.Notifications.StoreUpdatesAvailableMessage(string.Join(", ",
+					relevant.Select(update => update.Name))));
 			var text = title + "\n" + message;
 
 			// A dismissed entry stays dismissed until a version the user has not been told about appears.
@@ -88,7 +89,10 @@ public sealed class StoreUpdateNotifier : IDisposable
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	private void Retire()
 	{

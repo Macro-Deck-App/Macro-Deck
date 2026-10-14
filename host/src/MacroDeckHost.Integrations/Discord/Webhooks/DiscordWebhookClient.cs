@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord.Webhooks;
 
@@ -76,8 +75,8 @@ internal sealed class DiscordWebhookClient : IDiscordWebhookClient
 			return "No webhook URL was configured.";
 		}
 
-		if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var uri) ||
-			!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
+		if (!Uri.TryCreate(webhookUrl, UriKind.Absolute, out var uri)
+			|| !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal))
 		{
 			return "The webhook URL must be an https:// address.";
 		}

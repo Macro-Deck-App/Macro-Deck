@@ -20,7 +20,8 @@ internal sealed class ScreenSaverProviderCapabilityHandler(
 	public string Kind => CapabilityKinds.ScreenSaverProvider;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -30,6 +31,7 @@ internal sealed class ScreenSaverProviderCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -44,8 +46,8 @@ internal sealed class ScreenSaverProviderCapabilityHandler(
 			return Task.FromResult(CapabilityInvocationResult.Ok(new ScreenSaverProviderDescribePayload
 			{
 				ProviderName = _providers.Select(provider => provider.ProviderName)
-						.FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-					metadata.Name,
+						.FirstOrDefault(name => !string.IsNullOrEmpty(name))
+					?? metadata.Name,
 				ScreenSavers = ScreenSavers()
 			}));
 		}
@@ -69,5 +71,10 @@ internal sealed class ScreenSaverProviderCapabilityHandler(
 	}
 
 	private IReadOnlyList<ScreenSaverDescriptorDto> ScreenSavers()
-		=> [.. _providers.SelectMany(provider => provider.GetScreenSavers()).Select(ScreenSaverDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetScreenSavers()).Select(ScreenSaverDescriptorMapper.ToDto)
+		];
+	}
 }

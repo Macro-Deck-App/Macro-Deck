@@ -17,7 +17,8 @@ public sealed class AnnouncementService : IAnnouncementService, IDisposable
 	private Announcement? _pending;
 	private int _highestFetched;
 
-	public AnnouncementService(IPlatformAnnouncementClient client,
+	public AnnouncementService(
+		IPlatformAnnouncementClient client,
 		IServiceScopeFactory scopeFactory,
 		TimeProvider timeProvider)
 	{
@@ -124,5 +125,8 @@ public sealed class AnnouncementService : IAnnouncementService, IDisposable
 			number.ToString(CultureInfo.InvariantCulture));
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 }

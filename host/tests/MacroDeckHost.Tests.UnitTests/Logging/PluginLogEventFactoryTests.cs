@@ -27,7 +27,7 @@ public class PluginLogEventFactoryTests
 			{
 				["MacroDeckIntegrationId"] = "com.example.hue",
 				["LogOrigin"] = "Host",
-				["SourceContext"] = "Hue.Client",
+				["SourceContext"] = "Hue.Client"
 			}
 		};
 
@@ -55,7 +55,7 @@ public class PluginLogEventFactoryTests
 			{
 				[PluginLogEventFactory.SessionIdPropertyName] = "forged-session",
 				[PluginLogEventFactory.PluginVersionPropertyName] = "9.9.9-forged",
-				[PluginLogEventFactory.ProcessIdPropertyName] = "999999",
+				[PluginLogEventFactory.ProcessIdPropertyName] = "999999"
 			}
 		};
 
@@ -88,7 +88,7 @@ public class PluginLogEventFactoryTests
 			RenderedMessage = "connected",
 			Properties = new Dictionary<string, string>(StringComparer.Ordinal)
 			{
-				[PluginLogEventFactory.ProcessIdPropertyName] = "999999",
+				[PluginLogEventFactory.ProcessIdPropertyName] = "999999"
 			}
 		};
 
@@ -113,7 +113,7 @@ public class PluginLogEventFactoryTests
 			Timestamp = claimedTimestamp,
 			Level = LogLevels.Information,
 			MessageTemplate = "drifted",
-			RenderedMessage = "drifted",
+			RenderedMessage = "drifted"
 		};
 
 		var logEvent = PluginLogEventFactory.Create("com.example.plugin", "session-1", null, null, dto, timeProvider);
@@ -208,9 +208,9 @@ public class PluginLogEventFactoryTests
 				"the embedded newline must survive only as the literal two characters \\n");
 
 			Assert.That(physicalLines.Any(candidate =>
-					HostLogParser.TryParseHeader(candidate, out var header) &&
-					header.Source == LogEntrySource.Host &&
-					string.Equals(header.Message, "fabricated", StringComparison.Ordinal)),
+					HostLogParser.TryParseHeader(candidate, out var header)
+					&& header.Source == LogEntrySource.Host
+					&& string.Equals(header.Message, "fabricated", StringComparison.Ordinal)),
 				Is.False);
 		});
 	}
@@ -284,7 +284,7 @@ public class PluginLogEventFactoryTests
 			Properties = new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["pluginSecret"] = "pluginSecret=s3cr3t-value-here",
-				["sessionToken"] = "sessionToken=deadbeef1234567890",
+				["sessionToken"] = "sessionToken=deadbeef1234567890"
 			}
 		};
 
@@ -311,7 +311,11 @@ public class PluginLogEventFactoryTests
 	}
 
 	private static object? ReadScalarProperty(LogEvent logEvent, string name)
-		=> logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue scalar ? scalar.Value : null;
+	{
+		return logEvent.Properties.TryGetValue(name, out var value) && value is ScalarValue scalar
+			? scalar.Value
+			: null;
+	}
 
 	private static (string Line, ParsedLogLine Parsed) FormatAndParse(LogEvent logEvent)
 	{
@@ -342,6 +346,9 @@ public class PluginLogEventFactoryTests
 
 		public LogEvent Single => _events.Single();
 
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			_events.Add(logEvent);
+		}
 	}
 }

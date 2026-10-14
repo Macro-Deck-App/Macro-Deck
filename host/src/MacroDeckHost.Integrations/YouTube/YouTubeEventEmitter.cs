@@ -14,7 +14,8 @@ internal sealed class YouTubeEventEmitter
 	}
 
 	public void PublishStreamOnline(YouTubeAccount account, YouTubeAccountState state)
-		=> Publish(account,
+	{
+		Publish(account,
 			YouTubeEventIds.StreamOnline,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
@@ -22,9 +23,12 @@ internal sealed class YouTubeEventEmitter
 				["startedAt"] = state.StreamStartedAt?.ToString("o", CultureInfo.InvariantCulture) ?? string.Empty,
 				["broadcastId"] = state.BroadcastId ?? string.Empty
 			});
+	}
 
 	public void PublishStreamOffline(YouTubeAccount account)
-		=> Publish(account, YouTubeEventIds.StreamOffline, new Dictionary<string, object?>(StringComparer.Ordinal));
+	{
+		Publish(account, YouTubeEventIds.StreamOffline, new Dictionary<string, object?>(StringComparer.Ordinal));
+	}
 
 	public void PublishChatEvent(YouTubeAccount account, YouTubeChatMessage message)
 	{
@@ -61,7 +65,8 @@ internal sealed class YouTubeEventEmitter
 	}
 
 	private static (string EventId, Dictionary<string, object?> Values)? Describe(YouTubeChatMessage message)
-		=> message switch
+	{
+		return message switch
 		{
 			{ Type: YouTubeChatMessageTypes.SuperChat, SuperChat: { } superChat } => (YouTubeEventIds.SuperChat,
 				new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -104,4 +109,5 @@ internal sealed class YouTubeEventEmitter
 				}),
 			_ => null
 		};
+	}
 }

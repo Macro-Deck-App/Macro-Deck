@@ -86,12 +86,17 @@ internal sealed class ScriptedAndroidDevices : IAndroidDeviceManager
 	}
 
 	public IAndroidDevice? FindDevice(string serial)
-		=> Devices.FirstOrDefault(device => device.Serial == serial);
+	{
+		return Devices.FirstOrDefault(device => device.Serial == serial);
+	}
 
 	public Task<IAndroidDevice> ConnectAsync(string address, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public ScriptedAndroidDevice Attach(string serial,
+	public ScriptedAndroidDevice Attach(
+		string serial,
 		string? stableId,
 		bool raise = true,
 		AndroidBatteryState? battery = null,
@@ -161,9 +166,12 @@ internal sealed class ScriptedAndroidDevices : IAndroidDeviceManager
 	}
 
 	public void RaiseStateChanged(ScriptedAndroidDevice device, AndroidDeviceState previous)
-		=> DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, previous));
+	{
+		DeviceStateChanged?.Invoke(this, new AndroidDeviceEventArgs(device, previous));
+	}
 
-	public void SetState(string serial,
+	public void SetState(
+		string serial,
 		AndroidDeviceState state,
 		bool lacksUsbPermission = false,
 		AndroidDeviceMode mode = AndroidDeviceMode.Normal)
@@ -226,22 +234,36 @@ internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : I
 	}
 
 	public Task<AndroidBatteryState> GetBatteryStateAsync(CancellationToken cancellationToken = default)
-		=> BatteryFailure is { } failure ? Task.FromException<AndroidBatteryState>(failure) : Task.FromResult(Battery);
+	{
+		return BatteryFailure is { } failure
+			? Task.FromException<AndroidBatteryState>(failure)
+			: Task.FromResult(Battery);
+	}
 
 	public Task PushFileAsync(string localPath, string remotePath, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task PullFileAsync(string remotePath, string localPath, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task InstallApkAsync(string apkPath, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task UninstallPackageAsync(string packageName, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<bool> IsPackageInstalledAsync(string packageName, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	internal ScriptedAndroidDevices? Owner { get; init; }
 
@@ -257,32 +279,54 @@ internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : I
 
 	public AndroidDeviceStatus? Status { get; set; }
 
-	public Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default) => Run($"SendKey:{key}");
+	public Task SendKeyAsync(AndroidKey key, CancellationToken cancellationToken = default)
+	{
+		return Run($"SendKey:{key}");
+	}
 
 	public Task TapAsync(int x, int y, CancellationToken cancellationToken = default)
-		=> Run($"Tap:{Invariant(x)}:{Invariant(y)}");
+	{
+		return Run($"Tap:{Invariant(x)}:{Invariant(y)}");
+	}
 
-	public Task SwipeAsync(int fromX,
+	public Task SwipeAsync(
+		int fromX,
 		int fromY,
 		int toX,
 		int toY,
 		TimeSpan duration,
 		CancellationToken cancellationToken = default)
-		=> Run($"Swipe:{Invariant(fromX)}:{Invariant(fromY)}:{Invariant(toX)}:{Invariant(toY)}:" +
-			Invariant((int)duration.TotalMilliseconds));
+	{
+		return Run($"Swipe:{Invariant(fromX)}:{Invariant(fromY)}:{Invariant(toX)}:{Invariant(toY)}:"
+			+ Invariant((int)duration.TotalMilliseconds));
+	}
 
-	public Task InputTextAsync(string text, CancellationToken cancellationToken = default) => Run($"InputText:{text}");
+	public Task InputTextAsync(string text, CancellationToken cancellationToken = default)
+	{
+		return Run($"InputText:{text}");
+	}
 
 	public Task StartAppAsync(string packageName, CancellationToken cancellationToken = default)
-		=> Run($"StartApp:{packageName}");
+	{
+		return Run($"StartApp:{packageName}");
+	}
 
 	public Task ForceStopAppAsync(string packageName, CancellationToken cancellationToken = default)
-		=> Run($"ForceStopApp:{packageName}");
+	{
+		return Run($"ForceStopApp:{packageName}");
+	}
 
-	public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default) => Run($"OpenUri:{uri}");
+	public Task OpenUriAsync(string uri, CancellationToken cancellationToken = default)
+	{
+		return Run($"OpenUri:{uri}");
+	}
 
-	public Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
-		=> Run($"Reboot:{mode}");
+	public Task RebootAsync(
+		AndroidRebootMode mode = AndroidRebootMode.Normal,
+		CancellationToken cancellationToken = default)
+	{
+		return Run($"Reboot:{mode}");
+	}
 
 	public async Task<byte[]> CaptureScreenshotAsync(CancellationToken cancellationToken = default)
 	{
@@ -303,5 +347,8 @@ internal sealed class ScriptedAndroidDevice(string serial, string? stableId) : I
 		return NextFailure is { } failure ? Task.FromException(failure) : Task.CompletedTask;
 	}
 
-	private static string Invariant(int value) => value.ToString(CultureInfo.InvariantCulture);
+	private static string Invariant(int value)
+	{
+		return value.ToString(CultureInfo.InvariantCulture);
+	}
 }

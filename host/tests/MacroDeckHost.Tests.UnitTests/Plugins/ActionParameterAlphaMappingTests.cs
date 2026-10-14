@@ -38,8 +38,8 @@ public class ActionParameterAlphaMappingTests
 	{
 		var plain = JsonSerializer.Serialize(ActionParameterDefMapper.Map(ActionParameter.Color("color")),
 			UiWebSocketProtocol.Json);
-		var optedIn = JsonSerializer.Serialize(ActionParameterDefMapper.Map(
-				new ActionParameter { Name = "color", Type = ActionParameterType.Color, AllowAlpha = true }),
+		var optedIn = JsonSerializer.Serialize(ActionParameterDefMapper.Map(new ActionParameter
+				{ Name = "color", Type = ActionParameterType.Color, AllowAlpha = true }),
 			UiWebSocketProtocol.Json);
 
 		Assert.Multiple(() =>

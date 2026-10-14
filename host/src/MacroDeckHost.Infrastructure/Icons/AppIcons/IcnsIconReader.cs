@@ -44,7 +44,7 @@ internal static class IcnsIconReader
 			var payload = span.Slice(offset + ChunkHeaderLength, (int)chunkLength - ChunkHeaderLength);
 			if (!IsMetadataType(chunkType) && TryReadPngWidth(payload, out var width))
 			{
-				if (width > bestWidth || (width == bestWidth && payload.Length > bestLength))
+				if (width > bestWidth || width == bestWidth && payload.Length > bestLength)
 				{
 					best = payload.ToArray();
 					bestWidth = width;
@@ -59,10 +59,12 @@ internal static class IcnsIconReader
 	}
 
 	private static bool IsMetadataType(ReadOnlySpan<byte> chunkType)
-		=> chunkType.SequenceEqual("TOC "u8) ||
-			chunkType.SequenceEqual("icnV"u8) ||
-			chunkType.SequenceEqual("name"u8) ||
-			chunkType.SequenceEqual("info"u8);
+	{
+		return chunkType.SequenceEqual("TOC "u8)
+			|| chunkType.SequenceEqual("icnV"u8)
+			|| chunkType.SequenceEqual("name"u8)
+			|| chunkType.SequenceEqual("info"u8);
+	}
 
 	private static bool TryReadPngWidth(ReadOnlySpan<byte> payload, out int width)
 	{

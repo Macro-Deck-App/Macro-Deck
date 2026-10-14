@@ -43,7 +43,15 @@ public partial class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			new FakeRemotePluginIntegrationRegistrar(),
@@ -67,17 +75,27 @@ public partial class PluginWebSocketEndpointDispatchTests
 		PluginSessionRegistry SessionRegistry,
 		ScriptedCapabilityInvoker Invoker,
 		RecordingRegistrar Registrar,
-		InMemorySnapshotStore SnapshotStore) CreateEndpointWithState(string pluginId,
-		string sessionId,
-		IEmailSyncSignal? emailSync = null)
+		InMemorySnapshotStore SnapshotStore) CreateEndpointWithState(
+			string pluginId,
+			string sessionId,
+			IEmailSyncSignal? emailSync = null)
 	{
 		var registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		var invoker = new ScriptedCapabilityInvoker();
 		var snapshotStore = new InMemorySnapshotStore();
-		var registrar = new RecordingRegistrar { Refresher = new RemotePluginSnapshotRefresher(invoker, snapshotStore) };
+		var registrar = new RecordingRegistrar
+			{ Refresher = new RemotePluginSnapshotRefresher(invoker, snapshotStore) };
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			invoker,
 			registrar,
@@ -124,22 +142,28 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	private static PluginLogIngestor CreateLogIngestor(IPluginSessionRegistry sessionRegistry)
-		=> new(new PluginLogRateLimiter(TimeProvider.System),
+	{
+		return new PluginLogIngestor(new PluginLogRateLimiter(TimeProvider.System),
 			sessionRegistry,
 			new FakePluginSupervisor(),
 			TimeProvider.System);
+	}
 
 	private sealed class FakePluginCallbackRouter : IPluginCallbackRouter
 	{
 		public List<string?> RoutedSessionIds { get; } = [];
 
-		public Task<HostCallbackResult> RouteAsync(string pluginId,
+		public Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string correlationId,
 			HostInvokePayload payload,
 			CancellationToken cancellationToken)
-			=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+		{
+			return RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+		}
 
-		public Task<HostCallbackResult> RouteAsync(string pluginId,
+		public Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string? sessionId,
 			string correlationId,
 			HostInvokePayload payload,
@@ -149,69 +173,112 @@ public partial class PluginWebSocketEndpointDispatchTests
 			return Task.FromResult(HostCallbackResult.Ok());
 		}
 
-		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload) => null;
+		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload)
+		{
+			return null;
+		}
 	}
 
 	private sealed class FakeEventBus : IEventBus
 	{
 		private readonly Channel<EventOccurrence> _channel = Channel.CreateUnbounded<EventOccurrence>();
 
-		public void Publish(EventOccurrence occurrence) => _channel.Writer.TryWrite(occurrence);
+		public void Publish(EventOccurrence occurrence)
+		{
+			_channel.Writer.TryWrite(occurrence);
+		}
 
 		public ChannelReader<EventOccurrence> Reader => _channel.Reader;
 	}
 
 	private sealed class EmptyDeckNavigator : IDeckNavigator
 	{
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeckFolder> GetFolders() => [];
+		public IReadOnlyList<DeckFolder> GetFolders()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<DeckProfile> GetProfiles() => [];
+		public IReadOnlyList<DeckProfile> GetProfiles()
+		{
+			return [];
+		}
 	}
 
 	private sealed class EmptyScriptApi : IScriptApi
 	{
-		public IReadOnlyList<Script> GetScripts() => [];
+		public IReadOnlyList<Script> GetScripts()
+		{
+			return [];
+		}
 
-		public Task<MacroDeck.Sdk.Actions.ActionResult> RunAsync(string scriptId,
+		public Task<MacroDeck.Sdk.Actions.ActionResult> RunAsync(
+			string scriptId,
 			IReadOnlyDictionary<string, object?>? inputs = null,
 			string? originClientId = null,
 			string? ownerWidgetId = null,
 			CancellationToken cancellationToken = default)
-			=> MacroDeck.Sdk.Actions.ActionResult.SucceededTask;
+		{
+			return MacroDeck.Sdk.Actions.ActionResult.SucceededTask;
+		}
 	}
 
 	private sealed class EmptyWidgetApi : IWidgetApi
 	{
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [];
+		}
 
-		public bool Exists(string widgetId) => false;
+		public bool Exists(string widgetId)
+		{
+			return false;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	[Test]
@@ -224,7 +291,15 @@ public partial class PluginWebSocketEndpointDispatchTests
 			new FakeRemotePluginIntegrationRegistrar(),
 			router,
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
-			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
+			new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None),
 			new FakeEventBus(),
 			new LoginThrottle(TimeProvider.System),
 			TimeProvider.System,
@@ -240,8 +315,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 			{
 				Type = MessageTypes.HostInvoke,
 				Id = "1",
-				Payload = JsonSerializer.SerializeToElement(
-					new HostInvokePayload { Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterResource },
+				Payload = JsonSerializer.SerializeToElement(new HostInvokePayload
+						{ Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterResource },
 					PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
@@ -250,13 +325,18 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
-	public async Task An_artwork_lookup_waiting_on_a_player_does_not_hold_the_dispatch_loop_and_is_answered_when_it_finishes()
+	public async Task
+		An_artwork_lookup_waiting_on_a_player_does_not_hold_the_dispatch_loop_and_is_answered_when_it_finishes()
 	{
 		var router = new BlockingArtworkRouter();
 		var endpoint = EndpointWith(router);
 		var connection = new FakePluginConnection();
 
-		await endpoint.HandleHostInvokeAsync(connection, "com.example.plugin", "session-1", ArtworkInvoke("1"), CancellationToken.None);
+		await endpoint.HandleHostInvokeAsync(connection,
+			"com.example.plugin",
+			"session-1",
+			ArtworkInvoke("1"),
+			CancellationToken.None);
 
 		Assert.That(connection.Sent, Is.Empty, "the invoke returned to the dispatch loop before the lookup finished");
 
@@ -316,8 +396,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 					{
 						Type = MessageTypes.HostInvoke,
 						Id = index.ToString(CultureInfo.InvariantCulture),
-						Payload = JsonSerializer.SerializeToElement(
-							new HostInvokePayload
+						Payload = JsonSerializer.SerializeToElement(new HostInvokePayload
 							{
 								Api = HostApis.MusicPlayers, Operation = HostOperations.MusicPlayers.AlbumColor
 							},
@@ -357,7 +436,11 @@ public partial class PluginWebSocketEndpointDispatchTests
 		await Task.Delay(200);
 		var router2Attempt = new FakePluginConnection();
 		router.Reset();
-		await endpoint.HandleHostInvokeAsync(router2Attempt, "com.example.plugin", "session-1", ArtworkInvoke("9"), CancellationToken.None);
+		await endpoint.HandleHostInvokeAsync(router2Attempt,
+			"com.example.plugin",
+			"session-1",
+			ArtworkInvoke("9"),
+			CancellationToken.None);
 
 		Assert.That(router2Attempt.Sent, Is.Empty, "the fifth call was admitted after the first four ended");
 
@@ -368,14 +451,16 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	private static ProtocolEnvelope ArtworkInvoke(string id)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostInvoke,
 			Id = id,
-			Payload = JsonSerializer.SerializeToElement(
-				new HostInvokePayload { Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterMusicPlayerArtwork },
+			Payload = JsonSerializer.SerializeToElement(new HostInvokePayload
+					{ Api = HostApis.Ui, Operation = HostOperations.Ui.RegisterMusicPlayerArtwork },
 				PluginProtocolJson.Options)
 		};
+	}
 
 	private static PluginWebSocketEndpoint EndpointWith(IPluginCallbackRouter router)
 	{
@@ -386,7 +471,15 @@ public partial class PluginWebSocketEndpointDispatchTests
 			new FakeRemotePluginIntegrationRegistrar(),
 			router,
 			new PluginAssetReceiver(new InMemoryPluginAssetCache()),
-			new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None),
+			new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None),
 			new FakeEventBus(),
 			new LoginThrottle(TimeProvider.System),
 			TimeProvider.System,
@@ -398,19 +491,27 @@ public partial class PluginWebSocketEndpointDispatchTests
 
 	private sealed class BlockingArtworkRouter : IPluginCallbackRouter
 	{
-		public TaskCompletionSource Release { get; private set; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		public TaskCompletionSource Release { get; private set; }
+			= new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 		public bool ThrowOnRelease { get; set; }
 
-		public void Reset() => Release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		public void Reset()
+		{
+			Release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		}
 
-		public Task<HostCallbackResult> RouteAsync(string pluginId,
+		public Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string correlationId,
 			HostInvokePayload payload,
 			CancellationToken cancellationToken)
-			=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+		{
+			return RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+		}
 
-		public async Task<HostCallbackResult> RouteAsync(string pluginId,
+		public async Task<HostCallbackResult> RouteAsync(
+			string pluginId,
 			string? sessionId,
 			string correlationId,
 			HostInvokePayload payload,
@@ -421,7 +522,10 @@ public partial class PluginWebSocketEndpointDispatchTests
 			return ThrowOnRelease ? throw new InvalidOperationException("boom") : HostCallbackResult.Ok();
 		}
 
-		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload) => null;
+		public HostCallbackResult? Admit(string pluginId, HostInvokePayload payload)
+		{
+			return null;
+		}
 	}
 
 	[Test]
@@ -526,7 +630,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	private static ProtocolEnvelope EmailStateUpdate(string? inboxId)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.StateUpdate,
 			Id = Guid.NewGuid().ToString("N"),
@@ -534,6 +639,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 				new StateUpdatePayload { Kind = CapabilityKinds.EmailInbox, LocalId = inboxId },
 				PluginProtocolJson.Options)
 		};
+	}
 
 	[Test]
 	public void HandleStateUpdateAsync_With_A_Malformed_Payload_Does_Not_Throw()
@@ -866,10 +972,12 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	private static LogEventDto NewLogEvent(string message, string level = LogLevels.Information)
-		=> new()
+	{
+		return new LogEventDto
 		{
 			Timestamp = DateTimeOffset.UtcNow, Level = level, MessageTemplate = message, RenderedMessage = message
 		};
+	}
 
 	private static (PluginWebSocketEndpoint Endpoint, FakePluginConnection Connection, CapturingLogSink Sink)
 		CreateEndpointWithLogIngestor(LogEventLevel minimumLevel = LogEventLevel.Verbose)
@@ -878,7 +986,15 @@ public partial class PluginWebSocketEndpointDispatchTests
 		var invoker = new FakePluginCapabilityInvoker();
 		var throttle = new LoginThrottle(TimeProvider.System);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None);
 
 		var sink = new CapturingLogSink();
 		var capturingLogger = new LoggerConfiguration().MinimumLevel.Is(minimumLevel).WriteTo.Sink(sink).CreateLogger();
@@ -945,50 +1061,83 @@ public partial class PluginWebSocketEndpointDispatchTests
 	{
 		public bool CompleteResult { get; set; }
 
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("Not exercised by these tests.");
+		{
+			throw new NotSupportedException("Not exercised by these tests.");
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => CompleteResult;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return CompleteResult;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeRemotePluginIntegrationRegistrar : IRemotePluginIntegrationRegistrar
 	{
 		public Task<bool> RegisterAsync(string pluginId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(true);
+		{
+			return Task.FromResult(true);
+		}
 
 		public Task UnregisterAsync(string pluginId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task UnregisterVanishedInstallationsAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RegisterInstalledDetachedAsync(string pluginId,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task RegisterInstalledDetachedAsync(
+			string pluginId,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ApplyRefreshedSnapshotAsync(string pluginId,
+		public Task ApplyRefreshedSnapshotAsync(
+			string pluginId,
 			RemotePluginCapabilitySnapshot snapshot,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ApplyStateUpdateAsync(string pluginId,
+		public Task ApplyStateUpdateAsync(
+			string pluginId,
 			string kind,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RefreshLocalizationCatalogsAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class RecordingRegistrar : IRemotePluginIntegrationRegistrar
@@ -1026,18 +1175,29 @@ public partial class PluginWebSocketEndpointDispatchTests
 		}
 
 		public Task ForgetAsync(string pluginId, CancellationToken cancellationToken = default)
-			=> UnregisterAsync(pluginId, cancellationToken);
+		{
+			return UnregisterAsync(pluginId, cancellationToken);
+		}
 
 		public Task RegisterInstalledButStoppedAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task UnregisterVanishedInstallationsAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RegisterInstalledDetachedAsync(string pluginId,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task RegisterInstalledDetachedAsync(
+			string pluginId,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ApplyRefreshedSnapshotAsync(string pluginId,
+		public Task ApplyRefreshedSnapshotAsync(
+			string pluginId,
 			RemotePluginCapabilitySnapshot snapshot,
 			CancellationToken cancellationToken = default)
 		{
@@ -1046,7 +1206,9 @@ public partial class PluginWebSocketEndpointDispatchTests
 		}
 
 		public Task RefreshLocalizationCatalogsAsync(CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class ScriptedCapabilityInvoker : IPluginCapabilityInvoker
@@ -1061,7 +1223,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 
 		public int InvokeCount => Volatile.Read(ref _invokeCount);
 
-		public async Task<JsonElement?> InvokeAsync(string pluginId,
+		public async Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -1072,17 +1235,17 @@ public partial class PluginWebSocketEndpointDispatchTests
 				await gate.WaitAsync(cancellationToken);
 			}
 
-			if (request.Kind == CapabilityKinds.Variables &&
-				request.Operation == CapabilityOperations.Variables.Describe)
+			if (request.Kind == CapabilityKinds.Variables
+				&& request.Operation == CapabilityOperations.Variables.Describe)
 			{
-				return JsonSerializer.SerializeToElement(VariablesDescribeResult ??
-					new VariableCatalogPayload { DeclaredVariables = [], Variables = [] },
+				return JsonSerializer.SerializeToElement(
+					VariablesDescribeResult ?? new VariableCatalogPayload { DeclaredVariables = [], Variables = [] },
 					PluginProtocolJson.Options);
 			}
 
-			if (request.Kind == CapabilityKinds.EmailInbox &&
-				request.Operation == CapabilityOperations.EmailInbox.Inboxes &&
-				EmailInboxesResult is { } inboxes)
+			if (request.Kind == CapabilityKinds.EmailInbox
+				&& request.Operation == CapabilityOperations.EmailInbox.Inboxes
+				&& EmailInboxesResult is { } inboxes)
 			{
 				return JsonSerializer.SerializeToElement(inboxes, PluginProtocolJson.Options);
 			}
@@ -1090,13 +1253,19 @@ public partial class PluginWebSocketEndpointDispatchTests
 			throw new NotSupportedException($"Not scripted for kind '{request.Kind}'.");
 		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class InMemorySnapshotStore : IRemotePluginSnapshotStore
@@ -1104,11 +1273,16 @@ public partial class PluginWebSocketEndpointDispatchTests
 		private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
 		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-			=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+		{
+			return _byPluginId.TryGetValue(pluginId, out var snapshot)
 				? snapshot
 				: RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+		public bool Has(string pluginId)
+		{
+			return _byPluginId.ContainsKey(pluginId);
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 		{

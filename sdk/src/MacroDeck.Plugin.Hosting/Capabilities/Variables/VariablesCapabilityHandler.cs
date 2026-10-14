@@ -59,9 +59,9 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 		if (catalogs.Count > 1)
 		{
 			throw new InvalidOperationException(
-				"Only one IVariableProvider with SupportsCatalog may be registered in a single plugin. " +
-				"The host models a plugin as one integration, so a second catalog's resource ids could " +
-				"never be routed back to the provider that owns them.");
+				"Only one IVariableProvider with SupportsCatalog may be registered in a single plugin. "
+				+ "The host models a plugin as one integration, so a second catalog's resource ids could "
+				+ "never be routed back to the provider that owns them.");
 		}
 
 		_catalog = catalogs.Count == 1 ? catalogs[0] : null;
@@ -73,7 +73,9 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 	public string Kind => CapabilityKinds.Variables;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> [.. _providers.SelectMany(EagerDeclarationsOf)];
+	{
+		return [.. _providers.SelectMany(EagerDeclarationsOf)];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -103,15 +105,15 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 	private IEnumerable<DeclaredCapability> EagerDeclarationsOf(IVariableProvider provider)
 	{
 		var eager = provider.DeclaredVariables
-			.Where(definition => definition.Materialization == VariableMaterialization.Eager &&
-				definition.ResolvedId is not null)
+			.Where(definition => definition.Materialization == VariableMaterialization.Eager
+				&& definition.ResolvedId is not null)
 			.ToList();
 
 		if (eager.Count > VariableLimits.MaxEagerVariablesPerProvider)
 		{
-			_logger.Error("Integration '{Integration}' declares {Count} eager variables, more than the " +
-				"{Max} one provider may declare; the first {Max} in declaration order were kept and the " +
-				"rest are unavailable",
+			_logger.Error("Integration '{Integration}' declares {Count} eager variables, more than the "
+				+ "{Max} one provider may declare; the first {Max} in declaration order were kept and the "
+				+ "rest are unavailable",
 				provider.GetType().Name,
 				eager.Count,
 				VariableLimits.MaxEagerVariablesPerProvider,
@@ -184,8 +186,8 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 			return Written(VariableWriteResult.NotFound());
 		}
 
-		var definition = EagerDefinition(provider, invocation.LocalId) ??
-			await provider.ResolveAsync(invocation.LocalId, cancellationToken).ConfigureAwait(false);
+		var definition = EagerDefinition(provider, invocation.LocalId)
+			?? await provider.ResolveAsync(invocation.LocalId, cancellationToken).ConfigureAwait(false);
 
 		if (definition is null)
 		{
@@ -263,8 +265,8 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 
 		if (definition is not null && !IsValidCatalogDefinition(definition))
 		{
-			_logger.Warning("Variable catalog '{CatalogName}' resolved id '{Id}' to a definition whose own " +
-				"id '{DefinitionId}' is not a valid on-demand resource id; dropping it.",
+			_logger.Warning("Variable catalog '{CatalogName}' resolved id '{Id}' to a definition whose own "
+				+ "id '{DefinitionId}' is not a valid on-demand resource id; dropping it.",
 				_catalog.CatalogName,
 				arguments.Id,
 				definition.Id);
@@ -315,18 +317,24 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 	/// catalog, whose resource ids never appear in any eager list.
 	/// </summary>
 	private IVariableProvider? OwnerOf(string localId)
-		=> _providers.FirstOrDefault(provider => EagerDefinition(provider, localId) is not null) ?? _catalog;
+	{
+		return _providers.FirstOrDefault(provider => EagerDefinition(provider, localId) is not null) ?? _catalog;
+	}
 
 	private static VariableDefinition? EagerDefinition(IVariableProvider provider, string localId)
-		=> provider.Variables.FirstOrDefault(definition =>
-			definition.Materialization == VariableMaterialization.Eager &&
-			string.Equals(definition.ResolvedId, localId, StringComparison.Ordinal));
+	{
+		return provider.Variables.FirstOrDefault(definition =>
+			definition.Materialization == VariableMaterialization.Eager
+			&& string.Equals(definition.ResolvedId, localId, StringComparison.Ordinal));
+	}
 
 	private static CapabilityInvocationResult Written(VariableWriteResult result)
-		=> CapabilityInvocationResult.Ok(new VariableSetResult
+	{
+		return CapabilityInvocationResult.Ok(new VariableSetResult
 		{
 			Status = result.Status.ToString(), Message = PluginText.ToWireOrNull(result.Message)
 		});
+	}
 
 	private IEnumerable<VariableDefinition> ValidItems(IEnumerable<VariableDefinition> items)
 	{
@@ -338,8 +346,8 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 			}
 			else
 			{
-				_logger.Warning("Variable catalog '{CatalogName}' returned an invalid on-demand definition with id " +
-					"'{Id}'; dropping it.",
+				_logger.Warning("Variable catalog '{CatalogName}' returned an invalid on-demand definition with id "
+					+ "'{Id}'; dropping it.",
 					_catalog?.CatalogName,
 					item.Id);
 			}
@@ -347,9 +355,11 @@ internal sealed class VariablesCapabilityHandler : ICapabilityHandler
 	}
 
 	private static bool IsValidCatalogDefinition(VariableDefinition definition)
-		=> definition.Materialization == VariableMaterialization.OnDemand &&
-			definition.Id is { } id &&
-			MacroDeckId.IsValidLocalId(id, LocalIdKind.Resource);
+	{
+		return definition.Materialization == VariableMaterialization.OnDemand
+			&& definition.Id is { } id
+			&& MacroDeckId.IsValidLocalId(id, LocalIdKind.Resource);
+	}
 
 	private static T? Arguments<T>(CapabilityInvocation invocation)
 		where T : class

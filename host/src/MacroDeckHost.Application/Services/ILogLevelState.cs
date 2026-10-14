@@ -43,9 +43,15 @@ public sealed class LogLevelState : ILogLevelState
 		}
 	}
 
-	public LoggingLevelSwitch RegisterOverride(LogEventLevel baseline) => Register(new HardFloor(baseline));
+	public LoggingLevelSwitch RegisterOverride(LogEventLevel baseline)
+	{
+		return Register(new HardFloor(baseline));
+	}
 
-	public LoggingLevelSwitch RegisterNoiseFloor(LogEventLevel quiet) => Register(new NoiseFloor(quiet));
+	public LoggingLevelSwitch RegisterNoiseFloor(LogEventLevel quiet)
+	{
+		return Register(new NoiseFloor(quiet));
+	}
 
 	private LoggingLevelSwitch Register(LevelFloor floor)
 	{
@@ -59,7 +65,8 @@ public sealed class LogLevelState : ILogLevelState
 	}
 
 	private static LogEventLevel ToSerilog(LogEntryLevel level)
-		=> level switch
+	{
+		return level switch
 		{
 			LogEntryLevel.Verbose => LogEventLevel.Verbose,
 			LogEntryLevel.Debug => LogEventLevel.Debug,
@@ -69,6 +76,7 @@ public sealed class LogLevelState : ILogLevelState
 			LogEntryLevel.Fatal => LogEventLevel.Fatal,
 			_ => LogEventLevel.Information
 		};
+	}
 
 	private abstract class LevelFloor
 	{
@@ -93,7 +101,9 @@ public sealed class LogLevelState : ILogLevelState
 		}
 
 		public override void Apply(LogEventLevel minimum)
-			=> Switch.MinimumLevel = minimum > Baseline ? minimum : Baseline;
+		{
+			Switch.MinimumLevel = minimum > Baseline ? minimum : Baseline;
+		}
 	}
 
 	private sealed class NoiseFloor : LevelFloor
@@ -107,10 +117,12 @@ public sealed class LogLevelState : ILogLevelState
 		// without the upper clamp a quiet category would become more verbose than the rest of the log
 		// as soon as the user raises the minimum above the quiet level.
 		public override void Apply(LogEventLevel minimum)
-			=> Switch.MinimumLevel = minimum <= LogEventLevel.Debug
+		{
+			Switch.MinimumLevel = minimum <= LogEventLevel.Debug
 				? minimum
 				: minimum > Baseline
 					? minimum
 					: Baseline;
+		}
 	}
 }

@@ -115,8 +115,10 @@ public class RemotePluginSnapshotRefresherTests
 			}
 		};
 		var store = new InMemorySnapshotStore();
-		await store.SaveAsync(
-			RemotePluginCapabilitySnapshot.Empty(PluginId) with { CalendarProviderName = "Google Calendar" });
+		await store.SaveAsync(RemotePluginCapabilitySnapshot.Empty(PluginId) with
+		{
+			CalendarProviderName = "Google Calendar"
+		});
 		var refresher = new RemotePluginSnapshotRefresher(invoker, store);
 
 		var result = await refresher.RefreshKindAsync(PluginId, CapabilityKinds.Calendar, CancellationToken.None);
@@ -363,7 +365,8 @@ public class RemotePluginSnapshotRefresherTests
 
 		public CapabilityInvokeRequest? LastRequest { get; private set; }
 
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -371,13 +374,19 @@ public class RemotePluginSnapshotRefresherTests
 			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(Result, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class InMemorySnapshotStore : IRemotePluginSnapshotStore
@@ -385,11 +394,16 @@ public class RemotePluginSnapshotRefresherTests
 		private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
 		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-			=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+		{
+			return _byPluginId.TryGetValue(pluginId, out var snapshot)
 				? snapshot
 				: RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+		public bool Has(string pluginId)
+		{
+			return _byPluginId.ContainsKey(pluginId);
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 		{

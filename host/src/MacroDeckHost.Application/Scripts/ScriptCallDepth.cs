@@ -6,5 +6,8 @@ internal static class ScriptCallDepth
 
 	public static int Current => _current.Value;
 
-	public static void Set(int depth) => _current.Value = depth;
+	public static void Set(int depth)
+	{
+		_current.Value = depth;
+	}
 }

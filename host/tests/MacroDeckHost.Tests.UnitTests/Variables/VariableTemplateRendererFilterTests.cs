@@ -23,17 +23,20 @@ public class VariableTemplateRendererFilterTests
 		_attributed = attributed;
 	}
 
-	private VariableEntity Var(string name, VariableType type, string value, int? decimalPlaces = null) => new()
+	private VariableEntity Var(string name, VariableType type, string value, int? decimalPlaces = null)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value,
-		DecimalPlaces = decimalPlaces,
-		Unit = _attributed ? "%" : null
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value,
+			DecimalPlaces = decimalPlaces,
+			Unit = _attributed ? "%" : null
+		};
+	}
 
 	private static (VariableRegistry Registry, VariableTemplateRenderer Renderer, VariableContext Context) Build(
 		params VariableEntity[] vars)
@@ -102,7 +105,7 @@ public class VariableTemplateRendererFilterTests
 	[Test]
 	public void Numeric_variable_keeps_its_configured_decimal_places_through_the_filter()
 	{
-		var (_, renderer, context) = Build(Var("amount", VariableType.Numeric, "12.5", decimalPlaces: 2));
+		var (_, renderer, context) = Build(Var("amount", VariableType.Numeric, "12.5", 2));
 
 		Assert.That(renderer.Render("{{ vars.amount | plain_text }}", context), Is.EqualTo("12.50"));
 	}

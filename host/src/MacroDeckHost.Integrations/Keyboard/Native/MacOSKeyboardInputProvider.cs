@@ -21,7 +21,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 	private const string AppKit = "/System/Library/Frameworks/AppKit.framework/AppKit";
 	private const string LibObjC = "/usr/lib/libobjc.dylib";
-	private const nuint NSApplicationActivateIgnoringOtherApps = 2;
+	private const nuint NsApplicationActivateIgnoringOtherApps = 2;
 
 	private readonly MacOsKeyboardLayout _layout = new();
 	private ulong _activeFlags;
@@ -34,7 +34,10 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 	public bool HasPermission => MacOsAccessibility.IsTrusted();
 
-	public void RequestPermission() => MacOsAccessibility.RequestTrust();
+	public void RequestPermission()
+	{
+		MacOsAccessibility.RequestTrust();
+	}
 
 	public void KeyDown(KeyCode key)
 	{
@@ -43,7 +46,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			_activeFlags |= flag;
 		}
 
-		PostKey(key, keyDown: true);
+		PostKey(key, true);
 	}
 
 	public void KeyUp(KeyCode key)
@@ -53,7 +56,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			_activeFlags &= ~flag;
 		}
 
-		PostKey(key, keyDown: false);
+		PostKey(key, false);
 	}
 
 	public void TypeUnicode(string text)
@@ -61,8 +64,8 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 		foreach (var rune in text.EnumerateRunes())
 		{
 			var units = rune.ToString().ToCharArray();
-			PostUnicode(units, keyDown: true);
-			PostUnicode([], keyDown: false);
+			PostUnicode(units, true);
+			PostUnicode([], false);
 		}
 	}
 
@@ -119,10 +122,13 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 		return objc_msgSend_activate(byPid,
 			sel_registerName(Utf8("activateWithOptions:")),
-			NSApplicationActivateIgnoringOtherApps);
+			NsApplicationActivateIgnoringOtherApps);
 	}
 
-	private static byte[] Utf8(string value) => MacOsAccessibility.Utf8(value);
+	private static byte[] Utf8(string value)
+	{
+		return MacOsAccessibility.Utf8(value);
+	}
 
 	private void PostKey(KeyCode key, bool keyDown)
 	{
@@ -192,7 +198,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			return true;
 		}
 
-		if (NativeKeys.TryGetMacOSKeyCode(key, out virtualKey))
+		if (NativeKeys.TryGetMacOsKeyCode(key, out virtualKey))
 		{
 			return true;
 		}
@@ -294,7 +300,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 				_activeFlags |= flag;
 			}
 
-			PostToPid(key, keyDown: true);
+			PostToPid(key, true);
 		}
 
 		public void KeyUp(KeyCode key)
@@ -304,7 +310,7 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 				_activeFlags &= ~flag;
 			}
 
-			PostToPid(key, keyDown: false);
+			PostToPid(key, false);
 		}
 
 		public void TypeUnicode(string text)
@@ -312,8 +318,8 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 			foreach (var rune in text.EnumerateRunes())
 			{
 				var units = rune.ToString().ToCharArray();
-				PostUnicodeToPid(units, keyDown: true);
-				PostUnicodeToPid([], keyDown: false);
+				PostUnicodeToPid(units, true);
+				PostUnicodeToPid([], false);
 			}
 		}
 

@@ -21,12 +21,16 @@ internal sealed class UsbmuxConnector : IUsbmuxConnector
 	}
 
 	public Task ListenAsync(Action onListening, Action<UsbmuxDeviceEvent> onEvent, CancellationToken cancellationToken)
-		=> _client.ListenAsync(onListening, onEvent, cancellationToken);
+	{
+		return _client.ListenAsync(onListening, onEvent, cancellationToken);
+	}
 
 	public async Task<ILinkCarrier?> ConnectAsync(int deviceId, ushort port, CancellationToken cancellationToken)
-		=> await _client.ConnectAsync(deviceId, port, cancellationToken) is { } socket
+	{
+		return await _client.ConnectAsync(deviceId, port, cancellationToken) is { } socket
 			? new SocketLinkCarrier(socket)
 			: null;
+	}
 }
 
 internal sealed class UsbmuxCoordinator : IDisposable
@@ -44,7 +48,8 @@ internal sealed class UsbmuxCoordinator : IDisposable
 	private Task _listen = Task.CompletedTask;
 	private bool _available;
 
-	public UsbmuxCoordinator(IUsbmuxConnector connector,
+	public UsbmuxCoordinator(
+		IUsbmuxConnector connector,
 		Func<ILinkCarrier, string, INativeLinkSession> startSession,
 		ILogger logger)
 	{
@@ -76,9 +81,11 @@ internal sealed class UsbmuxCoordinator : IDisposable
 						device.Serial,
 						null,
 						null,
-						device.Session is { IsLinked: true } ? NativeUsbDeviceState.Linked : NativeUsbDeviceState.Connecting,
-						Picked: false,
-						Remembered: false))
+						device.Session is { IsLinked: true }
+							? NativeUsbDeviceState.Linked
+							: NativeUsbDeviceState.Connecting,
+						false,
+						false))
 					.ToList();
 			}
 		}
@@ -100,7 +107,10 @@ internal sealed class UsbmuxCoordinator : IDisposable
 					device.Session = null;
 				}
 
-				if (device.Session is null && device.Attempt.IsCompleted && bridgeAvailable && now >= device.NextAttempt)
+				if (device.Session is null
+					&& device.Attempt.IsCompleted
+					&& bridgeAvailable
+					&& now >= device.NextAttempt)
 				{
 					device.NextAttempt = now + ConnectInterval;
 					device.Attempt = TaskObservation.Settle(AttemptAsync(device, _listening!.Token), _logger);
@@ -109,7 +119,10 @@ internal sealed class UsbmuxCoordinator : IDisposable
 		}
 	}
 
-	public void Dispose() => StopAll();
+	public void Dispose()
+	{
+		StopAll();
+	}
 
 	public Task WhenStopped()
 	{
@@ -141,30 +154,32 @@ internal sealed class UsbmuxCoordinator : IDisposable
 		_listening = new CancellationTokenSource();
 		var token = _listening.Token;
 		_listen = TaskObservation.Settle(Task.Run(async () =>
-		{
-			try
-			{
-				await _connector.ListenAsync(OnListening, OnDeviceEvent, token);
-			}
-			catch (Exception ex)
-			{
-				if (!token.IsCancellationRequested)
 				{
-					_logger.Debug(ex, "usbmuxd is not reachable");
-				}
-			}
-			finally
-			{
-				lock (_gate)
-				{
-					if (!token.IsCancellationRequested)
+					try
 					{
-						_available = false;
-						StopDevices();
+						await _connector.ListenAsync(OnListening, OnDeviceEvent, token);
 					}
-				}
-			}
-		}, token), _logger);
+					catch (Exception ex)
+					{
+						if (!token.IsCancellationRequested)
+						{
+							_logger.Debug(ex, "usbmuxd is not reachable");
+						}
+					}
+					finally
+					{
+						lock (_gate)
+						{
+							if (!token.IsCancellationRequested)
+							{
+								_available = false;
+								StopDevices();
+							}
+						}
+					}
+				},
+				token),
+			_logger);
 	}
 
 	private void OnListening()
@@ -197,9 +212,15 @@ internal sealed class UsbmuxCoordinator : IDisposable
 		{
 			carrier = await _connector.ConnectAsync(device.Id, UsbmuxProtocol.CompanionLinkPort, cancellationToken);
 		}
-		catch (Exception ex) when (ex is IOException or System.Net.Sockets.SocketException or
-			OperationCanceledException or ObjectDisposedException or FormatException or
-			System.Xml.XmlException or ArgumentException or OverflowException or LinkLostException)
+		catch (Exception ex) when (ex is IOException
+			or System.Net.Sockets.SocketException
+			or OperationCanceledException
+			or ObjectDisposedException
+			or FormatException
+			or System.Xml.XmlException
+			or ArgumentException
+			or OverflowException
+			or LinkLostException)
 		{
 			_logger.Debug(ex, "Could not reach the app on iOS device {DeviceId}", device.Id);
 		}
@@ -211,10 +232,10 @@ internal sealed class UsbmuxCoordinator : IDisposable
 
 		lock (_gate)
 		{
-			if (!cancellationToken.IsCancellationRequested &&
-				_devices.TryGetValue(device.Id, out var current) &&
-				ReferenceEquals(current, device) &&
-				device.Session is null)
+			if (!cancellationToken.IsCancellationRequested
+				&& _devices.TryGetValue(device.Id, out var current)
+				&& ReferenceEquals(current, device)
+				&& device.Session is null)
 			{
 				device.Session = _startSession(carrier, NativeUsbDeviceKeys.For(device.Serial, Id(device)));
 				_logger.Information("Opened the usbmuxd link to iOS device {DeviceId}", device.Id);
@@ -248,7 +269,9 @@ internal sealed class UsbmuxCoordinator : IDisposable
 	}
 
 	private static string Id(IosDevice device)
-		=> "ios-" + (device.Serial ?? device.Id.ToString(CultureInfo.InvariantCulture));
+	{
+		return "ios-" + (device.Serial ?? device.Id.ToString(CultureInfo.InvariantCulture));
+	}
 
 	private sealed class IosDevice
 	{

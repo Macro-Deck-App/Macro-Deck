@@ -8,11 +8,20 @@ public static class ContentHash
 
 	private const int Sha256HexLength = 64;
 
-	public static string Compute(ReadOnlySpan<byte> content) => Format(SHA256.HashData(content));
+	public static string Compute(ReadOnlySpan<byte> content)
+	{
+		return Format(SHA256.HashData(content));
+	}
 
-	public static string Format(ReadOnlySpan<byte> digest) => Sha256Prefix + Convert.ToHexStringLower(digest);
+	public static string Format(ReadOnlySpan<byte> digest)
+	{
+		return Sha256Prefix + Convert.ToHexStringLower(digest);
+	}
 
-	public static IncrementalContentHash CreateIncremental() => new();
+	public static IncrementalContentHash CreateIncremental()
+	{
+		return new IncrementalContentHash();
+	}
 
 	public static string? Normalize(string? value)
 	{

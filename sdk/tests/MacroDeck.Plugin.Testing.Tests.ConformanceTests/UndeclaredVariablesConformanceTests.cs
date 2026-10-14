@@ -17,21 +17,25 @@ namespace MacroDeck.Plugin.Testing.Tests.ConformanceTests;
 internal sealed class CatalogOnlyVariablesSuiteTests : ConformanceFixture
 {
 	protected override Task<ConformanceSubject> CreateSubjectAsync()
-		=> Task.FromResult(ConformanceSubject.InProcess(
-			builder => builder.RegisterIntegration(_ => new CatalogOnlyIntegration()),
-			new PluginTestManifest(id: "app.macro-deck.catalog-only-test-plugin",
-				name: "Catalog Only Test Plugin",
-				version: "1.0.0")));
+	{
+		return Task.FromResult(ConformanceSubject.InProcess(builder
+				=> builder.RegisterIntegration(_ => new CatalogOnlyIntegration()),
+			new PluginTestManifest("app.macro-deck.catalog-only-test-plugin",
+				"Catalog Only Test Plugin",
+				"1.0.0")));
+	}
 
 	[TestCase("MDC0311", ConformanceOutcome.Passed)]
 	[TestCase("MDC0315", ConformanceOutcome.Passed)]
 	[TestCase("MDC0403", ConformanceOutcome.Passed)]
 	public void The_variables_checks_run_against_the_catalog(string checkId, ConformanceOutcome expected)
-		=> Assert.That(Report.Results.Single(result => result.Id == checkId).Result.Outcome, Is.EqualTo(expected));
+	{
+		Assert.That(Report.Results.Single(result => result.Id == checkId).Result.Outcome, Is.EqualTo(expected));
+	}
 
 	private sealed class CatalogOnlyIntegration : IPluginIntegration, IVariableProvider
 	{
-		private static readonly VariableDefinition Level = new()
+		private static readonly VariableDefinition _level = new()
 		{
 			Id = "device-level",
 			Name = "level",
@@ -49,17 +53,27 @@ internal sealed class CatalogOnlyVariablesSuiteTests : ConformanceFixture
 
 		public string CatalogName => "Devices";
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Of(1.0));
+		{
+			return ValueTask.FromResult(VariableReading.Of(1.0));
+		}
 
 		public ValueTask<VariableCatalogPage> DiscoverAsync(
 			VariableCatalogQuery query,
 			CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(new VariableCatalogPage { Items = [Level] });
+		{
+			return ValueTask.FromResult(new VariableCatalogPage { Items = [_level] });
+		}
 	}
 }
 
@@ -146,9 +160,9 @@ internal sealed class UndeclaredVariablesConformanceTests
 	private static async Task<ConformanceReport> RunAsync(Func<PluginHostBuilder, PluginHostBuilder> configure)
 	{
 		var subject = ConformanceSubject.InProcess(builder => configure(builder),
-			new PluginTestManifest(id: "app.macro-deck.undeclared-variables-test-plugin",
-				name: "Undeclared Variables Test Plugin",
-				version: "1.0.0"));
+			new PluginTestManifest("app.macro-deck.undeclared-variables-test-plugin",
+				"Undeclared Variables Test Plugin",
+				"1.0.0"));
 
 		try
 		{
@@ -164,69 +178,95 @@ internal sealed class UndeclaredVariablesConformanceTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnsupportedVariablesHandler : ICapabilityHandler
 	{
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
+		{
+			return Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 				"No variables here."));
+		}
 	}
 
 	private sealed class MalformedCatalogHandler : ICapabilityHandler
 	{
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(invocation.Operation switch
+		{
+			return Task.FromResult(invocation.Operation switch
 			{
-				CapabilityOperations.Variables.Describe => CapabilityInvocationResult.Ok(
-					new VariableCatalogPayload { SupportsCatalog = true, CatalogName = "Broken" }),
+				CapabilityOperations.Variables.Describe => CapabilityInvocationResult.Ok(new VariableCatalogPayload
+					{ SupportsCatalog = true, CatalogName = "Broken" }),
 				CapabilityOperations.Variables.Discover => CapabilityInvocationResult.Ok(new VariableCatalogPageResult
 				{
 					Items = [new VariableDefinitionDto { Name = "nameless", Type = nameof(VariableType.Numeric) }]
 				}),
 				_ => CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported, "Not offered.")
 			});
+		}
 	}
 
 	private sealed class UnrelatedDescribeHandler : ICapabilityHandler
 	{
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(CapabilityInvocationResult.Ok("not a catalog"));
+		{
+			return Task.FromResult(CapabilityInvocationResult.Ok("not a catalog"));
+		}
 	}
 
 	private sealed class NullListsDescribeHandler : ICapabilityHandler
 	{
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(CapabilityInvocationResult.Ok(JsonDocument
+		{
+			return Task.FromResult(CapabilityInvocationResult.Ok(JsonDocument
 				.Parse("""{"variables":null,"declaredVariables":null,"supportsCatalog":true}""")
 				.RootElement.Clone()));
+		}
 	}
 
 	private sealed class DeclaredButUnsupportedVariablesHandler : ICapabilityHandler
@@ -234,7 +274,8 @@ internal sealed class UndeclaredVariablesConformanceTests
 		public string Kind => CapabilityKinds.Variables;
 
 		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-			=>
+		{
+			return
 			[
 				new DeclaredCapability
 				{
@@ -243,24 +284,31 @@ internal sealed class UndeclaredVariablesConformanceTests
 					VersionRange = new CapabilityVersionRange { Minimum = 2, Maximum = 2 }
 				}
 			];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
+		{
+			return Task.FromResult(CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 				"Declared, but not answered."));
+		}
 	}
 
 	private sealed class RefusingWritableVariableHandler : ICapabilityHandler
 	{
 		public string Kind => CapabilityKinds.Variables;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(invocation.Operation switch
+		{
+			return Task.FromResult(invocation.Operation switch
 			{
 				CapabilityOperations.Variables.Describe => CapabilityInvocationResult.Ok(new VariableCatalogPayload
 				{
@@ -285,5 +333,6 @@ internal sealed class UndeclaredVariablesConformanceTests
 				}),
 				_ => CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported, "Not offered.")
 			});
+		}
 	}
 }

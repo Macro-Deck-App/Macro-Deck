@@ -21,12 +21,17 @@ public class AutomationService : IAutomationService
 		_mediator = mediator;
 	}
 
-	public IReadOnlyList<AutomationEntity> GetAll() =>
-		_automationCache.GetAll()
+	public IReadOnlyList<AutomationEntity> GetAll()
+	{
+		return _automationCache.GetAll()
 			.OrderBy(automation => automation.Name, StringComparer.CurrentCultureIgnoreCase)
 			.ToList();
+	}
 
-	public AutomationEntity? GetById(Guid id) => _automationCache.GetById(id);
+	public AutomationEntity? GetById(Guid id)
+	{
+		return _automationCache.GetById(id);
+	}
 
 	public async Task<Result<AutomationEntity, AutomationError>> Create(
 		string name,
@@ -119,7 +124,7 @@ public class AutomationService : IAutomationService
 			return Result.Fail<AutomationEntity, AutomationError>(AutomationError.NotFound, "Automation not found");
 		}
 
-		return await Create(NextCopyName(source.Name), source.Description, source.Flows, enabled: false);
+		return await Create(NextCopyName(source.Name), source.Description, source.Flows, false);
 	}
 
 	public async Task<Result<AutomationError>> Delete(Guid id)

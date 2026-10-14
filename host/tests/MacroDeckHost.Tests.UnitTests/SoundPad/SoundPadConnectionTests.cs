@@ -49,7 +49,7 @@ public class SoundPadConnectionTests
 		connection.Start();
 
 		Assert.ThrowsAsync<SoundPadUnavailableException>(() =>
-			connection.RunAsync(c => c.StopSoundAsync(), CancellationToken.None, connectOnDemand: true));
+			connection.RunAsync(c => c.StopSoundAsync(), CancellationToken.None, true));
 	}
 
 	[Test]
@@ -61,7 +61,7 @@ public class SoundPadConnectionTests
 		await SoundPadTestSupport.WaitUntilAsync(() => client.ConnectAttempts >= 1);
 
 		client.Reachable = true;
-		await connection.RunAsync(c => c.StopSoundAsync(), CancellationToken.None, connectOnDemand: true);
+		await connection.RunAsync(c => c.StopSoundAsync(), CancellationToken.None, true);
 
 		Assert.That(client.Commands, Is.EqualTo(new[] { "stop" }));
 	}

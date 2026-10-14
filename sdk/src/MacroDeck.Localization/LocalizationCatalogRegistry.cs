@@ -24,7 +24,7 @@ public sealed class LocalizationCatalogRegistry : ILocalizationCatalogRegistry
 		{
 			var replacement = new Dictionary<string, ILocalizationCatalog>(_catalogs, StringComparer.Ordinal)
 			{
-				[catalog.Scope] = catalog,
+				[catalog.Scope] = catalog
 			};
 
 			_catalogs = replacement;
@@ -55,5 +55,7 @@ public sealed class LocalizationCatalogRegistry : ILocalizationCatalogRegistry
 
 	/// <inheritdoc />
 	public ILocalizationCatalog? Find(string scope)
-		=> scope is not null && _catalogs.TryGetValue(scope, out var catalog) ? catalog : null;
+	{
+		return scope is not null && _catalogs.TryGetValue(scope, out var catalog) ? catalog : null;
+	}
 }

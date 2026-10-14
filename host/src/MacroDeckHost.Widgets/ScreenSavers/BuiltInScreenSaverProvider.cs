@@ -1,5 +1,4 @@
 using System.Text.Json;
-using MacroDeck.Localization;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
@@ -71,24 +70,28 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 		new()
 			{ Kind = UiSurfaceKinds.ScreenSaver, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
-	public Task InitializeAsync(IScreenSaverProviderContext context, CancellationToken cancellationToken = default) =>
-		Task.CompletedTask;
+	public Task InitializeAsync(IScreenSaverProviderContext context, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public IReadOnlyList<ScreenSaverDescriptor> GetScreenSavers()
-		=>
+	{
+		return
 		[
-			new(ClockId,
+			new ScreenSaverDescriptor(ClockId,
 				AppStrings.ScreenSavers.Clock.Name(),
 				AppStrings.ScreenSavers.Clock.Description(),
-				HasConfiguration: true),
-			new(NowPlayingId,
+				true),
+			new ScreenSaverDescriptor(NowPlayingId,
 				AppStrings.ScreenSavers.NowPlaying.Name(),
 				AppStrings.ScreenSavers.NowPlaying.Description(),
-				HasConfiguration: true),
+				true)
 		];
+	}
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 	{
@@ -110,7 +113,7 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 				ClockId => new WidgetConfigSession(new UiView(surface, ClockScreenSaverConfigView.Build(stored))),
 				NowPlayingId => new WidgetConfigSession(new UiView(surface,
 					NowPlayingScreenSaverConfigView.Build(stored, _registry))),
-				_ => null,
+				_ => null
 			};
 		}
 
@@ -157,6 +160,7 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 					resolver.ReleaseDemand();
 					throw;
 				}
+
 				var state = new UiState<MusicPlayerViewState>(initial);
 				var configState = new UiState<MusicPlayerWidgetData>(config);
 				var view = new UiView(surface,
@@ -180,7 +184,8 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 	}
 
 	private static JsonElement NowPlayingWidgetData(JsonElement configuration)
-		=> JsonSerializer.SerializeToElement(new
+	{
+		return JsonSerializer.SerializeToElement(new
 		{
 			instanceId = WidgetConfigJson.ReadString(configuration, "instanceId"),
 			coverStyle = MusicPlayerWidgetData.SmallCoverStyle,
@@ -189,8 +194,9 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 			showArtist = true,
 			showAlbum = false,
 			showTimeline = false,
-			showSource = false,
+			showSource = false
 		});
+	}
 
 	private static string? LocalId(string? qualified)
 	{
@@ -205,10 +211,14 @@ public sealed class BuiltInScreenSaverProvider : IScreenSaverProvider, IBuiltInI
 	}
 
 	private static string? Attribute(UiSurface surface, string key)
-		=> surface.Attributes.TryGetValue(key, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(key, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static JsonElement Element(UiSurface surface, string key)
-		=> surface.Attributes.TryGetValue(key, out var value) ? value : default;
+	{
+		return surface.Attributes.TryGetValue(key, out var value) ? value : default;
+	}
 }

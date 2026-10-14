@@ -18,7 +18,7 @@ public class SliderWidgetViewTests
 	private static readonly IReadOnlyList<UiEventHandler> _boundEvents =
 	[
 		UiEventHandler.On(UiComponentEvents.Adjust, _ => UiEventOutcome.Accepted),
-		UiEventHandler.On(UiComponentEvents.Change, _ => UiEventOutcome.Accepted),
+		UiEventHandler.On(UiComponentEvents.Change, _ => UiEventOutcome.Accepted)
 	];
 
 	private static readonly string[] _bothEventNames = ["adjust", "change"];
@@ -99,7 +99,7 @@ public class SliderWidgetViewTests
 	{
 		var host = Render(new
 		{
-			orientation = "vertical", label = "Vol", showLabel = true, showValue = true, action = Action(),
+			orientation = "vertical", label = "Vol", showLabel = true, showValue = true, action = Action()
 		});
 
 		var slider = host.ById("slider");
@@ -148,7 +148,7 @@ public class SliderWidgetViewTests
 	{
 		var config = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new { valueVariable = "vol" }));
 		var state = new UiState<SliderWidgetReadout>(new SliderWidgetReadout(true, 0, 100, 1, 75));
-		var element = SliderWidgetView.Build(config, state, icon: null, _boundEvents);
+		var element = SliderWidgetView.Build(config, state, null, _boundEvents);
 		var host = UiTestHost.Render(element,
 			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared });
 
@@ -205,7 +205,7 @@ public class SliderWidgetViewTests
 	{
 		var config = SliderWidgetData.Parse(JsonSerializer.SerializeToElement(new
 		{
-			valueVariable = "vol", min = -60, max = 0, step = 0.5, action = Action(),
+			valueVariable = "vol", min = -60, max = 0, step = 0.5, action = Action()
 		}));
 
 		Assert.Multiple(() =>
@@ -298,9 +298,13 @@ public class SliderWidgetViewTests
 
 	private static readonly UiResource _icon = new() { ResourceId = "icon-1" };
 
-	private static object Action() => new { integrationId = "integration", actionId = "action" };
+	private static object Action()
+	{
+		return new { integrationId = "integration", actionId = "action" };
+	}
 
-	private static UiTestHost Render(object data,
+	private static UiTestHost Render(
+		object data,
 		IReadOnlyList<UiEventHandler>? events = null,
 		UiResource? icon = null)
 	{

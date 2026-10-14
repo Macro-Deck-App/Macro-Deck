@@ -6,8 +6,8 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Integrations;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
@@ -105,7 +105,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -179,7 +179,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 				OwnerId = ImageResourceOwnerId,
 				Name = ImageResourceName(request.Surface),
 				MediaType = mediaType,
-				Content = content,
+				Content = content
 			})
 			: null;
 
@@ -313,10 +313,12 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static string? VariableScopeWidgetId(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.VariableScopeWidgetId, out var element) &&
-			element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.VariableScopeWidgetId, out var element)
+			&& element.ValueKind == JsonValueKind.String
 				? element.GetString()
 				: null;
+	}
 
 	// The Preview surface has no stored widget - see UiWidgetSurfaceAttributes.WidgetId - and never
 	// dispatches a press (its session is built with interactive: false), so its widget reference is never
@@ -326,9 +328,9 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 
 	private WidgetEntity? FindWidget(UiSurface surface)
 	{
-		if (!surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var idElement) ||
-			idElement.ValueKind != JsonValueKind.String ||
-			!Guid.TryParse(idElement.GetString(), out var widgetId))
+		if (!surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var idElement)
+			|| idElement.ValueKind != JsonValueKind.String
+			|| !Guid.TryParse(idElement.GetString(), out var widgetId))
 		{
 			return null;
 		}
@@ -347,11 +349,15 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 
 	private static string ImageResourceName(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var idElement) &&
-			idElement.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var idElement)
+			&& idElement.ValueKind == JsonValueKind.String
 				? idElement.GetString() ?? "preview"
 				: "preview";
+	}
 }

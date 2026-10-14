@@ -20,7 +20,10 @@ public class ReservedPathTests
 	[TestCase("/plugin/_macrodeck", ExpectedResult = false)]
 	[TestCase("/", ExpectedResult = false)]
 	[TestCase("", ExpectedResult = false)]
-	public bool The_prefix_is_matched_on_segment_boundaries(string path) => ReservedPaths.IsReserved(path);
+	public bool The_prefix_is_matched_on_segment_boundaries(string path)
+	{
+		return ReservedPaths.IsReserved(path);
+	}
 
 	[Test]
 	public void Mapping_a_route_under_the_prefix_fails_the_build()

@@ -164,13 +164,18 @@ internal sealed class BatteryStatePushTests
 		return BatteryPushes();
 	}
 
-	private List<BatteryStateDto> BatteryPushes() => BatteryPushes(_reader);
+	private List<BatteryStateDto> BatteryPushes()
+	{
+		return BatteryPushes(_reader);
+	}
 
 	private static List<BatteryStateDto> BatteryPushes(FakePluginConnection connection)
-		=> connection.Sent.ToList()
+	{
+		return connection.Sent.ToList()
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Batteries)
 			.Select(payload => payload.Data!.Value.Deserialize<BatteryStateDto>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 }

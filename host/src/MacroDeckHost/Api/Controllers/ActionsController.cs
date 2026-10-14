@@ -51,7 +51,9 @@ public class ActionsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetActionsResponse> GetAll(CancellationToken ct)
-		=> _getActions.Handle(new GetActionsRequest(), ct).AsTask();
+	{
+		return _getActions.Handle(new GetActionsRequest(), ct).AsTask();
+	}
 
 	[HttpPost("execute")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
@@ -67,25 +69,40 @@ public class ActionsController : ControllerBase
 	[HttpPost("run")]
 	public Task<ExecuteActionResponse> Run(
 		ExecuteActionRequest body,
-		CancellationToken ct) => _executeAction.Handle(body, ct).AsTask();
+		CancellationToken ct)
+	{
+		return _executeAction.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("run-flow")]
 	public Task<RunActionFlowResponse> RunFlow(
 		RunActionFlowRequest body,
-		CancellationToken ct) => _runActionFlow.Handle(body, ct).AsTask();
+		CancellationToken ct)
+	{
+		return _runActionFlow.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("options")]
 	public Task<GetActionParameterOptionsResponse> GetParameterOptions(
 		GetActionParameterOptionsRequest body,
-		CancellationToken ct) => _getParameterOptions.Handle(body, ct).AsTask();
+		CancellationToken ct)
+	{
+		return _getParameterOptions.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("provider-states")]
 	public Task<GetActionProviderStatesResponse> GetProviderStates(
 		GetActionProviderStatesRequest body,
-		CancellationToken ct) => _getProviderStates.Handle(body, ct).AsTask();
+		CancellationToken ct)
+	{
+		return _getProviderStates.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("provider-icon")]
 	public Task<GetActionProviderIconResponse> GetProviderIcon(
 		GetActionProviderIconRequest body,
-		CancellationToken ct) => _getProviderIcon.Handle(body, ct).AsTask();
+		CancellationToken ct)
+	{
+		return _getProviderIcon.Handle(body, ct).AsTask();
+	}
 }

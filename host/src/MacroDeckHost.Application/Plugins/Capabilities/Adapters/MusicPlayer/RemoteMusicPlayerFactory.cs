@@ -21,10 +21,14 @@ public static class RemoteMusicPlayerFactory
 
 		return (hasCatalog, hasDevices) switch
 		{
-			(false, false) => new RemoteMusicPlayerPlain(pluginId, instanceId, invoker, assetCache) { Options = options },
-			(true, false) => new RemoteMusicPlayerWithCatalog(pluginId, instanceId, invoker, assetCache) { Options = options },
-			(false, true) => new RemoteMusicPlayerWithDevices(pluginId, instanceId, invoker, assetCache) { Options = options },
-			(true, true) => new RemoteMusicPlayerWithCatalogAndDevices(pluginId, instanceId, invoker, assetCache) { Options = options }
+			(false, false) => new RemoteMusicPlayerPlain(pluginId, instanceId, invoker, assetCache)
+				{ Options = options },
+			(true, false) => new RemoteMusicPlayerWithCatalog(pluginId, instanceId, invoker, assetCache)
+				{ Options = options },
+			(false, true) => new RemoteMusicPlayerWithDevices(pluginId, instanceId, invoker, assetCache)
+				{ Options = options },
+			(true, true) => new RemoteMusicPlayerWithCatalogAndDevices(pluginId, instanceId, invoker, assetCache)
+				{ Options = options }
 		};
 	}
 }

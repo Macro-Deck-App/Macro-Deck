@@ -31,27 +31,34 @@ internal static class CompanionVariables
 	public static IReadOnlyList<VariableDefinition> Templates { get; } =
 		Declare(VariableNameTemplate.Placeholder("configuration"), null);
 
-	public static IReadOnlyList<VariableDefinition> Declare(string key,
+	public static IReadOnlyList<VariableDefinition> Declare(
+		string key,
 		Guid? entryId,
 		LocalizedText configurationName = default)
-		=> _slots.Select(slot => VariableDefinition.Eager($"companion_{key}_{slot.Name}",
-				slot.Type,
-				slot.DecimalPlaces,
-				_refreshInterval) with
-			{
-				DisplayName = DisplayNameFor(slot.Name),
-				Id = entryId is { } id
-					? $"entry-{id:N}-{slot.Name.Replace('_', '-')}"
-					: null,
-				Configuration = entryId is { } configId
-					? new VariableConfiguration(configId.ToString("N"), configurationName)
-					: null
-			}).ToList();
+	{
+		return _slots.Select(slot => VariableDefinition.Eager($"companion_{key}_{slot.Name}",
+					slot.Type,
+					slot.DecimalPlaces,
+					_refreshInterval) with
+				{
+					DisplayName = DisplayNameFor(slot.Name),
+					Id = entryId is { } id
+						? $"entry-{id:N}-{slot.Name.Replace('_', '-')}"
+						: null,
+					Configuration = entryId is { } configId
+						? new VariableConfiguration(configId.ToString("N"), configurationName)
+						: null
+				})
+			.ToList();
+	}
 
 	public static bool TryGetConfigurationEntryId(string? definitionId, out Guid entryId)
-		=> TryParseDefinitionId(definitionId, out entryId, out _);
+	{
+		return TryParseDefinitionId(definitionId, out entryId, out _);
+	}
 
-	public static bool TrySplit(string definitionId,
+	public static bool TrySplit(
+		string definitionId,
 		IReadOnlyList<CompanionRuntime> runtimes,
 		out CompanionRuntime runtime,
 		out string slot)
@@ -85,54 +92,60 @@ internal static class CompanionVariables
 			: VariableReading.Unavailable;
 	}
 
-	private static object? Value(CompanionDeviceState state, string slot) => slot switch
+	private static object? Value(CompanionDeviceState state, string slot)
 	{
-		"battery_level_percent" => state.BatteryLevelPercent,
-		"charging" => state.IsCharging,
-		"orientation" => state.Orientation,
-		"screen_brightness_percent" => state.ScreenBrightnessPercent,
-		"model" => state.Model,
-		"platform" => state.Platform,
-		"app_version" => state.AppVersion,
-		"in_focus" => state.InFocus,
-		"network_type" => state.NetworkType,
-		"network_metered" => state.NetworkMetered,
-		"network_validated" => state.NetworkValidated,
-		"network_name" => state.NetworkName,
-		"cpu_usage_percent" => state.CpuUsagePercent,
-		"memory_used_percent" => state.MemoryUsedPercent,
-		_ => null
-	};
+		return slot switch
+		{
+			"battery_level_percent" => state.BatteryLevelPercent,
+			"charging" => state.IsCharging,
+			"orientation" => state.Orientation,
+			"screen_brightness_percent" => state.ScreenBrightnessPercent,
+			"model" => state.Model,
+			"platform" => state.Platform,
+			"app_version" => state.AppVersion,
+			"in_focus" => state.InFocus,
+			"network_type" => state.NetworkType,
+			"network_metered" => state.NetworkMetered,
+			"network_validated" => state.NetworkValidated,
+			"network_name" => state.NetworkName,
+			"cpu_usage_percent" => state.CpuUsagePercent,
+			"memory_used_percent" => state.MemoryUsedPercent,
+			_ => null
+		};
+	}
 
-	private static LocalizedText DisplayNameFor(string slot) => slot switch
+	private static LocalizedText DisplayNameFor(string slot)
 	{
-		"is_connected" => MacroDeckStrings.Connection.Connected(),
-		"battery_level_percent" => AppStrings.Integrations.Companion.Variables.BatteryLevelPercent(),
-		"charging" => AppStrings.Integrations.Companion.Variables.Charging(),
-		"orientation" => AppStrings.Integrations.Companion.Variables.Orientation(),
-		"screen_brightness_percent" => AppStrings.Integrations.Companion.Variables.ScreenBrightnessPercent(),
-		"model" => AppStrings.Integrations.Companion.Variables.Model(),
-		"platform" => AppStrings.Integrations.Companion.Variables.Platform(),
-		"app_version" => AppStrings.Integrations.Companion.Variables.AppVersion(),
-		"in_focus" => AppStrings.Integrations.Companion.Variables.InFocus(),
-		"network_type" => AppStrings.Integrations.Companion.Variables.NetworkType(),
-		"network_metered" => AppStrings.Integrations.Companion.Variables.NetworkMetered(),
-		"network_validated" => AppStrings.Integrations.Companion.Variables.NetworkValidated(),
-		"network_name" => AppStrings.Integrations.Companion.Variables.NetworkName(),
-		"cpu_usage_percent" => AppStrings.Integrations.Companion.Variables.CpuUsagePercent(),
-		"memory_used_percent" => AppStrings.Integrations.Companion.Variables.MemoryUsedPercent(),
-		_ => default
-	};
+		return slot switch
+		{
+			"is_connected" => MacroDeckStrings.Connection.Connected(),
+			"battery_level_percent" => AppStrings.Integrations.Companion.Variables.BatteryLevelPercent(),
+			"charging" => AppStrings.Integrations.Companion.Variables.Charging(),
+			"orientation" => AppStrings.Integrations.Companion.Variables.Orientation(),
+			"screen_brightness_percent" => AppStrings.Integrations.Companion.Variables.ScreenBrightnessPercent(),
+			"model" => AppStrings.Integrations.Companion.Variables.Model(),
+			"platform" => AppStrings.Integrations.Companion.Variables.Platform(),
+			"app_version" => AppStrings.Integrations.Companion.Variables.AppVersion(),
+			"in_focus" => AppStrings.Integrations.Companion.Variables.InFocus(),
+			"network_type" => AppStrings.Integrations.Companion.Variables.NetworkType(),
+			"network_metered" => AppStrings.Integrations.Companion.Variables.NetworkMetered(),
+			"network_validated" => AppStrings.Integrations.Companion.Variables.NetworkValidated(),
+			"network_name" => AppStrings.Integrations.Companion.Variables.NetworkName(),
+			"cpu_usage_percent" => AppStrings.Integrations.Companion.Variables.CpuUsagePercent(),
+			"memory_used_percent" => AppStrings.Integrations.Companion.Variables.MemoryUsedPercent(),
+			_ => default
+		};
+	}
 
 	private static bool TryParseDefinitionId(string? definitionId, out Guid entryId, out string slot)
 	{
 		entryId = Guid.Empty;
 		slot = string.Empty;
-		if (definitionId is null ||
-			!definitionId.StartsWith("entry-", StringComparison.Ordinal) ||
-			definitionId.Length <= 39 ||
-			definitionId[38] != '-' ||
-			!Guid.TryParseExact(definitionId.AsSpan(6, 32), "N", out entryId))
+		if (definitionId is null
+			|| !definitionId.StartsWith("entry-", StringComparison.Ordinal)
+			|| definitionId.Length <= 39
+			|| definitionId[38] != '-'
+			|| !Guid.TryParseExact(definitionId.AsSpan(6, 32), "N", out entryId))
 		{
 			return false;
 		}

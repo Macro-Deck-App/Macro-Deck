@@ -12,20 +12,24 @@ public sealed record SingleIconImportResult(IconEntity Icon, bool Reused);
 
 public interface IIconImportService
 {
-	Task<Result<IconImportBatchEntity, IconError>> Import(Guid? packId,
+	Task<Result<IconImportBatchEntity, IconError>> Import(
+		Guid? packId,
 		string? sourceName,
 		IAsyncEnumerable<IconImportFile> files,
 		CancellationToken cancellationToken);
 
-	Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(Guid? packId,
+	Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(
+		Guid? packId,
 		IReadOnlyList<string> paths,
 		CancellationToken cancellationToken);
 
-	Task<Result<SingleIconImportResult, IconError>> ImportSingle(Guid? packId,
+	Task<Result<SingleIconImportResult, IconError>> ImportSingle(
+		Guid? packId,
 		IconImportFile file,
 		CancellationToken cancellationToken);
 
-	Task<Result<IconPackImportResult, IconError>> ImportPacks(IAsyncEnumerable<IconImportFile> files,
+	Task<Result<IconPackImportResult, IconError>> ImportPacks(
+		IAsyncEnumerable<IconImportFile> files,
 		CancellationToken cancellationToken);
 
 	Task<bool> CancelBatch(Guid batchId, CancellationToken cancellationToken);

@@ -33,8 +33,10 @@ internal sealed class VideoStreamSessionDescriptionTests
 	[TestCase("h ls")]
 	[TestCase("abcdefghijklmnopqrstuvwxyz0123456")]
 	public void A_transport_that_is_not_a_lowercase_token_is_rejected(string transport)
-		=> Assert.That(() => VideoStreamSessionDescription.FromUrl(transport, "http://127.0.0.1/a"),
+	{
+		Assert.That(() => VideoStreamSessionDescription.FromUrl(transport, "http://127.0.0.1/a"),
 			Throws.ArgumentException);
+	}
 
 	[TestCase(null)]
 	[TestCase("")]
@@ -74,6 +76,8 @@ internal sealed class VideoStreamSessionDescriptionTests
 
 	[Test]
 	public void An_encoded_slash_is_fine_in_the_query_where_it_is_data()
-		=> Assert.That(VideoStreamSessionDescription.Hls("http://camera.local/index.m3u8?src=a%2Fb").Url,
+	{
+		Assert.That(VideoStreamSessionDescription.Hls("http://camera.local/index.m3u8?src=a%2Fb").Url,
 			Does.EndWith("src=a%2Fb"));
+	}
 }

@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 namespace MacroDeckHost.Application.HostLocking;
 
 public interface IHostLockState

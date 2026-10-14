@@ -53,7 +53,9 @@ public static class Wait
 	}
 
 	private static string Describe(TimeSpan budget, string? because)
-		=> because is null
+	{
+		return because is null
 			? $"The condition was not met within {budget}."
 			: $"The condition was not met within {budget}: {because}";
+	}
 }

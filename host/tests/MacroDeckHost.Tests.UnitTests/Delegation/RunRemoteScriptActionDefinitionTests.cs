@@ -124,7 +124,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	{
 		var otherBaseUrl = await AddReachableRemote("inst-a", "PC-A");
 
-		var result = await RunAsync("script-1", instanceId: "inst-does-not-exist");
+		var result = await RunAsync("script-1", "inst-does-not-exist");
 
 		Assert.Multiple(() =>
 		{
@@ -253,7 +253,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	[Test]
 	public async Task No_owner_widget_is_sent_even_when_the_script_runs_on_a_widget()
 	{
-		var baseUrl = await AddReachableRemote("inst-1", "PC-A", runsOnWidget: true);
+		var baseUrl = await AddReachableRemote("inst-1", "PC-A", true);
 		_client.For(baseUrl).RunHandler = _ => new DelegateRunResult(true, null, "Succeeded", ["scene"]);
 
 		var result = await RunAsync("script-1", ownerWidgetId: "w1", inputs: [("scene", "Intermission")]);
@@ -275,7 +275,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 		await AddReachableRemote("inst-1", "PC-A");
 		await AddReachableRemote("inst-2", "PC-B");
 
-		var result = await GetScriptOptionsAsync(instanceId: null);
+		var result = await GetScriptOptionsAsync(null);
 
 		Assert.Multiple(() =>
 		{
@@ -292,7 +292,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	{
 		await AddReachableRemote("inst-1", "PC-A");
 
-		var result = await GetScriptOptionsAsync(instanceId: null);
+		var result = await GetScriptOptionsAsync(null);
 
 		Assert.Multiple(() =>
 		{
@@ -306,7 +306,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	{
 		await AddReachableRemote("inst-1", "PC-A");
 
-		var result = await GetScriptOptionsAsync(instanceId: "inst-does-not-exist");
+		var result = await GetScriptOptionsAsync("inst-does-not-exist");
 
 		Assert.Multiple(() =>
 		{
@@ -319,7 +319,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	[Test]
 	public async Task Nothing_configured_at_all_yields_no_scripts_and_the_none_configured_message()
 	{
-		var result = await GetScriptOptionsAsync(instanceId: null);
+		var result = await GetScriptOptionsAsync(null);
 
 		Assert.Multiple(() =>
 		{
@@ -336,7 +336,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 		AddEntry(baseUrl, "PC-A", "inst-1");
 		await ReloadAndStart();
 
-		var result = await GetScriptOptionsAsync(instanceId: "inst-1");
+		var result = await GetScriptOptionsAsync("inst-1");
 
 		Assert.Multiple(() =>
 		{
@@ -390,7 +390,8 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 	}
 
 	private Guid AddEntry(Uri baseUrl, string machineName, string instanceId)
-		=> _config.AddEntry(machineName,
+	{
+		return _config.AddEntry(machineName,
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[DelegateConfigKeys.BaseUrl] = baseUrl.ToString(),
@@ -402,6 +403,7 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 			},
 			new Dictionary<string, string>(StringComparer.Ordinal)
 				{ [DelegateConfigKeys.Password] = "correct-password" });
+	}
 
 	private async Task ReloadAndStart()
 	{
@@ -433,12 +435,13 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 			parameters["timeout"] = timeoutMilliseconds.Value;
 		}
 
-		return await _action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = parameters,
-			OwnerWidgetId = ownerWidgetId,
-			CancellationToken = CancellationToken.None,
-			CallDepth = callDepth
-		});
+		return await _action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = parameters,
+				OwnerWidgetId = ownerWidgetId,
+				CancellationToken = CancellationToken.None,
+				CallDepth = callDepth
+			});
 	}
 }

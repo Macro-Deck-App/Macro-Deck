@@ -32,7 +32,10 @@ internal sealed class CapabilityDispatcher(
 	private readonly SemaphoreSlim _concurrency = new(ProtocolLimits.MaxConcurrentInvocations);
 
 	/// <summary>Releases the concurrency gate. The dispatcher lives as long as the plugin does.</summary>
-	public void Dispose() => _concurrency.Dispose();
+	public void Dispose()
+	{
+		_concurrency.Dispose();
+	}
 
 	/// <summary>Sends one envelope back to the host.</summary>
 	internal delegate ValueTask Reply(ProtocolEnvelope envelope, CancellationToken cancellationToken);
@@ -77,7 +80,7 @@ internal sealed class CapabilityDispatcher(
 			await reply(Failure(correlationId,
 					Error(ProtocolErrorCodes.RateLimited,
 						$"This plugin is already running {ProtocolLimits.MaxConcurrentInvocations} invocations.",
-						retryable: true)),
+						true)),
 				connectionToken);
 			return;
 		}
@@ -131,7 +134,7 @@ internal sealed class CapabilityDispatcher(
 		}
 
 		var known = _byCorrelation.TryGetValue(correlationId, out var invocation);
-		var outcome = CancellationRules.Resolve(known, alreadyReplied: invocation?.Replied ?? true);
+		var outcome = CancellationRules.Resolve(known, invocation?.Replied ?? true);
 
 		if (outcome != CancellationOutcome.EmitCancelledResult || invocation is null)
 		{
@@ -172,7 +175,10 @@ internal sealed class CapabilityDispatcher(
 	/// resume: the host's idempotency cache survives a resume, so the plugin's has to as well, or a
 	/// redelivery under a known key would re-execute.
 	/// </summary>
-	public void ResetIdempotency() => _byIdempotencyKey.Clear();
+	public void ResetIdempotency()
+	{
+		_byIdempotencyKey.Clear();
+	}
 
 	private async Task<CapabilityInvocationResult> RunAsync(
 		CapabilityInvokePayload payload,
@@ -321,15 +327,20 @@ internal sealed class CapabilityDispatcher(
 	}
 
 	private static ProtocolError Error(string code, string message, bool retryable = false)
-		=> new() { Code = code, Message = Truncate(message), Retryable = retryable };
+	{
+		return new ProtocolError { Code = code, Message = Truncate(message), Retryable = retryable };
+	}
 
 	private static string Truncate(string message)
-		=> message.Length <= ProtocolLimits.MaxErrorMessageLength
+	{
+		return message.Length <= ProtocolLimits.MaxErrorMessageLength
 			? message
 			: message[..ProtocolLimits.MaxErrorMessageLength];
+	}
 
 	private static ProtocolEnvelope ToEnvelope(string correlationId, CapabilityInvocationResult result)
-		=> result.Error is { } error
+	{
+		return result.Error is { } error
 			? Failure(correlationId, error)
 			: new ProtocolEnvelope
 			{
@@ -339,9 +350,11 @@ internal sealed class CapabilityDispatcher(
 				Payload = JsonSerializer.SerializeToElement(new CapabilityResultPayload { Data = result.Data },
 					PluginProtocolJson.Options)
 			};
+	}
 
 	private static ProtocolEnvelope Failure(string correlationId, ProtocolError error)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.CapabilityResult,
 			Id = Guid.CreateVersion7().ToString(),
@@ -352,6 +365,7 @@ internal sealed class CapabilityDispatcher(
 				Details = ProtocolDiagnostics.Redact(error.Details)
 			}
 		};
+	}
 
 	/// <summary>One running invocation, and the single-reply guard that makes it safe.</summary>
 	private sealed class Invocation : IDisposable
@@ -392,7 +406,10 @@ internal sealed class CapabilityDispatcher(
 		public bool ConnectionLost => _connectionToken.IsCancellationRequested;
 
 		/// <summary>Wins the right to send the one reply. Only the first caller gets true.</summary>
-		public bool TryComplete() => Interlocked.Exchange(ref _replied, 1) == 0;
+		public bool TryComplete()
+		{
+			return Interlocked.Exchange(ref _replied, 1) == 0;
+		}
 
 		public void Cancel()
 		{
@@ -408,7 +425,10 @@ internal sealed class CapabilityDispatcher(
 			}
 		}
 
-		public void Dispose() => _cancellation.Dispose();
+		public void Dispose()
+		{
+			_cancellation.Dispose();
+		}
 	}
 
 	/// <summary>A remembered idempotent invocation: in flight while <see cref="Result" /> is null.</summary>

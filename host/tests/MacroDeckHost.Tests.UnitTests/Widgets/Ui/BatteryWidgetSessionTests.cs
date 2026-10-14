@@ -67,7 +67,7 @@ public class BatteryWidgetSessionTests
 		session.DrainPatches();
 		var before = Walk(session.BuildTree().Root).Select(node => node.Id).ToList();
 
-		_batteries.Set(FakeBatteries.Device("phone", "Pixel", 40, kind: BatteryDeviceKinds.Tablet),
+		_batteries.Set(FakeBatteries.Device("phone", "Pixel", 40, BatteryDeviceKinds.Tablet),
 			FakeBatteries.Device("pods", "Buds", 90));
 
 		var operations = session.DrainPatches().SelectMany(patch => patch.Operations).ToList();
@@ -79,7 +79,8 @@ public class BatteryWidgetSessionTests
 			Assert.That(operations.SelectMany(operation => operation.Properties?.Keys ?? []),
 				Is.All.EqualTo(UiComponentProperties.Icon));
 			Assert.That(Walk(tree).Select(node => node.Id), Is.EqualTo(before));
-			Assert.That(Walk(tree).Where(node => node.Type == UiComponents.Icon)
+			Assert.That(Walk(tree)
+					.Where(node => node.Type == UiComponents.Icon)
 					.Select(node => node.Properties[UiComponentProperties.Icon].GetString()),
 				Does.Contain(UiIcons.DeviceTablet));
 		});
@@ -112,9 +113,9 @@ public class BatteryWidgetSessionTests
 					SessionMode = UiSessionModes.Shared,
 					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 					{
-						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
-					},
-				},
+						[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
+					}
+				}
 			},
 			CancellationToken.None);
 
@@ -122,14 +123,18 @@ public class BatteryWidgetSessionTests
 	}
 
 	private static List<double> Levels(UiNode root)
-		=> Walk(root)
+	{
+		return Walk(root)
 			.Where(node => node.Type == UiComponents.Gauge && !node.Id.Contains("_fallback", StringComparison.Ordinal))
 			.Select(node => node.Properties[UiComponentProperties.Level].GetDouble())
 			.Distinct()
 			.ToList();
+	}
 
 	private static IEnumerable<UiNode> Walk(UiNode node)
-		=> new[] { node }
+	{
+		return new[] { node }
 			.Concat(node.Children.SelectMany(Walk))
 			.Concat(node.Fallback is null ? [] : Walk(node.Fallback));
+	}
 }

@@ -742,7 +742,7 @@ internal sealed class SpotifyMusicPlayerStateTests
 		await player.GetStateAsync();
 		Assert.That(player.CurrentItem, Is.Not.Null);
 
-		player.Disconnect();
+		await player.DisconnectAsync();
 
 		Assert.That(player.CurrentItem, Is.Null);
 	}
@@ -1009,19 +1009,29 @@ internal sealed class SpotifyMusicPlayerStateTests
 	}
 
 	private static string? Authorization(IRequest request)
-		=> request.Headers.TryGetValue("Authorization", out var header) ? header : null;
+	{
+		return request.Headers.TryGetValue("Authorization", out var header) ? header : null;
+	}
 
 	private static bool IsDevicesRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	}
 
 	private static Response PodcastAwareHandler(IRequest request)
-		=> Json(HttpStatusCode.OK, AsksForEpisodes(request) ? PlayingEpisodeJson : PodcastWithoutEpisodeOptInJson);
+	{
+		return Json(HttpStatusCode.OK, AsksForEpisodes(request) ? PlayingEpisodeJson : PodcastWithoutEpisodeOptInJson);
+	}
 
 	private static bool AsksForEpisodes(IRequest request)
-		=> AdditionalTypes(request).Contains("episode", StringComparison.Ordinal);
+	{
+		return AdditionalTypes(request).Contains("episode", StringComparison.Ordinal);
+	}
 
 	private static string AdditionalTypes(IRequest request)
-		=> request.Parameters.TryGetValue("additional_types", out var types) ? types : string.Empty;
+	{
+		return request.Parameters.TryGetValue("additional_types", out var types) ? types : string.Empty;
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(StubSpotifyHttpClient http, TimeProvider? timeProvider = null)
 	{
@@ -1042,14 +1052,17 @@ internal sealed class SpotifyMusicPlayerStateTests
 	}
 
 	private static SpotifyClientConfig Config(IHTTPClient http, ISpotifyAccessTokenSource tokens)
-		=> SpotifyClientConfig.CreateDefault()
+	{
+		return SpotifyClientConfig.CreateDefault()
 			.WithAuthenticator(new SpotifyAccessTokenAuthenticator(tokens))
 			.WithHTTPClient(http);
+	}
 
 	private static SpotifyTokenManager Tokens(
 		FakeSpotifyOAuthClient? oauth = null,
 		TimeSpan? expiresIn = null)
-		=> new(Guid.NewGuid(),
+	{
+		return new SpotifyTokenManager(Guid.NewGuid(),
 			"client-id",
 			"client-secret",
 			SpotifyTokenSnapshot.FromStored("token",
@@ -1061,14 +1074,17 @@ internal sealed class SpotifyMusicPlayerStateTests
 			new LoggerConfiguration().CreateLogger(),
 			TimeSpan.FromSeconds(5),
 			TimeSpan.Zero);
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static APIException ApiException(HttpStatusCode statusCode, string? body = null)
 	{

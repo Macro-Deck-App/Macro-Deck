@@ -6,7 +6,6 @@ using System.Text;
 using System.Text.Json;
 using MacroDeck.Sdk.Logging;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin.Protocol;
 
@@ -88,8 +87,11 @@ internal sealed class JellyfinClient : IJellyfinClient
 	}
 
 	public async Task<JellyfinPublicSystemInfo> GetPublicInfoAsync(CancellationToken cancellationToken)
-		=> await SendAsync<JellyfinPublicSystemInfo>(HttpMethod.Get, "System/Info/Public", null, cancellationToken)
-			.ConfigureAwait(false) ?? new JellyfinPublicSystemInfo();
+	{
+		return await SendAsync<JellyfinPublicSystemInfo>(HttpMethod.Get, "System/Info/Public", null, cancellationToken)
+				.ConfigureAwait(false)
+			?? new JellyfinPublicSystemInfo();
+	}
 
 	public async Task VerifyTokenAsync(CancellationToken cancellationToken)
 	{
@@ -109,8 +111,10 @@ internal sealed class JellyfinClient : IJellyfinClient
 		CancellationToken cancellationToken)
 	{
 		var body = new Dictionary<string, string> { ["Username"] = username, ["Pw"] = password };
-		using var request = CreateRequest(HttpMethod.Post, "Users/AuthenticateByName", JsonContent.Create(body),
-			includeToken: false);
+		using var request = CreateRequest(HttpMethod.Post,
+			"Users/AuthenticateByName",
+			JsonContent.Create(body),
+			false);
 		var result = await ReadAsync<JellyfinAuthenticationResult>(request, cancellationToken).ConfigureAwait(false);
 		if (string.IsNullOrEmpty(result?.AccessToken))
 		{
@@ -121,8 +125,11 @@ internal sealed class JellyfinClient : IJellyfinClient
 	}
 
 	public async Task<IReadOnlyList<JellyfinSessionDto>> GetSessionsAsync(CancellationToken cancellationToken)
-		=> await SendAsync<List<JellyfinSessionDto>>(HttpMethod.Get, "Sessions", null, cancellationToken)
-			.ConfigureAwait(false) ?? [];
+	{
+		return await SendAsync<List<JellyfinSessionDto>>(HttpMethod.Get, "Sessions", null, cancellationToken)
+				.ConfigureAwait(false)
+			?? [];
+	}
 
 	public Task SendPlaystateAsync(
 		string sessionId,
@@ -222,7 +229,7 @@ internal sealed class JellyfinClient : IJellyfinClient
 			path += $"&tag={Uri.EscapeDataString(tag)}";
 		}
 
-		using var request = CreateRequest(HttpMethod.Get, path, null, includeToken: true);
+		using var request = CreateRequest(HttpMethod.Get, path, null, true);
 		using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{
@@ -284,8 +291,8 @@ internal sealed class JellyfinClient : IJellyfinClient
 						linked.Token)
 					.ConfigureAwait(false);
 			}
-			catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested &&
-				Volatile.Read(ref delivered) == 0)
+			catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested
+				&& Volatile.Read(ref delivered) == 0)
 			{
 				throw new JellyfinSocketException("Jellyfin sent no session updates on the WebSocket.");
 			}
@@ -366,8 +373,9 @@ internal sealed class JellyfinClient : IJellyfinClient
 
 		switch (message?.MessageType)
 		{
-			case "ForceKeepAlive" when message.Data.ValueKind == JsonValueKind.Number &&
-				message.Data.TryGetInt32(out var seconds) && seconds > 1:
+			case "ForceKeepAlive" when message.Data.ValueKind == JsonValueKind.Number
+				&& message.Data.TryGetInt32(out var seconds)
+				&& seconds > 1:
 				keepAlive.Value = TimeSpan.FromSeconds(seconds / 2.0);
 				break;
 			case "Sessions" when message.Data.ValueKind == JsonValueKind.Array:
@@ -445,7 +453,7 @@ internal sealed class JellyfinClient : IJellyfinClient
 		HttpContent? content,
 		CancellationToken cancellationToken)
 	{
-		using var request = CreateRequest(method, path, content, includeToken: true);
+		using var request = CreateRequest(method, path, content, true);
 		using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
 		EnsureSuccess(response);
 	}
@@ -456,7 +464,7 @@ internal sealed class JellyfinClient : IJellyfinClient
 		HttpContent? content,
 		CancellationToken cancellationToken)
 	{
-		using var request = CreateRequest(method, path, content, includeToken: true);
+		using var request = CreateRequest(method, path, content, true);
 		return await ReadAsync<T>(request, cancellationToken).ConfigureAwait(false);
 	}
 

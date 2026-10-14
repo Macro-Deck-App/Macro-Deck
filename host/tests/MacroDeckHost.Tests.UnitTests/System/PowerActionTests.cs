@@ -9,7 +9,9 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class PowerActionTests
 {
 	private static ActionExecutionContext Context(Dictionary<string, object>? parameters = null)
-		=> new() { Parameters = parameters ?? new Dictionary<string, object>() };
+	{
+		return new ActionExecutionContext { Parameters = parameters ?? new Dictionary<string, object>() };
+	}
 
 	[Test]
 	public async Task LockComputer_succeeds_when_service_succeeds()

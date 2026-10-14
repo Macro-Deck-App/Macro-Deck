@@ -15,10 +15,12 @@ public sealed record StoreRegistryOptions
 
 	public bool IsOfficialRegistry => IsOfficial(Origin);
 
-	public static bool IsOfficial(string? origin) =>
-		origin is not null &&
-		Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
-		string.Equals(uri.GetLeftPart(UriPartial.Path), OfficialOrigin, StringComparison.OrdinalIgnoreCase);
+	public static bool IsOfficial(string? origin)
+	{
+		return origin is not null
+			&& Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+			&& string.Equals(uri.GetLeftPart(UriPartial.Path), OfficialOrigin, StringComparison.OrdinalIgnoreCase);
+	}
 
 	public TimeSpan RefreshInterval { get; init; } = TimeSpan.FromHours(1);
 

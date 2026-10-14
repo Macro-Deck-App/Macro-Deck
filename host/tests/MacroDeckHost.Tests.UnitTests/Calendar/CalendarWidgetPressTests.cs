@@ -15,7 +15,8 @@ namespace MacroDeckHost.Tests.UnitTests.Calendar;
 [TestFixture]
 public class CalendarWidgetPressTests
 {
-	private const string ShortPressFlow = """{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""";
+	private const string ShortPressFlow
+		= """{"flows":[{"triggerType":"onShortPress","children":[{"type":"action"}]}]}""";
 
 	private CalendarWidgetHarness _harness = null!;
 	private CalendarIntegration _integration = null!;
@@ -47,16 +48,17 @@ public class CalendarWidgetPressTests
 		var type = CalendarWidgetTypes.QualifiedId;
 		var widget = Widget(type, CalendarWidgetHarness.WithLayout(layout, "{}"));
 
-		var block = DefaultBlock(_defaults.FlowsSourceFor(widget, fromDevice: false));
+		var block = DefaultBlock(_defaults.FlowsSourceFor(widget, false));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(block.GetProperty("integrationId").GetString(), Is.EqualTo(CalendarWidgetTypes.OwnerId));
 			Assert.That(block.GetProperty("actionId").GetString(), Is.EqualTo("show-details"));
-			Assert.That(_defaults.FlowsSourceFor(widget, fromDevice: true), Is.Null);
+			Assert.That(_defaults.FlowsSourceFor(widget, true), Is.Null);
 			Assert.That(_defaults.RunsOnDevices(type), Is.False);
 			Assert.That(_defaults.FlowsSourceFor(Widget(type, CalendarWidgetHarness.WithLayout(layout, ShortPressFlow)),
-				fromDevice: false), Is.Null);
+					false),
+				Is.Null);
 		});
 	}
 
@@ -109,7 +111,8 @@ public class CalendarWidgetPressTests
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(client, Is.EqualTo(CalendarWidgetHarness.Client));
 			Assert.That(modal.ViewId, Is.EqualTo(CalendarUiProvider.AgendaDialogViewId));
-			Assert.That(modal.Data![CalendarUiProvider.AgendaDialogWidgetKey].GetString(), Is.EqualTo(widget.Id.ToString()));
+			Assert.That(modal.Data![CalendarUiProvider.AgendaDialogWidgetKey].GetString(),
+				Is.EqualTo(widget.Id.ToString()));
 		});
 	}
 
@@ -136,7 +139,7 @@ public class CalendarWidgetPressTests
 		await _harness.SyncAsync();
 		var widget = _harness.Folders.AddCalendar(layout, "{}");
 
-		var result = await ShowDetailsAsync(widget.Id.ToString(), withUi: false);
+		var result = await ShowDetailsAsync(widget.Id.ToString(), false);
 
 		Assert.Multiple(() =>
 		{
@@ -161,8 +164,9 @@ public class CalendarWidgetPressTests
 			"deleted-agenda" => Deleted(CalendarWidgetTypes.LayoutAgenda),
 			"deleted-next-event" => Deleted(CalendarWidgetTypes.LayoutNextEvent),
 			"next-event-without-event" => _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent,
-				$$"""{"calendars":["{{CalendarWidgetHarness.CalendarKey("elsewhere")}}"]}""").Id.ToString(),
-			_ => null,
+					$$"""{"calendars":["{{CalendarWidgetHarness.CalendarKey("elsewhere")}}"]}""")
+				.Id.ToString(),
+			_ => null
 		};
 
 		var result = await ShowDetailsAsync(ownerId);
@@ -188,17 +192,20 @@ public class CalendarWidgetPressTests
 	{
 		var action = _integration.Actions.Single(a => a.Id == "show-details");
 
-		return await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>(),
-			OriginClientId = CalendarWidgetHarness.Client,
-			OwnerWidgetId = ownerWidgetId,
-			Ui = withUi ? _harness.Interactions : null,
-		});
+		return await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object>(),
+				OriginClientId = CalendarWidgetHarness.Client,
+				OwnerWidgetId = ownerWidgetId,
+				Ui = withUi ? _harness.Interactions : null
+			});
 	}
 
 	private static WidgetEntity Widget(string type, string data)
-		=> new() { Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = type, Data = data };
+	{
+		return new WidgetEntity { Id = Guid.NewGuid(), FolderId = Guid.NewGuid(), Type = type, Data = data };
+	}
 
 	private static JsonElement DefaultBlock(string? source)
 	{

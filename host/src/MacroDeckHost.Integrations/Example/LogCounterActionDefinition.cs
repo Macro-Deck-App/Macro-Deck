@@ -18,15 +18,18 @@ public class LogCounterActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Slider("increment",
-			min: 1,
-			max: 100,
+			1,
+			100,
 			step: 1,
 			label: AppStrings.Integrations.Example.Actions.IncrementLabel(),
 			description: AppStrings.Integrations.Example.Actions.IncrementDescription(),
 			defaultValue: 1)
 	];
 
-	public IActionExecutor CreateExecutor() => new LogCounterActionExecutor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new LogCounterActionExecutor();
+	}
 
 	private sealed class LogCounterActionExecutor : IActionExecutor
 	{

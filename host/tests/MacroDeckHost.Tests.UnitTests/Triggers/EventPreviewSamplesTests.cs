@@ -63,8 +63,10 @@ public class EventPreviewSamplesTests
 	}
 
 	private void Record(params (string Name, object? Value)[] parameters)
-		=> _samples.Record(new EventOccurrence(EventId,
+	{
+		_samples.Record(new EventOccurrence(EventId,
 			parameters.ToDictionary(p => p.Name, p => p.Value, StringComparer.Ordinal)));
+	}
 
 	private string Render(string template, params (string Name, object? Value)[] overrides)
 	{
@@ -89,16 +91,24 @@ public class EventPreviewSamplesTests
 				Name = "Track Changed",
 				PayloadParameters =
 				[
-					ActionParameter.Text("trackName", label: "Track"),
-					ActionParameter.Number("volume", label: "Volume")
+					ActionParameter.Text("trackName", "Track"),
+					ActionParameter.Number("volume", "Volume")
 				]
 			});
 
-		public IReadOnlyList<EventDefinitionDescriptor> GetDefinitions() => [_trackChanged];
+		public IReadOnlyList<EventDefinitionDescriptor> GetDefinitions()
+		{
+			return [_trackChanged];
+		}
 
 		public EventDefinitionDescriptor? Find(string qualifiedEventId)
-			=> qualifiedEventId == EventId ? _trackChanged : null;
+		{
+			return qualifiedEventId == EventId ? _trackChanged : null;
+		}
 
-		public object? FindProvider(string qualifiedEventId) => null;
+		public object? FindProvider(string qualifiedEventId)
+		{
+			return null;
+		}
 	}
 }

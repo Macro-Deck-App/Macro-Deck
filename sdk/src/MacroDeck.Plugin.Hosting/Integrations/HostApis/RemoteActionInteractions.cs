@@ -18,11 +18,13 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 internal sealed class RemoteActionInteractions(IHostInvoker invoker, ILogger logger, string executeCorrelationId)
 	: IActionInteractions
 {
-	public void RequestItemPicker(string? originClientId,
+	public void RequestItemPicker(
+		string? originClientId,
 		string instanceId,
 		MusicPlayerCatalogItemKind kind,
 		string? prompt = null)
-		=> Fire(HostOperations.ActionInteractions.RequestItemPicker,
+	{
+		Fire(HostOperations.ActionInteractions.RequestItemPicker,
 			new ActionInteractionsRequestItemPickerArguments
 			{
 				ExecuteCorrelationId = executeCorrelationId,
@@ -32,12 +34,15 @@ internal sealed class RemoteActionInteractions(IHostInvoker invoker, ILogger log
 				Prompt = prompt
 			},
 			"request-item-picker");
+	}
 
-	public void RequestDevicePicker(string? originClientId,
+	public void RequestDevicePicker(
+		string? originClientId,
 		string instanceId,
 		bool startPlayback,
 		string? prompt = null)
-		=> Fire(HostOperations.ActionInteractions.RequestDevicePicker,
+	{
+		Fire(HostOperations.ActionInteractions.RequestDevicePicker,
 			new ActionInteractionsRequestDevicePickerArguments
 			{
 				ExecuteCorrelationId = executeCorrelationId,
@@ -47,6 +52,7 @@ internal sealed class RemoteActionInteractions(IHostInvoker invoker, ILogger log
 				Prompt = prompt
 			},
 			"request-device-picker");
+	}
 
 	private void Fire(string operation, object arguments, string label)
 	{

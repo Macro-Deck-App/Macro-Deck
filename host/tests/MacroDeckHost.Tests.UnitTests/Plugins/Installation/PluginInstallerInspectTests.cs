@@ -45,7 +45,10 @@ internal sealed class PluginInstallerInspectTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task Inspect_reports_an_unsigned_artifact_as_unsigned_with_an_advisory_warning()
@@ -152,10 +155,9 @@ internal sealed class PluginInstallerInspectTests
 	[Test]
 	public async Task Inspect_reports_the_declared_publisher_and_none_when_the_manifest_names_none()
 	{
-		var withPublisher = await Inspect(BuildArtifact(extraManifestBlocks:
-			"""
-			"publisher": { "name": "Acme Ltd" }
-			"""));
+		var withPublisher = await Inspect(BuildArtifact("""
+														"publisher": { "name": "Acme Ltd" }
+														"""));
 		var without = await Inspect(BuildArtifact());
 
 		Assert.Multiple(() =>
@@ -168,10 +170,9 @@ internal sealed class PluginInstallerInspectTests
 	[Test]
 	public async Task Inspect_reports_what_the_manifest_says_the_plugin_is()
 	{
-		var result = await Inspect(BuildArtifact(extraManifestBlocks:
-			"""
-			"description": "Does a thing."
-			"""));
+		var result = await Inspect(BuildArtifact("""
+												 "description": "Does a thing."
+												 """));
 
 		Assert.Multiple(() =>
 		{
@@ -230,7 +231,7 @@ internal sealed class PluginInstallerInspectTests
 	public async Task Inspect_refuses_an_icon_path_that_points_outside_the_artifact()
 	{
 		var secret = Path.Combine(_paths.BaseDirectory, "secret.svg");
-		File.WriteAllText(secret, "<svg>the user's own file</svg>");
+		await File.WriteAllTextAsync(secret, "<svg>the user's own file</svg>");
 
 		var artifact = new PluginArtifactBuilder()
 			.WithManifest(ManifestJson.Build("1.0.0",
@@ -252,7 +253,9 @@ internal sealed class PluginInstallerInspectTests
 	}
 
 	private static IEnumerable<string> WarningCodes(PluginInstallResult result)
-		=> result.Warnings.Select(warning => warning.Code);
+	{
+		return result.Warnings.Select(warning => warning.Code);
+	}
 
 	private string BuildArtifact(string? extraManifestBlocks = null)
 	{
@@ -299,6 +302,9 @@ internal sealed class PluginInstallerInspectTests
 
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
-		public HttpClient CreateClient(string name) => throw new NotSupportedException();
+		public HttpClient CreateClient(string name)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

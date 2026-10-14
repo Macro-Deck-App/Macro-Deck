@@ -42,7 +42,10 @@ public readonly record struct QualifiedId
 
 	/// <summary>Canonical serialization. The separator is exactly two characters and stays that way -
 	/// the trigger editor slices a local id off by adding its length to the owner id's.</summary>
-	public override string ToString() => IsEmpty ? string.Empty : _ownerId + Separator + _localId;
+	public override string ToString()
+	{
+		return IsEmpty ? string.Empty : _ownerId + Separator + _localId;
+	}
 
 	/// <summary>
 	/// Builds a qualified id from a declared owner and local id, throwing when either is invalid.
@@ -74,7 +77,9 @@ public readonly record struct QualifiedId
 	/// host did not itself declare.
 	/// </summary>
 	public static bool TryCreate(string? ownerId, string? localId, out QualifiedId id)
-		=> TryCreate(ownerId, localId, LocalIdKind.Resource, out id);
+	{
+		return TryCreate(ownerId, localId, LocalIdKind.Resource, out id);
+	}
 
 	public static bool TryCreate(string? ownerId, string? localId, LocalIdKind localKind, out QualifiedId id)
 	{
@@ -151,5 +156,8 @@ public readonly record struct QualifiedId
 	/// Whether a string is a well-formed qualified id. Used where the presence of an owner prefix is
 	/// itself the discriminator - a virtual profile carries one, a user's own profile is a bare GUID.
 	/// </summary>
-	public static bool IsQualified(string? value) => TryParse(value, out _);
+	public static bool IsQualified(string? value)
+	{
+		return TryParse(value, out _);
+	}
 }

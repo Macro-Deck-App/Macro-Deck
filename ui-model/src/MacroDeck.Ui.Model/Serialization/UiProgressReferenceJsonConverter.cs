@@ -26,7 +26,8 @@ public sealed class UiProgressReferenceJsonConverter : JsonConverter<UiProgressR
 	private const string AnchorFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
 	/// <inheritdoc />
-	public override UiProgressReference? Read(ref Utf8JsonReader reader,
+	public override UiProgressReference? Read(
+		ref Utf8JsonReader reader,
 		Type typeToConvert,
 		JsonSerializerOptions options)
 	{
@@ -42,8 +43,7 @@ public sealed class UiProgressReferenceJsonConverter : JsonConverter<UiProgressR
 
 		using var document = JsonDocument.ParseValue(ref reader);
 
-		if (!document.RootElement.TryGetProperty(Marker, out var marker) ||
-			marker.ValueKind != JsonValueKind.Object)
+		if (!document.RootElement.TryGetProperty(Marker, out var marker) || marker.ValueKind != JsonValueKind.Object)
 		{
 			throw new JsonException($"A progress reference must carry an object '{Marker}' member.");
 		}
@@ -64,12 +64,13 @@ public sealed class UiProgressReferenceJsonConverter : JsonConverter<UiProgressR
 			// absent member both mean the same thing, so a producer that spells it out is understood and
 			// the spelling never leaves this process.
 			DurationMs = ReadOptionalInt64(marker, DurationProperty),
-			Rate = ReadOptionalDouble(marker, RateProperty),
+			Rate = ReadOptionalDouble(marker, RateProperty)
 		};
 	}
 
 	/// <inheritdoc />
-	public override void Write(Utf8JsonWriter writer,
+	public override void Write(
+		Utf8JsonWriter writer,
 		UiProgressReference value,
 		JsonSerializerOptions options)
 	{
@@ -142,8 +143,7 @@ public sealed class UiProgressReferenceJsonConverter : JsonConverter<UiProgressR
 
 	private static DateTimeOffset ReadRequiredAnchor(JsonElement marker)
 	{
-		if (!marker.TryGetProperty(AnchorProperty, out var element) ||
-			element.ValueKind != JsonValueKind.String)
+		if (!marker.TryGetProperty(AnchorProperty, out var element) || element.ValueKind != JsonValueKind.String)
 		{
 			throw new JsonException($"A '{Marker}' member must carry a string '{AnchorProperty}'.");
 		}

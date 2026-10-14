@@ -20,10 +20,12 @@ namespace MacroDeck.Ui.Tests.UnitTests.Config;
 [TestFixture]
 public class UiOptionsStateConcurrencyTests
 {
-	private const string _optionsNodeKey = "options";
+	private const string OptionsNodeKey = "options";
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -47,7 +49,7 @@ public class UiOptionsStateConcurrencyTests
 	/// </summary>
 	private static IReadOnlyList<string> RenderedOptions(UiView view)
 	{
-		var node = FindById(view.Tree.Root, "setup." + _optionsNodeKey);
+		var node = FindById(view.Tree.Root, "setup." + OptionsNodeKey);
 
 		Assert.That(node, Is.Not.Null, "the fixture has to render the option list for this to prove anything");
 
@@ -57,7 +59,8 @@ public class UiOptionsStateConcurrencyTests
 	/// <summary>A flow whose option rows are real nodes, so "what the client sees" is the tree rather than a
 	/// property nobody renders.</summary>
 	private static UiView OptionListView(UiOptionsState options, UiState<string> typed)
-		=> new(ConfigSurface(),
+	{
+		return new UiView(ConfigSurface(),
 			new UiFlow
 			{
 				Key = "setup",
@@ -66,7 +69,7 @@ public class UiOptionsStateConcurrencyTests
 					new UiStringInput { Key = "search", Binding = Bind.To(typed) },
 					new UiConfigStack
 					{
-						Key = _optionsNodeKey,
+						Key = OptionsNodeKey,
 						Children =
 						[
 							new UiRepeat<UiOption>
@@ -77,13 +80,14 @@ public class UiOptionsStateConcurrencyTests
 								Template = (option, _) => new UiStringInput
 								{
 									Key = option.Value,
-									Binding = Bind.ReadOnly(UiValue.Of(option.Value)),
-								},
-							},
-						],
-					},
-				],
+									Binding = Bind.ReadOnly(UiValue.Of(option.Value))
+								}
+							}
+						]
+					}
+				]
 			});
+	}
 
 	[Test]
 	[CancelAfter(30_000)]
@@ -217,7 +221,7 @@ public class UiOptionsStateConcurrencyTests
 					{
 						NodeId = "search",
 						Name = UiConfigEvents.Change,
-						Data = UiCanonicalJson.ToElement($"typed{index}"),
+						Data = UiCanonicalJson.ToElement($"typed{index}")
 					});
 
 					if (!result.IsAccepted)

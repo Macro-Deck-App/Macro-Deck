@@ -1,4 +1,3 @@
-using MacroDeck.Sdk.Colors;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;

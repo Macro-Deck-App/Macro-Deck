@@ -24,7 +24,24 @@ public class WidgetTypesEndpointTests
 {
 	private static WidgetsController CreateController(
 		IUiTransportMessageHandler<GetWidgetTypesRequest, GetWidgetTypesResponse> handler)
-		=> new(null!, null!, null!, null!, null!, null!, null!, null!, null!, handler, null!, null!, null!, null!, null!, null!);
+	{
+		return new WidgetsController(null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			handler,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!,
+			null!);
+	}
 
 	[Test]
 	public async Task GetTypes_returns_one_entry_per_registered_type_carrying_its_id_and_isBuiltIn()
@@ -35,7 +52,8 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry("com.example::gauge",
 				"com.example",
 				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
+		var controller
+			= CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -64,7 +82,8 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry(WidgetTypeIds.Clock,
 				string.Empty,
 				new WidgetTypeDescriptor(WidgetTypeIds.Clock, LocalizedText.FromLiteral("Clock"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
+		var controller
+			= CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -93,7 +112,8 @@ public class WidgetTypesEndpointTests
 			new WidgetTypeCatalogEntry("com.example.gauges::gauge",
 				"com.example.gauges",
 				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"))));
-		var controller = CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
+		var controller
+			= CreateController(new GetWidgetTypesRequestMessageHandler(registry, new FakeIntegrationRegistry()));
 
 		var response = await controller.GetTypes(CancellationToken.None);
 
@@ -156,7 +176,8 @@ public class WidgetTypesEndpointTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(response.Types.Single(type => type.Id == "com.example.gauges::gauge").IsPluginProvided, Is.True);
+			Assert.That(response.Types.Single(type => type.Id == "com.example.gauges::gauge").IsPluginProvided,
+				Is.True);
 			Assert.That(response.Types.Single(type => type.Id == "app.macro-deck.calendar::calendar").IsPluginProvided,
 				Is.False,
 				"a type of one of the host's own integrations is not a plugin's");
@@ -208,26 +229,42 @@ public class WidgetTypesEndpointTests
 		public bool IsInitialized => true;
 		public string ProviderName => "Home Assistant";
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeWidgetTypeRegistry : IWidgetTypeRegistry
 	{
 		private readonly List<WidgetTypeCatalogEntry> _entries;
 
-		public FakeWidgetTypeRegistry(params WidgetTypeCatalogEntry[] entries) => _entries = [.. entries];
+		public FakeWidgetTypeRegistry(params WidgetTypeCatalogEntry[] entries)
+		{
+			_entries = [.. entries];
+		}
 
 		public IReadOnlyList<WidgetTypeCatalogEntry> All => _entries;
 
-		public bool IsRegistered(string? id) => _entries.Any(entry => entry.WidgetTypeId == id);
+		public bool IsRegistered(string? id)
+		{
+			return _entries.Any(entry => entry.WidgetTypeId == id);
+		}
 
 		public string? Resolve(string? spelling)
-			=> _entries.FirstOrDefault(entry => entry.WidgetTypeId == spelling)?.WidgetTypeId;
+		{
+			return _entries.FirstOrDefault(entry => entry.WidgetTypeId == spelling)?.WidgetTypeId;
+		}
 
 		public bool TryResolve(string? widgetTypeId, out WidgetTypeCatalogEntry entry)
 		{
@@ -239,12 +276,18 @@ public class WidgetTypesEndpointTests
 			string ownerId,
 			WidgetTypeDescriptor widgetType,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException("This endpoint only reads the catalog.");
+		{
+			throw new NotSupportedException("This endpoint only reads the catalog.");
+		}
 
 		public Task Unregister(string ownerId, string localId, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException("This endpoint only reads the catalog.");
+		{
+			throw new NotSupportedException("This endpoint only reads the catalog.");
+		}
 
 		public Task UnregisterAll(string ownerId, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException("This endpoint only reads the catalog.");
+		{
+			throw new NotSupportedException("This endpoint only reads the catalog.");
+		}
 	}
 }

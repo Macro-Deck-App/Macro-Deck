@@ -27,7 +27,7 @@ public class GetIconPacksRequestMessageHandlerTests
 	public async Task Handle_SortsDefaultPackFirst_ThenAlphabetically()
 	{
 		await _harness.CreatePack("banana");
-		await _harness.CreatePack("Zebra Icons", isDefault: true);
+		await _harness.CreatePack("Zebra Icons", true);
 		await _harness.CreatePack("Apple");
 		var handler = new GetIconPacksRequestMessageHandler(_harness.Cache, new IconPackOwnerRegistry([]));
 

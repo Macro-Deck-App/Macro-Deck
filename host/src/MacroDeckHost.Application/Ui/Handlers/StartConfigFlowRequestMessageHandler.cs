@@ -44,7 +44,7 @@ public class StartConfigFlowRequestMessageHandler
 					Error = new TransportError
 					{
 						Code = "INVALID_ID",
-						Message = AppStrings.Errors.Config.InvalidEntryId(id: rawEntryId)
+						Message = AppStrings.Errors.Config.InvalidEntryId(rawEntryId)
 					}
 				};
 			}
@@ -65,7 +65,7 @@ public class StartConfigFlowRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "NOT_SUPPORTED",
-					Message = AppStrings.Errors.Integrations.NoConfigFlow(id: request.IntegrationId)
+					Message = AppStrings.Errors.Integrations.NoConfigFlow(request.IntegrationId)
 				}
 			};
 		}
@@ -86,8 +86,8 @@ public class StartConfigFlowRequestMessageHandler
 			Step = outcome.Step is null ? null : ConfigFlowStepMapper.Map(outcome.Step),
 			SupportsConfigUi = outcome.SupportsConfigUi,
 			ConfigUiModelVersion = outcome.ConfigUiModelVersion,
-			InitialValues = outcome.InitialValues?.ToDictionary() ??
-				new Dictionary<string, global::System.Text.Json.JsonElement>(),
+			InitialValues = outcome.InitialValues?.ToDictionary()
+				?? new Dictionary<string, global::System.Text.Json.JsonElement>(),
 			StoredSecretFields = outcome.StoredSecretFields?.ToList() ?? []
 		};
 	}

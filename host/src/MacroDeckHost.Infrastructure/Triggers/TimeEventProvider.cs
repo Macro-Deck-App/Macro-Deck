@@ -50,7 +50,7 @@ public sealed class TimeEventProvider : IHostEventProvider
 			ConfigurationParameters =
 			[
 				ActionParameter.Number("every",
-					label: AppStrings.Events.Time.EveryLabel(),
+					AppStrings.Events.Time.EveryLabel(),
 					min: 1,
 					max: 100_000,
 					step: 1,
@@ -97,7 +97,7 @@ public sealed class TimeEventProvider : IHostEventProvider
 			ConfigurationParameters =
 			[
 				ActionParameter.Number("dayOfMonth",
-					label: AppStrings.Events.Time.DayOfMonthLabel(),
+					AppStrings.Events.Time.DayOfMonthLabel(),
 					min: 1,
 					max: 31,
 					step: 1,
@@ -116,9 +116,9 @@ public sealed class TimeEventProvider : IHostEventProvider
 			ConfigurationParameters =
 			[
 				ActionParameter.Text("expression",
-					label: AppStrings.Events.Time.ExpressionLabel(),
-					description: AppStrings.Events.Time.ExpressionDescription(),
-					placeholder: "0 9 * * MON-FRI",
+					AppStrings.Events.Time.ExpressionLabel(),
+					AppStrings.Events.Time.ExpressionDescription(),
+					"0 9 * * MON-FRI",
 					required: true)
 			],
 			PayloadParameters = FiredAt
@@ -127,15 +127,17 @@ public sealed class TimeEventProvider : IHostEventProvider
 
 	private static IReadOnlyList<ActionParameter> FiredAt =>
 	[
-		ActionParameter.Text("firedAt", label: AppStrings.Events.Time.FiredAtLabel()),
-		ActionParameter.Text("scheduledFor", label: AppStrings.Events.Time.ScheduledForLabel())
+		ActionParameter.Text("firedAt", AppStrings.Events.Time.FiredAtLabel()),
+		ActionParameter.Text("scheduledFor", AppStrings.Events.Time.ScheduledForLabel())
 	];
 
 	private static ActionParameter TimeOfDay()
-		=> ActionParameter.Text("time",
-			label: AppStrings.Events.Time.TimeLabel(),
-			description: AppStrings.Events.Time.TimeDescription(),
-			placeholder: "09:00",
-			defaultValue: "09:00",
-			required: true);
+	{
+		return ActionParameter.Text("time",
+			AppStrings.Events.Time.TimeLabel(),
+			AppStrings.Events.Time.TimeDescription(),
+			"09:00",
+			"09:00",
+			true);
+	}
 }

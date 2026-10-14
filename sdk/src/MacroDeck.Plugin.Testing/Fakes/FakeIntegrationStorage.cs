@@ -15,7 +15,10 @@ public sealed class FakeIntegrationStorage : IIntegrationStorage
 	public IReadOnlyCollection<string> Keys => [.. _documents.Keys];
 
 	/// <summary>The stored text under <paramref name="key" />, or <c>null</c> when there is none or it is damaged.</summary>
-	public string? Get(string key) => _documents.GetValueOrDefault(key);
+	public string? Get(string key)
+	{
+		return _documents.GetValueOrDefault(key);
+	}
 
 	/// <summary>Stores <paramref name="content" /> under <paramref name="key" /> as if it had been written.</summary>
 	public void Set(string key, string content)
@@ -32,7 +35,8 @@ public sealed class FakeIntegrationStorage : IIntegrationStorage
 	}
 
 	/// <inheritdoc />
-	public Task<IntegrationStorageReadResult> ReadAsync(string key,
+	public Task<IntegrationStorageReadResult> ReadAsync(
+		string key,
 		Func<string, bool>? isValid = null,
 		CancellationToken cancellationToken = default)
 	{

@@ -169,7 +169,9 @@ internal static class WindowsShellLinkParser
 	}
 
 	private static uint ReadOffsetField(ReadOnlySpan<byte> linkInfo, int field)
-		=> BinaryPrimitives.ReadUInt32LittleEndian(linkInfo[field..]);
+	{
+		return BinaryPrimitives.ReadUInt32LittleEndian(linkInfo[field..]);
+	}
 
 	private static string? ReadAnsiString(ReadOnlySpan<byte> linkInfo, uint offset)
 	{

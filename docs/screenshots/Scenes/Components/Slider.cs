@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
@@ -19,9 +21,15 @@ internal static partial class Scenes
 						Level = 0.65,
 						Step = 0.05,
 						Thickness = UiSize.FromBasis(0.12, 0.55),
-						Events = [UiEventHandler.On(UiComponentEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			},
 			2);
 
@@ -40,9 +48,15 @@ internal static partial class Scenes
 						Level = 0.4,
 						Direction = UiComponentDirections.Vertical,
 						Thickness = UiSize.FromBasis(0.12, 0.55),
-						Events = [UiEventHandler.On(UiComponentEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			},
 			1,
 			2);
@@ -66,9 +80,9 @@ internal static partial class Scenes
 						End = 0.6,
 						StartColor = "#2b6cee",
 						EndColor = "#ee2b2b",
-						Marker = 0.45,
-					},
-				],
+						Marker = 0.45
+					}
+				]
 			},
 			2);
 
@@ -76,7 +90,7 @@ internal static partial class Scenes
 		[
 			("Today", "9°", "21°", 0.2, 0.6, 0.45),
 			("Tue", "12°", "24°", 0.3, 0.7, null),
-			("Wed", "7°", "16°", 0.1, 0.45, null),
+			("Wed", "7°", "16°", 0.1, 0.45, null)
 		];
 		yield return Tile("range-bar-marker",
 			new UiStack
@@ -110,12 +124,12 @@ internal static partial class Scenes
 								End = day.End,
 								StartColor = "#2b6cee",
 								EndColor = "#ee2b2b",
-								Marker = day.Marker is { } marker ? UiValue.Of(marker) : UiValue.None<double>(),
+								Marker = day.Marker is { } marker ? UiValue.Of(marker) : UiValue.None<double>()
 							},
-							new UiTextRun { Key = "high", Text = day.High, Size = 0.09, MainSize = 0.16 },
-						],
+							new UiTextRun { Key = "high", Text = day.High, Size = 0.09, MainSize = 0.16 }
+						]
 					})
-				],
+				]
 			},
 			2,
 			1);

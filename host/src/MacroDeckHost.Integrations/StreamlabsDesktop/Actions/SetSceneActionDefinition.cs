@@ -22,11 +22,14 @@ internal sealed class SetSceneActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SceneParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -40,8 +43,8 @@ internal sealed class SetSceneActionDefinition : IDynamicOptionsActionDefinition
 
 		var state = _resolver()?.State;
 		var active = state is { IsConnected: true }
-			? string.Equals(state.CurrentScene, scene, StringComparison.Ordinal) ||
-			string.Equals(state.CurrentSceneId, scene, StringComparison.Ordinal)
+			? string.Equals(state.CurrentScene, scene, StringComparison.Ordinal)
+			|| string.Equals(state.CurrentSceneId, scene, StringComparison.Ordinal)
 			: (bool?)null;
 
 		return Task.FromResult<ActionStateSnapshot?>(ActionStates.Snapshot(ActionStates.ActiveInactive, active));
@@ -50,7 +53,9 @@ internal sealed class SetSceneActionDefinition : IDynamicOptionsActionDefinition
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	{
+		return StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

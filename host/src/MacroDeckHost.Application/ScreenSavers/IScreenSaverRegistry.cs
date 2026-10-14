@@ -9,7 +9,8 @@ public sealed record ScreenSaverCatalogEntry(
 
 public interface IScreenSaverRegistry
 {
-	Task<ScreenSaverRegistration> Register(string ownerId,
+	Task<ScreenSaverRegistration> Register(
+		string ownerId,
 		ScreenSaverDescriptor screenSaver,
 		CancellationToken cancellationToken = default);
 

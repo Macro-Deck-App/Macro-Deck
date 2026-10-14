@@ -95,13 +95,13 @@ public sealed class DevicePresenceBackgroundService : HostReadyBackgroundService
 		foreach (var id in wentOffline)
 		{
 			await mediator.Publish(new DeviceChangedNotification(id), ct);
-			await mediator.Publish(new DevicePresenceChangedNotification(id, Online: false), ct);
+			await mediator.Publish(new DevicePresenceChangedNotification(id, false), ct);
 		}
 
 		foreach (var id in wentOnline)
 		{
 			await mediator.Publish(new DeviceChangedNotification(id), ct);
-			await mediator.Publish(new DevicePresenceChangedNotification(id, Online: true), ct);
+			await mediator.Publish(new DevicePresenceChangedNotification(id, true), ct);
 		}
 
 		if (touchDue || wentOnline.Count > 0)

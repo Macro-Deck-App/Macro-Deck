@@ -33,7 +33,7 @@ public class WeatherWidgetConfigTests
 		showForecast = true,
 		animateIcon = true,
 		forecastDays = 5,
-		border = new { style = "static", color = "#ff0000" },
+		border = new { style = "static", color = "#ff0000" }
 	};
 
 	// A closed range of seven, each reading as a phrase rather than a digit, is picked from a list - and
@@ -222,14 +222,17 @@ public class WeatherWidgetConfigTests
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(WeatherWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+	{
+		return UiTestHost.Render(WeatherWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			new StubWeatherRegistry([
 				new WeatherStationDescriptor("owm.berlin", "openweathermap", default, "Berlin", false),
-				new WeatherStationDescriptor("owm.hamburg", "openweathermap", default, "Hamburg", false),
+				new WeatherStationDescriptor("owm.hamburg", "openweathermap", default, "Hamburg", false)
 			])));
+	}
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -239,16 +242,17 @@ public class WeatherWidgetConfigTests
 					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData)
+			}
 		};
+	}
 
 	private static JsonElement Compose(UiTestHost host)
 	{
 		var border = new Dictionary<string, object?>
 		{
 			["style"] = host.ById("border.style").Text(UiConfigProperties.Value),
-			["color"] = host.ById("border.color").Text(UiConfigProperties.Value),
+			["color"] = host.ById("border.color").Text(UiConfigProperties.Value)
 		};
 
 		var data = new Dictionary<string, object?>
@@ -262,7 +266,7 @@ public class WeatherWidgetConfigTests
 			["showForecast"] = host.ById("showForecast").Flag(UiConfigProperties.Value),
 			["animateIcon"] = host.ById("animateIcon").Flag(UiConfigProperties.Value),
 			["style"] = host.ById("style").Text(UiConfigProperties.Value),
-			["border"] = border,
+			["border"] = border
 		};
 
 		if (host.FindById("forecastDays") is { } forecastDays)
@@ -275,9 +279,15 @@ public class WeatherWidgetConfigTests
 
 	private sealed class StubWeatherRegistry(IReadOnlyList<WeatherStationDescriptor> instances) : IWeatherRegistry
 	{
-		public IReadOnlyList<WeatherStationDescriptor> GetInstances() => instances;
+		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
+		{
+			return instances;
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => null;
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return null;
+		}
 
 		public IWeatherStation? DefaultStation => null;
 	}
@@ -285,20 +295,27 @@ public class WeatherWidgetConfigTests
 	private sealed class NullResourceStore : IUiResourceStore
 	{
 		public UiResource Register(UiResourceRegistration registration)
-			=> new() { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		{
+			return new UiResource { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		}
 
 		public bool TryGet(string resourceId, out UiResourceContent content)
 		{
-			content = default!;
+			content = null!;
 			return false;
 		}
 
-		public bool Remove(string resourceId) => false;
+		public bool Remove(string resourceId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class PassThroughSampleText : IWidgetSampleTextResolver
 	{
-		public ValueTask<string> ResolveAsync(LocalizedString value) =>
-			ValueTask.FromResult(value.ToString() ?? string.Empty);
+		public ValueTask<string> ResolveAsync(LocalizedString value)
+		{
+			return ValueTask.FromResult(value.ToString() ?? string.Empty);
+		}
 	}
 }

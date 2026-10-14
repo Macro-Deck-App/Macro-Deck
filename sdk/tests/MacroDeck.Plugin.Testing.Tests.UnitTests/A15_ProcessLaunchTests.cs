@@ -6,7 +6,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// A15 - a real executable is really launched, and one that dies is visible rather than a hang.
 /// </summary>
 [TestFixture]
-public class A15_ProcessLaunchTests
+public class A15ProcessLaunchTests
 {
 	[Test]
 	public async Task The_well_behaved_plugins_built_executable_is_really_launched_and_connects()

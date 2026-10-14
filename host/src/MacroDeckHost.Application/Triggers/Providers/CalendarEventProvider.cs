@@ -39,11 +39,11 @@ public sealed class CalendarEventProvider : IHostEventProvider
 			ConfigurationParameters =
 			[
 				ActionParameter.Duration(LeadTimeParameter,
-					label: AppStrings.Events.Calendar.LeadTimeLabel(),
-					description: AppStrings.Events.Calendar.LeadTimeDescription(),
-					min: 0,
-					max: MaximumLeadTime.TotalMilliseconds,
-					defaultMilliseconds: DefaultLeadTime.TotalMilliseconds),
+					AppStrings.Events.Calendar.LeadTimeLabel(),
+					AppStrings.Events.Calendar.LeadTimeDescription(),
+					0,
+					MaximumLeadTime.TotalMilliseconds,
+					DefaultLeadTime.TotalMilliseconds),
 				AccountFilter(),
 				CalendarFilter()
 			],
@@ -70,8 +70,10 @@ public sealed class CalendarEventProvider : IHostEventProvider
 	];
 
 	public static string Qualify(string eventId)
-		=> QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
+	{
+		return QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
 			.ToString();
+	}
 
 	public static TimeSpan LeadTime(EventSubscription subscription)
 	{
@@ -99,8 +101,11 @@ public sealed class CalendarEventProvider : IHostEventProvider
 		return TimeSpan.FromMilliseconds(Math.Clamp(milliseconds.Value, 0, MaximumLeadTime.TotalMilliseconds));
 	}
 
-	public static IReadOnlyDictionary<string, object?> PayloadOf(CalendarEventSummary calendarEvent, string providerName)
-		=> new Dictionary<string, object?>(StringComparer.Ordinal)
+	public static IReadOnlyDictionary<string, object?> PayloadOf(
+		CalendarEventSummary calendarEvent,
+		string providerName)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["eventId"] = calendarEvent.EventId,
 			["title"] = calendarEvent.Title,
@@ -115,38 +120,46 @@ public sealed class CalendarEventProvider : IHostEventProvider
 			["location"] = calendarEvent.Location ?? string.Empty,
 			["meetingUrl"] = calendarEvent.MeetingUrl ?? string.Empty
 		};
+	}
 
-	private static IReadOnlyList<ActionParameter> Payload() =>
-	[
-		ActionParameter.Text("eventId", label: AppStrings.Events.Calendar.EventIdLabel()),
-		ActionParameter.Text("title", label: AppStrings.Events.Calendar.TitleLabel()),
-		ActionParameter.Text("start", label: AppStrings.Events.Calendar.StartLabel()),
-		ActionParameter.Text("end", label: AppStrings.Events.Calendar.EndLabel()),
-		ActionParameter.Toggle("allDay", label: AppStrings.Events.Calendar.AllDayLabel()),
-		ActionParameter.Text("calendar", label: AppStrings.Events.Calendar.CalendarNameLabel()),
-		ActionParameter.DynamicChoice(CalendarIdParameter,
-			label: AppStrings.Events.Calendar.CalendarLabel(),
-			optionsSourceId: CalendarOptionsSourceIds.Calendars),
-		ActionParameter.Text("account", label: AppStrings.Events.Calendar.AccountNameLabel()),
-		ActionParameter.DynamicChoice(AccountIdParameter,
-			label: AppStrings.Events.Calendar.AccountLabel(),
-			optionsSourceId: CalendarOptionsSourceIds.Accounts),
-		ActionParameter.Text("provider", label: AppStrings.Events.Calendar.ProviderLabel()),
-		ActionParameter.Text("location", label: AppStrings.Events.Calendar.LocationLabel()),
-		ActionParameter.Text("meetingUrl", label: AppStrings.Events.Calendar.MeetingUrlLabel())
-	];
+	private static IReadOnlyList<ActionParameter> Payload()
+	{
+		return
+		[
+			ActionParameter.Text("eventId", AppStrings.Events.Calendar.EventIdLabel()),
+			ActionParameter.Text("title", AppStrings.Events.Calendar.TitleLabel()),
+			ActionParameter.Text("start", AppStrings.Events.Calendar.StartLabel()),
+			ActionParameter.Text("end", AppStrings.Events.Calendar.EndLabel()),
+			ActionParameter.Toggle("allDay", AppStrings.Events.Calendar.AllDayLabel()),
+			ActionParameter.Text("calendar", AppStrings.Events.Calendar.CalendarNameLabel()),
+			ActionParameter.DynamicChoice(CalendarIdParameter,
+				AppStrings.Events.Calendar.CalendarLabel(),
+				optionsSourceId: CalendarOptionsSourceIds.Calendars),
+			ActionParameter.Text("account", AppStrings.Events.Calendar.AccountNameLabel()),
+			ActionParameter.DynamicChoice(AccountIdParameter,
+				AppStrings.Events.Calendar.AccountLabel(),
+				optionsSourceId: CalendarOptionsSourceIds.Accounts),
+			ActionParameter.Text("provider", AppStrings.Events.Calendar.ProviderLabel()),
+			ActionParameter.Text("location", AppStrings.Events.Calendar.LocationLabel()),
+			ActionParameter.Text("meetingUrl", AppStrings.Events.Calendar.MeetingUrlLabel())
+		];
+	}
 
 	private static ActionParameter AccountFilter()
-		=> ActionParameter.DynamicChoice(AccountIdParameter,
-			label: AppStrings.Events.Calendar.AccountLabel(),
-			description: AppStrings.Events.Calendar.AccountFilterDescription(),
-			optionsSourceId: CalendarOptionsSourceIds.Accounts,
-			placeholder: AppStrings.Events.Calendar.AnyAccountPlaceholder());
+	{
+		return ActionParameter.DynamicChoice(AccountIdParameter,
+			AppStrings.Events.Calendar.AccountLabel(),
+			AppStrings.Events.Calendar.AccountFilterDescription(),
+			CalendarOptionsSourceIds.Accounts,
+			AppStrings.Events.Calendar.AnyAccountPlaceholder());
+	}
 
 	private static ActionParameter CalendarFilter()
-		=> ActionParameter.DynamicChoice(CalendarIdParameter,
-			label: AppStrings.Events.Calendar.CalendarLabel(),
-			description: AppStrings.Events.Calendar.CalendarFilterDescription(),
-			optionsSourceId: CalendarOptionsSourceIds.Calendars,
-			placeholder: AppStrings.Events.Calendar.AnyCalendarPlaceholder());
+	{
+		return ActionParameter.DynamicChoice(CalendarIdParameter,
+			AppStrings.Events.Calendar.CalendarLabel(),
+			AppStrings.Events.Calendar.CalendarFilterDescription(),
+			CalendarOptionsSourceIds.Calendars,
+			AppStrings.Events.Calendar.AnyCalendarPlaceholder());
+	}
 }

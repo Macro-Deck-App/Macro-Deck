@@ -90,7 +90,7 @@ public class IconPackServiceTests
 	[Test]
 	public async Task Delete_DefaultPack_IsRejected()
 	{
-		var pack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var pack = await _harness.CreatePack("Imported Icons", true);
 
 		var result = await _service.Delete(pack.Id);
 

@@ -47,8 +47,8 @@ internal static class StreamerbotResponses
 				continue;
 			}
 
-			var enabled = !action.TryGetProperty("enabled", out var enabledElement) ||
-				enabledElement.ValueKind != JsonValueKind.False;
+			var enabled = !action.TryGetProperty("enabled", out var enabledElement)
+				|| enabledElement.ValueKind != JsonValueKind.False;
 
 			result.Add(new StreamerbotActionInfo(id, name, ReadString(action, "group"), enabled));
 		}
@@ -146,9 +146,9 @@ internal static class StreamerbotResponses
 	{
 		if (root.TryGetProperty("variables", out var variables))
 		{
-			if (variables.ValueKind == JsonValueKind.Object &&
-				variables.TryGetProperty(name, out var byName) &&
-				byName.TryGetProperty("value", out var value))
+			if (variables.ValueKind == JsonValueKind.Object
+				&& variables.TryGetProperty(name, out var byName)
+				&& byName.TryGetProperty("value", out var value))
 			{
 				return value;
 			}
@@ -157,8 +157,8 @@ internal static class StreamerbotResponses
 			{
 				foreach (var entry in variables.EnumerateArray())
 				{
-					if (string.Equals(ReadString(entry, "name"), name, StringComparison.Ordinal) &&
-						entry.TryGetProperty("value", out var entryValue))
+					if (string.Equals(ReadString(entry, "name"), name, StringComparison.Ordinal)
+						&& entry.TryGetProperty("value", out var entryValue))
 					{
 						return entryValue;
 					}
@@ -166,9 +166,9 @@ internal static class StreamerbotResponses
 			}
 		}
 
-		if (root.TryGetProperty("variable", out var single) &&
-			single.ValueKind == JsonValueKind.Object &&
-			single.TryGetProperty("value", out var singleValue))
+		if (root.TryGetProperty("variable", out var single)
+			&& single.ValueKind == JsonValueKind.Object
+			&& single.TryGetProperty("value", out var singleValue))
 		{
 			return singleValue;
 		}
@@ -195,9 +195,11 @@ internal static class StreamerbotResponses
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }

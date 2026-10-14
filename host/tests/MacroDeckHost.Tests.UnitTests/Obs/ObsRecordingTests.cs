@@ -9,7 +9,9 @@ namespace MacroDeckHost.Tests.UnitTests.Obs;
 internal sealed class ObsRecordingTests
 {
 	private static ActionExecutionContext Context(Dictionary<string, object>? parameters = null)
-		=> new() { Parameters = parameters ?? new Dictionary<string, object>() };
+	{
+		return new ActionExecutionContext { Parameters = parameters ?? new Dictionary<string, object>() };
+	}
 
 	private static (ObsConnection Connection, FakeObsClient Client, RecordingPublisher Publisher, int[] Refreshes)
 		Create(bool connected = true)
@@ -26,7 +28,9 @@ internal sealed class ObsRecordingTests
 	}
 
 	private static IActionDefinition Action(ObsConnection connection, string id)
-		=> ObsActions.Create(() => connection, new VariableApiAccessor()).Single(a => a.Id == id);
+	{
+		return ObsActions.Create(() => connection, new VariableApiAccessor()).Single(a => a.Id == id);
+	}
 
 	[Test]
 	public async Task Split_calls_the_client_and_succeeds()
@@ -62,9 +66,10 @@ internal sealed class ObsRecordingTests
 	[Test]
 	public async Task Every_recording_action_fails_with_not_connected_and_sends_nothing_when_obs_is_offline()
 	{
-		var (connection, client, _, _) = Create(connected: false);
+		var (connection, client, _, _) = Create(false);
 		using var _ = connection;
-		var directory = new Dictionary<string, object> { [SetRecordDirectoryActionDefinition.DirectoryParameter] = "/rec" };
+		var directory = new Dictionary<string, object>
+			{ [SetRecordDirectoryActionDefinition.DirectoryParameter] = "/rec" };
 
 		var results = new[]
 		{
@@ -93,7 +98,9 @@ internal sealed class ObsRecordingTests
 			parameters[CreateRecordChapterActionDefinition.ChapterNameParameter] = name;
 		}
 
-		var result = await Action(connection, "create-record-chapter").CreateExecutor().ExecuteAsync(Context(parameters));
+		var result = await Action(connection, "create-record-chapter")
+			.CreateExecutor()
+			.ExecuteAsync(Context(parameters));
 
 		Assert.Multiple(() =>
 		{
@@ -126,7 +133,8 @@ internal sealed class ObsRecordingTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderRejected));
-			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(), Is.EqualTo("Chapters need Hybrid MP4"));
+			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(),
+				Is.EqualTo("Chapters need Hybrid MP4"));
 		});
 	}
 
@@ -136,7 +144,8 @@ internal sealed class ObsRecordingTests
 		var (connection, client, _, _) = Create();
 		using var _ = connection;
 
-		var result = await Action(connection, "set-record-directory").CreateExecutor()
+		var result = await Action(connection, "set-record-directory")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object>
 				{ [SetRecordDirectoryActionDefinition.DirectoryParameter] = "  D:\\Rec\\Game  " }));
 
@@ -153,7 +162,8 @@ internal sealed class ObsRecordingTests
 		var (connection, client, _, _) = Create();
 		using var _ = connection;
 
-		var result = await Action(connection, "set-record-directory").CreateExecutor()
+		var result = await Action(connection, "set-record-directory")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object>
 				{ [SetRecordDirectoryActionDefinition.DirectoryParameter] = "  " }));
 
@@ -171,14 +181,16 @@ internal sealed class ObsRecordingTests
 		using var _ = connection;
 		client.RequestFailure = new ObsRequestException(400, "Invalid directory");
 
-		var result = await Action(connection, "set-record-directory").CreateExecutor()
+		var result = await Action(connection, "set-record-directory")
+			.CreateExecutor()
 			.ExecuteAsync(Context(new Dictionary<string, object>
 				{ [SetRecordDirectoryActionDefinition.DirectoryParameter] = "?" }));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderRejected));
-			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(), Is.EqualTo("Invalid directory"));
+			Assert.That(result.ErrorMessage.Localized?.Arguments["message"]?.ToString(),
+				Is.EqualTo("Invalid directory"));
 		});
 	}
 
@@ -296,6 +308,8 @@ internal sealed class ObsRecordingTests
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Published { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

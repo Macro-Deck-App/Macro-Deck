@@ -30,7 +30,8 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 	{
 	}
 
-	internal MusicPlayerArtworkService(IMusicPlayerRegistry registry,
+	internal MusicPlayerArtworkService(
+		IMusicPlayerRegistry registry,
 		IArtworkProcessor processor,
 		ILogger logger,
 		long maxCacheBytes)
@@ -47,13 +48,17 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 		return $"\"{artworkId}-{variant}\"";
 	}
 
-	public Task<ArtworkImageResult?> GetImage(string instanceId,
+	public Task<ArtworkImageResult?> GetImage(
+		string instanceId,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
-		=> GetImage(instanceId, () => _registry.GetPlayer(instanceId), artworkId, size, cancellationToken);
+	{
+		return GetImage(instanceId, () => _registry.GetPlayer(instanceId), artworkId, size, cancellationToken);
+	}
 
-	public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+	public Task<ArtworkImageResult?> GetImage(
+		MusicPlayerVariant variant,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
@@ -67,15 +72,16 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 			cancellationToken);
 	}
 
-	private async Task<ArtworkImageResult?> GetImage(string instanceId,
+	private async Task<ArtworkImageResult?> GetImage(
+		string instanceId,
 		Func<IMusicPlayer?> resolvePlayer,
 		string artworkId,
 		int? size,
 		CancellationToken cancellationToken)
 	{
 		var key = $"{instanceId}\n{artworkId}";
-		var entry = TryGetCached(key) ??
-			await FetchDeduplicated(key, instanceId, resolvePlayer, artworkId, cancellationToken);
+		var entry = TryGetCached(key)
+			?? await FetchDeduplicated(key, instanceId, resolvePlayer, artworkId, cancellationToken);
 		if (entry is null)
 		{
 			return null;
@@ -86,7 +92,8 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 		return new ArtworkImageResult(content, entry.ContentType, GetETag(artworkId, size));
 	}
 
-	private Task<CacheEntry?> FetchDeduplicated(string key,
+	private Task<CacheEntry?> FetchDeduplicated(
+		string key,
 		string instanceId,
 		Func<IMusicPlayer?> resolvePlayer,
 		string artworkId,
@@ -98,7 +105,8 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 		return lazy.Value.WaitAsync(cancellationToken);
 	}
 
-	private async Task<CacheEntry?> FetchAndCache(string key,
+	private async Task<CacheEntry?> FetchAndCache(
+		string key,
 		string instanceId,
 		Func<IMusicPlayer?> resolvePlayer,
 		string artworkId)

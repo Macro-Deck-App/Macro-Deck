@@ -20,14 +20,15 @@ public class PluginCompatibilityEvaluatorTests
 
 	private static readonly string[] _confirmedStates =
 	[
-		PluginCompatibilityStates.DeprecatedApis, PluginCompatibilityStates.UpdateRequired,
+		PluginCompatibilityStates.DeprecatedApis, PluginCompatibilityStates.UpdateRequired
 	];
 
 	private static PluginCompatibilityEvaluation Evaluation(
 		int? protocolVersion = 1,
 		IReadOnlyList<CapabilityNegotiationResult>? capabilities = null,
 		PluginSdkUsage? sdk = null)
-		=> new()
+	{
+		return new PluginCompatibilityEvaluation
 		{
 			PluginId = "com.example.plugin",
 			DisplayName = "Example",
@@ -35,12 +36,15 @@ public class PluginCompatibilityEvaluatorTests
 			Capabilities = capabilities ?? [],
 			Sdk = sdk
 		};
+	}
 
 	private static PluginSdkUsage Sdk(
 		string version = OldSdkVersion,
 		IReadOnlyList<string>? deprecatedApis = null,
 		bool truncated = false)
-		=> new() { SdkVersion = version, DeprecatedApis = deprecatedApis, Truncated = truncated };
+	{
+		return new PluginSdkUsage { SdkVersion = version, DeprecatedApis = deprecatedApis, Truncated = truncated };
+	}
 
 
 	[Test]
@@ -124,7 +128,7 @@ public class PluginCompatibilityEvaluatorTests
 	[Test]
 	public void An_old_sdk_without_a_usage_manifest_never_produces_a_confirmed_finding()
 	{
-		var evaluation = Evaluation(sdk: Sdk(version: OldSdkVersion, deprecatedApis: null));
+		var evaluation = Evaluation(sdk: Sdk(OldSdkVersion, null));
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -146,7 +150,7 @@ public class PluginCompatibilityEvaluatorTests
 		// The other half of the same rule: a plugin that proved it uses nothing deprecated must come out
 		// clean, not merely "unknown", and must not collect a deprecation finding from its version.
 		var evaluation = Evaluation(capabilities: [CapabilityNegotiationResult.Accept(CapabilityKinds.Actions, 1)],
-			sdk: Sdk(version: OldSdkVersion, deprecatedApis: _noDeprecatedApis));
+			sdk: Sdk(OldSdkVersion, _noDeprecatedApis));
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -187,8 +191,7 @@ public class PluginCompatibilityEvaluatorTests
 			Assert.Ignore("No SDK deprecations to infer from yet.");
 		}
 
-		var report = PluginCompatibilityEvaluator.Evaluate(
-			Evaluation(sdk: Sdk(version: "999.0.0", deprecatedApis: null)));
+		var report = PluginCompatibilityEvaluator.Evaluate(Evaluation(sdk: Sdk("999.0.0", null)));
 
 		Assert.Multiple(() =>
 		{
@@ -246,7 +249,7 @@ public class PluginCompatibilityEvaluatorTests
 	[Test]
 	public void A_plugin_with_no_negotiable_protocol_version_is_incompatible()
 	{
-		var evaluation = Evaluation(protocolVersion: null);
+		var evaluation = Evaluation(null);
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -281,7 +284,7 @@ public class PluginCompatibilityEvaluatorTests
 			[
 				CapabilityNegotiationResult.Reject(CapabilityKinds.Variables, "no version in common")
 			],
-			sdk: Sdk(version: OldSdkVersion, deprecatedApis: null));
+			sdk: Sdk(OldSdkVersion, null));
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -297,12 +300,11 @@ public class PluginCompatibilityEvaluatorTests
 	[Test]
 	public void A_failed_protocol_negotiation_outranks_every_other_finding()
 	{
-		var evaluation = Evaluation(protocolVersion: null,
-			capabilities:
+		var evaluation = Evaluation(null,
 			[
 				CapabilityNegotiationResult.Reject(CapabilityKinds.Variables, "no version in common")
 			],
-			sdk: Sdk(deprecatedApis: _oneUnknownDeprecatedApi));
+			Sdk(deprecatedApis: _oneUnknownDeprecatedApi));
 
 		Assert.That(PluginCompatibilityEvaluator.Evaluate(evaluation).State,
 			Is.EqualTo(PluginCompatibilityStates.Incompatible));
@@ -316,7 +318,7 @@ public class PluginCompatibilityEvaluatorTests
 		var evaluations = new[]
 		{
 			Evaluation(),
-			Evaluation(protocolVersion: null),
+			Evaluation(null),
 			Evaluation(sdk: Sdk(deprecatedApis: null)),
 			Evaluation(sdk: Sdk(deprecatedApis: _noDeprecatedApis)),
 			Evaluation(sdk: Sdk(deprecatedApis: _oneUnknownDeprecatedApi)),
@@ -349,13 +351,12 @@ public class PluginCompatibilityEvaluatorTests
 	{
 		// A finding without guidance is a dead end for the user, and one with an unknown source or
 		// severity cannot be rendered honestly by the UI.
-		var evaluation = Evaluation(protocolVersion: null,
-			capabilities:
+		var evaluation = Evaluation(null,
 			[
 				CapabilityNegotiationResult.Reject(CapabilityKinds.Variables, "no version in common"),
 				CapabilityNegotiationResult.Reject(CapabilityKinds.Actions, "no version in common")
 			],
-			sdk: Sdk(deprecatedApis: _oneUnknownDeprecatedApi));
+			Sdk(deprecatedApis: _oneUnknownDeprecatedApi));
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -381,7 +382,7 @@ public class PluginCompatibilityEvaluatorTests
 	[Test]
 	public void The_report_echoes_the_negotiated_protocol_version_and_sdk_version()
 	{
-		var evaluation = Evaluation(protocolVersion: 7, sdk: Sdk(version: "2.3.4", deprecatedApis: null));
+		var evaluation = Evaluation(7, sdk: Sdk("2.3.4", null));
 
 		var report = PluginCompatibilityEvaluator.Evaluate(evaluation);
 
@@ -403,7 +404,8 @@ public class PluginCompatibilityEvaluatorTests
 		{
 			Assert.That(report.UsageTruncated, Is.True);
 			Assert.That(PluginCompatibilityEvaluator
-					.Evaluate(Evaluation(sdk: Sdk(deprecatedApis: _oneUnknownDeprecatedApi))).UsageTruncated,
+					.Evaluate(Evaluation(sdk: Sdk(deprecatedApis: _oneUnknownDeprecatedApi)))
+					.UsageTruncated,
 				Is.False);
 		});
 	}
@@ -412,7 +414,7 @@ public class PluginCompatibilityEvaluatorTests
 	public void The_findings_of_one_report_stay_within_the_protocol_limit()
 	{
 		var capabilities = Enumerable
-			.Range(0, (ProtocolLimits.MaxCompatibilityFindings * 2) + 5)
+			.Range(0, ProtocolLimits.MaxCompatibilityFindings * 2 + 5)
 			.Select(i => CapabilityNegotiationResult.Reject($"kind-{i}", "no version in common"))
 			.ToList();
 

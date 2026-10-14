@@ -33,8 +33,10 @@ internal sealed class RemoteWidgetTypeProviderContext(IHostInvoker invoker) : IW
 	}
 
 	public Task UnregisterWidgetTypeAsync(string widgetTypeId, CancellationToken cancellationToken = default)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.WidgetTypes,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.WidgetTypes,
 			HostOperations.WidgetTypes.Unregister,
 			new WidgetTypesUnregisterArguments { WidgetTypeId = widgetTypeId },
 			cancellationToken);
+	}
 }

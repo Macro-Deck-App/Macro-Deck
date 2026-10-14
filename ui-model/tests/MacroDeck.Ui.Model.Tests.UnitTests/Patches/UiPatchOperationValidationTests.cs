@@ -11,7 +11,10 @@ public class UiPatchOperationValidationTests
 	private static readonly string[] _fivePatchOperations =
 		["set-properties", "insert-node", "remove-node", "replace-node", "move-node"];
 
-	private static JsonElement Element(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static JsonElement Element(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 
 	[Test]
 	public void Known_patch_operations_are_exactly_the_five_frozen_names()
@@ -58,7 +61,7 @@ public class UiPatchOperationValidationTests
 			Op = UiPatchOperations.SetProperties,
 			NodeId = "x",
 			Properties = new Dictionary<string, JsonElement> { ["a"] = Element("1") },
-			RemovedProperties = ["a"],
+			RemovedProperties = ["a"]
 		};
 
 		var nonConflicting = conflicting with { RemovedProperties = ["b"] };
@@ -78,7 +81,7 @@ public class UiPatchOperationValidationTests
 			Op = UiPatchOperations.InsertNode,
 			NodeId = "x",
 			ParentId = "parent",
-			Node = new UiNode { Id = "y", Type = "t" },
+			Node = new UiNode { Id = "y", Type = "t" }
 		};
 
 		var matched = mismatched with { Node = new UiNode { Id = "x", Type = "t" } };
@@ -126,7 +129,7 @@ public class UiPatchOperationValidationTests
 			Op = UiPatchOperations.MoveNode,
 			NodeId = "x",
 			ParentId = "parent",
-			Index = null,
+			Index = null
 		};
 
 		var missingParent = appended with { ParentId = null };

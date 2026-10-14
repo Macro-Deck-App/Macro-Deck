@@ -18,13 +18,20 @@ public class WeatherCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Weather,
 			LocalId = localId,
@@ -35,6 +42,7 @@ public class WeatherCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()
@@ -87,8 +95,10 @@ public class WeatherCapabilityHandlerTests
 	}
 
 	[Test]
-	public void No_provider_declares_nothing() =>
+	public void No_provider_declares_nothing()
+	{
 		Assert.That(new WeatherCapabilityHandler([], TestMetadata.Default).DeclareCapabilities(), Is.Empty);
+	}
 
 	[Test]
 	public async Task Describe_reports_the_provider_name_and_instances()

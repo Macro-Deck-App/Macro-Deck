@@ -46,13 +46,13 @@ internal static class LinuxDiskParser
 		foreach (var line in content.Split('\n'))
 		{
 			var fields = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-			if (fields.Length < 11 ||
-				!int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var major) ||
-				!int.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minor) ||
-				!TryParseCounter(fields[5], out var sectorsRead) ||
-				!TryParseCounter(fields[6], out var msReading) ||
-				!TryParseCounter(fields[9], out var sectorsWritten) ||
-				!TryParseCounter(fields[10], out var msWriting))
+			if (fields.Length < 11
+				|| !int.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var major)
+				|| !int.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minor)
+				|| !TryParseCounter(fields[5], out var sectorsRead)
+				|| !TryParseCounter(fields[6], out var msReading)
+				|| !TryParseCounter(fields[9], out var sectorsWritten)
+				|| !TryParseCounter(fields[10], out var msWriting))
 			{
 				continue;
 			}
@@ -69,15 +69,18 @@ internal static class LinuxDiskParser
 	public static DeviceNumber? ParseDeviceNumber(string content)
 	{
 		var parts = content.Trim().Split(':');
-		return parts.Length == 2 &&
-			int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var major) &&
-			int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minor)
+		return parts.Length == 2
+			&& int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var major)
+			&& int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var minor)
 				? new DeviceNumber(major, minor)
 				: null;
 	}
 
 	// udev escapes characters it cannot put in a file name as \xNN, a space in a label being \x20.
-	public static string DecodeUdevLabel(string label) => Unescape(label, 'x', 16, 2);
+	public static string DecodeUdevLabel(string label)
+	{
+		return Unescape(label, 'x', 16, 2);
+	}
 
 	private static LinuxMount? ParseMountLine(string line)
 	{
@@ -100,9 +103,9 @@ internal static class LinuxDiskParser
 
 	private static bool IsDisk(LinuxMount mount)
 	{
-		if (_skippedFileSystems.Contains(mount.FileSystem) ||
-			_skippedMountRoots.Any(root => mount.MountPoint == root ||
-				mount.MountPoint.StartsWith(root + "/", StringComparison.Ordinal)))
+		if (_skippedFileSystems.Contains(mount.FileSystem)
+			|| _skippedMountRoots.Any(root
+				=> mount.MountPoint == root || mount.MountPoint.StartsWith(root + "/", StringComparison.Ordinal)))
 		{
 			return false;
 		}
@@ -112,17 +115,21 @@ internal static class LinuxDiskParser
 			return true;
 		}
 
-		return mount.Source.StartsWith("/dev/", StringComparison.Ordinal) &&
-			!mount.Source.StartsWith("/dev/loop", StringComparison.Ordinal);
+		return mount.Source.StartsWith("/dev/", StringComparison.Ordinal)
+			&& !mount.Source.StartsWith("/dev/loop", StringComparison.Ordinal);
 	}
 
 	private static bool IsPreferred(string candidate, string current)
-		=> candidate.Length != current.Length
+	{
+		return candidate.Length != current.Length
 			? candidate.Length < current.Length
 			: string.CompareOrdinal(candidate, current) < 0;
+	}
 
 	private static bool TryParseCounter(string field, out ulong value)
-		=> ulong.TryParse(field, NumberStyles.None, CultureInfo.InvariantCulture, out value);
+	{
+		return ulong.TryParse(field, NumberStyles.None, CultureInfo.InvariantCulture, out value);
+	}
 
 	private static string Unescape(string value, char? marker, int radix, int digits)
 	{
@@ -136,10 +143,10 @@ internal static class LinuxDiskParser
 		var bytes = new List<byte>();
 		for (var i = 0; i < value.Length; i++)
 		{
-			if (value[i] == '\\' &&
-				i + prefix + digits <= value.Length &&
-				(marker is null || value[i + 1] == marker) &&
-				TryParseDigits(value.Substring(i + prefix, digits), radix, out var code))
+			if (value[i] == '\\'
+				&& i + prefix + digits <= value.Length
+				&& (marker is null || value[i + 1] == marker)
+				&& TryParseDigits(value.Substring(i + prefix, digits), radix, out var code))
 			{
 				bytes.Add(code);
 				i += prefix + digits - 1;

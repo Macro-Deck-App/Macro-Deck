@@ -13,8 +13,12 @@ public static class IntegrationIconVersion
 	private const int TokenLength = 16;
 
 	public static string? For(IIntegration integration)
-		=> integration is IIntegrationIconProvider iconProvider ? Of(iconProvider.GetIcon()) : null;
+	{
+		return integration is IIntegrationIconProvider iconProvider ? Of(iconProvider.GetIcon()) : null;
+	}
 
 	public static string? Of(byte[]? iconBytes)
-		=> iconBytes is null ? null : Convert.ToHexStringLower(SHA256.HashData(iconBytes))[..TokenLength];
+	{
+		return iconBytes is null ? null : Convert.ToHexStringLower(SHA256.HashData(iconBytes))[..TokenLength];
+	}
 }

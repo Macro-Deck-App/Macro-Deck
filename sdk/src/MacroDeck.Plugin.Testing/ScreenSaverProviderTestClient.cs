@@ -9,21 +9,28 @@ public sealed class ScreenSaverProviderTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal ScreenSaverProviderTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal ScreenSaverProviderTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>What this provider declares about itself.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ScreenSaverProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ScreenSaverProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ScreenSaverProvider.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>The screensavers the provider currently offers.</summary>
 	public Task<CapabilityInvocationOutcome> GetScreenSaversAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.ScreenSaverProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.ScreenSaverProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.ScreenSaverProvider.ScreenSavers,
 			null,
 			options);
+	}
 }

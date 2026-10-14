@@ -16,7 +16,9 @@ public sealed class PairingCodeStore
 	private int _failures;
 
 	public static bool IsPairingCodeShape(string token)
-		=> token.Length == CodeLength && token.All(char.IsAsciiDigit);
+	{
+		return token.Length == CodeLength && token.All(char.IsAsciiDigit);
+	}
 
 	public PairingCode Rotate(DateTime now)
 	{

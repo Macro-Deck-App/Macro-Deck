@@ -27,7 +27,8 @@ internal interface IPluginBuildRunner
 {
 	/// <exception cref="Processes.ProcessLaunchException">The executable could not be launched at all, as
 	/// opposed to launching and failing - which is a non-zero <see cref="PluginBuildRunResult.ExitCode" />.</exception>
-	Task<PluginBuildRunResult> RunAsync(string executable,
+	Task<PluginBuildRunResult> RunAsync(
+		string executable,
 		IReadOnlyList<string> arguments,
 		string workingDirectory,
 		CancellationToken cancellationToken);

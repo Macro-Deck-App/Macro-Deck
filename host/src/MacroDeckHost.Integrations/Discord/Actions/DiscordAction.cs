@@ -33,7 +33,10 @@ internal sealed class DiscordAction : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

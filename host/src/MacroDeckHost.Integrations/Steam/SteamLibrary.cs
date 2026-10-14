@@ -71,13 +71,15 @@ internal sealed class SteamLibrary
 			{
 				full = Path.GetFullPath(folder);
 			}
-			catch (Exception exception) when (exception is ArgumentException or NotSupportedException
+			catch (Exception exception) when (exception is ArgumentException
+				or NotSupportedException
 				or PathTooLongException)
 			{
 				return;
 			}
 
-			if (string.Equals(Path.GetFileName(full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)),
+			if (string.Equals(
+				Path.GetFileName(full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)),
 				"steamapps",
 				StringComparison.OrdinalIgnoreCase))
 			{
@@ -93,8 +95,8 @@ internal sealed class SteamLibrary
 
 		Add(steamRoot);
 
-		if (ReadFile(Path.Combine(steamRoot, "steamapps", "libraryfolders.vdf")) is { } text &&
-			ValveKeyValues.TryParse(text)?["libraryfolders"] is { } root)
+		if (ReadFile(Path.Combine(steamRoot, "steamapps", "libraryfolders.vdf")) is { } text
+			&& ValveKeyValues.TryParse(text)?["libraryfolders"] is { } root)
 		{
 			foreach (var entry in root.Children.Values)
 			{
@@ -126,10 +128,12 @@ internal sealed class SteamLibrary
 	{
 		try
 		{
-			return Directory.GetLastWriteTimeUtc(path).Ticks.ToString(CultureInfo.InvariantCulture) + "/" +
-				File.GetLastWriteTimeUtc(path).Ticks.ToString(CultureInfo.InvariantCulture);
+			return Directory.GetLastWriteTimeUtc(path).Ticks.ToString(CultureInfo.InvariantCulture)
+				+ "/"
+				+ File.GetLastWriteTimeUtc(path).Ticks.ToString(CultureInfo.InvariantCulture);
 		}
-		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException
+		catch (Exception exception) when (exception is IOException
+			or UnauthorizedAccessException
 			or ArgumentException)
 		{
 			return "-";
@@ -170,33 +174,32 @@ internal sealed class SteamLibrary
 		return
 		[
 			.. games.Values.OrderBy(game => game.Name, StringComparer.CurrentCultureIgnoreCase)
-				.ThenBy(game => game.AppId),
+				.ThenBy(game => game.AppId)
 		];
 	}
 
 	internal static SteamGame? ReadManifest(string path)
 	{
-		if (ReadFile(path) is not { } text ||
-			ValveKeyValues.TryParse(text)?["AppState"] is not { } state)
+		if (ReadFile(path) is not { } text || ValveKeyValues.TryParse(text)?["AppState"] is not { } state)
 		{
 			return null;
 		}
 
-		if (!int.TryParse(state["appid"]?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var appId) ||
-			appId <= 0 ||
-			state["name"]?.Value is not { Length: > 0 } name)
+		if (!int.TryParse(state["appid"]?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var appId)
+			|| appId <= 0
+			|| state["name"]?.Value is not { Length: > 0 } name)
 		{
 			return null;
 		}
 
-		if (!int.TryParse(state["StateFlags"]?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var flags) ||
-			(flags & InstalledStateFlag) == 0)
+		if (!int.TryParse(state["StateFlags"]?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var flags)
+			|| (flags & InstalledStateFlag) == 0)
 		{
 			return null;
 		}
 
-		if (_toolAppIds.Contains(appId) ||
-			_toolNamePrefixes.Any(prefix => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+		if (_toolAppIds.Contains(appId)
+			|| _toolNamePrefixes.Any(prefix => name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
 		{
 			return null;
 		}
@@ -204,9 +207,9 @@ internal sealed class SteamLibrary
 		DateTimeOffset? lastPlayed = long.TryParse(state["LastPlayed"]?.Value,
 				NumberStyles.None,
 				CultureInfo.InvariantCulture,
-				out var seconds) &&
-			seconds > 0 &&
-			seconds < 253402300799
+				out var seconds)
+			&& seconds > 0
+			&& seconds < 253402300799
 				? DateTimeOffset.FromUnixTimeSeconds(seconds)
 				: null;
 
@@ -224,11 +227,13 @@ internal sealed class SteamLibrary
 	}
 
 	internal static bool IsPlainFolderName(string? name)
-		=> !string.IsNullOrWhiteSpace(name) &&
-			name is not ("." or "..") &&
-			name.IndexOfAny(['/', '\\', ':']) < 0 &&
-			!Path.IsPathRooted(name) &&
-			name.Trim() == name;
+	{
+		return !string.IsNullOrWhiteSpace(name)
+			&& name is not ("." or "..")
+			&& name.IndexOfAny(['/', '\\', ':']) < 0
+			&& !Path.IsPathRooted(name)
+			&& name.Trim() == name;
+	}
 
 	internal static string? ReadFile(string path)
 	{

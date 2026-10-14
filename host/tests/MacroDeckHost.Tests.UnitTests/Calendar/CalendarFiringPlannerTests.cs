@@ -12,7 +12,10 @@ public class CalendarFiringPlannerTests
 	private CalendarFiringPlanner _planner = null!;
 
 	[SetUp]
-	public void SetUp() => _planner = new CalendarFiringPlanner();
+	public void SetUp()
+	{
+		_planner = new CalendarFiringPlanner();
+	}
 
 	[Test]
 	public void An_instant_fires_once_when_it_passes_and_the_next_one_is_named_until_then()
@@ -88,11 +91,17 @@ public class CalendarFiringPlannerTests
 			Is.EquivalentTo(new (object, string)[] { ("first", "mine"), ("second", "mine"), ("second", "other") }));
 	}
 
-	private CalendarFiringPlan Plan(DateTimeOffset now, CalendarEventSummary[] events, params CalendarFiringTarget[] targets)
-		=> _planner.Plan(new CalendarSnapshot(Noon.AddDays(-1), Noon.AddDays(8), [], events), now, targets);
+	private CalendarFiringPlan Plan(
+		DateTimeOffset now,
+		CalendarEventSummary[] events,
+		params CalendarFiringTarget[] targets)
+	{
+		return _planner.Plan(new CalendarSnapshot(Noon.AddDays(-1), Noon.AddDays(8), [], events), now, targets);
+	}
 
 	private static CalendarEventSummary Summary(string id, DateTimeOffset start, TimeSpan duration)
-		=> new()
+	{
+		return new CalendarEventSummary
 		{
 			InstanceKey = "main/" + id,
 			EventId = id,
@@ -105,6 +114,7 @@ public class CalendarFiringPlannerTests
 			CalendarName = "Main",
 			Title = id,
 			Start = start,
-			End = start + duration,
+			End = start + duration
 		};
+	}
 }

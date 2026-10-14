@@ -19,21 +19,25 @@ public class SinusBotMacroDeck2MigrationTests
 	};
 
 	private static ForeignAction PlayBackFile(string? instanceId)
-		=> new("SuchByte.SinusBotPlugin.Actions.PlayBackFileAction",
+	{
+		return new ForeignAction("SuchByte.SinusBotPlugin.Actions.PlayBackFileAction",
 			"SinusBot Plugin",
 			"Playback file",
 			instanceId is null
 				? """{"FileId":"file-1"}"""
 				: $$"""{"InstanceId":"{{instanceId}}","FileId":"file-1"}""",
 			null);
+	}
 
 	private static Task<IReadOnlyList<MigratedConfiguration>> Migrate(params ForeignAction[] actions)
-		=> new SinusBotMacroDeck2Migration().MigrateConfigurationAsync(new ForeignPluginSettings(
+	{
+		return new SinusBotMacroDeck2Migration().MigrateConfigurationAsync(new ForeignPluginSettings(
 				"macro deck_sinusbot plugin",
 				new Dictionary<string, string>(StringComparer.Ordinal),
 				[_login],
 				actions),
 			CancellationToken.None);
+	}
 
 	[Test]
 	public async Task MigrateConfiguration_TakesTheBotInstanceFromTheButtonsThatUsedIt()
@@ -70,7 +74,7 @@ public class SinusBotMacroDeck2MigrationTests
 	[Test]
 	public async Task MigrateConfiguration_WithoutAnInstanceAnywhere_MigratesNothing()
 	{
-		var configurations = await Migrate(PlayBackFile(instanceId: null));
+		var configurations = await Migrate(PlayBackFile(null));
 
 		Assert.That(configurations, Is.Empty);
 	}

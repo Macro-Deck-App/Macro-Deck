@@ -44,7 +44,7 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 		IMacroDeckPaths paths,
 		HttpMessageHandler handler,
 		ILogger logger)
-		: this(sessionService, paths, new HttpClient(handler, disposeHandler: false), true, logger)
+		: this(sessionService, paths, new HttpClient(handler, false), true, logger)
 	{
 	}
 
@@ -164,11 +164,11 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 			}
 
 			// A followed redirect would hand the host bytes from somewhere other than the issuer's assets.
-			if (!response.IsSuccessStatusCode ||
-				response.RequestMessage?.RequestUri is { } final && final != uri ||
-				response.Content.Headers.ContentType?.MediaType is not { } mediaType ||
-				!_extensions.TryGetValue(mediaType, out var extension) ||
-				response.Content.Headers.ContentLength > MaxAvatarBytes)
+			if (!response.IsSuccessStatusCode
+				|| response.RequestMessage?.RequestUri is { } final && final != uri
+				|| response.Content.Headers.ContentType?.MediaType is not { } mediaType
+				|| !_extensions.TryGetValue(mediaType, out var extension)
+				|| response.Content.Headers.ContentLength > MaxAvatarBytes)
 			{
 				_logger.Debug("The Macro Deck Connect avatar answered {Status}; keeping the cached copy",
 					(int)response.StatusCode);
@@ -183,8 +183,8 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 
 			Store(urlHash, bytes, extension, mediaType);
 		}
-		catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException &&
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(ex, "The Macro Deck Connect avatar could not be fetched; keeping the cached copy");
 		}
@@ -306,9 +306,9 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 		foreach (var file in Directory.EnumerateFiles(_directory))
 		{
 			var name = Path.GetFileName(file);
-			if (file != keep &&
-				(name.StartsWith("avatar-", StringComparison.Ordinal) ||
-					name.StartsWith("tmp-", StringComparison.Ordinal)))
+			if (file != keep
+				&& (name.StartsWith("avatar-", StringComparison.Ordinal)
+					|| name.StartsWith("tmp-", StringComparison.Ordinal)))
 			{
 				TryDelete(file);
 			}
@@ -324,12 +324,19 @@ public sealed partial class ConnectAvatarCache : IConnectAvatarCache, IDisposabl
 	}
 
 	private string? TrustedPictureUrl()
-		=> _sessionService.Current.Account?.PictureUrl is { } url && IsTrusted(url) ? url : null;
+	{
+		return _sessionService.Current.Account?.PictureUrl is { } url && IsTrusted(url) ? url : null;
+	}
 
-	private static bool IsTrusted(string? pictureUrl) => ConnectAssetUrls.IsTrusted(pictureUrl);
+	private static bool IsTrusted(string? pictureUrl)
+	{
+		return ConnectAssetUrls.IsTrusted(pictureUrl);
+	}
 
 	private static string Hash(byte[] value)
-		=> Convert.ToHexStringLower(SHA256.HashData(value))[..16];
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(value))[..16];
+	}
 
 	private void TryDelete(string path)
 	{

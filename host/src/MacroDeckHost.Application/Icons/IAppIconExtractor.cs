@@ -13,7 +13,8 @@ public interface IAppIconExtractor
 
 	bool CanExtractContent(string fileName);
 
-	Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(string fileName,
+	Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(
+		string fileName,
 		Stream content,
 		CancellationToken cancellationToken);
 }

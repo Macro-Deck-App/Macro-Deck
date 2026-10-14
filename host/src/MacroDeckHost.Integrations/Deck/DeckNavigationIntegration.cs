@@ -49,5 +49,8 @@ public sealed class DeckNavigationIntegration : IIntegration, ISystemIntegration
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }

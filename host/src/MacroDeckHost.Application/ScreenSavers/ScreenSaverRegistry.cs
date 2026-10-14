@@ -18,7 +18,8 @@ public sealed class ScreenSaverRegistry : IScreenSaverRegistry
 
 	// Built-ins are seeded from the catalog the provider already declares, exactly what a plugin is asked
 	// for after a reconnect, so they exist before the first request rather than after a hosted service.
-	public ScreenSaverRegistry(IPublisher publisher,
+	public ScreenSaverRegistry(
+		IPublisher publisher,
 		IEnumerable<IScreenSaverProvider>? builtIns = null,
 		IIntegrationRegistry? integrations = null)
 	{
@@ -34,9 +35,14 @@ public sealed class ScreenSaverRegistry : IScreenSaverRegistry
 
 			foreach (var screenSaver in provider.GetScreenSavers())
 			{
-				if (QualifiedId.TryCreate(owner.IntegrationId, screenSaver.Id, OwnerIdKind.Package, LocalIdKind.Resource, out var id))
+				if (QualifiedId.TryCreate(owner.IntegrationId,
+					screenSaver.Id,
+					OwnerIdKind.Package,
+					LocalIdKind.Resource,
+					out var id))
 				{
-					_byQualifiedId[id.ToString()] = new ScreenSaverCatalogEntry(id.ToString(), owner.IntegrationId, screenSaver);
+					_byQualifiedId[id.ToString()]
+						= new ScreenSaverCatalogEntry(id.ToString(), owner.IntegrationId, screenSaver);
 				}
 			}
 		}
@@ -123,10 +129,12 @@ public sealed class ScreenSaverRegistry : IScreenSaverRegistry
 	}
 
 	public IReadOnlyList<ScreenSaverCatalogEntry> GetAll()
-		=>
+	{
+		return
 		[
 			.. _byQualifiedId.Values
 				.OrderBy(candidate => BuiltInScreenSavers.IsBuiltIn(candidate.ScreenSaverId) ? 0 : 1)
-				.ThenBy(candidate => candidate.ScreenSaverId, StringComparer.Ordinal),
+				.ThenBy(candidate => candidate.ScreenSaverId, StringComparer.Ordinal)
 		];
+	}
 }

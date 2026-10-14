@@ -32,10 +32,10 @@ internal sealed class VoicemeeterEventEmitterTests
 	[Test]
 	public void A_mute_change_carries_the_channel_name()
 	{
-		_emitter.Observe(State(Strip(0, label: "Mic")));
+		_emitter.Observe(State(Strip(0, "Mic")));
 		_publisher.Clear();
 
-		_emitter.Observe(State(Strip(0, label: "Mic", muted: true)));
+		_emitter.Observe(State(Strip(0, "Mic", muted: true)));
 
 		Assert.Multiple(() =>
 		{
@@ -91,10 +91,10 @@ internal sealed class VoicemeeterEventEmitterTests
 	[Test]
 	public void Repatching_a_strip_reports_the_bus_that_changed_and_only_that_one()
 	{
-		_emitter.Observe(State(Strip(0, label: "Game", a1: true, a2: true)));
+		_emitter.Observe(State(Strip(0, "Game", a1: true, a2: true)));
 		_publisher.Clear();
 
-		_emitter.Observe(State(Strip(0, label: "Game", a1: true)));
+		_emitter.Observe(State(Strip(0, "Game", a1: true)));
 
 		Assert.Multiple(() =>
 		{
@@ -126,14 +126,17 @@ internal sealed class VoicemeeterEventEmitterTests
 		Assert.That(_publisher.Published, Is.Empty);
 	}
 
-	private static VoicemeeterState State(params VoicemeeterChannel[] strips) => new()
+	private static VoicemeeterState State(params VoicemeeterChannel[] strips)
 	{
-		IsConnected = true,
-		Edition = VoicemeeterEdition.Banana,
-		Version = "3.0.2.8",
-		Strips = strips,
-		Buses = []
-	};
+		return new VoicemeeterState
+		{
+			IsConnected = true,
+			Edition = VoicemeeterEdition.Banana,
+			Version = "3.0.2.8",
+			Strips = strips,
+			Buses = []
+		};
+	}
 
 	private static VoicemeeterChannel Strip(
 		int index,
@@ -142,15 +145,17 @@ internal sealed class VoicemeeterEventEmitterTests
 		bool muted = false,
 		bool a1 = false,
 		bool a2 = false)
-		=> new(index,
+	{
+		return new VoicemeeterChannel(index,
 			VoicemeeterChannelKind.Strip,
-			IsPhysical: true,
+			true,
 			label,
 			gain,
 			muted,
-			Mono: false,
-			Solo: false,
+			false,
+			false,
 			new Dictionary<string, bool>(StringComparer.Ordinal) { ["A1"] = a1, ["A2"] = a2 });
+	}
 
 	private sealed class RecordingPublisher : IEventPublisher
 	{
@@ -158,9 +163,14 @@ internal sealed class VoicemeeterEventEmitterTests
 
 		public IEnumerable<string> Ids => Published.Select(entry => entry.EventId);
 
-		public void Clear() => Published.Clear();
+		public void Clear()
+		{
+			Published.Clear();
+		}
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

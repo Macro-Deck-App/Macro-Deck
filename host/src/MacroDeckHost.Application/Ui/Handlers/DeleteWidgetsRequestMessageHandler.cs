@@ -52,9 +52,11 @@ public class DeleteWidgetsRequestMessageHandler
 	}
 
 	private static DeleteWidgetsResponse ValidationError(string message)
-		=> new()
+	{
+		return new DeleteWidgetsResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = "VALIDATION_ERROR", Message = message }
 		};
+	}
 }

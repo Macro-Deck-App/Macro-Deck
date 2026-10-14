@@ -13,7 +13,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// only a real re-initialization can move, not just the host's own bookkeeping.
 /// </summary>
 [TestFixture]
-public class A17_ResumeTests
+public class A17ResumeTests
 {
 	[Test]
 	public async Task A_non_fatal_close_resumes_the_same_session_without_re_initializing()
@@ -86,8 +86,11 @@ public class A17_ResumeTests
 		await using var host = await MacroDeckTestHost.StartAsync();
 		var credentials = PluginTestCredentials.Managed;
 
-		PluginHostBuilder Build(string integrationId) => MacroDeckPlugin.CreatePlugin()
-			.RegisterIntegration(_ => new TestIntegration(integrationId));
+		PluginHostBuilder Build(string integrationId)
+		{
+			return MacroDeckPlugin.CreatePlugin()
+				.RegisterIntegration(_ => new TestIntegration(integrationId));
+		}
 
 		// Both plugins share credentials (the same PluginTestCredentials.Managed instance), so
 		// HostAsync gives both the identical id via configuration regardless of what each build's own
@@ -113,7 +116,9 @@ public class A17_ResumeTests
 	}
 
 	private static async Task WaitForInitializeCount(TestIntegration integration, int expected)
-		=> await Wait.UntilAsync(() => integration.InitializeCount == expected,
+	{
+		await Wait.UntilAsync(() => integration.InitializeCount == expected,
 			TimeSpan.FromSeconds(10),
-			because: $"InitializeCount never reached {expected} (was {integration.InitializeCount})");
+			$"InitializeCount never reached {expected} (was {integration.InitializeCount})");
+	}
 }

@@ -9,7 +9,10 @@ internal sealed class StoreLinkResolverTests
 	private StoreCatalog _catalog = null!;
 
 	[SetUp]
-	public void SetUp() => _catalog = new StoreCatalog();
+	public void SetUp()
+	{
+		_catalog = new StoreCatalog();
+	}
 
 	[Test]
 	public void A_listed_package_of_the_official_registry_resolves_to_its_own_kind()
@@ -110,20 +113,29 @@ internal sealed class StoreLinkResolverTests
 		Assert.That(Create().Resolve("com." + new string('a', 200)).Outcome, Is.EqualTo(StoreLinkOutcome.NotFound));
 	}
 
-	private StoreLinkResolver Create(StoreRegistryOptions? options = null) => new(_catalog, options ?? StoreRegistryOptions.Default);
-
-	private void Load(params StoreCatalogEntry[] entries) =>
-		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries });
-
-	private static StoreCatalogEntry Entry(string id, StoreExtensionKind kind) => new()
+	private StoreLinkResolver Create(StoreRegistryOptions? options = null)
 	{
-		Kind = kind,
-		Id = id,
-		Name = id,
-		LatestVersion = "1.0.0",
-		LatestRelease = new StoreReleaseManifest
+		return new StoreLinkResolver(_catalog, options ?? StoreRegistryOptions.Default);
+	}
+
+	private void Load(params StoreCatalogEntry[] entries)
+	{
+		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries });
+	}
+
+	private static StoreCatalogEntry Entry(string id, StoreExtensionKind kind)
+	{
+		return new StoreCatalogEntry
 		{
-			Version = "1.0.0", ArtifactUrl = new Uri($"https://cdn.example/{id}.bin"), Sha256 = new string('a', 64), Size = 16
-		}
-	};
+			Kind = kind,
+			Id = id,
+			Name = id,
+			LatestVersion = "1.0.0",
+			LatestRelease = new StoreReleaseManifest
+			{
+				Version = "1.0.0", ArtifactUrl = new Uri($"https://cdn.example/{id}.bin"), Sha256 = new string('a', 64),
+				Size = 16
+			}
+		};
+	}
 }

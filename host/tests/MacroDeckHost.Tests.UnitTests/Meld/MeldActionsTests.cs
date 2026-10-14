@@ -45,7 +45,7 @@ internal sealed class MeldActionsTests
 	{
 		var actions = MeldActions.Create(() => null, new VariableApiAccessor());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var action in actions)
 			{
@@ -64,7 +64,7 @@ internal sealed class MeldActionsTests
 		using var connection = new MeldConnection(() => new FakeQWebChannelClient(), _uri);
 		var actions = MeldActions.Create(() => connection, new VariableApiAccessor());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var action in actions)
 			{
@@ -252,7 +252,7 @@ internal sealed class MeldActionsTests
 			]));
 
 		var variable = await targets.Find("layer_visible");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("layer_visible"), Is.EqualTo(true));
@@ -317,7 +317,7 @@ internal sealed class MeldActionsTests
 			]));
 
 		var variable = await targets.Find("effect_enabled");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("effect_enabled"), Is.EqualTo(false));
@@ -344,7 +344,7 @@ internal sealed class MeldActionsTests
 			]));
 
 		var variable = await targets.Find("track_muted");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("track_muted"), Is.EqualTo(false));
@@ -379,7 +379,7 @@ internal sealed class MeldActionsTests
 			]));
 
 		var variable = await targets.Find("track_volume");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable, Is.Not.Null);
 			Assert.That(await targets.ValueOf("track_volume"), Is.EqualTo(50m));
@@ -389,11 +389,13 @@ internal sealed class MeldActionsTests
 	}
 
 	private static ActionExecutionContext Context(IEnumerable<(string Key, object Value)>? parameters = null)
-		=> new()
+	{
+		return new ActionExecutionContext
 		{
 			Parameters = (parameters ?? [])
 				.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal)
 		};
+	}
 
 	[Test]
 	public async Task A_track_mute_button_reports_the_tracks_real_mute_state()
@@ -502,9 +504,11 @@ internal sealed class MeldActionsTests
 	}
 
 	private static IStateProviderActionDefinition Provider(MeldConnection? connection, string actionId)
-		=> (IStateProviderActionDefinition)MeldActions
+	{
+		return (IStateProviderActionDefinition)MeldActions
 			.Create(() => connection, new VariableApiAccessor())
 			.Single(action => action.Id == actionId);
+	}
 
 	private static async Task<MeldConnection> ConnectedAsync()
 	{
@@ -536,9 +540,15 @@ internal sealed class MeldActionsTests
 
 	private sealed class ThrowingVariableApi : IVariableApi
 	{
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => throw new InvalidOperationException("boom");
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => throw new InvalidOperationException("boom");
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
 		public Task<VariableHandle> CreateAsync(
 			string name,
@@ -546,10 +556,18 @@ internal sealed class MeldActionsTests
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> throw new InvalidOperationException("boom");
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => throw new InvalidOperationException("boom");
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			throw new InvalidOperationException("boom");
+		}
 
-		public Task DeleteAsync(Guid variableId) => throw new InvalidOperationException("boom");
+		public Task DeleteAsync(Guid variableId)
+		{
+			throw new InvalidOperationException("boom");
+		}
 	}
 }

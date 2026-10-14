@@ -41,13 +41,16 @@ public class FolderStartFolderTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Update_SetAsStartFolder_ClearsTheOtherRootAndPersistsBothMarkersTogether()
 	{
-		var first = await AddRoot("First", createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
-		var second = await AddRoot("Second", createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+		var first = await AddRoot("First", new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+		var second = await AddRoot("Second", new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 
 		var result = await Update(second.Id, isDefault: true);
 
@@ -97,8 +100,8 @@ public class FolderStartFolderTests
 	[Test]
 	public async Task Delete_CurrentStart_SelectsTheOldestRemainingRoot()
 	{
-		var current = await AddRoot("Current", createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
-		var replacement = await AddRoot("Oldest", createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+		var current = await AddRoot("Current", new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+		var replacement = await AddRoot("Oldest", new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 		await Update(current.Id, isDefault: true);
 		_mediator.Published.Clear();
 
@@ -120,11 +123,11 @@ public class FolderStartFolderTests
 	[Test]
 	public async Task Update_MovingCurrentStartInsideAnotherFolder_SelectsTheOldestRemainingRoot()
 	{
-		var replacement = await AddRoot("Oldest", createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
-		var current = await AddRoot("Current", createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+		var replacement = await AddRoot("Oldest", new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+		var current = await AddRoot("Current", new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 		await Update(current.Id, isDefault: true);
 
-		var result = await Update(current.Id, parentId: replacement.Id);
+		var result = await Update(current.Id, replacement.Id);
 
 		Assert.That(result.Success, Is.True);
 		Assert.Multiple(() =>
@@ -143,7 +146,7 @@ public class FolderStartFolderTests
 		var current = await AddRoot("Current");
 		var target = await AddRoot("Target");
 
-		var result = await Update(current.Id, parentId: target.Id, rows: 0);
+		var result = await Update(current.Id, target.Id, rows: 0);
 
 		Assert.Multiple(() =>
 		{
@@ -157,7 +160,9 @@ public class FolderStartFolderTests
 	}
 
 	private async Task<FolderEntity> AddRoot(string name, DateTime? createdAt = null)
-		=> await AddFolder(name, parentId: null, createdAt);
+	{
+		return await AddFolder(name, null, createdAt);
+	}
 
 	private async Task<FolderEntity> AddFolder(string name, Guid? parentId, DateTime? createdAt = null)
 	{
@@ -176,12 +181,15 @@ public class FolderStartFolderTests
 		return folder;
 	}
 
-	private Task<Domain.Common.Result<FolderEntity, FolderError>> Update(Guid id,
+	private Task<Domain.Common.Result<FolderEntity, FolderError>> Update(
+		Guid id,
 		Guid? parentId = null,
 		bool? isDefault = null,
 		int? rows = null,
 		int? order = null)
-		=> _service.Update(id, null, parentId, order, rows, null, null, null, null, isDefault);
+	{
+		return _service.Update(id, null, parentId, order, rows, null, null, null, null, isDefault);
+	}
 
 	[Test]
 	public async Task Update_SparseSiblingOrders_ClampsTheRequestedIndexAndRenumbersDensely()
@@ -217,7 +225,7 @@ public class FolderStartFolderTests
 		var e = await AddFolder("E", parentTwo.Id);
 		var savesBefore = _store.SaveCount;
 
-		var result = await Update(b.Id, parentId: parentTwo.Id);
+		var result = await Update(b.Id, parentTwo.Id);
 
 		Assert.That(result.Success, Is.True);
 		Assert.Multiple(() =>

@@ -27,13 +27,12 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SceneParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SceneLabel(),
 			required: true),
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SourceParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.SourceLabel(),
 			required: true),
 		ActionParameter.Choice(StreamlabsActionValues.ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -48,16 +47,21 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 					Value = ModeHide, Label = AppStrings.Integrations.StreamlabsDesktop.Params.HideLabel()
 				}
 			],
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
 			defaultValue: ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	{
+		return StreamlabsActionValues.SceneOrSourceOptionsAsync(_resolver(), context);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -75,8 +79,8 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 				return StreamlabsActionResults.NotConnected;
 			}
 
-			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SceneParameter) is not { } scene ||
-				StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source)
+			if (StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SceneParameter) is not { } scene
+				|| StreamlabsActionValues.ReadText(context, StreamlabsActionValues.SourceParameter) is not { } source)
 			{
 				return StreamlabsActionResults.MissingParameter(AppStrings.Integrations.StreamlabsDesktop.Errors
 					.NoSceneOrSourceSelected());

@@ -11,7 +11,7 @@ namespace MacroDeckHost.Domain.Serialization;
 /// </summary>
 public sealed class VariableScopeJsonConverter : JsonConverter<VariableScope>
 {
-	private const string _legacyWidgetName = "ActionButton";
+	private const string LegacyWidgetName = "ActionButton";
 
 	public override VariableScope Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
@@ -30,12 +30,12 @@ public sealed class VariableScopeJsonConverter : JsonConverter<VariableScope>
 
 		var name = reader.GetString();
 
-		if (string.Equals(name, _legacyWidgetName, StringComparison.OrdinalIgnoreCase))
+		if (string.Equals(name, LegacyWidgetName, StringComparison.OrdinalIgnoreCase))
 		{
 			return VariableScope.Widget;
 		}
 
-		return Enum.TryParse<VariableScope>(name, ignoreCase: true, out var scope)
+		return Enum.TryParse<VariableScope>(name, true, out var scope)
 			? scope
 			: throw new JsonException($"'{name}' is not a variable scope.");
 	}

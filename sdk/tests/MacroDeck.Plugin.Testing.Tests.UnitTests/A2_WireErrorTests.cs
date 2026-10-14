@@ -12,7 +12,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// itself rather than trusted from the outcome alone.
 /// </summary>
 [TestFixture]
-public class A2_WireErrorTests
+public class A2WireErrorTests
 {
 	private MacroDeckTestHost _host = null!;
 	private InProcessPlugin _plugin = null!;
@@ -79,8 +79,8 @@ public class A2_WireErrorTests
 	private void AssertMatchesWireReply(CapabilityInvocationOutcome outcome)
 	{
 		var reply = _host.Messages.All.Single(message
-			=> message.Direction == ProtocolMessageDirection.FromPlugin &&
-			string.Equals(message.Envelope.CorrelationId, outcome.CorrelationId, StringComparison.Ordinal));
+			=> message.Direction == ProtocolMessageDirection.FromPlugin
+			&& string.Equals(message.Envelope.CorrelationId, outcome.CorrelationId, StringComparison.Ordinal));
 
 		Assert.Multiple(() =>
 		{

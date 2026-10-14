@@ -19,19 +19,24 @@ public interface IIntegrationConfigStore
 
 	Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values);
 
-	Task<bool> Create(Guid entryId,
+	Task<bool> Create(
+		Guid entryId,
 		string integrationId,
 		string title,
 		IReadOnlyDictionary<string, JsonElement> values)
-		=> Task.FromException<bool>(
+	{
+		return Task.FromException<bool>(
 			new NotSupportedException("Explicit configuration entry identities are not supported by this store."));
+	}
 
 	Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values);
 
 	Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values);
 
 	Task<bool> Rename(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-		=> Replace(entryId, title, values);
+	{
+		return Replace(entryId, title, values);
+	}
 
 	Task Delete(Guid entryId);
 }

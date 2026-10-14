@@ -2,7 +2,6 @@ using System.Text.Json;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
-using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
@@ -42,7 +41,7 @@ public sealed class CountdownWidgetUiProvider : IBuiltInWidgetUiProvider, IBuilt
 		new()
 			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
 		new()
-			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -52,7 +51,8 @@ public sealed class CountdownWidgetUiProvider : IBuiltInWidgetUiProvider, IBuilt
 		if (request.Surface.Kind == UiSurfaceKinds.Dialog)
 		{
 			return Task.FromResult<IUiSession?>(
-				TimerWidgetSurfaces.ReadString(request.Surface, UiDialogSurfaceAttributes.ViewId) == DurationDialogViewId
+				TimerWidgetSurfaces.ReadString(request.Surface, UiDialogSurfaceAttributes.ViewId)
+				== DurationDialogViewId
 					? CountdownDurationDialogSession.Open(request.Surface, _sessions.Timers.Store, _drafts)
 					: null);
 		}
@@ -79,7 +79,7 @@ public sealed class StopwatchWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -123,12 +123,13 @@ public sealed class TimerWidgetSessionFactory
 		var config = TimerWidgetConfig.FromWidget(new WidgetEntity
 		{
 			Type = widgetTypeId,
-			Data = data.ValueKind == JsonValueKind.Object ? data.GetRawText() : null,
+			Data = data.ValueKind == JsonValueKind.Object ? data.GetRawText() : null
 		})!;
 		var settings = TimerWidgetSettings.Parse(data);
 
-		if (surface.Kind == UiSurfaceKinds.Widget &&
-			Guid.TryParse(TimerWidgetSurfaces.ReadString(surface, UiWidgetSurfaceAttributes.WidgetId), out var widgetId))
+		if (surface.Kind == UiSurfaceKinds.Widget
+			&& Guid.TryParse(TimerWidgetSurfaces.ReadString(surface, UiWidgetSurfaceAttributes.WidgetId),
+				out var widgetId))
 		{
 			return new TimerWidgetSession(surface, widgetId, config, settings, Timers, _lockState, _transport);
 		}
@@ -143,7 +144,9 @@ public sealed class TimerWidgetSessionFactory
 internal static class TimerWidgetSurfaces
 {
 	public static string? ReadString(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 }

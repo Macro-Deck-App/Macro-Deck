@@ -9,18 +9,20 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// host does, so a plugin author's green test against it is not lying about what a real host would do.
 /// </summary>
 [TestFixture]
-public class A26_WidgetTypeProviderFakeTests
+public class A26WidgetTypeProviderFakeTests
 {
 	private static WidgetTypeDescriptor Type(
 		string id,
 		bool hasConfiguration = false,
 		string? defaultData = null,
 		string? dataSchema = null)
-		=> new(id,
+	{
+		return new WidgetTypeDescriptor(id,
 			LocalizedText.FromLiteral("Gauge"),
 			DefaultData: defaultData,
 			DataSchema: dataSchema,
 			HasConfiguration: hasConfiguration);
+	}
 
 	[Test]
 	public async Task Registering_the_same_local_id_again_replaces_rather_than_duplicates()
@@ -29,7 +31,7 @@ public class A26_WidgetTypeProviderFakeTests
 
 		await context.RegisterWidgetTypeAsync(Type("gauge"));
 		await context.RegisterWidgetTypeAsync(Type("gauge",
-			hasConfiguration: true,
+			true,
 			dataSchema: "{\"type\":\"object\"}"));
 
 		Assert.Multiple(() =>
@@ -89,7 +91,7 @@ public class A26_WidgetTypeProviderFakeTests
 	{
 		var context = new FakeWidgetTypeProviderContext();
 
-		Assert.That(() => context.RegisterWidgetTypeAsync(Type("gauge", hasConfiguration: true)),
+		Assert.That(() => context.RegisterWidgetTypeAsync(Type("gauge", true)),
 			Throws.ArgumentException);
 	}
 

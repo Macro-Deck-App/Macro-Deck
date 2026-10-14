@@ -21,7 +21,9 @@ namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 public class RemoteVariableSinkTests
 {
 	private static RemoteVariableSink Sink(IHostInvoker invoker, VariableSubscriptions? subscriptions = null)
-		=> new(invoker, subscriptions ?? Subscribed(), Serilog.Core.Logger.None);
+	{
+		return new RemoteVariableSink(invoker, subscriptions ?? Subscribed(), Serilog.Core.Logger.None);
+	}
 
 	private static VariableSubscriptions Subscribed(params string[] ids)
 	{
@@ -148,7 +150,8 @@ public class RemoteVariableSinkTests
 	{
 		public List<RecordedCall> Calls { get; } = [];
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -157,17 +160,26 @@ public class RemoteVariableSinkTests
 			return Task.FromResult<JsonElement?>(null);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class ThrowingInvoker : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> throw new InvalidOperationException("Simulated transport failure.");
+		{
+			throw new InvalidOperationException("Simulated transport failure.");
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

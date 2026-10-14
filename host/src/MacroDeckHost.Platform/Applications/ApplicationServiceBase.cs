@@ -88,17 +88,25 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 	}
 
 	protected virtual void StartFile(string path)
-		=> Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+	{
+		Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+	}
 
 	protected virtual void StartWebsite(string url)
-		=> Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+	{
+		Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+	}
 
 	internal static bool IsWebsiteUrl(string url)
-		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
-			(uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+	{
+		return Uri.TryCreate(url, UriKind.Absolute, out var uri)
+			&& (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+	}
 
 	internal static bool IsSteamUri(string? uri)
-		=> uri is not null && SteamUriPattern().IsMatch(uri);
+	{
+		return uri is not null && SteamUriPattern().IsMatch(uri);
+	}
 
 	[GeneratedRegex(@"^steam://[A-Za-z0-9/_.\-]+$", RegexOptions.CultureInvariant)]
 	private static partial Regex SteamUriPattern();

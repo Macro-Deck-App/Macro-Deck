@@ -4,7 +4,8 @@ namespace MacroDeckHost.Application.Licensing;
 
 public interface IPlatformLicenseClient
 {
-	Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(CompanionLicenseProof proof,
+	Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(
+		CompanionLicenseProof proof,
 		CancellationToken cancellationToken);
 
 	Task<IReadOnlyList<string>?> GetRevokedLicenseIdsAsync(CancellationToken cancellationToken);
@@ -18,7 +19,8 @@ public abstract record PlatformLicenseIssueResult
 
 	public sealed record Issued(string License) : PlatformLicenseIssueResult;
 
-	public sealed record Retry(TimeSpan? RetryAfter, bool PurchasePending, string? Code = null) : PlatformLicenseIssueResult;
+	public sealed record Retry(TimeSpan? RetryAfter, bool PurchasePending, string? Code = null)
+		: PlatformLicenseIssueResult;
 
 	public sealed record Refused(string Code) : PlatformLicenseIssueResult;
 }

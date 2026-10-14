@@ -17,7 +17,8 @@ public class DeleteFolderFocusRuleRequestMessageHandler
 		_folderService = folderService;
 	}
 
-	public async ValueTask<DeleteFolderFocusRuleResponse> Handle(DeleteFolderFocusRuleRequest request,
+	public async ValueTask<DeleteFolderFocusRuleResponse> Handle(
+		DeleteFolderFocusRuleRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.FolderId, out var folderId) || !Guid.TryParse(request.RuleId, out var ruleId))

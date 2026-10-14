@@ -58,8 +58,10 @@ public sealed class BridgedConnections
 	}
 
 	public void Remove(BridgedConnectionRegistration registration)
-		=> _pending.TryRemove(new KeyValuePair<IPEndPoint, BridgedConnectionRegistration>(registration.Endpoint,
+	{
+		_pending.TryRemove(new KeyValuePair<IPEndPoint, BridgedConnectionRegistration>(registration.Endpoint,
 			registration));
+	}
 
 	// Kestrel can accept a connection after the dialler already closed it, so an entry nobody took yet
 	// outlives its socket for a grace period instead of vanishing and leaving that connection unstamped.
@@ -70,9 +72,11 @@ public sealed class BridgedConnections
 	}
 
 	public static IPEndPoint Normalize(IPEndPoint endpoint)
-		=> endpoint.Address.IsIPv4MappedToIPv6
+	{
+		return endpoint.Address.IsIPv4MappedToIPv6
 			? new IPEndPoint(endpoint.Address.MapToIPv4(), endpoint.Port)
 			: endpoint;
+	}
 
 	private void PruneClosed()
 	{

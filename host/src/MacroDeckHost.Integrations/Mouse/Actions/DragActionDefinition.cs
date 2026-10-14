@@ -21,16 +21,15 @@ internal sealed class DragActionDefinition : IActionDefinition
 	[
 		MouseParameters.Button,
 		ActionParameter.Choice("fromMode",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "current", Label = AppStrings.Integrations.Mouse.Actions.Drag.FromCurrent() },
 				new ActionParameterOption
 					{ Value = "absolute", Label = AppStrings.Integrations.Mouse.Actions.Drag.FromAbsolute() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.Drag.StartLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Drag.StartDescription(),
-			defaultValue: "current"),
+			AppStrings.Integrations.Mouse.Actions.Drag.StartLabel(),
+			AppStrings.Integrations.Mouse.Actions.Drag.StartDescription(),
+			"current"),
 		MouseParameters.X("fromX",
 				AppStrings.Integrations.Mouse.Actions.Drag.StartXLabel(),
 				AppStrings.Integrations.Mouse.Actions.Drag.StartXDescription())
@@ -40,16 +39,15 @@ internal sealed class DragActionDefinition : IActionDefinition
 				AppStrings.Integrations.Mouse.Actions.Drag.StartYDescription())
 			.OnlyWhen("fromMode", "absolute"),
 		ActionParameter.Choice("toMode",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "absolute", Label = AppStrings.Integrations.Mouse.Actions.Drag.ToAbsolute() },
 				new ActionParameterOption
 					{ Value = "relative", Label = AppStrings.Integrations.Mouse.Actions.Drag.ToRelative() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.Drag.EndLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Drag.EndDescription(),
-			defaultValue: "absolute"),
+			AppStrings.Integrations.Mouse.Actions.Drag.EndLabel(),
+			AppStrings.Integrations.Mouse.Actions.Drag.EndDescription(),
+			"absolute"),
 		MouseParameters.X("toX",
 			AppStrings.Integrations.Mouse.Actions.Drag.EndXLabel(),
 			AppStrings.Integrations.Mouse.Actions.Drag.EndXDescription()),
@@ -57,21 +55,24 @@ internal sealed class DragActionDefinition : IActionDefinition
 			AppStrings.Integrations.Mouse.Actions.Drag.EndYLabel(),
 			AppStrings.Integrations.Mouse.Actions.Drag.EndYDescription()),
 		ActionParameter.Duration("duration",
-			label: AppStrings.Integrations.Mouse.Actions.Drag.DurationLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Drag.DurationDescription(),
-			min: 0,
-			max: 10_000,
-			defaultMilliseconds: 250),
+			AppStrings.Integrations.Mouse.Actions.Drag.DurationLabel(),
+			AppStrings.Integrations.Mouse.Actions.Drag.DurationDescription(),
+			0,
+			10_000,
+			250),
 		ActionParameter.Number("steps",
-			label: AppStrings.Integrations.Mouse.Actions.Drag.StepsLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Drag.StepsDescription(),
-			min: 1,
-			max: 200,
-			step: 1,
-			defaultValue: 20)
+			AppStrings.Integrations.Mouse.Actions.Drag.StepsLabel(),
+			AppStrings.Integrations.Mouse.Actions.Drag.StepsDescription(),
+			1,
+			200,
+			1,
+			20)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

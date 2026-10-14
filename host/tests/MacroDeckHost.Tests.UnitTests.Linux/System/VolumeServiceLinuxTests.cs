@@ -13,7 +13,7 @@ public class VolumeServiceLinuxTests
 		var service = VolumeServiceFactory.Create();
 		var target = new AudioTarget(AudioFlow.Output, "macro_deck_test.no_such_sink");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await service.GetMuteAsync(target), Is.Null);
 			Assert.That(await service.GetVolumeAsync(target), Is.Null);

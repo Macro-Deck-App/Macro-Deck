@@ -16,7 +16,8 @@ public class
 	private readonly IColorReferenceResolver _colors;
 	private readonly IProfileCache _profiles;
 
-	public UpdateProfileRequestMessageHandler(IProfileService profileService,
+	public UpdateProfileRequestMessageHandler(
+		IProfileService profileService,
 		IColorReferenceResolver colors,
 		IProfileCache profiles)
 	{

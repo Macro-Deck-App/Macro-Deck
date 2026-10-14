@@ -15,7 +15,6 @@ using MacroDeckHost.Integrations.Jellyfin.Protocol;
 using MacroDeckHost.Integrations.Jellyfin.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Jellyfin;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Jellyfin;
 
@@ -114,7 +113,9 @@ public sealed partial class JellyfinIntegration
 			var variables = new List<VariableDefinition> { JellyfinVariables.Total() };
 			foreach (var runtime in runtimes)
 			{
-				variables.AddRange(JellyfinVariables.DeclareServer(runtime.VariableKey, runtime.EntryId, runtime.Title));
+				variables.AddRange(JellyfinVariables.DeclareServer(runtime.VariableKey,
+					runtime.EntryId,
+					runtime.Title));
 				foreach (var device in runtime.Devices.Devices)
 				{
 					variables.AddRange(JellyfinVariables.DeclareDevice(runtime.VariableKey,
@@ -134,12 +135,20 @@ public sealed partial class JellyfinIntegration
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => _ui.Surfaces;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new JellyfinConfigFlow(_clientFactory);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new JellyfinConfigFlow(_clientFactory);
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> _ui.CreateSessionAsync(request, cancellationToken);
+	{
+		return _ui.CreateSessionAsync(request, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -189,11 +198,12 @@ public sealed partial class JellyfinIntegration
 
 			foreach (var item in desired)
 			{
-				var existing = previous.FirstOrDefault(runtime => runtime.EntryId == item.EntryId &&
-					runtime.Title == item.Title &&
-					runtime.VariableKey == item.VariableKey &&
-					runtime.Settings == item.Settings &&
-					runtime.Token == item.Token);
+				var existing = previous.FirstOrDefault(runtime
+					=> runtime.EntryId == item.EntryId
+					&& runtime.Title == item.Title
+					&& runtime.VariableKey == item.VariableKey
+					&& runtime.Settings == item.Settings
+					&& runtime.Token == item.Token);
 				if (existing is not null)
 				{
 					retained.Add(existing);
@@ -203,7 +213,8 @@ public sealed partial class JellyfinIntegration
 
 				var devices = new JellyfinDeviceRegistry();
 				devices.Load(item.DevicesJson);
-				var client = _clientFactory(new JellyfinServerSettings(item.BaseUri, item.Token, item.Settings.DeviceId));
+				var client = _clientFactory(
+					new JellyfinServerSettings(item.BaseUri, item.Token, item.Settings.DeviceId));
 				var connection = new JellyfinConnection(client, item.Settings.DeviceId, _time, _timings);
 				var runtime = new JellyfinRuntime(item.EntryId,
 					item.Title,
@@ -250,9 +261,10 @@ public sealed partial class JellyfinIntegration
 		foreach (var runtime in Runtimes)
 		{
 			instances.Add(new MusicPlayerInstance(runtime.InstanceId, runtime.Title));
-			instances.AddRange(runtime.Devices.Devices.Where(device => device.IsControllable).Select(device =>
-				new MusicPlayerInstance(JellyfinRuntime.DeviceInstanceId(runtime.EntryId, device.LocalId),
-					$"{runtime.Title} · {DeviceLabel(runtime, device)}")));
+			instances.AddRange(runtime.Devices.Devices.Where(device => device.IsControllable)
+				.Select(device =>
+					new MusicPlayerInstance(JellyfinRuntime.DeviceInstanceId(runtime.EntryId, device.LocalId),
+						$"{runtime.Title} · {DeviceLabel(runtime, device)}")));
 		}
 
 		return instances;
@@ -269,9 +281,15 @@ public sealed partial class JellyfinIntegration
 			: $"{device.Name} ({namesakes.FindIndex(candidate => candidate.DeviceId == device.DeviceId) + 1})";
 	}
 
-	public IMusicPlayer? GetPlayer(string instanceId) => ResolveJellyfinPlayer(instanceId);
+	public IMusicPlayer? GetPlayer(string instanceId)
+	{
+		return ResolveJellyfinPlayer(instanceId);
+	}
 
-	private IMusicPlayer? ResolvePlayer(string? instanceId) => ResolveJellyfinPlayer(instanceId);
+	private IMusicPlayer? ResolvePlayer(string? instanceId)
+	{
+		return ResolveJellyfinPlayer(instanceId);
+	}
 
 	private JellyfinMusicPlayer? ResolveJellyfinPlayer(string? instanceId)
 	{
@@ -288,8 +306,8 @@ public sealed partial class JellyfinIntegration
 		}
 
 		var entryPart = instanceId.Length >= 32 ? instanceId[..32] : instanceId;
-		if (!Guid.TryParseExact(entryPart, "N", out var entryId) ||
-			runtimes.FirstOrDefault(runtime => runtime.EntryId == entryId) is not { } match)
+		if (!Guid.TryParseExact(entryPart, "N", out var entryId)
+			|| runtimes.FirstOrDefault(runtime => runtime.EntryId == entryId) is not { } match)
 		{
 			return null;
 		}
@@ -308,11 +326,12 @@ public sealed partial class JellyfinIntegration
 	{
 		var target = JellyfinVariables.Parse(localId);
 		var runtimes = Runtimes;
-		object? value = target.Kind switch
+		var value = target.Kind switch
 		{
 			VariableTargetKind.Total => runtimes.Sum(runtime =>
 				runtime.Connection.State.IsConnected ? runtime.Connection.State.ActiveSessions.Count : 0),
-			VariableTargetKind.Server => runtimes.FirstOrDefault(runtime => runtime.EntryId == target.EntryId) is { } server
+			VariableTargetKind.Server => runtimes.FirstOrDefault(runtime => runtime.EntryId == target.EntryId) is
+				{ } server
 				? JellyfinVariables.ReadServer(server.Connection.State, target.Slot)
 				: null,
 			VariableTargetKind.Device => ReadDevice(runtimes, target),
@@ -373,8 +392,8 @@ public sealed partial class JellyfinIntegration
 						.ConfigureAwait(false);
 					break;
 				case "progress_percent":
-					if (!MusicPlayerVariableWrites.TryReadNumber(value, out var percent) ||
-						player.CurrentSession()?.NowPlaying?.Duration is not { } length)
+					if (!MusicPlayerVariableWrites.TryReadNumber(value, out var percent)
+						|| player.CurrentSession()?.NowPlaying?.Duration is not { } length)
 					{
 						return VariableWriteResult.InvalidValue();
 					}
@@ -414,7 +433,9 @@ public sealed partial class JellyfinIntegration
 		}
 	}
 
-	private static JellyfinMusicPlayer? ResolveDevicePlayer(IReadOnlyList<JellyfinRuntime> runtimes, VariableTarget target)
+	private static JellyfinMusicPlayer? ResolveDevicePlayer(
+		IReadOnlyList<JellyfinRuntime> runtimes,
+		VariableTarget target)
 	{
 		var runtime = runtimes.FirstOrDefault(item => item.EntryId == target.EntryId);
 		return runtime?.Devices.FindByLocalId(target.DeviceLocalId!) is { } device
@@ -461,7 +482,9 @@ public sealed partial class JellyfinIntegration
 		return JellyfinVariables.ReadDevice(session, device, target.Slot, _time.GetUtcNow());
 	}
 
-	public Task<DynamicOptionsResult> GetEventOptionsAsync(EventOptionsContext context, CancellationToken cancellationToken)
+	public Task<DynamicOptionsResult> GetEventOptionsAsync(
+		EventOptionsContext context,
+		CancellationToken cancellationToken)
 	{
 		var runtimes = Runtimes;
 		if (context.ParameterName == JellyfinEventPayload.Configuration)
@@ -485,8 +508,9 @@ public sealed partial class JellyfinIntegration
 				Options =
 				[
 					.. runtimes
-						.Where(runtime => string.IsNullOrEmpty(server) ||
-							string.Equals(runtime.EntryId.ToString("D"), server, StringComparison.OrdinalIgnoreCase))
+						.Where(runtime
+							=> string.IsNullOrEmpty(server)
+							|| string.Equals(runtime.EntryId.ToString("D"), server, StringComparison.OrdinalIgnoreCase))
 						.SelectMany(runtime => runtime.Devices.Devices.Select(device => new ActionParameterOption
 						{
 							Value = device.DeviceId,
@@ -508,30 +532,32 @@ public sealed partial class JellyfinIntegration
 		var runtimes = Runtimes;
 
 		var rejected = runtimes.Where(runtime =>
-			runtime.Connection.State.Status == JellyfinConnectionStatus.AuthenticationFailed).ToList();
+				runtime.Connection.State.Status == JellyfinConnectionStatus.AuthenticationFailed)
+			.ToList();
 		if (rejected.Count > 0)
 		{
 			issues.Add(new IntegrationIssue
 			{
 				Id = AuthIssueId,
 				Title = Strings.Issues.AuthenticationFailedTitle(),
-				Description = Strings.Issues.AuthenticationFailedDescription(
-					servers: string.Join(", ", rejected.Select(runtime => runtime.Title))),
+				Description = Strings.Issues.AuthenticationFailedDescription(string.Join(", ",
+					rejected.Select(runtime => runtime.Title))),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = Strings.Issues.OpenSetupAction()
 			});
 		}
 
 		var unreachable = runtimes.Where(runtime =>
-			runtime.Connection.State.Status == JellyfinConnectionStatus.Disconnected).ToList();
+				runtime.Connection.State.Status == JellyfinConnectionStatus.Disconnected)
+			.ToList();
 		if (unreachable.Count > 0)
 		{
 			issues.Add(new IntegrationIssue
 			{
 				Id = UnreachableIssueId,
 				Title = Strings.Issues.UnreachableTitle(),
-				Description = Strings.Issues.UnreachableDescription(
-					servers: string.Join(", ", unreachable.Select(runtime => runtime.Title))),
+				Description = Strings.Issues.UnreachableDescription(string.Join(", ",
+					unreachable.Select(runtime => runtime.Title))),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -540,9 +566,11 @@ public sealed partial class JellyfinIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId == AuthIssueId
+	{
+		return Task.FromResult(issueId == AuthIssueId
 			? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed());
+	}
 
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
@@ -554,19 +582,21 @@ public sealed partial class JellyfinIntegration
 	}
 
 	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
-		=>
+	{
+		return
 		[
-			new(JellyfinWidgetTypes.SessionsLocalId,
+			new WidgetTypeDescriptor(JellyfinWidgetTypes.SessionsLocalId,
 				Strings.Widget.Name(),
 				Strings.Widget.Description(),
-				DefaultData: JellyfinWidgetTypes.DefaultData,
-				DataSchema: JellyfinWidgetTypes.DataSchema,
-				HasConfiguration: true)
+				JellyfinWidgetTypes.DefaultData,
+				JellyfinWidgetTypes.DataSchema,
+				true)
 			{
 				AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
 				SupportsFlows = true
 			}
 		];
+	}
 
 	IReadOnlyList<JellyfinServerSummary> IJellyfinSessionSource.GetServers()
 	{
@@ -579,12 +609,17 @@ public sealed partial class JellyfinIntegration
 				return new JellyfinServerSummary(runtime.EntryId.ToString("D"),
 					runtime.Title,
 					state.IsConnected,
-					state.IsConnected ? [.. state.ActiveSessions.Select(session => Summarize(runtime, session, now))] : []);
+					state.IsConnected
+						? [.. state.ActiveSessions.Select(session => Summarize(runtime, session, now))]
+						: []);
 			})
 		];
 	}
 
-	private static JellyfinSessionSummary Summarize(JellyfinRuntime runtime, JellyfinSession session, DateTimeOffset now)
+	private static JellyfinSessionSummary Summarize(
+		JellyfinRuntime runtime,
+		JellyfinSession session,
+		DateTimeOffset now)
 	{
 		var item = session.NowPlaying!;
 		var subtitle = item.IsEpisode ? item.SeriesName :
@@ -616,8 +651,10 @@ public sealed partial class JellyfinIntegration
 		bool devicesChanged;
 		lock (_deviceKeys)
 		{
-			devicesChanged = args.Current.IsConnected &&
-				runtime.Devices.Observe(args.Current.Sessions, _time.GetUtcNow(), key => IsDeviceKeyTaken(runtime, key));
+			devicesChanged = args.Current.IsConnected
+				&& runtime.Devices.Observe(args.Current.Sessions,
+					_time.GetUtcNow(),
+					key => IsDeviceKeyTaken(runtime, key));
 		}
 
 		if (devicesChanged)
@@ -664,8 +701,8 @@ public sealed partial class JellyfinIntegration
 		foreach (var other in Runtimes.Where(other => !ReferenceEquals(other, runtime)))
 		{
 			if (JellyfinVariables.ServerSlotNames.Any(slot =>
-					candidates.Contains(JellyfinVariables.ServerVariableName(other.VariableKey, slot))) ||
-				other.Devices.Devices.Any(device => JellyfinVariables.DeviceSlotNames.Any(slot =>
+					candidates.Contains(JellyfinVariables.ServerVariableName(other.VariableKey, slot)))
+				|| other.Devices.Devices.Any(device => JellyfinVariables.DeviceSlotNames.Any(slot =>
 					candidates.Contains(JellyfinVariables.DeviceVariableName(other.VariableKey, device.Key, slot)))))
 			{
 				return true;
@@ -691,7 +728,8 @@ public sealed partial class JellyfinIntegration
 				return;
 			}
 
-			await context.Config.SetStringAsync(runtime.EntryId, JellyfinConfigKeys.Devices, runtime.Devices.Serialize())
+			await context.Config
+				.SetStringAsync(runtime.EntryId, JellyfinConfigKeys.Devices, runtime.Devices.Serialize())
 				.ConfigureAwait(false);
 		}
 		catch (Exception ex)
@@ -704,7 +742,10 @@ public sealed partial class JellyfinIntegration
 		}
 	}
 
-	private static void Detach(JellyfinRuntime runtime) => runtime.Dispose();
+	private static void Detach(JellyfinRuntime runtime)
+	{
+		runtime.Dispose();
+	}
 
 	private static async Task<IReadOnlyList<DesiredRuntime>> LoadDesiredAsync(
 		IIntegrationConfig config,
@@ -714,12 +755,16 @@ public sealed partial class JellyfinIntegration
 		var usedKeys = new HashSet<string>(StringComparer.Ordinal);
 		foreach (var entry in await config.GetEntriesAsync(cancellationToken).ConfigureAwait(false))
 		{
-			var url = await config.GetStringAsync(entry.Id, JellyfinConfigKeys.Url, cancellationToken).ConfigureAwait(false);
+			var url = await config.GetStringAsync(entry.Id, JellyfinConfigKeys.Url, cancellationToken)
+				.ConfigureAwait(false);
 			var method = await config.GetStringAsync(entry.Id, JellyfinConfigKeys.AuthMethod, cancellationToken)
-				.ConfigureAwait(false) ?? JellyfinConfigKeys.AuthApiKey;
+					.ConfigureAwait(false)
+				?? JellyfinConfigKeys.AuthApiKey;
 			var token = method == JellyfinConfigKeys.AuthLogin
-				? await config.GetSecretAsync(entry.Id, JellyfinConfigKeys.AccessToken, cancellationToken).ConfigureAwait(false)
-				: await config.GetSecretAsync(entry.Id, JellyfinConfigKeys.ApiKey, cancellationToken).ConfigureAwait(false);
+				? await config.GetSecretAsync(entry.Id, JellyfinConfigKeys.AccessToken, cancellationToken)
+					.ConfigureAwait(false)
+				: await config.GetSecretAsync(entry.Id, JellyfinConfigKeys.ApiKey, cancellationToken)
+					.ConfigureAwait(false);
 			var deviceId = await config.GetStringAsync(entry.Id, JellyfinConfigKeys.DeviceId, cancellationToken)
 				.ConfigureAwait(false);
 
@@ -777,7 +822,8 @@ public sealed partial class JellyfinIntegration
 	{
 		var assembly = typeof(JellyfinIntegration).Assembly;
 		using var stream = assembly.GetManifestResourceStream(
-			$"{typeof(JellyfinIntegration).Namespace}.Icons.{JellyfinSessionsUiProvider.IconFolder}.{JellyfinSessionsUiProvider.GlyphIcon}.svg")!;
+				$"{typeof(JellyfinIntegration).Namespace}.Icons.{JellyfinSessionsUiProvider.IconFolder}.{JellyfinSessionsUiProvider.GlyphIcon}.svg")
+			!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);
 		return memory.ToArray();

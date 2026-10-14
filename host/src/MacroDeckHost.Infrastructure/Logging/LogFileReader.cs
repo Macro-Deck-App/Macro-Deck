@@ -121,7 +121,10 @@ public sealed class LogFileReader : ILogFileReader
 		};
 	}
 
-	public LogCursor CurrentEnd() => new(EndOf(_host), EndOf(_bootstrapper));
+	public LogCursor CurrentEnd()
+	{
+		return new LogCursor(EndOf(_host), EndOf(_bootstrapper));
+	}
 
 	public IReadOnlyList<LogSourceSummary> ReadSources()
 	{
@@ -172,10 +175,14 @@ public sealed class LogFileReader : ILogFileReader
 	}
 
 	private static LogReadPosition PositionOf(LogEntry entry)
-		=> LogEntryId.TryParse(entry.Id, out _, out var position) ? position : LogReadPosition.None;
+	{
+		return LogEntryId.TryParse(entry.Id, out _, out var position) ? position : LogReadPosition.None;
+	}
 
 	private LogCursor NewestAtOrBefore(DateTimeOffset to)
-		=> new(NewestAtOrBefore(_host, to), NewestAtOrBefore(_bootstrapper, to));
+	{
+		return new LogCursor(NewestAtOrBefore(_host, to), NewestAtOrBefore(_bootstrapper, to));
+	}
 
 	// File stamps are local dates taken when the line was written, so a day boundary crossed by a DST
 	// shift or by a travelling machine can put an in-range entry in the next day's file.
@@ -209,10 +216,14 @@ public sealed class LogFileReader : ILogFileReader
 	}
 
 	private static string DayStampAbove(DateTimeOffset instant)
-		=> instant.ToLocalTime().Date.AddDays(1).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+	{
+		return instant.ToLocalTime().Date.AddDays(1).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+	}
 
 	private static string DayStampBelow(DateTimeOffset instant)
-		=> instant.ToLocalTime().Date.AddDays(-1).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+	{
+		return instant.ToLocalTime().Date.AddDays(-1).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+	}
 
 	private static LogReadPosition EndOf(LogFileSet set)
 	{
@@ -299,8 +310,10 @@ public sealed class LogFileReader : ILogFileReader
 		}
 
 		private bool BelowFloor(LogEntry entry)
-			=> _floorStamp is not null &&
-				LogEntryId.TryParse(entry.Id, out _, out var position) &&
-				string.CompareOrdinal(position.FileStamp, _floorStamp) < 0;
+		{
+			return _floorStamp is not null
+				&& LogEntryId.TryParse(entry.Id, out _, out var position)
+				&& string.CompareOrdinal(position.FileStamp, _floorStamp) < 0;
+		}
 	}
 }

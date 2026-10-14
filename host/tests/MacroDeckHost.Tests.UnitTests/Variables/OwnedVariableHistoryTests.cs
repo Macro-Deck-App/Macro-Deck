@@ -128,7 +128,7 @@ internal sealed class OwnedVariableHistoryTests
 			Classification = VariableClassification.Integration,
 			OwnerIntegrationId = owner,
 			Value = value,
-			UpdatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
 		});
 	}
 }

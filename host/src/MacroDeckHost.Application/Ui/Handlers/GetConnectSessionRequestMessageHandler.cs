@@ -11,7 +11,8 @@ public sealed class GetConnectSessionRequestMessageHandler
 	private readonly IConnectSessionService _sessionService;
 	private readonly IConnectAvatarCache _avatarCache;
 
-	public GetConnectSessionRequestMessageHandler(IConnectSessionService sessionService,
+	public GetConnectSessionRequestMessageHandler(
+		IConnectSessionService sessionService,
 		IConnectAvatarCache avatarCache)
 	{
 		_sessionService = sessionService;
@@ -21,7 +22,8 @@ public sealed class GetConnectSessionRequestMessageHandler
 	// Must never trigger a refresh: this handler only reads the current snapshot. Refreshing here would
 	// change state, broadcast a change notification, and re-enter this very handler through the client's
 	// reaction to that notification.
-	public ValueTask<GetConnectSessionResponse> Handle(GetConnectSessionRequest request,
+	public ValueTask<GetConnectSessionResponse> Handle(
+		GetConnectSessionRequest request,
 		CancellationToken cancellationToken)
 	{
 		var snapshot = _sessionService.Current;
@@ -51,5 +53,8 @@ public sealed class GetConnectSessionRequestMessageHandler
 		});
 	}
 
-	private static string CamelCase(string value) => JsonNamingPolicy.CamelCase.ConvertName(value);
+	private static string CamelCase(string value)
+	{
+		return JsonNamingPolicy.CamelCase.ConvertName(value);
+	}
 }

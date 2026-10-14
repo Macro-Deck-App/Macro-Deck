@@ -29,7 +29,8 @@ public class DeviceSetupController : ControllerBase
 	private readonly IHostListenerState _listenerState;
 	private readonly Serilog.ILogger _logger;
 
-	public DeviceSetupController(IPublicTlsCertificateStore certificateStore,
+	public DeviceSetupController(
+		IPublicTlsCertificateStore certificateStore,
 		IHostListenerState listenerState,
 		Serilog.ILogger logger)
 	{

@@ -72,35 +72,53 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 	}
 
 	public Task<TwitchStreamInfo> GetStreamAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("stream", Stream);
+	{
+		return Read("stream", Stream);
+	}
 
 	public Task<TwitchChannelInfo> GetChannelAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("channel", Channel);
+	{
+		return Read("channel", Channel);
+	}
 
 	public Task<int?> GetFollowerCountAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("followers", FollowerCount);
+	{
+		return Read("followers", FollowerCount);
+	}
 
 	public Task<int?> GetChatterCountAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("chatters", ChatterCount);
+	{
+		return Read("chatters", ChatterCount);
+	}
 
 	public Task<TwitchSubscriberInfo> GetSubscriberInfoAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("subscribers", Subscribers);
+	{
+		return Read("subscribers", Subscribers);
+	}
 
 	public Task<TwitchChatSettings> GetChatSettingsAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Read("chatSettings", ChatSettings);
+	{
+		return Read("chatSettings", ChatSettings);
+	}
 
 	public Task<IReadOnlyList<TwitchCustomReward>> GetCustomRewardsAsync(
 		string broadcasterId,
 		CancellationToken cancellationToken)
-		=> Read("rewards", Rewards);
+	{
+		return Read("rewards", Rewards);
+	}
 
 	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetGlobalChatBadgesAsync(CancellationToken cancellationToken)
-		=> Read("globalBadges", GlobalBadges);
+	{
+		return Read("globalBadges", GlobalBadges);
+	}
 
 	public Task<IReadOnlyList<TwitchChatBadgeImage>> GetChannelChatBadgesAsync(
 		string broadcasterId,
 		CancellationToken cancellationToken)
-		=> Read("channelBadges", ChannelBadges);
+	{
+		return Read("channelBadges", ChannelBadges);
+	}
 
 	public Task<TwitchUserInfo?> GetUserAsync(string? userId, string? login, CancellationToken cancellationToken)
 	{
@@ -114,7 +132,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string? categoryId,
 		IReadOnlyList<string>? tags,
 		CancellationToken cancellationToken)
-		=> Record($"modifyChannel:{title}|{categoryId}|{(tags is null ? string.Empty : string.Join('+', tags))}");
+	{
+		return Record($"modifyChannel:{title}|{categoryId}|{(tags is null ? string.Empty : string.Join('+', tags))}");
+	}
 
 	public Task<string?> ResolveCategoryIdAsync(string name, CancellationToken cancellationToken)
 	{
@@ -128,7 +148,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string message,
 		string? replyToMessageId,
 		CancellationToken cancellationToken)
-		=> Record($"chat:{message}|{replyToMessageId}");
+	{
+		return Record($"chat:{message}|{replyToMessageId}");
+	}
 
 	public Task SendAnnouncementAsync(
 		string broadcasterId,
@@ -136,21 +158,27 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string message,
 		string color,
 		CancellationToken cancellationToken)
-		=> Record($"announce:{message}|{color}");
+	{
+		return Record($"announce:{message}|{color}");
+	}
 
 	public Task SendShoutoutAsync(
 		string fromBroadcasterId,
 		string toBroadcasterId,
 		string moderatorId,
 		CancellationToken cancellationToken)
-		=> Record($"shoutout:{toBroadcasterId}");
+	{
+		return Record($"shoutout:{toBroadcasterId}");
+	}
 
 	public Task DeleteChatMessagesAsync(
 		string broadcasterId,
 		string moderatorId,
 		string? messageId,
 		CancellationToken cancellationToken)
-		=> Record($"deleteChat:{messageId}");
+	{
+		return Record($"deleteChat:{messageId}");
+	}
 
 	public Task SetChatModeAsync(
 		string broadcasterId,
@@ -159,19 +187,29 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		bool enabled,
 		int? duration,
 		CancellationToken cancellationToken)
-		=> Record($"chatMode:{mode}|{enabled}|{duration}");
+	{
+		return Record($"chatMode:{mode}|{enabled}|{duration}");
+	}
 
 	public Task StartCommercialAsync(string broadcasterId, int lengthSeconds, CancellationToken cancellationToken)
-		=> Record($"commercial:{lengthSeconds}");
+	{
+		return Record($"commercial:{lengthSeconds}");
+	}
 
 	public Task SnoozeNextAdAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Record("snoozeAd");
+	{
+		return Record("snoozeAd");
+	}
 
 	public Task StartRaidAsync(string fromBroadcasterId, string toBroadcasterId, CancellationToken cancellationToken)
-		=> Record($"raid:{toBroadcasterId}");
+	{
+		return Record($"raid:{toBroadcasterId}");
+	}
 
 	public Task CancelRaidAsync(string broadcasterId, CancellationToken cancellationToken)
-		=> Record("cancelRaid");
+	{
+		return Record("cancelRaid");
+	}
 
 	public Task<TwitchCreatedClip?> CreateClipAsync(
 		string broadcasterId,
@@ -202,7 +240,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string broadcasterId,
 		string? description,
 		CancellationToken cancellationToken)
-		=> Record($"marker:{description}");
+	{
+		return Record($"marker:{description}");
+	}
 
 	public Task BanUserAsync(
 		string broadcasterId,
@@ -211,14 +251,18 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		int? durationSeconds,
 		string? reason,
 		CancellationToken cancellationToken)
-		=> Record($"ban:{targetUserId}|{durationSeconds}|{reason}");
+	{
+		return Record($"ban:{targetUserId}|{durationSeconds}|{reason}");
+	}
 
 	public Task UnbanUserAsync(
 		string broadcasterId,
 		string moderatorId,
 		string targetUserId,
 		CancellationToken cancellationToken)
-		=> Record($"unban:{targetUserId}");
+	{
+		return Record($"unban:{targetUserId}");
+	}
 
 	public Task CreatePollAsync(
 		string broadcasterId,
@@ -227,7 +271,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		int durationSeconds,
 		int? channelPointsPerVote,
 		CancellationToken cancellationToken)
-		=> Record($"createPoll:{title}|{string.Join('+', choices)}|{durationSeconds}|{channelPointsPerVote}");
+	{
+		return Record($"createPoll:{title}|{string.Join('+', choices)}|{durationSeconds}|{channelPointsPerVote}");
+	}
 
 	public Task<TwitchActiveEvent?> GetActivePollAsync(string broadcasterId, CancellationToken cancellationToken)
 	{
@@ -236,7 +282,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 	}
 
 	public Task EndPollAsync(string broadcasterId, string pollId, bool archive, CancellationToken cancellationToken)
-		=> Record($"endPoll:{pollId}|{archive}");
+	{
+		return Record($"endPoll:{pollId}|{archive}");
+	}
 
 	public Task CreatePredictionAsync(
 		string broadcasterId,
@@ -244,7 +292,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		IReadOnlyList<string> outcomes,
 		int windowSeconds,
 		CancellationToken cancellationToken)
-		=> Record($"createPrediction:{title}|{string.Join('+', outcomes)}|{windowSeconds}");
+	{
+		return Record($"createPrediction:{title}|{string.Join('+', outcomes)}|{windowSeconds}");
+	}
 
 	public Task<TwitchActiveEvent?> GetActivePredictionAsync(
 		string broadcasterId,
@@ -260,7 +310,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string status,
 		string? winningOutcomeId,
 		CancellationToken cancellationToken)
-		=> Record($"endPrediction:{predictionId}|{status}|{winningOutcomeId}");
+	{
+		return Record($"endPrediction:{predictionId}|{status}|{winningOutcomeId}");
+	}
 
 	public Task UpdateRedemptionStatusAsync(
 		string broadcasterId,
@@ -268,7 +320,9 @@ internal sealed class FakeTwitchHelixClient : ITwitchHelixClient
 		string redemptionId,
 		bool fulfilled,
 		CancellationToken cancellationToken)
-		=> Record($"redemption:{rewardId}|{redemptionId}|{fulfilled}");
+	{
+		return Record($"redemption:{rewardId}|{redemptionId}|{fulfilled}");
+	}
 
 	private Task Record(string call)
 	{

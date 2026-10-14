@@ -12,7 +12,8 @@ internal static class RelayScripts
 	public static readonly TimeSpan Soon = TimeSpan.FromSeconds(10);
 
 	public static Func<HttpContext, Task> Reply(string? contentType, string body, int status = 200)
-		=> async context =>
+	{
+		return async context =>
 		{
 			var bytes = Encoding.UTF8.GetBytes(body);
 			context.Response.StatusCode = status;
@@ -24,9 +25,11 @@ internal static class RelayScripts
 			context.Response.ContentLength = bytes.Length;
 			await context.Response.Body.WriteAsync(bytes);
 		};
+	}
 
 	public static Func<HttpContext, Task> StreamUntilAborted(TaskCompletionSource aborted)
-		=> async context =>
+	{
+		return async context =>
 		{
 			context.Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
 			await context.Response.WriteAsync("--frame\r\nContent-Type: image/jpeg\r\n\r\nFRAME1\r\n");
@@ -40,9 +43,12 @@ internal static class RelayScripts
 				aborted.TrySetResult();
 			}
 		};
+	}
 
 	public static async Task<string> ReadAllAsync(HttpResponseMessage response)
-		=> await response.Content.ReadAsStringAsync().WaitAsync(Soon);
+	{
+		return await response.Content.ReadAsStringAsync().WaitAsync(Soon);
+	}
 
 	public static async Task<string> ReadFirstAsync(Stream stream)
 	{
@@ -92,7 +98,9 @@ internal sealed class VideoStreamRelayEndpointTests
 	}
 
 	private string Arm(string path, string transport, string? sessionId = null)
-		=> _host.Arm(sessionId ?? $"s{++_sessions}", _upstream.Origin + path, transport);
+	{
+		return _host.Arm(sessionId ?? $"s{++_sessions}", _upstream.Origin + path, transport);
+	}
 
 	[Test]
 	public async Task The_first_mjpeg_chunk_arrives_before_the_upstream_finishes_and_the_boundary_survives()
@@ -120,9 +128,12 @@ internal sealed class VideoStreamRelayEndpointTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(response.Content.Headers.ContentType!.ToString(), Is.EqualTo("multipart/x-mixed-replace; boundary=frame"));
+			Assert.That(response.Content.Headers.ContentType!.ToString(),
+				Is.EqualTo("multipart/x-mixed-replace; boundary=frame"));
 			Assert.That(first, Does.Contain("FRAME1"));
-			Assert.That(finishedWhenFirstArrived, Is.False, "the client had its first frame while the upstream was still sending");
+			Assert.That(finishedWhenFirstArrived,
+				Is.False,
+				"the client had its first frame while the upstream was still sending");
 			Assert.That(rest, Does.Contain("FRAME2").And.Contain("--frame--"));
 		});
 	}
@@ -147,7 +158,8 @@ internal sealed class VideoStreamRelayEndpointTests
 			{
 				Assert.That(response.Headers.CacheControl!.NoStore, Is.True);
 				Assert.That(response.Headers.GetValues("X-Content-Type-Options"), Is.EqualTo(new[] { "nosniff" }));
-				Assert.That(response.Headers.GetValues("Content-Security-Policy"), Is.EqualTo(new[] { "sandbox; default-src 'none'" }));
+				Assert.That(response.Headers.GetValues("Content-Security-Policy"),
+					Is.EqualTo(new[] { "sandbox; default-src 'none'" }));
 			}
 		});
 	}
@@ -262,7 +274,8 @@ internal sealed class VideoStreamRelayEndpointTests
 		});
 		var relayPath = Arm("/live/seg1.ts", "hls");
 
-		using var response = await _host.GetAsync(relayPath, configure: r => r.Headers.Range = new RangeHeaderValue(0, 3));
+		using var response
+			= await _host.GetAsync(relayPath, configure: r => r.Headers.Range = new RangeHeaderValue(0, 3));
 
 		Assert.Multiple(() =>
 		{
@@ -286,7 +299,8 @@ internal sealed class VideoStreamRelayEndpointTests
 		});
 		var relayPath = Arm("/live/index.m3u8", "hls");
 
-		using var response = await _host.GetAsync(relayPath, configure: r => r.Headers.Range = new RangeHeaderValue(0, 5));
+		using var response
+			= await _host.GetAsync(relayPath, configure: r => r.Headers.Range = new RangeHeaderValue(0, 5));
 
 		Assert.Multiple(() =>
 		{
@@ -340,7 +354,9 @@ internal sealed class VideoStreamRelayEndpointTests
 			Assert.That((int)response.StatusCode, Is.EqualTo(expected));
 			if (expected == 502)
 			{
-				Assert.That(body, Does.Not.Contain("SECRET-BYTES").And.Not.Contain("seg1.ts"), "the upstream body is never forwarded");
+				Assert.That(body,
+					Does.Not.Contain("SECRET-BYTES").And.Not.Contain("seg1.ts"),
+					"the upstream body is never forwarded");
 			}
 		});
 
@@ -430,7 +446,9 @@ internal sealed class VideoStreamRelayEndpointTests
 		{
 			Assert.That(response.Content.Headers.ContentType!.ToString(), Is.EqualTo("application/vnd.apple.mpegurl"));
 			Assert.That(response.Content.Headers.ContentLength, Is.EqualTo(Encoding.UTF8.GetByteCount(body)));
-			Assert.That(body, Is.EqualTo($"#EXTM3U\n#EXT-X-MAP:URI=\"{prefix}/live/init.mp4\"\n{prefix}/live/seg1.ts\n{prefix}/live/seg2.ts?k=v\n{prefix}/top/seg3.ts\n"));
+			Assert.That(body,
+				Is.EqualTo(
+					$"#EXTM3U\n#EXT-X-MAP:URI=\"{prefix}/live/init.mp4\"\n{prefix}/live/seg1.ts\n{prefix}/live/seg2.ts?k=v\n{prefix}/top/seg3.ts\n"));
 			Assert.That(body, Does.Not.Contain(_upstream.Origin));
 		});
 	}
@@ -478,9 +496,15 @@ internal sealed class VideoStreamRelayEndpointTests
 		Assert.That(await RelayScripts.ReadAllAsync(response), Is.EqualTo("GIF89a-not-a-playlist-seg1.ts"));
 	}
 
-	[TestCase("application/vnd.apple.mpegurl", "<html>not a playlist</html>", TestName = "A_playlist_type_without_the_extm3u_line_is_refused")]
-	[TestCase("application/vnd.apple.mpegurl", "#EXTM3U\n#EXT-X-MAP:URI=\"x.mp4\nseg.ts\n", TestName = "A_playlist_with_a_broken_uri_attribute_is_refused")]
-	public async Task A_body_that_is_not_a_playlist_is_refused_when_the_type_or_path_says_it_is(string contentType, string body)
+	[TestCase("application/vnd.apple.mpegurl",
+		"<html>not a playlist</html>",
+		TestName = "A_playlist_type_without_the_extm3u_line_is_refused")]
+	[TestCase("application/vnd.apple.mpegurl",
+		"#EXTM3U\n#EXT-X-MAP:URI=\"x.mp4\nseg.ts\n",
+		TestName = "A_playlist_with_a_broken_uri_attribute_is_refused")]
+	public async Task A_body_that_is_not_a_playlist_is_refused_when_the_type_or_path_says_it_is(
+		string contentType,
+		string body)
 	{
 		_upstream.Reset(RelayScripts.Reply(contentType, body));
 		var relayPath = Arm("/live/index.m3u8", "hls");
@@ -553,7 +577,8 @@ internal sealed class VideoStreamRelayEndpointTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(_upstream.Requests.Select(r => r.RawTarget), Is.EqualTo(new[] { "/a/start", "/a/middle", "/b/final.jpg" }));
+			Assert.That(_upstream.Requests.Select(r => r.RawTarget),
+				Is.EqualTo(new[] { "/a/start", "/a/middle", "/b/final.jpg" }));
 		});
 		Assert.That(await RelayScripts.ReadAllAsync(response), Is.EqualTo("FINAL"));
 	}

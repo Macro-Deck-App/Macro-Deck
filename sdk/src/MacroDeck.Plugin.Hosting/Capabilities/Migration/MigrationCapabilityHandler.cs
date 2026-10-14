@@ -31,7 +31,8 @@ internal sealed class MigrationCapabilityHandler(IEnumerable<IPluginIntegration>
 	public string Kind => CapabilityKinds.Migration;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _migrations.Count == 0
+	{
+		return _migrations.Count == 0
 			? []
 			:
 			[
@@ -40,6 +41,7 @@ internal sealed class MigrationCapabilityHandler(IEnumerable<IPluginIntegration>
 					Kind = CapabilityKinds.Migration, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public async Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -72,7 +74,8 @@ internal sealed class MigrationCapabilityHandler(IEnumerable<IPluginIntegration>
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new MigrationDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new MigrationDescribePayload
 		{
 			Migrations =
 			[
@@ -84,6 +87,7 @@ internal sealed class MigrationCapabilityHandler(IEnumerable<IPluginIntegration>
 				})
 			]
 		});
+	}
 
 	private async Task<CapabilityInvocationResult> MigrateAction(
 		CapabilityInvocation invocation,
@@ -161,11 +165,15 @@ internal sealed class MigrationCapabilityHandler(IEnumerable<IPluginIntegration>
 	}
 
 	private IIntegrationMigration? Find(string? source)
-		=> Enum.TryParse<MigrationSource>(source, ignoreCase: true, out var parsed)
+	{
+		return Enum.TryParse<MigrationSource>(source, true, out var parsed)
 			? _migrations.FirstOrDefault(migration => migration.Source == parsed)
 			: null;
+	}
 
 	private static CapabilityInvocationResult NoSuchSource(string? source)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 			$"This plugin declares no migration from '{source}'.");
+	}
 }

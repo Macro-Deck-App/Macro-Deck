@@ -8,7 +8,8 @@ public readonly record struct AdvertisedInterface(int Index, IPAddress Ipv4);
 
 public sealed class ServiceAdvertisement : IEquatable<ServiceAdvertisement>
 {
-	public ServiceAdvertisement(string wireName,
+	public ServiceAdvertisement(
+		string wireName,
 		int port,
 		IReadOnlyList<TxtEntry> txt,
 		IReadOnlyList<AdvertisedInterface> interfaces)
@@ -28,12 +29,22 @@ public sealed class ServiceAdvertisement : IEquatable<ServiceAdvertisement>
 	public IReadOnlyList<AdvertisedInterface> Interfaces { get; }
 
 	public bool DescribesSameService(ServiceAdvertisement? other)
-		=> other is not null && WireName == other.WireName && Port == other.Port && Txt.SequenceEqual(other.Txt);
+	{
+		return other is not null && WireName == other.WireName && Port == other.Port && Txt.SequenceEqual(other.Txt);
+	}
 
 	public bool Equals(ServiceAdvertisement? other)
-		=> DescribesSameService(other) && Interfaces.SequenceEqual(other!.Interfaces);
+	{
+		return DescribesSameService(other) && Interfaces.SequenceEqual(other!.Interfaces);
+	}
 
-	public override bool Equals(object? obj) => Equals(obj as ServiceAdvertisement);
+	public override bool Equals(object? obj)
+	{
+		return Equals(obj as ServiceAdvertisement);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(WireName, Port, Interfaces.Count);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(WireName, Port, Interfaces.Count);
+	}
 }

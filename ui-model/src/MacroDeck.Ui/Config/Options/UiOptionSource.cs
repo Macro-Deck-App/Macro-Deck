@@ -41,7 +41,7 @@ public sealed record UiOptionSource
 		return new UiOptionSource
 		{
 			Load = async (query, cancellationToken) =>
-				UiOptionResult.From(await load(query, cancellationToken).ConfigureAwait(false)),
+				UiOptionResult.From(await load(query, cancellationToken).ConfigureAwait(false))
 		};
 	}
 }

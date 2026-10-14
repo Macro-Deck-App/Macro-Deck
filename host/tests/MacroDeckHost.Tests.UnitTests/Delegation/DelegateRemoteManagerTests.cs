@@ -72,7 +72,7 @@ internal sealed class DelegateRemoteManagerTests
 		_client.For(baseUrl).RunException = new DelegateUnauthorizedException();
 		_client.For(baseUrl).Password = "rotated-elsewhere";
 
-		ActionResult result = default!;
+		ActionResult result = null!;
 		Assert.DoesNotThrowAsync(async () => result = await RunAction("script-1"));
 
 		Assert.Multiple(() =>
@@ -343,5 +343,8 @@ internal sealed class DelegateRemoteManagerTests
 		});
 	}
 
-	private Task<IssueResolution> ResolveIssue(string issueId) => _integration.ResolveIssueAsync(issueId);
+	private Task<IssueResolution> ResolveIssue(string issueId)
+	{
+		return _integration.ResolveIssueAsync(issueId);
+	}
 }

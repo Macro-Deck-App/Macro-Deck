@@ -31,7 +31,8 @@ public sealed class StoreEntitlementSyncBackgroundService : BackgroundService
 	private int _failedAttempts;
 	private DateTimeOffset? _dueAt;
 
-	public StoreEntitlementSyncBackgroundService(IConnectSessionService session,
+	public StoreEntitlementSyncBackgroundService(
+		IConnectSessionService session,
 		IStoreOperationTracker operations,
 		IStoreRegistryRefreshTracker refreshes,
 		IStoreOfficialPackages packages,
@@ -216,7 +217,9 @@ public sealed class StoreEntitlementSyncBackgroundService : BackgroundService
 				ScheduleRetry(result.RetryAfter);
 				break;
 			default:
-				_logger.Warning("Claiming {Count} installed Store packages was refused ({Failure})", ids.Count, result.Failure);
+				_logger.Warning("Claiming {Count} installed Store packages was refused ({Failure})",
+					ids.Count,
+					result.Failure);
 				ClearPending();
 				break;
 		}
@@ -241,8 +244,10 @@ public sealed class StoreEntitlementSyncBackgroundService : BackgroundService
 		_dueAt = _timeProvider.GetUtcNow() + delay;
 	}
 
-	private void OnSessionChanged(object? sender, ConnectSessionSnapshot snapshot) =>
+	private void OnSessionChanged(object? sender, ConnectSessionSnapshot snapshot)
+	{
 		_signals.Writer.TryWrite(new SessionSignal(snapshot));
+	}
 
 	private void OnOperationChanged(StoreOperation operation)
 	{

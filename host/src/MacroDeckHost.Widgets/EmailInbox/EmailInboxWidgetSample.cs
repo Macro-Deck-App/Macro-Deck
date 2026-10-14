@@ -24,24 +24,41 @@ internal static class EmailInboxWidgetSample
 			LocalizedString preview,
 			TimeSpan age,
 			bool isRead)
-			=> new()
+		{
+			return new EmailMessage
 			{
 				Id = id,
 				SenderName = await text.ResolveAsync(sender).ConfigureAwait(false),
 				Subject = await text.ResolveAsync(subject).ConfigureAwait(false),
 				Preview = await text.ResolveAsync(preview).ConfigureAwait(false),
 				ReceivedAt = now - age,
-				IsRead = isRead,
+				IsRead = isRead
 			};
+		}
 
 		IReadOnlyList<EmailMessage> messages =
 		[
-			await Message("team", Strings.TeamSender(), Strings.TeamSubject(), Strings.TeamPreview(),
-				TimeSpan.FromMinutes(4), isRead: false).ConfigureAwait(false),
-			await Message("invoice", Strings.InvoiceSender(), Strings.InvoiceSubject(), Strings.InvoicePreview(),
-				TimeSpan.FromMinutes(52), isRead: false).ConfigureAwait(false),
-			await Message("friend", Strings.FriendSender(), Strings.FriendSubject(), Strings.FriendPreview(),
-				TimeSpan.FromHours(3), isRead: true).ConfigureAwait(false),
+			await Message("team",
+					Strings.TeamSender(),
+					Strings.TeamSubject(),
+					Strings.TeamPreview(),
+					TimeSpan.FromMinutes(4),
+					false)
+				.ConfigureAwait(false),
+			await Message("invoice",
+					Strings.InvoiceSender(),
+					Strings.InvoiceSubject(),
+					Strings.InvoicePreview(),
+					TimeSpan.FromMinutes(52),
+					false)
+				.ConfigureAwait(false),
+			await Message("friend",
+					Strings.FriendSender(),
+					Strings.FriendSubject(),
+					Strings.FriendPreview(),
+					TimeSpan.FromHours(3),
+					true)
+				.ConfigureAwait(false)
 		];
 
 		var inbox = new EmailInboxDescriptor(EmailWidgetTypes.OwnerId + "::" + InboxId,
@@ -51,8 +68,7 @@ internal static class EmailInboxWidgetSample
 			inboxName,
 			"you@example.com");
 
-		return new EmailInboxesSnapshot(
-		[
+		return new EmailInboxesSnapshot([
 			new EmailInboxState
 			{
 				Inbox = inbox,
@@ -62,8 +78,8 @@ internal static class EmailInboxWidgetSample
 				TotalCount = 3,
 				Latest = messages,
 				LatestUnread = [.. messages.Where(message => !message.IsRead)],
-				SyncedAt = now,
-			},
+				SyncedAt = now
+			}
 		]);
 	}
 }

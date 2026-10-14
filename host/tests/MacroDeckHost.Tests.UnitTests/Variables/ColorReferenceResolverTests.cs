@@ -11,7 +11,7 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class ColorReferenceResolverTests
 {
-	private static readonly Guid WidgetId = Guid.Parse("00000000-0000-0000-0000-0000000000c1");
+	private static readonly Guid _widgetId = Guid.Parse("00000000-0000-0000-0000-0000000000c1");
 
 	private VariableRegistry _registry = null!;
 	private ColorReferenceResolver _resolver = null!;
@@ -23,7 +23,11 @@ public class ColorReferenceResolverTests
 		_resolver = new ColorReferenceResolver(_registry);
 	}
 
-	private VariableEntity Add(string name, VariableType type, string value, string? widgetId = null,
+	private VariableEntity Add(
+		string name,
+		VariableType type,
+		string value,
+		string? widgetId = null,
 		bool available = true)
 	{
 		var entity = new VariableEntity
@@ -87,19 +91,19 @@ public class ColorReferenceResolverTests
 	public void Widget_data_resolves_every_reference_including_threshold_bands_and_leaves_labels()
 	{
 		Add("primary", VariableType.Color, "#3366ff");
-		const string Data = """
-			{
-			  "label": "{{ vars.primary }}",
-			  "backgroundColor": "{{ vars.primary | color | color_opacity: 50 }}",
-			  "gauges": [
-			    { "thresholds": { "bands": [
-			      { "id": "a", "color": "{{ vars.primary | color }}" },
-			      { "id": "b", "color": "#ff0000", "from": 50 } ] } }
-			  ]
-			}
-			""";
+		const string data = """
+							{
+							  "label": "{{ vars.primary }}",
+							  "backgroundColor": "{{ vars.primary | color | color_opacity: 50 }}",
+							  "gauges": [
+							    { "thresholds": { "bands": [
+							      { "id": "a", "color": "{{ vars.primary | color }}" },
+							      { "id": "b", "color": "#ff0000", "from": 50 } ] } }
+							  ]
+							}
+							""";
 
-		var resolved = JsonNode.Parse(_resolver.ResolveData(Data, null)!)!;
+		var resolved = JsonNode.Parse(_resolver.ResolveData(data, null)!)!;
 
 		Assert.Multiple(() =>
 		{
@@ -114,23 +118,23 @@ public class ColorReferenceResolverTests
 	[Test]
 	public void Data_without_a_reference_is_returned_untouched()
 	{
-		const string Data = """{"backgroundColor":"#3366ff","label":"{{ vars.primary }}"}""";
+		const string data = """{"backgroundColor":"#3366ff","label":"{{ vars.primary }}"}""";
 
-		Assert.That(_resolver.ResolveData(Data, WidgetId), Is.SameAs(Data));
+		Assert.That(_resolver.ResolveData(data, _widgetId), Is.SameAs(data));
 	}
 
 	[Test]
 	public void A_widget_scoped_variable_wins_over_the_global_one_for_its_widget()
 	{
 		Add("primary", VariableType.Color, "#3366ff");
-		Add("primary", VariableType.Color, "#ff0000", WidgetId.ToString());
-		const string Data = """{"color":"{{ vars.primary | color }}"}""";
+		Add("primary", VariableType.Color, "#ff0000", _widgetId.ToString());
+		const string data = """{"color":"{{ vars.primary | color }}"}""";
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(JsonNode.Parse(_resolver.ResolveData(Data, WidgetId)!)!["color"]!.GetValue<string>(),
+			Assert.That(JsonNode.Parse(_resolver.ResolveData(data, _widgetId)!)!["color"]!.GetValue<string>(),
 				Is.EqualTo("#ff0000"));
-			Assert.That(JsonNode.Parse(_resolver.ResolveData(Data, Guid.NewGuid())!)!["color"]!.GetValue<string>(),
+			Assert.That(JsonNode.Parse(_resolver.ResolveData(data, Guid.NewGuid())!)!["color"]!.GetValue<string>(),
 				Is.EqualTo("#3366ff"));
 		});
 	}
@@ -145,10 +149,12 @@ public class ColorReferenceResolverTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(renderer.Render("{{ vars.primary | color | color_darken: 20 | color_opacity: 70 }}",
-					VariableScope.Global, null),
+					VariableScope.Global,
+					null),
 				Is.EqualTo("#003df5b3"));
 			Assert.That(renderer.Render("{{ vars.primary | color | color_mix: vars.other, 50 }}",
-					VariableScope.Global, null),
+					VariableScope.Global,
+					null),
 				Is.EqualTo("#99b3ff"));
 			Assert.That(renderer.Render("[{{ vars.missing | color | color_lighten: 10 }}]", VariableScope.Global, null),
 				Is.EqualTo("[]"));
@@ -159,14 +165,14 @@ public class ColorReferenceResolverTests
 	public void A_band_whose_variable_is_gone_loses_only_its_own_colour()
 	{
 		Add("warn", VariableType.Color, "#ffcc00");
-		const string Data = """
-			{ "thresholds": { "bands": [
-			  { "id": "ok", "color": "#34c759" },
-			  { "id": "warn", "color": "{{ vars.warn | color }}", "from": 50 },
-			  { "id": "bad", "color": "{{ vars.deleted | color }}", "from": 90 } ] } }
-			""";
+		const string data = """
+							{ "thresholds": { "bands": [
+							  { "id": "ok", "color": "#34c759" },
+							  { "id": "warn", "color": "{{ vars.warn | color }}", "from": 50 },
+							  { "id": "bad", "color": "{{ vars.deleted | color }}", "from": 90 } ] } }
+							""";
 
-		using var resolved = JsonDocument.Parse(_resolver.ResolveData(Data, null)!);
+		using var resolved = JsonDocument.Parse(_resolver.ResolveData(data, null)!);
 		var parsed = UiThresholds.TryParse(resolved.RootElement.GetProperty("thresholds"), out var thresholds);
 
 		Assert.Multiple(() =>
@@ -192,7 +198,9 @@ public class ColorReferenceResolverTests
 			Assert.That(renderer.Render("[{{ vars.label | color_darken: 10 }}]", VariableScope.Global, null),
 				Is.EqualTo("[]"));
 			Assert.That(renderer.Render("[{{ vars.primary | color | color_mix: vars.label, 50 }}]",
-				VariableScope.Global, null), Is.EqualTo("[]"));
+					VariableScope.Global,
+					null),
+				Is.EqualTo("[]"));
 			Assert.That(renderer.Render("{{ vars.primary | color_darken: 20 }}", VariableScope.Global, null),
 				Is.EqualTo("#003df5"));
 			Assert.That(renderer.Render("{{ \"#3366ff\" | color_darken: 20 }}", VariableScope.Global, null),

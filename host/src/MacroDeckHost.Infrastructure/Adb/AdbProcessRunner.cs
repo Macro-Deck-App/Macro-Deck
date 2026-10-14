@@ -43,7 +43,8 @@ internal interface IAdbProcessRunner
 		TimeSpan timeout,
 		CancellationToken cancellationToken);
 
-	async Task<AdbBoundedResult> RunBoundedAsync(string executablePath,
+	async Task<AdbBoundedResult> RunBoundedAsync(
+		string executablePath,
 		IReadOnlyList<string> arguments,
 		TimeSpan timeout,
 		int maxChars,
@@ -119,7 +120,8 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 		}
 	}
 
-	public async Task<AdbBoundedResult> RunBoundedAsync(string executablePath,
+	public async Task<AdbBoundedResult> RunBoundedAsync(
+		string executablePath,
 		IReadOnlyList<string> arguments,
 		TimeSpan timeout,
 		int maxChars,
@@ -128,7 +130,7 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 		Process process;
 		try
 		{
-			process = StartProcess(executablePath, arguments, closeStandardInput: true);
+			process = StartProcess(executablePath, arguments, true);
 		}
 		catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException)
 		{
@@ -256,7 +258,8 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 		_liveProcesses.Clear();
 	}
 
-	private Process StartProcess(string executablePath,
+	private Process StartProcess(
+		string executablePath,
 		IReadOnlyList<string> arguments,
 		bool closeStandardInput = false)
 	{
@@ -286,8 +289,8 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 			startInfo.ArgumentList.Add(argument);
 		}
 
-		var process = Process.Start(startInfo) ??
-			throw new InvalidOperationException($"Failed to start '{executablePath}'.");
+		var process = Process.Start(startInfo)
+			?? throw new InvalidOperationException($"Failed to start '{executablePath}'.");
 		if (closeStandardInput)
 		{
 			process.StandardInput.Close();
@@ -297,7 +300,8 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 	}
 
 	// Keeps draining past the limit so a chatty process never blocks on a full pipe.
-	private static async Task<(string Text, bool Truncated)> ReadBoundedAsync(StreamReader reader,
+	private static async Task<(string Text, bool Truncated)> ReadBoundedAsync(
+		StreamReader reader,
 		int maxChars,
 		CancellationToken cancellationToken)
 	{
@@ -338,7 +342,7 @@ internal sealed class AdbProcessRunner : IAdbProcessRunner, IDisposable
 		{
 			if (!process.HasExited)
 			{
-				process.Kill(entireProcessTree: true);
+				process.Kill(true);
 			}
 		}
 		catch (Exception ex) when (ex is InvalidOperationException or Win32Exception or ObjectDisposedException)

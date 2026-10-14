@@ -39,7 +39,7 @@ public class HostApiStabilityTests
 		"video-streams",
 		"weather",
 		"widget-types",
-		"widgets",
+		"widgets"
 	];
 
 	private static readonly IReadOnlyDictionary<string, string[]> _expectedOperations
@@ -72,7 +72,8 @@ public class HostApiStabilityTests
 			[HostApis.ScreenSavers] = ["register", "unregister"],
 			[HostApis.Adb] =
 			[
-				"shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect", "key", "tap",
+				"shell", "battery", "push", "pull", "install", "uninstall", "package-installed", "connect", "key",
+				"tap",
 				"swipe", "input-text", "start-app", "force-stop-app", "open-uri", "reboot", "screenshot", "status"
 			],
 			[HostApis.Messaging] = ["publish", "send", "request", "subscriptions"],
@@ -86,7 +87,7 @@ public class HostApiStabilityTests
 			[HostApis.Http] = [],
 			[HostApis.CompanionDevices] = ["wait", "send", "request", "screenshot"],
 			[HostApis.MusicPlayers] = ["album-color"],
-			[HostApis.DesktopNotifications] = ["show"],
+			[HostApis.DesktopNotifications] = ["show"]
 		};
 
 	[Test]
@@ -99,7 +100,9 @@ public class HostApiStabilityTests
 
 	[Test]
 	public void Events_is_not_a_host_api_because_event_publish_already_covers_it()
-		=> Assert.That(HostApis.IsKnown("events"), Is.False);
+	{
+		Assert.That(HostApis.IsKnown("events"), Is.False);
+	}
 
 	[Test]
 	public void Every_host_api_has_a_frozen_operation_list()
@@ -121,17 +124,25 @@ public class HostApiStabilityTests
 
 	[TestCaseSource(nameof(_apisAndOperations))]
 	public void Is_known_is_true_for_every_documented_pair(string api, string operation)
-		=> Assert.That(HostOperations.IsKnown(api, operation), Is.True);
+	{
+		Assert.That(HostOperations.IsKnown(api, operation), Is.True);
+	}
 
 	[Test]
 	public void Is_known_is_false_for_an_unknown_operation()
-		=> Assert.That(HostOperations.IsKnown(HostApis.Variables, "not-a-real-operation"), Is.False);
+	{
+		Assert.That(HostOperations.IsKnown(HostApis.Variables, "not-a-real-operation"), Is.False);
+	}
 
 	[Test]
 	public void Is_known_is_false_for_an_unknown_api()
-		=> Assert.That(HostOperations.IsKnown("not-a-real-api", "list"), Is.False);
+	{
+		Assert.That(HostOperations.IsKnown("not-a-real-api", "list"), Is.False);
+	}
 
 	private static IEnumerable<TestCaseData> _apisAndOperations()
-		=> _expectedOperations.SelectMany(pair =>
+	{
+		return _expectedOperations.SelectMany(pair =>
 			pair.Value.Select(operation => new TestCaseData(pair.Key, operation)));
+	}
 }

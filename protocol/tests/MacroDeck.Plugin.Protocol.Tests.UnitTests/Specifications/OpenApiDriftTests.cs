@@ -165,11 +165,16 @@ public class OpenApiDriftTests
 	}
 
 	private static Dictionary<string, long> ConstantsOf(Type type)
-		=> type.GetFields(BindingFlags.Public | BindingFlags.Static)
+	{
+		return type.GetFields(BindingFlags.Public | BindingFlags.Static)
 			.Where(field => field.FieldType == typeof(int) || field.FieldType == typeof(long))
 			.ToDictionary(field => CamelCase(field.Name),
 				field => Convert.ToInt64(field.GetValue(null), CultureInfo.InvariantCulture),
 				StringComparer.Ordinal);
+	}
 
-	private static string CamelCase(string name) => char.ToLowerInvariant(name[0]) + name[1..];
+	private static string CamelCase(string name)
+	{
+		return char.ToLowerInvariant(name[0]) + name[1..];
+	}
 }

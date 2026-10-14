@@ -49,17 +49,23 @@ public static class ProtocolEnvelopeReader
 		return ProtocolReadResult.Success(envelope);
 	}
 
-	private static ProtocolError MalformedEnvelope() => new()
+	private static ProtocolError MalformedEnvelope()
 	{
-		Code = ProtocolErrorCodes.MalformedEnvelope,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.MalformedEnvelope),
-		Retryable = false,
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.MalformedEnvelope,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.MalformedEnvelope),
+			Retryable = false
+		};
+	}
 
-	private static ProtocolError UnknownMessageType() => new()
+	private static ProtocolError UnknownMessageType()
 	{
-		Code = ProtocolErrorCodes.UnknownMessageType,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.UnknownMessageType),
-		Retryable = false,
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.UnknownMessageType,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.UnknownMessageType),
+			Retryable = false
+		};
+	}
 }

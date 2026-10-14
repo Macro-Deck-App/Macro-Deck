@@ -18,12 +18,15 @@ internal sealed class CompanionTargetResolver
 	}
 
 	public static ActionParameter Parameter()
-		=> ActionParameter.DynamicChoice(ConfigurationParameter,
-			label: AppStrings.Integrations.Companion.Params.Configuration(),
+	{
+		return ActionParameter.DynamicChoice(ConfigurationParameter,
+			AppStrings.Integrations.Companion.Params.Configuration(),
 			required: true);
+	}
 
 	public DynamicOptionsResult ConfigurationOptions()
-		=> new()
+	{
+		return new DynamicOptionsResult
 		{
 			Options = _runtimes()
 				.Select(runtime => new ActionParameterOption
@@ -34,14 +37,16 @@ internal sealed class CompanionTargetResolver
 				.ToList(),
 			CacheSeconds = 0
 		};
+	}
 
-	public bool TryResolveTarget(IReadOnlyDictionary<string, object> parameters,
+	public bool TryResolveTarget(
+		IReadOnlyDictionary<string, object> parameters,
 		out Guid deviceId,
 		out ActionResult error)
 	{
-		if (!parameters.TryGetValue(ConfigurationParameter, out var raw) ||
-			raw is not string text ||
-			!Guid.TryParseExact(text, "D", out deviceId))
+		if (!parameters.TryGetValue(ConfigurationParameter, out var raw)
+			|| raw is not string text
+			|| !Guid.TryParseExact(text, "D", out deviceId))
 		{
 			deviceId = Guid.Empty;
 			error = InvalidParameter();
@@ -58,7 +63,8 @@ internal sealed class CompanionTargetResolver
 		return true;
 	}
 
-	public async Task<(ICompanionDeviceApi? Devices, ActionResult? Error)> ConnectAsync(Guid deviceId,
+	public async Task<(ICompanionDeviceApi? Devices, ActionResult? Error)> ConnectAsync(
+		Guid deviceId,
 		CancellationToken cancellationToken)
 	{
 		if (_devices() is not { } devices || !await devices.WaitForDeviceAsync(deviceId, cancellationToken))
@@ -69,16 +75,25 @@ internal sealed class CompanionTargetResolver
 		return HasConfiguration(deviceId) ? (devices, null) : (null, ConfigurationNotFound());
 	}
 
-	private bool HasConfiguration(Guid deviceId) => _runtimes().Any(runtime => runtime.Id == deviceId);
+	private bool HasConfiguration(Guid deviceId)
+	{
+		return _runtimes().Any(runtime => runtime.Id == deviceId);
+	}
 
 	private static ActionResult ConfigurationNotFound()
-		=> ActionResult.Failed(ActionErrorCodes.NotFound,
+	{
+		return ActionResult.Failed(ActionErrorCodes.NotFound,
 			AppStrings.Integrations.Companion.Errors.ConfigurationNotFound());
+	}
 
 	public static ActionResult InvalidParameter()
-		=> ActionResult.Failed(ActionErrorCodes.InvalidParameter, AppStrings.Errors.Actions.InvalidParameter());
+	{
+		return ActionResult.Failed(ActionErrorCodes.InvalidParameter, AppStrings.Errors.Actions.InvalidParameter());
+	}
 
 	public static ActionResult NotConnected()
-		=> ActionResult.Failed(ActionErrorCodes.NotConnected,
+	{
+		return ActionResult.Failed(ActionErrorCodes.NotConnected,
 			AppStrings.Integrations.Companion.Errors.NotConnected());
+	}
 }

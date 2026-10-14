@@ -21,11 +21,13 @@ internal static class LogText
 			.Replace("\r", "\\n", StringComparison.Ordinal)
 			.Replace("\n", "\\n", StringComparison.Ordinal);
 
-		return EscapeControls(text, keepLineBreaks: false);
+		return EscapeControls(text, false);
 	}
 
 	public static string? NeutralizeControls(string? value)
-		=> value is null ? null : EscapeControls(value, keepLineBreaks: true);
+	{
+		return value is null ? null : EscapeControls(value, true);
+	}
 
 	private static string EscapeControls(string text, bool keepLineBreaks)
 	{

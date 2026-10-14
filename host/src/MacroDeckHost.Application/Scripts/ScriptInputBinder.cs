@@ -79,23 +79,28 @@ public static class ScriptInputBinder
 	}
 
 	private static ScriptInputBinding Failed(string code, string message)
-		=> new(new Dictionary<string, object?>(StringComparer.Ordinal), [], code, message);
+	{
+		return new ScriptInputBinding(new Dictionary<string, object?>(StringComparer.Ordinal), [], code, message);
+	}
 
 	// Values arriving over HTTP or the plugin protocol are JsonElements; flatten them to plain CLR values
 	// so coercion and the resulting overlay never leak a serializer type into a script.
-	private static object? Normalize(object? raw) => raw switch
+	private static object? Normalize(object? raw)
 	{
-		JsonElement element => element.ValueKind switch
+		return raw switch
 		{
-			JsonValueKind.String => element.GetString(),
-			JsonValueKind.Number => element.GetDouble(),
-			JsonValueKind.True => true,
-			JsonValueKind.False => false,
-			JsonValueKind.Null or JsonValueKind.Undefined => null,
-			_ => element.GetRawText()
-		},
-		_ => raw
-	};
+			JsonElement element => element.ValueKind switch
+			{
+				JsonValueKind.String => element.GetString(),
+				JsonValueKind.Number => element.GetDouble(),
+				JsonValueKind.True => true,
+				JsonValueKind.False => false,
+				JsonValueKind.Null or JsonValueKind.Undefined => null,
+				_ => element.GetRawText()
+			},
+			_ => raw
+		};
+	}
 
 	private static bool TryCoerce(
 		ScriptInput declaration,
@@ -154,12 +159,15 @@ public static class ScriptInputBinder
 		}
 	}
 
-	private static string Stringify(object? value) => value switch
+	private static string Stringify(object? value)
 	{
-		null => string.Empty,
-		bool b => b ? "true" : "false",
-		string s => s,
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => value.ToString() ?? string.Empty
-	};
+		return value switch
+		{
+			null => string.Empty,
+			bool b => b ? "true" : "false",
+			string s => s,
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => value.ToString() ?? string.Empty
+		};
+	}
 }

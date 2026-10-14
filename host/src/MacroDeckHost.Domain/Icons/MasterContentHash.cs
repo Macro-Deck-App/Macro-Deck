@@ -2,13 +2,22 @@ namespace MacroDeckHost.Domain.Icons;
 
 public readonly record struct MasterContentHash
 {
-	private MasterContentHash(string value) => Value = value;
+	private MasterContentHash(string value)
+	{
+		Value = value;
+	}
 
 	public string Value { get; }
 
-	public static MasterContentHash Compute(ReadOnlySpan<byte> content) => new(ContentHash.Compute(content));
+	public static MasterContentHash Compute(ReadOnlySpan<byte> content)
+	{
+		return new MasterContentHash(ContentHash.Compute(content));
+	}
 
-	public static MasterContentHash FromComputed(string value) => new(value);
+	public static MasterContentHash FromComputed(string value)
+	{
+		return new MasterContentHash(value);
+	}
 
 	public static bool TryParse(string? value, out MasterContentHash hash)
 	{
@@ -17,5 +26,8 @@ public readonly record struct MasterContentHash
 		return normalized is not null;
 	}
 
-	public override string ToString() => Value;
+	public override string ToString()
+	{
+		return Value;
+	}
 }

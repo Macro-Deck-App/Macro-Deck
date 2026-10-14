@@ -117,7 +117,7 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 			Motion(point);
 		}
 
-		FakeButton(number, press: true);
+		FakeButton(number, true);
 		_ = XFlush(_display);
 	}
 
@@ -128,7 +128,7 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 			return;
 		}
 
-		FakeButton(number, press: false);
+		FakeButton(number, false);
 		_ = XFlush(_display);
 	}
 
@@ -147,8 +147,8 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		var clicks = Math.Clamp(clickCount, 1, 3);
 		for (var i = 0; i < clicks; i++)
 		{
-			FakeButton(number, press: true);
-			FakeButton(number, press: false);
+			FakeButton(number, true);
+			FakeButton(number, false);
 		}
 
 		_ = XFlush(_display);
@@ -182,18 +182,22 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		var count = Math.Abs(notches);
 		for (var i = 0; i < count; i++)
 		{
-			FakeButton(button, press: true);
-			FakeButton(button, press: false);
+			FakeButton(button, true);
+			FakeButton(button, false);
 		}
 
 		_ = XFlush(_display);
 	}
 
 	private void Motion(MousePoint position)
-		=> _ = XTestFakeMotionEvent(_display, AnyScreen, position.X, position.Y, 0);
+	{
+		_ = XTestFakeMotionEvent(_display, AnyScreen, position.X, position.Y, 0);
+	}
 
 	private void FakeButton(uint button, bool press)
-		=> _ = XTestFakeButtonEvent(_display, button, press, 0);
+	{
+		_ = XTestFakeButtonEvent(_display, button, press, 0);
+	}
 
 	private static bool TryGetButtonNumber(MouseButton button, out uint number)
 	{
@@ -245,8 +249,8 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 	private static LocalizedText DetectDegradation()
 	{
 		var sessionType = Environment.GetEnvironmentVariable("XDG_SESSION_TYPE");
-		var isWayland = string.Equals(sessionType, "wayland", StringComparison.OrdinalIgnoreCase) ||
-			!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
+		var isWayland = string.Equals(sessionType, "wayland", StringComparison.OrdinalIgnoreCase)
+			|| !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
 
 		return isWayland
 			? AppStrings.Integrations.Mouse.Issues.WaylandDegradedReason()

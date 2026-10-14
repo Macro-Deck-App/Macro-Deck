@@ -13,7 +13,10 @@ namespace MacroDeckHost.Application.Plugins.Capabilities;
 
 public sealed record RemotePluginCapabilitySnapshot
 {
-	public static RemotePluginCapabilitySnapshot Empty(string pluginId) => new() { PluginId = pluginId };
+	public static RemotePluginCapabilitySnapshot Empty(string pluginId)
+	{
+		return new RemotePluginCapabilitySnapshot { PluginId = pluginId };
+	}
 
 	public required string PluginId { get; init; }
 

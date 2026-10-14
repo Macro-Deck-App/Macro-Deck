@@ -28,22 +28,32 @@ internal sealed class ReportStationIconAction : IActionDefinition, IIconProvider
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor();
+	}
 
 	public Task<ActionIconSnapshot?> GetActionIconAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot
+	{
+		return Task.FromResult<ActionIconSnapshot?>(new ActionIconSnapshot
 			{ Version = IconVersion, MediaType = "image/png" });
+	}
 
 	public Task<ActionIconContent?> GetActionIconContentAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		string version,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<ActionIconContent?>(new ActionIconContent(_iconBytes, "image/png"));
+	{
+		return Task.FromResult<ActionIconContent?>(new ActionIconContent(_iconBytes, "image/png"));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
-		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context) => ActionResult.SucceededTask;
+		public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
+		{
+			return ActionResult.SucceededTask;
+		}
 	}
 }

@@ -38,15 +38,18 @@ internal sealed class UiElementMaterializer
 	/// than a real configuration surface.
 	/// </para>
 	/// </summary>
-	private const int _maxDepth = 32;
+	private const int MaxDepth = 32;
 
-	private const string _automaticFallbackSegment = "_fallback";
+	private const string AutomaticFallbackSegment = "_fallback";
 
 	private readonly List<UiDependent> _dependents = [];
 	private readonly UiNodeIdRegistry _registry = new();
 	private readonly UiView? _view;
 
-	internal UiElementMaterializer(UiView? view) => _view = view;
+	internal UiElementMaterializer(UiView? view)
+	{
+		_view = view;
+	}
 
 	internal bool InAutomaticFallback { get; set; }
 
@@ -59,12 +62,12 @@ internal sealed class UiElementMaterializer
 	internal UiMaterializedNode MaterializeRoot(UiElement root)
 	{
 		var rootNode = MaterializeSingle(root,
-			structuralPrefix: null,
-			inputScope: null,
-			parentDeclarationPath: string.Empty,
-			disabled: null);
+			null,
+			null,
+			string.Empty,
+			null);
 
-		Link(rootNode, parent: null, isFallbackOfParent: false);
+		Link(rootNode, null, false);
 
 		return rootNode;
 	}
@@ -86,11 +89,11 @@ internal sealed class UiElementMaterializer
 	{
 		// The declaration path gains a segment on every recursion, including through the transparent
 		// elements, so its depth is the recursion depth - no separate counter has to be threaded through.
-		if (Depth(parentDeclarationPath) >= _maxDepth)
+		if (Depth(parentDeclarationPath) >= MaxDepth)
 		{
-			throw new UiViewException($"The element keyed '{element.Key}' nests more than {_maxDepth} levels deep at " +
-				$"'{parentDeclarationPath}'. A conditional or repeat whose content closure reaches its own " +
-				"element - which a closure capturing the variable it is assigned to does - recurses forever.");
+			throw new UiViewException($"The element keyed '{element.Key}' nests more than {MaxDepth} levels deep at "
+				+ $"'{parentDeclarationPath}'. A conditional or repeat whose content closure reaches its own "
+				+ "element - which a closure capturing the variable it is assigned to does - recurses forever.");
 		}
 
 		switch (element)
@@ -122,7 +125,7 @@ internal sealed class UiElementMaterializer
 						inputScope,
 						Extend(parentDeclarationPath, when1.Key),
 						disabled,
-						modifiers: null);
+						null);
 				}
 
 				return;
@@ -165,7 +168,7 @@ internal sealed class UiElementMaterializer
 						inputScope,
 						Extend(parentDeclarationPath, itemKey),
 						disabled,
-						modifiers: null);
+						null);
 				}
 
 				return;
@@ -249,8 +252,8 @@ internal sealed class UiElementMaterializer
 
 			default:
 				throw new UiViewException(
-					$"Unrecognized DSL element type '{element.GetType().FullName}' keyed '{element.Key}' " +
-					$"declared near '{parentDeclarationPath}'.");
+					$"Unrecognized DSL element type '{element.GetType().FullName}' keyed '{element.Key}' "
+					+ $"declared near '{parentDeclarationPath}'.");
 		}
 	}
 
@@ -290,7 +293,7 @@ internal sealed class UiElementMaterializer
 	{
 		// No owner: a slot that must hold exactly one node has no parent child list, so nothing in it can be
 		// inserted, removed or moved. A structural scope declared here reports that on invalidation.
-		var slot = new UiChildRegion(parent: null, scope: null);
+		var slot = new UiChildRegion(null, null);
 
 		MaterializeInto(element, slot, structuralPrefix, inputScope, parentDeclarationPath, disabled, null);
 
@@ -300,8 +303,8 @@ internal sealed class UiElementMaterializer
 		if (nodes.Count != 1)
 		{
 			throw new UiViewException(
-				$"The element keyed '{element.Key}' declared near '{parentDeclarationPath}' must materialize " +
-				$"to exactly one node here, but produced {nodes.Count}.");
+				$"The element keyed '{element.Key}' declared near '{parentDeclarationPath}' must materialize "
+				+ $"to exactly one node here, but produced {nodes.Count}.");
 		}
 
 		return nodes[0];
@@ -326,12 +329,12 @@ internal sealed class UiElementMaterializer
 
 		if (child is UiWhen or UiFragment or IUiRepeatElement)
 		{
-			throw new UiViewException($"{where} needs a single element as its Child, not a conditional, a " +
-				"repeat or a fragment, which can produce other than one node.");
+			throw new UiViewException($"{where} needs a single element as its Child, not a conditional, a "
+				+ "repeat or a fragment, which can produce other than one node.");
 		}
 
 		IReadOnlyList<UiModifier> layers = modifiers is null ? [modifier] : [modifier, .. modifiers];
-		IReadOnlyList<UiValue<bool>>? chain = !modifier.Disabled.IsDeclared
+		var chain = !modifier.Disabled.IsDeclared
 			? disabled
 			: disabled is null
 				? [modifier.Disabled]
@@ -339,17 +342,17 @@ internal sealed class UiElementMaterializer
 
 		if (!modifier.IsWrapper)
 		{
-			if (modifier.MainSize.IsDeclared ||
-				modifier.Fill.IsDeclared ||
-				modifier.Answer.IsDeclared ||
-				modifier.ColumnSpan.IsDeclared ||
-				modifier.RowSpan.IsDeclared ||
-				modifier.Fallback is not null ||
-				modifier.RequiredComponentVersion is not null)
+			if (modifier.MainSize.IsDeclared
+				|| modifier.Fill.IsDeclared
+				|| modifier.Answer.IsDeclared
+				|| modifier.ColumnSpan.IsDeclared
+				|| modifier.RowSpan.IsDeclared
+				|| modifier.Fallback is not null
+				|| modifier.RequiredComponentVersion is not null)
 			{
-				throw new UiViewException($"{where} sets only node modifiers, so it emits no node that could carry " +
-					"MainSize, Fill, Answer, ColumnSpan, RowSpan, a Fallback or a component version. Set them on " +
-					"its child, or assign a wrapper member.");
+				throw new UiViewException($"{where} sets only node modifiers, so it emits no node that could carry "
+					+ "MainSize, Fill, Answer, ColumnSpan, RowSpan, a Fallback or a component version. Set them on "
+					+ "its child, or assign a wrapper member.");
 			}
 
 			MaterializeInto(child,
@@ -365,8 +368,8 @@ internal sealed class UiElementMaterializer
 
 		if (SizesItselfInParent(child))
 		{
-			throw new UiViewException($"{where} is a wrapper, so its child is laid out inside it and cannot set " +
-				"MainSize, Fill, ColumnSpan or RowSpan. Set them on the modifier instead.");
+			throw new UiViewException($"{where} is a wrapper, so its child is laid out inside it and cannot set "
+				+ "MainSize, Fill, ColumnSpan or RowSpan. Set them on the modifier instead.");
 		}
 
 		region.AddNode(MaterializeStructural(modifier,
@@ -387,15 +390,15 @@ internal sealed class UiElementMaterializer
 
 		return element switch
 		{
-			UiComponentContainer container => container.MainSize.IsDeclared ||
-				container.Fill.IsDeclared ||
-				container.ColumnSpan.IsDeclared ||
-				container.RowSpan.IsDeclared,
-			UiComponentLeaf leaf => leaf.MainSize.IsDeclared ||
-				leaf.Fill.IsDeclared ||
-				leaf.ColumnSpan.IsDeclared ||
-				leaf.RowSpan.IsDeclared,
-			_ => false,
+			UiComponentContainer container => container.MainSize.IsDeclared
+				|| container.Fill.IsDeclared
+				|| container.ColumnSpan.IsDeclared
+				|| container.RowSpan.IsDeclared,
+			UiComponentLeaf leaf => leaf.MainSize.IsDeclared
+				|| leaf.Fill.IsDeclared
+				|| leaf.ColumnSpan.IsDeclared
+				|| leaf.RowSpan.IsDeclared,
+			_ => false
 		};
 	}
 
@@ -403,9 +406,9 @@ internal sealed class UiElementMaterializer
 	{
 		if (InAutomaticFallback)
 		{
-			throw new UiViewException($"The input keyed '{input.Key}' declared near '{parentDeclarationPath}' sits " +
-				"inside a UiResponsive's Default or a UiFirstFit's last layout, which is copied as the fallback an " +
-				"older reader draws, and an input's id cannot appear twice. Give it an explicit Fallback.");
+			throw new UiViewException($"The input keyed '{input.Key}' declared near '{parentDeclarationPath}' sits "
+				+ "inside a UiResponsive's Default or a UiFirstFit's last layout, which is copied as the fallback an "
+				+ "older reader draws, and an input's id cannot appear twice. Give it an explicit Fallback.");
 		}
 	}
 
@@ -430,38 +433,38 @@ internal sealed class UiElementMaterializer
 		{
 			if (layout is UiWhen or UiFragment or IUiRepeatElement)
 			{
-				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a " +
-					"repeat or a fragment, which can produce other than one node.");
+				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a "
+					+ "repeat or a fragment, which can produce other than one node.");
 			}
 
-			if (string.Equals(layout.Key, _automaticFallbackSegment, StringComparison.Ordinal))
+			if (string.Equals(layout.Key, AutomaticFallbackSegment, StringComparison.Ordinal))
 			{
-				throw new UiViewException($"{where} has a layout keyed '{_automaticFallbackSegment}', which is " +
-					"reserved for the copy of its Default an older reader draws.");
+				throw new UiViewException($"{where} has a layout keyed '{AutomaticFallbackSegment}', which is "
+					+ "reserved for the copy of its Default an older reader draws.");
 			}
 
 			if (SizesItselfInParent(layout))
 			{
-				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout " +
-					$"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the " +
-					"UiResponsive instead.");
+				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout "
+					+ $"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the "
+					+ "UiResponsive instead.");
 			}
 		}
 
 		foreach (var variant in responsive.Variants)
 		{
-			if (NeverHolds(variant.MinWidth, variant.MaxWidth) ||
-				NeverHolds(variant.MinHeight, variant.MaxHeight) ||
-				NeverHolds(variant.MinAspect, variant.MaxAspect))
+			if (NeverHolds(variant.MinWidth, variant.MaxWidth)
+				|| NeverHolds(variant.MinHeight, variant.MaxHeight)
+				|| NeverHolds(variant.MinAspect, variant.MaxAspect))
 			{
-				throw new UiViewException($"{where} has a variant keyed '{variant.Content.Key}' whose minimum is " +
-					"not below its maximum, so it could never be drawn.");
+				throw new UiViewException($"{where} has a variant keyed '{variant.Content.Key}' whose minimum is "
+					+ "not below its maximum, so it could never be drawn.");
 			}
 		}
 
 		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, responsive.Key, parentDeclarationPath);
 
-		var childRegion = new UiChildRegion(parent: null, scope: null);
+		var childRegion = new UiChildRegion(null, null);
 		foreach (var layout in layouts)
 		{
 			MaterializeInto(layout, childRegion, id, inputScope, declarationPath, disabled, null);
@@ -489,27 +492,27 @@ internal sealed class UiElementMaterializer
 		{
 			if (layout is UiWhen or UiFragment or IUiRepeatElement)
 			{
-				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a " +
-					"repeat or a fragment, which can produce other than one node.");
+				throw new UiViewException($"{where} needs a single element as each layout, not a conditional, a "
+					+ "repeat or a fragment, which can produce other than one node.");
 			}
 
-			if (string.Equals(layout.Key, _automaticFallbackSegment, StringComparison.Ordinal))
+			if (string.Equals(layout.Key, AutomaticFallbackSegment, StringComparison.Ordinal))
 			{
-				throw new UiViewException($"{where} has a layout keyed '{_automaticFallbackSegment}', which is " +
-					"reserved for the copy of its last layout an older reader draws.");
+				throw new UiViewException($"{where} has a layout keyed '{AutomaticFallbackSegment}', which is "
+					+ "reserved for the copy of its last layout an older reader draws.");
 			}
 
 			if (SizesItselfInParent(layout))
 			{
-				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout " +
-					$"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the " +
-					"UiFirstFit instead.");
+				throw new UiViewException($"{where} draws its chosen layout across its whole box, so the layout "
+					+ $"keyed '{layout.Key}' cannot set MainSize, Fill, ColumnSpan or RowSpan. Set them on the "
+					+ "UiFirstFit instead.");
 			}
 		}
 
 		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, firstFit.Key, parentDeclarationPath);
 
-		var childRegion = new UiChildRegion(parent: null, scope: null);
+		var childRegion = new UiChildRegion(null, null);
 		foreach (var layout in layouts)
 		{
 			MaterializeInto(layout, childRegion, id, inputScope, declarationPath, disabled, null);
@@ -519,7 +522,13 @@ internal sealed class UiElementMaterializer
 			? MaterializeFallback(firstFit, structuralPrefix, inputScope, parentDeclarationPath, disabled)
 			: layouts.Count == 0
 				? null
-				: MaterializeAutomaticFallback(layouts[^1], id, inputScope, declarationPath, disabled, where, "UiFirstFit");
+				: MaterializeAutomaticFallback(layouts[^1],
+					id,
+					inputScope,
+					declarationPath,
+					disabled,
+					where,
+					"UiFirstFit");
 
 		return BuildNode(firstFit, id, childRegion, fallback, disabled, modifiers);
 	}
@@ -531,7 +540,15 @@ internal sealed class UiElementMaterializer
 		string declarationPath,
 		IReadOnlyList<UiValue<bool>>? disabled,
 		string where)
-		=> MaterializeAutomaticFallback(responsive.Default, id, inputScope, declarationPath, disabled, where, "UiResponsive");
+	{
+		return MaterializeAutomaticFallback(responsive.Default,
+			id,
+			inputScope,
+			declarationPath,
+			disabled,
+			where,
+			"UiResponsive");
+	}
 
 	private UiMaterializedNode MaterializeAutomaticFallback(
 		UiElement copied,
@@ -548,16 +565,18 @@ internal sealed class UiElementMaterializer
 		try
 		{
 			return MaterializeSingle(copied,
-				Compose(id, _automaticFallbackSegment),
+				Compose(id, AutomaticFallbackSegment),
 				inputScope,
-				Extend(declarationPath, _automaticFallbackSegment),
+				Extend(declarationPath, AutomaticFallbackSegment),
 				disabled);
 		}
 		catch (UiViewException exception) when (!outer)
 		{
-			throw new UiViewException($"{where} copies its {(owner == "UiFirstFit" ? "last layout" : "Default")} as the " +
-				$"fallback an older reader draws, and the copy failed: {exception.Message} Give the {owner} an " +
-				"explicit Fallback.", exception);
+			throw new UiViewException(
+				$"{where} copies its {(owner == "UiFirstFit" ? "last layout" : "Default")} as the "
+				+ $"fallback an older reader draws, and the copy failed: {exception.Message} Give the {owner} an "
+				+ "explicit Fallback.",
+				exception);
 		}
 		finally
 		{
@@ -566,7 +585,9 @@ internal sealed class UiElementMaterializer
 	}
 
 	private static bool NeverHolds(double? minimum, double? maximum)
-		=> minimum is { } min && maximum is { } max && min >= max;
+	{
+		return minimum is { } min && maximum is { } max && min >= max;
+	}
 
 	/// <summary>Materializes a structural element - a <see cref="UiContainer" /> with children or a
 	/// <see cref="UiLeaf" /> without - which composes its id from the structural prefix and opens no input-id
@@ -582,7 +603,7 @@ internal sealed class UiElementMaterializer
 	{
 		var (id, declarationPath) = ComposeAndValidate(structuralPrefix, element.Key, parentDeclarationPath);
 
-		var childRegion = new UiChildRegion(parent: null, scope: null);
+		var childRegion = new UiChildRegion(null, null);
 		foreach (var child in children)
 		{
 			MaterializeInto(child, childRegion, id, inputScope, declarationPath, disabled, null);
@@ -604,7 +625,7 @@ internal sealed class UiElementMaterializer
 		var (id, _) = ComposeAndValidate(inputScope, input.Key, parentDeclarationPath);
 		var fallback = MaterializeFallback(input, structuralPrefix, inputScope, parentDeclarationPath, disabled);
 
-		return BuildNode(input, id, new UiChildRegion(parent: null, scope: null), fallback, disabled, modifiers);
+		return BuildNode(input, id, new UiChildRegion(null, null), fallback, disabled, modifiers);
 	}
 
 	private UiMaterializedNode MaterializeInputContainer(
@@ -618,7 +639,7 @@ internal sealed class UiElementMaterializer
 	{
 		var (id, declarationPath) = ComposeAndValidate(inputScope, element.Key, parentDeclarationPath);
 
-		var childRegion = new UiChildRegion(parent: null, scope: null);
+		var childRegion = new UiChildRegion(null, null);
 		foreach (var child in inputContainer.Children)
 		{
 			MaterializeInto(child, childRegion, structuralPrefix, id, declarationPath, disabled, null);
@@ -710,13 +731,13 @@ internal sealed class UiElementMaterializer
 			RequiredComponentVersion = element.RequiredComponentVersion,
 			Properties = properties,
 			Children = childNodes,
-			Fallback = fallback?.Node,
+			Fallback = fallback?.Node
 		};
 
 		var materialized = new UiMaterializedNode(element, node, childRegion, children, fallback, cells)
 		{
 			ModifierHandlers = modifierHandlers,
-			Disabled = disabled,
+			Disabled = disabled
 		};
 
 		childRegion.Owner = materialized;
@@ -730,7 +751,8 @@ internal sealed class UiElementMaterializer
 		return materialized;
 	}
 
-	private static void DeclareModifiers(UiPropertyDeclaration declaration,
+	private static void DeclareModifiers(
+		UiPropertyDeclaration declaration,
 		IReadOnlyList<UiModifier> modifiers,
 		string id)
 	{
@@ -747,8 +769,8 @@ internal sealed class UiElementMaterializer
 		{
 			if (!keys.Add(member.Key))
 			{
-				throw new UiViewException($"The node '{id}' is given the modifier '{member.Key}' by more than one " +
-					"UiModifier. Assign each modifier once per node.");
+				throw new UiViewException($"The node '{id}' is given the modifier '{member.Key}' by more than one "
+					+ "UiModifier. Assign each modifier once per node.");
 			}
 		}
 
@@ -832,7 +854,7 @@ internal sealed class UiElementMaterializer
 		var scope = new UiStructuralScope(element, structuralPrefix, inputScope, parentDeclarationPath)
 		{
 			Disabled = disabled,
-			InAutomaticFallback = InAutomaticFallback,
+			InAutomaticFallback = InAutomaticFallback
 		};
 
 		scope.BindTo(_view);
@@ -850,12 +872,12 @@ internal sealed class UiElementMaterializer
 
 		foreach (var child in node.Children)
 		{
-			Link(child, node, isFallbackOfParent: false);
+			Link(child, node, false);
 		}
 
 		if (node.Fallback is not null)
 		{
-			Link(node.Fallback, node, isFallbackOfParent: true);
+			Link(node.Fallback, node, true);
 		}
 	}
 
@@ -883,11 +905,16 @@ internal sealed class UiElementMaterializer
 	}
 
 	/// <summary>Composes <paramref name="key" /> against an id prefix, which is a plain dot join.</summary>
-	internal static string Compose(string? prefix, string key) => prefix is null ? key : $"{prefix}.{key}";
+	internal static string Compose(string? prefix, string key)
+	{
+		return prefix is null ? key : $"{prefix}.{key}";
+	}
 
 	/// <summary>Extends a diagnostic declaration path by one key.</summary>
 	internal static string Extend(string parentPath, string key)
-		=> parentPath.Length == 0 ? key : $"{parentPath}.{key}";
+	{
+		return parentPath.Length == 0 ? key : $"{parentPath}.{key}";
+	}
 
 	/// <summary>Counts the segments in a declaration path, which is the current recursion depth.</summary>
 	private static int Depth(string declarationPath)

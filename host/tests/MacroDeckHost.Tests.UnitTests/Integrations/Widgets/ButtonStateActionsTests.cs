@@ -26,7 +26,7 @@ public class ButtonStateActionsTests
 			SetResult = WidgetStateWriteResult.Failed(WidgetStateWriteError.ProviderActive)
 		};
 
-		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, state: "on");
+		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, "on");
 
 		Assert.Multiple(() =>
 		{
@@ -60,7 +60,7 @@ public class ButtonStateActionsTests
 			SetResult = WidgetStateWriteResult.Failed(WidgetStateWriteError.UnknownState)
 		};
 
-		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, state: "nope");
+		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, "nope");
 
 		Assert.Multiple(() =>
 		{
@@ -74,7 +74,7 @@ public class ButtonStateActionsTests
 	{
 		var widgets = new FakeWidgetApi { SetResult = WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound) };
 
-		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, state: "on");
+		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, "on");
 
 		Assert.Multiple(() =>
 		{
@@ -88,7 +88,7 @@ public class ButtonStateActionsTests
 	{
 		var widgets = new FakeWidgetApi { SetResult = WidgetStateWriteResult.Succeeded("on") };
 
-		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, state: "on");
+		var result = await Execute(new SetButtonStateActionDefinition(() => widgets), widgets, "on");
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 	}
@@ -108,7 +108,7 @@ public class ButtonStateActionsTests
 	[Test]
 	public async Task MissingWidgetsApi_FailsWithUnavailable()
 	{
-		var result = await Execute(new SetButtonStateActionDefinition(() => null), null, state: "on");
+		var result = await Execute(new SetButtonStateActionDefinition(() => null), null, "on");
 
 		Assert.Multiple(() =>
 		{
@@ -123,11 +123,12 @@ public class ButtonStateActionsTests
 		var widgets = new FakeWidgetApi { SetResult = WidgetStateWriteResult.Succeeded("on") };
 		var action = new SetButtonStateActionDefinition(() => widgets);
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object> { ["widget"] = WidgetTargets.Self, ["state"] = "on" },
-			OwnerWidgetId = null
-		});
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object> { ["widget"] = WidgetTargets.Self, ["state"] = "on" },
+				OwnerWidgetId = null
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -174,10 +175,12 @@ public class ButtonStateActionsTests
 	}
 
 	private static DynamicOptionsContext Context(string target)
-		=> new()
+	{
+		return new DynamicOptionsContext
 		{
 			ParameterName = "state", CurrentParameters = new Dictionary<string, object?> { ["widget"] = target }
 		};
+	}
 
 	private static Task<ActionResult> Execute(IActionDefinition action, FakeWidgetApi? widgets, string? state = null)
 	{
@@ -200,21 +203,34 @@ public class ButtonStateActionsTests
 		public WidgetStateWriteResult AdvanceResult { get; set; } =
 			WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound);
 
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => Widgets;
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return Widgets;
+		}
 
-		public bool Exists(string widgetId) => Widgets.Any(w => w.Id == widgetId);
+		public bool Exists(string widgetId)
+		{
+			return Widgets.Any(w => w.Id == widgetId);
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(true);
+		{
+			return Task.FromResult(true);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(SetResult);
+		{
+			return Task.FromResult(SetResult);
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(AdvanceResult);
+		{
+			return Task.FromResult(AdvanceResult);
+		}
 	}
 }

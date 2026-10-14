@@ -96,5 +96,8 @@ public sealed class JsonIconImportBatchStore : IIconImportBatchStore
 		}
 	}
 
-	private object LockFor(Guid id) => _locks.GetOrAdd(id, _ => new object());
+	private object LockFor(Guid id)
+	{
+		return _locks.GetOrAdd(id, _ => new object());
+	}
 }

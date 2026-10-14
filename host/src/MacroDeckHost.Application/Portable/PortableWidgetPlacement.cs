@@ -4,7 +4,8 @@ public readonly record struct PortableCell(int X, int Y, int Width, int Height);
 
 public static class PortableWidgetPlacement
 {
-	public static IReadOnlyList<(int X, int Y)>? Place(IReadOnlyList<PortableCell> group,
+	public static IReadOnlyList<(int X, int Y)>? Place(
+		IReadOnlyList<PortableCell> group,
 		int columns,
 		int rows,
 		IReadOnlyList<PortableCell> occupied,
@@ -39,7 +40,8 @@ public static class PortableWidgetPlacement
 		return null;
 	}
 
-	private static IEnumerable<(int X, int Y)> CandidateOffsets(int columns,
+	private static IEnumerable<(int X, int Y)> CandidateOffsets(
+		int columns,
 		int rows,
 		int boundingWidth,
 		int boundingHeight,
@@ -67,7 +69,8 @@ public static class PortableWidgetPlacement
 		}
 	}
 
-	private static bool Fits(IReadOnlyList<PortableCell> group,
+	private static bool Fits(
+		IReadOnlyList<PortableCell> group,
 		IReadOnlyList<PortableCell> occupied,
 		int offsetX,
 		int offsetY)
@@ -88,8 +91,7 @@ public static class PortableWidgetPlacement
 	}
 
 	private static bool Overlaps(PortableCell a, PortableCell b)
-		=> a.X < b.X + b.Width &&
-			a.X + a.Width > b.X &&
-			a.Y < b.Y + b.Height &&
-			a.Y + a.Height > b.Y;
+	{
+		return a.X < b.X + b.Width && a.X + a.Width > b.X && a.Y < b.Y + b.Height && a.Y + a.Height > b.Y;
+	}
 }

@@ -52,16 +52,19 @@ internal sealed record DiscordState
 
 	public bool SelfSpeaking { get; init; }
 
-	public DiscordState WithoutVoiceChannel() => this with
+	public DiscordState WithoutVoiceChannel()
 	{
-		VoiceChannelId = null,
-		VoiceChannelName = null,
-		VoiceGuildId = null,
-		VoiceGuildName = null,
-		ServerMuted = false,
-		ServerDeafened = false,
-		SelfSpeaking = false,
-		VoiceConnectionState = null,
-		AveragePing = null
-	};
+		return this with
+		{
+			VoiceChannelId = null,
+			VoiceChannelName = null,
+			VoiceGuildId = null,
+			VoiceGuildName = null,
+			ServerMuted = false,
+			ServerDeafened = false,
+			SelfSpeaking = false,
+			VoiceConnectionState = null,
+			AveragePing = null
+		};
+	}
 }

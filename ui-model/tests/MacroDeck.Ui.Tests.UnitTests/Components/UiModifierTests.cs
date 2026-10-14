@@ -16,13 +16,19 @@ public class UiModifierTests
 	private static readonly string[] _handlerOrder = ["child", "inner", "outer", """drag {"x":0.1,"y":-0.2}"""];
 
 	private static UiSurface WidgetSurface()
-		=> new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared };
+	}
 
 	private static UiTree Build(params UiElement[] children)
-		=> UiViewBuilder.Build(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	{
+		return UiViewBuilder.Build(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	}
 
 	private static UiView View(params UiElement[] children)
-		=> new(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	{
+		return new UiView(WidgetSurface(), new UiStack { Key = "root", Children = children });
+	}
 
 	private static UiNode? Find(UiNode node, string id)
 	{
@@ -61,10 +67,14 @@ public class UiModifierTests
 	}
 
 	private static UiDispatchResult Press(UiView view, string nodeId)
-		=> view.Dispatch(new UiEvent { NodeId = nodeId, Name = UiComponentEvents.Press });
+	{
+		return view.Dispatch(new UiEvent { NodeId = nodeId, Name = UiComponentEvents.Press });
+	}
 
 	private static UiButton PressableButton(string key, Action onPress)
-		=> new() { Key = key, Events = [UiEventHandler.On(UiComponentEvents.Press, onPress)] };
+	{
+		return new UiButton { Key = key, Events = [UiEventHandler.On(UiComponentEvents.Press, onPress)] };
+	}
 
 	[Test]
 	public void Node_modifiers_merge_onto_the_child_which_keeps_its_id_and_no_node_of_their_own_is_emitted()
@@ -74,7 +84,7 @@ public class UiModifierTests
 			Key = "decoration",
 			Background = "#112233",
 			Radius = 0.1,
-			Child = new UiStack { Key = "card" },
+			Child = new UiStack { Key = "card" }
 		});
 
 		var card = tree.Root.Children.Single();
@@ -103,8 +113,8 @@ public class UiModifierTests
 				Key = "inner",
 				BorderWidth = 0.02,
 				AccessibilityLabel = "Volume",
-				Child = new UiTextRun { Key = "label", Text = "42" },
-			},
+				Child = new UiTextRun { Key = "label", Text = "42" }
+			}
 		});
 
 		Assert.That(tree.Root.Children.Single().Properties["modifiers"].GetRawText(),
@@ -119,7 +129,7 @@ public class UiModifierTests
 		{
 			Key = "outer",
 			Background = "#000000",
-			Child = new UiModifier { Key = "inner", Background = "#ffffff", Child = new UiStack { Key = "card" } },
+			Child = new UiModifier { Key = "inner", Background = "#ffffff", Child = new UiStack { Key = "card" } }
 		}));
 	}
 
@@ -132,13 +142,13 @@ public class UiModifierTests
 			{
 				Key = "m",
 				Radius = 0.1,
-				Child = new UiWhen { Key = "w", Condition = () => true, Content = () => new UiStack { Key = "s" } },
+				Child = new UiWhen { Key = "w", Condition = () => true, Content = () => new UiStack { Key = "s" } }
 			}));
 			Assert.Throws<UiViewException>(() => Build(new UiModifier
 			{
 				Key = "m",
 				Padding = 0.1,
-				Child = new UiFragment { Key = "f", Children = [new UiStack { Key = "a" }, new UiStack { Key = "b" }] },
+				Child = new UiFragment { Key = "f", Children = [new UiStack { Key = "a" }, new UiStack { Key = "b" }] }
 			}));
 		});
 	}
@@ -160,7 +170,7 @@ public class UiModifierTests
 				0.5,
 				new UiGradientStop { Offset = 0, Color = "#ffffff" },
 				new UiGradientStop { Offset = 1, Color = "#000000" }),
-			Child = new UiTextRun { Key = "label", Text = "On" },
+			Child = new UiTextRun { Key = "label", Text = "On" }
 		});
 
 		var wrapper = tree.Root.Children.Single();
@@ -193,14 +203,14 @@ public class UiModifierTests
 				Padding = 0.05,
 				Fallback = new UiStack
 					{ Key = "plain", Children = [new UiTextRun { Key = "plainLabel", Text = "On" }] },
-				Child = new UiTextRun { Key = "label", Text = "On" },
+				Child = new UiTextRun { Key = "label", Text = "On" }
 			},
 			new UiModifier
 			{
 				Key = "outer",
 				Padding = 0.05,
 				Child = new UiModifier
-					{ Key = "inner", Opacity = 0.5, Child = new UiTextRun { Key = "text", Text = "x" } },
+					{ Key = "inner", Opacity = 0.5, Child = new UiTextRun { Key = "text", Text = "x" } }
 			});
 
 		var given = tree.Root.Children[0];
@@ -229,13 +239,13 @@ public class UiModifierTests
 			{
 				Key = "m",
 				Padding = 0.1,
-				Child = new UiTextRun { Key = "t", MainSize = 0.2 },
+				Child = new UiTextRun { Key = "t", MainSize = 0.2 }
 			}));
 			Assert.Throws<UiViewException>(() => Build(new UiModifier
 			{
 				Key = "m",
 				Frame = new UiFrame { AspectRatio = 1 },
-				Child = new UiModifier { Key = "safe", Radius = 0.1, Child = new UiStack { Key = "s", Fill = true } },
+				Child = new UiModifier { Key = "safe", Radius = 0.1, Child = new UiStack { Key = "s", Fill = true } }
 			}));
 		});
 	}
@@ -253,9 +263,9 @@ public class UiModifierTests
 				{
 					Key = "m",
 					Padding = 0.05,
-					Child = new UiTextRun { Key = "t", Text = "x", ColumnSpan = 2 },
-				},
-			],
+					Child = new UiTextRun { Key = "t", Text = "x", ColumnSpan = 2 }
+				}
+			]
 		}));
 	}
 
@@ -273,9 +283,9 @@ public class UiModifierTests
 					Key = "m",
 					Background = "#112233",
 					RowSpan = 2,
-					Child = new UiTextRun { Key = "t", Text = "x" },
-				},
-			],
+					Child = new UiTextRun { Key = "t", Text = "x" }
+				}
+			]
 		}));
 	}
 
@@ -287,7 +297,7 @@ public class UiModifierTests
 			Key = "frame",
 			Padding = 0.05,
 			Fallback = new UiTextRun { Key = "plain", Text = "On" },
-			Child = new UiTextRun { Key = "label", Text = "On" },
+			Child = new UiTextRun { Key = "label", Text = "On" }
 		});
 
 		var older = new UiCapabilities
@@ -297,8 +307,8 @@ public class UiModifierTests
 			Components = new Dictionary<string, UiVersionRange>
 			{
 				["ui.stack"] = new() { Minimum = 1, Maximum = 1 },
-				["ui.text"] = new() { Minimum = 1, Maximum = 1 },
-			},
+				["ui.text"] = new() { Minimum = 1, Maximum = 1 }
+			}
 		};
 
 		var wrapper = tree.Root.Children.Single();
@@ -327,10 +337,10 @@ public class UiModifierTests
 				[
 					UiEventHandler.On(UiComponentEvents.Press, () => calls.Add("inner")),
 					UiEventHandler.On(UiComponentEvents.Drag,
-						data => calls.Add("drag " + data.Raw!.Value.GetRawText())),
+						data => calls.Add("drag " + data.Raw!.Value.GetRawText()))
 				],
-				Child = PressableButton("button", () => calls.Add("child")),
-			},
+				Child = PressableButton("button", () => calls.Add("child"))
+			}
 		});
 
 		var button = view.Tree.Root.Children.Single();
@@ -339,7 +349,7 @@ public class UiModifierTests
 		{
 			NodeId = "root.button",
 			Name = UiComponentEvents.Drag,
-			Data = UiCanonicalJson.ToElement(new Dictionary<string, double> { ["x"] = 0.1, ["y"] = -0.2 }),
+			Data = UiCanonicalJson.ToElement(new Dictionary<string, double> { ["x"] = 0.1, ["y"] = -0.2 })
 		});
 
 		Assert.Multiple(() =>
@@ -359,9 +369,27 @@ public class UiModifierTests
 			Key = "frame",
 			Padding = 0.05,
 			Disabled = true,
-			Events = [UiEventHandler.On(UiComponentEvents.Swipe, () => { })],
-			Fallback = PressableButton("fallback", () => { }),
-			Child = new UiStack { Key = "row", Children = [PressableButton("button", () => { })] },
+			Events =
+			[
+				UiEventHandler.On(UiComponentEvents.Swipe,
+					() =>
+					{
+					})
+			],
+			Fallback = PressableButton("fallback",
+				() =>
+				{
+				}),
+			Child = new UiStack
+			{
+				Key = "row", Children =
+				[
+					PressableButton("button",
+						() =>
+						{
+						})
+				]
+			}
 		});
 
 		var wrapper = tree.Root.Children.Single();
@@ -384,7 +412,10 @@ public class UiModifierTests
 		{
 			Key = "m",
 			Disabled = UiValue.From(() => disabled.Value),
-			Child = PressableButton("button", () => { }),
+			Child = PressableButton("button",
+				() =>
+				{
+				})
 		});
 
 		var before = Find(view.Tree.Root, "root.button")!;
@@ -408,7 +439,16 @@ public class UiModifierTests
 		{
 			Key = "m",
 			Disabled = UiValue.From(() => disabled.Value),
-			Child = new UiStack { Key = "row", Children = [PressableButton("button", () => { })] },
+			Child = new UiStack
+			{
+				Key = "row", Children =
+				[
+					PressableButton("button",
+						() =>
+						{
+						})
+				]
+			}
 		});
 
 		var before = Find(view.Tree.Root, "root.row.button")!;
@@ -438,10 +478,13 @@ public class UiModifierTests
 					new UiWhen
 					{
 						Key = "maybe", Condition = () => shown.Value,
-						Content = () => PressableButton("button", () => { })
-					},
-				],
-			},
+						Content = () => PressableButton("button",
+							() =>
+							{
+							})
+					}
+				]
+			}
 		});
 
 		shown.Set(true);
@@ -468,8 +511,8 @@ public class UiModifierTests
 			{
 				Key = "toggle",
 				On = true,
-				Events = [UiEventHandler.On(UiComponentEvents.Change, () => flipped++)],
-			},
+				Events = [UiEventHandler.On(UiComponentEvents.Change, () => flipped++)]
+			}
 		});
 
 		var toggle = Find(view.Tree.Root, "root.frame.toggle")!;
@@ -477,7 +520,7 @@ public class UiModifierTests
 		{
 			NodeId = "root.frame.toggle",
 			Name = UiComponentEvents.Change,
-			Data = UiCanonicalJson.ToElement(false),
+			Data = UiCanonicalJson.ToElement(false)
 		});
 
 		Assert.Multiple(() =>
@@ -497,7 +540,7 @@ public class UiModifierTests
 		{
 			Key = "m",
 			Disabled = true,
-			Child = new UiStack { Key = "row", Children = [PressableButton("button", () => pressed++)] },
+			Child = new UiStack { Key = "row", Children = [PressableButton("button", () => pressed++)] }
 		});
 
 		var result = Press(view, "root.row.button");
@@ -520,15 +563,15 @@ public class UiModifierTests
 			Child = new UiStack
 			{
 				Key = "row",
-				Children = [new UiStringInput { Key = "apiKey", Binding = Bind.To(value) }],
-			},
+				Children = [new UiStringInput { Key = "apiKey", Binding = Bind.To(value) }]
+			}
 		});
 
 		var result = view.Dispatch(new UiEvent
 		{
 			NodeId = "apiKey",
 			Name = UiComponentEvents.Change,
-			Data = UiCanonicalJson.ToElement("written"),
+			Data = UiCanonicalJson.ToElement("written")
 		});
 
 		Assert.Multiple(() =>

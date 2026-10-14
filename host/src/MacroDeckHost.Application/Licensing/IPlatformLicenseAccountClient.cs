@@ -2,7 +2,8 @@ namespace MacroDeckHost.Application.Licensing;
 
 public interface IPlatformLicenseAccountClient
 {
-	Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(long? afterRevision,
+	Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(
+		long? afterRevision,
 		TimeSpan wait,
 		CancellationToken cancellationToken);
 
@@ -46,7 +47,8 @@ public abstract record PlatformAccountLicenseResult
 	{
 	}
 
-	public sealed record Current(string? License, long Revision, TimeSpan? RetryAfter = null) : PlatformAccountLicenseResult;
+	public sealed record Current(string? License, long Revision, TimeSpan? RetryAfter = null)
+		: PlatformAccountLicenseResult;
 
 	public sealed record Conflict(string? License, long Revision) : PlatformAccountLicenseResult;
 

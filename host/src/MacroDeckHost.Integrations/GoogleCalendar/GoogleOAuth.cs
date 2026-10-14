@@ -14,10 +14,15 @@ internal static class GoogleOAuth
 	public const string ConsoleUrl = "https://console.cloud.google.com/apis/credentials";
 	public const string CalendarApiUrl = "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com";
 
-	public static string CreateCodeVerifier() => Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
+	public static string CreateCodeVerifier()
+	{
+		return Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
+	}
 
 	public static string CodeChallengeFor(string verifier)
-		=> Base64Url.EncodeToString(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
+	{
+		return Base64Url.EncodeToString(SHA256.HashData(Encoding.ASCII.GetBytes(verifier)));
+	}
 
 	public static string AuthorizeUrl(string clientId, string redirectUri, string state, string codeVerifier)
 	{
@@ -34,11 +39,14 @@ internal static class GoogleOAuth
 			("code_challenge_method", "S256")
 		};
 
-		return AuthorizeEndpoint + "?" +
-			string.Join('&', query.Select(p => $"{p.Name}={Uri.EscapeDataString(p.Value)}"));
+		return AuthorizeEndpoint
+			+ "?"
+			+ string.Join('&', query.Select(p => $"{p.Name}={Uri.EscapeDataString(p.Value)}"));
 	}
 
 	public static bool GrantsCalendarAccess(string? scope)
-		=> scope is not null &&
-			scope.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(CalendarScope, StringComparer.Ordinal);
+	{
+		return scope is not null
+			&& scope.Split(' ', StringSplitOptions.RemoveEmptyEntries).Contains(CalendarScope, StringComparer.Ordinal);
+	}
 }

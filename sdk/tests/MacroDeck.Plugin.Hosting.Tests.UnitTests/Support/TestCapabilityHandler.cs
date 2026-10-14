@@ -20,7 +20,8 @@ internal sealed class TestCapabilityHandler(
 	public int Invocations { get; private set; }
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=>
+	{
+		return
 		[
 			.. LocalIds.Select(localId => new DeclaredCapability
 			{
@@ -29,6 +30,7 @@ internal sealed class TestCapabilityHandler(
 				VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 			})
 		];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,

@@ -51,8 +51,8 @@ public class EarlyAppPreferenceReaderTests
 		{
 			using var insert = connection.CreateCommand();
 			insert.CommandText =
-				"INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) " +
-				"VALUES ($key, $value, '', '')";
+				"INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) "
+				+ "VALUES ($key, $value, '', '')";
 			insert.Parameters.AddWithValue("$key", key);
 			insert.Parameters.AddWithValue("$value", value);
 			insert.ExecuteNonQuery();

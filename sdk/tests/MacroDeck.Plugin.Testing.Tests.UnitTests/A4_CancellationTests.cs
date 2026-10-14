@@ -17,7 +17,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// already-answered correlation is a documented no-op, not an error.
 /// </summary>
 [TestFixture]
-public class A4_CancellationTests
+public class A4CancellationTests
 {
 	[Test]
 	public async Task Cancelling_an_in_flight_invocation_produces_exactly_one_cancelled_reply()
@@ -72,8 +72,8 @@ public class A4_CancellationTests
 			TimeSpan.FromSeconds(5));
 
 		var invokeEnvelope = host.Messages.All.Last(message
-			=> message.Direction == ProtocolMessageDirection.ToPlugin &&
-			message.Envelope.Type == MessageTypes.CapabilityInvoke);
+			=> message.Direction == ProtocolMessageDirection.ToPlugin
+			&& message.Envelope.Type == MessageTypes.CapabilityInvoke);
 
 		await session.CancelAsync(invokeEnvelope.Envelope.Id);
 
@@ -128,8 +128,10 @@ public class A4_CancellationTests
 	}
 
 	private static int CountReplies(MacroDeckTestHost host, string correlationId)
-		=> host.Messages.All.Count(message
-			=> message.Direction == ProtocolMessageDirection.FromPlugin &&
-			message.Envelope.Type == MessageTypes.CapabilityResult &&
-			string.Equals(message.Envelope.CorrelationId, correlationId, StringComparison.Ordinal));
+	{
+		return host.Messages.All.Count(message
+			=> message.Direction == ProtocolMessageDirection.FromPlugin
+			&& message.Envelope.Type == MessageTypes.CapabilityResult
+			&& string.Equals(message.Envelope.CorrelationId, correlationId, StringComparison.Ordinal));
+	}
 }

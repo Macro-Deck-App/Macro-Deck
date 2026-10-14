@@ -20,16 +20,20 @@ internal sealed class ObsOutputActionsTests
 	}
 
 	private static IActionDefinition Output(string id, ObsConnection connection)
-		=> ObsActions.Create(ObsTargetResolver.Legacy(() => connection), new VariableApiAccessor())
+	{
+		return ObsActions.Create(ObsTargetResolver.Legacy(() => connection), new VariableApiAccessor())
 			.Single(action => action.Id == id);
+	}
 
 	private static ActionExecutionContext Run(string? output)
-		=> new()
+	{
+		return new ActionExecutionContext
 		{
 			Parameters = output is null
 				? new Dictionary<string, object>()
 				: new Dictionary<string, object> { [ObsOutputSupport.OutputParameter] = output }
 		};
+	}
 
 	[Test]
 	public void The_catalog_offers_the_four_output_actions()
@@ -68,7 +72,7 @@ internal sealed class ObsOutputActionsTests
 	[TestCase("get-output-state")]
 	public async Task A_disconnected_obs_is_reported_and_nothing_is_sent(string actionId)
 	{
-		var (connection, client) = Connected(connected: false);
+		var (connection, client) = Connected(false);
 		ActionResult result;
 		using (connection)
 		{
@@ -160,7 +164,7 @@ internal sealed class ObsOutputActionsTests
 		DynamicOptionsResult options;
 		using (connection)
 		{
-			options = await Picker(connection, stored: null);
+			options = await Picker(connection, null);
 		}
 
 		Assert.That(options.Options.Select(option => option.Value), Is.EqualTo(_pluginOutputs));
@@ -173,7 +177,7 @@ internal sealed class ObsOutputActionsTests
 		DynamicOptionsResult options;
 		using (connection)
 		{
-			options = await Picker(connection, stored: "gone_output");
+			options = await Picker(connection, "gone_output");
 		}
 
 		var kept = options.Options.Single(option => option.Value == "gone_output");
@@ -187,11 +191,11 @@ internal sealed class ObsOutputActionsTests
 	[Test]
 	public async Task The_picker_keeps_the_stored_output_when_obs_is_disconnected()
 	{
-		var (connection, _) = Connected(connected: false);
+		var (connection, _) = Connected(false);
 		DynamicOptionsResult options;
 		using (connection)
 		{
-			options = await Picker(connection, stored: "multi_rtmp_1");
+			options = await Picker(connection, "multi_rtmp_1");
 		}
 
 		Assert.That(options.Options.Select(option => option.Value), Is.EqualTo(new[] { "multi_rtmp_1" }));
@@ -205,7 +209,7 @@ internal sealed class ObsOutputActionsTests
 		DynamicOptionsResult options;
 		using (connection)
 		{
-			options = await Picker(connection, stored: "multi_rtmp_1");
+			options = await Picker(connection, "multi_rtmp_1");
 		}
 
 		Assert.That(options.Options.Select(option => option.Value), Is.EqualTo(new[] { "multi_rtmp_1" }));
@@ -268,18 +272,19 @@ internal sealed class ObsOutputActionsTests
 		using (connection)
 		{
 			var action = new GetOutputStateActionDefinition(ObsTargetResolver.Legacy(() => connection), accessor);
-			result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-			{
-				Parameters = new Dictionary<string, object>
+			result = await action.CreateExecutor()
+				.ExecuteAsync(new ActionExecutionContext
 				{
-					[ObsOutputSupport.OutputParameter] = "multi_rtmp_1",
-					[GetOutputStateActionDefinition.VariableParameter] = "rtmp_live"
-				}
-			});
+					Parameters = new Dictionary<string, object>
+					{
+						[ObsOutputSupport.OutputParameter] = "multi_rtmp_1",
+						[GetOutputStateActionDefinition.VariableParameter] = "rtmp_live"
+					}
+				});
 		}
 
 		var variable = await targets.Find("rtmp_live");
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await targets.ValueOf("rtmp_live"), Is.EqualTo(active));
@@ -301,17 +306,18 @@ internal sealed class ObsOutputActionsTests
 		using (connection)
 		{
 			var action = new GetOutputStateActionDefinition(ObsTargetResolver.Legacy(() => connection), accessor);
-			result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-			{
-				Parameters = new Dictionary<string, object>
+			result = await action.CreateExecutor()
+				.ExecuteAsync(new ActionExecutionContext
 				{
-					[ObsOutputSupport.OutputParameter] = "gone_output",
-					[GetOutputStateActionDefinition.VariableParameter] = "rtmp_live"
-				}
-			});
+					Parameters = new Dictionary<string, object>
+					{
+						[ObsOutputSupport.OutputParameter] = "gone_output",
+						[GetOutputStateActionDefinition.VariableParameter] = "rtmp_live"
+					}
+				});
 		}
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
 			Assert.That(await targets.Find("rtmp_live"), Is.Null);
@@ -319,7 +325,8 @@ internal sealed class ObsOutputActionsTests
 	}
 
 	private static Task<DynamicOptionsResult> Picker(ObsConnection connection, string? stored)
-		=> ((IDynamicOptionsActionDefinition)Output("start-output", connection)).GetDynamicOptionsAsync(
+	{
+		return ((IDynamicOptionsActionDefinition)Output("start-output", connection)).GetDynamicOptionsAsync(
 			new DynamicOptionsContext
 			{
 				ParameterName = ObsOutputSupport.OutputParameter,
@@ -328,9 +335,12 @@ internal sealed class ObsOutputActionsTests
 					: new Dictionary<string, object?> { [ObsOutputSupport.OutputParameter] = stored }
 			},
 			CancellationToken.None);
+	}
 
 	private static Task<ActionStateSnapshot?> State(ObsConnection connection, string output)
-		=> ((IStateProviderActionDefinition)Output("toggle-output", connection)).GetActionStateAsync(
+	{
+		return ((IStateProviderActionDefinition)Output("toggle-output", connection)).GetActionStateAsync(
 			new Dictionary<string, object?> { [ObsOutputSupport.OutputParameter] = output },
 			CancellationToken.None);
+	}
 }

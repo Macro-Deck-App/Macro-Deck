@@ -95,8 +95,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 		TimeProvider timeProvider)
 	{
 		var toShutDown = registry.Integrations.Where(integration =>
-			registry.IsEnabled(integration.Id) &&
-			(integration.IsInitialized || attemptedIds.Contains(integration.Id)));
+			registry.IsEnabled(integration.Id) && (integration.IsInitialized || attemptedIds.Contains(integration.Id)));
 
 		await Task.WhenAll(toShutDown.Select(integration => ShutdownOneAsync(integration, logger, timeProvider)));
 	}
@@ -169,7 +168,9 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 	}
 
 	internal Task InitializeAllAsync(IReadOnlyList<PendingIntegration> pending, CancellationToken stoppingToken)
-		=> Task.WhenAll(pending.Select(p => InitializeOneAsync(p, stoppingToken)));
+	{
+		return Task.WhenAll(pending.Select(p => InitializeOneAsync(p, stoppingToken)));
+	}
 
 	private async Task InitializeOneAsync(PendingIntegration pending, CancellationToken stoppingToken)
 	{
@@ -203,7 +204,9 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 	}
 
 	private static bool DeveloperIntegrationsEnabled()
-		=> string.Equals(Environment.GetEnvironmentVariable("ENABLE_EXAMPLE_INTEGRATION"),
+	{
+		return string.Equals(Environment.GetEnvironmentVariable("ENABLE_EXAMPLE_INTEGRATION"),
 			"true",
 			StringComparison.OrdinalIgnoreCase);
+	}
 }

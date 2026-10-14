@@ -40,7 +40,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task An_adjust_moves_the_level_and_pushes_the_mapped_value_in_the_variables_units()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var slider = Writable(0, 100, 0, 50);
 
 		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.7);
 		await slider.Host.SettleAsync();
@@ -60,7 +60,7 @@ public class SliderWidgetSessionTests
 	public async Task
 		A_commit_on_release_variables_adjust_moves_the_level_but_pushes_nothing_and_the_following_change_pushes_once()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50, commitOnRelease: true);
+		var slider = Writable(0, 100, 0, 50, true);
 
 		var adjustResult = slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.3);
 		await slider.Host.SettleAsync();
@@ -94,7 +94,7 @@ public class SliderWidgetSessionTests
 		// which lands on 50, a value the variable's own grid does not contain. Anchoring at the minimum gives
 		// 53. (Snapping in fraction space is not the distinction: a fraction is measured from the minimum
 		// too, so it is the same arithmetic.)
-		var slider = Writable(min: 3, max: 103, step: 10, value: 3);
+		var slider = Writable(3, 103, 10, 3);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.47);
 		await slider.Host.SettleAsync();
@@ -110,7 +110,7 @@ public class SliderWidgetSessionTests
 		// min 0, max 10, step 1: a level of 0.25 lands exactly on raw 2.5, a tie between step 2 and 3. C#'s
 		// default Math.Round would bank to 2 (even); JavaScript's half-up Math.round gives 3. The host must
 		// match the client's half-up behaviour, or the same drag ends on a different value on each side.
-		var slider = Writable(min: 0, max: 10, step: 1, value: 0);
+		var slider = Writable(0, 10, 1, 0);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.25);
 		await slider.Host.SettleAsync();
@@ -126,7 +126,7 @@ public class SliderWidgetSessionTests
 		// min 0, max 1, step 0.1: the seventh step is 0.7, but rebuilding it as 7 * 0.1 in binary floating
 		// point gives 0.7000000000000001 - which the variable would be written with and which the readout
 		// beside the track would spell out to the user.
-		var slider = Writable(min: 0, max: 1, step: 0.1, value: 0);
+		var slider = Writable(0, 1, 0.1, 0);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.7);
 		await slider.Host.SettleAsync();
@@ -140,7 +140,7 @@ public class SliderWidgetSessionTests
 	public async Task
 		A_reading_reporting_the_old_value_during_the_hold_does_not_move_the_level_back_and_one_after_expiry_does()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var slider = Writable(0, 100, 0, 50);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.9);
 		await slider.Host.SettleAsync();
@@ -170,7 +170,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_dispatch_while_the_host_is_locked_is_rejected_and_pushes_nothing()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50, locked: true);
+		var slider = Writable(0, 100, 0, 50, locked: true);
 
 		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.7);
 		await slider.Host.SettleAsync();
@@ -190,7 +190,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_value_change_produces_only_set_properties_operations_never_a_structural_patch()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var slider = Writable(0, 100, 0, 50);
 
 		slider.Host.ClearPatches();
 
@@ -218,7 +218,7 @@ public class SliderWidgetSessionTests
 		// A client that ignores its own throttle - or simply a slow provider - must not be able to lose the
 		// last value. Intermediate values may be dropped, which is the point of coalescing; the one the
 		// interaction ended on may not.
-		var slider = Writable(min: 0, max: 100, step: 0, value: 0);
+		var slider = Writable(0, 100, 0, 0);
 
 		for (var i = 1; i <= 10; i++)
 		{
@@ -250,7 +250,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_slider_follows_the_variable_with_no_interaction()
 	{
-		var slider = UserOwned(min: 0, max: 100, step: 1, value: "75");
+		var slider = UserOwned(0, 100, 1, "75");
 
 		Assert.That(slider.Host.ById("slider.track").Number("level"), Is.EqualTo(0.75).Within(1e-9));
 
@@ -264,7 +264,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task An_out_of_range_variable_clamps_the_level_and_never_writes()
 	{
-		var slider = UserOwned(min: 0, max: 100, step: 1, value: "160");
+		var slider = UserOwned(0, 100, 1, "160");
 
 		Assert.That(slider.Host.ById("slider.track").Number("level"), Is.EqualTo(1.0).Within(1e-9));
 
@@ -291,10 +291,10 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_drag_maps_onto_the_variables_own_range_not_the_widget_configs()
 	{
-		var slider = Writable(min: 0,
-			max: 100,
-			step: 1,
-			value: 0,
+		var slider = Writable(0,
+			100,
+			1,
+			0,
 			configMin: -60,
 			configMax: 0,
 			configStep: 0.5);
@@ -314,7 +314,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_variable_declaring_no_range_falls_back_to_the_configured_one()
 	{
-		var slider = UserOwned(min: -60, max: 0, step: 0.5, value: "-10");
+		var slider = UserOwned(-60, 0, 0.5, "-10");
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.5);
 		await slider.Host.SettleAsync();
@@ -326,11 +326,12 @@ public class SliderWidgetSessionTests
 
 	[TestCase(5, 0.43, 45)]
 	[TestCase(15, 0.5, 45)]
-	public async Task A_custom_step_replaces_the_step_the_variable_declares(double widgetStep,
+	public async Task A_custom_step_replaces_the_step_the_variable_declares(
+		double widgetStep,
 		double level,
 		double written)
 	{
-		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+		var slider = Writable(0, 100, 1, 0, configStep: widgetStep, customStep: true);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, level);
 		await slider.Host.SettleAsync();
@@ -350,7 +351,7 @@ public class SliderWidgetSessionTests
 	public async Task A_custom_step_that_cannot_form_a_grid_falls_back_to_the_step_the_variable_declares(
 		double widgetStep)
 	{
-		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: widgetStep, customStep: true);
+		var slider = Writable(0, 100, 1, 0, configStep: widgetStep, customStep: true);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.4321);
 		await slider.Host.SettleAsync();
@@ -367,7 +368,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task Without_a_custom_step_the_step_the_variable_declares_still_wins()
 	{
-		var slider = Writable(min: 0, max: 100, step: 1, value: 0, configStep: 5);
+		var slider = Writable(0, 100, 1, 0, configStep: 5);
 
 		slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.43);
 		await slider.Host.SettleAsync();
@@ -380,7 +381,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_slider_whose_variable_declares_no_write_capability_is_inert_on_drag()
 	{
-		var slider = ReadOnlyIntegrationOwned(min: 0, max: 100, step: 1, value: "75");
+		var slider = ReadOnlyIntegrationOwned(0, 100, 1, "75");
 
 		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.Adjust, 0.2);
 		await slider.Host.SettleAsync();
@@ -401,7 +402,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_slider_whose_variable_is_user_owned_writes_it_on_drag()
 	{
-		var slider = UserOwned(min: 0, max: 100, step: 1, value: "75");
+		var slider = UserOwned(0, 100, 1, "75");
 
 		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.Change, 0.2);
 		await slider.Host.SettleAsync();
@@ -418,16 +419,18 @@ public class SliderWidgetSessionTests
 
 	[Test]
 	public async Task A_non_numeric_variable_renders_a_defined_level_and_value_text_never_NaN()
-		=> await AssertUnresolvedVariableRendersSafely(UserOwned(min: 0,
-			max: 100,
-			step: 1,
-			value: "abc",
-			type: DomainVariableType.Text));
+	{
+		await AssertUnresolvedVariableRendersSafely(UserOwned(0,
+			100,
+			1,
+			"abc",
+			DomainVariableType.Text));
+	}
 
 	[Test]
 	public async Task An_unavailable_variable_renders_a_defined_level_and_value_text_never_NaN()
 	{
-		var slider = UserOwned(min: 0, max: 100, step: 1, value: "75");
+		var slider = UserOwned(0, 100, 1, "75");
 		slider.Registry.SetAvailable(slider.Entity.Id, false);
 		slider.Report("75");
 
@@ -436,7 +439,9 @@ public class SliderWidgetSessionTests
 
 	[Test]
 	public async Task A_missing_variable_renders_a_defined_level_and_value_text_never_NaN()
-		=> await AssertUnresolvedVariableRendersSafely(Missing());
+	{
+		await AssertUnresolvedVariableRendersSafely(Missing());
+	}
 
 	/// <summary>
 	/// The slider's target is stored as a plain name, which ADR 0081 keeps true of every place a variable is
@@ -445,7 +450,9 @@ public class SliderWidgetSessionTests
 	/// </summary>
 	[Test]
 	public async Task An_attribute_path_is_not_a_slider_target()
-		=> await AssertUnresolvedVariableRendersSafely(BoundTo("vol.max"));
+	{
+		await AssertUnresolvedVariableRendersSafely(BoundTo("vol.max"));
+	}
 
 	private static async Task AssertUnresolvedVariableRendersSafely(SliderUnderTest slider)
 	{
@@ -492,7 +499,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_double_tap_runs_its_flow_after_the_second_taps_own_write_and_the_slider_shows_the_result()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50, doublePressFlow: true);
+		var slider = Writable(0, 100, 0, 50, doublePressFlow: true);
 		var writesWhenTheFlowRan = -1;
 		slider.Trigger.OnExecute = () =>
 		{
@@ -519,7 +526,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_double_tap_while_the_host_is_locked_is_rejected_and_runs_no_flow()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50, locked: true, doublePressFlow: true);
+		var slider = Writable(0, 100, 0, 50, locked: true, doublePressFlow: true);
 
 		var result = slider.Host.ById("slider.track").Raise(UiComponentEvents.DoublePress);
 		await slider.Host.SettleAsync();
@@ -536,7 +543,7 @@ public class SliderWidgetSessionTests
 	[Test]
 	public async Task A_slider_without_a_double_tap_flow_declares_exactly_the_events_it_always_has()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var slider = Writable(0, 100, 0, 50);
 
 		Assert.That(slider.Session.BuildEvents().Select(handler => handler.Name).Distinct(),
 			Is.EquivalentTo(new[] { UiComponentEvents.Adjust, UiComponentEvents.Change }));
@@ -596,7 +603,7 @@ public class SliderWidgetSessionTests
 		var registry = new VariableRegistry();
 		registry.Upsert(NumericUserVariable(SliderDefaultVariable.Name, VariableScope.Global, null));
 
-		Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), pickedName: null), Is.Null);
+		Assert.That(SliderDefaultVariable.Find(registry, Guid.NewGuid(), null), Is.Null);
 	}
 
 	[Test]
@@ -681,7 +688,8 @@ public class SliderWidgetSessionTests
 	}
 
 	private static VariableEntity TextUserVariable(string name, string value)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -691,8 +699,10 @@ public class SliderWidgetSessionTests
 			Value = value,
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
-	private static async Task<IUiSession> OpenLabelledAsync(SliderWidgetUiProvider provider,
+	private static async Task<IUiSession> OpenLabelledAsync(
+		SliderWidgetUiProvider provider,
 		Guid widgetId,
 		string label)
 	{
@@ -703,8 +713,8 @@ public class SliderWidgetSessionTests
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { label, showLabel = true }),
-				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-			},
+				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString())
+			}
 		};
 
 		return (await provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
@@ -712,11 +722,16 @@ public class SliderWidgetSessionTests
 	}
 
 	private static string? LabelText(IUiSession session)
-		=> Walk(session.BuildTree().Root).Single(node => node.Id == "slider.header.lead.label").Properties["text"]
+	{
+		return Walk(session.BuildTree().Root)
+			.Single(node => node.Id == "slider.header.lead.label")
+			.Properties["text"]
 			.GetString();
+	}
 
 	private static VariableEntity NumericUserVariable(string name, VariableScope scope, string? scopeRefId)
-		=> new()
+	{
+		return new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -727,6 +742,7 @@ public class SliderWidgetSessionTests
 			Value = "5",
 			UpdatedAt = DateTime.UtcNow
 		};
+	}
 
 	private static async Task<IReadOnlyList<string>> OpenAsync(
 		SliderWidgetUiProvider provider,
@@ -742,8 +758,8 @@ public class SliderWidgetSessionTests
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
-				[widgetIdAttribute] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-			},
+				[widgetIdAttribute] = JsonSerializer.SerializeToElement(widgetId.ToString())
+			}
 		};
 
 		var session = await provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
@@ -756,12 +772,15 @@ public class SliderWidgetSessionTests
 			: [];
 	}
 
-	private static IEnumerable<UiNode> Walk(UiNode node) => node.Children.SelectMany(Walk).Prepend(node);
+	private static IEnumerable<UiNode> Walk(UiNode node)
+	{
+		return node.Children.SelectMany(Walk).Prepend(node);
+	}
 
 	[Test]
 	public async Task A_colour_only_save_recolours_the_track_in_place_without_losing_the_users_value()
 	{
-		var slider = Writable(min: 0, max: 100, step: 0, value: 50);
+		var slider = Writable(0, 100, 0, 50);
 		var signals = new WidgetRenderSignals();
 		var widgetId = Guid.NewGuid();
 		slider.Session.FollowAccentColor(signals, widgetId.ToString(), slider.Config, slider.Accent);
@@ -795,7 +814,8 @@ public class SliderWidgetSessionTests
 	}
 
 	private static WidgetEntity SavedSlider(Guid widgetId, SliderWidgetData config)
-		=> new()
+	{
+		return new WidgetEntity
 		{
 			Id = widgetId,
 			Type = WidgetTypeIds.Slider,
@@ -806,11 +826,13 @@ public class SliderWidgetSessionTests
 				min = config.Min,
 				max = config.Max,
 				step = config.Step,
-				color = config.Color,
+				color = config.Color
 			})
 		};
+	}
 
-	private static SliderWidgetUiProvider ProviderWith(VariableRegistry registry,
+	private static SliderWidgetUiProvider ProviderWith(
+		VariableRegistry registry,
 		VariableChangeNotifier? notifier = null)
 	{
 		var integrations = new ConfigurableIntegrationRegistry([]);
@@ -838,7 +860,7 @@ public class SliderWidgetSessionTests
 			new StubFolderCache(),
 			new NullUiTransport(),
 			new RecordingRenderSignals(),
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache());
 	}
 
 	private static SliderUnderTest Writable(
@@ -853,7 +875,8 @@ public class SliderWidgetSessionTests
 		double configStep = 0,
 		bool doublePressFlow = false,
 		bool customStep = false)
-		=> SliderUnderTest.Build(entity =>
+	{
+		return SliderUnderTest.Build(entity =>
 			{
 				entity.Classification = VariableClassification.Integration;
 				entity.OwnerIntegrationId = RecordingVariableProvider.IntegrationId;
@@ -870,9 +893,11 @@ public class SliderWidgetSessionTests
 			locked,
 			doublePressFlow: doublePressFlow,
 			customStep: customStep);
+	}
 
 	private static SliderUnderTest ReadOnlyIntegrationOwned(double min, double max, double step, string value)
-		=> SliderUnderTest.Build(entity =>
+	{
+		return SliderUnderTest.Build(entity =>
 			{
 				entity.Classification = VariableClassification.Integration;
 				entity.OwnerIntegrationId = RecordingVariableProvider.IntegrationId;
@@ -882,6 +907,7 @@ public class SliderWidgetSessionTests
 			min,
 			max,
 			step);
+	}
 
 	private static SliderUnderTest UserOwned(
 		double min,
@@ -889,7 +915,8 @@ public class SliderWidgetSessionTests
 		double step,
 		string value,
 		DomainVariableType type = DomainVariableType.Numeric)
-		=> SliderUnderTest.Build(entity =>
+	{
+		return SliderUnderTest.Build(entity =>
 			{
 				entity.Type = type;
 				entity.Value = value;
@@ -897,11 +924,17 @@ public class SliderWidgetSessionTests
 			min,
 			max,
 			step);
+	}
 
-	private static SliderUnderTest Missing() => SliderUnderTest.Build(entity: null, 0, 100, 1);
+	private static SliderUnderTest Missing()
+	{
+		return SliderUnderTest.Build(null, 0, 100, 1);
+	}
 
 	private static SliderUnderTest BoundTo(string bindingName)
-		=> SliderUnderTest.Build(entity => entity.Value = "75", 0, 100, 1, bindingName: bindingName);
+	{
+		return SliderUnderTest.Build(entity => entity.Value = "75", 0, 100, 1, bindingName: bindingName);
+	}
 
 	/// <summary>One assembled slider: the real registry, variable service and session, with the owning
 	/// provider's writes recorded at the one boundary a variable write actually leaves the host through.
@@ -966,7 +999,10 @@ public class SliderWidgetSessionTests
 			Notifier.Publish(VariableName);
 		}
 
-		public async Task DisposeAsync() => await Session.DisposeAsync();
+		public async Task DisposeAsync()
+		{
+			await Session.DisposeAsync();
+		}
 
 		public static SliderUnderTest Build(
 			Action<VariableEntity>? entity,
@@ -1009,7 +1045,7 @@ public class SliderWidgetSessionTests
 				.AddSingleton<IMusicPlayerPollNudge>(new MusicPlayerPollNudge(integrations))
 				.AddTestFileVariables()
 				.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None)
-			.AddScoped<IVariableService, VariableService>()
+				.AddScoped<IVariableService, VariableService>()
 				.BuildServiceProvider()
 				.GetRequiredService<IServiceScopeFactory>();
 
@@ -1040,7 +1076,7 @@ public class SliderWidgetSessionTests
 			var session = new SliderWidgetSession(state,
 				new FakeHostLockState { IsLocked = locked },
 				timeProvider,
-				isWidgetSurface: true,
+				true,
 				binding,
 				doublePress);
 
@@ -1054,7 +1090,7 @@ public class SliderWidgetSessionTests
 				CustomStep = customStep
 			};
 			var accent = new UiState<string?>(config.Color);
-			var element = SliderWidgetView.Build(config, state, icon: null, session.BuildEvents(), accentColor: accent);
+			var element = SliderWidgetView.Build(config, state, null, session.BuildEvents(), accentColor: accent);
 			var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 				element);
 
@@ -1097,21 +1133,31 @@ public class SliderWidgetSessionTests
 	{
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	/// <summary>The owning integration of an integration-classified variable, recording what
@@ -1164,12 +1210,20 @@ public class SliderWidgetSessionTests
 			}
 		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
 		public ValueTask<VariableWriteResult> SetValueAsync(
 			string localId,
@@ -1190,7 +1244,10 @@ public class SliderWidgetSessionTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

@@ -36,7 +36,8 @@ public static class DeviceSurfaceMapper
 	}
 
 	private static DeviceSurfaceWidgetDto ToDto(DeviceSurfaceWidget widget)
-		=> new()
+	{
+		return new DeviceSurfaceWidgetDto
 		{
 			Id = widget.Id,
 			Type = widget.Type,
@@ -70,4 +71,5 @@ public static class DeviceSurfaceMapper
 			// kind by name, and one built against an earlier one must be able to ignore an unknown name.
 			SupportedInteractions = [.. widget.SupportedInteractions.Select(kind => kind.ToString())]
 		};
+	}
 }

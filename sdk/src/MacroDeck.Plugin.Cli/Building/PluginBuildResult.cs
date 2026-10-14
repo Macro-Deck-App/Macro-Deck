@@ -73,7 +73,8 @@ internal sealed record PluginBuildResult
 	/// <summary>The failing build tool's captured stdout and stderr, rendered as the diagnostic's detail.</summary>
 	public string? FailureDetail { get; init; }
 
-	public static PluginBuildResult Packed(IReadOnlyList<string> builtRids,
+	public static PluginBuildResult Packed(
+		IReadOnlyList<string> builtRids,
 		PluginPackResult pack,
 		IReadOnlyList<CliDiagnostic>? warnings = null)
 	{
@@ -86,7 +87,8 @@ internal sealed record PluginBuildResult
 		};
 	}
 
-	public static PluginBuildResult Fail(PluginBuildFailureReason reason,
+	public static PluginBuildResult Fail(
+		PluginBuildFailureReason reason,
 		string message,
 		string? detail = null,
 		IReadOnlyList<CliDiagnostic>? warnings = null)

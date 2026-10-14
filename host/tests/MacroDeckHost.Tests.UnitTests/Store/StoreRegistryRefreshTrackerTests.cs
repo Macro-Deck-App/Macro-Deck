@@ -43,7 +43,8 @@ internal sealed class StoreRegistryRefreshTrackerTests
 			Assert.That(published, Has.Count.EqualTo(4));
 			Assert.That(second.Id, Is.Not.EqualTo(first.Id));
 			Assert.That(second.HostInstanceId, Is.EqualTo(first.HostInstanceId));
-			Assert.That(second.Entries.Select(entry => entry.Step), Is.EqualTo(new[] { StoreRegistryRefreshStep.Started }));
+			Assert.That(second.Entries.Select(entry => entry.Step),
+				Is.EqualTo(new[] { StoreRegistryRefreshStep.Started }));
 		});
 	}
 }

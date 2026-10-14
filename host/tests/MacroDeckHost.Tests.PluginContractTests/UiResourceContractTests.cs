@@ -1,7 +1,6 @@
 using MacroDeck.Plugin.Hosting.Capabilities.Actions;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Protocol.Assets;
-using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
@@ -65,7 +64,7 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 20, refillPerSecond: 10),
+			new HostCallbackThrottle(TimeProvider.System, 20, 10),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			uiResources: _resources,
@@ -76,7 +75,10 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 	}
 
 	[TearDown]
-	public void UiResourceTearDown() => _resources.Dispose();
+	public void UiResourceTearDown()
+	{
+		_resources.Dispose();
+	}
 
 	[Test]
 	public async Task Fifty_images_registered_at_once_are_all_served_with_their_exact_bytes()
@@ -131,8 +133,9 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 				"image/png");
 		}
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterAsync("one-more", Image(99, 10), "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(()
+				=> registry.RegisterAsync("one-more", Image(99, 10), "image/png"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.QuotaExceeded));
 	}
@@ -145,8 +148,9 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 			$"The '{payload.Api}' api has no operation '{payload.Operation}'."));
 		var registry = await ConnectPluginAsync();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterAsync("photo", Image(1, 100), "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(()
+				=> registry.RegisterAsync("photo", Image(1, 100), "image/png"));
 
 		Assert.Multiple(() =>
 		{
@@ -172,7 +176,9 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 			Assert.That(served.Content.ToArray(), Is.EqualTo(bytes));
 			Assert.That(handle.MediaType, Is.EqualTo("image/webp"));
 			Assert.That(handle.ContentHash, Is.EqualTo(served.ContentHash));
-			Assert.That(_uiResourceCommits, Is.EqualTo(commitsBefore), "the host fetched the artwork, nothing was uploaded");
+			Assert.That(_uiResourceCommits,
+				Is.EqualTo(commitsBefore),
+				"the host fetched the artwork, nothing was uploaded");
 		});
 	}
 
@@ -189,15 +195,16 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 	[Test]
 	public async Task Artwork_a_ui_resource_cannot_be_is_a_permanent_failure_over_the_wire()
 	{
-		_artwork[("net.example.jukebox::default", "vector")] = new ArtworkImageResult(Image(1, 100), "image/svg+xml", "\"e\"");
+		_artwork[("net.example.jukebox::default", "vector")]
+			= new ArtworkImageResult(Image(1, 100), "image/svg+xml", "\"e\"");
 		_artwork[("net.example.jukebox::default", "huge")] =
 			new ArtworkImageResult(Image(2, ProtocolLimits.MaxUiResourceBytes + 1), "image/png", "\"e\"");
 		var registry = await ConnectPluginAsync();
 
-		var svg = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "vector"));
-		var huge = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "huge"));
+		var svg = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "vector"));
+		var huge = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "huge"));
 
 		Assert.Multiple(() =>
 		{
@@ -215,8 +222,8 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 			$"The '{payload.Api}' api has no operation '{payload.Operation}'."));
 		var registry = await ConnectPluginAsync();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
@@ -243,21 +250,31 @@ internal sealed class UiResourceContractTests : CapabilityContractFixture
 		return bytes;
 	}
 
-	private sealed class StubArtworkService(Dictionary<(string InstanceId, string ArtworkId), ArtworkImageResult> images)
+	private sealed class StubArtworkService(
+		Dictionary<(string InstanceId, string ArtworkId), ArtworkImageResult> images)
 		: IMusicPlayerArtworkService
 	{
-		public string GetETag(string artworkId, int? size) => "\"" + artworkId + "\"";
+		public string GetETag(string artworkId, int? size)
+		{
+			return "\"" + artworkId + "\"";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(images.GetValueOrDefault((instanceId, artworkId)));
+		{
+			return Task.FromResult(images.GetValueOrDefault((instanceId, artworkId)));
+		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

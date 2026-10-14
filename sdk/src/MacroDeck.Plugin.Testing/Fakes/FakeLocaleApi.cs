@@ -14,5 +14,7 @@ public sealed class FakeLocaleApi : ILocaleApi
 
 	/// <inheritdoc />
 	public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(TimeOfDayFormat);
+	{
+		return Task.FromResult(TimeOfDayFormat);
+	}
 }

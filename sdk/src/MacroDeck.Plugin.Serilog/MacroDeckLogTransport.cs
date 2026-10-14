@@ -30,8 +30,8 @@ internal sealed class PluginConnectionLogTransport(PluginConnectionState state) 
 
 	public async Task SendAsync(ProtocolEnvelope envelope, CancellationToken cancellationToken)
 	{
-		var connection = state.ActiveConnection ??
-			throw new InvalidOperationException("There is no active connection to send a log batch through.");
+		var connection = state.ActiveConnection
+			?? throw new InvalidOperationException("There is no active connection to send a log batch through.");
 
 		await connection.SendAsync(envelope, cancellationToken).ConfigureAwait(false);
 	}

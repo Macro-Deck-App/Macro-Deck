@@ -126,40 +126,51 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 			["is_available"] = _isAvailable,
 			["is_not_available"] = !_isAvailable,
 			["is_empty"] = _isEmpty,
-			["is_not_empty"] = _isAvailable && !_isEmpty
+			["is_not_empty"] = _isAvailable && !_isEmpty,
+			// Read-only because Unknown is a process-wide singleton: a template must not be able to write
+			// through one render's state object into every later render's.
+			IsReadOnly = true
 		};
 
-		// Read-only because Unknown is a process-wide singleton: a template must not be able to write
-		// through one render's state object into every later render's.
-		state.IsReadOnly = true;
 		return state;
 	}
 
 	/// <summary>Whether wrapping <paramref name="entity"/> would expose anything at all.</summary>
 	public static bool HasAttributes(VariableEntity entity)
-		=> entity.Unit is not null ||
-			entity.SemanticKind is not null ||
-			entity.DecimalPlaces is not null ||
-			entity.Min is not null ||
-			entity.Max is not null ||
-			entity.Step is not null ||
-			entity.Attributes is { Count: > 0 };
+	{
+		return entity.Unit is not null
+			|| entity.SemanticKind is not null
+			|| entity.DecimalPlaces is not null
+			|| entity.Min is not null
+			|| entity.Max is not null
+			|| entity.Step is not null
+			|| entity.Attributes is { Count: > 0 };
+	}
 
-	public static object? Unwrap(object? value) => value is VariableTemplateValue wrapped ? wrapped.Value : value;
+	public static object? Unwrap(object? value)
+	{
+		return value is VariableTemplateValue wrapped ? wrapped.Value : value;
+	}
 
 	// Mirrors Scriban's own ObjectToStringImpl for the three shapes a variable value can take, so a
 	// container that reaches a rendering path without going through VariableTemplateContext still prints
 	// what the bare value would have printed.
-	public override string ToString() => Render(Value);
-
-	private static string Render(object? value) => value switch
+	public override string ToString()
 	{
-		null => string.Empty,
-		string text => text,
-		bool flag => flag ? "true" : "false",
-		IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
-		_ => value.ToString() ?? string.Empty
-	};
+		return Render(Value);
+	}
+
+	private static string Render(object? value)
+	{
+		return value switch
+		{
+			null => string.Empty,
+			string text => text,
+			bool flag => flag ? "true" : "false",
+			IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+			_ => value.ToString() ?? string.Empty
+		};
+	}
 
 	public int Count => (_members?.Count ?? 0) + 1;
 
@@ -170,10 +181,14 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 	}
 
 	public IEnumerable<string> GetMembers()
-		=> _members is null ? [StateMemberName] : _members.Keys.Prepend(StateMemberName);
+	{
+		return _members is null ? [StateMemberName] : _members.Keys.Prepend(StateMemberName);
+	}
 
 	public bool Contains(string member)
-		=> member == StateMemberName || (_members?.ContainsKey(member) ?? false);
+	{
+		return member == StateMemberName || (_members?.ContainsKey(member) ?? false);
+	}
 
 	// The reserved name is answered ahead of the attribute map rather than merely inserted before it, so
 	// the open plugin map cannot reach it at all - see the TryAdd note in the constructor.
@@ -203,18 +218,29 @@ public sealed class VariableTemplateValue : IScriptObject, IScriptCustomBinaryOp
 		return context.GetMemberAccessor(Value).TryGetValue(context, span, Value, member, out value);
 	}
 
-	public bool CanWrite(string member) => false;
+	public bool CanWrite(string member)
+	{
+		return false;
+	}
 
 	public bool TrySetValue(TemplateContext? context, SourceSpan span, string member, object? value, bool readOnly)
-		=> false;
+	{
+		return false;
+	}
 
-	public bool Remove(string member) => false;
+	public bool Remove(string member)
+	{
+		return false;
+	}
 
 	public void SetReadOnly(string member, bool readOnly)
 	{
 	}
 
-	public IScriptObject Clone(bool deep) => this;
+	public IScriptObject Clone(bool deep)
+	{
+		return this;
+	}
 
 	public bool TryEvaluate(
 		TemplateContext context,

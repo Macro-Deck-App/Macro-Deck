@@ -28,7 +28,8 @@ internal sealed class VirtualProfilesCapabilityHandler(
 	public string Kind => CapabilityKinds.VirtualProfiles;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -38,6 +39,7 @@ internal sealed class VirtualProfilesCapabilityHandler(
 					VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -70,22 +72,32 @@ internal sealed class VirtualProfilesCapabilityHandler(
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new VirtualProfilesDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new VirtualProfilesDescribePayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? metadata.Name,
 			Profiles = BuildProfiles()
 		});
+	}
 
 	/// <summary>The <c>profiles</c> operation - see <c>MusicPlayerInstancesResult</c>'s identical remarks.</summary>
-	private CapabilityInvocationResult Profiles() => CapabilityInvocationResult.Ok(new VirtualProfilesResult
+	private CapabilityInvocationResult Profiles()
 	{
-		Profiles = BuildProfiles()
-	});
+		return CapabilityInvocationResult.Ok(new VirtualProfilesResult
+		{
+			Profiles = BuildProfiles()
+		});
+	}
 
 	/// <summary>Never re-sorted - see <c>MusicPlayerCapabilityHandler.BuildInstances</c>'s identical remarks.</summary>
 	private IReadOnlyList<VirtualProfileDescriptorDto> BuildProfiles()
-		=> [.. _providers.SelectMany(provider => provider.GetProfiles()).Select(VirtualProfileDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetProfiles()).Select(VirtualProfileDescriptorMapper.ToDto)
+		];
+	}
 
 	private async Task<CapabilityInvocationResult> WidgetInteractionAsync(
 		CapabilityInvocation invocation,
@@ -119,9 +131,11 @@ internal sealed class VirtualProfilesCapabilityHandler(
 	}
 
 	private static bool Owns(IProfileProvider provider, string folderId, string widgetId)
-		=> provider.GetProfiles()
+	{
+		return provider.GetProfiles()
 			.SelectMany(profile => profile.Folders)
 			.Where(folder => string.Equals(folder.Id, folderId, StringComparison.Ordinal))
 			.SelectMany(folder => folder.Widgets)
 			.Any(widget => string.Equals(widget.Id, widgetId, StringComparison.Ordinal));
+	}
 }

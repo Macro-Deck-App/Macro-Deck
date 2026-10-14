@@ -31,7 +31,8 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IWidgetRenderSignals _renderSignals;
 	private readonly IIconPackCache _iconPackCache;
 
-	public SliderWidgetUiProvider(IWidgetIconResources iconResources,
+	public SliderWidgetUiProvider(
+		IWidgetIconResources iconResources,
 		IHostLockState lockState,
 		IWidgetSampleTextResolver sampleText,
 		TimeProvider timeProvider,
@@ -67,7 +68,7 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -133,8 +134,8 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 				_variableNotifier,
 				_scopeFactory,
 				scopeWidgetId,
-				IsDefault: config.ValueVariable is null,
-				CustomStep: config.CustomStep)
+				config.ValueVariable is null,
+				config.CustomStep)
 			: null;
 
 		var doublePress = isWidgetSurface && config.HasDoublePressFlow && scopeWidgetId is { } widgetId
@@ -174,12 +175,16 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static Guid? SurfaceGuid(UiSurface surface, string attribute)
-		=> surface.Attributes.TryGetValue(attribute, out var id) &&
-			id.ValueKind == JsonValueKind.String &&
-			Guid.TryParse(id.GetString(), out var widgetId)
+	{
+		return surface.Attributes.TryGetValue(attribute, out var id)
+			&& id.ValueKind == JsonValueKind.String
+			&& Guid.TryParse(id.GetString(), out var widgetId)
 				? widgetId
 				: null;
+	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 }

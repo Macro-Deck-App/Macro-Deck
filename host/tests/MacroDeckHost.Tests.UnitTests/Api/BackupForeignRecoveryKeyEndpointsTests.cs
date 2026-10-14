@@ -82,7 +82,7 @@ public class BackupForeignRecoveryKeyEndpointsTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -107,7 +107,8 @@ public class BackupForeignRecoveryKeyEndpointsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(inspected.GetProperty("success").GetBoolean(), Is.True, inspected.ToString());
-			Assert.That(inspected.GetProperty("components").EnumerateArray()
+			Assert.That(inspected.GetProperty("components")
+					.EnumerateArray()
 					.Sum(component => component.GetProperty("entryCount").GetInt32()),
 				Is.GreaterThan(0),
 				"the entries are only countable once the payload has been decrypted");
@@ -123,7 +124,8 @@ public class BackupForeignRecoveryKeyEndpointsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(inspected.GetProperty("success").GetBoolean(), Is.False);
-			Assert.That(inspected.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("RecoveryKeyInvalid"));
+			Assert.That(inspected.GetProperty("error").GetProperty("code").GetString(),
+				Is.EqualTo("RecoveryKeyInvalid"));
 		});
 	}
 
@@ -136,8 +138,11 @@ public class BackupForeignRecoveryKeyEndpointsTests
 		{
 			Assert.That(imported.GetProperty("success").GetBoolean(), Is.False);
 			Assert.That(imported.GetProperty("error").GetProperty("code").GetString(), Is.EqualTo("InvalidArchive"));
-			Assert.That(imported.GetProperty("error").GetProperty("message").GetProperty("$localized")
-					.GetProperty("key").GetString(),
+			Assert.That(imported.GetProperty("error")
+					.GetProperty("message")
+					.GetProperty("$localized")
+					.GetProperty("key")
+					.GetString(),
 				Is.EqualTo("Errors.Backup.InvalidArchive"),
 				"the client renders the message in the user's language");
 		});
@@ -153,14 +158,17 @@ public class BackupForeignRecoveryKeyEndpointsTests
 		{
 			Assert.That(imported.GetProperty("success").GetBoolean(), Is.True, imported.ToString());
 			Assert.That(imported.GetProperty("backup").GetProperty("id").GetString(), Is.EqualTo(_foreignBackupId));
-			Assert.That(listed.GetProperty("backups").EnumerateArray()
+			Assert.That(listed.GetProperty("backups")
+					.EnumerateArray()
 					.Count(backup => backup.GetProperty("id").GetString() == _foreignBackupId),
 				Is.EqualTo(1));
 		});
 	}
 
 	private async Task<JsonElement> Inspect(string? recoveryKey)
-		=> await ReadJson(await Post($"/api/backups/{_foreignBackupId}/inspect", new { recoveryKey }));
+	{
+		return await ReadJson(await Post($"/api/backups/{_foreignBackupId}/inspect", new { recoveryKey }));
+	}
 
 	private async Task<JsonElement> Import(byte[] content)
 	{
@@ -182,10 +190,15 @@ public class BackupForeignRecoveryKeyEndpointsTests
 		return await _client.SendAsync(request);
 	}
 
-	private static HttpRequestMessage Loopback(HttpMethod method, string path) => new(method, path);
+	private static HttpRequestMessage Loopback(HttpMethod method, string path)
+	{
+		return new HttpRequestMessage(method, path);
+	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -199,7 +212,8 @@ public class BackupForeignRecoveryKeyEndpointsTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -211,5 +225,6 @@ public class BackupForeignRecoveryKeyEndpointsTests
 				});
 				next(app);
 			};
+		}
 	}
 }

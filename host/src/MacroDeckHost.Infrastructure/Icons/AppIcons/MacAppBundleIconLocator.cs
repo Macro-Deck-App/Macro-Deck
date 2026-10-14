@@ -139,5 +139,7 @@ internal static class MacAppBundleIconLocator
 	}
 
 	private static string TrimTrailingSeparators(string path)
-		=> path.TrimEnd(_separators);
+	{
+		return path.TrimEnd(_separators);
+	}
 }

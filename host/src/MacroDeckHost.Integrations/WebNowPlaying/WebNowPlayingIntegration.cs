@@ -70,13 +70,20 @@ public sealed class WebNowPlayingIntegration
 
 	internal int ListeningPort => _server?.Port ?? 0;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> _player is null ? [] : [new MusicPlayerInstance(InstanceId, DisplayName)];
+	{
+		return _player is null ? [] : [new MusicPlayerInstance(InstanceId, DisplayName)];
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> string.Equals(instanceId, InstanceId, StringComparison.Ordinal) ? _player : null;
+	{
+		return string.Equals(instanceId, InstanceId, StringComparison.Ordinal) ? _player : null;
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -102,7 +109,10 @@ public sealed class WebNowPlayingIntegration
 		RequestRefresh();
 	}
 
-	public Task ShutdownAsync() => StopAsync();
+	public Task ShutdownAsync()
+	{
+		return StopAsync();
+	}
 
 	public void Dispose()
 	{
@@ -142,7 +152,8 @@ public sealed class WebNowPlayingIntegration
 				: null,
 			WebNowPlayingVariables.VolumeId => player.Volume,
 			"webnowplaying-shuffle-enabled" => player.Shuffle,
-			"webnowplaying-repeat-mode" => WebNowPlayingMusicPlayer.ToRepeatMode(player.Repeat).ToString()
+			"webnowplaying-repeat-mode" => WebNowPlayingMusicPlayer.ToRepeatMode(player.Repeat)
+				.ToString()
 				.ToLowerInvariant(),
 			"webnowplaying-rating" => player.Rating,
 			_ => null
@@ -186,7 +197,7 @@ public sealed class WebNowPlayingIntegration
 					Id = PortInUseIssueId,
 					Title = AppStrings.Integrations.WebNowPlaying.Issues.PortInUseTitle(),
 					Description = AppStrings.Integrations.WebNowPlaying.Issues.PortInUseDescription(
-						port: _port.ToString(CultureInfo.InvariantCulture)),
+						_port.ToString(CultureInfo.InvariantCulture)),
 					Severity = IntegrationIssueSeverity.Error
 				}
 			]
@@ -196,20 +207,29 @@ public sealed class WebNowPlayingIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	{
+		return Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	private IMusicPlayer? ResolvePlayer(string? instanceId)
-		=> string.IsNullOrEmpty(instanceId) ? _player : GetPlayer(instanceId);
+	{
+		return string.IsNullOrEmpty(instanceId) ? _player : GetPlayer(instanceId);
+	}
 
 	private static string? ArtworkUrl(string? artworkId)
-		=> artworkId is null
+	{
+		return artworkId is null
 			? null
-			: ArtworkBaseUrl +
-			Uri.EscapeDataString(artworkId) +
-			"?instanceId=" +
-			Uri.EscapeDataString($"{IntegrationId}::{InstanceId}");
+			: ArtworkBaseUrl
+			+ Uri.EscapeDataString(artworkId)
+			+ "?instanceId="
+			+ Uri.EscapeDataString($"{IntegrationId}::{InstanceId}");
+	}
 
-	private void RequestRefresh() => _ = _variables?.RequestRefreshAsync();
+	private void RequestRefresh()
+	{
+		_ = _variables?.RequestRefreshAsync();
+	}
 
 	private async Task StopAsync()
 	{

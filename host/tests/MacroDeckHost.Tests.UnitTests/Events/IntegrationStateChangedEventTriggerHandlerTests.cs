@@ -39,7 +39,8 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 	}
 
 	[Test]
-	public async Task A_startup_connect_stays_connected_when_the_integration_is_disabled_before_event_dispatch_is_ready()
+	public async Task
+		A_startup_connect_stays_connected_when_the_integration_is_disabled_before_event_dispatch_is_ready()
 	{
 		await using var world = await World.Start();
 		var connected = world.Automations.Add(Flows("integration-connected", IntegrationId));
@@ -75,7 +76,8 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 	}
 
 	private static string Flows(string eventId, string integrationId)
-		=> JsonSerializer.Serialize(new[]
+	{
+		return JsonSerializer.Serialize(new[]
 		{
 			new
 			{
@@ -90,12 +92,14 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 				children = Array.Empty<object>()
 			}
 		});
+	}
 
 	private sealed class World : IAsyncDisposable
 	{
 		private readonly IHost _host;
 
-		private World(IHost host,
+		private World(
+			IHost host,
 			StubAutomationCache automations,
 			ThreadRecordingIntegrationRegistry registry,
 			StartupReadiness readiness,

@@ -53,8 +53,8 @@ internal static class IdentityGrammar
 
 		if (!_packageOwnerPattern.IsMatch(ownerId))
 		{
-			error = "It must be reverse-domain, lowercase and hyphen-separated, with at least two " +
-				"segments (e.g. 'com.example.my-plugin').";
+			error = "It must be reverse-domain, lowercase and hyphen-separated, with at least two "
+				+ "segments (e.g. 'com.example.my-plugin').";
 			return false;
 		}
 

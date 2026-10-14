@@ -19,7 +19,9 @@ namespace MacroDeck.Plugin.Protocol.Serialization;
 internal sealed class RawJsonElementConverter : JsonConverter<JsonElement>
 {
 	public override JsonElement Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> JsonElement.ParseValue(ref reader);
+	{
+		return JsonElement.ParseValue(ref reader);
+	}
 
 	public override void Write(Utf8JsonWriter writer, JsonElement value, JsonSerializerOptions options)
 	{
@@ -39,6 +41,6 @@ internal sealed class RawJsonElementConverter : JsonConverter<JsonElement>
 		// into the envelope and put invalid JSON on the wire. Registering this converter on any options
 		// instance that relaxes either setting - PluginManifestJson does relax one - breaks that
 		// invariant. See RawJsonElementConverterTests.
-		writer.WriteRawValue(JsonMarshal.GetRawUtf8Value(value), skipInputValidation: true);
+		writer.WriteRawValue(JsonMarshal.GetRawUtf8Value(value), true);
 	}
 }

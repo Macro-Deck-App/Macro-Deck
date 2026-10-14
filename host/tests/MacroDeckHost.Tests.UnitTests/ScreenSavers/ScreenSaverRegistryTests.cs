@@ -10,7 +10,10 @@ public class ScreenSaverRegistryTests
 	private ScreenSaverRegistry _registry = null!;
 
 	[SetUp]
-	public void SetUp() => _registry = new ScreenSaverRegistry(new RecordingMediator());
+	public void SetUp()
+	{
+		_registry = new ScreenSaverRegistry(new RecordingMediator());
+	}
 
 	[Test]
 	public async Task Register_QualifiesTheIdWithTheOwner()
@@ -27,8 +30,10 @@ public class ScreenSaverRegistryTests
 
 	[Test]
 	public void Register_RejectsAnEmptyName()
-		=> Assert.That(() => _registry.Register("com.example.home", new ScreenSaverDescriptor("photos", default)),
+	{
+		Assert.That(() => _registry.Register("com.example.home", new ScreenSaverDescriptor("photos", default)),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public async Task RegisteringTheSameLocalIdAgain_ReplacesTheDescriptor()
@@ -71,7 +76,10 @@ public class ScreenSaverRegistryTests
 
 	[Test]
 	public void Register_RefusesTheBuiltInOwner()
-		=> Assert.That(() => _registry.Register(BuiltInScreenSavers.ProviderId, Photos("clock")), Throws.ArgumentException);
+	{
+		Assert.That(() => _registry.Register(BuiltInScreenSavers.ProviderId, Photos("clock")),
+			Throws.ArgumentException);
+	}
 
 	[Test]
 	public void ABuiltInProvider_IsOnOffer_BeforeAnythingRegisters()
@@ -83,5 +91,7 @@ public class ScreenSaverRegistryTests
 	}
 
 	private static ScreenSaverDescriptor Photos(string id)
-		=> new(id, LocalizedText.FromLiteral("Photos"));
+	{
+		return new ScreenSaverDescriptor(id, LocalizedText.FromLiteral("Photos"));
+	}
 }

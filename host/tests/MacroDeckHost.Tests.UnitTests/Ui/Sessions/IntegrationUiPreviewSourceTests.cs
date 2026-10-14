@@ -15,9 +15,13 @@ internal sealed class IntegrationUiPreviewSourceTests
 	[TestCase("MacroDeckHost.Integrations.Jellyfin.Widgets.JellyfinSessionsViewPreviews.Several")]
 	[TestCase("MacroDeckHost.Integrations.Twitch.Widgets.TwitchStatsWidgetViewPreviews.Overview")]
 	public void A_built_in_integrations_scenario_is_listed_for_developer_tools(string member)
-		=> Assert.That(_source.Previews.Select(preview => preview.Id), Does.Contain($"{Assembly}:{member}"));
+	{
+		Assert.That(_source.Previews.Select(preview => preview.Id), Does.Contain($"{Assembly}:{member}"));
+	}
 
 	[Test]
 	public void Built_in_integrations_declare_no_malformed_scenario()
-		=> Assert.That(_source.Skipped, Is.Empty);
+	{
+		Assert.That(_source.Skipped, Is.Empty);
+	}
 }

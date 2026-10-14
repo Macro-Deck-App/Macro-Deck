@@ -131,8 +131,8 @@ internal sealed class YtmDesktopConnection : IDisposable
 		}
 
 		var now = DateTime.UtcNow;
-		if (now - new DateTime(Interlocked.Read(ref _lastStateTicks), DateTimeKind.Utc) < _stateRefreshInterval ||
-			now - new DateTime(Interlocked.Read(ref _lastFetchTicks), DateTimeKind.Utc) < _stateRefreshInterval)
+		if (now - new DateTime(Interlocked.Read(ref _lastStateTicks), DateTimeKind.Utc) < _stateRefreshInterval
+			|| now - new DateTime(Interlocked.Read(ref _lastFetchTicks), DateTimeKind.Utc) < _stateRefreshInterval)
 		{
 			return;
 		}
@@ -162,9 +162,14 @@ internal sealed class YtmDesktopConnection : IDisposable
 	}
 
 	public Task SendCommandAsync(string command, object? data, CancellationToken cancellationToken)
-		=> _sender.SendAsync(command, data, cancellationToken);
+	{
+		return _sender.SendAsync(command, data, cancellationToken);
+	}
 
-	public void EnqueueCommand(string command, object? data) => _sender.Enqueue(command, data);
+	public void EnqueueCommand(string command, object? data)
+	{
+		_sender.Enqueue(command, data);
+	}
 
 	public bool ShouldSendShuffle(bool enabled)
 	{
@@ -208,8 +213,8 @@ internal sealed class YtmDesktopConnection : IDisposable
 		var api = _api ?? throw new InvalidOperationException("YouTube Music Desktop App is not connected.");
 
 		var now = DateTime.UtcNow;
-		if (now - new DateTime(Interlocked.Read(ref _lastPlaylistTicks), DateTimeKind.Utc) < _playlistRefreshFloor &&
-			_playlists is { } cached)
+		if (now - new DateTime(Interlocked.Read(ref _lastPlaylistTicks), DateTimeKind.Utc) < _playlistRefreshFloor
+			&& _playlists is { } cached)
 		{
 			return cached;
 		}
@@ -270,7 +275,10 @@ internal sealed class YtmDesktopConnection : IDisposable
 
 		var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnDisconnected(object? sender, string? reason) => closed.TrySetResult();
+		void OnDisconnected(object? sender, string? reason)
+		{
+			closed.TrySetResult();
+		}
 
 		realtime.Disconnected += OnDisconnected;
 		realtime.StateUpdated += OnStateUpdated;
@@ -384,7 +392,10 @@ internal sealed class YtmDesktopConnection : IDisposable
 		Publish(state);
 	}
 
-	private void OnStateUpdated(object? sender, JsonElement state) => Publish(state);
+	private void OnStateUpdated(object? sender, JsonElement state)
+	{
+		Publish(state);
+	}
 
 	private void Publish(JsonElement state)
 	{
@@ -427,9 +438,9 @@ internal sealed class YtmDesktopConnection : IDisposable
 
 	private void RaiseLikeChanged(YtmDesktopSnapshot previous, YtmDesktopSnapshot next)
 	{
-		if (previous.VideoId is not { } previousVideo ||
-			next.VideoId is not { } nextVideo ||
-			!string.Equals(previousVideo, nextVideo, StringComparison.Ordinal))
+		if (previous.VideoId is not { } previousVideo
+			|| next.VideoId is not { } nextVideo
+			|| !string.Equals(previousVideo, nextVideo, StringComparison.Ordinal))
 		{
 			return;
 		}

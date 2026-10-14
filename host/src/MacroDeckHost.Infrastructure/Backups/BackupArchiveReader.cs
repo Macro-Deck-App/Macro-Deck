@@ -24,7 +24,7 @@ public sealed class BackupArchiveReader : IBackupArchiveReader
 
 	private static BackupArchiveManifest? ReadManifestEntry(Stream archive)
 	{
-		using var outer = new ZipArchive(archive, ZipArchiveMode.Read, leaveOpen: true);
+		using var outer = new ZipArchive(archive, ZipArchiveMode.Read, true);
 
 		if (outer.Entries.Count > BackupArchiveLimits.MaxOuterEntries)
 		{
@@ -49,18 +49,19 @@ public sealed class BackupArchiveReader : IBackupArchiveReader
 		}
 	}
 
-	public async Task DecryptPayload(Stream archive,
+	public async Task DecryptPayload(
+		Stream archive,
 		ReadOnlyMemory<byte> recoveryKey,
 		string destinationPath,
 		IProgress<long>? bytesProcessed = null,
 		CancellationToken cancellationToken = default)
 	{
-		using var outer = new ZipArchive(archive, ZipArchiveMode.Read, leaveOpen: true);
+		using var outer = new ZipArchive(archive, ZipArchiveMode.Read, true);
 
-		var manifestEntry = outer.GetEntry(BackupFileNames.ManifestEntry) ??
-			throw new BackupCryptoException(BackupDecryptResult.Corrupt, "The archive has no manifest.");
-		var payloadEntry = outer.GetEntry(BackupFileNames.PayloadEntry) ??
-			throw new BackupCryptoException(BackupDecryptResult.Corrupt, "The archive has no payload.");
+		var manifestEntry = outer.GetEntry(BackupFileNames.ManifestEntry)
+			?? throw new BackupCryptoException(BackupDecryptResult.Corrupt, "The archive has no manifest.");
+		var payloadEntry = outer.GetEntry(BackupFileNames.PayloadEntry)
+			?? throw new BackupCryptoException(BackupDecryptResult.Corrupt, "The archive has no payload.");
 
 		if (payloadEntry.Length > BackupArchiveLimits.MaxPayloadBytes)
 		{
@@ -79,7 +80,7 @@ public sealed class BackupArchiveReader : IBackupArchiveReader
 		await using var decryptor = BackupPayloadCrypto.CreateDecryptor(payloadStream,
 			recoveryKey.Span,
 			manifestBytes,
-			leaveOpen: true);
+			true);
 		await using var destination = new FileStream(destinationPath,
 			FileMode.Create,
 			FileAccess.Write,

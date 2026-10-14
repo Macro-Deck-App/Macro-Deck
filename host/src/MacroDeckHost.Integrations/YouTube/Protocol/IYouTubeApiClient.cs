@@ -2,7 +2,9 @@ namespace MacroDeckHost.Integrations.YouTube.Protocol;
 
 internal interface IYouTubeApiClient
 {
-	Task<IReadOnlyList<YouTubeBroadcast>> ListBroadcastsAsync(string broadcastStatus, CancellationToken cancellationToken);
+	Task<IReadOnlyList<YouTubeBroadcast>> ListBroadcastsAsync(
+		string broadcastStatus,
+		CancellationToken cancellationToken);
 
 	Task<YouTubeVideo?> GetVideoAsync(string videoId, CancellationToken cancellationToken);
 

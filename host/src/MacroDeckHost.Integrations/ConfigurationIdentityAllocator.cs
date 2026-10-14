@@ -22,14 +22,14 @@ internal static class ConfigurationIdentityAllocator
 			var digits = suffix().ToString(CultureInfo.InvariantCulture);
 			var candidate = sanitized.Length == 0
 				? $"configuration_{digits}"
-				: attempt == 0 &&
-				!occupiedKeys.Contains(sanitized) &&
-				!string.Equals(sanitized, keyThatMustChange, StringComparison.Ordinal)
+				: attempt == 0
+				&& !occupiedKeys.Contains(sanitized)
+				&& !string.Equals(sanitized, keyThatMustChange, StringComparison.Ordinal)
 					? sanitized
 					: $"{sanitized}_{digits}";
 
-			if (!occupiedKeys.Contains(candidate) &&
-				!string.Equals(candidate, keyThatMustChange, StringComparison.Ordinal))
+			if (!occupiedKeys.Contains(candidate)
+				&& !string.Equals(candidate, keyThatMustChange, StringComparison.Ordinal))
 			{
 				return candidate;
 			}

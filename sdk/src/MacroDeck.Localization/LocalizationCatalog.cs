@@ -10,7 +10,8 @@ public sealed class LocalizationCatalog : ILocalizationCatalog
 	/// <param name="defaultCulture">The culture the default-language resources are written in.</param>
 	/// <param name="templatesByCulture">Culture to key to template. Copied defensively.</param>
 	/// <exception cref="ArgumentException"><paramref name="scope" /> is not a valid scope.</exception>
-	public LocalizationCatalog(string scope,
+	public LocalizationCatalog(
+		string scope,
 		string defaultCulture,
 		IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> templatesByCulture)
 	{
@@ -47,18 +48,20 @@ public sealed class LocalizationCatalog : ILocalizationCatalog
 
 	/// <inheritdoc />
 	public IReadOnlyCollection<string> KeysOf(string culture)
-		=> culture is not null && _byCulture.TryGetValue(culture, out var templates)
+	{
+		return culture is not null && _byCulture.TryGetValue(culture, out var templates)
 			? (IReadOnlyCollection<string>)templates.Keys
 			: [];
+	}
 
 	/// <inheritdoc />
 	public bool TryGetTemplate(string culture, string key, out string text)
 	{
 		text = string.Empty;
 
-		return culture is not null &&
-			key is not null &&
-			_byCulture.TryGetValue(culture, out var templates) &&
-			templates.TryGetValue(key, out text!);
+		return culture is not null
+			&& key is not null
+			&& _byCulture.TryGetValue(culture, out var templates)
+			&& templates.TryGetValue(key, out text!);
 	}
 }

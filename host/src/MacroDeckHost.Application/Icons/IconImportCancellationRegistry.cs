@@ -7,7 +7,9 @@ public sealed class IconImportCancellationRegistry
 	private readonly ConcurrentDictionary<Guid, CancellationTokenSource> _sources = new();
 
 	public CancellationToken TokenFor(Guid batchId)
-		=> _sources.GetOrAdd(batchId, static _ => new CancellationTokenSource()).Token;
+	{
+		return _sources.GetOrAdd(batchId, static _ => new CancellationTokenSource()).Token;
+	}
 
 	public bool Cancel(Guid batchId)
 	{

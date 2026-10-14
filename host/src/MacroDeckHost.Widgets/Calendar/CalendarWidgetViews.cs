@@ -46,40 +46,44 @@ internal static class CalendarAgendaView
 				{
 					Key = "noCalendarsGate",
 					Condition = () => state.Value.Status == CalendarWidgetStatus.NoCalendars,
-					Content = () => CalendarWidgetParts.Notice("noCalendars", Strings.NoCalendars(), _rowText),
+					Content = () => CalendarWidgetParts.Notice("noCalendars", Strings.NoCalendars(), _rowText)
 				},
 				new UiWhen
 				{
 					Key = "readyGate",
 					Condition = () => state.Value.Status == CalendarWidgetStatus.Ready,
-					Content = () => settings.ShowDate ? Dated(state, settings) : Plain(state),
+					Content = () => settings.ShowDate ? Dated(state, settings) : Plain(state)
 				},
 				new UiWhen
 				{
 					Key = "accountErrorGate",
 					Condition = () => state.Value.HasAccountError,
-					Content = () => CalendarWidgetParts.AccountError(_detailText, _gap),
-				},
-			],
+					Content = () => CalendarWidgetParts.AccountError(_detailText, _gap)
+				}
+			]
 		};
 	}
 
 	private static UiResponsive Plain(UiState<CalendarAgendaState> state)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
-			Default = Compact(state, stacked: true, Strings.NoEvents()),
+			Default = Compact(state, true, Strings.NoEvents()),
 			Variants =
 			[
 				new UiResponsiveVariant { MinWidth = 1.5, MinHeight = 1.5, Content = Sections(state) },
-				new UiResponsiveVariant { MinWidth = 1.5, Content = Compact(state, stacked: false, Strings.NoEvents()) },
-			],
+				new UiResponsiveVariant { MinWidth = 1.5, Content = Compact(state, false, Strings.NoEvents()) }
+			]
 		};
+	}
 
 	private static UiResponsive Dated(UiState<CalendarAgendaState> state, CalendarAgendaSettings settings)
 	{
-		var empty = settings.Days == CalendarWidgetTypes.MinDays ? Strings.NoMoreEventsToday() : Strings.NoUpcomingEvents();
+		var empty = settings.Days == CalendarWidgetTypes.MinDays
+			? Strings.NoMoreEventsToday()
+			: Strings.NoUpcomingEvents();
 
 		return new UiResponsive
 		{
@@ -97,8 +101,8 @@ internal static class CalendarAgendaView
 						Key = "dateSections",
 						Direction = UiComponentDirections.Vertical,
 						Gap = _gap,
-						Children = [DateHeader(state, "dateHeader"), Sections(state) with { Fill = true }],
-					},
+						Children = [DateHeader(state, "dateHeader"), Sections(state) with { Fill = true }]
+					}
 				},
 				new UiResponsiveVariant
 				{
@@ -111,16 +115,17 @@ internal static class CalendarAgendaView
 						Children =
 						[
 							DateHeader(state, "dateColumn") with { MainSize = _dateColumn },
-							Compact(state, stacked: false, empty) with { Fill = true },
-						],
-					},
-				},
-			],
+							Compact(state, false, empty) with { Fill = true }
+						]
+					}
+				}
+			]
 		};
 	}
 
 	private static UiStack DateHeader(UiState<CalendarAgendaState> state, string key)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -134,7 +139,7 @@ internal static class CalendarAgendaView
 					Size = _weekdayText,
 					Weight = UiComponentTextWeights.SemiBold,
 					Color = CalendarWidgetParts.DateAccentColor,
-					MaxLines = 1,
+					MaxLines = 1
 				},
 				new UiTextRun
 				{
@@ -143,13 +148,15 @@ internal static class CalendarAgendaView
 					Size = _dayNumberText,
 					Weight = UiComponentTextWeights.Bold,
 					Role = UiComponentTextRoles.Primary,
-					MaxLines = 1,
-				},
-			],
+					MaxLines = 1
+				}
+			]
 		};
+	}
 
 	private static UiStack Glance(UiState<CalendarAgendaState> state, LocalizedText empty)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "glance",
 			Direction = UiComponentDirections.Vertical,
@@ -168,18 +175,20 @@ internal static class CalendarAgendaView
 						Size = _glanceTimeText,
 						Role = UiComponentTextRoles.Secondary,
 						Wrap = true,
-						MaxLines = 2,
-					},
+						MaxLines = 2
+					}
 				},
 				new UiRepeat<CalendarAgendaRow>
 				{
 					Key = "glanceRows",
-					Items = UiValue.From<IReadOnlyList<CalendarAgendaRow>>(() => [.. state.Value.Compact.Take(MaxGlanceRows)]),
+					Items = UiValue.From<IReadOnlyList<CalendarAgendaRow>>(()
+						=> [.. state.Value.Compact.Take(MaxGlanceRows)]),
 					KeySelector = row => row.Key,
-					Template = (row, _) => GlanceRow(row),
-				},
-			],
+					Template = (row, _) => GlanceRow(row)
+				}
+			]
 		};
+	}
 
 	private static UiStack GlanceRow(CalendarAgendaRow row)
 	{
@@ -192,8 +201,8 @@ internal static class CalendarAgendaView
 				Size = _glanceTitleText,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary,
-				MaxLines = 1,
-			},
+				MaxLines = 1
+			}
 		};
 
 		if (!row.Time.IsEmpty)
@@ -204,7 +213,7 @@ internal static class CalendarAgendaView
 				Text = row.Time,
 				Size = _glanceTimeText,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -221,14 +230,15 @@ internal static class CalendarAgendaView
 					Key = "text",
 					Direction = UiComponentDirections.Vertical,
 					Fill = true,
-					Children = text,
-				},
-			],
+					Children = text
+				}
+			]
 		};
 	}
 
 	private static UiStack Compact(UiState<CalendarAgendaState> state, bool stacked, LocalizedText empty)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = stacked ? "compactNarrow" : "compact",
 			Direction = UiComponentDirections.Vertical,
@@ -239,20 +249,22 @@ internal static class CalendarAgendaView
 				{
 					Key = "compactEmptyGate",
 					Condition = () => state.Value.Compact.Count == 0,
-					Content = () => CalendarWidgetParts.Notice("compactEmpty", empty, _rowText),
+					Content = () => CalendarWidgetParts.Notice("compactEmpty", empty, _rowText)
 				},
 				new UiRepeat<CalendarAgendaRow>
 				{
 					Key = "compactRows",
 					Items = UiValue.From(() => state.Value.Compact),
 					KeySelector = row => row.Key,
-					Template = (row, _) => Row(row),
-				},
-			],
+					Template = (row, _) => Row(row)
+				}
+			]
 		};
+	}
 
 	private static UiStack Sections(UiState<CalendarAgendaState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "sections",
 			Direction = UiComponentDirections.Vertical,
@@ -263,7 +275,7 @@ internal static class CalendarAgendaView
 				{
 					Key = "sectionsEmptyGate",
 					Condition = () => !state.Value.HasEvents,
-					Content = () => CalendarWidgetParts.Notice("sectionsEmpty", Strings.NoEvents(), _rowText),
+					Content = () => CalendarWidgetParts.Notice("sectionsEmpty", Strings.NoEvents(), _rowText)
 				},
 				new UiWhen
 				{
@@ -282,13 +294,14 @@ internal static class CalendarAgendaView
 								Key = "dayItems",
 								Items = UiValue.From(() => state.Value.Days),
 								KeySelector = day => day.Key,
-								Template = (day, _) => Day(day),
-							},
-						],
-					},
-				},
-			],
+								Template = (day, _) => Day(day)
+							}
+						]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Day(CalendarAgendaDay day)
 	{
@@ -301,8 +314,8 @@ internal static class CalendarAgendaView
 				Size = _headingText,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
-			},
+				MaxLines = 1
+			}
 		};
 
 		if (day.Rows.Count == 0)
@@ -313,7 +326,7 @@ internal static class CalendarAgendaView
 				Text = Strings.NoEvents(),
 				Size = _detailText,
 				Role = UiComponentTextRoles.Muted,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 		else
@@ -326,7 +339,7 @@ internal static class CalendarAgendaView
 			Key = day.Key,
 			Direction = UiComponentDirections.Vertical,
 			Gap = _gap,
-			Children = children,
+			Children = children
 		};
 	}
 
@@ -345,7 +358,7 @@ internal static class CalendarAgendaView
 				Size = _detailText,
 				Weight = UiComponentTextWeights.Medium,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			});
 		}
 
@@ -366,7 +379,7 @@ internal static class CalendarAgendaView
 				Key = "details",
 				Direction = UiComponentDirections.Horizontal,
 				Gap = _gap,
-				Children = details,
+				Children = details
 			});
 		}
 
@@ -383,32 +396,36 @@ internal static class CalendarAgendaView
 					Key = "text",
 					Direction = UiComponentDirections.Vertical,
 					Fill = true,
-					Children = text,
-				},
-			],
+					Children = text
+				}
+			]
 		};
 	}
 
 	private static UiTextRun Title(CalendarAgendaRow row)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = "title",
 			Text = row.Title,
 			Size = _rowText,
 			Role = UiComponentTextRoles.Primary,
 			MaxLines = 1,
-			Fill = true,
+			Fill = true
 		};
+	}
 
 	private static UiTextRun Detail(string key, string text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = _detailText,
 			Role = UiComponentTextRoles.Secondary,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 }
 
 internal static class CalendarNextEventView
@@ -452,20 +469,20 @@ internal static class CalendarNextEventView
 						Size = _detailText,
 						Weight = UiComponentTextWeights.SemiBold,
 						Color = CalendarWidgetParts.DateAccentColor,
-						MaxLines = 1,
-					},
+						MaxLines = 1
+					}
 				},
 				new UiWhen
 				{
 					Key = "noCalendarsGate",
 					Condition = () => state.Value.Status == CalendarWidgetStatus.NoCalendars,
-					Content = () => CalendarWidgetParts.Notice("noCalendars", Strings.NoCalendars(), _detailText),
+					Content = () => CalendarWidgetParts.Notice("noCalendars", Strings.NoCalendars(), _detailText)
 				},
 				new UiWhen
 				{
 					Key = "noEventsGate",
 					Condition = () => state.Value.Status == CalendarWidgetStatus.Ready && state.Value.Event is null,
-					Content = () => CalendarWidgetParts.Notice("noEvents", Strings.NoUpcomingEvents(), _detailText),
+					Content = () => CalendarWidgetParts.Notice("noEvents", Strings.NoUpcomingEvents(), _detailText)
 				},
 				new UiWhen
 				{
@@ -474,22 +491,23 @@ internal static class CalendarNextEventView
 					Content = () => new UiResponsive
 					{
 						Key = "layout",
-						Default = Event(state, narrow: true),
-						Variants = [new UiResponsiveVariant { MinWidth = 1.5, Content = Event(state, narrow: false) }],
-					},
+						Default = Event(state, true),
+						Variants = [new UiResponsiveVariant { MinWidth = 1.5, Content = Event(state, false) }]
+					}
 				},
 				new UiWhen
 				{
 					Key = "accountErrorGate",
 					Condition = () => state.Value.HasAccountError,
-					Content = () => CalendarWidgetParts.AccountError(_detailText, _gap),
-				},
-			],
+					Content = () => CalendarWidgetParts.AccountError(_detailText, _gap)
+				}
+			]
 		};
 	}
 
 	private static UiStack Event(UiState<CalendarNextEventState> state, bool narrow)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = narrow ? "eventNarrow" : "event",
 			Direction = UiComponentDirections.Horizontal,
@@ -500,7 +518,7 @@ internal static class CalendarNextEventView
 				{
 					Key = "bar",
 					MainSize = _bar,
-					Background = UiValue.From(() => state.Value.Color ?? CalendarWidgetParts.DefaultBarColor),
+					Background = UiValue.From(() => state.Value.Color ?? CalendarWidgetParts.DefaultBarColor)
 				},
 				new UiStack
 				{
@@ -518,7 +536,7 @@ internal static class CalendarNextEventView
 							Weight = UiComponentTextWeights.SemiBold,
 							Role = UiComponentTextRoles.Primary,
 							Wrap = true,
-							MaxLines = 2,
+							MaxLines = 2
 						},
 						new UiTextRun
 						{
@@ -526,16 +544,18 @@ internal static class CalendarNextEventView
 							Text = UiText.Optional(() => state.Value.When),
 							Size = narrow ? _detailText : _whenText,
 							Weight = UiComponentTextWeights.Medium,
-							MaxLines = 1,
+							MaxLines = 1
 						},
-						.. narrow ? [] : Details(state),
-					],
-				},
-			],
+						.. narrow ? [] : Details(state)
+					]
+				}
+			]
 		};
+	}
 
 	private static UiElement[] Details(UiState<CalendarNextEventState> state)
-		=>
+	{
+		return
 		[
 			new UiTextRun
 			{
@@ -543,7 +563,7 @@ internal static class CalendarNextEventView
 				Text = UiText.Optional(() => state.Value.Range),
 				Size = _detailText,
 				Role = UiComponentTextRoles.Secondary,
-				MaxLines = 1,
+				MaxLines = 1
 			},
 			new UiWhen
 			{
@@ -555,10 +575,11 @@ internal static class CalendarNextEventView
 					Text = UiText.From(() => state.Value.Location),
 					Size = _detailText,
 					Role = UiComponentTextRoles.Secondary,
-					MaxLines = 1,
-				},
-			},
+					MaxLines = 1
+				}
+			}
 		];
+	}
 }
 
 internal static class CalendarWidgetParts
@@ -568,7 +589,8 @@ internal static class CalendarWidgetParts
 	public const string DateAccentColor = "#ff3b30";
 
 	public static UiTextRun Notice(string key, LocalizedText text, UiLength size)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
@@ -577,14 +599,18 @@ internal static class CalendarWidgetParts
 			Align = UiComponentAlignments.Center,
 			Wrap = true,
 			MaxLines = 3,
-			Fill = true,
+			Fill = true
 		};
+	}
 
 	public static UiStack Bar(string? color, UiLength width)
-		=> new() { Key = "bar", MainSize = width, Background = color ?? DefaultBarColor };
+	{
+		return new UiStack { Key = "bar", MainSize = width, Background = color ?? DefaultBarColor };
+	}
 
 	public static UiStack AccountError(UiLength size, UiLength gap)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "accountError",
 			Direction = UiComponentDirections.Horizontal,
@@ -598,7 +624,7 @@ internal static class CalendarWidgetParts
 					Icon = UiIcons.AlertTriangle,
 					Size = size,
 					MainSize = size,
-					Role = UiComponentTextRoles.Secondary,
+					Role = UiComponentTextRoles.Secondary
 				},
 				new UiTextRun
 				{
@@ -608,8 +634,9 @@ internal static class CalendarWidgetParts
 					Role = UiComponentTextRoles.Secondary,
 					MaxLines = 2,
 					Wrap = true,
-					Fill = true,
-				},
-			],
+					Fill = true
+				}
+			]
 		};
+	}
 }

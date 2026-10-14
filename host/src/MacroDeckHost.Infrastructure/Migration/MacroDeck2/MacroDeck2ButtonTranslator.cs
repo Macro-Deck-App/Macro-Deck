@@ -51,18 +51,22 @@ internal sealed class MacroDeck2ButtonTranslator
 	}
 
 	private static bool RequiresStateMode(MacroDeck2Button button, string? stateBinding)
-		=> stateBinding is not null || DrivesItsOwnState(button);
+	{
+		return stateBinding is not null || DrivesItsOwnState(button);
+	}
 
 	/// <summary>
 	/// Whether one of Macro Deck 2's own state actions sits on this button. Matched on the type name
 	/// rather than on the translation, because the answer is needed before the flows are built.
 	/// </summary>
 	private static bool DrivesItsOwnState(MacroDeck2Button button)
-		=> new[] { button.Actions, button.ActionsRelease, button.ActionsLongPress, button.ActionsLongPressRelease }
+	{
+		return new[] { button.Actions, button.ActionsRelease, button.ActionsLongPress, button.ActionsLongPressRelease }
 			.SelectMany(actions => actions)
-			.Any(action => action.Type is { } type &&
-				(type.Contains("ActionButtonSetState", StringComparison.Ordinal) ||
-					type.Contains("ActionButtonToggleState", StringComparison.Ordinal)));
+			.Any(action => action.Type is { } type
+				&& (type.Contains("ActionButtonSetState", StringComparison.Ordinal)
+					|| type.Contains("ActionButtonToggleState", StringComparison.Ordinal)));
+	}
 
 	private static JsonObject WithStates(JsonObject off, JsonObject on, MacroDeck2Button button, string? stateBinding)
 	{
@@ -163,15 +167,20 @@ internal sealed class MacroDeck2ButtonTranslator
 	/// percentage of the cell so it survives resizing. The reference button was 100 px tall, which makes
 	/// a point size the same number of percent, clamped to what the editor itself allows.
 	/// </summary>
-	private static double MapFontSize(float size) => Math.Clamp(Math.Round(size, 1), 4, 60);
+	private static double MapFontSize(float size)
+	{
+		return Math.Clamp(Math.Round(size, 1), 4, 60);
+	}
 
 	private static string MapLabelPosition(int position)
-		=> position switch
+	{
+		return position switch
 		{
 			0 => "top",
 			1 => "center",
 			_ => "bottom"
 		};
+	}
 
 	private static JsonObject Merge(JsonObject target, JsonObject source)
 	{
@@ -184,11 +193,15 @@ internal sealed class MacroDeck2ButtonTranslator
 	}
 
 	private string? NormalizeBinding(string? variable)
-		=> string.IsNullOrWhiteSpace(variable) ? null : _resolveVariableName(variable.Trim());
+	{
+		return string.IsNullOrWhiteSpace(variable) ? null : _resolveVariableName(variable.Trim());
+	}
 
 	/// <summary>Rewrites <c>{name}</c> placeholders onto the names the variables were created under.</summary>
 	private string RewriteVariables(string text)
-		=> MacroDeck2VariablePlaceholder.Rewrite(text, _resolveVariableName);
+	{
+		return MacroDeck2VariablePlaceholder.Rewrite(text, _resolveVariableName);
+	}
 }
 
 internal static class MacroDeck2VariablePlaceholder

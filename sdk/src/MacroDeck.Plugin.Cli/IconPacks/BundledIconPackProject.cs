@@ -55,18 +55,21 @@ internal sealed record BundledIconPackOutcome
 
 	public int ExitCode { get; init; } = Cli.ExitCode.Success;
 
-	public static BundledIconPackOutcome Fail(int exitCode,
+	public static BundledIconPackOutcome Fail(
+		int exitCode,
 		string code,
 		string message,
 		string? detail = null,
 		IReadOnlyList<CliDiagnostic>? warnings = null)
-		=> new()
+	{
+		return new BundledIconPackOutcome
 		{
 			ExitCode = exitCode,
 			Error = new CliDiagnostic(code, message),
 			ErrorDetail = detail,
 			Warnings = warnings ?? []
 		};
+	}
 }
 
 internal sealed record ProjectManifest
@@ -115,8 +118,8 @@ internal static class BundledIconPackProject
 		{
 			return BundledIconPackOutcome.Fail(ExitCode.SubjectInvalid,
 				"icon-pack-too-large",
-				$"'{CliText.DisplayPath(sourceFull)}' is larger than the {PluginArtifactLimits.MaxEntryBytes} bytes " +
-				"a single plugin artifact entry may hold.");
+				$"'{CliText.DisplayPath(sourceFull)}' is larger than the {PluginArtifactLimits.MaxEntryBytes} bytes "
+				+ "a single plugin artifact entry may hold.");
 		}
 
 		var read = IconPackArchive.Read(sourceFull);
@@ -139,15 +142,15 @@ internal static class BundledIconPackProject
 		if (info.Ai is null)
 		{
 			warnings.Add(new CliDiagnostic("icon-pack-ai-undeclared",
-				"The icon pack declares nothing about AI. Its icons ship as part of this plugin, so make sure the " +
-				"plugin's own 'ai' declaration covers them."));
+				"The icon pack declares nothing about AI. Its icons ship as part of this plugin, so make sure the "
+				+ "plugin's own 'ai' declaration covers them."));
 		}
 		else if (info.Ai.GeneratedAssets && project.Manifest.Ai?.GeneratedAssets != true)
 		{
 			return BundledIconPackOutcome.Fail(ExitCode.SubjectInvalid,
 				"ai-declaration-mismatch",
-				"The icon pack declares AI-generated assets, but the plugin manifest does not. Set " +
-				"'ai.generatedAssets' to true in manifest.json before bundling it.");
+				"The icon pack declares AI-generated assets, but the plugin manifest does not. Set "
+				+ "'ai.generatedAssets' to true in manifest.json before bundling it.");
 		}
 
 		string key;
@@ -157,8 +160,8 @@ internal static class BundledIconPackProject
 			{
 				return BundledIconPackOutcome.Fail(ExitCode.UsageError,
 					"invalid-key",
-					$"'{requestedKey}' is not a valid key. Use lowercase letters, digits and inner hyphens, at most " +
-					$"{PluginBundledIconPacks.MaxKeyLength} characters.");
+					$"'{requestedKey}' is not a valid key. Use lowercase letters, digits and inner hyphens, at most "
+					+ $"{PluginBundledIconPacks.MaxKeyLength} characters.");
 			}
 
 			key = requestedKey;
@@ -187,8 +190,8 @@ internal static class BundledIconPackProject
 		{
 			return BundledIconPackOutcome.Fail(ExitCode.SubjectInvalid,
 				"icon-pack-exists",
-				$"The manifest already bundles an icon pack under the key '{key}'. Pass --force to replace it, or " +
-				"--key to choose another key.",
+				$"The manifest already bundles an icon pack under the key '{key}'. Pass --force to replace it, or "
+				+ "--key to choose another key.",
 				warnings: warnings);
 		}
 
@@ -196,16 +199,17 @@ internal static class BundledIconPackProject
 		{
 			return BundledIconPackOutcome.Fail(ExitCode.SubjectInvalid,
 				"too-many-icon-packs",
-				$"The manifest already bundles {PluginBundledIconPacks.MaxCount} icon packs, the most a plugin can " +
-				"declare.",
+				$"The manifest already bundles {PluginBundledIconPacks.MaxCount} icon packs, the most a plugin can "
+				+ "declare.",
 				warnings: warnings);
 		}
 
 		var targetRelative = PluginBundledIconPacks.DefaultPath(key);
 		var targetFull = Resolve(project.Root, targetRelative);
 
-		if (entries.FirstOrDefault(entry => !string.Equals(entry.Key, key, StringComparison.Ordinal) &&
-				string.Equals(entry.Path, targetRelative, StringComparison.OrdinalIgnoreCase)) is { } clash)
+		if (entries.FirstOrDefault(entry
+				=> !string.Equals(entry.Key, key, StringComparison.Ordinal)
+				&& string.Equals(entry.Path, targetRelative, StringComparison.OrdinalIgnoreCase)) is { } clash)
 		{
 			return BundledIconPackOutcome.Fail(ExitCode.SubjectInvalid,
 				"icon-pack-path-in-use",
@@ -239,7 +243,7 @@ internal static class BundledIconPackProject
 
 			if (placement != BundledIconPackPlacement.InPlace)
 			{
-				File.Copy(sourceFull, targetFull, overwrite: true);
+				File.Copy(sourceFull, targetFull, true);
 			}
 
 			var entry = new JsonObject { ["key"] = key, ["path"] = targetRelative };
@@ -261,17 +265,20 @@ internal static class BundledIconPackProject
 				File.Delete(sourceFull);
 			}
 
-			if (previousFull is not null &&
-				!string.Equals(previousFull, targetFull, _pathComparison) &&
-				!string.Equals(previousFull, sourceFull, _pathComparison) &&
-				File.Exists(previousFull))
+			if (previousFull is not null
+				&& !string.Equals(previousFull, targetFull, _pathComparison)
+				&& !string.Equals(previousFull, sourceFull, _pathComparison)
+				&& File.Exists(previousFull))
 			{
 				File.Delete(previousFull);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
-			return BundledIconPackOutcome.Fail(ExitCode.InputUnreadable, "write-failed", ex.Message, warnings: warnings);
+			return BundledIconPackOutcome.Fail(ExitCode.InputUnreadable,
+				"write-failed",
+				ex.Message,
+				warnings: warnings);
 		}
 
 		return new BundledIconPackOutcome
@@ -325,8 +332,9 @@ internal static class BundledIconPackProject
 
 			Save(project);
 
-			if (IsContainedRelative(removed.Path, project.Root) && Resolve(project.Root, removed.Path) is var full &&
-				File.Exists(full))
+			if (IsContainedRelative(removed.Path, project.Root)
+				&& Resolve(project.Root, removed.Path) is var full
+				&& File.Exists(full))
 			{
 				File.Delete(full);
 				deleted = true;
@@ -407,15 +415,15 @@ internal static class BundledIconPackProject
 
 		if (info.DuplicateNames.Count > 0)
 		{
-			lines.Add("  Used by more than one icon (names are compared case-insensitively): " +
-				string.Join(", ", info.DuplicateNames.Select(name => $"'{name}'")));
+			lines.Add("  Used by more than one icon (names are compared case-insensitively): "
+				+ string.Join(", ", info.DuplicateNames.Select(name => $"'{name}'")));
 		}
 
 		if (info.UnusableNames.Count > 0)
 		{
-			lines.Add("  Not usable as a name (blank, surrounding whitespace, '/', control characters or longer than " +
-				$"{IconPackArchive.MaxIconNameLength} characters): " +
-				string.Join(", ", info.UnusableNames.Select(name => $"'{name}'")));
+			lines.Add("  Not usable as a name (blank, surrounding whitespace, '/', control characters or longer than "
+				+ $"{IconPackArchive.MaxIconNameLength} characters): "
+				+ string.Join(", ", info.UnusableNames.Select(name => $"'{name}'")));
 		}
 
 		var withoutMaster = info.Icons.Where(icon => !icon.HasMaster).Select(icon => icon.Name).ToList();
@@ -449,8 +457,12 @@ internal static class BundledIconPackProject
 		{
 			entries.Add(new PluginBundledIconPack
 			{
-				Key = (item as JsonObject)?["key"] is JsonValue key && key.TryGetValue<string>(out var k) ? k : string.Empty,
-				Path = (item as JsonObject)?["path"] is JsonValue path && path.TryGetValue<string>(out var p) ? p : string.Empty
+				Key = (item as JsonObject)?["key"] is JsonValue key && key.TryGetValue<string>(out var k)
+					? k
+					: string.Empty,
+				Path = (item as JsonObject)?["path"] is JsonValue path && path.TryGetValue<string>(out var p)
+					? p
+					: string.Empty
 			});
 		}
 
@@ -492,10 +504,16 @@ internal static class BundledIconPackProject
 	}
 
 	private static string Resolve(string root, string relativePath)
-		=> Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	{
+		return Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+	}
 
 	private static bool IsContainedRelative(string relativePath, string root)
-		=> !string.IsNullOrEmpty(relativePath) && !Path.IsPathRooted(relativePath) && IsInside(Resolve(root, relativePath), root);
+	{
+		return !string.IsNullOrEmpty(relativePath)
+			&& !Path.IsPathRooted(relativePath)
+			&& IsInside(Resolve(root, relativePath), root);
+	}
 
 	private static bool IsInside(string fullPath, string root)
 	{

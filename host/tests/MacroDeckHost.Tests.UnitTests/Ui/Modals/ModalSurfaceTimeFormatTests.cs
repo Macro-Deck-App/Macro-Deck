@@ -19,7 +19,8 @@ public class ModalSurfaceTimeFormatTests
 	{
 		var coordinator = new ModalInteractionCoordinator(new ManualTimeProvider());
 		var broker = new RecordingUiSessionBroker();
-		var modalId = coordinator.Register("com.example.plugin", "client-a", new ModalDefinition { ViewId = "details" })!;
+		var modalId
+			= coordinator.Register("com.example.plugin", "client-a", new ModalDefinition { ViewId = "details" })!;
 		var opener = new ModalUiSessionOpener(coordinator,
 			broker,
 			Serilog.Core.Logger.None,
@@ -44,10 +45,11 @@ public class ModalSurfaceTimeFormatTests
 		services.AddSingleton<IAppPreferenceService>(new FakeLocalizationPreferences
 		{
 			Culture = "en-US",
-			TimeFormat = AppPreferenceService.TimeFormatSystem,
+			TimeFormat = AppPreferenceService.TimeFormatSystem
 		});
 		var system = new SwitchableHourCycle { Value = HourCycles.H12 };
-		var culture = new HostUiCulture(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), system);
+		var culture = new HostUiCulture(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+			system);
 		var opener = new ModalUiSessionOpener(coordinator, broker, Serilog.Core.Logger.None, culture);
 
 		var first = OpenHourCycle(coordinator, broker, opener);
@@ -61,11 +63,13 @@ public class ModalSurfaceTimeFormatTests
 		});
 	}
 
-	private static string? OpenHourCycle(ModalInteractionCoordinator coordinator,
+	private static string? OpenHourCycle(
+		ModalInteractionCoordinator coordinator,
 		RecordingUiSessionBroker broker,
 		ModalUiSessionOpener opener)
 	{
-		var modalId = coordinator.Register("com.example.plugin", "client-a", new ModalDefinition { ViewId = "details" })!;
+		var modalId
+			= coordinator.Register("com.example.plugin", "client-a", new ModalDefinition { ViewId = "details" })!;
 		opener.Open(new OpenModalUiSessionRequest { ModalId = modalId }, "device-a");
 
 		return broker.LastOpenedSurface!.Attributes[UiDialogSurfaceAttributes.HourCycle].GetString();
@@ -75,7 +79,10 @@ public class ModalSurfaceTimeFormatTests
 	{
 		public string? Value { get; set; }
 
-		public string? Read() => Value;
+		public string? Read()
+		{
+			return Value;
+		}
 	}
 
 	private sealed class FixedCulture(string culture, string hourCycle) : IHostUiCulture

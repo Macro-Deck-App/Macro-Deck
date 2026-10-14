@@ -23,7 +23,10 @@ public sealed class RemoteEmailInboxProvider(
 
 	public string ProviderName => providerName;
 
-	public IReadOnlyList<SdkEmailInbox> GetInboxes() => inboxes;
+	public IReadOnlyList<SdkEmailInbox> GetInboxes()
+	{
+		return inboxes;
+	}
 
 	event EventHandler<EmailInboxChangedEventArgs>? IEmailInboxProvider.Changed
 	{

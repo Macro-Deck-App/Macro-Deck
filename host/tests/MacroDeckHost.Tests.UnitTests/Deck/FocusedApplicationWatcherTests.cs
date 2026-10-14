@@ -67,6 +67,9 @@ public class FocusedApplicationWatcherTests
 			}
 		}
 
-		public void Dispose() => Disposed = true;
+		public void Dispose()
+		{
+			Disposed = true;
+		}
 	}
 }

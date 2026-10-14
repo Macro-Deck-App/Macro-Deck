@@ -29,15 +29,15 @@ internal static class NowPlayingScreenSaverView
 				{
 					Key = "playingGate",
 					Condition = () => state.Value.HasTrack,
-					Content = () => MusicPlayerWidgetView.Build(state, config, icons, 0),
+					Content = () => MusicPlayerWidgetView.Build(state, config, icons, 0)
 				},
 				new UiWhen
 				{
 					Key = "idleGate",
 					Condition = () => !state.Value.HasTrack,
-					Content = () => ClockScreenSaverView.Build(clock, clockPosition),
-				},
-			],
+					Content = () => ClockScreenSaverView.Build(clock, clockPosition)
+				}
+			]
 		};
 	}
 }

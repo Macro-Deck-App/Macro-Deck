@@ -27,8 +27,8 @@ public sealed class CompanionScreenshotsController : ControllerBase
 	[RequestSizeLimit(MaxUploadBytes)]
 	public async Task<IActionResult> Upload(string requestId, CancellationToken cancellationToken)
 	{
-		if (DeviceId() is not { } deviceId ||
-			!_requests.IsAwaitingAnswer(deviceId, requestId, CompanionRequestKind.Screenshot))
+		if (DeviceId() is not { } deviceId
+			|| !_requests.IsAwaitingAnswer(deviceId, requestId, CompanionRequestKind.Screenshot))
 		{
 			return NotFound();
 		}
@@ -45,7 +45,7 @@ public sealed class CompanionScreenshotsController : ControllerBase
 				requestId,
 				CompanionCommandResult.Failed(CompanionDeviceFailure.Failed),
 				CompanionRequestKind.Screenshot,
-				afterRunning: true);
+				true);
 			return BadRequest();
 		}
 
@@ -53,7 +53,7 @@ public sealed class CompanionScreenshotsController : ControllerBase
 			requestId,
 			CompanionCommandResult.Of(png),
 			CompanionRequestKind.Screenshot,
-			afterRunning: true)
+			true)
 			? NoContent()
 			: NotFound();
 	}
@@ -61,35 +61,49 @@ public sealed class CompanionScreenshotsController : ControllerBase
 	[HttpPost("commands/{requestId}")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public IActionResult Done(string requestId)
-		=> DeviceId() is { } deviceId &&
-			_requests.TryComplete(deviceId,
+	{
+		return DeviceId() is { } deviceId
+			&& _requests.TryComplete(deviceId,
 				requestId,
 				CompanionCommandResult.Done,
 				CompanionRequestKind.Command,
-				afterRunning: true)
+				true)
 				? NoContent()
 				: NotFound();
+	}
 
 	[HttpPost("commands/{requestId}/claim")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public IActionResult Claim(string requestId) => ClaimAs(requestId, CompanionRequestKind.Command);
+	public IActionResult Claim(string requestId)
+	{
+		return ClaimAs(requestId, CompanionRequestKind.Command);
+	}
 
 	[HttpPost("screenshots/{requestId}/claim")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public IActionResult ClaimScreenshot(string requestId) => ClaimAs(requestId, CompanionRequestKind.Screenshot);
+	public IActionResult ClaimScreenshot(string requestId)
+	{
+		return ClaimAs(requestId, CompanionRequestKind.Screenshot);
+	}
 
 	private IActionResult ClaimAs(string requestId, CompanionRequestKind kind)
-		=> DeviceId() is { } deviceId && _requests.TryClaim(deviceId, requestId, kind) ? NoContent() : NotFound();
+	{
+		return DeviceId() is { } deviceId && _requests.TryClaim(deviceId, requestId, kind) ? NoContent() : NotFound();
+	}
 
 	[HttpPost("screenshots/{requestId}/failed")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public IActionResult ScreenshotFailed(string requestId, [FromBody] CompanionScreenshotFailedRequest request)
-		=> Fail(requestId, request, CompanionRequestKind.Screenshot);
+	{
+		return Fail(requestId, request, CompanionRequestKind.Screenshot);
+	}
 
 	[HttpPost("commands/{requestId}/failed")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public IActionResult CommandFailed(string requestId, [FromBody] CompanionScreenshotFailedRequest request)
-		=> Fail(requestId, request, CompanionRequestKind.Command);
+	{
+		return Fail(requestId, request, CompanionRequestKind.Command);
+	}
 
 	private IActionResult Fail(string requestId, CompanionScreenshotFailedRequest request, CompanionRequestKind kind)
 	{
@@ -99,18 +113,20 @@ public sealed class CompanionScreenshotsController : ControllerBase
 			"unavailable" => CompanionDeviceFailure.Unavailable,
 			_ => CompanionDeviceFailure.Failed
 		};
-		return DeviceId() is { } deviceId &&
-			_requests.TryComplete(deviceId,
+		return DeviceId() is { } deviceId
+			&& _requests.TryComplete(deviceId,
 				requestId,
 				CompanionCommandResult.Failed(failure),
 				kind,
-				afterRunning: false)
+				false)
 				? NoContent()
 				: NotFound();
 	}
 
 	private Guid? DeviceId()
-		=> Guid.TryParse(User.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var deviceId) ? deviceId : null;
+	{
+		return Guid.TryParse(User.FindFirst(AuthDefaults.DeviceClaim)?.Value, out var deviceId) ? deviceId : null;
+	}
 
 	private async Task<byte[]?> ReadBoundedAsync(CancellationToken cancellationToken)
 	{

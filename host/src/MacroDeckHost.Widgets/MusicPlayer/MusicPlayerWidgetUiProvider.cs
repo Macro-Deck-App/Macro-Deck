@@ -68,7 +68,7 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -147,12 +147,16 @@ public sealed class MusicPlayerWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 
 	/// <summary>The stored widget's id, or <c>null</c> on a Preview, which has none.</summary>
 	private static string? WidgetId(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var id) &&
-			id.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.WidgetId, out var id)
+			&& id.ValueKind == JsonValueKind.String
 				? id.GetString()
 				: null;
+	}
 }

@@ -3,7 +3,7 @@ using MacroDeck.Sdk.Decks;
 namespace MacroDeck.Sdk.Tests.UnitTests.Decks;
 
 [TestFixture]
-public class IDeckNavigatorTests
+public class DeckNavigatorTests
 {
 	[Test]
 	public void An_implementer_that_predates_client_positions_reports_no_clients()
@@ -17,7 +17,9 @@ public class IDeckNavigatorTests
 	public void An_implementer_that_predates_client_positions_accepts_and_ignores_ClientChanged_handlers()
 	{
 		IDeckNavigator navigator = new Minimal();
-		EventHandler<DeckClientChangedEventArgs> handler = (_, _) => { };
+		EventHandler<DeckClientChangedEventArgs> handler = (_, _) =>
+		{
+		};
 
 		Assert.DoesNotThrow(() =>
 		{
@@ -28,22 +30,40 @@ public class IDeckNavigatorTests
 
 	private sealed class Minimal : IDeckNavigator
 	{
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeckFolder> GetFolders() => [];
+		public IReadOnlyList<DeckFolder> GetFolders()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<DeckProfile> GetProfiles() => [];
+		public IReadOnlyList<DeckProfile> GetProfiles()
+		{
+			return [];
+		}
 	}
 }

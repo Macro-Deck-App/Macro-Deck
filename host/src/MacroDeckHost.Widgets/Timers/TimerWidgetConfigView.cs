@@ -18,12 +18,12 @@ internal static class TimerWidgetConfigView
 		var isCountdown = widgetTypeId == WidgetTypeIds.Countdown;
 
 		var mode = new UiState<string>(WidgetConfigJson.ReadString(data, "mode") ?? "fixed");
-		var hasDuration = ReadNumber(data, "durationHours") is not null ||
-			ReadNumber(data, "durationMinutes") is not null ||
-			ReadNumber(data, "durationSeconds") is not null;
+		var hasDuration = ReadNumber(data, "durationHours") is not null
+			|| ReadNumber(data, "durationMinutes") is not null
+			|| ReadNumber(data, "durationSeconds") is not null;
 		var durationHours = new UiState<double>(ReadNumber(data, "durationHours") ?? 0);
-		var durationMinutes = new UiState<double>(ReadNumber(data, "durationMinutes") ??
-			(hasDuration ? 0 : TimerWidgetConfig.DefaultDurationSeconds / 60));
+		var durationMinutes = new UiState<double>(ReadNumber(data, "durationMinutes")
+			?? (hasDuration ? 0 : TimerWidgetConfig.DefaultDurationSeconds / 60));
 		var durationSeconds = new UiState<double>(ReadNumber(data, "durationSeconds") ?? 0);
 		var showLabel = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLabel") ?? false);
 		var label = new UiState<string>(WidgetConfigJson.ReadString(data, "label") ?? string.Empty);
@@ -40,8 +40,7 @@ internal static class TimerWidgetConfigView
 
 		if (isCountdown)
 		{
-			children.AddRange(
-			[
+			children.AddRange([
 				new UiHeading { Key = "countdown-heading", Text = AppStrings.WebClient.Widgets.Countdown.Name() },
 				new UiChoiceInput
 				{
@@ -51,8 +50,8 @@ internal static class TimerWidgetConfigView
 					Binding = Bind.To(mode),
 					Options = UiValue.Of<IReadOnlyList<UiOption>>([
 						UiOption.Of("fixed", AppStrings.Widgets.Countdown.ModeFixed()),
-						UiOption.Of(TimerWidgetConfig.AskMode, AppStrings.Widgets.Countdown.ModeAsk()),
-					]),
+						UiOption.Of(TimerWidgetConfig.AskMode, AppStrings.Widgets.Countdown.ModeAsk())
+					])
 				},
 				new UiWhen
 				{
@@ -65,17 +64,22 @@ internal static class TimerWidgetConfigView
 						Wrap = false,
 						Children =
 						[
-							DurationPart("durationHours", AppStrings.Widgets.Countdown.Dialog.Hours(), durationHours, 23),
-							DurationPart("durationMinutes", AppStrings.Widgets.Countdown.Dialog.Minutes(), durationMinutes, 59),
-							DurationPart("durationSeconds", AppStrings.Widgets.Clock.Seconds(), durationSeconds, 59),
-						],
-					},
-				},
+							DurationPart("durationHours",
+								AppStrings.Widgets.Countdown.Dialog.Hours(),
+								durationHours,
+								23),
+							DurationPart("durationMinutes",
+								AppStrings.Widgets.Countdown.Dialog.Minutes(),
+								durationMinutes,
+								59),
+							DurationPart("durationSeconds", AppStrings.Widgets.Clock.Seconds(), durationSeconds, 59)
+						]
+					}
+				}
 			]);
 		}
 
-		children.AddRange(
-		[
+		children.AddRange([
 			new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 			new UiColorInput
 			{
@@ -83,14 +87,14 @@ internal static class TimerWidgetConfigView
 				AllowVariables = true,
 				Label = AppStrings.Widgets.History.AccentColor(),
 				Binding = Bind.To(accentColor),
-				SupportsReset = true,
+				SupportsReset = true
 			},
 			WidgetConfigFragments.Background(backgroundColor),
 			new UiBooleanInput
 			{
 				Key = "showLabel",
 				Label = AppStrings.Widgets.Editor.Label(),
-				Binding = Bind.To(showLabel),
+				Binding = Bind.To(showLabel)
 			},
 			new UiStringInput
 			{
@@ -98,10 +102,10 @@ internal static class TimerWidgetConfigView
 				Placeholder = AppStrings.Widgets.Timer.LabelPlaceholderExample(),
 				Binding = Bind.To(label),
 				HideLabel = true,
-				VisibleWhen = new UiVisibleWhen { ParameterName = "showLabel", Values = ["true"] },
+				VisibleWhen = new UiVisibleWhen { ParameterName = "showLabel", Values = ["true"] }
 			},
 			new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-			WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
+			WidgetConfigFragments.Border(borderStyle, borderColor, false)
 		]);
 
 		return new UiWidgetConfiguration
@@ -118,24 +122,32 @@ internal static class TimerWidgetConfigView
 						Key = "flows",
 						Binding = Bind.To(flows),
 						CanRun = true,
-						Triggers = UiValue.Of(Triggers(isCountdown)),
-					},
-				],
-			},
+						Triggers = UiValue.Of(Triggers(isCountdown))
+					}
+				]
+			}
 		};
 	}
 
 	public static IReadOnlyList<string> Triggers(bool isCountdown)
-		=> isCountdown
+	{
+		return isCountdown
 			?
 			[
-				WidgetTriggerTypes.CountdownFinished, WidgetTriggerTypes.CountdownStarted, WidgetTriggerTypes.CountdownPaused,
-				WidgetTriggerTypes.CountdownReset, WidgetTriggerTypes.CountdownDismissed,
+				WidgetTriggerTypes.CountdownFinished, WidgetTriggerTypes.CountdownStarted,
+				WidgetTriggerTypes.CountdownPaused,
+				WidgetTriggerTypes.CountdownReset, WidgetTriggerTypes.CountdownDismissed
 			]
-			: [WidgetTriggerTypes.StopwatchStarted, WidgetTriggerTypes.StopwatchPaused, WidgetTriggerTypes.StopwatchReset];
+			:
+			[
+				WidgetTriggerTypes.StopwatchStarted, WidgetTriggerTypes.StopwatchPaused,
+				WidgetTriggerTypes.StopwatchReset
+			];
+	}
 
 	private static UiNumberInput DurationPart(string key, UiText label, UiState<double> value, double max)
-		=> new()
+	{
+		return new UiNumberInput
 		{
 			Key = key,
 			Label = label,
@@ -143,13 +155,16 @@ internal static class TimerWidgetConfigView
 			Min = 0,
 			Max = max,
 			Step = 1,
-			RowWeight = 1,
+			RowWeight = 1
 		};
+	}
 
 	private static double? ReadNumber(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
 				? value.GetDouble()
 				: null;
+	}
 }

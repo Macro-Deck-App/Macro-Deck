@@ -15,7 +15,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 // never sends a standalone capability.declare at handshake - capabilities travel on the session request
 // itself - so no .NET subject can satisfy or violate that ordering; there is nothing to assert.
 [TestFixture]
-public class A8_MessageLogTests
+public class A8MessageLogTests
 {
 	private MacroDeckTestHost _host = null!;
 	private InProcessPlugin _plugin = null!;
@@ -70,14 +70,14 @@ public class A8_MessageLogTests
 		var outcome = await _session.Actions.ExecuteAsync("quick");
 
 		var invoke = _host.Messages.All.Single(message
-			=> message.Direction == ProtocolMessageDirection.ToPlugin &&
-			message.Envelope.Type == MessageTypes.CapabilityInvoke &&
-			message.Envelope.Id == outcome.CorrelationId);
+			=> message.Direction == ProtocolMessageDirection.ToPlugin
+			&& message.Envelope.Type == MessageTypes.CapabilityInvoke
+			&& message.Envelope.Id == outcome.CorrelationId);
 
 		var result = _host.Messages.All.Single(message
-			=> message.Direction == ProtocolMessageDirection.FromPlugin &&
-			message.Envelope.Type == MessageTypes.CapabilityResult &&
-			message.Envelope.CorrelationId == outcome.CorrelationId);
+			=> message.Direction == ProtocolMessageDirection.FromPlugin
+			&& message.Envelope.Type == MessageTypes.CapabilityResult
+			&& message.Envelope.CorrelationId == outcome.CorrelationId);
 
 		Assert.That(result.Envelope.CorrelationId, Is.EqualTo(invoke.Envelope.Id));
 	}

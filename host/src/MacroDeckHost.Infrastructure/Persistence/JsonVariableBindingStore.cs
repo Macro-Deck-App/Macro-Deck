@@ -65,9 +65,9 @@ public sealed class JsonVariableBindingStore : IVariableBindingStore
 			// a file is present but unrecoverable (it already logged the latter). Only the absence of the
 			// primary file and every recovery candidate is safe to treat as "no bindings" - anything else
 			// must be reported as a failed read so a load-modify-save caller does not overwrite it.
-			if (!File.Exists(_filePath) &&
-				!File.Exists(_filePath + DurableJsonFile.TempSuffix) &&
-				!File.Exists(_filePath + DurableJsonFile.BackupSuffix))
+			if (!File.Exists(_filePath)
+				&& !File.Exists(_filePath + DurableJsonFile.TempSuffix)
+				&& !File.Exists(_filePath + DurableJsonFile.BackupSuffix))
 			{
 				_cache = [];
 				bindings = _cache;

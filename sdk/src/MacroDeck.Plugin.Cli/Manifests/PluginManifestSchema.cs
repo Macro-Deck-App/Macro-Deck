@@ -66,22 +66,25 @@ internal static class PluginManifestSchema
 		var locations = problems.Select(problem => problem.Pointer ?? string.Empty).ToList();
 
 		return problems
-			.Where((problem, index) => !_applicatorCodes.Contains(problem.Code) ||
-				!locations.Where((_, other) => other != index)
+			.Where((problem, index) => !_applicatorCodes.Contains(problem.Code)
+				|| !locations.Where((_, other) => other != index)
 					.Any(location => IsBeneath(location, locations[index])))
 			.ToList();
 	}
 
 	/// <summary>Whether one RFC 6901 pointer names a location strictly inside another. The root pointer is
 	/// the empty string, so every non-empty pointer is beneath it.</summary>
-	private static bool IsBeneath(string candidate, string ancestor) =>
-		ancestor.Length == 0
+	private static bool IsBeneath(string candidate, string ancestor)
+	{
+		return ancestor.Length == 0
 			? candidate.Length > 0
-			: candidate.Length > ancestor.Length &&
-			candidate.StartsWith(ancestor, StringComparison.Ordinal) &&
-			candidate[ancestor.Length] == '/';
+			: candidate.Length > ancestor.Length
+			&& candidate.StartsWith(ancestor, StringComparison.Ordinal)
+			&& candidate[ancestor.Length] == '/';
+	}
 
-	private static void Collect(EvaluationResults node,
+	private static void Collect(
+		EvaluationResults node,
 		List<ManifestProblem> problems,
 		HashSet<(string Pointer, string Keyword)> seen)
 	{
@@ -124,8 +127,8 @@ internal static class PluginManifestSchema
 	{
 		var assembly = typeof(PluginManifest).Assembly;
 
-		using var stream = assembly.GetManifestResourceStream("plugin-manifest-v1.schema.json") ??
-			throw new InvalidOperationException(
+		using var stream = assembly.GetManifestResourceStream("plugin-manifest-v1.schema.json")
+			?? throw new InvalidOperationException(
 				$"'{assembly.FullName}' does not embed 'plugin-manifest-v1.schema.json'.");
 
 		using var reader = new StreamReader(stream);

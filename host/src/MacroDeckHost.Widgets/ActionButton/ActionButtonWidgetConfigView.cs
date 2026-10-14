@@ -31,7 +31,8 @@ internal static class ActionButtonWidgetConfigView
 	// the real button shape. Widget geometry (grid width/height) is not part of a config surface's inputs
 	// today, so this uses the Action Button's usual square footprint rather than the placed instance's
 	// actual size - the same approximation the original editor made for a folder's inherited spacing.
-	public static UiElement Build(JsonElement data,
+	public static UiElement Build(
+		JsonElement data,
 		double aspectRatio,
 		IIntegrationRegistry integrations,
 		IFontCatalog fonts,
@@ -74,24 +75,31 @@ internal static class ActionButtonWidgetConfigView
 				StringComparer.Ordinal);
 
 		UiOption FamilyOption(string family)
-			=> previewFaces.TryGetValue(family, out var previewFaceId)
+		{
+			return previewFaces.TryGetValue(family, out var previewFaceId)
 				? UiOption.Of(family, family) with
 				{
 					Metadata = new Dictionary<string, string> { ["fontFaceId"] = previewFaceId }
 				}
 				: UiOption.Of(family, family);
+		}
 
 		string FamilyOf(string faceId)
-			=> string.IsNullOrEmpty(faceId)
+		{
+			return string.IsNullOrEmpty(faceId)
 				? string.Empty
-				: fonts.GetFaces().FirstOrDefault(face => string.Equals(face.FaceId, faceId, StringComparison.Ordinal))
-					?.Family ??
-				string.Empty;
+				: fonts.GetFaces()
+					.FirstOrDefault(face => string.Equals(face.FaceId, faceId, StringComparison.Ordinal))
+					?.Family
+				?? string.Empty;
+		}
 
 		List<FontFaceInfo> FacesForFamily(string family)
-			=> string.IsNullOrEmpty(family)
+		{
+			return string.IsNullOrEmpty(family)
 				? []
 				: fonts.GetFaces().Where(face => string.Equals(face.Family, family, StringComparison.Ordinal)).ToList();
+		}
 
 		// ---- Persisted cells - every one of these is a real widget-data key -----------------------------
 
@@ -130,12 +138,12 @@ internal static class ActionButtonWidgetConfigView
 		var labelShadow = new UiState<bool>(WidgetConfigJson.ReadBool(data, "labelShadow") ?? true);
 		var labelOutlineColor =
 			new UiState<string>(WidgetConfigJson.ReadString(data, "labelOutlineColor") ?? string.Empty);
-		var labelOutlineWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelOutlineWidth") ??
-			ActionButtonWidgetData.DefaultLabelStrokeWidth);
+		var labelOutlineWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelOutlineWidth")
+			?? ActionButtonWidgetData.DefaultLabelStrokeWidth);
 		var labelBoxBorderColor =
 			new UiState<string>(WidgetConfigJson.ReadString(data, "labelBoxBorderColor") ?? string.Empty);
-		var labelBoxBorderWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelBoxBorderWidth") ??
-			ActionButtonWidgetData.DefaultLabelStrokeWidth);
+		var labelBoxBorderWidth = new UiState<double>(WidgetConfigJson.ReadDouble(data, "labelBoxBorderWidth")
+			?? ActionButtonWidgetData.DefaultLabelStrokeWidth);
 		var fontFaceId = new UiState<string>(WidgetConfigJson.ReadString(data, "fontFaceId") ?? string.Empty);
 		var fontSize = new UiState<double>(WidgetConfigJson.ReadDouble(data, "fontSize") ?? 14);
 		var textAlign = new UiState<string>(WidgetConfigJson.ReadString(data, "textAlign") ?? "center");
@@ -157,8 +165,7 @@ internal static class ActionButtonWidgetConfigView
 		var iconNotices = new UiState<IReadOnlyList<ProviderNotice>>([]);
 		var iconHasSnapshot = new UiAsyncState<bool?>(async cancellationToken =>
 			{
-				if (iconProviderState.Peek() is not { } provider ||
-					FindBlock(provider.BlockId) is not { } block)
+				if (iconProviderState.Peek() is not { } provider || FindBlock(provider.BlockId) is not { } block)
 				{
 					return null;
 				}
@@ -206,7 +213,7 @@ internal static class ActionButtonWidgetConfigView
 			return
 			[
 				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOffStateId, "Off", Appearance("#ef4444")),
-				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#16a34a")),
+				new ActionButtonStateEntry(ActionButtonStateModel.DefaultOnStateId, "On", Appearance("#16a34a"))
 			];
 		}
 
@@ -237,11 +244,13 @@ internal static class ActionButtonWidgetConfigView
 		// WidgetStateService itself uses to resolve a live face when no provider or mapping governs, so the
 		// editor and the rendered button never disagree about what "no explicit choice yet" means.
 		string EffectiveSelectedStateId()
-			=> states.Value.Any(s => s.Id == activeStoredStateId.Value)
+		{
+			return states.Value.Any(s => s.Id == activeStoredStateId.Value)
 				? activeStoredStateId.Value
 				: states.Value.Count > 0
 					? states.Value[0].Id
 					: string.Empty;
+		}
 
 		void StashManualBackup()
 		{
@@ -289,7 +298,7 @@ internal static class ActionButtonWidgetConfigView
 					block.IntegrationId,
 					block.ActionId,
 					ActionLabelOf(block),
-					[])),
+					[]))
 			};
 			ActionButtonStateJson.AdoptProviderStates(data, snapshot.States, context.Localization, context.Culture);
 			var adopted = ActionButtonStateModel.Read(data);
@@ -343,38 +352,54 @@ internal static class ActionButtonWidgetConfigView
 		}
 
 		ActionButtonFlowBlockInfo? FindBlock(string blockId)
-			=> ActionButtonFlowBlocks.Enumerate(flows.Peek()).FirstOrDefault(b => b.Id == blockId);
+		{
+			return ActionButtonFlowBlocks.Enumerate(flows.Peek()).FirstOrDefault(b => b.Id == blockId);
+		}
 
 		bool IsStateCapable(ActionButtonFlowBlockInfo block)
-			=> !block.Disabled && context.Probe.IsStateProvider(block.IntegrationId, block.ActionId);
+		{
+			return !block.Disabled && context.Probe.IsStateProvider(block.IntegrationId, block.ActionId);
+		}
 
 		bool IsIconCapable(ActionButtonFlowBlockInfo block)
-			=> !block.Disabled && context.Probe.IsIconProvider(block.IntegrationId, block.ActionId);
+		{
+			return !block.Disabled && context.Probe.IsIconProvider(block.IntegrationId, block.ActionId);
+		}
 
 		string ActionLabelOf(ActionButtonFlowBlockInfo block)
-			=> block.Label.Length > 0
+		{
+			return block.Label.Length > 0
 				? block.Label
 				: integrations.FindAction(block.IntegrationId, block.ActionId) is { } action
 					? context.Resolve(action.Name)
 					: block.ActionId;
+		}
 
 		string IntegrationNameOf(string? integrationId)
-			=> integrations.Integrations.FirstOrDefault(i => i.Id == integrationId) is { } integration
+		{
+			return integrations.Integrations.FirstOrDefault(i => i.Id == integrationId) is { } integration
 				? context.Resolve(integration.Name)
 				: integrationId ?? string.Empty;
+		}
 
 		string StateNamesOf(ActionStateSnapshot snapshot)
-			=> string.Join(", ", snapshot.States.Select(state => context.Resolve(state.Label)));
+		{
+			return string.Join(", ", snapshot.States.Select(state => context.Resolve(state.Label)));
+		}
 
 		void Notify(UiState<IReadOnlyList<ProviderNotice>> target, string severity, params LocalizedString[] texts)
-			=> target.Value = [.. texts.Select(text => new ProviderNotice(Guid.NewGuid().ToString("N"), text, severity))];
+		{
+			target.Value = [.. texts.Select(text => new ProviderNotice(Guid.NewGuid().ToString("N"), text, severity))];
+		}
 
 		void NotifyProbeFailure(ActionProbeOutcome outcome)
-			=> Notify(stateNotices,
+		{
+			Notify(stateNotices,
 				"warning",
 				outcome == ActionProbeOutcome.Timeout
 					? AppStrings.Errors.Actions.ProviderTimeout()
 					: AppStrings.Widgets.Editor.ProviderProbeFailed());
+		}
 
 		void RepairMissingProviders(IReadOnlyDictionary<string, ActionButtonFlowBlockInfo> blocks)
 		{
@@ -432,30 +457,30 @@ internal static class ActionButtonWidgetConfigView
 
 			var offeredId = pendingOffer.Value?.Block.Id ?? Volatile.Read(ref offerInFlight);
 
-			if (handoffOffer is null &&
-				offeredId is not null &&
-				current.TryGetValue(offeredId, out var offered) &&
-				knownBlocks.TryGetValue(offeredId, out var offeredBefore) &&
-				offered.ParametersSignature != offeredBefore.ParametersSignature)
+			if (handoffOffer is null
+				&& offeredId is not null
+				&& current.TryGetValue(offeredId, out var offered)
+				&& knownBlocks.TryGetValue(offeredId, out var offeredBefore)
+				&& offered.ParametersSignature != offeredBefore.ParametersSignature)
 			{
 				handoffOffer = offered;
 				Interlocked.Increment(ref offerGeneration);
 				pendingOffer.Value = null;
 			}
 
-			if (iconProviderState.Value is { } iconProvider &&
-				current.TryGetValue(iconProvider.BlockId, out var iconNow) &&
-				knownBlocks.TryGetValue(iconProvider.BlockId, out var iconBefore) &&
-				iconNow.ParametersSignature != iconBefore.ParametersSignature)
+			if (iconProviderState.Value is { } iconProvider
+				&& current.TryGetValue(iconProvider.BlockId, out var iconNow)
+				&& knownBlocks.TryGetValue(iconProvider.BlockId, out var iconBefore)
+				&& iconNow.ParametersSignature != iconBefore.ParametersSignature)
 			{
 				handoffIconReload = true;
 				Interlocked.Increment(ref iconGeneration);
 			}
 
-			if (stateProvider.Value is { } provider &&
-				current.TryGetValue(provider.BlockId, out var now) &&
-				knownBlocks.TryGetValue(provider.BlockId, out var before) &&
-				now.ParametersSignature != before.ParametersSignature)
+			if (stateProvider.Value is { } provider
+				&& current.TryGetValue(provider.BlockId, out var now)
+				&& knownBlocks.TryGetValue(provider.BlockId, out var before)
+				&& now.ParametersSignature != before.ParametersSignature)
 			{
 				handoffRefresh = now;
 				Interlocked.Increment(ref refreshGeneration);
@@ -531,11 +556,11 @@ internal static class ActionButtonWidgetConfigView
 
 			using var batch = context.Batch();
 
-			if (Volatile.Read(ref refreshGeneration) != generation ||
-				stateProvider.Peek()?.BlockId != block.Id ||
-				FindBlock(block.Id) is not { } current ||
-				current.ParametersSignature != block.ParametersSignature ||
-				context.SessionToken.IsCancellationRequested)
+			if (Volatile.Read(ref refreshGeneration) != generation
+				|| stateProvider.Peek()?.BlockId != block.Id
+				|| FindBlock(block.Id) is not { } current
+				|| current.ParametersSignature != block.ParametersSignature
+				|| context.SessionToken.IsCancellationRequested)
 			{
 				return;
 			}
@@ -583,10 +608,10 @@ internal static class ActionButtonWidgetConfigView
 
 			using var batch = context.Batch();
 
-			if (Volatile.Read(ref offerGeneration) != generation ||
-				context.SessionToken.IsCancellationRequested ||
-				FindBlock(block.Id) is not { Disabled: false } current ||
-				current.ParametersSignature != block.ParametersSignature)
+			if (Volatile.Read(ref offerGeneration) != generation
+				|| context.SessionToken.IsCancellationRequested
+				|| FindBlock(block.Id) is not { Disabled: false } current
+				|| current.ParametersSignature != block.ParametersSignature)
 			{
 				return;
 			}
@@ -630,11 +655,11 @@ internal static class ActionButtonWidgetConfigView
 
 		async Task OnProvideAsync(UiEventData data)
 		{
-			if (data.Raw is not { ValueKind: JsonValueKind.Object } payload ||
-				WidgetConfigJson.ReadString(payload, "capability") is not { } capability ||
-				WidgetConfigJson.ReadString(payload, "blockId") is not { } blockId ||
-				!payload.TryGetProperty("enabled", out var enabledElement) ||
-				enabledElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+			if (data.Raw is not { ValueKind: JsonValueKind.Object } payload
+				|| WidgetConfigJson.ReadString(payload, "capability") is not { } capability
+				|| WidgetConfigJson.ReadString(payload, "blockId") is not { } blockId
+				|| !payload.TryGetProperty("enabled", out var enabledElement)
+				|| enabledElement.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
 			{
 				return;
 			}
@@ -697,10 +722,10 @@ internal static class ActionButtonWidgetConfigView
 
 			using var batch = context.Batch();
 
-			if (context.SessionToken.IsCancellationRequested ||
-				FindBlock(blockId) is not { Disabled: false } current ||
-				current.ParametersSignature != block.ParametersSignature ||
-				stateProvider.Peek()?.BlockId == blockId)
+			if (context.SessionToken.IsCancellationRequested
+				|| FindBlock(blockId) is not { Disabled: false } current
+				|| current.ParametersSignature != block.ParametersSignature
+				|| stateProvider.Peek()?.BlockId == blockId)
 			{
 				return;
 			}
@@ -786,7 +811,8 @@ internal static class ActionButtonWidgetConfigView
 			Func<string> currentIconColor,
 			Func<string> currentLabelOutlineColor,
 			Func<string> currentLabelBoxBorderColor)
-			=> new UiTabs
+		{
+			return new UiTabs
 			{
 				Key = key,
 				Children =
@@ -805,7 +831,7 @@ internal static class ActionButtonWidgetConfigView
 								// The one field on this form that takes variables, so LiteralOnly stays unset -
 								// the renderer offers the {{ }} helper exactly where the original editor did.
 								Multiline = true,
-								Binding = labelBinding,
+								Binding = labelBinding
 							},
 							// Font, full width on its own line, then Style and Size sharing the next line about
 							// 2:1 (issue #837) - exactly the original appearance form's linked Font/Style
@@ -840,10 +866,10 @@ internal static class ActionButtonWidgetConfigView
 								[
 									new UiOption
 									{
-										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited(),
+										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited()
 									},
-									.. fontFamilies.Select(FamilyOption),
-								]),
+									.. fontFamilies.Select(FamilyOption)
+								])
 							},
 							new UiConfigStack
 							{
@@ -863,7 +889,7 @@ internal static class ActionButtonWidgetConfigView
 											(IReadOnlyList<UiOption>)FacesForFamily(FamilyOf(currentFontFaceId()))
 												.Select(face => UiOption.Of(face.FaceId, face.StyleName))
 												.ToList()),
-										RowWeight = 2,
+										RowWeight = 2
 									},
 									new UiNumberInput
 									{
@@ -872,9 +898,9 @@ internal static class ActionButtonWidgetConfigView
 										Binding = fontSizeBinding,
 										Min = 1,
 										Max = 100,
-										RowWeight = 1,
-									},
-								],
+										RowWeight = 1
+									}
+								]
 							},
 							// Align and Position, one non-wrapping line, each a segmented choice whose options
 							// carry an icon instead of text (issue #837) - the original editor's own icon
@@ -909,8 +935,8 @@ internal static class ActionButtonWidgetConfigView
 												with
 												{
 													Icon = "align-right"
-												},
-										]),
+												}
+										])
 									},
 									new UiChoiceInput
 									{
@@ -934,16 +960,16 @@ internal static class ActionButtonWidgetConfigView
 												with
 												{
 													Icon = "align-bottom"
-												},
-										]),
-									},
-								],
+												}
+										])
+									}
+								]
 							},
 							new UiBooleanInput
 							{
 								Key = "labelShadow",
 								Label = AppStrings.Widgets.Editor.LabelShadow(),
-								Binding = labelShadowBinding,
+								Binding = labelShadowBinding
 							},
 							new UiColorInput
 							{
@@ -954,7 +980,7 @@ internal static class ActionButtonWidgetConfigView
 								// Reset returns to unset, the button's own default (a computed contrast colour),
 								// not a literal one this tree would have to know.
 								SupportsReset = true,
-								DefaultValue = string.Empty,
+								DefaultValue = string.Empty
 							},
 							LabelStroke("label-outline-row",
 								"labelOutlineColor",
@@ -972,7 +998,7 @@ internal static class ActionButtonWidgetConfigView
 								Label = AppStrings.Widgets.Editor.LabelBoxColor(),
 								Binding = labelBoxColorBinding,
 								SupportsReset = true,
-								DefaultValue = string.Empty,
+								DefaultValue = string.Empty
 							},
 							LabelStroke("label-box-border-row",
 								"labelBoxBorderColor",
@@ -982,8 +1008,8 @@ internal static class ActionButtonWidgetConfigView
 								"labelBoxBorderWidth",
 								AppStrings.Widgets.Editor.LabelBoxBorderWidth(),
 								labelBoxBorderWidthBinding,
-								ActionButtonWidgetData.MaxLabelBoxBorderWidth),
-						],
+								ActionButtonWidgetData.MaxLabelBoxBorderWidth)
+						]
 					},
 					new UiTab
 					{
@@ -1009,8 +1035,8 @@ internal static class ActionButtonWidgetConfigView
 									Label = AppStrings.Widgets.Editor.IconColor(),
 									Binding = iconColorBinding,
 									SupportsReset = true,
-									DefaultValue = string.Empty,
-								},
+									DefaultValue = string.Empty
+								}
 							},
 							new UiWhen
 							{
@@ -1027,129 +1053,140 @@ internal static class ActionButtonWidgetConfigView
 									Icon = UiValue.From(currentIcon),
 									AspectRatio = aspectRatio,
 									Background = UiValue.From(currentBackgroundColor),
-									Tint = UiValue.From(currentIconColor),
-								},
-							},
-						],
+									Tint = UiValue.From(currentIconColor)
+								}
+							}
+						]
 					},
 					new UiTab
 					{
 						Key = "border-tab", Label = AppStrings.Widgets.Editor.Border(), Children = [borderNode]
-					},
-				],
+					}
+				]
 			};
+		}
 
 		// ---- state row - the compact "which state am I editing" controls --------------------------------
 		//
-		UiElement BuildStateRow() => new UiConfigStack
+		UiElement BuildStateRow()
 		{
-			Key = "state-row",
-			Direction = "horizontal",
-			Wrap = false,
-			Children =
+			return new UiConfigStack
+			{
+				Key = "state-row",
+				Direction = "horizontal",
+				Wrap = false,
+				Children =
+				[
+					new UiChoiceInput
+					{
+						Key = "activeStateId",
+						HideLabel = true,
+						RowWeight = 1,
+						Label = UiText.FromLocalized(() =>
+							states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId()) is { } selected
+								? AppStrings.Widgets.Editor.StateBeingEdited(selected.Label)
+								: AppStrings.Widgets.Editor.NoStates()),
+						Binding = Bind.Custom(EffectiveSelectedStateId, value => activeStoredStateId.Value = value),
+						// The state the button is on right now is marked in the list itself, so opening it
+						// answers "which one is it doing" without reading anything else.
+						Options = UiValue.From(()
+							=> (IReadOnlyList<UiOption>)states.Value
+								.Select(s => s.Id == liveStateId.Value
+									? UiOption.Of(s.Id, s.Label) with { Badge = AppStrings.Widgets.Editor.Live() }
+									: UiOption.Of(s.Id, s.Label))
+								.ToList())
+					},
+					new UiWhen
+					{
+						Key = "addState-when",
+						Condition = () => stateProvider.Value is null
+							&& states.Value.Count < ActionButtonStateModel.MaxStates,
+						Content = () => new UiConfigButton
+						{
+							Key = "addState",
+							Label = AppStrings.Widgets.Editor.AddState(),
+							Icon = "plus",
+							Events =
+							[
+								UiEventHandler.On(UiConfigEvents.Activate,
+									() =>
+									{
+										var id = Guid.NewGuid().ToString("N");
+										var newState
+											= new ActionButtonStateEntry(id, NextStateLabel(states.Value), null);
+										states.Value = [.. states.Value, newState];
+										activeStoredStateId.Value = id;
+									})
+							]
+						}
+					},
+					new UiWhen
+					{
+						Key = "manageState-when",
+						Condition = () => stateProvider.Value is null,
+						Content = () => new UiConfigMenu
+						{
+							Key = "manageState",
+							Label = AppStrings.Widgets.Editor.ManageThisState(),
+							Icon = "dots-vertical",
+							Children = ManageStateEntries(string.Empty),
+							Fallback = new UiConfigStack
+							{
+								Key = "manageState-fallback",
+								Direction = "horizontal",
+								Wrap = false,
+								Children = ManageStateEntries("-fallback")
+							}
+						}
+					}
+				]
+			};
+		}
+
+		UiElement[] ManageStateEntries(string keySuffix)
+		{
+			return
 			[
-				new UiChoiceInput
+				new UiConfigButton
 				{
-					Key = "activeStateId",
-					HideLabel = true,
-					RowWeight = 1,
-					Label = UiText.FromLocalized(() =>
-						states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId()) is { } selected
-							? AppStrings.Widgets.Editor.StateBeingEdited(name: selected.Label)
-							: AppStrings.Widgets.Editor.NoStates()),
-					Binding = Bind.Custom(EffectiveSelectedStateId, value => activeStoredStateId.Value = value),
-					// The state the button is on right now is marked in the list itself, so opening it
-					// answers "which one is it doing" without reading anything else.
-					Options = UiValue.From(()
-						=> (IReadOnlyList<UiOption>)states.Value
-							.Select(s => s.Id == liveStateId.Value
-								? UiOption.Of(s.Id, s.Label) with { Badge = AppStrings.Widgets.Editor.Live() }
-								: UiOption.Of(s.Id, s.Label))
-							.ToList()),
+					Key = $"renameState{keySuffix}",
+					Label = MacroDeckStrings.Common.Rename(),
+					Icon = "pencil",
+					ConfirmTitle = MacroDeckStrings.Common.Rename(),
+					ConfirmLabel = MacroDeckStrings.Common.Save(),
+					PromptValue = UiValue.From(() =>
+						states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label ?? string.Empty),
+					Placeholder = AppStrings.Widgets.Editor.StateNamePlaceholder(),
+					Events = [UiEventHandler.On(UiConfigEvents.Activate, data => RenameSelectedState(data))]
 				},
 				new UiWhen
 				{
-					Key = "addState-when",
-					Condition = () => stateProvider.Value is null && states.Value.Count < ActionButtonStateModel.MaxStates,
+					Key = $"deleteState-when{keySuffix}",
+					Condition = () => states.Value.Count > 1,
 					Content = () => new UiConfigButton
 					{
-						Key = "addState",
-						Label = AppStrings.Widgets.Editor.AddState(),
-						Icon = "plus",
-						Events =
-						[
-							UiEventHandler.On(UiConfigEvents.Activate,
-								() =>
-								{
-									var id = Guid.NewGuid().ToString("N");
-									var newState = new ActionButtonStateEntry(id, NextStateLabel(states.Value), null);
-									states.Value = [.. states.Value, newState];
-									activeStoredStateId.Value = id;
-								}),
-						],
-					},
-				},
-				new UiWhen
-				{
-					Key = "manageState-when",
-					Condition = () => stateProvider.Value is null,
-					Content = () => new UiConfigMenu
-					{
-						Key = "manageState",
-						Label = AppStrings.Widgets.Editor.ManageThisState(),
-						Icon = "dots-vertical",
-						Children = ManageStateEntries(string.Empty),
-						Fallback = new UiConfigStack
-						{
-							Key = "manageState-fallback",
-							Direction = "horizontal",
-							Wrap = false,
-							Children = ManageStateEntries("-fallback"),
-						},
-					},
-				},
-			],
-		};
-
-		UiElement[] ManageStateEntries(string keySuffix) =>
-		[
-			new UiConfigButton
-			{
-				Key = $"renameState{keySuffix}",
-				Label = MacroDeckStrings.Common.Rename(),
-				Icon = "pencil",
-				ConfirmTitle = MacroDeckStrings.Common.Rename(),
-				ConfirmLabel = MacroDeckStrings.Common.Save(),
-				PromptValue = UiValue.From(() =>
-					states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label ?? string.Empty),
-				Placeholder = AppStrings.Widgets.Editor.StateNamePlaceholder(),
-				Events = [UiEventHandler.On(UiConfigEvents.Activate, data => RenameSelectedState(data))],
-			},
-			new UiWhen
-			{
-				Key = $"deleteState-when{keySuffix}",
-				Condition = () => states.Value.Count > 1,
-				Content = () => new UiConfigButton
-				{
-					Key = $"deleteState{keySuffix}",
-					Label = MacroDeckStrings.Common.Delete(),
-					Icon = "trash",
-					ConfirmTitle = AppStrings.Widgets.Editor.RemoveStateHeading(),
-					ConfirmMessage = UiText.FromLocalized(() =>
-						IsReferencedByMapping(EffectiveSelectedStateId())
-							? AppStrings.Widgets.Editor.RemoveStateConfirm(
-								name: states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label ??
-									string.Empty)
-							: AppStrings.Dialogs.Confirm.DefaultMessage()),
-					ConfirmLabel = MacroDeckStrings.Common.Remove(),
-					ConfirmDanger = true,
-					Events = [UiEventHandler.On(UiConfigEvents.Activate, RemoveSelectedState)],
-				},
-			},
-		];
+						Key = $"deleteState{keySuffix}",
+						Label = MacroDeckStrings.Common.Delete(),
+						Icon = "trash",
+						ConfirmTitle = AppStrings.Widgets.Editor.RemoveStateHeading(),
+						ConfirmMessage = UiText.FromLocalized(() =>
+							IsReferencedByMapping(EffectiveSelectedStateId())
+								? AppStrings.Widgets.Editor.RemoveStateConfirm(
+									states.Value.FirstOrDefault(s => s.Id == EffectiveSelectedStateId())?.Label
+									?? string.Empty)
+								: AppStrings.Dialogs.Confirm.DefaultMessage()),
+						ConfirmLabel = MacroDeckStrings.Common.Remove(),
+						ConfirmDanger = true,
+						Events = [UiEventHandler.On(UiConfigEvents.Activate, RemoveSelectedState)]
+					}
+				}
+			];
+		}
 
 		bool IsReferencedByMapping(string stateId)
-			=> fallbackStateId.Value == stateId || mappingRules.Value.Any(rule => rule.StateId == stateId);
+		{
+			return fallbackStateId.Value == stateId || mappingRules.Value.Any(rule => rule.StateId == stateId);
+		}
 
 		void RenameSelectedState(UiEventData data)
 		{
@@ -1170,35 +1207,42 @@ internal static class ActionButtonWidgetConfigView
 		// Only while that state is not the one being edited: the state list already badges the live one,
 		// so with the two the same the line would say a second time what the row above it just said. The
 		// case it exists for is the common one - styling one state while the button sits on another.
-		UiElement BuildLiveStateLine() => new UiWhen
+		UiElement BuildLiveStateLine()
 		{
-			Key = "live-state-when",
-			Condition = () =>
-				!string.IsNullOrEmpty(liveStateId.Value) &&
-				liveStateId.Value != EffectiveSelectedStateId() &&
-				(states.Value.Count == 0 || states.Value.Any(s => s.Id == liveStateId.Value)),
-			Content = () => new UiProse
+			return new UiWhen
 			{
-				Key = "live-state",
-				Severity = "success",
-				Text = UiText.FromLocalized(() => AppStrings.Widgets.Editor.CurrentlyState(name: liveStateLabel.Value)),
-			},
-		};
+				Key = "live-state-when",
+				Condition = () =>
+					!string.IsNullOrEmpty(liveStateId.Value)
+					&& liveStateId.Value != EffectiveSelectedStateId()
+					&& (states.Value.Count == 0 || states.Value.Any(s => s.Id == liveStateId.Value)),
+				Content = () => new UiProse
+				{
+					Key = "live-state",
+					Severity = "success",
+					Text = UiText.FromLocalized(()
+						=> AppStrings.Widgets.Editor.CurrentlyState(liveStateLabel.Value))
+				}
+			};
+		}
 
 		// Says why Add went away (issue #673), since UiConfigButton has no disabled state to show instead.
 		// At or above the limit, not exactly on it: a button predating the limit can hold far more.
-		UiElement BuildStateLimitLine() => new UiWhen
+		UiElement BuildStateLimitLine()
 		{
-			Key = "state-limit-when",
-			Condition = () => stateProvider.Value is null && states.Value.Count >= ActionButtonStateModel.MaxStates,
-			Content = () => new UiProse
+			return new UiWhen
 			{
-				Key = "state-limit",
-				Severity = "warning",
-				Text = UiText.FromLocalized(()
-					=> AppStrings.Widgets.Editor.MaxStatesReached(max: ActionButtonStateModel.MaxStates)),
-			},
-		};
+				Key = "state-limit-when",
+				Condition = () => stateProvider.Value is null && states.Value.Count >= ActionButtonStateModel.MaxStates,
+				Content = () => new UiProse
+				{
+					Key = "state-limit",
+					Severity = "warning",
+					Text = UiText.FromLocalized(()
+						=> AppStrings.Widgets.Editor.MaxStatesReached(ActionButtonStateModel.MaxStates))
+				}
+			};
+		}
 
 		// ---- states array --------------------------------------------------------------------------------
 		//
@@ -1209,7 +1253,8 @@ internal static class ActionButtonWidgetConfigView
 		// compose as states.<id>.label and states.<id>.appearance.*.
 
 		UiElement BuildStateItem(ActionButtonStateEntry state, string _)
-			=> new UiObjectInput
+		{
+			return new UiObjectInput
 			{
 				Key = state.Id,
 				Children =
@@ -1236,15 +1281,16 @@ internal static class ActionButtonWidgetConfigView
 								new UiHeading
 								{
 									Key = $"state-appearance-heading-{state.Id}",
-									Text = AppStrings.Widgets.Editor.Appearance(),
+									Text = AppStrings.Widgets.Editor.Appearance()
 								},
-								BuildIconProviderSection(keySuffix: $"-{state.Id}"),
-								BuildStateAppearance(state.Id),
-							],
-						},
-					},
-				],
+								BuildIconProviderSection($"-{state.Id}"),
+								BuildStateAppearance(state.Id)
+							]
+						}
+					}
+				]
 			};
+		}
 
 		UiObjectInput BuildStateAppearance(string stateId)
 		{
@@ -1255,12 +1301,12 @@ internal static class ActionButtonWidgetConfigView
 				Key = "appearance",
 				Children =
 				[
-					BuildAppearanceTabs(key: $"state-appearance-tabs-{stateId}",
-						labelBinding: StateStringBinding(states, stateId, "label"),
-						fontFaceIdBinding: StateStringBinding(states, stateId, "fontFaceId"),
-						currentFontFaceId: () =>
+					BuildAppearanceTabs($"state-appearance-tabs-{stateId}",
+						StateStringBinding(states, stateId, "label"),
+						StateStringBinding(states, stateId, "fontFaceId"),
+						() =>
 							ReadAppearanceString(states.Value, stateId, "fontFaceId") ?? string.Empty,
-						setFontFaceId: value =>
+						value =>
 							MutateAppearance(states,
 								stateId,
 								appearance =>
@@ -1274,80 +1320,83 @@ internal static class ActionButtonWidgetConfigView
 										appearance["fontFaceId"] = value;
 									}
 								}),
-						fontSizeBinding: StateDoubleBinding(states, stateId, "fontSize", 14),
-						textAlignBinding: StateStringBinding(states, stateId, "textAlign", fallback: "center"),
-						labelPositionBinding: StateStringBinding(states, stateId, "labelPosition", fallback: "center"),
-						labelColorBinding: StateStringBinding(states, stateId, "labelColor"),
-						labelBoxColorBinding: StateStringBinding(states, stateId, "labelBoxColor"),
-						labelShadowBinding: StateBoolBinding(states, stateId, "labelShadow", () => labelShadow.Value),
-						labelOutlineColorBinding: StateStringBinding(states, stateId, "labelOutlineColor"),
-						labelOutlineWidthBinding:
-							StateDoubleBinding(states, stateId, "labelOutlineWidth", () => labelOutlineWidth.Value),
-						labelBoxBorderColorBinding: StateStringBinding(states, stateId, "labelBoxBorderColor"),
-						labelBoxBorderWidthBinding:
-							StateDoubleBinding(states, stateId, "labelBoxBorderWidth", () => labelBoxBorderWidth.Value),
-						backgroundColorBinding: StateStringBinding(states, stateId, "backgroundColor"),
-						readIcon: () => ReadStateWidgetIcon(states.Value, stateId),
-						writeIcon: value => WriteStateIcon(states, stateId, value),
-						iconDisplayBinding: iconDisplayBinding,
-						iconColorBinding: StateStringBinding(states, stateId, "iconColor"),
+						StateDoubleBinding(states, stateId, "fontSize", 14),
+						StateStringBinding(states, stateId, "textAlign", fallback: "center"),
+						StateStringBinding(states, stateId, "labelPosition", fallback: "center"),
+						StateStringBinding(states, stateId, "labelColor"),
+						StateStringBinding(states, stateId, "labelBoxColor"),
+						StateBoolBinding(states, stateId, "labelShadow", () => labelShadow.Value),
+						StateStringBinding(states, stateId, "labelOutlineColor"),
+						StateDoubleBinding(states, stateId, "labelOutlineWidth", () => labelOutlineWidth.Value),
+						StateStringBinding(states, stateId, "labelBoxBorderColor"),
+						StateDoubleBinding(states, stateId, "labelBoxBorderWidth", () => labelBoxBorderWidth.Value),
+						StateStringBinding(states, stateId, "backgroundColor"),
+						() => ReadStateWidgetIcon(states.Value, stateId),
+						value => WriteStateIcon(states, stateId, value),
+						iconDisplayBinding,
+						StateStringBinding(states, stateId, "iconColor"),
 						// "off" is the style a state with no border of its own has, and naming it here is what
 						// keeps the control from rendering with nothing selected - see StateStringBinding.
-						borderNode: WidgetConfigFragments.Border(
-							StateStringBinding(states, stateId, "border", "style", fallback: "off"),
+						WidgetConfigFragments.Border(StateStringBinding(states, stateId, "border", "style", "off"),
 							StateStringBinding(states, stateId, "border", "color")),
-						currentIcon: () => ReadStateIcon(states.Value, stateId)!,
-						currentBackgroundColor: () =>
+						() => ReadStateIcon(states.Value, stateId)!,
+						() =>
 							ReadAppearanceString(states.Value, stateId, "backgroundColor") ?? string.Empty,
-						currentIconColor: () =>
+						() =>
 							ReadAppearanceString(states.Value, stateId, "iconColor") ?? string.Empty,
-						currentLabelOutlineColor: () =>
+						() =>
 							OwnOrRoot(ReadAppearanceString(states.Value, stateId, "labelOutlineColor"),
 								labelOutlineColor.Value),
-						currentLabelBoxBorderColor: () =>
+						() =>
 							OwnOrRoot(ReadAppearanceString(states.Value, stateId, "labelBoxBorderColor"),
-								labelBoxBorderColor.Value)),
-				],
+								labelBoxBorderColor.Value))
+				]
 			};
 		}
 
-		UiElement BuildStatesArray() => new UiWhen
+		UiElement BuildStatesArray()
 		{
-			Key = "states-when",
-			Condition = () => stateMode.Value,
-			Content = () => new UiArrayInput
+			return new UiWhen
 			{
-				Key = "states",
-				Binding = Bind.Custom(() => SerializeStates(states.Value),
-					value => states.Value = DeserializeStates(value)),
-				Children =
-				[
-					new UiRepeat<ActionButtonStateEntry>
-					{
-						Key = "stateItems",
-						Items = UiValue.From(() => (IReadOnlyList<ActionButtonStateEntry>)states.Value),
-						KeySelector = s => s.Id,
-						Template = BuildStateItem,
-					},
-				],
-			},
-		};
+				Key = "states-when",
+				Condition = () => stateMode.Value,
+				Content = () => new UiArrayInput
+				{
+					Key = "states",
+					Binding = Bind.Custom(() => SerializeStates(states.Value),
+						value => states.Value = DeserializeStates(value)),
+					Children =
+					[
+						new UiRepeat<ActionButtonStateEntry>
+						{
+							Key = "stateItems",
+							Items = UiValue.From(() => (IReadOnlyList<ActionButtonStateEntry>)states.Value),
+							KeySelector = s => s.Id,
+							Template = BuildStateItem
+						}
+					]
+				}
+			};
+		}
 
 		// ---- state row and states array's shared visibility ----------------------------------------------
 
-		UiElement BuildStateRowSection() => new UiWhen
+		UiElement BuildStateRowSection()
 		{
-			Key = "state-row-when",
-			Condition = () => stateMode.Value,
-			Content = () => new UiFragment
+			return new UiWhen
 			{
-				Key = "state-row-group",
-				Children =
-				[
-					BuildStateRow(), BuildStateLimitLine(), BuildLiveStateLine()
-				],
-			},
-		};
+				Key = "state-row-when",
+				Condition = () => stateMode.Value,
+				Content = () => new UiFragment
+				{
+					Key = "state-row-group",
+					Children =
+					[
+						BuildStateRow(), BuildStateLimitLine(), BuildLiveStateLine()
+					]
+				}
+			};
+		}
 
 		// ---- state mapping ---------------------------------------------------------------------------------
 		//
@@ -1355,24 +1404,27 @@ internal static class ActionButtonWidgetConfigView
 		// action-flow editor: the value is the whole mapping object, and the states it may route to travel
 		// as this node's own States property since the node - not a client service - is what knows them.
 
-		UiElement BuildStateMappingSection() => new UiWhen
+		UiElement BuildStateMappingSection()
 		{
-			Key = "stateMapping-when",
-			Condition = () => stateMode.Value && stateProvider.Value is null,
-			Content = () => new UiStateMappingEditorInput
+			return new UiWhen
 			{
-				Key = "stateMapping",
-				Binding = Bind.Custom(() => SerializeMapping(mappingRules.Value, fallbackStateId.Value),
-					value =>
-					{
-						var (rules, fallback) = DeserializeMapping(value);
-						mappingRules.Value = rules;
-						fallbackStateId.Value = fallback;
-					}),
-				States = UiValue.From(()
-					=> (IReadOnlyList<UiOption>)states.Value.Select(s => UiOption.Of(s.Id, s.Label)).ToList()),
-			},
-		};
+				Key = "stateMapping-when",
+				Condition = () => stateMode.Value && stateProvider.Value is null,
+				Content = () => new UiStateMappingEditorInput
+				{
+					Key = "stateMapping",
+					Binding = Bind.Custom(() => SerializeMapping(mappingRules.Value, fallbackStateId.Value),
+						value =>
+						{
+							var (rules, fallback) = DeserializeMapping(value);
+							mappingRules.Value = rules;
+							fallbackStateId.Value = fallback;
+						}),
+					States = UiValue.From(()
+						=> (IReadOnlyList<UiOption>)states.Value.Select(s => UiOption.Of(s.Id, s.Label)).ToList())
+				}
+			};
+		}
 
 		// ---- cycle states on press ---------------------------------------------------------------------
 		//
@@ -1380,57 +1432,72 @@ internal static class ActionButtonWidgetConfigView
 		// or a mapping is authoritative, and a press advance is refused for them anyway, so a toggle
 		// promising otherwise would be a lie rather than a disabled control.
 
-		UiElement BuildCycleStatesSection() => new UiWhen
+		UiElement BuildCycleStatesSection()
 		{
-			Key = "cycleStatesOnPress-when",
-			Condition = () => stateMode.Value && stateProvider.Value is null && mappingRules.Value.Count == 0,
-			Content = () => new UiBooleanInput
+			return new UiWhen
 			{
-				Key = "cycleStatesOnPress",
-				Label = AppStrings.Widgets.Editor.CycleStatesOnPress(),
-				Description = AppStrings.Widgets.Editor.CycleStatesOnPressHint(),
-				Binding = Bind.To(cycleStatesOnPress),
-			},
-		};
+				Key = "cycleStatesOnPress-when",
+				Condition = () => stateMode.Value && stateProvider.Value is null && mappingRules.Value.Count == 0,
+				Content = () => new UiBooleanInput
+				{
+					Key = "cycleStatesOnPress",
+					Label = AppStrings.Widgets.Editor.CycleStatesOnPress(),
+					Description = AppStrings.Widgets.Editor.CycleStatesOnPressHint(),
+					Binding = Bind.To(cycleStatesOnPress)
+				}
+			};
+		}
 
 		// ---- state/icon provider banners --------------------------------------------------------------------
 
 		// Each branch is its own UiWhen: a structural scope's Content only re-runs when its own Condition
 		// changes, so a choice made inside Content would never react to the state it reads.
-		UiElement BuildNotices(string key, UiState<IReadOnlyList<ProviderNotice>> notices) => new UiWhen
+		UiElement BuildNotices(string key, UiState<IReadOnlyList<ProviderNotice>> notices)
 		{
-			Key = $"{key}-when",
-			Condition = () => notices.Value.Count > 0,
-			Content = () => new UiFragment
+			return new UiWhen
 			{
-				Key = key,
-				Children =
-				[
-					new UiRepeat<ProviderNotice>
-					{
-						Key = $"{key}-items",
-						Items = UiValue.From(() => notices.Value),
-						KeySelector = notice => notice.Id,
-						Template = (notice, _) => new UiProse
+				Key = $"{key}-when",
+				Condition = () => notices.Value.Count > 0,
+				Content = () => new UiFragment
+				{
+					Key = key,
+					Children =
+					[
+						new UiRepeat<ProviderNotice>
 						{
-							Key = $"{key}-{notice.Id}", Severity = notice.Severity, Text = notice.Text,
+							Key = $"{key}-items",
+							Items = UiValue.From(() => notices.Value),
+							KeySelector = notice => notice.Id,
+							Template = (notice, _) => new UiProse
+							{
+								Key = $"{key}-{notice.Id}", Severity = notice.Severity, Text = notice.Text
+							}
 						},
-					},
-					new UiConfigButton
-					{
-						Key = $"{key}-dismiss",
-						Label = AppStrings.Feedback.Dismiss(),
-						Events = [UiEventHandler.On(UiConfigEvents.Activate, () => notices.Value = [])],
-					},
-				],
-			},
-		};
+						new UiConfigButton
+						{
+							Key = $"{key}-dismiss",
+							Label = AppStrings.Feedback.Dismiss(),
+							Events = [UiEventHandler.On(UiConfigEvents.Activate, () => notices.Value = [])]
+						}
+					]
+				}
+			};
+		}
 
 		UiText ProviderName(string? actionLabel)
-			=> string.IsNullOrEmpty(actionLabel) ? AppStrings.Widgets.Editor.AnAction() : actionLabel;
+		{
+			return string.IsNullOrEmpty(actionLabel) ? AppStrings.Widgets.Editor.AnAction() : actionLabel;
+		}
 
-		UiStatus ProviderStatus(string key, string icon, UiText label, UiText value, UiText sentence, UiConfigButton stop)
-			=> new()
+		UiStatus ProviderStatus(
+			string key,
+			string icon,
+			UiText label,
+			UiText value,
+			UiText sentence,
+			UiConfigButton stop)
+		{
+			return new UiStatus
 			{
 				Key = $"{key}Status",
 				Icon = icon,
@@ -1443,111 +1510,127 @@ internal static class ActionButtonWidgetConfigView
 					Children =
 					[
 						new UiProse { Key = $"{key}StatusFallbackText", Text = sentence },
-						stop with { Key = $"{stop.Key}Fallback", Icon = default },
-					],
-				},
+						stop with { Key = $"{stop.Key}Fallback", Icon = default }
+					]
+				}
 			};
+		}
 
-		UiElement BuildStateProviderSection() => new UiFragment
+		UiElement BuildStateProviderSection()
 		{
-			Key = "stateProvider-group",
-			Children =
-			[
-				BuildNotices("stateProviderNotices", stateNotices),
-				new UiWhen
-				{
-					Key = "stateProviderActive-when",
-					Condition = () => stateMode.Value && stateProvider.Value is not null,
-					Content = () => ProviderStatus("stateProvider",
-						"zap",
-						AppStrings.Widgets.Editor.ProvidedByPrefix(),
-						UiText.Optional(() => ProviderName(stateProvider.Value?.ActionLabel)),
-						UiText.FromLocalized(() => AppStrings.Widgets.Editor.StateProvidedBy(
-							integration: IntegrationNameOf(stateProvider.Value?.IntegrationId),
-							action: stateProvider.Value?.ActionLabel ?? string.Empty)),
-						new UiConfigButton
-						{
-							Key = "removeStateProvider",
-							Label = AppStrings.Widgets.Editor.StopUsingProviderAction(),
-							Icon = "x",
-							ConfirmTitle = AppStrings.Widgets.Editor.StopUsingProviderHeading(),
-							ConfirmMessage = AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
-							ConfirmLabel = AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
-							ConfirmDanger = true,
-							Events = [UiEventHandler.On(UiConfigEvents.Activate, () => RestoreManualStates(false))],
-						}),
-				},
-			],
-		};
+			return new UiFragment
+			{
+				Key = "stateProvider-group",
+				Children =
+				[
+					BuildNotices("stateProviderNotices", stateNotices),
+					new UiWhen
+					{
+						Key = "stateProviderActive-when",
+						Condition = () => stateMode.Value && stateProvider.Value is not null,
+						Content = () => ProviderStatus("stateProvider",
+							"zap",
+							AppStrings.Widgets.Editor.ProvidedByPrefix(),
+							UiText.Optional(() => ProviderName(stateProvider.Value?.ActionLabel)),
+							UiText.FromLocalized(() => AppStrings.Widgets.Editor.StateProvidedBy(
+								IntegrationNameOf(stateProvider.Value?.IntegrationId),
+								stateProvider.Value?.ActionLabel ?? string.Empty)),
+							new UiConfigButton
+							{
+								Key = "removeStateProvider",
+								Label = AppStrings.Widgets.Editor.StopUsingProviderAction(),
+								Icon = "x",
+								ConfirmTitle = AppStrings.Widgets.Editor.StopUsingProviderHeading(),
+								ConfirmMessage = AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
+								ConfirmLabel = AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
+								ConfirmDanger = true,
+								Events = [UiEventHandler.On(UiConfigEvents.Activate, () => RestoreManualStates(false))]
+							})
+					}
+				]
+			};
+		}
 
 		// keySuffix keys this section apart per call site (a state item passes its state's id, the root
 		// appearance section passes nothing) - see BuildStateItem for why an array item's chrome has to.
-		UiElement BuildIconProviderSection(string keySuffix = "") => new UiFragment
+		UiElement BuildIconProviderSection(string keySuffix = "")
 		{
-			Key = $"iconProvider-group{keySuffix}",
-			Children =
-			[
-				BuildNotices($"iconProviderNotices{keySuffix}", iconNotices),
-				new UiWhen
-				{
-					Key = $"iconProviderActive-when{keySuffix}",
-					Condition = () => iconProviderState.Value is not null,
-					Content = () => new UiFragment
+			return new UiFragment
+			{
+				Key = $"iconProvider-group{keySuffix}",
+				Children =
+				[
+					BuildNotices($"iconProviderNotices{keySuffix}", iconNotices),
+					new UiWhen
 					{
-						Key = $"iconProviderActive{keySuffix}",
-						Children =
-						[
-							ProviderStatus($"iconProvider{keySuffix}",
-								"image",
-								AppStrings.Widgets.Editor.ProvidedByPrefix(),
-								UiText.Optional(() => ProviderName(iconProviderState.Value?.ActionLabel)),
-								UiText.FromLocalized(() => AppStrings.Widgets.Editor.IconProvidedByPrefix(
-									integration: IntegrationNameOf(iconProviderState.Value?.IntegrationId),
-									action: iconProviderState.Value?.ActionLabel ?? string.Empty)),
-								new UiConfigButton
+						Key = $"iconProviderActive-when{keySuffix}",
+						Condition = () => iconProviderState.Value is not null,
+						Content = () => new UiFragment
+						{
+							Key = $"iconProviderActive{keySuffix}",
+							Children =
+							[
+								ProviderStatus($"iconProvider{keySuffix}",
+									"image",
+									AppStrings.Widgets.Editor.ProvidedByPrefix(),
+									UiText.Optional(() => ProviderName(iconProviderState.Value?.ActionLabel)),
+									UiText.FromLocalized(() => AppStrings.Widgets.Editor.IconProvidedByPrefix(
+										IntegrationNameOf(iconProviderState.Value?.IntegrationId),
+										iconProviderState.Value?.ActionLabel ?? string.Empty)),
+									new UiConfigButton
+									{
+										Key = $"removeIconProvider{keySuffix}",
+										Label = AppStrings.Widgets.Editor.StopUsingIconProviderAction(),
+										Icon = "x",
+										ConfirmTitle = AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
+										ConfirmMessage = AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
+										ConfirmLabel = AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
+										ConfirmDanger = true,
+										Events = [UiEventHandler.On(UiConfigEvents.Activate, ClearIconProvider)]
+									}),
+								new UiWhen
 								{
-									Key = $"removeIconProvider{keySuffix}",
-									Label = AppStrings.Widgets.Editor.StopUsingIconProviderAction(),
-									Icon = "x",
-									ConfirmTitle = AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
-									ConfirmMessage = AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
-									ConfirmLabel = AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
-									ConfirmDanger = true,
-									Events = [UiEventHandler.On(UiConfigEvents.Activate, ClearIconProvider)],
-								}),
-							new UiWhen
-							{
-								Key = $"iconProviderNoIcon-when{keySuffix}",
-								Condition = () => iconHasSnapshot.Value == false,
-								Content = () => new UiProse
-								{
-									Key = $"iconProviderNoIcon{keySuffix}",
-									Severity = "warning",
-									Text = AppStrings.Widgets.Editor.IconProviderNoIconYet(),
+									Key = $"iconProviderNoIcon-when{keySuffix}",
+									Condition = () => iconHasSnapshot.Value == false,
+									Content = () => new UiProse
+									{
+										Key = $"iconProviderNoIcon{keySuffix}",
+										Severity = "warning",
+										Text = AppStrings.Widgets.Editor.IconProviderNoIconYet()
+									}
 								},
-							},
-							new UiProse
-							{
-								Key = $"iconProviderPreviewNote{keySuffix}",
-								Text = AppStrings.Widgets.Editor.IconProviderPreviewNote(),
-							},
-						],
-					},
-				},
-			],
-		};
+								new UiProse
+								{
+									Key = $"iconProviderPreviewNote{keySuffix}",
+									Text = AppStrings.Widgets.Editor.IconProviderPreviewNote()
+								}
+							]
+						}
+					}
+				]
+			};
+		}
 
-		UiConfigButton AnswerButton(string key, UiText label, Action answer, bool danger = false) => new()
+		UiConfigButton AnswerButton(string key, UiText label, Action answer, bool danger = false)
 		{
-			Key = key,
-			Label = label,
-			ConfirmDanger = danger,
-			Events = [UiEventHandler.On(UiConfigEvents.Activate, answer)],
-		};
+			return new UiConfigButton
+			{
+				Key = key,
+				Label = label,
+				ConfirmDanger = danger,
+				Events = [UiEventHandler.On(UiConfigEvents.Activate, answer)]
+			};
+		}
 
-		UiElement Dialog(string key, Func<bool> open, Func<UiText> title, Func<UiText> text, Action cancel,
+		UiElement Dialog(
+			string key,
+			Func<bool> open,
+			Func<UiText> title,
+			Func<UiText> text,
+			Action cancel,
 			Func<IReadOnlyList<UiElement>> children)
-			=> new UiWhen
+		{
+			return new UiWhen
 			{
 				Key = $"{key}-when",
 				Condition = open,
@@ -1557,206 +1640,237 @@ internal static class ActionButtonWidgetConfigView
 					Title = title(),
 					Text = text(),
 					Events = [UiEventHandler.On(UiConfigEvents.Cancel, cancel)],
-					Children = [.. children()],
-				},
+					Children = [.. children()]
+				}
 			};
+		}
 
-		UiElement BuildDialogs() => new UiFragment
+		UiElement BuildDialogs()
 		{
-			Key = "dialogs",
-			Children =
-			[
-				Dialog("stateProviderOffer",
-					() => pendingOffer.Value is { States: not null, Icon: false },
-					() => stateMode.Value
-						? AppStrings.Widgets.Editor.ProviderOwnStatesHeading()
-						: AppStrings.Widgets.Editor.ProviderMultiStatesHeading(),
-					() => stateMode.Value
-						? AppStrings.Widgets.Editor.OfferProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block),
-							names: StateNamesOf(pendingOffer.Value!.States!))
-						: AppStrings.Widgets.Editor.EnableMultiStateMessage(action: ActionLabelOf(pendingOffer.Value!.Block),
-							names: StateNamesOf(pendingOffer.Value!.States!)),
-					() => pendingOffer.Value = null,
-					() =>
-					[
-						AnswerButton("declineStateProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
-						AnswerButton("acceptStateProvider",
-							stateMode.Value
-								? AppStrings.Widgets.Editor.UseProvidedStatesConfirm()
-								: AppStrings.Widgets.Editor.TurnOnMultiStateConfirm(),
-							() => AcceptOffer(true, false)),
-					]),
-				Dialog("combinedProviderOffer",
-					() => pendingOffer.Value is { States: not null, Icon: true },
-					() => AppStrings.Widgets.Editor.CombinedProviderHeading(),
-					() => AppStrings.Widgets.Editor.CombinedProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block)),
-					() => pendingOffer.Value = null,
-					() =>
-					[
-						new UiBooleanInput
-						{
-							Key = "combinedProviderUseState",
-							Transient = true,
-							Label = AppStrings.Widgets.Editor.CombinedProviderStateCheckboxLabel(
-								names: StateNamesOf(pendingOffer.Value!.States!)),
-							Binding = Bind.To(offerUseState),
-						},
-						new UiBooleanInput
-						{
-							Key = "combinedProviderUseIcon",
-							Transient = true,
-							Label = AppStrings.Widgets.Editor.CombinedProviderIconCheckboxLabel(),
-							Binding = Bind.To(offerUseIcon),
-						},
-						AnswerButton("declineCombinedProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
-						AnswerButton("acceptCombinedProvider",
-							AppStrings.Widgets.Editor.UseSelectedProvidersConfirm(),
-							() => AcceptOffer(offerUseState.Value, offerUseIcon.Value)),
-					]),
-				Dialog("iconProviderOffer",
-					() => pendingOffer.Value is { States: null, Icon: true },
-					() => AppStrings.Dialogs.Confirm.DefaultHeading(),
-					() => AppStrings.Widgets.Editor.OfferIconProviderMessage(action: ActionLabelOf(pendingOffer.Value!.Block)),
-					() => pendingOffer.Value = null,
-					() =>
-					[
-						AnswerButton("declineIconProvider", AppStrings.Feedback.Dismiss(), () => pendingOffer.Value = null),
-						AnswerButton("acceptIconProvider", AppStrings.Widgets.Editor.UseProvidedIconConfirm(),
-							() => AcceptOffer(false, true)),
-					]),
-				Dialog("providerSwitch",
-					() => pendingSwitch.Value is not null,
-					() => AppStrings.Dialogs.Confirm.DefaultHeading(),
-					() => pendingSwitch.Value?.Capability == "icon"
-						? AppStrings.Widgets.Editor.SwitchIconProviderMessage()
-						: AppStrings.Widgets.Editor.SwitchProviderMessage(),
-					() => pendingSwitch.Value = null,
-					() =>
-					[
-						AnswerButton("providerSwitchDismiss", MacroDeckStrings.Common.Cancel(), () => pendingSwitch.Value = null),
-						AnswerButton("providerSwitchConfirm", AppStrings.Widgets.Editor.SwitchProviderConfirm(), ConfirmSwitch),
-					]),
-				Dialog("stopStateProvider",
-					() => pendingStop.Value == "state",
-					() => AppStrings.Widgets.Editor.StopUsingProviderHeading(),
-					() => AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
-					() => pendingStop.Value = null,
-					() =>
-					[
-						AnswerButton("stopStateProviderCancel", MacroDeckStrings.Common.Cancel(), () => pendingStop.Value = null),
-						AnswerButton("stopStateProviderConfirm",
-							AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
-							() =>
+			return new UiFragment
+			{
+				Key = "dialogs",
+				Children =
+				[
+					Dialog("stateProviderOffer",
+						() => pendingOffer.Value is { States: not null, Icon: false },
+						() => stateMode.Value
+							? AppStrings.Widgets.Editor.ProviderOwnStatesHeading()
+							: AppStrings.Widgets.Editor.ProviderMultiStatesHeading(),
+						() => stateMode.Value
+							? AppStrings.Widgets.Editor.OfferProviderMessage(ActionLabelOf(pendingOffer.Value!.Block),
+								StateNamesOf(pendingOffer.Value!.States!))
+							: AppStrings.Widgets.Editor.EnableMultiStateMessage(
+								ActionLabelOf(pendingOffer.Value!.Block),
+								StateNamesOf(pendingOffer.Value!.States!)),
+						() => pendingOffer.Value = null,
+						() =>
+						[
+							AnswerButton("declineStateProvider",
+								AppStrings.Feedback.Dismiss(),
+								() => pendingOffer.Value = null),
+							AnswerButton("acceptStateProvider",
+								stateMode.Value
+									? AppStrings.Widgets.Editor.UseProvidedStatesConfirm()
+									: AppStrings.Widgets.Editor.TurnOnMultiStateConfirm(),
+								() => AcceptOffer(true, false))
+						]),
+					Dialog("combinedProviderOffer",
+						() => pendingOffer.Value is { States: not null, Icon: true },
+						() => AppStrings.Widgets.Editor.CombinedProviderHeading(),
+						() => AppStrings.Widgets.Editor.CombinedProviderMessage(
+							ActionLabelOf(pendingOffer.Value!.Block)),
+						() => pendingOffer.Value = null,
+						() =>
+						[
+							new UiBooleanInput
 							{
-								pendingStop.Value = null;
-								RestoreManualStates(false);
+								Key = "combinedProviderUseState",
+								Transient = true,
+								Label = AppStrings.Widgets.Editor.CombinedProviderStateCheckboxLabel(
+									StateNamesOf(pendingOffer.Value!.States!)),
+								Binding = Bind.To(offerUseState)
 							},
-							danger: true),
-					]),
-				Dialog("stopIconProvider",
-					() => pendingStop.Value == "icon",
-					() => AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
-					() => AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
-					() => pendingStop.Value = null,
-					() =>
-					[
-						AnswerButton("stopIconProviderCancel", MacroDeckStrings.Common.Cancel(), () => pendingStop.Value = null),
-						AnswerButton("stopIconProviderConfirm",
-							AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
-							() =>
+							new UiBooleanInput
 							{
-								pendingStop.Value = null;
-								ClearIconProvider();
+								Key = "combinedProviderUseIcon",
+								Transient = true,
+								Label = AppStrings.Widgets.Editor.CombinedProviderIconCheckboxLabel(),
+								Binding = Bind.To(offerUseIcon)
 							},
-							danger: true),
-					]),
-			],
-		};
+							AnswerButton("declineCombinedProvider",
+								AppStrings.Feedback.Dismiss(),
+								() => pendingOffer.Value = null),
+							AnswerButton("acceptCombinedProvider",
+								AppStrings.Widgets.Editor.UseSelectedProvidersConfirm(),
+								() => AcceptOffer(offerUseState.Value, offerUseIcon.Value))
+						]),
+					Dialog("iconProviderOffer",
+						() => pendingOffer.Value is { States: null, Icon: true },
+						() => AppStrings.Dialogs.Confirm.DefaultHeading(),
+						() => AppStrings.Widgets.Editor.OfferIconProviderMessage(
+							ActionLabelOf(pendingOffer.Value!.Block)),
+						() => pendingOffer.Value = null,
+						() =>
+						[
+							AnswerButton("declineIconProvider",
+								AppStrings.Feedback.Dismiss(),
+								() => pendingOffer.Value = null),
+							AnswerButton("acceptIconProvider",
+								AppStrings.Widgets.Editor.UseProvidedIconConfirm(),
+								() => AcceptOffer(false, true))
+						]),
+					Dialog("providerSwitch",
+						() => pendingSwitch.Value is not null,
+						() => AppStrings.Dialogs.Confirm.DefaultHeading(),
+						() => pendingSwitch.Value?.Capability == "icon"
+							? AppStrings.Widgets.Editor.SwitchIconProviderMessage()
+							: AppStrings.Widgets.Editor.SwitchProviderMessage(),
+						() => pendingSwitch.Value = null,
+						() =>
+						[
+							AnswerButton("providerSwitchDismiss",
+								MacroDeckStrings.Common.Cancel(),
+								() => pendingSwitch.Value = null),
+							AnswerButton("providerSwitchConfirm",
+								AppStrings.Widgets.Editor.SwitchProviderConfirm(),
+								ConfirmSwitch)
+						]),
+					Dialog("stopStateProvider",
+						() => pendingStop.Value == "state",
+						() => AppStrings.Widgets.Editor.StopUsingProviderHeading(),
+						() => AppStrings.Widgets.Editor.RestoreManualStatesMessage(),
+						() => pendingStop.Value = null,
+						() =>
+						[
+							AnswerButton("stopStateProviderCancel",
+								MacroDeckStrings.Common.Cancel(),
+								() => pendingStop.Value = null),
+							AnswerButton("stopStateProviderConfirm",
+								AppStrings.Widgets.Editor.StopUsingProviderConfirm(),
+								() =>
+								{
+									pendingStop.Value = null;
+									RestoreManualStates(false);
+								},
+								true)
+						]),
+					Dialog("stopIconProvider",
+						() => pendingStop.Value == "icon",
+						() => AppStrings.Widgets.Editor.StopUsingIconProviderHeading(),
+						() => AppStrings.Widgets.Editor.StopUsingIconProviderMessage(),
+						() => pendingStop.Value = null,
+						() =>
+						[
+							AnswerButton("stopIconProviderCancel",
+								MacroDeckStrings.Common.Cancel(),
+								() => pendingStop.Value = null),
+							AnswerButton("stopIconProviderConfirm",
+								AppStrings.Widgets.Editor.StopUsingIconProviderConfirm(),
+								() =>
+								{
+									pendingStop.Value = null;
+									ClearIconProvider();
+								},
+								true)
+						])
+				]
+			};
+		}
 
 		// ---- root (stateMode off) appearance ------------------------------------------------------------
 
-		UiElement BuildRootAppearance() => new UiWhen
+		UiElement BuildRootAppearance()
 		{
-			Key = "rootAppearance-when",
-			Condition = () => !stateMode.Value,
-			Content = () => new UiFragment
+			return new UiWhen
 			{
-				Key = "rootAppearance",
-				Children =
-				[
-					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
-					BuildIconProviderSection(),
-					BuildRootAppearanceTabs(),
-				],
-			},
-		};
-
-		UiElement BuildRootAppearanceTabs() => BuildAppearanceTabs(key: "appearance-tabs",
-			labelBinding: Bind.To(label),
-			fontFaceIdBinding: Bind.To(fontFaceId),
-			currentFontFaceId: () => fontFaceId.Value,
-			setFontFaceId: value => fontFaceId.Value = value,
-			fontSizeBinding: Bind.To(fontSize),
-			textAlignBinding: Bind.To(textAlign),
-			labelPositionBinding: Bind.To(labelPosition),
-			labelColorBinding: Bind.To(labelColor),
-			labelBoxColorBinding: Bind.To(labelBoxColor),
-			labelShadowBinding: Bind.To(labelShadow),
-			labelOutlineColorBinding: Bind.To(labelOutlineColor),
-			labelOutlineWidthBinding: Bind.To(labelOutlineWidth),
-			labelBoxBorderColorBinding: Bind.To(labelBoxBorderColor),
-			labelBoxBorderWidthBinding: Bind.To(labelBoxBorderWidth),
-			backgroundColorBinding: Bind.To(backgroundColor),
-			readIcon: () => icon.Value,
-			writeIcon: value => icon.Value = value,
-			iconDisplayBinding: Bind.Custom(() => new UiIconDisplay(iconFit.Value,
-					iconZoom.Value,
-					iconOffsetX.Value,
-					iconOffsetY.Value,
-					iconOpacity.Value),
-				value =>
+				Key = "rootAppearance-when",
+				Condition = () => !stateMode.Value,
+				Content = () => new UiFragment
 				{
-					if (value.Fit is not null)
-					{
-						iconFit.Value = value.Fit;
-					}
+					Key = "rootAppearance",
+					Children =
+					[
+						new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
+						BuildIconProviderSection(),
+						BuildRootAppearanceTabs()
+					]
+				}
+			};
+		}
 
-					if (value.Zoom is not null)
+		UiElement BuildRootAppearanceTabs()
+		{
+			return BuildAppearanceTabs("appearance-tabs",
+				Bind.To(label),
+				Bind.To(fontFaceId),
+				() => fontFaceId.Value,
+				value => fontFaceId.Value = value,
+				Bind.To(fontSize),
+				Bind.To(textAlign),
+				Bind.To(labelPosition),
+				Bind.To(labelColor),
+				Bind.To(labelBoxColor),
+				Bind.To(labelShadow),
+				Bind.To(labelOutlineColor),
+				Bind.To(labelOutlineWidth),
+				Bind.To(labelBoxBorderColor),
+				Bind.To(labelBoxBorderWidth),
+				Bind.To(backgroundColor),
+				() => icon.Value,
+				value => icon.Value = value,
+				Bind.Custom(() => new UiIconDisplay(iconFit.Value,
+						iconZoom.Value,
+						iconOffsetX.Value,
+						iconOffsetY.Value,
+						iconOpacity.Value),
+					value =>
 					{
-						iconZoom.Value = value.Zoom.Value;
-					}
+						if (value.Fit is not null)
+						{
+							iconFit.Value = value.Fit;
+						}
 
-					if (value.OffsetX is not null)
-					{
-						iconOffsetX.Value = value.OffsetX.Value;
-					}
+						if (value.Zoom is not null)
+						{
+							iconZoom.Value = value.Zoom.Value;
+						}
 
-					if (value.OffsetY is not null)
-					{
-						iconOffsetY.Value = value.OffsetY.Value;
-					}
+						if (value.OffsetX is not null)
+						{
+							iconOffsetX.Value = value.OffsetX.Value;
+						}
 
-					if (value.Opacity is not null)
-					{
-						iconOpacity.Value = value.Opacity.Value;
-					}
-				}),
-			iconColorBinding: Bind.To(iconColor),
-			borderNode: WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-			currentIcon: () => ToUiIcon(icon.Value)!,
-			currentBackgroundColor: () => backgroundColor.Value,
-			currentIconColor: () => iconColor.Value,
-			currentLabelOutlineColor: () => labelOutlineColor.Value,
-			currentLabelBoxBorderColor: () => labelBoxBorderColor.Value);
+						if (value.OffsetY is not null)
+						{
+							iconOffsetY.Value = value.OffsetY.Value;
+						}
+
+						if (value.Opacity is not null)
+						{
+							iconOpacity.Value = value.Opacity.Value;
+						}
+					}),
+				Bind.To(iconColor),
+				WidgetConfigFragments.Border(borderStyle, borderColor, false),
+				() => ToUiIcon(icon.Value)!,
+				() => backgroundColor.Value,
+				() => iconColor.Value,
+				() => labelOutlineColor.Value,
+				() => labelBoxBorderColor.Value);
+		}
 
 		// Host-owned keys no control edits: a bound composite is authoritative in the client's draft, and a
 		// sibling value stateMode never takes keeps it out of sight while it is still submitted.
-		UiObjectInput PersistedNode(string key, Func<JsonNode?> read) => new()
+		UiObjectInput PersistedNode(string key, Func<JsonNode?> read)
 		{
-			Key = key,
-			Binding = Bind.ReadOnly(UiValue.From(() => ToElement(read()))),
-			VisibleWhen = new UiVisibleWhen { ParameterName = "stateMode", Values = ["persisted-only"] },
-		};
+			return new UiObjectInput
+			{
+				Key = key,
+				Binding = Bind.ReadOnly(UiValue.From(() => ToElement(read()))),
+				VisibleWhen = new UiVisibleWhen { ParameterName = "stateMode", Values = ["persisted-only"] }
+			};
+		}
 
 		// ---- assembly -------------------------------------------------------------------------------------
 
@@ -1790,7 +1904,7 @@ internal static class ActionButtonWidgetConfigView
 								{
 									stateMode.Value = false;
 								}
-							}),
+							})
 					},
 					PersistedNode("stateProvider", () => ProviderJson(stateProvider.Value)),
 					PersistedNode("manualStateBackup", () => BackupJson(manualBackup.Value)),
@@ -1801,8 +1915,8 @@ internal static class ActionButtonWidgetConfigView
 					BuildStateMappingSection(),
 					BuildCycleStatesSection(),
 					BuildStatesArray(),
-					BuildRootAppearance(),
-				],
+					BuildRootAppearance()
+				]
 			},
 			Editor = new UiWidgetEditor
 			{
@@ -1824,7 +1938,7 @@ internal static class ActionButtonWidgetConfigView
 						[
 							UiEventHandler.On(UiConfigEvents.Change, OnFlowsChanged),
 							UiEventHandler.OnAsync(UiConfigEvents.Change, _ => SettleAndProbeAsync()),
-							UiEventHandler.OnAsync(UiConfigEvents.Provide, (data, _) => OnProvideAsync(data)),
+							UiEventHandler.OnAsync(UiConfigEvents.Provide, (data, _) => OnProvideAsync(data))
 						],
 						// The draft state list: a "Set Button State" block inside these flows resolves its
 						// options from stored widget data, which has not seen a state added in this session
@@ -1840,7 +1954,7 @@ internal static class ActionButtonWidgetConfigView
 								WidgetTriggerTypes.LongPress,
 								WidgetTriggerTypes.TouchStart,
 								WidgetTriggerTypes.TouchEnd,
-								WidgetTriggerTypes.DoublePress,
+								WidgetTriggerTypes.DoublePress
 							];
 
 							if (stateMode.Value)
@@ -1849,10 +1963,10 @@ internal static class ActionButtonWidgetConfigView
 							}
 
 							return (IReadOnlyList<string>)triggers;
-						}),
-					},
-				],
-			},
+						})
+					}
+				]
+			}
 		};
 	}
 
@@ -1867,7 +1981,8 @@ internal static class ActionButtonWidgetConfigView
 		string field,
 		string? nestedField = null,
 		string fallback = "")
-		=> Bind.Custom(() => ReadAppearanceString(states.Value, stateId, field, nestedField) ?? fallback,
+	{
+		return Bind.Custom(() => ReadAppearanceString(states.Value, stateId, field, nestedField) ?? fallback,
 			value => MutateAppearance(states,
 				stateId,
 				appearance =>
@@ -1883,41 +1998,51 @@ internal static class ActionButtonWidgetConfigView
 					nested[nestedField] = value;
 					appearance[field] = nested;
 				}));
+	}
 
 	private static UiBinding<double> StateDoubleBinding(
 		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		string field,
 		double fallback)
-		=> StateDoubleBinding(states, stateId, field, () => fallback);
+	{
+		return StateDoubleBinding(states, stateId, field, () => fallback);
+	}
 
 	private static UiBinding<double> StateDoubleBinding(
 		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		string field,
 		Func<double> fallback)
-		=> Bind.Custom(() =>
+	{
+		return Bind.Custom(() =>
 			{
 				var appearance = states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance;
 
 				return appearance?[field] is JsonValue value && value.TryGetValue<double>(out var d) ? d : fallback();
 			},
 			value => MutateAppearance(states, stateId, appearance => appearance[field] = value));
+	}
 
 	private static UiBinding<bool> StateBoolBinding(
 		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		string field,
 		Func<bool> fallback)
-		=> Bind.Custom(() =>
+	{
+		return Bind.Custom(() =>
 			{
 				var appearance = states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance;
 
 				return appearance?[field] is JsonValue value && value.TryGetValue<bool>(out var b) ? b : fallback();
 			},
 			value => MutateAppearance(states, stateId, appearance => appearance[field] = value));
+	}
 
-	private static string OwnOrRoot(string? own, string root) => string.IsNullOrEmpty(own) ? root : own;
+	private static string OwnOrRoot(string? own, string root)
+	{
+		return string.IsNullOrEmpty(own) ? root : own;
+	}
 
 	private static UiConfigStack LabelStroke(
 		string rowKey,
@@ -1929,7 +2054,8 @@ internal static class ActionButtonWidgetConfigView
 		UiText widthLabel,
 		UiBinding<double> widthBinding,
 		double maxWidth)
-		=> new()
+	{
+		return new UiConfigStack
 		{
 			Key = rowKey,
 			Direction = "horizontal",
@@ -1944,7 +2070,7 @@ internal static class ActionButtonWidgetConfigView
 					Binding = colorBinding,
 					SupportsReset = true,
 					DefaultValue = string.Empty,
-					RowWeight = 2,
+					RowWeight = 2
 				},
 				new UiNumberInput
 				{
@@ -1956,25 +2082,35 @@ internal static class ActionButtonWidgetConfigView
 					Max = maxWidth,
 					Step = 0.5,
 					RowWeight = 1,
-					Disabled = UiValue.From(() => string.IsNullOrEmpty(currentColor())),
-				},
-			],
+					Disabled = UiValue.From(() => string.IsNullOrEmpty(currentColor()))
+				}
+			]
 		};
+	}
 
-	private static WidgetIconReference? ReadStateWidgetIcon(IReadOnlyList<ActionButtonStateEntry> states,
+	private static WidgetIconReference? ReadStateWidgetIcon(
+		IReadOnlyList<ActionButtonStateEntry> states,
 		string stateId)
-		=> WidgetIconReference.Read(states.FirstOrDefault(s => s.Id == stateId)?.Appearance?["icon"], null);
+	{
+		return WidgetIconReference.Read(states.FirstOrDefault(s => s.Id == stateId)?.Appearance?["icon"], null);
+	}
 
 	private static UiIconReference? ReadStateIcon(IReadOnlyList<ActionButtonStateEntry> states, string stateId)
-		=> ToUiIcon(ReadStateWidgetIcon(states, stateId));
+	{
+		return ToUiIcon(ReadStateWidgetIcon(states, stateId));
+	}
 
 	private static UiIconReference? ToUiIcon(WidgetIconReference? reference)
-		=> reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+	{
+		return reference is { } value ? new UiIconReference(value.Type, value.Reference) : null;
+	}
 
-	private static void WriteStateIcon(UiState<List<ActionButtonStateEntry>> states,
+	private static void WriteStateIcon(
+		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		WidgetIconReference? value)
-		=> MutateAppearance(states,
+	{
+		MutateAppearance(states,
 			stateId,
 			appearance =>
 			{
@@ -1987,12 +2123,14 @@ internal static class ActionButtonWidgetConfigView
 
 				appearance["icon"] = value.Value.ToJson();
 			});
+	}
 
 	/// <summary>The per-state counterpart of the root <c>iconDisplay</c> binding built inline in
 	/// <see cref="Build" />: one value carrying the whole framing object, read with the same fallbacks a
 	/// freshly-created state would show and written field-by-field so a value that leaves a field out never
 	/// clobbers what is already there - see <see cref="UiIconDisplay" />'s own remarks.</summary>
-	private static UiBinding<UiIconDisplay> StateIconDisplayBinding(UiState<List<ActionButtonStateEntry>> states,
+	private static UiBinding<UiIconDisplay> StateIconDisplayBinding(
+		UiState<List<ActionButtonStateEntry>> states,
 		string stateId)
 	{
 		double? Numeric(string field)
@@ -2039,10 +2177,12 @@ internal static class ActionButtonWidgetConfigView
 				}));
 	}
 
-	private static void MutateIconDisplay(UiState<List<ActionButtonStateEntry>> states,
+	private static void MutateIconDisplay(
+		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		Action<JsonObject> mutate)
-		=> MutateAppearance(states,
+	{
+		MutateAppearance(states,
 			stateId,
 			appearance =>
 			{
@@ -2050,6 +2190,7 @@ internal static class ActionButtonWidgetConfigView
 				mutate(display);
 				appearance["iconDisplay"] = display;
 			});
+	}
 
 	private static string? ReadAppearanceString(
 		IReadOnlyList<ActionButtonStateEntry> states,
@@ -2064,34 +2205,37 @@ internal static class ActionButtonWidgetConfigView
 			return appearance?[field] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
 		}
 
-		return appearance?[field] is JsonObject nested &&
-			nested[nestedField] is JsonValue nestedValue &&
-			nestedValue.TryGetValue<string>(out var nestedString)
+		return appearance?[field] is JsonObject nested
+			&& nested[nestedField] is JsonValue nestedValue
+			&& nestedValue.TryGetValue<string>(out var nestedString)
 				? nestedString
 				: null;
 	}
 
-	private static void MutateAppearance(UiState<List<ActionButtonStateEntry>> states,
+	private static void MutateAppearance(
+		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		Action<JsonObject> mutate)
 	{
 		states.Value = states.Value.Select(s =>
-		{
-			if (s.Id != stateId)
 			{
-				return s;
-			}
+				if (s.Id != stateId)
+				{
+					return s;
+				}
 
-			var appearance = (JsonObject?)s.Appearance?.DeepClone() ?? new JsonObject();
-			mutate(appearance);
+				var appearance = (JsonObject?)s.Appearance?.DeepClone() ?? new JsonObject();
+				mutate(appearance);
 
-			return s with { Appearance = appearance };
-		}).ToList();
+				return s with { Appearance = appearance };
+			})
+			.ToList();
 	}
 
 	// ---- state-mapping-editor value (de)serialization ---------------------------------------------------
 
-	private static JsonElement SerializeMapping(IReadOnlyList<ActionButtonStateMappingRule> rules,
+	private static JsonElement SerializeMapping(
+		IReadOnlyList<ActionButtonStateMappingRule> rules,
 		string? fallbackStateId)
 	{
 		var array = new JsonArray();
@@ -2104,7 +2248,7 @@ internal static class ActionButtonWidgetConfigView
 				["stateId"] = rule.StateId,
 				["when"] = rule.When.ValueKind != JsonValueKind.Undefined
 					? JsonNode.Parse(rule.When.GetRawText())
-					: new JsonObject(),
+					: new JsonObject()
 			});
 		}
 
@@ -2190,8 +2334,8 @@ internal static class ActionButtonWidgetConfigView
 			}
 
 			var stateLabel = WidgetConfigJson.ReadString(item, "label") ?? id;
-			var appearance = item.TryGetProperty("appearance", out var appearanceElement) &&
-				appearanceElement.ValueKind == JsonValueKind.Object
+			var appearance = item.TryGetProperty("appearance", out var appearanceElement)
+				&& appearanceElement.ValueKind == JsonValueKind.Object
 					? JsonNode.Parse(appearanceElement.GetRawText()) as JsonObject
 					: null;
 
@@ -2230,12 +2374,15 @@ internal static class ActionButtonWidgetConfigView
 	}
 
 	private static JsonElement ToElement(JsonNode? node)
-		=> node is null
+	{
+		return node is null
 			? JsonSerializer.SerializeToElement<object?>(null)
 			: JsonSerializer.Deserialize<JsonElement>(node.ToJsonString());
+	}
 
 	private static JsonObject? ProviderJson(ActionButtonStateProvider? provider)
-		=> provider is null
+	{
+		return provider is null
 			? null
 			: new JsonObject
 			{
@@ -2245,19 +2392,22 @@ internal static class ActionButtonWidgetConfigView
 				["actionLabel"] = provider.ActionLabel,
 				["states"] = new JsonArray(provider.States
 					.Select(state => (JsonNode)new JsonObject { ["id"] = state.Id, ["label"] = state.Label })
-					.ToArray()),
+					.ToArray())
 			};
+	}
 
 	private static JsonObject? IconProviderJson(ActionButtonIconProvider? provider)
-		=> provider is null
+	{
+		return provider is null
 			? null
 			: new JsonObject
 			{
 				["blockId"] = provider.BlockId,
 				["integrationId"] = provider.IntegrationId,
 				["actionId"] = provider.ActionId,
-				["actionLabel"] = provider.ActionLabel,
+				["actionLabel"] = provider.ActionLabel
 			};
+	}
 
 	private static JsonObject? BackupJson(ActionButtonManualStateBackup? backup)
 	{
@@ -2270,7 +2420,8 @@ internal static class ActionButtonWidgetConfigView
 
 		if (backup.StateMapping is { } mapping)
 		{
-			result["stateMapping"] = JsonNode.Parse(SerializeMapping(mapping.Rules, mapping.FallbackStateId).GetRawText());
+			result["stateMapping"]
+				= JsonNode.Parse(SerializeMapping(mapping.Rules, mapping.FallbackStateId).GetRawText());
 		}
 
 		if (backup.ActiveStateId is { Length: > 0 } activeStateId)
@@ -2285,13 +2436,16 @@ internal static class ActionButtonWidgetConfigView
 
 	private sealed record ProviderOffer(ActionButtonFlowBlockInfo Block, ActionStateSnapshot? States, bool Icon);
 
-	private sealed record ProviderSwitch(string Capability, ActionButtonFlowBlockInfo Block, ActionStateSnapshot? States);
+	private sealed record ProviderSwitch(
+		string Capability,
+		ActionButtonFlowBlockInfo Block,
+		ActionStateSnapshot? States);
 
 	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{
-		var iconNode = data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty("icon", out var iconElement) &&
-			iconElement.ValueKind == JsonValueKind.Object
+		var iconNode = data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty("icon", out var iconElement)
+			&& iconElement.ValueKind == JsonValueKind.Object
 				? JsonNode.Parse(iconElement.GetRawText())
 				: null;
 

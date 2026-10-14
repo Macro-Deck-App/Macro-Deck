@@ -14,7 +14,9 @@ internal sealed class RecordingIntegrationConfig : IIntegrationConfig
 	public Func<string, Task>? BeforeSecretWrite { get; init; }
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([]);
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 	{

@@ -45,7 +45,7 @@ public class EndToEndTests
 	public async Task TearDown()
 	{
 		await _host.DisposeAsync();
-		Directory.Delete(_stateDirectory, recursive: true);
+		Directory.Delete(_stateDirectory, true);
 		_manifest.Dispose();
 	}
 
@@ -125,7 +125,7 @@ public class EndToEndTests
 	[Test]
 	public async Task A_managed_plugin_never_registers()
 	{
-		await using var plugin = Builder(managed: true).Build();
+		await using var plugin = Builder(true).Build();
 		await plugin.StartAsync();
 
 		await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));

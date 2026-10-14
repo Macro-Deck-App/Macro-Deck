@@ -37,7 +37,8 @@ internal sealed class FakePluginScaffoldGenerator : IPluginScaffoldGenerator
 		return Task.FromResult(ProbeResult);
 	}
 
-	public Task<PluginTemplateOperationResult> InstallAsync(string? templateVersion,
+	public Task<PluginTemplateOperationResult> InstallAsync(
+		string? templateVersion,
 		CancellationToken cancellationToken)
 	{
 		Calls.Add(nameof(InstallAsync));
@@ -60,7 +61,8 @@ internal sealed class FakePluginScaffoldGenerator : IPluginScaffoldGenerator
 		return Task.FromResult(UpdateResult);
 	}
 
-	public Task<PluginTemplateOperationResult> CreateAsync(PluginScaffoldRequest request,
+	public Task<PluginTemplateOperationResult> CreateAsync(
+		PluginScaffoldRequest request,
 		CancellationToken cancellationToken)
 	{
 		Calls.Add(nameof(CreateAsync));

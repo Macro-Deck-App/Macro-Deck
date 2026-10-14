@@ -10,7 +10,6 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
@@ -91,22 +90,34 @@ public sealed partial class SinusBotIntegration
 		}
 	}
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new SinusBotConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new SinusBotConfigFlow();
+	}
 
 	public bool AllowsMultipleConfigurations => true;
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new SinusBotMacroDeck2Migration()];
 
 	public IReadOnlyList<MusicPlayerInstance> GetInstances()
-		=> _instances.Select(i => new MusicPlayerInstance(i.EntryId, i.Title)).ToList();
+	{
+		return _instances.Select(i => new MusicPlayerInstance(i.EntryId, i.Title)).ToList();
+	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> _instances.FirstOrDefault(i => i.EntryId == instanceId)?.Player;
+	{
+		return _instances.FirstOrDefault(i => i.EntryId == instanceId)?.Player;
+	}
 
 	private IMusicPlayer? ResolvePlayer(string? instanceId)
-		=> string.IsNullOrEmpty(instanceId) ? DefaultPlayer : GetPlayer(instanceId);
+	{
+		return string.IsNullOrEmpty(instanceId) ? DefaultPlayer : GetPlayer(instanceId);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -227,9 +238,9 @@ public sealed partial class SinusBotIntegration
 
 	private static int? Progress(MusicPlayerState? state)
 	{
-		if (state?.Duration is not { } duration ||
-			duration.TotalMilliseconds <= 0 ||
-			state.Position is not { } position)
+		if (state?.Duration is not { } duration
+			|| duration.TotalMilliseconds <= 0
+			|| state.Position is not { } position)
 		{
 			return null;
 		}
@@ -269,10 +280,10 @@ public sealed partial class SinusBotIntegration
 		var instanceId = await context.Config.GetStringAsync(entryId, SinusBotConfigKeys.InstanceId);
 		var instanceName = await context.Config.GetStringAsync(entryId, SinusBotConfigKeys.InstanceName);
 
-		if (string.IsNullOrEmpty(serverUrl) ||
-			string.IsNullOrEmpty(username) ||
-			string.IsNullOrEmpty(password) ||
-			string.IsNullOrEmpty(instanceId))
+		if (string.IsNullOrEmpty(serverUrl)
+			|| string.IsNullOrEmpty(username)
+			|| string.IsNullOrEmpty(password)
+			|| string.IsNullOrEmpty(instanceId))
 		{
 			_logger.Warning("SinusBot config entry {EntryId} is incomplete; skipping", entryId);
 			return null;

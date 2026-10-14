@@ -5,7 +5,8 @@ namespace MacroDeckHost.Ui;
 
 public static class UiTransportServiceCollectionExtensions
 {
-	public static IServiceCollection AddUiTransport(this IServiceCollection services,
+	public static IServiceCollection AddUiTransport(
+		this IServiceCollection services,
 		params Assembly[] markerAssemblies)
 	{
 		var handlerInterfaceType = typeof(IUiTransportMessageHandler<,>);

@@ -22,7 +22,9 @@ public class FontsController : ControllerBase
 
 	[HttpGet]
 	public GetUserFontsResponse GetAll()
-		=> new() { Fonts = _library.List().Select(UserFontModel.From).ToList() };
+	{
+		return new GetUserFontsResponse { Fonts = _library.List().Select(UserFontModel.From).ToList() };
+	}
 
 	[HttpPost("import")]
 	[DisableFormValueModelBinding]
@@ -68,5 +70,7 @@ public class FontsController : ControllerBase
 
 	[HttpDelete("{fontId}")]
 	public async Task<DeleteUserFontResponse> Delete(string fontId, CancellationToken ct)
-		=> new() { Success = await _library.Remove(fontId, ct) };
+	{
+		return new DeleteUserFontResponse { Success = await _library.Remove(fontId, ct) };
+	}
 }

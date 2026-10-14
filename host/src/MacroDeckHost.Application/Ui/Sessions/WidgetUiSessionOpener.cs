@@ -110,8 +110,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		// reason, and reuse is matched on the surface instead.
 		var owner = ProviderOwnerOf(widget.Type);
 
-		var providerId = owner ??
-			(request.Ghost
+		var providerId = owner
+			?? (request.Ghost
 				? WidgetUiProviderRegistry.GhostProviderIdFor(widgetId, ownerPrincipal)
 				: WidgetUiProviderRegistry.ProviderIdFor(widgetId, ownerPrincipal));
 
@@ -120,8 +120,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			: FindExistingSurface(providerId,
 				ownerPrincipal,
 				UiSurfaceKinds.Widget,
-				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetId, widgetId.ToString()) &&
-					IsFlagged(candidate, UiWidgetSurfaceAttributes.Ghost) == request.Ghost);
+				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetId, widgetId.ToString())
+					&& IsFlagged(candidate, UiWidgetSurfaceAttributes.Ghost) == request.Ghost);
 
 		if (existing is { } opened)
 		{
@@ -150,8 +150,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		var sample = request.Sample;
 		var scope = VariableScopeOf(request);
 
-		if (_availability.Check(_widgetTypes.Resolve(request.WidgetType) ?? request.WidgetType) is { } missing &&
-			draft.ValueKind == JsonValueKind.Object)
+		if (_availability.Check(_widgetTypes.Resolve(request.WidgetType) ?? request.WidgetType) is { } missing
+			&& draft.ValueKind == JsonValueKind.Object)
 		{
 			var placeholderType = request.WidgetType ?? string.Empty;
 			var placeholderId = WidgetUiProviderRegistry.UnavailablePreviewProviderIdFor(placeholderType);
@@ -159,8 +159,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			if (FindExistingSurface(placeholderId,
 					ownerPrincipal,
 					UiSurfaceKinds.Preview,
-					candidate => IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == sample &&
-						Matches(candidate, UiWidgetSurfaceAttributes.VariableScopeWidgetId, scope?.ToString())) is
+					candidate => IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == sample
+						&& Matches(candidate, UiWidgetSurfaceAttributes.VariableScopeWidgetId, scope?.ToString())) is
 				{ } shown)
 			{
 				return shown;
@@ -207,8 +207,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 
 		var owner = ProviderOwnerOf(widgetType);
 
-		var providerId = owner ??
-			(request.Sample
+		var providerId = owner
+			?? (request.Sample
 				? WidgetUiProviderRegistry.SamplePreviewProviderIdFor(widgetType, ownerPrincipal)
 				: WidgetUiProviderRegistry.PreviewProviderIdFor(widgetType, ownerPrincipal, scope));
 
@@ -219,9 +219,9 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			: FindExistingSurface(providerId,
 				ownerPrincipal,
 				UiSurfaceKinds.Preview,
-				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetType, widgetType) &&
-					IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == request.Sample &&
-					Matches(candidate,
+				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetType, widgetType)
+					&& IsFlagged(candidate, UiWidgetSurfaceAttributes.Sample) == request.Sample
+					&& Matches(candidate,
 						UiWidgetSurfaceAttributes.VariableScopeWidgetId,
 						scope?.ToString()));
 
@@ -241,27 +241,34 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	}
 
 	private Guid? VariableScopeOf(OpenWidgetUiSessionRequest request)
-		=> Guid.TryParse(request.VariableScopeWidgetId, out var scopeWidgetId) && FindWidget(scopeWidgetId) is not null
-			? scopeWidgetId
-			: null;
+	{
+		return Guid.TryParse(request.VariableScopeWidgetId, out var scopeWidgetId)
+			&& FindWidget(scopeWidgetId) is not null
+				? scopeWidgetId
+				: null;
+	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
-		=> _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == widgetId);
+	{
+		return _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == widgetId);
+	}
 
 	/// <summary>The integration or plugin that serves this widget type, or <c>null</c> for a built-in type
 	/// the host draws itself and for a type nothing provides.</summary>
 	private string? ProviderOwnerOf(string widgetType)
-		=> _widgetTypes.TryResolve(widgetType, out var entry) && !entry.IsBuiltIn
+	{
+		return _widgetTypes.TryResolve(widgetType, out var entry) && !entry.IsBuiltIn
 			? entry.ProviderId
 			: null;
+	}
 
 	// A synthetic provider id already names exactly one session, so matching the owner is all it takes.
 	private UiSessionOpenTicket? FindExisting(string providerId, string ownerPrincipal)
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) &&
-				session.State is not (UiSessionState.Closed or UiSessionState.Invalidated))
+			if (string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)
+				&& session.State is not (UiSessionState.Closed or UiSessionState.Invalidated))
 			{
 				return UiSessionOpenTicket.Opened(session.SessionId);
 			}
@@ -279,9 +286,9 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) ||
-				session.State is UiSessionState.Closed or UiSessionState.Invalidated ||
-				!string.Equals(session.Surface.Kind, surfaceKind, StringComparison.Ordinal))
+			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)
+				|| session.State is UiSessionState.Closed or UiSessionState.Invalidated
+				|| !string.Equals(session.Surface.Kind, surfaceKind, StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -296,13 +303,17 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	}
 
 	private static bool Matches(UiSurface surface, string key, string? expected)
-		=> surface.Attributes.TryGetValue(key, out var candidate)
-			? candidate.ValueKind == JsonValueKind.String &&
-			string.Equals(candidate.GetString(), expected, StringComparison.Ordinal)
+	{
+		return surface.Attributes.TryGetValue(key, out var candidate)
+			? candidate.ValueKind == JsonValueKind.String
+			&& string.Equals(candidate.GetString(), expected, StringComparison.Ordinal)
 			: expected is null;
+	}
 
 	private static bool IsFlagged(UiSurface surface, string key)
-		=> surface.Attributes.TryGetValue(key, out var candidate) && candidate.ValueKind == JsonValueKind.True;
+	{
+		return surface.Attributes.TryGetValue(key, out var candidate) && candidate.ValueKind == JsonValueKind.True;
+	}
 
 	private Dictionary<string, JsonElement> BuildLiveAttributes(
 		Guid widgetId,
@@ -346,9 +357,12 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 	}
 
 	private FolderEntity? FindFolderOf(Guid widgetId)
-		=> _folderCache.GetAllFolders().FirstOrDefault(folder => folder.Widgets.Any(w => w.Id == widgetId));
+	{
+		return _folderCache.GetAllFolders().FirstOrDefault(folder => folder.Widgets.Any(w => w.Id == widgetId));
+	}
 
-	private Dictionary<string, JsonElement> BuildPreviewAttributes(string widgetType,
+	private Dictionary<string, JsonElement> BuildPreviewAttributes(
+		string widgetType,
 		JsonElement data,
 		bool sample,
 		Guid? variableScopeWidgetId)

@@ -7,17 +7,17 @@ public sealed class UserPathRedactor
 	public const string HomePlaceholder = "~";
 	public const string UserPlaceholder = "<user>";
 
-	private static readonly string[] ExemptSegments =
+	private static readonly string[] _exemptSegments =
 		["Public", "Default", "Default User", "All Users", "Shared"];
 
-	private static readonly Lazy<UserPathRedactor> Lazy = new(FromEnvironment);
+	private static readonly Lazy<UserPathRedactor> _lazy = new(FromEnvironment);
 
 	private readonly string? _home;
 	private readonly (string Root, string Replacement)[] _extraRoots;
 	private readonly bool _ignoreCase;
 	private readonly string? _homeProbe;
 
-	public static UserPathRedactor Current => Lazy.Value;
+	public static UserPathRedactor Current => _lazy.Value;
 
 	public UserPathRedactor(
 		string? homeDirectory,
@@ -59,27 +59,42 @@ public sealed class UserPathRedactor
 	}
 
 	private static bool IsPathBody(char character)
-		=> character > '\u007f' || char.IsAsciiLetterOrDigit(character) || character is '_' or '.' or '-';
+	{
+		return character > '\u007f' || char.IsAsciiLetterOrDigit(character) || character is '_' or '.' or '-';
+	}
 
-	private static bool IsSeparator(char character) => character is '/' or '\\';
+	private static bool IsSeparator(char character)
+	{
+		return character is '/' or '\\';
+	}
 
 	private static bool IsSegmentTerminator(char character)
-		=> character <= ' ' || character is '/' or '\\' or ':' or '*' or '?' or '"' or '<' or '>' or '|';
+	{
+		return character <= ' ' || character is '/' or '\\' or ':' or '*' or '?' or '"' or '<' or '>' or '|';
+	}
 
 	private static bool IsLeftBoundary(string text, int index)
-		=> index == 0 || !IsPathBody(text[index - 1]);
+	{
+		return index == 0 || !IsPathBody(text[index - 1]);
+	}
 
 	private static bool AsciiEquals(char left, char right, bool ignoreCase)
-		=> ignoreCase
+	{
+		return ignoreCase
 			? ToAsciiLower(left) == ToAsciiLower(right)
 			: left == right;
+	}
 
 	private static char ToAsciiLower(char character)
-		=> char.IsAsciiLetterUpper(character) ? (char)(character + 32) : character;
+	{
+		return char.IsAsciiLetterUpper(character) ? (char)(character + 32) : character;
+	}
 
 	private static bool IsUrlBoundary(char character)
-		=> char.IsWhiteSpace(character) ||
-			character is '"' or '\'' or ',' or ';' or '(' or ')' or '[' or ']' or '{' or '}' or '<' or '>' or '\\';
+	{
+		return char.IsWhiteSpace(character)
+			|| character is '"' or '\'' or ',' or ';' or '(' or ')' or '[' or ']' or '{' or '}' or '<' or '>' or '\\';
+	}
 
 	private string ReplaceRoot(string text, string root, string replacement, string probe)
 	{
@@ -162,9 +177,9 @@ public sealed class UserPathRedactor
 		var index = 0;
 		while (index < text.Length)
 		{
-			if (!IsLeftBoundary(text, index) ||
-				!TryMatchProfileRoot(text, index, out var segmentStart, out var hasExemptNames) ||
-				IsInsideNonFileUrl(text, index))
+			if (!IsLeftBoundary(text, index)
+				|| !TryMatchProfileRoot(text, index, out var segmentStart, out var hasExemptNames)
+				|| IsInsideNonFileUrl(text, index))
 			{
 				index++;
 				continue;
@@ -176,7 +191,7 @@ public sealed class UserPathRedactor
 				segmentEnd++;
 			}
 
-			if (segmentEnd == segmentStart || (hasExemptNames && IsExempt(text, segmentStart)))
+			if (segmentEnd == segmentStart || hasExemptNames && IsExempt(text, segmentStart))
 			{
 				index = segmentEnd > index ? segmentEnd : index + 1;
 				continue;
@@ -200,9 +215,9 @@ public sealed class UserPathRedactor
 		if (index + 1 < text.Length && char.IsAsciiLetter(text[index]) && text[index + 1] == ':')
 		{
 			index += 2;
-			if (!TrySkipSeparators(text, ref index) ||
-				!TrySkipLiteral(text, ref index, "Users", ignoreCase: true) ||
-				!TrySkipSeparators(text, ref index))
+			if (!TrySkipSeparators(text, ref index)
+				|| !TrySkipLiteral(text, ref index, "Users", true)
+				|| !TrySkipSeparators(text, ref index))
 			{
 				return false;
 			}
@@ -216,10 +231,10 @@ public sealed class UserPathRedactor
 				index++;
 			}
 
-			if (index == serverStart ||
-				!TrySkipSeparators(text, ref index) ||
-				!TrySkipLiteral(text, ref index, "Users", ignoreCase: true) ||
-				!TrySkipSeparators(text, ref index))
+			if (index == serverStart
+				|| !TrySkipSeparators(text, ref index)
+				|| !TrySkipLiteral(text, ref index, "Users", true)
+				|| !TrySkipSeparators(text, ref index))
 			{
 				return false;
 			}
@@ -227,13 +242,13 @@ public sealed class UserPathRedactor
 		else if (index < text.Length && text[index] == '/')
 		{
 			index++;
-			if (TrySkipLiteral(text, ref index, "home", ignoreCase: false))
+			if (TrySkipLiteral(text, ref index, "home", false))
 			{
 				// Nothing under /home is a shared profile directory, so a real account named
 				// "shared" or "public" must not be spared here.
 				hasExemptNames = false;
 			}
-			else if (!TrySkipLiteral(text, ref index, "Users", ignoreCase: false))
+			else if (!TrySkipLiteral(text, ref index, "Users", false))
 			{
 				return false;
 			}
@@ -290,16 +305,15 @@ public sealed class UserPathRedactor
 
 		var schemeEnd = text.AsSpan(tokenStart, index - tokenStart).IndexOf("://", StringComparison.Ordinal);
 
-		return schemeEnd >= 0 &&
-			!text.AsSpan(tokenStart, schemeEnd).Equals("file", StringComparison.OrdinalIgnoreCase);
+		return schemeEnd >= 0 && !text.AsSpan(tokenStart, schemeEnd).Equals("file", StringComparison.OrdinalIgnoreCase);
 	}
 
 	private static bool IsExempt(string text, int start)
 	{
-		foreach (var exempt in ExemptSegments)
+		foreach (var exempt in _exemptSegments)
 		{
-			if (start + exempt.Length > text.Length ||
-				!text.AsSpan(start, exempt.Length).Equals(exempt, StringComparison.OrdinalIgnoreCase))
+			if (start + exempt.Length > text.Length
+				|| !text.AsSpan(start, exempt.Length).Equals(exempt, StringComparison.OrdinalIgnoreCase))
 			{
 				continue;
 			}
@@ -327,11 +341,15 @@ public sealed class UserPathRedactor
 	}
 
 	private static bool IsAbsolute(string value)
-		=> IsSeparator(value[0]) ||
-			(value.Length >= 3 && char.IsAsciiLetter(value[0]) && value[1] == ':' && IsSeparator(value[2]));
+	{
+		return IsSeparator(value[0])
+			|| value.Length >= 3 && char.IsAsciiLetter(value[0]) && value[1] == ':' && IsSeparator(value[2]);
+	}
 
 	private static bool IsDriveRoot(string value)
-		=> value.Length == 2 && char.IsAsciiLetter(value[0]) && value[1] == ':';
+	{
+		return value.Length == 2 && char.IsAsciiLetter(value[0]) && value[1] == ':';
+	}
 
 	private static string? LastSegment(string? root)
 	{
@@ -354,8 +372,8 @@ public sealed class UserPathRedactor
 
 		var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-		return candidate.StartsWith(root, comparison) &&
-			(candidate.Length == root.Length || IsSeparator(candidate[root.Length]));
+		return candidate.StartsWith(root, comparison)
+			&& (candidate.Length == root.Length || IsSeparator(candidate[root.Length]));
 	}
 
 	private static UserPathRedactor FromEnvironment()

@@ -29,16 +29,16 @@ internal sealed class IconPackSigningLimitsTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
 	[Test]
 	public async Task An_icon_pack_whose_pack_json_exceeds_the_plugin_manifest_bound_signs_and_verifies()
 	{
-		var package = CreateIconPack("large.macroDeckIconPack", files: 2, padding: 12 * 1024 * 1024);
+		var package = CreateIconPack("large.macroDeckIconPack", 2, 12 * 1024 * 1024);
 
-		var signed = await Sign(package, withIssuer: false);
+		var signed = await Sign(package, false);
 		var verified = await Verify(signed.Output);
 
 		Assert.Multiple(() =>
@@ -51,9 +51,9 @@ internal sealed class IconPackSigningLimitsTests
 	[Test]
 	public async Task An_icon_pack_whose_pack_json_exceeds_the_icon_pack_bound_is_refused_by_signer_and_verifier()
 	{
-		var package = CreateIconPack("huge.macroDeckIconPack", files: 1, padding: IconPackArchiveLimits.MaxManifestBytes);
+		var package = CreateIconPack("huge.macroDeckIconPack", 1, IconPackArchiveLimits.MaxManifestBytes);
 
-		var signed = await Sign(package, withIssuer: false);
+		var signed = await Sign(package, false);
 		var verified = await Verify(package);
 
 		Assert.Multiple(() =>
@@ -76,7 +76,7 @@ internal sealed class IconPackSigningLimitsTests
 				["description"] = new string('x', PluginArtifactLimits.MaxManifestBytes)
 			});
 
-		var signed = await Sign(package, withIssuer: false);
+		var signed = await Sign(package, false);
 		var verified = await Verify(package);
 
 		Assert.Multiple(() =>
@@ -90,7 +90,7 @@ internal sealed class IconPackSigningLimitsTests
 	[TestCase(true, IconPackArchiveLimits.MaxEntries - 4)]
 	public async Task An_icon_pack_that_would_exceed_the_entry_bound_once_signed_is_refused(bool withIssuer, int files)
 	{
-		var package = CreateIconPack("full.macroDeckIconPack", files, padding: 0);
+		var package = CreateIconPack("full.macroDeckIconPack", files, 0);
 
 		var signed = await Sign(package, withIssuer);
 
@@ -104,9 +104,9 @@ internal sealed class IconPackSigningLimitsTests
 	[Test]
 	public async Task An_icon_pack_at_the_unsigned_entry_bound_signs_with_issuer_material_to_exactly_the_entry_bound()
 	{
-		var package = CreateIconPack("bound.macroDeckIconPack", IconPackArchiveLimits.MaxUnsignedEntries - 1, padding: 0);
+		var package = CreateIconPack("bound.macroDeckIconPack", IconPackArchiveLimits.MaxUnsignedEntries - 1, 0);
 
-		var signed = await Sign(package, withIssuer: true);
+		var signed = await Sign(package, true);
 		var verified = await Verify(signed.Output);
 
 		Assert.Multiple(() =>
@@ -122,10 +122,10 @@ internal sealed class IconPackSigningLimitsTests
 	{
 		var package = CreateIconPack("stale.macroDeckIconPack",
 			IconPackArchiveLimits.MaxEntries - 3,
-			padding: 0,
-			staleCertificate: true);
+			0,
+			true);
 
-		var signed = await Sign(package, withIssuer: false);
+		var signed = await Sign(package, false);
 
 		Assert.Multiple(() =>
 		{
@@ -137,7 +137,7 @@ internal sealed class IconPackSigningLimitsTests
 	[Test]
 	public async Task The_verifier_refuses_an_icon_pack_archive_above_the_entry_bound()
 	{
-		var package = CreateIconPack("over.macroDeckIconPack", IconPackArchiveLimits.MaxEntries, padding: 0);
+		var package = CreateIconPack("over.macroDeckIconPack", IconPackArchiveLimits.MaxEntries, 0);
 
 		var verified = await Verify(package);
 
@@ -174,11 +174,12 @@ internal sealed class IconPackSigningLimitsTests
 			["name"] = "Test Icons",
 			["description"] = new string('x', padding),
 			["files"] = new JsonArray(declared.Select(file => (JsonNode)new JsonObject
-			{
-				["path"] = file.Path,
-				["sha256"] = "sha256:" + PackageArchiveFixtures.Sha256Hex(file.Content),
-				["size"] = Encoding.UTF8.GetByteCount(file.Content)
-			}).ToArray())
+				{
+					["path"] = file.Path,
+					["sha256"] = "sha256:" + PackageArchiveFixtures.Sha256Hex(file.Content),
+					["size"] = Encoding.UTF8.GetByteCount(file.Content)
+				})
+				.ToArray())
 		};
 
 		var path = Path.Combine(_directory, fileName);
@@ -215,7 +216,8 @@ internal sealed class IconPackSigningLimitsTests
 			TestPki.Root.PublicKey,
 			SigningCertificateChain.PackageKeyUsage);
 		Assert.That(chain.Success, Is.True, chain.Message);
-		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate).Material!;
+		using var signer = SigningMaterial.Create(certificate.PrivateKey, chain.TrustedCertificate!.Certificate)
+			.Material!;
 
 		var output = Path.Combine(_directory, "signed-" + Path.GetFileName(package));
 		var result = await PackageSigner.SignAsync(package,
@@ -229,8 +231,10 @@ internal sealed class IconPackSigningLimitsTests
 		return (result, output);
 	}
 
-	private static Task<PackageVerifyResult> Verify(string path) =>
-		PackageVerifier.VerifyAsync(path, _manifestReader, TestPki.Root.PublicKey);
+	private static Task<PackageVerifyResult> Verify(string path)
+	{
+		return PackageVerifier.VerifyAsync(path, _manifestReader, TestPki.Root.PublicKey);
+	}
 
 	private static int EntryCount(string path)
 	{

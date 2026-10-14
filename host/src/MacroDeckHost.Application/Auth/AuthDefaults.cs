@@ -25,10 +25,16 @@ public static class AuthDefaults
 	/// <see cref="AccessCookie"/> and overwrite each other's, leaving the loser's own
 	/// <c>&lt;img&gt;</c> requests carrying a token signed with the wrong key.
 	/// </summary>
-	public static string AccessCookieFor(int port) => $"{AccessCookie}_{port}";
+	public static string AccessCookieFor(int port)
+	{
+		return $"{AccessCookie}_{port}";
+	}
 
 	/// <summary>Same reasoning as <see cref="AccessCookieFor"/>, for the refresh cookie.</summary>
-	public static string RefreshCookieFor(int port) => $"{RefreshCookie}_{port}";
+	public static string RefreshCookieFor(int port)
+	{
+		return $"{RefreshCookie}_{port}";
+	}
 
 	public const int MinPasswordLength = 8;
 	public const int MaxUsernameLength = 64;
@@ -41,9 +47,11 @@ public static class AuthDefaults
 	// Earned by the device claim, not by the scope: a token naming no device is outside the guard's reach
 	// and has no durable way to be revoked, so it keeps the short life.
 	public static TimeSpan AccessTokenLifetimeFor(AuthScope scope, Guid? deviceId)
-		=> scope != AuthScope.Admin && deviceId is not null
+	{
+		return scope != AuthScope.Admin && deviceId is not null
 			? ClientAccessTokenLifetime
 			: AdminAccessTokenLifetime;
+	}
 
 	public static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(365);
 
@@ -67,5 +75,7 @@ public static class AuthDefaults
 	public static readonly TimeSpan DeviceEnrollmentLifetime = TimeSpan.FromMinutes(15);
 
 	public static string ScopeClaimValue(AuthScope scope)
-		=> scope == AuthScope.Admin ? AdminScope : ClientScope;
+	{
+		return scope == AuthScope.Admin ? AdminScope : ClientScope;
+	}
 }

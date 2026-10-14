@@ -2,7 +2,6 @@ using MacroDeckHost.Application.Store;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Store;
 using MacroDeckHost.Infrastructure.BackgroundServices;
-using MacroDeckHost.Tests.UnitTests.Auth;
 
 namespace MacroDeckHost.Tests.UnitTests.BackgroundServices;
 
@@ -21,7 +20,8 @@ internal sealed class StoreRegistryRefreshBroadcastBackgroundServiceTests
 		tracker.Finish(StoreRegistryRefreshRunState.Failed,
 			RegistryRefreshError.NetworkFailure,
 			"offline",
-			new StoreRegistryStatus { HasCatalog = true, LastError = RegistryRefreshError.NetworkFailure, Stale = true });
+			new StoreRegistryStatus
+				{ HasCatalog = true, LastError = RegistryRefreshError.NetworkFailure, Stale = true });
 		await WaitFor(() => transport.GroupMessages.Count >= 3);
 		await service.StopAsync(CancellationToken.None);
 

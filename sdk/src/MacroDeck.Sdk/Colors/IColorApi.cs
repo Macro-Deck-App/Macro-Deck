@@ -26,7 +26,8 @@ public interface IColorApi
 	/// result to stop watching.
 	/// </summary>
 	/// <exception cref="InvalidOperationException">The plugin already watches the most colours it may.</exception>
-	Task<IAsyncDisposable> WatchAsync(string value,
+	Task<IAsyncDisposable> WatchAsync(
+		string value,
 		Func<string?, CancellationToken, Task> onChanged,
 		string? widgetId = null,
 		CancellationToken cancellationToken = default);

@@ -35,8 +35,8 @@ public sealed class MusicPlayerAlbumColor : IMusicPlayerAlbumColor
 
 		lock (_sync)
 		{
-			if (_entries.TryGetValue(instanceId, out var known) &&
-				string.Equals(known.ArtworkId, artworkId, StringComparison.Ordinal))
+			if (_entries.TryGetValue(instanceId, out var known)
+				&& string.Equals(known.ArtworkId, artworkId, StringComparison.Ordinal))
 			{
 				return known.Color;
 			}

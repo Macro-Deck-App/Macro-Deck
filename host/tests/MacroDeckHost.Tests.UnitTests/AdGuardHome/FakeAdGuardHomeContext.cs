@@ -21,8 +21,12 @@ internal sealed class FakeAdGuardHomeContext : IIntegrationContext, IIntegration
 	public IIntegrationConfig Config => this;
 	public FakeAdGuardHomeVariables OwnVariables { get; } = new();
 	public IVariableApi Variables => OwnVariables;
+
 	public IUiResourceRegistry UiResources { get; } =
-		new BuiltInUiResources(AdGuardHomeIntegration.IntegrationId, new UiResourceStore(), typeof(AdGuardHomeIntegration));
+		new BuiltInUiResources(AdGuardHomeIntegration.IntegrationId,
+			new UiResourceStore(),
+			typeof(AdGuardHomeIntegration));
+
 	public IUserVariableApi UserVariables => throw new NotSupportedException();
 	public IDeckNavigator Deck => throw new NotSupportedException();
 	public IScriptApi Scripts => throw new NotSupportedException();
@@ -48,22 +52,35 @@ internal sealed class FakeAdGuardHomeContext : IIntegrationContext, IIntegration
 		return entryId;
 	}
 
-	public void Clear() => _entries.Clear();
+	public void Clear()
+	{
+		_entries.Clear();
+	}
 
 	public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+	}
 
 	public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	{
+		return Task.FromResult<string?>(_secrets.GetValueOrDefault((entryId, key)));
+	}
 
 	public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 }
 
 internal sealed class FakeAdGuardHomeVariables : IVariableApi
@@ -106,14 +123,23 @@ internal sealed class FakeAdGuardHomeVariables : IVariableApi
 		return Task.CompletedTask;
 	}
 
-	public Task<VariableHandle?> GetByNameAsync(string name) => throw new NotSupportedException();
+	public Task<VariableHandle?> GetByNameAsync(string name)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<VariableHandle> CreateAsync(string name,
+	public Task<VariableHandle> CreateAsync(
+		string name,
 		VariableType type,
 		object? initialValue = null,
 		int? decimalPlaces = null,
 		string? definitionId = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+	public Task SetValueAsync(Guid variableId, object? value)
+	{
+		throw new NotSupportedException();
+	}
 }

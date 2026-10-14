@@ -11,9 +11,15 @@ internal static class UiPreviewHotReload
 {
 	public static event Action? Updated;
 
-	public static void UpdateApplication(Type[]? updatedTypes) => Reload();
+	public static void UpdateApplication(Type[]? updatedTypes)
+	{
+		Reload();
+	}
 
-	public static void Reload() => Updated?.Invoke();
+	public static void Reload()
+	{
+		Updated?.Invoke();
+	}
 }
 
 internal interface IUiSessionReloader
@@ -23,5 +29,8 @@ internal interface IUiSessionReloader
 
 internal sealed class HotReloadUiSessionReloader : IUiSessionReloader
 {
-	public void ReloadOpenSessions() => UiPreviewHotReload.Reload();
+	public void ReloadOpenSessions()
+	{
+		UiPreviewHotReload.Reload();
+	}
 }

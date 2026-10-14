@@ -10,7 +10,10 @@ internal static class ImapText
 
 	// A snapshot's status message is plain text, so it is resolved in the system language: the integration
 	// is not told which language the user picked, just as an out-of-process plugin is not.
-	public static string Resolve(LocalizedString value) => _resolver.Resolve(value, CultureInfo.CurrentUICulture.Name);
+	public static string Resolve(LocalizedString value)
+	{
+		return _resolver.Resolve(value, CultureInfo.CurrentUICulture.Name);
+	}
 
 	private static LocalizationResolver CreateResolver()
 	{

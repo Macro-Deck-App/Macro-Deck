@@ -7,17 +7,21 @@ namespace MacroDeckHost.Tests.UnitTests.Integrations;
 public class SoundPadMacroDeck2MigrationTests
 {
 	private static Task<ActionMigrationResult?> Migrate(string actionType, string? configuration)
-		=> new SoundPadMacroDeck2Migration().MigrateActionAsync(
-			new ForeignAction($"PW.MacroDeck.SoundPad.Actions.{actionType}",
+	{
+		return new SoundPadMacroDeck2Migration().MigrateActionAsync(new ForeignAction(
+				$"PW.MacroDeck.SoundPad.Actions.{actionType}",
 				"SoundPadPlugin",
 				"SoundPad button",
 				configuration,
 				null),
 			CancellationToken.None);
+	}
 
 	[Test]
 	public void ClaimsTheMacroDeck2PluginAssembly()
-		=> Assert.That(new SoundPadMacroDeck2Migration().ClaimedActionSources, Is.EqualTo(new[] { "SoundPadPlugin" }));
+	{
+		Assert.That(new SoundPadMacroDeck2Migration().ClaimedActionSources, Is.EqualTo(new[] { "SoundPadPlugin" }));
+	}
 
 	[TestCase("""{"AudioIndex":-1,"Sound":{"Index":7,"Title":"Airhorn"},"Category":{"Index":2,"Name":"Memes"}}""",
 		"7")]
@@ -38,7 +42,9 @@ public class SoundPadMacroDeck2MigrationTests
 	[TestCase("")]
 	[TestCase("not json")]
 	public async Task PlayAction_WithoutASound_IsNotMigrated(string configuration)
-		=> Assert.That(await Migrate("PlayAction", configuration), Is.Null);
+	{
+		Assert.That(await Migrate("PlayAction", configuration), Is.Null);
+	}
 
 	[TestCase("""{"RecordingDevice":0}""", "microphone")]
 	[TestCase("""{"RecordingDevice":1}""", "speakers")]
@@ -71,5 +77,7 @@ public class SoundPadMacroDeck2MigrationTests
 
 	[Test]
 	public async Task UnknownAction_IsNotMigrated()
-		=> Assert.That(await Migrate("SomethingElseAction", null), Is.Null);
+	{
+		Assert.That(await Migrate("SomethingElseAction", null), Is.Null);
+	}
 }

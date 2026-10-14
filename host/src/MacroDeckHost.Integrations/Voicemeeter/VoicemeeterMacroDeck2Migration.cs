@@ -24,26 +24,36 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 	private static readonly Regex _busAssignment = new(@"^[AB][0-9]+$", RegexOptions.Compiled);
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"PW.VoicemeeterPlugin.Actions.AdvancedAction" => MigrateAdvanced(action),
-		"PW.VoicemeeterPlugin.Actions.CommandAction" => MigrateCommand(action),
-		"PW.VoicemeeterPlugin.Actions.DeviceSliderAction" => MigrateSlider(action),
-		"PW.VoicemeeterPlugin.Actions.DeviceToggleAction" => MigrateToggle(action),
-		"PW.VoicemeeterPlugin.Actions.MacroButtonAction" => MigrateMacroButton(action),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"PW.VoicemeeterPlugin.Actions.AdvancedAction" => MigrateAdvanced(action),
+			"PW.VoicemeeterPlugin.Actions.CommandAction" => MigrateCommand(action),
+			"PW.VoicemeeterPlugin.Actions.DeviceSliderAction" => MigrateSlider(action),
+			"PW.VoicemeeterPlugin.Actions.DeviceToggleAction" => MigrateToggle(action),
+			"PW.VoicemeeterPlugin.Actions.MacroButtonAction" => MigrateMacroButton(action),
+			_ => null
+		};
+	}
 
 	// Macro Deck 3 talks to Voicemeeter directly through its Remote API rather than through a configured
 	// host/port/credential set, so there is nothing in the foreign plugin's settings worth carrying over.
-	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings) => [];
+	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
+	{
+		return [];
+	}
 
 	// AdvancedAction stores a raw Remote API script - the exact grammar RunScriptActionDefinition runs -
 	// rather than JSON, so it needs no parsing at all.
@@ -60,8 +70,8 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 
 	private static ActionMigrationResult? MigrateCommand(ForeignAction action)
 	{
-		if (!TryParseObject(action.Configuration, out var config) ||
-			!TryReadNestedInt(config, "Command", "CommandType", out var commandType))
+		if (!TryParseObject(action.Configuration, out var config)
+			|| !TryReadNestedInt(config, "Command", "CommandType", out var commandType))
 		{
 			return null;
 		}
@@ -99,20 +109,22 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static ActionMigrationResult RunCommand(ForeignAction action, string command, string fallbackLabel)
-		=> new(VoicemeeterIntegration.IntegrationId,
+	{
+		return new ActionMigrationResult(VoicemeeterIntegration.IntegrationId,
 			"run-command",
 			action.DisplayName ?? fallbackLabel,
 			Parameters(("command", JsonString(command))));
+	}
 
 	// The slider nudges a channel's gain by a delta relative to its last known value rather than setting
 	// it outright, which is exactly what set-{target}-gain's increase/decrease mode does.
 	private static ActionMigrationResult? MigrateSlider(ForeignAction action)
 	{
-		if (!TryParseObject(action.Configuration, out var config) ||
-			!TryReadOption(config, out var id, out var option) ||
-			!string.Equals(option, VoicemeeterParameters.Gain, StringComparison.Ordinal) ||
-			!TryParseChannel(id, out var kind, out var index) ||
-			!TryReadDouble(config, "Value", out var delta))
+		if (!TryParseObject(action.Configuration, out var config)
+			|| !TryReadOption(config, out var id, out var option)
+			|| !string.Equals(option, VoicemeeterParameters.Gain, StringComparison.Ordinal)
+			|| !TryParseChannel(id, out var kind, out var index)
+			|| !TryReadDouble(config, "Value", out var delta))
 		{
 			return null;
 		}
@@ -135,9 +147,9 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 	// recognised; a user-defined additional variable has no known Macro Deck 3 counterpart to toggle.
 	private static ActionMigrationResult? MigrateToggle(ForeignAction action)
 	{
-		if (!TryParseObject(action.Configuration, out var config) ||
-			!TryReadOption(config, out var id, out var option) ||
-			!TryParseChannel(id, out var kind, out var index))
+		if (!TryParseObject(action.Configuration, out var config)
+			|| !TryReadOption(config, out var id, out var option)
+			|| !TryParseChannel(id, out var kind, out var index))
 		{
 			return null;
 		}
@@ -178,25 +190,28 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 		return null;
 	}
 
-	private static bool IsSwitch(VoicemeeterChannelKind kind, string option) => kind switch
+	private static bool IsSwitch(VoicemeeterChannelKind kind, string option)
 	{
-		VoicemeeterChannelKind.Strip => option is VoicemeeterParameters.Mono or VoicemeeterParameters.Solo,
-		VoicemeeterChannelKind.Bus => option is VoicemeeterParameters.Mono
-			or VoicemeeterParameters.Eq
-			or VoicemeeterParameters.Sel,
-		_ => false
-	};
+		return kind switch
+		{
+			VoicemeeterChannelKind.Strip => option is VoicemeeterParameters.Mono or VoicemeeterParameters.Solo,
+			VoicemeeterChannelKind.Bus => option is VoicemeeterParameters.Mono
+				or VoicemeeterParameters.Eq
+				or VoicemeeterParameters.Sel,
+			_ => false
+		};
+	}
 
 	// Push mirrors set-macro-button's "press" mode (a momentary pulse); TwoPositions mirrors its "toggle"
 	// mode (a persistent state flip). Both read the button's current state the same way the source plugin
 	// does, so no explicit state is carried across.
 	private static ActionMigrationResult? MigrateMacroButton(ForeignAction action)
 	{
-		if (!TryParseObject(action.Configuration, out var config) ||
-			!TryReadInt(config, "ButtonId", out var buttonId) ||
-			buttonId < 0 ||
-			buttonId >= VoicemeeterConnection.MacroButtonCount ||
-			!TryReadInt(config, "ButtonType", out var buttonType))
+		if (!TryParseObject(action.Configuration, out var config)
+			|| !TryReadInt(config, "ButtonId", out var buttonId)
+			|| buttonId < 0
+			|| buttonId >= VoicemeeterConnection.MacroButtonCount
+			|| !TryReadInt(config, "ButtonType", out var buttonType))
 		{
 			return null;
 		}
@@ -259,14 +274,13 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 		id = string.Empty;
 		option = string.Empty;
 
-		if (!config.TryGetProperty("Option", out var optionElement) ||
-			optionElement.ValueKind != JsonValueKind.Object)
+		if (!config.TryGetProperty("Option", out var optionElement) || optionElement.ValueKind != JsonValueKind.Object)
 		{
 			return false;
 		}
 
-		if (ReadString(optionElement, "Id") is not { Length: > 0 } readId ||
-			ReadString(optionElement, "Option") is not { Length: > 0 } readOption)
+		if (ReadString(optionElement, "Id") is not { Length: > 0 } readId
+			|| ReadString(optionElement, "Option") is not { Length: > 0 } readOption)
 		{
 			return false;
 		}
@@ -279,36 +293,46 @@ internal sealed class VoicemeeterMacroDeck2Migration : IIntegrationMigration
 	private static bool TryReadNestedInt(JsonElement config, string objectName, string propertyName, out int value)
 	{
 		value = 0;
-		return config.TryGetProperty(objectName, out var nested) &&
-			nested.ValueKind == JsonValueKind.Object &&
-			TryReadInt(nested, propertyName, out value);
+		return config.TryGetProperty(objectName, out var nested)
+			&& nested.ValueKind == JsonValueKind.Object
+			&& TryReadInt(nested, propertyName, out value);
 	}
 
 	private static bool TryReadInt(JsonElement config, string name, out int value)
 	{
 		value = 0;
-		return config.TryGetProperty(name, out var element) &&
-			element.ValueKind == JsonValueKind.Number &&
-			element.TryGetInt32(out value);
+		return config.TryGetProperty(name, out var element)
+			&& element.ValueKind == JsonValueKind.Number
+			&& element.TryGetInt32(out value);
 	}
 
 	private static bool TryReadDouble(JsonElement config, string name, out double value)
 	{
 		value = 0;
-		return config.TryGetProperty(name, out var element) &&
-			element.ValueKind == JsonValueKind.Number &&
-			element.TryGetDouble(out value);
+		return config.TryGetProperty(name, out var element)
+			&& element.ValueKind == JsonValueKind.Number
+			&& element.TryGetDouble(out value);
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> config.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return config.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
-	private static JsonElement JsonNumber(double value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonNumber(double value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

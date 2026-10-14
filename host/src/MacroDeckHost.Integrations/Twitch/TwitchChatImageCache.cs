@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Streaming;
 using ILogger = Serilog.ILogger;
 
@@ -124,10 +123,10 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 
 		lock (_sync)
 		{
-			if (_disposed ||
-				_entries.ContainsKey(key) ||
-				_inFlight.Contains(key) ||
-				(_failures.TryGetValue(key, out var retryAt) && retryAt > now))
+			if (_disposed
+				|| _entries.ContainsKey(key)
+				|| _inFlight.Contains(key)
+				|| _failures.TryGetValue(key, out var retryAt) && retryAt > now)
 			{
 				return;
 			}
@@ -217,22 +216,26 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 			return EmoteIdPattern().IsMatch(image.Id) ? new Uri(EmoteUrl(image.Id)) : null;
 		}
 
-		var valid = image.Id.Split('/') is [var setId, var versionId] &&
-			BadgePartPattern().IsMatch(setId) &&
-			BadgePartPattern().IsMatch(versionId);
+		var valid = image.Id.Split('/') is [var setId, var versionId]
+			&& BadgePartPattern().IsMatch(setId)
+			&& BadgePartPattern().IsMatch(versionId);
 
 		return valid && IsAllowed(image.Url) ? new Uri(image.Url!) : null;
 	}
 
 	internal static string EmoteUrl(string emoteId)
-		=> $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteId}/default/dark/2.0";
+	{
+		return $"https://static-cdn.jtvnw.net/emoticons/v2/{emoteId}/default/dark/2.0";
+	}
 
 	internal static bool IsAllowed(string? url)
-		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
-			uri.Scheme == Uri.UriSchemeHttps &&
-			uri.IsDefaultPort &&
-			string.IsNullOrEmpty(uri.UserInfo) &&
-			string.Equals(uri.Host, AllowedHost, StringComparison.OrdinalIgnoreCase);
+	{
+		return Uri.TryCreate(url, UriKind.Absolute, out var uri)
+			&& uri.Scheme == Uri.UriSchemeHttps
+			&& uri.IsDefaultPort
+			&& string.IsNullOrEmpty(uri.UserInfo)
+			&& string.Equals(uri.Host, AllowedHost, StringComparison.OrdinalIgnoreCase);
+	}
 
 	// The bytes decide the type, whatever the upstream header claims; SVG is script-capable and refused.
 	internal static string? SniffImage(byte[] bytes)
@@ -247,8 +250,15 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 			return "image/gif";
 		}
 
-		return bytes.Length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F' &&
-			bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P'
+		return bytes.Length >= 12
+			&& bytes[0] == 'R'
+			&& bytes[1] == 'I'
+			&& bytes[2] == 'F'
+			&& bytes[3] == 'F'
+			&& bytes[8] == 'W'
+			&& bytes[9] == 'E'
+			&& bytes[10] == 'B'
+			&& bytes[11] == 'P'
 				? "image/webp"
 				: null;
 	}
@@ -312,7 +322,9 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 			return;
 		}
 
-		foreach (var expired in _failures.Where(failure => failure.Value <= now).Select(failure => failure.Key).ToList())
+		foreach (var expired in _failures.Where(failure => failure.Value <= now)
+			.Select(failure => failure.Key)
+			.ToList())
 		{
 			_failures.Remove(expired);
 		}
@@ -325,7 +337,8 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 
 	// Room is made and reserved before the registration, so concurrent fetches together never take the
 	// integration past its resource quota.
-	private async Task<bool> StoreAsync(StreamChatImage image,
+	private async Task<bool> StoreAsync(
+		StreamChatImage image,
 		byte[]? bytes,
 		string? mediaType,
 		CancellationToken cancellationToken)
@@ -371,7 +384,9 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 					.ConfigureAwait(false);
 			}
 		}
-		catch (Exception exception) when (exception is UiResourceException or ArgumentException or OperationCanceledException)
+		catch (Exception exception) when (exception is UiResourceException
+			or ArgumentException
+			or OperationCanceledException)
 		{
 			_logger.Debug(exception, "A Twitch chat image could not be registered");
 		}
@@ -403,8 +418,8 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 
 	private bool MakeRoom(int incoming, List<string> evicted)
 	{
-		while (_entries.Count + _reservedCount + 1 > MaxEntries ||
-			_cachedBytes + _reservedBytes + incoming > MaxCachedBytes)
+		while (_entries.Count + _reservedCount + 1 > MaxEntries
+			|| _cachedBytes + _reservedBytes + incoming > MaxCachedBytes)
 		{
 			var victim = _order.Last;
 
@@ -456,9 +471,9 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 			using var response = await _http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
 				.ConfigureAwait(false);
 
-			if (!response.IsSuccessStatusCode ||
-				response.Content.Headers.ContentLength > MaxImageBytes ||
-				!IsAllowed(response.RequestMessage?.RequestUri?.ToString() ?? uri.ToString()))
+			if (!response.IsSuccessStatusCode
+				|| response.Content.Headers.ContentLength > MaxImageBytes
+				|| !IsAllowed(response.RequestMessage?.RequestUri?.ToString() ?? uri.ToString()))
 			{
 				return null;
 			}
@@ -483,8 +498,8 @@ public sealed partial class TwitchChatImageCache : IStreamChatImages, IDisposabl
 				return buffer.ToArray();
 			}
 		}
-		catch (Exception exception) when (exception is HttpRequestException or IOException ||
-			(exception is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception exception) when (exception is HttpRequestException or IOException
+			|| exception is TaskCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(exception, "A Twitch chat image could not be fetched");
 			return null;

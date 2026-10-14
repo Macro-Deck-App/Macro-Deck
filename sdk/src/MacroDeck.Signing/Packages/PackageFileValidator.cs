@@ -13,7 +13,8 @@ namespace MacroDeck.Signing.Packages;
 /// </summary>
 internal static class PackageFileValidator
 {
-	public static async Task<SigningFailure?> ValidateAsync(IPackageEntrySource source,
+	public static async Task<SigningFailure?> ValidateAsync(
+		IPackageEntrySource source,
 		JsonObject manifest,
 		string manifestEntryName,
 		bool withIssuer,
@@ -101,11 +102,13 @@ internal static class PackageFileValidator
 		return null;
 	}
 
-	private static bool IsRootSignatureMaterial(string entryFullName, string manifestEntryName, bool withIssuer) =>
-		entryFullName == manifestEntryName ||
-		PackageSigningFiles.IsSignatureMaterial(entryFullName, withIssuer);
+	private static bool IsRootSignatureMaterial(string entryFullName, string manifestEntryName, bool withIssuer)
+	{
+		return entryFullName == manifestEntryName || PackageSigningFiles.IsSignatureMaterial(entryFullName, withIssuer);
+	}
 
-	private static async Task<string> ComputeEntrySha256Async(IPackageEntrySource source,
+	private static async Task<string> ComputeEntrySha256Async(
+		IPackageEntrySource source,
 		PackageEntry entry,
 		CancellationToken cancellationToken)
 	{

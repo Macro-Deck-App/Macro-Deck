@@ -26,13 +26,19 @@ internal static class UiTracking
 	/// <summary>Records <paramref name="state" /> as a dependency of whatever is currently being evaluated.
 	/// A no-op outside a build scope, which is what makes a read through <c>Peek</c> - or a read from
 	/// ordinary application code - non-tracking.</summary>
-	internal static void Register(IUiTrackedState state) => _current?.RecordDependency(state);
+	internal static void Register(IUiTrackedState state)
+	{
+		_current?.RecordDependency(state);
+	}
 
 	/// <summary>Makes <paramref name="dependent" /> the current dependent until the returned scope is
 	/// disposed. A <c>null</c> dependent installs "no tracking", which is what an untracked one-shot build
 	/// (<see cref="UiViewBuilder.Build" />) uses, and also stops an inner build from attributing its reads to
 	/// an outer scope.</summary>
-	internal static Scope Push(UiDependent? dependent) => new(dependent);
+	internal static Scope Push(UiDependent? dependent)
+	{
+		return new Scope(dependent);
+	}
 
 	/// <summary>Restores the previously current dependent on disposal.</summary>
 	internal readonly struct Scope : IDisposable
@@ -46,7 +52,10 @@ internal static class UiTracking
 		}
 
 		/// <summary>Restores the enclosing scope's dependent.</summary>
-		public void Dispose() => _current = _previous;
+		public void Dispose()
+		{
+			_current = _previous;
+		}
 	}
 }
 
@@ -100,7 +109,10 @@ internal abstract class UiDependent
 
 	/// <summary>Binds this dependent to <paramref name="view" />, which the materializer does before the
 	/// first evaluation.</summary>
-	internal void BindTo(UiView? view) => _view = view;
+	internal void BindTo(UiView? view)
+	{
+		_view = view;
+	}
 
 	/// <summary>Records <paramref name="state" /> as read by this dependent, once per distinct state.
 	/// </summary>

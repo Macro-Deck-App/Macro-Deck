@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Scripts;
@@ -22,12 +23,15 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice("scriptId",
-			label: AppStrings.Integrations.Scripts.Actions.ScriptLabel(),
-			description: AppStrings.Integrations.Scripts.Actions.ScriptDescription(),
+			AppStrings.Integrations.Scripts.Actions.ScriptLabel(),
+			AppStrings.Integrations.Scripts.Actions.ScriptDescription(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_scripts);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_scripts);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -35,8 +39,8 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 	{
 		var scripts = _scripts()?.GetScripts() ?? [];
 		var options = scripts
-			.Where(script => context.Filter is null ||
-				script.Name.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
+			.Where(script
+				=> context.Filter is null || script.Name.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
 			.Select(script => new ActionParameterOption
 			{
 				Value = script.Id,
@@ -82,13 +86,24 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 			}
 
 			var target = scripts.GetScripts().FirstOrDefault(s => s.Id == scriptId);
-			var ownerWidgetId = target is { RunsOnWidget: true } ? WidgetActionParameters.TargetOf(context) : null;
+			var ownerWidgetId = target is { RunsOnWidget: true } ? TargetOf(context) : null;
 
 			return scripts.RunAsync(scriptId,
 				ScriptInputParameters.Collect(context.Parameters),
 				context.OriginClientId,
 				ownerWidgetId,
 				context.CancellationToken);
+		}
+
+		private static string TargetOf(ActionExecutionContext context)
+		{
+			var value = context.Parameters.TryGetValue("widget", out var raw)
+				? raw.ToString() ?? string.Empty
+				: string.Empty;
+
+			return string.IsNullOrWhiteSpace(value) || WidgetTargets.IsSelf(value)
+				? context.OwnerWidgetId ?? string.Empty
+				: value;
 		}
 	}
 }

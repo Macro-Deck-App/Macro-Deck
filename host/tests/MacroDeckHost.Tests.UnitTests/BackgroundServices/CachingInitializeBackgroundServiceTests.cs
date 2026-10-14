@@ -151,7 +151,10 @@ internal sealed class CachingInitializeBackgroundServiceTests
 
 		public bool StopRequested { get; private set; }
 
-		public void StopApplication() => StopRequested = true;
+		public void StopApplication()
+		{
+			StopRequested = true;
+		}
 	}
 
 	private sealed class RecordingProfileService : IProfileService
@@ -192,16 +195,26 @@ internal sealed class CachingInitializeBackgroundServiceTests
 			int? defaultWidgetBorderRadius,
 			string? defaultEmptyCellStyle = null,
 			bool? defaultWidgetShadows = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(Guid id,
+		public Task<Result<IReadOnlyList<ProfileEntity>, ProfileError>> Move(
+			Guid id,
 			Guid targetId,
 			ProfileMovePosition position)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<ProfileError>> Delete(Guid id) => throw new NotSupportedException();
+		public Task<Result<ProfileError>> Delete(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<ProfileEntity, ProfileError>> Duplicate(Guid id, string? name = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

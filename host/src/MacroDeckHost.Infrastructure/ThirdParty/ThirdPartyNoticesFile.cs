@@ -19,10 +19,17 @@ public sealed class ThirdPartyNoticesFile : IThirdPartyNotices
 	{
 		_path = path;
 		_text = new Lazy<string?>(() => File.Exists(_path) ? File.ReadAllText(_path) : null);
-		_document = new Lazy<ThirdPartyNoticesDocument?>(() => _text.Value is { } text ? ThirdPartyNoticesDocument.Parse(text) : null);
+		_document = new Lazy<ThirdPartyNoticesDocument?>(()
+			=> _text.Value is { } text ? ThirdPartyNoticesDocument.Parse(text) : null);
 	}
 
-	public string? ReadText() => _text.Value;
+	public string? ReadText()
+	{
+		return _text.Value;
+	}
 
-	public ThirdPartyNoticesDocument? Read() => _document.Value;
+	public ThirdPartyNoticesDocument? Read()
+	{
+		return _document.Value;
+	}
 }

@@ -24,7 +24,7 @@ public class HostNotificationServiceTests
 		Assert.That(polled[0].Title, Is.EqualTo("A plugin wants to pair"));
 		Assert.That(polled[0].Message, Is.EqualTo("Example Plugin"));
 
-		bridge.Report(polled[0].Id, shown: true);
+		bridge.Report(polled[0].Id, true);
 		await show;
 	}
 
@@ -48,7 +48,7 @@ public class HostNotificationServiceTests
 			Assert.That((polled[0].Title, polled[0].Message), Is.EqualTo(("Build finished", "All green")));
 		});
 
-		bridge.Report(polled[0].Id, shown: true);
+		bridge.Report(polled[0].Id, true);
 		await show;
 	}
 
@@ -59,9 +59,9 @@ public class HostNotificationServiceTests
 
 		IServiceCollection wiring = new ServiceCollection();
 		foreach (var descriptor in startup.Where(descriptor =>
-			descriptor.ServiceType == typeof(IShellNotificationBridge) ||
-			descriptor.ServiceType == typeof(IPlatformNotificationService) ||
-			descriptor.ServiceType == typeof(IDesktopNotifier)))
+			descriptor.ServiceType == typeof(IShellNotificationBridge)
+			|| descriptor.ServiceType == typeof(IPlatformNotificationService)
+			|| descriptor.ServiceType == typeof(IDesktopNotifier)))
 		{
 			wiring.Add(descriptor);
 		}

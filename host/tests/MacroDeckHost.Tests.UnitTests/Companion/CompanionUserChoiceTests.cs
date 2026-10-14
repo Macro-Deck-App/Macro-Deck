@@ -50,7 +50,7 @@ internal sealed class CompanionUserChoiceTests
 	[Test]
 	public async Task Switching_the_integration_back_on_creates_entries_for_devices_already_connected()
 	{
-		var harness = new CompanionHarness(storedOff: true);
+		var harness = new CompanionHarness(true);
 		var device = harness.AddDevice("Phone");
 		await harness.ReportAsync("connection-1", device);
 
@@ -71,7 +71,7 @@ internal sealed class CompanionUserChoiceTests
 		harness.Coordinator.AfterDelete = async () =>
 		{
 			harness.Coordinator.AfterDelete = null;
-			await harness.Coordinator.Inner.DeleteAsync(IntegrationId, kept, confirmed: true, CancellationToken.None);
+			await harness.Coordinator.Inner.DeleteAsync(IntegrationId, kept, true, CancellationToken.None);
 		};
 
 		await harness.DeviceRegistry.RemoveDeviceAsync(removed, CancellationToken.None);

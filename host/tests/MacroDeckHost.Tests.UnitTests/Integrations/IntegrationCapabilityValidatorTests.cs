@@ -153,7 +153,10 @@ public class IntegrationCapabilityValidatorTests
 		public IReadOnlyList<ActionParameter> Parameters => [];
 		public MacroDeckPlatform Platforms { get; }
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakeEventIntegration : IIntegration, IEventProvider
@@ -172,9 +175,15 @@ public class IntegrationCapabilityValidatorTests
 		public string ProviderName => Id;
 		public IReadOnlyList<EventDefinition> EventDefinitions { get; }
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeVariableIntegration : IIntegration, IVariableProvider
@@ -194,10 +203,18 @@ public class IntegrationCapabilityValidatorTests
 		public IReadOnlyList<VariableDefinition> DeclaredVariables { get; }
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

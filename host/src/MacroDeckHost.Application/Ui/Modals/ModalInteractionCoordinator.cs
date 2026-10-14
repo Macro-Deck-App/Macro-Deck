@@ -167,7 +167,9 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 	}
 
 	public PendingModal? Find(string modalId)
-		=> _byModalId.TryGetValue(modalId, out var entry) ? entry.Modal : null;
+	{
+		return _byModalId.TryGetValue(modalId, out var entry) ? entry.Modal : null;
+	}
 
 	public void BindSession(string modalId, string sessionId)
 	{
@@ -178,12 +180,13 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 	}
 
 	public string? SessionFor(string modalId)
-		=> _byModalId.TryGetValue(modalId, out var entry) ? entry.SessionId : null;
+	{
+		return _byModalId.TryGetValue(modalId, out var entry) ? entry.SessionId : null;
+	}
 
 	public bool Settle(string modalId, string principal, bool cancelled, JsonElement? value)
 	{
-		if (!_byModalId.TryGetValue(modalId, out var entry) ||
-			!entry.BelongsTo(principal ?? string.Empty))
+		if (!_byModalId.TryGetValue(modalId, out var entry) || !entry.BelongsTo(principal ?? string.Empty))
 		{
 			return false;
 		}
@@ -262,8 +265,10 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 	}
 
 	private int CountFor(string clientId)
-		=> _byModalId.Values.Count(entry =>
+	{
+		return _byModalId.Values.Count(entry =>
 			string.Equals(entry.Modal.OriginClientId, clientId, StringComparison.Ordinal));
+	}
 
 	private sealed class Entry
 	{
@@ -310,10 +315,15 @@ public sealed class ModalInteractionCoordinator : IModalInteractionCoordinator
 		// TrySetResult, not SetResult: a modal can be settled and cancelled at nearly the same moment - the
 		// user submits as the connection drops - and the first answer is the true one.
 		public void Settle(bool cancelled, JsonElement? value)
-			=> Completion.TrySetResult(cancelled || value is null
+		{
+			Completion.TrySetResult(cancelled || value is null
 				? ModalResult.FromCancellation<JsonElement>()
 				: ModalResult.FromValue(value.Value.Clone()));
+		}
 
-		public void Cancel() => Completion.TrySetResult(ModalResult.FromCancellation<JsonElement>());
+		public void Cancel()
+		{
+			Completion.TrySetResult(ModalResult.FromCancellation<JsonElement>());
+		}
 	}
 }

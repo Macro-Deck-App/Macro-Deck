@@ -285,7 +285,8 @@ internal sealed class VariableBindingServiceTests
 		});
 
 		await harness.BindingBackgroundService.RestoreBindingsAsync(CancellationToken.None);
-		Assert.That(harness.Registry.GetByOwnerIntegration(IntegrationId), Is.Empty,
+		Assert.That(harness.Registry.GetByOwnerIntegration(IntegrationId),
+			Is.Empty,
 			"a removed integration's binding must not come back on restart");
 	}
 

@@ -2,7 +2,6 @@ using MacroDeck.Localization;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeck.Ui.Runtime;
 
 namespace MacroDeckHost.Integrations.Steam.Widgets;
 
@@ -17,10 +16,14 @@ internal enum SteamTone
 
 internal sealed record SteamInk(bool OnFace)
 {
-	public static SteamInk For(string? backgroundColor) => new(backgroundColor is null);
+	public static SteamInk For(string? backgroundColor)
+	{
+		return new SteamInk(backgroundColor is null);
+	}
 
 	public UiValue<string> Color(SteamTone tone)
-		=> OnFace
+	{
+		return OnFace
 			? UiValue.Of(tone switch
 			{
 				SteamTone.Primary => SteamStyle.TextPrimary,
@@ -28,14 +31,17 @@ internal sealed record SteamInk(bool OnFace)
 				_ => SteamStyle.TextMuted
 			})
 			: UiValue.None<string>();
+	}
 
 	public static string Role(SteamTone tone)
-		=> tone switch
+	{
+		return tone switch
 		{
 			SteamTone.Primary => UiComponentTextRoles.Primary,
 			SteamTone.Secondary => UiComponentTextRoles.Secondary,
 			_ => UiComponentTextRoles.Muted
 		};
+	}
 }
 
 internal static class SteamStyle
@@ -81,27 +87,34 @@ internal static class SteamStyle
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
 			Background = backgroundColor is { } background ? UiValue.Of(background) : UiValue.None<string>(),
-			Children = [content],
+			Children = [content]
 		};
 
 		return backgroundColor is null ? new UiModifier { Key = key + "Face", Background = _face, Child = root } : root;
 	}
 
 	public static UiStack Padded(string key, int cornerRadius, params IReadOnlyList<UiElement> children)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
 			Padding = SteamSurfaces.SafeArea(cornerRadius),
 			Gap = Gap,
-			Children = children,
+			Children = children
 		};
+	}
 
 	public static UiModifier Scrim(string key)
-		=> new() { Key = key, Background = _scrim, Child = new UiStack { Key = "fill", Fill = true } };
+	{
+		return new UiModifier { Key = key, Background = _scrim, Child = new UiStack { Key = "fill", Fill = true } };
+	}
 
 	public static UiModifier BackdropScrim(string key)
-		=> new() { Key = key, Background = _backdropScrim, Child = new UiStack { Key = "fill", Fill = true } };
+	{
+		return new UiModifier
+			{ Key = key, Background = _backdropScrim, Child = new UiStack { Key = "fill", Fill = true } };
+	}
 
 	public static UiStack EyebrowRow(
 		string key,
@@ -109,7 +122,8 @@ internal static class SteamStyle
 		Func<UiResource?> glyph,
 		SteamInk ink,
 		string? accent = null)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
@@ -124,7 +138,7 @@ internal static class SteamStyle
 					MainSize = EyebrowGlyph,
 					Source = UiValue.Optional(() => glyph() is { } resource
 						? UiValue.Of(resource)
-						: UiValue.None<UiResource>()),
+						: UiValue.None<UiResource>())
 				},
 				new UiTextRun
 				{
@@ -134,13 +148,15 @@ internal static class SteamStyle
 					Weight = UiComponentTextWeights.Bold,
 					Role = SteamInk.Role(SteamTone.Secondary),
 					Color = accent is { } color ? UiValue.Of(color) : ink.Color(SteamTone.Secondary),
-					MaxLines = 1,
-				},
-			],
+					MaxLines = 1
+				}
+			]
 		};
+	}
 
 	public static UiStack StatusLabel(string key, UiText text, UiValue<string> color, UiLength? size = null)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
@@ -156,10 +172,11 @@ internal static class SteamStyle
 					Size = size ?? Eyebrow,
 					Weight = UiComponentTextWeights.Bold,
 					Color = color,
-					MaxLines = 1,
-				},
-			],
+					MaxLines = 1
+				}
+			]
 		};
+	}
 
 	public static UiTextRun Text(
 		string key,
@@ -170,7 +187,8 @@ internal static class SteamStyle
 		string weight = UiComponentTextWeights.Regular,
 		int maxLines = 1,
 		string align = UiComponentAlignments.Start)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
@@ -180,8 +198,9 @@ internal static class SteamStyle
 			Color = ink.Color(tone),
 			Align = align,
 			Wrap = maxLines > 1,
-			MaxLines = maxLines,
+			MaxLines = maxLines
 		};
+	}
 
 	public static UiModifier Rounded(string key, UiLength radius, UiElement child, UiLength? mainSize = null)
 	{
@@ -190,22 +209,25 @@ internal static class SteamStyle
 			Key = key,
 			Radius = radius,
 			Clip = UiComponentClips.Bounds,
-			Child = child,
+			Child = child
 		};
 
 		return mainSize is { } size ? modifier with { MainSize = size } : modifier;
 	}
 
 	public static UiModifier Dot(string key, UiLength size, UiValue<string> color)
-		=> new()
+	{
+		return new UiModifier
 		{
 			Key = key,
 			Frame = new UiFrame { Width = size, Height = size },
-			Child = new UiShape { Key = "shape", Shape = UiComponentShapes.Circle, Color = color },
+			Child = new UiShape { Key = "shape", Shape = UiComponentShapes.Circle, Color = color }
 		};
+	}
 
 	public static UiStack GlyphTile(string key, UiLength size, Func<UiResource?> glyph)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Fill = true,
@@ -221,13 +243,20 @@ internal static class SteamStyle
 					Opacity = 0.55,
 					Source = UiValue.Optional(() => glyph() is { } resource
 						? UiValue.Of(resource)
-						: UiValue.None<UiResource>()),
-				},
-			],
+						: UiValue.None<UiResource>())
+				}
+			]
 		};
+	}
 
-	public static UiStack Notice(string key, LocalizedText text, Func<UiResource?> glyph, SteamInk ink, int cornerRadius)
-		=> new()
+	public static UiStack Notice(
+		string key,
+		LocalizedText text,
+		Func<UiResource?> glyph,
+		SteamInk ink,
+		int cornerRadius)
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -237,13 +266,15 @@ internal static class SteamStyle
 			Children =
 			[
 				Badge("badge", glyph),
-				Text("text", text, Body, ink, SteamTone.Secondary, UiComponentTextWeights.Medium, maxLines: 3),
-			],
+				Text("text", text, Body, ink, SteamTone.Secondary, UiComponentTextWeights.Medium, 3)
+			]
 		};
+	}
 
 	// A stack hands every child its whole cross extent, so the glyph sits in a row to stay at the leading edge.
 	public static UiStack Badge(string key, Func<UiResource?> glyph)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
@@ -256,13 +287,16 @@ internal static class SteamStyle
 					MainSize = UiLength.Capped(0.2, 26),
 					Source = UiValue.Optional(() => glyph() is { } resource
 						? UiValue.Of(resource)
-						: UiValue.None<UiResource>()),
-				},
-			],
+						: UiValue.None<UiResource>())
+				}
+			]
 		};
+	}
 
 	public static string PersonaColor(SteamFriend friend)
-		=> friend.IsInGame ? InGame :
+	{
+		return friend.IsInGame ? InGame :
 			!friend.IsOnline ? Offline :
 			friend.PersonaState is SteamPersona.Away or SteamPersona.Snooze or SteamPersona.Busy ? Away : Online;
+	}
 }

@@ -27,11 +27,11 @@ public class IconFallbackStoreTests
 	[Test]
 	public async Task An_animated_icon_falls_back_to_a_gif_that_still_moves()
 	{
-		var icon = await StoreAnimatedIcon(frameCount: 3);
+		var icon = await StoreAnimatedIcon(3);
 
 		var image = await _harness.FallbackStore.GetOrCreate(icon,
 			IconVariants.Master,
-			staticFrame: false,
+			false,
 			CancellationToken.None);
 
 		Assert.That(image, Is.Not.Null);
@@ -46,11 +46,11 @@ public class IconFallbackStoreTests
 	[Test]
 	public async Task An_animated_icon_asked_for_a_static_frame_yields_its_first_frame_as_png()
 	{
-		var icon = await StoreAnimatedIcon(frameCount: 3);
+		var icon = await StoreAnimatedIcon(3);
 
 		var image = await _harness.FallbackStore.GetOrCreate(icon,
 			IconVariants.Master,
-			staticFrame: true,
+			true,
 			CancellationToken.None);
 
 		Assert.That(image, Is.Not.Null);
@@ -67,10 +67,10 @@ public class IconFallbackStoreTests
 	public async Task An_animated_icon_falls_back_to_a_gif_that_draws_exactly_its_mostly_opaque_pixels()
 	{
 		using var source = new Image<Rgba32>(EdgedFrameSize, EdgedFrameSize);
-		PaintEdgedSquare(source.Frames.RootFrame, offset: 2);
+		PaintEdgedSquare(source.Frames.RootFrame, 2);
 		using (var second = new Image<Rgba32>(EdgedFrameSize, EdgedFrameSize))
 		{
-			PaintEdgedSquare(second.Frames.RootFrame, offset: 6);
+			PaintEdgedSquare(second.Frames.RootFrame, 6);
 			source.Frames.AddFrame(second.Frames.RootFrame);
 		}
 
@@ -78,7 +78,7 @@ public class IconFallbackStoreTests
 
 		var image = await _harness.FallbackStore.GetOrCreate(icon,
 			IconVariants.Master,
-			staticFrame: false,
+			false,
 			CancellationToken.None);
 
 		Assert.That(image, Is.Not.Null);
@@ -86,8 +86,8 @@ public class IconFallbackStoreTests
 		Assert.That(decoded.Frames.Count, Is.EqualTo(2));
 		for (var index = 0; index < decoded.Frames.Count; index++)
 		{
-			Assert.That(DrawnPixels(decoded.Frames[index], alphaThreshold: 128),
-				Is.EquivalentTo(DrawnPixels(source.Frames[index], alphaThreshold: 128)),
+			Assert.That(DrawnPixels(decoded.Frames[index], 128),
+				Is.EquivalentTo(DrawnPixels(source.Frames[index], 128)),
 				$"frame {index}");
 		}
 	}
@@ -133,15 +133,16 @@ public class IconFallbackStoreTests
 	[Test]
 	public async Task A_replaced_icon_leaves_only_its_current_fallback_image_behind()
 	{
-		var icon = await StoreAnimatedIcon(frameCount: 2);
-		(await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, staticFrame: false, CancellationToken.None))!
-			.Content.Dispose();
+		var icon = await StoreAnimatedIcon(2);
+		await (await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, false, CancellationToken.None))!
+			.Content.DisposeAsync();
 
 		icon.MasterContentHash = "sha256:" + new string('b', 64);
-		(await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, staticFrame: false, CancellationToken.None))!
-			.Content.Dispose();
+		await (await _harness.FallbackStore.GetOrCreate(icon, IconVariants.Master, false, CancellationToken.None))!
+			.Content.DisposeAsync();
 
-		var cached = Directory.GetFiles(Path.Combine(_harness.Paths.IconsDirectory, "fallback-cache"), $"{icon.Id:N}-*");
+		var cached = Directory.GetFiles(Path.Combine(_harness.Paths.IconsDirectory, "fallback-cache"),
+			$"{icon.Id:N}-*");
 		Assert.That(cached, Has.Length.EqualTo(1));
 	}
 
@@ -188,5 +189,8 @@ public class IconFallbackStoreTests
 		return icon;
 	}
 
-	private static Rgba32 FrameColor(int index) => new((byte)(40 + index * 60), 20, 200, 255);
+	private static Rgba32 FrameColor(int index)
+	{
+		return new Rgba32((byte)(40 + index * 60), 20, 200, 255);
+	}
 }

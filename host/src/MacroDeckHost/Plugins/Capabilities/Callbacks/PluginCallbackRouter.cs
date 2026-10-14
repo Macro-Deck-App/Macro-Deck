@@ -15,13 +15,11 @@ using MacroDeckHost.Application.Batteries;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Sdk.VideoStreams;
-using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.Ui;
 using MacroDeckHost.Application.Ui.Transport.Messages.Modals;
 using MacroDeckHost.Application.Ui.Transport;
@@ -57,6 +55,7 @@ using MacroDeckHost.Application.Variables.Colors;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.HostLocking;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -65,7 +64,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 {
 	private const int MaxConcurrentIconTransfers = 4;
 	private const int MaxMusicPlayerArtworkIdLength = 512;
-	private static readonly TimeSpan MusicPlayerArtworkTimeout = TimeSpan.FromSeconds(20);
+	private static readonly TimeSpan _defaultMusicPlayerArtworkTimeout = TimeSpan.FromSeconds(20);
 
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly IPluginCapabilityInvoker _invoker;
@@ -184,13 +183,14 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		_locale = locale;
 		_widgetData = widgetData;
 		_variableHistory = variableHistory;
-		_variableHistoryReadThrottle = variableHistoryReadThrottle ?? new VariableHistoryReadThrottle(TimeProvider.System);
+		_variableHistoryReadThrottle
+			= variableHistoryReadThrottle ?? new VariableHistoryReadThrottle(TimeProvider.System);
 		_notificationManager = notificationManager;
 		_variableRefresh = variableRefresh;
 		_eventOrigins = eventOrigins;
 		_colorWatches = colorWatches;
 		_batteries = batteries;
-		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? MusicPlayerArtworkTimeout;
+		_musicPlayerArtworkTimeout = musicPlayerArtworkTimeout ?? _defaultMusicPlayerArtworkTimeout;
 		_videoStreamProviders = videoStreamProviders;
 		_videoStreamSessions = videoStreamSessions;
 		_videoStreamThrottle = videoStreamThrottle ?? new VideoStreamCallbackThrottle(TimeProvider.System);
@@ -201,7 +201,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		_uiResources = uiResources;
 		_uiResourceThrottle = uiResourceThrottle ?? new UiResourceCallbackThrottle(TimeProvider.System);
 		_musicPlayerArtwork = musicPlayerArtwork;
-		_musicPlayerArtworkThrottle = musicPlayerArtworkThrottle ?? new MusicPlayerArtworkCallbackThrottle(TimeProvider.System);
+		_musicPlayerArtworkThrottle
+			= musicPlayerArtworkThrottle ?? new MusicPlayerArtworkCallbackThrottle(TimeProvider.System);
 		_deviceSurfaces = deviceSurfaces;
 		_deviceSessions = deviceSessions;
 		_assets = assets;
@@ -236,7 +237,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		string correlationId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+	{
+		return RouteAsync(pluginId, null, correlationId, payload, cancellationToken);
+	}
 
 	public Task<HostCallbackResult> RouteAsync(
 		string pluginId,
@@ -244,7 +247,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		string correlationId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
-		=> RouteAsync(pluginId, sessionId, null, correlationId, payload, cancellationToken);
+	{
+		return RouteAsync(pluginId, sessionId, null, correlationId, payload, cancellationToken);
+	}
 
 	public async Task<HostCallbackResult> RouteAsync(
 		string pluginId,
@@ -276,8 +281,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.ActionInteractions => RouteActionInteractions(pluginId, correlationId, payload),
 				HostApis.Ui when payload.Operation == HostOperations.Ui.RegisterMusicPlayerArtwork
 					=> await RouteMusicPlayerArtworkAsync(pluginId, sessionId, payload, cancellationToken),
-				HostApis.Ui when payload.Operation is HostOperations.Ui.OriginReportFailure or
-						HostOperations.Ui.OriginShowModal
+				HostApis.Ui when payload.Operation is HostOperations.Ui.OriginReportFailure
+						or HostOperations.Ui.OriginShowModal
 					=> await RouteUiOriginAsync(pluginId, payload, cancellationToken),
 				HostApis.Ui => RouteUi(pluginId, sessionId, payload),
 				HostApis.Devices => await RouteDevicesAsync(pluginId, payload, cancellationToken),
@@ -293,7 +298,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				HostApis.Weather => RouteWeather(pluginId, payload),
 				HostApis.Locale => await RouteLocaleAsync(cancellationToken),
 				HostApis.MusicPlayers => await RouteMusicPlayerAlbumColorAsync(payload, cancellationToken),
-				HostApis.DesktopNotifications => await RouteDesktopNotificationsAsync(pluginId, payload, cancellationToken),
+				HostApis.DesktopNotifications => await RouteDesktopNotificationsAsync(pluginId,
+					payload,
+					cancellationToken),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 					$"The host has no api '{payload.Api}'.")
 			};
@@ -310,7 +317,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private async Task<HostCallbackResult> RouteDesktopNotificationsAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteDesktopNotificationsAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -320,8 +328,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				"This host cannot show desktop notifications for plugins.");
 		}
 
-		return _desktopNotifications.Admit(pluginId) ??
-			await _desktopNotifications.ExecuteAsync(payload, cancellationToken);
+		return _desktopNotifications.Admit(pluginId)
+			?? await _desktopNotifications.ExecuteAsync(payload, cancellationToken);
 	}
 
 	private async Task<HostCallbackResult> RouteLocaleAsync(CancellationToken cancellationToken)
@@ -340,7 +348,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		});
 	}
 
-	private async Task<HostCallbackResult> RouteMusicPlayerAlbumColorAsync(HostInvokePayload payload,
+	private async Task<HostCallbackResult> RouteMusicPlayerAlbumColorAsync(
+		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
 		if (_albumColor is null)
@@ -374,7 +383,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.Timeout,
 				"The music player did not answer the artwork lookup in time.",
-				retryable: true);
+				true);
 		}
 	}
 
@@ -400,13 +409,13 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				? null
 				: HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 					"This plugin is reporting video session changes too quickly.",
-					retryable: true);
+					true);
 		}
 
 		// History windows are polled every second, so their reads get a bucket sized by the plugin's open
 		// windows instead of draining the budget of its other callbacks.
-		if (string.Equals(payload.Api, HostApis.Variables, StringComparison.Ordinal) &&
-			payload.Operation == HostOperations.Variables.HistoryRead)
+		if (string.Equals(payload.Api, HostApis.Variables, StringComparison.Ordinal)
+			&& payload.Operation == HostOperations.Variables.HistoryRead)
 		{
 			return _variableHistoryReadThrottle.TryConsume(pluginId, _variableHistory?.OpenCount(pluginId) ?? 0)
 				? null
@@ -427,11 +436,14 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	}
 
 	private static HostCallbackResult CallingTooQuickly()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 			"This plugin is calling back into the host too quickly.",
-			retryable: true);
+			true);
+	}
 
-	private async Task<HostCallbackResult> RouteVariablesAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteVariablesAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -541,7 +553,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return HostCallbackResult.Ok();
 	}
 
-	private async Task<HostCallbackResult> RouteVariableBindAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteVariableBindAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -623,7 +636,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
 					"That name is not one of this plugin's own variables.");
 			}
-			catch (VariableHistoryException exception) when (exception.ErrorCode == VariableHistoryErrorCode.LimitExceeded)
+			catch (VariableHistoryException exception) when (exception.ErrorCode
+				== VariableHistoryErrorCode.LimitExceeded)
 			{
 				return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 					"This plugin holds as many variable history windows as Macro Deck allows.");
@@ -647,7 +661,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return HostCallbackResult.Ok();
 	}
 
-	private async Task<HostCallbackResult> RouteUserVariablesAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteUserVariablesAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -663,8 +678,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			case HostOperations.UserVariables.Apply:
 			{
 				var arguments = Deserialize<UserVariablesApplyArguments>(payload.Arguments);
-				if (arguments is null ||
-					!Enum.TryParse<UserVariableOperation>(arguments.Operation, out var operation))
+				if (arguments is null || !Enum.TryParse<UserVariableOperation>(arguments.Operation, out var operation))
 				{
 					return MissingArguments();
 				}
@@ -701,7 +715,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private async Task<HostCallbackResult> RouteConfigAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteConfigAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -767,7 +782,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private async Task<HostCallbackResult> RouteDeckAsync(HostInvokePayload payload,
+	private async Task<HostCallbackResult> RouteDeckAsync(
+		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
 		if (_lockState.IsLocked)
@@ -824,7 +840,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private async Task<HostCallbackResult> RouteScriptsAsync(HostInvokePayload payload,
+	private async Task<HostCallbackResult> RouteScriptsAsync(
+		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
 		if (payload.Operation != HostOperations.Scripts.Run)
@@ -851,7 +868,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return HostCallbackResult.Ok(result);
 	}
 
-	private async Task<HostCallbackResult> RouteWidgetsAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteWidgetsAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -919,8 +937,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 			var targetStates = _widgetApi.GetWidgets()
 					.FirstOrDefault(widget => string.Equals(widget.Id, arguments.WidgetId, StringComparison.Ordinal))
-					?.States ??
-				[];
+					?.States
+				?? [];
 
 			request = WidgetStateWireCompatibility.ToApplyRequest(arguments, targetStates);
 		}
@@ -929,7 +947,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		return HostCallbackResult.Ok(applied);
 	}
 
-	private async Task<HostCallbackResult> RouteNotificationsAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteNotificationsAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -966,7 +985,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return HostCallbackResult.Ok();
 			}
 
-			case HostOperations.Notifications.Show or HostOperations.Notifications.Update
+			case HostOperations.Notifications.Show
+				or HostOperations.Notifications.Update
 				or HostOperations.Notifications.Close:
 				return await RouteInteractiveNotificationAsync(pluginId, displayName, payload, cancellationToken);
 
@@ -975,7 +995,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private async Task<HostCallbackResult> RouteInteractiveNotificationAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteInteractiveNotificationAsync(
+		string pluginId,
 		string displayName,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
@@ -1040,7 +1061,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			{
 				NotificationErrorCode.LimitExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 					exception.Message,
-					retryable: false),
+					false),
 				NotificationErrorCode.NotFound => HostCallbackResult.Fail(ProtocolErrorCodes.CorrelationUnknown,
 					exception.Message),
 				_ => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, exception.Message)
@@ -1236,7 +1257,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		}
 	}
 
-	private HostCallbackResult RouteVideoStreams(string pluginId,
+	private HostCallbackResult RouteVideoStreams(
+		string pluginId,
 		string? sessionId,
 		IPluginConnection? connection,
 		HostInvokePayload payload)
@@ -1253,7 +1275,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			switch (payload.Operation)
 			{
 				case HostOperations.VideoStreams.ProvidersChanged:
-					ObserveVideoStreamPull(_videoStreamProviders.RequestProvidersPullAsync(pluginId, sessionId, connection),
+					ObserveVideoStreamPull(
+						_videoStreamProviders.RequestProvidersPullAsync(pluginId, sessionId, connection),
 						pluginId);
 					return HostCallbackResult.Ok();
 
@@ -1265,7 +1288,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 						return MissingArguments();
 					}
 
-					ObserveVideoStreamPull(_videoStreamProviders.RequestStreamsPullAsync(pluginId, arguments.ProviderId),
+					ObserveVideoStreamPull(
+						_videoStreamProviders.RequestStreamsPullAsync(pluginId, arguments.ProviderId),
 						pluginId);
 					return HostCallbackResult.Ok();
 				}
@@ -1278,8 +1302,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 						return MissingArguments();
 					}
 
-					if (arguments.Description is not null &&
-						VideoStreamWire.ValidateDescription(arguments.Description) is { } problem)
+					if (arguments.Description is not null
+						&& VideoStreamWire.ValidateDescription(arguments.Description) is { } problem)
 					{
 						return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, problem);
 					}
@@ -1320,12 +1344,14 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	}
 
 	private void ObserveVideoStreamPull(Task pull, string pluginId)
-		=> _ = pull.ContinueWith(task => _logger.Warning(task.Exception,
+	{
+		_ = pull.ContinueWith(task => _logger.Warning(task.Exception,
 				"Refreshing the video streams of plugin {PluginId} failed",
 				pluginId),
 			CancellationToken.None,
 			TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
 			TaskScheduler.Default);
+	}
 
 	private async Task<HostCallbackResult> RouteFolderViewsAsync(
 		string pluginId,
@@ -1693,7 +1719,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					return UnknownSession();
 				}
 
-				await _deviceSurfaces!.CloseAsync(deviceId, reason: null, cancellationToken);
+				await _deviceSurfaces!.CloseAsync(deviceId, null, cancellationToken);
 
 				return HostCallbackResult.Ok();
 			}
@@ -1719,9 +1745,14 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 	// Runs before the payload validator, so size and shape checks see the bytes that are relayed.
 	private UiRawJson TranslatePluginIcons(string pluginId, UiRawJson payload)
-		=> _pluginIconResolver is null ? payload : PluginIconTreeRewriter.Rewrite(pluginId, payload, _pluginIconResolver);
+	{
+		return _pluginIconResolver is null
+			? payload
+			: PluginIconTreeRewriter.Rewrite(pluginId, payload, _pluginIconResolver);
+	}
 
-	private async Task<HostCallbackResult> RouteIconPacksAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteIconPacksAsync(
+		string pluginId,
 		string? sessionId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
@@ -1788,9 +1819,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				{
 					PluginIconPackSyncStatus.Invalid => HostCallbackResult.Fail(ProtocolErrorCodes.IconPackInvalid,
 						$"{ProtocolErrorMessages.For(ProtocolErrorCodes.IconPackInvalid)} Keys: {string.Join(", ", result.InvalidKeys ?? [])}."),
-					PluginIconPackSyncStatus.Skipped => HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+					PluginIconPackSyncStatus.Skipped => HostCallbackResult.Fail(
+						ProtocolErrorCodes.CapabilityUnavailable,
 						"The host's icon packs are not ready yet.",
-						retryable: true),
+						true),
 					_ => HostCallbackResult.Ok(new IconPackSyncResult { Changed = result.Changed })
 				};
 			}
@@ -1808,9 +1840,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					return MissingArguments();
 				}
 
-				if (!PluginBundledIconPacks.IsValidKey(arguments.Key) ||
-					string.IsNullOrEmpty(arguments.Name) ||
-					arguments.Name.Contains('/'))
+				if (!PluginBundledIconPacks.IsValidKey(arguments.Key)
+					|| string.IsNullOrEmpty(arguments.Name)
+					|| arguments.Name.Contains('/'))
 				{
 					return HostCallbackResult.Fail(ProtocolErrorCodes.PluginIconNotFound,
 						ProtocolErrorMessages.For(ProtocolErrorCodes.PluginIconNotFound));
@@ -1848,13 +1880,15 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	}
 
 	private PluginSessionSnapshot? DevelopmentSessionOf(string pluginId, string? sessionId)
-		=> sessionId is null
+	{
+		return sessionId is null
 			? null
 			: _sessionRegistry.Snapshot()
-				.FirstOrDefault(session => string.Equals(session.SessionId, sessionId, StringComparison.Ordinal) &&
-					string.Equals(session.PluginId, pluginId, StringComparison.Ordinal) &&
-					session.State == PluginSessionState.Connected &&
-					session.Origin == PluginSessionOrigin.SelfRegistered);
+				.FirstOrDefault(session => string.Equals(session.SessionId, sessionId, StringComparison.Ordinal)
+					&& string.Equals(session.PluginId, pluginId, StringComparison.Ordinal)
+					&& session.State == PluginSessionState.Connected
+					&& session.Origin == PluginSessionOrigin.SelfRegistered);
+	}
 
 	private static string? InvalidDeclaration(IconPackSyncArguments arguments)
 	{
@@ -1871,9 +1905,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return $"'{pack.Key}' is not a usable, unique bundled icon pack key.";
 			}
 
-			if (!AssetContentHash.IsValid(pack.ContentHash) ||
-				pack.ByteLength <= 0 ||
-				pack.ByteLength > ProtocolLimits.MaxAssetBytes)
+			if (!AssetContentHash.IsValid(pack.ContentHash)
+				|| pack.ByteLength <= 0
+				|| pack.ByteLength > ProtocolLimits.MaxAssetBytes)
 			{
 				return $"Bundled icon pack '{pack.Key}' names no valid archive.";
 			}
@@ -1884,7 +1918,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 
 	// The ui api is exempt from the per-plugin throttle for its tree traffic; an origin call puts something
 	// on a user's screen, so it is charged like any other callback.
-	private async Task<HostCallbackResult> RouteUiOriginAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteUiOriginAsync(
+		string pluginId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
 	{
@@ -1897,7 +1932,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				"This plugin is calling back into the host too quickly.",
-				retryable: true);
+				true);
 		}
 
 		if (payload.Operation == HostOperations.Ui.OriginReportFailure)
@@ -2031,8 +2066,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				if (arguments.Values.Count > ProtocolLimits.MaxVariableValuesPerBatch)
 				{
 					return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
-						$"A variable-values 'value' batch may not exceed " +
-						$"{ProtocolLimits.MaxVariableValuesPerBatch} values.");
+						$"A variable-values 'value' batch may not exceed "
+						+ $"{ProtocolLimits.MaxVariableValuesPerBatch} values.");
 				}
 
 				if (_dynamicVariableChannel is not null)
@@ -2078,7 +2113,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				"This plugin is registering UI resources too quickly.",
-				retryable: true);
+				true);
 		}
 
 		if (payload.Operation == HostOperations.Ui.RegisterResource)
@@ -2101,7 +2136,8 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			: FromUiResource(_uiResources.Remove(pluginId, sessionId, removal.Name));
 	}
 
-	private async Task<HostCallbackResult> RouteMusicPlayerArtworkAsync(string pluginId,
+	private async Task<HostCallbackResult> RouteMusicPlayerArtworkAsync(
+		string pluginId,
 		string? sessionId,
 		HostInvokePayload payload,
 		CancellationToken cancellationToken)
@@ -2122,10 +2158,10 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return MissingArguments();
 		}
 
-		if (string.IsNullOrEmpty(arguments.InstanceId) ||
-			string.IsNullOrEmpty(arguments.ArtworkId) ||
-			arguments.InstanceId.Length > MaxMusicPlayerArtworkIdLength ||
-			arguments.ArtworkId.Length > MaxMusicPlayerArtworkIdLength)
+		if (string.IsNullOrEmpty(arguments.InstanceId)
+			|| string.IsNullOrEmpty(arguments.ArtworkId)
+			|| arguments.InstanceId.Length > MaxMusicPlayerArtworkIdLength
+			|| arguments.ArtworkId.Length > MaxMusicPlayerArtworkIdLength)
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
 				$"A music player instance id and an artwork id are 1 to {MaxMusicPlayerArtworkIdLength} characters.");
@@ -2146,7 +2182,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.RateLimited,
 				"This plugin is registering music player artwork too quickly.",
-				retryable: true);
+				true);
 		}
 
 		ArtworkImageResult? image;
@@ -2165,7 +2201,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			{
 				return HostCallbackResult.Fail(ProtocolErrorCodes.Timeout,
 					"The music player did not answer the artwork lookup in time.",
-					retryable: true);
+					true);
 			}
 		}
 
@@ -2174,7 +2210,11 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return HostCallbackResult.Ok(new UiRegisterMusicPlayerArtworkResult());
 		}
 
-		var result = _uiResources.RegisterContent(pluginId, sessionId, arguments.Name, image.Content, image.ContentType);
+		var result = _uiResources.RegisterContent(pluginId,
+			sessionId,
+			arguments.Name,
+			image.Content,
+			image.ContentType);
 
 		return result.Outcome switch
 		{
@@ -2185,7 +2225,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 					ResourceId = result.Resource!.ResourceId,
 					ContentHash = result.Resource.ContentHash!,
 					MediaType = result.Resource.MediaType!,
-					ByteLength = (int)result.Resource.ByteLength!,
+					ByteLength = (int)result.Resource.ByteLength!
 				}
 			}),
 			PluginUiResourceOutcome.UnsupportedMediaType => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
@@ -2194,35 +2234,38 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		};
 	}
 
-	private static HostCallbackResult FromUiResource(PluginUiResourceResult result) => result.Outcome switch
+	private static HostCallbackResult FromUiResource(PluginUiResourceResult result)
 	{
-		PluginUiResourceOutcome.Registered => HostCallbackResult.Ok(new UiRegisterResourceResult
+		return result.Outcome switch
 		{
-			Resource = new UiResourceHandleDto
+			PluginUiResourceOutcome.Registered => HostCallbackResult.Ok(new UiRegisterResourceResult
 			{
-				ResourceId = result.Resource!.ResourceId,
-				ContentHash = result.Resource.ContentHash!,
-				MediaType = result.Resource.MediaType!,
-				ByteLength = (int)result.Resource.ByteLength!,
-			}
-		}),
-		PluginUiResourceOutcome.UploadRequired => HostCallbackResult.Ok(new UiRegisterResourceResult
-			{ UploadRequired = true }),
-		PluginUiResourceOutcome.Removed => HostCallbackResult.Ok(),
-		PluginUiResourceOutcome.InvalidName => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
-			"A UI resource name is a letter or digit followed by up to 63 letters, digits, hyphens or underscores."),
-		PluginUiResourceOutcome.UnsupportedMediaType => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
-			"A UI resource must be one of: " + string.Join(", ", UiResourceRules.SupportedMediaTypes) + "."),
-		PluginUiResourceOutcome.MediaTypeMismatch => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
-			"The media type differs from the one the upload declared."),
-		PluginUiResourceOutcome.QuotaExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.UiResourceQuotaExceeded,
-			ProtocolErrorMessages.For(ProtocolErrorCodes.UiResourceQuotaExceeded)),
-		PluginUiResourceOutcome.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
-			$"A UI resource is 1 to {ProtocolLimits.MaxUiResourceBytes} bytes."),
-		_ => HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
-			"This session is no longer the plugin's current session.",
-			retryable: true),
-	};
+				Resource = new UiResourceHandleDto
+				{
+					ResourceId = result.Resource!.ResourceId,
+					ContentHash = result.Resource.ContentHash!,
+					MediaType = result.Resource.MediaType!,
+					ByteLength = (int)result.Resource.ByteLength!
+				}
+			}),
+			PluginUiResourceOutcome.UploadRequired => HostCallbackResult.Ok(new UiRegisterResourceResult
+				{ UploadRequired = true }),
+			PluginUiResourceOutcome.Removed => HostCallbackResult.Ok(),
+			PluginUiResourceOutcome.InvalidName => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				"A UI resource name is a letter or digit followed by up to 63 letters, digits, hyphens or underscores."),
+			PluginUiResourceOutcome.UnsupportedMediaType => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				"A UI resource must be one of: " + string.Join(", ", UiResourceRules.SupportedMediaTypes) + "."),
+			PluginUiResourceOutcome.MediaTypeMismatch => HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+				"The media type differs from the one the upload declared."),
+			PluginUiResourceOutcome.QuotaExceeded => HostCallbackResult.Fail(ProtocolErrorCodes.UiResourceQuotaExceeded,
+				ProtocolErrorMessages.For(ProtocolErrorCodes.UiResourceQuotaExceeded)),
+			PluginUiResourceOutcome.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
+				$"A UI resource is 1 to {ProtocolLimits.MaxUiResourceBytes} bytes."),
+			_ => HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
+				"This session is no longer the plugin's current session.",
+				true)
+		};
+	}
 
 	// The ingest verdict is the host.result, so a provider learns from its own reply that a payload was
 	// refused - the deterministic signal a relay that silently drops updates cannot give. Translated
@@ -2247,10 +2290,12 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	}
 
 	private string DisplayNameOf(string pluginId)
-		=> _sessionRegistry.Snapshot()
+	{
+		return _sessionRegistry.Snapshot()
 				.FirstOrDefault(session => string.Equals(session.PluginId, pluginId, StringComparison.Ordinal))
-				?.DisplayName ??
-			pluginId;
+				?.DisplayName
+			?? pluginId;
+	}
 
 	/// <summary>
 	/// Answers the icon call with metadata only and starts the bytes on their way over the
@@ -2387,50 +2432,62 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	/// session by quoting its id.
 	/// </summary>
 	private Guid? ResolveSession(string pluginId, string? sessionId)
-		=> _deviceSurfaces is null || _deviceSessions is null
+	{
+		return _deviceSurfaces is null || _deviceSessions is null
 			? null
 			: _deviceSessions.ResolveDevice(pluginId, sessionId);
+	}
 
 	private static DeviceInteractionKind ToInteractionKind(string? kind)
-		=> Enum.TryParse<DeviceInteractionKind>(kind, ignoreCase: true, out var parsed)
+	{
+		return Enum.TryParse<DeviceInteractionKind>(kind, true, out var parsed)
 			? parsed
 			: DeviceInteractionKind.Unknown;
+	}
 
 	// DeviceSurfaceErrorCodes is the host's own vocabulary; only ProtocolErrorCodes is a promise to a
 	// plugin - the same translation RouteUi's FromIngest performs for UI payloads.
 	private static string ToProtocolCode(string code)
-		=> code switch
+	{
+		return code switch
 		{
 			DeviceSurfaceErrorCodes.SessionNotFound => ProtocolErrorCodes.SessionNotFound,
 			DeviceSurfaceErrorCodes.HostLocked => ProtocolErrorCodes.CapabilityUnavailable,
 			DeviceSessionReasons.IconTooLarge => ProtocolErrorCodes.AssetTooLarge,
 			_ => ProtocolErrorCodes.InvalidPayload
 		};
+	}
 
 	private static HostCallbackResult UnknownSession()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.SessionNotFound,
 			"This session id does not name an open device session of this plugin.");
+	}
 
 	// The device: prefix is minted by the host alone, for a device session acting on its own behalf. A
 	// plugin-supplied one is dropped rather than honoured: it would let a plugin address a device session
 	// it does not provide, and no real client ever produces this shape.
 	private static string? ClientOrigin(string? originClientId)
-		=> DeviceOrigin.TryParse(originClientId, out _) ? null : originClientId;
+	{
+		return DeviceOrigin.TryParse(originClientId, out _) ? null : originClientId;
+	}
 
 	private static HostCallbackResult IconResourceResult(PluginIconResourceResult resource, string notFoundCode)
-		=> resource.Status switch
+	{
+		return resource.Status switch
 		{
 			PluginIconResourceStatus.Found => HostCallbackResult.Ok(new UiResourceHandleDto
 			{
 				ResourceId = resource.Handle!.ResourceId,
 				ContentHash = resource.Handle.ContentHash!,
 				MediaType = resource.Handle.MediaType!,
-				ByteLength = (int)resource.Handle.ByteLength!,
+				ByteLength = (int)resource.Handle.ByteLength!
 			}),
 			PluginIconResourceStatus.TooLarge => HostCallbackResult.Fail(ProtocolErrorCodes.AssetTooLarge,
 				$"No rendition of this icon fits the {ProtocolLimits.MaxUiResourceBytes} byte UI resource limit."),
 			_ => HostCallbackResult.Fail(notFoundCode, ProtocolErrorMessages.For(notFoundCode))
 		};
+	}
 
 	private HostCallbackResult RouteColors(string pluginId, HostInvokePayload payload)
 	{
@@ -2478,9 +2535,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return UnknownOperation(payload);
 		}
 
-		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities ||
-			!capabilities.TryGetValue(CapabilityKinds.Weather, out var negotiated) ||
-			!negotiated.Accepted)
+		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities
+			|| !capabilities.TryGetValue(CapabilityKinds.Weather, out var negotiated)
+			|| !negotiated.Accepted)
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 				"Reporting changed weather snapshots requires the weather capability.");
@@ -2497,9 +2554,9 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			return UnknownOperation(payload);
 		}
 
-		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities ||
-			!capabilities.TryGetValue(CapabilityKinds.BatteryProvider, out var negotiated) ||
-			!negotiated.Accepted)
+		if (_sessionRegistry.GetCapabilities(pluginId)?.Capabilities is not { } capabilities
+			|| !capabilities.TryGetValue(CapabilityKinds.BatteryProvider, out var negotiated)
+			|| !negotiated.Accepted)
 		{
 			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 				"Publishing battery devices requires the battery-provider capability.");
@@ -2589,24 +2646,34 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	}
 
 	private static HostCallbackResult TooManyBatteryDevices()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload,
 			$"A battery provider can publish at most {ProtocolLimits.MaxBatteryDevicesPerProvider} devices.");
+	}
 
 	private static HostCallbackResult MissingArguments()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.");
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.InvalidPayload, "This operation requires arguments.");
+	}
 
 	private static HostCallbackResult UnknownOperation(HostInvokePayload payload)
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnsupported,
 			$"The '{payload.Api}' api has no operation '{payload.Operation}'.");
+	}
 
 	private static HostCallbackResult NotALiveExecute()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
 			"This correlation does not name a live actions/execute invocation of this plugin.");
+	}
 
 	// event.publish (a state report) is not routed through host.invoke, so it is unaffected - only the
 	// command operations checked above are refused while the host is locked.
 	private static HostCallbackResult HostLocked()
-		=> HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable, "The host is locked.");
+	{
+		return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable, "The host is locked.");
+	}
 
 	private static T? Deserialize<T>(JsonElement? element)
 	{

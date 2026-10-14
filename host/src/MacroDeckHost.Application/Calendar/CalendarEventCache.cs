@@ -127,7 +127,10 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 		}
 	}
 
-	public void Dispose() => _syncLock.Dispose();
+	public void Dispose()
+	{
+		_syncLock.Dispose();
+	}
 
 	private async Task<(CalendarAccountState State, IReadOnlyList<CalendarEventSummary> Events)> SyncAccountAsync(
 		CalendarAccountDescriptor account,
@@ -206,8 +209,9 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 				account.IntegrationId);
 
 			var lastCalendars = previous.Accounts
-				.FirstOrDefault(state => state.Account.AccountId == account.AccountId)
-				?.Calendars ?? [];
+					.FirstOrDefault(state => state.Account.AccountId == account.AccountId)
+					?.Calendars
+				?? [];
 			var lastEvents = previous.Events
 				.Where(e => e.AccountId == account.AccountId && e.Overlaps(from, to))
 				.ToList();
@@ -257,8 +261,8 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 			IntegrationId = account.IntegrationId,
 			CalendarKey = calendarKey,
 			CalendarId = calendarEvent.CalendarId,
-			CalendarName = calendar?.Name ??
-				CalendarText.Clip(calendarEvent.CalendarId, ProtocolLimits.MaxCalendarTitleLength),
+			CalendarName = calendar?.Name
+				?? CalendarText.Clip(calendarEvent.CalendarId, ProtocolLimits.MaxCalendarTitleLength),
 			CalendarColor = calendar?.Color,
 			Title = CalendarText.Clip(calendarEvent.Title?.Trim(), ProtocolLimits.MaxCalendarTitleLength),
 			Start = start,
@@ -292,20 +296,29 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 	}
 
 	private static IReadOnlyList<CalendarParticipant> Participants(IEnumerable<CalendarParticipant> participants)
-		=> [.. participants.Take(ProtocolLimits.MaxCalendarParticipants)
-			.Select(participant => participant with
-			{
-				Name = CalendarText.ClipOptional(participant.Name, ProtocolLimits.MaxCalendarTitleLength),
-				Email = CalendarText.ClipOptional(participant.Email, ProtocolLimits.MaxCalendarTitleLength)
-			})];
+	{
+		return
+		[
+			.. participants.Take(ProtocolLimits.MaxCalendarParticipants)
+				.Select(participant => participant with
+				{
+					Name = CalendarText.ClipOptional(participant.Name, ProtocolLimits.MaxCalendarTitleLength),
+					Email = CalendarText.ClipOptional(participant.Email, ProtocolLimits.MaxCalendarTitleLength)
+				})
+		];
+	}
 
 	private static CalendarEventDetails? Fallback(CalendarEventSummary? cached)
-		=> cached is null ? null : new CalendarEventDetails(cached, null, []);
+	{
+		return cached is null ? null : new CalendarEventDetails(cached, null, []);
+	}
 
 	private static IEnumerable<CalendarEventSummary> Order(IEnumerable<CalendarEventSummary> events)
-		=> events.OrderBy(e => e.Start)
+	{
+		return events.OrderBy(e => e.Start)
 			.ThenBy(e => e.IsAllDay ? 0 : 1)
 			.ThenBy(e => e.End)
 			.ThenBy(e => e.Title, StringComparer.CurrentCultureIgnoreCase)
 			.ThenBy(e => e.InstanceKey, StringComparer.Ordinal);
+	}
 }

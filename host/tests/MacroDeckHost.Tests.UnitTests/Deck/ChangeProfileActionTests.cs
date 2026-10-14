@@ -11,7 +11,9 @@ internal sealed class ChangeProfileActionTests
 	private static readonly string[] _streamingProfileIds = ["p1", "p3"];
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters, string? originClientId = null)
-		=> new() { Parameters = parameters, OriginClientId = originClientId };
+	{
+		return new ActionExecutionContext { Parameters = parameters, OriginClientId = originClientId };
+	}
 
 	[Test]
 	public async Task GetDynamicOptionsAsync_ReturnsProfilesFilteredByLabel()
@@ -99,7 +101,7 @@ internal sealed class ChangeProfileActionTests
 		var action = new ChangeProfileActionDefinition(() => navigator);
 
 		var result = await action.CreateExecutor()
-			.ExecuteAsync(Context(new Dictionary<string, object> { ["profileId"] = "p1" }, originClientId: "client-1"));
+			.ExecuteAsync(Context(new Dictionary<string, object> { ["profileId"] = "p1" }, "client-1"));
 
 		Assert.Multiple(() =>
 		{
@@ -114,12 +116,16 @@ internal sealed class ChangeProfileActionTests
 		public List<DeckProfile> Profiles { get; set; } = [];
 		public List<(string ProfileId, string? OriginClientId)> ChangeProfileCalls { get; } = [];
 
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
 			CancellationToken cancellationToken = default)
 		{
@@ -128,13 +134,23 @@ internal sealed class ChangeProfileActionTests
 		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public IReadOnlyList<DeckFolder> GetFolders() => throw new NotSupportedException();
+		public IReadOnlyList<DeckFolder> GetFolders()
+		{
+			throw new NotSupportedException();
+		}
 
-		public IReadOnlyList<DeckProfile> GetProfiles() => Profiles;
+		public IReadOnlyList<DeckProfile> GetProfiles()
+		{
+			return Profiles;
+		}
 	}
 }

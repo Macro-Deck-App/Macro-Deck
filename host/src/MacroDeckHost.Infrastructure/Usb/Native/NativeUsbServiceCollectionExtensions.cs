@@ -40,9 +40,11 @@ public static class NativeUsbServiceCollectionExtensions
 	}
 
 	private static NativeLinkSession StartSession(IServiceProvider services, ILinkCarrier carrier, string deviceKey)
-		=> new(carrier,
+	{
+		return new NativeLinkSession(carrier,
 			deviceKey,
 			services.GetRequiredService<ILinkStreamDialer>(),
 			services.GetRequiredService<TimeProvider>(),
 			services.GetRequiredService<ILogger>());
+	}
 }

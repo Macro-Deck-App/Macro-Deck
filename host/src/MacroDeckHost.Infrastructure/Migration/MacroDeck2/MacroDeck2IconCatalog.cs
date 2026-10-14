@@ -39,8 +39,8 @@ internal sealed class MacroDeck2IconCatalog
 			try
 			{
 				using var document = JsonDocument.Parse(File.ReadAllText(manifestPath));
-				name = document.RootElement.TryGetProperty("name", out var nameElement) &&
-					nameElement.ValueKind == JsonValueKind.String
+				name = document.RootElement.TryGetProperty("name", out var nameElement)
+					&& nameElement.ValueKind == JsonValueKind.String
 						? nameElement.GetString()
 						: null;
 			}
@@ -63,7 +63,9 @@ internal sealed class MacroDeck2IconCatalog
 	}
 
 	public static bool IsImage(string path)
-		=> _imageExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+	{
+		return _imageExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+	}
 
 	/// <summary>The pack a button's icon string names, or null when this installation does not hold it.</summary>
 	public MacroDeck2IconPack? ResolvePack(string? reference)
@@ -122,8 +124,8 @@ internal sealed record MacroDeck2IconPack(string Name, string Directory)
 		try
 		{
 			return System.IO.Directory.EnumerateFiles(Directory)
-				.Where(file => MacroDeck2IconCatalog.IsImage(file) &&
-					!Path.GetFileName(file).Equals("ExtensionIcon.png", StringComparison.OrdinalIgnoreCase))
+				.Where(file => MacroDeck2IconCatalog.IsImage(file)
+					&& !Path.GetFileName(file).Equals("ExtensionIcon.png", StringComparison.OrdinalIgnoreCase))
 				.Select(file => new MacroDeck2Icon(Name, Path.GetFileNameWithoutExtension(file), file))
 				.ToList();
 		}

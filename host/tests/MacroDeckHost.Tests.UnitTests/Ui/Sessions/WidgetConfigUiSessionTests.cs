@@ -4,14 +4,11 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
-using MacroDeckHost.Application.Caching;
-using MacroDeckHost.Application.Integrations.ConfigFlow;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Widgets;
-using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -97,7 +94,9 @@ internal sealed class WidgetConfigUiSessionTests
 			Assert.That(widgetData.GetProperty("border").GetProperty("style").GetString(), Is.EqualTo("comet"));
 			Assert.That(widgetData.GetProperty("states").ValueKind, Is.EqualTo(JsonValueKind.Array));
 			Assert.That(widgetData.GetProperty("states").GetArrayLength(), Is.EqualTo(1));
-			Assert.That(widgetData.GetProperty("states")[0].GetProperty("appearance").GetProperty("labelColor")
+			Assert.That(widgetData.GetProperty("states")[0]
+					.GetProperty("appearance")
+					.GetProperty("labelColor")
 					.GetString(),
 				Is.EqualTo("#111111"));
 			Assert.That(widgetData.GetProperty("flows").ValueKind,
@@ -112,7 +111,7 @@ internal sealed class WidgetConfigUiSessionTests
 	[Test]
 	public async Task Absent_stored_data_reads_as_an_empty_object()
 	{
-		var widget = AddWidget(WidgetTypeIds.Weather, data: null);
+		var widget = AddWidget(WidgetTypeIds.Weather, null);
 
 		var ticket = Open(widget.Id);
 		await ticket.Ready;
@@ -133,7 +132,7 @@ internal sealed class WidgetConfigUiSessionTests
 		// not the record the widget was last saved with.
 		var widget = AddWidget(WidgetTypeIds.Weather, """{"historyLength":10}""");
 
-		var ticket = Open(widget.Id, draft: """{"historyLength":120}""");
+		var ticket = Open(widget.Id, """{"historyLength":120}""");
 		await ticket.Ready;
 
 		var widgetData = _weatherProvider.LastSurface!.Attributes[UiConfigSurfaceAttributes.WidgetData];
@@ -164,7 +163,7 @@ internal sealed class WidgetConfigUiSessionTests
 	{
 		var widget = AddWidget(WidgetTypeIds.Weather, """{"historyLength":10}""");
 
-		var ticket = Open(widget.Id, draft: "{}");
+		var ticket = Open(widget.Id, "{}");
 		await ticket.Ready;
 
 		var widgetData = _weatherProvider.LastSurface!.Attributes[UiConfigSurfaceAttributes.WidgetData];
@@ -328,11 +327,13 @@ internal sealed class WidgetConfigUiSessionTests
 	}
 
 	private UiSessionOpenTicket Open(Guid widgetId, string? draft = null)
-		=> _opener.Open(new OpenConfigUiSessionRequest
+	{
+		return _opener.Open(new OpenConfigUiSessionRequest
 			{
 				EntryPoint = UiConfigEntryPoints.WidgetConfig, WidgetId = widgetId.ToString(), WidgetData = draft
 			},
 			DeviceA);
+	}
 
 	private WidgetEntity AddWidget(string type, string? data)
 	{
@@ -345,9 +346,15 @@ internal sealed class WidgetConfigUiSessionTests
 	{
 		private readonly Func<WidgetUiProviderRegistry> _widgets;
 
-		public WidgetOnlyResolver(Func<WidgetUiProviderRegistry> widgets) => _widgets = widgets;
+		public WidgetOnlyResolver(Func<WidgetUiProviderRegistry> widgets)
+		{
+			_widgets = widgets;
+		}
 
-		public IUiSessionProvider? Resolve(string providerId) => _widgets().Resolve(providerId);
+		public IUiSessionProvider? Resolve(string providerId)
+		{
+			return _widgets().Resolve(providerId);
+		}
 	}
 
 	/// <summary>A widget provider that declares (and, unless told to decline, serves) a config surface -
@@ -355,7 +362,10 @@ internal sealed class WidgetConfigUiSessionTests
 	/// was actually asked to render and how many times it was asked.</summary>
 	private sealed class ConfigCapableWidgetUiProvider : IBuiltInWidgetUiProvider
 	{
-		public ConfigCapableWidgetUiProvider(string widgetType) => WidgetTypeId = widgetType;
+		public ConfigCapableWidgetUiProvider(string widgetType)
+		{
+			WidgetTypeId = widgetType;
+		}
 
 		public string WidgetTypeId { get; }
 

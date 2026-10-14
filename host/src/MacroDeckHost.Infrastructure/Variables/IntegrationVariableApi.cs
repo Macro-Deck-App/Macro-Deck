@@ -18,7 +18,8 @@ public sealed class IntegrationVariableApi : IVariableApi
 	private readonly OwnedVariableHistory? _history;
 	private readonly VariableBindingAppender? _bindings;
 
-	public IntegrationVariableApi(string integrationId,
+	public IntegrationVariableApi(
+		string integrationId,
 		IVariableService service,
 		IVariableRefreshSignal? refresh = null,
 		IVariablePollingInvalidationSignal? declarations = null,
@@ -33,15 +34,15 @@ public sealed class IntegrationVariableApi : IVariableApi
 		_bindings = bindings;
 	}
 
-	public Task<SdkHistoryWindow> OpenHistoryAsync(string name,
+	public Task<SdkHistoryWindow> OpenHistoryAsync(
+		string name,
 		int capacity,
 		CancellationToken cancellationToken = default)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 
 		return _history is null
-			? Task.FromException<SdkHistoryWindow>(new VariableHistoryException(
-				VariableHistoryErrorCode.Unsupported,
+			? Task.FromException<SdkHistoryWindow>(new VariableHistoryException(VariableHistoryErrorCode.Unsupported,
 				"This context keeps no variable history."))
 			: Task.FromResult(_history.Open(_integrationId, name, capacity));
 	}
@@ -53,7 +54,8 @@ public sealed class IntegrationVariableApi : IVariableApi
 		return Task.CompletedTask;
 	}
 
-	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	public Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(definitionIds);
@@ -66,12 +68,15 @@ public sealed class IntegrationVariableApi : IVariableApi
 		return Task.CompletedTask;
 	}
 
-	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+	public Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(
+		IReadOnlyCollection<VariableBindingRequest> requests,
 		CancellationToken cancellationToken = default)
-		=> _bindings is null
+	{
+		return _bindings is null
 			? Task.FromException<IReadOnlyList<VariableBindingOutcome>>(
 				new NotSupportedException("This context cannot record variable bindings."))
 			: _bindings.AppendAsync(_integrationId, requests, cancellationToken);
+	}
 
 	public Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
 	{
@@ -90,9 +95,9 @@ public sealed class IntegrationVariableApi : IVariableApi
 	{
 		var canonical = VariableNameSanitizer.IsValid(name) ? name : VariableNameSanitizer.Sanitize(name);
 		var resolved = await _service.Resolve(canonical, VariableScope.Global, null);
-		if (resolved is null ||
-			resolved.Classification != VariableClassification.Integration ||
-			resolved.OwnerIntegrationId != _integrationId)
+		if (resolved is null
+			|| resolved.Classification != VariableClassification.Integration
+			|| resolved.OwnerIntegrationId != _integrationId)
 		{
 			return null;
 		}
@@ -106,7 +111,9 @@ public sealed class IntegrationVariableApi : IVariableApi
 		object? initialValue = null,
 		int? decimalPlaces = null,
 		string? definitionId = null)
-		=> Create(name, type, initialValue, decimalPlaces, definitionId, null);
+	{
+		return Create(name, type, initialValue, decimalPlaces, definitionId, null);
+	}
 
 	private async Task<VariableHandle> Create(
 		string name,
@@ -129,20 +136,22 @@ public sealed class IntegrationVariableApi : IVariableApi
 		if (!result.Success || result.Data is null)
 		{
 			throw new InvalidOperationException(
-				$"Failed to create variable '{name}' for integration '{_integrationId}': " +
-				$"{result.Error} ({result.ErrorMessage})");
+				$"Failed to create variable '{name}' for integration '{_integrationId}': "
+				+ $"{result.Error} ({result.ErrorMessage})");
 		}
 
 		return ToHandle(result.Data);
 	}
 
 	public Task<VariableHandle> CreateAsync(VariableDefinition declaration, object? initialValue = null)
-		=> Create(declaration.Name ?? string.Empty,
+	{
+		return Create(declaration.Name ?? string.Empty,
 			declaration.Type,
 			initialValue,
 			declaration.DecimalPlaces,
 			declaration.Id,
 			VariableDeclarationFactory.From(declaration));
+	}
 
 	public async Task SetValueAsync(Guid variableId, object? value)
 	{
@@ -150,32 +159,35 @@ public sealed class IntegrationVariableApi : IVariableApi
 		if (!result.Success)
 		{
 			throw new InvalidOperationException(
-				$"Failed to set variable '{variableId}' for integration '{_integrationId}': " +
-				$"{result.Error} ({result.ErrorMessage})");
+				$"Failed to set variable '{variableId}' for integration '{_integrationId}': "
+				+ $"{result.Error} ({result.ErrorMessage})");
 		}
 	}
 
 	public async Task DeleteAsync(Guid variableId)
 	{
 		var result = await _service.DeleteIntegrationVariable(_integrationId, variableId);
-		if (!result.Success &&
-			result.Error != VariableError.NotFound &&
-			result.Error != VariableError.NotOwnedByIntegration)
+		if (!result.Success
+			&& result.Error != VariableError.NotFound
+			&& result.Error != VariableError.NotOwnedByIntegration)
 		{
 			throw new InvalidOperationException(
-				$"Failed to delete variable '{variableId}' for integration '{_integrationId}': " +
-				$"{result.Error} ({result.ErrorMessage})");
+				$"Failed to delete variable '{variableId}' for integration '{_integrationId}': "
+				+ $"{result.Error} ({result.ErrorMessage})");
 		}
 	}
 
-	private static SdkVariableType MapType(DomainVariableType type) => type switch
+	private static SdkVariableType MapType(DomainVariableType type)
 	{
-		DomainVariableType.Text => SdkVariableType.Text,
-		DomainVariableType.Numeric => SdkVariableType.Numeric,
-		DomainVariableType.Boolean => SdkVariableType.Boolean,
-		DomainVariableType.Color => SdkVariableType.Color,
-		_ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown variable type")
-	};
+		return type switch
+		{
+			DomainVariableType.Text => SdkVariableType.Text,
+			DomainVariableType.Numeric => SdkVariableType.Numeric,
+			DomainVariableType.Boolean => SdkVariableType.Boolean,
+			DomainVariableType.Color => SdkVariableType.Color,
+			_ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown variable type")
+		};
+	}
 
 	private static VariableHandle ToHandle(VariableEntity entity)
 	{

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Config;
@@ -9,9 +8,7 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Testing;
-using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.MusicPlayer;
-using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
@@ -27,7 +24,8 @@ internal sealed class BuiltInScreenSaverProviderTests
 
 	[SetUp]
 	public void SetUp()
-		=> _provider = new BuiltInScreenSaverProvider(new StubRegistry(),
+	{
+		_provider = new BuiltInScreenSaverProvider(new StubRegistry(),
 			new StubStateCache(),
 			new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry())),
 			new StubArtworkService(),
@@ -38,6 +36,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 			new NullResourceStore(),
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
+	}
 
 	[Test]
 	public void Offers_the_clock_and_now_playing_under_its_own_id()
@@ -46,7 +45,8 @@ internal sealed class BuiltInScreenSaverProviderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(screenSavers.Select(descriptor => descriptor.Id), Is.EquivalentTo(new[] { "clock", "now-playing" }));
+			Assert.That(screenSavers.Select(descriptor => descriptor.Id),
+				Is.EquivalentTo(new[] { "clock", "now-playing" }));
 			Assert.That(_provider.IntegrationId, Is.EqualTo(BuiltInScreenSavers.ProviderId));
 			Assert.That(screenSavers.All(descriptor => descriptor.HasConfiguration), Is.True);
 			Assert.That(screenSavers.Any(descriptor => descriptor.Interactive), Is.False);
@@ -56,11 +56,12 @@ internal sealed class BuiltInScreenSaverProviderTests
 	[Test]
 	public async Task The_clock_screensaver_draws_a_ticking_time_with_the_configured_options()
 	{
-		var session = await _provider.CreateSessionAsync(
-			ScreenSaverRequest(BuiltInScreenSavers.Clock, """{"showSeconds":true,"showDate":false,"hourCycle":"24h"}"""),
+		var session = await _provider.CreateSessionAsync(ScreenSaverRequest(BuiltInScreenSavers.Clock,
+				"""{"showSeconds":true,"showDate":false,"hourCycle":"24h"}"""),
 			CancellationToken.None);
-		var options = ClockScreenSaverData.Parse(
-			JsonDocument.Parse("""{"showSeconds":true,"showDate":false,"hourCycle":"24h"}""").RootElement);
+		var options = ClockScreenSaverData.Parse(JsonDocument
+			.Parse("""{"showSeconds":true,"showDate":false,"hourCycle":"24h"}""")
+			.RootElement);
 		var runs = UiTestHost.Render(ClockScreenSaverView.Build(options, new UiState<int>(0)))
 			.ByType(UiMacroDeckComponents.DynamicText);
 		var withDate = UiTestHost.Render(ClockScreenSaverView.Build(new ClockScreenSaverData(), new UiState<int>(0)))
@@ -71,9 +72,12 @@ internal sealed class BuiltInScreenSaverProviderTests
 			Assert.That(session, Is.TypeOf<DriftingScreenSaverSession>());
 			Assert.That(runs, Is.Not.Empty);
 			Assert.That(runs.All(run => run.Flag(UiComponentProperties.Seconds) == true), Is.True);
-			Assert.That(runs.Select(run => run.Text(UiComponentProperties.Format)), Does.Contain(UiTimeFormats.Time24Hour));
-			Assert.That(runs.Select(run => run.Text(UiComponentProperties.Format)), Does.Not.Contain(UiTimeFormats.Date));
-			Assert.That(withDate.Select(run => run.Text(UiComponentProperties.Format)), Does.Contain(UiTimeFormats.Date));
+			Assert.That(runs.Select(run => run.Text(UiComponentProperties.Format)),
+				Does.Contain(UiTimeFormats.Time24Hour));
+			Assert.That(runs.Select(run => run.Text(UiComponentProperties.Format)),
+				Does.Not.Contain(UiTimeFormats.Date));
+			Assert.That(withDate.Select(run => run.Text(UiComponentProperties.Format)),
+				Does.Contain(UiTimeFormats.Date));
 		});
 	}
 
@@ -90,8 +94,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 	[Test]
 	public async Task Now_playing_shows_the_clock_while_nothing_plays()
 	{
-		var session = await _provider.CreateSessionAsync(
-			ScreenSaverRequest(BuiltInScreenSavers.NowPlaying, "{}"),
+		var session = await _provider.CreateSessionAsync(ScreenSaverRequest(BuiltInScreenSavers.NowPlaying, "{}"),
 			CancellationToken.None);
 		var host = UiTestHost.Render(NowPlayingScreenSaverView.Build(
 			new UiState<MusicPlayerViewState>(MusicPlayerViewState.Loading),
@@ -121,7 +124,7 @@ internal sealed class BuiltInScreenSaverProviderTests
 				TrackName = "Windowlicker",
 				ArtistName = "Aphex Twin",
 				DeviceName = "Kitchen",
-				Badge = "2/3",
+				Badge = "2/3"
 			});
 		var provider = new BuiltInScreenSaverProvider(new StubRegistry(),
 			cache,
@@ -157,9 +160,12 @@ internal sealed class BuiltInScreenSaverProviderTests
 			SessionMode = UiSessionModes.Exclusive,
 			Attributes = new Dictionary<string, JsonElement>
 			{
-				[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(UiConfigEntryPoints.ScreenSaverConfig),
-				[UiConfigSurfaceAttributes.ScreenSaverId] = JsonSerializer.SerializeToElement(BuiltInScreenSavers.Clock),
-				[UiConfigSurfaceAttributes.ScreenSaverConfiguration] = JsonDocument.Parse("""{"showDate":false}""").RootElement,
+				[UiConfigSurfaceAttributes.EntryPoint]
+					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.ScreenSaverConfig),
+				[UiConfigSurfaceAttributes.ScreenSaverId]
+					= JsonSerializer.SerializeToElement(BuiltInScreenSavers.Clock),
+				[UiConfigSurfaceAttributes.ScreenSaverConfiguration]
+					= JsonDocument.Parse("""{"showDate":false}""").RootElement
 			}
 		};
 
@@ -196,25 +202,33 @@ internal sealed class BuiltInScreenSaverProviderTests
 	}
 
 	private static UiSessionRequest ScreenSaverRequest(string screenSaverId, string configuration)
-		=> new() { Surface = ScreenSaverSurface(screenSaverId, configuration), UiModelVersion = 1 };
+	{
+		return new UiSessionRequest { Surface = ScreenSaverSurface(screenSaverId, configuration), UiModelVersion = 1 };
+	}
 
 	private static UiSurface ScreenSaverSurface(string screenSaverId, string configuration)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.ScreenSaver,
 			SessionMode = UiSessionModes.Shared,
 			Attributes = new Dictionary<string, JsonElement>
 			{
-				[UiScreenSaverSurfaceAttributes.DeviceId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
+				[UiScreenSaverSurfaceAttributes.DeviceId]
+					= JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiScreenSaverSurfaceAttributes.ScreenSaverId] = JsonSerializer.SerializeToElement(screenSaverId),
-				[UiScreenSaverSurfaceAttributes.Configuration] = JsonDocument.Parse(configuration).RootElement,
+				[UiScreenSaverSurfaceAttributes.Configuration] = JsonDocument.Parse(configuration).RootElement
 			}
 		};
+	}
 
 	private sealed class NullResourceStore : IUiResourceStore
 	{
 		public UiResource Register(UiResourceRegistration registration)
-			=> new() { ResourceId = registration.OwnerId + "/" + registration.Name, ContentHash = "sha256:00" };
+		{
+			return new UiResource
+				{ ResourceId = registration.OwnerId + "/" + registration.Name, ContentHash = "sha256:00" };
+		}
 
 		public bool TryGet(string resourceId, out UiResourceContent content)
 		{
@@ -222,6 +236,9 @@ internal sealed class BuiltInScreenSaverProviderTests
 			return false;
 		}
 
-		public bool Remove(string resourceId) => false;
+		public bool Remove(string resourceId)
+		{
+			return false;
+		}
 	}
 }

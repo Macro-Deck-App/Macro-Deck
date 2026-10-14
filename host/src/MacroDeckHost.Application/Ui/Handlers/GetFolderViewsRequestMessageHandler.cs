@@ -17,8 +17,10 @@ public sealed class GetFolderViewsRequestMessageHandler
 	public ValueTask<GetFolderViewsResponse> Handle(
 		GetFolderViewsRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetFolderViewsResponse
+	{
+		return ValueTask.FromResult(new GetFolderViewsResponse
 		{
 			FolderViews = FolderViewDtoMapper.MapToDto(_registry.GetAll())
 		});
+	}
 }

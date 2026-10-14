@@ -27,19 +27,21 @@ public static class CalendarEventDialogs
 			Data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[CalendarKey] = JsonSerializer.SerializeToElement(calendarEvent.CalendarKey),
-				[EventKey] = JsonSerializer.SerializeToElement(calendarEvent.EventId),
-			},
+				[EventKey] = JsonSerializer.SerializeToElement(calendarEvent.EventId)
+			}
 		};
 	}
 
 	public static ModalDefinition ForAgenda(Guid widgetId)
-		=> new()
+	{
+		return new ModalDefinition
 		{
 			ViewId = AgendaViewId,
 			Title = AppStrings.Widgets.Calendar.Layouts.Agenda(),
 			Data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
-				[WidgetKey] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-			},
+				[WidgetKey] = JsonSerializer.SerializeToElement(widgetId.ToString())
+			}
 		};
+	}
 }

@@ -46,7 +46,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 
 		if (provider.Name.IsEmpty)
 		{
-			throw new ArgumentException($"The name of video stream provider '{id}' must not be empty.", nameof(provider));
+			throw new ArgumentException($"The name of video stream provider '{id}' must not be empty.",
+				nameof(provider));
 		}
 
 		lock (_gate)
@@ -71,21 +72,31 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 	}
 
 	public Task<bool> RemoveAsync(string providerId)
-		=> WithdrawAsync(registration => string.Equals(registration.ProviderId, providerId, StringComparison.Ordinal));
+	{
+		return WithdrawAsync(registration
+			=> string.Equals(registration.ProviderId, providerId, StringComparison.Ordinal));
+	}
 
-	public Task<bool> RemoveAllAsync() => WithdrawAsync(_ => true);
+	public Task<bool> RemoveAllAsync()
+	{
+		return WithdrawAsync(_ => true);
+	}
 
 	public bool IsLive(string sessionId)
-		=> _sessions.TryGet(sessionId, out var session) && session.Phase != VideoStreamSessionPhase.Closed;
+	{
+		return _sessions.TryGet(sessionId, out var session) && session.Phase != VideoStreamSessionPhase.Closed;
+	}
 
-	public bool EndByProvider(string sessionId) => _sessions.EndByProvider(sessionId, out _);
+	public bool EndByProvider(string sessionId)
+	{
+		return _sessions.EndByProvider(sessionId, out _);
+	}
 
 	public Task<IReadOnlyList<VideoStreamProviderInfo>> DescribeAsync(CancellationToken cancellationToken)
 	{
 		lock (_gate)
 		{
-			return Task.FromResult<IReadOnlyList<VideoStreamProviderInfo>>(
-			[
+			return Task.FromResult<IReadOnlyList<VideoStreamProviderInfo>>([
 				.. _providers.Values.Select(registration => new VideoStreamProviderInfo(registration.ProviderId,
 					registration.Provider.Name,
 					registration.Provider.Description,
@@ -94,7 +105,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		}
 	}
 
-	public async Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(string providerId,
+	public async Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(
+		string providerId,
 		CancellationToken cancellationToken)
 	{
 		var registration = Resolve(providerId);
@@ -103,7 +115,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		return streams ?? [];
 	}
 
-	public async Task<VideoStreamOpenResult> OpenAsync(string providerId,
+	public async Task<VideoStreamOpenResult> OpenAsync(
+		string providerId,
 		VideoStreamOpenRequest request,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -126,19 +139,21 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		if (!IsCurrent(registration))
 		{
 			_sessions.FailOpen(sessionId);
-			throw Rejected(VideoStreamErrorCode.UnknownProvider, $"No video stream provider '{providerId}' is registered.");
+			throw Rejected(VideoStreamErrorCode.UnknownProvider,
+				$"No video stream provider '{providerId}' is registered.");
 		}
 
 		using var cancellation = new CancellationTokenSource();
-		var opening = Task.Run(() => registration.Provider.OpenAsync(request, cancellation.Token), CancellationToken.None);
+		var opening = Task.Run(() => registration.Provider.OpenAsync(request, cancellation.Token),
+			CancellationToken.None);
 
 		VideoStreamSessionDescription description;
 		try
 		{
 			description = await opening.WaitAsync(_timeout, _time, cancellationToken).ConfigureAwait(false);
 		}
-		catch (Exception exception) when (exception is TimeoutException or OperationCanceledException &&
-			!opening.IsCompleted)
+		catch (Exception exception) when (exception is TimeoutException or OperationCanceledException
+			&& !opening.IsCompleted)
 		{
 			_sessions.RequestClose(sessionId, VideoStreamSessionReason.Failed);
 			await cancellation.CancelAsync().ConfigureAwait(false);
@@ -172,7 +187,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 				return new VideoStreamOpenResult(VideoStreamWire.ToDto(description), registration.RegistrationId);
 
 			case VideoStreamOpenOutcome.Open:
-				_logger.Warning("Video stream provider {ProviderId} opened a session with an unusable description: {Problem}",
+				_logger.Warning(
+					"Video stream provider {ProviderId} opened a session with an unusable description: {Problem}",
 					providerId,
 					problem);
 				if (_sessions.RequestClose(sessionId, VideoStreamSessionReason.Failed).Close is { } failed)
@@ -191,7 +207,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		}
 	}
 
-	public async Task SuspendAsync(string providerId,
+	public async Task SuspendAsync(
+		string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -206,7 +223,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 			.ConfigureAwait(false);
 	}
 
-	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(string providerId,
+	public async Task<VideoStreamSessionDescriptionDto?> ResumeAsync(
+		string providerId,
 		string sessionId,
 		Func<bool> proceed,
 		CancellationToken cancellationToken)
@@ -217,13 +235,14 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		return description is null ? null : VideoStreamWire.ToDto(description);
 	}
 
-	public async Task CloseAsync(string providerId,
+	public async Task CloseAsync(
+		string providerId,
 		string sessionId,
 		VideoStreamSessionReason reason,
 		CancellationToken cancellationToken)
 	{
-		if (_sessions.TryGet(sessionId, out var session) &&
-			!string.Equals(session.ProviderId, providerId, StringComparison.Ordinal))
+		if (_sessions.TryGet(sessionId, out var session)
+			&& !string.Equals(session.ProviderId, providerId, StringComparison.Ordinal))
 		{
 			return;
 		}
@@ -280,7 +299,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		{
 			await CallAsync(async token =>
 					{
-						await closing.Provider.CloseAsync(closing.SessionId, closing.Reason, token).ConfigureAwait(false);
+						await closing.Provider.CloseAsync(closing.SessionId, closing.Reason, token)
+							.ConfigureAwait(false);
 						return true;
 					},
 					CancellationToken.None)
@@ -343,8 +363,8 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 	{
 		lock (_gate)
 		{
-			return _providers.TryGetValue(registration.ProviderId, out var current) &&
-				ReferenceEquals(current, registration);
+			return _providers.TryGetValue(registration.ProviderId, out var current)
+				&& ReferenceEquals(current, registration);
 		}
 	}
 
@@ -356,9 +376,9 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 		}
 
 		var registration = Resolve(providerId);
-		if (!_sessions.TryGet(sessionId, out var session) ||
-			session.Phase != VideoStreamSessionPhase.Open ||
-			!string.Equals(session.ProviderId, registration.ProviderId, StringComparison.Ordinal))
+		if (!_sessions.TryGet(sessionId, out var session)
+			|| session.Phase != VideoStreamSessionPhase.Open
+			|| !string.Equals(session.ProviderId, registration.ProviderId, StringComparison.Ordinal))
 		{
 			throw Rejected(VideoStreamErrorCode.UnknownSession, "The provider has no open session with this id.");
 		}
@@ -382,7 +402,9 @@ internal sealed class InProcessVideoStreamEndpoint : IVideoStreamEndpoint
 	}
 
 	private static VideoStreamEndpointException Rejected(VideoStreamErrorCode code, string message)
-		=> new(VideoStreamEndpointFailure.Rejected, code, message);
+	{
+		return new VideoStreamEndpointException(VideoStreamEndpointFailure.Rejected, code, message);
+	}
 
 	private sealed record Registration(string ProviderId, IVideoStreamProvider Provider, string RegistrationId);
 }

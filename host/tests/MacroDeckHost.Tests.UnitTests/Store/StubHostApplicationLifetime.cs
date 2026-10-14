@@ -21,7 +21,10 @@ internal sealed class StubHostApplicationLifetime : IHostApplicationLifetime, ID
 
 	public CancellationToken ApplicationStopped => CancellationToken.None;
 
-	public void StopApplication() => _stopping.Cancel();
+	public void StopApplication()
+	{
+		_stopping.Cancel();
+	}
 
 	public void Dispose()
 	{

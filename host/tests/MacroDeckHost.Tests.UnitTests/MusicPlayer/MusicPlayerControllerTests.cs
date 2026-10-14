@@ -24,15 +24,21 @@ public class MusicPlayerControllerTests
 		public int ImageCalls { get; private set; }
 
 		public string GetETag(string artworkId, int? size)
-			=> $"\"{artworkId}-{(size is null ? "master" : size.Value.ToString(CultureInfo.InvariantCulture))}\"";
+		{
+			return $"\"{artworkId}-{(size is null ? "master" : size.Value.ToString(CultureInfo.InvariantCulture))}\"";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		{
+			return GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
@@ -44,13 +50,17 @@ public class MusicPlayerControllerTests
 
 	private static MusicPlayerController CreateController(FakeArtworkService artwork)
 	{
-		var controller = new MusicPlayerController(artwork);
-		controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+		var controller = new MusicPlayerController(artwork)
+		{
+			ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+		};
 		return controller;
 	}
 
 	private static FakeArtworkService WithArtwork()
-		=> new(new ArtworkImageResult([1, 2, 3, 4], "image/webp", $"\"{ArtworkId}-master\""));
+	{
+		return new FakeArtworkService(new ArtworkImageResult([1, 2, 3, 4], "image/webp", $"\"{ArtworkId}-master\""));
+	}
 
 	// The bytes behind an artwork id never change, so a client that has them must not have to
 	// revalidate - not even with a conditional request (issue #421).

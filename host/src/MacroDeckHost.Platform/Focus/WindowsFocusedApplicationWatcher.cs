@@ -109,7 +109,7 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 
 		if (_hookInstalled)
 		{
-			if (!Win32WinEvent.PostThreadMessage(_pumpThreadId, Win32WinEvent.WM_QUIT, IntPtr.Zero, IntPtr.Zero))
+			if (!Win32WinEvent.PostThreadMessage(_pumpThreadId, Win32WinEvent.WmQuit, IntPtr.Zero, IntPtr.Zero))
 			{
 				_logger.Warning(
 					"Failed to post WM_QUIT to the Windows focus-watcher pump thread; it may not terminate");
@@ -131,22 +131,22 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 		// guaranteed deliverable.
 		Win32WinEvent.PeekMessage(out _,
 			IntPtr.Zero,
-			Win32WinEvent.WM_USER,
-			Win32WinEvent.WM_USER,
-			Win32WinEvent.PM_NOREMOVE);
+			Win32WinEvent.WmUser,
+			Win32WinEvent.WmUser,
+			Win32WinEvent.PmNoremove);
 
 		var hook = IntPtr.Zero;
 		try
 		{
 			// WINEVENT_OUTOFCONTEXT callbacks are delivered to the installing thread's message queue,
 			// so the hook must be installed on the same thread that runs the pump loop below.
-			hook = Win32WinEvent.SetWinEventHook(Win32WinEvent.EVENT_SYSTEM_FOREGROUND,
-				Win32WinEvent.EVENT_SYSTEM_FOREGROUND,
+			hook = Win32WinEvent.SetWinEventHook(Win32WinEvent.EventSystemForeground,
+				Win32WinEvent.EventSystemForeground,
 				IntPtr.Zero,
 				_proc,
 				0,
 				0,
-				Win32WinEvent.WINEVENT_OUTOFCONTEXT);
+				Win32WinEvent.WineventOutofcontext);
 			_hookInstalled = hook != IntPtr.Zero;
 		}
 		catch (Exception e)
@@ -187,7 +187,8 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 		}
 	}
 
-	private void OnForegroundChanged(IntPtr hook,
+	private void OnForegroundChanged(
+		IntPtr hook,
 		uint eventType,
 		IntPtr hwnd,
 		int objectId,
@@ -197,10 +198,10 @@ internal sealed class WindowsFocusedApplicationWatcher : IFocusedApplicationWatc
 	{
 		try
 		{
-			if (eventType != Win32WinEvent.EVENT_SYSTEM_FOREGROUND ||
-				objectId != Win32WinEvent.OBJID_WINDOW ||
-				childId != Win32WinEvent.CHILDID_SELF ||
-				hwnd == IntPtr.Zero)
+			if (eventType != Win32WinEvent.EventSystemForeground
+				|| objectId != Win32WinEvent.ObjidWindow
+				|| childId != Win32WinEvent.ChildidSelf
+				|| hwnd == IntPtr.Zero)
 			{
 				return;
 			}

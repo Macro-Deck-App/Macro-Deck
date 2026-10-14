@@ -49,5 +49,8 @@ public interface IFolderViewProvider
 	/// The folder views this provider currently offers. The host reads this to recover its view after a
 	/// reconnect; a provider that keeps no catalog of its own may return an empty list.
 	/// </summary>
-	IReadOnlyList<FolderViewDescriptor> GetFolderViews() => [];
+	IReadOnlyList<FolderViewDescriptor> GetFolderViews()
+	{
+		return [];
+	}
 }

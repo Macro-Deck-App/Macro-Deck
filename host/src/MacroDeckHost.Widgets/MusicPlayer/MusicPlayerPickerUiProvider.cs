@@ -50,7 +50,7 @@ public sealed class MusicPlayerPickerUiProvider : IBuiltInIntegrationUiProvider
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
 		new()
-			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -81,22 +81,26 @@ public sealed class MusicPlayerPickerUiProvider : IBuiltInIntegrationUiProvider
 
 	/// <summary>Anything but an explicit playlist is a track - the kind the action asks for by default.</summary>
 	internal static MusicPlayerCatalogItemKind ParseKind(string? kind)
-		=> string.Equals(kind, nameof(MusicPlayerCatalogItemKind.Playlist), StringComparison.OrdinalIgnoreCase)
+	{
+		return string.Equals(kind, nameof(MusicPlayerCatalogItemKind.Playlist), StringComparison.OrdinalIgnoreCase)
 			? MusicPlayerCatalogItemKind.Playlist
 			: MusicPlayerCatalogItemKind.Track;
+	}
 
 	private static string? ViewId(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.ViewId, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.ViewId, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static string? Data(UiSurface surface, string key)
 	{
-		if (!surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.Data, out var data) ||
-			data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty(key, out var member) ||
-			member.ValueKind != JsonValueKind.String)
+		if (!surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.Data, out var data)
+			|| data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty(key, out var member)
+			|| member.ValueKind != JsonValueKind.String)
 		{
 			return null;
 		}

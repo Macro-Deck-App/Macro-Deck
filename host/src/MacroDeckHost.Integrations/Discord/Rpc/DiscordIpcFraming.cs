@@ -25,7 +25,7 @@ internal static class DiscordIpcFraming
 	public static async Task<DiscordIpcFrame?> ReadFrameAsync(Stream stream, CancellationToken cancellationToken)
 	{
 		var header = new byte[HeaderLength];
-		if (!await ReadExactlyAsync(stream, header, allowEof: true, cancellationToken).ConfigureAwait(false))
+		if (!await ReadExactlyAsync(stream, header, true, cancellationToken).ConfigureAwait(false))
 		{
 			return null;
 		}
@@ -44,8 +44,7 @@ internal static class DiscordIpcFraming
 		}
 
 		var payload = new byte[length];
-		if (length > 0 &&
-			!await ReadExactlyAsync(stream, payload, allowEof: false, cancellationToken).ConfigureAwait(false))
+		if (length > 0 && !await ReadExactlyAsync(stream, payload, false, cancellationToken).ConfigureAwait(false))
 		{
 			throw new DiscordIpcProtocolException("Stream ended inside a frame payload.");
 		}

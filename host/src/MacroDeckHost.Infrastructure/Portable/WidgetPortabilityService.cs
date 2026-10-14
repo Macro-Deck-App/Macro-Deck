@@ -31,7 +31,8 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		_logger = logger;
 	}
 
-	public async Task<Result<byte[], PortabilityError>> Export(Guid folderId,
+	public async Task<Result<byte[], PortabilityError>> Export(
+		Guid folderId,
 		IReadOnlyList<Guid> widgetIds,
 		PortableExportOptions options,
 		CancellationToken cancellationToken)
@@ -86,7 +87,8 @@ public sealed class WidgetPortabilityService : IWidgetPortabilityService
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
-	public async Task<Result<IReadOnlyList<WidgetEntity>, PortabilityError>> Import(Guid folderId,
+	public async Task<Result<IReadOnlyList<WidgetEntity>, PortabilityError>> Import(
+		Guid folderId,
 		int anchorX,
 		int anchorY,
 		byte[] archiveBytes,

@@ -70,7 +70,7 @@ public class PortabilityEndpointsTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -83,12 +83,12 @@ public class PortabilityEndpointsTests
 			$"/api/profiles/{profileId}/export",
 			new { includeSecrets = false });
 		Assert.That(export.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-		Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar ??
-			export.Content.Headers.ContentDisposition!.FileName,
+		Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar
+			?? export.Content.Headers.ContentDisposition!.FileName,
 			Does.Contain(".macroDeckProfile"));
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var import = await ImportProfile(archive, password: null);
+		var import = await ImportProfile(archive, null);
 		var body = await ReadJson(import);
 
 		Assert.Multiple(() =>
@@ -178,9 +178,9 @@ public class PortabilityEndpointsTests
 			new { includeSecrets = true, password = "s3cret-export" });
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var withoutPassword = await ReadJson(await ImportProfile(archive, password: null));
-		var wrongPassword = await ReadJson(await ImportProfile(archive, password: "nope"));
-		var correctPassword = await ReadJson(await ImportProfile(archive, password: "s3cret-export"));
+		var withoutPassword = await ReadJson(await ImportProfile(archive, null));
+		var wrongPassword = await ReadJson(await ImportProfile(archive, "nope"));
+		var correctPassword = await ReadJson(await ImportProfile(archive, "s3cret-export"));
 
 		Assert.Multiple(() =>
 		{
@@ -225,8 +225,8 @@ public class PortabilityEndpointsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(export.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar ??
-				export.Content.Headers.ContentDisposition!.FileName,
+			Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar
+				?? export.Content.Headers.ContentDisposition!.FileName,
 				Does.Contain(".macroDeckWidget"));
 		});
 	}
@@ -282,12 +282,12 @@ public class PortabilityEndpointsTests
 			$"/api/folders/{childId}/export",
 			new { includeSubfolders = true, includeSecrets = false });
 		Assert.That(export.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-		Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar ??
-			export.Content.Headers.ContentDisposition!.FileName,
+		Assert.That(export.Content.Headers.ContentDisposition!.FileNameStar
+			?? export.Content.Headers.ContentDisposition!.FileName,
 			Does.Contain(".macroDeckFolder"));
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var import = await ImportFolder(archive, profileId, rootId, password: null);
+		var import = await ImportFolder(archive, profileId, rootId, null);
 		var body = await ReadJson(import);
 
 		Assert.Multiple(() =>
@@ -312,7 +312,7 @@ public class PortabilityEndpointsTests
 			new { includeSubfolders = false, includeSecrets = false });
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var body = await ReadJson(await ImportFolder(archive, profileId, parentFolderId: null, password: null));
+		var body = await ReadJson(await ImportFolder(archive, profileId, null, null));
 
 		Assert.Multiple(() =>
 		{
@@ -332,8 +332,8 @@ public class PortabilityEndpointsTests
 			new { includeSubfolders = false, includeSecrets = true, password = "s3cret-export" });
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var withoutPassword = await ReadJson(await ImportFolder(archive, profileId, null, password: null));
-		var wrongPassword = await ReadJson(await ImportFolder(archive, profileId, null, password: "nope"));
+		var withoutPassword = await ReadJson(await ImportFolder(archive, profileId, null, null));
+		var wrongPassword = await ReadJson(await ImportFolder(archive, profileId, null, "nope"));
 		var correctPassword = await ReadJson(await ImportFolder(archive, profileId, null, "s3cret-export"));
 
 		Assert.Multiple(() =>
@@ -358,7 +358,7 @@ public class PortabilityEndpointsTests
 			new { folderId, widgetIds = new[] { widgetId }, includeSecrets = false });
 		var archive = await export.Content.ReadAsByteArrayAsync();
 
-		var body = await ReadJson(await ImportFolder(archive, profileId, folderId, password: null));
+		var body = await ReadJson(await ImportFolder(archive, profileId, folderId, null));
 
 		Assert.Multiple(() =>
 		{
@@ -380,7 +380,7 @@ public class PortabilityEndpointsTests
 	[Test]
 	public async Task Import_rejects_a_non_archive_file()
 	{
-		var import = await ImportProfile([1, 2, 3, 4], password: null);
+		var import = await ImportProfile([1, 2, 3, 4], null);
 		var body = await ReadJson(import);
 
 		Assert.Multiple(() =>
@@ -395,7 +395,7 @@ public class PortabilityEndpointsTests
 	public async Task Profile_import_from_path_creates_a_new_profile()
 	{
 		var profileId = await CreateProfile("Path Round Trip");
-		var archive = await ExportProfile(profileId, password: null);
+		var archive = await ExportProfile(profileId, null);
 		var path = WriteArchive(archive, "profile.macroDeckProfile");
 
 		var body = await ReadJson(await SendJson(HttpMethod.Post, "/api/profiles/import-path", new { path }));
@@ -514,7 +514,7 @@ public class PortabilityEndpointsTests
 	public async Task Import_from_path_rejects_an_archive_of_the_wrong_kind()
 	{
 		var profileId = await CreateProfile("Wrong Kind");
-		var archive = await ExportProfile(profileId, password: null);
+		var archive = await ExportProfile(profileId, null);
 		var path = WriteArchive(archive, "misnamed.macroDeckFolder");
 
 		var body = await ReadJson(await SendJson(HttpMethod.Post, "/api/profiles/import-path", new { path }));
@@ -536,7 +536,7 @@ public class PortabilityEndpointsTests
 	public async Task Import_from_path_is_refused_outside_the_desktop_shell()
 	{
 		var profileId = await CreateProfile("Public Listener");
-		var archive = await ExportProfile(profileId, password: null);
+		var archive = await ExportProfile(profileId, null);
 		var path = WriteArchive(archive, "public.macroDeckProfile");
 
 		using var request = new HttpRequestMessage(HttpMethod.Post, "/api/profiles/import-path")
@@ -664,9 +664,9 @@ public class PortabilityEndpointsTests
 		using var fixture = new MacroDeck2Fixture();
 		fixture.WithProfile("0",
 				"Migrated",
-				rows: 3,
-				columns: 5,
-				folders: [MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
 			.WithPluginCredentials("vendor_plugin", key, new Dictionary<string, string> { ["token"] = "secret" })
 			.Build();
 
@@ -726,9 +726,9 @@ public class PortabilityEndpointsTests
 		using var fixture = new MacroDeck2Fixture();
 		fixture.WithProfile("0",
 				"Backed up",
-				rows: 3,
-				columns: 5,
-				folders: [MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
 			.Build();
 
 		var backup = fixture.PackAsBackup();
@@ -843,7 +843,8 @@ public class PortabilityEndpointsTests
 		return await _client.SendAsync(request);
 	}
 
-	private async Task<HttpResponseMessage> ImportFolder(byte[] archive,
+	private async Task<HttpResponseMessage> ImportFolder(
+		byte[] archive,
 		string profileId,
 		string? parentFolderId,
 		string? password)
@@ -876,7 +877,9 @@ public class PortabilityEndpointsTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -889,7 +892,8 @@ public class PortabilityEndpointsTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -909,5 +913,6 @@ public class PortabilityEndpointsTests
 				});
 				next(app);
 			};
+		}
 	}
 }

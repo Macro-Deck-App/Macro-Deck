@@ -73,5 +73,7 @@ public sealed class PluginOrphanReaper : IPluginOrphanReaper
 	}
 
 	private static bool WithinTolerance(DateTimeOffset left, DateTimeOffset right)
-		=> (left - right).Duration() <= _startTimeTolerance;
+	{
+		return (left - right).Duration() <= _startTimeTolerance;
+	}
 }

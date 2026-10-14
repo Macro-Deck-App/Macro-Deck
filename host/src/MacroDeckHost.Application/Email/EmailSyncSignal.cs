@@ -14,12 +14,18 @@ public sealed record EmailSyncRequest(
 	public bool IsEmpty => !All && Integrations.Count == 0 && Inboxes.Count == 0;
 
 	public bool Covers(EmailInboxDescriptor inbox)
-		=> All || Integrations.Contains(inbox.IntegrationId) || Inboxes.Contains((inbox.IntegrationId, inbox.LocalId));
+	{
+		return All
+			|| Integrations.Contains(inbox.IntegrationId)
+			|| Inboxes.Contains((inbox.IntegrationId, inbox.LocalId));
+	}
 
 	public EmailSyncRequest Union(EmailSyncRequest other)
-		=> new(All || other.All,
+	{
+		return new EmailSyncRequest(All || other.All,
 			new HashSet<string>(Integrations.Concat(other.Integrations), StringComparer.Ordinal),
 			new HashSet<(string, string)>(Inboxes.Concat(other.Inboxes)));
+	}
 }
 
 public interface IEmailSyncSignal
@@ -100,7 +106,10 @@ public sealed class EmailSyncSignal : IEmailSyncSignal, IDisposable
 		return first == signalled && signalled.IsCompletedSuccessfully;
 	}
 
-	public void Dispose() => _pending.Dispose();
+	public void Dispose()
+	{
+		_pending.Dispose();
+	}
 
 	private void Release()
 	{

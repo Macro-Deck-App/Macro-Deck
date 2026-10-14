@@ -33,20 +33,23 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.EntityLabel(),
 			required: true),
 		ActionParameter.Autocomplete(AttributeParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeDescription(),
+			AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributeDescription(),
 			placeholder: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.AttributePlaceholder()),
 		ActionParameter.Autocomplete(VariableParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableDescription(),
+			AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.GetEntityState.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -103,7 +106,7 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 			if (state is null)
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId: entityId));
+					AppStrings.Integrations.HomeAssistant.Errors.EntityUnknown(entityId));
 			}
 
 			var attribute = HomeAssistantActionValues.ReadText(context.Parameters, AttributeParameterName);
@@ -119,8 +122,8 @@ internal sealed class GetEntityStateActionDefinition : IDynamicOptionsActionDefi
 			else
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.HomeAssistant.Errors.AttributeUnknown(entityId: entityId,
-						attribute: attribute));
+					AppStrings.Integrations.HomeAssistant.Errors.AttributeUnknown(entityId,
+						attribute));
 			}
 
 			await HomeAssistantVariableWriter.WriteAsync(_variables,

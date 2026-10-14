@@ -17,9 +17,11 @@ public class IntegrationIssueServiceTests
 		FakeIntegrationRegistry registry,
 		FakeIntegrationHostIssueStore? hostIssueStore = null,
 		FakeIntegrationLifecycle? lifecycle = null)
-		=> new(registry,
+	{
+		return new IntegrationIssueService(registry,
 			hostIssueStore ?? new FakeIntegrationHostIssueStore(),
 			lifecycle ?? new FakeIntegrationLifecycle());
+	}
 
 	[Test]
 	public async Task Returns_issues_for_an_enabled_issue_provider()
@@ -174,16 +176,28 @@ public class IntegrationIssueServiceTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<IntegrationIssue>>([
+		{
+			return Task.FromResult<IReadOnlyList<IntegrationIssue>>([
 				new IntegrationIssue { Id = "problem", Title = "A problem", ActionLabel = "Fix" }
 			]);
+		}
 
 		public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow));
+		{
+			return Task.FromResult(IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow));
+		}
 	}
 
 	private sealed class PlainIntegration : IIntegration
@@ -193,7 +207,15 @@ public class IntegrationIssueServiceTests
 		public string Version => "1.0.0";
 		public IReadOnlyList<IActionDefinition> Actions => [];
 		public bool IsInitialized => true;
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
-		public Task ShutdownAsync() => Task.CompletedTask;
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

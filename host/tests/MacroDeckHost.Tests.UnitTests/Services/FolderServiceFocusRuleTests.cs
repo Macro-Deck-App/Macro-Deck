@@ -52,7 +52,10 @@ public class FolderServiceFocusRuleTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task SetFocusRule_NewRule_AssignsIdAndPersists()
@@ -80,7 +83,7 @@ public class FolderServiceFocusRuleTests
 		var created = await _service.SetFocusRule(_folderAId, NewRule());
 		var ruleId = created.Data!.Id;
 
-		var edited = await _service.SetFocusRule(_folderAId, NewRule(id: ruleId, identity: "wordpad", enabled: false));
+		var edited = await _service.SetFocusRule(_folderAId, NewRule(ruleId, identity: "wordpad", enabled: false));
 
 		Assert.That(edited.Success, Is.True);
 		Assert.Multiple(() =>
@@ -160,7 +163,7 @@ public class FolderServiceFocusRuleTests
 		var created = await _service.SetFocusRule(_folderAId, NewRule(deviceId: deviceId, identity: "notepad"));
 
 		var edited = await _service.SetFocusRule(_folderAId,
-			NewRule(id: created.Data!.Id, deviceId: deviceId, identity: "notepad", returnOnFocusLoss: true));
+			NewRule(created.Data!.Id, deviceId: deviceId, identity: "notepad", returnOnFocusLoss: true));
 
 		Assert.That(edited.Success, Is.True);
 	}
@@ -213,7 +216,8 @@ public class FolderServiceFocusRuleTests
 		ApplicationIdentityKind kind = ApplicationIdentityKind.ProcessName,
 		Guid? deviceId = null,
 		bool returnOnFocusLoss = false)
-		=> new()
+	{
+		return new FolderFocusRule
 		{
 			Id = id ?? Guid.Empty,
 			Enabled = enabled,
@@ -222,4 +226,5 @@ public class FolderServiceFocusRuleTests
 			DeviceId = deviceId ?? Guid.NewGuid(),
 			ReturnOnFocusLoss = returnOnFocusLoss
 		};
+	}
 }

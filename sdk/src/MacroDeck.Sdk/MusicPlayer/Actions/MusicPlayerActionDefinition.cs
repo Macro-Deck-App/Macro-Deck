@@ -42,9 +42,13 @@ public class MusicPlayerActionDefinition : IDynamicOptionsActionDefinition
 	public LocalizedText Description { get; }
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public virtual IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public virtual IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
-	public virtual Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public virtual Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.ParameterName != MusicPlayerActions.InstanceParameterName)
@@ -58,7 +62,9 @@ public class MusicPlayerActionDefinition : IDynamicOptionsActionDefinition
 
 	/// <summary>Resolves the player for an <c>instance</c> value, falling back to the first available.</summary>
 	protected IMusicPlayer? Resolve(string? instanceId)
-		=> string.IsNullOrEmpty(instanceId) ? _resolver(null) : _resolver(instanceId) ?? _resolver(null);
+	{
+		return string.IsNullOrEmpty(instanceId) ? _resolver(null) : _resolver(instanceId) ?? _resolver(null);
+	}
 
 	/// <summary>Label of the empty instance value, shared with the parameter's placeholder.</summary>
 	protected const string FirstAvailableLabel = "First available";
@@ -76,10 +82,12 @@ public class MusicPlayerActionDefinition : IDynamicOptionsActionDefinition
 	/// targets the first available player, and an empty-looking field said otherwise.
 	/// </summary>
 	protected static ActionParameter InstanceParameter()
-		=> ActionParameter.DynamicChoice(MusicPlayerActions.InstanceParameterName,
-			label: "Player",
-			description: "Which music player to control. Leave empty for the first available.",
+	{
+		return ActionParameter.DynamicChoice(MusicPlayerActions.InstanceParameterName,
+			"Player",
+			"Which music player to control. Leave empty for the first available.",
 			placeholder: FirstAvailableLabel);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -153,7 +161,7 @@ public sealed class MusicPlayerStateActionDefinition : MusicPlayerActionDefiniti
 			extraParameters,
 			command,
 			stateMapper,
-			expectedStateMapper: null)
+			null)
 	{
 	}
 
@@ -175,9 +183,12 @@ public sealed class MusicPlayerStateActionDefinition : MusicPlayerActionDefiniti
 		_expectedStateMapper = expectedStateMapper;
 	}
 
-	public override IActionExecutor CreateExecutor() => _expectedStateMapper is null
-		? base.CreateExecutor()
-		: new OptimisticExecutor(_resolver, _command, _expectedStateMapper);
+	public override IActionExecutor CreateExecutor()
+	{
+		return _expectedStateMapper is null
+			? base.CreateExecutor()
+			: new OptimisticExecutor(_resolver, _command, _expectedStateMapper);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -278,8 +289,8 @@ public sealed class MusicPlayerItemActionDefinition : MusicPlayerActionDefinitio
 			description,
 			[
 				ActionParameter.Autocomplete(itemParameterName,
-					label: itemLabel,
-					description: "Leave empty to pick at run time.",
+					itemLabel,
+					"Leave empty to pick at run time.",
 					placeholder: $"Search {itemLabel.ToLowerInvariant()}…",
 					required: false)
 			],
@@ -299,11 +310,17 @@ public sealed class MusicPlayerItemActionDefinition : MusicPlayerActionDefinitio
 		IReadOnlyDictionary<string, object> __,
 		IActionInteractions? ___,
 		CancellationToken ____)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
-	public override IActionExecutor CreateExecutor() => new ItemExecutor(this, _resolver);
+	public override IActionExecutor CreateExecutor()
+	{
+		return new ItemExecutor(this, _resolver);
+	}
 
-	public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.ParameterName == MusicPlayerActions.InstanceParameterName)

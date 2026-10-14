@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 namespace MacroDeck.Plugin.Analyzers;
 
 /// <summary>

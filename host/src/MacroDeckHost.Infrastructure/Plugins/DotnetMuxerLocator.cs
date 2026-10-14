@@ -29,7 +29,8 @@ public sealed class DotnetMuxerLocator : IDotnetMuxerLocator
 	{
 	}
 
-	internal DotnetMuxerLocator(ILogger logger,
+	internal DotnetMuxerLocator(
+		ILogger logger,
 		string bundledRoot,
 		Func<IEnumerable<string>> systemCandidatePaths,
 		Func<string, IReadOnlyDictionary<string, IReadOnlyList<Version>>?>? probe)
@@ -47,14 +48,15 @@ public sealed class DotnetMuxerLocator : IDotnetMuxerLocator
 		lock (_cacheLock)
 		{
 			var bundled = Bundled();
-			if (bundled?.InstalledFrameworks is { } bundledFrameworks && FirstUnmet(requirements, bundledFrameworks) is null)
+			if (bundled?.InstalledFrameworks is { } bundledFrameworks
+				&& FirstUnmet(requirements, bundledFrameworks) is null)
 			{
 				return new DotnetMuxerSelection { Muxer = bundled };
 			}
 
 			var system = System();
-			if (system is not null &&
-				(system.InstalledFrameworks is null || FirstUnmet(requirements, system.InstalledFrameworks) is null))
+			if (system is not null
+				&& (system.InstalledFrameworks is null || FirstUnmet(requirements, system.InstalledFrameworks) is null))
 			{
 				return new DotnetMuxerSelection { Muxer = system };
 			}
@@ -119,7 +121,8 @@ public sealed class DotnetMuxerLocator : IDotnetMuxerLocator
 		return _system;
 	}
 
-	private static DotnetFrameworkRequirement? FirstUnmet(IReadOnlyList<DotnetFrameworkRequirement> requirements,
+	private static DotnetFrameworkRequirement? FirstUnmet(
+		IReadOnlyList<DotnetFrameworkRequirement> requirements,
 		IReadOnlyDictionary<string, IReadOnlyList<Version>> installed)
 	{
 		return requirements.FirstOrDefault(requirement =>
@@ -288,7 +291,7 @@ public sealed class DotnetMuxerLocator : IDotnetMuxerLocator
 		{
 			if (!process.HasExited)
 			{
-				process.Kill(entireProcessTree: true);
+				process.Kill(true);
 			}
 		}
 		catch (InvalidOperationException)

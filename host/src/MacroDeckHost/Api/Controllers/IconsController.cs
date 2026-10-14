@@ -68,7 +68,9 @@ public class IconsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetIconsResponse> GetAll([FromQuery] string packId, CancellationToken ct)
-		=> _getIcons.Handle(new GetIconsRequest { PackId = packId }, ct).AsTask();
+	{
+		return _getIcons.Handle(new GetIconsRequest { PackId = packId }, ct).AsTask();
+	}
 
 	[HttpPatch("{id}")]
 	public Task<UpdateIconResponse> Update(string id, UpdateIconRequest body, CancellationToken ct)
@@ -79,11 +81,15 @@ public class IconsController : ControllerBase
 
 	[HttpDelete("{id}")]
 	public Task<DeleteIconResponse> Delete(string id, CancellationToken ct)
-		=> _deleteIcon.Handle(new DeleteIconRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteIcon.Handle(new DeleteIconRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("delete")]
 	public Task<DeleteIconsResponse> DeleteMany(DeleteIconsRequest body, CancellationToken ct)
-		=> _deleteIcons.Handle(body, ct).AsTask();
+	{
+		return _deleteIcons.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("import")]
 	[DisableFormValueModelBinding]
@@ -105,27 +111,35 @@ public class IconsController : ControllerBase
 			};
 		}
 
-		var result = await _iconImportService.Import(packId: null, sourceName: null, files, ct);
+		var result = await _iconImportService.Import(null, null, files, ct);
 		return IconMapper.ToImportResponse(result, _batchTracker);
 	}
 
 	[HttpPost("single-from-path")]
-	public Task<ImportSingleIconResponse> ImportSingleFromPath(ImportSingleIconFromPathRequest body,
+	public Task<ImportSingleIconResponse> ImportSingleFromPath(
+		ImportSingleIconFromPathRequest body,
 		CancellationToken ct)
-		=> _importSingleFromPath.Handle(body, ct).AsTask();
+	{
+		return _importSingleFromPath.Handle(body, ct).AsTask();
+	}
 
 	[HttpGet("import-batches/{batchId}")]
 	public Task<GetIconImportBatchResponse> GetImportBatch(string batchId, CancellationToken ct)
-		=> _getImportBatch.Handle(new GetIconImportBatchRequest { BatchId = batchId }, ct).AsTask();
+	{
+		return _getImportBatch.Handle(new GetIconImportBatchRequest { BatchId = batchId }, ct).AsTask();
+	}
 
 	[HttpPost("import-batches/{batchId}/cancel")]
 	public Task<CancelIconImportBatchResponse> CancelImportBatch(string batchId, CancellationToken ct)
-		=> _cancelImportBatch.Handle(new CancelIconImportBatchRequest { BatchId = batchId }, ct).AsTask();
+	{
+		return _cancelImportBatch.Handle(new CancelIconImportBatchRequest { BatchId = batchId }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/appearances")]
 	[RequestSizeLimit(IconUploadReader.MaxRequestBytes)]
 	[RequestFormLimits(MultipartBodyLengthLimit = IconUploadReader.MaxRequestBytes)]
-	public async Task<IActionResult> AddAppearance(string id,
+	public async Task<IActionResult> AddAppearance(
+		string id,
 		[FromForm] string? key,
 		IFormFile? file,
 		CancellationToken ct)
@@ -213,7 +227,8 @@ public class IconsController : ControllerBase
 
 	[HttpGet("{id}/image")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public async Task<IActionResult> GetImage(string id,
+	public async Task<IActionResult> GetImage(
+		string id,
 		[FromQuery] int? size,
 		[FromQuery(Name = "v")] string? version,
 		CancellationToken ct)
@@ -227,7 +242,7 @@ public class IconsController : ControllerBase
 		var result = await _iconService.GetImage(iconId,
 			size,
 			acceptWebp,
-			staticFrame: false,
+			false,
 			ct,
 			IconAppearanceContextQuery.FromRequest(HttpContext));
 		if (!result.Success)

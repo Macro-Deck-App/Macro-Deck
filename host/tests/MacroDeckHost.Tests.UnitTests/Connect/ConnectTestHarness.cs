@@ -86,10 +86,14 @@ internal sealed class ConnectTestHarness : IAsyncDisposable
 	}
 
 	public static Task WaitUntil(Func<Task<bool>> condition, string because)
-		=> WaitUntilCore(condition, because);
+	{
+		return WaitUntilCore(condition, because);
+	}
 
 	public static Task WaitUntil(Func<bool> condition, string because)
-		=> WaitUntilCore(() => Task.FromResult(condition()), because);
+	{
+		return WaitUntilCore(() => Task.FromResult(condition()), because);
+	}
 
 	private static async Task WaitUntilCore(Func<Task<bool>> condition, string because)
 	{

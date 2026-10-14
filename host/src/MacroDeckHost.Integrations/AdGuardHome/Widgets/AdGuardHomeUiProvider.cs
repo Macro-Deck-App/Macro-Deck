@@ -12,7 +12,10 @@ internal sealed class AdGuardHomeUiProvider : IUiProvider
 	private readonly Func<IUiResourceRegistry?> _resources;
 	private readonly TimeProvider _time;
 
-	public AdGuardHomeUiProvider(IAdGuardHomeInstances instances, Func<IUiResourceRegistry?> resources, TimeProvider time)
+	public AdGuardHomeUiProvider(
+		IAdGuardHomeInstances instances,
+		Func<IUiResourceRegistry?> resources,
+		TimeProvider time)
 	{
 		_instances = instances;
 		_resources = resources;
@@ -23,7 +26,7 @@ internal sealed class AdGuardHomeUiProvider : IUiProvider
 	[
 		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 		new() { Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
-		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)

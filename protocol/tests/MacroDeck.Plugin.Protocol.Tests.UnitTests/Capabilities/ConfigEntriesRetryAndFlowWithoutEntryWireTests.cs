@@ -21,8 +21,7 @@ public class ConfigEntriesRetryAndFlowWithoutEntryWireTests
 	[Test]
 	public void A_prepare_result_from_a_plugin_without_retries_does_not_ask_for_one()
 	{
-		var result = JsonSerializer.Deserialize<ConfigEntryPrepareResult>(
-			"""{"success":true,"reservedVariables":[]}""",
+		var result = JsonSerializer.Deserialize<ConfigEntryPrepareResult>("""{"success":true,"reservedVariables":[]}""",
 			PluginProtocolJson.Options)!;
 
 		Assert.That(result.RetryOnConflict, Is.Null);

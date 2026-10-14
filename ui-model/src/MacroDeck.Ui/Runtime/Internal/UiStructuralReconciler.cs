@@ -32,7 +32,10 @@ internal sealed class UiStructuralReconciler
 {
 	private readonly UiView _view;
 
-	internal UiStructuralReconciler(UiView view) => _view = view;
+	internal UiStructuralReconciler(UiView view)
+	{
+		_view = view;
+	}
 
 	/// <summary>Reconciles <paramref name="scope" /> and appends what it changed to
 	/// <paramref name="operations" />. Appends nothing when the scope's decision is the one it already
@@ -48,10 +51,10 @@ internal sealed class UiStructuralReconciler
 
 		if (region.Owner is not { } owner)
 		{
-			throw new UiViewException($"The conditional or repeat keyed '{scope.Element.Key}' declared near " +
-				$"'{scope.ParentDeclarationPath}' occupies a slot that must always hold exactly one node - the " +
-				"tree root or a Fallback - so its content cannot change. Move it inside the element that " +
-				"fills the slot.");
+			throw new UiViewException($"The conditional or repeat keyed '{scope.Element.Key}' declared near "
+				+ $"'{scope.ParentDeclarationPath}' occupies a slot that must always hold exactly one node - the "
+				+ "tree root or a Fallback - so its content cannot change. Move it inside the element that "
+				+ "fills the slot.");
 		}
 
 		var oldNodes = new List<UiMaterializedNode>();
@@ -83,7 +86,7 @@ internal sealed class UiStructuralReconciler
 				scope.InputScope,
 				UiElementMaterializer.Extend(scope.ParentDeclarationPath, segment),
 				scope.Disabled,
-				modifiers: null);
+				null);
 		}
 
 		var newNodes = new List<UiMaterializedNode>();
@@ -91,7 +94,7 @@ internal sealed class UiStructuralReconciler
 
 		foreach (var node in newNodes)
 		{
-			UiElementMaterializer.Link(node, owner, isFallbackOfParent: false);
+			UiElementMaterializer.Link(node, owner, false);
 		}
 
 		ReconcileChildLists(owner, oldNodes, newNodes, baseIndex, simulated, operations);
@@ -228,7 +231,7 @@ internal sealed class UiStructuralReconciler
 			operations.Add(new UiPatchOperation
 			{
 				Op = UiPatchOperations.RemoveNode,
-				NodeId = node.Node.Id,
+				NodeId = node.Node.Id
 			});
 
 			simulated.Remove(node.Node.Id);
@@ -271,9 +274,8 @@ internal sealed class UiStructuralReconciler
 			// The model's rule: a move's index is the index after the node left its old position.
 			if (desired > simulated.Count)
 			{
-				throw new UiViewException(
-					$"Internal invariant: move-node '{id}' computed index {desired}, beyond the " +
-					$"{simulated.Count} children its parent has once the node is removed.");
+				throw new UiViewException($"Internal invariant: move-node '{id}' computed index {desired}, beyond the "
+					+ $"{simulated.Count} children its parent has once the node is removed.");
 			}
 
 			simulated.Insert(desired, id);
@@ -283,7 +285,7 @@ internal sealed class UiStructuralReconciler
 				Op = UiPatchOperations.MoveNode,
 				NodeId = id,
 				ParentId = parent.Node.Id,
-				Index = desired,
+				Index = desired
 			});
 		}
 
@@ -294,8 +296,8 @@ internal sealed class UiStructuralReconciler
 			var node = newNodes[index];
 			var position = baseIndex + index;
 
-			if (position < simulated.Count &&
-				string.Equals(simulated[position], node.Node.Id, StringComparison.Ordinal))
+			if (position < simulated.Count
+				&& string.Equals(simulated[position], node.Node.Id, StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -303,8 +305,8 @@ internal sealed class UiStructuralReconciler
 			if (position > simulated.Count)
 			{
 				throw new UiViewException(
-					$"Internal invariant: insert-node '{node.Node.Id}' computed index {position}, beyond the " +
-					$"{simulated.Count} children its parent has.");
+					$"Internal invariant: insert-node '{node.Node.Id}' computed index {position}, beyond the "
+					+ $"{simulated.Count} children its parent has.");
 			}
 
 			operations.Add(new UiPatchOperation
@@ -313,7 +315,7 @@ internal sealed class UiStructuralReconciler
 				NodeId = node.Node.Id,
 				ParentId = parent.Node.Id,
 				Index = position == simulated.Count ? null : position,
-				Node = node.Node,
+				Node = node.Node
 			});
 
 			simulated.Insert(position, node.Node.Id);
@@ -337,15 +339,15 @@ internal sealed class UiStructuralReconciler
 	{
 		// A renderer cannot morph one component into another, and the fallback slot has no operation of its
 		// own, so either difference is answered by replacing the whole node.
-		if (!string.Equals(previous.Node.Type, current.Node.Type, StringComparison.Ordinal) ||
-			previous.Node.RequiredComponentVersion != current.Node.RequiredComponentVersion ||
-			!FallbacksAlign(previous.Node.Fallback, current.Node.Fallback))
+		if (!string.Equals(previous.Node.Type, current.Node.Type, StringComparison.Ordinal)
+			|| previous.Node.RequiredComponentVersion != current.Node.RequiredComponentVersion
+			|| !FallbacksAlign(previous.Node.Fallback, current.Node.Fallback))
 		{
 			operations.Add(new UiPatchOperation
 			{
 				Op = UiPatchOperations.ReplaceNode,
 				NodeId = current.Node.Id,
-				Node = current.Node,
+				Node = current.Node
 			});
 
 			return;
@@ -364,7 +366,7 @@ internal sealed class UiStructuralReconciler
 			simulated.Add(child.Node.Id);
 		}
 
-		ReconcileChildLists(current, previous.Children, current.Children, baseIndex: 0, simulated, operations);
+		ReconcileChildLists(current, previous.Children, current.Children, 0, simulated, operations);
 	}
 
 	private static bool FallbacksAlign(UiNode? previous, UiNode? current)
@@ -374,9 +376,9 @@ internal sealed class UiStructuralReconciler
 			return previous is null && current is null;
 		}
 
-		return string.Equals(previous.Id, current.Id, StringComparison.Ordinal) &&
-			string.Equals(previous.Type, current.Type, StringComparison.Ordinal) &&
-			previous.RequiredComponentVersion == current.RequiredComponentVersion;
+		return string.Equals(previous.Id, current.Id, StringComparison.Ordinal)
+			&& string.Equals(previous.Type, current.Type, StringComparison.Ordinal)
+			&& previous.RequiredComponentVersion == current.RequiredComponentVersion;
 	}
 
 	/// <summary>Emits one <c>set-properties</c> for the keys that actually differ. A key that is gone belongs
@@ -389,8 +391,8 @@ internal sealed class UiStructuralReconciler
 
 		foreach (var (key, value) in current.Properties)
 		{
-			if (previous.Properties.TryGetValue(key, out var before) &&
-				string.Equals(before.GetRawText(), value.GetRawText(), StringComparison.Ordinal))
+			if (previous.Properties.TryGetValue(key, out var before)
+				&& string.Equals(before.GetRawText(), value.GetRawText(), StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -416,7 +418,7 @@ internal sealed class UiStructuralReconciler
 			Op = UiPatchOperations.SetProperties,
 			NodeId = current.Id,
 			Properties = sets,
-			RemovedProperties = removals,
+			RemovedProperties = removals
 		});
 	}
 }

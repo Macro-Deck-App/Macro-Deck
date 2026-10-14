@@ -47,7 +47,8 @@ internal sealed class EmailInboxCapabilityHandler : ICapabilityHandler, IDisposa
 	public string Kind => CapabilityKinds.EmailInbox;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -56,6 +57,7 @@ internal sealed class EmailInboxCapabilityHandler : ICapabilityHandler, IDisposa
 					Kind = CapabilityKinds.EmailInbox, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -112,19 +114,26 @@ internal sealed class EmailInboxCapabilityHandler : ICapabilityHandler, IDisposa
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new EmailInboxDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new EmailInboxDescribePayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				_metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? _metadata.Name,
 			Inboxes = BuildInboxes()
 		});
+	}
 
 	// An inbox id announced by two providers belongs to the first one, as FindProvider routes it.
 	private IReadOnlyList<EmailInboxDto> BuildInboxes()
-		=> [.. _providers.SelectMany(provider => provider.GetInboxes())
-			.DistinctBy(inbox => inbox.Id, StringComparer.Ordinal)
-			.Take(ProtocolLimits.MaxEmailInboxes)
-			.Select(EmailInboxDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetInboxes())
+				.DistinctBy(inbox => inbox.Id, StringComparer.Ordinal)
+				.Take(ProtocolLimits.MaxEmailInboxes)
+				.Select(EmailInboxDescriptorMapper.ToDto)
+		];
+	}
 
 	private async Task<CapabilityInvocationResult> SnapshotAsync(
 		CapabilityInvocation invocation,
@@ -154,8 +163,10 @@ internal sealed class EmailInboxCapabilityHandler : ICapabilityHandler, IDisposa
 	}
 
 	private IEmailInboxProvider? FindProvider(string inboxId)
-		=> _providers.FirstOrDefault(provider => provider.GetInboxes()
+	{
+		return _providers.FirstOrDefault(provider => provider.GetInboxes()
 			.Any(inbox => string.Equals(inbox.Id, inboxId, StringComparison.Ordinal)));
+	}
 
 	private void OnProviderChanged(object? sender, EmailInboxChangedEventArgs e)
 	{

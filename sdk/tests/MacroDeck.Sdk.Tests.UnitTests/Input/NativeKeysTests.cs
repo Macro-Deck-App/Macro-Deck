@@ -5,10 +5,15 @@ namespace MacroDeck.Sdk.Tests.UnitTests.Input;
 [TestFixture]
 public class NativeKeysTests
 {
-	private static int NoLayout(int virtualKey) => 0;
+	private static int NoLayout(int virtualKey)
+	{
+		return 0;
+	}
 
 	private static KeyCode Windows(int virtualKey, bool extended = false)
-		=> NativeKeyTables.FromWindows(virtualKey, 0, extended, NoLayout);
+	{
+		return NativeKeyTables.FromWindows(virtualKey, 0, extended, NoLayout);
+	}
 
 	[TestCase(0x41, KeyCode.A)]
 	[TestCase(0x5A, KeyCode.Z)]
@@ -50,27 +55,33 @@ public class NativeKeysTests
 	[TestCase(0xB2, KeyCode.MediaStop)]
 	[TestCase(0xB3, KeyCode.MediaPlayPause)]
 	public void A_windows_virtual_key_is_the_key_it_names(int virtualKey, KeyCode expected)
-		=> Assert.That(Windows(virtualKey), Is.EqualTo(expected));
+	{
+		Assert.That(Windows(virtualKey), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void The_extended_flag_tells_the_numpad_enter_from_enter()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
-			Assert.That(Windows(0x0D, extended: false), Is.EqualTo(KeyCode.Enter));
-			Assert.That(Windows(0x0D, extended: true), Is.EqualTo(KeyCode.NumpadEnter));
+			Assert.That(Windows(0x0D, false), Is.EqualTo(KeyCode.Enter));
+			Assert.That(Windows(0x0D, true), Is.EqualTo(KeyCode.NumpadEnter));
 		});
+	}
 
 	[Test]
 	public void The_generic_modifier_virtual_keys_map_to_the_left_key_unless_extended()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(Windows(0x10), Is.EqualTo(KeyCode.LeftShift));
-			Assert.That(Windows(0x10, extended: true), Is.EqualTo(KeyCode.LeftShift));
+			Assert.That(Windows(0x10, true), Is.EqualTo(KeyCode.LeftShift));
 			Assert.That(Windows(0x11), Is.EqualTo(KeyCode.LeftControl));
-			Assert.That(Windows(0x11, extended: true), Is.EqualTo(KeyCode.RightControl));
+			Assert.That(Windows(0x11, true), Is.EqualTo(KeyCode.RightControl));
 			Assert.That(Windows(0x12), Is.EqualTo(KeyCode.LeftAlt));
-			Assert.That(Windows(0x12, extended: true), Is.EqualTo(KeyCode.RightAlt));
+			Assert.That(Windows(0x12, true), Is.EqualTo(KeyCode.RightAlt));
 		});
+	}
 
 	[TestCase(0x21, KeyCode.PageUp, KeyCode.Numpad9)]
 	[TestCase(0x22, KeyCode.PageDown, KeyCode.Numpad3)]
@@ -82,16 +93,23 @@ public class NativeKeysTests
 	[TestCase(0x28, KeyCode.ArrowDown, KeyCode.Numpad2)]
 	[TestCase(0x2D, KeyCode.Insert, KeyCode.Numpad0)]
 	[TestCase(0x2E, KeyCode.Delete, KeyCode.NumpadDecimal)]
-	public void A_navigation_virtual_key_without_the_extended_flag_is_the_numpad_key(int virtualKey, KeyCode navigation, KeyCode numpad)
-		=> Assert.Multiple(() =>
+	public void A_navigation_virtual_key_without_the_extended_flag_is_the_numpad_key(
+		int virtualKey,
+		KeyCode navigation,
+		KeyCode numpad)
+	{
+		Assert.Multiple(() =>
 		{
-			Assert.That(Windows(virtualKey, extended: true), Is.EqualTo(navigation));
-			Assert.That(Windows(virtualKey, extended: false), Is.EqualTo(numpad));
+			Assert.That(Windows(virtualKey, true), Is.EqualTo(navigation));
+			Assert.That(Windows(virtualKey, false), Is.EqualTo(numpad));
 		});
+	}
 
 	[Test]
 	public void Clear_is_the_numpad_five()
-		=> Assert.That(Windows(0x0C), Is.EqualTo(KeyCode.Numpad5));
+	{
+		Assert.That(Windows(0x0C), Is.EqualTo(KeyCode.Numpad5));
+	}
 
 	[TestCase(0xBA, KeyCode.Semicolon)]
 	[TestCase(0xBB, KeyCode.Equal)]
@@ -106,7 +124,9 @@ public class NativeKeysTests
 	[TestCase(0xDE, KeyCode.Quote)]
 	[TestCase(0xE2, KeyCode.IntlBackslash)]
 	public void Without_a_layout_a_punctuation_virtual_key_is_the_us_position(int virtualKey, KeyCode expected)
-		=> Assert.That(Windows(virtualKey), Is.EqualTo(expected));
+	{
+		Assert.That(Windows(virtualKey), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void On_a_german_layout_the_sharp_s_virtual_key_is_the_minus_position()
@@ -142,11 +162,13 @@ public class NativeKeysTests
 
 	[Test]
 	public void The_eighth_oem_virtual_key_is_known_only_through_its_position()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(NativeKeyTables.FromWindows(0xDF, 0x29, false, NoLayout), Is.EqualTo(KeyCode.Backquote));
 			Assert.That(Windows(0xDF), Is.EqualTo(KeyCode.None));
 		});
+	}
 
 	[TestCase(0x5D)]
 	[TestCase(0xE7)]
@@ -155,15 +177,19 @@ public class NativeKeysTests
 	[TestCase(-1)]
 	[TestCase(100000)]
 	public void A_windows_virtual_key_without_a_key_code_is_none(int virtualKey)
-		=> Assert.That(Windows(virtualKey), Is.EqualTo(KeyCode.None));
+	{
+		Assert.That(Windows(virtualKey), Is.EqualTo(KeyCode.None));
+	}
 
 	[Test]
 	public void Windows_letters_and_digits_do_not_need_a_layout()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(NativeKeys.FromWindows(0x5A, false), Is.EqualTo(KeyCode.Z));
 			Assert.That(NativeKeys.FromWindows(0x31, 0x02, false), Is.EqualTo(KeyCode.D1));
 		});
+	}
 
 	[TestCase(30, KeyCode.A)]
 	[TestCase(44, KeyCode.Z)]
@@ -233,21 +259,29 @@ public class NativeKeysTests
 	[TestCase(165, KeyCode.MediaTrackPrevious)]
 	[TestCase(166, KeyCode.MediaStop)]
 	public void A_linux_evdev_code_is_the_key_it_names(int evdevCode, KeyCode expected)
-		=> Assert.That(NativeKeys.FromLinux(evdevCode), Is.EqualTo(expected));
+	{
+		Assert.That(NativeKeys.FromLinux(evdevCode), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void Linux_letters_are_us_positions_whatever_the_layout()
-		=> Assert.That(NativeKeys.FromLinux(21), Is.EqualTo(KeyCode.Y));
+	{
+		Assert.That(NativeKeys.FromLinux(21), Is.EqualTo(KeyCode.Y));
+	}
 
 	[TestCase(0)]
 	[TestCase(-1)]
 	[TestCase(255)]
 	[TestCase(100000)]
 	public void A_linux_code_without_a_key_code_is_none(int evdevCode)
-		=> Assert.That(NativeKeys.FromLinux(evdevCode), Is.EqualTo(KeyCode.None));
+	{
+		Assert.That(NativeKeys.FromLinux(evdevCode), Is.EqualTo(KeyCode.None));
+	}
 
 	private static KeyCode Mac(int keyCode, Dictionary<ushort, string>? layout = null)
-		=> NativeKeyTables.FromMacOS(keyCode, code => layout?.GetValueOrDefault(code));
+	{
+		return NativeKeyTables.FromMacOs(keyCode, code => layout?.GetValueOrDefault(code));
+	}
 
 	[TestCase(36, KeyCode.Enter)]
 	[TestCase(76, KeyCode.NumpadEnter)]
@@ -286,7 +320,9 @@ public class NativeKeysTests
 	[TestCase(75, KeyCode.NumpadDivide)]
 	[TestCase(78, KeyCode.NumpadSubtract)]
 	public void A_mac_key_code_that_types_no_character_is_the_key_it_names(int keyCode, KeyCode expected)
-		=> Assert.That(Mac(keyCode), Is.EqualTo(expected));
+	{
+		Assert.That(Mac(keyCode), Is.EqualTo(expected));
+	}
 
 	[TestCase(0, KeyCode.A)]
 	[TestCase(6, KeyCode.Z)]
@@ -305,7 +341,9 @@ public class NativeKeysTests
 	[TestCase(50, KeyCode.Backquote)]
 	[TestCase(10, KeyCode.IntlBackslash)]
 	public void Without_a_layout_a_mac_key_code_is_the_us_position(int keyCode, KeyCode expected)
-		=> Assert.That(Mac(keyCode), Is.EqualTo(expected));
+	{
+		Assert.That(Mac(keyCode), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void On_a_german_layout_the_key_labeled_z_is_z_and_the_sharp_s_key_is_the_minus_position()
@@ -324,7 +362,8 @@ public class NativeKeysTests
 	[Test]
 	public void On_a_french_layout_the_letters_follow_the_labels()
 	{
-		var french = new Dictionary<ushort, string> { [12] = "a", [0] = "q", [13] = "z", [6] = "w", [41] = "m", [46] = "," };
+		var french = new Dictionary<ushort, string>
+			{ [12] = "a", [0] = "q", [13] = "z", [6] = "w", [41] = "m", [46] = "," };
 
 		Assert.Multiple(() =>
 		{
@@ -354,16 +393,22 @@ public class NativeKeysTests
 
 	[Test]
 	public void A_typed_upper_case_letter_names_the_same_key()
-		=> Assert.That(Mac(6, new Dictionary<ushort, string> { [6] = "Y" }), Is.EqualTo(KeyCode.Y));
+	{
+		Assert.That(Mac(6, new Dictionary<ushort, string> { [6] = "Y" }), Is.EqualTo(KeyCode.Y));
+	}
 
 	[Test]
 	public void A_translation_of_several_characters_is_no_letter()
-		=> Assert.That(Mac(6, new Dictionary<ushort, string> { [6] = "yy" }), Is.EqualTo(KeyCode.Z));
+	{
+		Assert.That(Mac(6, new Dictionary<ushort, string> { [6] = "yy" }), Is.EqualTo(KeyCode.Z));
+	}
 
 	[TestCase(63)]
 	[TestCase(-1)]
 	[TestCase(128)]
 	[TestCase(100000)]
 	public void A_mac_key_code_without_a_key_code_is_none(int keyCode)
-		=> Assert.That(Mac(keyCode), Is.EqualTo(KeyCode.None));
+	{
+		Assert.That(Mac(keyCode), Is.EqualTo(KeyCode.None));
+	}
 }

@@ -120,7 +120,9 @@ internal sealed class HomeAssistantConnection : IDisposable
 	}
 
 	public HomeAssistantEntityState? Entity(string? entityId)
-		=> entityId is { Length: > 0 } id ? _entities.GetValueOrDefault(id) : null;
+	{
+		return entityId is { Length: > 0 } id ? _entities.GetValueOrDefault(id) : null;
+	}
 
 	public async Task<LocalizedText?> CallServiceAsync(
 		string domain,
@@ -157,14 +159,14 @@ internal sealed class HomeAssistantConnection : IDisposable
 		catch (HomeAssistantRequestException ex)
 		{
 			_logger.Warning(ex, "Home Assistant rejected {Domain}.{Service}", domain, service);
-			return AppStrings.Integrations.HomeAssistant.Errors.ServiceCallRejected(domain: domain,
-				service: service,
-				details: ex.Message);
+			return AppStrings.Integrations.HomeAssistant.Errors.ServiceCallRejected(domain,
+				service,
+				ex.Message);
 		}
 		catch (Exception ex)
 		{
 			_logger.Error(ex, "Home Assistant call {Domain}.{Service} failed", domain, service);
-			return AppStrings.Integrations.HomeAssistant.Errors.ServiceCallFailed(domain: domain, service: service);
+			return AppStrings.Integrations.HomeAssistant.Errors.ServiceCallFailed(domain, service);
 		}
 	}
 
@@ -274,7 +276,10 @@ internal sealed class HomeAssistantConnection : IDisposable
 		var client = _clientFactory();
 		var closed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnDisconnected(object? sender, string? reason) => closed.TrySetResult();
+		void OnDisconnected(object? sender, string? reason)
+		{
+			closed.TrySetResult();
+		}
 
 		client.Disconnected += OnDisconnected;
 		client.EventReceived += OnEventReceived;
@@ -417,10 +422,10 @@ internal sealed class HomeAssistantConnection : IDisposable
 
 	private void HandleStateChanged(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty("entity_id", out var entityIdElement) ||
-			entityIdElement.ValueKind != JsonValueKind.String ||
-			entityIdElement.GetString() is not { Length: > 0 } entityId)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty("entity_id", out var entityIdElement)
+			|| entityIdElement.ValueKind != JsonValueKind.String
+			|| entityIdElement.GetString() is not { Length: > 0 } entityId)
 		{
 			return;
 		}

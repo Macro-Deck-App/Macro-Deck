@@ -131,7 +131,9 @@ internal sealed class TwitchEventPayloadTests
 			foreach (var (key, value) in values)
 			{
 				Assert.That(value,
-					Is.Null.Or.InstanceOf<string>().Or.InstanceOf<bool>().Or.InstanceOf<long>()
+					Is.Null.Or.InstanceOf<string>()
+						.Or.InstanceOf<bool>()
+						.Or.InstanceOf<long>()
 						.Or.InstanceOf<double>(),
 					key);
 			}
@@ -217,15 +219,22 @@ internal sealed class TwitchEventPayloadTests
 	}
 
 	private static Dictionary<string, object?> Build(string eventId, string eventJson)
-		=> TwitchEventPayload.Build(TwitchEventDefinitions.PayloadNames[eventId], Element(eventJson), _account);
+	{
+		return TwitchEventPayload.Build(TwitchEventDefinitions.PayloadNames[eventId], Element(eventJson), _account);
+	}
 
-	private static JsonElement Element(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static JsonElement Element(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 
 	private sealed class RecordingEventPublisher : IEventPublisher
 	{
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Values)> Published { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

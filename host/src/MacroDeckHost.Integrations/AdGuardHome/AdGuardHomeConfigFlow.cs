@@ -5,7 +5,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
@@ -39,9 +38,11 @@ public sealed class AdGuardHomeConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId == ConnectionStepId
+	{
+		return stepId == ConnectionStepId
 			? await SubmitConnection(input, context, cancellationToken)
 			: ConfigFlowResult.Error(ConnectionStep(context), Strings.UnknownStep());
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnection(
 		IReadOnlyDictionary<string, object?> input,
@@ -64,7 +65,7 @@ public sealed class AdGuardHomeConfigFlow : IConfigFlow
 		var controlUrl = AdGuardHomeEndpoint.TryBuild(baseUrl);
 		if (controlUrl is null)
 		{
-			fieldErrors[AdGuardHomeConfigKeys.BaseUrl] = Strings.EnterAddress(exampleUrl: AdGuardHomeEndpoint.ExampleUrl);
+			fieldErrors[AdGuardHomeConfigKeys.BaseUrl] = Strings.EnterAddress(AdGuardHomeEndpoint.ExampleUrl);
 		}
 
 		if (username.Length == 0 && password.Length > 0)
@@ -111,26 +112,25 @@ public sealed class AdGuardHomeConfigFlow : IConfigFlow
 		if ((context as IConfigFlowEntryContext)?.EntryTitle is null)
 		{
 			fields.Add(ActionParameter.Text(AdGuardHomeConfigKeys.Name,
-				label: AppStrings.Integrations.Detail.ConfigurationNameLabel(),
+				AppStrings.Integrations.Detail.ConfigurationNameLabel(),
 				placeholder: Strings.NamePlaceholder(),
 				required: true));
 		}
 
-		fields.AddRange(
-		[
+		fields.AddRange([
 			ActionParameter.Url(AdGuardHomeConfigKeys.BaseUrl,
-				label: Strings.AddressLabel(),
-				description: Strings.AddressDescription(),
-				placeholder: AdGuardHomeEndpoint.ExampleUrl,
-				required: true),
+				Strings.AddressLabel(),
+				Strings.AddressDescription(),
+				AdGuardHomeEndpoint.ExampleUrl,
+				true),
 			ActionParameter.Text(AdGuardHomeConfigKeys.Username,
-				label: Strings.UsernameLabel(),
-				description: Strings.UsernameDescription()),
+				Strings.UsernameLabel(),
+				Strings.UsernameDescription()),
 			ActionParameter.Secret(AdGuardHomeConfigKeys.Password,
-				label: Strings.PasswordLabel()),
+				Strings.PasswordLabel()),
 			ActionParameter.Toggle(AdGuardHomeConfigKeys.AcceptUntrustedCertificate,
-				label: Strings.AcceptUntrustedCertificateLabel(),
-				description: Strings.AcceptUntrustedCertificateDescription())
+				Strings.AcceptUntrustedCertificateLabel(),
+				Strings.AcceptUntrustedCertificateDescription())
 		]);
 
 		return new ConfigFlowStep
@@ -140,7 +140,8 @@ public sealed class AdGuardHomeConfigFlow : IConfigFlow
 			Description = Strings.ConnectionDescription(),
 			Links =
 			[
-				new ConfigFlowLink { Label = Strings.WebsiteLinkLabel(), Url = "https://adguard.com/adguard-home/overview.html" }
+				new ConfigFlowLink
+					{ Label = Strings.WebsiteLinkLabel(), Url = "https://adguard.com/adguard-home/overview.html" }
 			],
 			Fields = fields
 		};

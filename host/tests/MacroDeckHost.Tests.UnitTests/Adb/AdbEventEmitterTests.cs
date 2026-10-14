@@ -20,7 +20,9 @@ internal sealed class AdbEventEmitterTests
 		AdbDeviceStatus state = AdbDeviceStatus.Device,
 		string? model = "Pixel 8",
 		string? manufacturer = "Google")
-		=> new(new ScriptedAndroidDevice(serial, null), state, model, manufacturer);
+	{
+		return new AdbTrackedDevice(new ScriptedAndroidDevice(serial, null), state, model, manufacturer);
+	}
 
 	[TestCase(AdbDeviceChangeKind.Connected, AdbEventIds.DeviceConnected)]
 	[TestCase(AdbDeviceChangeKind.Disconnected, AdbEventIds.DeviceDisconnected)]
@@ -45,7 +47,7 @@ internal sealed class AdbEventEmitterTests
 	public void DeviceConnected_carries_the_manufacturer_and_state()
 	{
 		_emitter.Publish(new AdbDeviceChange(AdbDeviceChangeKind.Connected,
-			Device(serial: "S1", state: AdbDeviceStatus.Unauthorized, model: "Pixel 8", manufacturer: "Google")));
+			Device("S1", AdbDeviceStatus.Unauthorized, "Pixel 8", "Google")));
 
 		var parameters = _publisher.Published[0].Parameters!;
 		Assert.Multiple(() =>
@@ -64,7 +66,7 @@ internal sealed class AdbEventEmitterTests
 	[TestCase(AdbDeviceChangeKind.Offline)]
 	public void Every_other_kind_carries_only_serial_and_model(AdbDeviceChangeKind kind)
 	{
-		_emitter.Publish(new AdbDeviceChange(kind, Device(serial: "S1", model: "Pixel 8")));
+		_emitter.Publish(new AdbDeviceChange(kind, Device("S1", model: "Pixel 8")));
 
 		var parameters = _publisher.Published[0].Parameters!;
 		Assert.Multiple(() =>

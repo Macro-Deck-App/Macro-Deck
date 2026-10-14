@@ -4,7 +4,6 @@ using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Logging;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.SinusBot;
 
@@ -49,7 +48,8 @@ public sealed class SinusBotConfigFlow : IConfigFlow
 		};
 	}
 
-	private async Task<ConfigFlowResult> SubmitConnection(IReadOnlyDictionary<string, object?> input,
+	private async Task<ConfigFlowResult> SubmitConnection(
+		IReadOnlyDictionary<string, object?> input,
 		CancellationToken cancellationToken)
 	{
 		_serverUrl = (input.GetValueOrDefault(SinusBotConfigKeys.ServerUrl) as string ?? string.Empty).Trim();
@@ -88,7 +88,7 @@ public sealed class SinusBotConfigFlow : IConfigFlow
 		{
 			_logger.Warning(ex, "SinusBot connection failed for {ServerUrl}", _serverUrl);
 			return ConfigFlowResult.Error(ConnectionStep(),
-				AppStrings.Integrations.SinusBot.Config.AuthenticationFailed(details: ex.Message));
+				AppStrings.Integrations.SinusBot.Config.AuthenticationFailed(ex.Message));
 		}
 
 		var selectable = instances.Where(i => !string.IsNullOrWhiteSpace(i.Uuid)).ToList();
@@ -127,7 +127,8 @@ public sealed class SinusBotConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep ConnectionStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "connection",
 			Title = AppStrings.Integrations.SinusBot.Config.ConnectionTitle(),
@@ -140,19 +141,20 @@ public sealed class SinusBotConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Url(SinusBotConfigKeys.ServerUrl,
-					label: AppStrings.Integrations.SinusBot.Config.ServerUrlLabel(),
+					AppStrings.Integrations.SinusBot.Config.ServerUrlLabel(),
 					placeholder: "http://your-bot:8087",
 					required: true),
 				ActionParameter.Text(SinusBotConfigKeys.Username,
-					label: AppStrings.Integrations.SinusBot.Config.UsernameLabel(),
+					AppStrings.Integrations.SinusBot.Config.UsernameLabel(),
 					placeholder: AppStrings.Integrations.SinusBot.Config.UsernamePlaceholder(),
 					required: true),
 				ActionParameter.Secret(SinusBotConfigKeys.Password,
-					label: AppStrings.Integrations.SinusBot.Config.PasswordLabel(),
-					description: AppStrings.Integrations.SinusBot.Config.PasswordDescription(),
-					required: true)
+					AppStrings.Integrations.SinusBot.Config.PasswordLabel(),
+					AppStrings.Integrations.SinusBot.Config.PasswordDescription(),
+					true)
 			]
 		};
+	}
 
 	private static ConfigFlowStep InstanceStep(IReadOnlyList<SinusBotInstance> instances)
 	{
@@ -168,8 +170,8 @@ public sealed class SinusBotConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Choice(SinusBotConfigKeys.InstanceId,
-					options: options,
-					label: AppStrings.Integrations.SinusBot.Config.InstanceLabel(),
+					options,
+					AppStrings.Integrations.SinusBot.Config.InstanceLabel(),
 					required: true)
 			]
 		};

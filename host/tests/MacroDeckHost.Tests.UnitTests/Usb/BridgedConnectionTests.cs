@@ -49,11 +49,12 @@ public class BridgedConnectionTests
 			new FakeHostListenerState { PublicEndpoints = PublicEndpointSet.HttpOnly(closedPort) },
 			registry);
 
-		Assert.That(async () => await dialer.DialAsync(DeviceKey, CancellationToken.None), Throws.InstanceOf<SocketException>());
+		Assert.That(async () => await dialer.DialAsync(DeviceKey, CancellationToken.None),
+			Throws.InstanceOf<SocketException>());
 		Assert.That(registry.PendingCount, Is.Zero);
 
-		var refusing = new LoopbackBridgeDialer(
-			new FakeHostListenerState { PublicEndpoints = PublicEndpointSet.HttpsReplacingHttp(closedPort) },
+		var refusing = new LoopbackBridgeDialer(new FakeHostListenerState
+				{ PublicEndpoints = PublicEndpointSet.HttpsReplacingHttp(closedPort) },
 			registry);
 		Assert.That(await refusing.DialAsync(DeviceKey, CancellationToken.None), Is.Null);
 	}
@@ -176,20 +177,26 @@ public class BridgedConnectionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Exhausts(identity, "/api/auth/identity", HostIdentityRateLimit.PerAddressLimit), Is.True);
-			Assert.That(identity.AttemptAcquire(Context(IPAddress.Loopback, "usb:OTHER", "/api/auth/identity")).IsAcquired,
+			Assert.That(identity.AttemptAcquire(Context(IPAddress.Loopback, "usb:OTHER", "/api/auth/identity"))
+					.IsAcquired,
 				Is.True);
 			Assert.That(identity.AttemptAcquire(Context(IPAddress.Loopback, null, "/api/auth/identity")).IsAcquired,
 				Is.True);
 
-			Assert.That(Exhausts(transfer, "/api/legacy/md2-app/license-transfer",
-				LegacyLicenseTransferRateLimit.PerAddressLimit), Is.True);
+			Assert.That(Exhausts(transfer,
+					"/api/legacy/md2-app/license-transfer",
+					LegacyLicenseTransferRateLimit.PerAddressLimit),
+				Is.True);
 			Assert.That(transfer.AttemptAcquire(
-				Context(IPAddress.Loopback, "usb:OTHER", "/api/legacy/md2-app/license-transfer")).IsAcquired, Is.True);
+						Context(IPAddress.Loopback, "usb:OTHER", "/api/legacy/md2-app/license-transfer"))
+					.IsAcquired,
+				Is.True);
 		});
 	}
 
 	[Test]
-	public async Task Requests_over_a_link_reach_kestrel_bridged_for_the_whole_connection_while_direct_loopback_stays_local()
+	public async Task
+		Requests_over_a_link_reach_kestrel_bridged_for_the_whole_connection_while_direct_loopback_stays_local()
 	{
 		await using var harness = await KestrelHarness.StartAsync();
 		await harness.HandshakeAsync();
@@ -225,7 +232,8 @@ public class BridgedConnectionTests
 		Assert.That(harness.Seen.Single(), Is.EqualTo(("closing", false, DeviceKey)));
 	}
 
-	private static bool Exhausts(PartitionedRateLimiter<HttpContext> limiter,
+	private static bool Exhausts(
+		PartitionedRateLimiter<HttpContext> limiter,
 		string path,
 		int permits)
 	{
@@ -241,7 +249,9 @@ public class BridgedConnectionTests
 	}
 
 	private static byte[] Request(string target)
-		=> Encoding.ASCII.GetBytes($"GET {target} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n");
+	{
+		return Encoding.ASCII.GetBytes($"GET {target} HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n");
+	}
 
 	private static string? Stamped(BridgedConnections registry, IPEndPoint remote)
 	{
@@ -252,9 +262,15 @@ public class BridgedConnectionTests
 
 	private static DefaultHttpContext Context(IPAddress remote, string? deviceKey, string path = "/")
 	{
-		var context = new DefaultHttpContext { Connection = { RemoteIpAddress = remote, LocalPort = 8193 } };
-		context.Request.Host = new HostString("127.0.0.1", 8193);
-		context.Request.Path = path;
+		var context = new DefaultHttpContext
+		{
+			Connection = { RemoteIpAddress = remote, LocalPort = 8193 },
+			Request =
+			{
+				Host = new HostString("127.0.0.1", 8193),
+				Path = path
+			}
+		};
 		if (deviceKey is not null)
 		{
 			context.Features.Set<IBridgedConnectionFeature>(new BridgedConnectionFeature(deviceKey));
@@ -278,7 +294,11 @@ public class BridgedConnectionTests
 		private readonly CancellationTokenSource _stop = new();
 		private readonly Task _run;
 
-		private KestrelHarness(IHost host, int port, FakeLinkCarrier carrier, NativeLink link,
+		private KestrelHarness(
+			IHost host,
+			int port,
+			FakeLinkCarrier carrier,
+			NativeLink link,
 			ConcurrentQueue<(string, bool, string?)> seen)
 		{
 			_host = host;

@@ -14,7 +14,10 @@ public class GetPendingAnnouncementRequestMessageHandler
 		_announcements = announcements;
 	}
 
-	public ValueTask<GetPendingAnnouncementResponse> Handle(GetPendingAnnouncementRequest request,
+	public ValueTask<GetPendingAnnouncementResponse> Handle(
+		GetPendingAnnouncementRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetPendingAnnouncementResponse { Announcement = _announcements.Pending });
+	{
+		return ValueTask.FromResult(new GetPendingAnnouncementResponse { Announcement = _announcements.Pending });
+	}
 }

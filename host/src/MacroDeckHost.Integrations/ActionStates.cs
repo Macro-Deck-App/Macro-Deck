@@ -84,29 +84,34 @@ internal static class ActionStates
 		LocalizedText inactiveLabel,
 		string activeId,
 		LocalizedText activeLabel,
-		string activeColor = ActiveColor) =>
-	[
-		new(inactiveId, inactiveLabel)
-		{
-			DefaultAppearance = new ActionStateAppearance { BackgroundColor = InactiveColor }
-		},
-		new(activeId, activeLabel)
-		{
-			DefaultAppearance = new ActionStateAppearance { BackgroundColor = activeColor }
-		},
-		Unavailable
-	];
+		string activeColor = ActiveColor)
+	{
+		return
+		[
+			new ActionStateDefinition(inactiveId, inactiveLabel)
+			{
+				DefaultAppearance = new ActionStateAppearance { BackgroundColor = InactiveColor }
+			},
+			new ActionStateDefinition(activeId, activeLabel)
+			{
+				DefaultAppearance = new ActionStateAppearance { BackgroundColor = activeColor }
+			},
+			Unavailable
+		];
+	}
 
 	/// <summary>
 	/// Maps a nullable read onto a two-state set: <c>true</c> is the active state, <c>false</c> the
 	/// inactive one, and "cannot tell" the set's unavailable state.
 	/// </summary>
 	public static ActionStateSnapshot Snapshot(IReadOnlyList<ActionStateDefinition> states, bool? active)
-		=> new(states,
+	{
+		return new ActionStateSnapshot(states,
 			active switch
 			{
 				true => states[1].Id,
 				false => states[0].Id,
 				null => Unavailable.Id
 			});
+	}
 }

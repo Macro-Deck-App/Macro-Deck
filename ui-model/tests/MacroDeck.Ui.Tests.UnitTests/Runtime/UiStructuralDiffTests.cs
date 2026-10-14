@@ -19,14 +19,16 @@ namespace MacroDeck.Ui.Tests.UnitTests.Runtime;
 [TestFixture]
 public class UiStructuralDiffTests
 {
-	private const string _stepId = "setup.credentials";
-	private const string _valueKey = "value";
+	private const string StepId = "setup.credentials";
+	private const string ValueKey = "value";
 
 	private static readonly string[] _itemIds = ["headers.a", "headers.b", "headers.c"];
 	private static readonly string[] _reorderedItemIds = ["headers.c", "headers.a", "headers.b"];
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -85,26 +87,28 @@ public class UiStructuralDiffTests
 							new UiStringInput { Key = "first" },
 							Gate("B", gateB),
 							new UiStringInput { Key = "second" },
-							Gate("C", gateC),
-						],
-					},
-				],
+							Gate("C", gateC)
+						]
+					}
+				]
 			});
 
 		return (view, gateA, gateB, gateC);
 	}
 
 	private static UiWhen Gate(string suffix, UiState<bool> gate)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = $"gate{suffix}",
 			Condition = () => gate.Value,
 			Content = () => new UiAdvancedSection
 			{
 				Key = $"section{suffix}",
-				Children = [new UiDurationInput { Key = $"timeout{suffix}" }],
-			},
+				Children = [new UiDurationInput { Key = $"timeout{suffix}" }]
+			}
 		};
+	}
 
 	[Test]
 	public void A_conditional_section_becoming_visible_inserts_at_its_rendered_index_not_its_authored_index()
@@ -124,7 +128,7 @@ public class UiStructuralDiffTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(insertB.Op, Is.EqualTo(UiPatchOperations.InsertNode));
-			Assert.That(insertB.ParentId, Is.EqualTo(_stepId));
+			Assert.That(insertB.ParentId, Is.EqualTo(StepId));
 			Assert.That(insertB.Node, Is.Not.Null);
 			Assert.That(insertB.NodeId, Is.EqualTo(insertB.Node!.Id));
 
@@ -144,7 +148,7 @@ public class UiStructuralDiffTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(insertA.Op, Is.EqualTo(UiPatchOperations.InsertNode));
-			Assert.That(insertA.ParentId, Is.EqualTo(_stepId));
+			Assert.That(insertA.ParentId, Is.EqualTo(StepId));
 			Assert.That(insertA.Index, Is.Zero);
 		});
 	}
@@ -177,7 +181,7 @@ public class UiStructuralDiffTests
 			// surviving sibling would be throwing away their focus and in-flight edits.
 			foreach (var nodeId in AllOperations(patches).Select(candidate => candidate.NodeId))
 			{
-				Assert.That(nodeId, Is.Not.EqualTo(_stepId));
+				Assert.That(nodeId, Is.Not.EqualTo(StepId));
 				Assert.That(nodeId, Is.Not.EqualTo("first"));
 				Assert.That(nodeId, Is.Not.EqualTo("second"));
 			}
@@ -214,12 +218,12 @@ public class UiStructuralDiffTests
 								Template = (item, _) => new UiStringInput
 								{
 									Key = item.Id,
-									Binding = Bind.ReadOnly(UiValue.Of(item.Id)),
-								},
-							},
-						],
-					},
-				],
+									Binding = Bind.ReadOnly(UiValue.Of(item.Id))
+								}
+							}
+						]
+					}
+				]
 			});
 
 		var valuesBefore = ItemValues(view);
@@ -291,12 +295,12 @@ public class UiStructuralDiffTests
 								Template = (item, _) => new UiStringInput
 								{
 									Key = item.Id,
-									Binding = Bind.ReadOnly(UiValue.Of(item.Value)),
-								},
-							},
-						],
-					},
-				],
+									Binding = Bind.ReadOnly(UiValue.Of(item.Value))
+								}
+							}
+						]
+					}
+				]
 			});
 
 		view.DrainPatches();
@@ -324,7 +328,7 @@ public class UiStructuralDiffTests
 			Assert.That(operation.NodeId, Is.EqualTo("headers.b"));
 			Assert.That(operation.Properties, Is.Not.Null);
 			Assert.That(operation.Properties!, Has.Count.EqualTo(1));
-			Assert.That(operation.Properties![_valueKey].GetString(), Is.EqualTo("TWO"));
+			Assert.That(operation.Properties![ValueKey].GetString(), Is.EqualTo("TWO"));
 			Assert.That(operation.RemovedProperties, Is.Null);
 
 			// The keys are unchanged, so nothing is inserted, removed, moved or replaced.
@@ -334,11 +338,11 @@ public class UiStructuralDiffTests
 					UiPatchOperations.ReplaceNode,
 					UiPatchOperations.MoveNode));
 
-			Assert.That(FindById(view.Tree.Root, "headers.b")!.Properties[_valueKey].GetString(),
+			Assert.That(FindById(view.Tree.Root, "headers.b")!.Properties[ValueKey].GetString(),
 				Is.EqualTo("TWO"));
-			Assert.That(FindById(view.Tree.Root, "headers.a")!.Properties[_valueKey].GetString(),
+			Assert.That(FindById(view.Tree.Root, "headers.a")!.Properties[ValueKey].GetString(),
 				Is.EqualTo("one"));
-			Assert.That(FindById(view.Tree.Root, "headers.c")!.Properties[_valueKey].GetString(),
+			Assert.That(FindById(view.Tree.Root, "headers.c")!.Properties[ValueKey].GetString(),
 				Is.EqualTo("three"));
 		});
 	}
@@ -355,7 +359,7 @@ public class UiStructuralDiffTests
 			var node = FindById(view.Tree.Root, id);
 
 			Assert.That(node, Is.Not.Null, id);
-			values[id] = node!.Properties[_valueKey].GetString();
+			values[id] = node!.Properties[ValueKey].GetString();
 		}
 
 		return values;

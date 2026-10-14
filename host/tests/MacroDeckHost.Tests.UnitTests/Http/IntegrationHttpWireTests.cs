@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using MacroDeckHost.Application.Network.Http;
-using MacroDeckHost.Integrations.Http;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Http.Client;
 
 namespace MacroDeckHost.Tests.UnitTests.Http;
@@ -42,7 +42,7 @@ internal sealed class IntegrationHttpWireTests
 	[Test]
 	public async Task The_http_request_integration_client_sends_the_default_and_then_a_custom_value_without_a_restart()
 	{
-		var client = HttpSharedClients.Get(followRedirects: true, validateTls: true);
+		var client = HttpSharedClients.Get(true, true);
 
 		var first = await GetAndCaptureUserAgent(client);
 		_state.Apply("Custom/2.0");
@@ -59,7 +59,7 @@ internal sealed class IntegrationHttpWireTests
 	public async Task A_header_the_user_sets_on_an_http_request_wins_over_the_configured_value()
 	{
 		_state.Apply("Custom/2.0");
-		var client = HttpSharedClients.Get(followRedirects: true, validateTls: true);
+		var client = HttpSharedClients.Get(true, true);
 		using var request = new HttpRequestMessage(HttpMethod.Get, _prefix);
 		request.Headers.TryAddWithoutValidation("User-Agent", "FromTheAction/1");
 

@@ -47,7 +47,9 @@ internal sealed class RecordingUiTransport : IUiTransport
 
 	public IReadOnlyList<T> MessagesFor<T>(string connectionId)
 		where T : class
-		=> [.. For(connectionId).Select(recorded => recorded.Message).OfType<T>()];
+	{
+		return [.. For(connectionId).Select(recorded => recorded.Message).OfType<T>()];
+	}
 
 	public Task Send<T>(T message, CancellationToken cancellationToken = default)
 		where T : class
@@ -152,15 +154,18 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 	public string SessionMode { get; set; } = "exclusive";
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=>
+	{
+		return
 		[
-			new()
+			new DeclaredCapability
 			{
 				Kind = CapabilityKinds.Ui, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 			}
 		];
+	}
 
-	public async Task<CapabilityInvocationResult> InvokeAsync(CapabilityInvocation invocation,
+	public async Task<CapabilityInvocationResult> InvokeAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(invocation);
@@ -255,34 +260,42 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 	}
 
 	private static T? Read<T>(CapabilityInvocation invocation)
-		=> invocation.Arguments is { } arguments
+	{
+		return invocation.Arguments is { } arguments
 			? arguments.Deserialize<T>(PluginProtocolJson.Options)
 			: default;
+	}
 }
 
 /// <summary>Builds the bytes a plugin puts on the socket, with the payload spliced in verbatim.</summary>
 internal static class UiWire
 {
 	public static byte[] HostInvoke(string operation, string sessionId, string member, string payloadJson)
-		=> Encoding.UTF8.GetBytes("{\"type\":\"host.invoke\",\"id\":\"" +
-			Guid.CreateVersion7().ToString("N") +
-			"\",\"payload\":{\"api\":\"" +
-			HostApis.Ui +
-			"\",\"operation\":\"" +
-			operation +
-			"\",\"arguments\":{\"sessionId\":\"" +
-			sessionId +
-			"\",\"" +
-			member +
-			"\":" +
-			payloadJson +
-			"}}}");
+	{
+		return Encoding.UTF8.GetBytes("{\"type\":\"host.invoke\",\"id\":\""
+			+ Guid.CreateVersion7().ToString("N")
+			+ "\",\"payload\":{\"api\":\""
+			+ HostApis.Ui
+			+ "\",\"operation\":\""
+			+ operation
+			+ "\",\"arguments\":{\"sessionId\":\""
+			+ sessionId
+			+ "\",\""
+			+ member
+			+ "\":"
+			+ payloadJson
+			+ "}}}");
+	}
 
 	public static byte[] Snapshot(string sessionId, string treeJson)
-		=> HostInvoke(HostOperations.Ui.Snapshot, sessionId, "tree", treeJson);
+	{
+		return HostInvoke(HostOperations.Ui.Snapshot, sessionId, "tree", treeJson);
+	}
 
 	public static byte[] Patch(string sessionId, string patchJson)
-		=> HostInvoke(HostOperations.Ui.Patch, sessionId, "patch", patchJson);
+	{
+		return HostInvoke(HostOperations.Ui.Patch, sessionId, "patch", patchJson);
+	}
 }
 
 /// <summary>An in-process integration that serves UI trees, so the same session script can be run
@@ -316,13 +329,22 @@ internal sealed class InProcessUiTestIntegration : MacroDeck.Sdk.IIntegration, M
 			{ Kind = _surfaceKind, SessionMode = "exclusive" }
 	];
 
-	public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task<MacroDeck.Sdk.Ui.IUiSession?> CreateSessionAsync(MacroDeck.Sdk.Ui.UiSessionRequest request,
+	public Task<MacroDeck.Sdk.Ui.IUiSession?> CreateSessionAsync(
+		MacroDeck.Sdk.Ui.UiSessionRequest request,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<MacroDeck.Sdk.Ui.IUiSession?>(Session);
+	{
+		return Task.FromResult<MacroDeck.Sdk.Ui.IUiSession?>(Session);
+	}
 }
 
 internal sealed class InProcessUiTestSession : MacroDeck.Sdk.Ui.IUiSession
@@ -338,7 +360,10 @@ internal sealed class InProcessUiTestSession : MacroDeck.Sdk.Ui.IUiSession
 
 	public event EventHandler<MacroDeck.Sdk.Ui.UiSessionFaultedEventArgs>? Faulted;
 
-	public MacroDeck.Ui.Model.Nodes.UiTree BuildTree() => Tree;
+	public MacroDeck.Ui.Model.Nodes.UiTree BuildTree()
+	{
+		return Tree;
+	}
 
 	public IReadOnlyList<MacroDeck.Ui.Model.Patches.UiPatch> DrainPatches()
 	{
@@ -368,9 +393,15 @@ internal sealed class InProcessUiTestSession : MacroDeck.Sdk.Ui.IUiSession
 		Changed?.Invoke(this, EventArgs.Empty);
 	}
 
-	public void Fault() => Faulted?.Invoke(this, new MacroDeck.Sdk.Ui.UiSessionFaultedEventArgs("gone"));
+	public void Fault()
+	{
+		Faulted?.Invoke(this, new MacroDeck.Sdk.Ui.UiSessionFaultedEventArgs("gone"));
+	}
 
-	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public ValueTask DisposeAsync()
+	{
+		return ValueTask.CompletedTask;
+	}
 }
 
 internal sealed class StubIntegrationRegistry : MacroDeckHost.Application.Integrations.IIntegrationRegistry
@@ -386,23 +417,39 @@ internal sealed class StubIntegrationRegistry : MacroDeckHost.Application.Integr
 
 	public IReadOnlyList<MacroDeck.Sdk.IIntegration> Integrations => _integrations;
 
-	public void Add(MacroDeck.Sdk.IIntegration integration) => _integrations.Add(integration);
+	public void Add(MacroDeck.Sdk.IIntegration integration)
+	{
+		_integrations.Add(integration);
+	}
 
-	public MacroDeck.Sdk.Actions.IActionDefinition? FindAction(string integrationId, string actionId) => null;
+	public MacroDeck.Sdk.Actions.IActionDefinition? FindAction(string integrationId, string actionId)
+	{
+		return null;
+	}
 
-	public MacroDeck.Sdk.Actions.IActionDefinition? FindAction(MacroDeck.Sdk.Identity.QualifiedId id) => null;
+	public MacroDeck.Sdk.Actions.IActionDefinition? FindAction(MacroDeck.Sdk.Identity.QualifiedId id)
+	{
+		return null;
+	}
 
 	public IReadOnlyList<MacroDeckHost.Application.Integrations.ActionDescriptor> GetActions(bool enabledOnly = true)
-		=> [];
+	{
+		return [];
+	}
 
-	public bool IsEnabled(string integrationId) => true;
+	public bool IsEnabled(string integrationId)
+	{
+		return true;
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
 	}
 
 	public MacroDeckHost.Application.Integrations.IntegrationOrigin GetOrigin(string integrationId)
-		=> Application.Integrations.IntegrationOrigin.BuiltIn;
+	{
+		return Application.Integrations.IntegrationOrigin.BuiltIn;
+	}
 
 	public Task<MacroDeckHost.Application.Integrations.IntegrationRegistrationResult> RegisterAsync(
 		MacroDeck.Sdk.IIntegration integration,
@@ -414,7 +461,10 @@ internal sealed class StubIntegrationRegistry : MacroDeckHost.Application.Integr
 		return Task.FromResult(Application.Integrations.IntegrationRegistrationResult.Success);
 	}
 
-	public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(true);
+	public Task<bool> UnregisterAsync(string integrationId)
+	{
+		return Task.FromResult(true);
+	}
 }
 
 /// <summary>

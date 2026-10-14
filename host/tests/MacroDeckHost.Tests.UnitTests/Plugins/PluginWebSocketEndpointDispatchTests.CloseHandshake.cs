@@ -21,7 +21,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 	private const string ClosePluginId = "com.example.close";
 	private const string CloseSessionId = "close-session";
 
-	private static readonly TimeSpan CloseTestTimeout = TimeSpan.FromSeconds(15);
+	private static readonly TimeSpan _closeTestTimeout = TimeSpan.FromSeconds(15);
 
 	[Test]
 	public async Task A_handshake_timeout_reaches_the_plugin_as_invalid_payload_and_a_normal_close()
@@ -31,7 +31,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
 
 		var running = endpoint.RunConnectionAsync(pair.Host, ClosePluginId, CloseSessionId);
-		await clock.WaitForScheduleAsync(0).WaitAsync(CloseTestTimeout);
+		await clock.WaitForScheduleAsync(0).WaitAsync(_closeTestTimeout);
 		clock.Advance(ProtocolTimeouts.Handshake);
 
 		var error = await ReceiveEnvelopeAsync(pair.Plugin);
@@ -44,7 +44,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 
 		await pair.Plugin.CloseAsync(WebSocketCloseStatus.NormalClosure, null, Timeout());
 		Assert.That(pair.Plugin.State, Is.EqualTo(WebSocketState.Closed));
-		await running.WaitAsync(CloseTestTimeout);
+		await running.WaitAsync(_closeTestTimeout);
 	}
 
 	[Test]
@@ -55,10 +55,10 @@ public partial class PluginWebSocketEndpointDispatchTests
 		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
 
 		var running = endpoint.RunConnectionAsync(pair.Host, ClosePluginId, CloseSessionId);
-		await clock.WaitForScheduleAsync(0).WaitAsync(CloseTestTimeout);
+		await clock.WaitForScheduleAsync(0).WaitAsync(_closeTestTimeout);
 		clock.Advance(ProtocolTimeouts.Handshake);
 
-		await running.WaitAsync(ProtocolTimeouts.GracefulClose + CloseTestTimeout);
+		await running.WaitAsync(ProtocolTimeouts.GracefulClose + _closeTestTimeout);
 		Assert.That(pair.Host.State, Is.EqualTo(WebSocketState.Aborted));
 	}
 
@@ -73,7 +73,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 
 		Assert.That(pair.Plugin.State, Is.EqualTo(WebSocketState.Closed));
 		Assert.That(pair.Plugin.CloseStatus, Is.EqualTo(WebSocketCloseStatus.NormalClosure));
-		await running.WaitAsync(CloseTestTimeout);
+		await running.WaitAsync(_closeTestTimeout);
 	}
 
 	[Test]
@@ -92,7 +92,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 		Assert.That((int?)pair.Plugin.CloseStatus, Is.EqualTo(4321));
 		Assert.That(pair.Plugin.CloseStatusDescription, Is.EqualTo("Plugin stopping."));
 
-		await running.WaitAsync(CloseTestTimeout);
+		await running.WaitAsync(_closeTestTimeout);
 		var session = registry.Snapshot().Single(record => record.SessionId == CloseSessionId);
 		Assert.That(session.State, Is.EqualTo(PluginSessionState.Dropped));
 	}
@@ -102,7 +102,15 @@ public partial class PluginWebSocketEndpointDispatchTests
 	{
 		var registry = new PluginSessionRegistry(clock, Serilog.Core.Logger.None);
 		var statePusher
-			= new HostStatePusher(registry, new EmptyDeckNavigator(), new EmptyScriptApi(), new EmptyWidgetApi(), new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+			= new HostStatePusher(registry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				new EmptyWidgetApi(),
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None);
 		var endpoint = new PluginWebSocketEndpoint(registry,
 			new FakePluginCapabilityInvoker(),
 			new FakeRemotePluginIntegrationRegistrar(),
@@ -148,7 +156,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 
 		await plugin.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(hello),
 			WebSocketMessageType.Text,
-			endOfMessage: true,
+			true,
 			Timeout());
 	}
 
@@ -161,5 +169,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 			: ProtocolEnvelopeReader.Read(buffer.AsSpan(0, result.Count).ToArray()).Envelope;
 	}
 
-	private static CancellationToken Timeout() => new CancellationTokenSource(CloseTestTimeout).Token;
+	private static CancellationToken Timeout()
+	{
+		return new CancellationTokenSource(_closeTestTimeout).Token;
+	}
 }

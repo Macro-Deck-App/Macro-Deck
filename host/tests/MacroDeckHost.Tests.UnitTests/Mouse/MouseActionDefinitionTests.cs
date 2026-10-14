@@ -206,5 +206,7 @@ public class MouseActionDefinitionTests
 	}
 
 	private static IActionDefinition Action(string id)
-		=> new MouseInputIntegration().Actions.Single(a => a.Id == id);
+	{
+		return new MouseInputIntegration().Actions.Single(a => a.Id == id);
+	}
 }

@@ -58,13 +58,13 @@ internal static class SoundPadVariables
 				SemanticKind = VariableSemanticKinds.Percentage,
 				Write = MusicPlayerVariableWrites.Volume
 			},
-		VariableDefinition.Eager(Duration, VariableType.Numeric, decimalPlaces: 0, refreshInterval: _normal)
+		VariableDefinition.Eager(Duration, VariableType.Numeric, 0, _normal)
 			with
 			{
 				DisplayName = AppStrings.Integrations.SoundPad.Variables.Duration(),
 				SemanticKind = VariableSemanticKinds.Duration
 			},
-		VariableDefinition.Eager(Position, VariableType.Numeric, decimalPlaces: 0, refreshInterval: _fast)
+		VariableDefinition.Eager(Position, VariableType.Numeric, 0, _fast)
 			with
 			{
 				DisplayName = AppStrings.Integrations.SoundPad.Variables.Position(),

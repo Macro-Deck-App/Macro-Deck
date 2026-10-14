@@ -42,13 +42,15 @@ public class SingleInstanceGuardTests
 		{
 			var context = await listener.GetContextAsync();
 			var trusted = context.Request.Headers["X-MacroDeck-Loopback-Secret"] is not null;
-			context.Response.StatusCode = context.Request.Url!.AbsolutePath == "/api/auth/status" && !trusted ? 200 : 401;
+			context.Response.StatusCode
+				= context.Request.Url!.AbsolutePath == "/api/auth/status" && !trusted ? 200 : 401;
 			context.Response.Close();
 		});
 
 		try
 		{
-			await File.WriteAllTextAsync(HostEndpoints.LoopbackPortFilePath, port.ToString(CultureInfo.InvariantCulture));
+			await File.WriteAllTextAsync(HostEndpoints.LoopbackPortFilePath,
+				port.ToString(CultureInfo.InvariantCulture));
 
 			Assert.That(await SingleInstanceGuard.IsAnotherInstanceRunning(), Is.True);
 			await answering;

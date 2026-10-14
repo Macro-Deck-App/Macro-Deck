@@ -45,8 +45,7 @@ public sealed class WidgetUpdatedNotificationHandler : INotificationHandler<Widg
 		// no way to observe stored data at all - would go on drawing the configuration it opened with,
 		// leaving a saved edit sitting unapplied on every deck until something happened to reopen it.
 		// Rebuilding is the only way that tree comes up to date, and reopening is how a client rebuilds.
-		if (notification.DataChanged &&
-			!_renderSignals.RaiseDataChanged(_colors.Resolved(widget)))
+		if (notification.DataChanged && !_renderSignals.RaiseDataChanged(_colors.Resolved(widget)))
 		{
 			_sessions.InvalidateWidgetSessions(widget.Id);
 		}

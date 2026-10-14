@@ -25,24 +25,34 @@ public sealed class MigrationActionRegistry : IMigrationActionRegistry
 	}
 
 	public IIntegrationMigration? FindByActionSource(MigrationSource source, string actionSource)
-		=> string.IsNullOrWhiteSpace(actionSource)
+	{
+		return string.IsNullOrWhiteSpace(actionSource)
 			? null
 			: Find(source,
 				migration => migration.ClaimedActionSources.Contains(actionSource, StringComparer.OrdinalIgnoreCase));
+	}
 
 	public IIntegrationMigration? FindBySettingsSource(MigrationSource source, string settingsSource)
-		=> string.IsNullOrWhiteSpace(settingsSource)
+	{
+		return string.IsNullOrWhiteSpace(settingsSource)
 			? null
 			: Find(source,
 				migration => migration.ClaimedSettingsSources.Contains(settingsSource,
 					StringComparer.OrdinalIgnoreCase));
+	}
 
 	public IReadOnlyList<MigrationSource> SupportedSources()
-		=> Migrations().Select(migration => migration.Source).Distinct().Order().ToList();
+	{
+		return Migrations().Select(migration => migration.Source).Distinct().Order().ToList();
+	}
 
 	private IIntegrationMigration? Find(MigrationSource source, Func<IIntegrationMigration, bool> claims)
-		=> Migrations().Where(migration => migration.Source == source).FirstOrDefault(claims);
+	{
+		return Migrations().Where(migration => migration.Source == source).FirstOrDefault(claims);
+	}
 
 	private IEnumerable<IIntegrationMigration> Migrations()
-		=> _integrations.Integrations.OfType<IMigrationProvider>().SelectMany(provider => provider.Migrations);
+	{
+		return _integrations.Integrations.OfType<IMigrationProvider>().SelectMany(provider => provider.Migrations);
+	}
 }

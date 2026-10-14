@@ -25,9 +25,11 @@ public class NativeUsbSettingsTests
 		public Dictionary<string, string> Values { get; } = [];
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
+		{
+			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }
 				: null);
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -78,7 +80,7 @@ public class NativeUsbSettingsTests
 	[Test]
 	public async Task While_it_is_off_nothing_touches_libusb_or_usbmuxd()
 	{
-		var fixture = Fixture(PublicEndpointSet.HttpOnly(8193), enabled: false);
+		var fixture = Fixture(PublicEndpointSet.HttpOnly(8193), false);
 		fixture.Usb.Plug(1, [_mtp]);
 
 		await fixture.Manager.PollAsync(CancellationToken.None);
@@ -142,7 +144,14 @@ public class NativeUsbSettingsTests
 		{
 			Devices =
 			[
-				new AdbDevice("EXAMPLE0001", AdbDeviceState.Unauthorized, null, null, null, "1", null, DateTimeOffset.UtcNow),
+				new AdbDevice("EXAMPLE0001",
+					AdbDeviceState.Unauthorized,
+					null,
+					null,
+					null,
+					"1",
+					null,
+					DateTimeOffset.UtcNow),
 				new AdbDevice("EXAMPLE0002", AdbDeviceState.Device, null, null, null, "2", null, DateTimeOffset.UtcNow)
 			]
 		};
@@ -171,7 +180,8 @@ public class NativeUsbSettingsTests
 		await Preferences(store).SetNativeUsb(null, [new RememberedUsbDevice("EXAMPLE0001", name)]);
 		var stored = (await Preferences(store).GetNativeUsb()).RememberedDevices.Single().Name!;
 
-		Assert.That(stored, Is.EqualTo(new string('a', AppPreferenceService.MaxNativeUsbDeviceNameLength - 1) + "\U0001F600"));
+		Assert.That(stored,
+			Is.EqualTo(new string('a', AppPreferenceService.MaxNativeUsbDeviceNameLength - 1) + "\U0001F600"));
 	}
 
 	[Test]
@@ -197,7 +207,7 @@ public class NativeUsbSettingsTests
 		var remembered = (await Preferences(fixture.Store).GetNativeUsb()).RememberedDevices;
 		var forgotten = await fixture.Manager.ForgetAsync("EXAMPLE0001", CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(remembered, Is.EqualTo(new[] { new RememberedUsbDevice("EXAMPLE0001", "Example Phone") }));
 			Assert.That(forgotten, Is.True);
@@ -232,7 +242,8 @@ public class NativeUsbSettingsTests
 		await fixture.Manager.PollAsync(CancellationToken.None);
 		var handler = new UpdateNativeUsbSettingsRequestMessageHandler(fixture.Manager);
 
-		var response = await handler.Handle(new UpdateNativeUsbSettingsRequest { Enabled = false }, CancellationToken.None);
+		var response = await handler.Handle(new UpdateNativeUsbSettingsRequest { Enabled = false },
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -248,7 +259,8 @@ public class NativeUsbSettingsTests
 		var fixture = Fixture(PublicEndpointSet.HttpOnly(8193));
 		var handler = new ConnectNativeUsbDeviceRequestMessageHandler(fixture.Manager);
 
-		var response = await handler.Handle(new ConnectNativeUsbDeviceRequest { Id = "android-9-9" }, CancellationToken.None);
+		var response = await handler.Handle(new ConnectNativeUsbDeviceRequest { Id = "android-9-9" },
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -266,18 +278,27 @@ public class NativeUsbSettingsTests
 	}
 
 	private static List<RememberedUsbDevice> Remember(params string[] serials)
-		=> serials.Select(serial => new RememberedUsbDevice(serial, null)).ToList();
+	{
+		return serials.Select(serial => new RememberedUsbDevice(serial, null)).ToList();
+	}
 
 	private static AppPreferenceService Preferences(IAppPreferenceRepository store)
-		=> new(store, new TestBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+	{
+		return new AppPreferenceService(store,
+			new TestBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
+	}
 
 	private static (NativeUsbManager Manager, FakeUsb Usb, List<FakeLinkSession> Sessions, MemoryPreferences Store,
-		UnreachableUsbmux Usbmux) Fixture(PublicEndpointSet endpoints,
-		bool enabled = true,
-		bool sessionsEndWhenStopped = true,
-		FakeAdbManager? adb = null)
+		UnreachableUsbmux Usbmux) Fixture(
+			PublicEndpointSet endpoints,
+			bool enabled = true,
+			bool sessionsEndWhenStopped = true,
+			FakeAdbManager? adb = null)
 	{
-		var store = new MemoryPreferences { Values = { [AppPreferenceService.NativeUsbEnabledKey] = enabled.ToString() } };
+		var store = new MemoryPreferences
+			{ Values = { [AppPreferenceService.NativeUsbEnabledKey] = enabled.ToString() } };
 		var services = new ServiceCollection()
 			.AddScoped<IAppPreferenceService>(_ => Preferences(store))
 			.BuildServiceProvider();
@@ -310,13 +331,18 @@ public class NativeUsbSettingsTests
 
 		public int ListenCalls => Volatile.Read(ref _listenCalls);
 
-		public Task ListenAsync(Action onListening, Action<UsbmuxDeviceEvent> onEvent, CancellationToken cancellationToken)
+		public Task ListenAsync(
+			Action onListening,
+			Action<UsbmuxDeviceEvent> onEvent,
+			CancellationToken cancellationToken)
 		{
 			Interlocked.Increment(ref _listenCalls);
 			return Task.FromException(new IOException("usbmuxd is not running in tests."));
 		}
 
 		public Task<ILinkCarrier?> ConnectAsync(int deviceId, ushort port, CancellationToken cancellationToken)
-			=> Task.FromResult<ILinkCarrier?>(null);
+		{
+			return Task.FromResult<ILinkCarrier?>(null);
+		}
 	}
 }

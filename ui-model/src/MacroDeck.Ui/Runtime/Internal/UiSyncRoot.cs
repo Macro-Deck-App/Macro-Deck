@@ -37,7 +37,7 @@ internal sealed class UiSyncRoot
 {
 	/// <summary>How many passes the drain makes before it reports a non-converging plugin rather than
 	/// spinning silently.</summary>
-	private const int _maxDrainIterations = 1000;
+	private const int MaxDrainIterations = 1000;
 
 	private static long _nextId;
 
@@ -74,11 +74,16 @@ internal sealed class UiSyncRoot
 
 	/// <summary>Whether <paramref name="root" /> belongs to a component other than the one this thread is
 	/// already holding. False at depth 0, where any gate may be taken.</summary>
-	internal static bool IsForeign(UiSyncRoot root) => _depth > 0 && !ReferenceEquals(Find(root), _held);
+	internal static bool IsForeign(UiSyncRoot root)
+	{
+		return _depth > 0 && !ReferenceEquals(Find(root), _held);
+	}
 
 	/// <summary>Whether both roots already belong to one component.</summary>
 	internal static bool SameComponent(UiSyncRoot first, UiSyncRoot second)
-		=> ReferenceEquals(Find(first), Find(second));
+	{
+		return ReferenceEquals(Find(first), Find(second));
+	}
 
 	/// <summary>Merges two components into one. The caller must hold no component gate.</summary>
 	internal static void Merge(UiSyncRoot first, UiSyncRoot second)
@@ -150,7 +155,9 @@ internal sealed class UiSyncRoot
 	/// two components are merged and the dependent re-evaluated at depth 0 - a read has to end up in one
 	/// component, because the state has to be able to invalidate it.</summary>
 	internal static void DeferRead(UiSyncRoot stateRoot, UiSyncRoot viewRoot, UiDependent dependent, UiView view)
-		=> (_deferredReads ??= []).Add(new UiDeferredRead(stateRoot, viewRoot, dependent, view));
+	{
+		(_deferredReads ??= []).Add(new UiDeferredRead(stateRoot, viewRoot, dependent, view));
+	}
 
 	/// <summary>Records that a state belonging to another component was written. Only the notification is
 	/// deferred - the value is already written - and no merge happens: every dependent and view of that state
@@ -168,10 +175,15 @@ internal sealed class UiSyncRoot
 	/// <summary>Registers asynchronous work against a view in another component, at depth 0. Deferred rather
 	/// than skipped: dropping it would let that view's <see cref="UiView.WhenIdleAsync" /> return while the
 	/// load it is waiting for is still running.</summary>
-	internal static void DeferWork(UiView view, Task work) =>
+	internal static void DeferWork(UiView view, Task work)
+	{
 		(_deferredWork ??= []).Add(new UiDeferredWork(view, work));
+	}
 
-	internal static void DeferDispose(UiView view) => (_deferredDisposals ??= []).Add(view);
+	internal static void DeferDispose(UiView view)
+	{
+		(_deferredDisposals ??= []).Add(view);
+	}
 
 	/// <summary>Queues <c>Changed</c> (a <c>null</c> fault) or <c>HandlerFaulted</c> for
 	/// <paramref name="view" />, to be raised once this thread is outside every gate. Raised immediately when
@@ -187,10 +199,10 @@ internal sealed class UiSyncRoot
 
 		var notifications = _notifications ??= [];
 
-		if (fault is null &&
-			notifications.Count > 0 &&
-			notifications[^1] is { Fault: null } last &&
-			ReferenceEquals(last.View, view))
+		if (fault is null
+			&& notifications.Count > 0
+			&& notifications[^1] is { Fault: null } last
+			&& ReferenceEquals(last.View, view))
 		{
 			notifications[^1] = last with { Count = last.Count + 1 };
 
@@ -270,12 +282,12 @@ internal sealed class UiSyncRoot
 				// Everything taken above is discarded with the throw: a drain that will not converge is a
 				// defect in the plugin driving it, and finishing this pass would only extend the loop it is
 				// stuck in.
-				if (iteration >= _maxDrainIterations)
+				if (iteration >= MaxDrainIterations)
 				{
 					throw new InvalidOperationException(
-						$"A UI component's cross-component work did not settle after {_maxDrainIterations} " +
-						"passes. A value provider or handler is writing state that provokes further writes " +
-						"without ever converging.");
+						$"A UI component's cross-component work did not settle after {MaxDrainIterations} "
+						+ "passes. A value provider or handler is writing state that provokes further writes "
+						+ "without ever converging.");
 				}
 
 				if (merges is not null)
@@ -495,9 +507,15 @@ internal sealed class UiSyncRoot
 	{
 		private readonly UiSyncRoot _terminal;
 
-		internal UiSyncScope(UiSyncRoot terminal) => _terminal = terminal;
+		internal UiSyncScope(UiSyncRoot terminal)
+		{
+			_terminal = terminal;
+		}
 
 		/// <summary>Releases the gate and, at depth 0, runs whatever this call deferred.</summary>
-		public void Dispose() => _terminal.Exit();
+		public void Dispose()
+		{
+			_terminal.Exit();
+		}
 	}
 }

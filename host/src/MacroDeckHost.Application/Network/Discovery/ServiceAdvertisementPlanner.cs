@@ -12,19 +12,20 @@ public static class ServiceAdvertisementPlanner
 
 	private const int MaximumLabelBytes = 63;
 
-	private static readonly string[] VirtualNamePrefixes =
+	private static readonly string[] _virtualNamePrefixes =
 	[
 		"vEthernet", "docker", "br-", "veth", "virbr", "vmnet", "bridge", "utun", "tun", "tap", "wg", "zt",
 		"tailscale", "ipsec", "awdl", "llw", "anpi"
 	];
 
-	private static readonly string[] VirtualDescriptionMarkers =
+	private static readonly string[] _virtualDescriptionMarkers =
 	[
 		"Hyper-V", "WSL", "Docker", "VirtualBox", "VMware", "TAP-", "WireGuard", "Tailscale", "ZeroTier", "OpenVPN",
 		"Virtual", "Loopback"
 	];
 
-	public static ServiceAdvertisement? Plan(bool enabled,
+	public static ServiceAdvertisement? Plan(
+		bool enabled,
 		PublicEndpointSet endpoints,
 		string instanceName,
 		string version,
@@ -58,14 +59,16 @@ public static class ServiceAdvertisementPlanner
 	}
 
 	internal static bool IsLanInterface(NetworkInterfaceSnapshot nic)
-		=> nic.IsUp &&
-			nic.Index > 0 &&
-			nic.Type is not (NetworkInterfaceType.Loopback
+	{
+		return nic.IsUp
+			&& nic.Index > 0
+			&& nic.Type is not (NetworkInterfaceType.Loopback
 				or NetworkInterfaceType.Tunnel
-				or NetworkInterfaceType.Ppp) &&
-			!VirtualNamePrefixes.Any(prefix => nic.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) &&
-			!VirtualDescriptionMarkers.Any(marker =>
+				or NetworkInterfaceType.Ppp)
+			&& !_virtualNamePrefixes.Any(prefix => nic.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+			&& !_virtualDescriptionMarkers.Any(marker =>
 				nic.Description.Contains(marker, StringComparison.OrdinalIgnoreCase));
+	}
 
 	internal static bool IsLanAddress(IPAddress address)
 	{

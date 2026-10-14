@@ -31,8 +31,12 @@ internal sealed class VideoStreamUiPushHandlerTests
 				null),
 			CancellationToken.None);
 
-		var changed = transport.ConnectionMessages.Select(sent => sent.Message).OfType<VideoStreamSessionChangedEvent>().Single();
-		var closed = transport.ConnectionMessages.Select(sent => sent.Message).OfType<VideoStreamSessionClosedEvent>().Single();
+		var changed = transport.ConnectionMessages.Select(sent => sent.Message)
+			.OfType<VideoStreamSessionChangedEvent>()
+			.Single();
+		var closed = transport.ConnectionMessages.Select(sent => sent.Message)
+			.OfType<VideoStreamSessionClosedEvent>()
+			.Single();
 		Assert.Multiple(() =>
 		{
 			Assert.That(transport.ConnectionMessages.Select(sent => sent.ConnectionId), Is.All.EqualTo("ui-1"));

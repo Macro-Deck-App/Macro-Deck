@@ -15,9 +15,9 @@ public class FileVariableTests
 {
 	private const string WidgetId = "11111111-1111-1111-1111-111111111111";
 
-	private static readonly string Folder = Path.Combine(Path.GetTempPath(), "macro-deck-file-variables");
-	private static readonly string FilePath = Path.Combine(Folder, "value.txt");
-	private static readonly string OtherFilePath = Path.Combine(Folder, "other.txt");
+	private static readonly string _folder = Path.Combine(Path.GetTempPath(), "macro-deck-file-variables");
+	private static readonly string _filePath = Path.Combine(_folder, "value.txt");
+	private static readonly string _otherFilePath = Path.Combine(_folder, "other.txt");
 
 	private VariableRegistry _registry = null!;
 	private RecordingMediator _mediator = null!;
@@ -43,12 +43,15 @@ public class FileVariableTests
 	}
 
 	[TearDown]
-	public void TearDown() => _synchronizer.Dispose();
+	public void TearDown()
+	{
+		_synchronizer.Dispose();
+	}
 
 	[Test]
 	public async Task A_new_file_variable_holds_the_files_content_without_its_trailing_line_break()
 	{
-		_files.SetFile(FilePath, "Hello from a script\n", notify: false);
+		_files.SetFile(_filePath, "Hello from a script\n", false);
 
 		var created = await CreateFileVariable("status", VariableType.Text);
 
@@ -64,16 +67,16 @@ public class FileVariableTests
 	[Test]
 	public async Task A_widget_scoped_file_variable_follows_its_file_like_a_global_one()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
+		_files.SetFile(_filePath, "1", false);
 		var created = await _service.CreateUserVariable("level",
 			VariableScope.Widget,
 			WidgetId,
 			VariableType.Numeric,
 			null,
 			null,
-			new VariableFileSource(FilePath, false));
+			new VariableFileSource(_filePath, false));
 
-		await ChangeFileExternally(FilePath, "2");
+		await ChangeFileExternally(_filePath, "2");
 
 		var local = await _service.Resolve("level", VariableScope.Widget, WidgetId);
 		Assert.Multiple(() =>
@@ -86,12 +89,12 @@ public class FileVariableTests
 	[Test]
 	public async Task An_external_change_updates_the_value_and_rewriting_the_same_content_announces_nothing()
 	{
-		_files.SetFile(FilePath, "first", notify: false);
+		_files.SetFile(_filePath, "first", false);
 		var created = await CreateFileVariable("status", VariableType.Text);
 		_mediator.Published.Clear();
 
-		await ChangeFileExternally(FilePath, "second");
-		await ChangeFileExternally(FilePath, "second");
+		await ChangeFileExternally(_filePath, "second");
+		await ChangeFileExternally(_filePath, "second");
 
 		Assert.Multiple(() =>
 		{
@@ -103,11 +106,11 @@ public class FileVariableTests
 	[Test]
 	public async Task A_file_change_is_not_saved_to_the_user_variable_file()
 	{
-		_files.SetFile(FilePath, "first", notify: false);
+		_files.SetFile(_filePath, "first", false);
 		await CreateFileVariable("status", VariableType.Text);
 		var savesAfterCreate = _store.Saves;
 
-		await ChangeFileExternally(FilePath, "second");
+		await ChangeFileExternally(_filePath, "second");
 
 		Assert.That(_store.Saves, Is.EqualTo(savesAfterCreate));
 	}
@@ -118,7 +121,7 @@ public class FileVariableTests
 		var created = await CreateFileVariable("status", VariableType.Text);
 		var unavailableAtFirst = !_registry.IsAvailable(created.Data!.Id);
 
-		await ChangeFileExternally(FilePath, "now here");
+		await ChangeFileExternally(_filePath, "now here");
 
 		Assert.Multiple(() =>
 		{
@@ -131,10 +134,10 @@ public class FileVariableTests
 	[Test]
 	public async Task Content_that_does_not_fit_the_type_makes_the_variable_unavailable_and_keeps_its_value()
 	{
-		_files.SetFile(FilePath, "12", notify: false);
+		_files.SetFile(_filePath, "12", false);
 		var created = await CreateFileVariable("count", VariableType.Numeric);
 
-		await ChangeFileExternally(FilePath, "twelve");
+		await ChangeFileExternally(_filePath, "twelve");
 
 		Assert.Multiple(() =>
 		{
@@ -162,7 +165,7 @@ public class FileVariableTests
 	[Test]
 	public async Task A_read_only_file_variable_refuses_a_write_and_leaves_the_file_alone()
 	{
-		_files.SetFile(FilePath, "7", notify: false);
+		_files.SetFile(_filePath, "7", false);
 		var created = await CreateFileVariable("count", VariableType.Numeric);
 
 		var result = await _service.SetValue(created.Data!.Id, 9m);
@@ -179,8 +182,8 @@ public class FileVariableTests
 	[Test]
 	public async Task Write_back_writes_the_new_value_once_and_its_own_echo_announces_nothing_more()
 	{
-		_files.SetFile(FilePath, "note", notify: false);
-		var created = await CreateFileVariable("note", VariableType.Text, allowWriteBack: true);
+		_files.SetFile(_filePath, "note", false);
+		var created = await CreateFileVariable("note", VariableType.Text, true);
 		_mediator.Published.Clear();
 
 		await _service.SetValue(created.Data!.Id, "line with a break\n");
@@ -188,7 +191,7 @@ public class FileVariableTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_files.Writes, Is.EqualTo(new[] { (FilePath, "line with a break\n") }));
+			Assert.That(_files.Writes, Is.EqualTo(new[] { (FilePath: _filePath, "line with a break\n") }));
 			Assert.That(_registry.GetById(created.Data.Id)!.Value, Is.EqualTo("line with a break\n"));
 			Assert.That(ValueChanges(), Has.Count.EqualTo(1));
 		});
@@ -197,35 +200,35 @@ public class FileVariableTests
 	[Test]
 	public async Task A_value_that_came_from_the_file_is_never_written_back()
 	{
-		_files.SetFile(FilePath, "5", notify: false);
+		_files.SetFile(_filePath, "5", false);
 		var created = await _service.CreateUserVariable("level",
 			VariableScope.Global,
 			null,
 			VariableType.Numeric,
 			null,
 			2,
-			new VariableFileSource(FilePath, true));
+			new VariableFileSource(_filePath, true));
 
-		await ChangeFileExternally(FilePath, "6");
+		await ChangeFileExternally(_filePath, "6");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_registry.GetById(created.Data!.Id)!.Value, Is.EqualTo("6.00"));
 			Assert.That(_files.Writes, Is.Empty);
-			Assert.That(_files.Content(FilePath), Is.EqualTo("6"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("6"));
 		});
 	}
 
 	[Test]
 	public async Task A_read_that_started_before_the_users_write_cannot_bring_back_the_old_content()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 
 		var gate = new TaskCompletionSource();
 		_files.ReadGate = gate;
-		_files.SetFile(FilePath, "2");
+		_files.SetFile(_filePath, "2");
 		await WaitUntil(() => _files.GatedReads == 1);
 		await _service.SetValue(id, 7m);
 		_files.ReadGate = null;
@@ -235,24 +238,24 @@ public class FileVariableTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("7"));
-			Assert.That(_files.Content(FilePath), Is.EqualTo("7"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("7"));
 		});
 	}
 
 	[Test]
 	public async Task The_check_after_a_write_never_reapplies_a_value_the_user_already_replaced()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 		_mediator.Published.Clear();
 
 		var gate = new TaskCompletionSource();
 		_files.ReadGate = gate;
 		await _service.SetValue(id, 5m);
-		await WaitUntil(() => _files.Content(FilePath) == "5" && _files.GatedReads == 1);
+		await WaitUntil(() => _files.Content(_filePath) == "5" && _files.GatedReads == 1);
 		await _service.SetValue(id, 6m);
-		await WaitUntil(() => _files.Content(FilePath) == "6");
+		await WaitUntil(() => _files.Content(_filePath) == "6");
 		_files.ReadGate = null;
 		gate.SetResult();
 		await _synchronizer.WhenIdleAsync();
@@ -267,8 +270,8 @@ public class FileVariableTests
 	[Test]
 	public async Task Rapid_writes_end_with_the_last_value_in_memory_and_in_the_file()
 	{
-		_files.SetFile(FilePath, "0", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "0", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 
 		var writes = new TaskCompletionSource();
@@ -283,22 +286,22 @@ public class FileVariableTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("7"));
-			Assert.That(_files.Content(FilePath), Is.EqualTo("7"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("7"));
 		});
 	}
 
 	[Test]
 	public async Task Another_application_writing_a_value_we_wrote_earlier_is_still_applied()
 	{
-		_files.SetFile(FilePath, "0", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "0", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 		await _service.SetValue(id, 5m);
 		await _synchronizer.WhenIdleAsync();
 		await _service.SetValue(id, 6m);
 		await _synchronizer.WhenIdleAsync();
 
-		await ChangeFileExternally(FilePath, "5");
+		await ChangeFileExternally(_filePath, "5");
 
 		Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("5"));
 	}
@@ -306,17 +309,17 @@ public class FileVariableTests
 	[Test]
 	public async Task A_failed_write_back_keeps_the_users_value_and_shows_the_variable_as_unavailable()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 		_files.WriteFailure = _ => new UnauthorizedAccessException("read-only file");
 
 		await _service.SetValue(id, 5m);
 		await _synchronizer.WhenIdleAsync();
-		var afterFailure = (_registry.GetById(id)!.Value, _registry.IsAvailable(id), _files.Content(FilePath));
+		var afterFailure = (_registry.GetById(id)!.Value, _registry.IsAvailable(id), _files.Content(_filePath));
 
 		_files.WriteFailure = null;
-		await ChangeFileExternally(FilePath, "8");
+		await ChangeFileExternally(_filePath, "8");
 
 		Assert.Multiple(() =>
 		{
@@ -329,7 +332,7 @@ public class FileVariableTests
 	[Test]
 	public async Task A_write_back_into_a_missing_file_creates_it_and_makes_the_variable_available()
 	{
-		var created = await CreateFileVariable("note", VariableType.Text, allowWriteBack: true);
+		var created = await CreateFileVariable("note", VariableType.Text, true);
 		var id = created.Data!.Id;
 
 		await _service.SetValue(id, "created by Macro Deck");
@@ -337,7 +340,7 @@ public class FileVariableTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_files.Content(FilePath), Is.EqualTo("created by Macro Deck"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("created by Macro Deck"));
 			Assert.That(_registry.IsAvailable(id), Is.True);
 		});
 	}
@@ -345,8 +348,8 @@ public class FileVariableTests
 	[Test]
 	public async Task A_handler_that_throws_during_a_write_does_not_stop_later_file_changes()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 		var throwOnce = true;
 		_mediator.BeforePublish = notification =>
@@ -360,7 +363,7 @@ public class FileVariableTests
 
 		Assert.ThrowsAsync<InvalidOperationException>(() => _service.SetValue(id, 5m));
 		await _synchronizer.WhenIdleAsync();
-		await ChangeFileExternally(FilePath, "9");
+		await ChangeFileExternally(_filePath, "9");
 
 		Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("9"));
 	}
@@ -368,23 +371,23 @@ public class FileVariableTests
 	[Test]
 	public async Task A_new_path_is_read_and_the_old_file_no_longer_counts()
 	{
-		_files.SetFile(FilePath, "old", notify: false);
-		_files.SetFile(OtherFilePath, "other", notify: false);
+		_files.SetFile(_filePath, "old", false);
+		_files.SetFile(_otherFilePath, "other", false);
 		var created = await CreateFileVariable("status", VariableType.Text);
 		var id = created.Data!.Id;
 
-		var updated = await _service.UpdateUserVariable(id, null, null, new VariableFileSource(OtherFilePath, false));
+		var updated = await _service.UpdateUserVariable(id, null, null, new VariableFileSource(_otherFilePath, false));
 		await _synchronizer.WhenIdleAsync();
 		var afterSwitch = _registry.GetById(id)!.Value;
-		await ChangeFileExternally(FilePath, "ignored");
-		await ChangeFileExternally(OtherFilePath, "followed");
+		await ChangeFileExternally(_filePath, "ignored");
+		await ChangeFileExternally(_otherFilePath, "followed");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(updated.Success, Is.True);
 			Assert.That(afterSwitch, Is.EqualTo("other"));
 			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("followed"));
-			Assert.That(_files.WatcherCount(FilePath), Is.Zero);
+			Assert.That(_files.WatcherCount(_filePath), Is.Zero);
 			Assert.That(_files.Writes, Is.Empty);
 		});
 	}
@@ -392,8 +395,8 @@ public class FileVariableTests
 	[Test]
 	public async Task Turning_write_back_off_drops_a_queued_write_and_follows_the_file_again()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
-		var created = await CreateFileVariable("level", VariableType.Numeric, allowWriteBack: true);
+		_files.SetFile(_filePath, "1", false);
+		var created = await CreateFileVariable("level", VariableType.Numeric, true);
 		var id = created.Data!.Id;
 		var writes = new TaskCompletionSource();
 		_files.WriteGate = writes;
@@ -401,7 +404,7 @@ public class FileVariableTests
 		await WaitUntil(() => _files.GatedWrites == 1);
 		await _service.SetValue(id, 6m);
 
-		await _service.UpdateUserVariable(id, null, null, new VariableFileSource(FilePath, false));
+		await _service.UpdateUserVariable(id, null, null, new VariableFileSource(_filePath, false));
 		_files.WriteGate = null;
 		writes.SetResult();
 		await _synchronizer.WhenIdleAsync();
@@ -409,7 +412,7 @@ public class FileVariableTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_files.Writes.Select(write => write.Content), Is.EqualTo(new[] { "5" }));
-			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo(_files.Content(FilePath)));
+			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo(_files.Content(_filePath)));
 			Assert.That(_registry.GetById(id)!.CanWrite, Is.False);
 		});
 	}
@@ -417,20 +420,23 @@ public class FileVariableTests
 	[Test]
 	public async Task A_refused_update_leaves_the_file_source_as_it_was()
 	{
-		_files.SetFile(FilePath, "old", notify: false);
-		_files.SetFile(OtherFilePath, "other", notify: false);
+		_files.SetFile(_filePath, "old", false);
+		_files.SetFile(_otherFilePath, "other", false);
 		await _service.CreateUserVariable("taken", VariableScope.Global, null, VariableType.Text, "x", null);
 		var created = await CreateFileVariable("status", VariableType.Text);
 		var id = created.Data!.Id;
 
-		var updated = await _service.UpdateUserVariable(id, "taken", null, new VariableFileSource(OtherFilePath, true));
+		var updated = await _service.UpdateUserVariable(id,
+			"taken",
+			null,
+			new VariableFileSource(_otherFilePath, true));
 		await _synchronizer.WhenIdleAsync();
-		await ChangeFileExternally(FilePath, "still followed");
+		await ChangeFileExternally(_filePath, "still followed");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(updated.Error, Is.EqualTo(VariableError.AlreadyExists));
-			Assert.That(_registry.GetById(id)!.FileSource, Is.EqualTo(new VariableFileSource(FilePath, false)));
+			Assert.That(_registry.GetById(id)!.FileSource, Is.EqualTo(new VariableFileSource(_filePath, false)));
 			Assert.That(_registry.GetById(id)!.CanWrite, Is.False);
 			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("still followed"));
 		});
@@ -439,8 +445,8 @@ public class FileVariableTests
 	[Test]
 	public async Task Setting_the_value_the_file_already_holds_leaves_the_file_untouched()
 	{
-		_files.SetFile(FilePath, "Hello\n", notify: false);
-		var created = await CreateFileVariable("greeting", VariableType.Text, allowWriteBack: true);
+		_files.SetFile(_filePath, "Hello\n", false);
+		var created = await CreateFileVariable("greeting", VariableType.Text, true);
 
 		await _service.SetValue(created.Data!.Id, "Hello");
 		await _synchronizer.WhenIdleAsync();
@@ -448,20 +454,20 @@ public class FileVariableTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_files.Writes, Is.Empty);
-			Assert.That(_files.Content(FilePath), Is.EqualTo("Hello\n"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("Hello\n"));
 		});
 	}
 
 	[Test]
 	public async Task A_set_right_after_an_external_change_still_reaches_the_file()
 	{
-		_files.SetFile(FilePath, "B", notify: false);
-		var created = await CreateFileVariable("state", VariableType.Text, allowWriteBack: true);
+		_files.SetFile(_filePath, "B", false);
+		var created = await CreateFileVariable("state", VariableType.Text, true);
 		var id = created.Data!.Id;
 
 		var gate = new TaskCompletionSource();
 		_files.ReadGate = gate;
-		_files.SetFile(FilePath, "A");
+		_files.SetFile(_filePath, "A");
 		await WaitUntil(() => _files.GatedReads == 1);
 		await _service.SetValue(id, "B");
 		_files.ReadGate = null;
@@ -470,7 +476,7 @@ public class FileVariableTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_files.Content(FilePath), Is.EqualTo("B"));
+			Assert.That(_files.Content(_filePath), Is.EqualTo("B"));
 			Assert.That(_registry.GetById(id)!.Value, Is.EqualTo("B"));
 		});
 	}
@@ -478,12 +484,17 @@ public class FileVariableTests
 	[Test]
 	public async Task A_normal_variable_cannot_be_given_a_file_source_afterwards()
 	{
-		var created = await _service.CreateUserVariable("count", VariableScope.Global, null, VariableType.Numeric, 1, null);
+		var created = await _service.CreateUserVariable("count",
+			VariableScope.Global,
+			null,
+			VariableType.Numeric,
+			1,
+			null);
 
 		var updated = await _service.UpdateUserVariable(created.Data!.Id,
 			null,
 			null,
-			new VariableFileSource(FilePath, false));
+			new VariableFileSource(_filePath, false));
 
 		Assert.That(updated.Error, Is.EqualTo(VariableError.ValidationError));
 	}
@@ -505,7 +516,7 @@ public class FileVariableTests
 	[Test]
 	public async Task Deleting_a_variable_or_its_widget_stops_watching_the_file()
 	{
-		_files.SetFile(FilePath, "1", notify: false);
+		_files.SetFile(_filePath, "1", false);
 		var global = await CreateFileVariable("level", VariableType.Numeric);
 		await _service.CreateUserVariable("local",
 			VariableScope.Widget,
@@ -513,22 +524,27 @@ public class FileVariableTests
 			VariableType.Numeric,
 			null,
 			null,
-			new VariableFileSource(OtherFilePath, false));
+			new VariableFileSource(_otherFilePath, false));
 
 		await _service.DeleteUserVariable(global.Data!.Id);
 		await _service.DeleteByScopeInstance(VariableScope.Widget, WidgetId);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_files.WatcherCount(FilePath), Is.Zero);
-			Assert.That(_files.WatcherCount(OtherFilePath), Is.Zero);
+			Assert.That(_files.WatcherCount(_filePath), Is.Zero);
+			Assert.That(_files.WatcherCount(_otherFilePath), Is.Zero);
 		});
 	}
 
 	[Test]
 	public async Task A_normal_user_variable_stays_writable()
 	{
-		var created = await _service.CreateUserVariable("count", VariableScope.Global, null, VariableType.Numeric, 1, null);
+		var created = await _service.CreateUserVariable("count",
+			VariableScope.Global,
+			null,
+			VariableType.Numeric,
+			1,
+			null);
 
 		var result = await _service.SetValue(created.Data!.Id, 2m);
 
@@ -544,13 +560,15 @@ public class FileVariableTests
 		string name,
 		VariableType type,
 		bool allowWriteBack = false)
-		=> _service.CreateUserVariable(name,
+	{
+		return _service.CreateUserVariable(name,
 			VariableScope.Global,
 			null,
 			type,
 			null,
 			null,
-			new VariableFileSource(FilePath, allowWriteBack));
+			new VariableFileSource(_filePath, allowWriteBack));
+	}
 
 	private async Task ChangeFileExternally(string path, string content)
 	{
@@ -559,7 +577,9 @@ public class FileVariableTests
 	}
 
 	private List<VariableValueChangedNotification> ValueChanges()
-		=> _mediator.Published.OfType<VariableValueChangedNotification>().ToList();
+	{
+		return _mediator.Published.OfType<VariableValueChangedNotification>().ToList();
+	}
 
 	private static async Task WaitUntil(Func<bool> condition)
 	{
@@ -575,8 +595,14 @@ public class FileVariableTests
 	{
 		public int Saves { get; private set; }
 
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
-		public void Save(IEnumerable<VariableEntity> userVariables) => Saves++;
+		public void Save(IEnumerable<VariableEntity> userVariables)
+		{
+			Saves++;
+		}
 	}
 }

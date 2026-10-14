@@ -54,14 +54,19 @@ public interface IVideoStreamProvider
 	/// The consumer stopped showing the stream for now, for example because the page is hidden. The
 	/// default does nothing and keeps the session running.
 	/// </summary>
-	Task SuspendAsync(string sessionId, CancellationToken cancellationToken) => Task.CompletedTask;
+	Task SuspendAsync(string sessionId, CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// The consumer shows a suspended stream again. Returns a new description, or null when the previous
 	/// one is still valid, which is the default.
 	/// </summary>
 	Task<VideoStreamSessionDescription?> ResumeAsync(string sessionId, CancellationToken cancellationToken)
-		=> Task.FromResult<VideoStreamSessionDescription?>(null);
+	{
+		return Task.FromResult<VideoStreamSessionDescription?>(null);
+	}
 
 	/// <summary>
 	/// Ends a session and releases whatever it holds. Called exactly once per opened session; see the

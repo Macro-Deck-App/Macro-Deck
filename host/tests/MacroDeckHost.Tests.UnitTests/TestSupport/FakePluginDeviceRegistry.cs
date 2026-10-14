@@ -17,10 +17,14 @@ internal sealed class FakePluginDeviceRegistry : IPluginDeviceRegistry
 	public IReadOnlyDictionary<(string Provider, string Device), DeviceDescriptor> Devices => _devices;
 
 	public bool IsOnline(string providerId, string deviceId)
-		=> _online.GetValueOrDefault((providerId, deviceId));
+	{
+		return _online.GetValueOrDefault((providerId, deviceId));
+	}
 
 	public string? AssignedIdOf(string providerId, string deviceId)
-		=> _ids.GetValueOrDefault((providerId, deviceId));
+	{
+		return _ids.GetValueOrDefault((providerId, deviceId));
+	}
 
 	public Task<DeviceRegistration> RegisterAsync(
 		string providerId,

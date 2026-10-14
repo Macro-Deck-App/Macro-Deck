@@ -11,7 +11,9 @@ public class ApplicationActionsTests
 	private static readonly string[] _expectedOpenedFolders = ["/tmp"];
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	[Test]
 	public async Task LaunchApplication_forwards_path_arguments_working_directory_mode_and_admin()
@@ -19,14 +21,15 @@ public class ApplicationActionsTests
 		var applications = new FakeApplicationService();
 		var action = new LaunchApplicationActionDefinition(applications);
 
-		await action.CreateExecutor().ExecuteAsync(Context(new Dictionary<string, object>
-		{
-			["path"] = "/usr/bin/app",
-			["arguments"] = "--flag",
-			["workingDirectory"] = "/work",
-			["mode"] = "start-focus",
-			["runAsAdmin"] = true
-		}));
+		await action.CreateExecutor()
+			.ExecuteAsync(Context(new Dictionary<string, object>
+			{
+				["path"] = "/usr/bin/app",
+				["arguments"] = "--flag",
+				["workingDirectory"] = "/work",
+				["mode"] = "start-focus",
+				["runAsAdmin"] = true
+			}));
 
 		Assert.That(applications.Launches, Has.Count.EqualTo(1));
 		Assert.That(applications.Launches[0],
@@ -64,7 +67,9 @@ public class ApplicationActionsTests
 	[TestCase("start-focus", LaunchMode.StartFocus)]
 	[TestCase("unknown", LaunchMode.Start)]
 	public void ParseMode_maps_choice_values(string value, LaunchMode expected)
-		=> Assert.That(LaunchApplicationActionDefinition.ParseMode(value), Is.EqualTo(expected));
+	{
+		Assert.That(LaunchApplicationActionDefinition.ParseMode(value), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public async Task OpenWebsite_OpenFile_and_OpenFolder_forward_values()
@@ -103,14 +108,18 @@ public class ApplicationActionsTests
 	[TestCase("http://example.com")]
 	[TestCase("https://example.com/dashboard?tab=1")]
 	public void IsWebsiteUrl_accepts_http_and_https_urls(string url)
-		=> Assert.That(ApplicationServiceBase.IsWebsiteUrl(url), Is.True);
+	{
+		Assert.That(ApplicationServiceBase.IsWebsiteUrl(url), Is.True);
+	}
 
 	[TestCase("")]
 	[TestCase("example.com")]
 	[TestCase("ftp://example.com")]
 	[TestCase("mailto:hello@example.com")]
 	public void IsWebsiteUrl_rejects_missing_or_unsupported_protocols(string url)
-		=> Assert.That(ApplicationServiceBase.IsWebsiteUrl(url), Is.False);
+	{
+		Assert.That(ApplicationServiceBase.IsWebsiteUrl(url), Is.False);
+	}
 
 	[Test]
 	public async Task KillApplication_defaults_to_graceful()

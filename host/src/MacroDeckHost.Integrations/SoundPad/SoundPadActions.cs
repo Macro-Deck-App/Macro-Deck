@@ -37,7 +37,8 @@ internal static class SoundPadActions
 		string integrationId,
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=>
+	{
+		return
 		[
 			new MusicPlayerItemActionDefinition(integrationId,
 				resolver,
@@ -62,7 +63,6 @@ internal static class SoundPadActions
 				AppStrings.Integrations.SoundPad.Actions.StartRecordingDescription(),
 				[
 					ActionParameter.Choice(SourceParameter,
-						options:
 						[
 							new ActionParameterOption
 							{
@@ -80,7 +80,7 @@ internal static class SoundPadActions
 								Label = AppStrings.Integrations.SoundPad.Actions.SourceSpeakers()
 							}
 						],
-						label: AppStrings.Integrations.SoundPad.Actions.SourceLabel(),
+						AppStrings.Integrations.SoundPad.Actions.SourceLabel(),
 						defaultValue: SourceDefault,
 						required: true)
 				],
@@ -100,15 +100,20 @@ internal static class SoundPadActions
 				AppStrings.Integrations.SoundPad.Actions.ToggleMuteDescription(),
 				[],
 				(player, _, ct) => player.ToggleMuteAsync(ct)),
-			.. MusicPlayerActions.Common(resolver, getInstances).Where(action => !_unsupportedCommon.Contains(action.Id))
+			.. MusicPlayerActions.Common(resolver, getInstances)
+				.Where(action => !_unsupportedCommon.Contains(action.Id))
 		];
+	}
 
-	public static SoundPadRecordingSource ParseSource(string? value) => value switch
+	public static SoundPadRecordingSource ParseSource(string? value)
 	{
-		SourceMicrophone => SoundPadRecordingSource.Microphone,
-		SourceSpeakers => SoundPadRecordingSource.Speakers,
-		_ => SoundPadRecordingSource.Default
-	};
+		return value switch
+		{
+			SourceMicrophone => SoundPadRecordingSource.Microphone,
+			SourceSpeakers => SoundPadRecordingSource.Speakers,
+			_ => SoundPadRecordingSource.Default
+		};
+	}
 
 	private static MusicPlayerActionDefinition Command(
 		MusicPlayerResolver resolver,
@@ -118,17 +123,21 @@ internal static class SoundPadActions
 		LocalizedText description,
 		IReadOnlyList<ActionParameter> parameters,
 		Func<SoundPadMusicPlayer, IReadOnlyDictionary<string, object>, CancellationToken, Task> command)
-		=> new(resolver,
+	{
+		return new MusicPlayerActionDefinition(resolver,
 			getInstances,
 			id,
 			name,
 			description,
 			parameters,
 			(player, values, _, ct) => command(AsSoundPad(player), values, ct));
+	}
 
 	private static SoundPadMusicPlayer AsSoundPad(IMusicPlayer player)
-		=> player as SoundPadMusicPlayer ??
-			throw new InvalidOperationException("The resolved music player is not SoundPad.");
+	{
+		return player as SoundPadMusicPlayer
+			?? throw new InvalidOperationException("The resolved music player is not SoundPad.");
+	}
 
 	private static string? ReadText(IReadOnlyDictionary<string, object> values, string name)
 	{
@@ -144,12 +153,14 @@ internal static class SoundPadActions
 	}
 
 	private static bool ReadBool(IReadOnlyDictionary<string, object> values, string name, bool fallback)
-		=> values.GetValueOrDefault(name) switch
+	{
+		return values.GetValueOrDefault(name) switch
 		{
 			bool b => b,
 			string s when bool.TryParse(s, out var parsed) => parsed,
 			_ => fallback
 		};
+	}
 
 	private sealed class PlayRandomSoundActionDefinition : MusicPlayerActionDefinition
 	{
@@ -168,14 +179,14 @@ internal static class SoundPadActions
 				AppStrings.Integrations.SoundPad.Actions.PlayRandomSoundDescription(),
 				[
 					ActionParameter.DynamicChoice(CategoryParameter,
-						label: AppStrings.Integrations.SoundPad.Actions.CategoryLabel(),
-						description: AppStrings.Integrations.SoundPad.Actions.CategoryDescription(),
+						AppStrings.Integrations.SoundPad.Actions.CategoryLabel(),
+						AppStrings.Integrations.SoundPad.Actions.CategoryDescription(),
 						placeholder: AppStrings.Integrations.SoundPad.Actions.AllSounds()),
 					ActionParameter.Toggle(SpeakersParameter,
-						label: AppStrings.Integrations.SoundPad.Actions.PlayOnSpeakersLabel(),
+						AppStrings.Integrations.SoundPad.Actions.PlayOnSpeakersLabel(),
 						defaultValue: true),
 					ActionParameter.Toggle(MicrophoneParameter,
-						label: AppStrings.Integrations.SoundPad.Actions.PlayOnMicrophoneLabel(),
+						AppStrings.Integrations.SoundPad.Actions.PlayOnMicrophoneLabel(),
 						defaultValue: true)
 				],
 				(player, values, _, ct) => AsSoundPad(player)
@@ -187,7 +198,8 @@ internal static class SoundPadActions
 			_resolver = resolver;
 		}
 
-		public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+		public override async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+			DynamicOptionsContext context,
 			CancellationToken cancellationToken)
 		{
 			if (context.ParameterName != CategoryParameter)
@@ -226,11 +238,13 @@ internal static class SoundPadActions
 		}
 
 		private static int? ReadCategory(IReadOnlyDictionary<string, object> values)
-			=> int.TryParse(ReadText(values, CategoryParameter),
+		{
+			return int.TryParse(ReadText(values, CategoryParameter),
 				NumberStyles.Integer,
 				CultureInfo.InvariantCulture,
 				out var index)
 				? index
 				: null;
+		}
 	}
 }

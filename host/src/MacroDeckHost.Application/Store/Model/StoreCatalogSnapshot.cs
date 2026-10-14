@@ -30,14 +30,21 @@ public sealed record StoreCatalogSnapshot
 
 	// The registry requires a version on every entry, so one without is malformed and fails closed as
 	// covering every version of the package.
-	public StoreRemovedPackage? FindRemoval(string id, string? version) =>
-		RemovedPackages.FirstOrDefault(removed =>
-			string.Equals(removed.Id, id, StringComparison.OrdinalIgnoreCase) &&
-			(string.IsNullOrWhiteSpace(removed.Version) ||
-				(version is not null && StoreVersions.Same(removed.Version, version))));
+	public StoreRemovedPackage? FindRemoval(string id, string? version)
+	{
+		return RemovedPackages.FirstOrDefault(removed =>
+			string.Equals(removed.Id, id, StringComparison.OrdinalIgnoreCase)
+			&& (string.IsNullOrWhiteSpace(removed.Version)
+				|| version is not null && StoreVersions.Same(removed.Version, version)));
+	}
 
-	public StoreRemovedPackage? FindWithdrawal(StoreCatalogEntry entry) => FindRemoval(entry.Id, entry.LatestVersion);
+	public StoreRemovedPackage? FindWithdrawal(StoreCatalogEntry entry)
+	{
+		return FindRemoval(entry.Id, entry.LatestVersion);
+	}
 
-	public bool HasRemoval(string id) =>
-		RemovedPackages.Any(removed => string.Equals(removed.Id, id, StringComparison.OrdinalIgnoreCase));
+	public bool HasRemoval(string id)
+	{
+		return RemovedPackages.Any(removed => string.Equals(removed.Id, id, StringComparison.OrdinalIgnoreCase));
+	}
 }

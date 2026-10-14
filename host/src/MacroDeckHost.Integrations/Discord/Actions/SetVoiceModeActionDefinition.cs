@@ -28,7 +28,6 @@ internal sealed class SetVoiceModeActionDefinition : IActionDefinition, IStatePr
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -45,7 +44,7 @@ internal sealed class SetVoiceModeActionDefinition : IActionDefinition, IStatePr
 					Label = AppStrings.Integrations.Discord.Actions.SetVoiceMode.VoiceActivityOption()
 				}
 			],
-			label: AppStrings.Integrations.Discord.Actions.SetVoiceMode.ModeLabel(),
+			AppStrings.Integrations.Discord.Actions.SetVoiceMode.ModeLabel(),
 			defaultValue: ModeToggle)
 	];
 
@@ -62,7 +61,10 @@ internal sealed class SetVoiceModeActionDefinition : IActionDefinition, IStatePr
 		ActionStates.Unavailable
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(Id, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(Id, _resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -123,8 +125,10 @@ internal sealed class SetVoiceModeActionDefinition : IActionDefinition, IStatePr
 		}
 
 		private static string Flip(string? current)
-			=> string.Equals(current, DiscordVoiceModes.PushToTalk, StringComparison.Ordinal)
+		{
+			return string.Equals(current, DiscordVoiceModes.PushToTalk, StringComparison.Ordinal)
 				? DiscordVoiceModes.VoiceActivity
 				: DiscordVoiceModes.PushToTalk;
+		}
 	}
 }

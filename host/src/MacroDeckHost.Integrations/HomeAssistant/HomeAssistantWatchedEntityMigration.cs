@@ -69,7 +69,9 @@ internal sealed class HomeAssistantWatchedEntityMigration
 	}
 
 	private static VariableBindingRequest Request(string localResourceId, string name)
-		=> new(localResourceId, name, VariableType.Text) { MigratedFrom = MigratedFromId };
+	{
+		return new VariableBindingRequest(localResourceId, name, VariableType.Text) { MigratedFrom = MigratedFromId };
+	}
 
 	private async Task<Guid?> ResolveEntryAsync(CancellationToken cancellationToken)
 	{

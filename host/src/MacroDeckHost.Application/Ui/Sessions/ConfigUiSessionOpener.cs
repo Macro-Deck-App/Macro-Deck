@@ -40,7 +40,8 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	private readonly IWidgetProviderAvailability _availability;
 	private readonly UnavailableWidgetSessionRecovery _recovery;
 
-	public ConfigUiSessionOpener(IIntegrationRegistry integrations,
+	public ConfigUiSessionOpener(
+		IIntegrationRegistry integrations,
 		IConfigFlowManager configFlows,
 		IFolderViewRegistry folderViews,
 		IScreenSaverRegistry screenSavers,
@@ -152,7 +153,9 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
-		=> _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == widgetId);
+	{
+		return _folderCache.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(w => w.Id == widgetId);
+	}
 
 	private bool TryResolveProviderId(
 		OpenConfigUiSessionRequest request,
@@ -268,8 +271,7 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	{
 		providerId = string.Empty;
 
-		if (string.IsNullOrEmpty(request.FolderViewId) ||
-			!_folderViews.TryResolve(request.FolderViewId, out var entry))
+		if (string.IsNullOrEmpty(request.FolderViewId) || !_folderViews.TryResolve(request.FolderViewId, out var entry))
 		{
 			rejection = Rejection.NoSuchFolderView;
 			return false;
@@ -293,8 +295,8 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 	{
 		providerId = string.Empty;
 
-		if (string.IsNullOrEmpty(request.ScreenSaverId) ||
-			!_screenSavers.TryResolve(request.ScreenSaverId, out var entry))
+		if (string.IsNullOrEmpty(request.ScreenSaverId)
+			|| !_screenSavers.TryResolve(request.ScreenSaverId, out var entry))
 		{
 			rejection = Rejection.NoSuchScreenSaver;
 			return false;
@@ -328,8 +330,8 @@ public sealed class ConfigUiSessionOpener : IConfigUiSessionOpener
 				= JsonSerializer.SerializeToElement(flowSessionId);
 		}
 
-		if (string.Equals(request.EntryPoint, UiConfigEntryPoints.ActionConfig, StringComparison.Ordinal) &&
-			action is not null)
+		if (string.Equals(request.EntryPoint, UiConfigEntryPoints.ActionConfig, StringComparison.Ordinal)
+			&& action is not null)
 		{
 			attributes[UiConfigSurfaceAttributes.ActionId]
 				= JsonSerializer.SerializeToElement(request.ActionId ?? string.Empty);

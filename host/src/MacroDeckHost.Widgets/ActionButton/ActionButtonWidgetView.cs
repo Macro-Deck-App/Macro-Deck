@@ -17,9 +17,9 @@ internal static class ActionButtonWidgetView
 {
 	// The retired ActionButtonWidgetComponent's fixed 5px label inset, expressed as a basis fraction
 	// (issue's resolved decision: "the 5 px label padding becomes a 0.05 basis fraction").
-	private const double _labelPadding = 0.05;
-	private const double _labelBoxPadding = 0.03;
-	private const double _labelBoxRadius = 0.03;
+	private const double LabelPadding = 0.05;
+	private const double BaseLabelBoxPadding = 0.03;
+	private const double LabelBoxRadius = 0.03;
 
 	public static UiElement Build(
 		UiState<ActionButtonWidgetData> config,
@@ -69,7 +69,7 @@ internal static class ActionButtonWidgetView
 			StrokeWidth = UiSize.Optional(() =>
 				Appearance(config, activeState) is { HasLabelOutline: true } appearance
 					? UiSize.FromBasis(appearance.LabelOutlineWidth / 100.0)
-					: UiSize.None()),
+					: UiSize.None())
 		};
 
 		var labelBox = new UiModifier
@@ -81,7 +81,7 @@ internal static class ActionButtonWidgetView
 					? UiValue.Of(UiBackground.Solid(color))
 					: UiValue.None<UiBackground>()),
 			Radius = UiSize.From(() => UiLength.OfBasis(
-				HasLabelBox(Appearance(config, activeState)) ? _labelBoxRadius : 0)),
+				HasLabelBox(Appearance(config, activeState)) ? LabelBoxRadius : 0)),
 			BorderWidth = UiSize.Optional(() =>
 				Appearance(config, activeState) is { HasLabelBoxBorder: true } appearance
 					? UiSize.FromBasis(appearance.LabelBoxBorderWidth / 100.0)
@@ -92,7 +92,7 @@ internal static class ActionButtonWidgetView
 					: UiValue.None<string>()),
 			Fill = UiValue.Optional(() =>
 				HasLabelBox(Appearance(config, activeState)) ? UiValue.None<bool>() : UiValue.Of(true)),
-			Child = label,
+			Child = label
 		};
 
 		var labelRow = new UiStack
@@ -103,7 +103,7 @@ internal static class ActionButtonWidgetView
 				Appearance(config, activeState) is var appearance && HasLabelBox(appearance)
 					? UiValue.Of(JustifyForAlign(appearance.TextAlign))
 					: UiValue.None<string>()),
-			Children = [labelBox],
+			Children = [labelBox]
 		};
 
 		return new UiButton
@@ -125,23 +125,23 @@ internal static class ActionButtonWidgetView
 					? UiValue.Of(ActionButtonIconDisplay.Cover)
 					: UiValue.None<string>()),
 			Zoom = UiValue.Optional(() =>
-				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d &&
-				d.Zoom != 100
+				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d
+				&& d.Zoom != 100
 					? UiValue.Of(d.Zoom / 100.0)
 					: UiValue.None<double>()),
 			OffsetX = UiValue.Optional(() =>
-				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d &&
-				d.OffsetX != 0
+				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d
+				&& d.OffsetX != 0
 					? UiValue.Of(d.OffsetX / 100.0)
 					: UiValue.None<double>()),
 			OffsetY = UiValue.Optional(() =>
-				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d &&
-				d.OffsetY != 0
+				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d
+				&& d.OffsetY != 0
 					? UiValue.Of(d.OffsetY / 100.0)
 					: UiValue.None<double>()),
 			Opacity = UiValue.Optional(() =>
-				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d &&
-				d.Opacity != 100
+				BackdropDisplay(config, activeState, iconResources, iconProvider, imageResource) is { } d
+				&& d.Opacity != 100
 					? UiValue.Of(d.Opacity / 100.0)
 					: UiValue.None<double>()),
 			Tint = UiValue.Optional(() =>
@@ -165,7 +165,7 @@ internal static class ActionButtonWidgetView
 			Fallback = new UiStack
 			{
 				Key = "actionButtonFallback",
-				Padding = UiSize.FromBasis(_labelPadding),
+				Padding = UiSize.FromBasis(LabelPadding),
 				Justify = UiValue.From(() => JustifyFor(Appearance(config, activeState).LabelPosition)),
 				Background = UiValue.Optional(() =>
 				{
@@ -173,13 +173,15 @@ internal static class ActionButtonWidgetView
 
 					return background is null ? UiValue.None<string>() : UiValue.Of(background);
 				}),
-				Children = [label],
-			},
+				Children = [label]
+			}
 		};
 	}
 
 	private static bool HasLabelBox(ActionButtonResolvedAppearance appearance)
-		=> appearance.LabelBoxColor is not null || appearance.HasLabelBoxBorder;
+	{
+		return appearance.LabelBoxColor is not null || appearance.HasLabelBoxBorder;
+	}
 
 	// The modifier border is drawn inside the box edge, so the padding grows with it to keep it off the text.
 	private static double LabelBoxPadding(ActionButtonResolvedAppearance appearance)
@@ -189,12 +191,15 @@ internal static class ActionButtonWidgetView
 			return 0;
 		}
 
-		return _labelBoxPadding + (appearance.HasLabelBoxBorder ? appearance.LabelBoxBorderWidth / 100.0 : 0);
+		return BaseLabelBoxPadding + (appearance.HasLabelBoxBorder ? appearance.LabelBoxBorderWidth / 100.0 : 0);
 	}
 
-	private static ActionButtonResolvedAppearance Appearance(UiState<ActionButtonWidgetData> config,
+	private static ActionButtonResolvedAppearance Appearance(
+		UiState<ActionButtonWidgetData> config,
 		UiState<string?> activeState)
-		=> config.Value.Resolve(activeState.Value);
+	{
+		return config.Value.Resolve(activeState.Value);
+	}
 
 	private readonly record struct ResolvedBackdrop(
 		UiValue<UiResource> Source,
@@ -246,26 +251,37 @@ internal static class ActionButtonWidgetView
 		UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> iconResources,
 		UiState<WidgetIconResolution> iconProvider,
 		UiResource? imageResource)
-		=> Backdrop(config, activeState, iconResources, iconProvider, imageResource).Display;
-
-	private static string JustifyFor(string labelPosition) => labelPosition switch
 	{
-		"top" => UiComponentJustify.Start,
-		"bottom" => UiComponentJustify.End,
-		_ => UiComponentJustify.Center,
-	};
+		return Backdrop(config, activeState, iconResources, iconProvider, imageResource).Display;
+	}
 
-	private static string JustifyForAlign(string textAlign) => textAlign switch
+	private static string JustifyFor(string labelPosition)
 	{
-		"left" => UiComponentJustify.Start,
-		"right" => UiComponentJustify.End,
-		_ => UiComponentJustify.Center,
-	};
+		return labelPosition switch
+		{
+			"top" => UiComponentJustify.Start,
+			"bottom" => UiComponentJustify.End,
+			_ => UiComponentJustify.Center
+		};
+	}
 
-	private static string AlignFor(string textAlign) => textAlign switch
+	private static string JustifyForAlign(string textAlign)
 	{
-		"left" => UiComponentAlignments.Start,
-		"right" => UiComponentAlignments.End,
-		_ => UiComponentAlignments.Center,
-	};
+		return textAlign switch
+		{
+			"left" => UiComponentJustify.Start,
+			"right" => UiComponentJustify.End,
+			_ => UiComponentJustify.Center
+		};
+	}
+
+	private static string AlignFor(string textAlign)
+	{
+		return textAlign switch
+		{
+			"left" => UiComponentAlignments.Start,
+			"right" => UiComponentAlignments.End,
+			_ => UiComponentAlignments.Center
+		};
+	}
 }

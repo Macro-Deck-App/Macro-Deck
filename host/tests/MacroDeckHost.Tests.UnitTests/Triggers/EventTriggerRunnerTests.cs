@@ -33,10 +33,14 @@ public class EventTriggerRunnerTests
 	}
 
 	private static EventSubscription Subscription(EventTriggerOwner owner)
-		=> new(owner, "t1", "obs::scene-changed", EventSubscription.NoConfiguration, null);
+	{
+		return new EventSubscription(owner, "t1", "obs::scene-changed", EventSubscription.NoConfiguration, null);
+	}
 
 	private static EventOccurrence Occurrence(EventSubscription subscription)
-		=> new(subscription.EventId, EventOccurrence.NoParameters, subscription.Target);
+	{
+		return new EventOccurrence(subscription.EventId, EventOccurrence.NoParameters, subscription.Target);
+	}
 
 	[Test]
 	public async Task A_widget_trigger_runs_its_widget_data_in_action_button_scope()
@@ -126,7 +130,7 @@ public class EventTriggerRunnerTests
 	[Test]
 	public async Task A_disabled_automation_does_not_run_even_if_an_occurrence_is_already_queued()
 	{
-		var automation = _automations.Add(Flows, enabled: false);
+		var automation = _automations.Add(Flows, false);
 		var subscription = Subscription(EventTriggerOwner.ForAutomation(automation.Id));
 
 		await _runner.Run(subscription, Occurrence(subscription), CancellationToken.None);
@@ -177,11 +181,20 @@ public class EventTriggerRunnerTests
 
 	private sealed class EmptyEventRegistry : IEventRegistry
 	{
-		public IReadOnlyList<EventDefinitionDescriptor> GetDefinitions() => [];
+		public IReadOnlyList<EventDefinitionDescriptor> GetDefinitions()
+		{
+			return [];
+		}
 
-		public EventDefinitionDescriptor? Find(string qualifiedEventId) => null;
+		public EventDefinitionDescriptor? Find(string qualifiedEventId)
+		{
+			return null;
+		}
 
-		public object? FindProvider(string qualifiedEventId) => null;
+		public object? FindProvider(string qualifiedEventId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class AlwaysMatchingMatcher : IEventSubscriptionMatcher
@@ -190,17 +203,26 @@ public class EventTriggerRunnerTests
 			EventSubscription subscription,
 			EventDefinitionDescriptor descriptor,
 			VariableContext context)
-			=> true;
+		{
+			return true;
+		}
 	}
 
 	private sealed class EmptyVariableRenderer : IVariableTemplateRenderer
 	{
 		public Task<string> RenderAsync(string templateText, VariableScope contextScope, string? contextScopeRefId)
-			=> Task.FromResult(templateText);
+		{
+			return Task.FromResult(templateText);
+		}
 
 		public Task<VariableContext> CreateContextAsync(VariableScope contextScope, string? contextScopeRefId)
-			=> Task.FromResult(VariableContext.Empty);
+		{
+			return Task.FromResult(VariableContext.Empty);
+		}
 
-		public string Render(string templateText, VariableContext context) => templateText;
+		public string Render(string templateText, VariableContext context)
+		{
+			return templateText;
+		}
 	}
 }

@@ -3,7 +3,8 @@ namespace MacroDeck.Localization.Compiler;
 /// <summary>One key of a compiled resource set: its default template and the parameters callers pass.</summary>
 internal sealed class LocalizationCompiledEntry
 {
-	public LocalizationCompiledEntry(string key,
+	public LocalizationCompiledEntry(
+		string key,
 		string defaultTemplate,
 		List<LocalizationCompiledParameter> parameters,
 		string? removedGuidance)
@@ -46,7 +47,8 @@ internal sealed class LocalizationCompiledParameter
 /// <summary>The outcome of compiling one scope's resources.</summary>
 internal sealed class LocalizationCompilationResult
 {
-	public LocalizationCompilationResult(string scope,
+	public LocalizationCompilationResult(
+		string scope,
 		string defaultCulture,
 		List<string> cultures,
 		List<LocalizationCompiledEntry> entries,
@@ -224,7 +226,8 @@ internal static class LocalizationCompilation
 	/// method and a class of the same name in the same scope; without this the author sees a duplicate
 	/// definition error inside generated source they did not write.
 	/// </summary>
-	private static void ReportGroupCollisions(LocalizationResourceFile file,
+	private static void ReportGroupCollisions(
+		LocalizationResourceFile file,
 		List<LocalizationCompiledEntry> entries,
 		List<LocalizationFinding> findings)
 	{
@@ -248,8 +251,8 @@ internal static class LocalizationCompilation
 				findings.Add(new LocalizationFinding(LocalizationDiagnosticIds.KeyIsAlsoAGroup,
 					file.Path,
 					entry.Key,
-					$"'{entry.Key}' is a key and also the group '{entry.Key}.…' keys nest under; " +
-					"rename one of them."));
+					$"'{entry.Key}' is a key and also the group '{entry.Key}.…' keys nest under; "
+					+ "rename one of them."));
 			}
 		}
 	}
@@ -267,7 +270,8 @@ internal static class LocalizationCompilation
 		return null;
 	}
 
-	private static Dictionary<string, ResxEntry> CollectEntries(LocalizationResourceFile file,
+	private static Dictionary<string, ResxEntry> CollectEntries(
+		LocalizationResourceFile file,
 		List<LocalizationFinding> findings)
 	{
 		var collected = new Dictionary<string, ResxEntry>(StringComparer.Ordinal);
@@ -295,7 +299,8 @@ internal static class LocalizationCompilation
 	/// ordinary entry already owns - is reported and its forms fall back to being ordinary entries, so a
 	/// broken declaration costs a diagnostic rather than silently removing members.
 	/// </summary>
-	private static PluralFamilies CollectPluralFamilies(LocalizationResourceFile file,
+	private static PluralFamilies CollectPluralFamilies(
+		LocalizationResourceFile file,
 		Dictionary<string, ResxEntry> defaultEntries,
 		List<LocalizationFinding> findings)
 	{
@@ -314,8 +319,8 @@ internal static class LocalizationCompilation
 				findings.Add(new LocalizationFinding(LocalizationDiagnosticIds.InvalidPluralFamily,
 					file.Path,
 					pair.Key,
-					$"'{pair.Key}' is declared '[{LocalizationPluralForms.Marker}]' but does not end in a " +
-					$"plural form; expected '{string.Join("' or '", LocalizationPluralForms.All)}'."));
+					$"'{pair.Key}' is declared '[{LocalizationPluralForms.Marker}]' but does not end in a "
+					+ $"plural form; expected '{string.Join("' or '", LocalizationPluralForms.All)}'."));
 				continue;
 			}
 
@@ -339,8 +344,8 @@ internal static class LocalizationCompilation
 				findings.Add(new LocalizationFinding(LocalizationDiagnosticIds.InvalidPluralFamily,
 					file.Path,
 					family.BaseKey + "." + LocalizationPluralForms.One,
-					$"'{family.BaseKey}' has no '{LocalizationPluralForms.Other}' form; every count that " +
-					"is not one resolves through it."));
+					$"'{family.BaseKey}' has no '{LocalizationPluralForms.Other}' form; every count that "
+					+ "is not one resolves through it."));
 				continue;
 			}
 
@@ -349,8 +354,8 @@ internal static class LocalizationCompilation
 				findings.Add(new LocalizationFinding(LocalizationDiagnosticIds.InvalidPluralFamily,
 					file.Path,
 					family.BaseKey,
-					$"'{family.BaseKey}' is both an ordinary key and the base of a plural family; " +
-					"one of them has to be renamed."));
+					$"'{family.BaseKey}' is both an ordinary key and the base of a plural family; "
+					+ "one of them has to be renamed."));
 				continue;
 			}
 
@@ -365,7 +370,8 @@ internal static class LocalizationCompilation
 		return new PluralFamilies(families, forms);
 	}
 
-	private static List<LocalizationCompiledParameter> ResolveParameters(LocalizationResourceFile file,
+	private static List<LocalizationCompiledParameter> ResolveParameters(
+		LocalizationResourceFile file,
 		ResxEntry entry,
 		List<string> placeholders,
 		List<string> declarable,
@@ -383,8 +389,8 @@ internal static class LocalizationCompilation
 				findings.Add(new LocalizationFinding(LocalizationDiagnosticIds.UnknownParameterType,
 					file.Path,
 					entry.Name,
-					$"'{entry.Name}' declares '{declaration.Name}' as '{declaration.DeclaredType}'; " +
-					$"known types are {LocalizationParameterTypes.KnownNames}."));
+					$"'{entry.Name}' declares '{declaration.Name}' as '{declaration.DeclaredType}'; "
+					+ $"known types are {LocalizationParameterTypes.KnownNames}."));
 				continue;
 			}
 
@@ -412,7 +418,8 @@ internal static class LocalizationCompilation
 		return parameters;
 	}
 
-	private static void ComparePlaceholders(LocalizationResourceFile file,
+	private static void ComparePlaceholders(
+		LocalizationResourceFile file,
 		string key,
 		List<string> expected,
 		string translation,
@@ -512,7 +519,10 @@ internal static class LocalizationCompilation
 	{
 		private readonly List<PluralForm> _forms = new();
 
-		public PluralFamily(string baseKey) => BaseKey = baseKey;
+		public PluralFamily(string baseKey)
+		{
+			BaseKey = baseKey;
+		}
 
 		public string BaseKey { get; }
 
@@ -540,7 +550,10 @@ internal static class LocalizationCompilation
 			}
 		}
 
-		public void Add(string form, ResxEntry entry) => _forms.Add(new PluralForm(this, form, entry));
+		public void Add(string form, ResxEntry entry)
+		{
+			_forms.Add(new PluralForm(this, form, entry));
+		}
 
 		public bool Has(string form)
 		{
@@ -555,7 +568,8 @@ internal static class LocalizationCompilation
 			return false;
 		}
 
-		public LocalizationCompiledEntry Compile(LocalizationResourceFile file,
+		public LocalizationCompiledEntry Compile(
+			LocalizationResourceFile file,
 			List<LocalizationFinding> findings)
 		{
 			var other = Form(LocalizationPluralForms.Other)!;
@@ -570,8 +584,8 @@ internal static class LocalizationCompilation
 			// it - "one icon" needs the value it does not show.
 			for (var index = 0; index < parameters.Count; index++)
 			{
-				if (parameters[index].Name == LocalizationPluralForms.CountParameter &&
-					parameters[index].Type == LocalizationParameterType.String)
+				if (parameters[index].Name == LocalizationPluralForms.CountParameter
+					&& parameters[index].Type == LocalizationParameterType.String)
 				{
 					parameters[index] = new LocalizationCompiledParameter(LocalizationPluralForms.CountParameter,
 						LocalizationParameterType.Int);

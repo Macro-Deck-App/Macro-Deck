@@ -23,7 +23,10 @@ internal sealed class SteamGameCloser
 		_gracePeriod = gracePeriod ?? DefaultGracePeriod;
 	}
 
-	public async Task<SteamCommandOutcome> CloseAsync(SteamSnapshot snapshot, bool force, CancellationToken cancellationToken)
+	public async Task<SteamCommandOutcome> CloseAsync(
+		SteamSnapshot snapshot,
+		bool force,
+		CancellationToken cancellationToken)
 	{
 		if (!_platform.CanCloseGames)
 		{
@@ -35,7 +38,8 @@ internal sealed class SteamGameCloser
 			return SteamCommandOutcome.NotRunning;
 		}
 
-		var installDirectory = snapshot.Games.FirstOrDefault(candidate => candidate.AppId == game.AppId)?.InstallDirectory;
+		var installDirectory
+			= snapshot.Games.FirstOrDefault(candidate => candidate.AppId == game.AppId)?.InstallDirectory;
 		var processes = _platform.FindGameProcesses(game.AppId, installDirectory);
 		if (processes.Count == 0)
 		{

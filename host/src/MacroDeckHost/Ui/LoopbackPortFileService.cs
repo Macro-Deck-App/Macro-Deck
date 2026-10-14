@@ -14,7 +14,8 @@ public class LoopbackPortFileService : IHostedService
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IHostListenerState _listenerState;
 
-	public LoopbackPortFileService(IServer server,
+	public LoopbackPortFileService(
+		IServer server,
 		IHostApplicationLifetime lifetime,
 		IHostListenerState listenerState)
 	{

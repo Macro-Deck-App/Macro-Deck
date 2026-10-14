@@ -54,7 +54,8 @@ public class SubmitConfigFlowStepRequestMessageHandler
 	}
 
 	private static SubmitConfigFlowStepResponse FlowNotFound()
-		=> new()
+	{
+		return new SubmitConfigFlowStepResponse
 		{
 			Kind = ConfigFlowOutcomeKind.Error,
 			Error = new TransportError
@@ -63,9 +64,11 @@ public class SubmitConfigFlowStepRequestMessageHandler
 				Message = AppStrings.Errors.Config.FlowExpired()
 			}
 		};
+	}
 
 	private static ConfigFlowOutcomeKind MapKind(ConfigFlowResultKind kind)
-		=> kind switch
+	{
+		return kind switch
 		{
 			ConfigFlowResultKind.Step => ConfigFlowOutcomeKind.Step,
 			ConfigFlowResultKind.Error => ConfigFlowOutcomeKind.Error,
@@ -73,4 +76,5 @@ public class SubmitConfigFlowStepRequestMessageHandler
 			ConfigFlowResultKind.External => ConfigFlowOutcomeKind.External,
 			_ => ConfigFlowOutcomeKind.Error
 		};
+	}
 }

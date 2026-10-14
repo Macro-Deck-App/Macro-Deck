@@ -29,7 +29,7 @@ public class AndroidDeviceTypedOperationsCompatibilityTests
 	{
 		IAndroidDevice device = new DeviceWrittenBeforeTypedOperations();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await device.GetStatusAsync(), Is.Null);
 			Assert.That(device.LacksUsbPermission, Is.False);
@@ -52,7 +52,9 @@ public class AndroidDeviceTypedOperationsCompatibilityTests
 
 	[Test]
 	public void The_unsupported_manager_has_no_default_device()
-		=> Assert.That(((IAndroidDeviceManager)UnsupportedAndroidDeviceManager.Instance).DefaultDevice, Is.Null);
+	{
+		Assert.That(((IAndroidDeviceManager)UnsupportedAndroidDeviceManager.Instance).DefaultDevice, Is.Null);
+	}
 
 	[Test]
 	public void New_enums_keep_their_published_values()
@@ -64,7 +66,8 @@ public class AndroidDeviceTypedOperationsCompatibilityTests
 			Assert.That((int)AndroidRebootMode.Normal, Is.EqualTo(0));
 			Assert.That((int)AndroidRebootMode.Recovery, Is.EqualTo(1));
 			Assert.That((int)AndroidRebootMode.Bootloader, Is.EqualTo(2));
-			Assert.That(Enum.GetValues<AndroidDeviceMode>().Select(mode => (int)mode), Is.EqualTo(Enumerable.Range(0, 5)));
+			Assert.That(Enum.GetValues<AndroidDeviceMode>().Select(mode => (int)mode),
+				Is.EqualTo(Enumerable.Range(0, 5)));
 			Assert.That((int)AndroidDeviceMode.Normal, Is.EqualTo(0));
 		});
 	}
@@ -84,25 +87,39 @@ public class AndroidDeviceTypedOperationsCompatibilityTests
 		public AndroidDeviceState State => AndroidDeviceState.Unauthorized;
 
 		public Task<AndroidShellResult> ExecuteShellAsync(string command, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<AndroidBatteryState> GetBatteryStateAsync(CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task PushFileAsync(string localPath, string remotePath, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task PullFileAsync(string remotePath, string localPath, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task InstallApkAsync(string apkPath, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task UninstallPackageAsync(string packageName, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> IsPackageInstalledAsync(string packageName, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class ManagerWrittenBeforeDefaultDevice : IAndroidDeviceManager
@@ -111,10 +128,15 @@ public class AndroidDeviceTypedOperationsCompatibilityTests
 
 		public IReadOnlyCollection<IAndroidDevice> Devices => [new DeviceWrittenBeforeTypedOperations()];
 
-		public IAndroidDevice? FindDevice(string serial) => Devices.FirstOrDefault(device => device.Serial == serial);
+		public IAndroidDevice? FindDevice(string serial)
+		{
+			return Devices.FirstOrDefault(device => device.Serial == serial);
+		}
 
 		public Task<IAndroidDevice> ConnectAsync(string address, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public event EventHandler<AndroidDeviceEventArgs>? DeviceConnected
 		{

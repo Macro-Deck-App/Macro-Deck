@@ -14,7 +14,9 @@ namespace MacroDeckHost.Tests.UnitTests.Notifications;
 public class PersistenceRecoveryNotifierTests
 {
 	private static PersistenceRecoveryNotifier CreateNotifier(UserNotificationStore store)
-		=> new(store, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+	{
+		return new PersistenceRecoveryNotifier(store, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+	}
 
 	[Test]
 	public void ReportRecovered_RaisesOneCoalescedWarning_ForSeveralRecoveredDocuments()

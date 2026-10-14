@@ -28,9 +28,9 @@ internal static class HomeAssistantVariableNames
 
 	private const int HashTailLength = 9;
 
-	private static readonly int _maxCoreLength = MacroDeckId.MaxDeclaredLocalIdLength -
-		DefinitionIdPrefix.Length -
-		AttributesDefinitionIdSuffix.Length;
+	private static readonly int _maxCoreLength = MacroDeckId.MaxDeclaredLocalIdLength
+		- DefinitionIdPrefix.Length
+		- AttributesDefinitionIdSuffix.Length;
 
 	public static IReadOnlyList<HomeAssistantVariableName> Build(IEnumerable<string> entityIds)
 	{

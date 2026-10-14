@@ -13,16 +13,17 @@ public class RunCommandActionWindowsTests
 		var userVariables = new RecordingUserVariableApi();
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { UserVariables = userVariables });
 
-		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = "\"cmd.exe\" /c echo \"hello quoted\"",
-				["outputVariable"] = "result",
-				["timeout"] = 30
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = "\"cmd.exe\" /c echo \"hello quoted\"",
+					["outputVariable"] = "result",
+					["timeout"] = 30
+				}
+			});
 
 		Assert.That(userVariables.Values.TryGetValue("result", out var value), Is.True);
 		Assert.That(value?.Trim(), Is.EqualTo("\"hello quoted\""));

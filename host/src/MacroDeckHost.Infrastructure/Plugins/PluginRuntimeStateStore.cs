@@ -34,8 +34,10 @@ public sealed class PluginRuntimeStateStore : IPluginRuntimeStateStore
 	{
 		lock (_lock)
 		{
-			var states = new Dictionary<string, bool>(Load());
-			states[pluginId] = started;
+			var states = new Dictionary<string, bool>(Load())
+			{
+				[pluginId] = started
+			};
 			Write(states);
 		}
 

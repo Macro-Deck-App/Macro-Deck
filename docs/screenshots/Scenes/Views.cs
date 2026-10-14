@@ -1,16 +1,21 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.References;
 
 internal static partial class Scenes
 {
-	private static UiStack Card(string key, params UiElement[] children) => new()
+	private static UiStack Card(string key, params UiElement[] children)
 	{
-		Key = key,
-		Fill = true,
-		Background = "#2c2c2e",
-		Children = children,
-	};
+		return new UiStack
+		{
+			Key = key,
+			Fill = true,
+			Background = "#2c2c2e",
+			Children = children
+		};
+	}
 
 	private static IEnumerable<Scene> ViewScenes()
 	{
@@ -44,11 +49,11 @@ internal static partial class Scenes
 									new UiTextRun
 									{
 										Key = "temp", Text = "21°", Size = 0.26, Weight = UiComponentTextWeights.Bold
-									},
-								],
+									}
+								]
 							},
-							new UiImage { Key = "icon", Source = Icon("sun", "#ffcc00"), Size = 0.26 },
-						],
+							new UiImage { Key = "icon", Source = Icon("sun", "#ffcc00"), Size = 0.26 }
+						]
 					},
 					new UiTextRun
 						{ Key = "condition", Text = "Sunny", Size = 0.08, Role = UiComponentTextRoles.Secondary },
@@ -61,9 +66,9 @@ internal static partial class Scenes
 						End = 0.6,
 						StartColor = "#2b6cee",
 						EndColor = "#ee2b2b",
-						Marker = 0.45,
-					},
-				],
+						Marker = 0.45
+					}
+				]
 			},
 			2,
 			2);
@@ -86,9 +91,9 @@ internal static partial class Scenes
 							{
 								Key = "reading", Text = "70 km/h", Size = 0.09, Role = UiComponentTextRoles.Secondary
 							}
-						],
-					},
-				],
+						]
+					}
+				]
 			});
 
 		var berlin = UiValue.Of(UiTimeReference.InZone("Europe/Berlin"));
@@ -107,11 +112,11 @@ internal static partial class Scenes
 							Key = "clockStack",
 							Fill = true,
 							Padding = 0.06,
-							Children = [new UiClockDial { Key = "dial", Value = berlin, Seconds = true, Fill = true }],
+							Children = [new UiClockDial { Key = "dial", Value = berlin, Seconds = true, Fill = true }]
 						}),
 					Card("cpu", HistoryGraph("CPU", "Package", "42 %") with { Fill = true }),
-					Card("gpu", HistoryGraph("GPU", "Core", "67 %") with { Fill = true }),
-				],
+					Card("gpu", HistoryGraph("GPU", "Core", "67 %") with { Fill = true })
+				]
 			},
 			4,
 			2);
@@ -120,7 +125,7 @@ internal static partial class Scenes
 		[
 			("desk", "Studio desktop", "Windows - this computer", "device-desktop"),
 			("tablet", "Living room tablet", "Android - connected", "device-tablet"),
-			("phone", "Pixel 9", "Android - last seen 2 min ago", "device-phone"),
+			("phone", "Pixel 9", "Android - last seen 2 min ago", "device-phone")
 		];
 		yield return Dialog("view-modal",
 			new UiList
@@ -138,7 +143,13 @@ internal static partial class Scenes
 						Gap = UiSize.FromBasis(0.03),
 						Padding = UiSize.FromBasis(0.025),
 						Background = "#2c2c2e",
-						Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Press,
+								() =>
+								{
+								})
+						],
 						Children =
 						[
 							new UiImage { Key = "icon", Source = Icon(device.Icon), Size = UiSize.FromBasis(0.06) },
@@ -158,12 +169,12 @@ internal static partial class Scenes
 									{
 										Key = "detail", Text = device.Detail, Size = UiSize.FromBasis(0.03),
 										Role = UiComponentTextRoles.Secondary
-									},
-								],
-							},
-						],
+									}
+								]
+							}
+						]
 					})
-				],
+				]
 			},
 			600,
 			300);

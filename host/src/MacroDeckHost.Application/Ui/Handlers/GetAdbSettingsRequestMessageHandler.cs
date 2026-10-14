@@ -13,7 +13,8 @@ public class GetAdbSettingsRequestMessageHandler
 	private readonly IAdbManager _adbManager;
 	private readonly IHostListenerState _listenerState;
 
-	public GetAdbSettingsRequestMessageHandler(IAppPreferenceService preferences,
+	public GetAdbSettingsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IAdbManager adbManager,
 		IHostListenerState listenerState)
 	{
@@ -22,7 +23,8 @@ public class GetAdbSettingsRequestMessageHandler
 		_listenerState = listenerState;
 	}
 
-	public async ValueTask<GetAdbSettingsResponse> Handle(GetAdbSettingsRequest request,
+	public async ValueTask<GetAdbSettingsResponse> Handle(
+		GetAdbSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
 		var view = AdbSettingsProjection.From(await _preferences.GetAdb(),

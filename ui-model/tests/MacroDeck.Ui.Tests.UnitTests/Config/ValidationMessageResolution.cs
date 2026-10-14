@@ -16,12 +16,16 @@ internal static class ValidationMessageResolution
 
 	/// <summary>What a reader on <paramref name="culture" /> sees. Defaults to English.</summary>
 	public static string? Resolved(this UiValidationOutcome outcome, string culture = "en")
-		=> _resolver.Resolve(outcome.Message, culture);
+	{
+		return _resolver.Resolve(outcome.Message, culture);
+	}
 
 	/// <summary>What a reader sees for a node property carrying text. The property is a localization
 	/// reference on the wire, so this is the client's half of the same journey.</summary>
 	public static string? ResolvedText(this JsonElement property, string culture = "en")
-		=> _resolver.Resolve(JsonSerializer.Deserialize<LocalizedText>(property.GetRawText()), culture);
+	{
+		return _resolver.Resolve(JsonSerializer.Deserialize<LocalizedText>(property.GetRawText()), culture);
+	}
 
 	private static LocalizationResolver BuildResolver()
 	{

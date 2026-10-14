@@ -8,8 +8,8 @@ namespace MacroDeckHost.Application.Devices;
 
 [SuppressMessage("Design",
 	"CA1001:Types that own disposable fields should be disposable",
-	Justification = "A process-lifetime singleton whose shutdown token must stay readable by connections that " +
-		"end after shutdown. The source has no timer and holds no unmanaged resource.")]
+	Justification = "A process-lifetime singleton whose shutdown token must stay readable by connections that "
+		+ "end after shutdown. The source has no timer and holds no unmanaged resource.")]
 public sealed class DeviceConnectionTracker
 {
 	private sealed class ConnectionEntry
@@ -191,7 +191,8 @@ public sealed class DeviceConnectionTracker
 		Action?[] aborts;
 		lock (_sync)
 		{
-			aborts = _connections.Values.Where(entry => entry.DeviceId == deviceId).Select(entry => entry.Abort)
+			aborts = _connections.Values.Where(entry => entry.DeviceId == deviceId)
+				.Select(entry => entry.Abort)
 				.ToArray();
 		}
 
@@ -244,10 +245,14 @@ public sealed class DeviceConnectionTracker
 	}
 
 	private ConnectionEntry GetOrAdd(string connectionId)
-		=> _connections.GetOrAdd(connectionId, static _ => new ConnectionEntry());
+	{
+		return _connections.GetOrAdd(connectionId, static _ => new ConnectionEntry());
+	}
 
 	private static string KeyFor(Guid? deviceId, string? clientId)
-		=> deviceId is { } id ? $"device:{id:D}" : $"client:{clientId}";
+	{
+		return deviceId is { } id ? $"device:{id:D}" : $"client:{clientId}";
+	}
 
 	private void Publish(string eventId, Guid? deviceId, string? clientId)
 	{

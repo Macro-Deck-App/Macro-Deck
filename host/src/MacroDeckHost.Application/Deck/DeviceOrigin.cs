@@ -9,13 +9,16 @@ public static class DeviceOrigin
 {
 	public const string Prefix = "device:";
 
-	public static string For(Guid deviceId) => $"{Prefix}{deviceId:D}";
+	public static string For(Guid deviceId)
+	{
+		return $"{Prefix}{deviceId:D}";
+	}
 
 	public static bool TryParse(string? originClientId, out Guid deviceId)
 	{
 		deviceId = Guid.Empty;
-		return originClientId is not null &&
-			originClientId.StartsWith(Prefix, StringComparison.Ordinal) &&
-			Guid.TryParse(originClientId[Prefix.Length..], out deviceId);
+		return originClientId is not null
+			&& originClientId.StartsWith(Prefix, StringComparison.Ordinal)
+			&& Guid.TryParse(originClientId[Prefix.Length..], out deviceId);
 	}
 }

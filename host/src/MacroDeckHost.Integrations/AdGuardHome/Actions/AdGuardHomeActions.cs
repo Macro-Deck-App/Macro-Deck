@@ -16,48 +16,72 @@ internal static class AdGuardHomeActions
 
 	private static readonly TimeSpan _maximumPause = TimeSpan.FromDays(7);
 
-	public static IReadOnlyList<IActionDefinition> Create(IAdGuardHomeActionTarget target) =>
-	[
-		new AdGuardHomeAction("enable-protection", ActionStrings.EnableProtection.Name(), ActionStrings.EnableProtection.Description(),
-			target, _ => new AdGuardHomeCommand(AdGuardHomeCommandKind.EnableProtection)),
-		new AdGuardHomeAction("disable-protection", ActionStrings.DisableProtection.Name(),
-			ActionStrings.DisableProtection.Description(), target,
-			_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.DisableProtection)),
-		new AdGuardHomeStateAction("toggle-protection", ActionStrings.ToggleProtection.Name(),
-			ActionStrings.ToggleProtection.Description(), target,
-			_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.ToggleProtection),
-			snapshot => snapshot.ProtectionEnabled),
-		new AdGuardHomeAction("pause-protection", ActionStrings.PauseProtection.Name(), ActionStrings.PauseProtection.Description(),
-			target, PauseCommand,
-			[
-				ActionParameter.Choice(DurationParameter,
-					options:
-					[
-						.. AdGuardHomeWidgetType.PauseDurations
-							.Where(duration => duration.Length is not null)
-							.Select(duration => new ActionParameterOption
-								{ Value = duration.Id, Label = AdGuardHomeDurationText.Label(duration.Id) }),
-						new ActionParameterOption { Value = CustomDuration, Label = Durations.Custom() }
-					],
-					label: Params.Duration(),
-					defaultValue: "5m",
-					required: true),
-				ActionParameter.Duration(CustomDurationParameter,
-					label: Params.CustomDuration(),
-					min: 1000,
-					max: _maximumPause.TotalMilliseconds,
-					defaultMilliseconds: TimeSpan.FromMinutes(10).TotalMilliseconds)
-					.OnlyWhen(DurationParameter, CustomDuration)
-			]),
-		new AdGuardHomeAction("enable-filtering", ActionStrings.EnableFiltering.Name(), ActionStrings.EnableFiltering.Description(),
-			target, _ => new AdGuardHomeCommand(AdGuardHomeCommandKind.EnableFiltering)),
-		new AdGuardHomeAction("disable-filtering", ActionStrings.DisableFiltering.Name(), ActionStrings.DisableFiltering.Description(),
-			target, _ => new AdGuardHomeCommand(AdGuardHomeCommandKind.DisableFiltering)),
-		new AdGuardHomeAction("toggle-filtering", ActionStrings.ToggleFiltering.Name(), ActionStrings.ToggleFiltering.Description(),
-			target, _ => new AdGuardHomeCommand(AdGuardHomeCommandKind.ToggleFiltering)),
-		new AdGuardHomeAction("refresh-filters", ActionStrings.RefreshFilters.Name(), ActionStrings.RefreshFilters.Description(),
-			target, _ => new AdGuardHomeCommand(AdGuardHomeCommandKind.RefreshFilters)),
-	];
+	public static IReadOnlyList<IActionDefinition> Create(IAdGuardHomeActionTarget target)
+	{
+		return
+		[
+			new AdGuardHomeAction("enable-protection",
+				ActionStrings.EnableProtection.Name(),
+				ActionStrings.EnableProtection.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.EnableProtection)),
+			new AdGuardHomeAction("disable-protection",
+				ActionStrings.DisableProtection.Name(),
+				ActionStrings.DisableProtection.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.DisableProtection)),
+			new AdGuardHomeStateAction("toggle-protection",
+				ActionStrings.ToggleProtection.Name(),
+				ActionStrings.ToggleProtection.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.ToggleProtection),
+				snapshot => snapshot.ProtectionEnabled),
+			new AdGuardHomeAction("pause-protection",
+				ActionStrings.PauseProtection.Name(),
+				ActionStrings.PauseProtection.Description(),
+				target,
+				PauseCommand,
+				[
+					ActionParameter.Choice(DurationParameter,
+						[
+							.. AdGuardHomeWidgetType.PauseDurations
+								.Where(duration => duration.Length is not null)
+								.Select(duration => new ActionParameterOption
+									{ Value = duration.Id, Label = AdGuardHomeDurationText.Label(duration.Id) }),
+							new ActionParameterOption { Value = CustomDuration, Label = Durations.Custom() }
+						],
+						Params.Duration(),
+						defaultValue: "5m",
+						required: true),
+					ActionParameter.Duration(CustomDurationParameter,
+							Params.CustomDuration(),
+							min: 1000,
+							max: _maximumPause.TotalMilliseconds,
+							defaultMilliseconds: TimeSpan.FromMinutes(10).TotalMilliseconds)
+						.OnlyWhen(DurationParameter, CustomDuration)
+				]),
+			new AdGuardHomeAction("enable-filtering",
+				ActionStrings.EnableFiltering.Name(),
+				ActionStrings.EnableFiltering.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.EnableFiltering)),
+			new AdGuardHomeAction("disable-filtering",
+				ActionStrings.DisableFiltering.Name(),
+				ActionStrings.DisableFiltering.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.DisableFiltering)),
+			new AdGuardHomeAction("toggle-filtering",
+				ActionStrings.ToggleFiltering.Name(),
+				ActionStrings.ToggleFiltering.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.ToggleFiltering)),
+			new AdGuardHomeAction("refresh-filters",
+				ActionStrings.RefreshFilters.Name(),
+				ActionStrings.RefreshFilters.Description(),
+				target,
+				_ => new AdGuardHomeCommand(AdGuardHomeCommandKind.RefreshFilters))
+		];
+	}
 
 	internal static AdGuardHomeCommand? PauseCommand(IReadOnlyDictionary<string, object> parameters)
 	{
@@ -65,9 +89,9 @@ internal static class AdGuardHomeActions
 
 		if (choice == CustomDuration)
 		{
-			return ReadMilliseconds(parameters.GetValueOrDefault(CustomDurationParameter)) is { } milliseconds &&
-				milliseconds >= 1000 &&
-				milliseconds <= _maximumPause.TotalMilliseconds
+			return ReadMilliseconds(parameters.GetValueOrDefault(CustomDurationParameter)) is { } milliseconds
+				&& milliseconds >= 1000
+				&& milliseconds <= _maximumPause.TotalMilliseconds
 					? new AdGuardHomeCommand(AdGuardHomeCommandKind.PauseProtection,
 						TimeSpan.FromMilliseconds(milliseconds))
 					: null;
@@ -79,7 +103,8 @@ internal static class AdGuardHomeActions
 	}
 
 	private static double? ReadMilliseconds(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			long number => number,
 			int number => number,
@@ -88,4 +113,5 @@ internal static class AdGuardHomeActions
 				=> number,
 			_ => null
 		};
+	}
 }

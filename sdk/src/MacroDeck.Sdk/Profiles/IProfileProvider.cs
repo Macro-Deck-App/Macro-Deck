@@ -27,5 +27,8 @@ public interface IProfileProvider
 		string profileId,
 		string folderId,
 		string widgetId,
-		WidgetInteraction interaction) => Task.CompletedTask;
+		WidgetInteraction interaction)
+	{
+		return Task.CompletedTask;
+	}
 }

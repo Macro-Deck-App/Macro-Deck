@@ -21,7 +21,10 @@ public class EmptyCellStylePersistenceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void A_saved_style_is_written_lowercase_and_reads_back()
@@ -69,16 +72,16 @@ public class EmptyCellStylePersistenceTests
 	{
 		var id = Guid.NewGuid();
 		var json = $$"""
-					{
-						"id": "{{id}}",
-						"name": "Deck",
-						"defaultEmptyCellStyle": "shimmer",
-						"folders": [
-							{ "id": "{{Guid.NewGuid()}}", "name": "Home", "order": 0, "widgets": [] },
-							{ "id": "{{Guid.NewGuid()}}", "name": "Other", "order": 1, "emptyCellStyle": "TRANSPARENT", "widgets": [] }
-						]
-					}
-					""";
+					 {
+					 	"id": "{{id}}",
+					 	"name": "Deck",
+					 	"defaultEmptyCellStyle": "shimmer",
+					 	"folders": [
+					 		{ "id": "{{Guid.NewGuid()}}", "name": "Home", "order": 0, "widgets": [] },
+					 		{ "id": "{{Guid.NewGuid()}}", "name": "Other", "order": 1, "emptyCellStyle": "TRANSPARENT", "widgets": [] }
+					 	]
+					 }
+					 """;
 		Directory.CreateDirectory(_paths.ProfilesDirectory);
 		File.WriteAllText(Path.Combine(_paths.ProfilesDirectory, id + ".json"), json);
 
@@ -93,5 +96,8 @@ public class EmptyCellStylePersistenceTests
 	}
 
 	private static FolderEntity Folder(Guid profileId, EmptyCellStyle? style)
-		=> new() { Id = Guid.NewGuid(), ProfileId = profileId, Name = "Home", Order = 0, EmptyCellStyle = style };
+	{
+		return new FolderEntity
+			{ Id = Guid.NewGuid(), ProfileId = profileId, Name = "Home", Order = 0, EmptyCellStyle = style };
+	}
 }

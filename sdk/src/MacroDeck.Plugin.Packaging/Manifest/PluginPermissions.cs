@@ -79,8 +79,9 @@ public static class PluginPermissions
 	[
 		HostVariables, HostUserVariables, HostConfig, HostDeck, HostScripts, HostWidgets,
 		HostNotifications, HostActionInteractions, HostDevices, HostVariableValues, HostLayouts,
-		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, HostMessaging, HostVideoStreams, HostCompanionDevices, HostDesktopNotifications, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
-		ProcessSpawn, DeviceUsb,
+		HostFolderViews, HostWidgetTypes, HostEventBindings, HostScreenSavers, HostAdb, HostMessaging, HostVideoStreams,
+		HostCompanionDevices, HostDesktopNotifications, EventsPublish, AssetsUpload, NetOutbound, FileSystemUserFiles,
+		ProcessSpawn, DeviceUsb
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);

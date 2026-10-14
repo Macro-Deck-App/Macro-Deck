@@ -67,10 +67,14 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 			new LoggerConfiguration().CreateLogger());
 	}
 
-	private CreateWidgetFromApplicationRequest Request(int x = 2,
+	private CreateWidgetFromApplicationRequest Request(
+		int x = 2,
 		int y = 1,
 		string path = "/Applications/Calculator.app")
-		=> new() { FolderId = _folder.Id.ToString(), PositionX = x, PositionY = y, Path = path };
+	{
+		return new CreateWidgetFromApplicationRequest
+			{ FolderId = _folder.Id.ToString(), PositionX = x, PositionY = y, Path = path };
+	}
 
 	[Test]
 	public async Task Handle_BuildsAnActionButtonThatLaunchesTheApplication()
@@ -268,7 +272,10 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 	{
 		public ResolvedApplication? Result { get; set; }
 
-		public ResolvedApplication? Resolve(string path) => Result;
+		public ResolvedApplication? Resolve(string path)
+		{
+			return Result;
+		}
 	}
 
 	private sealed class RoleDeclaringIntegration(string id) : IIntegration
@@ -279,9 +286,15 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [new RoleDeclaringLaunchAction()];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class RoleDeclaringLaunchAction : IActionDefinition
@@ -293,20 +306,22 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } =
 		[
-			ActionParameter.File("path", label: "Application", required: true, fileExtensions: ["exe", "app"]),
-			ActionParameter.Text("arguments", label: "Arguments"),
-			ActionParameter.Folder("workingDirectory", label: "Working Directory"),
+			ActionParameter.File("path", "Application", required: true, fileExtensions: ["exe", "app"]),
+			ActionParameter.Text("arguments", "Arguments"),
+			ActionParameter.Folder("workingDirectory", "Working Directory"),
 			ActionParameter.Choice("mode",
-				options:
 				[
 					new ActionParameterOption { Value = "start", Label = "Start" },
 					new ActionParameterOption { Value = "start-stop", Label = "Start / Stop Toggle" }
 				],
-				label: "Mode",
+				"Mode",
 				defaultValue: "start")
 		];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StubAppIconExtractor : IAppIconExtractor
@@ -317,7 +332,10 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 
 		public List<string> RequestedContent { get; } = [];
 
-		public bool CanExtract(string path) => Icon is not null;
+		public bool CanExtract(string path)
+		{
+			return Icon is not null;
+		}
 
 		public Task<Result<ExtractedAppIcon, IconError>> Extract(string path, CancellationToken cancellationToken)
 		{
@@ -327,9 +345,13 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 				: Result.Ok<ExtractedAppIcon, IconError>(Icon));
 		}
 
-		public bool CanExtractContent(string fileName) => Icon is not null;
+		public bool CanExtractContent(string fileName)
+		{
+			return Icon is not null;
+		}
 
-		public Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(string fileName,
+		public Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(
+			string fileName,
 			Stream content,
 			CancellationToken cancellationToken)
 		{
@@ -358,77 +380,154 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 			return _icon.Id;
 		}
 
-		public Task<Result<SingleIconImportResult, IconError>> ImportSingle(Guid? packId,
+		public Task<Result<SingleIconImportResult, IconError>> ImportSingle(
+			Guid? packId,
 			IconImportFile file,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(_icon is null
+		{
+			return Task.FromResult(_icon is null
 				? Result.Fail<SingleIconImportResult, IconError>(IconError.ValidationError, "nothing staged")
-				: Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(_icon, Reused: false)));
+				: Result.Ok<SingleIconImportResult, IconError>(new SingleIconImportResult(_icon, false)));
+		}
 
-		public Task<Result<IconImportBatchEntity, IconError>> Import(Guid? packId,
+		public Task<Result<IconImportBatchEntity, IconError>> Import(
+			Guid? packId,
 			string? sourceName,
 			IAsyncEnumerable<IconImportFile> files,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(Guid? packId,
+		public Task<Result<IconImportBatchEntity, IconError>> ImportFromPath(
+			Guid? packId,
 			IReadOnlyList<string> paths,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<IconPackImportResult, IconError>> ImportPacks(IAsyncEnumerable<IconImportFile> files,
+		public Task<Result<IconPackImportResult, IconError>> ImportPacks(
+			IAsyncEnumerable<IconImportFile> files,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> CancelBatch(Guid batchId, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class StubIconPackCache : IIconPackCache
 	{
 		private readonly Dictionary<Guid, IconEntity> _icons = [];
 
-		public void Add(IconEntity icon) => _icons[icon.Id] = icon;
+		public void Add(IconEntity icon)
+		{
+			_icons[icon.Id] = icon;
+		}
 
-		public IconEntity? GetIconById(Guid iconId) => _icons.GetValueOrDefault(iconId);
+		public IconEntity? GetIconById(Guid iconId)
+		{
+			return _icons.GetValueOrDefault(iconId);
+		}
 
-		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+		{
+			return [];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IconPackEntity? GetPackById(Guid id) => null;
+		public IconPackEntity? GetPackById(Guid id)
+		{
+			return null;
+		}
 
-		public List<IconPackEntity> GetAllPacks() => [];
+		public List<IconPackEntity> GetAllPacks()
+		{
+			return [];
+		}
 
-		public IconPackEntity? GetDefaultPack() => null;
+		public IconPackEntity? GetDefaultPack()
+		{
+			return null;
+		}
 
-		public Task AddOrUpdatePack(IconPackEntity pack) => Task.CompletedTask;
+		public Task AddOrUpdatePack(IconPackEntity pack)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RemovePack(Guid id) => Task.CompletedTask;
+		public Task RemovePack(Guid id)
+		{
+			return Task.CompletedTask;
+		}
 
-		public List<IconEntity> GetIconsByPackId(Guid packId) => [];
+		public List<IconEntity> GetIconsByPackId(Guid packId)
+		{
+			return [];
+		}
 
-		public List<IconEntity> GetIconsByBatchId(Guid batchId) => [];
+		public List<IconEntity> GetIconsByBatchId(Guid batchId)
+		{
+			return [];
+		}
 
-		public List<IconEntity> GetIconsByState(params IconProcessingState[] states) => [];
+		public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
+		{
+			return [];
+		}
 
-		public int GetIconCount(Guid packId) => 0;
+		public int GetIconCount(Guid packId)
+		{
+			return 0;
+		}
 
-		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null) => null;
+		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
+		{
+			return null;
+		}
 
-		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null) => null;
+		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
+		{
+			return null;
+		}
 
-		public List<IconEntity> GetIconsMissingMasterContentHash() => [];
+		public List<IconEntity> GetIconsMissingMasterContentHash()
+		{
+			return [];
+		}
 
-		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons) => Task.CompletedTask;
+		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task UpdateIcon(IconEntity icon) => Task.CompletedTask;
+		public Task UpdateIcon(IconEntity icon)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RemoveIcon(Guid iconId) => Task.CompletedTask;
+		public Task RemoveIcon(Guid iconId)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => Task.CompletedTask;
+		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task FlushPendingWrites() => Task.CompletedTask;
+		public Task FlushPendingWrites()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class RecordingWidgetService : IWidgetService
@@ -442,7 +541,8 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 
 		public List<WidgetEntity> Created { get; } = [];
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
 		{
@@ -457,34 +557,53 @@ public class CreateWidgetFromApplicationRequestMessageHandlerTests
 			return Task.FromResult(Result.Ok<WidgetEntity, WidgetError>(widget));
 		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget) => throw new NotSupportedException();
+		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
+			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

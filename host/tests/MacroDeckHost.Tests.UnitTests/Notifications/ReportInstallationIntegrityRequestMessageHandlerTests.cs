@@ -10,10 +10,17 @@ namespace MacroDeckHost.Tests.UnitTests.Notifications;
 public partial class ReportInstallationIntegrityRequestMessageHandlerTests
 {
 	private static ReportInstallationIntegrityRequestMessageHandler CreateHandler(IUserNotificationStore store)
-		=> new(store, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+	{
+		return new ReportInstallationIntegrityRequestMessageHandler(store,
+			TestLocalization.ScopeFactory,
+			TestLocalization.Resolver);
+	}
 
 	private static ReportInstallationIntegrityRequest Damaged(string installKind)
-		=> new() { Status = "damaged", Reason = "files", Missing = 1, Modified = 2, InstallKind = installKind };
+	{
+		return new ReportInstallationIntegrityRequest
+			{ Status = "damaged", Reason = "files", Missing = 1, Modified = 2, InstallKind = installKind };
+	}
 
 	[Test]
 	public async Task A_damaged_installation_tells_the_user_to_reinstall_and_where_to_look()
@@ -30,12 +37,13 @@ public partial class ReportInstallationIntegrityRequestMessageHandlerTests
 			Assert.That(notification.Title, Is.EqualTo("Macro Deck was not updated completely"));
 			Assert.That(notification.Message, Does.Contain("antivirus software"));
 			Assert.That(notification.Message, Does.Contain("Download the latest version"));
-			Assert.That(notification.Actions.Select(action => action.Kind), Is.EqualTo(new[]
-			{
-				UserNotificationActionKind.OpenDownloadPage,
-				UserNotificationActionKind.OpenTroubleshootingGuide,
-				UserNotificationActionKind.OpenLogs
-			}));
+			Assert.That(notification.Actions.Select(action => action.Kind),
+				Is.EqualTo(new[]
+				{
+					UserNotificationActionKind.OpenDownloadPage,
+					UserNotificationActionKind.OpenTroubleshootingGuide,
+					UserNotificationActionKind.OpenLogs
+				}));
 		});
 	}
 
@@ -88,8 +96,11 @@ public partial class ReportInstallationIntegrityRequestMessageHandlerTests
 	{
 		var store = new UserNotificationStore();
 		CreateHandler(store).Handle(Damaged("windows"), CancellationToken.None).AsTask().GetAwaiter().GetResult();
-		var target = store.Snapshot().Single().Actions
-			.Single(action => action.Kind == UserNotificationActionKind.OpenTroubleshootingGuide).Target;
+		var target = store.Snapshot()
+			.Single()
+			.Actions
+			.Single(action => action.Kind == UserNotificationActionKind.OpenTroubleshootingGuide)
+			.Target;
 
 		var slugs = File.ReadLines(TroubleshootingGuidePath())
 			.Where(line => line.StartsWith("## ", StringComparison.Ordinal))
@@ -99,7 +110,9 @@ public partial class ReportInstallationIntegrityRequestMessageHandlerTests
 	}
 
 	private static string Slug(string heading)
-		=> NotSlugCharacters().Replace(heading.Trim().ToLowerInvariant(), string.Empty).Replace(' ', '-');
+	{
+		return NotSlugCharacters().Replace(heading.Trim().ToLowerInvariant(), string.Empty).Replace(' ', '-');
+	}
 
 	[GeneratedRegex("[^a-z0-9 -]")]
 	private static partial Regex NotSlugCharacters();
@@ -111,7 +124,13 @@ public partial class ReportInstallationIntegrityRequestMessageHandlerTests
 		{
 			if (File.Exists(Path.Combine(directory.FullName, "MacroDeck.slnx")))
 			{
-				return Path.Combine(directory.FullName, "docs", "src", "content", "docs", "guide", "troubleshooting.md");
+				return Path.Combine(directory.FullName,
+					"docs",
+					"src",
+					"content",
+					"docs",
+					"guide",
+					"troubleshooting.md");
 			}
 
 			directory = directory.Parent;

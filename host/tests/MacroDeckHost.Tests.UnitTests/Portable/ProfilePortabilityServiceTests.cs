@@ -19,10 +19,16 @@ public class ProfilePortabilityServiceTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	// Exporting and importing on the same host: the archive's icon is byte-identical to the one already
 	// stored, so the import references it instead of writing a second copy (issue #284).
@@ -30,7 +36,7 @@ public class ProfilePortabilityServiceTests
 	public async Task Export_ThenImport_CreatesAnIndependentProfile_ReusingTheIconItAlreadyHas()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (source, _, _) = await _harness.SeedProfile($"{{\"states\":{{\"off\":{{\"iconId\":\"{icon.Id}\"}}}}}}");
 
 		var export = await _harness.ProfileService.Export(source.Id,
@@ -38,7 +44,7 @@ public class ProfilePortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var imported = import.Data!;
@@ -67,7 +73,7 @@ public class ProfilePortabilityServiceTests
 	public async Task Import_RecreatesAnIconTheCatalogDoesNotHave_InTheSharedPack()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var (source, _, _) = await _harness.SeedProfile($"{{\"states\":{{\"off\":{{\"iconId\":\"{icon.Id}\"}}}}}}");
 
 		var export = await _harness.ProfileService.Export(source.Id,
@@ -77,7 +83,7 @@ public class ProfilePortabilityServiceTests
 
 		await _harness.Icons.Cache.RemoveIcon(icon.Id);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 
 		var importedWidget = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single().Widgets.Single();
@@ -116,7 +122,7 @@ public class ProfilePortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var importedFolder = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single();
@@ -143,7 +149,7 @@ public class ProfilePortabilityServiceTests
 
 		Assert.That(export.Success, Is.True);
 		using var zip = new ZipArchive(new MemoryStream(export.Data!), ZipArchiveMode.Read);
-		using var reader = new StreamReader(zip.GetEntry("content.json")!.Open(), Encoding.UTF8);
+		using var reader = new StreamReader(await zip.GetEntry("content.json")!.OpenAsync(), Encoding.UTF8);
 		var contentJson = await reader.ReadToEndAsync();
 		Assert.That(contentJson, Does.Not.Contain("isDefault"));
 	}
@@ -167,7 +173,7 @@ public class ProfilePortabilityServiceTests
 
 		Assert.That(export.Success, Is.True);
 		using var zip = new ZipArchive(new MemoryStream(export.Data!), ZipArchiveMode.Read);
-		using var reader = new StreamReader(zip.GetEntry("content.json")!.Open(), Encoding.UTF8);
+		using var reader = new StreamReader(await zip.GetEntry("content.json")!.OpenAsync(), Encoding.UTF8);
 		Assert.That(await reader.ReadToEndAsync(), Does.Not.Contain("focusRules"));
 	}
 
@@ -187,7 +193,7 @@ public class ProfilePortabilityServiceTests
 		var export = await _harness.ProfileService.Export(source.Id,
 			PortableExportOptions.Default,
 			CancellationToken.None);
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var importedFolder = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single();
@@ -223,9 +229,9 @@ public class ProfilePortabilityServiceTests
 				}
 			},
 			[],
-			password: null);
+			null);
 
-		var import = await _harness.ProfileService.Import(archive, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(archive, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var folders = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id);
@@ -259,9 +265,9 @@ public class ProfilePortabilityServiceTests
 				}
 			},
 			[],
-			password: null);
+			null);
 
-		var import = await _harness.ProfileService.Import(archive, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(archive, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var folders = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id);
@@ -273,7 +279,7 @@ public class ProfilePortabilityServiceTests
 			Assert.That(first.IsDefault, Is.True);
 			Assert.That(middle.IsDefault, Is.False);
 			Assert.That(later.IsDefault, Is.False);
-			Assert.That(folders.All(folder => folder.CreatedAt != default(DateTime)), Is.True);
+			Assert.That(folders.All(folder => folder.CreatedAt != default), Is.True);
 			Assert.That(first.CreatedAt, Is.LessThan(middle.CreatedAt));
 			Assert.That(middle.CreatedAt, Is.LessThan(later.CreatedAt));
 		});
@@ -307,7 +313,7 @@ public class ProfilePortabilityServiceTests
 		Assert.That(export.Success, Is.True);
 
 		var import = await _harness.ProfileService.Import(export.Data!,
-			password: "export-password",
+			"export-password",
 			CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
@@ -330,7 +336,7 @@ public class ProfilePortabilityServiceTests
 			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },
 			CancellationToken.None);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: "nope", CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, "nope", CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -347,7 +353,7 @@ public class ProfilePortabilityServiceTests
 			new PortableExportOptions { IncludeSecrets = true, Password = "export-password" },
 			CancellationToken.None);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Error, Is.EqualTo(PortabilityError.PasswordRequired));
 	}
@@ -405,8 +411,8 @@ public class ProfilePortabilityServiceTests
 	{
 		var profile = await _harness.AddProfile("Source");
 		var main = await _harness.AddFolder(profile.Id, "Main", rows: 4, columns: 4);
-		var games = await _harness.AddFolder(profile.Id, "Games", main.Id, rows: 4, columns: 4);
-		var retro = await _harness.AddFolder(profile.Id, "Retro", games.Id, rows: 4, columns: 4);
+		var games = await _harness.AddFolder(profile.Id, "Games", main.Id, 4, 4);
+		var retro = await _harness.AddFolder(profile.Id, "Retro", games.Id, 4, 4);
 
 		var profileWidget = new WidgetEntity
 		{
@@ -440,7 +446,7 @@ public class ProfilePortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 		Assert.That(import.Success, Is.True);
 
 		var importedFolders = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id);
@@ -498,25 +504,28 @@ public class ProfilePortabilityServiceTests
 			CancellationToken.None);
 		Assert.That(export.Success, Is.True);
 		using (var zip = new ZipArchive(new MemoryStream(export.Data!), ZipArchiveMode.Read))
-		using (var reader = new StreamReader(zip.GetEntry("content.json")!.Open(), Encoding.UTF8))
+		using (var reader = new StreamReader(await zip.GetEntry("content.json")!.OpenAsync(), Encoding.UTF8))
 		{
 			Assert.That(await reader.ReadToEndAsync(), Does.Not.Contain("pinScope"));
 		}
 
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var importedWidget = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single().Widgets.Single();
 		Assert.That(importedWidget.PinScope, Is.EqualTo(PinScope.Profile));
 	}
 
-	private static WidgetEntity Widget(int x, int y) => new()
+	private static WidgetEntity Widget(int x, int y)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1
+		};
+	}
 }

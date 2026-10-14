@@ -32,7 +32,10 @@ internal static class StreamStatsResolver
 			return StreamStatsViewState.Empty;
 		}
 
-		string? Read(string name) => source.Read(account, name);
+		string? Read(string name)
+		{
+			return source.Read(account, name);
+		}
 
 		var stats = platform.Stats;
 		var live = string.Equals(Read(IsLiveVariable), "true", StringComparison.OrdinalIgnoreCase);
@@ -59,15 +62,15 @@ internal static class StreamStatsResolver
 						: Read(entry.VariableName) ?? string.Empty,
 				StringComparer.Ordinal),
 			Points = live || !graphedOnlyWhileLive ? Normalize(history) : [],
-			Thumbnail = live ? thumbnails.Find(account.AccountId) : null,
+			Thumbnail = live ? thumbnails.Find(account.AccountId) : null
 		};
 	}
 
 	internal static string Count(string? value)
 	{
-		if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) ||
-			!double.IsFinite(number) ||
-			number < 0)
+		if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+			|| !double.IsFinite(number)
+			|| number < 0)
 		{
 			return StreamStatsViewState.Unavailable;
 		}
@@ -76,25 +79,27 @@ internal static class StreamStatsResolver
 
 		return whole switch
 		{
-			>= 1_000_000 => (whole / 1_000_000).ToString(whole >= 100_000_000 ? "0" : "0.#", CultureInfo.CurrentCulture) + "M",
+			>= 1_000_000 => (whole / 1_000_000).ToString(whole >= 100_000_000 ? "0" : "0.#", CultureInfo.CurrentCulture)
+				+ "M",
 			>= 100_000 => Math.Floor(whole / 1_000).ToString("0", CultureInfo.CurrentCulture) + "K",
 			>= 10_000 => (Math.Floor(whole / 100) / 10).ToString("0.#", CultureInfo.CurrentCulture) + "K",
-			_ => whole.ToString("N0", CultureInfo.CurrentCulture),
+			_ => whole.ToString("N0", CultureInfo.CurrentCulture)
 		};
 	}
 
 	internal static string Uptime(string? seconds)
 	{
-		if (!double.TryParse(seconds, NumberStyles.Float, CultureInfo.InvariantCulture, out var total) ||
-			!double.IsFinite(total) ||
-			total < 0)
+		if (!double.TryParse(seconds, NumberStyles.Float, CultureInfo.InvariantCulture, out var total)
+			|| !double.IsFinite(total)
+			|| total < 0)
 		{
 			return string.Empty;
 		}
 
 		var span = TimeSpan.FromSeconds(Math.Floor(total));
 
-		return string.Create(CultureInfo.InvariantCulture, $"{(int)span.TotalHours:00}:{span.Minutes:00}:{span.Seconds:00}");
+		return string.Create(CultureInfo.InvariantCulture,
+			$"{(int)span.TotalHours:00}:{span.Minutes:00}:{span.Seconds:00}");
 	}
 
 	internal static double[] Normalize(IReadOnlyList<double?> history)

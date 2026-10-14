@@ -31,17 +31,23 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	{
 	}
 
-	public void KeyDown(KeyCode key) => SendKey(key, isUp: false);
+	public void KeyDown(KeyCode key)
+	{
+		SendKey(key, false);
+	}
 
-	public void KeyUp(KeyCode key) => SendKey(key, isUp: true);
+	public void KeyUp(KeyCode key)
+	{
+		SendKey(key, true);
+	}
 
 	public void TypeUnicode(string text)
 	{
 		var inputs = new List<Input>(text.Length * 2);
 		foreach (var unit in text)
 		{
-			inputs.Add(UnicodeInput(unit, isUp: false));
-			inputs.Add(UnicodeInput(unit, isUp: true));
+			inputs.Add(UnicodeInput(unit, false));
+			inputs.Add(UnicodeInput(unit, true));
 		}
 
 		Send(inputs);
@@ -114,7 +120,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 				{
 					wVk = scan == 0 ? vk : (ushort)0,
 					wScan = scan,
-					dwFlags = scan == 0 ? (isUp ? KeyEventFKeyUp : 0) : flags,
+					dwFlags = scan == 0 ? isUp ? KeyEventFKeyUp : 0 : flags,
 					time = 0,
 					dwExtraInfo = IntPtr.Zero
 				}
@@ -125,7 +131,8 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	}
 
 	private static Input UnicodeInput(char unit, bool isUp)
-		=> new()
+	{
+		return new Input
 		{
 			type = InputKeyboard,
 			union = new InputUnion
@@ -140,37 +147,47 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 				}
 			}
 		};
+	}
 
-	private static void Send(IReadOnlyCollection<Input> inputs) => Win32Input.Send(inputs);
+	private static void Send(IReadOnlyCollection<Input> inputs)
+	{
+		Win32Input.Send(inputs);
+	}
 
-	internal static bool IsExtendedKey(KeyCode key) => key is
-		KeyCode.Insert
-		or KeyCode.Delete
-		or KeyCode.Home
-		or KeyCode.End
-		or KeyCode.PageUp
-		or KeyCode.PageDown
-		or KeyCode.ArrowUp
-		or KeyCode.ArrowDown
-		or KeyCode.ArrowLeft
-		or KeyCode.ArrowRight
-		or KeyCode.RightControl
-		or KeyCode.RightAlt
-		or KeyCode.LeftMeta
-		or KeyCode.RightMeta
-		or KeyCode.NumpadDivide
-		or KeyCode.NumpadEnter
-		or KeyCode.PrintScreen
-		or KeyCode.NumLock;
+	internal static bool IsExtendedKey(KeyCode key)
+	{
+		return key is
+			KeyCode.Insert
+			or KeyCode.Delete
+			or KeyCode.Home
+			or KeyCode.End
+			or KeyCode.PageUp
+			or KeyCode.PageDown
+			or KeyCode.ArrowUp
+			or KeyCode.ArrowDown
+			or KeyCode.ArrowLeft
+			or KeyCode.ArrowRight
+			or KeyCode.RightControl
+			or KeyCode.RightAlt
+			or KeyCode.LeftMeta
+			or KeyCode.RightMeta
+			or KeyCode.NumpadDivide
+			or KeyCode.NumpadEnter
+			or KeyCode.PrintScreen
+			or KeyCode.NumLock;
+	}
 
-	private static bool IsMediaKey(KeyCode key) => key is
-		KeyCode.MediaPlayPause
-		or KeyCode.MediaStop
-		or KeyCode.MediaTrackNext
-		or KeyCode.MediaTrackPrevious
-		or KeyCode.AudioVolumeUp
-		or KeyCode.AudioVolumeDown
-		or KeyCode.AudioVolumeMute;
+	private static bool IsMediaKey(KeyCode key)
+	{
+		return key is
+			KeyCode.MediaPlayPause
+			or KeyCode.MediaStop
+			or KeyCode.MediaTrackNext
+			or KeyCode.MediaTrackPrevious
+			or KeyCode.AudioVolumeUp
+			or KeyCode.AudioVolumeDown
+			or KeyCode.AudioVolumeMute;
+	}
 
 	private static bool TryGetVirtualKey(KeyCode key, out ushort vk)
 	{
@@ -331,9 +348,15 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			return null;
 		}
 
-		public void KeyDown(KeyCode key) => Post(key, isUp: false);
+		public void KeyDown(KeyCode key)
+		{
+			Post(key, false);
+		}
 
-		public void KeyUp(KeyCode key) => Post(key, isUp: true);
+		public void KeyUp(KeyCode key)
+		{
+			Post(key, true);
+		}
 
 		public void TypeUnicode(string text)
 		{
@@ -373,7 +396,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 			if (isUp)
 			{
-				value |= (1u << 30) | (1u << 31); // previous key state + transition (release)
+				value |= 1u << 30 | 1u << 31; // previous key state + transition (release)
 			}
 
 			return (nint)value;
@@ -388,7 +411,10 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 				_previous = previous;
 			}
 
-			public void Dispose() => _ = Win32Foreground.TryActivate(_previous, verifyTimeoutMs: 0);
+			public void Dispose()
+			{
+				_ = Win32Foreground.TryActivate(_previous, 0);
+			}
 		}
 	}
 }

@@ -11,10 +11,16 @@ public class EmptyCellStylePortabilityTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task A_profile_export_then_import_keeps_the_default_and_the_folder_override()
@@ -29,7 +35,7 @@ public class EmptyCellStylePortabilityTests
 		var export = await _harness.ProfileService.Export(source.Id,
 			PortableExportOptions.Default,
 			CancellationToken.None);
-		var import = await _harness.ProfileService.Import(export.Data!, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(export.Data!, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		var importedFolder = _harness.FolderCache.GetFoldersByProfileId(import.Data!.Id).Single();
@@ -59,9 +65,9 @@ public class EmptyCellStylePortabilityTests
 				}
 			},
 			[],
-			password: null);
+			null);
 
-		var import = await _harness.ProfileService.Import(archive, password: null, CancellationToken.None);
+		var import = await _harness.ProfileService.Import(archive, null, CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
 		Assert.Multiple(() =>
@@ -86,7 +92,7 @@ public class EmptyCellStylePortabilityTests
 		var import = await _harness.FolderService.Import(profile.Id,
 			root.Id,
 			export.Data!,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);
@@ -110,12 +116,12 @@ public class EmptyCellStylePortabilityTests
 				]
 			},
 			[],
-			password: null);
+			null);
 
 		var import = await _harness.FolderService.Import(profile.Id,
 			root.Id,
 			archive,
-			password: null,
+			null,
 			CancellationToken.None);
 
 		Assert.That(import.Success, Is.True);

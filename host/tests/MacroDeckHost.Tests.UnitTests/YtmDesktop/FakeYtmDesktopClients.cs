@@ -77,9 +77,11 @@ internal sealed class FakeYtmDesktopApiClient : IYtmDesktopApiClient
 	}
 
 	public Task<IReadOnlyList<string>> GetApiVersionsAsync(CancellationToken cancellationToken)
-		=> MetadataException is not null
+	{
+		return MetadataException is not null
 			? Task.FromException<IReadOnlyList<string>>(MetadataException)
 			: Task.FromResult<IReadOnlyList<string>>(ApiVersions.ToList());
+	}
 
 	public Task<string> RequestAuthCodeAsync(
 		string appId,
@@ -134,10 +136,17 @@ internal sealed class FakeYtmDesktopApiClient : IYtmDesktopApiClient
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => Volatile.Write(ref _disposed, true);
+	public void Dispose()
+	{
+		Volatile.Write(ref _disposed, true);
+	}
 
 	public static YtmDesktopApiException RateLimited()
-		=> new("Too many requests", (HttpStatusCode)429, retryAfter: TimeSpan.FromSeconds(5));
+	{
+		return new YtmDesktopApiException("Too many requests",
+			(HttpStatusCode)429,
+			retryAfter: TimeSpan.FromSeconds(5));
+	}
 }
 
 internal sealed class FakeYtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
@@ -183,9 +192,15 @@ internal sealed class FakeYtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 		StateUpdated?.Invoke(this, document.RootElement.Clone());
 	}
 
-	public void RaisePlaylistCreated(YtmPlaylist playlist) => PlaylistCreated?.Invoke(this, playlist);
+	public void RaisePlaylistCreated(YtmPlaylist playlist)
+	{
+		PlaylistCreated?.Invoke(this, playlist);
+	}
 
-	public void RaisePlaylistDeleted(string playlistId) => PlaylistDeleted?.Invoke(this, playlistId);
+	public void RaisePlaylistDeleted(string playlistId)
+	{
+		PlaylistDeleted?.Invoke(this, playlistId);
+	}
 
 	public void Drop(string? reason = "closed")
 	{
@@ -193,5 +208,8 @@ internal sealed class FakeYtmDesktopRealtimeClient : IYtmDesktopRealtimeClient
 		Disconnected?.Invoke(this, reason);
 	}
 
-	public void Dispose() => Volatile.Write(ref _disposed, true);
+	public void Dispose()
+	{
+		Volatile.Write(ref _disposed, true);
+	}
 }

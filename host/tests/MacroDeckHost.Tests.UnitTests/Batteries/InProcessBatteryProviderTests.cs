@@ -11,7 +11,6 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Tests.UnitTests.Integrations;
-using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeckHost.Tests.UnitTests.VideoStreams;
@@ -123,7 +122,8 @@ internal sealed class InProcessBatteryProviderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_batteries.Devices.Select(device => device.ProviderId), Is.EqualTo(new[] { "com.example.other" }));
+			Assert.That(_batteries.Devices.Select(device => device.ProviderId),
+				Is.EqualTo(new[] { "com.example.other" }));
 			Assert.That(integration.Changes,
 				Is.EqualTo(afterShutdown),
 				"a handler subscribed through the context outlived its integration");
@@ -169,13 +169,21 @@ internal sealed class InProcessBatteryProviderTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IBatteryProviderContext context, CancellationToken cancellationToken = default)
-			=> context.PublishAsync(new BatteryDevice { Id = "pixel", Name = "Pixel", LevelPercent = 50 },
+		{
+			return context.PublishAsync(new BatteryDevice { Id = "pixel", Name = "Pixel", LevelPercent = 50 },
 				cancellationToken);
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public async Task WaitForChangesAsync(int count)
 		{

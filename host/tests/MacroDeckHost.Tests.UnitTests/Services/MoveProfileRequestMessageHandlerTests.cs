@@ -38,11 +38,16 @@ public class MoveProfileRequestMessageHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	private ValueTask<MoveProfileResponse> Move(string id, string targetId, string position)
-		=> _handler.Handle(new MoveProfileRequest { Id = id, TargetId = targetId, Position = position },
+	{
+		return _handler.Handle(new MoveProfileRequest { Id = id, TargetId = targetId, Position = position },
 			CancellationToken.None);
+	}
 
 	[Test]
 	public async Task A_valid_move_answers_the_new_placements()

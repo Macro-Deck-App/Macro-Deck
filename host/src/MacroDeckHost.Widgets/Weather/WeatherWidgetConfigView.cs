@@ -22,8 +22,8 @@ internal static class WeatherWidgetConfigView
 		var showTemperature = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showTemperature") ?? true);
 		var showCondition = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
 		// Must match WeatherWidgetData.Parse: the editor recomposes every bound key on save.
-		var showLocation = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLocation") ??
-			WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
+		var showLocation = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showLocation")
+			?? WidgetConfigJson.ReadBool(data, "showCondition") ?? true);
 		var style = new UiState<string>(WeatherWidgetData.Parse(data).Style);
 		var showForecast = new UiState<bool>(WidgetConfigJson.ReadBool(data, "showForecast") ?? true);
 		var animateIcon = new UiState<bool>(WidgetConfigJson.ReadBool(data, "animateIcon") ?? true);
@@ -53,7 +53,7 @@ internal static class WeatherWidgetConfigView
 				[
 					new UiHeading
 					{
-						Key = "location-heading", Text = AppStrings.Widgets.Weather.LocationSection(),
+						Key = "location-heading", Text = AppStrings.Widgets.Weather.LocationSection()
 					},
 					LocationPicker(registry, instanceId, instanceOptions),
 					new UiHeading { Key = "style-heading", Text = AppStrings.Widgets.Editor.Style() },
@@ -66,33 +66,33 @@ internal static class WeatherWidgetConfigView
 						Binding = Bind.To(style),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(WeatherWidgetData.StyleForecast, AppStrings.Widgets.Weather.Forecast()),
-							UiOption.Of(WeatherWidgetData.StyleCompact, AppStrings.Widgets.Weather.Styles.Compact()),
-						]),
+							UiOption.Of(WeatherWidgetData.StyleCompact, AppStrings.Widgets.Weather.Styles.Compact())
+						])
 					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiBooleanInput
 					{
 						Key = "showIcon",
 						Label = AppStrings.Widgets.Weather.ConditionIcon(),
-						Binding = Bind.To(showIcon),
+						Binding = Bind.To(showIcon)
 					},
 					new UiBooleanInput
 					{
 						Key = "showTemperature",
 						Label = AppStrings.Widgets.Weather.Temperature(),
-						Binding = Bind.To(showTemperature),
+						Binding = Bind.To(showTemperature)
 					},
 					new UiBooleanInput
 					{
 						Key = "showCondition",
 						Label = AppStrings.Widgets.Weather.ConditionText(),
-						Binding = Bind.To(showCondition),
+						Binding = Bind.To(showCondition)
 					},
 					new UiBooleanInput
 					{
 						Key = "showLocation",
 						Label = AppStrings.Widgets.Weather.LocationName(),
-						Binding = Bind.To(showLocation),
+						Binding = Bind.To(showLocation)
 					},
 					new UiBooleanInput
 					{
@@ -103,15 +103,15 @@ internal static class WeatherWidgetConfigView
 						{
 							ParameterName = WeatherWidgetData.StyleKey,
 							Values = [WeatherWidgetData.StyleForecast],
-							SiblingValue = () => style.Value,
-						},
+							SiblingValue = () => style.Value
+						}
 					},
 					new UiBooleanInput
 					{
 						Key = "animateIcon",
 						Label = AppStrings.Widgets.Weather.AnimateIcon(),
 						Binding = Bind.To(animateIcon),
-						VisibleWhen = new UiVisibleWhen { ParameterName = "showIcon", Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen { ParameterName = "showIcon", Values = ["true"] }
 					},
 					new UiWhen
 					{
@@ -127,29 +127,29 @@ internal static class WeatherWidgetConfigView
 							Step = 1,
 							// A closed range of seven, each of which reads as a phrase rather than a digit -
 							// picked from a list, the way the original form offered it, not typed into a box.
-							Options = UiValue.Of(ForecastDayOptions),
-							VisibleWhen = new UiVisibleWhen { ParameterName = "showForecast", Values = ["true"] },
-						},
+							Options = UiValue.Of(_forecastDayOptions),
+							VisibleWhen = new UiVisibleWhen { ParameterName = "showForecast", Values = ["true"] }
+						}
 					},
 					new UiProse
 					{
-						Key = "live-update-hint", Text = AppStrings.Widgets.Weather.LiveUpdateHint(),
+						Key = "live-update-hint", Text = AppStrings.Widgets.Weather.LiveUpdateHint()
 					},
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
-	private static readonly IReadOnlyList<UiOption> ForecastDayOptions =
+	private static readonly IReadOnlyList<UiOption> _forecastDayOptions =
 	[
 		.. Enumerable.Range(1, 7)
 			.Select(days => UiOption.Of(days.ToString(CultureInfo.InvariantCulture),
-				AppStrings.Widgets.Weather.ForecastDaysCount(count: days))),
+				AppStrings.Widgets.Weather.ForecastDaysCount(days)))
 	];
 
 	/// <summary>The location picker, carrying the "nothing set up yet" sentence only while there is
@@ -165,7 +165,7 @@ internal static class WeatherWidgetConfigView
 			Key = "instanceId",
 			Label = AppStrings.Widgets.Weather.WeatherLocation(),
 			Binding = Bind.To(instanceId),
-			OptionsState = instanceOptions,
+			OptionsState = instanceOptions
 		};
 
 		return registry.GetInstances().Count == 0
@@ -179,7 +179,7 @@ internal static class WeatherWidgetConfigView
 		// itself - is composed directly rather than through the factory.
 		var options = new List<UiOption>
 		{
-			new() { Value = string.Empty, Label = AppStrings.Widgets.Weather.FirstAvailable() },
+			new() { Value = string.Empty, Label = AppStrings.Widgets.Weather.FirstAvailable() }
 		};
 
 		options.AddRange(registry.GetInstances()

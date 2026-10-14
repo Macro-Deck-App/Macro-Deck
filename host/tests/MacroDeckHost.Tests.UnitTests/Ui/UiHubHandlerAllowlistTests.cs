@@ -75,14 +75,17 @@ public class UiHubHandlerAllowlistTests
 	}
 
 	private static List<string> DispatcherMethodNames()
-		=> typeof(UiWebSocketDispatcher)
+	{
+		return typeof(UiWebSocketDispatcher)
 			.GetMethods(
 				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
 			.Select(m => m.Name)
 			.ToList();
+	}
 
 	private static List<Type> HubHandlerRequestTypes()
-		=> typeof(UiWebSocketDispatcher)
+	{
+		return typeof(UiWebSocketDispatcher)
 			.GetConstructors()
 			.Single()
 			.GetParameters()
@@ -90,4 +93,5 @@ public class UiHubHandlerAllowlistTests
 			.Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IUiTransportMessageHandler<,>))
 			.Select(t => t.GetGenericArguments()[0])
 			.ToList();
+	}
 }

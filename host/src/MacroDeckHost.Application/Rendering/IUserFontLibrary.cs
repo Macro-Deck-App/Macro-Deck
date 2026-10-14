@@ -33,7 +33,8 @@ public interface IUserFontLibrary
 {
 	IReadOnlyList<UserFont> List();
 
-	Task<IReadOnlyList<UserFontImportResult>> Import(IReadOnlyList<UserFontUpload> uploads,
+	Task<IReadOnlyList<UserFontImportResult>> Import(
+		IReadOnlyList<UserFontUpload> uploads,
 		CancellationToken cancellationToken);
 
 	Task<bool> Remove(string fontId, CancellationToken cancellationToken);

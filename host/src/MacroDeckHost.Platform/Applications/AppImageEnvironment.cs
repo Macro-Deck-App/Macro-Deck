@@ -7,13 +7,14 @@ namespace MacroDeckHost.Platform.Applications;
 // and the bundle's library and GTK paths would leak into the opened application.
 internal static class AppImageEnvironment
 {
-	private const UnixFileMode AnyExecute = UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
+	private const UnixFileMode AnyExecute
+		= UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute;
 
-	private static readonly string[] ForcedByBundle = ["APPDIR", "GTK_THEME", "GDK_BACKEND"];
+	private static readonly string[] _forcedByBundle = ["APPDIR", "GTK_THEME", "GDK_BACKEND"];
 
-	private static readonly string[] WorkingDirectoryCandidates = ["OWD", "HOME"];
+	private static readonly string[] _workingDirectoryCandidates = ["OWD", "HOME"];
 
-	private static readonly (string Program, string[] Arguments)[] Launchers =
+	private static readonly (string Program, string[] Arguments)[] _launchers =
 	[
 		("xdg-open", []),
 		("gio", ["open"]),
@@ -22,14 +23,16 @@ internal static class AppImageEnvironment
 	];
 
 	public static ProcessStartInfo? TryCreateOpener(string target)
-		=> TryCreateOpener(target, CurrentEnvironment());
+	{
+		return TryCreateOpener(target, CurrentEnvironment());
+	}
 
 	public static ProcessStartInfo? TryCreateOpener(string target, IReadOnlyDictionary<string, string> environment)
 	{
-		if (OperatingSystem.IsWindows() ||
-			!environment.TryGetValue("APPDIR", out var appDir) ||
-			!Path.IsPathRooted(appDir) ||
-			appDir.TrimEnd('/').Length == 0)
+		if (OperatingSystem.IsWindows()
+			|| !environment.TryGetValue("APPDIR", out var appDir)
+			|| !Path.IsPathRooted(appDir)
+			|| appDir.TrimEnd('/').Length == 0)
 		{
 			return null;
 		}
@@ -71,7 +74,7 @@ internal static class AppImageEnvironment
 		var outside = new Dictionary<string, string>(StringComparer.Ordinal);
 		foreach (var (name, value) in environment)
 		{
-			if (ForcedByBundle.Contains(name, StringComparer.Ordinal))
+			if (_forcedByBundle.Contains(name, StringComparer.Ordinal))
 			{
 				continue;
 			}
@@ -119,7 +122,7 @@ internal static class AppImageEnvironment
 				}
 
 				var next = Path.Combine(current, part);
-				current = File.ResolveLinkTarget(next, returnFinalTarget: true)?.FullName ?? next;
+				current = File.ResolveLinkTarget(next, true)?.FullName ?? next;
 			}
 
 			return current;
@@ -137,19 +140,22 @@ internal static class AppImageEnvironment
 			return false;
 		}
 
-		var resolved = File.ResolveLinkTarget(path, returnFinalTarget: true)?.FullName ?? path;
+		var resolved = File.ResolveLinkTarget(path, true)?.FullName ?? path;
 		return (File.GetUnixFileMode(resolved) & AnyExecute) != 0;
 	}
 
 	private static bool IsBundled(string entry, IReadOnlyList<string> roots)
-		=> roots.Any(root => root.Length > 0 &&
-			entry.StartsWith(root, StringComparison.Ordinal) &&
-			(entry.Length == root.Length || entry[root.Length] == '/'));
+	{
+		return roots.Any(root
+			=> root.Length > 0
+			&& entry.StartsWith(root, StringComparison.Ordinal)
+			&& (entry.Length == root.Length || entry[root.Length] == '/'));
+	}
 
 	private static (string? Program, string[] Arguments) FindLauncher(string? searchPath, string appDir)
 	{
 		var directories = (searchPath ?? string.Empty).Split(':', StringSplitOptions.RemoveEmptyEntries);
-		foreach (var (program, arguments) in Launchers)
+		foreach (var (program, arguments) in _launchers)
 		{
 			var resolved = directories
 				.Select(directory => Path.Combine(directory, program))
@@ -165,9 +171,12 @@ internal static class AppImageEnvironment
 	}
 
 	private static string WorkingDirectory(IReadOnlyDictionary<string, string> environment)
-		=> WorkingDirectoryCandidates
-			.Select(name => environment.GetValueOrDefault(name))
-			.FirstOrDefault(directory => !string.IsNullOrEmpty(directory) && Directory.Exists(directory)) ?? "/";
+	{
+		return _workingDirectoryCandidates
+				.Select(name => environment.GetValueOrDefault(name))
+				.FirstOrDefault(directory => !string.IsNullOrEmpty(directory) && Directory.Exists(directory))
+			?? "/";
+	}
 
 	private static Dictionary<string, string> CurrentEnvironment()
 	{

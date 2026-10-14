@@ -9,5 +9,8 @@ internal sealed class YouTubeManualClock : TimeProvider
 
 	public DateTimeOffset Now { get; set; }
 
-	public override DateTimeOffset GetUtcNow() => Now;
+	public override DateTimeOffset GetUtcNow()
+	{
+		return Now;
+	}
 }

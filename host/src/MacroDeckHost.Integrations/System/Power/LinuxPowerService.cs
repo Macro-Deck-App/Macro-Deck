@@ -20,9 +20,11 @@ internal sealed class LinuxPowerService : IPowerService
 	public bool IsSupported => _hasSystemctl || _hasLoginctl || _hasXdgScreensaver;
 
 	public bool Supports(PowerOperation operation)
-		=> operation == PowerOperation.Lock
+	{
+		return operation == PowerOperation.Lock
 			? _hasLoginctl || _hasXdgScreensaver
 			: _hasSystemctl || _hasLoginctl;
+	}
 
 	public async Task<PowerResult> ExecuteAsync(
 		PowerOperation operation,
@@ -54,12 +56,15 @@ internal sealed class LinuxPowerService : IPowerService
 	}
 
 	private static LocalizedText UnsupportedReason(PowerOperation operation)
-		=> operation == PowerOperation.Lock
+	{
+		return operation == PowerOperation.Lock
 			? AppStrings.Integrations.System.Errors.Power.LinuxNoLockCommand()
 			: AppStrings.Integrations.System.Errors.Power.LinuxNoControlCommand();
+	}
 
 	private static LocalizedText FailureMessage(PowerOperation operation)
-		=> operation switch
+	{
+		return operation switch
 		{
 			PowerOperation.Lock => AppStrings.Integrations.System.Errors.Power.LockFailed(),
 			PowerOperation.Sleep => AppStrings.Integrations.System.Errors.Power.SleepFailed(),
@@ -68,4 +73,5 @@ internal sealed class LinuxPowerService : IPowerService
 			PowerOperation.ShutDown => AppStrings.Integrations.System.Errors.Power.LinuxShutDownRefused(),
 			_ => AppStrings.Integrations.System.Errors.Power.OperationFailed()
 		};
+	}
 }

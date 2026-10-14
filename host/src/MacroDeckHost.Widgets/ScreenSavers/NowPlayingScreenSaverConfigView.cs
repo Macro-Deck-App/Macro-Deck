@@ -32,7 +32,7 @@ internal static class NowPlayingScreenSaverConfigView
 					instanceId.Value = value;
 					instanceOptions.Reload();
 				}),
-			OptionsState = instanceOptions,
+			OptionsState = instanceOptions
 		};
 
 		return new UiConfigStack
@@ -42,8 +42,8 @@ internal static class NowPlayingScreenSaverConfigView
 			[
 				registry.GetInstances().Count == 0
 					? picker with { Description = AppStrings.Widgets.Music.NoProvidersHint() }
-					: picker,
-			],
+					: picker
+			]
 		};
 	}
 }

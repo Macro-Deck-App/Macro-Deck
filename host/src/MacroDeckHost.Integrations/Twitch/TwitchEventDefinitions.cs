@@ -7,49 +7,53 @@ namespace MacroDeckHost.Integrations.Twitch;
 
 internal static class TwitchEventDefinitions
 {
-	private static readonly LocalizedText StreamCategory = AppStrings.Integrations.Twitch.Events.StreamCategory();
-	private static readonly LocalizedText CommunityCategory = AppStrings.Integrations.Twitch.Events.CommunityCategory();
+	private static readonly LocalizedText _streamCategory = AppStrings.Integrations.Twitch.Events.StreamCategory();
 
-	private static readonly LocalizedText SubscriptionCategory
+	private static readonly LocalizedText
+		_communityCategory = AppStrings.Integrations.Twitch.Events.CommunityCategory();
+
+	private static readonly LocalizedText _subscriptionCategory
 		= AppStrings.Integrations.Twitch.Events.SubscriptionsCategory();
 
-	private static readonly LocalizedText BitsCategory = AppStrings.Integrations.Twitch.Events.BitsCategory();
+	private static readonly LocalizedText _bitsCategory = AppStrings.Integrations.Twitch.Events.BitsCategory();
 
-	private static readonly LocalizedText ChannelPointsCategory
+	private static readonly LocalizedText _channelPointsCategory
 		= AppStrings.Integrations.Twitch.Events.ChannelPointsCategory();
 
-	private static readonly LocalizedText InteractiveCategory
+	private static readonly LocalizedText _interactiveCategory
 		= AppStrings.Integrations.Twitch.Events.PollsAndPredictionsCategory();
 
-	private static readonly LocalizedText HypeTrainCategory = AppStrings.Integrations.Twitch.Events.HypeTrainCategory();
-	private static readonly LocalizedText GoalsCategory = AppStrings.Integrations.Twitch.Events.GoalsCategory();
-	private static readonly LocalizedText ChatCategory = AppStrings.Integrations.Twitch.Events.ChatCategory();
+	private static readonly LocalizedText
+		_hypeTrainCategory = AppStrings.Integrations.Twitch.Events.HypeTrainCategory();
 
-	private static readonly LocalizedText ModerationCategory
+	private static readonly LocalizedText _goalsCategory = AppStrings.Integrations.Twitch.Events.GoalsCategory();
+	private static readonly LocalizedText _chatCategory = AppStrings.Integrations.Twitch.Events.ChatCategory();
+
+	private static readonly LocalizedText _moderationCategory
 		= AppStrings.Integrations.Twitch.Events.ModerationCategory();
 
-	private static readonly LocalizedText ConnectionCategory
+	private static readonly LocalizedText _connectionCategory
 		= AppStrings.Integrations.Twitch.Events.ConnectionCategory();
 
-	private static readonly LocalizedText AdvancedCategory = AppStrings.Integrations.Twitch.Events.AdvancedCategory();
+	private static readonly LocalizedText _advancedCategory = AppStrings.Integrations.Twitch.Events.AdvancedCategory();
 
 	public static IReadOnlyList<EventDefinition> All { get; } =
 	[
 		Event(TwitchEventIds.StreamOnline,
 			Fields.StreamOnlineName(),
 			Fields.StreamOnlineDescription(),
-			StreamCategory,
+			_streamCategory,
 			payload: [Text("streamType", Fields.Type()), Text("startedAt", Fields.StartedAt())]),
 
 		Event(TwitchEventIds.StreamOffline,
 			Fields.StreamOfflineName(),
 			Fields.StreamOfflineDescription(),
-			StreamCategory),
+			_streamCategory),
 
 		Event(TwitchEventIds.ChannelUpdate,
 			Fields.ChannelUpdateName(),
 			Fields.ChannelUpdateDescription(),
-			StreamCategory,
+			_streamCategory,
 			payload:
 			[
 				Text("title", Fields.Title()),
@@ -62,7 +66,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.AdBreakBegin,
 			Fields.AdBreakBeginName(),
 			Fields.AdBreakBeginDescription(),
-			StreamCategory,
+			_streamCategory,
 			payload:
 			[
 				Number("durationSeconds", Fields.DurationSeconds()),
@@ -74,13 +78,13 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.Follow,
 			Fields.FollowName(),
 			Fields.FollowDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload: [.. User(), Text("followedAt", Fields.FollowedAt())]),
 
 		Event(TwitchEventIds.RaidIncoming,
 			Fields.RaidIncomingName(),
 			Fields.RaidIncomingDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload:
 			[
 				Text("fromUserId", Fields.FromUserId()),
@@ -92,7 +96,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.RaidOutgoing,
 			Fields.RaidOutgoingName(),
 			Fields.RaidOutgoingDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload:
 			[
 				Text("toUserId", Fields.ToUserId()),
@@ -104,7 +108,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.ShoutoutCreated,
 			Fields.ShoutoutCreatedName(),
 			Fields.ShoutoutCreatedDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload:
 			[
 				Text("toUserLogin", Fields.ToLogin()),
@@ -115,7 +119,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.ShoutoutReceived,
 			Fields.ShoutoutReceivedName(),
 			Fields.ShoutoutReceivedDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload:
 			[
 				Text("fromUserLogin", Fields.FromLogin()),
@@ -126,28 +130,27 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.VipAdded,
 			Fields.VipAddedName(),
 			Fields.VipAddedDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload: [.. User()]),
 
 		Event(TwitchEventIds.VipRemoved,
 			Fields.VipRemovedName(),
 			Fields.VipRemovedDescription(),
-			CommunityCategory,
+			_communityCategory,
 			payload: [.. User()]),
 
 		Event(TwitchEventIds.Subscribe,
 			Fields.SubscribeName(),
 			Fields.SubscribeDescription(),
-			SubscriptionCategory,
-			configuration: [Tier()],
-			payload: [.. User(), Text("tier", Fields.Tier()), Bool("isGift", Fields.Gifted())]),
+			_subscriptionCategory,
+			[Tier()],
+			[.. User(), Text("tier", Fields.Tier()), Bool("isGift", Fields.Gifted())]),
 
 		Event(TwitchEventIds.SubscriptionMessage,
 			Fields.SubscriptionMessageName(),
 			Fields.SubscriptionMessageDescription(),
-			SubscriptionCategory,
-			configuration: [Tier()],
-			payload:
+			_subscriptionCategory,
+			[Tier()],
 			[
 				.. User(),
 				Text("tier", Fields.Tier()),
@@ -160,9 +163,8 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.SubscriptionGift,
 			Fields.SubscriptionGiftName(),
 			Fields.SubscriptionGiftDescription(),
-			SubscriptionCategory,
-			configuration: [Tier()],
-			payload:
+			_subscriptionCategory,
+			[Tier()],
 			[
 				.. User(),
 				Text("tier", Fields.Tier()),
@@ -174,14 +176,14 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.SubscriptionEnd,
 			Fields.SubscriptionEndName(),
 			Fields.SubscriptionEndDescription(),
-			SubscriptionCategory,
-			configuration: [Tier()],
-			payload: [.. User(), Text("tier", Fields.Tier()), Bool("isGift", Fields.WasGifted())]),
+			_subscriptionCategory,
+			[Tier()],
+			[.. User(), Text("tier", Fields.Tier()), Bool("isGift", Fields.WasGifted())]),
 
 		Event(TwitchEventIds.Cheer,
 			Fields.CheerName(),
 			Fields.CheerDescription(),
-			BitsCategory,
+			_bitsCategory,
 			payload:
 			[
 				.. User(),
@@ -193,9 +195,8 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.RewardRedeemed,
 			Fields.RewardRedeemedName(),
 			Fields.RewardRedeemedDescription(),
-			ChannelPointsCategory,
-			configuration: [RewardFilter()],
-			payload:
+			_channelPointsCategory,
+			[RewardFilter()],
 			[
 				.. User(),
 				Text("rewardId", Fields.RewardId()),
@@ -209,9 +210,8 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.RewardRedemptionUpdated,
 			Fields.RewardRedemptionUpdatedName(),
 			Fields.RewardRedemptionUpdatedDescription(),
-			ChannelPointsCategory,
-			configuration: [RewardFilter()],
-			payload:
+			_channelPointsCategory,
+			[RewardFilter()],
 			[
 				.. User(),
 				Text("rewardId", Fields.RewardId()),
@@ -224,13 +224,13 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.AutomaticRewardRedeemed,
 			Fields.AutomaticRewardRedeemedName(),
 			Fields.AutomaticRewardRedeemedDescription(),
-			ChannelPointsCategory,
+			_channelPointsCategory,
 			payload: [.. User(), Text("rewardType", Fields.Reward()), Text("userInput", Fields.ViewerInput())]),
 
 		Event(TwitchEventIds.PollBegin,
 			Fields.PollBeginName(),
 			Fields.PollBeginDescription(),
-			InteractiveCategory,
+			_interactiveCategory,
 			payload:
 			[
 				Text("pollId", Fields.PollId()),
@@ -242,7 +242,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.PollEnd,
 			Fields.PollEndName(),
 			Fields.PollEndDescription(),
-			InteractiveCategory,
+			_interactiveCategory,
 			payload:
 			[
 				Text("pollId", Fields.PollId()),
@@ -255,7 +255,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.PredictionBegin,
 			Fields.PredictionBeginName(),
 			Fields.PredictionBeginDescription(),
-			InteractiveCategory,
+			_interactiveCategory,
 			payload:
 			[
 				Text("predictionId", Fields.PredictionId()),
@@ -267,13 +267,13 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.PredictionLock,
 			Fields.PredictionLockName(),
 			Fields.PredictionLockDescription(),
-			InteractiveCategory,
+			_interactiveCategory,
 			payload: [Text("predictionId", Fields.PredictionId()), Text("title", Fields.Title())]),
 
 		Event(TwitchEventIds.PredictionEnd,
 			Fields.PredictionEndName(),
 			Fields.PredictionEndDescription(),
-			InteractiveCategory,
+			_interactiveCategory,
 			payload:
 			[
 				Text("predictionId", Fields.PredictionId()),
@@ -285,7 +285,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.HypeTrainBegin,
 			Fields.HypeTrainBeginName(),
 			Fields.HypeTrainBeginDescription(),
-			HypeTrainCategory,
+			_hypeTrainCategory,
 			payload:
 			[
 				Number("level", Fields.Level()),
@@ -298,7 +298,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.HypeTrainProgress,
 			Fields.HypeTrainProgressName(),
 			Fields.HypeTrainProgressDescription(),
-			HypeTrainCategory,
+			_hypeTrainCategory,
 			payload:
 			[
 				Number("level", Fields.Level()),
@@ -310,7 +310,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.HypeTrainEnd,
 			Fields.HypeTrainEndName(),
 			Fields.HypeTrainEndDescription(),
-			HypeTrainCategory,
+			_hypeTrainCategory,
 			payload:
 			[
 				Number("level", Fields.Level()), Number("total", Fields.Total()), Text("endedAt", Fields.EndedAt())
@@ -319,25 +319,24 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.GoalBegin,
 			Fields.GoalBeginName(),
 			Fields.GoalBeginDescription(),
-			GoalsCategory,
+			_goalsCategory,
 			payload: [.. Goal()]),
 		Event(TwitchEventIds.GoalProgress,
 			Fields.GoalProgressName(),
 			Fields.GoalProgressDescription(),
-			GoalsCategory,
+			_goalsCategory,
 			payload: [.. Goal()]),
 		Event(TwitchEventIds.GoalEnd,
 			Fields.GoalEndName(),
 			Fields.GoalEndDescription(),
-			GoalsCategory,
+			_goalsCategory,
 			payload: [.. Goal(), Bool("isAchieved", Fields.Achieved())]),
 
 		Event(TwitchEventIds.ChatNotification,
 			Fields.ChatNotificationName(),
 			Fields.ChatNotificationDescription(),
-			ChatCategory,
-			configuration: [NoticeType()],
-			payload:
+			_chatCategory,
+			[NoticeType()],
 			[
 				.. User(),
 				Text("noticeType", Fields.Notice()),
@@ -348,18 +347,18 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.ChatCleared,
 			Fields.ChatClearedName(),
 			Fields.ChatClearedDescription(),
-			ChatCategory),
+			_chatCategory),
 
 		Event(TwitchEventIds.ChatMessageDeleted,
 			Fields.ChatMessageDeletedName(),
 			Fields.ChatMessageDeletedDescription(),
-			ChatCategory,
+			_chatCategory,
 			payload: [.. User(), Text("messageId", Fields.MessageId())]),
 
 		Event(TwitchEventIds.ChatSettingsUpdated,
 			Fields.ChatSettingsUpdatedName(),
 			Fields.ChatSettingsUpdatedDescription(),
-			ChatCategory,
+			_chatCategory,
 			payload:
 			[
 				Bool("emoteMode", Fields.EmoteOnly()),
@@ -374,7 +373,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.Ban,
 			Fields.BanName(),
 			Fields.BanDescription(),
-			ModerationCategory,
+			_moderationCategory,
 			payload:
 			[
 				.. User(),
@@ -388,7 +387,7 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.Unban,
 			Fields.UnbanName(),
 			Fields.UnbanDescription(),
-			ModerationCategory,
+			_moderationCategory,
 			payload:
 			[
 				.. User(), Text("moderatorLogin", Fields.ModeratorLogin()), Text("moderatorName", Fields.Moderator())
@@ -397,25 +396,23 @@ internal static class TwitchEventDefinitions
 		Event(TwitchEventIds.Connected,
 			MacroDeckStrings.Connection.Connected(),
 			Fields.ConnectedDescription(),
-			ConnectionCategory),
+			_connectionCategory),
 
 		Event(TwitchEventIds.Disconnected,
 			MacroDeckStrings.Connection.Disconnected(),
 			Fields.DisconnectedDescription(),
-			ConnectionCategory),
+			_connectionCategory),
 
 		Event(TwitchEventIds.Any,
 			Fields.AnyName(),
 			Fields.AnyDescription(),
-			AdvancedCategory,
-			configuration:
+			_advancedCategory,
 			[
 				ActionParameter.DynamicChoice("type",
-					label: Fields.EventType(),
-					description: Fields.EventTypeDescription(),
+					Fields.EventType(),
+					Fields.EventTypeDescription(),
 					placeholder: Fields.AnyEventPlaceholder())
 			],
-			payload:
 			[
 				Selectable("type", Fields.EventType()),
 				Text("version", Fields.Version()),
@@ -439,7 +436,8 @@ internal static class TwitchEventDefinitions
 		LocalizedText category,
 		IReadOnlyList<ActionParameter>? configuration = null,
 		IReadOnlyList<ActionParameter>? payload = null)
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = id,
 			Name = name,
@@ -448,26 +446,35 @@ internal static class TwitchEventDefinitions
 			ConfigurationParameters = [Account(), .. configuration ?? []],
 			PayloadParameters = [.. AccountPayload(), .. payload ?? []]
 		};
+	}
 
 	private static ActionParameter Account()
-		=> ActionParameter.DynamicChoice("account",
-			label: Fields.Account(),
-			description: Fields.AccountDescription(),
+	{
+		return ActionParameter.DynamicChoice("account",
+			Fields.Account(),
+			Fields.AccountDescription(),
 			placeholder: Fields.FirstAccountPlaceholder());
+	}
 
 	private static ActionParameter[] AccountPayload()
-		=>
+	{
+		return
 		[
 			Selectable("account", Fields.AccountId()),
 			Text("accountLogin", Fields.AccountLogin()),
 			Text("accountName", Fields.Account())
 		];
+	}
 
 	private static ActionParameter[] User()
-		=> [Text("userId", Fields.UserId()), Text("userLogin", Fields.UserLogin()), Text("userName", Fields.User())];
+	{
+		return
+			[Text("userId", Fields.UserId()), Text("userLogin", Fields.UserLogin()), Text("userName", Fields.User())];
+	}
 
 	private static ActionParameter[] Goal()
-		=>
+	{
+		return
 		[
 			Text("goalId", Fields.GoalId()),
 			Text("goalType", Fields.Type()),
@@ -475,26 +482,32 @@ internal static class TwitchEventDefinitions
 			Number("currentAmount", Fields.Current()),
 			Number("targetAmount", Fields.Target())
 		];
+	}
 
 	private static ActionParameter Tier()
-		=> ActionParameter.Choice("tier",
+	{
+		return ActionParameter.Choice("tier",
 			[
 				new ActionParameterOption { Value = "1000", Label = Fields.TierOption1() },
 				new ActionParameterOption { Value = "2000", Label = Fields.TierOption2() },
 				new ActionParameterOption { Value = "3000", Label = Fields.TierOption3() },
 				new ActionParameterOption { Value = "Prime", Label = Fields.TierOptionPrime() }
 			],
-			label: Fields.Tier(),
-			description: Fields.TierDescription());
+			Fields.Tier(),
+			Fields.TierDescription());
+	}
 
 	private static ActionParameter RewardFilter()
-		=> ActionParameter.DynamicChoice("rewardTitle",
-			label: Fields.Reward(),
-			description: Fields.RewardDescription(),
+	{
+		return ActionParameter.DynamicChoice("rewardTitle",
+			Fields.Reward(),
+			Fields.RewardDescription(),
 			placeholder: Fields.AnyRewardPlaceholder());
+	}
 
 	private static ActionParameter NoticeType()
-		=> ActionParameter.Choice("noticeType",
+	{
+		return ActionParameter.Choice("noticeType",
 			[
 				new ActionParameterOption { Value = "sub", Label = Fields.OptionSubscription() },
 				new ActionParameterOption { Value = "resub", Label = Fields.OptionResubscription() },
@@ -509,335 +522,922 @@ internal static class TwitchEventDefinitions
 				new ActionParameterOption { Value = "bits_badge_tier", Label = Fields.OptionBitsBadge() },
 				new ActionParameterOption { Value = "charity_donation", Label = Fields.OptionCharityDonation() }
 			],
-			label: Fields.Notice(),
-			description: Fields.NoticeDescription());
+			Fields.Notice(),
+			Fields.NoticeDescription());
+	}
 
-	private static ActionParameter Text(string name, LocalizedText label) => ActionParameter.Text(name, label: label);
+	private static ActionParameter Text(string name, LocalizedText label)
+	{
+		return ActionParameter.Text(name, label);
+	}
 
 	// Payload values the integration can list: the same options its matching filter offers, so a
 	// condition on one is authored by picking a name while the stored value stays the raw id.
 	private static ActionParameter Selectable(string name, LocalizedText label)
-		=> ActionParameter.DynamicChoice(name, label: label);
+	{
+		return ActionParameter.DynamicChoice(name, label);
+	}
 
-	private static ActionParameter Number(string name, LocalizedText label) =>
-		ActionParameter.Number(name, label: label);
+	private static ActionParameter Number(string name, LocalizedText label)
+	{
+		return ActionParameter.Number(name, label);
+	}
 
-	private static ActionParameter Bool(string name, LocalizedText label) => ActionParameter.Toggle(name, label: label);
+	private static ActionParameter Bool(string name, LocalizedText label)
+	{
+		return ActionParameter.Toggle(name, label);
+	}
 
 	private static class Fields
 	{
-		public static LocalizedText StreamOnlineName() => AppStrings.Integrations.Twitch.Events.StreamOnlineName();
-
-		public static LocalizedText StreamOnlineDescription() =>
-			AppStrings.Integrations.Twitch.Events.StreamOnlineDescription();
-
-		public static LocalizedText StreamOfflineName() => AppStrings.Integrations.Twitch.Events.StreamOfflineName();
-
-		public static LocalizedText StreamOfflineDescription() =>
-			AppStrings.Integrations.Twitch.Events.StreamOfflineDescription();
-
-		public static LocalizedText ChannelUpdateName() => AppStrings.Integrations.Twitch.Events.ChannelUpdateName();
-
-		public static LocalizedText ChannelUpdateDescription() =>
-			AppStrings.Integrations.Twitch.Events.ChannelUpdateDescription();
-
-		public static LocalizedText AdBreakBeginName() => AppStrings.Integrations.Twitch.Events.AdBreakBeginName();
-
-		public static LocalizedText AdBreakBeginDescription() =>
-			AppStrings.Integrations.Twitch.Events.AdBreakBeginDescription();
-
-		public static LocalizedText FollowName() => AppStrings.Integrations.Twitch.Events.FollowName();
-		public static LocalizedText FollowDescription() => AppStrings.Integrations.Twitch.Events.FollowDescription();
-		public static LocalizedText RaidIncomingName() => AppStrings.Integrations.Twitch.Events.RaidIncomingName();
-
-		public static LocalizedText RaidIncomingDescription() =>
-			AppStrings.Integrations.Twitch.Events.RaidIncomingDescription();
-
-		public static LocalizedText RaidOutgoingName() => AppStrings.Integrations.Twitch.Events.RaidOutgoingName();
-
-		public static LocalizedText RaidOutgoingDescription() =>
-			AppStrings.Integrations.Twitch.Events.RaidOutgoingDescription();
-
-		public static LocalizedText ShoutoutCreatedName() =>
-			AppStrings.Integrations.Twitch.Events.ShoutoutCreatedName();
-
-		public static LocalizedText ShoutoutCreatedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ShoutoutCreatedDescription();
-
-		public static LocalizedText ShoutoutReceivedName() =>
-			AppStrings.Integrations.Twitch.Events.ShoutoutReceivedName();
-
-		public static LocalizedText ShoutoutReceivedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ShoutoutReceivedDescription();
-
-		public static LocalizedText VipAddedName() => AppStrings.Integrations.Twitch.Events.VipAddedName();
-
-		public static LocalizedText VipAddedDescription() =>
-			AppStrings.Integrations.Twitch.Events.VipAddedDescription();
-
-		public static LocalizedText VipRemovedName() => AppStrings.Integrations.Twitch.Events.VipRemovedName();
-
-		public static LocalizedText VipRemovedDescription() =>
-			AppStrings.Integrations.Twitch.Events.VipRemovedDescription();
-
-		public static LocalizedText SubscribeName() => AppStrings.Integrations.Twitch.Events.SubscribeName();
-
-		public static LocalizedText SubscribeDescription() =>
-			AppStrings.Integrations.Twitch.Events.SubscribeDescription();
-
-		public static LocalizedText SubscriptionMessageName() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionMessageName();
-
-		public static LocalizedText SubscriptionMessageDescription() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionMessageDescription();
-
-		public static LocalizedText SubscriptionGiftName() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionGiftName();
-
-		public static LocalizedText SubscriptionGiftDescription() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionGiftDescription();
-
-		public static LocalizedText SubscriptionEndName() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionEndName();
-
-		public static LocalizedText SubscriptionEndDescription() =>
-			AppStrings.Integrations.Twitch.Events.SubscriptionEndDescription();
-
-		public static LocalizedText CheerName() => AppStrings.Integrations.Twitch.Events.CheerName();
-		public static LocalizedText CheerDescription() => AppStrings.Integrations.Twitch.Events.CheerDescription();
-		public static LocalizedText RewardRedeemedName() => AppStrings.Integrations.Twitch.Events.RewardRedeemedName();
-
-		public static LocalizedText RewardRedeemedDescription() =>
-			AppStrings.Integrations.Twitch.Events.RewardRedeemedDescription();
-
-		public static LocalizedText RewardRedemptionUpdatedName() =>
-			AppStrings.Integrations.Twitch.Events.RewardRedemptionUpdatedName();
-
-		public static LocalizedText RewardRedemptionUpdatedDescription() =>
-			AppStrings.Integrations.Twitch.Events.RewardRedemptionUpdatedDescription();
-
-		public static LocalizedText AutomaticRewardRedeemedName() =>
-			AppStrings.Integrations.Twitch.Events.AutomaticRewardRedeemedName();
-
-		public static LocalizedText AutomaticRewardRedeemedDescription() =>
-			AppStrings.Integrations.Twitch.Events.AutomaticRewardRedeemedDescription();
-
-		public static LocalizedText PollBeginName() => AppStrings.Integrations.Twitch.Events.PollBeginName();
-
-		public static LocalizedText PollBeginDescription() =>
-			AppStrings.Integrations.Twitch.Events.PollBeginDescription();
-
-		public static LocalizedText PollEndName() => AppStrings.Integrations.Twitch.Events.PollEndName();
-		public static LocalizedText PollEndDescription() => AppStrings.Integrations.Twitch.Events.PollEndDescription();
-
-		public static LocalizedText PredictionBeginName() =>
-			AppStrings.Integrations.Twitch.Events.PredictionBeginName();
-
-		public static LocalizedText PredictionBeginDescription() =>
-			AppStrings.Integrations.Twitch.Events.PredictionBeginDescription();
-
-		public static LocalizedText PredictionLockName() => AppStrings.Integrations.Twitch.Events.PredictionLockName();
-
-		public static LocalizedText PredictionLockDescription() =>
-			AppStrings.Integrations.Twitch.Events.PredictionLockDescription();
-
-		public static LocalizedText PredictionEndName() => AppStrings.Integrations.Twitch.Events.PredictionEndName();
-
-		public static LocalizedText PredictionEndDescription() =>
-			AppStrings.Integrations.Twitch.Events.PredictionEndDescription();
-
-		public static LocalizedText HypeTrainBeginName() => AppStrings.Integrations.Twitch.Events.HypeTrainBeginName();
-
-		public static LocalizedText HypeTrainBeginDescription() =>
-			AppStrings.Integrations.Twitch.Events.HypeTrainBeginDescription();
-
-		public static LocalizedText HypeTrainProgressName() =>
-			AppStrings.Integrations.Twitch.Events.HypeTrainProgressName();
-
-		public static LocalizedText HypeTrainProgressDescription() =>
-			AppStrings.Integrations.Twitch.Events.HypeTrainProgressDescription();
-
-		public static LocalizedText HypeTrainEndName() => AppStrings.Integrations.Twitch.Events.HypeTrainEndName();
-
-		public static LocalizedText HypeTrainEndDescription() =>
-			AppStrings.Integrations.Twitch.Events.HypeTrainEndDescription();
-
-		public static LocalizedText GoalBeginName() => AppStrings.Integrations.Twitch.Events.GoalBeginName();
-
-		public static LocalizedText GoalBeginDescription() =>
-			AppStrings.Integrations.Twitch.Events.GoalBeginDescription();
-
-		public static LocalizedText GoalProgressName() => AppStrings.Integrations.Twitch.Events.GoalProgressName();
-
-		public static LocalizedText GoalProgressDescription() =>
-			AppStrings.Integrations.Twitch.Events.GoalProgressDescription();
-
-		public static LocalizedText GoalEndName() => AppStrings.Integrations.Twitch.Events.GoalEndName();
-		public static LocalizedText GoalEndDescription() => AppStrings.Integrations.Twitch.Events.GoalEndDescription();
-
-		public static LocalizedText ChatNotificationName() =>
-			AppStrings.Integrations.Twitch.Events.ChatNotificationName();
-
-		public static LocalizedText ChatNotificationDescription() =>
-			AppStrings.Integrations.Twitch.Events.ChatNotificationDescription();
-
-		public static LocalizedText ChatClearedName() => AppStrings.Integrations.Twitch.Events.ChatClearedName();
-
-		public static LocalizedText ChatClearedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ChatClearedDescription();
-
-		public static LocalizedText ChatMessageDeletedName() =>
-			AppStrings.Integrations.Twitch.Events.ChatMessageDeletedName();
-
-		public static LocalizedText ChatMessageDeletedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ChatMessageDeletedDescription();
-
-		public static LocalizedText ChatSettingsUpdatedName() =>
-			AppStrings.Integrations.Twitch.Events.ChatSettingsUpdatedName();
-
-		public static LocalizedText ChatSettingsUpdatedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ChatSettingsUpdatedDescription();
-
-		public static LocalizedText BanName() => AppStrings.Integrations.Twitch.Events.BanName();
-		public static LocalizedText BanDescription() => AppStrings.Integrations.Twitch.Events.BanDescription();
-		public static LocalizedText UnbanName() => AppStrings.Integrations.Twitch.Events.UnbanName();
-		public static LocalizedText UnbanDescription() => AppStrings.Integrations.Twitch.Events.UnbanDescription();
-		public static LocalizedText AnyName() => AppStrings.Integrations.Twitch.Events.AnyName();
-		public static LocalizedText AnyDescription() => AppStrings.Integrations.Twitch.Events.AnyDescription();
-
-		public static LocalizedText ConnectedDescription() =>
-			AppStrings.Integrations.Twitch.Events.ConnectedDescription();
-
-		public static LocalizedText DisconnectedDescription() =>
-			AppStrings.Integrations.Twitch.Events.DisconnectedDescription();
-
-		public static LocalizedText Type() => AppStrings.Integrations.Twitch.Events.Type();
-		public static LocalizedText StartedAt() => AppStrings.Integrations.Twitch.Events.StartedAt();
-		public static LocalizedText Title() => AppStrings.Integrations.Twitch.Events.Title();
-		public static LocalizedText CategoryId() => AppStrings.Integrations.Twitch.Events.CategoryId();
-		public static LocalizedText Category() => AppStrings.Integrations.Twitch.Events.Category();
-		public static LocalizedText Language() => AppStrings.Integrations.Twitch.Events.Language();
-		public static LocalizedText ContentLabels() => AppStrings.Integrations.Twitch.Events.ContentLabels();
-		public static LocalizedText DurationSeconds() => AppStrings.Integrations.Twitch.Events.DurationSeconds();
-		public static LocalizedText Automatic() => AppStrings.Integrations.Twitch.Events.Automatic();
-		public static LocalizedText StartedBy() => AppStrings.Integrations.Twitch.Events.StartedBy();
-		public static LocalizedText FollowedAt() => AppStrings.Integrations.Twitch.Events.FollowedAt();
-		public static LocalizedText FromUserId() => AppStrings.Integrations.Twitch.Events.FromUserId();
-		public static LocalizedText FromLogin() => AppStrings.Integrations.Twitch.Events.FromLogin();
-		public static LocalizedText FromName() => AppStrings.Integrations.Twitch.Events.FromName();
-		public static LocalizedText Viewers() => AppStrings.Integrations.Twitch.Events.Viewers();
-		public static LocalizedText ToUserId() => AppStrings.Integrations.Twitch.Events.ToUserId();
-		public static LocalizedText ToLogin() => AppStrings.Integrations.Twitch.Events.ToLogin();
-		public static LocalizedText ToName() => AppStrings.Integrations.Twitch.Events.ToName();
-		public static LocalizedText UserId() => AppStrings.Integrations.Twitch.Events.UserId();
-		public static LocalizedText UserLogin() => AppStrings.Integrations.Twitch.Events.UserLogin();
-		public static LocalizedText User() => AppStrings.Integrations.Twitch.Events.User();
-		public static LocalizedText Account() => AppStrings.Integrations.Twitch.Events.Account();
-		public static LocalizedText AccountDescription() => AppStrings.Integrations.Twitch.Events.AccountDescription();
-
-		public static LocalizedText FirstAccountPlaceholder() =>
-			AppStrings.Integrations.Twitch.Events.FirstAccountPlaceholder();
-
-		public static LocalizedText AccountId() => AppStrings.Integrations.Twitch.Events.AccountId();
-		public static LocalizedText AccountLogin() => AppStrings.Integrations.Twitch.Events.AccountLogin();
-		public static LocalizedText Tier() => AppStrings.Integrations.Twitch.Events.Tier();
-		public static LocalizedText TierDescription() => AppStrings.Integrations.Twitch.Events.TierDescription();
-		public static LocalizedText TierOption1() => AppStrings.Integrations.Twitch.Events.TierOption1();
-		public static LocalizedText TierOption2() => AppStrings.Integrations.Twitch.Events.TierOption2();
-		public static LocalizedText TierOption3() => AppStrings.Integrations.Twitch.Events.TierOption3();
-		public static LocalizedText TierOptionPrime() => AppStrings.Integrations.Twitch.Events.TierOptionPrime();
-		public static LocalizedText Gifted() => AppStrings.Integrations.Twitch.Events.Gifted();
-		public static LocalizedText MonthsTotal() => AppStrings.Integrations.Twitch.Events.MonthsTotal();
-		public static LocalizedText MonthStreak() => AppStrings.Integrations.Twitch.Events.MonthStreak();
-		public static LocalizedText MonthsBought() => AppStrings.Integrations.Twitch.Events.MonthsBought();
-		public static LocalizedText Message() => AppStrings.Integrations.Twitch.Events.Message();
-		public static LocalizedText GiftedNow() => AppStrings.Integrations.Twitch.Events.GiftedNow();
-		public static LocalizedText GiftedInTotal() => AppStrings.Integrations.Twitch.Events.GiftedInTotal();
-		public static LocalizedText Anonymous() => AppStrings.Integrations.Twitch.Events.Anonymous();
-		public static LocalizedText WasGifted() => AppStrings.Integrations.Twitch.Events.WasGifted();
-		public static LocalizedText Bits() => AppStrings.Integrations.Twitch.Events.Bits();
-		public static LocalizedText RewardId() => AppStrings.Integrations.Twitch.Events.RewardId();
-		public static LocalizedText Reward() => AppStrings.Integrations.Twitch.Events.Reward();
-		public static LocalizedText Cost() => AppStrings.Integrations.Twitch.Events.Cost();
-		public static LocalizedText RedemptionId() => AppStrings.Integrations.Twitch.Events.RedemptionId();
-		public static LocalizedText ViewerInput() => AppStrings.Integrations.Twitch.Events.ViewerInput();
-		public static LocalizedText Status() => AppStrings.Integrations.Twitch.Events.Status();
-		public static LocalizedText RewardDescription() => AppStrings.Integrations.Twitch.Events.RewardDescription();
-
-		public static LocalizedText AnyRewardPlaceholder() =>
-			AppStrings.Integrations.Twitch.Events.AnyRewardPlaceholder();
-
-		public static LocalizedText PollId() => AppStrings.Integrations.Twitch.Events.PollId();
-		public static LocalizedText Choices() => AppStrings.Integrations.Twitch.Events.Choices();
-		public static LocalizedText EndsAt() => AppStrings.Integrations.Twitch.Events.EndsAt();
-		public static LocalizedText WinningChoice() => AppStrings.Integrations.Twitch.Events.WinningChoice();
-		public static LocalizedText WinningVotes() => AppStrings.Integrations.Twitch.Events.WinningVotes();
-		public static LocalizedText PredictionId() => AppStrings.Integrations.Twitch.Events.PredictionId();
-		public static LocalizedText Outcomes() => AppStrings.Integrations.Twitch.Events.Outcomes();
-		public static LocalizedText LocksAt() => AppStrings.Integrations.Twitch.Events.LocksAt();
-		public static LocalizedText WinningOutcome() => AppStrings.Integrations.Twitch.Events.WinningOutcome();
-		public static LocalizedText Level() => AppStrings.Integrations.Twitch.Events.Level();
-		public static LocalizedText Total() => AppStrings.Integrations.Twitch.Events.Total();
-		public static LocalizedText Goal() => AppStrings.Integrations.Twitch.Events.Goal();
-		public static LocalizedText ExpiresAt() => AppStrings.Integrations.Twitch.Events.ExpiresAt();
-		public static LocalizedText Progress() => AppStrings.Integrations.Twitch.Events.Progress();
-		public static LocalizedText EndedAt() => AppStrings.Integrations.Twitch.Events.EndedAt();
-		public static LocalizedText GoalId() => AppStrings.Integrations.Twitch.Events.GoalId();
-		public static LocalizedText Description() => AppStrings.Integrations.Twitch.Events.Description();
-		public static LocalizedText Current() => AppStrings.Integrations.Twitch.Events.Current();
-		public static LocalizedText Target() => AppStrings.Integrations.Twitch.Events.Target();
-		public static LocalizedText Achieved() => AppStrings.Integrations.Twitch.Events.Achieved();
-		public static LocalizedText Notice() => AppStrings.Integrations.Twitch.Events.Notice();
-		public static LocalizedText NoticeDescription() => AppStrings.Integrations.Twitch.Events.NoticeDescription();
-		public static LocalizedText OptionSubscription() => AppStrings.Integrations.Twitch.Events.OptionSubscription();
-
-		public static LocalizedText OptionResubscription() =>
-			AppStrings.Integrations.Twitch.Events.OptionResubscription();
-
-		public static LocalizedText OptionGiftedSubscription() =>
-			AppStrings.Integrations.Twitch.Events.OptionGiftedSubscription();
-
-		public static LocalizedText OptionCommunityGift() =>
-			AppStrings.Integrations.Twitch.Events.OptionCommunityGift();
-
-		public static LocalizedText OptionGiftUpgrade() => AppStrings.Integrations.Twitch.Events.OptionGiftUpgrade();
-		public static LocalizedText OptionPrimeUpgrade() => AppStrings.Integrations.Twitch.Events.OptionPrimeUpgrade();
-		public static LocalizedText OptionRaid() => AppStrings.Integrations.Twitch.Events.OptionRaid();
-
-		public static LocalizedText OptionRaidCancelled() =>
-			AppStrings.Integrations.Twitch.Events.OptionRaidCancelled();
-
-		public static LocalizedText OptionPayItForward() => AppStrings.Integrations.Twitch.Events.OptionPayItForward();
-		public static LocalizedText OptionAnnouncement() => AppStrings.Integrations.Twitch.Events.OptionAnnouncement();
-		public static LocalizedText OptionBitsBadge() => AppStrings.Integrations.Twitch.Events.OptionBitsBadge();
-
-		public static LocalizedText OptionCharityDonation() =>
-			AppStrings.Integrations.Twitch.Events.OptionCharityDonation();
-
-		public static LocalizedText SystemMessage() => AppStrings.Integrations.Twitch.Events.SystemMessage();
-		public static LocalizedText MessageId() => AppStrings.Integrations.Twitch.Events.MessageId();
-		public static LocalizedText EmoteOnly() => AppStrings.Integrations.Twitch.Events.EmoteOnly();
-		public static LocalizedText FollowersOnly() => AppStrings.Integrations.Twitch.Events.FollowersOnly();
-
-		public static LocalizedText FollowersOnlyMinutes() =>
-			AppStrings.Integrations.Twitch.Events.FollowersOnlyMinutes();
-
-		public static LocalizedText SlowMode() => AppStrings.Integrations.Twitch.Events.SlowMode();
-		public static LocalizedText SlowModeSeconds() => AppStrings.Integrations.Twitch.Events.SlowModeSeconds();
-		public static LocalizedText SubscribersOnly() => AppStrings.Integrations.Twitch.Events.SubscribersOnly();
-		public static LocalizedText UniqueChat() => AppStrings.Integrations.Twitch.Events.UniqueChat();
-		public static LocalizedText ModeratorLogin() => AppStrings.Integrations.Twitch.Events.ModeratorLogin();
-		public static LocalizedText Moderator() => AppStrings.Integrations.Twitch.Events.Moderator();
-		public static LocalizedText Reason() => AppStrings.Integrations.Twitch.Events.Reason();
-		public static LocalizedText Permanent() => AppStrings.Integrations.Twitch.Events.Permanent();
-		public static LocalizedText Version() => AppStrings.Integrations.Twitch.Events.Version();
-		public static LocalizedText RawData() => AppStrings.Integrations.Twitch.Events.RawData();
-		public static LocalizedText EventType() => AppStrings.Integrations.Twitch.Events.EventType();
-
-		public static LocalizedText EventTypeDescription() =>
-			AppStrings.Integrations.Twitch.Events.EventTypeDescription();
-
-		public static LocalizedText AnyEventPlaceholder() =>
-			AppStrings.Integrations.Twitch.Events.AnyEventPlaceholder();
+		public static LocalizedText StreamOnlineName()
+		{
+			return AppStrings.Integrations.Twitch.Events.StreamOnlineName();
+		}
+
+		public static LocalizedText StreamOnlineDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.StreamOnlineDescription();
+		}
+
+		public static LocalizedText StreamOfflineName()
+		{
+			return AppStrings.Integrations.Twitch.Events.StreamOfflineName();
+		}
+
+		public static LocalizedText StreamOfflineDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.StreamOfflineDescription();
+		}
+
+		public static LocalizedText ChannelUpdateName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChannelUpdateName();
+		}
+
+		public static LocalizedText ChannelUpdateDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChannelUpdateDescription();
+		}
+
+		public static LocalizedText AdBreakBeginName()
+		{
+			return AppStrings.Integrations.Twitch.Events.AdBreakBeginName();
+		}
+
+		public static LocalizedText AdBreakBeginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.AdBreakBeginDescription();
+		}
+
+		public static LocalizedText FollowName()
+		{
+			return AppStrings.Integrations.Twitch.Events.FollowName();
+		}
+
+		public static LocalizedText FollowDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.FollowDescription();
+		}
+
+		public static LocalizedText RaidIncomingName()
+		{
+			return AppStrings.Integrations.Twitch.Events.RaidIncomingName();
+		}
+
+		public static LocalizedText RaidIncomingDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.RaidIncomingDescription();
+		}
+
+		public static LocalizedText RaidOutgoingName()
+		{
+			return AppStrings.Integrations.Twitch.Events.RaidOutgoingName();
+		}
+
+		public static LocalizedText RaidOutgoingDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.RaidOutgoingDescription();
+		}
+
+		public static LocalizedText ShoutoutCreatedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ShoutoutCreatedName();
+		}
+
+		public static LocalizedText ShoutoutCreatedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ShoutoutCreatedDescription();
+		}
+
+		public static LocalizedText ShoutoutReceivedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ShoutoutReceivedName();
+		}
+
+		public static LocalizedText ShoutoutReceivedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ShoutoutReceivedDescription();
+		}
+
+		public static LocalizedText VipAddedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.VipAddedName();
+		}
+
+		public static LocalizedText VipAddedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.VipAddedDescription();
+		}
+
+		public static LocalizedText VipRemovedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.VipRemovedName();
+		}
+
+		public static LocalizedText VipRemovedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.VipRemovedDescription();
+		}
+
+		public static LocalizedText SubscribeName()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscribeName();
+		}
+
+		public static LocalizedText SubscribeDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscribeDescription();
+		}
+
+		public static LocalizedText SubscriptionMessageName()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionMessageName();
+		}
+
+		public static LocalizedText SubscriptionMessageDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionMessageDescription();
+		}
+
+		public static LocalizedText SubscriptionGiftName()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionGiftName();
+		}
+
+		public static LocalizedText SubscriptionGiftDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionGiftDescription();
+		}
+
+		public static LocalizedText SubscriptionEndName()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionEndName();
+		}
+
+		public static LocalizedText SubscriptionEndDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscriptionEndDescription();
+		}
+
+		public static LocalizedText CheerName()
+		{
+			return AppStrings.Integrations.Twitch.Events.CheerName();
+		}
+
+		public static LocalizedText CheerDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.CheerDescription();
+		}
+
+		public static LocalizedText RewardRedeemedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardRedeemedName();
+		}
+
+		public static LocalizedText RewardRedeemedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardRedeemedDescription();
+		}
+
+		public static LocalizedText RewardRedemptionUpdatedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardRedemptionUpdatedName();
+		}
+
+		public static LocalizedText RewardRedemptionUpdatedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardRedemptionUpdatedDescription();
+		}
+
+		public static LocalizedText AutomaticRewardRedeemedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.AutomaticRewardRedeemedName();
+		}
+
+		public static LocalizedText AutomaticRewardRedeemedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.AutomaticRewardRedeemedDescription();
+		}
+
+		public static LocalizedText PollBeginName()
+		{
+			return AppStrings.Integrations.Twitch.Events.PollBeginName();
+		}
+
+		public static LocalizedText PollBeginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.PollBeginDescription();
+		}
+
+		public static LocalizedText PollEndName()
+		{
+			return AppStrings.Integrations.Twitch.Events.PollEndName();
+		}
+
+		public static LocalizedText PollEndDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.PollEndDescription();
+		}
+
+		public static LocalizedText PredictionBeginName()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionBeginName();
+		}
+
+		public static LocalizedText PredictionBeginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionBeginDescription();
+		}
+
+		public static LocalizedText PredictionLockName()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionLockName();
+		}
+
+		public static LocalizedText PredictionLockDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionLockDescription();
+		}
+
+		public static LocalizedText PredictionEndName()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionEndName();
+		}
+
+		public static LocalizedText PredictionEndDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionEndDescription();
+		}
+
+		public static LocalizedText HypeTrainBeginName()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainBeginName();
+		}
+
+		public static LocalizedText HypeTrainBeginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainBeginDescription();
+		}
+
+		public static LocalizedText HypeTrainProgressName()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainProgressName();
+		}
+
+		public static LocalizedText HypeTrainProgressDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainProgressDescription();
+		}
+
+		public static LocalizedText HypeTrainEndName()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainEndName();
+		}
+
+		public static LocalizedText HypeTrainEndDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.HypeTrainEndDescription();
+		}
+
+		public static LocalizedText GoalBeginName()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalBeginName();
+		}
+
+		public static LocalizedText GoalBeginDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalBeginDescription();
+		}
+
+		public static LocalizedText GoalProgressName()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalProgressName();
+		}
+
+		public static LocalizedText GoalProgressDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalProgressDescription();
+		}
+
+		public static LocalizedText GoalEndName()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalEndName();
+		}
+
+		public static LocalizedText GoalEndDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalEndDescription();
+		}
+
+		public static LocalizedText ChatNotificationName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatNotificationName();
+		}
+
+		public static LocalizedText ChatNotificationDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatNotificationDescription();
+		}
+
+		public static LocalizedText ChatClearedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatClearedName();
+		}
+
+		public static LocalizedText ChatClearedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatClearedDescription();
+		}
+
+		public static LocalizedText ChatMessageDeletedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatMessageDeletedName();
+		}
+
+		public static LocalizedText ChatMessageDeletedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatMessageDeletedDescription();
+		}
+
+		public static LocalizedText ChatSettingsUpdatedName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatSettingsUpdatedName();
+		}
+
+		public static LocalizedText ChatSettingsUpdatedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ChatSettingsUpdatedDescription();
+		}
+
+		public static LocalizedText BanName()
+		{
+			return AppStrings.Integrations.Twitch.Events.BanName();
+		}
+
+		public static LocalizedText BanDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.BanDescription();
+		}
+
+		public static LocalizedText UnbanName()
+		{
+			return AppStrings.Integrations.Twitch.Events.UnbanName();
+		}
+
+		public static LocalizedText UnbanDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.UnbanDescription();
+		}
+
+		public static LocalizedText AnyName()
+		{
+			return AppStrings.Integrations.Twitch.Events.AnyName();
+		}
+
+		public static LocalizedText AnyDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.AnyDescription();
+		}
+
+		public static LocalizedText ConnectedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.ConnectedDescription();
+		}
+
+		public static LocalizedText DisconnectedDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.DisconnectedDescription();
+		}
+
+		public static LocalizedText Type()
+		{
+			return AppStrings.Integrations.Twitch.Events.Type();
+		}
+
+		public static LocalizedText StartedAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.StartedAt();
+		}
+
+		public static LocalizedText Title()
+		{
+			return AppStrings.Integrations.Twitch.Events.Title();
+		}
+
+		public static LocalizedText CategoryId()
+		{
+			return AppStrings.Integrations.Twitch.Events.CategoryId();
+		}
+
+		public static LocalizedText Category()
+		{
+			return AppStrings.Integrations.Twitch.Events.Category();
+		}
+
+		public static LocalizedText Language()
+		{
+			return AppStrings.Integrations.Twitch.Events.Language();
+		}
+
+		public static LocalizedText ContentLabels()
+		{
+			return AppStrings.Integrations.Twitch.Events.ContentLabels();
+		}
+
+		public static LocalizedText DurationSeconds()
+		{
+			return AppStrings.Integrations.Twitch.Events.DurationSeconds();
+		}
+
+		public static LocalizedText Automatic()
+		{
+			return AppStrings.Integrations.Twitch.Events.Automatic();
+		}
+
+		public static LocalizedText StartedBy()
+		{
+			return AppStrings.Integrations.Twitch.Events.StartedBy();
+		}
+
+		public static LocalizedText FollowedAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.FollowedAt();
+		}
+
+		public static LocalizedText FromUserId()
+		{
+			return AppStrings.Integrations.Twitch.Events.FromUserId();
+		}
+
+		public static LocalizedText FromLogin()
+		{
+			return AppStrings.Integrations.Twitch.Events.FromLogin();
+		}
+
+		public static LocalizedText FromName()
+		{
+			return AppStrings.Integrations.Twitch.Events.FromName();
+		}
+
+		public static LocalizedText Viewers()
+		{
+			return AppStrings.Integrations.Twitch.Events.Viewers();
+		}
+
+		public static LocalizedText ToUserId()
+		{
+			return AppStrings.Integrations.Twitch.Events.ToUserId();
+		}
+
+		public static LocalizedText ToLogin()
+		{
+			return AppStrings.Integrations.Twitch.Events.ToLogin();
+		}
+
+		public static LocalizedText ToName()
+		{
+			return AppStrings.Integrations.Twitch.Events.ToName();
+		}
+
+		public static LocalizedText UserId()
+		{
+			return AppStrings.Integrations.Twitch.Events.UserId();
+		}
+
+		public static LocalizedText UserLogin()
+		{
+			return AppStrings.Integrations.Twitch.Events.UserLogin();
+		}
+
+		public static LocalizedText User()
+		{
+			return AppStrings.Integrations.Twitch.Events.User();
+		}
+
+		public static LocalizedText Account()
+		{
+			return AppStrings.Integrations.Twitch.Events.Account();
+		}
+
+		public static LocalizedText AccountDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.AccountDescription();
+		}
+
+		public static LocalizedText FirstAccountPlaceholder()
+		{
+			return AppStrings.Integrations.Twitch.Events.FirstAccountPlaceholder();
+		}
+
+		public static LocalizedText AccountId()
+		{
+			return AppStrings.Integrations.Twitch.Events.AccountId();
+		}
+
+		public static LocalizedText AccountLogin()
+		{
+			return AppStrings.Integrations.Twitch.Events.AccountLogin();
+		}
+
+		public static LocalizedText Tier()
+		{
+			return AppStrings.Integrations.Twitch.Events.Tier();
+		}
+
+		public static LocalizedText TierDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.TierDescription();
+		}
+
+		public static LocalizedText TierOption1()
+		{
+			return AppStrings.Integrations.Twitch.Events.TierOption1();
+		}
+
+		public static LocalizedText TierOption2()
+		{
+			return AppStrings.Integrations.Twitch.Events.TierOption2();
+		}
+
+		public static LocalizedText TierOption3()
+		{
+			return AppStrings.Integrations.Twitch.Events.TierOption3();
+		}
+
+		public static LocalizedText TierOptionPrime()
+		{
+			return AppStrings.Integrations.Twitch.Events.TierOptionPrime();
+		}
+
+		public static LocalizedText Gifted()
+		{
+			return AppStrings.Integrations.Twitch.Events.Gifted();
+		}
+
+		public static LocalizedText MonthsTotal()
+		{
+			return AppStrings.Integrations.Twitch.Events.MonthsTotal();
+		}
+
+		public static LocalizedText MonthStreak()
+		{
+			return AppStrings.Integrations.Twitch.Events.MonthStreak();
+		}
+
+		public static LocalizedText MonthsBought()
+		{
+			return AppStrings.Integrations.Twitch.Events.MonthsBought();
+		}
+
+		public static LocalizedText Message()
+		{
+			return AppStrings.Integrations.Twitch.Events.Message();
+		}
+
+		public static LocalizedText GiftedNow()
+		{
+			return AppStrings.Integrations.Twitch.Events.GiftedNow();
+		}
+
+		public static LocalizedText GiftedInTotal()
+		{
+			return AppStrings.Integrations.Twitch.Events.GiftedInTotal();
+		}
+
+		public static LocalizedText Anonymous()
+		{
+			return AppStrings.Integrations.Twitch.Events.Anonymous();
+		}
+
+		public static LocalizedText WasGifted()
+		{
+			return AppStrings.Integrations.Twitch.Events.WasGifted();
+		}
+
+		public static LocalizedText Bits()
+		{
+			return AppStrings.Integrations.Twitch.Events.Bits();
+		}
+
+		public static LocalizedText RewardId()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardId();
+		}
+
+		public static LocalizedText Reward()
+		{
+			return AppStrings.Integrations.Twitch.Events.Reward();
+		}
+
+		public static LocalizedText Cost()
+		{
+			return AppStrings.Integrations.Twitch.Events.Cost();
+		}
+
+		public static LocalizedText RedemptionId()
+		{
+			return AppStrings.Integrations.Twitch.Events.RedemptionId();
+		}
+
+		public static LocalizedText ViewerInput()
+		{
+			return AppStrings.Integrations.Twitch.Events.ViewerInput();
+		}
+
+		public static LocalizedText Status()
+		{
+			return AppStrings.Integrations.Twitch.Events.Status();
+		}
+
+		public static LocalizedText RewardDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.RewardDescription();
+		}
+
+		public static LocalizedText AnyRewardPlaceholder()
+		{
+			return AppStrings.Integrations.Twitch.Events.AnyRewardPlaceholder();
+		}
+
+		public static LocalizedText PollId()
+		{
+			return AppStrings.Integrations.Twitch.Events.PollId();
+		}
+
+		public static LocalizedText Choices()
+		{
+			return AppStrings.Integrations.Twitch.Events.Choices();
+		}
+
+		public static LocalizedText EndsAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.EndsAt();
+		}
+
+		public static LocalizedText WinningChoice()
+		{
+			return AppStrings.Integrations.Twitch.Events.WinningChoice();
+		}
+
+		public static LocalizedText WinningVotes()
+		{
+			return AppStrings.Integrations.Twitch.Events.WinningVotes();
+		}
+
+		public static LocalizedText PredictionId()
+		{
+			return AppStrings.Integrations.Twitch.Events.PredictionId();
+		}
+
+		public static LocalizedText Outcomes()
+		{
+			return AppStrings.Integrations.Twitch.Events.Outcomes();
+		}
+
+		public static LocalizedText LocksAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.LocksAt();
+		}
+
+		public static LocalizedText WinningOutcome()
+		{
+			return AppStrings.Integrations.Twitch.Events.WinningOutcome();
+		}
+
+		public static LocalizedText Level()
+		{
+			return AppStrings.Integrations.Twitch.Events.Level();
+		}
+
+		public static LocalizedText Total()
+		{
+			return AppStrings.Integrations.Twitch.Events.Total();
+		}
+
+		public static LocalizedText Goal()
+		{
+			return AppStrings.Integrations.Twitch.Events.Goal();
+		}
+
+		public static LocalizedText ExpiresAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.ExpiresAt();
+		}
+
+		public static LocalizedText Progress()
+		{
+			return AppStrings.Integrations.Twitch.Events.Progress();
+		}
+
+		public static LocalizedText EndedAt()
+		{
+			return AppStrings.Integrations.Twitch.Events.EndedAt();
+		}
+
+		public static LocalizedText GoalId()
+		{
+			return AppStrings.Integrations.Twitch.Events.GoalId();
+		}
+
+		public static LocalizedText Description()
+		{
+			return AppStrings.Integrations.Twitch.Events.Description();
+		}
+
+		public static LocalizedText Current()
+		{
+			return AppStrings.Integrations.Twitch.Events.Current();
+		}
+
+		public static LocalizedText Target()
+		{
+			return AppStrings.Integrations.Twitch.Events.Target();
+		}
+
+		public static LocalizedText Achieved()
+		{
+			return AppStrings.Integrations.Twitch.Events.Achieved();
+		}
+
+		public static LocalizedText Notice()
+		{
+			return AppStrings.Integrations.Twitch.Events.Notice();
+		}
+
+		public static LocalizedText NoticeDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.NoticeDescription();
+		}
+
+		public static LocalizedText OptionSubscription()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionSubscription();
+		}
+
+		public static LocalizedText OptionResubscription()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionResubscription();
+		}
+
+		public static LocalizedText OptionGiftedSubscription()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionGiftedSubscription();
+		}
+
+		public static LocalizedText OptionCommunityGift()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionCommunityGift();
+		}
+
+		public static LocalizedText OptionGiftUpgrade()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionGiftUpgrade();
+		}
+
+		public static LocalizedText OptionPrimeUpgrade()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionPrimeUpgrade();
+		}
+
+		public static LocalizedText OptionRaid()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionRaid();
+		}
+
+		public static LocalizedText OptionRaidCancelled()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionRaidCancelled();
+		}
+
+		public static LocalizedText OptionPayItForward()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionPayItForward();
+		}
+
+		public static LocalizedText OptionAnnouncement()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionAnnouncement();
+		}
+
+		public static LocalizedText OptionBitsBadge()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionBitsBadge();
+		}
+
+		public static LocalizedText OptionCharityDonation()
+		{
+			return AppStrings.Integrations.Twitch.Events.OptionCharityDonation();
+		}
+
+		public static LocalizedText SystemMessage()
+		{
+			return AppStrings.Integrations.Twitch.Events.SystemMessage();
+		}
+
+		public static LocalizedText MessageId()
+		{
+			return AppStrings.Integrations.Twitch.Events.MessageId();
+		}
+
+		public static LocalizedText EmoteOnly()
+		{
+			return AppStrings.Integrations.Twitch.Events.EmoteOnly();
+		}
+
+		public static LocalizedText FollowersOnly()
+		{
+			return AppStrings.Integrations.Twitch.Events.FollowersOnly();
+		}
+
+		public static LocalizedText FollowersOnlyMinutes()
+		{
+			return AppStrings.Integrations.Twitch.Events.FollowersOnlyMinutes();
+		}
+
+		public static LocalizedText SlowMode()
+		{
+			return AppStrings.Integrations.Twitch.Events.SlowMode();
+		}
+
+		public static LocalizedText SlowModeSeconds()
+		{
+			return AppStrings.Integrations.Twitch.Events.SlowModeSeconds();
+		}
+
+		public static LocalizedText SubscribersOnly()
+		{
+			return AppStrings.Integrations.Twitch.Events.SubscribersOnly();
+		}
+
+		public static LocalizedText UniqueChat()
+		{
+			return AppStrings.Integrations.Twitch.Events.UniqueChat();
+		}
+
+		public static LocalizedText ModeratorLogin()
+		{
+			return AppStrings.Integrations.Twitch.Events.ModeratorLogin();
+		}
+
+		public static LocalizedText Moderator()
+		{
+			return AppStrings.Integrations.Twitch.Events.Moderator();
+		}
+
+		public static LocalizedText Reason()
+		{
+			return AppStrings.Integrations.Twitch.Events.Reason();
+		}
+
+		public static LocalizedText Permanent()
+		{
+			return AppStrings.Integrations.Twitch.Events.Permanent();
+		}
+
+		public static LocalizedText Version()
+		{
+			return AppStrings.Integrations.Twitch.Events.Version();
+		}
+
+		public static LocalizedText RawData()
+		{
+			return AppStrings.Integrations.Twitch.Events.RawData();
+		}
+
+		public static LocalizedText EventType()
+		{
+			return AppStrings.Integrations.Twitch.Events.EventType();
+		}
+
+		public static LocalizedText EventTypeDescription()
+		{
+			return AppStrings.Integrations.Twitch.Events.EventTypeDescription();
+		}
+
+		public static LocalizedText AnyEventPlaceholder()
+		{
+			return AppStrings.Integrations.Twitch.Events.AnyEventPlaceholder();
+		}
 	}
 }

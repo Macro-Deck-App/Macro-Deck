@@ -41,7 +41,8 @@ public class MusicPlayerStatePayload
 	public string? Badge { get; set; }
 
 	public static MusicPlayerStatePayload From(MusicPlayerState state, string? instanceId = null)
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			InstanceId = instanceId,
 			IsConnected = state.IsConnected,
@@ -62,7 +63,10 @@ public class MusicPlayerStatePayload
 			DeviceType = state.DeviceType,
 			Badge = state.Badge
 		};
+	}
 
 	public static MusicPlayerStatePayload Disconnected(string? instanceId = null)
-		=> From(MusicPlayerState.Disconnected, instanceId);
+	{
+		return From(MusicPlayerState.Disconnected, instanceId);
+	}
 }

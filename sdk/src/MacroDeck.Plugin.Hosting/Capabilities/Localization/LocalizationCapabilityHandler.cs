@@ -27,7 +27,8 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 	public string Kind => CapabilityKinds.Localization;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> source.Catalog is null
+	{
+		return source.Catalog is null
 			? []
 			:
 			[
@@ -35,11 +36,13 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 				{
 					Kind = CapabilityKinds.Localization,
 					LocalId = ProviderCapabilityId.LocalId,
-					VersionRange = _version,
-				},
+					VersionRange = _version
+				}
 			];
+	}
 
-	public Task<CapabilityInvocationResult> InvokeAsync(CapabilityInvocation invocation,
+	public Task<CapabilityInvocationResult> InvokeAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(invocation);
@@ -55,7 +58,7 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 			CapabilityOperations.Localization.Describe => Describe(catalog),
 			CapabilityOperations.Localization.Catalog => Catalog(catalog, invocation),
 			_ => CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
-				$"The localization capability has no operation '{invocation.Operation}'."),
+				$"The localization capability has no operation '{invocation.Operation}'.")
 		});
 	}
 
@@ -64,17 +67,18 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 		if (catalog.Cultures.Count > ProtocolLimits.MaxLocalizationCultures)
 		{
 			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
-				$"This plugin declares {catalog.Cultures.Count} cultures; at most " +
-				$"{ProtocolLimits.MaxLocalizationCultures} are allowed.");
+				$"This plugin declares {catalog.Cultures.Count} cultures; at most "
+				+ $"{ProtocolLimits.MaxLocalizationCultures} are allowed.");
 		}
 
 		return CapabilityInvocationResult.Ok(new LocalizationDescribeResult
 		{
-			Scope = catalog.Scope, DefaultCulture = catalog.DefaultCulture, Cultures = catalog.Cultures,
+			Scope = catalog.Scope, DefaultCulture = catalog.DefaultCulture, Cultures = catalog.Cultures
 		});
 	}
 
-	private static CapabilityInvocationResult Catalog(ILocalizationCatalog catalog,
+	private static CapabilityInvocationResult Catalog(
+		ILocalizationCatalog catalog,
 		CapabilityInvocation invocation)
 	{
 		var arguments = invocation.Arguments?.Deserialize<LocalizationCatalogArguments>(PluginProtocolJson.Options);
@@ -97,9 +101,9 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 			// Refused rather than truncated: a half-catalog would resolve some keys and silently render
 			// the missing-resource placeholder for the rest, which reads as a translation gap rather than
 			// as the size problem it is.
-			if (key.Length > ProtocolLimits.MaxLocalizationKeyLength ||
-				template.Length > ProtocolLimits.MaxLocalizationValueLength ||
-				entries.Count >= ProtocolLimits.MaxLocalizationEntries)
+			if (key.Length > ProtocolLimits.MaxLocalizationKeyLength
+				|| template.Length > ProtocolLimits.MaxLocalizationValueLength
+				|| entries.Count >= ProtocolLimits.MaxLocalizationEntries)
 			{
 				return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 					$"This plugin's '{arguments.Culture}' catalog exceeds the protocol's localization limits.");
@@ -110,7 +114,7 @@ internal sealed class LocalizationCapabilityHandler(PluginLocalizationSource sou
 
 		return CapabilityInvocationResult.Ok(new LocalizationCatalogResult
 		{
-			Culture = arguments.Culture, Entries = entries,
+			Culture = arguments.Culture, Entries = entries
 		});
 	}
 }

@@ -62,7 +62,7 @@ public class CapabilityVersionStabilityTests
 			[CapabilityKinds.ConfigEntries] = (1, 1),
 			[CapabilityKinds.BatteryProvider] = (1, 1),
 			[CapabilityKinds.EmailInbox] = (1, 1),
-			[CapabilityKinds.CompanionDeviceEntries] = (1, 1),
+			[CapabilityKinds.CompanionDeviceEntries] = (1, 1)
 		};
 
 	/// <summary>The kinds the fixture below actually gets a declaration out of, listed so the assertion
@@ -83,12 +83,14 @@ public class CapabilityVersionStabilityTests
 		CapabilityKinds.ConfigEntries,
 		CapabilityKinds.BatteryProvider,
 		CapabilityKinds.EmailInbox,
-		CapabilityKinds.CompanionDeviceEntries,
+		CapabilityKinds.CompanionDeviceEntries
 	];
 
 	[Test]
 	public void Every_capability_kind_has_a_pinned_version_range()
-		=> Assert.That(_expected.Keys, Is.EquivalentTo(CapabilityKinds.All));
+	{
+		Assert.That(_expected.Keys, Is.EquivalentTo(CapabilityKinds.All));
+	}
 
 	[Test]
 	public void Every_declared_capability_carries_the_pinned_range_for_its_kind()
@@ -124,7 +126,9 @@ public class CapabilityVersionStabilityTests
 
 	[Test]
 	public void A_plugin_without_a_calendar_provider_declares_no_calendar_capability()
-		=> Assert.That(Declare(withCalendar: false).Keys, Does.Not.Contain(CapabilityKinds.Calendar));
+	{
+		Assert.That(Declare(false).Keys, Does.Not.Contain(CapabilityKinds.Calendar));
+	}
 
 	private static Dictionary<string, List<CapabilityVersionRange>> Declare(bool withCalendar = true)
 	{

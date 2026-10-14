@@ -11,9 +11,15 @@ internal static class ScriptInputScope
 {
 	private static readonly AsyncLocal<IReadOnlySet<string>?> _current = new();
 
-	public static bool IsDeclared(string name) => _current.Value?.Contains(name) == true;
+	public static bool IsDeclared(string name)
+	{
+		return _current.Value?.Contains(name) == true;
+	}
 
 	public static IReadOnlySet<string>? Current => _current.Value;
 
-	public static void Set(IReadOnlySet<string>? names) => _current.Value = names;
+	public static void Set(IReadOnlySet<string>? names)
+	{
+		_current.Value = names;
+	}
 }

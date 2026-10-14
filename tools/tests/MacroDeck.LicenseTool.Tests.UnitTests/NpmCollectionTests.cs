@@ -5,19 +5,20 @@ namespace MacroDeck.LicenseTool.Tests.UnitTests;
 public sealed class NpmCollectionTests
 {
 	private const string Workspaces = """
-		    - path: web
-		      tsconfig: tsconfig.json
-		      entries:
-		        - src/main.ts
-		      styleRoots:
-		        - src
-		""";
+									      - path: web
+									        tsconfig: tsconfig.json
+									        entries:
+									          - src/main.ts
+									        styleRoots:
+									          - src
+									  """;
 
 	private static FixtureRepository WebWorkspace()
 	{
 		var repository = new FixtureRepository();
 		repository.UseNpm(Workspaces);
-		repository.Write("ui/web/tsconfig.json", """
+		repository.Write("ui/web/tsconfig.json",
+			"""
 			/* comments are allowed here */
 			{
 			  "compilerOptions": {
@@ -33,7 +34,8 @@ public sealed class NpmCollectionTests
 	{
 		using var repository = WebWorkspace();
 		repository.NpmWorkspace("web", "declared-dependency", "@types/declared");
-		repository.Write("ui/web/src/main.ts", """
+		repository.Write("ui/web/src/main.ts",
+			"""
 			import { helper } from './helper';
 			import { shared } from '@shared';
 			import polyfill from 'dev-polyfill/auto';
@@ -56,7 +58,8 @@ public sealed class NpmCollectionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Problems, Is.Empty);
-			foreach (var shipped in new[] { "declared-dependency", "dev-polyfill", "polyfill-helper", "lib-from-helper", "lib-from-alias" })
+			foreach (var shipped in new[]
+				{ "declared-dependency", "dev-polyfill", "polyfill-helper", "lib-from-helper", "lib-from-alias" })
 			{
 				Assert.That(result.ThirdPartyNotices, Does.Contain($"\n{shipped}\n  License:"), shipped);
 			}
@@ -103,12 +106,12 @@ public sealed class NpmCollectionTests
 			return result.ThirdPartyNotices;
 		}
 
-		var withInstall = Generate(installed: true);
+		var withInstall = Generate(true);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(withInstall, Does.Not.Contain("tool-darwin"));
-			Assert.That(withInstall, Is.EqualTo(Generate(installed: false)));
+			Assert.That(withInstall, Is.EqualTo(Generate(false)));
 		});
 	}
 
@@ -118,7 +121,8 @@ public sealed class NpmCollectionTests
 		using var repository = WebWorkspace();
 		repository.NpmWorkspace("web");
 		repository.Write("ui/web/src/main.ts", "");
-		repository.Write("ui/web/src/styles/main.scss", """
+		repository.Write("ui/web/src/styles/main.scss",
+			"""
 			// @use './commented/out';
 			@use 'sass:math';
 			@use 'variables' as vars;
@@ -150,11 +154,12 @@ public sealed class NpmCollectionTests
 
 		var result = repository.Generate();
 
-		Assert.That(result.Problems, Is.EquivalentTo(new[]
-		{
-			"npm: relative stylesheet load not found: ui/web/src/broken.scss: ../nowhere",
-			"npm: ui/web/src/main.ts: import './missing' does not resolve to a file",
-			"npm: ui/web/src/main.ts: package 'not-installed' is not in package-lock.json",
-		}));
+		Assert.That(result.Problems,
+			Is.EquivalentTo(new[]
+			{
+				"npm: relative stylesheet load not found: ui/web/src/broken.scss: ../nowhere",
+				"npm: ui/web/src/main.ts: import './missing' does not resolve to a file",
+				"npm: ui/web/src/main.ts: package 'not-installed' is not in package-lock.json"
+			}));
 	}
 }

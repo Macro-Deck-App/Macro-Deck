@@ -23,8 +23,11 @@ public class EmailChangeDetectorTests
 	[Test]
 	public void A_new_message_on_top_of_the_window_is_received_once()
 	{
-		var before = State(EmailInboxStatus.Connected, 1, Message("a", 1, isRead: true), Message("b", 2));
-		var after = State(EmailInboxStatus.Connected, 2, Message("a", 1, isRead: true), Message("b", 2),
+		var before = State(EmailInboxStatus.Connected, 1, Message("a", 1, true), Message("b", 2));
+		var after = State(EmailInboxStatus.Connected,
+			2,
+			Message("a", 1, true),
+			Message("b", 2),
 			Message("c", 3));
 
 		var first = EmailChangeDetector.Detect(before, after, true);
@@ -41,9 +44,12 @@ public class EmailChangeDetectorTests
 	[Test]
 	public void Mail_that_arrived_during_an_outage_fires_once_when_the_inbox_is_read_again()
 	{
-		var before = State(EmailInboxStatus.Connected, 0, Message("a", 1, isRead: true));
+		var before = State(EmailInboxStatus.Connected, 0, Message("a", 1, true));
 		var stale = before with { IsStale = true };
-		var after = State(EmailInboxStatus.Connected, 2, Message("a", 1, isRead: true), Message("b", 30),
+		var after = State(EmailInboxStatus.Connected,
+			2,
+			Message("a", 1, true),
+			Message("b", 30),
 			Message("c", 40));
 
 		var duringOutage = EmailChangeDetector.Detect(before, stale, true);
@@ -53,7 +59,8 @@ public class EmailChangeDetectorTests
 		{
 			Assert.That(duringOutage.Changes, Is.Empty);
 			Assert.That(afterOutage.Changes.OfType<EmailReceived>().Select(change => change.Message.Id),
-				Is.EqualTo(new[] { "b", "c" }), "oldest first");
+				Is.EqualTo(new[] { "b", "c" }),
+				"oldest first");
 		});
 	}
 
@@ -97,7 +104,7 @@ public class EmailChangeDetectorTests
 	public void A_read_flip_and_the_unread_count_are_reported()
 	{
 		var before = State(EmailInboxStatus.Connected, 2, Message("a", 1), Message("b", 2));
-		var after = State(EmailInboxStatus.Connected, 1, Message("a", 1, isRead: true), Message("b", 2));
+		var after = State(EmailInboxStatus.Connected, 1, Message("a", 1, true), Message("b", 2));
 
 		var detection = EmailChangeDetector.Detect(before, after, true);
 
@@ -161,7 +168,8 @@ public class EmailChangeDetectorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(gap.Changes.Single(), Is.TypeOf<EmailInboxDisconnected>(),
+			Assert.That(gap.Changes.Single(),
+				Is.TypeOf<EmailInboxDisconnected>(),
 				"an empty disconnected read reports no mail changes");
 			Assert.That(back.Changes.OfType<EmailReceived>().Select(change => change.Message.Id),
 				Is.EqualTo(new[] { "b" }));
@@ -190,7 +198,8 @@ public class EmailChangeDetectorTests
 	}
 
 	private static EmailInboxState State(EmailInboxStatus status, int unreadCount, params EmailMessage[] messages)
-		=> new()
+	{
+		return new EmailInboxState
 		{
 			Inbox = _inbox,
 			Slug = "work",
@@ -200,4 +209,5 @@ public class EmailChangeDetectorTests
 			Latest = [.. messages.OrderByDescending(message => message.ReceivedAt)],
 			SyncedAt = Noon
 		};
+	}
 }

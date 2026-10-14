@@ -22,7 +22,7 @@ public class ApkSigningCertificatesTests
 	[Test]
 	public void An_apk_without_a_v2_or_v3_signature_has_no_signers()
 	{
-		Assert.That(Read(Apk([[1, 2, 3]], blockId: 0x42726577)), Is.Empty);
+		Assert.That(Read(Apk([[1, 2, 3]], 0x42726577)), Is.Empty);
 	}
 
 	[Test]
@@ -34,11 +34,12 @@ public class ApkSigningCertificatesTests
 	[Test]
 	public void The_jar_signature_certificates_are_hashed_for_android_6()
 	{
-		byte[] certificate = Certificate(7);
+		var certificate = Certificate(7);
 
 		using var stream = new MemoryStream(Apk([certificate], jarCertificates: [certificate]));
 
-		Assert.That(ApkSigningCertificates.ReadJarSignerCertificateSha256(stream), Is.EqualTo(new[] { Hex(certificate) }));
+		Assert.That(ApkSigningCertificates.ReadJarSignerCertificateSha256(stream),
+			Is.EqualTo(new[] { Hex(certificate) }));
 	}
 
 	[Test]
@@ -57,7 +58,10 @@ public class ApkSigningCertificatesTests
 		Assert.That(Read(apk), Is.Empty);
 	}
 
-	internal static string Hex(byte[] certificate) => Convert.ToHexStringLower(SHA256.HashData(certificate));
+	internal static string Hex(byte[] certificate)
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(certificate));
+	}
 
 	internal static byte[] Certificate(int serial)
 	{
@@ -70,7 +74,8 @@ public class ApkSigningCertificatesTests
 		return writer.Encode();
 	}
 
-	internal static byte[] Apk(IReadOnlyList<byte[]> certificates,
+	internal static byte[] Apk(
+		IReadOnlyList<byte[]> certificates,
 		uint blockId = 0x7109871a,
 		bool corruptSigner = false,
 		IReadOnlyList<byte[]>? jarCertificates = null,
@@ -103,7 +108,7 @@ public class ApkSigningCertificatesTests
 	private static byte[] Zip(byte[] signingBlock, byte[]? jarSignature = null)
 	{
 		using var buffer = new MemoryStream();
-		using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+		using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, true))
 		{
 			using (var manifest = archive.CreateEntry("AndroidManifest.xml").Open())
 			{
@@ -132,7 +137,7 @@ public class ApkSigningCertificatesTests
 		using (writer.PushSequence())
 		{
 			writer.WriteObjectIdentifier("1.2.840.113549.1.7.2");
-			using (writer.PushSequence(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true)))
+			using (writer.PushSequence(new Asn1Tag(TagClass.ContextSpecific, 0, true)))
 			using (writer.PushSequence())
 			{
 				writer.WriteInteger(1);
@@ -145,7 +150,7 @@ public class ApkSigningCertificatesTests
 					writer.WriteObjectIdentifier("1.2.840.113549.1.7.1");
 				}
 
-				using (writer.PushSetOf(new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true)))
+				using (writer.PushSetOf(new Asn1Tag(TagClass.ContextSpecific, 0, true)))
 				{
 					foreach (var certificate in certificates)
 					{
@@ -176,5 +181,8 @@ public class ApkSigningCertificatesTests
 		return result;
 	}
 
-	private static byte[] Concat(params byte[][] parts) => [.. parts.SelectMany(part => part)];
+	private static byte[] Concat(params byte[][] parts)
+	{
+		return [.. parts.SelectMany(part => part)];
+	}
 }

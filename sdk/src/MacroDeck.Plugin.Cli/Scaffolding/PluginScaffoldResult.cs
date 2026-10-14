@@ -17,14 +17,20 @@ internal sealed record PluginScaffoldResult
 
 	public string? FailureDetail { get; init; }
 
-	public static PluginScaffoldResult Ok(string outputPath, string manifestPath, string buildConfigPath) => new()
+	public static PluginScaffoldResult Ok(string outputPath, string manifestPath, string buildConfigPath)
 	{
-		Success = true,
-		OutputPath = outputPath,
-		ManifestPath = manifestPath,
-		BuildConfigPath = buildConfigPath
-	};
+		return new PluginScaffoldResult
+		{
+			Success = true,
+			OutputPath = outputPath,
+			ManifestPath = manifestPath,
+			BuildConfigPath = buildConfigPath
+		};
+	}
 
 	public static PluginScaffoldResult Fail(PluginScaffoldFailureReason reason, string message, string? detail = null)
-		=> new() { Success = false, FailureReason = reason, FailureMessage = message, FailureDetail = detail };
+	{
+		return new PluginScaffoldResult
+			{ Success = false, FailureReason = reason, FailureMessage = message, FailureDetail = detail };
+	}
 }

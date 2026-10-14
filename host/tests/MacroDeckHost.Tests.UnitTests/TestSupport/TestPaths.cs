@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeckHost.Application.Paths;
 
 namespace MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -34,7 +36,8 @@ internal sealed class TestPaths : IMacroDeckPaths
 		foreach (var directory in new[]
 			{
 				ResourcesDirectory, ImagesDirectory, DataDirectory, ProfilesDirectory, ScriptsDirectory,
-				AutomationsDirectory, IconsDirectory, IconPacksDirectory, IconStagingDirectory, FontsDirectory, ConfigDirectory,
+				AutomationsDirectory, IconsDirectory, IconPacksDirectory, IconStagingDirectory, FontsDirectory,
+				ConfigDirectory,
 				LogsDirectory, KeysDirectory, PluginsDirectory, PluginStagingDirectory, PluginCacheDirectory,
 				BackupsDirectory, RestoreStagingDirectory
 			})
@@ -54,7 +57,7 @@ internal sealed class TestPaths : IMacroDeckPaths
 	{
 		if (Directory.Exists(BaseDirectory))
 		{
-			Directory.Delete(BaseDirectory, recursive: true);
+			Directory.Delete(BaseDirectory, true);
 		}
 	}
 }

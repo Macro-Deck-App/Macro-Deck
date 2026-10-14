@@ -36,7 +36,8 @@ public class IntegrationContextCompanionDevicesCompatibilityTests
 			Assert.That(devices.FindDevice(_deviceId), Is.Null);
 			Assert.That(waited, Is.False);
 			Assert.That(sent, Is.False);
-			Assert.That(requested, Is.EqualTo(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected)));
+			Assert.That(requested,
+				Is.EqualTo(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected)));
 			Assert.That(screenshot.Png, Is.Null);
 			Assert.That(screenshot.Failure, Is.EqualTo(CompanionDeviceFailure.NotConnected));
 			Assert.That(raised, Is.False);
@@ -46,11 +47,15 @@ public class IntegrationContextCompanionDevicesCompatibilityTests
 	[TestCase(-1)]
 	[TestCase(101)]
 	public void A_brightness_outside_zero_to_one_hundred_is_refused(int percent)
-		=> Assert.Throws<ArgumentOutOfRangeException>(() => CompanionDeviceCommand.SetBrightness(percent));
+	{
+		Assert.Throws<ArgumentOutOfRangeException>(() => CompanionDeviceCommand.SetBrightness(percent));
+	}
 
 	[Test]
 	public void An_orientation_the_devices_do_not_know_is_refused()
-		=> Assert.Throws<ArgumentException>(() => CompanionDeviceCommand.SetOrientation("upside-down"));
+	{
+		Assert.Throws<ArgumentException>(() => CompanionDeviceCommand.SetOrientation("upside-down"));
+	}
 
 	[Test]
 	public void A_command_carries_only_the_value_its_kind_uses()

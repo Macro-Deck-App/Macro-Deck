@@ -24,8 +24,8 @@ internal static class RunCommand
 
 		var hostUrlOption = new Option<string?>("--host-url")
 		{
-			Description = "A real host's URL. Defaults to the running desktop host, discovered through its " +
-				"loopback port file."
+			Description = "A real host's URL. Defaults to the running desktop host, discovered through its "
+				+ "loopback port file."
 		};
 		var stubHostOption = new Option<bool>("--stub-host")
 			{ Description = "Run against a disposable in-process stub host instead of a real one." };
@@ -33,26 +33,26 @@ internal static class RunCommand
 		var modeOption = CreateModeOption();
 		var enrollmentTokenOption = new Option<string?>("--enrollment-token")
 		{
-			Description = "Self-registering only. Required against a real host unless --pairing is left " +
-				"enabled (the default); defaults to a placeholder against --stub-host."
+			Description = "Self-registering only. Required against a real host unless --pairing is left "
+				+ "enabled (the default); defaults to a placeholder against --stub-host."
 		};
 		var pairingOption = new Option<bool>("--pairing")
 		{
-			Description = "Self-registering only. Whether the plugin may fall back to interactive pairing " +
-				"when no --enrollment-token is given. Defaults to true.",
+			Description = "Self-registering only. Whether the plugin may fall back to interactive pairing "
+				+ "when no --enrollment-token is given. Defaults to true.",
 			DefaultValueFactory = _ => true
 		};
 		var pluginIdOption = new Option<string?>("--plugin-id")
 		{
-			Description = "Managed only. Defaults to the id declared by the manifest.json next to the launch " +
-				"target; a generated development id when no manifest is found."
+			Description = "Managed only. Defaults to the id declared by the manifest.json next to the launch "
+				+ "target; a generated development id when no manifest is found."
 		};
 		var secretOption = new Option<string?>("--secret")
 			{ Description = "Managed only. Defaults to a generated secret against --stub-host." };
 		var stateDirectoryOption = new Option<string?>("--state-directory")
 		{
-			Description = "Self-registering only. Where the persisted credential is stored. Defaults to a " +
-				"temporary directory."
+			Description = "Self-registering only. Where the persisted credential is stored. Defaults to a "
+				+ "temporary directory."
 		};
 		var dataDirectoryOption = new Option<string?>("--data-directory")
 			{ Description = "Managed only. Defaults to a temporary directory." };
@@ -64,8 +64,8 @@ internal static class RunCommand
 			{ Description = "Where the plugin listens. Defaults to http://127.0.0.1:0 (an OS-chosen loopback port)." };
 		var watchOption = new Option<bool>("--watch")
 		{
-			Description = "With --project against a real host: run the plugin under dotnet watch, so a saved change " +
-				"is applied with .NET Hot Reload, or rebuilds and restarts the plugin when it cannot be."
+			Description = "With --project against a real host: run the plugin under dotnet watch, so a saved change "
+				+ "is applied with .NET Hot Reload, or rebuilds and restarts the plugin when it cannot be."
 		};
 
 		var command = new Command("run", "Launch a plugin against a stub or real host, streaming its output.");
@@ -121,13 +121,12 @@ internal static class RunCommand
 		var option = new Option<PluginRegistrationMode>("--mode")
 		{
 			Description = "managed or self-registering. Defaults to self-registering.",
-			DefaultValueFactory = _ => PluginRegistrationMode.SelfRegistering
+			DefaultValueFactory = _ => PluginRegistrationMode.SelfRegistering,
+			CustomParser = result => CliOptionParsing.ParseToken(result,
+				PluginRegistrationMode.SelfRegistering,
+				("managed", PluginRegistrationMode.Managed),
+				("self-registering", PluginRegistrationMode.SelfRegistering))
 		};
-
-		option.CustomParser = result => CliOptionParsing.ParseToken(result,
-			PluginRegistrationMode.SelfRegistering,
-			("managed", PluginRegistrationMode.Managed),
-			("self-registering", PluginRegistrationMode.SelfRegistering));
 
 		return option;
 	}

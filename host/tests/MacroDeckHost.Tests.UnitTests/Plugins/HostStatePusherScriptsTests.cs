@@ -49,7 +49,7 @@ public class HostStatePusherScriptsTests
 			new FakeWidgetApi(),
 			new NoBindings(),
 			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(),
+			new Adb.FakeAdbManager(),
 			new FixedAdbAccessPolicy(),
 			Serilog.Core.Logger.None);
 
@@ -58,7 +58,10 @@ public class HostStatePusherScriptsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _pusher.Dispose();
+	public void TearDown()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task A_plugin_that_did_not_negotiate_colour_inputs_gets_the_whole_list_with_text_inputs()
@@ -70,9 +73,11 @@ public class HostStatePusherScriptsTests
 		{
 			foreach (var scripts in ScriptPushes(_old))
 			{
-				Assert.That(scripts.Select(script => script.GetProperty("id").GetString()), Is.EqualTo(new[] { "s1", "s2" }));
+				Assert.That(scripts.Select(script => script.GetProperty("id").GetString()),
+					Is.EqualTo(new[] { "s1", "s2" }));
 				Assert.That(InputTypes(scripts[0]), Is.EqualTo(new[] { "text", "numeric" }));
-				Assert.That(scripts[0].GetProperty("inputs")[0].GetProperty("defaultValue").GetString(), Is.EqualTo("#3366ff"));
+				Assert.That(scripts[0].GetProperty("inputs")[0].GetProperty("defaultValue").GetString(),
+					Is.EqualTo("#3366ff"));
 			}
 
 			Assert.That(ScriptPushes(_old), Has.Count.EqualTo(2));
@@ -115,24 +120,37 @@ public class HostStatePusherScriptsTests
 	}
 
 	private static List<List<JsonElement>> ScriptPushes(FakePluginConnection connection)
-		=> connection.Sent
+	{
+		return connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Scripts)
 			.Select(payload => payload.Data!.Value.EnumerateArray().ToList())
 			.ToList();
+	}
 
 	private static List<string?> InputTypes(JsonElement script)
-		=> [.. script.GetProperty("inputs").EnumerateArray().Select(input => input.GetProperty("type").GetString())];
+	{
+		return
+			[.. script.GetProperty("inputs").EnumerateArray().Select(input => input.GetProperty("type").GetString())];
+	}
 
 	private sealed class NoBindings : MacroDeckHost.Application.Triggers.IEventBindingTracker
 	{
-		public IReadOnlyList<MacroDeck.Plugin.Protocol.Callbacks.EventBindingDto> BindingsFor(string providerId) => [];
+		public IReadOnlyList<EventBindingDto> BindingsFor(string providerId)
+		{
+			return [];
+		}
 
-		public IDisposable Subscribe(Func<string, IReadOnlyList<MacroDeck.Plugin.Protocol.Callbacks.EventBindingDto>, Task> onChanged)
-			=> new Nothing();
+		public IDisposable Subscribe(Func<string, IReadOnlyList<EventBindingDto>, Task> onChanged)
+		{
+			return new Nothing();
+		}
 
-		public Task FlushAsync() => Task.CompletedTask;
+		public Task FlushAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		private sealed class Nothing : IDisposable
 		{

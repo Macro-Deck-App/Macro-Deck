@@ -77,7 +77,7 @@ public class BackupEndpointsTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -99,8 +99,8 @@ public class BackupEndpointsTests
 		{
 			Assert.That(Ids(listed), Does.Contain(backupId));
 			Assert.That(download.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(download.Content.Headers.ContentDisposition!.FileNameStar ??
-				download.Content.Headers.ContentDisposition!.FileName,
+			Assert.That(download.Content.Headers.ContentDisposition!.FileNameStar
+				?? download.Content.Headers.ContentDisposition!.FileName,
 				Does.Contain(".macroDeckBackup"));
 			Assert.That(archive, Is.Not.Empty);
 			Assert.That(deleted.GetProperty("success").GetBoolean(), Is.True);
@@ -197,8 +197,8 @@ public class BackupEndpointsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(onlyConfirmed.GetProperty("success").GetBoolean(), Is.False);
-			Assert.That(onlyConfirmed.TryGetProperty("key", out var withoutAck) &&
-				withoutAck.ValueKind
+			Assert.That(onlyConfirmed.TryGetProperty("key", out var withoutAck)
+				&& withoutAck.ValueKind
 					is not JsonValueKind.Null,
 				Is.False,
 				"no key may be handed out on a refused rotation");
@@ -237,16 +237,24 @@ public class BackupEndpointsTests
 	}
 
 	private static IEnumerable<string?> Ids(JsonElement listed)
-		=> listed.GetProperty("backups").EnumerateArray().Select(b => b.GetProperty("id").GetString());
+	{
+		return listed.GetProperty("backups").EnumerateArray().Select(b => b.GetProperty("id").GetString());
+	}
 
 	private async Task<string> ReadRaw(HttpMethod method, string path)
-		=> await (await Send(method, path)).Content.ReadAsStringAsync();
+	{
+		return await (await Send(method, path)).Content.ReadAsStringAsync();
+	}
 
 	private Task<HttpResponseMessage> Send(HttpMethod method, string path, object? body = null)
-		=> Dispatch(method, path, body, loopback: true);
+	{
+		return Dispatch(method, path, body, true);
+	}
 
 	private Task<HttpResponseMessage> SendPublic(HttpMethod method, string path, object? body = null)
-		=> Dispatch(method, path, body, loopback: false);
+	{
+		return Dispatch(method, path, body, false);
+	}
 
 	private async Task<HttpResponseMessage> Dispatch(HttpMethod method, string path, object? body, bool loopback)
 	{
@@ -269,7 +277,9 @@ public class BackupEndpointsTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -283,7 +293,8 @@ public class BackupEndpointsTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -303,5 +314,6 @@ public class BackupEndpointsTests
 				});
 				next(app);
 			};
+		}
 	}
 }

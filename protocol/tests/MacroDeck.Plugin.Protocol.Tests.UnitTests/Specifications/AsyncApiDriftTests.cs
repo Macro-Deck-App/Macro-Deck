@@ -119,8 +119,10 @@ public class AsyncApiDriftTests
 
 	[Test]
 	public void Asset_kinds_match_the_contracts()
-		=> Assert.That(SpecificationDocuments.AsStrings(SpecificationDocuments.AsyncApi["x-macrodeck-asset-kinds"]),
+	{
+		Assert.That(SpecificationDocuments.AsStrings(SpecificationDocuments.AsyncApi["x-macrodeck-asset-kinds"]),
 			Is.EquivalentTo(AssetKinds.All));
+	}
 
 	[Test]
 	public void The_envelope_schema_matches_the_envelope_record()
@@ -150,11 +152,13 @@ public class AsyncApiDriftTests
 	}
 
 	private static IReadOnlyList<string> DocumentedMessageTypes()
-		=>
+	{
+		return
 		[
 			.. SpecificationDocuments.Map(SpecificationDocuments.AsyncApi, "components", "messages")
 				.Values
 				.Select(SpecificationDocuments.AsMap)
 				.Select(message => (string)message["x-macrodeck-message-type"]!)
 		];
+	}
 }

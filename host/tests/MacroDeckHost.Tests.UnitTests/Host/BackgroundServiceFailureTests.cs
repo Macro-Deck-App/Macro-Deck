@@ -13,7 +13,8 @@ internal sealed class BackgroundServiceFailureTests
 		var startupServices = new ServiceCollection();
 		new Startup().ConfigureServices(startupServices);
 
-		var builder = Microsoft.Extensions.Hosting.Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
+		var builder
+			= Microsoft.Extensions.Hosting.Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings());
 		foreach (var descriptor in startupServices.Where(d => d.ServiceType == typeof(IConfigureOptions<HostOptions>)))
 		{
 			builder.Services.Add(descriptor);

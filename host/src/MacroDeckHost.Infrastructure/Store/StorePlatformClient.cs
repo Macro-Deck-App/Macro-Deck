@@ -20,7 +20,8 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 	private readonly StorePlatformOptions _options;
 	private readonly ILogger _logger;
 
-	public StorePlatformClient(IHttpClientFactory httpClientFactory,
+	public StorePlatformClient(
+		IHttpClientFactory httpClientFactory,
 		IConnectSessionService session,
 		StorePlatformOptions options,
 		ILogger logger)
@@ -28,15 +29,17 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 	{
 	}
 
-	internal StorePlatformClient(HttpMessageHandler handler,
+	internal StorePlatformClient(
+		HttpMessageHandler handler,
 		IConnectSessionService session,
 		StorePlatformOptions options,
 		ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, session, options, logger)
+		: this(new HttpClient(handler, false), true, session, options, logger)
 	{
 	}
 
-	private StorePlatformClient(HttpClient http,
+	private StorePlatformClient(
+		HttpClient http,
 		bool ownsClient,
 		IConnectSessionService session,
 		StorePlatformOptions options,
@@ -66,8 +69,8 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		{
 			var result = await Send<Dictionary<string, StorePlatformRating>>(HttpMethod.Get,
 				$"api/v1/store/ratings?packageIds={JoinIds(chunk)}",
-				content: null,
-				authenticated: false,
+				null,
+				false,
 				cancellationToken);
 			if (!result.Success)
 			{
@@ -94,8 +97,8 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		{
 			var result = await Send<Dictionary<string, StorePlatformInstalls>>(HttpMethod.Get,
 				$"api/v1/store/installs?packageIds={JoinIds(chunk)}",
-				content: null,
-				authenticated: false,
+				null,
+				false,
 				cancellationToken);
 			if (!result.Success)
 			{
@@ -113,15 +116,19 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		return StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformInstalls>>(merged);
 	}
 
-	public Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
-		CancellationToken cancellationToken = default) =>
-		Send<StorePlatformRating>(HttpMethod.Get,
+	public Task<StorePlatformResult<StorePlatformRating>> GetRating(
+		string packageId,
+		CancellationToken cancellationToken = default)
+	{
+		return Send<StorePlatformRating>(HttpMethod.Get,
 			$"{PackagePath(packageId)}/rating",
-			content: null,
-			authenticated: false,
+			null,
+			false,
 			cancellationToken);
+	}
 
-	public Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(string packageId,
+	public Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(
+		string packageId,
 		int page,
 		int pageSize,
 		StorePlatformReviewSort sort,
@@ -136,58 +143,71 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 
 		return Send<StorePlatformReviewPage>(HttpMethod.Get,
 			$"{PackagePath(packageId)}/reviews?{query}",
-			content: null,
-			authenticated: false,
+			null,
+			false,
 			cancellationToken);
 	}
 
-	public async Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(string packageId,
+	public async Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(
+		string packageId,
 		CancellationToken cancellationToken = default)
 	{
 		var result = await Send<StorePlatformOwnReview>(HttpMethod.Get,
 			$"{PackagePath(packageId)}/reviews/me",
-			content: null,
-			authenticated: true,
+			null,
+			true,
 			cancellationToken);
-		return result.Failure == StorePlatformFailure.NotFound ? StorePlatformResult.Ok<StorePlatformOwnReview>(null) : result;
+		return result.Failure == StorePlatformFailure.NotFound
+			? StorePlatformResult.Ok<StorePlatformOwnReview>(null)
+			: result;
 	}
 
-	public Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(string packageId,
+	public Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(
+		string packageId,
 		int rating,
 		string? title,
 		string? body,
-		CancellationToken cancellationToken = default) =>
-		Send<StorePlatformOwnReview>(HttpMethod.Put,
+		CancellationToken cancellationToken = default)
+	{
+		return Send<StorePlatformOwnReview>(HttpMethod.Put,
 			$"{PackagePath(packageId)}/reviews/me",
 			JsonContent.Create(new { rating, title, body }, options: _json),
-			authenticated: true,
+			true,
 			cancellationToken);
+	}
 
-	public async Task<StorePlatformResult<bool>> DeleteOwnReview(string packageId,
+	public async Task<StorePlatformResult<bool>> DeleteOwnReview(
+		string packageId,
 		CancellationToken cancellationToken = default)
 	{
 		var result = await Send<JsonElement?>(HttpMethod.Delete,
 			$"{PackagePath(packageId)}/reviews/me",
-			content: null,
-			authenticated: true,
+			null,
+			true,
 			cancellationToken);
 		return result.Success
 			? StorePlatformResult.Ok<bool>(true)
 			: StorePlatformResult.Fail<bool>(result.Failure, result.RetryAfter, result.Field);
 	}
 
-	public Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+	public Task<StorePlatformResult<bool>> ReportPackage(
+		string packageId,
 		string category,
 		string? detail,
-		CancellationToken cancellationToken = default) =>
-		Report($"{PackagePath(packageId)}/report", category, detail, cancellationToken);
+		CancellationToken cancellationToken = default)
+	{
+		return Report($"{PackagePath(packageId)}/report", category, detail, cancellationToken);
+	}
 
-	public Task<StorePlatformResult<bool>> ReportReview(string packageId,
+	public Task<StorePlatformResult<bool>> ReportReview(
+		string packageId,
 		Guid reviewId,
 		string category,
 		string? detail,
-		CancellationToken cancellationToken = default) =>
-		Report($"{PackagePath(packageId)}/reviews/{reviewId:D}/report", category, detail, cancellationToken);
+		CancellationToken cancellationToken = default)
+	{
+		return Report($"{PackagePath(packageId)}/reviews/{reviewId:D}/report", category, detail, cancellationToken);
+	}
 
 	public async Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementStatus>>> GetEntitlements(
 		IReadOnlyCollection<string> packageIds,
@@ -198,8 +218,8 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		{
 			var result = await Send<Dictionary<string, string>>(HttpMethod.Get,
 				$"api/v1/store/entitlements?packageIds={JoinIds(chunk)}",
-				content: null,
-				authenticated: true,
+				null,
+				true,
 				cancellationToken);
 			if (!result.Success)
 			{
@@ -229,11 +249,12 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 			var result = await Send<Dictionary<string, string>>(HttpMethod.Post,
 				"api/v1/store/entitlements/claim",
 				JsonContent.Create(new { packageIds = chunk }, options: _json),
-				authenticated: true,
+				true,
 				cancellationToken);
 			if (!result.Success)
 			{
-				return StorePlatformResult.Fail<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(result.Failure,
+				return StorePlatformResult.Fail<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(
+					result.Failure,
 					result.RetryAfter,
 					result.Field);
 			}
@@ -254,31 +275,39 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 	{
 		var result = await Send<List<StorePlatformTest>>(HttpMethod.Get,
 			"api/v1/store/tests",
-			content: null,
-			authenticated: true,
+			null,
+			true,
 			cancellationToken);
 		return result.Success
 			? StorePlatformResult.Ok<IReadOnlyList<StorePlatformTest>>(result.Value)
-			: StorePlatformResult.Fail<IReadOnlyList<StorePlatformTest>>(result.Failure, result.RetryAfter, result.Field);
+			: StorePlatformResult.Fail<IReadOnlyList<StorePlatformTest>>(result.Failure,
+				result.RetryAfter,
+				result.Field);
 	}
 
-	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(
+		string packageId,
 		Guid buildId,
-		CancellationToken cancellationToken = default) =>
-		Send<StorePlatformTestBuildDownload>(HttpMethod.Post,
+		CancellationToken cancellationToken = default)
+	{
+		return Send<StorePlatformTestBuildDownload>(HttpMethod.Post,
 			$"api/v1/store/tests/{Uri.EscapeDataString(packageId)}/builds/{buildId:D}/download",
-			content: null,
-			authenticated: true,
+			null,
+			true,
 			cancellationToken);
+	}
 
-	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default) =>
-		Send<string>(HttpMethod.Get,
+	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default)
+	{
+		return Send<string>(HttpMethod.Get,
 			"api/v1/public/creator-guidelines",
-			content: null,
-			authenticated: false,
+			null,
+			false,
 			cancellationToken);
+	}
 
-	private async Task<StorePlatformResult<bool>> Report(string relativeUrl,
+	private async Task<StorePlatformResult<bool>> Report(
+		string relativeUrl,
 		string category,
 		string? detail,
 		CancellationToken cancellationToken)
@@ -286,7 +315,7 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		var result = await Send<JsonElement?>(HttpMethod.Post,
 			relativeUrl,
 			JsonContent.Create(new { category, detail }, options: _json),
-			authenticated: true,
+			true,
 			cancellationToken);
 		if (result.Success)
 		{
@@ -299,13 +328,15 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		return StorePlatformResult.Fail<bool>(failure, result.RetryAfter, result.Field);
 	}
 
-	private async Task<StorePlatformResult<T>> Send<T>(HttpMethod method,
+	private async Task<StorePlatformResult<T>> Send<T>(
+		HttpMethod method,
 		string relativeUrl,
 		HttpContent? content,
 		bool authenticated,
 		CancellationToken cancellationToken)
 	{
-		using var request = new HttpRequestMessage(method, new Uri(_options.BaseUrl, relativeUrl)) { Content = content };
+		using var request = new HttpRequestMessage(method, new Uri(_options.BaseUrl, relativeUrl))
+			{ Content = content };
 
 		if (authenticated)
 		{
@@ -338,11 +369,12 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 
 		try
 		{
-			using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+			using var response
+				= await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
 			return await Interpret<T>(response, method, authenticated, timeout.Token);
 		}
-		catch (Exception ex) when (ex is HttpRequestException or IOException or JsonException or NotSupportedException ||
-			ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
+		catch (Exception ex) when (ex is HttpRequestException or IOException or JsonException or NotSupportedException
+			|| ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning("The Macro Deck Platform request {Method} {Path} failed: {Error}",
 				method.Method,
@@ -352,7 +384,8 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		}
 	}
 
-	private async Task<StorePlatformResult<T>> Interpret<T>(HttpResponseMessage response,
+	private async Task<StorePlatformResult<T>> Interpret<T>(
+		HttpResponseMessage response,
 		HttpMethod method,
 		bool authenticated,
 		CancellationToken cancellationToken)
@@ -399,14 +432,17 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		// something the user can fix by signing in again.
 		if (response.StatusCode == HttpStatusCode.Unauthorized || failure == StorePlatformFailure.Unavailable)
 		{
-			_logger.Warning("The Macro Deck Platform answered {Status} to {Method} {Path} (authenticated: {Authenticated})",
+			_logger.Warning(
+				"The Macro Deck Platform answered {Status} to {Method} {Path} (authenticated: {Authenticated})",
 				(int)response.StatusCode,
 				method.Method,
 				response.RequestMessage?.RequestUri?.AbsolutePath,
 				authenticated);
 		}
 
-		return StorePlatformResult.Fail<T>(failure, retryAfter, failure == StorePlatformFailure.Validation ? problem.Field : null);
+		return StorePlatformResult.Fail<T>(failure,
+			retryAfter,
+			failure == StorePlatformFailure.Validation ? problem.Field : null);
 	}
 
 	private static async Task<Problem> ReadProblem(HttpResponseMessage response, CancellationToken cancellationToken)
@@ -463,17 +499,28 @@ public sealed class StorePlatformClient : IStorePlatformClient, IDisposable
 		return header.Date is { } date && date > DateTimeOffset.UtcNow ? date - DateTimeOffset.UtcNow : null;
 	}
 
-	private static string PackagePath(string packageId) => $"api/v1/store/packages/{Uri.EscapeDataString(packageId)}";
+	private static string PackagePath(string packageId)
+	{
+		return $"api/v1/store/packages/{Uri.EscapeDataString(packageId)}";
+	}
 
-	private static string JoinIds(IEnumerable<string> ids) => string.Join(',', ids.Select(Uri.EscapeDataString));
+	private static string JoinIds(IEnumerable<string> ids)
+	{
+		return string.Join(',', ids.Select(Uri.EscapeDataString));
+	}
 
-	private static IEnumerable<string[]> Chunks(IReadOnlyCollection<string> ids) =>
-		ids.Distinct(StringComparer.Ordinal).Chunk(StorePlatformOptions.MaxIdsPerRequest);
+	private static IEnumerable<string[]> Chunks(IReadOnlyCollection<string> ids)
+	{
+		return ids.Distinct(StringComparer.Ordinal).Chunk(StorePlatformOptions.MaxIdsPerRequest);
+	}
 
 	private sealed record Problem(HashSet<string> Flags, string? Field)
 	{
 		public static readonly Problem Empty = new([], null);
 
-		public bool Flag(string name) => Flags.Contains(name);
+		public bool Flag(string name)
+		{
+			return Flags.Contains(name);
+		}
 	}
 }

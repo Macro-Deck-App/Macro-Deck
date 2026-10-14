@@ -6,13 +6,13 @@ namespace MacroDeck.Sdk.Tests.UnitTests.MusicPlayer;
 [TestFixture]
 internal sealed class MusicPlayerArtworkExtensionsTests
 {
-	private static readonly byte[] FirstCover = [1, 2, 3];
-	private static readonly byte[] SecondCover = [4, 5, 6, 7];
+	private static readonly byte[] _firstCover = [1, 2, 3];
+	private static readonly byte[] _secondCover = [4, 5, 6, 7];
 
 	[Test]
 	public async Task The_artwork_is_registered_under_the_given_name_and_its_handle_returned()
 	{
-		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(FirstCover, "image/jpeg") };
+		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(_firstCover, "image/jpeg") };
 		var resources = new FakeUiResourceRegistry();
 
 		var cover = await player.GetArtworkAsUiResourceAsync(resources, "now-playing-cover", "track-1");
@@ -21,7 +21,7 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(cover, Is.EqualTo(registered.Handle));
-			Assert.That(registered.Content, Is.EqualTo(FirstCover));
+			Assert.That(registered.Content, Is.EqualTo(_firstCover));
 			Assert.That(registered.Handle.MediaType, Is.EqualTo("image/jpeg"));
 		});
 	}
@@ -31,8 +31,8 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 	{
 		var player = new ArtworkPlayer
 		{
-			["track-1"] = new MusicPlayerArtwork(FirstCover, "image/jpeg"),
-			["track-2"] = new MusicPlayerArtwork(SecondCover, "image/png"),
+			["track-1"] = new MusicPlayerArtwork(_firstCover, "image/jpeg"),
+			["track-2"] = new MusicPlayerArtwork(_secondCover, "image/png")
 		};
 		var resources = new FakeUiResourceRegistry();
 
@@ -44,14 +44,14 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 			Assert.That(resources.Resources, Has.Count.EqualTo(1));
 			Assert.That(second!.ResourceId, Is.EqualTo(first!.ResourceId));
 			Assert.That(second.ContentHash, Is.Not.EqualTo(first.ContentHash));
-			Assert.That(resources.Resources["now-playing-cover"].Content, Is.EqualTo(SecondCover));
+			Assert.That(resources.Resources["now-playing-cover"].Content, Is.EqualTo(_secondCover));
 		});
 	}
 
 	[Test]
 	public async Task No_artwork_returns_null_and_leaves_the_previous_cover_in_place()
 	{
-		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(FirstCover, "image/jpeg") };
+		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(_firstCover, "image/jpeg") };
 		var resources = new FakeUiResourceRegistry();
 		await player.GetArtworkAsUiResourceAsync(resources, "now-playing-cover", "track-1");
 
@@ -63,20 +63,20 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 			Assert.That(unknown, Is.Null);
 			Assert.That(noId, Is.Null);
 			Assert.That(player.RequestedIds, Is.EqualTo((string[])["track-1", "track-without-cover"]));
-			Assert.That(resources.Resources["now-playing-cover"].Content, Is.EqualTo(FirstCover));
+			Assert.That(resources.Resources["now-playing-cover"].Content, Is.EqualTo(_firstCover));
 		});
 	}
 
 	[Test]
 	public void Artwork_Macro_Deck_does_not_accept_throws_and_registers_nothing()
 	{
-		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(FirstCover, "image/svg+xml") };
+		var player = new ArtworkPlayer { ["track-1"] = new MusicPlayerArtwork(_firstCover, "image/svg+xml") };
 		var resources = new FakeUiResourceRegistry();
 
 		Assert.Multiple(() =>
 		{
-			Assert.ThrowsAsync<ArgumentException>(
-				() => player.GetArtworkAsUiResourceAsync(resources, "now-playing-cover", "track-1"));
+			Assert.ThrowsAsync<ArgumentException>(()
+				=> player.GetArtworkAsUiResourceAsync(resources, "now-playing-cover", "track-1"));
 			Assert.That(resources.Resources, Is.Empty);
 		});
 	}
@@ -92,7 +92,8 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 
 		public List<string> RequestedIds { get; } = [];
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
 		{
 			RequestedIds.Add(artworkId);
@@ -100,26 +101,53 @@ internal sealed class MusicPlayerArtworkExtensionsTests
 		}
 
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(MusicPlayerState.Disconnected);
+		{
+			return Task.FromResult(MusicPlayerState.Disconnected);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

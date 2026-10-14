@@ -173,7 +173,8 @@ public sealed class LogFileTailReader
 	}
 
 	private LogEntry Build(ParsedLogLine parsed, string stamp, long offset, List<string> continuations)
-		=> new()
+	{
+		return new LogEntry
 		{
 			Id = LogEntryId.Create(_set.Stream, stamp, offset),
 			Timestamp = parsed.Timestamp,
@@ -184,6 +185,7 @@ public sealed class LogFileTailReader
 			Message = parsed.Message,
 			Exception = continuations.Count == 0 ? null : string.Join('\n', continuations)
 		};
+	}
 
 	private static long EndOfFile(string path)
 	{

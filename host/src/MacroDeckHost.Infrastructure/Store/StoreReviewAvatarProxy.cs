@@ -20,7 +20,10 @@ public sealed class StoreReviewAvatarProxy : IStoreReviewAvatarProxy, IDisposabl
 	private readonly ILogger _logger;
 	private readonly Lock _sync = new();
 	private readonly LinkedList<(string Url, CachedAvatar Avatar)> _order = new();
-	private readonly Dictionary<string, LinkedListNode<(string Url, CachedAvatar Avatar)>> _entries = new(StringComparer.Ordinal);
+
+	private readonly Dictionary<string, LinkedListNode<(string Url, CachedAvatar Avatar)>> _entries
+		= new(StringComparer.Ordinal);
+
 	private long _cachedBytes;
 
 	public StoreReviewAvatarProxy(IHttpClientFactory httpClientFactory, TimeProvider timeProvider, ILogger logger)
@@ -29,7 +32,7 @@ public sealed class StoreReviewAvatarProxy : IStoreReviewAvatarProxy, IDisposabl
 	}
 
 	internal StoreReviewAvatarProxy(HttpMessageHandler handler, TimeProvider timeProvider, ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, timeProvider, logger)
+		: this(new HttpClient(handler, false), true, timeProvider, logger)
 	{
 	}
 
@@ -104,8 +107,8 @@ public sealed class StoreReviewAvatarProxy : IStoreReviewAvatarProxy, IDisposabl
 			var bytes = buffer.ToArray();
 			return SniffRaster(bytes) is { } contentType ? new StoreReviewAvatar(bytes, contentType) : null;
 		}
-		catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException &&
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(ex, "A Store review avatar could not be fetched");
 			return null;
@@ -153,8 +156,15 @@ public sealed class StoreReviewAvatarProxy : IStoreReviewAvatarProxy, IDisposabl
 			return "image/gif";
 		}
 
-		return bytes.Length >= 12 && bytes[0] == 'R' && bytes[1] == 'I' && bytes[2] == 'F' && bytes[3] == 'F' &&
-			bytes[8] == 'W' && bytes[9] == 'E' && bytes[10] == 'B' && bytes[11] == 'P'
+		return bytes.Length >= 12
+			&& bytes[0] == 'R'
+			&& bytes[1] == 'I'
+			&& bytes[2] == 'F'
+			&& bytes[3] == 'F'
+			&& bytes[8] == 'W'
+			&& bytes[9] == 'E'
+			&& bytes[10] == 'B'
+			&& bytes[11] == 'P'
 				? "image/webp"
 				: null;
 	}

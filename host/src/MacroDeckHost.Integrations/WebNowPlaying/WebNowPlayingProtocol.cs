@@ -105,10 +105,10 @@ internal static class WebNowPlayingProtocol
 		message = default;
 		var parts = text.Split(' ', 3);
 
-		if (parts.Length < 2 ||
-			!int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var type) ||
-			type is < 0 or > 4 ||
-			!long.TryParse(parts[1], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var id))
+		if (parts.Length < 2
+			|| !int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var type)
+			|| type is < 0 or > 4
+			|| !long.TryParse(parts[1], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var id))
 		{
 			return false;
 		}
@@ -181,7 +181,9 @@ internal static class WebNowPlayingProtocol
 	}
 
 	public static string Command(long portId, int eventId, WebNowPlayingEvent @event, long data)
-		=> string.Create(CultureInfo.InvariantCulture, $"{portId} {eventId} {(int)@event} {data}");
+	{
+		return string.Create(CultureInfo.InvariantCulture, $"{portId} {eventId} {(int)@event} {data}");
+	}
 
 	private static List<string> SplitFields(string data)
 	{

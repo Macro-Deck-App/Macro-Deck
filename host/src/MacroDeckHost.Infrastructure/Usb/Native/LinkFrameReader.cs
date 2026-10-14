@@ -33,7 +33,9 @@ internal sealed class LinkFrameReader
 	}
 
 	public bool IsStuck(DateTimeOffset now)
-		=> !Seeking && _partialSince is { } since && now - since >= LinkProtocol.IncompleteFrameTimeout;
+	{
+		return !Seeking && _partialSince is { } since && now - since >= LinkProtocol.IncompleteFrameTimeout;
+	}
 
 	// The stuck frame's first byte is dropped and whatever arrived after it is rescanned for a HELLO,
 	// so HELLOs resent while the frame hung are still found.
@@ -134,14 +136,16 @@ internal sealed class LinkFrameReader
 	}
 
 	private static bool HeaderIsValid(LinkFrameType type, ushort stream, uint length)
-		=> length <= LinkProtocol.MaxPayloadLength &&
-			type switch
+	{
+		return length <= LinkProtocol.MaxPayloadLength
+			&& type switch
 			{
-				LinkFrameType.Hello => stream == LinkProtocol.ControlStream &&
-					length >= LinkProtocol.HelloPayloadLength,
+				LinkFrameType.Hello => stream == LinkProtocol.ControlStream
+					&& length >= LinkProtocol.HelloPayloadLength,
 				LinkFrameType.Window => length == LinkProtocol.WindowPayloadLength,
 				_ => true
 			};
+	}
 
 	private void Malformed(List<LinkInbound> output)
 	{

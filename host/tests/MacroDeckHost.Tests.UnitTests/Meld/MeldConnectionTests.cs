@@ -82,7 +82,7 @@ internal sealed class MeldConnectionTests
 	public async Task ApiVersion_defaults_to_1_when_absent()
 	{
 		_factory.Configure = client =>
-			client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(version: null);
+			client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(null);
 
 		using var connection = Create();
 		connection.Start();
@@ -94,7 +94,7 @@ internal sealed class MeldConnectionTests
 	[Test]
 	public async Task ApiVersion_reads_the_reported_version()
 	{
-		_factory.Configure = client => client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(version: 2);
+		_factory.Configure = client => client.Objects["meld"] = FakeQWebChannelClient.BuildMeldObjectInfo(2);
 
 		using var connection = Create();
 		connection.Start();
@@ -107,7 +107,7 @@ internal sealed class MeldConnectionTests
 	public async Task SupportsSetProperty_is_false_at_v2_without_the_setProperty_method()
 	{
 		_factory.Configure = client => client.Objects["meld"] =
-			FakeQWebChannelClient.BuildMeldObjectInfo(version: 2, supportsSetProperty: false);
+			FakeQWebChannelClient.BuildMeldObjectInfo(2, supportsSetProperty: false);
 
 		using var connection = Create();
 		connection.Start();
@@ -152,8 +152,8 @@ internal sealed class MeldConnectionTests
 
 		await WaitForAsync(() =>
 				_factory.Last.InvocationSnapshot()
-					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver) >=
-				2,
+					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver)
+				>= 2,
 			"both tracks to be observed");
 
 		var registered = _factory.Last.InvocationSnapshot()
@@ -185,8 +185,8 @@ internal sealed class MeldConnectionTests
 
 		await WaitForAsync(() =>
 				_factory.Last.InvocationSnapshot()
-					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver) >=
-				2,
+					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver)
+				>= 2,
 			"the second observer");
 
 		var secondRegistration =
@@ -206,8 +206,8 @@ internal sealed class MeldConnectionTests
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 		await WaitForAsync(() =>
 				_factory.Last.InvocationSnapshot()
-					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver) >=
-				2,
+					.Count(invocation => invocation.Method == MeldObjects.RegisterTrackObserver)
+				>= 2,
 			"both observers");
 
 		_factory.Last.RaiseSignal(MeldObjects.Object,
@@ -267,7 +267,7 @@ internal sealed class MeldConnectionTests
 		_factory.Configure = client => client.Objects["meld"] =
 			FakeQWebChannelClient.BuildMeldObjectInfo(sessionJson: OneTrackSessionJson);
 
-		using var connection = Create(reconnectDelayMs: 30_000);
+		using var connection = Create(30_000);
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
@@ -422,7 +422,7 @@ internal sealed class MeldConnectionTests
 	{
 		_factory.Configure = client => client.ConnectException = new InvalidOperationException("refused");
 
-		using var connection = Create(reconnectDelayMs: 200, maxReconnectDelayMs: 5_000);
+		using var connection = Create(200, 5_000);
 		connection.Start();
 
 		await WaitForAsync(() => _factory.CreatedAt.Count >= 4, "several failed attempts");
@@ -436,7 +436,7 @@ internal sealed class MeldConnectionTests
 	[Test]
 	public async Task A_good_session_resets_the_reconnect_backoff()
 	{
-		using var connection = Create(reconnectDelayMs: 30);
+		using var connection = Create(30);
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
@@ -452,7 +452,7 @@ internal sealed class MeldConnectionTests
 	{
 		_factory.Configure = client => client.Objects.Remove("meld");
 
-		using var connection = Create(reconnectDelayMs: 10, maxReconnectDelayMs: 50, needsSetupReconnectDelayMs: 20);
+		using var connection = Create(10, 50, 20);
 		connection.Start();
 
 		await WaitForAsync(() => connection.NeedsSetup, "NeedsSetup to be set after three failures");
@@ -466,7 +466,7 @@ internal sealed class MeldConnectionTests
 	{
 		_factory.Configure = client => client.ConnectException = new InvalidOperationException("refused");
 
-		using var connection = Create(reconnectDelayMs: 10);
+		using var connection = Create(10);
 		connection.Start();
 
 		await WaitForAsync(() => _factory.Created.Count >= 4, "several failed attempts");
@@ -570,13 +570,15 @@ internal sealed class MeldConnectionTests
 		int? needsSetupReconnectDelayMs = null,
 		int confirmationTimeoutMs = 500,
 		Action? onVariablesChanged = null)
-		=> new(_factory.Create,
+	{
+		return new MeldConnection(_factory.Create,
 			_uri,
 			TimeSpan.FromMilliseconds(reconnectDelayMs),
 			TimeSpan.FromMilliseconds(maxReconnectDelayMs ?? reconnectDelayMs * 4),
 			TimeSpan.FromMilliseconds(confirmationTimeoutMs),
 			needsSetupReconnectDelay: TimeSpan.FromMilliseconds(needsSetupReconnectDelayMs ?? reconnectDelayMs * 2),
 			onVariablesChanged: onVariablesChanged);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition, string because)
 	{

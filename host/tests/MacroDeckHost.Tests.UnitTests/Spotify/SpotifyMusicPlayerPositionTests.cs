@@ -323,13 +323,13 @@ internal sealed class SpotifyMusicPlayerPositionTests
 
 		try
 		{
-			await http.Arrived.Task.WaitAsync(HangGuard);
+			await http.Arrived.Task.WaitAsync(_hangGuard);
 			disposing = Task.Run(player.Dispose);
 			await SettleAsync();
 			Assert.That(disposing.IsCompleted, Is.False);
 
 			http.Release.TrySetResult(Json(HttpStatusCode.OK, Playing()));
-			await disposing.WaitAsync(HangGuard);
+			await disposing.WaitAsync(_hangGuard);
 			Assert.That(player.LastState, Is.EqualTo(MusicPlayerState.Disconnected));
 
 			await AdvanceAsync(time, TimeSpan.FromSeconds(20));
@@ -340,7 +340,7 @@ internal sealed class SpotifyMusicPlayerPositionTests
 			http.Release.TrySetResult(Json(HttpStatusCode.OK, Playing()));
 			if (disposing is not null)
 			{
-				await disposing.WaitAsync(HangGuard);
+				await disposing.WaitAsync(_hangGuard);
 			}
 			else
 			{
@@ -429,7 +429,7 @@ internal sealed class SpotifyMusicPlayerPositionTests
 		var time = new ManualTimeProvider();
 		var reads = new List<TimeSpan>();
 		var http = PlaybackTransport(time, time.Now, reads, Playback(true, 30_000, 200_000));
-		var (player, tokens) = CreatePlayer(http, time, autonomousPolling: false);
+		var (player, tokens) = CreatePlayer(http, time, false);
 
 		try
 		{
@@ -462,7 +462,7 @@ internal sealed class SpotifyMusicPlayerPositionTests
 		var time = new ManualTimeProvider();
 		var reads = new List<TimeSpan>();
 		var http = PlaybackTransport(time, time.Now, reads, Playback(false, 42_000, 180_000));
-		var (player, tokens) = CreatePlayer(http, time, autonomousPolling: false);
+		var (player, tokens) = CreatePlayer(http, time, false);
 
 		try
 		{
@@ -484,7 +484,7 @@ internal sealed class SpotifyMusicPlayerPositionTests
 		var time = new ManualTimeProvider();
 		var reads = new List<TimeSpan>();
 		var http = PlaybackTransport(time, time.Now, reads, Playback(true, 196_000, 200_000));
-		var (player, tokens) = CreatePlayer(http, time, autonomousPolling: false);
+		var (player, tokens) = CreatePlayer(http, time, false);
 
 		try
 		{
@@ -505,7 +505,8 @@ internal sealed class SpotifyMusicPlayerPositionTests
 		DateTimeOffset start,
 		List<TimeSpan> reads,
 		string playback)
-		=> new()
+	{
+		return new StubSpotifyHttpClient
 		{
 			Handler = request =>
 			{
@@ -518,6 +519,7 @@ internal sealed class SpotifyMusicPlayerPositionTests
 				return Json(HttpStatusCode.NoContent, string.Empty);
 			}
 		};
+	}
 
 	private static (SpotifyMusicPlayer Player, SpotifyTokenManager Tokens) CreatePlayer(
 		IHTTPClient http,
@@ -540,26 +542,30 @@ internal sealed class SpotifyMusicPlayerPositionTests
 	}
 
 	private static SpotifyClientConfig Config(IHTTPClient http, ISpotifyAccessTokenSource tokens)
-		=> SpotifyClientConfig.CreateDefault()
+	{
+		return SpotifyClientConfig.CreateDefault()
 			.WithAuthenticator(new SpotifyAccessTokenAuthenticator(tokens))
 			.WithHTTPClient(http)
 			.WithRetryHandler(new SpotifyRetryHandler());
+	}
 
 	private static bool IsPlaybackRead(IRequest request)
-		=> request.Method == HttpMethod.Get &&
-			request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal) &&
-			!request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	{
+		return request.Method == HttpMethod.Get
+			&& request.Endpoint.ToString().Contains("me/player", StringComparison.Ordinal)
+			&& !request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	}
 
 	// Every poll loop iteration ends by arming a delay on the fake clock, so waiting for the arm count to
 	// grow is an exact "the iteration has finished" barrier. The cap only turns a genuine hang into a
 	// failing test instead of a stuck run; it is never a budget the loop is expected to fit into.
-	private static readonly TimeSpan HangGuard = TimeSpan.FromSeconds(10);
+	private static readonly TimeSpan _hangGuard = TimeSpan.FromSeconds(10);
 
 	private static async Task WaitForPollAsync(ManualTimeProvider time, long scheduledBefore)
 	{
 		try
 		{
-			await time.WaitForScheduleAsync(scheduledBefore).WaitAsync(HangGuard);
+			await time.WaitForScheduleAsync(scheduledBefore).WaitAsync(_hangGuard);
 		}
 		catch (TimeoutException)
 		{
@@ -585,7 +591,8 @@ internal sealed class SpotifyMusicPlayerPositionTests
 	}
 
 	private static Task ExecuteActionAsync(SpotifyMusicPlayer player, string action)
-		=> action switch
+	{
+		return action switch
 		{
 			"play" => player.PlayAsync(),
 			"pause" => player.PauseAsync(),
@@ -606,38 +613,50 @@ internal sealed class SpotifyMusicPlayerPositionTests
 			"transfer-and-play" => player.TransferPlaybackAsync("device-2", true, CancellationToken.None),
 			_ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
 		};
+	}
 
-	private static string Playing() => Playback(isPlaying: true);
+	private static string Playing()
+	{
+		return Playback(true);
+	}
 
-	private static string Paused() => Playback(isPlaying: false);
+	private static string Paused()
+	{
+		return Playback(false);
+	}
 
-	private static string Playback(bool isPlaying, int progressMs = 1_000, int durationMs = 200_000) => $$"""
-		  {
-		    "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer", "volume_percent": 55 },
-		    "repeat_state": "off",
-		    "shuffle_state": false,
-		    "progress_ms": {{progressMs}},
-		    "is_playing": {{isPlaying.ToString().ToLowerInvariant()}},
-		    "currently_playing_type": "track",
-		    "item": {
-		      "type": "track",
-		      "id": "track-1",
-		      "uri": "spotify:track:track-1",
-		      "name": "Track",
-		      "duration_ms": {{durationMs}},
-		      "artists": [{ "name": "Artist" }],
-		      "album": { "name": "Album", "images": [] }
-		    }
-		  }
-		  """;
+	private static string Playback(bool isPlaying, int progressMs = 1_000, int durationMs = 200_000)
+	{
+		return $$"""
+				 {
+				   "device": { "id": "dev-1", "is_active": true, "name": "Desk", "type": "Computer", "volume_percent": 55 },
+				   "repeat_state": "off",
+				   "shuffle_state": false,
+				   "progress_ms": {{progressMs}},
+				   "is_playing": {{isPlaying.ToString().ToLowerInvariant()}},
+				   "currently_playing_type": "track",
+				   "item": {
+				     "type": "track",
+				     "id": "track-1",
+				     "uri": "spotify:track:track-1",
+				     "name": "Track",
+				     "duration_ms": {{durationMs}},
+				     "artists": [{ "name": "Artist" }],
+				     "album": { "name": "Album", "images": [] }
+				   }
+				 }
+				 """;
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private sealed class BlockingPlaybackTransport : IHTTPClient
 	{

@@ -16,7 +16,7 @@ namespace MacroDeckHost.Tests.UnitTests.Feedback;
 [TestFixture]
 internal sealed class GitHubStarPromptServiceTests
 {
-	private static readonly DateTime InstalledAt = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+	private static readonly DateTime _installedAt = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
 	private MemoryPreferences _preferences = null!;
 	private FakeTimeProvider _time = null!;
@@ -44,8 +44,8 @@ internal sealed class GitHubStarPromptServiceTests
 	[Test]
 	public async Task It_is_not_due_before_the_installation_is_seven_days_old()
 	{
-		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), InstalledAt);
-		_time.Now = new DateTimeOffset(InstalledAt) + TimeSpan.FromDays(7) - TimeSpan.FromHours(1);
+		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), _installedAt);
+		_time.Now = new DateTimeOffset(_installedAt) + TimeSpan.FromDays(7) - TimeSpan.FromHours(1);
 
 		Assert.That((await _prompt.GetPrompt()).Due, Is.False);
 	}
@@ -53,8 +53,8 @@ internal sealed class GitHubStarPromptServiceTests
 	[Test]
 	public async Task It_is_due_once_the_installation_is_seven_days_old()
 	{
-		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), InstalledAt);
-		_time.Now = new DateTimeOffset(InstalledAt) + TimeSpan.FromDays(7);
+		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), _installedAt);
+		_time.Now = new DateTimeOffset(_installedAt) + TimeSpan.FromDays(7);
 
 		Assert.That((await _prompt.GetPrompt()).Due, Is.True);
 	}
@@ -62,8 +62,8 @@ internal sealed class GitHubStarPromptServiceTests
 	[Test]
 	public async Task It_is_never_due_again_after_it_was_shown()
 	{
-		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), InstalledAt);
-		_time.Now = new DateTimeOffset(InstalledAt) + TimeSpan.FromDays(8);
+		_preferences.Seed(AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"), _installedAt);
+		_time.Now = new DateTimeOffset(_installedAt) + TimeSpan.FromDays(8);
 
 		await _prompt.MarkShown(CancellationToken.None);
 		_time.Now += TimeSpan.FromDays(365);
@@ -74,7 +74,7 @@ internal sealed class GitHubStarPromptServiceTests
 	[Test]
 	public async Task It_is_not_due_without_an_installation_anchor()
 	{
-		_time.Now = new DateTimeOffset(InstalledAt) + TimeSpan.FromDays(30);
+		_time.Now = new DateTimeOffset(_installedAt) + TimeSpan.FromDays(30);
 
 		Assert.That((await _prompt.GetPrompt()).Due, Is.False);
 	}
@@ -84,10 +84,15 @@ internal sealed class GitHubStarPromptServiceTests
 		private readonly ConcurrentDictionary<string, AppPreferenceEntity> _rows = new();
 
 		public void Seed(string key, string value, DateTime createdAt)
-			=> _rows[key] = new AppPreferenceEntity { Key = key, Value = value, CreatedAt = createdAt, UpdatedAt = createdAt };
+		{
+			_rows[key] = new AppPreferenceEntity
+				{ Key = key, Value = value, CreatedAt = createdAt, UpdatedAt = createdAt };
+		}
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_rows.TryGetValue(key, out var row) ? row : null);
+		{
+			return Task.FromResult(_rows.TryGetValue(key, out var row) ? row : null);
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -143,7 +148,7 @@ internal sealed class GitHubStarPromptInstallAnchorTests
 		SqliteConnection.ClearAllPools();
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -151,7 +156,9 @@ internal sealed class GitHubStarPromptInstallAnchorTests
 	public async Task An_anchor_seeded_at_startup_counts_seven_days_from_its_creation()
 	{
 		var before = DateTimeOffset.UtcNow;
-		EarlyAppPreferenceReader.EnsureValue(_paths, AppPreferenceService.InstallationIdKey, Guid.NewGuid().ToString("D"));
+		EarlyAppPreferenceReader.EnsureValue(_paths,
+			AppPreferenceService.InstallationIdKey,
+			Guid.NewGuid().ToString("D"));
 		var after = DateTimeOffset.UtcNow;
 
 		await AssertBoundary(before, after);
@@ -176,12 +183,13 @@ internal sealed class GitHubStarPromptInstallAnchorTests
 	public async Task An_anchor_stored_without_an_offset_is_read_as_local_time()
 	{
 		var local = new DateTime(2026, 1, 1, 12, 0, 0);
-		await using (var connection = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = _paths.DatabasePath }.ToString()))
+		await using (var connection
+			= new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = _paths.DatabasePath }.ToString()))
 		{
 			await connection.OpenAsync();
 			await using var insert = connection.CreateCommand();
-			insert.CommandText = "INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) " +
-				"VALUES ($key, $value, '2026-01-01 12:00:00', '2026-01-01 12:00:00')";
+			insert.CommandText = "INSERT INTO app_preference (ap_key, ap_value, ap_created_at, ap_updated_at) "
+				+ "VALUES ($key, $value, '2026-01-01 12:00:00', '2026-01-01 12:00:00')";
 			insert.Parameters.AddWithValue("$key", AppPreferenceService.InstallationIdKey);
 			insert.Parameters.AddWithValue("$value", Guid.NewGuid().ToString("D"));
 			await insert.ExecuteNonQueryAsync();

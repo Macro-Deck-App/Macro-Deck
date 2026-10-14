@@ -76,7 +76,7 @@ public class PluginIdentityReconciliationTests
 		};
 
 		await _sessionRegistry.Create(record);
-		_sessionRegistry.TryAttach(record.SessionId, new FakePluginConnection(), instanceId: null);
+		_sessionRegistry.TryAttach(record.SessionId, new FakePluginConnection(), null);
 		return record;
 	}
 

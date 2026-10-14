@@ -7,7 +7,9 @@ namespace MacroDeckHost.Integrations.YouTube.Actions;
 internal static class YouTubeActionErrors
 {
 	public static ActionResult QuotaExhausted()
-		=> ActionResult.Failed(ActionErrorCodes.Unavailable, Errors.QuotaExhausted());
+	{
+		return ActionResult.Failed(ActionErrorCodes.Unavailable, Errors.QuotaExhausted());
+	}
 
 	public static ActionResult From(YouTubeApiException exception)
 	{

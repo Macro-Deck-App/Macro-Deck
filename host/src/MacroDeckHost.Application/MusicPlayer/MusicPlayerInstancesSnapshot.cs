@@ -15,5 +15,8 @@ public sealed class MusicPlayerInstancesSnapshot : IMusicPlayerInstancesSnapshot
 
 	public IReadOnlyList<MusicPlayerInstanceDto> Instances => _instances;
 
-	public void Record(IReadOnlyList<MusicPlayerInstanceDto> instances) => _instances = instances;
+	public void Record(IReadOnlyList<MusicPlayerInstanceDto> instances)
+	{
+		_instances = instances;
+	}
 }

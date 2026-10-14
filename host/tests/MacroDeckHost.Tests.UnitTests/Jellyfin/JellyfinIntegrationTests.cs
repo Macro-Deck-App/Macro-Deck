@@ -5,7 +5,6 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeck.Sdk.MusicPlayer.Actions;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Integrations.Jellyfin;
-using MacroDeckHost.Integrations.Jellyfin.Protocol;
 using static MacroDeckHost.Tests.UnitTests.Jellyfin.JellyfinSessions;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;
@@ -26,13 +25,18 @@ internal sealed class JellyfinIntegrationTests
 	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public async Task A_remembered_device_stays_selectable_while_the_server_is_unreachable()
 	{
 		var known = new JellyfinDeviceRegistry();
-		known.Observe(JellyfinSessionMapper.Map([Session("tv", "Living Room TV")], "x"), DateTimeOffset.UtcNow, _ => false);
+		known.Observe(JellyfinSessionMapper.Map([Session("tv", "Living Room TV")], "x"),
+			DateTimeOffset.UtcNow,
+			_ => false);
 		_context.AddServer("Home", variableKey: "home", devices: known.Serialize());
 		_client.Unreachable = true;
 
@@ -50,12 +54,13 @@ internal sealed class JellyfinIntegrationTests
 	public async Task A_device_without_a_session_reads_as_disconnected_and_the_active_player_follows_playback()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV"), Session("phone", "Phone", item: Episode())];
+		_client.Sessions = [Session("tv", "Living Room TV"), Session("phone", "Phone", Episode())];
 
 		await InitializeAndWaitForDevicesAsync(2);
 
 		var instances = _integration.GetInstances();
-		var tv = instances.Single(instance => instance.DisplayName.EndsWith("Living Room TV", StringComparison.Ordinal));
+		var tv = instances.Single(instance
+			=> instance.DisplayName.EndsWith("Living Room TV", StringComparison.Ordinal));
 		var tvState = await _integration.GetPlayer(tv.Id)!.GetStateAsync();
 		var active = await _integration.GetPlayer(instances[0].Id)!.GetStateAsync();
 
@@ -73,7 +78,7 @@ internal sealed class JellyfinIntegrationTests
 	public async Task The_shared_music_player_actions_reach_the_chosen_device()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie())];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie())];
 		await InitializeAndWaitForDevicesAsync(1);
 		var tv = _integration.GetInstances()[1];
 
@@ -90,7 +95,7 @@ internal sealed class JellyfinIntegrationTests
 	public async Task A_command_the_client_does_not_support_is_refused_without_reaching_Jellyfin()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie(), commands: ["VolumeUp"])];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie(), commands: ["VolumeUp"])];
 		await InitializeAndWaitForDevicesAsync(1);
 		var tv = _integration.GetInstances()[1];
 
@@ -142,12 +147,12 @@ internal sealed class JellyfinIntegrationTests
 	[Test]
 	public async Task The_default_player_follows_playback_on_any_server()
 	{
-		var second = new FakeJellyfinClient { Sessions = [Session("phone", "Phone", item: Track())] };
+		var second = new FakeJellyfinClient { Sessions = [Session("phone", "Phone", Track())] };
 		_integration.Dispose();
 		_integration = new JellyfinIntegration(settings => settings.BaseUri.Host == "cabin.local" ? second : _client,
 			timings: FastTimings);
 		_context.AddServer("Home", variableKey: "home");
-		_context.AddServer("Cabin", url: "http://cabin.local:8096", variableKey: "cabin");
+		_context.AddServer("Cabin", "http://cabin.local:8096", variableKey: "cabin");
 		_client.Sessions = [Session("tv")];
 
 		await InitializeAndWaitForDevicesAsync(2);
@@ -164,14 +169,16 @@ internal sealed class JellyfinIntegrationTests
 	public async Task A_client_that_cannot_be_controlled_still_gets_variables_but_no_player()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Bedroom TV", item: Movie(), controllable: false)];
+		_client.Sessions = [Session("tv", "Bedroom TV", Movie(), controllable: false)];
 
 		await InitializeAndWaitForDevicesAsync(1);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_integration.GetInstances().Select(instance => instance.DisplayName), Is.EqualTo(new[] { "Home" }));
-			Assert.That(_integration.Variables.Select(variable => variable.Name), Does.Contain("jellyfin_home_bedroom_tv_title"));
+			Assert.That(_integration.GetInstances().Select(instance => instance.DisplayName),
+				Is.EqualTo(new[] { "Home" }));
+			Assert.That(_integration.Variables.Select(variable => variable.Name),
+				Does.Contain("jellyfin_home_bedroom_tv_title"));
 		});
 	}
 
@@ -179,7 +186,7 @@ internal sealed class JellyfinIntegrationTests
 	public async Task Volume_position_pause_and_mute_variables_control_the_device()
 	{
 		_context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie())];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie())];
 		await InitializeAndWaitForDevicesAsync(1);
 
 		var volume = await Write("volume", 30d);
@@ -188,18 +195,19 @@ internal sealed class JellyfinIntegrationTests
 		var muted = await Write("is_muted", "true");
 		var title = await Write("title", "x");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(new[] { volume, progress, paused, muted }.Select(result => result.Status),
 				Is.All.EqualTo(VariableWriteStatus.Applied));
 			Assert.That(title.Status, Is.EqualTo(VariableWriteStatus.NotWritable));
-			Assert.That(_client.Commands, Is.EqualTo(new[]
-			{
-				"command:session-tv:SetVolume:Volume=30",
-				$"playstate:session-tv:Seek:{TimeSpan.FromMinutes(5).Ticks}",
-				"playstate:session-tv:Pause",
-				"command:session-tv:Mute:"
-			}));
+			Assert.That(_client.Commands,
+				Is.EqualTo(new[]
+				{
+					"command:session-tv:SetVolume:Volume=30",
+					$"playstate:session-tv:Seek:{TimeSpan.FromMinutes(5).Ticks}",
+					"playstate:session-tv:Pause",
+					"command:session-tv:Mute:"
+				}));
 			var reading = await _integration.ReadAsync(Variable("jellyfin_home_living_room_tv_position").ResolvedId!);
 			Assert.That(reading.Max, Is.EqualTo(600));
 		});
@@ -218,7 +226,9 @@ internal sealed class JellyfinIntegrationTests
 	}
 
 	private Task<VariableWriteResult> Write(string slot, object value)
-		=> _integration.SetValueAsync(Variable($"jellyfin_home_living_room_tv_{slot}").ResolvedId!, value).AsTask();
+	{
+		return _integration.SetValueAsync(Variable($"jellyfin_home_living_room_tv_{slot}").ResolvedId!, value).AsTask();
+	}
 
 	[Test]
 	public async Task Devices_with_the_same_name_can_be_told_apart()
@@ -236,7 +246,7 @@ internal sealed class JellyfinIntegrationTests
 	public async Task Device_variables_fall_back_to_typed_empties_when_playback_ends()
 	{
 		var entry = _context.AddServer("Home", variableKey: "home");
-		_client.Sessions = [Session("tv", "Living Room TV", item: Movie())];
+		_client.Sessions = [Session("tv", "Living Room TV", Movie())];
 		await InitializeAndWaitForDevicesAsync(1);
 
 		var title = Variable("jellyfin_home_living_room_tv_title");
@@ -245,10 +255,11 @@ internal sealed class JellyfinIntegrationTests
 		_client.Sessions = [Session("tv", "Living Room TV")];
 		await WaitUntilAsync(() => _integration.Runtimes[0].Connection.State.ActiveSessions.Count == 0);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync(title.ResolvedId!)).Value, Is.EqualTo(string.Empty));
-			Assert.That((await _integration.ReadAsync(Variable("jellyfin_home_living_room_tv_is_playing").ResolvedId!)).Value,
+			Assert.That((await _integration.ReadAsync(Variable("jellyfin_home_living_room_tv_is_playing").ResolvedId!))
+				.Value,
 				Is.EqualTo(false));
 			Assert.That(_context.ConfigStore.Read(entry, JellyfinConfigKeys.Devices), Does.Contain("living_room_tv"));
 		});
@@ -271,7 +282,7 @@ internal sealed class JellyfinIntegrationTests
 	public async Task Every_variable_has_a_valid_name_and_id_even_for_long_server_and_device_names()
 	{
 		_context.AddServer("Grandparents living room media server upstairs");
-		_client.Sessions = [Session("a", "Samsung QLED 75 inch television in the guest room", item: Movie())];
+		_client.Sessions = [Session("a", "Samsung QLED 75 inch television in the guest room", Movie())];
 
 		await InitializeAndWaitForDevicesAsync(1);
 
@@ -282,7 +293,8 @@ internal sealed class JellyfinIntegrationTests
 			{
 				Assert.That(VariableNameSanitizer.IsValid(variable.Name), Is.True, variable.Name);
 				Assert.That(variable.Name!.Length, Is.LessThanOrEqualTo(64), variable.Name);
-				Assert.That(MacroDeckId.IsValidLocalId(variable.ResolvedId, LocalIdKind.Declared), Is.True,
+				Assert.That(MacroDeckId.IsValidLocalId(variable.ResolvedId, LocalIdKind.Declared),
+					Is.True,
 					variable.ResolvedId);
 			});
 		}
@@ -308,11 +320,16 @@ internal sealed class JellyfinIntegrationTests
 	}
 
 	private VariableDefinitionSnapshot Variable(string name)
-		=> _integration.Variables.Where(variable => variable.Name == name)
+	{
+		return _integration.Variables.Where(variable => variable.Name == name)
 			.Select(variable => new VariableDefinitionSnapshot(variable.ResolvedId))
 			.Single();
+	}
 
-	private async Task<ActionResult> RunAsync(string actionId, string instanceId, params (string Name, object Value)[] extra)
+	private async Task<ActionResult> RunAsync(
+		string actionId,
+		string instanceId,
+		params (string Name, object Value)[] extra)
 	{
 		var parameters = new Dictionary<string, object> { [MusicPlayerActions.InstanceParameterName] = instanceId };
 		foreach (var (name, value) in extra)
@@ -327,8 +344,9 @@ internal sealed class JellyfinIntegrationTests
 	private async Task InitializeAndWaitForDevicesAsync(int devices)
 	{
 		await _integration.InitializeAsync(_context);
-		await WaitUntilAsync(() => _integration.Runtimes.Sum(runtime => runtime.Devices.Devices.Count) >= devices &&
-			_integration.Runtimes.All(runtime => runtime.Connection.State.IsConnected));
+		await WaitUntilAsync(()
+			=> _integration.Runtimes.Sum(runtime => runtime.Devices.Devices.Count) >= devices
+			&& _integration.Runtimes.All(runtime => runtime.Connection.State.IsConnected));
 	}
 
 	private static async Task WaitUntilAsync(Func<bool> condition)

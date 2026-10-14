@@ -17,7 +17,8 @@ public class UpdateNetworkTlsCertificateRequestMessageHandler
 	private readonly INetworkRestartNotifier _restartNotifier;
 	private readonly IServiceScopeFactory _scopeFactory;
 
-	public UpdateNetworkTlsCertificateRequestMessageHandler(IAppPreferenceService preferences,
+	public UpdateNetworkTlsCertificateRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IPublicTlsCertificateStore certificateStore,
 		INetworkRestartNotifier restartNotifier,

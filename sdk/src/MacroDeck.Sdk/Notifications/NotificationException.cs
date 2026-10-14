@@ -4,7 +4,10 @@ namespace MacroDeck.Sdk.Notifications;
 public sealed class NotificationException : Exception
 {
 	public NotificationException(NotificationErrorCode errorCode, string message)
-		: base(message) => ErrorCode = errorCode;
+		: base(message)
+	{
+		ErrorCode = errorCode;
+	}
 
 	public NotificationException()
 	{

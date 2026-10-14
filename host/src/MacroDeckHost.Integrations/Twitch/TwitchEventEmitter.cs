@@ -15,8 +15,8 @@ internal sealed class TwitchEventEmitter
 
 	public void Publish(TwitchAccount account, TwitchEventSubMessage message)
 	{
-		var payload = message.Payload.ValueKind is JsonValueKind.Object &&
-			message.Payload.TryGetProperty("event", out var eventElement)
+		var payload = message.Payload.ValueKind is JsonValueKind.Object
+			&& message.Payload.TryGetProperty("event", out var eventElement)
 				? eventElement
 				: default;
 
@@ -35,13 +35,15 @@ internal sealed class TwitchEventEmitter
 	}
 
 	public void PublishConnection(TwitchAccount account, bool connected)
-		=> _publisher.Publish(connected ? TwitchEventIds.Connected : TwitchEventIds.Disconnected,
+	{
+		_publisher.Publish(connected ? TwitchEventIds.Connected : TwitchEventIds.Disconnected,
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["account"] = account.UserId,
 				["accountLogin"] = account.Login,
 				["accountName"] = account.DisplayName
 			});
+	}
 
 	private static string? ResolveEventId(
 		TwitchAccount account,
@@ -50,9 +52,9 @@ internal sealed class TwitchEventEmitter
 	{
 		if (string.Equals(message.SubscriptionType, "channel.raid", StringComparison.Ordinal))
 		{
-			var target = payload.ValueKind is JsonValueKind.Object &&
-				payload.TryGetProperty("to_broadcaster_user_id", out var to) &&
-				to.ValueKind is JsonValueKind.String
+			var target = payload.ValueKind is JsonValueKind.Object
+				&& payload.TryGetProperty("to_broadcaster_user_id", out var to)
+				&& to.ValueKind is JsonValueKind.String
 					? to.GetString()
 					: null;
 

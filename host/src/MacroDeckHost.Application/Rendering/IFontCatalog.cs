@@ -20,7 +20,10 @@ public interface IFontCatalog
 
 	byte[]? GetFaceFile(string faceId);
 
-	string ResolveFaceId(string faceId) => faceId;
+	string ResolveFaceId(string faceId)
+	{
+		return faceId;
+	}
 
 	FontFaceInfo? FindFace(string faceId)
 	{

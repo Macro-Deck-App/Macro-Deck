@@ -69,8 +69,8 @@ public sealed class ModalSessionWatcher : HostReadyBackgroundService
 		foreach (var modal in _coordinator.CancelForSession(e.Session.SessionId))
 		{
 			_logger.Write(level,
-				"Cancelled modal {ModalId} of integration {IntegrationId} (view {ViewId}): its session {SessionId} " +
-				"ended ({Reason}, code {Code}, retryable {Retryable})",
+				"Cancelled modal {ModalId} of integration {IntegrationId} (view {ViewId}): its session {SessionId} "
+				+ "ended ({Reason}, code {Code}, retryable {Retryable})",
 				modal.ModalId,
 				modal.IntegrationId,
 				modal.ViewId,

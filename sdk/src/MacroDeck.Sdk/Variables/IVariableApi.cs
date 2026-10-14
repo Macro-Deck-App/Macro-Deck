@@ -32,11 +32,13 @@ public interface IVariableApi
 	/// method, which would break every already-compiled caller.
 	/// </remarks>
 	Task<VariableHandle> CreateAsync(VariableDefinition declaration, object? initialValue = null)
-		=> CreateAsync(declaration.Name ?? string.Empty,
+	{
+		return CreateAsync(declaration.Name ?? string.Empty,
 			declaration.Type,
 			initialValue,
 			declaration.DecimalPlaces,
 			declaration.Id);
+	}
 
 	/// <summary>Updates an owned variable's value.</summary>
 	Task SetValueAsync(Guid variableId, object? value);
@@ -54,7 +56,10 @@ public interface IVariableApi
 	/// it, and any implementation that does not override it, does nothing; the variables are still read at
 	/// their refresh interval. Pushed variables are unaffected: set those with <see cref="SetValueAsync" />.
 	/// </remarks>
-	Task RequestRefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	Task RequestRefreshAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Asks Macro Deck to read only the declared variables with the given definition ids again now, instead
@@ -68,9 +73,12 @@ public interface IVariableApi
 	/// Deck that predates this member, read every declared variable instead. A pending request for every
 	/// variable covers any pending request for some.
 	/// </remarks>
-	Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
-		=> definitionIds.Count == 0 ? Task.CompletedTask : RequestRefreshAsync(cancellationToken);
+	{
+		return definitionIds.Count == 0 ? Task.CompletedTask : RequestRefreshAsync(cancellationToken);
+	}
 
 	/// <summary>
 	/// Tells Macro Deck that the set of variables this integration declares has changed, for example
@@ -82,7 +90,10 @@ public interface IVariableApi
 	/// <c>state.update</c> for the <c>variables</c> capability kind, which every Macro Deck version
 	/// understands. An implementation that does not override it does nothing.
 	/// </remarks>
-	Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	Task NotifyDeclarationsChangedAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Records bindings from resources of this integration's variable catalog to variables, as if the user
@@ -106,10 +117,13 @@ public interface IVariableApi
 	/// <exception cref="ArgumentException">A name or resource id is invalid; nothing was recorded.</exception>
 	/// <exception cref="NotSupportedException">This Macro Deck cannot record bindings.</exception>
 	/// <exception cref="InvalidOperationException">The bindings could not be stored; nothing was recorded.</exception>
-	Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(IReadOnlyCollection<VariableBindingRequest> requests,
+	Task<IReadOnlyList<VariableBindingOutcome>> BindAsync(
+		IReadOnlyCollection<VariableBindingRequest> requests,
 		CancellationToken cancellationToken = default)
-		=> Task.FromException<IReadOnlyList<VariableBindingOutcome>>(
+	{
+		return Task.FromException<IReadOnlyList<VariableBindingOutcome>>(
 			new NotSupportedException("This Macro Deck cannot record variable bindings."));
+	}
 
 	/// <summary>
 	/// Opens a rolling window of the recent values of one of this integration's own global numeric
@@ -128,10 +142,13 @@ public interface IVariableApi
 	/// </remarks>
 	/// <exception cref="VariableHistoryException">No window could be opened; see
 	/// <see cref="VariableHistoryException.ErrorCode" />.</exception>
-	Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+	Task<IVariableHistoryWindow> OpenHistoryAsync(
+		string name,
 		int capacity,
 		CancellationToken cancellationToken = default)
-		=> Task.FromException<IVariableHistoryWindow>(new VariableHistoryException(
+	{
+		return Task.FromException<IVariableHistoryWindow>(new VariableHistoryException(
 			VariableHistoryErrorCode.Unsupported,
 			"This Macro Deck keeps no variable history."));
+	}
 }

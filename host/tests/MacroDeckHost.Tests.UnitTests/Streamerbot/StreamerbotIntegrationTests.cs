@@ -73,7 +73,7 @@ internal sealed class StreamerbotIntegrationTests
 	public async Task Everything_but_the_connection_flag_is_unknown_while_disconnected()
 	{
 		// A closed Streamer.bot must not read as a signed-out channel.
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("streamerbot-is-connected", CancellationToken.None)).Value,
 				Is.EqualTo(false));
@@ -199,10 +199,12 @@ internal sealed class StreamerbotIntegrationTests
 	}
 
 	private static EventOptionsContext Options(string parameterName)
-		=> new()
+	{
+		return new EventOptionsContext
 		{
 			EventId = "event",
 			ParameterName = parameterName,
 			CurrentParameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 		};
+	}
 }

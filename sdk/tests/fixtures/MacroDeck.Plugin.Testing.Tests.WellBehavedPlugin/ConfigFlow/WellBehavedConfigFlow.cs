@@ -41,7 +41,9 @@ internal sealed class WellBehavedConfigFlow : IConfigFlow, IUiConfigFlow
 	private const string StepId = "location";
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(BuildStep()));
+	{
+		return Task.FromResult(ConfigFlowResult.Step(BuildStep()));
+	}
 
 	public Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
@@ -89,57 +91,63 @@ internal sealed class WellBehavedConfigFlow : IConfigFlow, IUiConfigFlow
 
 	// Shared with WellBehavedConfigFlowPreviews so a preview renders the tree this flow really serves
 	// rather than a copy of it that can drift.
-	internal static UiElement BuildTree(string location) => new UiFlow
+	internal static UiElement BuildTree(string location)
 	{
-		Key = "setup",
-		Title = "Sample location",
-		StepId = UiValue.Of(StepId),
-		Children =
-		[
-			new UiStep
-			{
-				Key = StepId,
-				StepId = UiValue.Of(StepId),
-				Title = "Sample location",
-				Description = "Pick the location the fixture's synthetic weather station reports for.",
-				Children =
-				[
-					new UiStringInput
-					{
-						Key = LocationFieldName,
-						Label = "Location name",
-						Binding = Bind.To(new UiState<string>(location)),
-						Required = true
-					},
-					new UiThresholdsInput
-					{
-						Key = AlertBandsFieldName,
-						Label = "Alert bands",
-						Binding = Bind.To(new UiState<UiThresholds>(null!)),
-						Min = 0,
-						Max = 100,
-						Step = 1,
-						Unit = "%",
-						DefaultValue = AlertBandDefaults,
-						SupportsReset = true,
-						FixedCount = true
-					}
-				]
-			}
-		]
-	};
+		return new UiFlow
+		{
+			Key = "setup",
+			Title = "Sample location",
+			StepId = UiValue.Of(StepId),
+			Children =
+			[
+				new UiStep
+				{
+					Key = StepId,
+					StepId = UiValue.Of(StepId),
+					Title = "Sample location",
+					Description = "Pick the location the fixture's synthetic weather station reports for.",
+					Children =
+					[
+						new UiStringInput
+						{
+							Key = LocationFieldName,
+							Label = "Location name",
+							Binding = Bind.To(new UiState<string>(location)),
+							Required = true
+						},
+						new UiThresholdsInput
+						{
+							Key = AlertBandsFieldName,
+							Label = "Alert bands",
+							Binding = Bind.To(new UiState<UiThresholds>(null!)),
+							Min = 0,
+							Max = 100,
+							Step = 1,
+							Unit = "%",
+							DefaultValue = AlertBandDefaults,
+							SupportsReset = true,
+							FixedCount = true
+						}
+					]
+				}
+			]
+		};
+	}
 
-	private static ConfigFlowStep BuildStep() => new()
+	private static ConfigFlowStep BuildStep()
 	{
-		StepId = StepId,
-		Title = "Sample location",
-		Description = "Pick the location the fixture's synthetic weather station reports for.",
-		Fields =
-		[
-			ActionParameter.Text(LocationFieldName,
-				label: "Location name",
-				defaultValue: "Berlin, Germany",
-				required: true)
-		]
-	};
+		return new ConfigFlowStep
+		{
+			StepId = StepId,
+			Title = "Sample location",
+			Description = "Pick the location the fixture's synthetic weather station reports for.",
+			Fields =
+			[
+				ActionParameter.Text(LocationFieldName,
+					"Location name",
+					defaultValue: "Berlin, Germany",
+					required: true)
+			]
+		};
+	}
 }

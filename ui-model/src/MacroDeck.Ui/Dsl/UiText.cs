@@ -17,7 +17,10 @@ namespace MacroDeck.Ui.Dsl;
 /// </remarks>
 public readonly record struct UiText
 {
-	private UiText(UiValue<LocalizedText> value) => Value = value;
+	private UiText(UiValue<LocalizedText> value)
+	{
+		Value = value;
+	}
 
 	/// <summary>The underlying value, evaluated by the runtime when it composes node properties.</summary>
 	internal UiValue<LocalizedText> Value { get; }
@@ -26,14 +29,22 @@ public readonly record struct UiText
 	public bool IsDeclared => Value.IsDeclared;
 
 	/// <summary>Literal text, already in its final form.</summary>
-	public static implicit operator UiText(string? literal) => new(LocalizedText.FromLiteral(literal));
+	public static implicit operator UiText(string? literal)
+	{
+		return new UiText(LocalizedText.FromLiteral(literal));
+	}
 
 	/// <summary>A reference resolved in the reader's active language.</summary>
 	public static implicit operator UiText(LocalizedString localized)
-		=> new(LocalizedText.FromLocalized(localized));
+	{
+		return new UiText(LocalizedText.FromLocalized(localized));
+	}
 
 	/// <summary>Either shape, already wrapped.</summary>
-	public static implicit operator UiText(LocalizedText text) => new(text);
+	public static implicit operator UiText(LocalizedText text)
+	{
+		return new UiText(text);
+	}
 
 	/// <summary>A computed string value, so existing <c>UiValue.From(() =&gt; …)</c> call sites keep working.</summary>
 	public static implicit operator UiText(UiValue<string> value)
@@ -46,10 +57,16 @@ public readonly record struct UiText
 	}
 
 	/// <summary>Literal text, for a call site that cannot rely on the implicit conversion.</summary>
-	public static UiText Of(string? literal) => literal;
+	public static UiText Of(string? literal)
+	{
+		return literal;
+	}
 
 	/// <summary>A reference, for a call site that cannot rely on the implicit conversion.</summary>
-	public static UiText Of(LocalizedString localized) => localized;
+	public static UiText Of(LocalizedString localized)
+	{
+		return localized;
+	}
 
 	/// <summary>Text computed on each evaluation.</summary>
 	public static UiText From(Func<string?> compute)
@@ -76,9 +93,15 @@ public readonly record struct UiText
 	}
 
 	/// <summary>The absent value.</summary>
-	public static UiText None() => default;
+	public static UiText None()
+	{
+		return default;
+	}
 
 	/// <summary>Evaluates the property.</summary>
 	/// <returns><c>false</c> when the property is absent.</returns>
-	public bool TryEvaluate(out LocalizedText text) => Value.TryEvaluate(out text);
+	public bool TryEvaluate(out LocalizedText text)
+	{
+		return Value.TryEvaluate(out text);
+	}
 }

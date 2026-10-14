@@ -39,8 +39,8 @@ public static class WidgetVariableReferenceParser
 		}
 
 		var hasLiquid = VariableTemplateRenderer.ContainsLiquid(data);
-		var hasStateMapping = data.Contains(StateMappingKey, StringComparison.Ordinal) ||
-			data.Contains(LegacyStateBindingKey, StringComparison.Ordinal);
+		var hasStateMapping = data.Contains(StateMappingKey, StringComparison.Ordinal)
+			|| data.Contains(LegacyStateBindingKey, StringComparison.Ordinal);
 		var hasProvider = data.Contains(ProviderKey, StringComparison.Ordinal);
 		var hasIconProvider = data.Contains(IconProviderKey, StringComparison.Ordinal);
 
@@ -71,9 +71,11 @@ public static class WidgetVariableReferenceParser
 
 	// Dynamic access, vars[name], names nothing after the prefix and is not collected.
 	public static IReadOnlySet<string> ReferencedNames(string? template)
-		=> VariableTemplateRenderer.ContainsLiquid(template)
+	{
+		return VariableTemplateRenderer.ContainsLiquid(template)
 			? CollectNamesAfter(template!, VarsPrefix)
 			: WidgetVariableReferences.Empty.LabelNames;
+	}
 
 	private static (string IntegrationId, string ActionId)? ReadProviderReference(string data, string key)
 	{
@@ -83,8 +85,8 @@ public static class WidgetVariableReferenceParser
 			return null;
 		}
 
-		var integrationId = provider["integrationId"] is JsonValue integrationValue &&
-			integrationValue.TryGetValue<string>(out var integration)
+		var integrationId = provider["integrationId"] is JsonValue integrationValue
+			&& integrationValue.TryGetValue<string>(out var integration)
 				? integration
 				: null;
 		var actionId = provider["actionId"] is JsonValue actionValue && actionValue.TryGetValue<string>(out var action)
@@ -140,5 +142,7 @@ public static class WidgetVariableReferenceParser
 	}
 
 	private static bool IsIdentifierChar(char c)
-		=> c is >= 'a' and <= 'z' || c is >= 'A' and <= 'Z' || c is >= '0' and <= '9' || c == '_';
+	{
+		return c is >= 'a' and <= 'z' || c is >= 'A' and <= 'Z' || c is >= '0' and <= '9' || c == '_';
+	}
 }

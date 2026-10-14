@@ -58,7 +58,8 @@ internal sealed class IntegrationGatewayBinderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(signal.DrainDefinitionsFor(integration.Id), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(signal.DrainDefinitionsFor(integration.Id),
+				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(signal.DrainEagerRefreshRequested(integration.Id), Is.False);
 		});
 	}
@@ -159,21 +160,21 @@ internal sealed class IntegrationGatewayBinderTests
 	{
 		var gateway = CreateGateway();
 		var store = new RecordingVariableBindingStore();
-		var integration = new VariableRequestingIntegration(variables => variables.BindAsync(
-		[
+		var integration = new VariableRequestingIntegration(variables => variables.BindAsync([
 			new VariableBindingRequest("entity/light.kitchen/state", "ha_light_kitchen", VariableType.Text)
 			{
 				MigratedFrom = "test/v1"
 			}
 		]));
 		using var serviceProvider = BuildScopeServices();
-		var initializer = CreateInitializer(gateway, serviceProvider, bindingStore: store);
+		var initializer = CreateInitializer(gateway, serviceProvider, store);
 
 		await initializer.InitializeAsync(integration, "Variable Requester");
 
 		Assert.That(store.Saved.Select(binding => (binding.IntegrationId, binding.LocalResourceId, binding.Name,
 				binding.MigratedFrom)),
-			Is.EqualTo(new[] { (integration.Id, "entity/light.kitchen/state", "ha_light_kitchen", (string?)"test/v1") }));
+			Is.EqualTo(new[]
+				{ (integration.Id, "entity/light.kitchen/state", "ha_light_kitchen", (string?)"test/v1") }));
 	}
 
 	[Test]
@@ -188,7 +189,7 @@ internal sealed class IntegrationGatewayBinderTests
 
 		await initializer.InitializeAsync(integration, "Music Player Reader");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(integration.Context!.MusicPlayers.Instances.Select(instance => instance.Id),
 				Is.EqualTo(new[] { "net.example.jukebox::default" }));
@@ -212,18 +213,37 @@ internal sealed class IntegrationGatewayBinderTests
 			return Task.CompletedTask;
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class OneMusicPlayer : IMusicPlayerRegistry
 	{
 		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
-			=> [new MusicPlayerInstanceDescriptor("net.example.jukebox::default", "net.example.jukebox", "Jukebox", "Jukebox", false)];
+		{
+			return
+			[
+				new MusicPlayerInstanceDescriptor("net.example.jukebox::default",
+					"net.example.jukebox",
+					"Jukebox",
+					"Jukebox",
+					false)
+			];
+		}
 
-		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayer(string instanceId) => null;
+		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
-		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayerWithOptions(string instanceId,
-			IReadOnlyDictionary<string, object> options) => null;
+		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? GetPlayerWithOptions(
+			string instanceId,
+			IReadOnlyDictionary<string, object> options)
+		{
+			return null;
+		}
 
 		public MacroDeck.Sdk.MusicPlayer.IMusicPlayer? DefaultPlayer => null;
 	}
@@ -231,18 +251,25 @@ internal sealed class IntegrationGatewayBinderTests
 	private sealed class OneAlbumColor : IMusicPlayerAlbumColor
 	{
 		public Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>("#102030");
+		{
+			return Task.FromResult<string?>("#102030");
+		}
 	}
 
-	private static CalendarHostServices CreateGateway() => new(null!, null!, TimeProvider.System, null!);
+	private static CalendarHostServices CreateGateway()
+	{
+		return new CalendarHostServices(null!, null!, TimeProvider.System, null!);
+	}
 
-	private static IntegrationInitializer CreateInitializer(CalendarHostServices gateway,
+	private static IntegrationInitializer CreateInitializer(
+		CalendarHostServices gateway,
 		ServiceProvider serviceProvider,
 		IVariableBindingStore? bindingStore = null,
 		IVariableRefreshSignal? refreshSignal = null,
 		IMusicPlayerRegistry? musicPlayers = null,
 		IMusicPlayerAlbumColor? albumColor = null)
-		=> new(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
+	{
+		return new IntegrationInitializer(serviceProvider.GetRequiredService<IServiceScopeFactory>(),
 			new FakeDeckNavigator(),
 			new FakeScriptApi(),
 			new FakeWidgetApi(),
@@ -268,14 +295,17 @@ internal sealed class IntegrationGatewayBinderTests
 			albumColor: albumColor,
 			musicPlayerRegistry: musicPlayers,
 			musicPlayerNotifier: new MusicPlayerStateNotifier());
+	}
 
 	private static ServiceProvider BuildScopeServices()
-		=> new ServiceCollection()
+	{
+		return new ServiceCollection()
 			.AddSingleton<IVariableService>(new ThrowingVariableService())
 			.AddSingleton<IMediator>(new RecordingMediator())
 			.AddSingleton(TestLocalization.Resolver)
 			.AddSingleton(TestLocalization.Preferences)
 			.BuildServiceProvider();
+	}
 
 	private sealed class VariableRequestingIntegration(Func<IVariableApi, Task> request) : IIntegration
 	{
@@ -310,7 +340,10 @@ internal sealed class IntegrationGatewayBinderTests
 		public int InitializeCallCount { get; private set; }
 		public int ShutdownCallCount { get; private set; }
 
-		public void UseCalendarServices(CalendarHostServices services) => ReceivedGateway = services;
+		public void UseCalendarServices(CalendarHostServices services)
+		{
+			ReceivedGateway = services;
+		}
 
 		public Task InitializeAsync(IIntegrationContext context)
 		{
@@ -332,7 +365,10 @@ internal sealed class IntegrationGatewayBinderTests
 	{
 		public List<VariableBinding> Saved { get; } = [];
 
-		public IReadOnlyList<VariableBinding> Load() => [.. Saved];
+		public IReadOnlyList<VariableBinding> Load()
+		{
+			return [.. Saved];
+		}
 
 		public bool TryLoad(out IReadOnlyList<VariableBinding> bindings)
 		{
@@ -351,7 +387,10 @@ internal sealed class IntegrationGatewayBinderTests
 
 	private sealed class NullVariableBindingStore : IVariableBindingStore
 	{
-		public IReadOnlyList<VariableBinding> Load() => [];
+		public IReadOnlyList<VariableBinding> Load()
+		{
+			return [];
+		}
 
 		public bool TryLoad(out IReadOnlyList<VariableBinding> bindings)
 		{
@@ -359,7 +398,10 @@ internal sealed class IntegrationGatewayBinderTests
 			return true;
 		}
 
-		public bool Save(IEnumerable<VariableBinding> bindings) => true;
+		public bool Save(IEnumerable<VariableBinding> bindings)
+		{
+			return true;
+		}
 	}
 
 	private sealed class PlainRecordingIntegration : IIntegration

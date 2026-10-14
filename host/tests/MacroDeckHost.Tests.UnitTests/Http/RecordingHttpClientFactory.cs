@@ -5,7 +5,10 @@ namespace MacroDeckHost.Tests.UnitTests.Http;
 
 internal sealed record RecordedRequest(Uri Url, IReadOnlyDictionary<string, string> Headers)
 {
-	public string? Header(string name) => Headers.TryGetValue(name, out var value) ? value : null;
+	public string? Header(string name)
+	{
+		return Headers.TryGetValue(name, out var value) ? value : null;
+	}
 
 	public bool HasMacroDeckHeaders =>
 		Headers.Keys.Any(name => name.StartsWith("X-MacroDeck-", StringComparison.OrdinalIgnoreCase));
@@ -19,7 +22,7 @@ internal sealed class RecordingHttpClientFactory : IHttpClientFactory, IDisposab
 	public RecordingHttpClientFactory(bool shareClient = false)
 	{
 		_handler = new RecordingHandler(this);
-		_sharedClient = shareClient ? new HttpClient(_handler, disposeHandler: false) : null;
+		_sharedClient = shareClient ? new HttpClient(_handler, false) : null;
 	}
 
 	public byte[] Body { get; set; } = [];
@@ -28,7 +31,10 @@ internal sealed class RecordingHttpClientFactory : IHttpClientFactory, IDisposab
 
 	public ConcurrentQueue<RecordedRequest> Requests { get; } = new();
 
-	public HttpClient CreateClient(string name) => _sharedClient ?? new HttpClient(_handler, disposeHandler: false);
+	public HttpClient CreateClient(string name)
+	{
+		return _sharedClient ?? new HttpClient(_handler, false);
+	}
 
 	public void Dispose()
 	{
@@ -42,9 +48,13 @@ internal sealed class RecordingHttpClientFactory : IHttpClientFactory, IDisposab
 		private readonly TaskCompletionSource _allInFlight = new(TaskCreationOptions.RunContinuationsAsynchronously);
 		private int _inFlight;
 
-		public RecordingHandler(RecordingHttpClientFactory owner) => _owner = owner;
+		public RecordingHandler(RecordingHttpClientFactory owner)
+		{
+			_owner = owner;
+		}
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			_owner.Requests.Enqueue(new RecordedRequest(request.RequestUri!,

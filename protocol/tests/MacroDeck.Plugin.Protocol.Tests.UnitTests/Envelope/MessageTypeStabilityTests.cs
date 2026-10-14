@@ -40,13 +40,13 @@ public class MessageTypeStabilityTests
 		"session.ping",
 		"session.pong",
 		"session.welcome",
-		"state.update",
+		"state.update"
 	];
 
 	private static readonly string[] _replyTypes =
 	[
 		MessageTypes.CapabilityResult, MessageTypes.CapabilityDeclareAck, MessageTypes.AssetAck,
-		MessageTypes.HostResult, MessageTypes.HostAssetAck,
+		MessageTypes.HostResult, MessageTypes.HostAssetAck
 	];
 
 	[Test]
@@ -102,13 +102,19 @@ public class MessageTypeStabilityTests
 
 	[Test]
 	public void Protocol_error_does_not_require_correlation()
-		=> Assert.That(MessageTypes.RequiresCorrelation(MessageTypes.ProtocolError), Is.False);
+	{
+		Assert.That(MessageTypes.RequiresCorrelation(MessageTypes.ProtocolError), Is.False);
+	}
 
 	[TestCaseSource(nameof(_replyTypes))]
 	public void Every_reply_type_requires_correlation(string type)
-		=> Assert.That(MessageTypes.RequiresCorrelation(type), Is.True);
+	{
+		Assert.That(MessageTypes.RequiresCorrelation(type), Is.True);
+	}
 
 	[Test]
 	public void No_duplicate_message_types()
-		=> Assert.That(MessageTypes.All, Is.Unique);
+	{
+		Assert.That(MessageTypes.All, Is.Unique);
+	}
 }

@@ -39,42 +39,45 @@ internal sealed class ExecuteWebhookActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Url(UrlParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlLabel(),
-			description: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlDescription(),
-			placeholder: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlPlaceholder(),
-			required: true),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlDescription(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UrlPlaceholder(),
+			true),
 		ActionParameter.MultilineText(ContentParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.MessageLabel(),
-			description: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.MessageDescription(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.MessageLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.MessageDescription(),
 			maxLength: 2000),
 		ActionParameter.Text(UsernameParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UsernameLabel(),
-			description: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UsernameDescription()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UsernameLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.UsernameDescription()),
 		ActionParameter.Url(AvatarParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.AvatarLabel(),
-			description: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.AvatarDescription()),
-		ActionParameter.Toggle(TtsParameter, label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.TtsLabel()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.AvatarLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.AvatarDescription()),
+		ActionParameter.Toggle(TtsParameter, AppStrings.Integrations.Discord.Actions.ExecuteWebhook.TtsLabel()),
 		ActionParameter.Text(EmbedTitleParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedTitleLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedTitleLabel(),
 			maxLength: 256),
 		ActionParameter.MultilineText(EmbedDescriptionParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedTextLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedTextLabel(),
 			maxLength: 4096),
 		ActionParameter.Url(EmbedUrlParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedLinkLabel(),
-			description: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedLinkDescription()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedLinkLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedLinkDescription()),
 		ActionParameter.Color(EmbedColorParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedColourLabel()),
 		ActionParameter.Url(EmbedImageParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedImageLabel()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedImageLabel()),
 		ActionParameter.Url(EmbedThumbnailParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedThumbnailLabel()),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedThumbnailLabel()),
 		ActionParameter.Text(EmbedFooterParameter,
-			label: AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedFooterLabel(),
+			AppStrings.Integrations.Discord.Actions.ExecuteWebhook.EmbedFooterLabel(),
 			maxLength: 2048)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_client);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_client);
+	}
 
 	internal static DiscordWebhookRequest BuildRequest(IReadOnlyDictionary<string, object> parameters)
 	{
@@ -114,8 +117,8 @@ internal sealed class ExecuteWebhookActionDefinition : IActionDefinition
 			hex = hex[..6];
 		}
 
-		return hex.Length == 6 &&
-			int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var parsed)
+		return hex.Length == 6
+			&& int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var parsed)
 				? parsed
 				: null;
 	}
@@ -162,7 +165,7 @@ internal sealed class ExecuteWebhookActionDefinition : IActionDefinition
 			{
 				_logger.Warning("Discord webhook was not sent: {Reason}", failure);
 				return ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.Discord.Errors.WebhookFailed(details: failure));
+					AppStrings.Integrations.Discord.Errors.WebhookFailed(failure));
 			}
 
 			return ActionResult.Success();

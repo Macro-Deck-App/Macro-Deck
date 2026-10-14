@@ -28,7 +28,8 @@ public static class PackageSigner
 	/// <paramref name="manifestReader"/> is only consulted for a <see cref="SignablePackageFormat.Plugin"/>
 	/// archive, which is the only format with a typed manifest model in the SDK.
 	/// </summary>
-	public static Task<PackageSignResult> SignAsync(string packagePath,
+	public static Task<PackageSignResult> SignAsync(
+		string packagePath,
 		string outputPath,
 		SigningMaterial signer,
 		byte[] certificateBytes,
@@ -57,7 +58,8 @@ public static class PackageSigner
 	/// <see langword="null"/>, and must be the issuer the certificate names
 	/// (<see cref="SigningError.CertificateIssuerMismatch"/> otherwise). Nothing is written when they disagree.
 	/// </summary>
-	public static async Task<PackageSignResult> SignAsync(string packagePath,
+	public static async Task<PackageSignResult> SignAsync(
+		string packagePath,
 		string outputPath,
 		SigningMaterial signer,
 		byte[] certificateBytes,
@@ -135,7 +137,8 @@ public static class PackageSigner
 			string? manifestJson;
 			await using (var manifestStream = await manifestEntry.OpenAsync(cancellationToken))
 			{
-				manifestJson = await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
+				manifestJson
+					= await PackageManifestEntry.ReadBoundedAsync(manifestStream, maxManifestBytes, cancellationToken);
 			}
 
 			if (manifestJson is null)
@@ -147,8 +150,8 @@ public static class PackageSigner
 			JsonObject manifestNode;
 			try
 			{
-				manifestNode = JsonNode.Parse(manifestJson) as JsonObject ??
-					throw new JsonException("The manifest document must contain a JSON object.");
+				manifestNode = JsonNode.Parse(manifestJson) as JsonObject
+					?? throw new JsonException("The manifest document must contain a JSON object.");
 			}
 			catch (JsonException ex)
 			{
@@ -213,7 +216,7 @@ public static class PackageSigner
 				await using var outputStream
 					= new FileStream(outputPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
 				outputCreated = true;
-				using (var target = new ZipArchive(outputStream, ZipArchiveMode.Create, leaveOpen: true))
+				using (var target = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
 				{
 					foreach (var entry in source.Entries)
 					{
@@ -295,7 +298,8 @@ public static class PackageSigner
 		}
 	}
 
-	private static SigningFailure? CheckIssuerMaterial(SigningCertificate certificate,
+	private static SigningFailure? CheckIssuerMaterial(
+		SigningCertificate certificate,
 		byte[]? issuerCertificateBytes,
 		byte[]? issuerCertificateSignatureBytes)
 	{
@@ -368,9 +372,13 @@ public sealed record PackageSignResult
 
 	public string? Message { get; init; }
 
-	public static PackageSignResult Ok(string certificateId, string outputPath) =>
-		new() { Success = true, CertificateId = certificateId, OutputPath = outputPath };
+	public static PackageSignResult Ok(string certificateId, string outputPath)
+	{
+		return new PackageSignResult { Success = true, CertificateId = certificateId, OutputPath = outputPath };
+	}
 
-	public static PackageSignResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static PackageSignResult Fail(SigningError error, string message)
+	{
+		return new PackageSignResult { Success = false, Error = error, Message = message };
+	}
 }

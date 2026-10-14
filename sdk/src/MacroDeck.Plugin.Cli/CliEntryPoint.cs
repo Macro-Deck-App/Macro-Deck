@@ -15,7 +15,8 @@ namespace MacroDeck.Plugin.Cli;
 /// </summary>
 internal static class CliEntryPoint
 {
-	public static Command CreateRootCommand(CliPromptReader? prompt = null,
+	public static Command CreateRootCommand(
+		CliPromptReader? prompt = null,
 		IPluginScaffoldGenerator? scaffoldGenerator = null,
 		IPluginBuildRunner? buildRunner = null,
 		IHostPairingProbe? pairingProbe = null,
@@ -27,8 +28,8 @@ internal static class CliEntryPoint
 		// MacroDeck.Plugin.Testing's InternalsVisibleTo. A Command constructed with an explicit name renders
 		// that name instead, for both the root and every subcommand's own usage line.
 		var rootCommand = new Command("macrodeck-plugin",
-			"macrodeck-plugin: build, validate, inspect, pack, merge, run, test, preview, sign and verify Macro Deck plugins " +
-			"without a running host.");
+			"macrodeck-plugin: build, validate, inspect, pack, merge, run, test, preview, sign and verify Macro Deck plugins "
+			+ "without a running host.");
 
 		// Only RootCommand adds --help/--version for you; a plain Command needs them added explicitly.
 		rootCommand.Add(new HelpOption());
@@ -53,7 +54,8 @@ internal static class CliEntryPoint
 		return rootCommand;
 	}
 
-	public static async Task<int> RunAsync(string[] args,
+	public static async Task<int> RunAsync(
+		string[] args,
 		TextWriter output,
 		TextWriter error,
 		CliPromptReader? prompt = null,
@@ -73,7 +75,7 @@ internal static class CliEntryPoint
 			// second usage renderer, so the two can never drift.
 			var helpInvocationConfiguration = new InvocationConfiguration { Output = output, Error = error };
 			await rootCommand.Parse("--help").InvokeAsync(helpInvocationConfiguration, ct).ConfigureAwait(false);
-			output.WriteLine("Run 'macrodeck-plugin <command> --help' for a command's options.");
+			await output.WriteLineAsync("Run 'macrodeck-plugin <command> --help' for a command's options.");
 			return ExitCode.UsageError;
 		}
 
@@ -101,8 +103,8 @@ internal static class CliEntryPoint
 				console.WriteError("unknown-command",
 					suggestion is not null
 						? $"'{firstToken}' is not a macrodeck-plugin command. Did you mean '{suggestion}'?"
-						: $"'{firstToken}' is not a macrodeck-plugin command. Run 'macrodeck-plugin --help' to see every " +
-						"command.");
+						: $"'{firstToken}' is not a macrodeck-plugin command. Run 'macrodeck-plugin --help' to see every "
+						+ "command.");
 
 				return ExitCode.UsageError;
 			}

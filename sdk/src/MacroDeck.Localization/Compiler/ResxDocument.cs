@@ -89,8 +89,7 @@ internal static class ResxDocument
 		baseName = string.Empty;
 		culture = null;
 
-		if (string.IsNullOrEmpty(fileName) ||
-			!fileName!.EndsWith(".resx", StringComparison.OrdinalIgnoreCase))
+		if (string.IsNullOrEmpty(fileName) || !fileName!.EndsWith(".resx", StringComparison.OrdinalIgnoreCase))
 		{
 			return false;
 		}

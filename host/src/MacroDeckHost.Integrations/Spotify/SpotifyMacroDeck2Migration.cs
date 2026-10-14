@@ -27,32 +27,42 @@ internal sealed class SpotifyMacroDeck2Migration : IIntegrationMigration
 		["develeon64_spotifyplugin", "suchbyte, develeon64_spotifyplugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"Develeon64.SpotifyPlugin.Actions.LibraryActionAction" => MigrateLibrary(action),
-		"Develeon64.SpotifyPlugin.Actions.LoopAction" => MigrateLoop(action),
-		"Develeon64.SpotifyPlugin.Actions.PauseAction" => MigratePause(action),
-		"Develeon64.SpotifyPlugin.Actions.PlaylistAction" => MigratePlaylist(action),
-		"Develeon64.SpotifyPlugin.Actions.PreviousAction" => Simple(action, "previous", "Previous track"),
-		"Develeon64.SpotifyPlugin.Actions.ShuffleAction" => MigrateShuffle(action),
-		"Develeon64.SpotifyPlugin.Actions.SkipAction" => Simple(action, "next", "Next track"),
-		"Develeon64.SpotifyPlugin.Actions.VolumeAction" => MigrateVolume(action),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"Develeon64.SpotifyPlugin.Actions.LibraryActionAction" => MigrateLibrary(action),
+			"Develeon64.SpotifyPlugin.Actions.LoopAction" => MigrateLoop(action),
+			"Develeon64.SpotifyPlugin.Actions.PauseAction" => MigratePause(action),
+			"Develeon64.SpotifyPlugin.Actions.PlaylistAction" => MigratePlaylist(action),
+			"Develeon64.SpotifyPlugin.Actions.PreviousAction" => Simple(action, "previous", "Previous track"),
+			"Develeon64.SpotifyPlugin.Actions.ShuffleAction" => MigrateShuffle(action),
+			"Develeon64.SpotifyPlugin.Actions.SkipAction" => Simple(action, "next", "Next track"),
+			"Develeon64.SpotifyPlugin.Actions.VolumeAction" => MigrateVolume(action),
+			_ => null
+		};
+	}
 
 	// The plugin never collects a Spotify app client secret (it authorizes with PKCE), but
 	// SpotifyConfigFlow's authorization-code exchange - and every later token refresh - requires one.
 	// Carrying over the access/refresh token pair without it would produce a connection that reads as
 	// configured and then fails the moment the short-lived access token expires, so nothing is migrated;
 	// the user reconnects Spotify through the normal config flow instead.
-	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings) => [];
+	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
+	{
+		return [];
+	}
 
 	private static ActionMigrationResult MigrateLibrary(ForeignAction action)
 	{
@@ -125,7 +135,7 @@ internal sealed class SpotifyMacroDeck2Migration : IIntegrationMigration
 		var warnings = new List<LocalizedText>();
 		if (ReadInt(config, "Track") is { } track and not 0)
 		{
-			warnings.Add(AppStrings.Migration.Warning.Spotify.PlaylistStartPositionIgnored(position: track));
+			warnings.Add(AppStrings.Migration.Warning.Spotify.PlaylistStartPositionIgnored(track));
 		}
 
 		return new ActionMigrationResult(SpotifyIntegration.IntegrationId,
@@ -177,13 +187,22 @@ internal sealed class SpotifyMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static LocalizedText VolumeStepWarning(int configuredValue)
-		=> AppStrings.Migration.Warning.VolumeStepFixed(value: configuredValue, step: VolumeStepPercent);
+	{
+		return AppStrings.Migration.Warning.VolumeStepFixed(configuredValue, VolumeStepPercent);
+	}
 
 	private static ActionMigrationResult Simple(ForeignAction action, string actionId, string label)
-		=> new(SpotifyIntegration.IntegrationId, actionId, action.DisplayName ?? label, Parameters());
+	{
+		return new ActionMigrationResult(SpotifyIntegration.IntegrationId,
+			actionId,
+			action.DisplayName ?? label,
+			Parameters());
+	}
 
 	private static int? ReadModeIndex(string? configuration)
-		=> TryParseConfig(configuration, out var config) ? ReadEnumIndex(config, "Mode") : null;
+	{
+		return TryParseConfig(configuration, out var config) ? ReadEnumIndex(config, "Mode") : null;
+	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
 	{
@@ -216,9 +235,11 @@ internal sealed class SpotifyMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement config, string name)
 	{
@@ -258,8 +279,13 @@ internal sealed class SpotifyMacroDeck2Migration : IIntegrationMigration
 		return null;
 	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

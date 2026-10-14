@@ -14,7 +14,9 @@ public sealed class ColorPaletteChangedNotificationHandler : INotificationHandle
 	}
 
 	public async ValueTask Handle(ColorPaletteChangedNotification notification, CancellationToken cancellationToken)
-		=> await _uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		await _uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new ColorPaletteChangedEvent { Colors = notification.Colors },
 			cancellationToken);
+	}
 }

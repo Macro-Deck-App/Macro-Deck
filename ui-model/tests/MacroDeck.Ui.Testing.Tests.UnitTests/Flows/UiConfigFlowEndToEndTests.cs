@@ -30,14 +30,14 @@ public class UiConfigFlowEndToEndTests
 	/// <summary>The message the flow's own validation rule carries. The test owns it, so the rendered
 	/// <c>validation-message</c> node is checked against what the rule was authored with rather than against
 	/// whatever the runtime happened to compose.</summary>
-	private const string _apiKeyRequiredMessage = "An API key is required.";
+	private const string ApiKeyRequiredMessage = "An API key is required.";
 
-	private const string _basicMode = "basic";
-	private const string _advancedMode = "advanced";
-	private const string _credentialsStepId = "credentials";
-	private const string _verifyStepId = "verify";
+	private const string BasicMode = "basic";
+	private const string AdvancedMode = "advanced";
+	private const string CredentialsStepId = "credentials";
+	private const string VerifyStepId = "verify";
 
-	private static readonly string[] _expectedModeValues = [_basicMode, _advancedMode];
+	private static readonly string[] _expectedModeValues = [BasicMode, AdvancedMode];
 
 	/// <summary>The <c>MacroDeck.*</c> assemblies the DSL is allowed to reference. Localization joined the
 	/// model when text properties became localizable (#326); like the model, it references nothing itself,
@@ -70,7 +70,7 @@ public class UiConfigFlowEndToEndTests
 				Is.Not.Null,
 				"a load in flight has to be visible as a node, not merely as a flag");
 			Assert.That(host.SingleByType(UiConfigPrimitives.Busy).Id, Is.EqualTo("setup.credentials.busy"));
-			Assert.That(host.FindById("setup." + _verifyStepId), Is.Null);
+			Assert.That(host.FindById("setup." + VerifyStepId), Is.Null);
 			Assert.That(OptionValues(host.ById("mode")), Is.Empty, "nothing has loaded yet");
 			Assert.That(host.ById("mode").Flag(UiConfigProperties.Loading),
 				Is.True,
@@ -79,7 +79,7 @@ public class UiConfigFlowEndToEndTests
 
 		// 2. The test completes the load, so "loading finished" is an event the test causes rather than a delay it
 		//    waits out.
-		flow.CompleteOptionLoad(UiOption.Of(_basicMode, "Basic"), UiOption.Of(_advancedMode, "Advanced"));
+		flow.CompleteOptionLoad(UiOption.Of(BasicMode, "Basic"), UiOption.Of(AdvancedMode, "Advanced"));
 		await host.SettleAsync();
 
 		Assert.Multiple(() =>
@@ -93,7 +93,7 @@ public class UiConfigFlowEndToEndTests
 
 		// 3. First negative checkpoint: submitting an incomplete step is refused, and the refusal is visible as a
 		//    validation-message node rather than only as a returned reason.
-		var rejected = host.ById("setup." + _credentialsStepId).Submit();
+		var rejected = host.ById("setup." + CredentialsStepId).Submit();
 
 		Assert.Multiple(() =>
 		{
@@ -101,18 +101,18 @@ public class UiConfigFlowEndToEndTests
 
 			// Verbatim, not wrapped: the handler declined, so the client is told what the handler said rather than
 			// what a fault report made of it.
-			Assert.That(rejected.Reason, Is.EqualTo(_apiKeyRequiredMessage));
+			Assert.That(rejected.Reason, Is.EqualTo(ApiKeyRequiredMessage));
 			Assert.That(faults, Is.Empty, "a refused submit is an answer, not a defect");
 
 			var messages = host.ByType(UiConfigPrimitives.ValidationMessage);
 
 			Assert.That(messages, Has.Count.EqualTo(1));
-			Assert.That(messages[0].Text(UiConfigProperties.Text), Is.EqualTo(_apiKeyRequiredMessage));
+			Assert.That(messages[0].Text(UiConfigProperties.Text), Is.EqualTo(ApiKeyRequiredMessage));
 			Assert.That(messages[0].Text(UiConfigProperties.For), Is.EqualTo("apiKey"));
-			Assert.That(host.FindById("setup." + _credentialsStepId),
+			Assert.That(host.FindById("setup." + CredentialsStepId),
 				Is.Not.Null,
 				"a refused submit leaves the flow on the step it refused");
-			Assert.That(host.FindById("setup." + _verifyStepId), Is.Null);
+			Assert.That(host.FindById("setup." + VerifyStepId), Is.Null);
 		});
 
 		// 4. Second negative checkpoint: filling the field removes the message node by naming it, not by replacing
@@ -141,7 +141,7 @@ public class UiConfigFlowEndToEndTests
 		});
 
 		// 5. The conditional section: one insert naming the section, at the position it renders at.
-		Assert.That(host.ById("mode").Change(_advancedMode).IsAccepted, Is.True);
+		Assert.That(host.ById("mode").Change(AdvancedMode).IsAccepted, Is.True);
 
 		await host.SettleAsync();
 
@@ -160,16 +160,16 @@ public class UiConfigFlowEndToEndTests
 
 		// 6. Third negative checkpoint: the step the flow left is genuinely gone, not merely hidden - a completed
 		//    step that stayed in the tree would still submit its fields.
-		Assert.That(host.ById("setup." + _credentialsStepId).Submit().IsAccepted, Is.True);
+		Assert.That(host.ById("setup." + CredentialsStepId).Submit().IsAccepted, Is.True);
 
 		await host.SettleAsync();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.FindById("setup." + _verifyStepId), Is.Not.Null);
-			Assert.That(host.FindById("setup." + _credentialsStepId), Is.Null);
+			Assert.That(host.FindById("setup." + VerifyStepId), Is.Not.Null);
+			Assert.That(host.FindById("setup." + CredentialsStepId), Is.Null);
 			Assert.That(host.FindById("apiKey"), Is.Null);
-			Assert.That(host.ById("setup").Text(UiConfigProperties.StepId), Is.EqualTo(_verifyStepId));
+			Assert.That(host.ById("setup").Text(UiConfigProperties.StepId), Is.EqualTo(VerifyStepId));
 		});
 
 		// 7. What makes the whole script a correctness claim rather than a liveness one: every patch the flow
@@ -205,8 +205,8 @@ public class UiConfigFlowEndToEndTests
 			.ToList();
 
 		var offending = loaded
-			.Where(name => name.StartsWith("MacroDeckHost", StringComparison.Ordinal) ||
-				name.Contains("Renderer", StringComparison.OrdinalIgnoreCase))
+			.Where(name => name.StartsWith("MacroDeckHost", StringComparison.Ordinal)
+				|| name.Contains("Renderer", StringComparison.OrdinalIgnoreCase))
 			.ToList();
 
 		var dslReferences = MacroDeckReferencesOf(typeof(UiView).Assembly);
@@ -223,11 +223,13 @@ public class UiConfigFlowEndToEndTests
 	/// <summary>The <c>MacroDeck.*</c> assemblies <paramref name="assembly" /> references, sorted so the
 	/// expectation is a set rather than a link order.</summary>
 	private static List<string> MacroDeckReferencesOf(Assembly assembly)
-		=> assembly.GetReferencedAssemblies()
+	{
+		return assembly.GetReferencedAssemblies()
 			.Select(reference => reference.Name ?? string.Empty)
 			.Where(name => name.StartsWith("MacroDeck", StringComparison.Ordinal))
 			.OrderBy(name => name, StringComparer.Ordinal)
 			.ToList();
+	}
 
 	private static List<string> OptionValues(UiTestNode node)
 	{
@@ -257,13 +259,15 @@ public class UiConfigFlowEndToEndTests
 	{
 		private readonly TaskCompletionSource<UiOptionResult> _optionLoad = new();
 		private readonly UiState<string> _apiKey = new(string.Empty);
-		private readonly UiState<string> _mode = new(_basicMode);
-		private readonly UiState<string> _stepId = new(_credentialsStepId);
+		private readonly UiState<string> _mode = new(BasicMode);
+		private readonly UiState<string> _stepId = new(CredentialsStepId);
 		private readonly UiState<bool> _submitAttempted = new(false);
 		private readonly UiOptionsState _options;
 
 		internal SampleConfigFlow()
-			=> _options = new UiOptionsState(UiOptionSource.From((_, _) => _optionLoad.Task));
+		{
+			_options = new UiOptionsState(UiOptionSource.From((_, _) => _optionLoad.Task));
+		}
 
 		/// <summary>Starts the option load and renders, so the first tree the test sees is one whose list is still
 		/// loading.</summary>
@@ -277,10 +281,13 @@ public class UiConfigFlowEndToEndTests
 		/// <summary>Lets the load the render started finish, with the options in the order a renderer must keep.
 		/// </summary>
 		internal void CompleteOptionLoad(params UiOption[] options)
-			=> _optionLoad.SetResult(UiOptionResult.From(options));
+		{
+			_optionLoad.SetResult(UiOptionResult.From(options));
+		}
 
 		private UiFlow Build()
-			=> new()
+		{
+			return new UiFlow
 			{
 				Key = "setup",
 				Title = "Connect your account",
@@ -290,22 +297,24 @@ public class UiConfigFlowEndToEndTests
 					new UiWhen
 					{
 						Key = "credentialsGate",
-						Condition = () => string.Equals(_stepId.Value, _credentialsStepId, StringComparison.Ordinal),
-						Content = BuildCredentialsStep,
+						Condition = () => string.Equals(_stepId.Value, CredentialsStepId, StringComparison.Ordinal),
+						Content = BuildCredentialsStep
 					},
 					new UiWhen
 					{
 						Key = "verifyGate",
-						Condition = () => string.Equals(_stepId.Value, _verifyStepId, StringComparison.Ordinal),
-						Content = () => new UiStep { Key = _verifyStepId },
-					},
-				],
+						Condition = () => string.Equals(_stepId.Value, VerifyStepId, StringComparison.Ordinal),
+						Content = () => new UiStep { Key = VerifyStepId }
+					}
+				]
 			};
+		}
 
 		private UiStep BuildCredentialsStep()
-			=> new()
+		{
+			return new UiStep
 			{
-				Key = _credentialsStepId,
+				Key = CredentialsStepId,
 				Events = [UiEventHandler.On(UiConfigEvents.Submit, Submit)],
 				Children =
 				[
@@ -313,7 +322,7 @@ public class UiConfigFlowEndToEndTests
 					{
 						Key = "loadingGate",
 						Condition = () => _options.IsLoading,
-						Content = () => new UiBusy { Key = "busy", Text = "Loading modes..." },
+						Content = () => new UiBusy { Key = "busy", Text = "Loading modes..." }
 					},
 					new UiStringInput
 					{
@@ -322,8 +331,8 @@ public class UiConfigFlowEndToEndTests
 						Binding = Bind.To(_apiKey),
 						ValidationRules =
 						[
-							UiValidationRule.Require(_apiKeyRequiredMessage, () => _apiKey.Value.Length > 0),
-						],
+							UiValidationRule.Require(ApiKeyRequiredMessage, () => _apiKey.Value.Length > 0)
+						]
 					},
 					new UiWhen
 					{
@@ -332,30 +341,31 @@ public class UiConfigFlowEndToEndTests
 						Content = () => new UiValidationMessage
 						{
 							Key = "apiKeyMessage",
-							Text = _apiKeyRequiredMessage,
-							For = "apiKey",
-						},
+							Text = ApiKeyRequiredMessage,
+							For = "apiKey"
+						}
 					},
 					new UiDynamicChoiceInput
 					{
 						Key = "mode",
 						Label = "Mode",
 						Binding = Bind.To(_mode),
-						OptionsState = _options,
+						OptionsState = _options
 					},
 					new UiWhen
 					{
 						Key = "advancedGate",
-						Condition = () => string.Equals(_mode.Value, _advancedMode, StringComparison.Ordinal),
+						Condition = () => string.Equals(_mode.Value, AdvancedMode, StringComparison.Ordinal),
 						Content = () => new UiAdvancedSection
 						{
 							Key = "advanced",
 							Label = "Advanced configuration",
-							Children = [new UiDurationInput { Key = "timeout", Label = "Timeout" }],
-						},
-					},
-				],
+							Children = [new UiDurationInput { Key = "timeout", Label = "Timeout" }]
+						}
+					}
+				]
 			};
+		}
 
 		/// <summary>
 		/// What the step's continue affordance does. Refusing is expressed by declining the event, never by
@@ -369,11 +379,11 @@ public class UiConfigFlowEndToEndTests
 			{
 				_submitAttempted.Value = true;
 
-				return UiEventOutcome.Rejected(_apiKeyRequiredMessage);
+				return UiEventOutcome.Rejected(ApiKeyRequiredMessage);
 			}
 
 			_submitAttempted.Value = false;
-			_stepId.Value = _verifyStepId;
+			_stepId.Value = VerifyStepId;
 
 			return UiEventOutcome.Accepted;
 		}

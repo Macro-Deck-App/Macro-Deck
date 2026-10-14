@@ -39,14 +39,15 @@ public class VariableRefreshAndBindingWireTests
 				]
 			},
 			PluginProtocolJson.Options);
-		var answer = JsonSerializer.Serialize(
-			new VariablesBindResult { Outcomes = [VariableBindingOutcomes.Bound, VariableBindingOutcomes.AlreadyBound] },
+		var answer = JsonSerializer.Serialize(new VariablesBindResult
+				{ Outcomes = [VariableBindingOutcomes.Bound, VariableBindingOutcomes.AlreadyBound] },
 			PluginProtocolJson.Options);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(request,
-				Is.EqualTo("""{"bindings":[{"localResourceId":"entity/light.kitchen/state","name":"ha_light_kitchen","type":"Numeric","decimalPlaces":1,"migratedFrom":"v1"}]}"""));
+				Is.EqualTo(
+					"""{"bindings":[{"localResourceId":"entity/light.kitchen/state","name":"ha_light_kitchen","type":"Numeric","decimalPlaces":1,"migratedFrom":"v1"}]}"""));
 			Assert.That(answer, Is.EqualTo("""{"outcomes":["bound","already-bound"]}"""));
 		});
 	}

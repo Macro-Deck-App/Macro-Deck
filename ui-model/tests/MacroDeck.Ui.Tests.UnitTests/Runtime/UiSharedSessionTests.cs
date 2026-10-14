@@ -28,7 +28,7 @@ public class UiSharedSessionTests
 	private static readonly string[] _forbiddenKeys =
 	[
 		"focus", "focused", "hasFocus", "scroll", "scrollTop", "scrollOffset", "hover", "hovered", "caret",
-		"caretPosition", "selectionStart", "selectionEnd", "expanded",
+		"caretPosition", "selectionStart", "selectionEnd", "expanded"
 	];
 
 	[Test]
@@ -65,7 +65,7 @@ public class UiSharedSessionTests
 				{
 					NodeId = node.Id,
 					Name = name,
-					Data = ChangeData(name),
+					Data = ChangeData(name)
 				});
 
 				if (result.IsAccepted)
@@ -108,9 +108,11 @@ public class UiSharedSessionTests
 	/// <summary>The payload a change event needs, and nothing for the rest - a wrong payload is rejected rather
 	/// than dispatched, which would make the sweep above prove less than it looks.</summary>
 	private static JsonElement? ChangeData(string name)
-		=> string.Equals(name, UiConfigEvents.Change, StringComparison.Ordinal)
+	{
+		return string.Equals(name, UiConfigEvents.Change, StringComparison.Ordinal)
 			? UiCanonicalJson.ToElement("swept")
 			: null;
+	}
 
 	private static void AssertNoForbiddenKeys(UiNode root)
 	{
@@ -134,23 +136,39 @@ public class UiSharedSessionTests
 		UiState<string> apiKeyState,
 		UiState<string> modeState,
 		UiState<IReadOnlyList<HeaderItem>> headerState)
-		=> new()
+	{
+		return new UiFlow
 		{
 			Key = "setup",
 			Title = "Setup",
 			CanSubmit = true,
 			Events =
 			[
-				UiEventHandler.On(UiConfigEvents.Submit, () => { }),
-				UiEventHandler.On(UiConfigEvents.Cancel, () => { }),
-				UiEventHandler.On(UiConfigEvents.Back, () => { }),
+				UiEventHandler.On(UiConfigEvents.Submit,
+					() =>
+					{
+					}),
+				UiEventHandler.On(UiConfigEvents.Cancel,
+					() =>
+					{
+					}),
+				UiEventHandler.On(UiConfigEvents.Back,
+					() =>
+					{
+					})
 			],
 			Children =
 			[
 				new UiStep
 				{
 					Key = "credentials",
-					Events = [UiEventHandler.On(UiConfigEvents.Submit, () => { })],
+					Events =
+					[
+						UiEventHandler.On(UiConfigEvents.Submit,
+							() =>
+							{
+							})
+					],
 					Children =
 					[
 						new UiStringInput { Key = "apiKey", Label = "API key", Binding = Bind.To(apiKeyState) },
@@ -158,15 +176,21 @@ public class UiSharedSessionTests
 						new UiObjectInput
 						{
 							Key = "endpoint",
-							Children = [new UiStringInput { Key = "host" }, new UiNumberInput { Key = "port" }],
+							Children = [new UiStringInput { Key = "host" }, new UiNumberInput { Key = "port" }]
 						},
 						new UiArrayInput
 						{
 							Key = "headers",
 							Events =
 							[
-								UiEventHandler.On(UiConfigEvents.Add, () => { }),
-								UiEventHandler.On(UiConfigEvents.Remove, () => { }),
+								UiEventHandler.On(UiConfigEvents.Add,
+									() =>
+									{
+									}),
+								UiEventHandler.On(UiConfigEvents.Remove,
+									() =>
+									{
+									})
 							],
 							Children =
 							[
@@ -181,18 +205,24 @@ public class UiSharedSessionTests
 										Children =
 										[
 											new UiStringInput { Key = "name" },
-											new UiStringInput { Key = "value" },
-										],
-									},
-								},
-							],
+											new UiStringInput { Key = "value" }
+										]
+									}
+								}
+							]
 						},
 						new UiLink
 						{
 							Key = "docs",
 							Label = "Docs",
 							Url = "https://example.com",
-							Events = [UiEventHandler.On(UiConfigEvents.Activate, () => { })],
+							Events =
+							[
+								UiEventHandler.On(UiConfigEvents.Activate,
+									() =>
+									{
+									})
+							]
 						},
 						new UiWhen
 						{
@@ -205,16 +235,23 @@ public class UiSharedSessionTests
 								DefaultExpanded = false,
 								Events =
 								[
-									UiEventHandler.On(UiConfigEvents.Expand, () => { }),
-									UiEventHandler.On(UiConfigEvents.Collapse, () => { }),
+									UiEventHandler.On(UiConfigEvents.Expand,
+										() =>
+										{
+										}),
+									UiEventHandler.On(UiConfigEvents.Collapse,
+										() =>
+										{
+										})
 								],
-								Children = [new UiDurationInput { Key = "timeout" }],
-							},
-						},
-					],
-				},
-			],
+								Children = [new UiDurationInput { Key = "timeout" }]
+							}
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{

@@ -11,7 +11,7 @@ public enum ActionProbeOutcome
 	Ok,
 	NotFound,
 	Timeout,
-	Failed,
+	Failed
 }
 
 public sealed record ActionProbeResult<T>(ActionProbeOutcome Outcome, T? Snapshot)
@@ -39,16 +39,20 @@ public sealed class ActionProviderProbe
 	}
 
 	public bool IsStateProvider(string integrationId, string actionId)
-		=> ResolveStateProvider(integrationId, actionId) is not null;
+	{
+		return ResolveStateProvider(integrationId, actionId) is not null;
+	}
 
 	public bool IsIconProvider(string integrationId, string actionId)
-		=> _integrations.IsEnabled(integrationId) &&
-			_integrations.FindAction(integrationId, actionId) switch
+	{
+		return _integrations.IsEnabled(integrationId)
+			&& _integrations.FindAction(integrationId, actionId) switch
 			{
 				IIconProviderActionDefinition => true,
 				RemoteActionDefinition remote => remote.ProvidesIcon,
-				_ => false,
+				_ => false
 			};
+	}
 
 	public async Task<ActionProbeResult<ActionStateSnapshot>> ProbeStatesAsync(
 		string integrationId,
@@ -58,7 +62,7 @@ public sealed class ActionProviderProbe
 	{
 		if (ResolveStateProvider(integrationId, actionId) is not { } provider)
 		{
-			return new(ActionProbeOutcome.NotFound, null);
+			return new ActionProbeResult<ActionStateSnapshot>(ActionProbeOutcome.NotFound, null);
 		}
 
 		var result = await ProbeAsync(integrationId,
@@ -67,11 +71,11 @@ public sealed class ActionProviderProbe
 				cancellationToken)
 			.ConfigureAwait(false);
 
-		if (result is { Outcome: ActionProbeOutcome.Ok, Snapshot: { } snapshot } &&
-			!(snapshot.States.All(s => ActionButtonStateJson.IsValidId(s.Id)) &&
-				(snapshot.ActiveStateId is null || snapshot.States.Any(s => s.Id == snapshot.ActiveStateId))))
+		if (result is { Outcome: ActionProbeOutcome.Ok, Snapshot: { } snapshot }
+			&& !(snapshot.States.All(s => ActionButtonStateJson.IsValidId(s.Id))
+				&& (snapshot.ActiveStateId is null || snapshot.States.Any(s => s.Id == snapshot.ActiveStateId))))
 		{
-			return new(ActionProbeOutcome.Failed, null);
+			return new ActionProbeResult<ActionStateSnapshot>(ActionProbeOutcome.Failed, null);
 		}
 
 		return result;
@@ -85,7 +89,7 @@ public sealed class ActionProviderProbe
 	{
 		if (ResolveIconProvider(integrationId, actionId) is not { } provider)
 		{
-			return new(ActionProbeOutcome.NotFound, null);
+			return new ActionProbeResult<ActionIconSnapshot>(ActionProbeOutcome.NotFound, null);
 		}
 
 		return await ProbeAsync(integrationId,
@@ -96,9 +100,11 @@ public sealed class ActionProviderProbe
 	}
 
 	private IStateProviderActionDefinition? ResolveStateProvider(string integrationId, string actionId)
-		=> _integrations.IsEnabled(integrationId)
+	{
+		return _integrations.IsEnabled(integrationId)
 			? _integrations.FindAction(integrationId, actionId) as IStateProviderActionDefinition
 			: null;
+	}
 
 	private IIconProviderActionDefinition? ResolveIconProvider(string integrationId, string actionId)
 	{
@@ -111,7 +117,7 @@ public sealed class ActionProviderProbe
 		{
 			IIconProviderActionDefinition direct => direct,
 			RemoteActionDefinition { ProvidesIcon: true } => _remoteIconProviders.Resolve(integrationId, actionId),
-			_ => null,
+			_ => null
 		};
 	}
 
@@ -127,21 +133,21 @@ public sealed class ActionProviderProbe
 
 		try
 		{
-			return new(ActionProbeOutcome.Ok, await probe(linked.Token).ConfigureAwait(false));
+			return new ActionProbeResult<T>(ActionProbeOutcome.Ok, await probe(linked.Token).ConfigureAwait(false));
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
-			return new(ActionProbeOutcome.Failed, null);
+			return new ActionProbeResult<T>(ActionProbeOutcome.Failed, null);
 		}
 		catch (OperationCanceledException)
 		{
-			return new(ActionProbeOutcome.Timeout, null);
+			return new ActionProbeResult<T>(ActionProbeOutcome.Timeout, null);
 		}
 		catch (Exception ex)
 		{
 			_logger.Error(ex, "Failed to probe provider action {Integration}.{Action}", integrationId, actionId);
 
-			return new(ActionProbeOutcome.Failed, null);
+			return new ActionProbeResult<T>(ActionProbeOutcome.Failed, null);
 		}
 	}
 }

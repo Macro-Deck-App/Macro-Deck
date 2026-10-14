@@ -41,31 +41,35 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 	[
 		CompanionTargetResolver.Parameter(),
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = DeckMode, Label = AppStrings.Integrations.Companion.Options.Deck() },
 				new ActionParameterOption
 					{ Value = FullMode, Label = AppStrings.Integrations.Companion.Options.FullScreen() }
 			],
-			label: AppStrings.Integrations.Companion.Params.ScreenshotMode(),
+			AppStrings.Integrations.Companion.Params.ScreenshotMode(),
 			defaultValue: DeckMode),
 		ActionParameter.Folder(FolderParameter,
-			label: AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
-			required: true),
+			AppStrings.Integrations.Adb.Actions.ScreenshotFolderLabel(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotFolderDescription(),
+			true),
 		ActionParameter.Autocomplete(FileNameVariableParameter,
-			label: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
-			description: AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableLabel(),
+			AppStrings.Integrations.Adb.Actions.ScreenshotSavePathVariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables, _userVariables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables, _userVariables);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -154,8 +158,8 @@ internal sealed class TakeScreenshotAction : IDynamicOptionsActionDefinition
 					AppStrings.Integrations.Adb.Errors.ScreenshotSaveFailed());
 			}
 
-			if (context.Parameters.GetValueOrDefault(FileNameVariableParameter) is string variableName &&
-				!string.IsNullOrWhiteSpace(variableName))
+			if (context.Parameters.GetValueOrDefault(FileNameVariableParameter) is string variableName
+				&& !string.IsNullOrWhiteSpace(variableName))
 			{
 				await ActionVariableTarget.WriteAsync(_userVariables(),
 					_variables(),

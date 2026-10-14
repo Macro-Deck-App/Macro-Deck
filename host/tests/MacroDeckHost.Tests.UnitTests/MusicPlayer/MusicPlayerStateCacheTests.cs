@@ -85,10 +85,10 @@ internal sealed class MusicPlayerStateCacheTests
 	{
 		var cache = new MusicPlayerStateCache();
 		cache.Record(A, Paused("One"));
-		cache.Record(B, Playing("Two", positionMs: 1_000));
+		cache.Record(B, Playing("Two", 1_000));
 		cache.Record(A, Playing("One"));
 
-		cache.Record(B, Playing("Two", positionMs: 3_000));
+		cache.Record(B, Playing("Two", 3_000));
 
 		Assert.That(cache.ActiveInstanceId, Is.EqualTo(A));
 	}
@@ -143,21 +143,25 @@ internal sealed class MusicPlayerStateCacheTests
 	}
 
 	private static MusicPlayerStatePayload Playing(string? track, long positionMs = 0)
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			IsConnected = true,
 			IsPlaying = true,
 			PlaybackState = "playing",
 			TrackName = track,
-			PositionMs = positionMs,
+			PositionMs = positionMs
 		};
+	}
 
 	private static MusicPlayerStatePayload Paused(string track)
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			IsConnected = true,
 			IsPlaying = false,
 			PlaybackState = "paused",
-			TrackName = track,
+			TrackName = track
 		};
+	}
 }

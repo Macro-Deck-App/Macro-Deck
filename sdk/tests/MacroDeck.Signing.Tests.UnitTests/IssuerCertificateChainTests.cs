@@ -6,7 +6,8 @@ namespace MacroDeck.Signing.Tests.UnitTests;
 [TestFixture]
 internal sealed class IssuerCertificateChainTests
 {
-	private static SigningCertificateVerificationResult Verify(TestPki.IssuedCertificate certificate,
+	private static SigningCertificateVerificationResult Verify(
+		TestPki.IssuedCertificate certificate,
 		TestPki.IssuedCertificate? issuer,
 		string requiredKeyUsage = SigningCertificateChain.PackageKeyUsage)
 	{
@@ -47,8 +48,8 @@ internal sealed class IssuerCertificateChainTests
 	public void A_registry_certificate_signed_by_a_root_signed_issuer_verifies()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var certificate = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage],
+		var certificate = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage],
 			issuer: issuer);
 
 		var result = Verify(certificate, issuer, SigningCertificateChain.RegistryKeyUsage);
@@ -137,8 +138,8 @@ internal sealed class IssuerCertificateChainTests
 	public void A_second_intermediate_level_is_refused()
 	{
 		var firstIssuer = TestPki.IssueIssuer();
-		var secondIssuer = TestPki.IssueIssuer(notBefore: DateTimeOffset.UtcNow.AddDays(-1),
-			notAfter: DateTimeOffset.UtcNow.AddYears(1),
+		var secondIssuer = TestPki.IssueIssuer(DateTimeOffset.UtcNow.AddDays(-1),
+			DateTimeOffset.UtcNow.AddYears(1),
 			issuer: firstIssuer);
 		var certificate = TestPki.IssueCertificate(notBefore: DateTimeOffset.UtcNow.AddHours(-1),
 			notAfter: DateTimeOffset.UtcNow.AddMonths(6),
@@ -166,7 +167,7 @@ internal sealed class IssuerCertificateChainTests
 	[Test]
 	public void A_certificate_valid_before_its_issuer_is_refused()
 	{
-		var issuer = TestPki.IssueIssuer(notBefore: DateTimeOffset.UtcNow.AddDays(-1));
+		var issuer = TestPki.IssueIssuer(DateTimeOffset.UtcNow.AddDays(-1));
 		var certificate = TestPki.IssueCertificate(notBefore: DateTimeOffset.UtcNow.AddDays(-2), issuer: issuer);
 
 		AssertRefused(Verify(certificate, issuer), SigningError.CertificateOutlivesIssuer);
@@ -175,8 +176,8 @@ internal sealed class IssuerCertificateChainTests
 	[Test]
 	public void An_expired_issuer_is_refused_at_the_signature_instant()
 	{
-		var issuer = TestPki.IssueIssuer(notBefore: DateTimeOffset.UtcNow.AddYears(-2),
-			notAfter: DateTimeOffset.UtcNow.AddYears(-1));
+		var issuer = TestPki.IssueIssuer(DateTimeOffset.UtcNow.AddYears(-2),
+			DateTimeOffset.UtcNow.AddYears(-1));
 		var certificate = TestPki.IssueCertificate(notBefore: DateTimeOffset.UtcNow.AddYears(-2).AddDays(1),
 			notAfter: DateTimeOffset.UtcNow.AddYears(-1).AddDays(-1),
 			issuer: issuer);
@@ -245,7 +246,8 @@ internal sealed class IssuerCertificateChainTests
 	public void A_certificate_naming_a_different_issuer_than_the_one_that_signed_it_is_refused()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var certificate = TestPki.IssueCertificate(issuer: issuer, issuerIdOverride: "cert_" + Guid.NewGuid().ToString("N"));
+		var certificate
+			= TestPki.IssueCertificate(issuer: issuer, issuerIdOverride: "cert_" + Guid.NewGuid().ToString("N"));
 
 		AssertRefused(Verify(certificate, issuer), SigningError.CertificateIssuerMismatch);
 	}
@@ -295,8 +297,8 @@ internal sealed class IssuerCertificateChainTests
 	public void An_issuer_signed_certificate_cannot_itself_act_as_an_issuer()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var certificate = TestPki.IssueCertificate(subjectKind: "issuer",
-			keyUsage: [SigningCertificateChain.IssuerKeyUsage],
+		var certificate = TestPki.IssueCertificate("issuer",
+			[SigningCertificateChain.IssuerKeyUsage],
 			issuer: issuer);
 
 		AssertRefused(Verify(certificate, issuer, SigningCertificateChain.IssuerKeyUsage),

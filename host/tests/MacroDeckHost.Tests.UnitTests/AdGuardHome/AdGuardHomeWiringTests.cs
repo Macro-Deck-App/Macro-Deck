@@ -17,7 +17,8 @@ internal sealed class AdGuardHomeWiringTests
 	{
 		var integration = new AdGuardHomeIntegration(_ => new FakeAdGuardHomeClient(), new FakeTimeProvider());
 		var context = new FakeAdGuardHomeContext();
-		context.AddEntry("Home", new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan" });
+		context.AddEntry("Home",
+			new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan" });
 
 		await integration.InitializeAsync(context);
 
@@ -45,12 +46,15 @@ internal sealed class AdGuardHomeWiringTests
 			SessionMode = UiSessionModes.Shared,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
-				[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
-				[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(new { instance = entryId.ToString("D") }),
+				[UiWidgetSurfaceAttributes.WidgetType]
+					= JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
+				[UiWidgetSurfaceAttributes.Data]
+					= JsonSerializer.SerializeToElement(new { instance = entryId.ToString("D") })
 			}
 		};
 		await using var session = (await integration.CreateSessionAsync(
-			new UiSessionRequest { Surface = surface, UiModelVersion = 1 }, CancellationToken.None))!;
+			new UiSessionRequest { Surface = surface, UiModelVersion = 1 },
+			CancellationToken.None))!;
 		var logo = await context.UiResources.GetPluginIconAsync("widget", "logo");
 		var shield = await context.UiResources.GetPluginIconAsync("widget", "protected");
 		Assert.That(Tree(session), Does.Not.Contain(logo.ResourceId));
@@ -59,8 +63,9 @@ internal sealed class AdGuardHomeWiringTests
 
 		try
 		{
-			await CalendarTree.WaitForAsync(() => Tree(session).Contains(logo.ResourceId, StringComparison.Ordinal) &&
-					Tree(session).Contains(shield.ResourceId, StringComparison.Ordinal),
+			await CalendarTree.WaitForAsync(()
+					=> Tree(session).Contains(logo.ResourceId, StringComparison.Ordinal)
+					&& Tree(session).Contains(shield.ResourceId, StringComparison.Ordinal),
 				"the open widget never showed its icons");
 		}
 		finally
@@ -73,9 +78,13 @@ internal sealed class AdGuardHomeWiringTests
 	public async Task A_renamed_instance_keeps_its_variable_key()
 	{
 		var integration = Integration();
-		var existing = Entry("Home", key: "home");
+		var existing = Entry("Home", "home");
 
-		var result = await integration.PrepareEntryAsync(Preparation("Home DNS", existing.Id, existing, [existing], true));
+		var result = await integration.PrepareEntryAsync(Preparation("Home DNS",
+			existing.Id,
+			existing,
+			[existing],
+			true));
 
 		Assert.That(Key(result), Is.EqualTo("home"));
 	}
@@ -84,7 +93,7 @@ internal sealed class AdGuardHomeWiringTests
 	public async Task New_instances_with_the_same_name_get_distinct_variable_keys()
 	{
 		var integration = Integration();
-		var sibling = Entry("Home", key: "home");
+		var sibling = Entry("Home", "home");
 
 		var result = await integration.PrepareEntryAsync(Preparation("Home", Guid.NewGuid(), null, [sibling], false));
 
@@ -131,16 +140,17 @@ internal sealed class AdGuardHomeWiringTests
 
 		var integration = new AdGuardHomeIntegration(_ => client, new FakeTimeProvider());
 		var context = new FakeAdGuardHomeContext();
-		var entryId = context.AddEntry("Home", new Dictionary<string, string?>
-		{
-			[AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan",
-			[AdGuardHomeConfigKeys.VariableKey] = "home",
-		});
+		var entryId = context.AddEntry("Home",
+			new Dictionary<string, string?>
+			{
+				[AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan",
+				[AdGuardHomeConfigKeys.VariableKey] = "home"
+			});
 		await integration.InitializeAsync(context);
 
 		try
 		{
-			var entry = Entry("Home", key: "home") with { Id = entryId };
+			var entry = Entry("Home", "home") with { Id = entryId };
 			await CalendarTree.WaitForAsync(() => integration.GetEntryStatusAsync(entry).Result == expected,
 				$"the entry never showed {expected}");
 		}
@@ -161,7 +171,7 @@ internal sealed class AdGuardHomeWiringTests
 
 		try
 		{
-			var status = await integration.GetEntryStatusAsync(Entry("Home", key: "home") with { Id = entryId });
+			var status = await integration.GetEntryStatusAsync(Entry("Home", "home") with { Id = entryId });
 
 			Assert.That(status, Is.EqualTo(ConfigEntryStatus.Connecting));
 		}
@@ -174,7 +184,7 @@ internal sealed class AdGuardHomeWiringTests
 	[Test]
 	public async Task An_entry_without_a_running_instance_shows_as_disconnected()
 	{
-		var status = await Integration().GetEntryStatusAsync(Entry("Home", key: "home"));
+		var status = await Integration().GetEntryStatusAsync(Entry("Home", "home"));
 
 		Assert.That(status, Is.EqualTo(ConfigEntryStatus.Disconnected));
 	}
@@ -194,7 +204,7 @@ internal sealed class AdGuardHomeWiringTests
 
 		try
 		{
-			await integration.SynchronizeEntriesAsync([Entry("Office", key: "office")]);
+			await integration.SynchronizeEntriesAsync([Entry("Office", "office")]);
 
 			Assert.That((await context.Variables.GetAllAsync()).Select(variable => variable.Id),
 				Is.EquivalentTo(new[] { kept.Id, foreign.Id }));
@@ -227,17 +237,20 @@ internal sealed class AdGuardHomeWiringTests
 	{
 		var created = 0;
 		var integration = new AdGuardHomeIntegration(_ =>
-		{
-			created++;
-			return new FakeAdGuardHomeClient();
-		}, new FakeTimeProvider());
+			{
+				created++;
+				return new FakeAdGuardHomeClient();
+			},
+			new FakeTimeProvider());
 		var context = new FakeAdGuardHomeContext();
-		context.AddEntry("Home", new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan" });
+		context.AddEntry("Home",
+			new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://home.lan" });
 		await integration.InitializeAsync(context);
 
 		try
 		{
-			context.AddEntry("Office", new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://office.lan" });
+			context.AddEntry("Office",
+				new Dictionary<string, string?> { [AdGuardHomeConfigKeys.BaseUrl] = "http://office.lan" });
 
 			var reloaded = await integration.ReloadEntriesAsync();
 
@@ -258,36 +271,57 @@ internal sealed class AdGuardHomeWiringTests
 	private sealed class UnansweredClient : IAdGuardHomeClient
 	{
 		public Task<AdGuardHomeServerStatus> GetStatusAsync(CancellationToken cancellationToken)
-			=> new TaskCompletionSource<AdGuardHomeServerStatus>().Task.WaitAsync(cancellationToken);
+		{
+			return new TaskCompletionSource<AdGuardHomeServerStatus>().Task.WaitAsync(cancellationToken);
+		}
 
 		public Task<AdGuardHomeServerStatistics> GetStatisticsAsync(CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task SetProtectionAsync(bool enabled, TimeSpan? pause, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<AdGuardHomeFilteringStatus> GetFilteringStatusAsync(CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task SetFilteringAsync(bool enabled, int interval, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RefreshFiltersAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+		public Task RefreshFiltersAsync(CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
-	private static string Tree(IUiSession session) => JsonSerializer.Serialize(session.BuildTree().Root);
+	private static string Tree(IUiSession session)
+	{
+		return JsonSerializer.Serialize(session.BuildTree().Root);
+	}
 
 	private static AdGuardHomeIntegration Integration()
-		=> new(_ => new FakeAdGuardHomeClient(), new FakeTimeProvider());
+	{
+		return new AdGuardHomeIntegration(_ => new FakeAdGuardHomeClient(), new FakeTimeProvider());
+	}
 
 	private static VariableHandle Variable(string definitionId)
-		=> new(Guid.NewGuid(), definitionId.Replace('-', '_'), VariableType.Numeric, null, null)
+	{
+		return new VariableHandle(Guid.NewGuid(), definitionId.Replace('-', '_'), VariableType.Numeric, null, null)
 		{
 			DefinitionId = definitionId
 		};
+	}
 
 	private static StoredConfigEntry Entry(string title, string key)
-		=> new()
+	{
+		return new StoredConfigEntry
 		{
 			Id = Guid.NewGuid(),
 			Title = title,
@@ -295,8 +329,9 @@ internal sealed class AdGuardHomeWiringTests
 			Values = new Dictionary<string, JsonElement>
 			{
 				[AdGuardHomeConfigKeys.VariableKey] = JsonSerializer.SerializeToElement(key)
-			},
+			}
 		};
+	}
 
 	private static ConfigEntryPreparation Preparation(
 		string title,
@@ -304,16 +339,20 @@ internal sealed class AdGuardHomeWiringTests
 		StoredConfigEntry? existing,
 		IReadOnlyList<StoredConfigEntry> siblings,
 		bool titleChanged)
-		=> new()
+	{
+		return new ConfigEntryPreparation
 		{
 			EntryId = entryId,
 			Title = title,
 			Values = new Dictionary<string, JsonElement>(),
 			Existing = existing,
 			Siblings = siblings,
-			TitleChanged = titleChanged,
+			TitleChanged = titleChanged
 		};
+	}
 
 	private static string? Key(ConfigEntryPreparationResult result)
-		=> result.Values![AdGuardHomeConfigKeys.VariableKey].GetString();
+	{
+		return result.Values![AdGuardHomeConfigKeys.VariableKey].GetString();
+	}
 }

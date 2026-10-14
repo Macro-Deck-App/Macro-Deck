@@ -22,7 +22,7 @@ internal sealed class HomeAssistantClientTests
 	{
 		_pair = await WebSocketPair.CreateAsync();
 		_client = new HomeAssistantClient((_, _) => Task.FromResult(_pair.Client),
-			handshakeTimeout: TimeSpan.FromMilliseconds(300));
+			TimeSpan.FromMilliseconds(300));
 	}
 
 	[TearDown]
@@ -275,10 +275,10 @@ internal sealed class HomeAssistantClientTests
 		var disconnects = 0;
 		_client.Disconnected += (_, _) => Interlocked.Increment(ref disconnects);
 
-		var oversized = "{ \"type\": \"event\", \"id\": 1, \"event\": { \"event_type\": \"state_changed\", " +
-			"\"data\": \"" +
-			new string('a', HomeAssistantClient.MaxMessageBytes + 1024) +
-			"\" } }";
+		var oversized = "{ \"type\": \"event\", \"id\": 1, \"event\": { \"event_type\": \"state_changed\", "
+			+ "\"data\": \""
+			+ new string('a', HomeAssistantClient.MaxMessageBytes + 1024)
+			+ "\" } }";
 
 		await _pair.SendAsync(oversized);
 

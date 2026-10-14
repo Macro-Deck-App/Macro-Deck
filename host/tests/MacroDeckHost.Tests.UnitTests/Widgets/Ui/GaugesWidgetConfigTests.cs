@@ -18,8 +18,8 @@ public class GaugesWidgetConfigTests
 		gauges = new object[]
 		{
 			new { id = "one", variable = "system_cpu_usage_percent", name = "CPU", max = 100 },
-			new { id = "two", variable = "system_ram_usage_percent", name = "RAM", max = 100 },
-		},
+			new { id = "two", variable = "system_ram_usage_percent", name = "RAM", max = 100 }
+		}
 	};
 
 	[Test]
@@ -113,8 +113,12 @@ public class GaugesWidgetConfigTests
 		{
 			gauges = new[]
 			{
-				new { id = "a", icon = new { type = "icon-pack", reference = "abc" }, color = "#ff0000", iconColor = "#ffffff" },
-			},
+				new
+				{
+					id = "a", icon = new { type = "icon-pack", reference = "abc" }, color = "#ff0000",
+					iconColor = "#ffffff"
+				}
+			}
 		});
 
 		host.ById("gauges.a.icon").Change(JsonSerializer.SerializeToElement<object?>(null));
@@ -171,7 +175,8 @@ public class GaugesWidgetConfigTests
 		{
 			Assert.That(host.FindById("gauges.one.max"), Is.Null);
 			Assert.That(host.FindById("gauges.two.max"), Is.Not.Null);
-			Assert.That(Gauges(host).Select(Id), Is.EqualTo(new[] { "one", "two" }).AsCollection,
+			Assert.That(Gauges(host).Select(Id),
+				Is.EqualTo(new[] { "one", "two" }).AsCollection,
 				"a gauge whose fields are hidden is still part of the saved list");
 		});
 	}
@@ -237,7 +242,7 @@ public class GaugesWidgetConfigTests
 	{
 		var host = Render(new
 		{
-			gauges = Enumerable.Range(0, GaugesWidgetData.MaxGauges).Select(index => new { id = $"g{index}" }).ToArray(),
+			gauges = Enumerable.Range(0, GaugesWidgetData.MaxGauges).Select(index => new { id = $"g{index}" }).ToArray()
 		});
 
 		Assert.Multiple(() =>
@@ -308,17 +313,20 @@ public class GaugesWidgetConfigTests
 				Is.EqualTo(new[] { "system_cpu_usage_percent", "system_ram_usage_percent" }).AsCollection);
 			Assert.That(config.Gauges.Select(gauge => gauge.Icon?.Reference),
 				Is.EqualTo(new[]
-				{
-					IncludedIconPack.IconId(IncludedIconPack.Cpu).ToString(),
-					IncludedIconPack.IconId(IncludedIconPack.MemoryStick).ToString(),
-				}).AsCollection);
+					{
+						IncludedIconPack.IconId(IncludedIconPack.Cpu).ToString(),
+						IncludedIconPack.IconId(IncludedIconPack.MemoryStick).ToString()
+					})
+					.AsCollection);
 		});
 	}
 
 	private static string DefaultData()
-		=> BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
+	{
+		return BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
 			.Single(type => type.Id == WidgetTypeIds.Gauges)
 			.DefaultData!;
+	}
 
 	private static Json.Schema.JsonSchema Schema()
 	{
@@ -328,20 +336,29 @@ public class GaugesWidgetConfigTests
 		return schema!;
 	}
 
-	private static string Id(JsonElement gauge) => gauge.GetProperty("id").GetString() ?? string.Empty;
+	private static string Id(JsonElement gauge)
+	{
+		return gauge.GetProperty("id").GetString() ?? string.Empty;
+	}
 
 	private static List<JsonElement> Gauges(UiTestHost host)
-		=> host.ById("gauges").Property(UiConfigProperties.Value)!.Value.EnumerateArray().ToList();
+	{
+		return host.ById("gauges").Property(UiConfigProperties.Value)!.Value.EnumerateArray().ToList();
+	}
 
 	private static JsonElement Compose(UiTestHost host)
-		=> JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+	{
+		return JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 		{
 			["title"] = host.ById("title").Text(UiConfigProperties.Value),
 			["style"] = host.ById("style").Text(UiConfigProperties.Value),
 			["gauges"] = host.ById("gauges").Property(UiConfigProperties.Value),
-			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
+			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value)
 		});
+	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(GaugesWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	{
+		return UiTestHost.Render(GaugesWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	}
 }

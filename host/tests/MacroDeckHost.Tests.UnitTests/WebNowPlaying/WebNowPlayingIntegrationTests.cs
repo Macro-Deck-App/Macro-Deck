@@ -164,7 +164,7 @@ internal sealed class WebNowPlayingIntegrationTests
 	{
 		using var integration = await StartAsync();
 		using var extension = await ConnectAsync(integration);
-		await SendTextAsync(extension, Added(7, portId: 4711));
+		await SendTextAsync(extension, Added(7, 4711));
 		await EventuallyAsync(integration, s => s.TrackName is not null);
 		var player = Player(integration);
 
@@ -318,9 +318,9 @@ internal sealed class WebNowPlayingIntegrationTests
 		{
 			using var integration = new WebNowPlayingIntegration(((IPEndPoint)occupied.LocalEndpoint).Port);
 			await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
-		{
-			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
-		});
+			{
+				VariableApi = new System.RecordingVariableApi()
+			});
 
 			var issues = await integration.GetIssuesAsync();
 
@@ -345,7 +345,7 @@ internal sealed class WebNowPlayingIntegrationTests
 
 		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
 		{
-			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+			VariableApi = new System.RecordingVariableApi()
 		});
 		var boundWhileOn = integration.ListeningPort;
 		await integration.ShutdownAsync();
@@ -354,7 +354,7 @@ internal sealed class WebNowPlayingIntegrationTests
 		probe.Stop();
 		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
 		{
-			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+			VariableApi = new System.RecordingVariableApi()
 		});
 		var issues = await integration.GetIssuesAsync();
 
@@ -372,17 +372,18 @@ internal sealed class WebNowPlayingIntegrationTests
 		var claimants = BuiltInIntegrations.Discover(Serilog.Log.Logger)
 			.OfType<IMigrationProvider>()
 			.Where(provider => provider.Migrations.Any(migration =>
-				migration.Source == MigrationSource.MacroDeck2 &&
-				migration.ClaimedActionSources.Contains("WebNowPlaying Plugin")))
+				migration.Source == MigrationSource.MacroDeck2
+				&& migration.ClaimedActionSources.Contains("WebNowPlaying Plugin")))
 			.ToList();
 
-		var migrated = await claimants.Single().Migrations.Single().MigrateActionAsync(new ForeignAction(
-				TypeName: "jbcarreon123.WebNowPlayingPlugin.Actions.PlayPauseAction",
-				ActionSource: "WebNowPlaying Plugin",
-				DisplayName: null,
-				Configuration: null,
-				ConfigurationSummary: null),
-			CancellationToken.None);
+		var migrated = await claimants.Single()
+			.Migrations.Single()
+			.MigrateActionAsync(new ForeignAction("jbcarreon123.WebNowPlayingPlugin.Actions.PlayPauseAction",
+					"WebNowPlaying Plugin",
+					null,
+					null,
+					null),
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -400,8 +401,9 @@ internal sealed class WebNowPlayingIntegrationTests
 		int volume = 50,
 		long activeAt = 1000,
 		int canSkipNext = 1)
-		=> $"0 {id} " +
-			string.Join('|',
+	{
+		return $"0 {id} "
+			+ string.Join('|',
 				portId ?? id,
 				"YouTube",
 				title,
@@ -427,23 +429,27 @@ internal sealed class WebNowPlayingIntegrationTests
 				1,
 				1,
 				1,
-				activeAt) +
-			"|";
+				activeAt)
+			+ "|";
+	}
 
 	private static async Task<WebNowPlayingIntegration> StartAsync()
 	{
 		var integration = new WebNowPlayingIntegration(0);
 		await integration.InitializeAsync(new FakeYtmDesktopIntegrationContext
 		{
-			VariableApi = new MacroDeckHost.Tests.UnitTests.System.RecordingVariableApi()
+			VariableApi = new System.RecordingVariableApi()
 		});
 		return integration;
 	}
 
 	private static IMusicPlayer Player(WebNowPlayingIntegration integration)
-		=> integration.GetPlayer(WebNowPlayingIntegration.InstanceId)!;
+	{
+		return integration.GetPlayer(WebNowPlayingIntegration.InstanceId)!;
+	}
 
-	private static async Task<ClientWebSocket> ConnectAsync(WebNowPlayingIntegration integration,
+	private static async Task<ClientWebSocket> ConnectAsync(
+		WebNowPlayingIntegration integration,
 		string origin = ExtensionOrigin)
 	{
 		var socket = new ClientWebSocket();
@@ -462,7 +468,9 @@ internal sealed class WebNowPlayingIntegrationTests
 	}
 
 	private static Task SendTextAsync(ClientWebSocket socket, string text)
-		=> socket.SendAsync(Encoding.UTF8.GetBytes(text), WebSocketMessageType.Text, true, CancellationToken.None);
+	{
+		return socket.SendAsync(Encoding.UTF8.GetBytes(text), WebSocketMessageType.Text, true, CancellationToken.None);
+	}
 
 	private static Task SendCoverAsync(ClientWebSocket socket, uint playerId, byte[] cover)
 	{

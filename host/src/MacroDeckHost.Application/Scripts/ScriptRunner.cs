@@ -49,8 +49,8 @@ public sealed class ScriptRunner : IScriptRunner
 		var depth = Math.Max(ScriptCallDepth.Current, inheritedDepth);
 		if (depth >= MaxCallDepth)
 		{
-			_logger.Error("Script {ScriptName} ({ScriptId}) exceeded the maximum call depth of {MaxDepth}; " +
-				"check for scripts running each other in a cycle",
+			_logger.Error("Script {ScriptName} ({ScriptId}) exceeded the maximum call depth of {MaxDepth}; "
+				+ "check for scripts running each other in a cycle",
 				script.Name,
 				script.Id,
 				MaxCallDepth);
@@ -128,7 +128,8 @@ public sealed class ScriptRunner : IScriptRunner
 	}
 
 	private static FlowExecutionResult WithAppliedInputs(FlowExecutionResult result, IReadOnlyList<string> applied)
-		=> new()
+	{
+		return new FlowExecutionResult
 		{
 			ExecutionId = result.ExecutionId,
 			Status = result.Status,
@@ -139,12 +140,16 @@ public sealed class ScriptRunner : IScriptRunner
 			ErrorCode = result.ErrorCode,
 			ErrorMessage = result.ErrorMessage
 		};
+	}
 
-	private static FlowExecutionResult Failed(string errorCode, string errorMessage) => new()
+	private static FlowExecutionResult Failed(string errorCode, string errorMessage)
 	{
-		ExecutionId = Guid.NewGuid(),
-		Status = FlowExecutionStatus.Failed,
-		ErrorCode = errorCode,
-		ErrorMessage = errorMessage
-	};
+		return new FlowExecutionResult
+		{
+			ExecutionId = Guid.NewGuid(),
+			Status = FlowExecutionStatus.Failed,
+			ErrorCode = errorCode,
+			ErrorMessage = errorMessage
+		};
+	}
 }

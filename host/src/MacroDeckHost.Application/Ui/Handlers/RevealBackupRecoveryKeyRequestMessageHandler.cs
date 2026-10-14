@@ -11,7 +11,9 @@ public sealed class RevealBackupRecoveryKeyRequestMessageHandler
 	private readonly IBackupRecoveryKeyService _recoveryKeyService;
 
 	public RevealBackupRecoveryKeyRequestMessageHandler(IBackupRecoveryKeyService recoveryKeyService)
-		=> _recoveryKeyService = recoveryKeyService;
+	{
+		_recoveryKeyService = recoveryKeyService;
+	}
 
 	public async ValueTask<BackupRecoveryKeyResponse> Handle(
 		RevealBackupRecoveryKeyRequest request,

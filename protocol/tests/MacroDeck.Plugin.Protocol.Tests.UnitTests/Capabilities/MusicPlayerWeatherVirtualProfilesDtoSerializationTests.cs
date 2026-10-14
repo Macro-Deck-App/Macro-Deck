@@ -83,7 +83,8 @@ public class MusicPlayerWeatherVirtualProfilesDtoSerializationTests
 	[Test]
 	public void Music_player_state_from_a_plugin_that_predates_the_badge_reads_as_no_badge()
 	{
-		const string json = """{"isConnected":true,"playbackState":"Playing","repeatMode":"Off","deviceName":"Firefox"}""";
+		const string json
+			= """{"isConnected":true,"playbackState":"Playing","repeatMode":"Off","deviceName":"Firefox"}""";
 
 		var actual = JsonSerializer.Deserialize<MusicPlayerStateDto>(json, PluginProtocolJson.Options);
 
@@ -399,11 +400,11 @@ public class MusicPlayerWeatherVirtualProfilesDtoSerializationTests
 	{
 		var candidateTypes = typeof(MusicPlayerInstanceDto).Assembly.GetTypes()
 			.Where(type =>
-				type.IsPublic &&
-				type.Namespace is not null &&
-				(type.Namespace == typeof(MusicPlayerInstanceDto).Namespace ||
-					type.Namespace == typeof(WeatherStationInstanceDto).Namespace ||
-					type.Namespace == typeof(VirtualProfileDescriptorDto).Namespace));
+				type.IsPublic
+				&& type.Namespace is not null
+				&& (type.Namespace == typeof(MusicPlayerInstanceDto).Namespace
+					|| type.Namespace == typeof(WeatherStationInstanceDto).Namespace
+					|| type.Namespace == typeof(VirtualProfileDescriptorDto).Namespace));
 
 		Assert.Multiple(() =>
 		{

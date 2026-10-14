@@ -7,7 +7,6 @@ namespace MacroDeckHost.Integrations.Mouse.Actions;
 internal static class MouseParameters
 {
 	public static ActionParameter Button { get; } = ActionParameter.Choice("button",
-		options:
 		[
 			new ActionParameterOption
 				{ Value = "left", Label = AppStrings.Integrations.Mouse.Actions.Shared.ButtonOptionLeft() },
@@ -20,14 +19,13 @@ internal static class MouseParameters
 			new ActionParameterOption
 				{ Value = "forward", Label = AppStrings.Integrations.Mouse.Actions.Shared.ButtonOptionForward() }
 		],
-		label: AppStrings.Integrations.Mouse.Actions.Shared.ButtonLabel(),
-		description: AppStrings.Integrations.Mouse.Actions.Shared.ButtonDescription(),
-		defaultValue: "left");
+		AppStrings.Integrations.Mouse.Actions.Shared.ButtonLabel(),
+		AppStrings.Integrations.Mouse.Actions.Shared.ButtonDescription(),
+		"left");
 
 	public static IReadOnlyList<ActionParameter> OptionalPosition { get; } =
 	[
 		ActionParameter.Choice("positionMode",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "current", Label = AppStrings.Integrations.Mouse.Actions.Shared.PositionCurrent() },
@@ -36,9 +34,9 @@ internal static class MouseParameters
 				new ActionParameterOption
 					{ Value = "relative", Label = AppStrings.Integrations.Mouse.Actions.Shared.PositionRelative() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.Shared.PositionLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Shared.PositionDescription(),
-			defaultValue: "current"),
+			AppStrings.Integrations.Mouse.Actions.Shared.PositionLabel(),
+			AppStrings.Integrations.Mouse.Actions.Shared.PositionDescription(),
+			"current"),
 		X("x",
 				AppStrings.Integrations.Mouse.Actions.Shared.XLabel(),
 				AppStrings.Integrations.Mouse.Actions.Shared.XDescription())
@@ -50,8 +48,12 @@ internal static class MouseParameters
 	];
 
 	public static ActionParameter X(string name, LocalizedText label, LocalizedText description)
-		=> ActionParameter.Number(name, label: label, description: description, step: 1, defaultValue: 0);
+	{
+		return ActionParameter.Number(name, label, description, step: 1, defaultValue: 0);
+	}
 
 	public static ActionParameter Y(string name, LocalizedText label, LocalizedText description)
-		=> ActionParameter.Number(name, label: label, description: description, step: 1, defaultValue: 0);
+	{
+		return ActionParameter.Number(name, label, description, step: 1, defaultValue: 0);
+	}
 }

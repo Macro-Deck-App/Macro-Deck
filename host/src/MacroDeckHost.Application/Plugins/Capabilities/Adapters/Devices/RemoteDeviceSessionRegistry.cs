@@ -17,17 +17,24 @@ public sealed class RemoteDeviceSessionRegistry
 		new(StringComparer.Ordinal);
 
 	public void Add(string sessionId, string pluginId, Guid deviceId)
-		=> _sessions[sessionId] = new RemoteDeviceSessionOwner(pluginId, deviceId);
+	{
+		_sessions[sessionId] = new RemoteDeviceSessionOwner(pluginId, deviceId);
+	}
 
-	public void Remove(string sessionId) => _sessions.TryRemove(sessionId, out _);
+	public void Remove(string sessionId)
+	{
+		_sessions.TryRemove(sessionId, out _);
+	}
 
 	/// <summary>Resolves the device a session addresses, but only for the plugin that owns it. Null for
 	/// an unknown session and for one owned by any other plugin - the two are deliberately
 	/// indistinguishable to the caller.</summary>
 	public Guid? ResolveDevice(string pluginId, string? sessionId)
-		=> sessionId is not null &&
-			_sessions.TryGetValue(sessionId, out var owner) &&
-			string.Equals(owner.PluginId, pluginId, StringComparison.Ordinal)
+	{
+		return sessionId is not null
+			&& _sessions.TryGetValue(sessionId, out var owner)
+			&& string.Equals(owner.PluginId, pluginId, StringComparison.Ordinal)
 				? owner.DeviceId
 				: null;
+	}
 }

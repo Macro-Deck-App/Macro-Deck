@@ -8,19 +8,29 @@ internal sealed class NullUiTransport : IUiTransport
 {
 	public Task Send<T>(T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }

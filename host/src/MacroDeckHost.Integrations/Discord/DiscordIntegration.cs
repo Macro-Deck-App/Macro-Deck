@@ -13,7 +13,6 @@ using MacroDeck.Sdk.Migration;
 using MacroDeck.Sdk.Variables;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Discord;
 
@@ -209,9 +208,15 @@ public sealed class DiscordIntegration
 			}
 	];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new DiscordConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new DiscordConfigFlow();
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new DiscordMacroDeck2Migration()];
 
@@ -435,8 +440,8 @@ public sealed class DiscordIntegration
 			{
 				Id = VoiceSettingsIgnoredIssueId,
 				Title = AppStrings.Integrations.Discord.Issues.VoiceSettingsIgnoredTitle(),
-				Description = AppStrings.Integrations.Discord.Issues.VoiceSettingsIgnoredDescription(
-					settings: string.Join(", ", ignoredVoiceSettings)),
+				Description = AppStrings.Integrations.Discord.Issues.VoiceSettingsIgnoredDescription(string.Join(", ",
+					ignoredVoiceSettings)),
 				Severity = IntegrationIssueSeverity.Warning
 				// No ActionLabel: the host cannot fix this on the user's behalf, same as privilege-mismatch.
 			});
@@ -446,7 +451,8 @@ public sealed class DiscordIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId switch
+	{
+		return Task.FromResult(issueId switch
 		{
 			ReauthorizationIssueId => IssueResolution.Ok(AppStrings.Integrations.Discord.Issues.ReauthorizeResolution(),
 				IssueResolutionFollowUp.StartConfigFlow),
@@ -456,6 +462,7 @@ public sealed class DiscordIntegration
 				.VoiceSettingsIgnoredResolution()),
 			_ => IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue())
 		});
+	}
 
 	private static byte[] LoadIcon()
 	{
@@ -515,9 +522,11 @@ public sealed class DiscordIntegration
 	}
 
 	private static DateTimeOffset? ParseExpiry(string? raw)
-		=> DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+	{
+		return DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
 			? parsed
 			: null;
+	}
 
 	private async Task PersistTokensAsync(DiscordTokens tokens, CancellationToken cancellationToken)
 	{

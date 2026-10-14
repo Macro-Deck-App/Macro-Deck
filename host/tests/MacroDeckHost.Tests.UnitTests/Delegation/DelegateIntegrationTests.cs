@@ -11,10 +11,16 @@ internal sealed class DelegateIntegrationTests
 	private DelegateIntegration _integration = null!;
 
 	[SetUp]
-	public void SetUp() => _integration = new DelegateIntegration();
+	public void SetUp()
+	{
+		_integration = new DelegateIntegration();
+	}
 
 	[TearDown]
-	public void TearDown() => _integration.Dispose();
+	public void TearDown()
+	{
+		_integration.Dispose();
+	}
 
 	[Test]
 	public void The_integration_is_identified()

@@ -27,7 +27,7 @@ public class HistoryGraphWidgetConfigTests
 		subtitle = "custom caption",
 		maxValue = 50,
 		accentColor = "#ff0000",
-		border = new { style = "static", color = "#ff0000" },
+		border = new { style = "static", color = "#ff0000" }
 	};
 
 	[Test]
@@ -95,14 +95,17 @@ public class HistoryGraphWidgetConfigTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name" })
-					.ById("subtitle").Text(UiConfigProperties.Value),
+					.ById("subtitle")
+					.Text(UiConfigProperties.Value),
 				Is.EqualTo("{{ vars.system_cpu_name }}"));
 			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name", subtitle = "" })
-					.ById("subtitle").Text(UiConfigProperties.Value),
+					.ById("subtitle")
+					.Text(UiConfigProperties.Value),
 				Is.Empty,
 				"a subtitle the user cleared must not be re-seeded from the older key on the next visit");
 			Assert.That(Render(new { showSubtitle = true, subtitleVariable = "system_cpu_name", subtitle = "Mine" })
-					.ById("subtitle").Text(UiConfigProperties.Value),
+					.ById("subtitle")
+					.Text(UiConfigProperties.Value),
 				Is.EqualTo("Mine"),
 				"the form shows what the deck shows, so a later save cannot overwrite it");
 		});
@@ -113,8 +116,8 @@ public class HistoryGraphWidgetConfigTests
 	{
 		var defaultData = BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
 				.Single(type => type.Id == WidgetTypeIds.HistoryGraph)
-				.DefaultData ??
-			"{}";
+				.DefaultData
+			?? "{}";
 		var host = Render(JsonSerializer.Deserialize<JsonElement>(defaultData));
 
 		Assert.That(host.ById("subtitle").Text(UiConfigProperties.Value),
@@ -261,10 +264,13 @@ public class HistoryGraphWidgetConfigTests
 	}
 
 	private static UiTestHost Render(object data)
-		=> UiTestHost.Render(HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	{
+		return UiTestHost.Render(HistoryGraphWidgetConfigView.Build(JsonSerializer.SerializeToElement(data)));
+	}
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -274,16 +280,17 @@ public class HistoryGraphWidgetConfigTests
 					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData)
+			}
 		};
+	}
 
 	private static JsonElement Compose(UiTestHost host)
 	{
 		var border = new Dictionary<string, object?>
 		{
 			["style"] = host.ById("border.style").Text(UiConfigProperties.Value),
-			["color"] = host.ById("border.color").Text(UiConfigProperties.Value),
+			["color"] = host.ById("border.color").Text(UiConfigProperties.Value)
 		};
 
 		var data = new Dictionary<string, object?>
@@ -296,7 +303,7 @@ public class HistoryGraphWidgetConfigTests
 			["maxValue"] = host.ById("maxValue").Number(UiConfigProperties.Value),
 			["minValue"] = host.ById("minValue").Number(UiConfigProperties.Value),
 			["accentColor"] = host.ById("accentColor").Text(UiConfigProperties.Value),
-			["border"] = border,
+			["border"] = border
 		};
 
 		return JsonSerializer.SerializeToElement(data);
@@ -304,15 +311,20 @@ public class HistoryGraphWidgetConfigTests
 
 	private sealed class NullVariableHistory : MacroDeckHost.Application.Variables.IVariableHistory
 	{
-		public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(string variableName,
+		public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(
+			string variableName,
 			int capacity,
 			string? scopeRefId = null)
-			=> EmptyVariableHistoryWindow.Instance;
+		{
+			return EmptyVariableHistoryWindow.Instance;
+		}
 	}
 
 	private sealed class PassThroughSampleText : MacroDeckHost.Widgets.Preview.IWidgetSampleTextResolver
 	{
 		public ValueTask<string> ResolveAsync(MacroDeck.Localization.LocalizedString value)
-			=> ValueTask.FromResult(value.ToString() ?? string.Empty);
+		{
+			return ValueTask.FromResult(value.ToString() ?? string.Empty);
+		}
 	}
 }

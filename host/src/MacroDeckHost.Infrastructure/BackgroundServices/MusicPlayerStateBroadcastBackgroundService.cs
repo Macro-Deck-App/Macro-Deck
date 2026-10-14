@@ -175,7 +175,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 		{
 			var gone = MusicPlayerStatePayload.Disconnected(goneId);
 			_events.Observe(gone);
-			await BroadcastIfChanged(goneId, gone, force: false, ct);
+			await BroadcastIfChanged(goneId, gone, false, ct);
 			_lastByInstance.Remove(goneId);
 			_lastConnectedByInstance.Remove(goneId);
 			_readFailures.TryRemove(goneId, out _);
@@ -257,8 +257,8 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 			if (NoteReadFailure(key, $"no answer within {_pollTimeout}"))
 			{
 				_logger.Debug(
-					"Music player instance {InstanceId} did not answer within {Timeout} (gave up after {ElapsedMs} ms); " +
-					"keeping last state",
+					"Music player instance {InstanceId} did not answer within {Timeout} (gave up after {ElapsedMs} ms); "
+					+ "keeping last state",
 					key,
 					_pollTimeout,
 					(long)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
@@ -294,8 +294,8 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 				return false;
 			case FailureEpisodeSignalKind.SummaryDue:
 				_logger.Information(
-					"Music player instance {InstanceId} state polls failing for {Duration} ({Failures} consecutive; " +
-					"last: {LastError})",
+					"Music player instance {InstanceId} state polls failing for {Duration} ({Failures} consecutive; "
+					+ "last: {LastError})",
 					instanceId,
 					signal.Duration,
 					signal.ConsecutiveFailures,
@@ -357,7 +357,8 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 	}
 
 	private static string OptionsFingerprint(IReadOnlyList<MusicPlayerInstanceDescriptor> instances)
-		=> JsonSerializer.Serialize(instances.Select(instance => new
+	{
+		return JsonSerializer.Serialize(instances.Select(instance => new
 		{
 			instance.InstanceId,
 			Options = instance.Options.Select(option => new
@@ -374,6 +375,7 @@ public sealed class MusicPlayerStateBroadcastBackgroundService : HostReadyBackgr
 				Choices = option.Options?.Select(choice => new { choice.Value, Label = choice.Label.ToString() })
 			})
 		}));
+	}
 
 	private async Task BroadcastIfChanged(
 		string instanceId,

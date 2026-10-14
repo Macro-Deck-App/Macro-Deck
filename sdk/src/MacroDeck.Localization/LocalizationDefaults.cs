@@ -9,5 +9,8 @@ public static class LocalizationDefaults
 	/// <summary>Wraps a key that could not be resolved in any culture. Deliberately conspicuous: a blank
 	/// label reads as a rendering bug, whereas <c>[[macrodeck:Common.Save]]</c> names the missing key and
 	/// the scope that should have carried it.</summary>
-	public static string MissingText(LocalizationKey key) => $"[[{key}]]";
+	public static string MissingText(LocalizationKey key)
+	{
+		return $"[[{key}]]";
+	}
 }

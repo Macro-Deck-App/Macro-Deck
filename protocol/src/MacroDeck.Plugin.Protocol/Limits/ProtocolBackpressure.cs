@@ -33,8 +33,11 @@ public static class ProtocolBackpressure
 		MessageTypes.ProtocolError,
 		MessageTypes.HostInvoke,
 		MessageTypes.HostResult,
-		MessageTypes.HostCancel,
+		MessageTypes.HostCancel
 	};
 
-	public static bool IsExemptWhilePaused(string messageType) => _exemptWhilePaused.Contains(messageType);
+	public static bool IsExemptWhilePaused(string messageType)
+	{
+		return _exemptWhilePaused.Contains(messageType);
+	}
 }

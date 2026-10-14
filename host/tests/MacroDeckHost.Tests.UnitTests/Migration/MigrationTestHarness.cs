@@ -60,7 +60,10 @@ internal sealed class MigrationTestHarness : IDisposable
 
 	public MigrationService Service { get; }
 
-	public void Dispose() => Portability.Dispose();
+	public void Dispose()
+	{
+		Portability.Dispose();
+	}
 
 	internal sealed class RecordingConfigStore : IIntegrationConfigStore
 	{
@@ -69,13 +72,17 @@ internal sealed class MigrationTestHarness : IDisposable
 		public IReadOnlyList<ConfigEntryRecord> Entries => _entries;
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(_entries
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(_entries
 				.Where(entry => entry.IntegrationId == integrationId)
 				.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(_entries.FirstOrDefault(entry => entry.Id == entryId));
+		{
+			return Task.FromResult(_entries.FirstOrDefault(entry => entry.Id == entryId));
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{
@@ -85,10 +92,14 @@ internal sealed class MigrationTestHarness : IDisposable
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task Delete(Guid entryId)
 		{
@@ -106,33 +117,49 @@ internal sealed class MigrationTestHarness : IDisposable
 				KeyRingLockReason.None,
 				KeyRingUnprotectedReason.None,
 				KeyRingBackend.None,
-				BackendAvailable: false,
-				BackendUnavailableReason: null,
-				KekId: null,
-				EscrowWrapCount: 0,
-				RecoveryKeyExported: false,
-				MigrationPending: false);
+				false,
+				null,
+				null,
+				0,
+				false,
+				false);
 
-		public Task<Result<KeyRingProtectionError>> EnsureProtected(ReadOnlyMemory<byte> recoveryKey,
+		public Task<Result<KeyRingProtectionError>> EnsureProtected(
+			ReadOnlyMemory<byte> recoveryKey,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		{
+			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		}
 
-		public Task<Result<KeyRingProtectionError>> AddEscrowWrap(ReadOnlyMemory<byte> recoveryKey,
+		public Task<Result<KeyRingProtectionError>> AddEscrowWrap(
+			ReadOnlyMemory<byte> recoveryKey,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		{
+			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		}
 
-		public Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(ReadOnlyMemory<byte> recoveryKey,
+		public Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(
+			ReadOnlyMemory<byte> recoveryKey,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		{
+			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		}
 
-		public Task<Result<KeyRingProtectionError>> Unlock(ReadOnlyMemory<byte> recoveryKey,
+		public Task<Result<KeyRingProtectionError>> Unlock(
+			ReadOnlyMemory<byte> recoveryKey,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		{
+			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		}
 
 		public Task<Result<KeyRingProtectionError>> RewrapPending(CancellationToken cancellationToken = default)
-			=> Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		{
+			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
+		}
 
 		public Result<KeyRingProtectionError> AdoptKek(ReadOnlyMemory<byte> kek)
-			=> Result.Ok<KeyRingProtectionError>();
+		{
+			return Result.Ok<KeyRingProtectionError>();
+		}
 	}
 }

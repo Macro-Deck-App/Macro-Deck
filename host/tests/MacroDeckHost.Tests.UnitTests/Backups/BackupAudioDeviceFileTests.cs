@@ -27,6 +27,7 @@ public class BackupAudioDeviceFileTests
 	{
 		var effective = BackupComponentSelection.Expand([group]).Effective;
 
-		Assert.That(effective, Is.SupersetOf(new[] { BackupComponentGroup.Variables, BackupComponentGroup.Integrations }));
+		Assert.That(effective,
+			Is.SupersetOf(new[] { BackupComponentGroup.Variables, BackupComponentGroup.Integrations }));
 	}
 }

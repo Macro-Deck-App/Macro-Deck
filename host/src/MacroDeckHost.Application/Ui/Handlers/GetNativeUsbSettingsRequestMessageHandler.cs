@@ -7,7 +7,11 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class GetNativeUsbSettingsRequestMessageHandler(INativeUsbManager manager)
 	: IUiTransportMessageHandler<GetNativeUsbSettingsRequest, GetNativeUsbSettingsResponse>
 {
-	public ValueTask<GetNativeUsbSettingsResponse> Handle(GetNativeUsbSettingsRequest request,
+	public ValueTask<GetNativeUsbSettingsResponse> Handle(
+		GetNativeUsbSettingsRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetNativeUsbSettingsResponse().Fill<GetNativeUsbSettingsResponse>(manager.Status));
+	{
+		return ValueTask.FromResult(
+			new GetNativeUsbSettingsResponse().Fill<GetNativeUsbSettingsResponse>(manager.Status));
+	}
 }

@@ -21,7 +21,7 @@ public sealed class UnavailableWidgetUiProvider : IUiProvider
 	[
 		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 		new() { Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
-		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public static Dictionary<string, JsonElement> Naming(
@@ -46,7 +46,8 @@ public sealed class UnavailableWidgetUiProvider : IUiProvider
 	}
 
 	private static UiStack TileView(LocalizedText name)
-		=> new UiStack
+	{
+		return new UiStack
 		{
 			Key = "unavailable",
 			Direction = UiComponentDirections.Vertical,
@@ -57,15 +58,17 @@ public sealed class UnavailableWidgetUiProvider : IUiProvider
 				new UiTextRun
 				{
 					Key = "message",
-					Text = UiText.FromLocalized(() => AppStrings.Deck.UnavailableWidget.Tile(plugin: name)),
+					Text = UiText.FromLocalized(() => AppStrings.Deck.UnavailableWidget.Tile(name)),
 					Size = UiSize.FromBasis(0.1),
-					Wrap = UiValue.Of(true),
-				},
-			],
+					Wrap = UiValue.Of(true)
+				}
+			]
 		};
+	}
 
 	private static UiWidgetConfiguration ConfigView(LocalizedText name)
-		=> new UiWidgetConfiguration
+	{
+		return new UiWidgetConfiguration
 		{
 			Key = "root",
 			Properties = new UiWidgetProperties
@@ -77,12 +80,13 @@ public sealed class UnavailableWidgetUiProvider : IUiProvider
 					{
 						Key = "message",
 						Text = UiText.FromLocalized(() =>
-							AppStrings.Widgets.Editor.ProviderUnavailableMessage(plugin: name)),
-						Wrap = UiValue.Of(true),
-					},
-				],
-			},
+							AppStrings.Widgets.Editor.ProviderUnavailableMessage(name)),
+						Wrap = UiValue.Of(true)
+					}
+				]
+			}
 		};
+	}
 
 	private sealed class UnavailableWidgetSession : IUiSession
 	{
@@ -100,12 +104,24 @@ public sealed class UnavailableWidgetUiProvider : IUiProvider
 
 		public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-		public UiTree BuildTree() => _view.Tree;
+		public UiTree BuildTree()
+		{
+			return _view.Tree;
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return _view.DrainPatches();
+		}
 
-		public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+		public void Dispatch(UiEvent uiEvent)
+		{
+			_view.Dispatch(uiEvent);
+		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

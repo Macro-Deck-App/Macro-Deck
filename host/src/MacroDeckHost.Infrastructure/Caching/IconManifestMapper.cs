@@ -8,7 +8,8 @@ namespace MacroDeckHost.Infrastructure.Caching;
 internal static class IconManifestMapper
 {
 	public static IconPackEntity ToPackEntity(IconPackManifest manifest)
-		=> new()
+	{
+		return new IconPackEntity
 		{
 			Id = manifest.Id,
 			Name = manifest.Name,
@@ -24,9 +25,12 @@ internal static class IconManifestMapper
 			CreatedAt = manifest.CreatedAt,
 			UpdatedAt = manifest.UpdatedAt
 		};
+	}
 
 	public static IEnumerable<IconEntity> ToIconEntities(IconPackManifest manifest)
-		=> manifest.Icons.SelectMany(entry => Flatten(manifest.Id, entry, parent: null));
+	{
+		return manifest.Icons.SelectMany(entry => Flatten(manifest.Id, entry, null));
+	}
 
 	public static IconPackManifest ToManifest(IconPackEntity pack, IEnumerable<IconEntity> icons)
 	{
@@ -36,7 +40,8 @@ internal static class IconManifestMapper
 			.GroupBy(icon => icon.AppearanceOfId!.Value)
 			.ToDictionary(group => group.Key,
 				group => group
-					.OrderBy(asset => asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty,
+					.OrderBy(asset
+							=> asset.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty,
 						StringComparer.Ordinal)
 					.ToList());
 
@@ -60,7 +65,7 @@ internal static class IconManifestMapper
 				.OrderBy(icon => icon.CreatedAt)
 				.Select(icon => ToEntry(icon,
 					appearancesByParent.TryGetValue(icon.Id, out var appearances)
-						? appearances.Select(asset => ToEntry(asset, appearances: null, icon.Name)).ToList()
+						? appearances.Select(asset => ToEntry(asset, null, icon.Name)).ToList()
 						: null))
 				.ToList()
 		};
@@ -80,7 +85,8 @@ internal static class IconManifestMapper
 	}
 
 	private static IconEntity ToEntity(Guid packId, IconManifestEntry entry, IconManifestEntry? parent)
-		=> new()
+	{
+		return new IconEntity
 		{
 			Id = entry.Id,
 			PackId = packId,
@@ -107,9 +113,11 @@ internal static class IconManifestMapper
 			CreatedAt = entry.CreatedAt,
 			UpdatedAt = entry.UpdatedAt
 		};
+	}
 
 	private static IconManifestEntry ToEntry(IconEntity icon, List<IconManifestEntry>? appearances, string? name = null)
-		=> new()
+	{
+		return new IconManifestEntry
 		{
 			Id = icon.Id,
 			Name = name ?? icon.Name,
@@ -135,9 +143,12 @@ internal static class IconManifestMapper
 				: null,
 			Appearances = appearances is { Count: > 0 } ? appearances : null
 		};
+	}
 
 	private static string? StripPrefix(string? hash)
-		=> hash is null || !hash.StartsWith(ContentHash.Sha256Prefix, StringComparison.Ordinal)
+	{
+		return hash is null || !hash.StartsWith(ContentHash.Sha256Prefix, StringComparison.Ordinal)
 			? hash
 			: hash[ContentHash.Sha256Prefix.Length..];
+	}
 }

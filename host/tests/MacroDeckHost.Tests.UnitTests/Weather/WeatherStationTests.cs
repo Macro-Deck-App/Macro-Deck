@@ -73,7 +73,8 @@ internal sealed class WeatherStationTests
 	}
 
 	private static OpenMeteoForecastResponse ForecastWith(double temperature)
-		=> new()
+	{
+		return new OpenMeteoForecastResponse
 		{
 			Current = new OpenMeteoCurrent
 			{
@@ -83,4 +84,5 @@ internal sealed class WeatherStationTests
 				IsDay = 1
 			}
 		};
+	}
 }

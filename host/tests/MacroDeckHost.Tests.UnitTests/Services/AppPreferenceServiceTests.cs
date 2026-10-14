@@ -14,7 +14,9 @@ public class AppPreferenceServiceTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -35,16 +37,20 @@ public class AppPreferenceServiceTests
 	private static AppPreferenceService CreateService(
 		bool isBeta = false,
 		BuildChannel channel = BuildChannel.Production)
-		=> CreateService(new FakeAppPreferenceRepository(), isBeta, channel);
+	{
+		return CreateService(new FakeAppPreferenceRepository(), isBeta, channel);
+	}
 
 	private static AppPreferenceService CreateService(
 		IAppPreferenceRepository repository,
 		bool isBeta = false,
 		BuildChannel channel = BuildChannel.Production)
-		=> new(repository,
+	{
+		return new AppPreferenceService(repository,
 			new FakeBuildEnvironment { IsBeta = isBeta, Channel = channel },
 			new FakeHostListenerState(),
 			TestColors.None);
+	}
 
 	[Test]
 	public async Task GetOnboarding_is_not_pending_when_unset()
@@ -202,15 +208,21 @@ public class AppPreferenceServiceTests
 
 	[Test]
 	public void A_backup_restores_the_adb_device_id_key_with_the_other_preferences()
-		=> Assert.That(MacroDeckHost.Application.Backups.BackupComponentGroups.IsRestorablePreferenceKey(
-			AppPreferenceService.AdbDeviceIdKeyKey), Is.True);
+	{
+		Assert.That(Application.Backups.BackupComponentGroups.IsRestorablePreferenceKey(AppPreferenceService
+				.AdbDeviceIdKeyKey),
+			Is.True);
+	}
 
 	[Test]
 	public async Task GetInstallationId_replaces_invalid_stored_value()
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.InstallationIdKey, "not-a-guid");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var id = await service.GetInstallationId();
 		var reloaded = await service.GetInstallationId();
@@ -253,7 +265,7 @@ public class AppPreferenceServiceTests
 	[Test]
 	public async Task GetLogging_defaults_to_Information_on_beta_builds()
 	{
-		var service = CreateService(isBeta: true, channel: BuildChannel.Production);
+		var service = CreateService(true, BuildChannel.Production);
 
 		var settings = await service.GetLogging();
 
@@ -299,7 +311,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.MinimumLogLevelKey, stored);
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetLogging();
 
@@ -311,7 +326,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.MinimumLogLevelKey, "verbose");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetLogging();
 
@@ -341,7 +359,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, null, null, allowPlugins: false);
+		var applied = await service.SetAdb(true, null, true, null, null, false);
 		var reloaded = await service.GetAdb();
 
 		Assert.Multiple(() =>
@@ -356,7 +374,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, "/usr/local/bin/adb", true, "R58M12ABCDE", true, allowPlugins: true);
+		var applied = await service.SetAdb(true, "/usr/local/bin/adb", true, "R58M12ABCDE", true, true);
 		var reloaded = await service.GetAdb();
 
 		Assert.Multiple(() =>
@@ -378,9 +396,9 @@ public class AppPreferenceServiceTests
 	public async Task SetAdb_falls_back_to_each_flags_own_default_and_treats_null_strings_as_unset()
 	{
 		var service = CreateService();
-		await service.SetAdb(true, "/usr/local/bin/adb", false, "R58M12ABCDE", null, allowPlugins: true);
+		await service.SetAdb(true, "/usr/local/bin/adb", false, "R58M12ABCDE", null, true);
 
-		var applied = await service.SetAdb(null, null, null, null, null, allowPlugins: true);
+		var applied = await service.SetAdb(null, null, null, null, null, true);
 
 		Assert.Multiple(() =>
 		{
@@ -398,7 +416,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, input, false, null, null, allowPlugins: true);
+		var applied = await service.SetAdb(true, input, false, null, null, true);
 
 		Assert.That(applied.ExecutablePath, Is.EqualTo(expected));
 	}
@@ -408,7 +426,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, "  R58M12ABCDE  ", null, allowPlugins: true);
+		var applied = await service.SetAdb(true, null, true, "  R58M12ABCDE  ", null, true);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.EqualTo("R58M12ABCDE"));
 	}
@@ -419,7 +437,7 @@ public class AppPreferenceServiceTests
 		var service = CreateService();
 		var tooLong = new string('a', 129);
 
-		var applied = await service.SetAdb(true, null, true, tooLong, null, allowPlugins: true);
+		var applied = await service.SetAdb(true, null, true, tooLong, null, true);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.Null);
 	}
@@ -431,7 +449,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, serial, null, allowPlugins: true);
+		var applied = await service.SetAdb(true, null, true, serial, null, true);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.EqualTo(serial));
 	}
@@ -443,7 +461,7 @@ public class AppPreferenceServiceTests
 	{
 		var service = CreateService();
 
-		var applied = await service.SetAdb(true, null, true, serial, null, allowPlugins: true);
+		var applied = await service.SetAdb(true, null, true, serial, null, true);
 
 		Assert.That(applied.DefaultDeviceSerial, Is.Null);
 	}
@@ -453,7 +471,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.AdbEnabledKey, "maybe");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetAdb();
 
@@ -465,7 +486,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.AdbDefaultDeviceSerialKey, "not a valid serial!");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetAdb();
 
@@ -513,7 +537,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.LockScreenEnabledKey, "maybe");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetLockScreen();
 
@@ -564,7 +591,7 @@ public class AppPreferenceServiceTests
 
 		await service.SetExtensions(null, null, null, 30, askForRatings: false);
 		var off = await service.GetExtensions();
-		await service.SetExtensions(null, null, null, null, autoUpdate: true);
+		await service.SetExtensions(null, null, null, null, true);
 		var stillOff = await service.GetExtensions();
 
 		Assert.Multiple(() =>
@@ -590,9 +617,9 @@ public class AppPreferenceServiceTests
 	public async Task Turning_on_automatic_updates_keeps_the_other_extension_settings()
 	{
 		var service = CreateService();
-		await service.SetExtensions(null, null, notifyOnUpdates: false, 30);
+		await service.SetExtensions(null, null, false, 30);
 
-		await service.SetExtensions(null, null, null, null, autoUpdate: true);
+		await service.SetExtensions(null, null, null, null, true);
 		var reloaded = await service.GetExtensions();
 
 		Assert.Multiple(() =>
@@ -608,7 +635,10 @@ public class AppPreferenceServiceTests
 	{
 		var repository = new FakeAppPreferenceRepository();
 		await repository.SetValue(AppPreferenceService.ExtensionsRefreshIntervalMinutesKey, "not a number");
-		var service = new AppPreferenceService(repository, new FakeBuildEnvironment(), new FakeHostListenerState(), TestColors.None);
+		var service = new AppPreferenceService(repository,
+			new FakeBuildEnvironment(),
+			new FakeHostListenerState(),
+			TestColors.None);
 
 		var settings = await service.GetExtensions();
 

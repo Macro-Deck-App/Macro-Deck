@@ -7,7 +7,7 @@ public static class VirtualProfileCatalogMapper
 {
 	public static ProfileLayout ToDomain(ProfileLayoutDto dto)
 	{
-		if (!Enum.TryParse<LayoutKind>(dto.Kind, ignoreCase: false, out var kind))
+		if (!Enum.TryParse<LayoutKind>(dto.Kind, false, out var kind))
 		{
 			throw new InvalidOperationException($"Unknown virtual profile layout kind '{dto.Kind}'.");
 		}
@@ -16,16 +16,33 @@ public static class VirtualProfileCatalogMapper
 	}
 
 	public static VirtualWidgetDescriptor ToDomain(VirtualWidgetDescriptorDto dto)
-		=> new(dto.Id, dto.Type, dto.PositionX, dto.PositionY, dto.Width, dto.Height, dto.Data);
+	{
+		return new VirtualWidgetDescriptor(dto.Id,
+			dto.Type,
+			dto.PositionX,
+			dto.PositionY,
+			dto.Width,
+			dto.Height,
+			dto.Data);
+	}
 
 	public static VirtualFolderDescriptor ToDomain(VirtualFolderDescriptorDto dto)
-		=> new(dto.Id, dto.Name, [.. dto.Widgets.Select(ToDomain)], dto.ParentId, dto.Order);
+	{
+		return new VirtualFolderDescriptor(dto.Id,
+			dto.Name,
+			[.. dto.Widgets.Select(ToDomain)],
+			dto.ParentId,
+			dto.Order);
+	}
 
 	public static VirtualProfileDescriptor ToDomain(VirtualProfileDescriptorDto dto)
-		=> new(dto.Id, dto.Name, ToDomain(dto.Layout), [.. dto.Folders.Select(ToDomain)]);
+	{
+		return new VirtualProfileDescriptor(dto.Id, dto.Name, ToDomain(dto.Layout), [.. dto.Folders.Select(ToDomain)]);
+	}
 
 	public static ProfileLayoutDto ToDto(ProfileLayout layout)
-		=> new()
+	{
+		return new ProfileLayoutDto
 		{
 			Kind = layout.Kind.ToString(),
 			Rows = layout.Rows,
@@ -33,9 +50,11 @@ public static class VirtualProfileCatalogMapper
 			RowsLocked = layout.RowsLocked,
 			ColumnsLocked = layout.ColumnsLocked
 		};
+	}
 
 	public static VirtualWidgetDescriptorDto ToDto(VirtualWidgetDescriptor widget)
-		=> new()
+	{
+		return new VirtualWidgetDescriptorDto
 		{
 			Id = widget.Id,
 			Type = widget.Type,
@@ -45,9 +64,11 @@ public static class VirtualProfileCatalogMapper
 			Height = widget.Height,
 			Data = widget.Data
 		};
+	}
 
 	public static VirtualFolderDescriptorDto ToDto(VirtualFolderDescriptor folder)
-		=> new()
+	{
+		return new VirtualFolderDescriptorDto
 		{
 			Id = folder.Id,
 			Name = folder.Name,
@@ -55,13 +76,16 @@ public static class VirtualProfileCatalogMapper
 			ParentId = folder.ParentId,
 			Order = folder.Order
 		};
+	}
 
 	public static VirtualProfileDescriptorDto ToDto(VirtualProfileDescriptor profile)
-		=> new()
+	{
+		return new VirtualProfileDescriptorDto
 		{
 			Id = profile.Id,
 			Name = profile.Name,
 			Layout = ToDto(profile.Layout),
 			Folders = [.. profile.Folders.Select(ToDto)]
 		};
+	}
 }

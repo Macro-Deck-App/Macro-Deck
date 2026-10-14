@@ -27,7 +27,10 @@ internal sealed class WindowsDiskCounters : IDisposable
 	private bool _primed;
 	private bool _disposed;
 
-	~WindowsDiskCounters() => Close();
+	~WindowsDiskCounters()
+	{
+		Close();
+	}
 
 	public IReadOnlyDictionary<string, DiskActivity>? Read()
 	{
@@ -49,7 +52,7 @@ internal sealed class WindowsDiskCounters : IDisposable
 
 	private Dictionary<string, DiskActivity>? ReadCore()
 	{
-		if (_queryFailed || _disposed || (_query == 0 && !OpenQuery()) || PdhCollectQueryData(_query) != 0)
+		if (_queryFailed || _disposed || _query == 0 && !OpenQuery() || PdhCollectQueryData(_query) != 0)
 		{
 			return null;
 		}
@@ -104,9 +107,9 @@ internal sealed class WindowsDiskCounters : IDisposable
 	{
 		var values = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
 		var bufferSize = 0u;
-		if (PdhGetFormattedCounterArray(counter, PdhFmtDouble | PdhFmtNoCap100, ref bufferSize, out _, nint.Zero) !=
-			PdhMoreData ||
-			bufferSize == 0)
+		if (PdhGetFormattedCounterArray(counter, PdhFmtDouble | PdhFmtNoCap100, ref bufferSize, out _, nint.Zero)
+			!= PdhMoreData
+			|| bufferSize == 0)
 		{
 			return values;
 		}
@@ -118,8 +121,8 @@ internal sealed class WindowsDiskCounters : IDisposable
 					PdhFmtDouble | PdhFmtNoCap100,
 					ref bufferSize,
 					out var itemCount,
-					buffer) !=
-				0)
+					buffer)
+				!= 0)
 			{
 				return values;
 			}
@@ -127,10 +130,10 @@ internal sealed class WindowsDiskCounters : IDisposable
 			var itemSize = Marshal.SizeOf<PdhFmtCounterValueItem>();
 			for (var i = 0; i < itemCount; i++)
 			{
-				var item = Marshal.PtrToStructure<PdhFmtCounterValueItem>(buffer + (i * itemSize));
-				if (item.CStatus is (PdhCStatusValidData or PdhCStatusNewData) &&
-					item.Name != nint.Zero &&
-					Marshal.PtrToStringUni(item.Name) is { Length: > 0 } name)
+				var item = Marshal.PtrToStructure<PdhFmtCounterValueItem>(buffer + i * itemSize);
+				if (item.CStatus is PdhCStatusValidData or PdhCStatusNewData
+					&& item.Name != nint.Zero
+					&& Marshal.PtrToStringUni(item.Name) is { Length: > 0 } name)
 				{
 					values[name] = item.DoubleValue;
 				}

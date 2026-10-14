@@ -30,7 +30,10 @@ internal sealed class IconPackInitializerBackgroundServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	// User decision 3: already-stale records self-heal. IconPackInitializerBackgroundService is the
 	// only production caller of PruneOrphanedIconPackRecords(), so this pins the observable behaviour
@@ -151,17 +154,23 @@ internal sealed class IconPackInitializerBackgroundServiceTests
 
 	private sealed class ThrowingIncludedIconPackSync : IIncludedIconPackSync
 	{
-		public Task SyncAsync(CancellationToken cancellationToken) => throw new InvalidOperationException("broken");
+		public Task SyncAsync(CancellationToken cancellationToken)
+		{
+			throw new InvalidOperationException("broken");
+		}
 	}
 
 	private sealed class IconUsageScannerStub : IIconUsageScanner
 	{
-		public IReadOnlySet<Guid> FindReferencedIconIds() => new HashSet<Guid>();
+		public IReadOnlySet<Guid> FindReferencedIconIds()
+		{
+			return new HashSet<Guid>();
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

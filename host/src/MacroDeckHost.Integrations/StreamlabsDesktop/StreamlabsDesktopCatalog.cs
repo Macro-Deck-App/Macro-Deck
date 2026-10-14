@@ -30,13 +30,13 @@ internal sealed class StreamlabsDesktopCatalog
 
 	public async Task<IReadOnlyList<string>> GetSceneNamesAsync()
 	{
-		var catalog = await GetAsync(forceRefresh: false).ConfigureAwait(false);
+		var catalog = await GetAsync(false).ConfigureAwait(false);
 		return catalog?.Scenes.Select(scene => scene.Name).ToList() ?? [];
 	}
 
 	public async Task<IReadOnlyList<string>> GetAudioSourceNamesAsync()
 	{
-		var catalog = await GetAsync(forceRefresh: false).ConfigureAwait(false);
+		var catalog = await GetAsync(false).ConfigureAwait(false);
 		return catalog?.AudioSources.Select(source => source.Name).ToList() ?? [];
 	}
 
@@ -48,31 +48,31 @@ internal sealed class StreamlabsDesktopCatalog
 			return [];
 		}
 
-		var items = await GetItemsAsync(scene, forceRefresh: false).ConfigureAwait(false);
+		var items = await GetItemsAsync(scene, false).ConfigureAwait(false);
 		return items.Select(item => item.Name).Distinct(StringComparer.Ordinal).ToList();
 	}
 
 	public async Task<StreamlabsScene?> ResolveSceneAsync(string name)
 	{
-		var catalog = await GetAsync(forceRefresh: false).ConfigureAwait(false);
+		var catalog = await GetAsync(false).ConfigureAwait(false);
 		if (catalog is not null && Lookup(catalog.ScenesByName, name) is { } hit)
 		{
 			return hit;
 		}
 
-		catalog = await GetAsync(forceRefresh: true).ConfigureAwait(false);
+		catalog = await GetAsync(true).ConfigureAwait(false);
 		return catalog is null ? null : Lookup(catalog.ScenesByName, name);
 	}
 
 	public async Task<StreamlabsAudioSource?> ResolveAudioSourceAsync(string name)
 	{
-		var catalog = await GetAsync(forceRefresh: false).ConfigureAwait(false);
+		var catalog = await GetAsync(false).ConfigureAwait(false);
 		if (catalog is not null && Lookup(catalog.AudioSourcesByName, name) is { } hit)
 		{
 			return hit;
 		}
 
-		catalog = await GetAsync(forceRefresh: true).ConfigureAwait(false);
+		catalog = await GetAsync(true).ConfigureAwait(false);
 		return catalog is null ? null : Lookup(catalog.AudioSourcesByName, name);
 	}
 
@@ -86,13 +86,13 @@ internal sealed class StreamlabsDesktopCatalog
 			return [];
 		}
 
-		var items = Match(await GetItemsAsync(scene, forceRefresh: false).ConfigureAwait(false), sourceName);
+		var items = Match(await GetItemsAsync(scene, false).ConfigureAwait(false), sourceName);
 		if (items.Count > 0)
 		{
 			return items;
 		}
 
-		return Match(await GetItemsAsync(scene, forceRefresh: true).ConfigureAwait(false), sourceName);
+		return Match(await GetItemsAsync(scene, true).ConfigureAwait(false), sourceName);
 	}
 
 	public string? SourceName(string sourceId)
@@ -102,7 +102,10 @@ internal sealed class StreamlabsDesktopCatalog
 	}
 
 	public string? SceneName(string sceneId)
-		=> _current?.Scenes.FirstOrDefault(scene => string.Equals(scene.Id, sceneId, StringComparison.Ordinal))?.Name;
+	{
+		return _current?.Scenes.FirstOrDefault(scene => string.Equals(scene.Id, sceneId, StringComparison.Ordinal))
+			?.Name;
+	}
 
 	public StreamlabsSceneItem? FindItem(string sceneId, string sceneItemId)
 	{
@@ -168,7 +171,10 @@ internal sealed class StreamlabsDesktopCatalog
 		}
 	}
 
-	public void Clear() => Invalidate();
+	public void Clear()
+	{
+		Invalidate();
+	}
 
 	private static List<StreamlabsSceneItem> Match(
 		IReadOnlyList<StreamlabsSceneItem> items,

@@ -25,27 +25,33 @@ internal static class SteamLibraryView
 
 		var ink = SteamInk.For(backgroundColor);
 
-		return SteamStyle.Root(Root, backgroundColor, new UiStack
-		{
-			Key = "content",
-			Direction = UiComponentDirections.Vertical,
-			Fill = true,
-			Children =
-			[
-				Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
-				Gate(state, ink, cornerRadius, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
-				Gate(state, ink, cornerRadius, "accountUnavailable", SteamWidgetStatus.AccountUnavailable,
-					Strings.AccountUnavailable()),
-				Gate(state, ink, cornerRadius, "private", SteamWidgetStatus.Private, Strings.GamesPrivate()),
-				Gate(state, ink, cornerRadius, "noGames", SteamWidgetStatus.NoGames, Strings.NoGames()),
-				new UiWhen
-				{
-					Key = "readyGate",
-					Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
-					Content = () => Layout(state, ink, cornerRadius),
-				},
-			],
-		});
+		return SteamStyle.Root(Root,
+			backgroundColor,
+			new UiStack
+			{
+				Key = "content",
+				Direction = UiComponentDirections.Vertical,
+				Fill = true,
+				Children =
+				[
+					Gate(state, ink, cornerRadius, "unavailable", SteamWidgetStatus.Unavailable, Strings.Unavailable()),
+					Gate(state, ink, cornerRadius, "notFound", SteamWidgetStatus.NotFound, Strings.NotFound()),
+					Gate(state,
+						ink,
+						cornerRadius,
+						"accountUnavailable",
+						SteamWidgetStatus.AccountUnavailable,
+						Strings.AccountUnavailable()),
+					Gate(state, ink, cornerRadius, "private", SteamWidgetStatus.Private, Strings.GamesPrivate()),
+					Gate(state, ink, cornerRadius, "noGames", SteamWidgetStatus.NoGames, Strings.NoGames()),
+					new UiWhen
+					{
+						Key = "readyGate",
+						Condition = () => state.Value.Status == SteamWidgetStatus.Ready,
+						Content = () => Layout(state, ink, cornerRadius)
+					}
+				]
+			});
 	}
 
 	private static UiWhen Gate(
@@ -55,15 +61,18 @@ internal static class SteamLibraryView
 		string key,
 		SteamWidgetStatus status,
 		LocalizedText text)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = key + "Gate",
 			Condition = () => state.Value.Status == status,
-			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius),
+			Content = () => SteamStyle.Notice(key, text, () => state.Value.Glyph, ink, cornerRadius)
 		};
+	}
 
 	private static UiResponsive Layout(UiState<SteamLibraryWidgetState> state, SteamInk ink, int cornerRadius)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
@@ -74,18 +83,20 @@ internal static class SteamLibraryView
 				{
 					MinWidth = 1.5,
 					MinHeight = 1.5,
-					Content = SteamStyle.Padded("large", cornerRadius,
+					Content = SteamStyle.Padded("large",
+						cornerRadius,
 						Header(state, ink),
 						Stats(state, ink),
-						List(state, ink, 3)),
+						List(state, ink, 3))
 				},
 				new UiResponsiveVariant
 				{
 					MinHeight = 1.5,
-					Content = SteamStyle.Padded("tall", cornerRadius,
+					Content = SteamStyle.Padded("tall",
+						cornerRadius,
 						Eyebrow(state, ink),
 						Summary(state, ink),
-						List(state, ink, 2)),
+						List(state, ink, 2))
 				},
 				new UiResponsiveVariant
 				{
@@ -103,20 +114,24 @@ internal static class SteamLibraryView
 								Key = "summaryColumn",
 								Direction = UiComponentDirections.Vertical,
 								MainSize = UiLength.OfBasis(0.8),
-								Children = [Eyebrow(state, ink), Spacer(), Summary(state, ink)],
+								Children = [Eyebrow(state, ink), Spacer(), Summary(state, ink)]
 							},
-							Covers(state),
-						],
-					},
-				},
-			],
+							Covers(state)
+						]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Eyebrow(UiState<SteamLibraryWidgetState> state, SteamInk ink)
-		=> SteamStyle.EyebrowRow("eyebrow", Strings.Eyebrow.Library(), () => state.Value.Glyph, ink);
+	{
+		return SteamStyle.EyebrowRow("eyebrow", Strings.Eyebrow.Library(), () => state.Value.Glyph, ink);
+	}
 
 	private static UiStack Summary(UiState<SteamLibraryWidgetState> state, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "summary",
 			Direction = UiComponentDirections.Vertical,
@@ -126,23 +141,32 @@ internal static class SteamLibraryView
 					UiText.From(() => state.Value.FromAccount
 						? state.Value.TotalHours
 						: state.Value.GameCount.ToString(CultureInfo.InvariantCulture)),
-					SteamStyle.Numeral, ink, weight: UiComponentTextWeights.Bold),
+					SteamStyle.Numeral,
+					ink,
+					weight: UiComponentTextWeights.Bold),
 				SteamStyle.Text("caption",
 					UiText.FromLocalized(() => state.Value.FromAccount ? Strings.HoursPlayed() : Strings.Installed()),
-					SteamStyle.Body, ink, SteamTone.Secondary, UiComponentTextWeights.Medium),
+					SteamStyle.Body,
+					ink,
+					SteamTone.Secondary,
+					UiComponentTextWeights.Medium),
 				new UiWhen
 				{
 					Key = "countGate",
 					Condition = () => state.Value.FromAccount,
 					Content = () => SteamStyle.Text("count",
-						UiText.FromLocalized(() => Strings.GamesCount(count: state.Value.GameCount)),
-						SteamStyle.Caption, ink, SteamTone.Muted),
-				},
-			],
+						UiText.FromLocalized(() => Strings.GamesCount(state.Value.GameCount)),
+						SteamStyle.Caption,
+						ink,
+						SteamTone.Muted)
+				}
+			]
 		};
+	}
 
 	private static UiStack Header(UiState<SteamLibraryWidgetState> state, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "header",
 			Direction = UiComponentDirections.Horizontal,
@@ -151,13 +175,19 @@ internal static class SteamLibraryView
 			Children =
 			[
 				Eyebrow(state, ink),
-				SteamStyle.Text("count", UiText.FromLocalized(() => Strings.GamesCount(count: state.Value.GameCount)),
-					SteamStyle.Caption, ink, SteamTone.Secondary, UiComponentTextWeights.Medium),
-			],
+				SteamStyle.Text("count",
+					UiText.FromLocalized(() => Strings.GamesCount(state.Value.GameCount)),
+					SteamStyle.Caption,
+					ink,
+					SteamTone.Secondary,
+					UiComponentTextWeights.Medium)
+			]
 		};
+	}
 
 	private static UiWhen Stats(UiState<SteamLibraryWidgetState> state, SteamInk ink)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = "statsGate",
 			Condition = () => state.Value.FromAccount,
@@ -168,18 +198,22 @@ internal static class SteamLibraryView
 				Gap = SteamStyle.Gap,
 				Children =
 				[
-					Stat("total", ink,
-						UiText.FromLocalized(() => Strings.HoursValue(hours: state.Value.TotalHours)),
+					Stat("total",
+						ink,
+						UiText.FromLocalized(() => Strings.HoursValue(state.Value.TotalHours)),
 						Strings.HoursPlayed()),
-					Stat("recent", ink,
-						UiText.FromLocalized(() => Strings.HoursValue(hours: state.Value.RecentHours)),
-						Strings.LastTwoWeeks()),
-				],
-			},
+					Stat("recent",
+						ink,
+						UiText.FromLocalized(() => Strings.HoursValue(state.Value.RecentHours)),
+						Strings.LastTwoWeeks())
+				]
+			}
 		};
+	}
 
 	private static UiModifier Stat(string key, SteamInk ink, UiText value, UiText caption)
-		=> new()
+	{
+		return new UiModifier
 		{
 			Key = key,
 			Background = "#ffffff14",
@@ -193,13 +227,15 @@ internal static class SteamLibraryView
 				Children =
 				[
 					SteamStyle.Text("value", value, _statValue, ink, weight: UiComponentTextWeights.Bold),
-					SteamStyle.Text("caption", caption, SteamStyle.Caption, ink, SteamTone.Secondary),
-				],
-			},
+					SteamStyle.Text("caption", caption, SteamStyle.Caption, ink, SteamTone.Secondary)
+				]
+			}
 		};
+	}
 
 	private static UiStack List(UiState<SteamLibraryWidgetState> state, SteamInk ink, int count)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "recent",
 			Direction = UiComponentDirections.Vertical,
@@ -211,13 +247,15 @@ internal static class SteamLibraryView
 					Key = "games",
 					Items = UiValue.From(() => state.Value.Take(count)),
 					KeySelector = game => game.Key,
-					Template = (game, _) => Row(game, ink),
-				},
-			],
+					Template = (game, _) => Row(game, ink)
+				}
+			]
 		};
+	}
 
 	private static UiStack Row(SteamLibraryGame game, SteamInk ink)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = game.Key,
 			Direction = UiComponentDirections.Horizontal,
@@ -235,18 +273,30 @@ internal static class SteamLibraryView
 					Fill = true,
 					Children =
 					[
-						SteamStyle.Text("name", game.Name, UiLength.Capped(0.1, 12), ink,
+						SteamStyle.Text("name",
+							game.Name,
+							UiLength.Capped(0.1, 12),
+							ink,
 							weight: UiComponentTextWeights.SemiBold),
 						.. game.Detail.IsEmpty
 							? Array.Empty<UiElement>()
-							: [SteamStyle.Text("detail", game.Detail, UiLength.Capped(0.085, 10.5), ink, SteamTone.Secondary)],
-					],
-				},
-			],
+							:
+							[
+								SteamStyle.Text("detail",
+									game.Detail,
+									UiLength.Capped(0.085, 10.5),
+									ink,
+									SteamTone.Secondary)
+							]
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Covers(UiState<SteamLibraryWidgetState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "covers",
 			Direction = UiComponentDirections.Horizontal,
@@ -260,29 +310,37 @@ internal static class SteamLibraryView
 					Key = "games",
 					Items = UiValue.From(() => state.Value.Take(2)),
 					KeySelector = game => game.Key,
-					Template = (game, _) => SteamStyle.Rounded(game.Key, SteamStyle.ArtworkRadius, Artwork(game),
-						_coverWidth),
-				},
-			],
+					Template = (game, _) => SteamStyle.Rounded(game.Key,
+						SteamStyle.ArtworkRadius,
+						Artwork(game),
+						_coverWidth)
+				}
+			]
 		};
+	}
 
 	private static UiElement Artwork(SteamLibraryGame game)
-		=> game.Cover is { } cover
+	{
+		return game.Cover is { } cover
 			? new UiButton
 			{
 				Key = "cover",
 				Background = "#000000",
 				Fit = UiComponentImageFits.Cover,
 				Transition = UiComponentImageTransitions.Crossfade,
-				Source = cover,
+				Source = cover
 			}
 			: new UiStack
 			{
 				Key = "placeholder",
 				Align = UiComponentAlignments.Center,
 				Justify = UiComponentJustify.Center,
-				Background = SteamStyle.Placeholder,
+				Background = SteamStyle.Placeholder
 			};
+	}
 
-	private static UiStack Spacer() => new() { Key = "spacer", Fill = true };
+	private static UiStack Spacer()
+	{
+		return new UiStack { Key = "spacer", Fill = true };
+	}
 }

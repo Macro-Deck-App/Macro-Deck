@@ -82,10 +82,13 @@ public class WeatherWidgetSessionRefreshTests
 	}
 
 	private static string TextOf(UiTree tree)
-		=> JsonSerializer.Serialize(tree);
+	{
+		return JsonSerializer.Serialize(tree);
+	}
 
 	private static UiSessionRequest WidgetSurface(string data = "{}")
-		=> new()
+	{
+		return new UiSessionRequest
 		{
 			UiModelVersion = 1,
 			Surface = new UiSurface
@@ -100,6 +103,7 @@ public class WeatherWidgetSessionRefreshTests
 				}
 			}
 		};
+	}
 
 	private sealed class GrowingRegistry : IWeatherRegistry
 	{
@@ -112,9 +116,15 @@ public class WeatherWidgetSessionRefreshTests
 			_stations[instanceId] = new StaticStation(location);
 		}
 
-		public IReadOnlyList<WeatherStationDescriptor> GetInstances() => _instances;
+		public IReadOnlyList<WeatherStationDescriptor> GetInstances()
+		{
+			return _instances;
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => _stations.GetValueOrDefault(instanceId);
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return _stations.GetValueOrDefault(instanceId);
+		}
 
 		public IWeatherStation? DefaultStation
 			=> _instances.Count > 0 ? GetStation(_instances[0].InstanceId) : null;
@@ -124,32 +134,44 @@ public class WeatherWidgetSessionRefreshTests
 	{
 		private readonly string _location;
 
-		public StaticStation(string location) => _location = location;
+		public StaticStation(string location)
+		{
+			_location = location;
+		}
 
 		public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
-			=> Task.FromResult(new WeatherSnapshot
+		{
+			return Task.FromResult(new WeatherSnapshot
 			{
 				IsAvailable = true, LocationName = _location, Temperature = 21, IsDay = true
 			});
+		}
 	}
 
 	private sealed class NullResourceStore : IUiResourceStore
 	{
 		public UiResource Register(UiResourceRegistration registration)
-			=> new() { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		{
+			return new UiResource { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		}
 
 		public bool TryGet(string resourceId, out UiResourceContent content)
 		{
-			content = default!;
+			content = null!;
 			return false;
 		}
 
-		public bool Remove(string resourceId) => false;
+		public bool Remove(string resourceId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class PassThroughSampleText : IWidgetSampleTextResolver
 	{
 		public ValueTask<string> ResolveAsync(LocalizedString value)
-			=> ValueTask.FromResult(value.ToString() ?? string.Empty);
+		{
+			return ValueTask.FromResult(value.ToString() ?? string.Empty);
+		}
 	}
 }

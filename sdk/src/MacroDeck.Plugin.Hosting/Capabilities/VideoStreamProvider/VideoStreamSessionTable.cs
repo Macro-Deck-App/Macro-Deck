@@ -5,28 +5,28 @@ internal enum VideoStreamSessionPhase
 {
 	Opening,
 	Open,
-	Closed,
+	Closed
 }
 
 internal enum VideoStreamOpenAdmission
 {
 	Admitted,
 	Duplicate,
-	Tombstoned,
+	Tombstoned
 }
 
 internal enum VideoStreamOpenOutcome
 {
 	Open,
 	CloseNow,
-	Discard,
+	Discard
 }
 
 internal enum VideoStreamCloseOutcome
 {
 	CloseNow,
 	Deferred,
-	AlreadyClosed,
+	AlreadyClosed
 }
 
 internal sealed class VideoStreamSessionTable<TReason, TProvider>
@@ -54,7 +54,10 @@ internal sealed class VideoStreamSessionTable<TReason, TProvider>
 
 	public long CurrentEpoch => Interlocked.Read(ref _epoch);
 
-	public long AdvanceEpoch() => Interlocked.Increment(ref _epoch);
+	public long AdvanceEpoch()
+	{
+		return Interlocked.Increment(ref _epoch);
+	}
 
 	public VideoStreamOpenAdmission TryBeginOpen(string sessionId, string providerId, TProvider provider, long epoch)
 	{
@@ -184,12 +187,19 @@ internal sealed class VideoStreamSessionTable<TReason, TProvider>
 	}
 
 	public IReadOnlyList<Closing> CloseOlderThan(long epoch, TReason reason)
-		=> CloseWhere(entry => entry.Epoch < epoch, reason);
+	{
+		return CloseWhere(entry => entry.Epoch < epoch, reason);
+	}
 
 	public IReadOnlyList<Closing> CloseProvider(TProvider provider, TReason reason)
-		=> CloseWhere(entry => ReferenceEquals(entry.Provider, provider), reason);
+	{
+		return CloseWhere(entry => ReferenceEquals(entry.Provider, provider), reason);
+	}
 
-	public IReadOnlyList<Closing> CloseAll(TReason reason) => CloseWhere(_ => true, reason);
+	public IReadOnlyList<Closing> CloseAll(TReason reason)
+	{
+		return CloseWhere(_ => true, reason);
+	}
 
 	private List<Closing> CloseWhere(Func<Entry, bool> predicate, TReason reason)
 	{
@@ -280,8 +290,13 @@ internal sealed class VideoStreamSessionTable<TReason, TProvider>
 		public bool IsClosing => DeferredReason is not null || EndedByProvider;
 
 		public Session ToSession()
-			=> new(SessionId, ProviderId, Epoch, IsClosing ? VideoStreamSessionPhase.Closed : Phase);
+		{
+			return new Session(SessionId, ProviderId, Epoch, IsClosing ? VideoStreamSessionPhase.Closed : Phase);
+		}
 
-		public Closing ToClosing(TReason reason) => new(SessionId, ProviderId, Provider, Epoch, reason);
+		public Closing ToClosing(TReason reason)
+		{
+			return new Closing(SessionId, ProviderId, Provider, Epoch, reason);
+		}
 	}
 }

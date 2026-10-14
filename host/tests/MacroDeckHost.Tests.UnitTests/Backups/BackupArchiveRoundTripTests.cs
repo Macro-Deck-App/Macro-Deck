@@ -43,7 +43,10 @@ public class BackupArchiveRoundTripTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task RestoresEveryArchivedFileAndLeavesDerivedDataOut()
@@ -108,12 +111,12 @@ public class BackupArchiveRoundTripTests
 		var payloadPath = Path.Combine(_paths.BaseDirectory, "payload.zip");
 		await reader.DecryptPayload(archive, _recoveryKey, payloadPath);
 
-		using var inner = ZipFile.OpenRead(payloadPath);
+		using var inner = await ZipFile.OpenReadAsync(payloadPath);
 		var entry = inner.GetEntry("files/data/profiles/living-room.json");
 
 		Assert.That(entry, Is.Not.Null);
 
-		using var stream = entry!.Open();
+		using var stream = await entry!.OpenAsync();
 		using var text = new StreamReader(stream, Encoding.UTF8);
 
 		Assert.That(await text.ReadToEndAsync(), Is.EqualTo("""{"name":"Living Room"}"""));
@@ -123,7 +126,7 @@ public class BackupArchiveRoundTripTests
 	public async Task StoresAlreadyCompressedContentAndDeflatesTheRest()
 	{
 		var payloadPath = await DecryptPayload();
-		using var inner = ZipFile.OpenRead(payloadPath);
+		using var inner = await ZipFile.OpenReadAsync(payloadPath);
 
 		var image = inner.GetEntry("files/data/icons/packs/tile.png")!;
 		var json = inner.GetEntry("files/data/profiles/living-room.json")!;
@@ -141,9 +144,9 @@ public class BackupArchiveRoundTripTests
 	public async Task RestoresStoredContentByteForByte()
 	{
 		var payloadPath = await DecryptPayload();
-		using var inner = ZipFile.OpenRead(payloadPath);
+		using var inner = await ZipFile.OpenReadAsync(payloadPath);
 
-		using var stream = inner.GetEntry("files/data/icons/packs/tile.png")!.Open();
+		using var stream = await inner.GetEntry("files/data/icons/packs/tile.png")!.OpenAsync();
 		using var restored = new MemoryStream();
 		await stream.CopyToAsync(restored);
 
@@ -169,7 +172,9 @@ public class BackupArchiveRoundTripTests
 	}
 
 	private static BackupComponentGroup Component(BackupContentIndex index, string path)
-		=> index.Entries.Single(entry => entry.Path == path).Component;
+	{
+		return index.Entries.Single(entry => entry.Path == path).Component;
+	}
 
 	private async Task<string> DecryptPayload()
 	{
@@ -186,7 +191,7 @@ public class BackupArchiveRoundTripTests
 		var payloadPath = Path.Combine(_paths.BaseDirectory, "payload.zip");
 		await new BackupArchiveReader().DecryptPayload(archive, _recoveryKey, payloadPath);
 
-		using var inner = ZipFile.OpenRead(payloadPath);
+		using var inner = await ZipFile.OpenReadAsync(payloadPath);
 
 		return [.. inner.Entries.Select(entry => entry.FullName)];
 	}
@@ -197,8 +202,8 @@ public class BackupArchiveRoundTripTests
 		var payloadPath = Path.Combine(_paths.BaseDirectory, "payload.zip");
 		await new BackupArchiveReader().DecryptPayload(archive, _recoveryKey, payloadPath);
 
-		using var inner = ZipFile.OpenRead(payloadPath);
-		using var stream = inner.GetEntry(BackupFileNames.ContentIndexEntry)!.Open();
+		using var inner = await ZipFile.OpenReadAsync(payloadPath);
+		using var stream = await inner.GetEntry(BackupFileNames.ContentIndexEntry)!.OpenAsync();
 
 		return JsonSerializer.Deserialize<BackupContentIndex>(stream, PublicJson())!;
 	}
@@ -241,7 +246,9 @@ public class BackupArchiveRoundTripTests
 	}
 
 	private void Seed(string relativePath, string content)
-		=> SeedBytes(relativePath, Encoding.UTF8.GetBytes(content));
+	{
+		SeedBytes(relativePath, Encoding.UTF8.GetBytes(content));
+	}
 
 	private void SeedBytes(string relativePath, byte[] content)
 	{
@@ -253,5 +260,7 @@ public class BackupArchiveRoundTripTests
 	// The archive writes enums as names, which is what lets an older reader keep understanding a manifest
 	// after a new value is added.
 	private static JsonSerializerOptions PublicJson()
-		=> new(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
+	{
+		return new JsonSerializerOptions(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
+	}
 }

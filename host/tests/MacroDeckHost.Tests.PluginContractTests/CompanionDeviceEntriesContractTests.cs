@@ -38,8 +38,11 @@ internal sealed class CompanionDeviceEntriesContractTests : CapabilityContractFi
 	[Test]
 	public async Task A_plugin_built_before_device_entries_declares_nothing_new()
 	{
-		var integration = await ConnectAsync([new MacroDeck.Plugin.Hosting.Capabilities.Actions.ActionsCapabilityHandler(
-				[new TestIntegration(new TestAction("play"))])],
+		var integration = await ConnectAsync([
+				new MacroDeck.Plugin.Hosting.Capabilities.Actions.ActionsCapabilityHandler([
+					new TestIntegration(new TestAction("play"))
+				])
+			],
 			[
 				new DeclaredCapability
 				{
@@ -58,8 +61,14 @@ internal sealed class CompanionDeviceEntriesContractTests : CapabilityContractFi
 	{
 		public IReadOnlyList<MacroDeck.Sdk.Actions.IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

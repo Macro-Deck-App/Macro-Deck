@@ -31,7 +31,10 @@ public class ScriptServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_PersistsScriptAndAnnouncesIt()
@@ -269,5 +272,8 @@ public class ScriptServiceTests
 		});
 	}
 
-	private static ScriptInput Input(string name) => new() { Name = name, Type = ScriptInputType.Text };
+	private static ScriptInput Input(string name)
+	{
+		return new ScriptInput { Name = name, Type = ScriptInputType.Text };
+	}
 }

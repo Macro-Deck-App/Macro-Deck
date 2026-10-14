@@ -29,11 +29,15 @@ internal sealed class StoreCatalogQueryServiceTests
 		_query = new StoreCatalogQueryService(_catalog,
 			new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 			new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None),
-			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners());
+			new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+			new InstalledPluginSigners());
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void A_page_reports_how_many_entries_match_not_how_many_it_returns()
@@ -248,12 +252,11 @@ internal sealed class StoreCatalogQueryServiceTests
 	public void A_package_the_registry_withdrew_is_not_served_even_when_it_is_still_featured()
 	{
 		Seed([Entry("com.acme.hue", "Hue Bridge"), Entry("com.acme.gone", "Gone")],
-			featured:
 			[
 				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.gone" },
 				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.hue" }
 			],
-			removed: [new StoreRemovedPackage { Id = "com.acme.gone" }]);
+			[new StoreRemovedPackage { Id = "com.acme.gone" }]);
 
 		var featured = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Featured });
 		var everything = Page(new StoreCatalogQuery { Section = StoreCatalogSection.All });
@@ -270,11 +273,10 @@ internal sealed class StoreCatalogQueryServiceTests
 	public void The_featured_section_keeps_the_order_the_registry_published()
 	{
 		Seed([Entry("z", "Zulu"), Entry("a", "Alpha"), Entry("m", "Mike")],
-			featured:
-			[
-				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "z" },
-				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "a" }
-			]);
+		[
+			new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "z" },
+			new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "a" }
+		]);
 
 		var page = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Featured });
 
@@ -289,12 +291,11 @@ internal sealed class StoreCatalogQueryServiceTests
 	public void A_featured_entry_the_catalog_cannot_resolve_is_skipped_and_the_rest_still_serve()
 	{
 		Seed([Entry("com.acme.hue", "Hue Bridge"), Entry("com.acme.material", "Material", StoreExtensionKind.IconPack)],
-			featured:
-			[
-				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.ghost" },
-				new StoreFeaturedRef { Kind = StoreExtensionKind.IconPack, Id = "com.acme.hue" },
-				new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.hue" }
-			]);
+		[
+			new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.ghost" },
+			new StoreFeaturedRef { Kind = StoreExtensionKind.IconPack, Id = "com.acme.hue" },
+			new StoreFeaturedRef { Kind = StoreExtensionKind.Plugin, Id = "com.acme.hue" }
+		]);
 
 		var page = Page(new StoreCatalogQuery { Kinds = _browseKinds, Section = StoreCatalogSection.Featured });
 
@@ -359,10 +360,14 @@ internal sealed class StoreCatalogQueryServiceTests
 		Seed([
 			Entry("portable", "Portable"),
 			Entry("elsewhere", "Elsewhere") with { SupportedRids = ["plan9-sparc"] },
-			Entry("here", "Here") with { SupportedRids = [global::System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier] }
+			Entry("here", "Here") with
+			{
+				SupportedRids = [global::System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier]
+			}
 		]);
 
-		var filtered = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name, SupportedOnly = true, Take = 1 });
+		var filtered
+			= Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name, SupportedOnly = true, Take = 1 });
 		var everything = Page(new StoreCatalogQuery { Section = StoreCatalogSection.Name });
 
 		Assert.Multiple(() =>
@@ -419,8 +424,14 @@ internal sealed class StoreCatalogQueryServiceTests
 				Entry("obs", "OBS") with { Tags = ["streaming"] },
 				Entry("twitch", "Twitch") with { Tags = ["Streaming", "gaming"] },
 				Entry("removed", "Removed") with { Tags = ["streaming"] },
-				Entry("stream-icons", "Stream Icons", StoreExtensionKind.IconPack) with { Tags = ["streaming", "icons"] },
-				Entry("stream-profile", "Stream Profile", StoreExtensionKind.ProfileTemplate) with { Tags = ["streaming"] }
+				Entry("stream-icons", "Stream Icons", StoreExtensionKind.IconPack) with
+				{
+					Tags = ["streaming", "icons"]
+				},
+				Entry("stream-profile", "Stream Profile", StoreExtensionKind.ProfileTemplate) with
+				{
+					Tags = ["streaming"]
+				}
 			],
 			RemovedPackages = [new StoreRemovedPackage { Id = "removed" }],
 			Categories = [Category("icons"), Category("streaming"), Category("music")]
@@ -461,7 +472,7 @@ internal sealed class StoreCatalogQueryServiceTests
 		});
 
 		var everything = _query.Categories(_browseKinds);
-		var runsHere = _query.Categories(_browseKinds, supportedOnly: true);
+		var runsHere = _query.Categories(_browseKinds, true);
 
 		Assert.Multiple(() =>
 		{
@@ -538,7 +549,8 @@ internal sealed class StoreCatalogQueryServiceTests
 	}
 
 	[Test]
-	public void A_package_whose_latest_version_is_withdrawn_is_hidden_until_it_is_installed_and_then_only_listed_as_installed()
+	public void
+		A_package_whose_latest_version_is_withdrawn_is_hidden_until_it_is_installed_and_then_only_listed_as_installed()
 	{
 		Seed([Versioned("com.acme.icons", "2.0.0", "2.0.0", "1.0.0")],
 			removed: [Removal("com.acme.icons", "2.0.0")]);
@@ -585,15 +597,19 @@ internal sealed class StoreCatalogQueryServiceTests
 		});
 	}
 
-	private static StoreRemovedPackage Removal(string id, string version) => new()
+	private static StoreRemovedPackage Removal(string id, string version)
 	{
-		Id = id,
-		Version = version,
-		Reason = "Compromised signing key",
-		Replacement = "com.acme.better-icons"
-	};
+		return new StoreRemovedPackage
+		{
+			Id = id,
+			Version = version,
+			Reason = "Compromised signing key",
+			Replacement = "com.acme.better-icons"
+		};
+	}
 
-	private void InstallIconPack(string id, string version) =>
+	private void InstallIconPack(string id, string version)
+	{
 		new JsonStoreInstallationStore(_paths, Serilog.Core.Logger.None).Save(new StoreInstallationRecord
 		{
 			Origin = "https://registry.example/",
@@ -601,9 +617,11 @@ internal sealed class StoreCatalogQueryServiceTests
 			PackageId = id,
 			Version = version
 		});
+	}
 
-	private static StoreCatalogEntry Versioned(string id, string latest, params string[] versions) =>
-		Entry(id, id, StoreExtensionKind.IconPack) with
+	private static StoreCatalogEntry Versioned(string id, string latest, params string[] versions)
+	{
+		return Entry(id, id, StoreExtensionKind.IconPack) with
 		{
 			LatestVersion = latest,
 			LatestRelease = new StoreReleaseManifest
@@ -614,11 +632,15 @@ internal sealed class StoreCatalogQueryServiceTests
 				Size = 16
 			},
 			Tags = ["icons"],
-			History = versions.Select(version => new StoreVersionHistoryEntry { Version = version, HasRelease = true }).ToList()
+			History = versions.Select(version => new StoreVersionHistoryEntry { Version = version, HasRelease = true })
+				.ToList()
 		};
+	}
 
-	private static StoreCategory Category(string id) =>
-		new() { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
+	private static StoreCategory Category(string id)
+	{
+		return new StoreCategory { Id = id, Names = new Dictionary<string, string> { ["en"] = id } };
+	}
 
 	[Test]
 	public void An_installed_plugin_whose_signing_issuer_the_registry_revoked_is_flagged()
@@ -626,8 +648,12 @@ internal sealed class StoreCatalogQueryServiceTests
 		SeedWithRevoked(["cert_issuer00000000000000000000000001"],
 			Entry("com.acme.revoked", "Revoked"),
 			Entry("com.acme.fine", "Fine"));
-		InstallSignedPlugin("com.acme.revoked", "cert_leaf000000000000000000000000001", "cert_issuer00000000000000000000000001");
-		InstallSignedPlugin("com.acme.fine", "cert_leaf000000000000000000000000002", "cert_issuer00000000000000000000000002");
+		InstallSignedPlugin("com.acme.revoked",
+			"cert_leaf000000000000000000000000001",
+			"cert_issuer00000000000000000000000001");
+		InstallSignedPlugin("com.acme.fine",
+			"cert_leaf000000000000000000000000002",
+			"cert_issuer00000000000000000000000002");
 
 		Assert.Multiple(() =>
 		{
@@ -653,8 +679,10 @@ internal sealed class StoreCatalogQueryServiceTests
 		Assert.That(_query.Find(StoreExtensionKind.Plugin, "com.acme.revoked").Data!.SigningRevoked, Is.False);
 	}
 
-	private void SeedWithRevoked(IReadOnlyList<string> revokedKeyIds, params StoreCatalogEntry[] entries) =>
+	private void SeedWithRevoked(IReadOnlyList<string> revokedKeyIds, params StoreCatalogEntry[] entries)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries, RevokedKeyIds = revokedKeyIds });
+	}
 
 	private void InstallSignedPlugin(string pluginId, string certificateId, string? issuerId)
 	{
@@ -669,16 +697,20 @@ internal sealed class StoreCatalogQueryServiceTests
 		File.WriteAllText(Path.Combine(pluginDirectory, "current.json"), "{\"version\":\"1.0.0\"}");
 	}
 
-	private void SeedSearchable() =>
+	private void SeedSearchable()
+	{
 		Seed([
 			Entry("bright", "Bright Hue", createdAt: new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)),
 			Entry("bridge", "Hue Bridge", createdAt: new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)),
 			Entry("zebra", "Zebra Hue Lights", createdAt: new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero))
 		]);
+	}
 
-	private void Seed(IEnumerable<StoreCatalogEntry> entries,
+	private void Seed(
+		IEnumerable<StoreCatalogEntry> entries,
 		IEnumerable<StoreFeaturedRef>? featured = null,
-		IEnumerable<StoreRemovedPackage>? removed = null) =>
+		IEnumerable<StoreRemovedPackage>? removed = null)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
@@ -686,6 +718,7 @@ internal sealed class StoreCatalogQueryServiceTests
 			Featured = featured?.ToList() ?? [],
 			RemovedPackages = removed?.ToList() ?? []
 		});
+	}
 
 	private StoreCatalogPage Page(StoreCatalogQuery query)
 	{
@@ -694,15 +727,19 @@ internal sealed class StoreCatalogQueryServiceTests
 		return result.Data!;
 	}
 
-	private static List<string> Ids(StoreCatalogPage page) =>
-		page.Items.Select(item => item.Entry.Id).ToList();
+	private static List<string> Ids(StoreCatalogPage page)
+	{
+		return page.Items.Select(item => item.Entry.Id).ToList();
+	}
 
-	private static StoreCatalogEntry Entry(string id,
+	private static StoreCatalogEntry Entry(
+		string id,
 		string name,
 		StoreExtensionKind kind = StoreExtensionKind.Plugin,
 		DateTimeOffset? createdAt = null,
-		DateTimeOffset? updatedAt = null) =>
-		new()
+		DateTimeOffset? updatedAt = null)
+	{
+		return new StoreCatalogEntry
 		{
 			Kind = kind,
 			Id = id,
@@ -718,4 +755,5 @@ internal sealed class StoreCatalogQueryServiceTests
 				Size = 16
 			}
 		};
+	}
 }

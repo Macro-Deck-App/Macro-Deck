@@ -21,16 +21,19 @@ internal static class HomeAssistantActionValues
 	}
 
 	public static bool ReadBool(IReadOnlyDictionary<string, object> parameters, string name, bool fallback = false)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			null => fallback,
 			bool b => b,
 			string s when bool.TryParse(s, out var parsed) => parsed,
 			_ => fallback
 		};
+	}
 
 	public static double? ReadNumber(IReadOnlyDictionary<string, object> parameters, string name)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			null => null,
 			double d => d,
@@ -42,16 +45,21 @@ internal static class HomeAssistantActionValues
 				=> parsed,
 			_ => null
 		};
+	}
 
 	public static double? ReadNumber(
 		IReadOnlyDictionary<string, object> parameters,
 		string name,
 		double min,
 		double max)
-		=> ReadNumber(parameters, name) is { } value ? Math.Clamp(value, min, max) : null;
+	{
+		return ReadNumber(parameters, name) is { } value ? Math.Clamp(value, min, max) : null;
+	}
 
 	public static IReadOnlyList<string> ReadList(IReadOnlyDictionary<string, object> parameters, string name)
-		=> ReadList(parameters.GetValueOrDefault(name));
+	{
+		return ReadList(parameters.GetValueOrDefault(name));
+	}
 
 	public static IReadOnlyList<string> ReadList(object? value)
 	{
@@ -90,9 +98,9 @@ internal static class HomeAssistantActionValues
 			return null;
 		}
 
-		if (!int.TryParse(value[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var red) ||
-			!int.TryParse(value[2..4], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var green) ||
-			!int.TryParse(value[4..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var blue))
+		if (!int.TryParse(value[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var red)
+			|| !int.TryParse(value[2..4], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var green)
+			|| !int.TryParse(value[4..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var blue))
 		{
 			return null;
 		}
@@ -205,13 +213,16 @@ internal static class HomeAssistantActionValues
 		return result;
 	}
 
-	private static object? ToPrimitive(JsonElement value) => value.ValueKind switch
+	private static object? ToPrimitive(JsonElement value)
 	{
-		JsonValueKind.String => value.GetString(),
-		JsonValueKind.True => true,
-		JsonValueKind.False => false,
-		JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
-		JsonValueKind.Null => null,
-		_ => value.Clone()
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.String => value.GetString(),
+			JsonValueKind.True => true,
+			JsonValueKind.False => false,
+			JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
+			JsonValueKind.Null => null,
+			_ => value.Clone()
+		};
+	}
 }

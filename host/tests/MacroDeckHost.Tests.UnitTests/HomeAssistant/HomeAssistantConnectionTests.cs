@@ -93,7 +93,7 @@ internal sealed class HomeAssistantConnectionTests
 	[Test]
 	public async Task Connected_and_disconnected_are_published_once_per_session()
 	{
-		using var connection = Create(reconnectDelayMs: 30_000);
+		using var connection = Create(30_000);
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
@@ -108,7 +108,7 @@ internal sealed class HomeAssistantConnectionTests
 	public async Task A_dropped_connection_keeps_the_catalogue_but_clears_the_live_state()
 	{
 		// A long retry delay so the reconnect cannot race the assertions back into "connected".
-		using var connection = Create(reconnectDelayMs: 30_000);
+		using var connection = Create(30_000);
 		connection.Start();
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
@@ -231,11 +231,11 @@ internal sealed class HomeAssistantConnectionTests
 			_factory.Script.Enqueue(client => client.FailingRequests.Add("get_states"));
 		}
 
-		using var connection = Create(reconnectDelayMs: 60);
+		using var connection = Create(60);
 		var timestamps = new List<long>();
 
 		connection.Start();
-		await WaitForAsync(() => _factory.Created.Count >= 3, "three failed connection attempts", timeout: 10);
+		await WaitForAsync(() => _factory.Created.Count >= 3, "three failed connection attempts", 10);
 
 		foreach (var client in _factory.Created)
 		{
@@ -256,10 +256,10 @@ internal sealed class HomeAssistantConnectionTests
 			_factory.Script.Enqueue(client => client.FailingRequests.Add("get_states"));
 		}
 
-		using var connection = Create(reconnectDelayMs: 40);
+		using var connection = Create(40);
 		connection.Start();
 
-		await WaitForAsync(() => _factory.Created.Count >= 4, "four failed sessions", timeout: 10);
+		await WaitForAsync(() => _factory.Created.Count >= 4, "four failed sessions", 10);
 
 		Assert.That(connection.IsConnected, Is.False);
 	}
@@ -270,7 +270,7 @@ internal sealed class HomeAssistantConnectionTests
 		_factory.Script.Enqueue(client => client.FailingRequests.Add("get_states"));
 
 		const int baseDelayMs = 150;
-		using var connection = Create(reconnectDelayMs: baseDelayMs);
+		using var connection = Create(baseDelayMs);
 		connection.Start();
 
 		await WaitForAsync(() => _factory.Created.Count >= 2, "the retry after the first failure");
@@ -346,12 +346,14 @@ internal sealed class HomeAssistantConnectionTests
 	}
 
 	private HomeAssistantConnection Create(int reconnectDelayMs = 20, Action? onVariablesChanged = null)
-		=> new(_factory.Create,
+	{
+		return new HomeAssistantConnection(_factory.Create,
 			_uri,
 			"the-token",
 			events: _emitter,
 			reconnectDelay: TimeSpan.FromMilliseconds(reconnectDelayMs),
 			onVariablesChanged: onVariablesChanged);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition, string because, int timeout = 5)
 	{
@@ -415,6 +417,8 @@ internal sealed class HomeAssistantConnectionTests
 		public IEnumerable<string> Ids => Published.Select(entry => entry.EventId);
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> _published.Enqueue((eventId, parameters));
+		{
+			_published.Enqueue((eventId, parameters));
+		}
 	}
 }

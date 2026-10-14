@@ -8,7 +8,8 @@ public sealed record VideoStreamOpenTicket(string SessionId, long Revision, Vide
 
 public interface IVideoStreamSessionBroker
 {
-	VideoStreamOpenTicket OpenSession(string connectionId,
+	VideoStreamOpenTicket OpenSession(
+		string connectionId,
 		string providerId,
 		string streamId,
 		IReadOnlyList<string> acceptedTransports);
@@ -23,7 +24,8 @@ public interface IVideoStreamSessionBroker
 
 	void CloseConnection(string connectionId, VideoStreamSessionReason reason);
 
-	void ApplyProviderUpdate(string ownerId,
+	void ApplyProviderUpdate(
+		string ownerId,
 		string sessionId,
 		VideoStreamSessionState state,
 		VideoStreamSessionDescriptionDto? description,

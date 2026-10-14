@@ -19,7 +19,9 @@ public class PluginAdbCallbacksTests
 	private const string PluginId = "com.example.android";
 
 	private static IEnumerable<TestCaseData> EveryOperation()
-		=> HostOperations.Adb.All.Select(operation => new TestCaseData(operation).SetName($"{{m}}({operation})"));
+	{
+		return HostOperations.Adb.All.Select(operation => new TestCaseData(operation).SetName($"{{m}}({operation})"));
+	}
 
 	[TestCaseSource(nameof(EveryOperation))]
 	public async Task Every_operation_is_refused_as_not_enabled_while_adb_is_off(string operation)
@@ -59,14 +61,16 @@ public class PluginAdbCallbacksTests
 	[TestCase("reboot", false)]
 	[TestCase("screenshot", false)]
 	[TestCase("status", false)]
-	public async Task While_the_host_is_locked_only_the_open_ended_operations_are_refused(string operation,
+	public async Task While_the_host_is_locked_only_the_open_ended_operations_are_refused(
+		string operation,
 		bool refused)
 	{
-		var callbacks = Callbacks(PluginAdbAccess.Available, locked: true);
+		var callbacks = Callbacks(PluginAdbAccess.Available, true);
 
 		var refusal = await callbacks.AdmitAsync(PluginId, Payload(operation), CancellationToken.None);
 
-		Assert.That(refusal?.Error?.Details?["reason"], refused ? Is.EqualTo(ProtocolErrorReasons.HostLocked) : Is.Null);
+		Assert.That(refusal?.Error?.Details?["reason"],
+			refused ? Is.EqualTo(ProtocolErrorReasons.HostLocked) : Is.Null);
 	}
 
 	[TestCase(AdbFailureCode.DeviceOffline, ProtocolErrorReasons.AdbDeviceOffline)]
@@ -76,14 +80,18 @@ public class PluginAdbCallbacksTests
 	[TestCase(AdbFailureCode.Timeout, ProtocolErrorReasons.AdbTimeout)]
 	[TestCase(AdbFailureCode.InvalidParameter, ProtocolErrorReasons.AdbInvalidArgument)]
 	[TestCase(AdbFailureCode.CommandFailed, ProtocolErrorReasons.AdbCommandFailed)]
-	public async Task A_device_or_adb_failure_is_ADB_FAILED_with_a_reason_naming_it(AdbFailureCode failure, string reason)
+	public async Task A_device_or_adb_failure_is_ADB_FAILED_with_a_reason_naming_it(
+		AdbFailureCode failure,
+		string reason)
 	{
 		var operations = new FakeAdbDeviceOperations
 		{
 			Install = Result.Fail<AdbFailureCode>(failure, "adb said no")
 		};
 
-		var result = await new PluginAdbCallbacks(operations, new FixedAdbAccessPolicy(PluginAdbAccess.Available), new FakeHostLockState())
+		var result = await new PluginAdbCallbacks(operations,
+				new FixedAdbAccessPolicy(PluginAdbAccess.Available),
+				new FakeHostLockState())
 			.ExecuteAsync(Payload(HostOperations.Adb.Install), CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -96,9 +104,12 @@ public class PluginAdbCallbacksTests
 	[Test]
 	public async Task Adb_switched_off_between_admission_and_execution_is_still_not_enabled()
 	{
-		var operations = new FakeAdbDeviceOperations { Install = Result.Fail<AdbFailureCode>(AdbFailureCode.Disabled, "off") };
+		var operations = new FakeAdbDeviceOperations
+			{ Install = Result.Fail<AdbFailureCode>(AdbFailureCode.Disabled, "off") };
 
-		var result = await new PluginAdbCallbacks(operations, new FixedAdbAccessPolicy(PluginAdbAccess.Available), new FakeHostLockState())
+		var result = await new PluginAdbCallbacks(operations,
+				new FixedAdbAccessPolicy(PluginAdbAccess.Available),
+				new FakeHostLockState())
 			.ExecuteAsync(Payload(HostOperations.Adb.Install), CancellationToken.None);
 
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.AdbNotEnabled));
@@ -108,7 +119,8 @@ public class PluginAdbCallbacksTests
 	[TestCase(PluginAdbAccess.NotAllowed, true, true)]
 	[TestCase(PluginAdbAccess.NotAllowed, false, false)]
 	[TestCase(PluginAdbAccess.Available, true, false)]
-	public async Task A_refused_call_asks_the_user_only_when_allowing_adb_would_let_the_plugin_in(PluginAdbAccess access,
+	public async Task A_refused_call_asks_the_user_only_when_allowing_adb_would_let_the_plugin_in(
+		PluginAdbAccess access,
 		bool grantable,
 		bool asked)
 	{
@@ -129,14 +141,16 @@ public class PluginAdbCallbacksTests
 		var result = await Callbacks(PluginAdbAccess.Available)
 			.ExecuteAsync(Payload(HostOperations.Adb.Connect), CancellationToken.None);
 
-		Assert.That(result.Data?.Deserialize<AdbConnectResultDto>(PluginProtocolJson.Options)?.Serial, Is.EqualTo("192.168.1.20:5555"));
+		Assert.That(result.Data?.Deserialize<AdbConnectResultDto>(PluginProtocolJson.Options)?.Serial,
+			Is.EqualTo("192.168.1.20:5555"));
 	}
 
 	[Test]
 	public async Task Missing_arguments_are_an_invalid_payload()
 	{
 		var result = await Callbacks(PluginAdbAccess.Available)
-			.ExecuteAsync(new HostInvokePayload { Api = HostApis.Adb, Operation = HostOperations.Adb.Push }, CancellationToken.None);
+			.ExecuteAsync(new HostInvokePayload { Api = HostApis.Adb, Operation = HostOperations.Adb.Push },
+				CancellationToken.None);
 
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
 	}
@@ -144,7 +158,10 @@ public class PluginAdbCallbacksTests
 	[Test]
 	public void Shell_output_that_would_not_fit_one_protocol_message_is_cut_and_marked()
 	{
-		var dto = PluginAdbCallbacks.FitToBudget(new AdbShellOutput(0, new string('é', 90_000), new string('', 40_000), false));
+		var dto = PluginAdbCallbacks.FitToBudget(new AdbShellOutput(0,
+			new string('é', 90_000),
+			new string('', 40_000),
+			false));
 
 		var size = JsonSerializer.SerializeToUtf8Bytes(dto, PluginProtocolJson.Options).Length;
 		Assert.Multiple(() =>
@@ -160,7 +177,8 @@ public class PluginAdbCallbacksTests
 	{
 		var dto = PluginAdbCallbacks.FitToBudget(new AdbShellOutput(1, "out", "err", false));
 
-		Assert.That((dto.ExitCode, dto.StandardOutput, dto.StandardError, dto.Truncated), Is.EqualTo((1, "out", "err", false)));
+		Assert.That((dto.ExitCode, dto.StandardOutput, dto.StandardError, dto.Truncated),
+			Is.EqualTo((1, "out", "err", false)));
 	}
 
 	[Test]
@@ -199,15 +217,17 @@ public class PluginAdbCallbacksTests
 	{
 		var adb = new FakeAdbManager();
 
-		var result = await TypedCallbacks(adb).ExecuteAsync(PluginId,
-			new HostInvokePayload
-			{
-				Api = HostApis.Adb,
-				Operation = HostOperations.Adb.Key,
-				Arguments = JsonSerializer.SerializeToElement(new AdbKeyArguments { Serial = "", Key = AdbKeys.Home },
-					PluginProtocolJson.Options)
-			},
-			CancellationToken.None);
+		var result = await TypedCallbacks(adb)
+			.ExecuteAsync(PluginId,
+				new HostInvokePayload
+				{
+					Api = HostApis.Adb,
+					Operation = HostOperations.Adb.Key,
+					Arguments = JsonSerializer.SerializeToElement(
+						new AdbKeyArguments { Serial = "", Key = AdbKeys.Home },
+						PluginProtocolJson.Options)
+				},
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -221,15 +241,17 @@ public class PluginAdbCallbacksTests
 	{
 		var adb = new FakeAdbManager();
 
-		var result = await TypedCallbacks(adb).ExecuteAsync(PluginId,
-			new HostInvokePayload
-			{
-				Api = HostApis.Adb,
-				Operation = HostOperations.Adb.Key,
-				Arguments = JsonSerializer.SerializeToElement(new AdbKeyArguments { Serial = "A1", Key = "quantum" },
-					PluginProtocolJson.Options)
-			},
-			CancellationToken.None);
+		var result = await TypedCallbacks(adb)
+			.ExecuteAsync(PluginId,
+				new HostInvokePayload
+				{
+					Api = HostApis.Adb,
+					Operation = HostOperations.Adb.Key,
+					Arguments = JsonSerializer.SerializeToElement(
+						new AdbKeyArguments { Serial = "A1", Key = "quantum" },
+						PluginProtocolJson.Options)
+				},
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -253,7 +275,8 @@ public class PluginAdbCallbacksTests
 			Assert.That(before.Error, Is.Null);
 			Assert.That(before.Data, Is.Null);
 			Assert.That(after.Data?.Deserialize<AdbDeviceStatusDto>(PluginProtocolJson.Options),
-				Is.EqualTo(new AdbDeviceStatusDto { ScreenOn = true, Locked = true, ForegroundPackage = "com.example.app" }));
+				Is.EqualTo(new AdbDeviceStatusDto
+					{ ScreenOn = true, Locked = true, ForegroundPackage = "com.example.app" }));
 			Assert.That(adb.PropertiesSerials, Is.EqualTo(new[] { "A1", "A1" }));
 		});
 	}
@@ -273,8 +296,11 @@ public class PluginAdbCallbacksTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(announced?.ByteLength, Is.EqualTo(png.Length));
-			Assert.That(announced?.ContentHash, Is.EqualTo(MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(png)));
-			Assert.That(sent, Is.EqualTo((PluginId, announced?.TransferId, MacroDeck.Plugin.Protocol.Assets.AssetKinds.AndroidScreenshot)));
+			Assert.That(announced?.ContentHash,
+				Is.EqualTo(MacroDeck.Plugin.Protocol.Assets.AssetContentHash.Compute(png)));
+			Assert.That(sent,
+				Is.EqualTo((PluginId, announced?.TransferId,
+					MacroDeck.Plugin.Protocol.Assets.AssetKinds.AndroidScreenshot)));
 			Assert.That(adb.CaptureScreenshotSerials, Is.EqualTo(new[] { "A1" }));
 		});
 	}
@@ -289,18 +315,21 @@ public class PluginAdbCallbacksTests
 	}
 
 	private static PluginAdbCallbacks TypedCallbacks(FakeAdbManager adb, IPluginHostAssetSender? assets = null)
-		=> new(new FakeAdbDeviceOperations(),
+	{
+		return new PluginAdbCallbacks(new FakeAdbDeviceOperations(),
 			new FixedAdbAccessPolicy(PluginAdbAccess.Available),
 			new FakeHostLockState(),
 			adbManager: adb,
 			assets: assets);
+	}
 
 	private sealed class RecordingHostAssetSender : IPluginHostAssetSender
 	{
 		public TaskCompletionSource<(string PluginId, string? TransferId, string Kind)> Sent { get; } =
 			new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		public Task<bool> SendAsync(string pluginId,
+		public Task<bool> SendAsync(
+			string pluginId,
 			string transferId,
 			string kind,
 			string mimeType,
@@ -312,7 +341,10 @@ public class PluginAdbCallbacksTests
 			return Task.FromResult(true);
 		}
 
-		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope ack) => false;
+		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope ack)
+		{
+			return false;
+		}
 
 		public void DropSession(string pluginId)
 		{
@@ -320,15 +352,21 @@ public class PluginAdbCallbacksTests
 	}
 
 	private static PluginAdbCallbacks Callbacks(PluginAdbAccess access, bool locked = false)
-		=> new(new FakeAdbDeviceOperations(), new FixedAdbAccessPolicy(access), new FakeHostLockState { IsLocked = locked });
+	{
+		return new PluginAdbCallbacks(new FakeAdbDeviceOperations(),
+			new FixedAdbAccessPolicy(access),
+			new FakeHostLockState { IsLocked = locked });
+	}
 
 	internal static HostInvokePayload Payload(string operation)
 	{
 		object arguments = operation switch
 		{
 			HostOperations.Adb.Shell => new AdbShellArguments { Serial = "A1", Command = "true" },
-			HostOperations.Adb.Push => new AdbPushArguments { Serial = "A1", LocalPath = "/tmp/a", RemotePath = "/sdcard/a" },
-			HostOperations.Adb.Pull => new AdbPullArguments { Serial = "A1", RemotePath = "/sdcard/a", LocalPath = "/tmp/a" },
+			HostOperations.Adb.Push => new AdbPushArguments
+				{ Serial = "A1", LocalPath = "/tmp/a", RemotePath = "/sdcard/a" },
+			HostOperations.Adb.Pull => new AdbPullArguments
+				{ Serial = "A1", RemotePath = "/sdcard/a", LocalPath = "/tmp/a" },
 			HostOperations.Adb.Install => new AdbInstallArguments { Serial = "A1", ApkPath = "/tmp/app.apk" },
 			HostOperations.Adb.Uninstall or HostOperations.Adb.PackageInstalled
 				=> new AdbPackageArguments { Serial = "A1", PackageName = "com.example.app" },
@@ -361,38 +399,71 @@ internal sealed class FakeAdbDeviceOperations : IAdbDeviceOperations
 	public Result<AdbFailureCode> Install { get; set; } = Result.Ok<AdbFailureCode>();
 
 	public Func<CancellationToken, Task<Result<AdbShellOutput, AdbFailureCode>>> Shell { get; set; }
-		= _ => Task.FromResult(Result.Ok<AdbShellOutput, AdbFailureCode>(new AdbShellOutput(0, string.Empty, string.Empty, false)));
+		= _ => Task.FromResult(
+			Result.Ok<AdbShellOutput, AdbFailureCode>(new AdbShellOutput(0, string.Empty, string.Empty, false)));
 
-	public Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(string serial,
+	public Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(
+		string serial,
 		string command,
-		CancellationToken cancellationToken) => Shell(cancellationToken);
+		CancellationToken cancellationToken)
+	{
+		return Shell(cancellationToken);
+	}
 
-	public Result<AdbBatteryReading, AdbFailureCode> Battery { get; set; } = Result.Ok<AdbBatteryReading, AdbFailureCode>(
-		new AdbBatteryReading(50, false, AdbBatteryStatus.Discharging, AdbBatteryHealth.Good));
+	public Result<AdbBatteryReading, AdbFailureCode> Battery { get; set; }
+		= Result.Ok<AdbBatteryReading, AdbFailureCode>(new AdbBatteryReading(50,
+			false,
+			AdbBatteryStatus.Discharging,
+			AdbBatteryHealth.Good));
 
-	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(string serial, CancellationToken cancellationToken)
-		=> Task.FromResult(Battery);
+	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(
+		string serial,
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Battery);
+	}
 
-	public Task<Result<AdbFailureCode>> PushFileAsync(string serial,
+	public Task<Result<AdbFailureCode>> PushFileAsync(
+		string serial,
 		string localPath,
 		string remotePath,
-		CancellationToken cancellationToken) => Task.FromResult(Result.Ok<AdbFailureCode>());
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Result.Ok<AdbFailureCode>());
+	}
 
-	public Task<Result<AdbFailureCode>> PullFileAsync(string serial,
+	public Task<Result<AdbFailureCode>> PullFileAsync(
+		string serial,
 		string remotePath,
 		string localPath,
-		CancellationToken cancellationToken) => Task.FromResult(Result.Ok<AdbFailureCode>());
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Result.Ok<AdbFailureCode>());
+	}
 
-	public Task<Result<AdbFailureCode>> InstallApkAsync(string serial, string apkPath, CancellationToken cancellationToken)
-		=> Task.FromResult(Install);
+	public Task<Result<AdbFailureCode>> InstallApkAsync(
+		string serial,
+		string apkPath,
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Install);
+	}
 
-	public Task<Result<AdbFailureCode>> UninstallPackageAsync(string serial,
+	public Task<Result<AdbFailureCode>> UninstallPackageAsync(
+		string serial,
 		string packageName,
-		CancellationToken cancellationToken) => Task.FromResult(Result.Ok<AdbFailureCode>());
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Result.Ok<AdbFailureCode>());
+	}
 
-	public Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(string serial,
+	public Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(
+		string serial,
 		string packageName,
-		CancellationToken cancellationToken) => Task.FromResult(Result.Ok<bool, AdbFailureCode>(true));
+		CancellationToken cancellationToken)
+	{
+		return Task.FromResult(Result.Ok<bool, AdbFailureCode>(true));
+	}
 
 	public Func<string, Result<string, AdbFailureCode>> Connect { get; set; }
 		= address => Result.Ok<string, AdbFailureCode>(address);
@@ -414,7 +485,8 @@ internal sealed class RecordingConsentNotifier : IPluginAdbConsentNotifier
 
 	public List<string> Dismissed { get; } = [];
 
-	public Task NotifyIfNeededAsync(string pluginId,
+	public Task NotifyIfNeededAsync(
+		string pluginId,
 		string pluginName,
 		bool declaresAdb,
 		bool previouslyDeclaredAdb,
@@ -430,7 +502,10 @@ internal sealed class RecordingConsentNotifier : IPluginAdbConsentNotifier
 		return Task.CompletedTask;
 	}
 
-	public void Dismiss(string pluginId) => Dismissed.Add(pluginId);
+	public void Dismiss(string pluginId)
+	{
+		Dismissed.Add(pluginId);
+	}
 
 	public void DismissAll()
 	{

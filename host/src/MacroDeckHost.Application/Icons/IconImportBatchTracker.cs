@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Persistence;
+using MacroDeckHost.Application.Persistence.Icons;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 
@@ -36,18 +37,26 @@ public sealed class IconImportBatchTracker
 	}
 
 	public IconImportBatchEntity? Get(Guid batchId)
-		=> _batches.TryGetValue(batchId, out var tracked) ? tracked.Batch : null;
+	{
+		return _batches.TryGetValue(batchId, out var tracked) ? tracked.Batch : null;
+	}
 
-	public List<IconImportBatchEntity> GetAll() => _batches.Values.Select(t => t.Batch).ToList();
+	public List<IconImportBatchEntity> GetAll()
+	{
+		return _batches.Values.Select(t => t.Batch).ToList();
+	}
 
 	public (int Total, int Processed, int Failed) GetCounters(Guid batchId)
-		=> _batches.TryGetValue(batchId, out var tracked)
+	{
+		return _batches.TryGetValue(batchId, out var tracked)
 			? (Volatile.Read(ref tracked.Total) - Volatile.Read(ref tracked.AppearanceTotal),
 				Volatile.Read(ref tracked.Processed) - Volatile.Read(ref tracked.AppearanceProcessed),
 				Volatile.Read(ref tracked.Failed) - Volatile.Read(ref tracked.AppearanceFailed))
 			: (0, 0, 0);
+	}
 
-	public void SetCounters(Guid batchId,
+	public void SetCounters(
+		Guid batchId,
 		(int Total, int Processed, int Failed) icons,
 		(int Total, int Processed, int Failed) appearances)
 	{
@@ -114,7 +123,9 @@ public sealed class IconImportBatchTracker
 	}
 
 	public bool HasItems(Guid batchId)
-		=> _batches.TryGetValue(batchId, out var tracked) && Volatile.Read(ref tracked.Total) > 0;
+	{
+		return _batches.TryGetValue(batchId, out var tracked) && Volatile.Read(ref tracked.Total) > 0;
+	}
 
 	public bool IsFinished(Guid batchId)
 	{
@@ -123,9 +134,9 @@ public sealed class IconImportBatchTracker
 			return true;
 		}
 
-		return tracked.Batch.State is not IconImportBatchState.Discovering &&
-			Volatile.Read(ref tracked.Processed) + Volatile.Read(ref tracked.Failed) >=
-			Volatile.Read(ref tracked.Total);
+		return tracked.Batch.State is not IconImportBatchState.Discovering
+			&& Volatile.Read(ref tracked.Processed) + Volatile.Read(ref tracked.Failed)
+			>= Volatile.Read(ref tracked.Total);
 	}
 
 	public bool ShouldEmitProgress(Guid batchId, bool force)
@@ -163,10 +174,13 @@ public sealed class IconImportBatchTracker
 	}
 
 	public IReadOnlyList<IconImportBatchEntity> LoadPersisted()
-		=> _store.LoadAll().Select(ToEntity).ToList();
+	{
+		return _store.LoadAll().Select(ToEntity).ToList();
+	}
 
-	private static Persistence.Icons.IconImportBatchFile ToFile(IconImportBatchEntity batch)
-		=> new()
+	private static IconImportBatchFile ToFile(IconImportBatchEntity batch)
+	{
+		return new IconImportBatchFile
 		{
 			Id = batch.Id,
 			PackId = batch.PackId,
@@ -181,9 +195,11 @@ public sealed class IconImportBatchTracker
 			CreatedAt = batch.CreatedAt,
 			UpdatedAt = batch.UpdatedAt
 		};
+	}
 
-	private static IconImportBatchEntity ToEntity(Persistence.Icons.IconImportBatchFile file)
-		=> new()
+	private static IconImportBatchEntity ToEntity(IconImportBatchFile file)
+	{
+		return new IconImportBatchEntity
 		{
 			Id = file.Id,
 			PackId = file.PackId,
@@ -198,4 +214,5 @@ public sealed class IconImportBatchTracker
 			CreatedAt = file.CreatedAt,
 			UpdatedAt = file.UpdatedAt
 		};
+	}
 }

@@ -52,27 +52,35 @@ public sealed record WeatherWidgetData
 			AnimateIcon = ReadBool(data, "animateIcon") ?? true,
 			ForecastDays = Math.Clamp(ReadInt(data, "forecastDays") ?? 5, 1, 7),
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(data, "backgroundColor")),
-			Style = ReadStyle(data),
+			Style = ReadStyle(data)
 		};
 	}
 
 	private static string ReadStyle(JsonElement data)
-		=> ReadString(data, StyleKey) == StyleCompact ? StyleCompact : StyleForecast;
+	{
+		return ReadString(data, StyleKey) == StyleCompact ? StyleCompact : StyleForecast;
+	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return data.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
 			? value.GetBoolean()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var number)
+	{
+		return data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var number)
 				? number
 				: null;
+	}
 }

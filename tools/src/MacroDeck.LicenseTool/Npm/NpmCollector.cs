@@ -6,16 +6,17 @@ namespace MacroDeck.LicenseTool.Npm;
 
 internal sealed class NpmCollector
 {
-	private static readonly string[] ScriptExtensions = [".ts", ".tsx", ".mts", ".cts", ".js", ".mjs", ".cjs"];
+	private static readonly string[] _scriptExtensions = [".ts", ".tsx", ".mts", ".cts", ".js", ".mjs", ".cjs"];
 
-	private static readonly string[] StyleExtensions = [".scss", ".sass", ".css"];
+	private static readonly string[] _styleExtensions = [".scss", ".sass", ".css"];
 
-	private static readonly string[] ExcludedDirectories = ["node_modules", "dist", "test", "tests", "__tests__", "e2e"];
+	private static readonly string[] _excludedDirectories =
+		["node_modules", "dist", "test", "tests", "__tests__", "e2e"];
 
-	private static readonly JsonDocumentOptions JsoncOptions = new()
+	private static readonly JsonDocumentOptions _jsoncOptions = new()
 	{
 		CommentHandling = JsonCommentHandling.Skip,
-		AllowTrailingCommas = true,
+		AllowTrailingCommas = true
 	};
 
 	private readonly string _repositoryRoot;
@@ -26,17 +27,26 @@ internal sealed class NpmCollector
 	private readonly HashSet<string> _scannedFiles = new(StringComparer.Ordinal);
 	private readonly SortedSet<string> _shippedKeys = new(StringComparer.Ordinal);
 
-	private NpmCollector(string repositoryRoot, NpmSourceConfiguration source, Problems problems, JsonDocument lockDocument)
+	private NpmCollector(
+		string repositoryRoot,
+		NpmSourceConfiguration source,
+		Problems problems,
+		JsonDocument lockDocument)
 	{
 		_repositoryRoot = repositoryRoot;
 		_npmRoot = Path.Combine(repositoryRoot, source.Root);
 		_source = source;
 		_problems = problems;
-		_lock = lockDocument.RootElement.GetProperty("packages").EnumerateObject()
+		_lock = lockDocument.RootElement.GetProperty("packages")
+			.EnumerateObject()
 			.ToDictionary(property => property.Name, property => property.Value.Clone(), StringComparer.Ordinal);
 	}
 
-	public static bool Collect(string repositoryRoot, NpmSourceConfiguration source, ComponentSet components, Problems problems)
+	public static bool Collect(
+		string repositoryRoot,
+		NpmSourceConfiguration source,
+		ComponentSet components,
+		Problems problems)
 	{
 		var lockPath = Path.Combine(repositoryRoot, source.Root, "package-lock.json");
 		if (!File.Exists(lockPath))
@@ -48,7 +58,8 @@ internal sealed class NpmCollector
 		using var lockDocument = JsonDocument.Parse(File.ReadAllText(lockPath));
 		if (!lockDocument.RootElement.TryGetProperty("packages", out _))
 		{
-			problems.Add($"npm: {Relative(repositoryRoot, lockPath)} has no packages map; lockfileVersion 2 or 3 is required");
+			problems.Add(
+				$"npm: {Relative(repositoryRoot, lockPath)} has no packages map; lockfileVersion 2 or 3 is required");
 			return false;
 		}
 
@@ -64,9 +75,10 @@ internal sealed class NpmCollector
 			var workspaceDirectory = Path.Combine(_npmRoot, workspace.Path);
 			if (_lock.TryGetValue(workspace.Path, out var entry))
 			{
-				foreach (var name in DependencyNames(entry, "dependencies").Concat(DependencyNames(entry, "optionalDependencies")))
+				foreach (var name in DependencyNames(entry, "dependencies")
+					.Concat(DependencyNames(entry, "optionalDependencies")))
 				{
-					ResolvePackage(workspace.Path, name, required: true, $"{workspace.Path}/package.json");
+					ResolvePackage(workspace.Path, name, true, $"{workspace.Path}/package.json");
 				}
 			}
 			else
@@ -106,14 +118,21 @@ internal sealed class NpmCollector
 		}
 	}
 
-	private static IEnumerable<string> EnumerateStylesheets(string directory) =>
-		Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-			.Where(file => StyleExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
-			.Where(file => !Path.GetRelativePath(directory, file).Replace('\\', '/').Split('/')
-				.Any(segment => ExcludedDirectories.Contains(segment, StringComparer.Ordinal)))
+	private static IEnumerable<string> EnumerateStylesheets(string directory)
+	{
+		return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
+			.Where(file => _styleExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
+			.Where(file => !Path.GetRelativePath(directory, file)
+				.Replace('\\', '/')
+				.Split('/')
+				.Any(segment => _excludedDirectories.Contains(segment, StringComparer.Ordinal)))
 			.Order(StringComparer.Ordinal);
+	}
 
-	private void ScanFile(NpmWorkspaceConfiguration workspace, IReadOnlyList<(string Key, List<string> Targets)> aliases, string file)
+	private void ScanFile(
+		NpmWorkspaceConfiguration workspace,
+		IReadOnlyList<(string Key, List<string> Targets)> aliases,
+		string file)
 	{
 		if (!_scannedFiles.Add(file))
 		{
@@ -122,7 +141,7 @@ internal sealed class NpmCollector
 
 		var extension = Path.GetExtension(file);
 		var source = File.ReadAllText(file);
-		if (StyleExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+		if (_styleExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
 		{
 			var lineComments = !string.Equals(extension, ".css", StringComparison.OrdinalIgnoreCase);
 			foreach (var target in StylesheetImportScanner.Scan(source, lineComments))
@@ -133,7 +152,7 @@ internal sealed class NpmCollector
 			return;
 		}
 
-		if (!ScriptExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+		if (!_scriptExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
 		{
 			return;
 		}
@@ -155,13 +174,15 @@ internal sealed class NpmCollector
 			return;
 		}
 
-		if (specifier.StartsWith("./", StringComparison.Ordinal) || specifier.StartsWith("../", StringComparison.Ordinal)
+		if (specifier.StartsWith("./", StringComparison.Ordinal)
+			|| specifier.StartsWith("../", StringComparison.Ordinal)
 			|| specifier is "." or "..")
 		{
 			var resolved = ResolveScriptFile(Path.Combine(Path.GetDirectoryName(file)!, specifier));
 			if (resolved is null)
 			{
-				_problems.Add($"npm: {Relative(_repositoryRoot, file)}: import '{specifier}' does not resolve to a file");
+				_problems.Add(
+					$"npm: {Relative(_repositoryRoot, file)}: import '{specifier}' does not resolve to a file");
 				return;
 			}
 
@@ -177,7 +198,8 @@ internal sealed class NpmCollector
 				continue;
 			}
 
-			var resolved = targets.Select(target => ResolveScriptFile(target.Replace("*", matched, StringComparison.Ordinal)))
+			var resolved = targets
+				.Select(target => ResolveScriptFile(target.Replace("*", matched, StringComparison.Ordinal)))
 				.FirstOrDefault(candidate => candidate is not null);
 			if (resolved is null)
 			{
@@ -189,7 +211,7 @@ internal sealed class NpmCollector
 			return;
 		}
 
-		ResolvePackage(workspace.Path, PackageName(specifier), required: true, Relative(_repositoryRoot, file));
+		ResolvePackage(workspace.Path, PackageName(specifier), true, Relative(_repositoryRoot, file));
 	}
 
 	private void ResolveStylesheetTarget(
@@ -198,8 +220,10 @@ internal sealed class NpmCollector
 		string file,
 		string target)
 	{
-		if (target.StartsWith("sass:", StringComparison.Ordinal) || target.StartsWith("http:", StringComparison.Ordinal)
-			|| target.StartsWith("https:", StringComparison.Ordinal) || target.StartsWith("//", StringComparison.Ordinal))
+		if (target.StartsWith("sass:", StringComparison.Ordinal)
+			|| target.StartsWith("http:", StringComparison.Ordinal)
+			|| target.StartsWith("https:", StringComparison.Ordinal)
+			|| target.StartsWith("//", StringComparison.Ordinal))
 		{
 			return;
 		}
@@ -207,7 +231,7 @@ internal sealed class NpmCollector
 		var location = Relative(_repositoryRoot, file);
 		if (target.StartsWith('~'))
 		{
-			ResolvePackage(workspace.Path, PackageName(target[1..]), required: true, location);
+			ResolvePackage(workspace.Path, PackageName(target[1..]), true, location);
 			return;
 		}
 
@@ -230,7 +254,7 @@ internal sealed class NpmCollector
 			return;
 		}
 
-		ResolvePackage(workspace.Path, PackageName(target), required: true, location);
+		ResolvePackage(workspace.Path, PackageName(target), true, location);
 	}
 
 	private void ResolvePackage(string fromKey, string name, bool required, string requester)
@@ -257,7 +281,8 @@ internal sealed class NpmCollector
 			var resolved = entry.TryGetProperty("resolved", out var target) ? target.GetString() : null;
 			if (!_source.Workspaces.Any(workspace => workspace.Path == resolved))
 			{
-				_problems.Add($"npm: {requester}: workspace package '{name}' ({resolved}) is not configured in third-party/config.yml");
+				_problems.Add(
+					$"npm: {requester}: workspace package '{name}' ({resolved}) is not configured in third-party/config.yml");
 			}
 
 			return;
@@ -270,12 +295,13 @@ internal sealed class NpmCollector
 
 		foreach (var dependency in DependencyNames(entry, "dependencies"))
 		{
-			ResolvePackage(key, dependency, required: true, key);
+			ResolvePackage(key, dependency, true, key);
 		}
 
-		foreach (var dependency in DependencyNames(entry, "optionalDependencies").Concat(DependencyNames(entry, "peerDependencies")))
+		foreach (var dependency in DependencyNames(entry, "optionalDependencies")
+			.Concat(DependencyNames(entry, "peerDependencies")))
 		{
-			ResolvePackage(key, dependency, required: false, key);
+			ResolvePackage(key, dependency, false, key);
 		}
 	}
 
@@ -298,7 +324,9 @@ internal sealed class NpmCollector
 			var nested = directory.LastIndexOf("node_modules/", StringComparison.Ordinal);
 			directory = nested >= 0
 				? directory[..nested].TrimEnd('/')
-				: directory.Contains('/', StringComparison.Ordinal) ? directory[..directory.LastIndexOf('/')] : "";
+				: directory.Contains('/', StringComparison.Ordinal)
+					? directory[..directory.LastIndexOf('/')]
+					: "";
 		}
 	}
 
@@ -330,7 +358,9 @@ internal sealed class NpmCollector
 			}
 
 			ReadPackageJson(Path.Combine(directory, "package.json"), component);
-			foreach (var file in Directory.EnumerateFiles(directory).Select(Path.GetFileName).Order(StringComparer.Ordinal))
+			foreach (var file in Directory.EnumerateFiles(directory)
+				.Select(Path.GetFileName)
+				.Order(StringComparer.Ordinal))
 			{
 				if (LicenseFiles.Classify(file!) is { } kind)
 				{
@@ -351,22 +381,26 @@ internal sealed class NpmCollector
 			return;
 		}
 
-		using var document = JsonDocument.Parse(File.ReadAllText(path), JsoncOptions);
+		using var document = JsonDocument.Parse(File.ReadAllText(path), _jsoncOptions);
 		var root = document.RootElement;
 		var repository = root.TryGetProperty("repository", out var repositoryElement)
 			? repositoryElement.ValueKind == JsonValueKind.String
 				? repositoryElement.GetString()
-				: repositoryElement.TryGetProperty("url", out var url) ? url.GetString() : null
+				: repositoryElement.TryGetProperty("url", out var url)
+					? url.GetString()
+					: null
 			: null;
-		var homepage = root.TryGetProperty("homepage", out var homepageElement) && homepageElement.ValueKind == JsonValueKind.String
-			? homepageElement.GetString()
-			: null;
+		var homepage = root.TryGetProperty("homepage", out var homepageElement)
+			&& homepageElement.ValueKind == JsonValueKind.String
+				? homepageElement.GetString()
+				: null;
 		component.Url = TextNormalizer.CleanUrl(repository ?? homepage);
 		if (repository is not null && repository.StartsWith("github:", StringComparison.Ordinal))
 		{
 			component.Url = "https://github.com/" + repository["github:".Length..];
 		}
-		else if (repository is not null && !repository.Contains(':', StringComparison.Ordinal)
+		else if (repository is not null
+			&& !repository.Contains(':', StringComparison.Ordinal)
 			&& repository.Count(character => character == '/') == 1)
 		{
 			component.Url = "https://github.com/" + repository;
@@ -376,7 +410,9 @@ internal sealed class NpmCollector
 		{
 			component.Copyright = author.ValueKind == JsonValueKind.String
 				? author.GetString()
-				: author.TryGetProperty("name", out var authorName) ? authorName.GetString() : null;
+				: author.TryGetProperty("name", out var authorName)
+					? authorName.GetString()
+					: null;
 		}
 	}
 
@@ -391,11 +427,13 @@ internal sealed class NpmCollector
 		{
 			JsonValueKind.String => license.GetString(),
 			JsonValueKind.Object when license.TryGetProperty("type", out var type) => type.GetString(),
-			_ => null,
+			_ => null
 		};
 	}
 
-	private List<(string Key, List<string> Targets)> ReadAliases(NpmWorkspaceConfiguration workspace, string workspaceDirectory)
+	private List<(string Key, List<string> Targets)> ReadAliases(
+		NpmWorkspaceConfiguration workspace,
+		string workspaceDirectory)
 	{
 		if (workspace.Tsconfig is null)
 		{
@@ -409,7 +447,7 @@ internal sealed class NpmCollector
 			return [];
 		}
 
-		using var document = JsonDocument.Parse(File.ReadAllText(path), JsoncOptions);
+		using var document = JsonDocument.Parse(File.ReadAllText(path), _jsoncOptions);
 		if (!document.RootElement.TryGetProperty("compilerOptions", out var options)
 			|| !options.TryGetProperty("paths", out var paths))
 		{
@@ -436,7 +474,8 @@ internal sealed class NpmCollector
 
 		var prefix = key[..star];
 		var suffix = key[(star + 1)..];
-		return specifier.StartsWith(prefix, StringComparison.Ordinal) && specifier.EndsWith(suffix, StringComparison.Ordinal)
+		return specifier.StartsWith(prefix, StringComparison.Ordinal)
+			&& specifier.EndsWith(suffix, StringComparison.Ordinal)
 			&& specifier.Length >= prefix.Length + suffix.Length
 				? specifier[prefix.Length..^suffix.Length]
 				: null;
@@ -446,7 +485,7 @@ internal sealed class NpmCollector
 	{
 		var full = Path.GetFullPath(path);
 		var candidates = new List<string> { full };
-		candidates.AddRange(ScriptExtensions.Select(extension => full + extension));
+		candidates.AddRange(_scriptExtensions.Select(extension => full + extension));
 		candidates.Add(full + ".json");
 		var extension = Path.GetExtension(full);
 		if (extension is ".js" or ".mjs" or ".cjs")
@@ -455,7 +494,7 @@ internal sealed class NpmCollector
 			candidates.AddRange([stem + ".ts", stem + ".tsx", stem + ".mts", stem + ".cts"]);
 		}
 
-		candidates.AddRange(ScriptExtensions.Select(candidate => Path.Combine(full, "index" + candidate)));
+		candidates.AddRange(_scriptExtensions.Select(candidate => Path.Combine(full, "index" + candidate)));
 		return candidates.FirstOrDefault(File.Exists);
 	}
 
@@ -476,15 +515,17 @@ internal sealed class NpmCollector
 			Path.Combine(full, "_index.scss"),
 			Path.Combine(full, "index.scss"),
 			Path.Combine(full, "_index.sass"),
-			Path.Combine(full, "index.sass"),
+			Path.Combine(full, "index.sass")
 		];
 		return candidates.FirstOrDefault(File.Exists);
 	}
 
-	private static IEnumerable<string> DependencyNames(JsonElement entry, string property) =>
-		entry.TryGetProperty(property, out var dependencies)
+	private static IEnumerable<string> DependencyNames(JsonElement entry, string property)
+	{
+		return entry.TryGetProperty(property, out var dependencies)
 			? dependencies.EnumerateObject().Select(dependency => dependency.Name)
 			: [];
+	}
 
 	private static string PackageName(string specifier)
 	{
@@ -492,5 +533,8 @@ internal sealed class NpmCollector
 		return specifier.StartsWith('@') && segments.Length > 1 ? $"{segments[0]}/{segments[1]}" : segments[0];
 	}
 
-	private static string Relative(string root, string path) => Path.GetRelativePath(root, path).Replace('\\', '/');
+	private static string Relative(string root, string path)
+	{
+		return Path.GetRelativePath(root, path).Replace('\\', '/');
+	}
 }

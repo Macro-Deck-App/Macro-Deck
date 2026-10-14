@@ -58,7 +58,7 @@ public static class PluginArtifactFiles
 	/// the extension is camel-cased by convention but file systems disagree about case.</summary>
 	public static bool HasArtifactExtension(string? path)
 	{
-		return !string.IsNullOrWhiteSpace(path) &&
-			Path.GetExtension(path).Equals(MacroDeckPluginExtension, StringComparison.OrdinalIgnoreCase);
+		return !string.IsNullOrWhiteSpace(path)
+			&& Path.GetExtension(path).Equals(MacroDeckPluginExtension, StringComparison.OrdinalIgnoreCase);
 	}
 }

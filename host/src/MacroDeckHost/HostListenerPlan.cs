@@ -11,7 +11,8 @@ namespace MacroDeckHost;
 
 internal sealed class HostListenerPlan
 {
-	private HostListenerPlan(PublicEndpointSet endpoints,
+	private HostListenerPlan(
+		PublicEndpointSet endpoints,
 		int loopbackPort,
 		X509Certificate2? certificate,
 		BridgedConnections bridgedConnections)
@@ -32,7 +33,8 @@ internal sealed class HostListenerPlan
 
 	internal bool PublicListenerAvailable => Endpoints.HasPublicListener;
 
-	internal static HostListenerPlan Create(PublicEndpointSet requested,
+	internal static HostListenerPlan Create(
+		PublicEndpointSet requested,
 		int loopbackPort,
 		X509Certificate2? certificate = null,
 		Func<int, PublicListenerProbeResult>? probe = null,
@@ -45,8 +47,8 @@ internal sealed class HostListenerPlan
 		{
 			if (certificate is null)
 			{
-				Log.Warning("HTTPS is enabled but no usable certificate is available, so the HTTPS listener on " +
-					"port {HttpsPort} is not opened. Configure a certificate in Settings > Network.",
+				Log.Warning("HTTPS is enabled but no usable certificate is available, so the HTTPS listener on "
+					+ "port {HttpsPort} is not opened. Configure a certificate in Settings > Network.",
 					httpsPort);
 				effective = effective.WithoutHttps();
 			}
@@ -95,9 +97,9 @@ internal sealed class HostListenerPlan
 			return true;
 		}
 
-		Log.Warning("The public {Protocol} listener on port {Port} could not be opened " +
-			"({SocketError}, native error {NativeErrorCode}). Macro Deck continues without it; " +
-			"choose a different port in Settings > Network.",
+		Log.Warning("The public {Protocol} listener on port {Port} could not be opened "
+			+ "({SocketError}, native error {NativeErrorCode}). Macro Deck continues without it; "
+			+ "choose a different port in Settings > Network.",
 			protocol,
 			port,
 			result.Error,

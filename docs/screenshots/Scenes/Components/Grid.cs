@@ -1,20 +1,24 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
-	private static UiStack Reading(string key, string label, string value) => new()
+	private static UiStack Reading(string key, string label, string value)
 	{
-		Key = key,
-		Background = "#1c2430",
-		Justify = UiComponentJustify.Center,
-		Align = UiComponentAlignments.Center,
-		Children =
-		[
-			new UiTextRun { Key = "value", Text = value, Size = 0.14, Weight = UiComponentTextWeights.SemiBold },
-			new UiTextRun { Key = "label", Text = label, Size = 0.08, Role = UiComponentTextRoles.Secondary },
-		],
-	};
+		return new UiStack
+		{
+			Key = key,
+			Background = "#1c2430",
+			Justify = UiComponentJustify.Center,
+			Align = UiComponentAlignments.Center,
+			Children =
+			[
+				new UiTextRun { Key = "value", Text = value, Size = 0.14, Weight = UiComponentTextWeights.SemiBold },
+				new UiTextRun { Key = "label", Text = label, Size = 0.08, Role = UiComponentTextRoles.Secondary }
+			]
+		};
+	}
 
 	private static IEnumerable<Scene> GridScenes()
 	{
@@ -41,13 +45,13 @@ internal static partial class Scenes
 								Fill = true,
 								Points = SamplePoints,
 								PlotTop = 0.3,
-								Thickness = UiSize.Capped(2d / UiLength.Cell, 2),
-							},
-						],
+								Thickness = UiSize.Capped(2d / UiLength.Cell, 2)
+							}
+						]
 					},
 					Reading("ram", "RAM", "62 %"),
-					Reading("gpu", "GPU", "38 %"),
-				],
+					Reading("gpu", "GPU", "38 %")
+				]
 			},
 			2,
 			2);

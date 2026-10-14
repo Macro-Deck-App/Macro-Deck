@@ -2,7 +2,6 @@ using System.Text.Json.Nodes;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Configuration;
-using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
@@ -52,7 +51,8 @@ public class ColorVariableChangedHandlerTests
 		_mediator = new RecordingMediator();
 		var colors = new ColorReferenceResolver(_registry);
 		_store = new CountingPreferences();
-		_preferences = new AppPreferenceService(_store, new FakeBuildEnvironment(), new FakeHostListenerState(), colors);
+		_preferences
+			= new AppPreferenceService(_store, new FakeBuildEnvironment(), new FakeHostListenerState(), colors);
 		_provider = new ServiceCollection()
 			.AddSingleton<IAppPreferenceService>(_preferences)
 			.AddSingleton<IMediator>(_mediator)
@@ -72,7 +72,10 @@ public class ColorVariableChangedHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _provider.Dispose();
+	public void TearDown()
+	{
+		_provider.Dispose();
+	}
 
 	[Test]
 	public async Task An_open_session_receives_the_new_colour_without_being_rebuilt()
@@ -80,11 +83,12 @@ public class ColorVariableChangedHandlerTests
 		var primary = Variable("primary", "#3366ff");
 		var widget = Widget(WidgetTypeIds.Slider, $$"""{"color":"{{Reference}}"}""");
 		WidgetEntity? received = null;
-		using var _ = _signals.SubscribeDataChanged(widget.Id.ToString(), entity =>
-		{
-			received = entity;
-			return true;
-		});
+		using var _ = _signals.SubscribeDataChanged(widget.Id.ToString(),
+			entity =>
+			{
+				received = entity;
+				return true;
+			});
 
 		await ChangeValue(primary, "#ff000080");
 
@@ -116,11 +120,12 @@ public class ColorVariableChangedHandlerTests
 		var primary = Variable("primary", "#3366ff");
 		var widget = Widget(WidgetTypeIds.Gauges, $$"""{"backgroundColor":"{{Reference}}"}""");
 		WidgetEntity? received = null;
-		using var _ = _signals.SubscribeDataChanged(widget.Id.ToString(), entity =>
-		{
-			received = entity;
-			return true;
-		});
+		using var _ = _signals.SubscribeDataChanged(widget.Id.ToString(),
+			entity =>
+			{
+				received = entity;
+				return true;
+			});
 
 		_registry.Remove(primary.Id);
 		await _handler.Handle(new VariableDeletedNotification(primary), CancellationToken.None);
@@ -203,7 +208,8 @@ public class ColorVariableChangedHandlerTests
 		Assert.That(_store.Reads, Is.EqualTo(readsAfterFirst));
 	}
 
-	internal static ColorVariableChangedHandler Handler(IWidgetVariableIndex index,
+	internal static ColorVariableChangedHandler Handler(
+		IWidgetVariableIndex index,
 		IFolderCache folders,
 		VariableRegistry variables,
 		IUiSessionBroker sessions,
@@ -273,35 +279,59 @@ public class ColorVariableChangedHandlerTests
 	{
 		public int Invalidations { get; private set; }
 
-		public bool IsOpen(Guid deviceId) => false;
+		public bool IsOpen(Guid deviceId)
+		{
+			return false;
+		}
 
-		public Task OpenAsync(Guid deviceId,
+		public Task OpenAsync(
+			Guid deviceId,
 			string providerId,
 			string providerDeviceId,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<bool> NavigateAsync(Guid deviceId,
+		public Task<bool> NavigateAsync(
+			Guid deviceId,
 			DeckNavigationCommand command,
-			CancellationToken cancellationToken = default) => Task.FromResult(false);
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(false);
+		}
 
-		public Task<DeviceInteractionOutcome> SubmitInteractionAsync(Guid deviceId,
+		public Task<DeviceInteractionOutcome> SubmitInteractionAsync(
+			Guid deviceId,
 			DeviceInteraction interaction,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.SessionNotFound));
+		{
+			return Task.FromResult(DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.SessionNotFound));
+		}
 
-		public Task<DeviceIconImage?> GetIconAsync(Guid deviceId,
+		public Task<DeviceIconImage?> GetIconAsync(
+			Guid deviceId,
 			string iconId,
 			int? size = null,
 			string? knownETag = null,
-			CancellationToken cancellationToken = default) => Task.FromResult<DeviceIconImage?>(null);
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceIconImage?>(null);
+		}
 
-		public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(Guid deviceId,
+		public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(
+			Guid deviceId,
 			string widgetId,
 			string? knownETag = null,
-			CancellationToken cancellationToken = default) => Task.FromResult<DeviceWidgetIconImage?>(null);
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceWidgetIconImage?>(null);
+		}
 
 		public Task InvalidateAsync(CancellationToken cancellationToken = default)
 		{
@@ -310,13 +340,18 @@ public class ColorVariableChangedHandlerTests
 		}
 
 		public Task InvalidateAsync(Guid deviceId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetPresenceAsync(Guid deviceId, bool online, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
-	private sealed class CountingPreferences : MacroDeckHost.Application.Persistence.Repositories.IAppPreferenceRepository
+	private sealed class
+		CountingPreferences : MacroDeckHost.Application.Persistence.Repositories.IAppPreferenceRepository
 	{
 		private readonly Dictionary<string, string> _values = new(StringComparer.Ordinal);
 

@@ -208,7 +208,9 @@ public sealed class FakeIntegrationContext : IIntegrationContext
 	IWeatherProviderApi IIntegrationContext.WeatherProvider => WeatherProvider;
 
 	internal void UseRegisteredAndroidDevices(IAndroidDeviceManager androidDevices)
-		=> _registeredAndroidDevices = ReferenceEquals(androidDevices, AndroidDevices) ? null : androidDevices;
+	{
+		_registeredAndroidDevices = ReferenceEquals(androidDevices, AndroidDevices) ? null : androidDevices;
+	}
 
 	/// <summary>This integration's stored documents - see <see cref="FakeIntegrationStorage" />.</summary>
 	public FakeIntegrationStorage Storage { get; }

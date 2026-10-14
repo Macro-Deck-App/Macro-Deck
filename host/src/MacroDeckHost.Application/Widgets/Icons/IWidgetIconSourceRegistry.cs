@@ -18,5 +18,8 @@ public sealed class WidgetIconSourceRegistry : IWidgetIconSourceRegistry
 		_sourcesByType = sources.ToDictionary(source => source.Type, StringComparer.Ordinal);
 	}
 
-	public IWidgetIconSource? Find(string type) => _sourcesByType.GetValueOrDefault(type);
+	public IWidgetIconSource? Find(string type)
+	{
+		return _sourcesByType.GetValueOrDefault(type);
+	}
 }

@@ -7,7 +7,10 @@ namespace MacroDeck.Plugin.Hosting.Tests.UnitTests.Support;
 /// <summary>An integration with whatever actions a test needs and nothing else.</summary>
 internal class TestIntegration : IPluginIntegration
 {
-	public TestIntegration(params IActionDefinition[] actions) => Actions = actions;
+	public TestIntegration(params IActionDefinition[] actions)
+	{
+		Actions = actions;
+	}
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
@@ -49,7 +52,10 @@ internal sealed class TestAction(string id, Func<ActionExecutionContext, Task<Ac
 	/// <summary>The context the last execution was handed, so a test can inspect what was bound.</summary>
 	public ActionExecutionContext? LastContext { get; private set; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this, execute);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this, execute);
+	}
 
 	private sealed class Executor(TestAction action, Func<ActionExecutionContext, Task<ActionResult>>? execute)
 		: IActionExecutor

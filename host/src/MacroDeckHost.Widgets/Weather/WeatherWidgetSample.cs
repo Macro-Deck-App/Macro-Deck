@@ -18,10 +18,11 @@ internal static class WeatherWidgetSample
 		("cloudy", 10, 17),
 		("mainly-clear", 12, 22),
 		("clear", 14, 25),
-		("cloudy", 13, 20),
+		("cloudy", 13, 20)
 	];
 
-	internal static async ValueTask<WeatherStatePayload> BuildAsync(WeatherWidgetData config,
+	internal static async ValueTask<WeatherStatePayload> BuildAsync(
+		WeatherWidgetData config,
 		IWidgetSampleTextResolver text)
 	{
 		var location = await text.ResolveAsync(AppStrings.Widgets.SamplePreview.WeatherLocation())
@@ -44,7 +45,7 @@ internal static class WeatherWidgetSample
 			Sunrise = "06:12",
 			Sunset = "20:34",
 			Days = BuildDays(config.ForecastDays),
-			Hours = BuildHours(),
+			Hours = BuildHours()
 		};
 	}
 
@@ -60,19 +61,21 @@ internal static class WeatherWidgetSample
 				Date = start.AddDays(offset).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
 				Condition = _days[offset].Condition,
 				Min = _days[offset].Min,
-				Max = _days[offset].Max,
+				Max = _days[offset].Max
 			})
 			.ToList();
 	}
 
 	private static List<WeatherHourPayload> BuildHours()
-		=> Enumerable.Range(0, 8)
+	{
+		return Enumerable.Range(0, 8)
 			.Select(offset => new WeatherHourPayload
 			{
 				Time = $"{12 + offset:00}:00",
 				Condition = offset < 4 ? "partly-cloudy" : "clear",
 				Temperature = 21 + (offset < 4 ? offset : 6 - offset),
-				PrecipitationProbability = offset < 4 ? 20 : 5,
+				PrecipitationProbability = offset < 4 ? 20 : 5
 			})
 			.ToList();
+	}
 }

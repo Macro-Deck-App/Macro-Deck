@@ -181,8 +181,8 @@ internal static class HttpRequestBuilder
 					return false;
 				}
 
-				var fileFieldName = HttpActionValues.ReadText(parameters, FileFieldNameParameter) ??
-					DefaultFileFieldName;
+				var fileFieldName = HttpActionValues.ReadText(parameters, FileFieldNameParameter)
+					?? DefaultFileFieldName;
 				body = new HttpBodyMultipart(HttpActionValues.ReadKeyValue(parameters, FormBodyParameter),
 					filePath,
 					fileFieldName);

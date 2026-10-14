@@ -79,8 +79,8 @@ public class PluginLogFileIntegrationTests
 
 		var lines = contents.Split('\n').Select(line => line.TrimEnd('\r')).Where(line => line.Length > 0).ToList();
 		var headerIndex = lines.FindIndex(line =>
-			HostLogParser.TryParseHeader(line, out var candidate) &&
-			string.Equals(candidate.Message, "Callback failed", StringComparison.Ordinal));
+			HostLogParser.TryParseHeader(line, out var candidate)
+			&& string.Equals(candidate.Message, "Callback failed", StringComparison.Ordinal));
 		Assert.That(headerIndex, Is.GreaterThanOrEqualTo(0), "the forwarded event's header line should parse");
 
 		Assert.That(HostLogParser.TryParseHeader(lines[headerIndex], out var header), Is.True);
@@ -190,6 +190,9 @@ public class PluginLogFileIntegrationTests
 
 		public LogEvent Single => _events.Single();
 
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			_events.Add(logEvent);
+		}
 	}
 }

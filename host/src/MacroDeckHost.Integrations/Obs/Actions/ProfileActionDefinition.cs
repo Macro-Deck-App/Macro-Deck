@@ -27,11 +27,14 @@ internal sealed class ProfileActionDefinition : IDynamicOptionsActionDefinition,
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(ProfileParameter,
-			label: AppStrings.Integrations.Obs.Params.Profile(),
+			AppStrings.Integrations.Obs.Params.Profile(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -88,8 +91,8 @@ internal sealed class ProfileActionDefinition : IDynamicOptionsActionDefinition,
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(ProfileParameter) is not string profile ||
-				string.IsNullOrWhiteSpace(profile))
+			if (context.Parameters.GetValueOrDefault(ProfileParameter) is not string profile
+				|| string.IsNullOrWhiteSpace(profile))
 			{
 				_logger.Warning("OBS profile action skipped: no profile selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

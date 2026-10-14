@@ -7,10 +7,15 @@ internal static class TestWidgetTypeProviders
 {
 	/// <summary>A fresh, empty widget type registry - so a test about something else gets the built-in
 	/// types and nothing more.</summary>
-	public static IWidgetTypeRegistry Registry() => new WidgetTypeRegistry(new RecordingMediator());
+	public static IWidgetTypeRegistry Registry()
+	{
+		return new WidgetTypeRegistry(new RecordingMediator());
+	}
 
 	/// <summary>A widget-type-provider host wired to a fresh registry, for tests about something
 	/// else.</summary>
-	public static WidgetTypeProviderHost Host() =>
-		new(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	public static WidgetTypeProviderHost Host()
+	{
+		return new WidgetTypeProviderHost(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	}
 }

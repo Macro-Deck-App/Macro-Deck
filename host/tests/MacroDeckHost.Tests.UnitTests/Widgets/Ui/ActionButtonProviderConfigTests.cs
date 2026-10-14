@@ -33,14 +33,15 @@ public class ActionButtonProviderConfigTests
 				new ActionStateDefinition("unmuted", MacroDeckStrings.States.Unmuted()),
 				new ActionStateDefinition("muted", MacroDeckStrings.States.Muted())
 				{
-					DefaultAppearance = new ActionStateAppearance { BackgroundColor = "#c53030" },
-				})),
+					DefaultAppearance = new ActionStateAppearance { BackgroundColor = "#c53030" }
+				}))
 		};
 		_cover = new ControllableIconProviderAction();
 		_registry = new FakeIntegrationRegistry();
 		_registry.Add(new FakeIntegration
 		{
-			Id = IntegrationId, Actions = [_mute, _cover, new StateAndIconProviderAction(), new CapturingActionDefinition()],
+			Id = IntegrationId,
+			Actions = [_mute, _cover, new StateAndIconProviderAction(), new CapturingActionDefinition()]
 		});
 		_registry.Add(RemoteIconProviderFixture.Integration());
 		_time = new FakeTimeProvider();
@@ -67,7 +68,7 @@ public class ActionButtonProviderConfigTests
 		{
 			stateMode = false,
 			backgroundColor = "#101010",
-			flows = Flow(Block("b1", "mute"), Block("b2", "mute")),
+			flows = Flow(Block("b1", "mute"), Block("b2", "mute"))
 		});
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b2", enabled = true });
@@ -101,7 +102,7 @@ public class ActionButtonProviderConfigTests
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
 			activeStateId = "on",
-			flows = Flow(Block("b1", "mute")),
+			flows = Flow(Block("b1", "mute"))
 		});
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
@@ -132,9 +133,9 @@ public class ActionButtonProviderConfigTests
 			stateMode = false,
 			states = new object[]
 			{
-				new { id = "a", label = "A" }, new { id = "b", label = "B" }, new { id = "c", label = "C" },
+				new { id = "a", label = "A" }, new { id = "b", label = "B" }, new { id = "c", label = "C" }
 			},
-			flows = Flow(Block("b1", "mute")),
+			flows = Flow(Block("b1", "mute"))
 		});
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
@@ -153,12 +154,12 @@ public class ActionButtonProviderConfigTests
 	public async Task The_live_state_line_never_names_a_state_the_adopted_provider_does_not_have()
 	{
 		var host = Render(new
-		{
-			stateMode = true,
-			states = new object[] { new { id = "a", label = "A" } },
-			flows = Flow(Block("b1", "mute")),
-		},
-		new WidgetStateOption("a", "A"));
+			{
+				stateMode = true,
+				states = new object[] { new { id = "a", label = "A" } },
+				flows = Flow(Block("b1", "mute"))
+			},
+			new WidgetStateOption("a", "A"));
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
 		await host.SettleAsync();
@@ -173,7 +174,7 @@ public class ActionButtonProviderConfigTests
 		{
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
-			flows = Flow(Block("b1", "mute")),
+			flows = Flow(Block("b1", "mute"))
 		});
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
 		await host.SettleAsync();
@@ -209,7 +210,8 @@ public class ActionButtonProviderConfigTests
 		await host.SettleAsync();
 
 		var stopState = host.ById("root.properties.stateProviderStatus.removeStateProvider");
-		var stopIcon = host.ByType("button").Single(button => button.Id.EndsWith("removeIconProvider-unmuted", StringComparison.Ordinal));
+		var stopIcon = host.ByType("button")
+			.Single(button => button.Id.EndsWith("removeIconProvider-unmuted", StringComparison.Ordinal));
 
 		Assert.Multiple(() =>
 		{
@@ -253,7 +255,7 @@ public class ActionButtonProviderConfigTests
 		{
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" } },
-			flows = Flow(Block("b1", "mute", label: "First"), Block("b2", "mute", label: "Second")),
+			flows = Flow(Block("b1", "mute", label: "First"), Block("b2", "mute", label: "Second"))
 		});
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
@@ -297,7 +299,7 @@ public class ActionButtonProviderConfigTests
 	[Test]
 	public async Task A_disabled_block_is_not_adopted()
 	{
-		var host = Render(new { flows = Flow(Block("b1", "mute", disabled: true)) });
+		var host = Render(new { flows = Flow(Block("b1", "mute", true)) });
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
 		await host.SettleAsync();
@@ -320,8 +322,8 @@ public class ActionButtonProviderConfigTests
 				integrationId = RemoteIconProviderFixture.PluginId,
 				actionId = RemoteIconProviderFixture.ActionId,
 				label = "Artwork",
-				parameters = Array.Empty<object>(),
-			}),
+				parameters = Array.Empty<object>()
+			})
 		});
 
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "icon", blockId = "b1", enabled = true });
@@ -338,7 +340,8 @@ public class ActionButtonProviderConfigTests
 	}
 
 	[Test]
-	public async Task Adding_a_state_capable_action_offers_it_and_accepting_on_a_single_state_button_turns_multi_state_on()
+	public async Task
+		Adding_a_state_capable_action_offers_it_and_accepting_on_a_single_state_button_turns_multi_state_on()
 	{
 		var host = Render(new { stateMode = false, flows = Flow(Block("existing", "mute")) });
 
@@ -372,11 +375,12 @@ public class ActionButtonProviderConfigTests
 	}
 
 	[Test]
-	public async Task Editing_a_just_added_actions_settings_before_its_offer_appears_offers_what_the_edited_action_reports()
+	public async Task
+		Editing_a_just_added_actions_settings_before_its_offer_appears_offers_what_the_edited_action_reports()
 	{
 		_mute.Answer = (parameters, _) => Task.FromResult<ActionStateSnapshot?>(
 			ControllableStateProviderAction.Snapshot(
-				new ActionStateDefinition((parameters.GetValueOrDefault("device") as string) ?? "none", "Device")));
+				new ActionStateDefinition(parameters.GetValueOrDefault("device") as string ?? "none", "Device")));
 		var host = Render(new { flows = Flow() });
 
 		host.ById("flows").Change(Flow(Block("b1", "mute", device: "speakers")));
@@ -429,7 +433,7 @@ public class ActionButtonProviderConfigTests
 		{
 			stateMode = true,
 			states = new object[] { new { id = "off", label = "Off" } },
-			flows = Flow(Block("b1", "mute")),
+			flows = Flow(Block("b1", "mute"))
 		});
 		host.ById("flows").Raise(UiConfigEvents.Provide, new { capability = "state", blockId = "b1", enabled = true });
 		await host.SettleAsync();
@@ -451,10 +455,11 @@ public class ActionButtonProviderConfigTests
 		{
 			stateMode = true,
 			states = new object[] { new { id = "muted", label = "Muted" } },
-			stateProvider = new { blockId = "gone", integrationId = IntegrationId, actionId = "mute", actionLabel = "Mute" },
+			stateProvider = new
+				{ blockId = "gone", integrationId = IntegrationId, actionId = "mute", actionLabel = "Mute" },
 			manualStateBackup = new { states = new object[] { new { id = "off", label = "Off" } } },
 			iconProvider = new { blockId = "gone", integrationId = IntegrationId, actionId = "cover" },
-			flows = Flow(),
+			flows = Flow()
 		});
 
 		Assert.Multiple(() =>
@@ -506,7 +511,8 @@ public class ActionButtonProviderConfigTests
 		host.ById("flows").Change(Flow(Block("b1", "mute", device: "speakers")));
 		_time.Advance(ActionButtonConfigContext.SettleDelay);
 		host.ById("flows").Change(Flow(Block("b1", "mute", device: "headphones")));
-		slowSpeakers.SetResult(ControllableStateProviderAction.Snapshot(new ActionStateDefinition("speakers", "Speakers")));
+		slowSpeakers.SetResult(
+			ControllableStateProviderAction.Snapshot(new ActionStateDefinition("speakers", "Speakers")));
 		await SettleAfterDelayAsync(host);
 
 		Assert.That(StateIds(host), Is.EqualTo(new[] { "headphones" }).AsCollection);
@@ -541,10 +547,15 @@ public class ActionButtonProviderConfigTests
 			TestLocalization.Resolver,
 			"en",
 			_time,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache(),
+			new Devices.Surfaces.StubIconPackCache(),
 			CancellationToken.None);
 		var view = new UiView(new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
-			ActionButtonWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), 1, _registry, new NoFonts(), liveState, context));
+			ActionButtonWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+				1,
+				_registry,
+				new NoFonts(),
+				liveState,
+				context));
 		context.Attach(view);
 
 		return UiTestHost.Render(view);
@@ -557,36 +568,60 @@ public class ActionButtonProviderConfigTests
 	}
 
 	private static object[] Flow(params object[] blocks)
-		=> [new { id = "flow-1", triggerType = "short-press", children = blocks }];
+	{
+		return [new { id = "flow-1", triggerType = "short-press", children = blocks }];
+	}
 
-	private static object Block(string id, string actionId, bool disabled = false, string? device = null, string label = "")
-		=> new
+	private static object Block(
+		string id,
+		string actionId,
+		bool disabled = false,
+		string? device = null,
+		string label = "")
+	{
+		return new
 		{
 			id,
 			integrationId = IntegrationId,
 			actionId,
 			label,
 			disabled,
-			parameters = device is null ? Array.Empty<object>() : new object[] { new { name = "device", value = device } },
+			parameters = device is null
+				? Array.Empty<object>()
+				: new object[] { new { name = "device", value = device } }
 		};
+	}
 
 	private static string? ProviderBlockId(UiTestHost host)
-		=> host.ById("stateProvider").Property(UiConfigProperties.Value) is { ValueKind: JsonValueKind.Object } provider
+	{
+		return host.ById("stateProvider").Property(UiConfigProperties.Value) is
+			{ ValueKind: JsonValueKind.Object } provider
 			? provider.GetProperty("blockId").GetString()
 			: null;
+	}
 
 	private static List<string?> StateIds(UiTestHost host)
-		=> host.ById("states").Property(UiConfigProperties.Value)!.Value.EnumerateArray()
+	{
+		return host.ById("states").Property(UiConfigProperties.Value)!.Value.EnumerateArray()
 			.Select(state => state.GetProperty("id").GetString())
 			.ToList();
+	}
 
 	private static List<string?> Events(UiTestNode node)
-		=> node.Property(UiConfigProperties.Events)!.Value.EnumerateArray().Select(e => e.GetString()).ToList();
+	{
+		return node.Property(UiConfigProperties.Events)!.Value.EnumerateArray().Select(e => e.GetString()).ToList();
+	}
 
 	private sealed class NoFonts : IFontCatalog
 	{
-		public IReadOnlyList<FontFaceInfo> GetFaces() => [];
+		public IReadOnlyList<FontFaceInfo> GetFaces()
+		{
+			return [];
+		}
 
-		public byte[]? GetFaceFile(string faceId) => null;
+		public byte[]? GetFaceFile(string faceId)
+		{
+			return null;
+		}
 	}
 }

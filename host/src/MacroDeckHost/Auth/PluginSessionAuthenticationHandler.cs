@@ -80,9 +80,10 @@ public class PluginSessionAuthenticationHandler : AuthenticationHandler<Authenti
 			return AuthenticateResult.Fail("Missing plugin session claims.");
 		}
 
-		var isLive = _sessionRegistry.Snapshot().Any(session =>
-			string.Equals(session.SessionId, sessionId, StringComparison.Ordinal) &&
-			string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
+		var isLive = _sessionRegistry.Snapshot()
+			.Any(session =>
+				string.Equals(session.SessionId, sessionId, StringComparison.Ordinal)
+				&& string.Equals(session.PluginId, pluginId, StringComparison.Ordinal));
 		if (!isLive)
 		{
 			return AuthenticateResult.Fail("The plugin session no longer exists.");

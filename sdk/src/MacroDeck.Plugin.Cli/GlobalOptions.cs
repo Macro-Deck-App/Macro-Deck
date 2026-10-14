@@ -27,13 +27,12 @@ internal static class GlobalOptions
 		var option = new Option<CliOutputFormat>("--output")
 		{
 			Description = "How to render the result.",
-			DefaultValueFactory = _ => CliOutputFormat.Text
+			DefaultValueFactory = _ => CliOutputFormat.Text,
+			CustomParser = result => CliOptionParsing.ParseToken(result,
+				CliOutputFormat.Text,
+				("text", CliOutputFormat.Text),
+				("json", CliOutputFormat.Json))
 		};
-
-		option.CustomParser = result => CliOptionParsing.ParseToken(result,
-			CliOutputFormat.Text,
-			("text", CliOutputFormat.Text),
-			("json", CliOutputFormat.Json));
 
 		return option;
 	}
@@ -44,14 +43,13 @@ internal static class GlobalOptions
 		{
 			Description = "How much a command narrates while it works.",
 			DefaultValueFactory = _ => Verbosity.Normal,
-			Recursive = true
+			Recursive = true,
+			CustomParser = result => CliOptionParsing.ParseToken(result,
+				Verbosity.Normal,
+				("quiet", Verbosity.Quiet),
+				("normal", Verbosity.Normal),
+				("diagnostic", Verbosity.Diagnostic))
 		};
-
-		option.CustomParser = result => CliOptionParsing.ParseToken(result,
-			Verbosity.Normal,
-			("quiet", Verbosity.Quiet),
-			("normal", Verbosity.Normal),
-			("diagnostic", Verbosity.Diagnostic));
 
 		return option;
 	}

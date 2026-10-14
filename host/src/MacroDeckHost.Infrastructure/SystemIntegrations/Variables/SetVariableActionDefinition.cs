@@ -29,12 +29,11 @@ internal sealed class SetVariableActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete("variable",
-			label: AppStrings.Integrations.Variables.Actions.VariableLabel(),
-			description: AppStrings.Integrations.Variables.Actions.VariableDescription(),
+			AppStrings.Integrations.Variables.Actions.VariableLabel(),
+			AppStrings.Integrations.Variables.Actions.VariableDescription(),
 			optionsSourceId: UserVariablesOptionsSource,
 			required: true),
 		ActionParameter.Choice("operation",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = OperationSet, Label = AppStrings.Integrations.Variables.Actions.OperationSetTo() },
@@ -45,16 +44,19 @@ internal sealed class SetVariableActionDefinition : IActionDefinition
 				new ActionParameterOption
 					{ Value = OperationAppend, Label = AppStrings.Integrations.Variables.Actions.OperationAppend() }
 			],
-			label: AppStrings.Integrations.Variables.Actions.OperationLabel(),
-			description: AppStrings.Integrations.Variables.Actions.OperationDescription(),
-			defaultValue: OperationSet),
+			AppStrings.Integrations.Variables.Actions.OperationLabel(),
+			AppStrings.Integrations.Variables.Actions.OperationDescription(),
+			OperationSet),
 		ActionParameter.Text("value",
-				label: AppStrings.Integrations.Variables.Actions.ValueLabel(),
-				description: AppStrings.Integrations.Variables.Actions.ValueDescription())
+				AppStrings.Integrations.Variables.Actions.ValueLabel(),
+				AppStrings.Integrations.Variables.Actions.ValueDescription())
 			.OnlyWhen("operation", OperationSet, OperationAdd, OperationAppend)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_variables);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -85,7 +87,7 @@ internal sealed class SetVariableActionDefinition : IActionDefinition
 			if (!TryParseOperation(raw, out var operation))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.Variables.Errors.UnknownOperation(operation: raw ?? string.Empty));
+					AppStrings.Integrations.Variables.Errors.UnknownOperation(raw ?? string.Empty));
 			}
 
 			var result = await variables.ApplyAsync(name,

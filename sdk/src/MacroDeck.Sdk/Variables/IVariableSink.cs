@@ -30,7 +30,9 @@ public interface IVariableSink
 
 	/// <summary>Publishes a single value.</summary>
 	Task PublishAsync(VariableValue value, CancellationToken cancellationToken = default)
-		=> PublishAsync([value], cancellationToken);
+	{
+		return PublishAsync([value], cancellationToken);
+	}
 
 	/// <summary>
 	/// Tells the host that the set of resources this provider can enumerate has changed. Currently

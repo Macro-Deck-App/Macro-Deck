@@ -14,5 +14,5 @@ public enum CorrelationOutcome
 	MalformedEnvelope,
 
 	/// <summary>The <c>correlationId</c> does not match any in-flight message. Non-fatal, but reported.</summary>
-	CorrelationUnknown,
+	CorrelationUnknown
 }

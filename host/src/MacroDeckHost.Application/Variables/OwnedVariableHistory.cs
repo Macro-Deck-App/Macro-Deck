@@ -45,12 +45,16 @@ public sealed class OwnedVariableHistory
 	}
 
 	private bool IsOwnedOrAbsent(string ownerId, string name)
-		=> _variables.FindByName(VariableScope.Global, null, name) is not { } variable ||
-			(variable.Classification == VariableClassification.Integration &&
-				string.Equals(variable.OwnerIntegrationId, ownerId, StringComparison.Ordinal));
+	{
+		return _variables.FindByName(VariableScope.Global, null, name) is not { } variable
+			|| variable.Classification == VariableClassification.Integration
+			&& string.Equals(variable.OwnerIntegrationId, ownerId, StringComparison.Ordinal);
+	}
 
 	private void Release(string ownerId)
-		=> _openPerOwner.AddOrUpdate(ownerId, 0, (_, count) => Math.Max(0, count - 1));
+	{
+		_openPerOwner.AddOrUpdate(ownerId, 0, (_, count) => Math.Max(0, count - 1));
+	}
 
 	private sealed class Window : SdkHistoryWindow
 	{
@@ -86,6 +90,9 @@ public sealed class OwnedVariableHistory
 			return ValueTask.CompletedTask;
 		}
 
-		private void OnChanged(object? sender, EventArgs e) => Changed?.Invoke(this, EventArgs.Empty);
+		private void OnChanged(object? sender, EventArgs e)
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 	}
 }

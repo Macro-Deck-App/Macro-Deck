@@ -37,7 +37,10 @@ public static partial class StoreTags
 		return tags;
 	}
 
-	public static bool IsValid(string tag) => tag.Length <= MaxTagLength && TagPattern().IsMatch(tag);
+	public static bool IsValid(string tag)
+	{
+		return tag.Length <= MaxTagLength && TagPattern().IsMatch(tag);
+	}
 
 	[GeneratedRegex("^[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.CultureInvariant)]
 	private static partial Regex TagPattern();

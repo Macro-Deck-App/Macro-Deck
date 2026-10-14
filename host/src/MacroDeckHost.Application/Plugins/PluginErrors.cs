@@ -6,84 +6,108 @@ namespace MacroDeckHost.Application.Plugins;
 
 public static class PluginErrors
 {
-	public static ProtocolError Unauthenticated() => new()
+	public static ProtocolError Unauthenticated()
 	{
-		Code = ProtocolErrorCodes.Unauthenticated,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
-		Retryable = false
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.Unauthenticated,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
+			Retryable = false
+		};
+	}
 
-	public static ProtocolError Forbidden() => new()
+	public static ProtocolError Forbidden()
 	{
-		Code = ProtocolErrorCodes.Unauthenticated,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
-		Retryable = false
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.Unauthenticated,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
+			Retryable = false
+		};
+	}
 
 	/// <summary>
 	/// Refusal because Developer Mode is switched off. Reuses the generic unauthenticated code so a
 	/// client compiled against an older SDK still handles it; the <c>reason</c> detail is what lets a
 	/// newer client name the setting instead of reporting a bare 403.
 	/// </summary>
-	public static ProtocolError DeveloperModeDisabled() => new()
+	public static ProtocolError DeveloperModeDisabled()
 	{
-		Code = ProtocolErrorCodes.Unauthenticated,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
-		Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+		return new ProtocolError
 		{
-			["reason"] = ProtocolErrorReasons.DeveloperModeDisabled
-		}),
-		Retryable = false
-	};
+			Code = ProtocolErrorCodes.Unauthenticated,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.Unauthenticated),
+			Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+			{
+				["reason"] = ProtocolErrorReasons.DeveloperModeDisabled
+			}),
+			Retryable = false
+		};
+	}
 
-	public static ProtocolError RateLimited(TimeSpan retryAfter) => new()
+	public static ProtocolError RateLimited(TimeSpan retryAfter)
 	{
-		Code = ProtocolErrorCodes.RateLimited,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.RateLimited),
-		Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+		return new ProtocolError
 		{
-			["retryAfterSeconds"] = Math.Max(0, (int)Math.Ceiling(retryAfter.TotalSeconds))
-				.ToString(CultureInfo.InvariantCulture)
-		}),
-		Retryable = true
-	};
+			Code = ProtocolErrorCodes.RateLimited,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.RateLimited),
+			Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+			{
+				["retryAfterSeconds"] = Math.Max(0, (int)Math.Ceiling(retryAfter.TotalSeconds))
+					.ToString(CultureInfo.InvariantCulture)
+			}),
+			Retryable = true
+		};
+	}
 
-	public static ProtocolError InvalidPayload(IReadOnlyDictionary<string, string>? details = null) => new()
+	public static ProtocolError InvalidPayload(IReadOnlyDictionary<string, string>? details = null)
 	{
-		Code = ProtocolErrorCodes.InvalidPayload,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload),
-		Details = ProtocolDiagnostics.Redact(details),
-		Retryable = false
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.InvalidPayload,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.InvalidPayload),
+			Details = ProtocolDiagnostics.Redact(details),
+			Retryable = false
+		};
+	}
 
-	public static ProtocolError AlreadyRegistered() => new()
+	public static ProtocolError AlreadyRegistered()
 	{
-		Code = ProtocolErrorCodes.PluginAlreadyRegistered,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
-		Retryable = false
-	};
+		return new ProtocolError
+		{
+			Code = ProtocolErrorCodes.PluginAlreadyRegistered,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
+			Retryable = false
+		};
+	}
 
 	// Keeps the already-registered code so older SDKs still recognise it; only the reason is new.
-	public static ProtocolError PluginInstalled() => new()
+	public static ProtocolError PluginInstalled()
 	{
-		Code = ProtocolErrorCodes.PluginAlreadyRegistered,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
-		Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+		return new ProtocolError
 		{
-			["reason"] = ProtocolErrorReasons.PluginInstalled
-		}),
-		Retryable = false
-	};
+			Code = ProtocolErrorCodes.PluginAlreadyRegistered,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.PluginAlreadyRegistered),
+			Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+			{
+				["reason"] = ProtocolErrorReasons.PluginInstalled
+			}),
+			Retryable = false
+		};
+	}
 
-	public static ProtocolError VersionUnsupported(ProtocolVersionRange hostRange) => new()
+	public static ProtocolError VersionUnsupported(ProtocolVersionRange hostRange)
 	{
-		Code = ProtocolErrorCodes.ProtocolVersionUnsupported,
-		Message = ProtocolErrorMessages.For(ProtocolErrorCodes.ProtocolVersionUnsupported),
-		Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+		return new ProtocolError
 		{
-			["supportedMinimum"] = hostRange.Minimum.ToString(CultureInfo.InvariantCulture),
-			["supportedMaximum"] = hostRange.Maximum.ToString(CultureInfo.InvariantCulture)
-		}),
-		Retryable = false
-	};
+			Code = ProtocolErrorCodes.ProtocolVersionUnsupported,
+			Message = ProtocolErrorMessages.For(ProtocolErrorCodes.ProtocolVersionUnsupported),
+			Details = ProtocolDiagnostics.Redact(new Dictionary<string, string>
+			{
+				["supportedMinimum"] = hostRange.Minimum.ToString(CultureInfo.InvariantCulture),
+				["supportedMaximum"] = hostRange.Maximum.ToString(CultureInfo.InvariantCulture)
+			}),
+			Retryable = false
+		};
+	}
 }

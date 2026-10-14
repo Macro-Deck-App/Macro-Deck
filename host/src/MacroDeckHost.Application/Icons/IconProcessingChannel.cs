@@ -12,7 +12,10 @@ public sealed class IconProcessingChannel
 {
 	private readonly Channel<IconWorkItem> _channel = Channel.CreateUnbounded<IconWorkItem>();
 
-	public void Enqueue(IconWorkItem item) => _channel.Writer.TryWrite(item);
+	public void Enqueue(IconWorkItem item)
+	{
+		_channel.Writer.TryWrite(item);
+	}
 
 	public ChannelReader<IconWorkItem> Reader => _channel.Reader;
 }

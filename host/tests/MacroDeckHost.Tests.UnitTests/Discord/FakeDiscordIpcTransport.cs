@@ -9,14 +9,25 @@ internal sealed record FakeCommand(string Command, string? EventName, string? No
 
 internal sealed record FakeResponse(string? Data, int ErrorCode = 0, string ErrorMessage = "")
 {
-	public static FakeResponse Ok(string data = "{}") => new(data);
+	public static FakeResponse Ok(string data = "{}")
+	{
+		return new FakeResponse(data);
+	}
 
-	public static FakeResponse Error(int code, string message = "rejected") => new(null, code, message);
+	public static FakeResponse Error(int code, string message = "rejected")
+	{
+		return new FakeResponse(null, code, message);
+	}
 
-	public static FakeResponse NotAuthenticated() => Error(4006, "Not authenticated or invalid scope");
+	public static FakeResponse NotAuthenticated()
+	{
+		return Error(4006, "Not authenticated or invalid scope");
+	}
 
 	public static FakeResponse RealClient(FakeCommand command)
-		=> command.Command == "GET_GUILDS" ? NotAuthenticated() : Ok();
+	{
+		return command.Command == "GET_GUILDS" ? NotAuthenticated() : Ok();
+	}
 }
 
 internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
@@ -112,15 +123,24 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 	}
 
 	public void Push(DiscordRpcOpcode opcode, string json)
-		=> _inbound.Writer.TryWrite(new DiscordIpcFrame(opcode, Encoding.UTF8.GetBytes(json)));
+	{
+		_inbound.Writer.TryWrite(new DiscordIpcFrame(opcode, Encoding.UTF8.GetBytes(json)));
+	}
 
 	public void PushEvent(string eventName, string dataJson)
-		=> Push(DiscordRpcOpcode.Frame, $$"""{"cmd":"DISPATCH","evt":"{{eventName}}","data":{{dataJson}}}""");
+	{
+		Push(DiscordRpcOpcode.Frame, $$"""{"cmd":"DISPATCH","evt":"{{eventName}}","data":{{dataJson}}}""");
+	}
 
-	public void Close() => _inbound.Writer.TryComplete();
+	public void Close()
+	{
+		_inbound.Writer.TryComplete();
+	}
 
 	public IEnumerable<DiscordIpcFrame> WrittenWithOpcode(DiscordRpcOpcode opcode)
-		=> Written.Where(f => f.Opcode == opcode);
+	{
+		return Written.Where(f => f.Opcode == opcode);
+	}
 
 	private void Answer(byte[] payload)
 	{
@@ -157,7 +177,9 @@ internal sealed class FakeDiscordIpcTransport : IDiscordIpcTransport
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

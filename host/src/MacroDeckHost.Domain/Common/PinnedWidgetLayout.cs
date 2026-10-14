@@ -8,24 +8,28 @@ public static class PinnedWidgetLayout
 	public static IEnumerable<WidgetEntity> DisplayedWidgets(
 		FolderEntity folder,
 		IEnumerable<FolderEntity> profileFolders)
-		=> FolderChain.DisplayedWidgets<FolderEntity, Guid, WidgetEntity>(folder,
+	{
+		return FolderChain.DisplayedWidgets<FolderEntity, Guid, WidgetEntity>(folder,
 			profileFolders,
 			FolderEntityChain.IdOf,
 			FolderEntityChain.ParentIdOf,
 			FolderEntityChain.WidgetsOf,
 			widget => widget.IsPinned,
 			widget => widget.PinScope == PinScope.Profile);
+	}
 
 	public static IEnumerable<WidgetEntity> PinnedWidgetsOutside(
 		FolderEntity folder,
 		IEnumerable<FolderEntity> profileFolders)
-		=> FolderChain.PinnedWidgetsOutside<FolderEntity, Guid, WidgetEntity>(folder,
+	{
+		return FolderChain.PinnedWidgetsOutside<FolderEntity, Guid, WidgetEntity>(folder,
 			profileFolders,
 			FolderEntityChain.IdOf,
 			FolderEntityChain.ParentIdOf,
 			FolderEntityChain.WidgetsOf,
 			widget => widget.IsPinned,
 			widget => widget.PinScope == PinScope.Profile);
+	}
 
 	public static void GrowToFitPinned(
 		FolderEntity folder,
@@ -85,10 +89,10 @@ public static class PinnedWidgetLayout
 		{
 			var columns = GridInheritance.ResolveColumns(folder, profileFolders, profileDefaultColumns);
 			var rows = GridInheritance.ResolveRows(folder, profileFolders, profileDefaultRows);
-			if (widget.PositionX < 0 ||
-				widget.PositionY < 0 ||
-				widget.PositionX + widget.Width > columns ||
-				widget.PositionY + widget.Height > rows)
+			if (widget.PositionX < 0
+				|| widget.PositionY < 0
+				|| widget.PositionX + widget.Width > columns
+				|| widget.PositionY + widget.Height > rows)
 			{
 				conflicts.Add(folder);
 				continue;
@@ -141,16 +145,18 @@ public static class PinnedWidgetLayout
 	}
 
 	public static string DescribeReachConflicts(IEnumerable<PinReachConflict> conflicts)
-		=> string.Join("; ",
+	{
+		return string.Join("; ",
 			conflicts.Select(conflict =>
 				$"{conflict.Folder.Name} would overlap the pinned widget from {conflict.Home.Name}"));
+	}
 
 	public static bool Overlaps(WidgetEntity a, WidgetEntity b)
 	{
-		return a.PositionX < b.PositionX + b.Width &&
-			a.PositionX + a.Width > b.PositionX &&
-			a.PositionY < b.PositionY + b.Height &&
-			a.PositionY + a.Height > b.PositionY;
+		return a.PositionX < b.PositionX + b.Width
+			&& a.PositionX + a.Width > b.PositionX
+			&& a.PositionY < b.PositionY + b.Height
+			&& a.PositionY + a.Height > b.PositionY;
 	}
 }
 

@@ -69,12 +69,16 @@ internal sealed class MacOsSystemMetricsService : SystemMetricsServiceBase
 	}
 
 	protected override Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken)
-		=> Task.FromResult(MacOsDiskInterop.ReadDisks());
+	{
+		return Task.FromResult(MacOsDiskInterop.ReadDisks());
+	}
 
 	private static Task<string> ReadIoRegAcceleratorAsync(CancellationToken cancellationToken)
-		=> ProcessRunner.RunAsync("ioreg",
+	{
+		return ProcessRunner.RunAsync("ioreg",
 			["-r", "-d", "1", "-w", "0", "-c", "IOAccelerator"],
 			cancellationToken);
+	}
 
 	private static long? ReadTotalMemoryBytes()
 	{

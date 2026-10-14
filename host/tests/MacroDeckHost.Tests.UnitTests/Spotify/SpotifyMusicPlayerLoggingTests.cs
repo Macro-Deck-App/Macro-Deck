@@ -79,8 +79,8 @@ internal sealed class SpotifyMusicPlayerLoggingTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(sink.Events.Count(e =>
-					e.Level == LogEventLevel.Information &&
-					e.MessageTemplate.Text.Contains("state reads for entry {EntryId} recovered")),
+					e.Level == LogEventLevel.Information
+					&& e.MessageTemplate.Text.Contains("state reads for entry {EntryId} recovered")),
 				Is.EqualTo(1));
 			Assert.That(player.UnreachableSince, Is.Null);
 		});
@@ -109,7 +109,7 @@ internal sealed class SpotifyMusicPlayerLoggingTests
 		var tokens = Tokens();
 		var http = new StubSpotifyHttpClient { Handler = _ => Json(HttpStatusCode.NoContent, string.Empty) };
 		player.Connect(Config(http, tokens), tokens);
-		player.Disconnect();
+		await player.DisconnectAsync();
 		await player.GetStateAsync();
 
 		Assert.That(sink.Events.Count(e => e.MessageTemplate.Text.Contains("no connected client")),
@@ -168,10 +168,14 @@ internal sealed class SpotifyMusicPlayerLoggingTests
 	}
 
 	private static string Reason(LogEvent logEvent)
-		=> ((ScalarValue)logEvent.Properties["Reason"]).Value as string ?? string.Empty;
+	{
+		return ((ScalarValue)logEvent.Properties["Reason"]).Value as string ?? string.Empty;
+	}
 
 	private static bool IsDevicesRequest(IRequest request)
-		=> request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	{
+		return request.Endpoint.ToString().Contains("devices", StringComparison.Ordinal);
+	}
 
 	private static SpotifyMusicPlayer CreatePlayer(
 		StubSpotifyHttpClient http,
@@ -196,14 +200,17 @@ internal sealed class SpotifyMusicPlayerLoggingTests
 	}
 
 	private static SpotifyClientConfig Config(IHTTPClient http, ISpotifyAccessTokenSource tokens)
-		=> SpotifyClientConfig.CreateDefault()
+	{
+		return SpotifyClientConfig.CreateDefault()
 			.WithAuthenticator(new SpotifyAccessTokenAuthenticator(tokens))
 			.WithHTTPClient(http);
+	}
 
 	private static SpotifyTokenManager Tokens(
 		FakeSpotifyOAuthClient? oauth = null,
 		TimeSpan? expiresIn = null)
-		=> new(Guid.NewGuid(),
+	{
+		return new SpotifyTokenManager(Guid.NewGuid(),
 			"client-id",
 			"client-secret",
 			SpotifyTokenSnapshot.FromStored("token",
@@ -215,22 +222,30 @@ internal sealed class SpotifyMusicPlayerLoggingTests
 			new LoggerConfiguration().CreateLogger(),
 			TimeSpan.FromSeconds(5),
 			TimeSpan.Zero);
+	}
 
 	private static Response Json(HttpStatusCode statusCode, string body)
-		=> new(new Dictionary<string, string>())
+	{
+		return new Response(new Dictionary<string, string>())
 		{
 			StatusCode = statusCode,
 			ContentType = "application/json",
 			Body = body
 		};
+	}
 
 	private static Logger Collecting(CollectingSink sink)
-		=> new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	{
+		return new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

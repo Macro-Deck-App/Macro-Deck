@@ -93,40 +93,72 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 
 	// Icon invalidation and variable changes have no widget id to key on, unlike the three above - every
 	// subscriber shares this one key and filters for itself.
-	private const string _unkeyed = "*";
+	private const string Unkeyed = "*";
 
 	public IDisposable SubscribeState(string widgetId, Action<WidgetStateUpdatedEvent> handler)
-		=> _state.Subscribe(widgetId, handler);
+	{
+		return _state.Subscribe(widgetId, handler);
+	}
 
 	public IDisposable SubscribeLabel(string widgetId, Action<LabelTextUpdatedEvent> handler)
-		=> _label.Subscribe(widgetId, handler);
+	{
+		return _label.Subscribe(widgetId, handler);
+	}
 
 	public IDisposable SubscribeDataChanged(string widgetId, Action<WidgetEntity> handler)
-		=> _data.Subscribe(widgetId, handler);
+	{
+		return _data.Subscribe(widgetId, handler);
+	}
 
 	public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler)
-		=> _data.Subscribe(widgetId, handler);
+	{
+		return _data.Subscribe(widgetId, handler);
+	}
 
 	public IDisposable SubscribeIconInvalidated(Action<Guid> handler)
-		=> _iconInvalidated.Subscribe(_unkeyed, handler);
+	{
+		return _iconInvalidated.Subscribe(Unkeyed, handler);
+	}
 
 	public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler)
-		=> _widgetIconChanged.Subscribe(widgetId, _ => handler());
+	{
+		return _widgetIconChanged.Subscribe(widgetId, _ => handler());
+	}
 
 	public IDisposable SubscribeVariableChanged(Action handler)
-		=> _variableChanged.Subscribe(_unkeyed, _ => handler());
+	{
+		return _variableChanged.Subscribe(Unkeyed, _ => handler());
+	}
 
-	public void RaiseStateChanged(WidgetStateUpdatedEvent evt) => _ = _state.Raise(evt.WidgetId, evt);
+	public void RaiseStateChanged(WidgetStateUpdatedEvent evt)
+	{
+		_ = _state.Raise(evt.WidgetId, evt);
+	}
 
-	public void RaiseLabelChanged(LabelTextUpdatedEvent evt) => _ = _label.Raise(evt.WidgetId, evt);
+	public void RaiseLabelChanged(LabelTextUpdatedEvent evt)
+	{
+		_ = _label.Raise(evt.WidgetId, evt);
+	}
 
-	public bool RaiseDataChanged(WidgetEntity widget) => _data.Raise(widget.Id.ToString(), widget);
+	public bool RaiseDataChanged(WidgetEntity widget)
+	{
+		return _data.Raise(widget.Id.ToString(), widget);
+	}
 
-	public void RaiseIconInvalidated(Guid iconId) => _ = _iconInvalidated.Raise(_unkeyed, iconId);
+	public void RaiseIconInvalidated(Guid iconId)
+	{
+		_ = _iconInvalidated.Raise(Unkeyed, iconId);
+	}
 
-	public void RaiseWidgetIconChanged(Guid widgetId) => _ = _widgetIconChanged.Raise(widgetId.ToString(), default);
+	public void RaiseWidgetIconChanged(Guid widgetId)
+	{
+		_ = _widgetIconChanged.Raise(widgetId.ToString(), default);
+	}
 
-	public void RaiseVariableChanged() => _ = _variableChanged.Raise(_unkeyed, default);
+	public void RaiseVariableChanged()
+	{
+		_ = _variableChanged.Raise(Unkeyed, default);
+	}
 
 	/// <summary>A signal that carries no data of its own - the subscriber always re-resolves for itself.</summary>
 	private readonly record struct Unit;
@@ -140,12 +172,14 @@ public sealed class WidgetRenderSignals : IWidgetRenderSignals
 		private readonly Dictionary<string, List<Func<T, bool>>> _byKey = new(StringComparer.Ordinal);
 
 		public IDisposable Subscribe(string key, Action<T> handler)
-			=> Subscribe(key,
+		{
+			return Subscribe(key,
 				value =>
 				{
 					handler(value);
 					return true;
 				});
+		}
 
 		public IDisposable Subscribe(string key, Func<T, bool> handler)
 		{

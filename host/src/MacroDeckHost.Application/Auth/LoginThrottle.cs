@@ -68,7 +68,10 @@ public class LoginThrottle
 			});
 	}
 
-	public void RegisterSuccess(string key) => _entries.TryRemove(key, out _);
+	public void RegisterSuccess(string key)
+	{
+		_entries.TryRemove(key, out _);
+	}
 
 	public void ClearUsername(string username)
 	{
@@ -76,8 +79,8 @@ public class LoginThrottle
 		foreach (var key in _entries.Keys)
 		{
 			var separator = key.IndexOf('|');
-			if (separator >= 0 &&
-				string.Equals(key[(separator + 1)..].Trim(), name, StringComparison.OrdinalIgnoreCase))
+			if (separator >= 0
+				&& string.Equals(key[(separator + 1)..].Trim(), name, StringComparison.OrdinalIgnoreCase))
 			{
 				_entries.TryRemove(key, out _);
 			}

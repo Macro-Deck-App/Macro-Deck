@@ -25,16 +25,21 @@ internal sealed class CreateRecordChapterActionDefinition : IDynamicOptionsActio
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.Text(ChapterNameParameter,
-			label: AppStrings.Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel(),
-			description: AppStrings.Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription())
+			AppStrings.Integrations.Obs.Actions.CreateRecordChapter.ChapterNameLabel(),
+			AppStrings.Integrations.Obs.Actions.CreateRecordChapter.ChapterNameDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

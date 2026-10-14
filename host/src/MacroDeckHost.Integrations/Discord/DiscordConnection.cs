@@ -161,7 +161,9 @@ internal sealed class DiscordConnection : IDisposable
 	}
 
 	private static string FormatRejection(DiscordRpcException ex)
-		=> string.Create(CultureInfo.InvariantCulture, $"{ex.Message} (code {ex.Code})");
+	{
+		return string.Create(CultureInfo.InvariantCulture, $"{ex.Message} (code {ex.Code})");
+	}
 
 	private void RecordVoiceSettingsOutcome(
 		DiscordVoiceSettingsPatch patch,
@@ -184,28 +186,36 @@ internal sealed class DiscordConnection : IDisposable
 	}
 
 	public Task JoinVoiceChannelAsync(string channelId, bool force, CancellationToken cancellationToken = default)
-		=> SendAsync(DiscordRpcCommands.SelectVoiceChannel,
+	{
+		return SendAsync(DiscordRpcCommands.SelectVoiceChannel,
 			new SelectVoiceChannelArgs { ChannelId = channelId, Force = force },
-			onResponse: null,
+			null,
 			cancellationToken);
+	}
 
 	public Task LeaveVoiceChannelAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(DiscordRpcCommands.SelectVoiceChannel,
+	{
+		return SendAsync(DiscordRpcCommands.SelectVoiceChannel,
 			new SelectVoiceChannelArgs { ChannelId = null },
-			onResponse: null,
+			null,
 			cancellationToken);
+	}
 
 	public Task SelectTextChannelAsync(string channelId, CancellationToken cancellationToken = default)
-		=> SendAsync(DiscordRpcCommands.SelectTextChannel,
+	{
+		return SendAsync(DiscordRpcCommands.SelectTextChannel,
 			new SelectTextChannelArgs { ChannelId = channelId },
-			onResponse: null,
+			null,
 			cancellationToken);
+	}
 
 	public Task SetActivityAsync(DiscordActivity? activity, CancellationToken cancellationToken = default)
-		=> SendAsync(DiscordRpcCommands.SetActivity,
+	{
+		return SendAsync(DiscordRpcCommands.SetActivity,
 			new DiscordSetActivityArgs { Pid = Environment.ProcessId, Activity = activity },
-			onResponse: null,
+			null,
 			cancellationToken);
+	}
 
 	public async Task<IReadOnlyList<DiscordGuild>> GetGuildsAsync(CancellationToken cancellationToken = default)
 	{
@@ -283,9 +293,9 @@ internal sealed class DiscordConnection : IDisposable
 
 	private static List<DiscordGuild> ReadGuilds(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty("guilds", out var guilds) ||
-			guilds.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty("guilds", out var guilds)
+			|| guilds.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -305,9 +315,9 @@ internal sealed class DiscordConnection : IDisposable
 
 	private static List<DiscordChannel> ReadChannels(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty("channels", out var channels) ||
-			channels.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty("channels", out var channels)
+			|| channels.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -331,9 +341,11 @@ internal sealed class DiscordConnection : IDisposable
 		IDiscordRpcClient client,
 		string accessToken,
 		CancellationToken cancellationToken)
-		=> client.SendCommandAsync(DiscordRpcCommands.Authenticate,
+	{
+		return client.SendCommandAsync(DiscordRpcCommands.Authenticate,
 			new AuthenticateArgs { AccessToken = accessToken },
 			cancellationToken: cancellationToken);
+	}
 
 	private static async Task UnsubscribeVoiceChannelAsync(
 		IDiscordRpcClient client,
@@ -462,7 +474,7 @@ internal sealed class DiscordConnection : IDisposable
 			await AuthenticateAsync(client, ready, cancellationToken).ConfigureAwait(false);
 			await SubscribeGlobalEventsAsync(client, cancellationToken).ConfigureAwait(false);
 			await SeedVoiceSettingsAsync(client, cancellationToken).ConfigureAwait(false);
-			await ResubscribeVoiceChannelAsync(client, channelIdHint: null, cancellationToken).ConfigureAwait(false);
+			await ResubscribeVoiceChannelAsync(client, null, cancellationToken).ConfigureAwait(false);
 
 			UpdateState(state => state with { IsConnected = true });
 
@@ -540,14 +552,16 @@ internal sealed class DiscordConnection : IDisposable
 	}
 
 	private async Task<DiscordTokens> EnsureFreshTokensAsync(CancellationToken cancellationToken)
-		=> !_tokens.NeedsRefresh(DateTimeOffset.UtcNow) || _tokens.RefreshToken is null
+	{
+		return !_tokens.NeedsRefresh(DateTimeOffset.UtcNow) || _tokens.RefreshToken is null
 			? _tokens
 			: await RefreshTokensAsync(cancellationToken).ConfigureAwait(false);
+	}
 
 	private async Task<DiscordTokens> RefreshTokensAsync(CancellationToken cancellationToken)
 	{
-		var refreshToken = _tokens.RefreshToken ??
-			throw new DiscordOAuthException("No refresh token is stored; run the Discord setup again.");
+		var refreshToken = _tokens.RefreshToken
+			?? throw new DiscordOAuthException("No refresh token is stored; run the Discord setup again.");
 
 		var refreshed = await _oauth
 			.RefreshAsync(_clientId, _clientSecret, refreshToken, cancellationToken)
@@ -560,16 +574,16 @@ internal sealed class DiscordConnection : IDisposable
 
 	private async Task SubscribeGlobalEventsAsync(IDiscordRpcClient client, CancellationToken cancellationToken)
 	{
-		await SubscribeAsync(client, DiscordRpcEvents.VoiceSettingsUpdate, args: null, cancellationToken)
+		await SubscribeAsync(client, DiscordRpcEvents.VoiceSettingsUpdate, null, cancellationToken)
 			.ConfigureAwait(false);
-		await SubscribeAsync(client, DiscordRpcEvents.VoiceChannelSelect, args: null, cancellationToken)
+		await SubscribeAsync(client, DiscordRpcEvents.VoiceChannelSelect, null, cancellationToken)
 			.ConfigureAwait(false);
-		await SubscribeAsync(client, DiscordRpcEvents.VoiceConnectionStatus, args: null, cancellationToken)
+		await SubscribeAsync(client, DiscordRpcEvents.VoiceConnectionStatus, null, cancellationToken)
 			.ConfigureAwait(false);
 
 		if (_grantedScopes.Contains(DiscordScopes.RpcNotificationsRead, StringComparer.Ordinal))
 		{
-			await SubscribeAsync(client, DiscordRpcEvents.NotificationCreate, args: null, cancellationToken)
+			await SubscribeAsync(client, DiscordRpcEvents.NotificationCreate, null, cancellationToken)
 				.ConfigureAwait(false);
 		}
 	}
@@ -596,8 +610,8 @@ internal sealed class DiscordConnection : IDisposable
 		var queriedId = DiscordStateMapper.ReadString(selected, "id");
 		var channelId = channelIdHint ?? queriedId;
 
-		if (_subscribedVoiceChannelId is not null &&
-			!string.Equals(_subscribedVoiceChannelId, channelId, StringComparison.Ordinal))
+		if (_subscribedVoiceChannelId is not null
+			&& !string.Equals(_subscribedVoiceChannelId, channelId, StringComparison.Ordinal))
 		{
 			await UnsubscribeVoiceChannelAsync(client, _subscribedVoiceChannelId, cancellationToken)
 				.ConfigureAwait(false);
@@ -683,11 +697,11 @@ internal sealed class DiscordConnection : IDisposable
 				break;
 
 			case DiscordRpcEvents.SpeakingStart:
-				HandleSpeaking(e.Data, speaking: true);
+				HandleSpeaking(e.Data, true);
 				break;
 
 			case DiscordRpcEvents.SpeakingStop:
-				HandleSpeaking(e.Data, speaking: false);
+				HandleSpeaking(e.Data, false);
 				break;
 
 			case DiscordRpcEvents.VoiceChannelSelect:

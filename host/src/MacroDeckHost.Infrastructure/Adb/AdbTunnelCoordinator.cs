@@ -44,7 +44,10 @@ internal sealed class AdbTunnelCoordinator
 		_logger = logger.ForContext<AdbTunnelCoordinator>();
 	}
 
-	public void SetExecutablePath(string? executablePath) => _executablePath = executablePath;
+	public void SetExecutablePath(string? executablePath)
+	{
+		_executablePath = executablePath;
+	}
 
 	public async Task<IReadOnlyDictionary<string, AdbTunnel>> ReconcileAsync(
 		IReadOnlyList<AdbDevice> devices,
@@ -182,7 +185,8 @@ internal sealed class AdbTunnelCoordinator
 		public int CyclesToSkip { get; set; }
 	}
 
-	public async Task RemoveOwnedTunnelsAsync(TimeSpan perDeviceTimeout,
+	public async Task RemoveOwnedTunnelsAsync(
+		TimeSpan perDeviceTimeout,
 		TimeSpan totalBudget,
 		CancellationToken cancellationToken)
 	{
@@ -219,7 +223,8 @@ internal sealed class AdbTunnelCoordinator
 		}
 	}
 
-	public async Task ReleaseOwnedTunnelsAsync(TimeSpan perDeviceTimeout,
+	public async Task ReleaseOwnedTunnelsAsync(
+		TimeSpan perDeviceTimeout,
 		TimeSpan totalBudget,
 		CancellationToken cancellationToken)
 	{
@@ -337,8 +342,8 @@ internal sealed class AdbTunnelCoordinator
 
 	private void RecordTunnel(string serial, int devicePort, int hostPort)
 	{
-		var state = _ownershipMarker.Read() ??
-			new AdbOwnershipState(Environment.ProcessId, false, [], DateTimeOffset.UtcNow);
+		var state = _ownershipMarker.Read()
+			?? new AdbOwnershipState(Environment.ProcessId, false, [], DateTimeOffset.UtcNow);
 		var tunnels = state.Tunnels
 			.Where(tunnel => tunnel.Serial != serial)
 			.Append(new AdbOwnedTunnel(serial, devicePort, hostPort))

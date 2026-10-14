@@ -30,6 +30,6 @@ public static class PluginAuthDefaults
 	public static readonly IReadOnlyList<string> All =
 	[
 		PluginIdHeaderName, PluginSecretHeaderName, EnrollmentTokenHeaderName, SessionIdHeaderName,
-		AuthorizationHeaderName,
+		AuthorizationHeaderName
 	];
 }

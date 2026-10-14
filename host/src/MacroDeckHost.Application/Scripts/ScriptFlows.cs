@@ -6,5 +6,8 @@ public static class ScriptFlows
 {
 	public const string TriggerType = "onRun";
 
-	public static string ToFlowsSource(string? flows) => WidgetFlowsJson.ToSource(flows);
+	public static string ToFlowsSource(string? flows)
+	{
+		return WidgetFlowsJson.ToSource(flows);
+	}
 }

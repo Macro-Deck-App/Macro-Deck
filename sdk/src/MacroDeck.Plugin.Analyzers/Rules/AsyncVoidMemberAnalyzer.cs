@@ -82,5 +82,7 @@ public sealed class AsyncVoidMemberAnalyzer : DiagnosticAnalyzer
 	/// <summary>The one legitimate use of async void - a method shaped like a standard .NET event
 	/// handler, <c>(object? sender, TEventArgs e)</c>.</summary>
 	private static bool IsStandardEventHandlerSignature(IMethodSymbol method, INamedTypeSymbol? eventArgsType)
-		=> method.Parameters.Length == 2 && method.Parameters[1].Type.IsOrDerivesFrom(eventArgsType);
+	{
+		return method.Parameters.Length == 2 && method.Parameters[1].Type.IsOrDerivesFrom(eventArgsType);
+	}
 }

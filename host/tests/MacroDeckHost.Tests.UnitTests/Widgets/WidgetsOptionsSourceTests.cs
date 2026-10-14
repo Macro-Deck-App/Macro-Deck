@@ -58,7 +58,7 @@ public class WidgetsOptionsSourceTests
 	[Test]
 	public async Task A_label_rendering_to_nothing_falls_back_to_the_widget_type_name()
 	{
-		var source = Source(Widget("{{ vars.missing }}", type: WidgetTypeIds.Clock));
+		var source = Source(Widget("{{ vars.missing }}", WidgetTypeIds.Clock));
 
 		var result = await source.GetOptionsAsync(null, CancellationToken.None);
 
@@ -68,7 +68,7 @@ public class WidgetsOptionsSourceTests
 	[Test]
 	public async Task A_label_that_cannot_be_rendered_falls_back_to_the_widget_type_name()
 	{
-		var source = Source(Widget("{{ 1 +", type: WidgetTypeIds.Clock));
+		var source = Source(Widget("{{ 1 +", WidgetTypeIds.Clock));
 
 		var result = await source.GetOptionsAsync(null, CancellationToken.None);
 
@@ -105,42 +105,61 @@ public class WidgetsOptionsSourceTests
 		return new WidgetsOptionsSource(new FakeWidgetApi(widget), provider.GetRequiredService<IServiceScopeFactory>());
 	}
 
-	private static WidgetTargetInfo Widget(string label, string type = "clock") => new()
+	private static WidgetTargetInfo Widget(string label, string type = "clock")
 	{
-		Id = "clock-1",
-		Label = label,
-		Location = "Profile / Folder",
-		Type = type,
-		AppearanceProperties = [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
-	};
+		return new WidgetTargetInfo
+		{
+			Id = "clock-1",
+			Label = label,
+			Location = "Profile / Folder",
+			Type = type,
+			AppearanceProperties = [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
+		};
+	}
 
-	private static VariableEntity Variable(string name, string value) => new()
+	private static VariableEntity Variable(string name, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = VariableType.Text,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private sealed class FakeWidgetApi(WidgetTargetInfo widget) : IWidgetApi
 	{
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [widget];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [widget];
+		}
 
-		public bool Exists(string widgetId) => widgetId == widget.Id;
+		public bool Exists(string widgetId)
+		{
+			return widgetId == widget.Id;
+		}
 
-		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default) =>
-			Task.FromResult(false);
+		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 }

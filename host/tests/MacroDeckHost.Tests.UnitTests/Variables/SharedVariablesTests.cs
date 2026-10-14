@@ -55,7 +55,8 @@ internal sealed class SharedVariablesTests
 				Is.EqualTo(new[] { ("deaths", "numeric", "3", true) }));
 			Assert.That(all.Single(v => v.Name == "deaths").Shared, Is.True);
 			Assert.That(_mediator.Published.OfType<VariableUpdatedNotification>().Select(n => n.Variable.Id),
-				Does.Contain(deaths.Id), "clients must learn about the new flag");
+				Does.Contain(deaths.Id),
+				"clients must learn about the new flag");
 		});
 	}
 
@@ -126,8 +127,12 @@ internal sealed class SharedVariablesTests
 	[Test]
 	public async Task A_widget_variable_cannot_be_shared()
 	{
-		var result = await _service.CreateUserVariable("counter", VariableScope.Widget, "widget-1", VariableType.Numeric,
-			0m, null);
+		var result = await _service.CreateUserVariable("counter",
+			VariableScope.Widget,
+			"widget-1",
+			VariableType.Numeric,
+			0m,
+			null);
 
 		var toggle = await SetShared(result.Data!, true);
 
@@ -141,7 +146,7 @@ internal sealed class SharedVariablesTests
 	[Test]
 	public async Task A_variable_its_provider_declared_non_shareable_cannot_be_shared()
 	{
-		var mirrored = await CreateDeclared("mirrored", "mirrored", shareable: false);
+		var mirrored = await CreateDeclared("mirrored", "mirrored", false);
 
 		var toggle = await SetShared(mirrored, true);
 
@@ -157,10 +162,10 @@ internal sealed class SharedVariablesTests
 	[Test]
 	public async Task A_variable_shared_before_its_provider_declared_it_non_shareable_is_never_served()
 	{
-		var scene = await CreateDeclared("obs_scene", "obs-scene", shareable: true);
+		var scene = await CreateDeclared("obs_scene", "obs-scene", true);
 		await SetShared(scene, true);
 
-		var redeclared = await CreateDeclared("obs_scene", "obs-scene", shareable: false);
+		var redeclared = await CreateDeclared("obs_scene", "obs-scene", false);
 		var listed = await ListAsync();
 		var write = await SetValue("obs_scene", "Main");
 
@@ -176,9 +181,9 @@ internal sealed class SharedVariablesTests
 	[Test]
 	public async Task A_share_stored_before_its_provider_declared_it_non_shareable_can_still_be_removed()
 	{
-		var scene = await CreateDeclared("obs_scene", "obs-scene", shareable: true);
+		var scene = await CreateDeclared("obs_scene", "obs-scene", true);
 		await SetShared(scene, true);
-		await CreateDeclared("obs_scene", "obs-scene", shareable: false);
+		await CreateDeclared("obs_scene", "obs-scene", false);
 
 		var toggle = await SetShared(scene, false);
 
@@ -302,7 +307,7 @@ internal sealed class SharedVariablesTests
 			Assert.That(response.Success, Is.False);
 			Assert.That(response.Error!.Code, Is.EqualTo(nameof(VariableError.OwnerUnavailable)));
 			Assert.That(response.Error.Message.Localized?.Key,
-				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable(integration: "Volume Mixer").Key));
+				Is.EqualTo(AppStrings.Errors.Variables.OwnerUnavailable("Volume Mixer").Key));
 			Assert.That(TestLocalization.Resolve(response.Error.Message),
 				Is.EqualTo("Volume Mixer is not available right now"));
 		});
@@ -319,13 +324,19 @@ internal sealed class SharedVariablesTests
 		Assert.That(restarted.IsShared(deaths), Is.True);
 	}
 
-	private VariableOwnerNames OwnerNames() => new(_integrations, TestLocalization.ScopeFactory);
+	private VariableOwnerNames OwnerNames()
+	{
+		return new VariableOwnerNames(_integrations, TestLocalization.ScopeFactory);
+	}
 
 	private async Task<VariableEntity> CreateUser(string name, VariableType type, object value)
-		=> (await _service.CreateUserVariable(name, VariableScope.Global, null, type, value, null)).Data!;
+	{
+		return (await _service.CreateUserVariable(name, VariableScope.Global, null, type, value, null)).Data!;
+	}
 
 	private async Task<VariableEntity> CreateIntegration(string name, string definitionId)
-		=> (await _service.CreateIntegrationVariable(ObsIntegration,
+	{
+		return (await _service.CreateIntegrationVariable(ObsIntegration,
 			name,
 			VariableScope.Global,
 			null,
@@ -333,6 +344,7 @@ internal sealed class SharedVariablesTests
 			true,
 			null,
 			definitionId)).Data!;
+	}
 
 	private async Task<VariableEntity> CreateDeclared(string name, string definitionId, bool shareable)
 	{
@@ -352,8 +364,11 @@ internal sealed class SharedVariablesTests
 	}
 
 	private async Task<SetVariableSharedResponse> SetShared(VariableEntity variable, bool shared)
-		=> await new SetVariableSharedRequestMessageHandler(_shared, _registry, _mediator)
-			.Handle(new SetVariableSharedRequest { Id = variable.Id.ToString(), Shared = shared }, CancellationToken.None);
+	{
+		return await new SetVariableSharedRequestMessageHandler(_shared, _registry, _mediator)
+			.Handle(new SetVariableSharedRequest { Id = variable.Id.ToString(), Shared = shared },
+				CancellationToken.None);
+	}
 
 	private async Task<List<SharedVariableDto>> ListAsync()
 	{
@@ -378,9 +393,11 @@ internal sealed class SharedVariablesTests
 	}
 
 	private async Task<SetSharedVariableValueResponse> SetValue(string name, string value)
-		=> await new SetSharedVariableValueRequestMessageHandler(_shared,
+	{
+		return await new SetSharedVariableValueRequestMessageHandler(_shared,
 				_service,
 				new FakeHostLockState { IsLocked = false },
 				OwnerNames())
 			.Handle(new SetSharedVariableValueRequest { Name = name, Value = value }, CancellationToken.None);
+	}
 }

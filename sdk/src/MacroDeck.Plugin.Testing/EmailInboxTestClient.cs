@@ -13,7 +13,10 @@ public sealed class EmailInboxTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal EmailInboxTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal EmailInboxTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>
 	/// Reads an <c>EmailInboxDescribePayload</c>: the first non-empty provider name of the plugin's email
@@ -21,22 +24,26 @@ public sealed class EmailInboxTestClient
 	/// <c>ProtocolLimits.MaxEmailInboxes</c>.
 	/// </summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.EmailInbox.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>
 	/// Reads an <c>EmailInboxesResult</c> with the same inbox list <see cref="DescribeAsync" /> carries; an
 	/// id two integrations announce is listed once, for the first of them.
 	/// </summary>
 	public Task<CapabilityInvocationOutcome> GetInboxesAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.EmailInbox.Inboxes,
 			null,
 			options);
+	}
 
 	/// <summary>
 	/// Reads an <c>EmailInboxSnapshotResult</c> from the integration that owns the inbox: the status as a
@@ -46,11 +53,14 @@ public sealed class EmailInboxTestClient
 	/// <c>ProtocolErrorCodes.CapabilityUnavailable</c>; a provider that throws fails with
 	/// <c>ProtocolErrorCodes.InternalError</c>.
 	/// </summary>
-	public Task<CapabilityInvocationOutcome> GetSnapshotAsync(EmailInboxSnapshotArguments arguments,
+	public Task<CapabilityInvocationOutcome> GetSnapshotAsync(
+		EmailInboxSnapshotArguments arguments,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.EmailInbox,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.EmailInbox.Snapshot,
 			arguments,
 			options);
+	}
 }

@@ -18,7 +18,9 @@ public class EventRegistryTests
 	private static EventRegistry Registry(
 		IIntegrationRegistry integrations,
 		params IHostEventProvider[] hostProviders)
-		=> new(integrations, hostProviders, new LoggerConfiguration().CreateLogger());
+	{
+		return new EventRegistry(integrations, hostProviders, new LoggerConfiguration().CreateLogger());
+	}
 
 	private static IEnumerable<IHostEventProvider> HostProviders()
 	{
@@ -234,9 +236,9 @@ public class EventRegistryTests
 			{
 				foreach (var parameter in definition.PayloadParameters.Where(OffersOptions))
 				{
-					Assert.That(parameter.Options is { Count: > 0 } ||
-						parameter.OptionsSourceId is not null ||
-						hasProvider,
+					Assert.That(parameter.Options is { Count: > 0 }
+						|| parameter.OptionsSourceId is not null
+						|| hasProvider,
 						Is.True,
 						$"{definition.Id}/{parameter.Name}");
 				}
@@ -245,9 +247,11 @@ public class EventRegistryTests
 	}
 
 	private static bool OffersOptions(ActionParameter parameter)
-		=> parameter.Type is ActionParameterType.Choice
+	{
+		return parameter.Type is ActionParameterType.Choice
 			or ActionParameterType.DynamicChoice
 			or ActionParameterType.Autocomplete;
+	}
 
 	private sealed class EventProvidingIntegration : IIntegration, IEventProvider
 	{
@@ -262,9 +266,15 @@ public class EventRegistryTests
 		public IReadOnlyList<EventDefinition> EventDefinitions { get; } =
 			[new() { Id = "scene-changed", Name = "Scene Changed" }];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnnamedEventProvidingIntegration : IIntegration, IEventProvider
@@ -278,9 +288,15 @@ public class EventRegistryTests
 		public IReadOnlyList<EventDefinition> EventDefinitions { get; } =
 			[new() { Id = "scene-changed", Name = "Scene Changed" }];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class DisabledIntegrationRegistry : IIntegrationRegistry
@@ -295,28 +311,51 @@ public class EventRegistryTests
 
 		public IReadOnlyList<IIntegration> Integrations => _integrations;
 
-		public void Add(IIntegration integration) => _integrations.Add(integration);
+		public void Add(IIntegration integration)
+		{
+			_integrations.Add(integration);
+		}
 
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => null;
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
 
-		public bool IsEnabled(string integrationId) => false;
+		public bool IsEnabled(string integrationId)
+		{
+			return false;
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
 		}
 
-		public IntegrationOrigin GetOrigin(string integrationId) => IntegrationOrigin.BuiltIn;
+		public IntegrationOrigin GetOrigin(string integrationId)
+		{
+			return IntegrationOrigin.BuiltIn;
+		}
 
 		public Task<IntegrationRegistrationResult> RegisterAsync(
 			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
-			=> Task.FromResult(IntegrationRegistrationResult.Success);
+		{
+			return Task.FromResult(IntegrationRegistrationResult.Success);
+		}
 
-		public Task<bool> UnregisterAsync(string integrationId) => Task.FromResult(false);
+		public Task<bool> UnregisterAsync(string integrationId)
+		{
+			return Task.FromResult(false);
+		}
 	}
 }

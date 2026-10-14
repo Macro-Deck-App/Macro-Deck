@@ -4,12 +4,15 @@ namespace MacroDeckHost.Application.Ui.Transport.Messages.Store;
 
 public static class StoreAvailableUpdateBodyFactory
 {
-	public static StoreAvailableUpdateBody Create(StoreAvailableUpdate update) => new()
+	public static StoreAvailableUpdateBody Create(StoreAvailableUpdate update)
 	{
-		Kind = update.Kind,
-		PackageId = update.PackageId,
-		Name = update.Name,
-		InstalledVersion = update.InstalledVersion,
-		LatestVersion = update.LatestVersion
-	};
+		return new StoreAvailableUpdateBody
+		{
+			Kind = update.Kind,
+			PackageId = update.PackageId,
+			Name = update.Name,
+			InstalledVersion = update.InstalledVersion,
+			LatestVersion = update.LatestVersion
+		};
+	}
 }

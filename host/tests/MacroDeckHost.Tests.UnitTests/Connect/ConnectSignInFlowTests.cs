@@ -206,7 +206,10 @@ public class ConnectSignInFlowTests
 
 		public List<TimeSpan> Delays { get; } = [];
 
-		public ValueTask DisposeAsync() => Flow.DisposeAsync();
+		public ValueTask DisposeAsync()
+		{
+			return Flow.DisposeAsync();
+		}
 
 		/// <summary>Records what was waited for and advances the clock by it, so an attempt nobody confirms
 		/// reaches its expiry without the test waiting a quarter of an hour.</summary>

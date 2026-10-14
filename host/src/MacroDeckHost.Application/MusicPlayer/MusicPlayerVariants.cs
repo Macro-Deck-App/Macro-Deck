@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Capabilities.MusicPlayer;
-using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
 
 namespace MacroDeckHost.Application.MusicPlayer;
@@ -47,9 +46,15 @@ public sealed record MusicPlayerVariant
 		return new MusicPlayerVariant(instanceId, options, key.ToString());
 	}
 
-	public bool Equals(MusicPlayerVariant? other) => other is not null && string.Equals(Key, other.Key, StringComparison.Ordinal);
+	public bool Equals(MusicPlayerVariant? other)
+	{
+		return other is not null && string.Equals(Key, other.Key, StringComparison.Ordinal);
+	}
 
-	public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Key);
+	public override int GetHashCode()
+	{
+		return StringComparer.Ordinal.GetHashCode(Key);
+	}
 }
 
 public interface IMusicPlayerVariants

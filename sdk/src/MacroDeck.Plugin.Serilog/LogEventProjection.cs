@@ -33,7 +33,8 @@ internal static class LogEventProjection
 	}
 
 	private static string MapLevel(LogEventLevel level)
-		=> level switch
+	{
+		return level switch
 		{
 			LogEventLevel.Verbose => LogLevels.Verbose,
 			LogEventLevel.Debug => LogLevels.Debug,
@@ -43,11 +44,12 @@ internal static class LogEventProjection
 			LogEventLevel.Fatal => LogLevels.Fatal,
 			_ => LogLevels.Information
 		};
+	}
 
 	private static string? ExtractSourceContext(LogEvent logEvent)
 	{
-		if (!logEvent.Properties.TryGetValue(SourceContextPropertyName, out var value) ||
-			value is not ScalarValue { Value: string text })
+		if (!logEvent.Properties.TryGetValue(SourceContextPropertyName, out var value)
+			|| value is not ScalarValue { Value: string text })
 		{
 			return null;
 		}
@@ -98,16 +100,19 @@ internal static class LogEventProjection
 	/// string" and "discarded" are different outcomes.
 	/// </summary>
 	private static string RenderPropertyValue(LogEventPropertyValue value)
-		=> value switch
+	{
+		return value switch
 		{
 			ScalarValue { Value: null } => string.Empty,
 			ScalarValue { Value: IFormattable formattable } => formattable.ToString(null, CultureInfo.InvariantCulture),
 			ScalarValue scalar => scalar.Value?.ToString() ?? string.Empty,
 			_ => value.ToString()
 		};
+	}
 
 	private static LogExceptionDto BuildException(Exception exception, int remainingDepth)
-		=> new()
+	{
+		return new LogExceptionDto
 		{
 			Type = exception.GetType().FullName ?? exception.GetType().Name,
 			Message = exception.Message,
@@ -121,7 +126,10 @@ internal static class LogEventProjection
 				? BuildException(inner, remainingDepth - 1)
 				: null
 		};
+	}
 
-	private static string Truncate(string value, int maxLength) =>
-		value.Length <= maxLength ? value : value[..maxLength];
+	private static string Truncate(string value, int maxLength)
+	{
+		return value.Length <= maxLength ? value : value[..maxLength];
+	}
 }

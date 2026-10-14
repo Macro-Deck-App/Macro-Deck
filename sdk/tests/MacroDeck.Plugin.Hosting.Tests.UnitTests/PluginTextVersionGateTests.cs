@@ -29,7 +29,10 @@ public class PluginTextVersionGateTests
 	}
 
 	[TearDown]
-	public void TearDown() => PluginText.Negotiated(ProtocolVersions.Minimum);
+	public void TearDown()
+	{
+		PluginText.Negotiated(ProtocolVersions.Minimum);
+	}
 
 	[Test]
 	public void A_reference_travels_as_a_reference_once_the_shape_is_negotiated()

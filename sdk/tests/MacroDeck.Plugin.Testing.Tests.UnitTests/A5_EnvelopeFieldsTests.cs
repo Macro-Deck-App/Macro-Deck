@@ -9,7 +9,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// A5 - <see cref="CapabilityInvokeOptions" /> travels on the envelope, never duplicated inside the payload.
 /// </summary>
 [TestFixture]
-public class A5_EnvelopeFieldsTests
+public class A5EnvelopeFieldsTests
 {
 	[Test]
 	public async Task Deadline_and_idempotency_key_live_on_the_envelope_not_the_payload()
@@ -29,8 +29,8 @@ public class A5_EnvelopeFieldsTests
 			options: new CapabilityInvokeOptions { Timeout = TimeSpan.FromSeconds(5), IdempotencyKey = "key-a5" });
 
 		var invokeEnvelope = host.Messages.All
-			.Single(message => message.Direction == ProtocolMessageDirection.ToPlugin &&
-				message.Envelope.Id == outcome.CorrelationId)
+			.Single(message => message.Direction == ProtocolMessageDirection.ToPlugin
+				&& message.Envelope.Id == outcome.CorrelationId)
 			.Envelope;
 
 		Assert.Multiple(() =>

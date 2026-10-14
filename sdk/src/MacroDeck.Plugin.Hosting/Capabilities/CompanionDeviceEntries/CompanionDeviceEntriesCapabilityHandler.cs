@@ -17,7 +17,8 @@ internal sealed class CompanionDeviceEntriesCapabilityHandler(IEnumerable<IPlugi
 	public string Kind => CapabilityKinds.CompanionDeviceEntries;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _declared
+	{
+		return _declared
 			?
 			[
 				new DeclaredCapability
@@ -27,6 +28,7 @@ internal sealed class CompanionDeviceEntriesCapabilityHandler(IEnumerable<IPlugi
 				}
 			]
 			: [];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -35,8 +37,8 @@ internal sealed class CompanionDeviceEntriesCapabilityHandler(IEnumerable<IPlugi
 		ArgumentNullException.ThrowIfNull(invocation);
 
 		return Task.FromResult(string.Equals(invocation.Operation,
-				CapabilityOperations.CompanionDeviceEntries.Describe,
-				StringComparison.Ordinal)
+			CapabilityOperations.CompanionDeviceEntries.Describe,
+			StringComparison.Ordinal)
 			? CapabilityInvocationResult.Ok()
 			: CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnsupported,
 				$"The companion-device-entries capability has no operation '{invocation.Operation}'."));

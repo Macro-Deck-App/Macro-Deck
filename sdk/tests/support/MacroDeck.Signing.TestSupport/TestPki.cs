@@ -82,7 +82,8 @@ public static class TestPki
 	/// valid from two days ago for two years so a default <see cref="IssueCertificate" /> under it fits inside
 	/// its window.
 	/// </summary>
-	public static IssuedCertificate IssueIssuer(DateTimeOffset? notBefore = null,
+	public static IssuedCertificate IssueIssuer(
+		DateTimeOffset? notBefore = null,
 		DateTimeOffset? notAfter = null,
 		(byte[] PrivateKey, byte[] PublicKey)? signingRoot = null,
 		IReadOnlyList<string>? keyUsage = null,
@@ -90,11 +91,11 @@ public static class TestPki
 		int schemaVersion = 2,
 		IssuedCertificate? issuer = null)
 	{
-		return IssueCertificate(subjectKind: subjectKind,
-			keyUsage: keyUsage ?? [SigningCertificateChain.IssuerKeyUsage],
-			notBefore: notBefore ?? DateTimeOffset.UtcNow.AddDays(-2),
-			notAfter: notAfter ?? DateTimeOffset.UtcNow.AddYears(2),
-			signingRoot: signingRoot,
+		return IssueCertificate(subjectKind,
+			keyUsage ?? [SigningCertificateChain.IssuerKeyUsage],
+			notBefore ?? DateTimeOffset.UtcNow.AddDays(-2),
+			notAfter ?? DateTimeOffset.UtcNow.AddYears(2),
+			signingRoot,
 			schemaVersion: schemaVersion,
 			issuer: issuer);
 	}
@@ -103,7 +104,8 @@ public static class TestPki
 	/// against <paramref name="trustedRoot" /> (<see cref="Root" /> by default) and unwraps a trusted result -
 	/// convenience for the many tests that only care about the certificate once it has already passed the
 	/// chain check.</summary>
-	public static TrustedSigningCertificate VerifyChain(IssuedCertificate issued,
+	public static TrustedSigningCertificate VerifyChain(
+		IssuedCertificate issued,
 		string requiredKeyUsage,
 		(byte[] PrivateKey, byte[] PublicKey)? trustedRoot = null)
 	{

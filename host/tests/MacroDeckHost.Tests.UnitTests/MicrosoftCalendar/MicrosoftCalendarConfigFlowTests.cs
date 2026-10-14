@@ -23,17 +23,22 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 	public void SetUp()
 	{
 		_harness = new MicrosoftCalendarHarness();
-		_harness.Calendars(MicrosoftCalendarHarness.Calendar("cal-1", "Calendar", ownerAddress: Email, isDefault: true),
-			MicrosoftCalendarHarness.Calendar("cal-2", "Holidays", ownerAddress: Email),
-			MicrosoftCalendarHarness.Calendar("cal-3", "Calendar", ownerAddress: "alex@contoso.com",
-				ownerName: "Alex Wilber"),
-			MicrosoftCalendarHarness.Calendar("cal-4", "Family", ownerAddress: "outlook_A1B2@outlook.com"));
+		_harness.Calendars(MicrosoftCalendarHarness.Calendar("cal-1", "Calendar", Email, isDefault: true),
+			MicrosoftCalendarHarness.Calendar("cal-2", "Holidays", Email),
+			MicrosoftCalendarHarness.Calendar("cal-3",
+				"Calendar",
+				"alex@contoso.com",
+				"Alex Wilber"),
+			MicrosoftCalendarHarness.Calendar("cal-4", "Family", "outlook_A1B2@outlook.com"));
 		_context = new FakeConfigFlowContext();
 		_flow = _harness.Integration.CreateConfigFlow();
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task The_first_step_only_asks_to_sign_in_and_keeps_an_own_app_optional()
@@ -47,20 +52,26 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 			Assert.That(step.Fields, Is.Empty, "nothing has to be entered to sign in");
 			Assert.That(step.AdvancedFields.Select(f => (f.Name, f.Required)),
 				Is.EqualTo(new[] { ("clientId", false), ("tenant", false) }));
-			Assert.That(step.AdvancedFields.Select(f => f.Type), Has.None.EqualTo(ActionParameterType.Secret),
+			Assert.That(step.AdvancedFields.Select(f => f.Type),
+				Has.None.EqualTo(ActionParameterType.Secret),
 				"a public client has no secret to ask for");
-			Assert.That(instructions, Does.Not.Contain(_context.RedirectUri).And.Not.Contain("Calendars.Read"),
+			Assert.That(instructions,
+				Does.Not.Contain(_context.RedirectUri).And.Not.Contain("Calendars.Read"),
 				"the own-app setup stays out of sight until Advanced is opened");
 			Assert.That(step.Links, Is.Empty);
-			Assert.That(ownApp, Does.Contain(_context.RedirectUri).And.Contain("Mobile and desktop applications")
-				.And.Contain("Calendars.Read").And.Contain("needs a directory"));
+			Assert.That(ownApp,
+				Does.Contain(_context.RedirectUri)
+					.And.Contain("Mobile and desktop applications")
+					.And.Contain("Calendars.Read")
+					.And.Contain("needs a directory"));
 		});
 	}
 
 	[Test]
 	public async Task Without_an_own_app_the_sign_in_uses_macro_decks_app_and_keeps_it_for_the_account()
 	{
-		var external = await _flow.SubmitAsync("app", new Dictionary<string, object?>(), _context, CancellationToken.None);
+		var external
+			= await _flow.SubmitAsync("app", new Dictionary<string, object?>(), _context, CancellationToken.None);
 		var query = GraphRecordedRequest.ParseQuery(new Uri(external.ExternalUrl!).Query.TrimStart('?'));
 		var calendars = await SignInAsync(external);
 		var exchange = _harness.Server.To(MicrosoftCalendarHarness.TokenPath).Single().Form;
@@ -74,9 +85,11 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 			Assert.That(query["client_id"], Is.EqualTo(MicrosoftOAuth.DefaultClientId));
 			Assert.That(exchange["client_id"], Is.EqualTo(MicrosoftOAuth.DefaultClientId));
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
-			Assert.That(result.Values!["signInClientId"], Is.EqualTo(ConfigFlowValue.Plain(MicrosoftOAuth.DefaultClientId)),
+			Assert.That(result.Values!["signInClientId"],
+				Is.EqualTo(ConfigFlowValue.Plain(MicrosoftOAuth.DefaultClientId)),
 				"refresh tokens belong to the app that issued them");
-			Assert.That(result.Values!.Keys, Has.None.EqualTo("clientId").And.None.EqualTo("tenant"),
+			Assert.That(result.Values!.Keys,
+				Has.None.EqualTo("clientId").And.None.EqualTo("tenant"),
 				"editing the connection shows Advanced as the user left it");
 		});
 	}
@@ -94,7 +107,8 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 	}
 
 	[TestCase(null, "https://login.microsoftonline.com/common/oauth2/v2.0/authorize")]
-	[TestCase("Contoso.onmicrosoft.com", "https://login.microsoftonline.com/contoso.onmicrosoft.com/oauth2/v2.0/authorize")]
+	[TestCase("Contoso.onmicrosoft.com",
+		"https://login.microsoftonline.com/contoso.onmicrosoft.com/oauth2/v2.0/authorize")]
 	[TestCase("consumers", "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize")]
 	public async Task The_sign_in_asks_the_tenant_for_offline_read_only_calendar_access_with_pkce(
 		string? tenant,
@@ -104,13 +118,17 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 		var authorize = new Uri(result.ExternalUrl!);
 		var query = GraphRecordedRequest.ParseQuery(authorize.Query.TrimStart('?'));
 
-		await SignInAsync(result, tokenPath: authority.Replace("https://login.microsoftonline.com", "")
-			.Replace("authorize", "token"));
-		var exchange = _harness.Server.Requests.Single(r => r.Uri.AbsolutePath.EndsWith("/token", StringComparison.Ordinal))
+		await SignInAsync(result,
+			tokenPath: authority.Replace("https://login.microsoftonline.com", "")
+				.Replace("authorize", "token"));
+		var exchange = _harness.Server.Requests
+			.Single(r => r.Uri.AbsolutePath.EndsWith("/token", StringComparison.Ordinal))
 			.Form;
 
 		var challenge = Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(exchange["code_verifier"])))
-			.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+			.TrimEnd('=')
+			.Replace('+', '-')
+			.Replace('/', '_');
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.External));
@@ -118,10 +136,11 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 			Assert.That(query["client_id"], Is.EqualTo(ClientId));
 			Assert.That(query["redirect_uri"], Is.EqualTo(_context.RedirectUri));
 			Assert.That(query["state"], Is.EqualTo(_context.State));
-			Assert.That(query["scope"].Split(' '), Is.EquivalentTo(new[]
-			{
-				"openid", "profile", "email", "offline_access", "https://graph.microsoft.com/Calendars.Read"
-			}));
+			Assert.That(query["scope"].Split(' '),
+				Is.EquivalentTo(new[]
+				{
+					"openid", "profile", "email", "offline_access", "https://graph.microsoft.com/Calendars.Read"
+				}));
 			Assert.That(query["code_challenge_method"], Is.EqualTo("S256"));
 			Assert.That(query["code_challenge"], Is.EqualTo(challenge));
 			Assert.That(exchange["grant_type"], Is.EqualTo("authorization_code"));
@@ -226,7 +245,9 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 	public async Task A_cancelled_sign_in_returns_to_the_first_step()
 	{
 		var external = await SubmitAppAsync(ClientId);
-		var result = await _flow.SubmitAsync(external.ResumeStepId!, new Dictionary<string, object?>(), _context,
+		var result = await _flow.SubmitAsync(external.ResumeStepId!,
+			new Dictionary<string, object?>(),
+			_context,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -246,7 +267,7 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 			HttpStatusCode.BadRequest,
 			$$"""{"error":"invalid_client","error_description":"AADSTS{{code}}: refused.","error_codes":[{{code}}]}""");
 
-		var result = await SignInAsync(await SubmitAppAsync(ClientId), answerToken: false);
+		var result = await SignInAsync(await SubmitAppAsync(ClientId), false);
 
 		Assert.Multiple(() =>
 		{
@@ -255,13 +276,17 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 		});
 	}
 
-	[TestCase("""{"token_type":"Bearer","scope":"Calendars.Read openid profile email","expires_in":3599,"access_token":"access-1"}""")]
-	[TestCase("""{"token_type":"Bearer","scope":"openid profile email","expires_in":3599,"access_token":"access-1","refresh_token":"refresh-1"}""")]
+	[TestCase(
+		"""{"token_type":"Bearer","scope":"Calendars.Read openid profile email","expires_in":3599,"access_token":"access-1"}""")]
+	[TestCase(
+		"""{"token_type":"Bearer","scope":"openid profile email","expires_in":3599,"access_token":"access-1","refresh_token":"refresh-1"}""")]
 	public async Task A_grant_without_lasting_or_calendar_access_is_not_stored(string tokenResponse)
 	{
-		_harness.Server.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.TokenPath, HttpStatusCode.OK, tokenResponse);
+		_harness.Server.On(r => r.Uri.AbsolutePath == MicrosoftCalendarHarness.TokenPath,
+			HttpStatusCode.OK,
+			tokenResponse);
 
-		var result = await SignInAsync(await SubmitAppAsync(ClientId), answerToken: false);
+		var result = await SignInAsync(await SubmitAppAsync(ClientId), false);
 
 		Assert.Multiple(() =>
 		{
@@ -271,10 +296,12 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> SubmitAppAsync(string clientId, string? tenant = null)
-		=> _flow.SubmitAsync("app",
+	{
+		return _flow.SubmitAsync("app",
 			new Dictionary<string, object?> { ["clientId"] = clientId, ["tenant"] = tenant },
 			_context,
 			CancellationToken.None);
+	}
 
 	private async Task<ConfigFlowResult> SignInAsync(
 		ConfigFlowResult external,
@@ -289,7 +316,9 @@ internal sealed class MicrosoftCalendarConfigFlowTests
 		}
 
 		_context.AuthorizationCode = "auth-code";
-		return await _flow.SubmitAsync(external.ResumeStepId!, new Dictionary<string, object?>(), _context,
+		return await _flow.SubmitAsync(external.ResumeStepId!,
+			new Dictionary<string, object?>(),
+			_context,
 			CancellationToken.None);
 	}
 }

@@ -64,8 +64,8 @@ public class CachingInitializeBackgroundService : HostReadyBackgroundService
 			if (_profileCache.HadUnreadableProfiles)
 			{
 				_logger.Error(
-					"No profiles could be loaded but unreadable profile files were found; refusing to create a " +
-					"Default Profile to avoid masking data loss");
+					"No profiles could be loaded but unreadable profile files were found; refusing to create a "
+					+ "Default Profile to avoid masking data loss");
 			}
 			else
 			{

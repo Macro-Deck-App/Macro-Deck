@@ -19,7 +19,8 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 	// artwork uploads, and refuses the rest outright.
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
-	public async Task<UiResource> RegisterAsync(string name,
+	public async Task<UiResource> RegisterAsync(
+		string name,
 		ReadOnlyMemory<byte> content,
 		string mediaType,
 		CancellationToken cancellationToken = default)
@@ -86,7 +87,10 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 		}
 	}
 
-	public async Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
+	public async Task<UiResource> GetPluginIconAsync(
+		string key,
+		string name,
+		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(key);
 		ArgumentNullException.ThrowIfNull(name);
@@ -133,13 +137,17 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 				$"Macro Deck answered the lookup of icon '{iconId}' without a resource.");
 	}
 
-	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		CancellationToken cancellationToken = default)
-		=> RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, null, cancellationToken);
+	{
+		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, null, cancellationToken);
+	}
 
-	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int maxSize,
@@ -149,9 +157,13 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 		return RegisterMusicPlayerArtworkAsync(name, instanceId, artworkId, (int?)maxSize, cancellationToken);
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
-	private async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	private async Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int? maxSize,
@@ -181,8 +193,8 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 				throw Translate(exception);
 			}
 
-			var answer = result?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options) ??
-				throw new UiResourceException(UiResourceErrorCode.Failed,
+			var answer = result?.Deserialize<UiRegisterMusicPlayerArtworkResult>(PluginProtocolJson.Options)
+				?? throw new UiResourceException(UiResourceErrorCode.Failed,
 					$"Macro Deck answered the registration of UI resource '{name}' without a result.");
 
 			return answer.Resource is { } handle ? ToResource(handle) : null;
@@ -194,15 +206,18 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 	}
 
 	private static UiResource ToResource(UiResourceHandleDto handle)
-		=> new()
+	{
+		return new UiResource
 		{
 			ResourceId = handle.ResourceId,
 			ContentHash = handle.ContentHash,
 			MediaType = handle.MediaType,
-			ByteLength = handle.ByteLength,
+			ByteLength = handle.ByteLength
 		};
+	}
 
-	private async Task<UiRegisterResourceResult> RegisterOnceAsync(UiRegisterResourceArguments arguments,
+	private async Task<UiRegisterResourceResult> RegisterOnceAsync(
+		UiRegisterResourceArguments arguments,
 		CancellationToken cancellationToken)
 	{
 		JsonElement? result;
@@ -219,8 +234,8 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			throw Translate(exception);
 		}
 
-		return result?.Deserialize<UiRegisterResourceResult>(PluginProtocolJson.Options) ??
-			throw new UiResourceException(UiResourceErrorCode.Failed,
+		return result?.Deserialize<UiRegisterResourceResult>(PluginProtocolJson.Options)
+			?? throw new UiResourceException(UiResourceErrorCode.Failed,
 				$"Macro Deck answered the registration of UI resource '{arguments.Name}' without a result.");
 	}
 
@@ -228,7 +243,8 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 	{
 		try
 		{
-			await uploader.UploadAsync(AssetKinds.UiResource, mediaType, bytes, cancellationToken).ConfigureAwait(false);
+			await uploader.UploadAsync(AssetKinds.UiResource, mediaType, bytes, cancellationToken)
+				.ConfigureAwait(false);
 		}
 		catch (AssetUploadException exception)
 		{
@@ -243,8 +259,8 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 		if (!UiResourceRules.IsValidName(name))
 		{
 			throw new ArgumentException(
-				$"'{name}' is not a valid UI resource name: use a letter or digit followed by up to 63 letters, " +
-				"digits, hyphens or underscores.",
+				$"'{name}' is not a valid UI resource name: use a letter or digit followed by up to 63 letters, "
+				+ "digits, hyphens or underscores.",
 				nameof(name));
 		}
 	}
@@ -258,7 +274,7 @@ internal sealed class RemoteUiResourceRegistry(IHostInvoker invoker, IPluginAsse
 			ProtocolErrorCodes.RateLimited => UiResourceErrorCode.RateLimited,
 			ProtocolErrorCodes.PluginIconNotFound => UiResourceErrorCode.PluginIconNotFound,
 			ProtocolErrorCodes.IconNotFound => UiResourceErrorCode.IconNotFound,
-			_ => UiResourceErrorCode.Failed,
+			_ => UiResourceErrorCode.Failed
 		};
 
 		return new UiResourceException(code, exception.Message, exception);

@@ -169,7 +169,7 @@ public sealed class PluginSessionView : ICapabilityInvoker
 		};
 
 		var stopwatch = Stopwatch.StartNew();
-		var reply = await _connection.InvokeAndWaitAsync(envelope, options?.CancellationToken ?? default)
+		var reply = await _connection.InvokeAndWaitAsync(envelope, options?.CancellationToken ?? CancellationToken.None)
 			.ConfigureAwait(false);
 		stopwatch.Stop();
 

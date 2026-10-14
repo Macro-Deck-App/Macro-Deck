@@ -65,7 +65,10 @@ public sealed class LogOriginEnricher : ILogEventEnricher
 	}
 
 	private static string? ReadString(LogEvent logEvent, string propertyName)
-		=> logEvent.Properties.TryGetValue(propertyName, out var value) && value is ScalarValue { Value: string text }
-			? text
-			: null;
+	{
+		return logEvent.Properties.TryGetValue(propertyName, out var value)
+			&& value is ScalarValue { Value: string text }
+				? text
+				: null;
+	}
 }

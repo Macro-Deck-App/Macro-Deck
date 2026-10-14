@@ -67,7 +67,10 @@ public class FolderServiceDuplicateVariableTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Duplicate_CarriesEachWidgetsUserVariablesOntoItsDuplicate()
@@ -117,7 +120,10 @@ public class FolderServiceDuplicateVariableTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

@@ -13,7 +13,8 @@ public class GetLocalizationRequestMessageHandler
 	private readonly ILocalizationResolver _resolver;
 	private readonly TimeFormatResolver _timeFormat;
 
-	public GetLocalizationRequestMessageHandler(IAppPreferenceService preferences,
+	public GetLocalizationRequestMessageHandler(
+		IAppPreferenceService preferences,
 		ILocalizationCatalogRegistry catalogs,
 		ILocalizationResolver resolver,
 		TimeFormatResolver timeFormat)

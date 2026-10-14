@@ -36,30 +36,60 @@ internal sealed class MusicPlayerCapabilityShapeTests
 	private sealed class MinimalPlayer : IMusicPlayer
 	{
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(MusicPlayerState.Disconnected);
+		{
+			return Task.FromResult(MusicPlayerState.Disconnected);
+		}
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

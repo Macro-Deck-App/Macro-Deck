@@ -50,7 +50,8 @@ public sealed class FileVariableSynchronizer : IDisposable
 	// only mark a re-read, so nothing is applied to a variable the registry does not know yet.
 	public async Task<FileVariableInitialState> AttachAsync(VariableEntity entity)
 	{
-		var source = entity.FileSource ?? throw new ArgumentException("The variable has no file source.", nameof(entity));
+		var source = entity.FileSource
+			?? throw new ArgumentException("The variable has no file source.", nameof(entity));
 
 		Detach(entity.Id);
 		var state = new State(entity.Id, source) { Reading = true };
@@ -58,8 +59,8 @@ public sealed class FileVariableSynchronizer : IDisposable
 		state.Watch = WatchSafely(state);
 
 		var outcome = await ReadSafelyAsync(source.Path);
-		if (outcome.Content is { } content &&
-			VariableFileText.TryToValue(entity.Type, entity.DecimalPlaces, content, out var value))
+		if (outcome.Content is { } content
+			&& VariableFileText.TryToValue(entity.Type, entity.DecimalPlaces, content, out var value))
 		{
 			lock (state.Gate)
 			{
@@ -161,7 +162,9 @@ public sealed class FileVariableSynchronizer : IDisposable
 	}
 
 	public Task RefreshAsync(Guid id)
-		=> _states.TryGetValue(id, out var state) ? ReadAndApplyAsync(state) : Task.CompletedTask;
+	{
+		return _states.TryGetValue(id, out var state) ? ReadAndApplyAsync(state) : Task.CompletedTask;
+	}
 
 	public void ScheduleRefresh(Guid id)
 	{
@@ -356,17 +359,17 @@ public sealed class FileVariableSynchronizer : IDisposable
 		}
 
 		string? value = null;
-		var available = outcome.Content is { } content &&
-			VariableFileText.TryToValue(entity.Type, entity.DecimalPlaces, content, out value);
+		var available = outcome.Content is { } content
+			&& VariableFileText.TryToValue(entity.Type, entity.DecimalPlaces, content, out value);
 
 		var previousValue = entity.Value;
 		bool wasAvailable;
 		lock (state.Gate)
 		{
-			if (state.Detached ||
-				state.Requested != requested ||
-				state.Epoch != epoch ||
-				state.Completed < state.Requested)
+			if (state.Detached
+				|| state.Requested != requested
+				|| state.Epoch != epoch
+				|| state.Completed < state.Requested)
 			{
 				return;
 			}
@@ -375,8 +378,8 @@ public sealed class FileVariableSynchronizer : IDisposable
 
 			// The file still holds what we wrote: the variable already has that value, and re-parsing it
 			// would drop a trailing line break the user set and report a change that did not happen.
-			var ownWrite = outcome.Content is not null &&
-				string.Equals(outcome.Content, state.LastWrittenRaw, StringComparison.Ordinal);
+			var ownWrite = outcome.Content is not null
+				&& string.Equals(outcome.Content, state.LastWrittenRaw, StringComparison.Ordinal);
 			if (!ownWrite)
 			{
 				state.LastWrittenRaw = null;

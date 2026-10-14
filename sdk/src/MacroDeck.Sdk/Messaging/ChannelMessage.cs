@@ -32,7 +32,9 @@ public sealed record ChannelMessage
 	/// </summary>
 	/// <exception cref="JsonException">The payload does not fit <typeparamref name="T" />.</exception>
 	public T? PayloadAs<T>(JsonSerializerOptions? options = null)
-		=> Payload is { } payload
+	{
+		return Payload is { } payload
 			? payload.Deserialize<T>(options ?? MessageChannelJson.Options)
 			: default;
+	}
 }

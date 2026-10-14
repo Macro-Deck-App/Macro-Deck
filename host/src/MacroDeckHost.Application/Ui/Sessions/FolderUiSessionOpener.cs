@@ -46,8 +46,8 @@ public sealed class FolderUiSessionOpener : IFolderUiSessionOpener
 		ArgumentNullException.ThrowIfNull(request);
 		ownerPrincipal ??= string.Empty;
 
-		if (!Guid.TryParse(request.FolderId, out var folderId) ||
-			_folderCache.GetFolderById(folderId) is not { } folder)
+		if (!Guid.TryParse(request.FolderId, out var folderId)
+			|| _folderCache.GetFolderById(folderId) is not { } folder)
 		{
 			return Rejected(string.Empty,
 				UiSessionErrorCodes.ProviderUnavailable,
@@ -98,16 +98,16 @@ public sealed class FolderUiSessionOpener : IFolderUiSessionOpener
 
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) ||
-				session.State is UiSessionState.Closed or UiSessionState.Invalidated ||
-				!string.Equals(session.Surface.Kind, UiSurfaceKinds.Folder, StringComparison.Ordinal))
+			if (!string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)
+				|| session.State is UiSessionState.Closed or UiSessionState.Invalidated
+				|| !string.Equals(session.Surface.Kind, UiSurfaceKinds.Folder, StringComparison.Ordinal))
 			{
 				continue;
 			}
 
-			if (session.Surface.Attributes.TryGetValue(UiFolderSurfaceAttributes.FolderId, out var candidate) &&
-				candidate.ValueKind == JsonValueKind.String &&
-				string.Equals(candidate.GetString(), wanted, StringComparison.Ordinal))
+			if (session.Surface.Attributes.TryGetValue(UiFolderSurfaceAttributes.FolderId, out var candidate)
+				&& candidate.ValueKind == JsonValueKind.String
+				&& string.Equals(candidate.GetString(), wanted, StringComparison.Ordinal))
 			{
 				return session.SessionId;
 			}
@@ -117,13 +117,15 @@ public sealed class FolderUiSessionOpener : IFolderUiSessionOpener
 	}
 
 	private static Dictionary<string, JsonElement> BuildAttributes(Guid folderId, FolderEntity folder, string viewId)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiFolderSurfaceAttributes.FolderId] = JsonSerializer.SerializeToElement(folderId.ToString()),
 			[UiFolderSurfaceAttributes.FolderName] = JsonSerializer.SerializeToElement(folder.Name),
 			[UiFolderSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(viewId),
 			[UiFolderSurfaceAttributes.Configuration] = ParseStoredConfiguration(folder.ViewConfiguration)
 		};
+	}
 
 	private static JsonElement ParseStoredConfiguration(string? json)
 	{
@@ -146,8 +148,14 @@ public sealed class FolderUiSessionOpener : IFolderUiSessionOpener
 	}
 
 	private static OpenFolderUiSessionResponse Accepted(string sessionId, string viewId, string navigation)
-		=> new() { Accepted = true, SessionId = sessionId, ViewId = viewId, Navigation = navigation };
+	{
+		return new OpenFolderUiSessionResponse
+			{ Accepted = true, SessionId = sessionId, ViewId = viewId, Navigation = navigation };
+	}
 
 	private static OpenFolderUiSessionResponse Rejected(string viewId, string code, string? message)
-		=> new() { Accepted = false, SessionId = string.Empty, ViewId = viewId, Code = code, Message = message };
+	{
+		return new OpenFolderUiSessionResponse
+			{ Accepted = false, SessionId = string.Empty, ViewId = viewId, Code = code, Message = message };
+	}
 }

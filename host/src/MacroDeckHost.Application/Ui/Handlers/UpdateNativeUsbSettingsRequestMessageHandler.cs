@@ -7,7 +7,8 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 public class UpdateNativeUsbSettingsRequestMessageHandler(INativeUsbManager manager)
 	: IUiTransportMessageHandler<UpdateNativeUsbSettingsRequest, UpdateNativeUsbSettingsResponse>
 {
-	public async ValueTask<UpdateNativeUsbSettingsResponse> Handle(UpdateNativeUsbSettingsRequest request,
+	public async ValueTask<UpdateNativeUsbSettingsResponse> Handle(
+		UpdateNativeUsbSettingsRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (request.Enabled is { } enabled)

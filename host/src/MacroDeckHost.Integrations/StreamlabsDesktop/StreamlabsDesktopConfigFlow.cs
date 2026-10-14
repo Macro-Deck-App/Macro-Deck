@@ -6,7 +6,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Localization;
 using Serilog;
 using MacroDeck.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.StreamlabsDesktop;
 
@@ -42,59 +41,64 @@ public sealed class StreamlabsDesktopConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			StepId => await SubmitConnection(input, cancellationToken).ConfigureAwait(false),
 			_ => ConfigFlowResult.Error(ConnectionStep(),
 				AppStrings.Integrations.StreamlabsDesktop.Config.UnknownStep())
 		};
+	}
 
-	internal static ConfigFlowStep ConnectionStep() => new()
+	internal static ConfigFlowStep ConnectionStep()
 	{
-		StepId = StepId,
-		Title = AppStrings.Integrations.StreamlabsDesktop.Config.ConnectTitle(),
-		Description = AppStrings.Integrations.StreamlabsDesktop.Config.ConnectDescription(),
-		Instructions =
-		[
-			new ConfigFlowInstruction
-				{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionOpenSettings() },
-			new ConfigFlowInstruction
-			{
-				Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionOpenRemoteControl()
-			},
-			new ConfigFlowInstruction
-				{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionRevealToken() },
-			new ConfigFlowInstruction
-				{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionPasteToken() }
-		],
-		Links =
-		[
-			new ConfigFlowLink
-			{
-				Label = AppStrings.Integrations.StreamlabsDesktop.Config.ApiDocumentationLinkLabel(),
-				Url = "https://stream-labs.github.io/streamlabs-desktop-api-docs/docs/index.html"
-			}
-		],
-		Fields =
-		[
-			ActionParameter.Secret(StreamlabsDesktopConfigKeys.Token,
-				label: AppStrings.Integrations.StreamlabsDesktop.Config.ApiTokenLabel(),
-				description: AppStrings.Integrations.StreamlabsDesktop.Config.ApiTokenDescription(),
-				required: true)
-		],
-		AdvancedFields =
-		[
-			ActionParameter.Text(StreamlabsDesktopConfigKeys.Host,
-				label: AppStrings.Integrations.StreamlabsDesktop.Config.AddressLabel(),
-				description: AppStrings.Integrations.StreamlabsDesktop.Config.AddressDescription(),
-				placeholder: StreamlabsDesktopEndpoint.DefaultHost),
-			ActionParameter.Number(StreamlabsDesktopConfigKeys.Port,
-				label: AppStrings.Integrations.StreamlabsDesktop.Config.PortLabel(),
-				description: AppStrings.Integrations.StreamlabsDesktop.Config.PortDescription(),
-				min: 1,
-				max: 65535)
-		]
-	};
+		return new ConfigFlowStep
+		{
+			StepId = StepId,
+			Title = AppStrings.Integrations.StreamlabsDesktop.Config.ConnectTitle(),
+			Description = AppStrings.Integrations.StreamlabsDesktop.Config.ConnectDescription(),
+			Instructions =
+			[
+				new ConfigFlowInstruction
+					{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionOpenSettings() },
+				new ConfigFlowInstruction
+				{
+					Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionOpenRemoteControl()
+				},
+				new ConfigFlowInstruction
+					{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionRevealToken() },
+				new ConfigFlowInstruction
+					{ Text = AppStrings.Integrations.StreamlabsDesktop.Config.InstructionPasteToken() }
+			],
+			Links =
+			[
+				new ConfigFlowLink
+				{
+					Label = AppStrings.Integrations.StreamlabsDesktop.Config.ApiDocumentationLinkLabel(),
+					Url = "https://stream-labs.github.io/streamlabs-desktop-api-docs/docs/index.html"
+				}
+			],
+			Fields =
+			[
+				ActionParameter.Secret(StreamlabsDesktopConfigKeys.Token,
+					AppStrings.Integrations.StreamlabsDesktop.Config.ApiTokenLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Config.ApiTokenDescription(),
+					true)
+			],
+			AdvancedFields =
+			[
+				ActionParameter.Text(StreamlabsDesktopConfigKeys.Host,
+					AppStrings.Integrations.StreamlabsDesktop.Config.AddressLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Config.AddressDescription(),
+					StreamlabsDesktopEndpoint.DefaultHost),
+				ActionParameter.Number(StreamlabsDesktopConfigKeys.Port,
+					AppStrings.Integrations.StreamlabsDesktop.Config.PortLabel(),
+					AppStrings.Integrations.StreamlabsDesktop.Config.PortDescription(),
+					1,
+					65535)
+			]
+		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnection(
 		IReadOnlyDictionary<string, object?> input,
@@ -193,21 +197,29 @@ public sealed class StreamlabsDesktopConfigFlow : IConfigFlow
 	}
 
 	private static LocalizedText Unreachable(StreamlabsDesktopEndpoint endpoint)
-		=> AppStrings.Integrations.StreamlabsDesktop.Config.Unreachable(address: endpoint.DisplayAddress);
-
-	private static int? ParsePort(object? value) => value switch
 	{
-		null => null,
-		int number => Valid(number),
-		long number => Valid((int)number),
-		double number => Valid((int)number),
-		string text when string.IsNullOrWhiteSpace(text) => null,
-		string text when int.TryParse(text,
-			NumberStyles.Integer,
-			CultureInfo.InvariantCulture,
-			out var parsed) => Valid(parsed),
-		_ => 0
-	};
+		return AppStrings.Integrations.StreamlabsDesktop.Config.Unreachable(endpoint.DisplayAddress);
+	}
 
-	private static int Valid(int port) => port is > 0 and <= 65535 ? port : 0;
+	private static int? ParsePort(object? value)
+	{
+		return value switch
+		{
+			null => null,
+			int number => Valid(number),
+			long number => Valid((int)number),
+			double number => Valid((int)number),
+			string text when string.IsNullOrWhiteSpace(text) => null,
+			string text when int.TryParse(text,
+				NumberStyles.Integer,
+				CultureInfo.InvariantCulture,
+				out var parsed) => Valid(parsed),
+			_ => 0
+		};
+	}
+
+	private static int Valid(int port)
+	{
+		return port is > 0 and <= 65535 ? port : 0;
+	}
 }

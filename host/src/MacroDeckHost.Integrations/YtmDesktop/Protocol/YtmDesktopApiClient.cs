@@ -20,7 +20,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 	private bool _disposed;
 
 	public YtmDesktopApiClient(YtmDesktopEndpoint endpoint)
-		: this(endpoint, send: null)
+		: this(endpoint, null)
 	{
 	}
 
@@ -32,14 +32,17 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 		_send = send;
 	}
 
-	public void UseToken(string? token) => _token = token;
+	public void UseToken(string? token)
+	{
+		_token = token;
+	}
 
 	public async Task<IReadOnlyList<string>> GetApiVersionsAsync(CancellationToken cancellationToken)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, _endpoint.MetadataUri());
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Fast,
-				authenticated: false,
+				false,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -47,9 +50,9 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 			.ConfigureAwait(false);
 
 		var root = document.RootElement;
-		if (root.ValueKind != JsonValueKind.Object ||
-			!root.TryGetProperty("apiVersions", out var versions) ||
-			versions.ValueKind != JsonValueKind.Array)
+		if (root.ValueKind != JsonValueKind.Object
+			|| !root.TryGetProperty("apiVersions", out var versions)
+			|| versions.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -87,7 +90,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Fast,
-				authenticated: false,
+				false,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -111,7 +114,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Slow,
-				authenticated: false,
+				false,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -124,7 +127,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 		using var request = new HttpRequestMessage(HttpMethod.Get, _endpoint.ApiUri("state"));
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Fast,
-				authenticated: true,
+				true,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -138,7 +141,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 		using var request = new HttpRequestMessage(HttpMethod.Get, _endpoint.ApiUri("playlists"));
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Slow,
-				authenticated: true,
+				true,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -173,7 +176,7 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 
 		using var response = await SendAsync(request,
 				YtmDesktopHttpClients.Fast,
-				authenticated: true,
+				true,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -234,8 +237,8 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 			: string.Create(CultureInfo.InvariantCulture,
 				$"The Companion Server answered {(int)response.StatusCode} ({errorCode}).");
 
-		if (response.StatusCode == HttpStatusCode.Unauthorized ||
-			string.Equals(errorCode, YtmErrorCodes.Unauthenticated, StringComparison.Ordinal))
+		if (response.StatusCode == HttpStatusCode.Unauthorized
+			|| string.Equals(errorCode, YtmErrorCodes.Unauthenticated, StringComparison.Ordinal))
 		{
 			throw new YtmDesktopAuthorizationException(message);
 		}
@@ -312,16 +315,20 @@ internal sealed class YtmDesktopApiClient : IYtmDesktopApiClient
 	}
 
 	private static string ReadRequiredString(JsonElement root, string property, HttpStatusCode statusCode)
-		=> ReadString(root, property) ??
-			throw new YtmDesktopApiException($"The Companion Server's response did not include '{property}'.",
+	{
+		return ReadString(root, property)
+			?? throw new YtmDesktopApiException($"The Companion Server's response did not include '{property}'.",
 				statusCode);
+	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private sealed record CommandBody(string Command, object? Data);
 }

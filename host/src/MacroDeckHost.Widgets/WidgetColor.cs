@@ -24,7 +24,11 @@ internal static partial class WidgetColor
 	public const string Transparent = "transparent";
 
 	public static string? NormalizeBackground(string? raw)
-		=> string.Equals(raw?.Trim(), Transparent, StringComparison.OrdinalIgnoreCase) ? Transparent : Normalize(raw);
+	{
+		return string.Equals(raw?.Trim(), Transparent, StringComparison.OrdinalIgnoreCase)
+			? Transparent
+			: Normalize(raw);
+	}
 
 	public static string? Normalize(string? raw)
 	{
@@ -74,9 +78,9 @@ internal static partial class WidgetColor
 			return null;
 		}
 
-		if (!TryComponent(tokens[0], out var r) ||
-			!TryComponent(tokens[1], out var g) ||
-			!TryComponent(tokens[2], out var b))
+		if (!TryComponent(tokens[0], out var r)
+			|| !TryComponent(tokens[1], out var g)
+			|| !TryComponent(tokens[2], out var b))
 		{
 			return null;
 		}
@@ -93,8 +97,10 @@ internal static partial class WidgetColor
 	{
 		alpha = 0;
 		var percent = token.EndsWith('%');
-		if (!double.TryParse(percent ? token[..^1] : token, NumberStyles.Float, CultureInfo.InvariantCulture,
-				out var number))
+		if (!double.TryParse(percent ? token[..^1] : token,
+			NumberStyles.Float,
+			CultureInfo.InvariantCulture,
+			out var number))
 		{
 			return false;
 		}
@@ -129,7 +135,10 @@ internal static partial class WidgetColor
 		return true;
 	}
 
-	private static byte ToByte(double value) => (byte)Math.Round(value, MidpointRounding.AwayFromZero);
+	private static byte ToByte(double value)
+	{
+		return (byte)Math.Round(value, MidpointRounding.AwayFromZero);
+	}
 
 	private static bool IsHex(string value)
 	{
@@ -144,7 +153,10 @@ internal static partial class WidgetColor
 		return true;
 	}
 
-	private static string Compose(byte r, byte g, byte b) => $"#{r:x2}{g:x2}{b:x2}";
+	private static string Compose(byte r, byte g, byte b)
+	{
+		return $"#{r:x2}{g:x2}{b:x2}";
+	}
 
 
 	private static readonly IReadOnlyDictionary<string, string> _namedColors
@@ -192,6 +204,6 @@ internal static partial class WidgetColor
 			["slategrey"] = "#708090", ["snow"] = "#fffafa", ["springgreen"] = "#00ff7f", ["steelblue"] = "#4682b4",
 			["tan"] = "#d2b48c", ["teal"] = "#008080", ["thistle"] = "#d8bfd8", ["tomato"] = "#ff6347",
 			["turquoise"] = "#40e0d0", ["violet"] = "#ee82ee", ["wheat"] = "#f5deb3", ["white"] = "#ffffff",
-			["whitesmoke"] = "#f5f5f5", ["yellow"] = "#ffff00", ["yellowgreen"] = "#9acd32",
+			["whitesmoke"] = "#f5f5f5", ["yellow"] = "#ffff00", ["yellowgreen"] = "#9acd32"
 		};
 }

@@ -3,7 +3,6 @@ using System.Runtime.Versioning;
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Migration;
-using MacroDeckHost.Integrations.Keyboard;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.System;
@@ -42,47 +41,62 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["macro deck_windows utils"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"SuchByte.WindowsUtils.Actions.HotkeyAction" => MigrateHotkey(action),
-		"SuchByte.WindowsUtils.Actions.WriteTextAction" => MigrateWriteText(action),
-		"SuchByte.WindowsUtils.Actions.StartApplicationAction" => MigrateStartApplication(action),
-		"SuchByte.WindowsUtils.Actions.OpenFileAction" => MigratePath(action, "open-file"),
-		"SuchByte.WindowsUtils.Actions.OpenFolderAction" => MigratePath(action, "open-folder"),
-		"SuchByte.WindowsUtils.Actions.CommandlineAction" => MigrateCommandline(action),
-		"SuchByte.WindowsUtils.Actions.MuteVolumeAction" => NoParameterAction(action, "mute-volume", "Mute volume"),
-		"SuchByte.WindowsUtils.Actions.IncreaseVolumeAction" => NoParameterAction(action,
-			"increase-volume",
-			"Increase volume"),
-		"SuchByte.WindowsUtils.Actions.DecreaseVolumeAction" => NoParameterAction(action,
-			"decrease-volume",
-			"Decrease volume"),
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
 
-		// MultiHotkeyAction's own config UI is wired to StartApplicationActionConfigView rather than its
-		// own MultiHotkeyActionConfigView - a bug in the source plugin - so a real installation's saved
-		// configuration for this action is not trustworthy. Its model also stores each step behind the
-		// IMultiHotkeyAction interface, which System.Text.Json serializes with no members of the concrete
-		// step type, so even a correctly configured button would not round-trip its steps. Nothing here can
-		// be read with any confidence, so it is left as a placeholder.
-		"SuchByte.WindowsUtils.Actions.MultiHotkeyAction" => null,
+	private ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"SuchByte.WindowsUtils.Actions.HotkeyAction" => MigrateHotkey(action),
+			"SuchByte.WindowsUtils.Actions.WriteTextAction" => MigrateWriteText(action),
+			"SuchByte.WindowsUtils.Actions.StartApplicationAction" => MigrateStartApplication(action),
+			"SuchByte.WindowsUtils.Actions.OpenFileAction" => MigratePath(action, "open-file"),
+			"SuchByte.WindowsUtils.Actions.OpenFolderAction" => MigratePath(action, "open-folder"),
+			"SuchByte.WindowsUtils.Actions.CommandlineAction" => MigrateCommandline(action),
+			"SuchByte.WindowsUtils.Actions.MuteVolumeAction" => NoParameterAction(action, "mute-volume", "Mute volume"),
+			"SuchByte.WindowsUtils.Actions.IncreaseVolumeAction" => NoParameterAction(action,
+				"increase-volume",
+				"Increase volume"),
+			"SuchByte.WindowsUtils.Actions.DecreaseVolumeAction" => NoParameterAction(action,
+				"decrease-volume",
+				"Decrease volume"),
 
-		// Simulates the browser-navigation keys (back/forward/home/refresh) for File Explorer. Macro Deck 3's
-		// keyboard action has no key codes for them and no integration offers Explorer navigation directly.
-		"SuchByte.WindowsUtils.Actions.WindowsExplorerControlAction" => null,
-		_ => null
-	};
+			// MultiHotkeyAction's own config UI is wired to StartApplicationActionConfigView rather than its
+			// own MultiHotkeyActionConfigView - a bug in the source plugin - so a real installation's saved
+			// configuration for this action is not trustworthy. Its model also stores each step behind the
+			// IMultiHotkeyAction interface, which System.Text.Json serializes with no members of the concrete
+			// step type, so even a correctly configured button would not round-trip its steps. Nothing here can
+			// be read with any confidence, so it is left as a placeholder.
+			"SuchByte.WindowsUtils.Actions.MultiHotkeyAction" => null,
 
-	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings) => [];
+			// Simulates the browser-navigation keys (back/forward/home/refresh) for File Explorer. Macro Deck 3's
+			// keyboard action has no key codes for them and no integration offers Explorer navigation directly.
+			"SuchByte.WindowsUtils.Actions.WindowsExplorerControlAction" => null,
+			_ => null
+		};
+	}
+
+	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
+	{
+		return [];
+	}
 
 	private static ActionMigrationResult NoParameterAction(ForeignAction action, string actionId, string fallbackLabel)
-		=> new(SystemIntegration.IntegrationId, actionId, action.DisplayName ?? fallbackLabel, Parameters());
+	{
+		return new ActionMigrationResult(SystemIntegration.IntegrationId,
+			actionId,
+			action.DisplayName ?? fallbackLabel,
+			Parameters());
+	}
 
 	private ActionMigrationResult? MigrateHotkey(ForeignAction action)
 	{
@@ -104,7 +118,10 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 		AddModifier(config, modifiers, null, "lwin", "rwin", "meta", "RightMeta");
 
 		var parameters = Parameters(("combo", ComboJson(modifiers, key)));
-		return new ActionMigrationResult(KeyboardIntegrationId, "press-key", action.DisplayName ?? "Hotkey", parameters);
+		return new ActionMigrationResult(KeyboardIntegrationId,
+			"press-key",
+			action.DisplayName ?? "Hotkey",
+			parameters);
 	}
 
 	private static void AddModifier(
@@ -246,10 +263,10 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 			}
 
 			var variableType = ReadString(config, "variableType");
-			if (!string.IsNullOrEmpty(variableType) &&
-				!string.Equals(variableType, "String", StringComparison.OrdinalIgnoreCase))
+			if (!string.IsNullOrEmpty(variableType)
+				&& !string.Equals(variableType, "String", StringComparison.OrdinalIgnoreCase))
 			{
-				warnings = [AppStrings.Migration.Warning.System.CommandOutputTypeIgnored(variableType: variableType)];
+				warnings = [AppStrings.Migration.Warning.System.CommandOutputTypeIgnored(variableType)];
 			}
 		}
 
@@ -269,10 +286,11 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	private bool TryMapKey(string virtualKeyCode, out string key)
 	{
 		// OEM virtual keys depend on the keyboard layout, so they map to a position only through one.
-		if (_oemVirtualKeys.TryGetValue(virtualKeyCode, out var oem) &&
-			_virtualKeyToScanCode?.Invoke(oem) is { } scan && scan != 0 &&
-			NativeKeys.TryFromWindowsScanCode(scan, out var physical) &&
-			NativeKeys.IsPositional(physical))
+		if (_oemVirtualKeys.TryGetValue(virtualKeyCode, out var oem)
+			&& _virtualKeyToScanCode?.Invoke(oem) is { } scan
+			&& scan != 0
+			&& NativeKeys.TryFromWindowsScanCode(scan, out var physical)
+			&& NativeKeys.IsPositional(physical))
 		{
 			key = physical.ToString();
 			return true;
@@ -300,7 +318,10 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	};
 
 	[SupportedOSPlatform("windows")]
-	private static ushort WindowsVirtualKeyToScanCode(ushort virtualKey) => (ushort)MapVirtualKey(virtualKey, 0);
+	private static ushort WindowsVirtualKeyToScanCode(ushort virtualKey)
+	{
+		return (ushort)MapVirtualKey(virtualKey, 0);
+	}
 
 	[DllImport("user32.dll")]
 	private static extern uint MapVirtualKey(uint uCode, uint uMapType);
@@ -395,7 +416,9 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static JsonElement ComboJson(IReadOnlyList<string> modifiers, string key)
-		=> JsonSerializer.SerializeToElement(new { modifiers, key });
+	{
+		return JsonSerializer.SerializeToElement(new { modifiers, key });
+	}
 
 	private static bool TryParseObject(string? json, out JsonElement element)
 	{
@@ -448,14 +471,21 @@ internal sealed class WindowsUtilsMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static int ReadInt(JsonElement config, string name, int fallback)
-		=> config.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var parsed)
+	{
+		return config.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var parsed)
 				? parsed
 				: fallback;
+	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

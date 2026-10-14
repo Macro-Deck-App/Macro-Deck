@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Application.Integrations;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Rendering;
@@ -17,6 +16,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeckHost.Application.HostLocking;
 using Serilog;
 
 namespace MacroDeckHost.Application.Actions;
@@ -77,7 +77,8 @@ public sealed class FlowExecutor : IFlowExecutor
 		_stateEvalQueue = stateEvalQueue;
 	}
 
-	public async Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request,
+	public async Task<FlowExecutionResult> ExecuteAsync(
+		FlowExecutionRequest request,
 		CancellationToken cancellationToken)
 	{
 		var stopwatch = Stopwatch.StartNew();
@@ -428,9 +429,9 @@ public sealed class FlowExecutor : IFlowExecutor
 		var stopwatch = Stopwatch.StartNew();
 		WidgetOptimisticStateIdentity? optimisticIdentity = null;
 		long optimisticGeneration = 0;
-		if (run.OwnerWidgetId is { } widgetId &&
-			action is IStateProviderActionDefinition &&
-			_optimisticStates is not null)
+		if (run.OwnerWidgetId is { } widgetId
+			&& action is IStateProviderActionDefinition
+			&& _optimisticStates is not null)
 		{
 			optimisticIdentity = new WidgetOptimisticStateIdentity(widgetId, block.Id, integrationId, actionId);
 			optimisticGeneration = _optimisticStates.Begin(optimisticIdentity);
@@ -478,17 +479,17 @@ public sealed class FlowExecutor : IFlowExecutor
 
 				_musicPlayerPollNudge.NoteActionExecuted(integrationId);
 
-				if (optimisticIdentity is not null &&
-					result.ExpectedStateId is { Length: > 0 } expectedStateId &&
-					_optimisticStates!.TryApply(optimisticIdentity, optimisticGeneration, expectedStateId))
+				if (optimisticIdentity is not null
+					&& result.ExpectedStateId is { Length: > 0 } expectedStateId
+					&& _optimisticStates!.TryApply(optimisticIdentity, optimisticGeneration, expectedStateId))
 				{
 					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
 				}
 				// Host runs are excluded: an onStateChange flow toggling its own provider would otherwise
 				// re-trigger itself through the queue, past the reconciler's synchronous depth guard.
-				else if (optimisticIdentity is not null &&
-					run.Origin == ExecutionOrigin.Client &&
-					string.Equals(run.ProviderBlockId, block.Id, StringComparison.Ordinal))
+				else if (optimisticIdentity is not null
+					&& run.Origin == ExecutionOrigin.Client
+					&& string.Equals(run.ProviderBlockId, block.Id, StringComparison.Ordinal))
 				{
 					_stateEvalQueue?.Enqueue(optimisticIdentity.WidgetId);
 				}
@@ -526,8 +527,8 @@ public sealed class FlowExecutor : IFlowExecutor
 			{
 				Severity = UserNotificationSeverity.Error,
 				Kind = UserNotificationKind.Error,
-				Title = _localization.Resolve(AppStrings.Notifications.ActionFailed(name: actionName), notifyCulture) ??
-					$"\"{actionName}\" failed",
+				Title = _localization.Resolve(AppStrings.Notifications.ActionFailed(actionName), notifyCulture)
+					?? $"\"{actionName}\" failed",
 				Message = _localization.Resolve(message, notifyCulture),
 				Action = new UserNotificationAction(UserNotificationActionKind.OpenLogs, null),
 				DedupeKey = $"action-failed:{integrationId}.{actionId}"
@@ -582,9 +583,10 @@ public sealed class FlowExecutor : IFlowExecutor
 		foreach (var branch in block.Branches ?? [])
 		{
 			var kind = branch.Kind.ToLowerInvariant();
-			if (kind == "else" ||
-				(kind == "case" && subjectAvailable &&
-				 _conditionEvaluator.Evaluate(block.Subject, "==", branch.Value, run.Variables)))
+			if (kind == "else"
+				|| kind == "case"
+				&& subjectAvailable
+				&& _conditionEvaluator.Evaluate(block.Subject, "==", branch.Value, run.Variables))
 			{
 				await ExecuteBlocksAsync(branch.Children, run, cancellationToken);
 				return;
@@ -691,13 +693,13 @@ public sealed class FlowExecutor : IFlowExecutor
 		object value,
 		IReadOnlyList<ActionParameter>? declared)
 	{
-		if (!string.Equals(parameter.Type, "color", StringComparison.OrdinalIgnoreCase) ||
-			value is not string rendered ||
-			parameter.Value.ValueKind != JsonValueKind.String ||
-			!ColorReference.TryParse(parameter.Value.GetString(), out _) ||
-			declared?.FirstOrDefault(candidate =>
-				string.Equals(candidate.Name, parameter.Name, StringComparison.OrdinalIgnoreCase)) is
-			{ AllowAlpha: true })
+		if (!string.Equals(parameter.Type, "color", StringComparison.OrdinalIgnoreCase)
+			|| value is not string rendered
+			|| parameter.Value.ValueKind != JsonValueKind.String
+			|| !ColorReference.TryParse(parameter.Value.GetString(), out _)
+			|| declared?.FirstOrDefault(candidate =>
+					string.Equals(candidate.Name, parameter.Name, StringComparison.OrdinalIgnoreCase)) is
+				{ AllowAlpha: true })
 		{
 			return value;
 		}
@@ -763,8 +765,8 @@ public sealed class FlowExecutor : IFlowExecutor
 				"keyvalue" => ConvertKeyValueParameter(parameter.Value, variables),
 				"hotkey" or "object" or "json" => ConvertJsonElement(parameter.Value) ?? parameter.Value.GetRawText(),
 				"keyboardsequence" =>
-					_conditionEvaluator.RenderTemplateString(parameter.Value.GetRawText(), variables) ??
-					parameter.Value.GetRawText(),
+					_conditionEvaluator.RenderTemplateString(parameter.Value.GetRawText(), variables)
+					?? parameter.Value.GetRawText(),
 				_ => parameter.Value.GetRawText()
 			};
 		}
@@ -812,11 +814,12 @@ public sealed class FlowExecutor : IFlowExecutor
 				.Select(element => element.ValueKind switch
 				{
 					JsonValueKind.String => _conditionEvaluator
-							.RenderTemplateString(element.GetString() ?? string.Empty, variables) ??
-						string.Empty,
+							.RenderTemplateString(element.GetString() ?? string.Empty, variables)
+						?? string.Empty,
 					JsonValueKind.Object => ActionConditionEvaluator
-							.ResolveVariableReference(element, variables)?.ToString() ??
-						element.GetRawText(),
+							.ResolveVariableReference(element, variables)
+							?.ToString()
+						?? element.GetRawText(),
 					_ => element.ToString()
 				})
 				.ToArray();
@@ -892,8 +895,11 @@ public sealed class FlowExecutor : IFlowExecutor
 			_ => (0d, 0)
 		};
 
-		if (suffixLength > 0 &&
-			double.TryParse(trimmed[..^suffixLength], NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
+		if (suffixLength > 0
+			&& double.TryParse(trimmed[..^suffixLength],
+				NumberStyles.Float,
+				CultureInfo.InvariantCulture,
+				out var number))
 		{
 			return number * factor;
 		}
@@ -905,14 +911,16 @@ public sealed class FlowExecutor : IFlowExecutor
 	{
 		secretId = Guid.Empty;
 
-		return element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty("$secret", out var reference) &&
-			reference.ValueKind == JsonValueKind.String &&
-			Guid.TryParse(reference.GetString(), out secretId);
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty("$secret", out var reference)
+			&& reference.ValueKind == JsonValueKind.String
+			&& Guid.TryParse(reference.GetString(), out secretId);
 	}
 
 	private static bool TryGetDouble(object? value, out double number)
-		=> ActionConditionEvaluator.TryGetDouble(value, out number);
+	{
+		return ActionConditionEvaluator.TryGetDouble(value, out number);
+	}
 
 	private static (string? IntegrationId, string? ActionId) ResolveActionIdentity(ActionBlock block)
 	{
@@ -935,14 +943,17 @@ public sealed class FlowExecutor : IFlowExecutor
 		return (block.BlockType[..separatorIndex], block.BlockType[(separatorIndex + 1)..]);
 	}
 
-	private static bool IsIntegrationActionBlockType(string? blockType) => !string.IsNullOrWhiteSpace(blockType) &&
-		blockType.Contains('.', StringComparison.Ordinal);
+	private static bool IsIntegrationActionBlockType(string? blockType)
+	{
+		return !string.IsNullOrWhiteSpace(blockType) && blockType.Contains('.', StringComparison.Ordinal);
+	}
 
 	private sealed class FlowRun
 	{
 		private readonly Lazy<string?> _providerBlockId;
 
-		public FlowRun(Guid executionId,
+		public FlowRun(
+			Guid executionId,
 			VariableContext variables,
 			string? originClientId,
 			Guid? ownerWidgetId,

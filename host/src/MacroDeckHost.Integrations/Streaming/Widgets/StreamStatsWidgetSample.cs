@@ -18,7 +18,7 @@ internal static class StreamStatsWidgetSample
 			{
 				{ Kind: StreamStatsDetailKind.Duration } => SampleUptime,
 				{ Sample: { } sample } => WidgetText.Resolve(sample(), culture),
-				_ => string.Empty,
+				_ => string.Empty
 			};
 		}
 
@@ -30,7 +30,7 @@ internal static class StreamStatsWidgetSample
 				metric => StreamStatsResolver.Count(metric.SampleValue),
 				StringComparer.Ordinal),
 			Details = details,
-			Points = [0.1, 0.2, 0.15, 0.3, 0.28, 0.45, 0.4, 0.6, 0.55, 0.8, 0.75, 1],
+			Points = [0.1, 0.2, 0.15, 0.3, 0.28, 0.45, 0.4, 0.6, 0.55, 0.8, 0.75, 1]
 		};
 	}
 }

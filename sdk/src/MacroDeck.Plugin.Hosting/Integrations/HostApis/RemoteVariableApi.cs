@@ -61,12 +61,13 @@ internal sealed class RemoteVariableApi(
 			},
 			CancellationToken.None);
 
-		return result?.Deserialize<VariableHandle>(PluginProtocolJson.Options) ??
-			throw new InvalidOperationException($"The host returned no variable for '{name}'.");
+		return result?.Deserialize<VariableHandle>(PluginProtocolJson.Options)
+			?? throw new InvalidOperationException($"The host returned no variable for '{name}'.");
 	}
 
 	public Task SetValueAsync(Guid variableId, object? value)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
 			HostOperations.Variables.Set,
 			new VariablesSetArguments
 			{
@@ -74,17 +75,23 @@ internal sealed class RemoteVariableApi(
 				Value = value is null ? null : JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
+	}
 
 	public Task DeleteAsync(Guid variableId)
-		=> invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
+	{
+		return invoker.InvokeAsync(Protocol.Callbacks.HostApis.Variables,
 			HostOperations.Variables.Delete,
 			new VariablesDeleteArguments { VariableId = variableId },
 			CancellationToken.None);
+	}
 
 	public Task RequestRefreshAsync(CancellationToken cancellationToken = default)
-		=> EnqueueRefresh(null, cancellationToken);
+	{
+		return EnqueueRefresh(null, cancellationToken);
+	}
 
-	public Task RequestDefinitionRefreshAsync(IReadOnlyCollection<string> definitionIds,
+	public Task RequestDefinitionRefreshAsync(
+		IReadOnlyCollection<string> definitionIds,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(definitionIds);
@@ -169,7 +176,8 @@ internal sealed class RemoteVariableApi(
 		return Task.CompletedTask;
 	}
 
-	public async Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+	public async Task<IVariableHistoryWindow> OpenHistoryAsync(
+		string name,
 		int capacity,
 		CancellationToken cancellationToken = default)
 	{
@@ -317,8 +325,10 @@ internal sealed class RemoteVariableApi(
 		// Reading every declared variable covers any subset, so a list too long for one request is sent
 		// as a request for all of them.
 		public VariablesRefreshArguments? ToArguments()
-			=> _definitionIds is { Count: > 0 and <= ProtocolLimits.MaxVariableRefreshDefinitionIds } ids
+		{
+			return _definitionIds is { Count: > 0 and <= ProtocolLimits.MaxVariableRefreshDefinitionIds } ids
 				? new VariablesRefreshArguments { DefinitionIds = [.. ids.Order(StringComparer.Ordinal)] }
 				: null;
+		}
 	}
 }

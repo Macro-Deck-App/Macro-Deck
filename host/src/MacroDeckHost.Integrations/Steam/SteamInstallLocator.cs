@@ -16,7 +16,8 @@ internal static class SteamInstallLocator
 		switch (platform.Os)
 		{
 			case SteamOs.Windows:
-				if (platform.ReadRegistrySteamPath() is { Length: > 0 } registered && FullPathOrNull(registered) is { } full)
+				if (platform.ReadRegistrySteamPath() is { Length: > 0 } registered
+					&& FullPathOrNull(registered) is { } full)
 				{
 					yield return full;
 				}
@@ -48,12 +49,16 @@ internal static class SteamInstallLocator
 		{
 			return Path.GetFullPath(path);
 		}
-		catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
+		catch (Exception exception) when (exception is ArgumentException
+			or NotSupportedException
+			or PathTooLongException)
 		{
 			return null;
 		}
 	}
 
 	internal static bool IsSteamRoot(string folder)
-		=> Directory.Exists(Path.Combine(folder, "steamapps"));
+	{
+		return Directory.Exists(Path.Combine(folder, "steamapps"));
+	}
 }

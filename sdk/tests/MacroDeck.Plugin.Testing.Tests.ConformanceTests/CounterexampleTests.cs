@@ -25,47 +25,69 @@ internal sealed class CounterexampleTests
 {
 	[Test]
 	public async Task IgnoringCancellationMakesDeadlineCheckFail()
-		=> await AssertCheckFailsAsync("MDC0502", MisbehaviorFlags.IgnoreCancellation);
+	{
+		await AssertCheckFailsAsync("MDC0502", MisbehaviorFlags.IgnoreCancellation);
+	}
 
 	[Test]
 	public async Task DuplicateInstanceIdsMakeDuplicateProviderInstanceCheckFail()
-		=> await AssertCheckFailsAsync("MDC0402", MisbehaviorFlags.DuplicateInstanceIds);
+	{
+		await AssertCheckFailsAsync("MDC0402", MisbehaviorFlags.DuplicateInstanceIds);
+	}
 
 	[Test]
 	public async Task InvalidInstanceIdMakesRuntimeInstanceIdCheckFail()
-		=> await AssertCheckFailsAsync("MDC0103", MisbehaviorFlags.InvalidInstanceId);
+	{
+		await AssertCheckFailsAsync("MDC0103", MisbehaviorFlags.InvalidInstanceId);
+	}
 
 	[Test]
 	public async Task DuplicateVariableDefinitionIdsMakeDuplicateVariableCheckFail()
-		=> await AssertCheckFailsAsync("MDC0403", MisbehaviorFlags.DuplicateVariableDefinitionIds);
+	{
+		await AssertCheckFailsAsync("MDC0403", MisbehaviorFlags.DuplicateVariableDefinitionIds);
+	}
 
 	[Test]
 	public async Task OversizeDescribeMakesMessageSizeCheckFail()
-		=> await AssertCheckFailsAsync("MDC0305", MisbehaviorFlags.OversizeDescribe);
+	{
+		await AssertCheckFailsAsync("MDC0305", MisbehaviorFlags.OversizeDescribe);
+	}
 
 	[Test]
 	public async Task NonIdempotentInitMakesNonResumeReconnectCheckFail()
-		=> await AssertCheckFailsAsync("MDC0603", MisbehaviorFlags.NonIdempotentInit);
+	{
+		await AssertCheckFailsAsync("MDC0603", MisbehaviorFlags.NonIdempotentInit);
+	}
 
 	[Test]
 	public async Task BypassLoggingPipelineMakesErrorSurvivesFloodCheckFail()
-		=> await AssertCheckFailsAsync("MDC0802", MisbehaviorFlags.BypassLoggingPipeline);
+	{
+		await AssertCheckFailsAsync("MDC0802", MisbehaviorFlags.BypassLoggingPipeline);
+	}
 
 	[Test]
 	public async Task DuplicateStateIdsMakeActionStateSnapshotCheckFail()
-		=> await AssertCheckFailsAsync("MDC0309", MisbehaviorFlags.DuplicateStateIds);
+	{
+		await AssertCheckFailsAsync("MDC0309", MisbehaviorFlags.DuplicateStateIds);
+	}
 
 	[Test]
 	public async Task InvalidStateIdMakesActionStateIdCheckFail()
-		=> await AssertCheckFailsAsync("MDC0310", MisbehaviorFlags.InvalidStateId);
+	{
+		await AssertCheckFailsAsync("MDC0310", MisbehaviorFlags.InvalidStateId);
+	}
 
 	[Test]
 	public async Task InconsistentIconSnapshotMakesActionIconSnapshotCheckFail()
-		=> await AssertCheckFailsAsync("MDC0312", MisbehaviorFlags.InconsistentIconSnapshot);
+	{
+		await AssertCheckFailsAsync("MDC0312", MisbehaviorFlags.InconsistentIconSnapshot);
+	}
 
 	[Test]
 	public async Task NonImageIconContentMediaTypeMakesActionIconContentCheckFail()
-		=> await AssertCheckFailsAsync("MDC0313", MisbehaviorFlags.NonImageIconMediaType);
+	{
+		await AssertCheckFailsAsync("MDC0313", MisbehaviorFlags.NonImageIconMediaType);
+	}
 
 	/// <summary>
 	/// The documented silent foot-gun (B7): a plugin that overrides <c>ASPNETCORE_URLS</c> before building
@@ -136,8 +158,8 @@ internal sealed class CounterexampleTests
 
 		Assert.That(host.Registrations.Count,
 			Is.EqualTo(2),
-			"Two starts under two different state directories should register twice - proof that MDC0204's own " +
-			"shared-directory mechanism is what makes 'registers exactly once across two runs' a meaningful assertion.");
+			"Two starts under two different state directories should register twice - proof that MDC0204's own "
+			+ "shared-directory mechanism is what makes 'registers exactly once across two runs' a meaningful assertion.");
 	}
 
 	/// <summary>
@@ -173,10 +195,10 @@ internal sealed class CounterexampleTests
 
 		Assert.That(outcome.Result.Outcome,
 			Is.EqualTo(ConformanceOutcome.Failed),
-			() => $"Expected pairing disabled with no enrollment token to make MDC0206 fail, but it reported " +
-				$"{outcome.Result.Outcome}" +
-				(outcome.Result.SkipReason is { Length: > 0 } reason ? $" ({reason})" : string.Empty) +
-				".");
+			() => $"Expected pairing disabled with no enrollment token to make MDC0206 fail, but it reported "
+				+ $"{outcome.Result.Outcome}"
+				+ (outcome.Result.SkipReason is { Length: > 0 } reason ? $" ({reason})" : string.Empty)
+				+ ".");
 	}
 
 	private static async Task AssertCheckFailsAsync(string checkId, string flag)
@@ -204,8 +226,8 @@ internal sealed class CounterexampleTests
 
 		Assert.That(outcome.Result.Outcome,
 			Is.EqualTo(ConformanceOutcome.Failed),
-			() => $"Expected '{flag}' to make {checkId} fail, but it reported {outcome.Result.Outcome}" +
-				(outcome.Result.SkipReason is { Length: > 0 } reason ? $" ({reason})" : string.Empty) +
-				".");
+			() => $"Expected '{flag}' to make {checkId} fail, but it reported {outcome.Result.Outcome}"
+				+ (outcome.Result.SkipReason is { Length: > 0 } reason ? $" ({reason})" : string.Empty)
+				+ ".");
 	}
 }

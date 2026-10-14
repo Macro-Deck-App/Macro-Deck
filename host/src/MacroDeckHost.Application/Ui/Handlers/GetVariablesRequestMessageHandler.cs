@@ -14,7 +14,8 @@ public class GetVariablesRequestMessageHandler
 	private readonly StartupReadiness _readiness;
 	private readonly SharedVariables _sharedVariables;
 
-	public GetVariablesRequestMessageHandler(IVariableService service,
+	public GetVariablesRequestMessageHandler(
+		IVariableService service,
 		VariableRegistry registry,
 		IVariableBindingService dynamicBindings,
 		StartupReadiness readiness,

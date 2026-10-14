@@ -24,12 +24,16 @@ internal sealed class HomeAssistantMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["macro deck_home assistant plugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
+	{
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
 
 	private static ActionMigrationResult? Migrate(ForeignAction action)
 	{
@@ -106,12 +110,15 @@ internal sealed class HomeAssistantMacroDeck2Migration : IIntegrationMigration
 		];
 	}
 
-	private static string? ReadCredential(IReadOnlyList<IReadOnlyDictionary<string, string>> credentials,
+	private static string? ReadCredential(
+		IReadOnlyList<IReadOnlyDictionary<string, string>> credentials,
 		string name)
-		=> credentials
+	{
+		return credentials
 			.SelectMany(dict => dict)
 			.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase))
 			.Value;
+	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
 	{
@@ -144,7 +151,9 @@ internal sealed class HomeAssistantMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

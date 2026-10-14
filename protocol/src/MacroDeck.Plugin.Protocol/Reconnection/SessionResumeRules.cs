@@ -7,8 +7,13 @@ namespace MacroDeck.Plugin.Protocol.Reconnection;
 /// </summary>
 public static class SessionResumeRules
 {
-	public static bool IsResumeAttempt(string? resumeSessionId) => !string.IsNullOrEmpty(resumeSessionId);
+	public static bool IsResumeAttempt(string? resumeSessionId)
+	{
+		return !string.IsNullOrEmpty(resumeSessionId);
+	}
 
 	public static bool CanResume(string? resumeSessionId, bool sessionExists, bool withinResumeWindow)
-		=> IsResumeAttempt(resumeSessionId) && sessionExists && withinResumeWindow;
+	{
+		return IsResumeAttempt(resumeSessionId) && sessionExists && withinResumeWindow;
+	}
 }

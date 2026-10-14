@@ -100,7 +100,9 @@ public class UiTestHostPatchFidelityTests
 	}
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	/// <summary>
 	/// The six-mutation script: a bound value, a condition turning true, a reorder, a removal, a value cleared to
@@ -115,10 +117,14 @@ public class UiTestHostPatchFidelityTests
 		private readonly UiState<bool> _advancedVisible = new(false);
 		private readonly UiState<IReadOnlyList<HeaderItem>> _headers;
 
-		internal MutationScript() => _headers = new UiState<IReadOnlyList<HeaderItem>>(_initialHeaders);
+		internal MutationScript()
+		{
+			_headers = new UiState<IReadOnlyList<HeaderItem>>(_initialHeaders);
+		}
 
 		internal UiFlow Build()
-			=> new()
+		{
+			return new UiFlow
 			{
 				Key = "setup",
 				Children =
@@ -143,10 +149,10 @@ public class UiTestHostPatchFidelityTests
 										Template = (item, _) => new UiObjectInput
 										{
 											Key = item.Id,
-											Children = [new UiStringInput { Key = "name" }],
-										},
-									},
-								],
+											Children = [new UiStringInput { Key = "name" }]
+										}
+									}
+								]
 							},
 							new UiWhen
 							{
@@ -155,14 +161,15 @@ public class UiTestHostPatchFidelityTests
 								Content = () => new UiAdvancedSection
 								{
 									Key = "advanced",
-									Children = [new UiDurationInput { Key = "timeout" }],
-								},
-							},
-						],
+									Children = [new UiDurationInput { Key = "timeout" }]
+								}
+							}
+						]
 					},
-					new UiStep { Key = "verify" },
-				],
+					new UiStep { Key = "verify" }
+				]
 			};
+		}
 
 		internal void Mutate()
 		{
@@ -177,6 +184,8 @@ public class UiTestHostPatchFidelityTests
 		/// <summary>An optional text value: absent while the state holds null, present otherwise. Absence has to be
 		/// expressed through the value itself, because a present null means "explicitly null" on the wire.</summary>
 		private static UiValue<string> OptionalText(UiState<string?> state)
-			=> UiValue.Optional(() => state.Value is { } text ? UiValue.Of(text) : UiValue.None<string>());
+		{
+			return UiValue.Optional(() => state.Value is { } text ? UiValue.Of(text) : UiValue.None<string>());
+		}
 	}
 }

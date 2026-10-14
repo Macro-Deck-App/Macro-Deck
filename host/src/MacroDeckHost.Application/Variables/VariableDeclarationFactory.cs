@@ -46,10 +46,14 @@ public static class VariableDeclarationFactory
 	/// registration - a bad group label must never cost the user the variable itself.
 	/// </summary>
 	private static VariableConfiguration? Usable(VariableConfiguration? configuration)
-		=> configuration is not null && !string.IsNullOrWhiteSpace(configuration.Key) ? configuration : null;
+	{
+		return configuration is not null && !string.IsNullOrWhiteSpace(configuration.Key) ? configuration : null;
+	}
 
 	private static string? Trimmed(string? value)
-		=> string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 
 	// An offending entry is dropped, never a registration failure: an unbounded or malformed open map
 	// must not cost the user a working variable. The size bound is not cosmetic - every attribute rides
@@ -70,10 +74,10 @@ public static class VariableDeclarationFactory
 				break;
 			}
 
-			if (entry.Value is null ||
-				entry.Value.Length > VariableLimits.MaxAttributeValueLength ||
-				_reservedAttributeKeys.Contains(entry.Key) ||
-				!IsAttributeKey(entry.Key))
+			if (entry.Value is null
+				|| entry.Value.Length > VariableLimits.MaxAttributeValueLength
+				|| _reservedAttributeKeys.Contains(entry.Key)
+				|| !IsAttributeKey(entry.Key))
 			{
 				continue;
 			}
@@ -93,7 +97,7 @@ public static class VariableDeclarationFactory
 
 		foreach (var character in key)
 		{
-			if (character is not ((>= 'a' and <= 'z') or (>= '0' and <= '9') or '_'))
+			if (character is not (>= 'a' and <= 'z' or >= '0' and <= '9' or '_'))
 			{
 				return false;
 			}

@@ -35,13 +35,15 @@ internal static class TestVariableServices
 	}
 
 	public static IServiceCollection AddTestFileVariables(this IServiceCollection services)
-		=> services
+	{
+		return services
 			.AddSingleton(provider => new FileVariableSynchronizer(provider.GetRequiredService<VariableRegistry>(),
 				provider.GetRequiredService<IMediator>(),
 				new FakeVariableFileSystem(),
 				Serilog.Core.Logger.None))
 			.AddSingleton(provider => new TemplateVariableSynchronizer(provider.GetRequiredService<VariableRegistry>(),
 				provider.GetRequiredService<IMediator>()));
+	}
 
 	public static VariableService Create(
 		VariableRegistry registry,
@@ -59,7 +61,8 @@ internal static class TestVariableServices
 			new VariableCatalogProviders(owners),
 			new VariableRefreshSignal(),
 			new MusicPlayerPollNudge(owners),
-			files ?? new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Serilog.Core.Logger.None),
+			files
+			?? new FileVariableSynchronizer(registry, mediator, new FakeVariableFileSystem(), Serilog.Core.Logger.None),
 			templates ?? new TemplateVariableSynchronizer(registry, mediator),
 			Serilog.Core.Logger.None);
 	}

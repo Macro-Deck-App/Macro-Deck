@@ -20,7 +20,8 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IWidgetSampleTextResolver _sampleText;
 	private readonly IWidgetRenderSignals _renderSignals;
 
-	public HistoryGraphWidgetUiProvider(VariableRegistry variables,
+	public HistoryGraphWidgetUiProvider(
+		VariableRegistry variables,
 		IVariableHistory history,
 		IVariableChangeNotifier notifier,
 		IWidgetSampleTextResolver sampleText,
@@ -42,7 +43,7 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new()
-			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -60,8 +61,9 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 			var configScope = WidgetConfigSurfaces.WidgetId(request.Surface)?.ToString();
 			var configView = new UiView(request.Surface,
 				HistoryGraphWidgetConfigView.Build(configData,
-					name => (configScope is null ? null : _variables.FindByName(VariableScope.Widget, configScope, name)) ??
-						_variables.FindByName(VariableScope.Global, null, name)));
+					name
+						=> (configScope is null ? null : _variables.FindByName(VariableScope.Widget, configScope, name))
+						?? _variables.FindByName(VariableScope.Global, null, name)));
 
 			return new WidgetConfigSession(configView);
 		}
@@ -95,8 +97,9 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		var session = new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config);
 
-		if (request.Surface.Kind == UiSurfaceKinds.Widget &&
-			Guid.TryParse(ReadStringAttribute(request.Surface, UiWidgetSurfaceAttributes.WidgetId), out var widgetId))
+		if (request.Surface.Kind == UiSurfaceKinds.Widget
+			&& Guid.TryParse(ReadStringAttribute(request.Surface, UiWidgetSurfaceAttributes.WidgetId),
+				out var widgetId))
 		{
 			session.FollowAccentColor(_renderSignals, widgetId.ToString(), accent);
 		}
@@ -105,14 +108,20 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 	}
 
 	private static string? VariableScopeWidgetId(UiSurface surface)
-		=> ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId) ??
-			ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+	{
+		return ReadStringAttribute(surface, UiWidgetSurfaceAttributes.WidgetId)
+			?? ReadStringAttribute(surface, UiWidgetSurfaceAttributes.VariableScopeWidgetId);
+	}
 
 	private static string? ReadStringAttribute(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 
 	private static JsonElement DataElement(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	{
+		return surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var data) ? data : default;
+	}
 }

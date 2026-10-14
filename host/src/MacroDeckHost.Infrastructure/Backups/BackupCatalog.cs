@@ -17,7 +17,8 @@ internal static class LocalRecoveryKey
 		return keyId;
 	}
 
-	public static async Task<(string? KeyId, byte[]? Key)> Resolve(IServiceScopeFactory scopeFactory,
+	public static async Task<(string? KeyId, byte[]? Key)> Resolve(
+		IServiceScopeFactory scopeFactory,
 		CancellationToken cancellationToken)
 	{
 		await using var scope = scopeFactory.CreateAsyncScope();
@@ -39,7 +40,10 @@ internal static class ImportedBackupRegistry
 {
 	private const string FileName = "imported-backups.json";
 
-	public static string ResolvePath(IMacroDeckPaths paths) => Path.Combine(paths.BackupsDirectory, FileName);
+	public static string ResolvePath(IMacroDeckPaths paths)
+	{
+		return Path.Combine(paths.BackupsDirectory, FileName);
+	}
 }
 
 public sealed class BackupCatalog : IBackupCatalog
@@ -51,7 +55,8 @@ public sealed class BackupCatalog : IBackupCatalog
 	private readonly DurableJsonFile _importedStore;
 	private readonly ConcurrentDictionary<CacheKey, BackupDescriptor> _cache = new();
 
-	public BackupCatalog(IBackupStorageRegistry registry,
+	public BackupCatalog(
+		IBackupStorageRegistry registry,
 		IBackupArchiveReader archiveReader,
 		IServiceScopeFactory scopeFactory,
 		IMacroDeckPaths paths,
@@ -127,7 +132,8 @@ public sealed class BackupCatalog : IBackupCatalog
 		return Task.CompletedTask;
 	}
 
-	private async Task<BackupDescriptor?> BuildDescriptor(IBackupStorageProvider provider,
+	private async Task<BackupDescriptor?> BuildDescriptor(
+		IBackupStorageProvider provider,
 		BackupStorageObject obj,
 		string? localKeyId,
 		HashSet<Guid> importedIds,
@@ -152,8 +158,8 @@ public sealed class BackupCatalog : IBackupCatalog
 				return null;
 			}
 
-			var decryptableLocally = localKeyId is not null &&
-				string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal);
+			var decryptableLocally = localKeyId is not null
+				&& string.Equals(manifest.RecoveryKeyId, localKeyId, StringComparison.Ordinal);
 
 			return new BackupDescriptor(manifest.BackupId,
 				obj.ProviderId,
@@ -180,7 +186,7 @@ public sealed class BackupCatalog : IBackupCatalog
 	private HashSet<Guid> ReadImportedBackupIds()
 	{
 		var path = ImportedBackupRegistry.ResolvePath(_paths);
-		var document = _importedStore.Read<ImportedBackupsDocument>(path, repair: false);
+		var document = _importedStore.Read<ImportedBackupsDocument>(path, false);
 		return document is null ? [] : [.. document.BackupIds];
 	}
 

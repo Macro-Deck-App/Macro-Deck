@@ -8,10 +8,12 @@ namespace MacroDeckHost.Application.Integrations;
 
 public interface IIntegrationIssueService
 {
-	Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(string integrationId,
+	Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(
+		string integrationId,
 		CancellationToken cancellationToken = default);
 
-	Task<IssueResolution?> ResolveAsync(string integrationId,
+	Task<IssueResolution?> ResolveAsync(
+		string integrationId,
 		string issueId,
 		CancellationToken cancellationToken = default);
 }

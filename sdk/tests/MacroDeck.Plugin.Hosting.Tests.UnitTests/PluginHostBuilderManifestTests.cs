@@ -15,7 +15,10 @@ public class PluginHostBuilderManifestTests
 	private PluginManifestFixture? _fixture;
 
 	[TearDown]
-	public void TearDown() => _fixture?.Dispose();
+	public void TearDown()
+	{
+		_fixture?.Dispose();
+	}
 
 	private PluginHostBuilder CreateBuilder(string manifestJson)
 	{
@@ -34,7 +37,8 @@ public class PluginHostBuilderManifestTests
 										   "version": "2.3.4",
 										   "description": "Does things."
 										 }
-										 """).Build();
+										 """)
+			.Build();
 
 		Assert.Multiple(() =>
 		{
@@ -58,7 +62,7 @@ public class PluginHostBuilderManifestTests
 		}
 		finally
 		{
-			Directory.Delete(contentRoot, recursive: true);
+			Directory.Delete(contentRoot, true);
 		}
 	}
 
@@ -75,13 +79,14 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_the_manifest_version_is_not_the_supported_one()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 2,
-			  "id": "com.example.test",
-			  "name": "Test",
-			  "version": "1.0.0"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 2,
+				  "id": "com.example.test",
+				  "name": "Test",
+				  "version": "1.0.0"
+				}
+				""")
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Contains("manifestVersion"));
 	}
@@ -90,11 +95,12 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_the_manifest_omits_the_name_or_the_version()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "com.example.test"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "com.example.test"
+				}
+				""")
+			.Build());
 
 		Assert.Multiple(() =>
 		{
@@ -126,14 +132,15 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_a_declared_icon_does_not_exist_under_the_content_root()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "com.example.test",
-			  "name": "Test",
-			  "version": "1.0.0",
-			  "icon": "assets/icon.png"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "com.example.test",
+				  "name": "Test",
+				  "version": "1.0.0",
+				  "icon": "assets/icon.png"
+				}
+				""")
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Contains("assets/icon.png"));
 	}
@@ -144,14 +151,15 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_the_manifest_declares_a_blank_icon()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "com.example.test",
-			  "name": "Test",
-			  "version": "1.0.0",
-			  "icon": ""
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "com.example.test",
+				  "name": "Test",
+				  "version": "1.0.0",
+				  "icon": ""
+				}
+				""")
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Contains("icon"));
 	}
@@ -187,7 +195,7 @@ public class PluginHostBuilderManifestTests
 		}
 		finally
 		{
-			Directory.Delete(parent, recursive: true);
+			Directory.Delete(parent, true);
 		}
 	}
 
@@ -208,7 +216,8 @@ public class PluginHostBuilderManifestTests
 										   "compatibility": { "macroDeck": ">=3.0.0" },
 										   "somethingFromTheFuture": 123
 										 }
-										 """).Build();
+										 """)
+			.Build();
 
 		Assert.Multiple(() =>
 		{
@@ -245,14 +254,15 @@ public class PluginHostBuilderManifestTests
 	public void Build_reports_every_problem_at_once()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "bad id",
-			  "name": "Test",
-			  "version": "1.0.0",
-			  "icon": "no-such-icon.png"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "bad id",
+				  "name": "Test",
+				  "version": "1.0.0",
+				  "icon": "no-such-icon.png"
+				}
+				""")
+			.Build());
 
 		// The whole point of collecting: an author fixing two mistakes should need one run, not two.
 		Assert.That(exception!.Problems, Has.Count.EqualTo(2));
@@ -266,13 +276,14 @@ public class PluginHostBuilderManifestTests
 	{
 		var overLongName = new string('a', 129);
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder($$"""
-			  {
-			    "manifestVersion": 1,
-			    "id": "com.example.test",
-			    "name": "{{overLongName}}",
-			    "version": "1.0.0"
-			  }
-			  """).Build());
+				  {
+				    "manifestVersion": 1,
+				    "id": "com.example.test",
+				    "name": "{{overLongName}}",
+				    "version": "1.0.0"
+				  }
+				  """)
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Matches<string>(problem => problem.Contains("128")));
 	}
@@ -281,13 +292,14 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_the_manifest_name_contains_a_control_character()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "com.example.test",
-			  "name": "Test\nPlugin",
-			  "version": "1.0.0"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "com.example.test",
+				  "name": "Test\nPlugin",
+				  "version": "1.0.0"
+				}
+				""")
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Matches<string>(problem => problem.Contains("control character")));
 	}
@@ -296,13 +308,14 @@ public class PluginHostBuilderManifestTests
 	public void Build_fails_when_the_manifest_id_is_not_a_reverse_domain_id()
 	{
 		var exception = Assert.Throws<PluginConfigurationException>(() => CreateBuilder("""
-			{
-			  "manifestVersion": 1,
-			  "id": "not-reverse-domain",
-			  "name": "Test",
-			  "version": "1.0.0"
-			}
-			""").Build());
+				{
+				  "manifestVersion": 1,
+				  "id": "not-reverse-domain",
+				  "name": "Test",
+				  "version": "1.0.0"
+				}
+				""")
+			.Build());
 
 		Assert.That(exception!.Problems, Has.One.Contains("'not-reverse-domain'"));
 	}

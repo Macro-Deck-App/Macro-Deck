@@ -67,7 +67,7 @@ public class OnboardingEndpointsTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -109,7 +109,8 @@ public class OnboardingEndpointsTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -120,5 +121,6 @@ public class OnboardingEndpointsTests
 				});
 				next(app);
 			};
+		}
 	}
 }

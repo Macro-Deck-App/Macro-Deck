@@ -13,5 +13,8 @@ public sealed class EphemeralSigningKeyProvider : ISigningKeyProvider
 {
 	private readonly byte[] _key = RandomNumberGenerator.GetBytes(64);
 
-	public byte[] GetKey() => _key;
+	public byte[] GetKey()
+	{
+		return _key;
+	}
 }

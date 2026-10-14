@@ -286,7 +286,10 @@ internal sealed class MacOsFocusedApplicationWatcher : IFocusedApplicationWatche
 		}
 	}
 
-	private static byte[] Utf8(string value) => MacOsAccessibility.Utf8(value);
+	private static byte[] Utf8(string value)
+	{
+		return MacOsAccessibility.Utf8(value);
+	}
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	private delegate void ActivationCallback(IntPtr self, IntPtr selector, IntPtr notification);
@@ -314,7 +317,8 @@ internal sealed class MacOsFocusedApplicationWatcher : IFocusedApplicationWatche
 	private static extern IntPtr objc_msgSend_ptr(IntPtr receiver, IntPtr selector, IntPtr arg);
 
 	[DllImport(LibObjC, EntryPoint = "objc_msgSend")]
-	private static extern void objc_msgSend_addObserver(IntPtr receiver,
+	private static extern void objc_msgSend_addObserver(
+		IntPtr receiver,
 		IntPtr selector,
 		IntPtr observer,
 		IntPtr aSelector,

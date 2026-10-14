@@ -165,7 +165,10 @@ internal sealed class WindowsSystemMetricsService : SystemMetricsServiceBase
 		private readonly uint _low;
 		private readonly uint _high;
 
-		public ulong ToTicks() => ((ulong)_high << 32) | _low;
+		public ulong ToTicks()
+		{
+			return (ulong)_high << 32 | _low;
+		}
 	}
 
 	[StructLayout(LayoutKind.Sequential)]

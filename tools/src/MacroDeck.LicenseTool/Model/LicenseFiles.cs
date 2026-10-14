@@ -2,11 +2,12 @@ namespace MacroDeck.LicenseTool.Model;
 
 internal static class LicenseFiles
 {
-	private static readonly string[] LicensePrefixes = ["LICENSE", "LICENCE", "COPYING", "UNLICENSE"];
+	private static readonly string[] _licensePrefixes = ["LICENSE", "LICENCE", "COPYING", "UNLICENSE"];
 
-	private static readonly string[] NoticePrefixes = ["NOTICE", "THIRD-PARTY-NOTICES", "THIRDPARTYNOTICES", "THIRD_PARTY_NOTICES"];
+	private static readonly string[] _noticePrefixes =
+		["NOTICE", "THIRD-PARTY-NOTICES", "THIRDPARTYNOTICES", "THIRD_PARTY_NOTICES"];
 
-	private static readonly (string Token, string LicensePrefix)[] NamedLicenses =
+	private static readonly (string Token, string LicensePrefix)[] _namedLicenses =
 	[
 		("APACHE", "Apache-"),
 		("MIT", "MIT"),
@@ -17,18 +18,18 @@ internal static class LicenseFiles
 		("BSL", "BSL-"),
 		("MPL", "MPL-"),
 		("CC0", "CC0-"),
-		("UNICODE", "Unicode-"),
+		("UNICODE", "Unicode-")
 	];
 
 	public static LicenseTextKind? Classify(string fileName)
 	{
 		var upper = fileName.ToUpperInvariant();
-		if (NoticePrefixes.Any(prefix => upper.StartsWith(prefix, StringComparison.Ordinal)))
+		if (_noticePrefixes.Any(prefix => upper.StartsWith(prefix, StringComparison.Ordinal)))
 		{
 			return LicenseTextKind.Notice;
 		}
 
-		if (LicensePrefixes.Any(prefix => upper.StartsWith(prefix, StringComparison.Ordinal)))
+		if (_licensePrefixes.Any(prefix => upper.StartsWith(prefix, StringComparison.Ordinal)))
 		{
 			return LicenseTextKind.License;
 		}
@@ -44,14 +45,14 @@ internal static class LicenseFiles
 			return !selectedLicenses.Contains("Unlicense", StringComparer.OrdinalIgnoreCase);
 		}
 
-		var prefix = LicensePrefixes.FirstOrDefault(candidate => stem.StartsWith(candidate, StringComparison.Ordinal));
+		var prefix = _licensePrefixes.FirstOrDefault(candidate => stem.StartsWith(candidate, StringComparison.Ordinal));
 		if (prefix is null)
 		{
 			return false;
 		}
 
 		var qualifier = stem[prefix.Length..];
-		foreach (var (token, licensePrefix) in NamedLicenses)
+		foreach (var (token, licensePrefix) in _namedLicenses)
 		{
 			if (qualifier.Contains(token, StringComparison.Ordinal))
 			{

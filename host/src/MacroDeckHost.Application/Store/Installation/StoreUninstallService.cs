@@ -26,7 +26,8 @@ public sealed class StoreUninstallService : IStoreUninstallService
 	private readonly IUiTransport _transport;
 	private readonly ILogger _logger;
 
-	public StoreUninstallService(IStoreInstallationStore installations,
+	public StoreUninstallService(
+		IStoreInstallationStore installations,
 		IPluginInstaller pluginInstaller,
 		IIconPackService iconPackService,
 		IProfileService profileService,
@@ -45,7 +46,8 @@ public sealed class StoreUninstallService : IStoreUninstallService
 		_logger = logger;
 	}
 
-	public async Task<Result<StoreUninstallError>> Uninstall(StoreExtensionKind kind,
+	public async Task<Result<StoreUninstallError>> Uninstall(
+		StoreExtensionKind kind,
 		string packageId,
 		CancellationToken cancellationToken = default)
 	{
@@ -72,7 +74,8 @@ public sealed class StoreUninstallService : IStoreUninstallService
 		return result;
 	}
 
-	private async Task<Result<StoreUninstallError>> UninstallPlugin(string pluginId,
+	private async Task<Result<StoreUninstallError>> UninstallPlugin(
+		string pluginId,
 		CancellationToken cancellationToken)
 	{
 		var request = new PluginUninstallRequest { KeepData = true, Force = false };
@@ -186,10 +189,13 @@ public sealed class StoreUninstallService : IStoreUninstallService
 		}
 	}
 
-	private static StoreUninstallError ToUninstallError(PluginInstallError? error) => error switch
+	private static StoreUninstallError ToUninstallError(PluginInstallError? error)
 	{
-		PluginInstallError.NotInstalled => StoreUninstallError.NotInstalled,
-		PluginInstallError.DependencyInUse => StoreUninstallError.DependencyInUse,
-		_ => StoreUninstallError.Failed
-	};
+		return error switch
+		{
+			PluginInstallError.NotInstalled => StoreUninstallError.NotInstalled,
+			PluginInstallError.DependencyInUse => StoreUninstallError.DependencyInUse,
+			_ => StoreUninstallError.Failed
+		};
+	}
 }

@@ -17,29 +17,39 @@ public class NewCommandOptionTests
 		_output = Path.Combine(Directory.CreateTempSubdirectory("macrodeck-cli-tests-").FullName, "SpotifyController");
 	}
 
-	private static FakePluginScaffoldGenerator NewGenerator() => new()
+	private static FakePluginScaffoldGenerator NewGenerator()
 	{
-		OnCreate = ScaffoldFixtures.WriteTemplateProject
-	};
+		return new FakePluginScaffoldGenerator
+		{
+			OnCreate = ScaffoldFixtures.WriteTemplateProject
+		};
+	}
 
-	private string[] CanonicalArgs(params string[] extra) =>
-	[
-		"new",
-		"--name", "Spotify Controller",
-		"--id", "com.example.spotify",
-		"--publisher", "Example Publisher",
-		"--platform", "win-x64",
-		"--platform", "osx-arm64",
-		"--platform", "linux-x64",
-		"--output", _output,
-		.. extra
-	];
+	private string[] CanonicalArgs(params string[] extra)
+	{
+		return
+		[
+			"new",
+			"--name", "Spotify Controller",
+			"--id", "com.example.spotify",
+			"--publisher", "Example Publisher",
+			"--platform", "win-x64",
+			"--platform", "osx-arm64",
+			"--platform", "linux-x64",
+			"--output", _output,
+			.. extra
+		];
+	}
 
-	private static JsonDocument ReadManifest(string output) =>
-		JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "manifest.json")));
+	private static JsonDocument ReadManifest(string output)
+	{
+		return JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "manifest.json")));
+	}
 
-	private static JsonDocument ReadBuildConfig(string output) =>
-		JsonDocument.Parse(File.ReadAllText(Path.Combine(output, PluginScaffoldDefaults.BuildConfigFileName)));
+	private static JsonDocument ReadBuildConfig(string output)
+	{
+		return JsonDocument.Parse(File.ReadAllText(Path.Combine(output, PluginScaffoldDefaults.BuildConfigFileName)));
+	}
 
 	// R0
 	[Test]
@@ -89,8 +99,8 @@ public class NewCommandOptionTests
 		{
 			Assert.That(exitCode, Is.EqualTo(ExitCode.UsageError));
 			Assert.That(error,
-				Does.Contain("error invalid-plugin-id: Owner id must be reverse-domain, " +
-					"lowercase and hyphen-separated, with at least two segments (e.g. 'com.example.my-plugin')."));
+				Does.Contain("error invalid-plugin-id: Owner id must be reverse-domain, "
+					+ "lowercase and hyphen-separated, with at least two segments (e.g. 'com.example.my-plugin')."));
 			Assert.That(Directory.Exists(_output), Is.False);
 		});
 	}
@@ -165,8 +175,8 @@ public class NewCommandOptionTests
 		{
 			Assert.That(exitCode, Is.EqualTo(ExitCode.UsageError));
 			Assert.That(error,
-				Does.Contain("error unknown-platform: 'win-x86' is not a supported target " +
-					"platform. Supported: win-x64, win-arm64, osx-arm64, osx-x64, linux-x64, linux-arm64."));
+				Does.Contain("error unknown-platform: 'win-x86' is not a supported target "
+					+ "platform. Supported: win-x64, win-arm64, osx-arm64, osx-x64, linux-x64, linux-arm64."));
 		});
 	}
 
@@ -256,8 +266,10 @@ public class NewCommandOptionTests
 			Assert.That(File.Exists(Path.Combine(_output, "SpotifyCtl.csproj")), Is.True);
 
 			using var manifest = ReadManifest(_output);
-			Assert.That(manifest.RootElement.GetProperty("entrypoints").GetProperty("win-x64")
-					.GetProperty("executable").GetString(),
+			Assert.That(manifest.RootElement.GetProperty("entrypoints")
+					.GetProperty("win-x64")
+					.GetProperty("executable")
+					.GetString(),
 				Is.EqualTo("runtimes/win-x64/SpotifyCtl.dll"));
 		});
 	}
@@ -276,7 +288,9 @@ public class NewCommandOptionTests
 		Assert.That(exitCode, Is.EqualTo(ExitCode.Success));
 
 		using var manifest = ReadManifest(_output);
-		var manifestKeys = manifest.RootElement.GetProperty("entrypoints").EnumerateObject().Select(p => p.Name)
+		var manifestKeys = manifest.RootElement.GetProperty("entrypoints")
+			.EnumerateObject()
+			.Select(p => p.Name)
 			.ToList();
 		Assert.That(manifestKeys, Is.EquivalentTo(new List<string> { "osx-arm64", "linux-arm64" }));
 
@@ -284,8 +298,8 @@ public class NewCommandOptionTests
 		var buildKeys = buildConfig.RootElement.GetProperty("targets").EnumerateObject().Select(p => p.Name).ToList();
 		Assert.That(buildKeys, Is.EquivalentTo(new List<string> { "osx-arm64", "linux-arm64" }));
 
-		Assert.That(File.ReadAllText(Path.Combine(_output, "manifest.json")), Does.Not.Contain("win-x64"));
-		Assert.That(File.ReadAllText(Path.Combine(_output, PluginScaffoldDefaults.BuildConfigFileName)),
+		Assert.That(await File.ReadAllTextAsync(Path.Combine(_output, "manifest.json")), Does.Not.Contain("win-x64"));
+		Assert.That(await File.ReadAllTextAsync(Path.Combine(_output, PluginScaffoldDefaults.BuildConfigFileName)),
 			Does.Not.Contain("win-x64"));
 	}
 
@@ -386,7 +400,7 @@ public class NewCommandOptionTests
 			"win-x64",
 			"--non-interactive");
 
-		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(output, "manifest.json")));
+		using var document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(output, "manifest.json")));
 
 		Assert.Multiple(() =>
 		{
@@ -465,7 +479,8 @@ public class NewCommandOptionTests
 	[Test]
 	public async Task No_color_strips_ansi_and_the_default_adds_it()
 	{
-		var args = CanonicalArgs("--no-color").Select(a => a == "com.example.spotify" ? "Com.Example.Spotify" : a)
+		var args = CanonicalArgs("--no-color")
+			.Select(a => a == "com.example.spotify" ? "Com.Example.Spotify" : a)
 			.ToArray();
 		var (_, noColorError, _) = await CliRunner.Run(NewGenerator(), args);
 

@@ -22,7 +22,10 @@ internal sealed class SpotifyTokenManagerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _persister.Dispose();
+	public void TearDown()
+	{
+		_persister.Dispose();
+	}
 
 	[Test]
 	public async Task A_token_that_is_not_close_to_expiring_needs_no_network_call()
@@ -60,7 +63,7 @@ internal sealed class SpotifyTokenManagerTests
 	public async Task A_non_responsive_token_endpoint_fails_within_the_refresh_lifetime()
 	{
 		var oauth = new FakeSpotifyOAuthClient { Stall = true };
-		using var manager = Manager(oauth, TimeSpan.Zero, refreshLifetime: TimeSpan.FromMilliseconds(200));
+		using var manager = Manager(oauth, TimeSpan.Zero, TimeSpan.FromMilliseconds(200));
 
 		Assert.That(async () => await manager.EnsureValidTokenAsync(CancellationToken.None),
 			Throws.InstanceOf<SpotifyAuthTransientException>());
@@ -314,7 +317,7 @@ internal sealed class SpotifyTokenManagerTests
 	public async Task StopAsync_gives_up_within_its_timeout_when_a_refresh_will_not_finish()
 	{
 		var oauth = new FakeSpotifyOAuthClient { Stall = true };
-		using var manager = Manager(oauth, TimeSpan.Zero, refreshLifetime: TimeSpan.FromSeconds(30));
+		using var manager = Manager(oauth, TimeSpan.Zero, TimeSpan.FromSeconds(30));
 
 		_ = manager.EnsureValidTokenAsync(CancellationToken.None);
 		await WaitForRefreshAsync(oauth);
@@ -511,7 +514,8 @@ internal sealed class SpotifyTokenManagerTests
 		ILogger? logger = null,
 		TimeSpan? persistenceBudget = null,
 		TimeProvider? timeProvider = null)
-		=> new(_entryId,
+	{
+		return new SpotifyTokenManager(_entryId,
 			"client-id",
 			"client-secret",
 			SpotifyTokenSnapshot.FromStored("stored-access",
@@ -525,6 +529,7 @@ internal sealed class SpotifyTokenManagerTests
 			failureBackoff ?? TimeSpan.Zero,
 			persistenceBudget,
 			timeProvider);
+	}
 
 	[Test]
 	public async Task A_second_transient_refresh_failure_logs_debug_instead_of_warning()
@@ -581,15 +586,23 @@ internal sealed class SpotifyTokenManagerTests
 		Assert.That(oauth.RefreshCount, Is.EqualTo(1), "the refresh never started");
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private static Logger Collecting(CollectingSink sink)
-		=> new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	{
+		return new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

@@ -22,7 +22,10 @@ public sealed class KeyRingXmlDecryptor : IXmlDecryptor
 	{
 	}
 
-	public KeyRingXmlDecryptor(IKeyRingKekAccessor kek) => _kek = kek;
+	public KeyRingXmlDecryptor(IKeyRingKekAccessor kek)
+	{
+		_kek = kek;
+	}
 
 	public XElement Decrypt(XElement encryptedElement)
 	{
@@ -30,21 +33,21 @@ public sealed class KeyRingXmlDecryptor : IXmlDecryptor
 
 		var element = encryptedElement.Name == KeyRingXmlNames.SecretElement
 			? encryptedElement
-			: encryptedElement.Element(KeyRingXmlNames.SecretElement) ??
-			throw new CryptographicException("The key ring element is not in the expected format.");
+			: encryptedElement.Element(KeyRingXmlNames.SecretElement)
+			?? throw new CryptographicException("The key ring element is not in the expected format.");
 
 		var version = (int?)element.Attribute(KeyRingXmlNames.VersionAttribute);
 		if (version != KeyRingXmlNames.Version)
 		{
-			throw new CryptographicException("The key ring was written by an unsupported format version " +
-				$"({version?.ToString(CultureInfo.InvariantCulture) ?? "none"}).");
+			throw new CryptographicException("The key ring was written by an unsupported format version "
+				+ $"({version?.ToString(CultureInfo.InvariantCulture) ?? "none"}).");
 		}
 
-		var kekId = (string?)element.Attribute(KeyRingXmlNames.KekIdAttribute) ??
-			throw new CryptographicException("The key ring element names no key encryption key.");
+		var kekId = (string?)element.Attribute(KeyRingXmlNames.KekIdAttribute)
+			?? throw new CryptographicException("The key ring element names no key encryption key.");
 
-		var kek = _kek.TryGetKek() ??
-			throw new CryptographicException(
+		var kek = _kek.TryGetKek()
+			?? throw new CryptographicException(
 				"The key ring is protected but no key encryption key is available to open it.");
 
 		try
@@ -62,8 +65,8 @@ public sealed class KeyRingXmlDecryptor : IXmlDecryptor
 				Read(element, KeyRingXmlNames.ValueElement),
 				Read(element, KeyRingXmlNames.TagElement));
 
-			var plaintext = KeyRingAead.TryOpen(kek, sealedValue, KeyRingXmlNames.AssociatedData(kekId)) ??
-				throw new CryptographicException("The protected key ring element failed authentication.");
+			var plaintext = KeyRingAead.TryOpen(kek, sealedValue, KeyRingXmlNames.AssociatedData(kekId))
+				?? throw new CryptographicException("The protected key ring element failed authentication.");
 
 			try
 			{
@@ -82,8 +85,8 @@ public sealed class KeyRingXmlDecryptor : IXmlDecryptor
 
 	private static byte[] Read(XElement element, XName name)
 	{
-		var value = (string?)element.Element(name) ??
-			throw new CryptographicException($"The protected key ring element has no {name.LocalName}.");
+		var value = (string?)element.Element(name)
+			?? throw new CryptographicException($"The protected key ring element has no {name.LocalName}.");
 
 		try
 		{

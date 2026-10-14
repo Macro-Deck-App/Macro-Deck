@@ -16,7 +16,7 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 	[
 		(CalendarFiringKind.Started, WidgetTriggerTypes.CalendarEventStarted),
 		(CalendarFiringKind.Ended, WidgetTriggerTypes.CalendarEventEnded),
-		(CalendarFiringKind.StartsSoon, WidgetTriggerTypes.CalendarEventStartsSoon),
+		(CalendarFiringKind.StartsSoon, WidgetTriggerTypes.CalendarEventStartsSoon)
 	];
 
 	private readonly IFolderCache _folders;
@@ -43,7 +43,10 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 
 	public event Action? ReplanRequested;
 
-	public void RequestReplan() => ReplanRequested?.Invoke();
+	public void RequestReplan()
+	{
+		ReplanRequested?.Invoke();
+	}
 
 	public async Task<TimeSpan> RunAsync(CancellationToken cancellationToken)
 	{
@@ -71,7 +74,10 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 		}
 	}
 
-	public void Dispose() => _runLock.Dispose();
+	public void Dispose()
+	{
+		_runLock.Dispose();
+	}
 
 	private List<CalendarFiringTarget> Targets()
 	{
@@ -79,8 +85,8 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 
 		foreach (var widget in _folders.GetAllFolders().SelectMany(folder => folder.Widgets))
 		{
-			if (!CalendarWidgetTypes.IsCalendarWidget(widget.Type) ||
-				CalendarWidgetSelection.EventFilter(widget.Type, widget.Data) is not { } filter)
+			if (!CalendarWidgetTypes.IsCalendarWidget(widget.Type)
+				|| CalendarWidgetSelection.EventFilter(widget.Type, widget.Data) is not { } filter)
 			{
 				continue;
 			}
@@ -112,7 +118,8 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 			}
 
 			await using var scope = _scopeFactory.CreateAsyncScope();
-			var parameters = await CalendarPayloads.BuildAsync(scope.ServiceProvider, firing.Event).ConfigureAwait(false);
+			var parameters = await CalendarPayloads.BuildAsync(scope.ServiceProvider, firing.Event)
+				.ConfigureAwait(false);
 
 			// Host-initiated like a countdown finishing: nobody pressed anything, so no host-lock gate applies.
 			var result = await scope.ServiceProvider.GetRequiredService<IFlowExecutor>()
@@ -124,7 +131,7 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 						ScopeRefId = widget.Id.ToString(),
 						OwnerWidgetId = widget.Id,
 						Origin = ExecutionOrigin.Host,
-						EventParameters = parameters,
+						EventParameters = parameters
 					},
 					CancellationToken.None)
 				.ConfigureAwait(false);
@@ -149,7 +156,11 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
-		=> _folders.GetAllFolders().SelectMany(folder => folder.Widgets).FirstOrDefault(widget => widget.Id == widgetId);
+	{
+		return _folders.GetAllFolders()
+			.SelectMany(folder => folder.Widgets)
+			.FirstOrDefault(widget => widget.Id == widgetId);
+	}
 
 	private readonly record struct WidgetTarget(Guid WidgetId, string Trigger);
 }

@@ -11,7 +11,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 {
 	private static readonly JsonSerializerOptions _json = PersistenceJsonOptions.Default;
 
-	public async Task<BackupContentIndex> Write(Stream destination,
+	public async Task<BackupContentIndex> Write(
+		Stream destination,
 		BackupArchiveWriteRequest request,
 		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default)
@@ -19,7 +20,7 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		var manifestBytes = JsonSerializer.SerializeToUtf8Bytes(request.Manifest, _json);
 		var index = new BackupContentIndex { Skipped = [.. request.Plan.Skipped] };
 
-		using var outer = new ZipArchive(destination, ZipArchiveMode.Create, leaveOpen: true);
+		using var outer = new ZipArchive(destination, ZipArchiveMode.Create, true);
 
 		// The manifest is written before the payload and its exact bytes are the associated data of the
 		// key wrap, so any later edit to it breaks decryption instead of silently changing what the
@@ -35,9 +36,9 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		await using var encryptor = BackupPayloadCrypto.CreateEncryptor(payloadStream,
 			recoveryKey.Span,
 			manifestBytes,
-			leaveOpen: true);
+			true);
 
-		using (var inner = new ZipArchive(encryptor, ZipArchiveMode.Create, leaveOpen: true))
+		using (var inner = new ZipArchive(encryptor, ZipArchiveMode.Create, true))
 		{
 			await WriteEntry(inner, BackupFileNames.ManifestEntry, manifestBytes, cancellationToken);
 
@@ -83,7 +84,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		return index;
 	}
 
-	private static async Task<BackupDatabaseInfo> WriteDatabase(ZipArchive inner,
+	private static async Task<BackupDatabaseInfo> WriteDatabase(
+		ZipArchive inner,
 		BackupArchiveWriteRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -112,7 +114,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		};
 	}
 
-	private static async Task<BackupContentEntry?> WriteFile(ZipArchive inner,
+	private static async Task<BackupContentEntry?> WriteFile(
+		ZipArchive inner,
 		BackupSnapshotFile file,
 		IProgress<long>? progress,
 		CancellationToken cancellationToken)
@@ -148,7 +151,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		}
 	}
 
-	private static async Task WriteEntry(ZipArchive archive,
+	private static async Task WriteEntry(
+		ZipArchive archive,
 		string name,
 		byte[] content,
 		CancellationToken cancellationToken)
@@ -158,7 +162,8 @@ public sealed class BackupArchiveWriter : IBackupArchiveWriter
 		await stream.WriteAsync(content, cancellationToken);
 	}
 
-	private static async Task<string> CopyWithDigest(Stream source,
+	private static async Task<string> CopyWithDigest(
+		Stream source,
 		Stream destination,
 		IProgress<long>? progress,
 		CancellationToken cancellationToken)

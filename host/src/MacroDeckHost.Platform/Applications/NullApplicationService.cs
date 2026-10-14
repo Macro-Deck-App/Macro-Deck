@@ -10,7 +10,10 @@ internal sealed class NullApplicationService : IApplicationService
 		string? workingDirectory,
 		LaunchMode mode,
 		bool runAsAdmin,
-		CancellationToken cancellationToken = default) => Task.CompletedTask;
+		CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public void OpenFile(string path)
 	{
@@ -20,7 +23,10 @@ internal sealed class NullApplicationService : IApplicationService
 	{
 	}
 
-	public void OpenUri(string uri) => throw new NotSupportedException();
+	public void OpenUri(string uri)
+	{
+		throw new NotSupportedException();
+	}
 
 	public void OpenFolder(string path)
 	{

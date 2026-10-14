@@ -12,7 +12,8 @@ public class GetNetworkSettingsRequestMessageHandler
 	private readonly IAppPreferenceService _preferences;
 	private readonly IApplicationRestartService _restart;
 
-	public GetNetworkSettingsRequestMessageHandler(IAppPreferenceService preferences,
+	public GetNetworkSettingsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IApplicationRestartService restart)
 	{
 		_preferences = preferences;

@@ -69,7 +69,8 @@ internal sealed class SliderLabelBinding
 	private readonly VariableTemplateRenderer _renderer;
 	private readonly string? _scopeRefId;
 
-	public SliderLabelBinding(string template,
+	public SliderLabelBinding(
+		string template,
 		VariableRegistry variables,
 		IVariableChangeNotifier notifier,
 		string? scopeRefId)
@@ -133,7 +134,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	// than a whole one: a whole step accepts the *adjacent* grid point, so a reading still reporting the
 	// value the user just dragged away from would release the hold and snap the level backward - the one
 	// thing the hold exists to prevent.
-	private const double _holdTolerance = 1e-6;
+	private const double HoldTolerance = 1e-6;
 
 	private static readonly TimeSpan _pushMinInterval = TimeSpan.FromMilliseconds(100);
 
@@ -227,7 +228,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			UiEventHandler.On(UiComponentEvents.Adjust, HandleInteraction),
 			UiEventHandler.OnAsync(UiComponentEvents.Adjust, HandleAdjustPushAsync),
 			UiEventHandler.On(UiComponentEvents.Change, HandleInteraction),
-			UiEventHandler.OnAsync(UiComponentEvents.Change, HandleChangePushAsync),
+			UiEventHandler.OnAsync(UiComponentEvents.Change, HandleChangePushAsync)
 		];
 
 		if (_doublePress is not null)
@@ -267,7 +268,8 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 	}
 
-	internal void FollowAccentColor(IWidgetRenderSignals signals,
+	internal void FollowAccentColor(
+		IWidgetRenderSignals signals,
 		string widgetId,
 		SliderWidgetData config,
 		UiState<string?> accent)
@@ -315,7 +317,10 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 	}
 
-	public void Dispatch(UiEvent uiEvent) => Dispatch(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Dispatch(uiEvent, null);
+	}
 
 	public void Dispatch(UiEvent uiEvent, string? originClientId)
 	{
@@ -464,7 +469,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			.ExecuteAsync(widget,
 				WidgetTriggerTypes.DoublePress,
 				originClientId,
-				originDeviceId: null,
+				null,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -482,14 +487,19 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 	}
 
-	private bool CanWriteVariable() => Entity()?.CanWrite == true;
+	private bool CanWriteVariable()
+	{
+		return Entity()?.CanWrite == true;
+	}
 
 	private VariableEntity? Entity()
-		=> _variable is null
+	{
+		return _variable is null
 			? null
 			: SliderDefaultVariable.Find(_variable.Variables,
 				_variable.WidgetId,
 				_variable.IsDefault ? null : _variable.Name);
+	}
 
 	/// <summary>
 	/// Snaps <paramref name="fraction" /> onto the bound variable's own grid, <b>anchored at
@@ -511,7 +521,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	/// </summary>
 	private static double MapToGrid(double fraction, SliderWidgetReadout readout)
 	{
-		var raw = readout.Min + (fraction * (readout.Max - readout.Min));
+		var raw = readout.Min + fraction * (readout.Max - readout.Min);
 
 		if (SliderWidgetView.ComputeStepFraction(readout) is null)
 		{
@@ -519,7 +529,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		}
 
 		var steps = Math.Round((raw - readout.Min) / readout.Step, MidpointRounding.AwayFromZero);
-		var onGrid = readout.Min + (steps * readout.Step);
+		var onGrid = readout.Min + steps * readout.Step;
 
 		// Rebuilding the value by multiplication reintroduces binary-float noise - 7 * 0.1 is
 		// 0.7000000000000001 - and this value is both what the variable is written with and what the readout
@@ -540,7 +550,10 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		return RequestPushAsync(LastMappedValue());
 	}
 
-	private Task HandleChangePushAsync(CancellationToken cancellationToken) => RequestPushAsync(LastMappedValue());
+	private Task HandleChangePushAsync(CancellationToken cancellationToken)
+	{
+		return RequestPushAsync(LastMappedValue());
+	}
 
 	private double LastMappedValue()
 	{
@@ -744,7 +757,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	{
 		if (_holdUntil is { } deadline && _heldValue is { } held)
 		{
-			var closeEnough = Math.Abs(freshValue - held) <= Math.Max(step / 2, _holdTolerance);
+			var closeEnough = Math.Abs(freshValue - held) <= Math.Max(step / 2, HoldTolerance);
 			var expired = _timeProvider.GetUtcNow() >= deadline;
 
 			if (closeEnough || expired)
@@ -762,8 +775,10 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	}
 
 	private static double? ParseNumeric(string raw)
-		=> double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) &&
-			double.IsFinite(value)
+	{
+		return double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			&& double.IsFinite(value)
 				? value
 				: null;
+	}
 }

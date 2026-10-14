@@ -18,17 +18,20 @@ public class PluginScaffolderTests
 		_output = Path.Combine(Directory.CreateTempSubdirectory("macrodeck-cli-tests-").FullName, "SpotifyController");
 	}
 
-	private PluginScaffoldRequest CanonicalRequest() => new()
+	private PluginScaffoldRequest CanonicalRequest()
 	{
-		Name = "Spotify Controller",
-		Id = "com.example.spotify",
-		Publisher = "Example Publisher",
-		Description = "A Macro Deck plugin.",
-		License = "MIT",
-		ProjectName = "SpotifyController",
-		Output = _output,
-		Platforms = ["win-x64", "osx-arm64", "linux-x64"]
-	};
+		return new PluginScaffoldRequest
+		{
+			Name = "Spotify Controller",
+			Id = "com.example.spotify",
+			Publisher = "Example Publisher",
+			Description = "A Macro Deck plugin.",
+			License = "MIT",
+			ProjectName = "SpotifyController",
+			Output = _output,
+			Platforms = ["win-x64", "osx-arm64", "linux-x64"]
+		};
+	}
 
 	[Test]
 	public async Task Happy_path_rewrites_the_manifest_and_writes_a_sibling_build_config()
@@ -230,7 +233,8 @@ public class PluginScaffolderTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(SemanticVersionRange.TryParse(compatibility.GetProperty("macroDeck").GetString(), out var range),
+			Assert.That(
+				SemanticVersionRange.TryParse(compatibility.GetProperty("macroDeck").GetString(), out var range),
 				Is.True);
 			Assert.That(SemanticVersion.TryParse("3.0.0-beta.6", out var betaHost), Is.True);
 			Assert.That(range!.Satisfies(betaHost!), Is.True);

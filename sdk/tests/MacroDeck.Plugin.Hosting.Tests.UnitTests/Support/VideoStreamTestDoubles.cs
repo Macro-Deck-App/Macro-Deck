@@ -25,7 +25,7 @@ internal sealed class TestVideoProvider(string id = "cam") : IVideoStreamProvide
 	public LocalizedText Name { get; } = LocalizedText.FromLiteral("Camera");
 
 	public IReadOnlyList<VideoStreamDescriptor> Streams { get; set; } =
-		[new VideoStreamDescriptor("main", LocalizedText.FromLiteral("Main"))];
+		[new("main", LocalizedText.FromLiteral("Main"))];
 
 	public Func<VideoStreamOpenRequest, CancellationToken, Task<VideoStreamSessionDescription>> Open { get; set; } =
 		(_, _) => Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
@@ -39,9 +39,12 @@ internal sealed class TestVideoProvider(string id = "cam") : IVideoStreamProvide
 	public IReadOnlyList<(string SessionId, VideoStreamSessionReason Reason)> Closes => [.. _closes];
 
 	public Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(CancellationToken cancellationToken)
-		=> Task.FromResult(Streams);
+	{
+		return Task.FromResult(Streams);
+	}
 
-	public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
+	public Task<VideoStreamSessionDescription> OpenAsync(
+		VideoStreamOpenRequest request,
 		CancellationToken cancellationToken)
 	{
 		Interlocked.Increment(ref _openCount);
@@ -52,7 +55,9 @@ internal sealed class TestVideoProvider(string id = "cam") : IVideoStreamProvide
 		_ => Task.FromResult<VideoStreamSessionDescription?>(null);
 
 	public Task<VideoStreamSessionDescription?> ResumeAsync(string sessionId, CancellationToken cancellationToken)
-		=> Resume(sessionId);
+	{
+		return Resume(sessionId);
+	}
 
 	public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
 	{
@@ -108,7 +113,10 @@ internal sealed class VideoRecordingInvoker : IHostInvoker
 
 	public bool Hang { get; set; }
 
-	public Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments,
+	public Task<JsonElement?> InvokeAsync(
+		string api,
+		string operation,
+		object? arguments,
 		CancellationToken cancellationToken)
 	{
 		var call = new HostCall(api, operation, arguments);
@@ -123,11 +131,16 @@ internal sealed class VideoRecordingInvoker : IHostInvoker
 			: Task.FromResult<JsonElement?>(null);
 	}
 
-	public bool TryComplete(ProtocolEnvelope result) => false;
+	public bool TryComplete(ProtocolEnvelope result)
+	{
+		return false;
+	}
 
 	public static Exception Unsupported(HostCall call)
-		=> HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported,
+	{
+		return HostInvocationException.CreateNonRetryable(ProtocolErrorCodes.CapabilityUnsupported,
 			$"'{call.Api}' is not a host api this host knows.");
+	}
 }
 
 internal sealed class VideoStreamFixture : IDisposable
@@ -163,9 +176,12 @@ internal sealed class VideoStreamFixture : IDisposable
 		_services.Dispose();
 	}
 
-	public Task<CapabilityInvocationResult> InvokeAsync(string operation, object? arguments = null,
+	public Task<CapabilityInvocationResult> InvokeAsync(
+		string operation,
+		object? arguments = null,
 		CancellationToken cancellationToken = default)
-		=> Handler.InvokeAsync(new CapabilityInvocation
+	{
+		return Handler.InvokeAsync(new CapabilityInvocation
 			{
 				Kind = CapabilityKinds.VideoStreamProvider,
 				LocalId = ProviderCapabilityId.LocalId,
@@ -177,10 +193,14 @@ internal sealed class VideoStreamFixture : IDisposable
 				Services = _services
 			},
 			cancellationToken);
+	}
 
-	public Task<CapabilityInvocationResult> OpenAsync(string sessionId, string providerId = "cam",
+	public Task<CapabilityInvocationResult> OpenAsync(
+		string sessionId,
+		string providerId = "cam",
 		params string[] transports)
-		=> InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionOpen,
+	{
+		return InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionOpen,
 			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionOpenArguments
 			{
 				SessionId = sessionId,
@@ -188,31 +208,42 @@ internal sealed class VideoStreamFixture : IDisposable
 				StreamId = "main",
 				AcceptedTransports = transports.Length == 0 ? ["hls"] : transports
 			});
+	}
 
-	public Task<CapabilityInvocationResult> CloseAsync(string sessionId, string providerId = "cam",
+	public Task<CapabilityInvocationResult> CloseAsync(
+		string sessionId,
+		string providerId = "cam",
 		string reason = "ConsumerClosed")
-		=> InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionClose,
+	{
+		return InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionClose,
 			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionCloseArguments
 			{
 				SessionId = sessionId, ProviderId = providerId, Reason = reason
 			});
+	}
 
 	public Task<CapabilityInvocationResult> ResumeAsync(string sessionId, string providerId = "cam")
-		=> InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionResume,
+	{
+		return InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionResume,
 			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionArguments
 			{
 				SessionId = sessionId, ProviderId = providerId
 			});
+	}
 
 	public Task<CapabilityInvocationResult> SuspendAsync(string sessionId, string providerId = "cam")
-		=> InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionSuspend,
+	{
+		return InvokeAsync(CapabilityOperations.VideoStreamProvider.SessionSuspend,
 			new Protocol.Capabilities.VideoStreamProvider.VideoStreamSessionArguments
 			{
 				SessionId = sessionId, ProviderId = providerId
 			});
+	}
 
 	public static string? Reason(CapabilityInvocationResult result)
-		=> result.Error?.Details?.GetValueOrDefault("reason");
+	{
+		return result.Error?.Details?.GetValueOrDefault("reason");
+	}
 
 	public static async Task WaitForAsync(Func<bool> condition, TimeSpan? timeout = null)
 	{

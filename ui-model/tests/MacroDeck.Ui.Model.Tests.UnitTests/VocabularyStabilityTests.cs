@@ -24,15 +24,21 @@ public class VocabularyStabilityTests
 
 	[Test]
 	public void The_five_patch_operations_are_the_frozen_list()
-		=> Assert.That(UiPatchOperations.All, Is.EqualTo(_fivePatchOperations));
+	{
+		Assert.That(UiPatchOperations.All, Is.EqualTo(_fivePatchOperations));
+	}
 
 	[Test]
 	public void The_two_session_modes_are_the_frozen_list()
-		=> Assert.That(UiSessionModes.WellKnown, Is.EqualTo(_twoSessionModes));
+	{
+		Assert.That(UiSessionModes.WellKnown, Is.EqualTo(_twoSessionModes));
+	}
 
 	[Test]
 	public void The_well_known_surface_kinds_are_the_frozen_list()
-		=> Assert.That(UiSurfaceKinds.WellKnown, Is.EqualTo(_surfaceKinds));
+	{
+		Assert.That(UiSurfaceKinds.WellKnown, Is.EqualTo(_surfaceKinds));
+	}
 
 	[Test]
 	public void The_model_version_numbers_are_the_frozen_values()

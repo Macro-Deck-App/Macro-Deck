@@ -45,20 +45,21 @@ public class RunCommandActionTests
 			UserVariables = targets.UserVariables
 		});
 
-		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = "echo hello",
-				["outputVariable"] = "result",
-				["timeout"] = 30
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = "echo hello",
+					["outputVariable"] = "result",
+					["timeout"] = 30
+				}
+			});
 
 		var variable = await targets.Find("result");
 		Assert.That(variable, Is.Not.Null);
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(variable!.Classification, Is.EqualTo(VariableClassification.User));
 			Assert.That((await targets.Service.GetAll()).Count(v => v.Name == "result"), Is.EqualTo(1));
@@ -72,14 +73,15 @@ public class RunCommandActionTests
 		var api = new RecordingVariableApi();
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = api });
 
-		await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["command"] = "   ",
-				["outputVariable"] = "result"
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["command"] = "   ",
+					["outputVariable"] = "result"
+				}
+			});
 
 		Assert.That(api.CreateCount, Is.EqualTo(0));
 	}
@@ -90,15 +92,16 @@ public class RunCommandActionTests
 		var api = new RecordingVariableApi();
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = api });
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = "exit 3",
-				["timeout"] = 30
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = "exit 3",
+					["timeout"] = 30
+				}
+			});
 
 		Assert.Multiple(() =>
 		{
@@ -114,17 +117,18 @@ public class RunCommandActionTests
 		using var pidFile = new PidFile();
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = new RecordingVariableApi() });
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = pidFile.LongRunningCommand,
-				["timeout"] = 1
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = pidFile.LongRunningCommand,
+					["timeout"] = 1
+				}
+			});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await pidFile.IsRunning(), Is.True);
@@ -143,18 +147,19 @@ public class RunCommandActionTests
 			UserVariables = targets.UserVariables
 		});
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = pidFile.LongRunningCommand,
-				["outputVariable"] = "result",
-				["timeout"] = 1
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"] = pidFile.LongRunningCommand,
+					["outputVariable"] = "result",
+					["timeout"] = 1
+				}
+			});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Timeout));
@@ -170,16 +175,17 @@ public class RunCommandActionTests
 		using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = new RecordingVariableApi() });
 
-		Assert.That(async () => await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-			{
-				Parameters = new Dictionary<string, object>
+		Assert.That(async () => await action.CreateExecutor()
+				.ExecuteAsync(new ActionExecutionContext
 				{
-					["shell"] = "default",
-					["command"] = pidFile.LongRunningCommand,
-					["timeout"] = 30
-				},
-				CancellationToken = cancellation.Token
-			}),
+					Parameters = new Dictionary<string, object>
+					{
+						["shell"] = "default",
+						["command"] = pidFile.LongRunningCommand,
+						["timeout"] = 30
+					},
+					CancellationToken = cancellation.Token
+				}),
 			Throws.InstanceOf<OperationCanceledException>());
 		Assert.That(await pidFile.IsRunning(), Is.True);
 	}
@@ -188,7 +194,8 @@ public class RunCommandActionTests
 	[Platform(Exclude = "Win")]
 	public async Task RunCommand_without_output_capture_does_not_hand_the_host_streams_to_the_command()
 	{
-		using (var inherits = Process.Start(new ProcessStartInfo("sh") { ArgumentList = { "-c", "[ /dev/stdout -ef /dev/null ]" } })!)
+		using (var inherits = Process.Start(new ProcessStartInfo("sh")
+			{ ArgumentList = { "-c", "[ /dev/stdout -ef /dev/null ]" } })!)
 		{
 			await inherits.WaitForExitAsync();
 			Assume.That(inherits.ExitCode, Is.Not.EqualTo(0), "the test runner's own stdout is already /dev/null");
@@ -196,15 +203,17 @@ public class RunCommandActionTests
 
 		var action = new RunCommandActionDefinition(new VariableApiAccessor { Current = new RecordingVariableApi() });
 
-		var result = await action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = new Dictionary<string, object>
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
 			{
-				["shell"] = "default",
-				["command"] = "[ /dev/stdin -ef /dev/null ] && [ /dev/stdout -ef /dev/null ] && [ /dev/stderr -ef /dev/null ]",
-				["timeout"] = 30
-			}
-		});
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = "default",
+					["command"]
+						= "[ /dev/stdin -ef /dev/null ] && [ /dev/stdout -ef /dev/null ] && [ /dev/stderr -ef /dev/null ]",
+					["timeout"] = 30
+				}
+			});
 
 		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 	}

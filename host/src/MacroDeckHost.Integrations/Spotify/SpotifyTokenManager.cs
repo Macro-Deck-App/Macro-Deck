@@ -15,7 +15,9 @@ internal sealed record SpotifyTokenSnapshot(
 		string refreshToken,
 		DateTime expiresAtUtc,
 		TimeSpan margin)
-		=> new(accessToken, refreshToken, expiresAtUtc, expiresAtUtc - margin);
+	{
+		return new SpotifyTokenSnapshot(accessToken, refreshToken, expiresAtUtc, expiresAtUtc - margin);
+	}
 
 	internal static SpotifyTokenSnapshot FromIssued(
 		string accessToken,
@@ -194,11 +196,13 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 	}
 
 	private static SpotifyAuthTransientException Transient(SpotifyRefreshOutcome outcome)
-		=> new(outcome.Message, outcome.Cause!)
+	{
+		return new SpotifyAuthTransientException(outcome.Message, outcome.Cause!)
 		{
 			IsRateLimit = outcome.Cause is SpotifyAuthTransientException { IsRateLimit: true },
 			RetryAfter = (outcome.Cause as SpotifyAuthTransientException)?.RetryAfter
 		};
+	}
 
 	public async Task<bool> TryRefreshRejectedAccessTokenAsync(
 		string rejectedAccessToken,
@@ -264,8 +268,8 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 			catch (TimeoutException)
 			{
 				_logger.Warning(
-					"A Spotify token refresh for entry {EntryId} did not finish within {Timeout}; a rotated " +
-					"refresh token may not have been stored",
+					"A Spotify token refresh for entry {EntryId} did not finish within {Timeout}; a rotated "
+					+ "refresh token may not have been stored",
 					_entryId,
 					timeout);
 			}
@@ -295,7 +299,10 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 	}
 
 	private SpotifyAuthRejectedException RejectedAgain()
-		=> new($"Spotify rejected the stored authorization for entry {_entryId}; reconnect to re-authorize.");
+	{
+		return new SpotifyAuthRejectedException(
+			$"Spotify rejected the stored authorization for entry {_entryId}; reconnect to re-authorize.");
+	}
 
 	private async Task<SpotifyRefreshOutcome> RefreshCoreAsync(
 		SpotifyTokenSnapshot observed,
@@ -342,9 +349,8 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 			catch (TimeoutException)
 			{
 				stored = true;
-				_logger.Error(
-					"A rotated Spotify token for entry {EntryId} is still being written after {Timeout}; the " +
-					"write stays queued",
+				_logger.Error("A rotated Spotify token for entry {EntryId} is still being written after {Timeout}; the "
+					+ "write stays queued",
 					_entryId,
 					_persistenceBudget);
 				_ = LogLatePersistenceAsync(persisting);
@@ -353,8 +359,8 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 			if (!stored)
 			{
 				_logger.Error(
-					"A rotated Spotify token for entry {EntryId} could not be stored durably; it will have to " +
-					"be re-authorized after a restart",
+					"A rotated Spotify token for entry {EntryId} could not be stored durably; it will have to "
+					+ "be re-authorized after a restart",
 					_entryId);
 			}
 
@@ -382,8 +388,8 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 			}
 
 			_logger.Warning(
-				"Spotify rejected the stored credentials for entry {EntryId} after {ElapsedMs} ms (reconnect " +
-				"to re-authorize; {Failure})",
+				"Spotify rejected the stored credentials for entry {EntryId} after {ElapsedMs} ms (reconnect "
+				+ "to re-authorize; {Failure})",
 				_entryId,
 				stopwatch.ElapsedMilliseconds,
 				SafeFailure(ex));
@@ -424,16 +430,16 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 			{
 				case FailureEpisodeSignalKind.Onset:
 					_logger.Warning(
-						"Spotify token refresh for entry {EntryId} failed after {ElapsedMs} ms; keeping the stored " +
-						"credentials and retrying later ({Failure})",
+						"Spotify token refresh for entry {EntryId} failed after {ElapsedMs} ms; keeping the stored "
+						+ "credentials and retrying later ({Failure})",
 						_entryId,
 						stopwatch.ElapsedMilliseconds,
 						SafeFailure(ex));
 					break;
 				case FailureEpisodeSignalKind.SummaryDue:
 					_logger.Information(
-						"Spotify token refresh for entry {EntryId} still failing after {Duration} ({Failures} " +
-						"attempts; last error: {LastError})",
+						"Spotify token refresh for entry {EntryId} still failing after {Duration} ({Failures} "
+						+ "attempts; last error: {LastError})",
 						_entryId,
 						signal.Duration,
 						signal.ConsecutiveFailures,
@@ -441,8 +447,8 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 					break;
 				default:
 					_logger.Debug(
-						"Spotify token refresh for entry {EntryId} failed after {ElapsedMs} ms; keeping the stored " +
-						"credentials and retrying later ({Failure})",
+						"Spotify token refresh for entry {EntryId} failed after {ElapsedMs} ms; keeping the stored "
+						+ "credentials and retrying later ({Failure})",
 						_entryId,
 						stopwatch.ElapsedMilliseconds,
 						SafeFailure(ex));
@@ -457,19 +463,23 @@ internal sealed class SpotifyTokenManager : ISpotifyAccessTokenSource, IDisposab
 	{
 		if (!await persisting)
 		{
-			_logger.Error("A rotated Spotify token for entry {EntryId} could not be stored durably; it will have to " +
-				"be re-authorized after a restart",
+			_logger.Error("A rotated Spotify token for entry {EntryId} could not be stored durably; it will have to "
+				+ "be re-authorized after a restart",
 				_entryId);
 		}
 	}
 
 	private static string TransientMessage(Exception ex)
-		=> ex is OperationCanceledException
+	{
+		return ex is OperationCanceledException
 			? "The Spotify token refresh did not finish in time."
 			: "Spotify token refresh failed temporarily.";
+	}
 
 	private static string SafeFailure(Exception ex)
-		=> ex.GetType().Name;
+	{
+		return ex.GetType().Name;
+	}
 
 	private enum SpotifyRefreshResult
 	{

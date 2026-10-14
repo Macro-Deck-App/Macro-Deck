@@ -38,8 +38,8 @@ internal sealed class RemoteBatteryApi : IBatteryApi, IDisposable
 
 	public event EventHandler<BatteryDevicesChangedEventArgs>? Changed
 	{
-		add => Subscribe(value, lifecycle: false);
-		remove => Unsubscribe(value, lifecycle: false);
+		add => Subscribe(value, false);
+		remove => Unsubscribe(value, false);
 	}
 
 	public BatteryDeviceSnapshot? Find(string id)
@@ -60,7 +60,10 @@ internal sealed class RemoteBatteryApi : IBatteryApi, IDisposable
 		}
 	}
 
-	public void Dispose() => _stateCache.BatteriesChanged -= OnBatteriesChanged;
+	public void Dispose()
+	{
+		_stateCache.BatteriesChanged -= OnBatteriesChanged;
+	}
 
 	private void OnBatteriesChanged()
 	{
@@ -171,12 +174,15 @@ internal sealed class RemoteBatteryApi : IBatteryApi, IDisposable
 	{
 		public IReadOnlyList<BatteryDeviceSnapshot> Devices => api.Devices;
 
-		public BatteryDeviceSnapshot? Find(string id) => api.Find(id);
+		public BatteryDeviceSnapshot? Find(string id)
+		{
+			return api.Find(id);
+		}
 
 		public event EventHandler<BatteryDevicesChangedEventArgs>? Changed
 		{
-			add => api.Subscribe(value, lifecycle: true);
-			remove => api.Unsubscribe(value, lifecycle: true);
+			add => api.Subscribe(value, true);
+			remove => api.Unsubscribe(value, true);
 		}
 	}
 }

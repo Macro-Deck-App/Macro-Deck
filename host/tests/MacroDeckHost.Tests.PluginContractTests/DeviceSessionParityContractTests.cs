@@ -50,12 +50,14 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 	];
 
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.DeviceProvider,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 2 }
 		};
+	}
 
 	private static string Describe(DeviceSurface surface)
 	{
@@ -64,12 +66,12 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		var state = surface.Widgets.Select(widget => widget.StateId is null
 					? string.Empty
 					: $" state={widget.StateId}/{widget.StateLabel}")
-				.FirstOrDefault(value => value.Length > 0) ??
-			string.Empty;
+				.FirstOrDefault(value => value.Length > 0)
+			?? string.Empty;
 
-		return $"surface rev={surface.Revision} profile={surface.Profile?.Name} folder={surface.Folder?.Name} " +
-			$"grid={surface.Layout.Rows}x{surface.Layout.Columns} ref={surface.Layout.LayoutReference} " +
-			$"widgets={widgets}{state}";
+		return $"surface rev={surface.Revision} profile={surface.Profile?.Name} folder={surface.Folder?.Name} "
+			+ $"grid={surface.Layout.Rows}x{surface.Layout.Columns} ref={surface.Layout.LayoutReference} "
+			+ $"widgets={widgets}{state}";
 	}
 
 	/// <summary>Steps 3 to 7 of the walkthrough, written once. Steps 1 and 2 - registering the device and
@@ -124,7 +126,8 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 	}
 
 	[Test]
-	public async Task A_provider_reporting_whole_short_presses_keeps_an_immediate_verdict_on_a_widget_with_a_double_tap_flow()
+	public async Task
+		A_provider_reporting_whole_short_presses_keeps_an_immediate_verdict_on_a_widget_with_a_double_tap_flow()
 	{
 		var provider = new WalkthroughProvider();
 		var adapter = new InProcessDeviceSurfaceProvider("integration.walkthrough",
@@ -136,14 +139,17 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		_world = world;
 		world.Profiles.GetFoldersForProfile(ContractDeck.ProfileId)
 			.Single(folder => folder.Id == ContractDeck.FolderId)
-			.Widgets.Single().Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+			.Widgets.Single()
+			.Data = JsonSerializer.Serialize(new Dictionary<string, object?>
+		{
+			["flows"] = new[]
 			{
-				["flows"] = new[]
-				{
-					new Dictionary<string, object?> { ["triggerType"] = "onShortPress", ["children"] = new[] { new { id = "a" } } },
-					new Dictionary<string, object?> { ["triggerType"] = "onDoublePress", ["children"] = new[] { new { id = "b" } } }
-				}
-			});
+				new Dictionary<string, object?>
+					{ ["triggerType"] = "onShortPress", ["children"] = new[] { new { id = "a" } } },
+				new Dictionary<string, object?>
+					{ ["triggerType"] = "onDoublePress", ["children"] = new[] { new { id = "b" } } }
+			}
+		});
 
 		await world.RegisterAndOpenAsync(ProviderDeviceId);
 		await WaitForAsync(() => provider.Surfaces.Count == 1, "the provider never received its first surface");
@@ -224,7 +230,8 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		_world = world;
 		world.Profiles.GetFoldersForProfile(ContractDeck.ProfileId)
 			.Single(folder => folder.Id == ContractDeck.FolderId)
-			.Widgets.Single().Type = "com.example.contract.meter";
+			.Widgets.Single()
+			.Type = "com.example.contract.meter";
 		router = CreateRouter(world, sessionOwners);
 
 		await world.RegisterAndOpenAsync(ProviderDeviceId);
@@ -265,7 +272,7 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			world.Service,
@@ -284,27 +291,40 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 
 		public List<DeviceSurface> Surfaces { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public string ProviderName => "Walkthrough Deck";
 
 		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task ShutdownAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
 		public IReadOnlyList<DeviceDescriptor> GetDevices()
-			=>
+		{
+			return
 			[
-				new(ProviderDeviceId,
+				new DeviceDescriptor(ProviderDeviceId,
 					"Walkthrough Deck",
 					null,
 					null,
 					ContractDeck.LayoutReference,
 					new DeviceCapabilities { KeyCount = 6 })
 			];
+		}
 
 		public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 		{
@@ -314,11 +334,13 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		}
 
 		public Task<DeviceInteractionResult> SendAsync(DeviceInteractionKind kind, string widgetId)
-			=> _session!.SendInteractionAsync(new DeviceInteraction
+		{
+			return _session!.SendInteractionAsync(new DeviceInteraction
 			{
 				Kind = kind,
 				Target = new DeviceInteractionTarget { WidgetId = widgetId },
 				SurfaceRevision = _session.CurrentSurface.Revision
 			});
+		}
 	}
 }

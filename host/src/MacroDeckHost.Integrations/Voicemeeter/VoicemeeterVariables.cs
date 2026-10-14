@@ -65,10 +65,12 @@ internal static class VoicemeeterVariables
 	}
 
 	private static VariableReading ReadRouting(VoicemeeterChannel channel, string suffix)
-		=> channel.Kind == VoicemeeterChannelKind.Strip &&
-			channel.Assignments.TryGetValue(suffix[1..].ToUpperInvariant(), out var routed)
+	{
+		return channel.Kind == VoicemeeterChannelKind.Strip
+			&& channel.Assignments.TryGetValue(suffix[1..].ToUpperInvariant(), out var routed)
 				? VariableReading.Of(routed)
 				: VariableReading.Unavailable;
+	}
 
 	public static VariableWriteResult Write(VoicemeeterConnection connection, string name, double decibels)
 	{
@@ -164,7 +166,7 @@ internal static class VoicemeeterVariables
 			variables.Add(VariableDefinition.Eager(name, VariableType.Boolean, refreshInterval: _liveInterval)
 				with
 				{
-					DisplayName = AppStrings.Integrations.Voicemeeter.Variables.StripRouted(bus: bus)
+					DisplayName = AppStrings.Integrations.Voicemeeter.Variables.StripRouted(bus)
 				});
 		}
 	}

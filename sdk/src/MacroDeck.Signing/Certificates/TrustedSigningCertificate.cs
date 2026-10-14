@@ -14,7 +14,8 @@ public sealed class TrustedSigningCertificate
 {
 	private readonly Ed25519VerificationKey _publicKey;
 
-	internal TrustedSigningCertificate(SigningCertificate certificate,
+	internal TrustedSigningCertificate(
+		SigningCertificate certificate,
 		Ed25519VerificationKey publicKey,
 		SigningCertificate? issuer = null)
 	{

@@ -22,7 +22,9 @@ public static partial class PkceCodeChallenge
 	}
 
 	public static bool IsWellFormed(string? codeChallenge)
-		=> codeChallenge is { Length: ChallengeLength } && ChallengeCharactersRegex().IsMatch(codeChallenge);
+	{
+		return codeChallenge is { Length: ChallengeLength } && ChallengeCharactersRegex().IsMatch(codeChallenge);
+	}
 
 	public static bool Verify(string codeVerifier, string codeChallenge)
 	{
@@ -33,8 +35,8 @@ public static partial class PkceCodeChallenge
 		// The length check must happen before FixedTimeEquals: that primitive requires equal-length
 		// inputs and throws otherwise, and a length mismatch is not itself secret, so short-circuiting
 		// on it leaks nothing that a constant-time comparison was protecting.
-		return computedBytes.Length == storedBytes.Length &&
-			CryptographicOperations.FixedTimeEquals(computedBytes, storedBytes);
+		return computedBytes.Length == storedBytes.Length
+			&& CryptographicOperations.FixedTimeEquals(computedBytes, storedBytes);
 	}
 
 	public static string Compute(string codeVerifier)
@@ -44,7 +46,9 @@ public static partial class PkceCodeChallenge
 	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	[GeneratedRegex("^[A-Za-z0-9_-]+$")]
 	private static partial Regex ChallengeCharactersRegex();

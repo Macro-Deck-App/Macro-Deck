@@ -64,5 +64,7 @@ public class DelegateRemoteStoredScriptsTests
 	[TestCase("not json")]
 	[TestCase("[]")]
 	public void Nothing_usable_reads_as_no_scripts(string? stored)
-		=> Assert.That(DelegateRemote.ParseScripts(stored), Is.Empty);
+	{
+		Assert.That(DelegateRemote.ParseScripts(stored), Is.Empty);
+	}
 }

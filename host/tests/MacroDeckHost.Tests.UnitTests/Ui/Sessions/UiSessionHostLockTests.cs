@@ -1,5 +1,4 @@
 using System.Text.Json;
-using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Ui;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -30,19 +29,23 @@ internal sealed class UiSessionHostLockTests : UiSessionFixture
 	private static readonly Guid _widgetId = Guid.Parse("4c7a0f4e-1d8e-4f53-9d2b-8a31f0e7b6c1");
 
 	private static UiSurface WidgetSurface()
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Widget,
 			SessionMode = UiSessionModes.Shared,
 			Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 			{
 				[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(_widgetId.ToString()),
-				[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(PluginId + "::counter"),
+				[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(PluginId + "::counter")
 			}
 		};
+	}
 
 	private static UiSurface DialogSurface()
-		=> new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private async Task<(string SessionId, ScriptedUiPluginInvoker Plugin)> OpenPluginWidgetAsync()
 	{
@@ -57,13 +60,21 @@ internal sealed class UiSessionHostLockTests : UiSessionFixture
 	}
 
 	private UiSendEventResponse Send(string sessionId, string name)
-		=> Broker.SendEvent(new UiSendEventRequest { SessionId = sessionId, NodeId = "root", Name = name },
+	{
+		return Broker.SendEvent(new UiSendEventRequest { SessionId = sessionId, NodeId = "root", Name = name },
 			Connection,
 			ClientId);
+	}
 
 	private IReadOnlyList<ActionExecutionStatusEvent> StatusEventsToClient()
-		=> [.. Transport.InGroup(UiClientGroups.For(ClientId)).Select(recorded => recorded.Message)
-			.OfType<ActionExecutionStatusEvent>()];
+	{
+		return
+		[
+			.. Transport.InGroup(UiClientGroups.For(ClientId))
+				.Select(recorded => recorded.Message)
+				.OfType<ActionExecutionStatusEvent>()
+		];
+	}
 
 	[Test]
 	public async Task A_plugin_widget_does_not_receive_a_client_press_while_the_host_is_locked()
@@ -123,9 +134,15 @@ internal sealed class UiSessionHostLockTests : UiSessionFixture
 		Integrations.Add(new StubUiIntegration("app.example.integration")
 		{
 			Session = session,
-			Surfaces = [new UiSurfaceDeclaration { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }]
+			Surfaces =
+			[
+				new UiSurfaceDeclaration { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
+			]
 		});
-		var ticket = await Broker.OpenAsync("app.example.integration", DialogSurface(), DeviceA, CancellationToken.None);
+		var ticket = await Broker.OpenAsync("app.example.integration",
+			DialogSurface(),
+			DeviceA,
+			CancellationToken.None);
 		Attach(ticket.SessionId, Connection);
 		HostLock.IsLocked = true;
 
@@ -194,12 +211,20 @@ internal sealed class UiSessionHostLockTests : UiSessionFixture
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 			[new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(Session);
+		{
+			return Task.FromResult<IUiSession?>(Session);
+		}
 	}
 
 	private sealed class StubBuiltInIntegrationUiProvider(string integrationId, StubUiSession session)
@@ -211,7 +236,9 @@ internal sealed class UiSessionHostLockTests : UiSessionFixture
 			[new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }];
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(session);
+		{
+			return Task.FromResult<IUiSession?>(session);
+		}
 	}
 }
 
@@ -231,7 +258,8 @@ internal sealed class ScriptedUiPluginInvoker(Func<IUiSessionSink> sink) : IPlug
 		}
 	}
 
-	public Task<JsonElement?> InvokeAsync(string pluginId,
+	public Task<JsonElement?> InvokeAsync(
+		string pluginId,
 		CapabilityInvokeRequest request,
 		CancellationToken cancellationToken)
 	{
@@ -258,11 +286,17 @@ internal sealed class ScriptedUiPluginInvoker(Func<IUiSessionSink> sink) : IPlug
 		return Task.FromResult<JsonElement?>(null);
 	}
 
-	public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+	public bool TryComplete(string pluginId, ProtocolEnvelope result)
+	{
+		return false;
+	}
 
 	public void AbortAll(string pluginId, ProtocolError reason)
 	{
 	}
 
-	public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+	public bool IsLiveActionExecute(string pluginId, string correlationId)
+	{
+		return false;
+	}
 }

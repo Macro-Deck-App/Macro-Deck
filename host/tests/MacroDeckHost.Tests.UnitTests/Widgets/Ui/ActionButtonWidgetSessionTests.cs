@@ -30,32 +30,32 @@ public class ActionButtonWidgetSessionTests
 	private static readonly Guid _widgetId = Guid.NewGuid();
 
 	private const string TwoStateData =
-		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":[" +
-		"{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}}," +
-		"{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}]," +
-		"\"flows\":\"[]\"}";
+		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":["
+		+ "{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}},"
+		+ "{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}],"
+		+ "\"flows\":\"[]\"}";
 
 	private const string LiquidLabelData = "{\"stateMode\":false,\"label\":\"Vol: {{ vol }}%\"}";
 
 	private const string TemplatedTwoStateData =
-		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":[" +
-		"{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"{{ vars.name }} Off\"}}," +
-		"{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"{{ vars.name }} On\"}}]," +
-		"\"flows\":\"[]\"}";
+		"{\"stateMode\":true,\"activeStateId\":\"a\",\"states\":["
+		+ "{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"{{ vars.name }} Off\"}},"
+		+ "{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"{{ vars.name }} On\"}}],"
+		+ "\"flows\":\"[]\"}";
 
 	// No "activeStateId" at all - a freshly placed two-state button, never explicitly advanced or set.
 	private const string TwoStateDataNoStoredActiveId =
-		"{\"stateMode\":true,\"states\":[" +
-		"{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}}," +
-		"{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}]," +
-		"\"flows\":\"[]\"}";
+		"{\"stateMode\":true,\"states\":["
+		+ "{\"id\":\"a\",\"label\":\"A\",\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}},"
+		+ "{\"id\":\"b\",\"label\":\"B\",\"appearance\":{\"label\":\"On\",\"backgroundColor\":\"#222222\"}}],"
+		+ "\"flows\":\"[]\"}";
 
 	private static readonly string[] _textOnly = ["text"];
 
 	[Test]
 	public async Task A_press_on_a_two_state_button_patches_every_property_that_changed_and_only_that()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 
 		fixture.Host.ClearPatches();
 		fixture.Host.ById("actionButton").Raise(UiComponentEvents.Press);
@@ -82,7 +82,7 @@ public class ActionButtonWidgetSessionTests
 		// tree has something to render, but ActionButtonStateJson's persisted advance treats "nothing ever
 		// stored" as null, not states[0] - so its own first advance lands on states[0], not states[1]. The
 		// session's optimistic advance has to agree, or the tile paints one state ahead of what gets saved.
-		var fixture = Build(TwoStateDataNoStoredActiveId, interactive: true);
+		var fixture = Build(TwoStateDataNoStoredActiveId, true);
 
 		var persistedData = (JsonNode.Parse(TwoStateDataNoStoredActiveId) as JsonObject)!;
 		var persistedNext = ActionButtonStateJson.AdvanceState(persistedData);
@@ -93,7 +93,9 @@ public class ActionButtonWidgetSessionTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(persistedNext, Is.EqualTo("a"), "sanity: the persisted rule itself stays on state a");
-			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Off"), "state a's label");
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"),
+				Is.EqualTo("Off"),
+				"state a's label");
 			Assert.That(fixture.Host.ById("actionButton").Text("background"),
 				Is.EqualTo("#111111"),
 				"state a's background");
@@ -107,7 +109,7 @@ public class ActionButtonWidgetSessionTests
 	{
 		var data = TwoStateData.Replace("\"flows\":\"[]\"",
 			"\"flows\":\"[{\\\"triggerType\\\":\\\"onLongPress\\\",\\\"children\\\":[]}]\"");
-		var fixture = Build(data, interactive: true);
+		var fixture = Build(data, true);
 
 		var result = fixture.Host.ById("actionButton").Raise(UiComponentEvents.LongPress);
 		await fixture.Host.SettleAsync();
@@ -131,8 +133,9 @@ public class ActionButtonWidgetSessionTests
 		string children,
 		string[] expected)
 	{
-		const string singleState = "{\"stateMode\":false,\"flows\":\"[{\\\"triggerType\\\":\\\"onDoublePress\\\",\\\"children\\\":CHILDREN}]\"}";
-		var fixture = Build(singleState.Replace("CHILDREN", children), interactive: true);
+		const string singleState
+			= "{\"stateMode\":false,\"flows\":\"[{\\\"triggerType\\\":\\\"onDoublePress\\\",\\\"children\\\":CHILDREN}]\"}";
+		var fixture = Build(singleState.Replace("CHILDREN", children), true);
 
 		var events = fixture.Host.ById("actionButton").Property("events") is { } declared
 			? declared.EnumerateArray().Select(name => name.GetString()).ToArray()
@@ -148,7 +151,7 @@ public class ActionButtonWidgetSessionTests
 	{
 		var data = TwoStateData.Replace("\"flows\":\"[]\"",
 			"\"flows\":\"[{\\\"triggerType\\\":\\\"onDoublePress\\\",\\\"children\\\":[{\\\"id\\\":\\\"b1\\\"}]}]\"");
-		var fixture = Build(data, interactive: true);
+		var fixture = Build(data, true);
 
 		var result = fixture.Host.ById("actionButton").Raise(UiComponentEvents.DoublePress);
 		await fixture.Host.SettleAsync();
@@ -166,7 +169,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_dispatch_while_locked_is_rejected_and_runs_no_trigger()
 	{
-		var fixture = Build(TwoStateData, interactive: true, locked: true);
+		var fixture = Build(TwoStateData, true, true);
 
 		var result = fixture.Host.ById("actionButton").Raise(UiComponentEvents.Press);
 		await fixture.Host.SettleAsync();
@@ -184,7 +187,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_press_refused_by_a_locked_host_emits_a_failed_action_execution_status_event()
 	{
-		var fixture = Build(TwoStateData, interactive: true, locked: true);
+		var fixture = Build(TwoStateData, true, true);
 
 		fixture.Session.Dispatch(new UiEvent { NodeId = "actionButton", Name = UiComponentEvents.Press }, "client-1");
 		await fixture.Host.SettleAsync();
@@ -205,7 +208,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_press_whose_flow_fails_emits_a_failed_action_execution_status_event()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 		fixture.Trigger.Result = new FlowExecutionResult
 		{
 			ExecutionId = Guid.NewGuid(),
@@ -232,7 +235,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_successful_press_emits_no_action_execution_status_event()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 		fixture.Trigger.Result = new FlowExecutionResult
 			{ ExecutionId = Guid.NewGuid(), Status = FlowExecutionStatus.Succeeded };
 
@@ -247,7 +250,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_preview_session_declares_no_events_and_ignores_a_press()
 	{
-		var fixture = Build(TwoStateData, interactive: false);
+		var fixture = Build(TwoStateData, false);
 
 		Assert.That(fixture.Host.ById("actionButton").HasProperty("events"), Is.False);
 
@@ -267,7 +270,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task An_unknown_event_name_and_a_press_at_the_label_node_both_run_no_trigger()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 
 		var unknown = fixture.Host.ById("actionButton").Raise("double-press");
 		var atLabel = fixture.Host.ById("actionButton.labelRow.labelBox.label").Raise(UiComponentEvents.Press);
@@ -287,7 +290,7 @@ public class ActionButtonWidgetSessionTests
 	public async Task A_button_with_no_declared_flows_and_no_state_still_declares_press_only_when_it_can_advance()
 	{
 		const string singleState = "{\"stateMode\":false}";
-		var fixture = Build(singleState, interactive: true);
+		var fixture = Build(singleState, true);
 
 		Assert.That(fixture.Host.ById("actionButton").HasProperty("events"),
 			Is.False,
@@ -299,7 +302,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_state_signal_from_any_authority_patches_the_open_session_with_only_set_properties()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 
 		fixture.Host.ClearPatches();
 		fixture.Signals.RaiseStateChanged(new WidgetStateUpdatedEvent
@@ -330,7 +333,7 @@ public class ActionButtonWidgetSessionTests
 		// has no label subscription to correct it later, so if the data change does not carry it the
 		// tile renders no label for as long as that session lives.
 		const string unlabelled = "{\"stateMode\":false}";
-		var fixture = Build(unlabelled, interactive: true);
+		var fixture = Build(unlabelled, true);
 
 		fixture.Host.ClearPatches();
 		fixture.Signals.RaiseDataChanged(new WidgetEntity
@@ -343,7 +346,8 @@ public class ActionButtonWidgetSessionTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Fresh Label"));
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"),
+				Is.EqualTo("Fresh Label"));
 			Assert.That(fixture.Host.Patches.SelectMany(p => p.Operations).Select(o => o.Op),
 				Has.All.EqualTo(UiPatchOperations.SetProperties));
 		});
@@ -354,7 +358,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_data_changed_signal_repaints_appearance_that_a_plugin_action_changed()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 
 		fixture.Host.ClearPatches();
 		var recoloured = TwoStateData.Replace("#111111", "#abcdef");
@@ -379,7 +383,7 @@ public class ActionButtonWidgetSessionTests
 		A_data_changed_signal_referencing_an_icon_this_session_has_never_resolved_serves_it_as_the_source()
 	{
 		var icons = new FakeWidgetIconResources();
-		var fixture = Build(TwoStateData, interactive: true, iconResources: icons);
+		var fixture = Build(TwoStateData, true, iconResources: icons);
 
 		fixture.Host.ClearPatches();
 		var withNewIcon = TwoStateData.Replace("\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}",
@@ -420,7 +424,7 @@ public class ActionButtonWidgetSessionTests
 		var signals = new RaceableRenderSignals();
 		var withIcon = TwoStateData.Replace("\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}",
 			$"\"appearance\":{{\"label\":\"Off\",\"backgroundColor\":\"#111111\",\"iconId\":\"{iconId}\"}}");
-		var fixture = Build(withIcon, interactive: true, iconResources: icons, renderSignals: signals);
+		var fixture = Build(withIcon, true, iconResources: icons, renderSignals: signals);
 
 		// Resolve it once, via the same path a stored-data change already uses in production.
 		fixture.Signals.RaiseDataChanged(new WidgetEntity
@@ -444,7 +448,7 @@ public class ActionButtonWidgetSessionTests
 	{
 		var icons = new FakeWidgetIconResources();
 		var signals = new RaceableRenderSignals();
-		var fixture = Build(TwoStateData, interactive: true, iconResources: icons, renderSignals: signals);
+		var fixture = Build(TwoStateData, true, iconResources: icons, renderSignals: signals);
 
 		signals.RaiseIconInvalidated(Guid.NewGuid());
 		await fixture.Session.WaitForIconResolutionAsync();
@@ -459,7 +463,7 @@ public class ActionButtonWidgetSessionTests
 	{
 		var icons = new FakeWidgetIconResources();
 		icons.FailingIconIds.Add("icon-bad");
-		var fixture = Build(TwoStateData, interactive: true, iconResources: icons);
+		var fixture = Build(TwoStateData, true, iconResources: icons);
 
 		var withBadIcon = TwoStateData.Replace("\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\"}",
 			"\"appearance\":{\"label\":\"Off\",\"backgroundColor\":\"#111111\",\"iconId\":\"icon-bad\"}");
@@ -480,7 +484,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_data_changed_signal_that_changes_the_declared_trigger_set_faults_the_session()
 	{
-		var fixture = Build(TwoStateData, interactive: true);
+		var fixture = Build(TwoStateData, true);
 
 		UiSessionFaultedEventArgs? fault = null;
 		fixture.Session.Faulted += (_, args) => fault = args;
@@ -500,7 +504,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_liquid_label_resolves_host_side_and_the_raw_template_never_reaches_the_tree()
 	{
-		var fixture = Build(LiquidLabelData, interactive: true, initialLabel: "Vol: 30%");
+		var fixture = Build(LiquidLabelData, true, initialLabel: "Vol: 30%");
 
 		Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Vol: 30%"));
 		Assert.That(fixture.Host.ToCanonicalJson(), Does.Not.Contain("{{"));
@@ -531,7 +535,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task Disposing_a_session_removes_both_tracker_registrations()
 	{
-		var fixture = Build(LiquidLabelData, interactive: true, initialLabel: "Vol: 30%");
+		var fixture = Build(LiquidLabelData, true, initialLabel: "Vol: 30%");
 		var widgetKey = _widgetId.ToString();
 
 		Assert.Multiple(() =>
@@ -563,7 +567,7 @@ public class ActionButtonWidgetSessionTests
 		// barrier, this late state push re-adds a fresh (and now unowned) entry under the new state -
 		// an orphan that keeps HasSubscribers true for the widget's whole remaining process lifetime.
 		var signals = new RaceableRenderSignals();
-		var fixture = Build(LiquidLabelData, interactive: true, initialLabel: "Vol: 30%", renderSignals: signals);
+		var fixture = Build(LiquidLabelData, true, initialLabel: "Vol: 30%", renderSignals: signals);
 		var widgetKey = _widgetId.ToString();
 
 		Assert.That(fixture.LabelSubscriptions.HasAnySubscribers(widgetKey), Is.True);
@@ -585,7 +589,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_state_change_shows_the_new_states_templated_label_without_any_variable_changing()
 	{
-		var fixture = Build(TemplatedTwoStateData, interactive: true, initialLabel: "Strip3 Off");
+		var fixture = Build(TemplatedTwoStateData, true, initialLabel: "Strip3 Off");
 		var labelText = new Devices.Surfaces.FakeLabelTextService();
 		labelText.Set(_widgetId, "a", "Strip3 Off");
 		labelText.Set(_widgetId, "b", "Strip3 On");
@@ -657,7 +661,9 @@ public class ActionButtonWidgetSessionTests
 		}
 
 		public IDisposable SubscribeDataChanged(string widgetId, Func<WidgetEntity, bool> handler)
-			=> new NoopSubscription();
+		{
+			return new NoopSubscription();
+		}
 
 		public IDisposable SubscribeWidgetIconChanged(string widgetId, Action handler)
 		{
@@ -671,9 +677,15 @@ public class ActionButtonWidgetSessionTests
 			return new NoopSubscription();
 		}
 
-		public void RaiseStateChanged(WidgetStateUpdatedEvent evt) => _stateHandler?.Invoke(evt);
+		public void RaiseStateChanged(WidgetStateUpdatedEvent evt)
+		{
+			_stateHandler?.Invoke(evt);
+		}
 
-		public void RaiseLabelChanged(LabelTextUpdatedEvent evt) => _labelHandler?.Invoke(evt);
+		public void RaiseLabelChanged(LabelTextUpdatedEvent evt)
+		{
+			_labelHandler?.Invoke(evt);
+		}
 
 		public bool RaiseDataChanged(WidgetEntity widget)
 		{
@@ -683,11 +695,20 @@ public class ActionButtonWidgetSessionTests
 			return handler is not null;
 		}
 
-		public void RaiseIconInvalidated(Guid iconId) => _iconInvalidatedHandler?.Invoke(iconId);
+		public void RaiseIconInvalidated(Guid iconId)
+		{
+			_iconInvalidatedHandler?.Invoke(iconId);
+		}
 
-		public void RaiseWidgetIconChanged(Guid widgetId) => _widgetIconChangedHandler?.Invoke();
+		public void RaiseWidgetIconChanged(Guid widgetId)
+		{
+			_widgetIconChangedHandler?.Invoke();
+		}
 
-		public void RaiseVariableChanged() => _variableChangedHandler?.Invoke();
+		public void RaiseVariableChanged()
+		{
+			_variableChangedHandler?.Invoke();
+		}
 
 		private sealed class NoopSubscription : IDisposable
 		{
@@ -702,7 +723,7 @@ public class ActionButtonWidgetSessionTests
 		A_session_with_no_resolved_icon_falls_back_to_a_real_legacy_image_resource_as_the_backdrop_source()
 	{
 		var imageResource = new UiResource { ResourceId = "legacy-image-1" };
-		var fixture = Build(TwoStateData, interactive: true, imageResource: imageResource);
+		var fixture = Build(TwoStateData, true, imageResource: imageResource);
 
 		Assert.That(fixture.Host.ById("actionButton").Property("source")!.Value.GetProperty("resourceId").GetString(),
 			Is.EqualTo("legacy-image-1"));
@@ -713,7 +734,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_press_runs_the_flows_the_widget_has_now_not_the_ones_its_session_opened_with()
 	{
-		var fixture = Build(FlowData("original"), interactive: true);
+		var fixture = Build(FlowData("original"), true);
 
 		var edited = FlowData("edited");
 		fixture.Folder.Widgets[0] = new WidgetEntity
@@ -735,7 +756,7 @@ public class ActionButtonWidgetSessionTests
 	[Test]
 	public async Task A_press_on_a_widget_that_is_no_longer_stored_runs_nothing()
 	{
-		var fixture = Build(FlowData("original"), interactive: true);
+		var fixture = Build(FlowData("original"), true);
 
 		fixture.Folder.Widgets.Clear();
 
@@ -852,10 +873,13 @@ public class ActionButtonWidgetSessionTests
 	/// <see cref="WidgetIconResolution.Inactive" />, matching a button with no icon-provider assignment.</summary>
 	internal sealed class FakeWidgetIconService : IWidgetIconService
 	{
-		public Task<WidgetIconResolution> Resolve(Guid widgetId,
-			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+		public Task<WidgetIconResolution> Resolve(
+			Guid widgetId,
+			WidgetIconLimit limit,
 			CancellationToken cancellationToken = default)
-			=> Resolve(widgetId, cancellationToken);
+		{
+			return Resolve(widgetId, cancellationToken);
+		}
 
 		public WidgetIconResolution Resolution { get; set; } = WidgetIconResolution.Inactive;
 
@@ -869,7 +893,10 @@ public class ActionButtonWidgetSessionTests
 			return Task.FromResult(Resolution);
 		}
 
-		public TimeSpan? GetProviderPollInterval(Guid widgetId) => PollInterval;
+		public TimeSpan? GetProviderPollInterval(Guid widgetId)
+		{
+			return PollInterval;
+		}
 	}
 
 	/// <summary>Resolves an icon reference to a <see cref="UiResource" /> named after its bare reference
@@ -878,10 +905,13 @@ public class ActionButtonWidgetSessionTests
 	/// or DI-scope machinery.</summary>
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
-			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+		public Task<UiResource?> ResolveAsync(
+			WidgetIconReference? reference,
+			WidgetIconLimit limit,
 			CancellationToken cancellationToken)
-			=> ResolveAsync(reference, cancellationToken);
+		{
+			return ResolveAsync(reference, cancellationToken);
+		}
 
 		public HashSet<string> FailingIconIds { get; } = new(StringComparer.Ordinal);
 
@@ -936,7 +966,9 @@ public class ActionButtonWidgetSessionTests
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class
@@ -949,12 +981,18 @@ public class ActionButtonWidgetSessionTests
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

@@ -40,11 +40,19 @@ internal static class BuildFixtures
 	}
 
 	public static string ExecutableName(string rid)
-		=> rid.StartsWith("win-", StringComparison.Ordinal) ? $"{ProjectName}.exe" : ProjectName;
+	{
+		return rid.StartsWith("win-", StringComparison.Ordinal) ? $"{ProjectName}.exe" : ProjectName;
+	}
 
-	public static string EntrypointPath(string rid) => $"runtimes/{rid}/{ExecutableName(rid)}";
+	public static string EntrypointPath(string rid)
+	{
+		return $"runtimes/{rid}/{ExecutableName(rid)}";
+	}
 
-	public static string OutputDirectory(string rid) => Path.Combine("bin", "publish", rid);
+	public static string OutputDirectory(string rid)
+	{
+		return Path.Combine("bin", "publish", rid);
+	}
 
 	/// <summary>Stands in for what a real build tool writes: the declared executable plus a sibling file,
 	/// since self-contained output is never a single file.</summary>
@@ -60,7 +68,8 @@ internal static class BuildFixtures
 	/// <summary>The runner callback that makes every configured target "succeed" by writing the output a
 	/// real tool would have produced. The runner is told the RID through the argument vector the fixture's
 	/// build config carries.</summary>
-	public static Action<string, IReadOnlyList<string>, string> ProducingOutput(string projectDirectory,
+	public static Action<string, IReadOnlyList<string>, string> ProducingOutput(
+		string projectDirectory,
 		IReadOnlyList<string> rids)
 	{
 		return (_, arguments, _) =>

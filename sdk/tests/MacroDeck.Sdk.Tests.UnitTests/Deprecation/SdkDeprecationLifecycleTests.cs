@@ -30,13 +30,15 @@ public class SdkDeprecationLifecycleTests
 	}
 
 	private static string DeprecationsDocument()
-		=> File.ReadAllText(Path.Combine(RepositoryRoot(),
+	{
+		return File.ReadAllText(Path.Combine(RepositoryRoot(),
 			"docs",
 			"src",
 			"content",
 			"docs",
 			"policies",
 			"deprecations.md"));
+	}
 
 	/// <summary>Every public member of the SDK, including those declared on nested and non-visible types.</summary>
 	private static IEnumerable<MemberInfo> PublicSurface()
@@ -47,11 +49,11 @@ public class SdkDeprecationLifecycleTests
 		{
 			yield return type;
 
-			foreach (var member in type.GetMembers(BindingFlags.Public |
-				BindingFlags.NonPublic |
-				BindingFlags.Instance |
-				BindingFlags.Static |
-				BindingFlags.DeclaredOnly))
+			foreach (var member in type.GetMembers(BindingFlags.Public
+				| BindingFlags.NonPublic
+				| BindingFlags.Instance
+				| BindingFlags.Static
+				| BindingFlags.DeclaredOnly))
 			{
 				yield return member;
 			}
@@ -59,7 +61,9 @@ public class SdkDeprecationLifecycleTests
 	}
 
 	private static IEnumerable<MemberInfo> DeprecatedMembers()
-		=> PublicSurface().Where(member => member.GetCustomAttribute<MacroDeckDeprecatedAttribute>() is not null);
+	{
+		return PublicSurface().Where(member => member.GetCustomAttribute<MacroDeckDeprecatedAttribute>() is not null);
+	}
 
 	/// <summary>
 	/// A deprecation the registry does not know about is invisible to the host: the plugin reports the
@@ -146,8 +150,8 @@ public class SdkDeprecationLifecycleTests
 			{
 				Assert.That(present,
 					Does.Contain(entry.ApiId),
-					$"'{entry.ApiId}' is listed as deprecated-but-present and no longer exists - move it to " +
-					"SdkDeprecations.Removed and document the removal");
+					$"'{entry.ApiId}' is listed as deprecated-but-present and no longer exists - move it to "
+					+ "SdkDeprecations.Removed and document the removal");
 			}
 
 			foreach (var entry in SdkDeprecations.Removed)
@@ -219,13 +223,16 @@ public class SdkDeprecationLifecycleTests
 	/// Reflection's own spelling of the documentation comment id, built here rather than taken from
 	/// production code so the test and the registry cannot agree on a wrong format.
 	/// </summary>
-	private static string DocumentationCommentId(MemberInfo member) => member switch
+	private static string DocumentationCommentId(MemberInfo member)
 	{
-		Type type => $"T:{type.FullName}",
-		MethodBase method => $"M:{method.DeclaringType?.FullName}.{method.Name}",
-		PropertyInfo property => $"P:{property.DeclaringType?.FullName}.{property.Name}",
-		EventInfo eventInfo => $"E:{eventInfo.DeclaringType?.FullName}.{eventInfo.Name}",
-		FieldInfo field => $"F:{field.DeclaringType?.FullName}.{field.Name}",
-		_ => $"?:{member.Name}"
-	};
+		return member switch
+		{
+			Type type => $"T:{type.FullName}",
+			MethodBase method => $"M:{method.DeclaringType?.FullName}.{method.Name}",
+			PropertyInfo property => $"P:{property.DeclaringType?.FullName}.{property.Name}",
+			EventInfo eventInfo => $"E:{eventInfo.DeclaringType?.FullName}.{eventInfo.Name}",
+			FieldInfo field => $"F:{field.DeclaringType?.FullName}.{field.Name}",
+			_ => $"?:{member.Name}"
+		};
+	}
 }

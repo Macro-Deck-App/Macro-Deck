@@ -54,7 +54,10 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 		return ReadCertificateInfo(_certificateFilePath, ReadSource());
 	}
 
-	public string? ReadCertificatePem() => ReadPemIfPresent(_certificateFilePath);
+	public string? ReadCertificatePem()
+	{
+		return ReadPemIfPresent(_certificateFilePath);
+	}
 
 	public PublicTlsCertificateResolution LoadServerCertificate()
 	{
@@ -139,7 +142,10 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 	// Reads only the public half, so the certificate a device has to install stays available even when
 	// the key ring cannot open the authority's private key.
-	public string? ReadAuthorityCertificatePem() => ReadPemIfPresent(_authorityCertificateFilePath);
+	public string? ReadAuthorityCertificatePem()
+	{
+		return ReadPemIfPresent(_authorityCertificateFilePath);
+	}
 
 	public PublicTlsAuthorityResolution LoadAuthority()
 	{
@@ -209,11 +215,13 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 	}
 
 	private static PublicTlsCertificateInfo ToInfo(X509Certificate2 certificate, PublicTlsCertificateSource source)
-		=> new(certificate.Subject,
+	{
+		return new PublicTlsCertificateInfo(certificate.Subject,
 			certificate.GetCertHashString(HashAlgorithmName.SHA256),
 			certificate.NotBefore,
 			certificate.NotAfter,
 			source);
+	}
 
 	private static string? ReadPemIfPresent(string path)
 	{
@@ -229,8 +237,8 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 
 	private PublicTlsCertificateSource ReadSource()
 	{
-		if (File.Exists(_sourceFilePath) &&
-			Enum.TryParse<PublicTlsCertificateSource>(File.ReadAllText(_sourceFilePath).Trim(), out var source))
+		if (File.Exists(_sourceFilePath)
+			&& Enum.TryParse<PublicTlsCertificateSource>(File.ReadAllText(_sourceFilePath).Trim(), out var source))
 		{
 			return source;
 		}
@@ -245,6 +253,6 @@ public sealed class FilePublicTlsCertificateStore : IPublicTlsCertificateStore
 	{
 		var tempPath = $"{path}.tmp";
 		File.WriteAllBytes(tempPath, content);
-		File.Move(tempPath, path, overwrite: true);
+		File.Move(tempPath, path, true);
 	}
 }

@@ -9,13 +9,13 @@ internal static class PublicListenerProbe
 {
 	internal static PublicListenerProbeResult Probe(int port)
 	{
-		var ipv6Result = TryBind(AddressFamily.InterNetworkV6, IPAddress.IPv6Any, port, dualMode: true);
+		var ipv6Result = TryBind(AddressFamily.InterNetworkV6, IPAddress.IPv6Any, port, true);
 		if (ipv6Result.CanBind || ipv6Result.Error == SocketError.AddressAlreadyInUse)
 		{
 			return ipv6Result;
 		}
 
-		return TryBind(AddressFamily.InterNetwork, IPAddress.Any, port, dualMode: false);
+		return TryBind(AddressFamily.InterNetwork, IPAddress.Any, port, false);
 	}
 
 	private static PublicListenerProbeResult TryBind(AddressFamily family, IPAddress address, int port, bool dualMode)

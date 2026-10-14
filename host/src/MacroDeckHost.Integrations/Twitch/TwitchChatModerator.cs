@@ -25,8 +25,8 @@ internal sealed class TwitchChatModerator : IStreamChatModerator
 		ArgumentNullException.ThrowIfNull(request);
 
 		// Resolve treats an empty id as the first account; moderation must never act on a guessed account.
-		if (string.IsNullOrEmpty(accountId) ||
-			_accounts().Resolve(accountId) is not { State.IsConnected: true } connection)
+		if (string.IsNullOrEmpty(accountId)
+			|| _accounts().Resolve(accountId) is not { State.IsConnected: true } connection)
 		{
 			return ChatModerationResult.AccountUnavailable;
 		}
@@ -42,7 +42,11 @@ internal sealed class TwitchChatModerator : IStreamChatModerator
 					await connection.Helix.DeleteChatMessagesAsync(channel, channel, messageId, cancellationToken);
 					break;
 				case { Kind: ChatModerationKind.Timeout, AuthorId: { Length: > 0 } chatterId, DurationSeconds: > 0 }:
-					await connection.Helix.BanUserAsync(channel, channel, chatterId, request.DurationSeconds, null,
+					await connection.Helix.BanUserAsync(channel,
+						channel,
+						chatterId,
+						request.DurationSeconds,
+						null,
 						cancellationToken);
 					break;
 				case { Kind: ChatModerationKind.Ban, AuthorId: { Length: > 0 } chatterId }:
@@ -76,8 +80,8 @@ internal sealed class TwitchChatModerator : IStreamChatModerator
 
 			return ChatModerationResult.Refused;
 		}
-		catch (Exception exception) when (exception is not OperationCanceledException ||
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception exception) when (exception is not OperationCanceledException
+			|| !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "Twitch chat moderation {Kind} failed", request.Kind);
 

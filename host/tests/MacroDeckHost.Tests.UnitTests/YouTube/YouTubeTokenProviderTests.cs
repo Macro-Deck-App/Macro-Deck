@@ -171,12 +171,22 @@ internal sealed class YouTubeTokenProviderTests
 	}
 
 	private YouTubeTokenProvider Provider(IYouTubeOAuthClient client, YouTubeTokens tokens)
-		=> new(_entryId, "client-id", "secret", tokens, client, _persister, SilentLogger());
+	{
+		return new YouTubeTokenProvider(_entryId, "client-id", "secret", tokens, client, _persister, SilentLogger());
+	}
 
 	private static YouTubeTokens Tokens(string access, string refresh, TimeSpan validFor)
-		=> new(access, refresh, DateTimeOffset.UtcNow + validFor, ["https://www.googleapis.com/auth/youtube"]);
+	{
+		return new YouTubeTokens(access,
+			refresh,
+			DateTimeOffset.UtcNow + validFor,
+			["https://www.googleapis.com/auth/youtube"]);
+	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private sealed class FakeOAuthClient : IYouTubeOAuthClient
 	{
@@ -193,14 +203,18 @@ internal sealed class YouTubeTokenProviderTests
 		public int RefreshCount { get; private set; }
 
 		public Task<YouTubeDeviceCode> RequestDeviceCodeAsync(string clientId, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<YouTubeTokenPoll> PollTokenAsync(
 			string clientId,
 			string clientSecret,
 			string deviceCode,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public async Task<YouTubeTokens> RefreshAsync(
 			string clientId,
@@ -244,7 +258,9 @@ internal sealed class YouTubeTokenProviderTests
 		public Func<Task>? BeforeSecretWrite { get; init; }
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([]);
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
 		{
@@ -262,7 +278,8 @@ internal sealed class YouTubeTokenProviderTests
 			}
 		}
 
-		public Task SetStringAsync(Guid entryId,
+		public Task SetStringAsync(
+			Guid entryId,
 			string key,
 			string? value,
 			CancellationToken cancellationToken = default)
@@ -275,7 +292,8 @@ internal sealed class YouTubeTokenProviderTests
 			return Task.CompletedTask;
 		}
 
-		public async Task SetSecretAsync(Guid entryId,
+		public async Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)

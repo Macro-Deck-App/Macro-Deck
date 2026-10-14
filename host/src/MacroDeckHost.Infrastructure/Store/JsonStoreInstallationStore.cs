@@ -15,7 +15,8 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 	private readonly string _path;
 	private readonly DurableJsonFile _files;
 
-	public JsonStoreInstallationStore(IMacroDeckPaths paths,
+	public JsonStoreInstallationStore(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
@@ -53,9 +54,10 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 			var previous = records.FirstOrDefault(existing => Same(existing, record.Kind, record.PackageId));
 			records.RemoveAll(existing => Same(existing, record.Kind, record.PackageId));
 			// An update keeps the first install time, so it cannot restart the rating prompt wait.
-			records.Add(previous is not null && string.Equals(previous.Origin, record.Origin, StringComparison.OrdinalIgnoreCase)
-				? record with { InstalledAt = previous.InstalledAt }
-				: record);
+			records.Add(previous is not null
+				&& string.Equals(previous.Origin, record.Origin, StringComparison.OrdinalIgnoreCase)
+					? record with { InstalledAt = previous.InstalledAt }
+					: record);
 			_files.Write(_path, records);
 		}
 	}
@@ -72,9 +74,13 @@ public sealed class JsonStoreInstallationStore : IStoreInstallationStore
 		}
 	}
 
-	private List<StoreInstallationRecord> Read() =>
-		_files.Read<List<StoreInstallationRecord>>(_path) ?? [];
+	private List<StoreInstallationRecord> Read()
+	{
+		return _files.Read<List<StoreInstallationRecord>>(_path) ?? [];
+	}
 
-	private static bool Same(StoreInstallationRecord record, StoreExtensionKind kind, string packageId) =>
-		record.Kind == kind && string.Equals(record.PackageId, packageId, StringComparison.OrdinalIgnoreCase);
+	private static bool Same(StoreInstallationRecord record, StoreExtensionKind kind, string packageId)
+	{
+		return record.Kind == kind && string.Equals(record.PackageId, packageId, StringComparison.OrdinalIgnoreCase);
+	}
 }

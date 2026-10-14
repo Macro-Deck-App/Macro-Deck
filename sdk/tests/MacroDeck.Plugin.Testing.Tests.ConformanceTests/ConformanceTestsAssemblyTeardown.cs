@@ -13,5 +13,8 @@ namespace MacroDeck.Plugin.Testing.Tests.ConformanceTests;
 internal sealed class ConformanceTestsAssemblyTeardown
 {
 	[OneTimeTearDown]
-	public Task DisposeSharedInProcessRunAsync() => SharedInProcessConformanceRun.DisposeAsync();
+	public Task DisposeSharedInProcessRunAsync()
+	{
+		return SharedInProcessConformanceRun.DisposeAsync();
+	}
 }

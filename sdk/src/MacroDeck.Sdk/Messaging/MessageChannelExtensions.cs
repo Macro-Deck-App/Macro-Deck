@@ -8,7 +8,8 @@ namespace MacroDeck.Sdk.Messaging;
 /// </summary>
 public static class MessageChannelExtensions
 {
-	public static Task PublishAsync<T>(this IMessageChannel channel,
+	public static Task PublishAsync<T>(
+		this IMessageChannel channel,
 		string topic,
 		T payload,
 		JsonSerializerOptions? options = null,
@@ -18,7 +19,8 @@ public static class MessageChannelExtensions
 		return channel.PublishAsync(topic, Serialize(payload, options), cancellationToken);
 	}
 
-	public static Task SendAsync<T>(this IMessageChannel channel,
+	public static Task SendAsync<T>(
+		this IMessageChannel channel,
 		string topic,
 		T payload,
 		JsonSerializerOptions? options = null,
@@ -31,7 +33,8 @@ public static class MessageChannelExtensions
 
 	/// <summary>Sends a typed request and deserializes the reply; a reply of nothing is the default of <typeparamref name="TResponse" />.</summary>
 	/// <exception cref="JsonException">The reply does not fit <typeparamref name="TResponse" />.</exception>
-	public static async Task<TResponse?> RequestAsync<TRequest, TResponse>(this IMessageChannel channel,
+	public static async Task<TResponse?> RequestAsync<TRequest, TResponse>(
+		this IMessageChannel channel,
 		string topic,
 		TRequest request,
 		JsonSerializerOptions? options = null,
@@ -44,7 +47,8 @@ public static class MessageChannelExtensions
 		return reply is { } element ? element.Deserialize<TResponse>(options ?? MessageChannelJson.Options) : default;
 	}
 
-	public static Task<IAsyncDisposable> SubscribeAsync<T>(this IMessageChannel channel,
+	public static Task<IAsyncDisposable> SubscribeAsync<T>(
+		this IMessageChannel channel,
 		string topicPattern,
 		Func<T?, ChannelMessage, CancellationToken, Task> handler,
 		JsonSerializerOptions? options = null,
@@ -57,7 +61,8 @@ public static class MessageChannelExtensions
 			cancellationToken);
 	}
 
-	public static Task<IAsyncDisposable> HandleCommandsAsync<T>(this IMessageChannel channel,
+	public static Task<IAsyncDisposable> HandleCommandsAsync<T>(
+		this IMessageChannel channel,
 		string topic,
 		Func<T?, ChannelMessage, CancellationToken, Task> handler,
 		JsonSerializerOptions? options = null,
@@ -70,7 +75,8 @@ public static class MessageChannelExtensions
 			cancellationToken);
 	}
 
-	public static Task<IAsyncDisposable> HandleRequestsAsync<TRequest, TResponse>(this IMessageChannel channel,
+	public static Task<IAsyncDisposable> HandleRequestsAsync<TRequest, TResponse>(
+		this IMessageChannel channel,
 		string topic,
 		Func<TRequest?, ChannelMessage, CancellationToken, Task<TResponse>> handler,
 		JsonSerializerOptions? options = null,
@@ -88,5 +94,7 @@ public static class MessageChannelExtensions
 	}
 
 	private static JsonElement? Serialize<T>(T value, JsonSerializerOptions? options)
-		=> value is null ? null : JsonSerializer.SerializeToElement(value, options ?? MessageChannelJson.Options);
+	{
+		return value is null ? null : JsonSerializer.SerializeToElement(value, options ?? MessageChannelJson.Options);
+	}
 }

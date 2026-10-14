@@ -49,6 +49,8 @@ public class LoopbackSessionController(TimeProvider timeProvider) : ControllerBa
 	}
 
 	private static bool IsVersion(string? value)
-		=> value is { Length: > 0 and <= 64 } &&
-			value.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '+' or '-');
+	{
+		return value is { Length: > 0 and <= 64 }
+			&& value.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '+' or '-');
+	}
 }

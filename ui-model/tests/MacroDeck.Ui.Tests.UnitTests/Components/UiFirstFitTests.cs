@@ -15,9 +15,10 @@ public class UiFirstFitTests
 	private static readonly string[] _drawnLayouts = ["root.group.inline", "root.group.stacked"];
 
 	private static UiTree Build(params UiElement[] children)
-		=> UiViewBuilder.Build(
-			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+	{
+		return UiViewBuilder.Build(new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 			new UiStack { Key = "root", Children = children });
+	}
 
 	private static IEnumerable<UiNode> Walk(UiNode node)
 	{
@@ -29,26 +30,37 @@ public class UiFirstFitTests
 		}
 	}
 
-	private static UiFirstFit Group(UiElement? fallback = null) => new()
+	private static UiFirstFit Group(UiElement? fallback = null)
 	{
-		Key = "group",
-		Fill = true,
-		Fallback = fallback,
-		Children =
-		[
-			new UiStack
-			{
-				Key = "inline",
-				Direction = UiComponentDirections.Horizontal,
-				Children = [new UiTextRun { Key = "name", Text = "Mouse" }, new UiTextRun { Key = "caption", Text = "0:35 to full" }],
-			},
-			new UiStack
-			{
-				Key = "stacked",
-				Children = [new UiTextRun { Key = "name", Text = "Mouse" }, new UiTextRun { Key = "caption", Text = "0:35 to full" }],
-			},
-		],
-	};
+		return new UiFirstFit
+		{
+			Key = "group",
+			Fill = true,
+			Fallback = fallback,
+			Children =
+			[
+				new UiStack
+				{
+					Key = "inline",
+					Direction = UiComponentDirections.Horizontal,
+					Children =
+					[
+						new UiTextRun { Key = "name", Text = "Mouse" },
+						new UiTextRun { Key = "caption", Text = "0:35 to full" }
+					]
+				},
+				new UiStack
+				{
+					Key = "stacked",
+					Children =
+					[
+						new UiTextRun { Key = "name", Text = "Mouse" },
+						new UiTextRun { Key = "caption", Text = "0:35 to full" }
+					]
+				}
+			]
+		};
+	}
 
 	[Test]
 	public void The_node_carries_its_layouts_in_order_and_no_properties_of_its_own()
@@ -99,15 +111,16 @@ public class UiFirstFitTests
 			Components = new Dictionary<string, UiVersionRange>
 			{
 				["ui.stack"] = new() { Minimum = 1, Maximum = 1 },
-				["ui.text"] = new() { Minimum = 1, Maximum = 1 },
-			},
+				["ui.text"] = new() { Minimum = 1, Maximum = 1 }
+			}
 		};
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiCapabilityNegotiator.NegotiateComponent(node, older).IsSupported, Is.False);
 			Assert.That(UiCapabilityNegotiator.NegotiateComponent(node.Fallback!, older).IsSupported, Is.True);
-			Assert.That(node.Fallback!.Properties.GetValueOrDefault("direction").ToString(), Does.Not.Contain("horizontal"));
+			Assert.That(node.Fallback!.Properties.GetValueOrDefault("direction").ToString(),
+				Does.Not.Contain("horizontal"));
 		});
 	}
 
@@ -117,20 +130,26 @@ public class UiFirstFitTests
 		Assert.Multiple(() =>
 		{
 			Assert.Throws<UiViewException>(() => Build(new UiFirstFit
-			{
-				Key = "f",
-				Children = [new UiWhen { Key = "w", Condition = () => true, Content = () => new UiStack { Key = "d" } }],
-			}), "conditional layout");
+				{
+					Key = "f",
+					Children =
+					[
+						new UiWhen { Key = "w", Condition = () => true, Content = () => new UiStack { Key = "d" } }
+					]
+				}),
+				"conditional layout");
 			Assert.Throws<UiViewException>(() => Build(new UiFirstFit
-			{
-				Key = "f",
-				Children = [new UiStack { Key = "_fallback" }],
-			}), "reserved key");
+				{
+					Key = "f",
+					Children = [new UiStack { Key = "_fallback" }]
+				}),
+				"reserved key");
 			Assert.Throws<UiViewException>(() => Build(new UiFirstFit
-			{
-				Key = "f",
-				Children = [new UiStack { Key = "a" }, new UiStack { Key = "b", Fill = true }],
-			}), "slot property on a layout");
+				{
+					Key = "f",
+					Children = [new UiStack { Key = "a" }, new UiStack { Key = "b", Fill = true }]
+				}),
+				"slot property on a layout");
 		});
 	}
 
@@ -138,12 +157,22 @@ public class UiFirstFitTests
 	public void An_input_in_the_last_layout_that_is_copied_is_rejected_naming_the_explicit_fallback_way_out()
 	{
 		var text = new UiState<string>("");
-		UiFirstFit Form(UiElement? fallback) => new()
+
+		UiFirstFit Form(UiElement? fallback)
 		{
-			Key = "form",
-			Fallback = fallback,
-			Children = [new UiStack { Key = "fields", Children = [new UiStringInput { Key = "name", Binding = Bind.To(text) }] }],
-		};
+			return new UiFirstFit
+			{
+				Key = "form",
+				Fallback = fallback,
+				Children =
+				[
+					new UiStack
+					{
+						Key = "fields", Children = [new UiStringInput { Key = "name", Binding = Bind.To(text) }]
+					}
+				]
+			};
+		}
 
 		var exception = Assert.Throws<UiViewException>(() => Build(Form(null)));
 

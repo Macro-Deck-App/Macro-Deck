@@ -17,7 +17,8 @@ internal sealed class GaugesWidgetSession : IUiSession
 	private readonly Dictionary<string, List<int>> _watched = new(StringComparer.Ordinal);
 	private readonly Lock _refreshSync = new();
 
-	public GaugesWidgetSession(UiView view,
+	public GaugesWidgetSession(
+		UiView view,
 		IReadOnlyList<GaugeConfig> gauges,
 		IReadOnlyList<UiState<GaugeFace>> faces,
 		GaugesViewStateResolver resolver,
@@ -65,11 +66,20 @@ internal sealed class GaugesWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public ValueTask DisposeAsync()
 	{

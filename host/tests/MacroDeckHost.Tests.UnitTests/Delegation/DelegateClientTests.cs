@@ -19,7 +19,7 @@ internal sealed class DelegateClientTests
 	private static readonly string[] _sceneAndVolume = ["scene", "volume"];
 	private static readonly string[] _sceneVolumeAndMuted = ["scene", "volume", "muted"];
 
-	private static readonly Uri BaseUrl = new("http://10.0.0.5:5000");
+	private static readonly Uri _baseUrl = new("http://10.0.0.5:5000");
 
 	[Test]
 	public async Task RunScriptAsync_reports_a_successful_run()
@@ -33,7 +33,7 @@ internal sealed class DelegateClientTests
 				DurationMs = 12
 			});
 
-		var result = await client.RunScriptAsync(BaseUrl,
+		var result = await client.RunScriptAsync(_baseUrl,
 			"token",
 			"script-1",
 			"client-1",
@@ -61,9 +61,9 @@ internal sealed class DelegateClientTests
 				DurationMs = 3
 			});
 
-		DelegateRunResult result = default!;
+		DelegateRunResult result = null!;
 		Assert.DoesNotThrowAsync(async () =>
-			result = await client.RunScriptAsync(BaseUrl, "token", "script-1", null, 0, null, CancellationToken.None));
+			result = await client.RunScriptAsync(_baseUrl, "token", "script-1", null, 0, null, CancellationToken.None));
 
 		Assert.Multiple(() =>
 		{
@@ -85,7 +85,7 @@ internal sealed class DelegateClientTests
 			});
 
 		Assert.ThrowsAsync<DelegateDepthExceededException>(async () =>
-			await client.RunScriptAsync(BaseUrl, "token", "script-1", null, 10, null, CancellationToken.None));
+			await client.RunScriptAsync(_baseUrl, "token", "script-1", null, 10, null, CancellationToken.None));
 	}
 
 	[Test]
@@ -101,7 +101,7 @@ internal sealed class DelegateClientTests
 				]
 			});
 
-		var scripts = await client.GetScriptsAsync(BaseUrl, "token", CancellationToken.None);
+		var scripts = await client.GetScriptsAsync(_baseUrl, "token", CancellationToken.None);
 
 		Assert.That(scripts.Select(s => (s.Id, s.Name)),
 			Is.EquivalentTo(new[] { ("s1", "Alpha"), ("s2", "Beta") }));
@@ -112,7 +112,7 @@ internal sealed class DelegateClientTests
 	{
 		using var client = CreateClient(HttpStatusCode.OK, new TokenResponse("token-value", 3600, "admin", "someone"));
 
-		var result = await client.LoginAsync(BaseUrl, "someone", "password", CancellationToken.None);
+		var result = await client.LoginAsync(_baseUrl, "someone", "password", CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -127,7 +127,7 @@ internal sealed class DelegateClientTests
 		using var client = CreateClient(HttpStatusCode.OK,
 			new GetConnectionInfoResponse { InstanceName = "OTHER-PC", Version = "1.0.0" });
 
-		var info = await client.GetConnectionInfoAsync(BaseUrl, "token", CancellationToken.None);
+		var info = await client.GetConnectionInfoAsync(_baseUrl, "token", CancellationToken.None);
 
 		Assert.That(info.InstanceName, Is.EqualTo("OTHER-PC"));
 	}
@@ -152,7 +152,13 @@ internal sealed class DelegateClientTests
 			["volume"] = 70d
 		};
 
-		var result = await client.RunScriptAsync(BaseUrl, "token", "script-1", null, 0, inputs, CancellationToken.None);
+		var result = await client.RunScriptAsync(_baseUrl,
+			"token",
+			"script-1",
+			null,
+			0,
+			inputs,
+			CancellationToken.None);
 
 		using var body = JsonDocument.Parse(handler.LastRequestBody!);
 		var sent = body.RootElement.GetProperty("inputs");
@@ -190,7 +196,7 @@ internal sealed class DelegateClientTests
 			["muted"] = true
 		};
 
-		await client.RunScriptAsync(BaseUrl, "token", "script-1", null, 1, inputs, CancellationToken.None);
+		await client.RunScriptAsync(_baseUrl, "token", "script-1", null, 1, inputs, CancellationToken.None);
 
 		using var body = JsonDocument.Parse(handler.LastRequestBody!);
 		var sent = body.RootElement.GetProperty("inputs");
@@ -233,7 +239,7 @@ internal sealed class DelegateClientTests
 				]
 			});
 
-		var script = (await client.GetScriptsAsync(BaseUrl, "token", CancellationToken.None)).Single();
+		var script = (await client.GetScriptsAsync(_baseUrl, "token", CancellationToken.None)).Single();
 
 		var declared = script.Inputs.Single();
 		Assert.Multiple(() =>
@@ -251,7 +257,7 @@ internal sealed class DelegateClientTests
 		using var client = CreateClient(HttpStatusCode.OK,
 			new GetScriptsResponse { Scripts = [new Script { Id = "s1", Name = "Alpha", Flows = "[]" }] });
 
-		var script = (await client.GetScriptsAsync(BaseUrl, "token", CancellationToken.None)).Single();
+		var script = (await client.GetScriptsAsync(_baseUrl, "token", CancellationToken.None)).Single();
 
 		Assert.That(script.Inputs, Is.Empty);
 	}
@@ -277,13 +283,23 @@ internal sealed class DelegateClientTests
 				]
 			});
 
-		var variables = await client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None);
+		var variables = await client.GetSharedVariablesAsync(_baseUrl, "token", CancellationToken.None);
 
 		Assert.That(variables,
 			Is.EqualTo(new[]
 			{
 				new DelegateSharedVariable("obs_streaming", VariableType.Boolean, "true", true, true, false),
-				new DelegateSharedVariable("volume", VariableType.Numeric, "40", true, true, true, true, 0, "%", 0, 100),
+				new DelegateSharedVariable("volume",
+					VariableType.Numeric,
+					"40",
+					true,
+					true,
+					true,
+					true,
+					0,
+					"%",
+					0,
+					100),
 				new DelegateSharedVariable("scene", VariableType.Text, string.Empty, false, false, false)
 			}));
 	}
@@ -291,14 +307,15 @@ internal sealed class DelegateClientTests
 	[TestCase(HttpStatusCode.NotFound, "application/json", "{}")]
 	[TestCase(HttpStatusCode.MethodNotAllowed, "application/json", "{}")]
 	[TestCase(HttpStatusCode.OK, "text/html", "<!doctype html><html></html>")]
-	public void GetSharedVariablesAsync_reports_a_host_from_before_sharing_as_unsupported(HttpStatusCode status,
+	public void GetSharedVariablesAsync_reports_a_host_from_before_sharing_as_unsupported(
+		HttpStatusCode status,
 		string mediaType,
 		string body)
 	{
 		using var client = new DelegateClient(new HttpClient(new StubHandler(status, body, mediaType)));
 
 		Assert.ThrowsAsync<DelegateSharingUnsupportedException>(() =>
-			client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None));
+			client.GetSharedVariablesAsync(_baseUrl, "token", CancellationToken.None));
 	}
 
 	[Test]
@@ -308,7 +325,7 @@ internal sealed class DelegateClientTests
 			"{\"error\":\"locked\"}")));
 
 		Assert.ThrowsAsync<DelegateServerErrorException>(() =>
-			client.GetSharedVariablesAsync(BaseUrl, "token", CancellationToken.None));
+			client.GetSharedVariablesAsync(_baseUrl, "token", CancellationToken.None));
 	}
 
 	[Test]
@@ -323,12 +340,17 @@ internal sealed class DelegateClientTests
 				DelegateJson.Options));
 		using var client = new DelegateClient(new HttpClient(handler));
 
-		var result = await client.SetSharedVariableAsync(BaseUrl, "token", "obs_volume", "12.5", CancellationToken.None);
+		var result = await client.SetSharedVariableAsync(_baseUrl,
+			"token",
+			"obs_volume",
+			"12.5",
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result, Is.EqualTo(new DelegateWriteResult(false, "HOST_LOCKED")));
-			Assert.That(handler.LastRequestUri, Is.EqualTo("http://10.0.0.5:5000/api/shared-variables/obs_volume/value"));
+			Assert.That(handler.LastRequestUri,
+				Is.EqualTo("http://10.0.0.5:5000/api/shared-variables/obs_volume/value"));
 			Assert.That(handler.LastRequestBody, Is.EqualTo("{\"value\":\"12.5\"}"));
 		});
 	}
@@ -356,7 +378,8 @@ internal sealed class DelegateClientTests
 
 		public string? LastRequestUri { get; private set; }
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			LastRequestUri = request.RequestUri?.ToString();

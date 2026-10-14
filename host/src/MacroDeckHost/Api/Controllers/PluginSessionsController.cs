@@ -187,8 +187,8 @@ public class PluginSessionsController : ControllerBase
 				PluginSessionCreationError.DeprecatedApiIdTooLong => ("sdk.deprecatedApis",
 					$"Each reported API id must be at most {ProtocolLimits.MaxDeprecatedApiIdLength} characters."),
 				PluginSessionCreationError.InvalidDeclaredName => ("declaredName",
-					$"The declared name must be at most {ProtocolLimits.MaxDeclaredNameLength} characters " +
-					"and must not contain control characters."),
+					$"The declared name must be at most {ProtocolLimits.MaxDeclaredNameLength} characters "
+					+ "and must not contain control characters."),
 				_ => ("capabilities", "Too many declared capabilities.")
 			};
 
@@ -232,13 +232,15 @@ public class PluginSessionsController : ControllerBase
 			return !_takeovers.IsActive(pluginId);
 		}
 
-		return _takeovers.IsActive(pluginId) &&
-			await _registrationService.Authenticate(pluginId, secret) is not null;
+		return _takeovers.IsActive(pluginId) && await _registrationService.Authenticate(pluginId, secret) is not null;
 	}
 
 	private bool IsInstalled(string pluginId)
-		=> _catalog.Discover().Any(plugin =>
-			string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0);
+	{
+		return _catalog.Discover()
+			.Any(plugin =>
+				string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0);
+	}
 
 	[HttpDelete("{sessionId}")]
 	[AllowAnonymous]

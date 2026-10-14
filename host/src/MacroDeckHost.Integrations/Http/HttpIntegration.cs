@@ -37,7 +37,10 @@ public sealed class HttpIntegration : IIntegration, IIntegrationIconProvider
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{

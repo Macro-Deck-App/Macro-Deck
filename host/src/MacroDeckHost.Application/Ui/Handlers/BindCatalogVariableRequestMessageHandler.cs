@@ -10,7 +10,8 @@ public class BindCatalogVariableRequestMessageHandler
 	private readonly IVariableBindingService _bindings;
 	private readonly SharedVariables _sharedVariables;
 
-	public BindCatalogVariableRequestMessageHandler(IVariableBindingService bindings,
+	public BindCatalogVariableRequestMessageHandler(
+		IVariableBindingService bindings,
 		SharedVariables sharedVariables)
 	{
 		_bindings = bindings;
@@ -34,7 +35,7 @@ public class BindCatalogVariableRequestMessageHandler
 		{
 			return new BindCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage),
+				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage)
 			};
 		}
 
@@ -42,8 +43,10 @@ public class BindCatalogVariableRequestMessageHandler
 
 		return new BindCatalogVariableResponse
 		{
-			Variable = VariableDtoMapper.ToDto(result.Data, true, dynamicResourceId,
-				_sharedVariables.IsShared(result.Data)),
+			Variable = VariableDtoMapper.ToDto(result.Data,
+				true,
+				dynamicResourceId,
+				_sharedVariables.IsShared(result.Data))
 		};
 	}
 }

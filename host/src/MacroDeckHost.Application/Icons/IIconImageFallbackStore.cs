@@ -11,7 +11,8 @@ public interface IIconImageFallbackStore
 	/// <paramref name="staticFrame" /> asks for its first frame alone as PNG, for a consumer that cannot
 	/// carry the whole animation.
 	/// </summary>
-	Task<FallbackIconImage?> GetOrCreate(IconEntity icon,
+	Task<FallbackIconImage?> GetOrCreate(
+		IconEntity icon,
 		string variant,
 		bool staticFrame,
 		CancellationToken cancellationToken,

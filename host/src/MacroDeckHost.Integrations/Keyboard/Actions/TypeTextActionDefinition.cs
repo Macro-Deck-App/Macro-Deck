@@ -20,14 +20,17 @@ internal sealed class TypeTextActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.MultilineText("text",
-			label: AppStrings.Integrations.Keyboard.Actions.TypeTextLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.TypeTextParameterDescription(),
-			placeholder: AppStrings.Integrations.Keyboard.Actions.TypeTextPlaceholder(),
+			AppStrings.Integrations.Keyboard.Actions.TypeTextLabel(),
+			AppStrings.Integrations.Keyboard.Actions.TypeTextParameterDescription(),
+			AppStrings.Integrations.Keyboard.Actions.TypeTextPlaceholder(),
 			required: true),
 		.. KeyboardTargetParameters.All
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

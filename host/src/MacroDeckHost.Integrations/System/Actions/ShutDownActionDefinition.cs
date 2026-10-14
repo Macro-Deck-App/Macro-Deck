@@ -19,8 +19,8 @@ internal sealed class ShutDownActionDefinition : PowerActionDefinitionBase
 	public override IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Toggle("force",
-			label: AppStrings.Integrations.System.Actions.ForceLabel(),
-			description: AppStrings.Integrations.System.Actions.ShutDown.ForceDescription(),
-			defaultValue: false)
+			AppStrings.Integrations.System.Actions.ForceLabel(),
+			AppStrings.Integrations.System.Actions.ShutDown.ForceDescription(),
+			false)
 	];
 }
