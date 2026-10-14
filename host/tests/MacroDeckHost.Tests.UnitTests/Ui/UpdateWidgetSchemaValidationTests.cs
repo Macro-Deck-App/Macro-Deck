@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Services;
@@ -138,6 +139,35 @@ public class UpdateWidgetSchemaValidationTests
 		{
 			Assert.That(response.Success, Is.True);
 			Assert.That(service.Updated, Is.Not.Null);
+		});
+	}
+
+	private const string ManualStates = "[{\"id\":\"on\",\"label\":\"On\"},{\"id\":\"off\",\"label\":\"Off\"}]";
+
+	private const string ManualMapping =
+		"{\"rules\":[{\"id\":\"r1\",\"stateId\":\"on\",\"when\":{\"kind\":\"compare\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":90}}],\"fallbackStateId\":\"off\"}";
+
+	[Test]
+	public async Task Adopting_an_action_s_states_saves_without_deleting_the_manual_mapping_rules_first()
+	{
+		var service = new RecordingWidgetService();
+		var handler = CreateHandler(service);
+		var editorPayload = "{\"stateMode\":true," +
+			"\"states\":[{\"id\":\"muted\",\"label\":\"Muted\"},{\"id\":\"unmuted\",\"label\":\"Unmuted\"}]," +
+			"\"activeStateId\":\"muted\"," +
+			$"\"stateMapping\":{ManualMapping}," +
+			"\"stateProvider\":{\"blockId\":\"b1\",\"integrationId\":\"app.macro-deck.system\",\"actionId\":\"mute-volume\"}," +
+			$"\"manualStateBackup\":{{\"states\":{ManualStates},\"stateMapping\":{ManualMapping},\"activeStateId\":\"on\"}}}}";
+
+		var response = await handler.Handle(Request(WidgetTypeIds.ActionButton, editorPayload), CancellationToken.None);
+
+		Assert.That(response.Success, Is.True);
+		var saved = JsonNode.Parse(service.Updated!.Data!)!.AsObject();
+		Assert.Multiple(() =>
+		{
+			Assert.That(saved.ContainsKey("stateMapping"), Is.False);
+			Assert.That(JsonNode.DeepEquals(saved["manualStateBackup"]!["stateMapping"], JsonNode.Parse(ManualMapping)),
+				Is.True);
 		});
 	}
 
