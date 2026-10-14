@@ -210,6 +210,14 @@ describe('artwork transition', () => {
     set src(value: string) {
       this._src = value;
     }
+
+    load(): void {
+      if (this.onload) this.onload();
+    }
+
+    fail(): void {
+      if (this.onerror) this.onerror();
+    }
   }
 
   beforeEach(() => {
@@ -227,11 +235,12 @@ describe('artwork transition', () => {
     TestBed.resetTestingModule();
   });
 
-  function imageNode(resourceId: string, transition?: string): UiNode {
+  function imageNode(resourceId: string, transition?: string, zoom?: number): UiNode {
     const properties: Record<string, unknown> = {
       [Props.Size]: { basis: 0.5 },
       [Props.Source]: { resourceId, contentHash: resourceId },
     };
+    if (zoom !== undefined) properties[Props.Zoom] = zoom;
     if (transition !== undefined) properties[Props.Transition] = transition;
     return { id: 'art', type: Types.Image, properties };
   }
@@ -242,18 +251,42 @@ describe('artwork transition', () => {
     await tick(rendered);
   }
 
-  function sources(rendered: RenderedTree): string[] {
-    return [...el(rendered).querySelectorAll('[data-node-id="art"] img')].map(img =>
-      (img as HTMLImageElement).getAttribute('src') ?? '');
+  function images(rendered: RenderedTree): HTMLImageElement[] {
+    return [...el(rendered).querySelectorAll('[data-node-id="art"] img')] as HTMLImageElement[];
   }
 
-  it('replaces the artwork immediately when the node declares no transition', async () => {
+  function sources(rendered: RenderedTree): string[] {
+    return images(rendered).map(img => img.getAttribute('src') ?? '');
+  }
+
+  function showBitmap(img: HTMLImageElement, shown: boolean): void {
+    Object.defineProperty(img, 'complete', { configurable: true, get: () => shown });
+    Object.defineProperty(img, 'naturalWidth', { configurable: true, get: () => (shown ? 64 : 0) });
+  }
+
+  it('replaces artwork that is not on screen yet at once when the node declares no transition', async () => {
     const rendered = await renderTree(imageNode('first'), withBasis(240));
+    showBitmap(images(rendered)[0], false);
     await updateTree(rendered, { root: imageNode('second') });
 
     expect(sources(rendered).length).toBe(1);
     expect(sources(rendered)[0]).toContain('second');
     expect(created.length).toBe(0);
+  });
+
+  it('keeps the outgoing artwork at its own zoom until the incoming one has loaded', async () => {
+    const rendered = await renderTree(imageNode('first', undefined, 0.9), withBasis(240));
+    showBitmap(images(rendered)[0], true);
+    await updateTree(rendered, { root: imageNode('second', undefined, 1) });
+
+    expect(sources(rendered)).toEqual([jasmine.stringContaining('first')]);
+    expect(images(rendered)[0].style.transform).toContain('scale(0.9)');
+
+    created[0].load();
+    await tick(rendered);
+
+    expect(sources(rendered)).toEqual([jasmine.stringContaining('second')]);
+    expect(images(rendered)[0].style.transform).toContain('scale(1)');
   });
 
   it('keeps the outgoing artwork until the incoming one has decoded, then promotes it', async () => {
@@ -265,7 +298,7 @@ describe('artwork transition', () => {
     expect(sources(rendered)[0]).toContain('first');
     expect(created.length).toBe(1);
 
-    created[0].onload!();
+    created[0].load();
     await tick(rendered);
 
     // Both layers, the incoming one fading in over the settled one.
@@ -284,7 +317,7 @@ describe('artwork transition', () => {
     const rendered = await renderTree(imageNode('first', 'crossfade'), withBasis(240));
     await updateTree(rendered, { root: imageNode('broken', 'crossfade') });
 
-    created[0].onerror!();
+    created[0].fail();
     await tick(rendered);
 
     // Holding the previous cover would attribute it to whatever the element now stands for.
@@ -298,12 +331,13 @@ describe('artwork transition', () => {
     await updateTree(rendered, { root: imageNode('third', 'crossfade') });
 
     // The first preload finishing must not resurrect artwork two tracks out of date.
-    created[0].onload!();
+    expect(created[0].src).toBe('');
+    created[0].load();
     await tick(rendered);
 
     expect(sources(rendered).some(src => src.includes('second'))).toBeFalse();
 
-    created[1].onload!();
+    created[1].load();
     jasmine.clock().tick(CROSSFADE_PROMOTE_MS);
     await settleFrames(rendered);
 
