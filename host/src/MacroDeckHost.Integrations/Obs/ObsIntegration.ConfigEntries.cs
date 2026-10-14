@@ -25,7 +25,7 @@ public sealed partial class ObsIntegration
 		{
 			[ObsConfigKeys.ConfigurationName] = JsonSerializer.SerializeToElement(preparation.Title),
 			[ObsConfigurationMetadata.VariableIdentityKey] = JsonSerializer.SerializeToElement(
-				ObsConfigurationMetadata.SerializeIdentity(new ObsConfigurationIdentity(preparation.Title, key))),
+				ConfigurationIdentityJson.Serialize(new ConfigurationIdentity(preparation.Title, key))),
 			[ObsConfigurationMetadata.SchemaKey] = JsonSerializer.SerializeToElement(ObsConfigurationMetadata.SchemaVersion)
 		};
 
@@ -102,6 +102,6 @@ public sealed partial class ObsIntegration
 				ObsConfigurationMetadata.SchemaVersion) &&
 			ReadIdentity(entry) is not null;
 
-	private static ObsConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
+	private static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
 		=> ConfigurationIdentityPreparation.ReadIdentity(entry, ObsConfigurationMetadata.VariableIdentityKey);
 }

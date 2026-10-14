@@ -1,7 +1,7 @@
 using System.Net.WebSockets;
 using MacroDeck.Sdk.Http;
 
-namespace MacroDeckHost.Integrations.Http;
+namespace MacroDeckHost.Integrations;
 
 internal static class IntegrationHttp
 {

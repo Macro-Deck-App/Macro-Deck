@@ -1,7 +1,6 @@
 using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
-using MacroDeckHost.Integrations.Scripts;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Delegation;

@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Delegation.Protocol;
-using MacroDeckHost.Integrations.Scripts;
 using MacroDeckHost.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;

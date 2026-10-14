@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Integrations.Http;
 using MacroDeckHost.Integrations.Streaming;
 using ILogger = Serilog.ILogger;
 

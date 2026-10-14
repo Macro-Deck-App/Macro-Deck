@@ -4,7 +4,6 @@ using MacroDeckHost.Integrations.Delegation.Protocol;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeckHost.Localization;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation;
 

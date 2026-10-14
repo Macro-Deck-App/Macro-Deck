@@ -7,7 +7,6 @@ using MacroDeckHost.Integrations.YouTube.Auth;
 using MacroDeckHost.Integrations.YouTube.Protocol;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.YouTube.Config;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube;
 

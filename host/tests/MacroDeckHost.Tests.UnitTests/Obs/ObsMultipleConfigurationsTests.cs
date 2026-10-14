@@ -146,6 +146,22 @@ internal sealed class ObsMultipleConfigurationsTests
 	}
 
 	[Test]
+	public void Stored_configuration_identities_and_keys_keep_their_persisted_shape()
+	{
+		const string stored = """{"SourceTitle":"OBS","Key":"obs"}""";
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ConfigurationIdentityJson.Serialize(new ConfigurationIdentity("OBS", "obs")), Is.EqualTo(stored));
+			Assert.That(ConfigurationIdentityJson.TryParse(stored, out var identity), Is.True);
+			Assert.That(identity, Is.EqualTo(new ConfigurationIdentity("OBS", "obs")));
+			Assert.That(ObsConfigurationMetadata.SchemaKey, Is.EqualTo("obsConfigurationSchema"));
+			Assert.That(ObsConfigurationMetadata.SchemaVersion, Is.EqualTo("multiple-v1"));
+			Assert.That(ObsConfigurationMetadata.VariableIdentityKey, Is.EqualTo("obsVariableIdentity"));
+		});
+	}
+
+	[Test]
 	public void Variable_identities_are_collision_safe_and_definitions_survive_rename()
 	{
 		var main = ConfigurationIdentityAllocator.Allocate("Main OBS",
@@ -338,7 +354,7 @@ internal sealed class ObsMultipleConfigurationsTests
 			CancellationToken.None);
 		var stored = await harness.Store.Find(entryId);
 		var identityJson = stored!.Values[ObsConfigurationMetadata.VariableIdentityKey].GetString();
-		var parsed = ObsConfigurationMetadata.TryParseIdentity(identityJson, out var identity);
+		var parsed = ConfigurationIdentityJson.TryParse(identityJson, out var identity);
 		var variables = await harness.Variables.GetByOwnerIntegration(ObsIntegration.IntegrationId);
 
 		Assert.Multiple(() =>
@@ -427,7 +443,7 @@ internal sealed class ObsMultipleConfigurationsTests
 	private static ObsRuntime Runtime(Guid id, string title, string key, ObsConnection connection)
 		=> new(id,
 			title,
-			new ObsConfigurationIdentity(title, key),
+			new ConfigurationIdentity(title, key),
 			new ObsConfigurationSettings(title.ToLowerInvariant(), 4455, null),
 			connection);
 
@@ -516,7 +532,7 @@ internal sealed class ObsMultipleConfigurationsTests
 				[ObsConfigurationMetadata.SchemaKey]
 					= JsonSerializer.SerializeToElement(ObsConfigurationMetadata.SchemaVersion),
 				[ObsConfigurationMetadata.VariableIdentityKey] = JsonSerializer.SerializeToElement(
-					ObsConfigurationMetadata.SerializeIdentity(new ObsConfigurationIdentity(title, key)))
+					ConfigurationIdentityJson.Serialize(new ConfigurationIdentity(title, key)))
 			});
 
 	private sealed class MemoryConfigStore : IIntegrationConfigStore

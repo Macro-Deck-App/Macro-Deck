@@ -2,7 +2,6 @@ using System.Buffers.Text;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.MicrosoftCalendar;
 

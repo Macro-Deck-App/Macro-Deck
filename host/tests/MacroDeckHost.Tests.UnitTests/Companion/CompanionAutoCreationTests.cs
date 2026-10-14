@@ -1,7 +1,7 @@
 using System.Text.Json;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Companion;
-using MacroDeckHost.Integrations.Obs;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
@@ -130,7 +130,7 @@ internal sealed class CompanionAutoCreationTests
 		await harness.ReportAsync("connection-1", device);
 
 		var entry = harness.Entries.Single();
-		var parsed = ObsConfigurationMetadata.TryParseIdentity(
+		var parsed = ConfigurationIdentityJson.TryParse(
 			entry.Values[CompanionConfigurationMetadata.VariableIdentityKey].GetString(),
 			out var identity);
 		var variables = await harness.Variables.GetByOwnerIntegration(IntegrationId);

@@ -3,7 +3,7 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 
-namespace MacroDeckHost.Integrations;
+namespace MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
 
 internal static class WidgetActionParameters
 {

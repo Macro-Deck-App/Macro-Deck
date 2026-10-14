@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.Variables;
+using MacroDeckHost.Integrations;
 using MacroDeckHost.Integrations.Obs;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
@@ -119,7 +120,7 @@ internal sealed class ObsVariableRefreshRequestTests
 			{
 				ObsConfigurationMetadata.SchemaKey => ObsConfigurationMetadata.SchemaVersion,
 				ObsConfigurationMetadata.VariableIdentityKey =>
-					ObsConfigurationMetadata.SerializeIdentity(new ObsConfigurationIdentity("mdfi", "mdfi")),
+					ConfigurationIdentityJson.Serialize(new ConfigurationIdentity("mdfi", "mdfi")),
 				"host" => "127.0.0.1",
 				"port" => "4455",
 				_ => null

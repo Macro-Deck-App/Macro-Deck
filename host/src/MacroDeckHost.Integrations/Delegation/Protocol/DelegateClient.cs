@@ -6,7 +6,6 @@ using System.Text.Json;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Variables;
 
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Delegation.Protocol;
 

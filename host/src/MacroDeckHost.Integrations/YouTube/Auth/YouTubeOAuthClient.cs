@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YouTube.Auth;
 

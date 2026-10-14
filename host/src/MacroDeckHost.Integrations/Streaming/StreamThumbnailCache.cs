@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Resources;
-using MacroDeckHost.Integrations.Http;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Integrations.Streaming;

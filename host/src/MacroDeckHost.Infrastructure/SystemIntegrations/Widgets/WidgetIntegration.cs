@@ -4,7 +4,6 @@ using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Actions.Options;
 using MacroDeckHost.Application.Icons;
-using MacroDeckHost.Integrations;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;

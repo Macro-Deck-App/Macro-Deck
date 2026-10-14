@@ -28,7 +28,7 @@ internal sealed class IntegrationHttpSourceGuardTests
 			.Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
 			.Where(path => !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
 			.Select(path => Path.GetRelativePath(root, path).Replace('\\', '/'))
-			.Where(relative => relative != "Http/IntegrationHttp.cs")
+			.Where(relative => relative != "IntegrationHttp.cs")
 			.Where(relative => !_libraryOwnedTransport.Contains(relative))
 			.Where(relative => _forbidden.Any(pattern => pattern.IsMatch(File.ReadAllText(Path.Combine(root, relative)))))
 			.ToList();

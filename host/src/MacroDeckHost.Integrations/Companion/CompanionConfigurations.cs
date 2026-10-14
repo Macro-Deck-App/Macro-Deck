@@ -1,5 +1,3 @@
-using MacroDeckHost.Integrations.Obs;
-
 namespace MacroDeckHost.Integrations.Companion;
 
 internal static class CompanionConfigurationMetadata
@@ -9,4 +7,4 @@ internal static class CompanionConfigurationMetadata
 	public const string VariableIdentityKey = "companionVariableIdentity";
 }
 
-internal sealed record CompanionRuntime(Guid Id, string Title, ObsConfigurationIdentity Identity);
+internal sealed record CompanionRuntime(Guid Id, string Title, ConfigurationIdentity Identity);

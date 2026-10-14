@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Scripts;
+using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Integrations.Scripts;
@@ -82,13 +83,22 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 			}
 
 			var target = scripts.GetScripts().FirstOrDefault(s => s.Id == scriptId);
-			var ownerWidgetId = target is { RunsOnWidget: true } ? WidgetActionParameters.TargetOf(context) : null;
+			var ownerWidgetId = target is { RunsOnWidget: true } ? TargetOf(context) : null;
 
 			return scripts.RunAsync(scriptId,
 				ScriptInputParameters.Collect(context.Parameters),
 				context.OriginClientId,
 				ownerWidgetId,
 				context.CancellationToken);
+		}
+
+		private static string TargetOf(ActionExecutionContext context)
+		{
+			var value = context.Parameters.TryGetValue("widget", out var raw) ? raw.ToString() ?? string.Empty : string.Empty;
+
+			return string.IsNullOrWhiteSpace(value) || WidgetTargets.IsSelf(value)
+				? context.OwnerWidgetId ?? string.Empty
+				: value;
 		}
 	}
 }

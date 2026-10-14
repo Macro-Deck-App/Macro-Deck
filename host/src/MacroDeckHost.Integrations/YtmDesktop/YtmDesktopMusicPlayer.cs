@@ -7,7 +7,6 @@ using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Localization;
 using Serilog;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.YtmDesktop;
 

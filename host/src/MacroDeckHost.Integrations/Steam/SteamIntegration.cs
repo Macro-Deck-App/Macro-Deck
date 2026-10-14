@@ -16,7 +16,6 @@ using MacroDeckHost.Platform.Applications;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.Steam;
 using WidgetStrings = MacroDeckHost.Localization.AppStrings.Widgets.Steam;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.Steam;
 

@@ -14,7 +14,6 @@ using MacroDeckHost.Integrations.AdGuardHome.Actions;
 using MacroDeckHost.Integrations.AdGuardHome.Widgets;
 using Serilog;
 using Strings = MacroDeckHost.Localization.AppStrings.Integrations.AdGuardHome;
-using MacroDeckHost.Integrations.Http;
 
 namespace MacroDeckHost.Integrations.AdGuardHome;
 
