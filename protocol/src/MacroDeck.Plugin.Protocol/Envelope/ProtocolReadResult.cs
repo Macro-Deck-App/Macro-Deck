@@ -18,8 +18,12 @@ public sealed record ProtocolReadResult
 	public ProtocolError? Error { get; init; }
 
 	public static ProtocolReadResult Success(ProtocolEnvelope envelope)
-		=> new() { Succeeded = true, Envelope = envelope };
+	{
+		return new ProtocolReadResult { Succeeded = true, Envelope = envelope };
+	}
 
 	public static ProtocolReadResult Failure(ProtocolError error, ProtocolEnvelope? envelope = null)
-		=> new() { Succeeded = false, Error = error, Envelope = envelope };
+	{
+		return new ProtocolReadResult { Succeeded = false, Error = error, Envelope = envelope };
+	}
 }

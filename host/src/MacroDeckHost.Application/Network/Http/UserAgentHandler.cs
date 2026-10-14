@@ -15,7 +15,8 @@ public sealed class UserAgentHandler : DelegatingHandler
 		}
 	}
 
-	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+	protected override Task<HttpResponseMessage> SendAsync(
+		HttpRequestMessage request,
 		CancellationToken cancellationToken)
 	{
 		if (request.Headers.UserAgent.Count == 0)

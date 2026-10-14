@@ -21,7 +21,8 @@ internal static class StreamerbotActionValues
 	}
 
 	public static bool ReadBool(IReadOnlyDictionary<string, object> parameters, string name, bool fallback = false)
-		=> parameters.GetValueOrDefault(name) switch
+	{
+		return parameters.GetValueOrDefault(name) switch
 		{
 			null => fallback,
 			bool b => b,
@@ -29,6 +30,7 @@ internal static class StreamerbotActionValues
 			string s when string.IsNullOrWhiteSpace(s) => fallback,
 			_ => fallback
 		};
+	}
 
 	public static IReadOnlyDictionary<string, object?>? ReadArguments(
 		IReadOnlyDictionary<string, object> parameters,

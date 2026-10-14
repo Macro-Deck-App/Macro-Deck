@@ -24,10 +24,15 @@ public sealed class UiSessionWorkPump : IAsyncDisposable
 		_pump = Task.Run(RunAsync);
 	}
 
-	public void Enqueue(Func<CancellationToken, Task> operation) => _operations.Write(operation);
+	public void Enqueue(Func<CancellationToken, Task> operation)
+	{
+		_operations.Write(operation);
+	}
 
 	public void EnqueueReplaceable(string key, Func<CancellationToken, Task> operation)
-		=> _operations.WriteReplaceable(key, operation);
+	{
+		_operations.WriteReplaceable(key, operation);
+	}
 
 	// Stops accepting work and waits for everything already enqueued to be written out, so a
 	// terminal message a client must see is never dropped by the shutdown that follows it.
@@ -71,34 +76,51 @@ public sealed class UiSessionWorkPump : IAsyncDisposable
 internal static class UiSessionLog
 {
 	public static void OutboundOperationFailed(ILogger logger, string sessionId, Exception exception)
-		=> logger.Error(exception, "Failed to deliver a UI session message for session '{SessionId}'", sessionId);
+	{
+		logger.Error(exception, "Failed to deliver a UI session message for session '{SessionId}'", sessionId);
+	}
 
-	public static void ProviderReportedFault(ILogger logger,
+	public static void ProviderReportedFault(
+		ILogger logger,
 		string sessionId,
 		string providerId,
 		string code,
 		string? message)
-		=> logger.Error("The UI provider '{ProviderId}' faulted session '{SessionId}' with '{Code}': {ProviderMessage}",
+	{
+		logger.Error("The UI provider '{ProviderId}' faulted session '{SessionId}' with '{Code}': {ProviderMessage}",
 			providerId,
 			sessionId,
 			code,
 			message ?? "(no message)");
+	}
 
-	public static void ProviderDeclinedOpen(ILogger logger, string sessionId, string providerId, string surfaceKind, string code)
-		=> logger.Warning("The UI provider '{ProviderId}' declined to open session '{SessionId}' for a '{SurfaceKind}' surface: {Code}",
+	public static void ProviderDeclinedOpen(
+		ILogger logger,
+		string sessionId,
+		string providerId,
+		string surfaceKind,
+		string code)
+	{
+		logger.Warning(
+			"The UI provider '{ProviderId}' declined to open session '{SessionId}' for a '{SurfaceKind}' surface: {Code}",
 			providerId,
 			sessionId,
 			surfaceKind,
 			code);
+	}
 
 	public static void ProviderReloaded(ILogger logger, string sessionId, string providerId)
-		=> logger.Information("The UI provider '{ProviderId}' was updated and reloads session '{SessionId}'",
+	{
+		logger.Information("The UI provider '{ProviderId}' was updated and reloads session '{SessionId}'",
 			providerId,
 			sessionId);
+	}
 
 	public static void ProviderCallFailed(ILogger logger, string sessionId, string operation, Exception exception)
-		=> logger.Error(exception,
+	{
+		logger.Error(exception,
 			"The UI provider for session '{SessionId}' failed during '{Operation}'",
 			sessionId,
 			operation);
+	}
 }

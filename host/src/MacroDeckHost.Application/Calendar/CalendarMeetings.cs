@@ -25,11 +25,11 @@ public static class CalendarMeetings
 		}
 
 		return snapshot.Events
-			.Where(e => !e.IsAllDay &&
-				e.MeetingUrl is not null &&
-				(string.IsNullOrEmpty(calendarKey) || e.CalendarKey == calendarKey) &&
-				e.Start - window <= now &&
-				now < e.End)
+			.Where(e => !e.IsAllDay
+				&& e.MeetingUrl is not null
+				&& (string.IsNullOrEmpty(calendarKey) || e.CalendarKey == calendarKey)
+				&& e.Start - window <= now
+				&& now < e.End)
 			.OrderBy(e => (e.Start - now).Duration())
 			.ThenBy(e => e.Start)
 			.FirstOrDefault();

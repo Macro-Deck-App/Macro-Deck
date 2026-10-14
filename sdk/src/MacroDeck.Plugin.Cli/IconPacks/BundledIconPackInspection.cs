@@ -50,7 +50,7 @@ internal static class BundledIconPackInspection
 				return File.Exists(full) ? File.OpenRead(full) : null;
 			},
 			"directory",
-			checkFiles: false);
+			false);
 	}
 
 	public static BundledIconPackInspectionResult InspectArtifact(PluginManifest manifest, string artifactPath)
@@ -77,8 +77,8 @@ internal static class BundledIconPackInspection
 			return Inspect(manifest,
 				path =>
 				{
-					if (!entries.TryGetValue(EntrypointPresence.Normalize(path), out var entry) ||
-						entry.Length > PluginArtifactLimits.MaxEntryBytes)
+					if (!entries.TryGetValue(EntrypointPresence.Normalize(path), out var entry)
+						|| entry.Length > PluginArtifactLimits.MaxEntryBytes)
 					{
 						return null;
 					}
@@ -93,7 +93,7 @@ internal static class BundledIconPackInspection
 					return buffer;
 				},
 				"artifact",
-				checkFiles: true);
+				true);
 		}
 		finally
 		{
@@ -102,7 +102,8 @@ internal static class BundledIconPackInspection
 		}
 	}
 
-	private static BundledIconPackInspectionResult Inspect(PluginManifest manifest,
+	private static BundledIconPackInspectionResult Inspect(
+		PluginManifest manifest,
 		Func<string, Stream?> open,
 		string subjectNoun,
 		bool checkFiles)
@@ -110,7 +111,8 @@ internal static class BundledIconPackInspection
 		var packs = new List<InspectedBundledIconPack>();
 		var warnings = new List<CliDiagnostic>();
 		var listed = manifest.Files is { } files
-			? new HashSet<string>(files.Select(file => EntrypointPresence.Normalize(file.Path)), StringComparer.OrdinalIgnoreCase)
+			? new HashSet<string>(files.Select(file => EntrypointPresence.Normalize(file.Path)),
+				StringComparer.OrdinalIgnoreCase)
 			: null;
 
 		foreach (var declared in manifest.BundledIconPacks ?? [])
@@ -122,8 +124,8 @@ internal static class BundledIconPackInspection
 			if (listedInFiles == false)
 			{
 				warnings.Add(new CliDiagnostic("bundled-icon-pack-not-in-files",
-					$"Bundled icon pack '{declared.Key}' declares '{declared.Path}', which is not listed in 'files'. " +
-					"The host skips a pack the signed file list does not cover."));
+					$"Bundled icon pack '{declared.Key}' declares '{declared.Path}', which is not listed in 'files'. "
+					+ "The host skips a pack the signed file list does not cover."));
 			}
 
 			IconPackArchiveReadResult? read;

@@ -19,7 +19,9 @@ namespace MacroDeck.Plugin.Testing.Tests.ConformanceTests.Support;
 internal static class WellBehavedPluginComposition
 {
 	public static PluginHostBuilder Configure(PluginHostBuilder builder)
-		=> builder
+	{
+		return builder
 			.UseMacroDeckLogging()
 			.RegisterIntegration<WellBehavedIntegration>();
+	}
 }

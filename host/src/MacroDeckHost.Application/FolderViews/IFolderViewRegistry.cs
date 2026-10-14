@@ -26,7 +26,8 @@ public interface IFolderViewRegistry
 	/// <exception cref="ArgumentException">The owner id or the descriptor's id is invalid or empty, or the
 	/// name is empty. A provider cannot collide with a built-in view: a registered id is always
 	/// <c>owner::local</c>, and no built-in id carries a separator.</exception>
-	Task<FolderViewRegistration> Register(string ownerId,
+	Task<FolderViewRegistration> Register(
+		string ownerId,
 		FolderViewDescriptor folderView,
 		CancellationToken cancellationToken = default);
 

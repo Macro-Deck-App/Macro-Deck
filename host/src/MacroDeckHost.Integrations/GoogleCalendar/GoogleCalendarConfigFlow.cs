@@ -40,13 +40,15 @@ internal sealed class GoogleCalendarConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			CredentialsStepId => SubmitCredentials(input, context),
 			AuthorizeStepId => await SubmitAuthorizeAsync(context, cancellationToken),
 			_ => ConfigFlowResult.Error(CredentialsStep(context.OAuth.RedirectUri),
 				AppStrings.Integrations.Spotify.Config.UnknownStep())
 		};
+	}
 
 	private ConfigFlowResult SubmitCredentials(IReadOnlyDictionary<string, object?> input, IConfigFlowContext context)
 	{
@@ -126,7 +128,8 @@ internal sealed class GoogleCalendarConfigFlow : IConfigFlow
 				= ConfigFlowValue.Plain((now + token.ExpiresIn).ToString("o", CultureInfo.InvariantCulture)),
 			[GoogleCalendarConfigKeys.Scope] = ConfigFlowValue.Plain(scope),
 			[GoogleCalendarConfigKeys.Email] = ConfigFlowValue.Plain(email),
-			[GoogleCalendarConfigKeys.ConnectedAt] = ConfigFlowValue.Plain(now.ToString("o", CultureInfo.InvariantCulture))
+			[GoogleCalendarConfigKeys.ConnectedAt]
+				= ConfigFlowValue.Plain(now.ToString("o", CultureInfo.InvariantCulture))
 		};
 
 		return ConfigFlowResult.Complete(string.IsNullOrWhiteSpace(email) ? GoogleCalendarIntegration.BrandName : email,
@@ -147,10 +150,13 @@ internal sealed class GoogleCalendarConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowResult Failed(IConfigFlowContext context, LocalizedText message)
-		=> ConfigFlowResult.Error(CredentialsStep(context.OAuth.RedirectUri), message);
+	{
+		return ConfigFlowResult.Error(CredentialsStep(context.OAuth.RedirectUri), message);
+	}
 
 	internal static ConfigFlowStep CredentialsStep(string redirectUri)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = CredentialsStepId,
 			Title = AppStrings.Integrations.GoogleCalendar.Config.ConnectTitle(),
@@ -193,13 +199,14 @@ internal sealed class GoogleCalendarConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text(GoogleCalendarConfigKeys.ClientId,
-					label: AppStrings.Integrations.Spotify.Config.ClientIdLabel(),
+					AppStrings.Integrations.Spotify.Config.ClientIdLabel(),
 					placeholder: AppStrings.Integrations.GoogleCalendar.Config.ClientIdPlaceholder(),
 					required: true),
 				ActionParameter.Secret(GoogleCalendarConfigKeys.ClientSecret,
-					label: AppStrings.Integrations.Spotify.Config.ClientSecretLabel(),
-					description: AppStrings.Integrations.GoogleCalendar.Config.ClientSecretDescription(),
-					required: true)
+					AppStrings.Integrations.Spotify.Config.ClientSecretLabel(),
+					AppStrings.Integrations.GoogleCalendar.Config.ClientSecretDescription(),
+					true)
 			]
 		};
+	}
 }

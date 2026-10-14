@@ -15,11 +15,17 @@ public class IntegrationEventPublisherBindingsTests
 	{
 		_index = new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache());
 		_tracker = new EventBindingTracker(_index, Serilog.Core.Logger.None);
-		_publisher = new IntegrationEventPublisher("com.hotkeys", new RecordingEventBus(), _tracker, Serilog.Core.Logger.None);
+		_publisher = new IntegrationEventPublisher("com.hotkeys",
+			new RecordingEventBus(),
+			_tracker,
+			Serilog.Core.Logger.None);
 	}
 
 	[TearDown]
-	public void TearDown() => _tracker.Dispose();
+	public void TearDown()
+	{
+		_tracker.Dispose();
+	}
 
 	[Test]
 	public async Task BindingsChanged_fires_for_the_integrations_own_events_only()
@@ -29,13 +35,13 @@ public class IntegrationEventPublisherBindingsTests
 
 		_index.ReindexAutomation(Guid.NewGuid(),
 			EventBindingTrackerTests.Flows("com.other", "scene-changed", EventBindingTrackerTests.Combo("F4")),
-			enabled: true);
+			true);
 		await _tracker.FlushAsync();
 		var raisedForOther = await raised.WaitAsync(TimeSpan.FromMilliseconds(200));
 
 		_index.ReindexAutomation(Guid.NewGuid(),
 			EventBindingTrackerTests.Flows("com.hotkeys", "hotkey-pressed", EventBindingTrackerTests.Combo("F3")),
-			enabled: true);
+			true);
 		await _tracker.FlushAsync();
 		var raisedForOwn = await raised.WaitAsync(TimeSpan.FromSeconds(5));
 
@@ -55,7 +61,7 @@ public class IntegrationEventPublisherBindingsTests
 
 		var write = Task.Run(() => _index.ReindexAutomation(Guid.NewGuid(),
 			EventBindingTrackerTests.Flows("com.hotkeys", "hotkey-pressed", EventBindingTrackerTests.Combo("F3")),
-			enabled: true));
+			true));
 		var writerReturned = await Task.WhenAny(write, Task.Delay(TimeSpan.FromSeconds(5))) == write;
 		var flush = _tracker.FlushAsync();
 		var deliveryFinished = await Task.WhenAny(flush, Task.Delay(TimeSpan.FromSeconds(5))) == flush;

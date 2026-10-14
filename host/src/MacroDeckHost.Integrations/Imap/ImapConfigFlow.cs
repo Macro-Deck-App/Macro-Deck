@@ -26,24 +26,28 @@ internal sealed class ImapConfigFlow : IConfigFlow
 	}
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(AccountStep(context)));
+	{
+		return Task.FromResult(ConfigFlowResult.Step(AccountStep(context)));
+	}
 
 	public async Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId == StepId
+	{
+		return stepId == StepId
 			? await SubmitAccountAsync(input, context, cancellationToken).ConfigureAwait(false)
 			: ConfigFlowResult.Error(AccountStep(context), Strings.UnknownStep());
+	}
 
 	private async Task<ConfigFlowResult> SubmitAccountAsync(
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
 	{
-		var name = (context as IConfigFlowEntryContext)?.EntryTitle ??
-			Read(input, ImapConfigKeys.ConfigurationName).Trim();
+		var name = (context as IConfigFlowEntryContext)?.EntryTitle
+			?? Read(input, ImapConfigKeys.ConfigurationName).Trim();
 		var preset = ImapProviderPresets.Find(Read(input, ImapConfigKeys.Provider));
 		var host = preset?.Host ?? Read(input, ImapConfigKeys.Host).Trim();
 		var port = preset?.Port ?? ImapAccountSettings.ParsePort(input.GetValueOrDefault(ImapConfigKeys.Port));
@@ -118,7 +122,7 @@ internal sealed class ImapConfigFlow : IConfigFlow
 		}
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
-			return new TestFailure(null, Strings.ConnectionTimedOut(host: settings.Host));
+			return new TestFailure(null, Strings.ConnectionTimedOut(settings.Host));
 		}
 		catch (ImapSessionException ex)
 		{
@@ -130,10 +134,11 @@ internal sealed class ImapConfigFlow : IConfigFlow
 			{
 				ImapFailure.Authentication => new TestFailure(ImapConfigKeys.Password, Strings.SignInRejected()),
 				ImapFailure.FolderNotFound => new TestFailure(ImapConfigKeys.Folder,
-					Strings.FolderNotFound(folder: settings.Folder)),
-				ImapFailure.Certificate => new TestFailure(null, Strings.CertificateFailed(host: settings.Host)),
-				_ => new TestFailure(null, Strings.ConnectionFailed(host: settings.Host,
-					port: settings.Port.ToString(CultureInfo.InvariantCulture)))
+					Strings.FolderNotFound(settings.Folder)),
+				ImapFailure.Certificate => new TestFailure(null, Strings.CertificateFailed(settings.Host)),
+				_ => new TestFailure(null,
+					Strings.ConnectionFailed(settings.Host,
+						settings.Port.ToString(CultureInfo.InvariantCulture)))
 			};
 		}
 		finally
@@ -150,10 +155,14 @@ internal sealed class ImapConfigFlow : IConfigFlow
 	}
 
 	private static bool IsHostName(string host)
-		=> host.Length > 0 && Uri.CheckHostName(host) != UriHostNameType.Unknown;
+	{
+		return host.Length > 0 && Uri.CheckHostName(host) != UriHostNameType.Unknown;
+	}
 
 	private static string Read(IReadOnlyDictionary<string, object?> input, string key)
-		=> input.GetValueOrDefault(key) as string ?? string.Empty;
+	{
+		return input.GetValueOrDefault(key) as string ?? string.Empty;
+	}
 
 	private static ConfigFlowStep AccountStep(IConfigFlowContext context)
 	{
@@ -161,7 +170,7 @@ internal sealed class ImapConfigFlow : IConfigFlow
 		if ((context as IConfigFlowEntryContext)?.EntryTitle is null)
 		{
 			fields.Add(ActionParameter.Text(ImapConfigKeys.ConfigurationName,
-				label: AppStrings.Integrations.Detail.ConfigurationNameLabel(),
+				AppStrings.Integrations.Detail.ConfigurationNameLabel(),
 				placeholder: Strings.ConfigurationNamePlaceholder(),
 				required: true));
 		}
@@ -169,51 +178,54 @@ internal sealed class ImapConfigFlow : IConfigFlow
 		fields.AddRange([
 			ActionParameter.Choice(ImapConfigKeys.Provider,
 				[
-					new ActionParameterOption { Value = ImapConfigKeys.ProviderCustom, Label = Strings.ProviderCustom() },
+					new ActionParameterOption
+						{ Value = ImapConfigKeys.ProviderCustom, Label = Strings.ProviderCustom() },
 					.. ImapProviderPresets.All.Select(preset =>
 						new ActionParameterOption { Value = preset.Id, Label = preset.Name })
 				],
-				label: Strings.ProviderLabel(),
-				description: Strings.ProviderDescription(),
-				defaultValue: ImapConfigKeys.ProviderCustom,
-				required: true),
+				Strings.ProviderLabel(),
+				Strings.ProviderDescription(),
+				ImapConfigKeys.ProviderCustom,
+				true),
 			ActionParameter.Text(ImapConfigKeys.Host,
-					label: Strings.HostLabel(),
-					description: Strings.HostDescription(),
-					placeholder: "imap.example.com",
+					Strings.HostLabel(),
+					Strings.HostDescription(),
+					"imap.example.com",
 					required: true)
 				.OnlyWhen(ImapConfigKeys.Provider, ImapConfigKeys.ProviderCustom),
 			ActionParameter.Number(ImapConfigKeys.Port,
-					label: Strings.PortLabel(),
-					description: Strings.PortDescription(),
-					min: 1,
-					max: 65535,
-					step: 1,
-					defaultValue: ImapAccountSettings.DefaultPort,
-					required: true)
+					Strings.PortLabel(),
+					Strings.PortDescription(),
+					1,
+					65535,
+					1,
+					ImapAccountSettings.DefaultPort,
+					true)
 				.OnlyWhen(ImapConfigKeys.Provider, ImapConfigKeys.ProviderCustom),
 			ActionParameter.Choice(ImapConfigKeys.Security,
 					[
-						new ActionParameterOption { Value = ImapConfigKeys.SecuritySslTls, Label = Strings.SecuritySslTls() },
-						new ActionParameterOption { Value = ImapConfigKeys.SecurityStartTls, Label = Strings.SecurityStartTls() }
+						new ActionParameterOption
+							{ Value = ImapConfigKeys.SecuritySslTls, Label = Strings.SecuritySslTls() },
+						new ActionParameterOption
+							{ Value = ImapConfigKeys.SecurityStartTls, Label = Strings.SecurityStartTls() }
 					],
-					label: Strings.SecurityLabel(),
-					description: Strings.SecurityDescription(),
-					defaultValue: ImapConfigKeys.SecuritySslTls,
-					required: true)
+					Strings.SecurityLabel(),
+					Strings.SecurityDescription(),
+					ImapConfigKeys.SecuritySslTls,
+					true)
 				.OnlyWhen(ImapConfigKeys.Provider, ImapConfigKeys.ProviderCustom),
 			ActionParameter.Text(ImapConfigKeys.Username,
-				label: Strings.UsernameLabel(),
-				description: Strings.UsernameDescription(),
+				Strings.UsernameLabel(),
+				Strings.UsernameDescription(),
 				required: true),
 			ActionParameter.Secret(ImapConfigKeys.Password,
-				label: Strings.PasswordLabel(),
-				description: Strings.PasswordDescription()),
+				Strings.PasswordLabel(),
+				Strings.PasswordDescription()),
 			ActionParameter.Text(ImapConfigKeys.Folder,
-				label: Strings.FolderLabel(),
-				description: Strings.FolderDescription(),
-				placeholder: ImapAccountSettings.DefaultFolder,
-				defaultValue: ImapAccountSettings.DefaultFolder)
+				Strings.FolderLabel(),
+				Strings.FolderDescription(),
+				ImapAccountSettings.DefaultFolder,
+				ImapAccountSettings.DefaultFolder)
 		]);
 
 		return new ConfigFlowStep

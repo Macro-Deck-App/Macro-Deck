@@ -30,7 +30,10 @@ internal sealed class TwitchChatHubTests
 	}
 
 	[TearDown]
-	public void TearDown() => _hub.Dispose();
+	public void TearDown()
+	{
+		_hub.Dispose();
+	}
 
 	[Test]
 	public void A_burst_in_one_tick_raises_one_change_per_account_and_keeps_only_the_newest_hundred()
@@ -137,9 +140,9 @@ internal sealed class TwitchChatHubTests
 	[Test]
 	public void Clearing_a_user_removes_only_their_messages()
 	{
-		_hub.Post(new ChatMessageReceived(Streamer, Message("a", chatterId: "troll")));
-		_hub.Post(new ChatMessageReceived(Streamer, Message("b", chatterId: "fan")));
-		_hub.Post(new ChatMessageReceived(Streamer, Message("c", chatterId: "troll")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("a", "troll")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("b", "fan")));
+		_hub.Post(new ChatMessageReceived(Streamer, Message("c", "troll")));
 		_hub.Tick();
 
 		_hub.Post(new ChatUserCleared(Streamer, "troll"));
@@ -241,7 +244,9 @@ internal sealed class TwitchChatHubTests
 		hub.Tick();
 		var requestedUnwatched = images.Requested.Count;
 
-		hub.Changed += (_, _) => { };
+		hub.Changed += (_, _) =>
+		{
+		};
 		hub.Tick();
 
 		Assert.Multiple(() =>
@@ -256,7 +261,9 @@ internal sealed class TwitchChatHubTests
 	{
 		var images = new FakeTwitchChatImages();
 		using var hub = new StreamChatHub(_time, Logger.None, images);
-		hub.Changed += (_, _) => { };
+		hub.Changed += (_, _) =>
+		{
+		};
 		hub.SetAccounts([new ChatAccount(Streamer, "Streamer")]);
 		hub.Tick();
 
@@ -280,7 +287,8 @@ internal sealed class TwitchChatHubTests
 	}
 
 	internal static ChatMessage Message(string id, string chatterId = "42", string? emoteId = null)
-		=> new(id,
+	{
+		return new ChatMessage(id,
 			chatterId,
 			"viewer",
 			"Viewer",
@@ -291,6 +299,7 @@ internal sealed class TwitchChatHubTests
 				:
 				[
 					new ChatFragment(ChatFragmentKind.Text, "hello "),
-					new ChatFragment(ChatFragmentKind.Emote, "Kappa", emoteId),
+					new ChatFragment(ChatFragmentKind.Emote, "Kappa", emoteId)
 				]);
+	}
 }

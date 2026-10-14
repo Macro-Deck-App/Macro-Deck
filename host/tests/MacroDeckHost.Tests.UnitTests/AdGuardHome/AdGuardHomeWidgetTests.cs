@@ -48,12 +48,15 @@ internal sealed class AdGuardHomeWidgetTests
 	}
 
 	[TearDown]
-	public void TearDown() => global::System.Globalization.CultureInfo.CurrentCulture = _culture;
+	public void TearDown()
+	{
+		global::System.Globalization.CultureInfo.CurrentCulture = _culture;
+	}
 
 	[Test]
 	public async Task The_widget_shows_the_configured_instance_with_its_statistics()
 	{
-		_hub.Replace([Connected(HomeId, "Home", queries: 1234), Connected(OfficeId, "Office", queries: 98765)]);
+		_hub.Replace([Connected(HomeId, "Home", 1234), Connected(OfficeId, "Office", 98765)]);
 
 		await using var session = await OpenAsync(new { instance = OfficeId, view = "statistics" });
 		var texts = CalendarTree.Texts(session.BuildTree().Root);
@@ -72,7 +75,7 @@ internal sealed class AdGuardHomeWidgetTests
 	[TestCase(AdGuardHomeConnection.Incompatible)]
 	public async Task An_instance_that_is_not_connected_shows_no_stale_values(AdGuardHomeConnection failure)
 	{
-		_hub.Replace([Connected(HomeId, "Home", queries: 1234)]);
+		_hub.Replace([Connected(HomeId, "Home", 1234)]);
 		await using var session = await OpenAsync(new { instance = HomeId, view = "overview" });
 		Assert.That(CalendarTree.Texts(session.BuildTree().Root), Does.Contain("1,234"));
 
@@ -90,7 +93,7 @@ internal sealed class AdGuardHomeWidgetTests
 	[Test]
 	public async Task A_widget_whose_instance_was_removed_says_so()
 	{
-		_hub.Replace([Connected(OfficeId, "Office", queries: 5)]);
+		_hub.Replace([Connected(OfficeId, "Office", 5)]);
 
 		await using var session = await OpenAsync(new { instance = HomeId });
 
@@ -116,14 +119,17 @@ internal sealed class AdGuardHomeWidgetTests
 		CalendarTree.Press(session, Button(session, "pause-1h"));
 
 		await CalendarTree.WaitForAsync(() => _commands.Count == 1, "no command was sent");
-		Assert.That(_commands.Single(), Is.EqualTo((OfficeId,
-			new AdGuardHomeCommand(AdGuardHomeCommandKind.PauseProtection, TimeSpan.FromHours(1)))));
+		Assert.That(_commands.Single(),
+			Is.EqualTo((OfficeId,
+				new AdGuardHomeCommand(AdGuardHomeCommandKind.PauseProtection, TimeSpan.FromHours(1)))));
 	}
 
 	[Test]
 	public async Task A_paused_instance_offers_to_enable_protection_and_counts_down()
 	{
-		_hub.Replace([Connected(HomeId, "Home") with { ProtectionEnabled = false, DisabledUntil = _time.Now.AddMinutes(5) }]);
+		_hub.Replace([
+			Connected(HomeId, "Home") with { ProtectionEnabled = false, DisabledUntil = _time.Now.AddMinutes(5) }
+		]);
 		await using var session = await OpenAsync(new { instance = HomeId });
 
 		CalendarTree.Press(session, Button(session, "enable"));
@@ -145,7 +151,8 @@ internal sealed class AdGuardHomeWidgetTests
 		await using var session = await OpenAsync(new { instance = HomeId, durations = new[] { "5m" } });
 		var origin = new RecordingOrigin();
 
-		session.Dispatch(new UiEvent { NodeId = Button(session, "pause-5m").Id, Name = UiComponentEvents.Press }, origin);
+		session.Dispatch(new UiEvent { NodeId = Button(session, "pause-5m").Id, Name = UiComponentEvents.Press },
+			origin);
 
 		await CalendarTree.WaitForAsync(() => origin.Failures.Count == 1, "the failure was not reported to the client");
 		Assert.That(CalendarTree.Resolve(origin.Failures.Single()), Does.Contain("did not answer in time"));
@@ -178,7 +185,8 @@ internal sealed class AdGuardHomeWidgetTests
 		CalendarTree.Press(session, Button(session, "pause-5m"));
 
 		await CalendarTree.WaitForAsync(() => CalendarTree.Texts(session.BuildTree().Root)
-			.Any(text => text.Contains("Sign-in rejected", StringComparison.Ordinal)), "the failure was not shown");
+				.Any(text => text.Contains("Sign-in rejected", StringComparison.Ordinal)),
+			"the failure was not shown");
 	}
 
 	[Test]
@@ -187,20 +195,22 @@ internal sealed class AdGuardHomeWidgetTests
 		_hub.Replace([Connected(HomeId, "Home"), Connected(OfficeId, "Office")]);
 
 		await using var session = (await _provider.CreateSessionAsync(new UiSessionRequest
-		{
-			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Config,
-				SessionMode = UiSessionModes.Exclusive,
-				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				Surface = new UiSurface
 				{
-					[UiConfigSurfaceAttributes.EntryPoint] = JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
-					[UiConfigSurfaceAttributes.WidgetType] =
-						JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
+					Kind = UiSurfaceKinds.Config,
+					SessionMode = UiSessionModes.Exclusive,
+					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+					{
+						[UiConfigSurfaceAttributes.EntryPoint]
+							= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
+						[UiConfigSurfaceAttributes.WidgetType] =
+							JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId)
+					}
 				},
+				UiModelVersion = 1
 			},
-			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+			CancellationToken.None))!;
 
 		var json = JsonSerializer.Serialize(session.BuildTree().Root);
 		Assert.Multiple(() =>
@@ -211,13 +221,15 @@ internal sealed class AdGuardHomeWidgetTests
 	}
 
 	private static AdGuardHomeSnapshot Connected(string entryId, string title, long queries = 100)
-		=> new(entryId, title, title.ToLowerInvariant(), AdGuardHomeConnection.Connected)
+	{
+		return new AdGuardHomeSnapshot(entryId, title, title.ToLowerInvariant(), AdGuardHomeConnection.Connected)
 		{
 			ProtectionEnabled = true,
 			DnsRunning = true,
 			Version = "v0.107.57",
-			Statistics = new AdGuardHomeStatistics(queries, queries / 4, 1, 2, 3, 4.2),
+			Statistics = new AdGuardHomeStatistics(queries, queries / 4, 1, 2, 3, 4.2)
 		};
+	}
 
 	private sealed class RecordingOrigin : IUiEventOrigin
 	{
@@ -248,18 +260,25 @@ internal sealed class AdGuardHomeWidgetTests
 		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(ModalResult.FromCancellation<T>());
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
 	}
 
 	private async Task<IUiSession> OpenAsync(object data, Guid? widgetId = null)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
+			[UiWidgetSurfaceAttributes.WidgetType]
+				= JsonSerializer.SerializeToElement(AdGuardHomeWidgetType.QualifiedId),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
 		};
 
 		if (widgetId is { } id)
@@ -268,16 +287,22 @@ internal sealed class AdGuardHomeWidgetTests
 		}
 
 		return (await _provider.CreateSessionAsync(new UiSessionRequest
-		{
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
-			UiModelVersion = 1,
-		}, CancellationToken.None))!;
+			{
+				Surface = new UiSurface
+					{ Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
+				UiModelVersion = 1
+			},
+			CancellationToken.None))!;
 	}
 
 	private static UiNode Button(IUiSession session, string key)
-		=> CalendarTree.Flatten(session.BuildTree().Root)
+	{
+		return CalendarTree.Flatten(session.BuildTree().Root)
 			.First(node => node.Id.EndsWith("." + key, StringComparison.Ordinal) && CalendarTree.IsPressable(node));
+	}
 
 	private static List<string> Buttons(UiNode root)
-		=> [.. CalendarTree.Flatten(root).Where(CalendarTree.IsPressable).Select(node => node.Id)];
+	{
+		return [.. CalendarTree.Flatten(root).Where(CalendarTree.IsPressable).Select(node => node.Id)];
+	}
 }

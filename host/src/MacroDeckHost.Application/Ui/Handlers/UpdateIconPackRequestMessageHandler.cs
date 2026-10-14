@@ -16,7 +16,8 @@ public class UpdateIconPackRequestMessageHandler
 	private readonly IIconPackCache _iconPackCache;
 	private readonly IIconPackOwnerRegistry _ownerRegistry;
 
-	public UpdateIconPackRequestMessageHandler(IIconPackService iconPackService,
+	public UpdateIconPackRequestMessageHandler(
+		IIconPackService iconPackService,
 		IIconPackCache iconPackCache,
 		IIconPackOwnerRegistry ownerRegistry)
 	{
@@ -25,7 +26,8 @@ public class UpdateIconPackRequestMessageHandler
 		_ownerRegistry = ownerRegistry;
 	}
 
-	public async ValueTask<UpdateIconPackResponse> Handle(UpdateIconPackRequest request,
+	public async ValueTask<UpdateIconPackResponse> Handle(
+		UpdateIconPackRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(request.Id, out var packId))

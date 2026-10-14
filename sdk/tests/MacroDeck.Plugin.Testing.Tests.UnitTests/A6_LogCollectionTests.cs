@@ -10,12 +10,14 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// genuinely times out rather than hanging.
 /// </summary>
 [TestFixture]
-public class A6_LogCollectionTests
+public class A6LogCollectionTests
 {
 	[Test]
 	public async Task Log_collection_preserves_structure_and_filters_correctly()
 	{
-		await using var harness = PluginTestHarness.Create(_ => { });
+		await using var harness = PluginTestHarness.Create(_ =>
+		{
+		});
 
 		var logger = harness.Services.GetRequiredService<ILogger>()
 			.ForContext(Constants.SourceContextPropertyName, "A6.Category");
@@ -74,7 +76,9 @@ public class A6_LogCollectionTests
 	[Test]
 	public async Task WaitForAsync_throws_when_the_text_never_appears()
 	{
-		await using var harness = PluginTestHarness.Create(_ => { });
+		await using var harness = PluginTestHarness.Create(_ =>
+		{
+		});
 
 		var exception = Assert.ThrowsAsync<PluginTestTimeoutException>(async () => await harness.Logs.WaitForAsync(
 			logEvent => logEvent.Message.Contains("never going to appear", StringComparison.Ordinal),

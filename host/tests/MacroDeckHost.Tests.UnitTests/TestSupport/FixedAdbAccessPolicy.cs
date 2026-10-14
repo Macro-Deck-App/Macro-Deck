@@ -10,11 +10,19 @@ internal sealed class FixedAdbAccessPolicy(PluginAdbAccess access = PluginAdbAcc
 	public List<AdbSettings> Refreshed { get; } = [];
 
 	public Task<PluginAdbAccess> EvaluateAsync(string pluginId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(Access);
+	{
+		return Task.FromResult(Access);
+	}
 
 	public bool Grantable { get; set; } = true;
 
-	public void Refresh(AdbSettings settings) => Refreshed.Add(settings);
+	public void Refresh(AdbSettings settings)
+	{
+		Refreshed.Add(settings);
+	}
 
-	public bool CanBeGranted(string pluginId) => Grantable;
+	public bool CanBeGranted(string pluginId)
+	{
+		return Grantable;
+	}
 }

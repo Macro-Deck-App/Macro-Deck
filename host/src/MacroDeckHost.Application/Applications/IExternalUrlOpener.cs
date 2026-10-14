@@ -24,10 +24,10 @@ public static class ExternalUrls
 	{
 		url = string.Empty;
 
-		if (string.IsNullOrWhiteSpace(candidate) ||
-			!Uri.TryCreate(candidate.Trim(), UriKind.Absolute, out var uri) ||
-			(uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) ||
-			string.IsNullOrEmpty(uri.Host))
+		if (string.IsNullOrWhiteSpace(candidate)
+			|| !Uri.TryCreate(candidate.Trim(), UriKind.Absolute, out var uri)
+			|| uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps
+			|| string.IsNullOrEmpty(uri.Host))
 		{
 			return false;
 		}

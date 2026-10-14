@@ -6,8 +6,10 @@ internal sealed class ComponentSet
 
 	public IEnumerable<Component> All => _components.Values;
 
-	public Component? Find(Ecosystem ecosystem, string name) =>
-		_components.GetValueOrDefault(Component.KeyOf(ecosystem, name));
+	public Component? Find(Ecosystem ecosystem, string name)
+	{
+		return _components.GetValueOrDefault(Component.KeyOf(ecosystem, name));
+	}
 
 	public void Add(Component component)
 	{
@@ -21,5 +23,8 @@ internal sealed class ComponentSet
 		}
 	}
 
-	public void Remove(Component component) => _components.Remove(component.Key);
+	public void Remove(Component component)
+	{
+		_components.Remove(component.Key);
+	}
 }

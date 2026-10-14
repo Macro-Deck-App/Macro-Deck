@@ -26,7 +26,18 @@ internal static class SoundPadTestSupport
 		}
 	}
 
-	public static SoundPadSound Sound(int index, string title, string? path = null, DateTime? lastPlayedOn = null,
+	public static SoundPadSound Sound(
+		int index,
+		string title,
+		string? path = null,
+		DateTime? lastPlayedOn = null,
 		string? artist = null)
-		=> new(index, title, artist, path ?? $@"C:\Sounds\{title}.mp3", TimeSpan.FromSeconds(3), lastPlayedOn);
+	{
+		return new SoundPadSound(index,
+			title,
+			artist,
+			path ?? $@"C:\Sounds\{title}.mp3",
+			TimeSpan.FromSeconds(3),
+			lastPlayedOn);
+	}
 }

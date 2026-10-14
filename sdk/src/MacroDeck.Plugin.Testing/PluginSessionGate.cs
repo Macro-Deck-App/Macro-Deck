@@ -35,7 +35,7 @@ public sealed class PluginSessionGate
 	/// <see cref="MacroDeckTestHostOptions.SessionCreation" />, so a host behaves exactly as it did
 	/// before this type existed unless a test opts into <see cref="Held" />.
 	/// </summary>
-	public static PluginSessionGate Open { get; } = new(open: true);
+	public static PluginSessionGate Open { get; } = new(true);
 
 	/// <summary>
 	/// Returns a new gate that refuses every <c>POST /api/plugins/sessions</c> request with a
@@ -44,7 +44,10 @@ public sealed class PluginSessionGate
 	/// <see cref="Open" />, this is not a shared singleton: every call returns a fresh, independent
 	/// instance, so one test releasing its gate can never affect another's.
 	/// </summary>
-	public static PluginSessionGate Held() => new(open: false);
+	public static PluginSessionGate Held()
+	{
+		return new PluginSessionGate(false);
+	}
 
 	/// <summary>Whether a session request is currently let through.</summary>
 	public bool IsOpen => _open;

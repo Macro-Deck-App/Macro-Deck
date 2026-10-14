@@ -22,13 +22,20 @@ public class ConfigFlowCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.ConfigFlow,
 			LocalId = localId,
@@ -39,9 +46,13 @@ public class ConfigFlowCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static ConfigFlowOAuthContextDto Oauth(string? code = null)
-		=> new() { RedirectUri = "http://127.0.0.1:9696/callback", State = "state-1", AuthorizationCode = code };
+	{
+		return new ConfigFlowOAuthContextDto
+			{ RedirectUri = "http://127.0.0.1:9696/callback", State = "state-1", AuthorizationCode = code };
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()
@@ -61,15 +72,17 @@ public class ConfigFlowCapabilityHandlerTests
 
 	[Test]
 	public void No_provider_declares_nothing()
-		=> Assert.That(new ConfigFlowCapabilityHandler([], new PluginConfigFlowSessions(TimeProvider.System))
+	{
+		Assert.That(new ConfigFlowCapabilityHandler([], new PluginConfigFlowSessions(TimeProvider.System))
 				.DeclareCapabilities(),
 			Is.Empty);
+	}
 
 	[Test]
 	public async Task Describe_reports_allows_multiple_configurations()
 	{
 		var integration
-			= new TestConfigFlowIntegration(() => new TestConfigFlow(), allowsMultipleConfigurations: false);
+			= new TestConfigFlowIntegration(() => new TestConfigFlow(), false);
 		var handler = new ConfigFlowCapabilityHandler([integration], new PluginConfigFlowSessions(TimeProvider.System));
 
 		var result = await handler.InvokeAsync(
@@ -117,11 +130,20 @@ public class ConfigFlowCapabilityHandlerTests
 
 		public bool RequiresConfiguration => false;
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public IConfigFlow CreateConfigFlow() => new TestConfigFlow();
+		public IConfigFlow CreateConfigFlow()
+		{
+			return new TestConfigFlow();
+		}
 	}
 
 	[Test]
@@ -130,16 +152,16 @@ public class ConfigFlowCapabilityHandlerTests
 		var flow = new TestConfigFlow
 		{
 			ResultToReturn = ConfigFlowResult.Step(new ConfigFlowStep
-				{ StepId = "one", Fields = [ActionParameter.Text("name")] })
-		};
-		flow.SubmitOverride = (stepId, input, _) => stepId switch
-		{
-			"one" => Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+				{ StepId = "one", Fields = [ActionParameter.Text("name")] }),
+			SubmitOverride = (stepId, input, _) => stepId switch
 			{
-				StepId = "two", Fields = [ActionParameter.Text("email")]
-			})),
-			"two" => Task.FromResult(ConfigFlowResult.Complete("Done")),
-			_ => throw new InvalidOperationException()
+				"one" => Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep
+				{
+					StepId = "two", Fields = [ActionParameter.Text("email")]
+				})),
+				"two" => Task.FromResult(ConfigFlowResult.Complete("Done")),
+				_ => throw new InvalidOperationException()
+			}
 		};
 
 		var createCount = 0;

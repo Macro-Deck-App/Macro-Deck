@@ -12,9 +12,14 @@ public static class PluginId
 {
 	public const int MaxLength = MacroDeckId.MaxOwnerIdLength;
 
-	public static bool IsValid(string? pluginId) => MacroDeckId.IsValidOwnerId(pluginId, OwnerIdKind.Package);
+	public static bool IsValid(string? pluginId)
+	{
+		return MacroDeckId.IsValidOwnerId(pluginId, OwnerIdKind.Package);
+	}
 
 	/// <summary>Validates and, on failure, explains why in a sentence fit for a protocol error detail.</summary>
 	public static bool TryValidate(string? pluginId, out string? error)
-		=> MacroDeckId.TryValidateOwnerId(pluginId, OwnerIdKind.Package, out error);
+	{
+		return MacroDeckId.TryValidateOwnerId(pluginId, OwnerIdKind.Package, out error);
+	}
 }

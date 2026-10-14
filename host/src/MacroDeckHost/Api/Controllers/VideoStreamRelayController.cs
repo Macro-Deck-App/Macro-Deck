@@ -65,8 +65,7 @@ public sealed class VideoStreamRelayController(
 			return NotFound();
 		}
 
-		using var linked = CancellationTokenSource.CreateLinkedTokenSource(
-			clientAborted,
+		using var linked = CancellationTokenSource.CreateLinkedTokenSource(clientAborted,
 			lease.Aborted,
 			lifetime.ApplicationStopping);
 		var ct = linked.Token;
@@ -140,13 +139,12 @@ public sealed class VideoStreamRelayController(
 		var mediaType = contentHeaders.ContentType?.MediaType;
 		var encoding = contentHeaders.ContentEncoding;
 		var badEncoding = encoding.Any(value => !string.Equals(value, "identity", StringComparison.OrdinalIgnoreCase));
-		if (badEncoding || (rawContentType is not null && mediaType is null))
+		if (badEncoding || rawContentType is not null && mediaType is null)
 		{
 			return StatusCode(StatusCodes.Status502BadGateway);
 		}
 
-		var kind = VideoStreamRelayContent.Classify(
-			lease.Transport,
+		var kind = VideoStreamRelayContent.Classify(lease.Transport,
 			mediaType,
 			VideoStreamRelayContent.IsPlaylistPath(effective.AbsolutePath));
 		if (kind == VideoStreamRelayContentKind.Rejected)
@@ -367,9 +365,9 @@ public sealed class VideoStreamRelayController(
 			}
 
 			response.Dispose();
-			if (redirects >= MaxRedirects ||
-				!Uri.TryCreate(current, location.OriginalString, out var next) ||
-				!SameOrigin(next, pinned))
+			if (redirects >= MaxRedirects
+				|| !Uri.TryCreate(current, location.OriginalString, out var next)
+				|| !SameOrigin(next, pinned))
 			{
 				return new Fetch(null, current);
 			}
@@ -383,8 +381,8 @@ public sealed class VideoStreamRelayController(
 		pathAndQuery = string.Empty;
 		var encoded = Request.Path.ToUriComponent();
 		var prefix = VideoStreamRelay.PathPrefix;
-		if (encoded.Length < prefix.Length + token.Length ||
-			!encoded.AsSpan(prefix.Length).StartsWith(token, StringComparison.Ordinal))
+		if (encoded.Length < prefix.Length + token.Length
+			|| !encoded.AsSpan(prefix.Length).StartsWith(token, StringComparison.Ordinal))
 		{
 			return false;
 		}
@@ -430,19 +428,25 @@ public sealed class VideoStreamRelayController(
 	}
 
 	private static bool IsTokenShape(string token)
-		=> token.Length == TokenLength && token.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
+	{
+		return token.Length == TokenLength && token.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
+	}
 
 	private static bool IsRedirect(HttpStatusCode status)
-		=> status is HttpStatusCode.MovedPermanently
+	{
+		return status is HttpStatusCode.MovedPermanently
 			or HttpStatusCode.Found
 			or HttpStatusCode.SeeOther
 			or HttpStatusCode.TemporaryRedirect
 			or HttpStatusCode.PermanentRedirect;
+	}
 
 	private static bool SameOrigin(Uri candidate, Uri pinned)
-		=> candidate.Scheme == pinned.Scheme &&
-			candidate.Port == pinned.Port &&
-			string.Equals(candidate.Host, pinned.Host, StringComparison.OrdinalIgnoreCase);
+	{
+		return candidate.Scheme == pinned.Scheme
+			&& candidate.Port == pinned.Port
+			&& string.Equals(candidate.Host, pinned.Host, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private readonly record struct Fetch(HttpResponseMessage? Response, Uri Effective);
 }

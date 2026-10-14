@@ -11,7 +11,7 @@ internal static class StreamChatWidgetSample
 	[
 		(Strings.SampleChatter1, Strings.SampleMessage1),
 		(Strings.SampleChatter2, Strings.SampleMessage2),
-		(Strings.SampleChatter3, Strings.SampleMessage3),
+		(Strings.SampleChatter3, Strings.SampleMessage3)
 	];
 
 	public static StreamChatViewState Build(string? culture, string separator, StreamChatLineLayout? layout = null)
@@ -32,7 +32,7 @@ internal static class StreamChatWidgetSample
 					[],
 					[new ChatFragment(ChatFragmentKind.Text, message)]),
 				separator,
-				images: null,
+				null,
 				layout));
 		}
 

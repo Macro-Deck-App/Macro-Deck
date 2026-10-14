@@ -15,7 +15,8 @@ public class GetApplicationFocusCapabilityRequestMessageHandler
 		_watcher = watcher;
 	}
 
-	public ValueTask<GetApplicationFocusCapabilityResponse> Handle(GetApplicationFocusCapabilityRequest request,
+	public ValueTask<GetApplicationFocusCapabilityResponse> Handle(
+		GetApplicationFocusCapabilityRequest request,
 		CancellationToken cancellationToken)
 	{
 		var response = new GetApplicationFocusCapabilityResponse

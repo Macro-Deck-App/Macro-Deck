@@ -37,38 +37,59 @@ public static class IconImportFiles
 			[IconAppearanceTraits.Animated] = (IconAppearanceTraits.Motion, IconAppearanceTraits.Animated)
 		};
 
-	public static bool IsSupportedImage(string fileName) => _imageExtensions.Contains(Path.GetExtension(fileName));
+	public static bool IsSupportedImage(string fileName)
+	{
+		return _imageExtensions.Contains(Path.GetExtension(fileName));
+	}
 
 	public static bool IsLottieContainer(string fileName)
-		=> Path.GetExtension(fileName).Equals(LottieExtension, StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(fileName).Equals(LottieExtension, StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static bool IsLottieJson(string fileName)
-		=> Path.GetExtension(fileName).Equals(LottieJsonExtension, StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(fileName).Equals(LottieJsonExtension, StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static bool IsSupportedImportEntry(string fileName)
-		=> IsSupportedImage(fileName) || IsLottieContainer(fileName);
+	{
+		return IsSupportedImage(fileName) || IsLottieContainer(fileName);
+	}
 
 	public static bool IsImportableIcon(string fileName)
-		=> IsSupportedImportEntry(fileName) || IsLottieJson(fileName);
+	{
+		return IsSupportedImportEntry(fileName) || IsLottieJson(fileName);
+	}
 
 	public static bool IsUploadedIcon(string fileName)
-		=> CarriesDirectory(fileName)
+	{
+		return CarriesDirectory(fileName)
 			? IsSupportedImportEntry(fileName)
 			: IsImportableIcon(fileName);
+	}
 
 	public static bool CarriesDirectory(string fileName)
-		=> fileName.Contains('/', StringComparison.Ordinal) || fileName.Contains('\\', StringComparison.Ordinal);
+	{
+		return fileName.Contains('/', StringComparison.Ordinal) || fileName.Contains('\\', StringComparison.Ordinal);
+	}
 
 	public static bool IsAppIconSource(string fileName)
-		=> _appIconSourceExtensions.Contains(Path.GetExtension(TrimTrailingSeparators(fileName)));
+	{
+		return _appIconSourceExtensions.Contains(Path.GetExtension(TrimTrailingSeparators(fileName)));
+	}
 
 	public static bool IsIconDropSource(string fileName)
-		=> IsSupportedImportEntry(fileName) || IsAppIconSource(fileName);
+	{
+		return IsSupportedImportEntry(fileName) || IsAppIconSource(fileName);
+	}
 
 	public static bool IsFolderImportEntry(string fileName)
-		=> IsSupportedImportEntry(fileName) ||
-			IsPackFile(fileName) ||
-			_sweepableAppIconExtensions.Contains(Path.GetExtension(TrimTrailingSeparators(fileName)));
+	{
+		return IsSupportedImportEntry(fileName)
+			|| IsPackFile(fileName)
+			|| _sweepableAppIconExtensions.Contains(Path.GetExtension(TrimTrailingSeparators(fileName)));
+	}
 
 	public static string TrimTrailingSeparators(string path)
 	{
@@ -76,22 +97,35 @@ public static class IconImportFiles
 		return trimmed.Length == 0 ? path : trimmed;
 	}
 
-	public static bool IsArchive(string fileName) => _archiveExtensions.Contains(Path.GetExtension(fileName));
+	public static bool IsArchive(string fileName)
+	{
+		return _archiveExtensions.Contains(Path.GetExtension(fileName));
+	}
 
 	public static bool IsStreamDeckIconPack(string fileName)
-		=> Path.GetExtension(fileName).Equals(".streamdeckiconpack", StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(fileName).Equals(".streamdeckiconpack", StringComparison.OrdinalIgnoreCase);
+	}
 
 	public static bool IsTouchPortalIconPack(string fileName)
-		=> Path.GetExtension(fileName).Equals(".tpi", StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(fileName).Equals(".tpi", StringComparison.OrdinalIgnoreCase);
+	}
 
 	public const string MacroDeckIconPackExtension = ".macroDeckIconPack";
 
 	public static bool IsMacroDeckIconPack(string fileName)
-		=> Path.GetExtension(fileName).Equals(MacroDeckIconPackExtension, StringComparison.OrdinalIgnoreCase);
+	{
+		return Path.GetExtension(fileName).Equals(MacroDeckIconPackExtension, StringComparison.OrdinalIgnoreCase);
+	}
 
-	public static bool IsPackFile(string fileName) => IsArchive(fileName) || IsMacroDeckIconPack(fileName);
+	public static bool IsPackFile(string fileName)
+	{
+		return IsArchive(fileName) || IsMacroDeckIconPack(fileName);
+	}
 
-	public static bool TryParseAppearanceName(string fileName,
+	public static bool TryParseAppearanceName(
+		string fileName,
 		out string baseName,
 		out IReadOnlyDictionary<string, string> traits)
 	{
@@ -126,7 +160,10 @@ public static class IconImportFiles
 		return true;
 	}
 
-	public static string AppearanceBaseNameOf(string fileName) => Path.GetFileNameWithoutExtension(FileNameOf(fileName));
+	public static string AppearanceBaseNameOf(string fileName)
+	{
+		return Path.GetFileNameWithoutExtension(FileNameOf(fileName));
+	}
 
 	public static string DirectoryOf(string fileName)
 	{
@@ -135,7 +172,8 @@ public static class IconImportFiles
 		return separator < 0 ? string.Empty : normalized[..separator];
 	}
 
-	public static IReadOnlyList<IconImportGroup<T>> GroupAppearanceFiles<T>(IReadOnlyList<T> items,
+	public static IReadOnlyList<IconImportGroup<T>> GroupAppearanceFiles<T>(
+		IReadOnlyList<T> items,
 		Func<T, string> directoryOf,
 		Func<T, string> fileNameOf)
 	{
@@ -163,8 +201,8 @@ public static class IconImportFiles
 		var consumed = new bool[items.Count];
 		for (var index = 0; index < items.Count; index++)
 		{
-			if (appearanceNames[index] is not { } name ||
-				!baseIndexes.TryGetValue((directoryOf(items[index]), name.BaseName), out var baseIndex))
+			if (appearanceNames[index] is not { } name
+				|| !baseIndexes.TryGetValue((directoryOf(items[index]), name.BaseName), out var baseIndex))
 			{
 				continue;
 			}
@@ -176,8 +214,8 @@ public static class IconImportFiles
 			}
 
 			var key = IconAppearanceTraits.ToKey(name.Traits);
-			if (appearances.Count < IconAppearanceTraits.MaxAppearancesPerIcon &&
-				appearances.TrueForAll(appearance => IconAppearanceTraits.ToKey(appearance.Traits) != key))
+			if (appearances.Count < IconAppearanceTraits.MaxAppearancesPerIcon
+				&& appearances.TrueForAll(appearance => IconAppearanceTraits.ToKey(appearance.Traits) != key))
 			{
 				appearances.Add(new IconImportAppearance<T>(items[index], name.Traits));
 				consumed[index] = true;

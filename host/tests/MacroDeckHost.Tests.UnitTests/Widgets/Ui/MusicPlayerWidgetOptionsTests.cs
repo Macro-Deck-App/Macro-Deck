@@ -4,7 +4,6 @@ using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Transport.Messages.MusicPlayer;
-using MacroDeckHost.Tests.UnitTests.Delegation;
 using MacroDeckHost.Widgets.MusicPlayer;
 using Serilog;
 
@@ -22,7 +21,10 @@ public class MusicPlayerWidgetOptionsTests
 	private MusicPlayerVariants _variants = null!;
 
 	[SetUp]
-	public void SetUp() => _variants = new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry()));
+	public void SetUp()
+	{
+		_variants = new MusicPlayerVariants(new MusicPlayerPollNudge(new FakeIntegrationRegistry()));
+	}
 
 	[Test]
 	public async Task Two_widgets_on_one_instance_each_show_the_state_and_cover_of_their_own_options()
@@ -50,7 +52,7 @@ public class MusicPlayerWidgetOptionsTests
 	[Test]
 	public async Task A_widget_that_stored_no_values_shows_the_instance_with_its_declared_defaults()
 	{
-		await Resolve(Resolver(), Config(AnyApp, optionsJson: null));
+		await Resolve(Resolver(), Config(AnyApp, null));
 
 		Assert.That(_variants.Demanded(), Is.EqualTo(new[] { Variant(10) }));
 	}
@@ -58,7 +60,7 @@ public class MusicPlayerWidgetOptionsTests
 	[Test]
 	public async Task A_new_variant_shows_loading_until_its_first_read_instead_of_the_plain_instance()
 	{
-		_stateCache.Record(AnyApp, Playing("Current app", artworkId: null));
+		_stateCache.Record(AnyApp, Playing("Current app", null));
 
 		var shown = await Resolve(Resolver(), Config(AnyApp, """{"cycleSeconds":10}"""));
 
@@ -68,11 +70,11 @@ public class MusicPlayerWidgetOptionsTests
 	[Test]
 	public async Task The_active_player_and_instances_without_options_keep_showing_the_plain_instance()
 	{
-		_stateCache.Record(AnyApp, Playing("Current app", artworkId: null));
-		_stateCache.Record(Spotify, Playing("Song", artworkId: null));
+		_stateCache.Record(AnyApp, Playing("Current app", null));
+		_stateCache.Record(Spotify, Playing("Song", null));
 		_stateCache.ActiveInstanceId = AnyApp;
 
-		var active = await Resolve(Resolver(), Config(instanceId: null, """{"cycleSeconds":10}"""));
+		var active = await Resolve(Resolver(), Config(null, """{"cycleSeconds":10}"""));
 		var plain = await Resolve(Resolver(), Config(Spotify, """{"cycleSeconds":10}"""));
 
 		Assert.Multiple(() =>
@@ -119,32 +121,41 @@ public class MusicPlayerWidgetOptionsTests
 		Assert.That(reordered, Is.EqualTo(first));
 	}
 
-	private static string Key(double seconds) => Variant(seconds).Key;
+	private static string Key(double seconds)
+	{
+		return Variant(seconds).Key;
+	}
 
 	private static MusicPlayerVariant Variant(double seconds)
-		=> MusicPlayerVariant.Create(AnyApp, new Dictionary<string, object> { ["cycleSeconds"] = seconds });
+	{
+		return MusicPlayerVariant.Create(AnyApp, new Dictionary<string, object> { ["cycleSeconds"] = seconds });
+	}
 
 	private static MusicPlayerWidgetData Config(string? instanceId, string? optionsJson)
 	{
 		var instance = instanceId is null ? "null" : $"\"{instanceId}\"";
 		var options = optionsJson is null ? string.Empty : $""","instanceOptions":{optionsJson}""";
 
-		return MusicPlayerWidgetData.Parse(MusicPlayerWidgetData.ParseData($$"""{"instanceId":{{instance}}{{options}}}"""));
+		return MusicPlayerWidgetData.Parse(
+			MusicPlayerWidgetData.ParseData($$"""{"instanceId":{{instance}}{{options}}}"""));
 	}
 
 	private static MusicPlayerStatePayload Playing(string track, string? artworkId)
-		=> new()
+	{
+		return new MusicPlayerStatePayload
 		{
 			InstanceId = AnyApp,
 			IsConnected = true,
 			IsPlaying = true,
 			PlaybackState = "playing",
 			TrackName = track,
-			ArtworkId = artworkId,
+			ArtworkId = artworkId
 		};
+	}
 
 	private MusicPlayerViewStateResolver Resolver()
-		=> new(_registry,
+	{
+		return new MusicPlayerViewStateResolver(_registry,
 			_stateCache,
 			_variants,
 			new StubArtworkService(),
@@ -153,25 +164,47 @@ public class MusicPlayerWidgetOptionsTests
 			_resources,
 			TimeProvider.System,
 			new LoggerConfiguration().CreateLogger());
+	}
 
-	private static Task<MusicPlayerViewState> Resolve(MusicPlayerViewStateResolver resolver, MusicPlayerWidgetData config)
-		=> resolver.ResolveAsync(config, MusicPlayerViewState.Loading, CancellationToken.None);
+	private static Task<MusicPlayerViewState> Resolve(
+		MusicPlayerViewStateResolver resolver,
+		MusicPlayerWidgetData config)
+	{
+		return resolver.ResolveAsync(config, MusicPlayerViewState.Loading, CancellationToken.None);
+	}
 
 	private sealed class OptionsRegistry : IMusicPlayerRegistry
 	{
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() =>
-		[
-			new(AnyApp, "system-media", LocalizedText.FromLiteral("System Media"), "Any app", false)
-			{
-				Options = [ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10)],
-			},
-			new(Spotify, "spotify", LocalizedText.FromLiteral("Spotify"), "Spotify (alice)", false),
-		];
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return
+			[
+				new MusicPlayerInstanceDescriptor(AnyApp,
+					"system-media",
+					LocalizedText.FromLiteral("System Media"),
+					"Any app",
+					false)
+				{
+					Options =
+						[ActionParameter.Number("cycleSeconds", "Cycle every", min: 5, max: 60, defaultValue: 10)]
+				},
+				new MusicPlayerInstanceDescriptor(Spotify,
+					"spotify",
+					LocalizedText.FromLiteral("Spotify"),
+					"Spotify (alice)",
+					false)
+			];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> null;
+		{
+			return null;
+		}
 
 		public IMusicPlayer? DefaultPlayer => null;
 	}

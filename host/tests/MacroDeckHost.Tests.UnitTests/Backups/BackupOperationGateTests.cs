@@ -9,10 +9,16 @@ public class BackupOperationGateTests
 	private BackupOperationGate _gate = null!;
 
 	[SetUp]
-	public void SetUp() => _gate = new BackupOperationGate();
+	public void SetUp()
+	{
+		_gate = new BackupOperationGate();
+	}
 
 	[TearDown]
-	public void TearDown() => _gate.Dispose();
+	public void TearDown()
+	{
+		_gate.Dispose();
+	}
 
 	[Test]
 	public void RefusesASecondOperationWhileOneIsRunning()

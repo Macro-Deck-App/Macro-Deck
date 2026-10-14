@@ -7,13 +7,13 @@ namespace MacroDeckHost.Integrations.Voicemeeter;
 
 internal static class VoicemeeterEventDefinitions
 {
-	private static readonly LocalizedText ConnectionCategory
+	private static readonly LocalizedText _connectionCategory
 		= AppStrings.Integrations.Voicemeeter.Events.ConnectionCategory();
 
-	private static readonly LocalizedText StripCategory = AppStrings.Integrations.Voicemeeter.Events.StripsCategory();
-	private static readonly LocalizedText BusCategory = AppStrings.Integrations.Voicemeeter.Events.BusesCategory();
+	private static readonly LocalizedText _stripCategory = AppStrings.Integrations.Voicemeeter.Events.StripsCategory();
+	private static readonly LocalizedText _busCategory = AppStrings.Integrations.Voicemeeter.Events.BusesCategory();
 
-	private static readonly LocalizedText MacroCategory
+	private static readonly LocalizedText _macroCategory
 		= AppStrings.Integrations.Voicemeeter.Events.MacroButtonsCategory();
 
 	public static IReadOnlyList<EventDefinition> All { get; } =
@@ -23,13 +23,13 @@ internal static class VoicemeeterEventDefinitions
 			Id = VoicemeeterEventIds.Connected,
 			Name = MacroDeckStrings.Connection.Connected(),
 			Description = AppStrings.Integrations.Voicemeeter.Events.ConnectedDescription(),
-			Category = ConnectionCategory,
+			Category = _connectionCategory,
 			PayloadParameters =
 			[
 				ActionParameter.Text("edition",
-					label: AppStrings.Integrations.Voicemeeter.Events.Connected.EditionLabel()),
+					AppStrings.Integrations.Voicemeeter.Events.Connected.EditionLabel()),
 				ActionParameter.Text("version",
-					label: AppStrings.Integrations.Voicemeeter.Events.Connected.VersionLabel())
+					AppStrings.Integrations.Voicemeeter.Events.Connected.VersionLabel())
 			]
 		},
 		new()
@@ -37,7 +37,7 @@ internal static class VoicemeeterEventDefinitions
 			Id = VoicemeeterEventIds.Disconnected,
 			Name = MacroDeckStrings.Connection.Disconnected(),
 			Description = AppStrings.Integrations.Voicemeeter.Events.DisconnectedDescription(),
-			Category = ConnectionCategory
+			Category = _connectionCategory
 		},
 		MuteEvent(VoicemeeterEventIds.StripMuteChanged,
 			AppStrings.Integrations.Voicemeeter.Events.StripMuteChangedName(),
@@ -60,25 +60,25 @@ internal static class VoicemeeterEventDefinitions
 			Id = VoicemeeterEventIds.StripRoutingChanged,
 			Name = AppStrings.Integrations.Voicemeeter.Events.StripRoutingChangedName(),
 			Description = AppStrings.Integrations.Voicemeeter.Events.StripRoutingChangedDescription(),
-			Category = StripCategory,
+			Category = _stripCategory,
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("strip",
-					label: AppStrings.Integrations.Voicemeeter.Common.StripLabel(),
+					AppStrings.Integrations.Voicemeeter.Common.StripLabel(),
 					placeholder: AppStrings.Integrations.Voicemeeter.Events.Common.AnyStrip()),
 				ActionParameter.DynamicChoice("bus",
-					label: AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel(),
+					AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel(),
 					placeholder: AppStrings.Integrations.Voicemeeter.Events.Common.AnyBus())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.Number("strip",
-					label: AppStrings.Integrations.Voicemeeter.Events.Common.StripIndexLabel()),
-				ActionParameter.Text("name", label: AppStrings.Integrations.Voicemeeter.Common.StripLabel()),
+					AppStrings.Integrations.Voicemeeter.Events.Common.StripIndexLabel()),
+				ActionParameter.Text("name", AppStrings.Integrations.Voicemeeter.Common.StripLabel()),
 				ActionParameter.DynamicChoice("bus",
-					label: AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel()),
+					AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel()),
 				ActionParameter.Toggle("enabled",
-					label: AppStrings.Integrations.Voicemeeter.Events.StripRoutingChanged.EnabledLabel())
+					AppStrings.Integrations.Voicemeeter.Events.StripRoutingChanged.EnabledLabel())
 			]
 		},
 		new()
@@ -86,26 +86,27 @@ internal static class VoicemeeterEventDefinitions
 			Id = VoicemeeterEventIds.MacroButtonChanged,
 			Name = AppStrings.Integrations.Voicemeeter.Events.MacroButtonChangedName(),
 			Description = AppStrings.Integrations.Voicemeeter.Events.MacroButtonChangedDescription(),
-			Category = MacroCategory,
+			Category = _macroCategory,
 			ConfigurationParameters =
 			[
 				ActionParameter.Number("button",
-					label: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel(),
-					description: AppStrings.Integrations.Voicemeeter.Events.MacroButtonChanged.ButtonDescription(),
-					min: 0,
-					max: VoicemeeterConnection.MacroButtonCount - 1,
-					step: 1)
+					AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel(),
+					AppStrings.Integrations.Voicemeeter.Events.MacroButtonChanged.ButtonDescription(),
+					0,
+					VoicemeeterConnection.MacroButtonCount - 1,
+					1)
 			],
 			PayloadParameters =
 			[
 				ActionParameter.Number("button",
-					label: AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel()),
-				ActionParameter.Toggle("state", label: AppStrings.Integrations.Voicemeeter.Common.OnOption())
+					AppStrings.Integrations.Voicemeeter.Actions.SetMacroButton.ButtonLabel()),
+				ActionParameter.Toggle("state", AppStrings.Integrations.Voicemeeter.Common.OnOption())
 			]
 		}
 	];
 
-	private static EventDefinition MuteEvent(string id,
+	private static EventDefinition MuteEvent(
+		string id,
 		LocalizedText name,
 		LocalizedText description,
 		VoicemeeterChannelKind kind)
@@ -117,18 +118,19 @@ internal static class VoicemeeterEventDefinitions
 			Id = id,
 			Name = name,
 			Description = description,
-			Category = kind == VoicemeeterChannelKind.Strip ? StripCategory : BusCategory,
+			Category = kind == VoicemeeterChannelKind.Strip ? _stripCategory : _busCategory,
 			ConfigurationParameters = [ChannelFilter(kind)],
 			PayloadParameters =
 			[
-				ActionParameter.Number(channel, label: IndexLabel(kind)),
-				ActionParameter.Text("name", label: TitleLabel(kind)),
-				ActionParameter.Toggle("muted", label: AppStrings.Integrations.Voicemeeter.Events.Common.MutedLabel())
+				ActionParameter.Number(channel, IndexLabel(kind)),
+				ActionParameter.Text("name", TitleLabel(kind)),
+				ActionParameter.Toggle("muted", AppStrings.Integrations.Voicemeeter.Events.Common.MutedLabel())
 			]
 		};
 	}
 
-	private static EventDefinition GainEvent(string id,
+	private static EventDefinition GainEvent(
+		string id,
 		LocalizedText name,
 		LocalizedText description,
 		VoicemeeterChannelKind kind)
@@ -140,36 +142,44 @@ internal static class VoicemeeterEventDefinitions
 			Id = id,
 			Name = name,
 			Description = description,
-			Category = kind == VoicemeeterChannelKind.Strip ? StripCategory : BusCategory,
+			Category = kind == VoicemeeterChannelKind.Strip ? _stripCategory : _busCategory,
 			ConfigurationParameters = [ChannelFilter(kind)],
 			PayloadParameters =
 			[
-				ActionParameter.Number(channel, label: IndexLabel(kind)),
-				ActionParameter.Text("name", label: TitleLabel(kind)),
-				ActionParameter.Number("gain", label: AppStrings.Integrations.Voicemeeter.Common.GainLabel()),
+				ActionParameter.Number(channel, IndexLabel(kind)),
+				ActionParameter.Text("name", TitleLabel(kind)),
+				ActionParameter.Number("gain", AppStrings.Integrations.Voicemeeter.Common.GainLabel()),
 				ActionParameter.Number("previousGain",
-					label: AppStrings.Integrations.Voicemeeter.Events.Common.PreviousGainLabel())
+					AppStrings.Integrations.Voicemeeter.Events.Common.PreviousGainLabel())
 			]
 		};
 	}
 
 	private static ActionParameter ChannelFilter(VoicemeeterChannelKind kind)
-		=> ActionParameter.DynamicChoice(ChannelParameterName(kind),
-			label: TitleLabel(kind),
+	{
+		return ActionParameter.DynamicChoice(ChannelParameterName(kind),
+			TitleLabel(kind),
 			placeholder: kind == VoicemeeterChannelKind.Strip
 				? AppStrings.Integrations.Voicemeeter.Events.Common.AnyStrip()
 				: AppStrings.Integrations.Voicemeeter.Events.Common.AnyBus());
+	}
 
 	internal static string ChannelParameterName(VoicemeeterChannelKind kind)
-		=> kind == VoicemeeterChannelKind.Strip ? "strip" : "bus";
+	{
+		return kind == VoicemeeterChannelKind.Strip ? "strip" : "bus";
+	}
 
 	private static LocalizedText TitleLabel(VoicemeeterChannelKind kind)
-		=> kind == VoicemeeterChannelKind.Strip
+	{
+		return kind == VoicemeeterChannelKind.Strip
 			? AppStrings.Integrations.Voicemeeter.Common.StripLabel()
 			: AppStrings.Integrations.Voicemeeter.Common.BusLabel();
+	}
 
 	private static LocalizedText IndexLabel(VoicemeeterChannelKind kind)
-		=> kind == VoicemeeterChannelKind.Strip
+	{
+		return kind == VoicemeeterChannelKind.Strip
 			? AppStrings.Integrations.Voicemeeter.Events.Common.StripIndexLabel()
 			: AppStrings.Integrations.Voicemeeter.Events.Common.BusIndexLabel();
+	}
 }

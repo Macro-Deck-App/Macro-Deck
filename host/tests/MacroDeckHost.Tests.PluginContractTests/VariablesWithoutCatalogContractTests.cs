@@ -20,30 +20,34 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class VariablesWithoutCatalogContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Variable(string localId)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Variables, LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 2 }
 		};
+	}
 
 	private static VariablesCapabilityHandler Handler(IPluginIntegration provider)
-		=> new([provider],
+	{
+		return new VariablesCapabilityHandler([provider],
 			TestMetadata.Default,
 			new VariableSubscriptions(Serilog.Log.Logger),
 			Serilog.Core.Logger.None);
+	}
 
 	[Test]
 	public async Task A_catalog_less_plugin_round_trips_its_eager_variables_exactly_as_before()
 	{
-		var variable = VariableDefinition.Eager("cpu_temp", VariableType.Numeric, decimalPlaces: 1)
+		var variable = VariableDefinition.Eager("cpu_temp", VariableType.Numeric, 1)
 			with
 			{
 				Id = "cpu-temp"
 			};
 		var integration = await ConnectAsync([
 				Handler(new TestVariableIntegration([variable],
-					dependsOnConfiguration: true,
-					read: (_, _) => ValueTask.FromResult(VariableReading.Of(42.5))))
+					true,
+					(_, _) => ValueTask.FromResult(VariableReading.Of(42.5))))
 			],
 			[Variable("cpu-temp")],
 			[CapabilityKinds.Variables]);

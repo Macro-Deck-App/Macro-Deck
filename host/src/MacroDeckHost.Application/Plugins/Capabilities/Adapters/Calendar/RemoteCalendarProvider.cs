@@ -22,7 +22,10 @@ public sealed class RemoteCalendarProvider(
 
 	public string ProviderName => providerName;
 
-	public IReadOnlyList<CalendarAccount> GetAccounts() => accounts;
+	public IReadOnlyList<CalendarAccount> GetAccounts()
+	{
+		return accounts;
+	}
 
 	public async Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(
 		string accountId,
@@ -55,9 +58,10 @@ public sealed class RemoteCalendarProvider(
 		var result = data?.Deserialize<CalendarEventsResult>(PluginProtocolJson.Options);
 		if (result?.Truncated == true)
 		{
-			_logger.Warning(
-				"Plugin {PluginId} truncated the calendar events between {From} and {To}",
-				pluginId, query.From, query.To);
+			_logger.Warning("Plugin {PluginId} truncated the calendar events between {From} and {To}",
+				pluginId,
+				query.From,
+				query.To);
 		}
 
 		return result is null ? [] : [.. result.Events.Select(CalendarMapper.ToDomain)];
@@ -79,7 +83,8 @@ public sealed class RemoteCalendarProvider(
 	}
 
 	private Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
-		=> invoker.InvokeAsync(pluginId,
+	{
+		return invoker.InvokeAsync(pluginId,
 			new CapabilityInvokeRequest
 			{
 				Kind = CapabilityKinds.Calendar,
@@ -88,4 +93,5 @@ public sealed class RemoteCalendarProvider(
 				Arguments = arguments
 			},
 			cancellationToken);
+	}
 }

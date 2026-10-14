@@ -8,7 +8,6 @@ using MacroDeck.Sdk.Notifications;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Sdk.Variables;
-using MacroDeck.Sdk.Weather;
 using MacroDeck.Sdk.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Weather;
@@ -20,7 +19,7 @@ internal sealed class WeatherIntegrationTests
 	public async Task The_widget_shows_the_configuration_name_rather_than_the_configured_location_value()
 	{
 		var context = new FakeContext();
-		var entryId = context.ConfigStore.AddEntry("Office", latitude: "52.52", longitude: "13.41");
+		var entryId = context.ConfigStore.AddEntry("Office", "52.52", "13.41");
 		context.ConfigStore.SetDisplayName(entryId, "52.52, 13.41");
 
 		using var integration = new WeatherIntegration(new FakeOpenMeteoClient());
@@ -36,7 +35,7 @@ internal sealed class WeatherIntegrationTests
 	public async Task A_configuration_with_no_title_of_its_own_falls_back_to_the_stored_location_value()
 	{
 		var context = new FakeContext();
-		var entryId = context.ConfigStore.AddEntry("   ", latitude: "52.52", longitude: "13.41");
+		var entryId = context.ConfigStore.AddEntry("   ", "52.52", "13.41");
 		context.ConfigStore.SetDisplayName(entryId, "52.52, 13.41");
 
 		using var integration = new WeatherIntegration(new FakeOpenMeteoClient());
@@ -52,7 +51,7 @@ internal sealed class WeatherIntegrationTests
 	public async Task Renaming_a_configuration_keeps_the_weather_it_already_had()
 	{
 		var context = new FakeContext();
-		var entryId = context.ConfigStore.AddEntry("Berlin", latitude: "52.52", longitude: "13.41");
+		var entryId = context.ConfigStore.AddEntry("Berlin", "52.52", "13.41");
 		var client = new FakeOpenMeteoClient { Forecast = ForecastWith(21) };
 
 		using var integration = new WeatherIntegration(client);
@@ -78,14 +77,14 @@ internal sealed class WeatherIntegrationTests
 	public async Task Moving_a_configuration_to_new_coordinates_does_not_keep_the_old_location_weather()
 	{
 		var context = new FakeContext();
-		var entryId = context.ConfigStore.AddEntry("Berlin", latitude: "52.52", longitude: "13.41");
+		var entryId = context.ConfigStore.AddEntry("Berlin", "52.52", "13.41");
 		var client = new FakeOpenMeteoClient { Forecast = ForecastWith(21) };
 
 		using var integration = new WeatherIntegration(client);
 		await integration.InitializeAsync(context);
 		await ((WeatherStation)integration.GetStation(entryId.ToString())!).RefreshAsync(CancellationToken.None);
 
-		context.ConfigStore.Move(entryId, latitude: "35.68", longitude: "139.69");
+		context.ConfigStore.Move(entryId, "35.68", "139.69");
 		client.Forecast = ForecastWith(30);
 		await integration.ShutdownAsync();
 		await integration.InitializeAsync(context);
@@ -97,7 +96,8 @@ internal sealed class WeatherIntegrationTests
 	}
 
 	internal static OpenMeteoForecastResponse ForecastWith(double temperature)
-		=> new()
+	{
+		return new OpenMeteoForecastResponse
 		{
 			Current = new OpenMeteoCurrent
 			{
@@ -107,6 +107,7 @@ internal sealed class WeatherIntegrationTests
 				IsDay = 1
 			}
 		};
+	}
 
 	internal sealed class FakeConfig : IIntegrationConfig
 	{
@@ -125,7 +126,9 @@ internal sealed class WeatherIntegrationTests
 		}
 
 		public void SetDisplayName(Guid entryId, string displayName)
-			=> _values[(entryId, WeatherConfigKeys.DisplayName)] = displayName;
+		{
+			_values[(entryId, WeatherConfigKeys.DisplayName)] = displayName;
+		}
 
 		public void Rename(Guid entryId, string title)
 		{
@@ -140,25 +143,37 @@ internal sealed class WeatherIntegrationTests
 		}
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_values.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult(_values.GetValueOrDefault((entryId, key)));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetStringAsync(Guid entryId,
+		public Task SetStringAsync(
+			Guid entryId,
 			string key,
 			string? value,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetSecretAsync(Guid entryId,
+		public Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	internal sealed class FakeContext : IIntegrationContext

@@ -30,10 +30,12 @@ public class RemoteVariableBindingTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(outcomes, Is.EqualTo(new[] { VariableBindingOutcome.Bound, VariableBindingOutcome.AlreadyBound }));
+			Assert.That(outcomes,
+				Is.EqualTo(new[] { VariableBindingOutcome.Bound, VariableBindingOutcome.AlreadyBound }));
 			Assert.That(host.Operation, Is.EqualTo(HostOperations.Variables.Bind));
 			Assert.That(host.Arguments,
-				Is.EqualTo("""{"bindings":[{"localResourceId":"entity/light.kitchen/state","name":"ha_light_kitchen","type":"Text","migratedFrom":"v1"},{"localResourceId":"entity/switch.desk/state","name":"ha_switch_desk","type":"Boolean"}]}"""));
+				Is.EqualTo(
+					"""{"bindings":[{"localResourceId":"entity/light.kitchen/state","name":"ha_light_kitchen","type":"Text","migratedFrom":"v1"},{"localResourceId":"entity/switch.desk/state","name":"ha_switch_desk","type":"Boolean"}]}"""));
 		});
 	}
 
@@ -64,8 +66,8 @@ public class RemoteVariableBindingTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.ThrowsAsync<ArgumentException>(() => new RemoteVariableApi(host).BindAsync(
-				[_kitchen with { Name = "Kitchen Light" }]));
+			Assert.ThrowsAsync<ArgumentException>(()
+				=> new RemoteVariableApi(host).BindAsync([_kitchen with { Name = "Kitchen Light" }]));
 			Assert.That(host.Operation, Is.Null);
 		});
 	}
@@ -90,7 +92,8 @@ public class RemoteVariableBindingTests
 
 		public string? Arguments { get; private set; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -102,6 +105,9 @@ public class RemoteVariableBindingTests
 				: Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(answer, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

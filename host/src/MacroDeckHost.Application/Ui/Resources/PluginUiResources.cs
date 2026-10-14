@@ -33,13 +33,15 @@ public sealed record PluginUiResourceResult(PluginUiResourceOutcome Outcome, UiR
 
 public interface IPluginUiResources
 {
-	PluginUiResourceResult Register(string pluginId,
+	PluginUiResourceResult Register(
+		string pluginId,
 		string sessionId,
 		string name,
 		string contentHash,
 		string mediaType);
 
-	PluginUiResourceResult RegisterContent(string pluginId,
+	PluginUiResourceResult RegisterContent(
+		string pluginId,
 		string sessionId,
 		string name,
 		byte[] content,
@@ -65,7 +67,8 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 		_sessions.SessionEnded += OnSessionEnded;
 	}
 
-	public PluginUiResourceResult Register(string pluginId,
+	public PluginUiResourceResult Register(
+		string pluginId,
 		string sessionId,
 		string name,
 		string contentHash,
@@ -90,9 +93,9 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 
 			var plugin = ForSession(pluginId, sessionId);
 
-			if (plugin.Entries.TryGetValue(name, out var existing) &&
-				string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal) &&
-				string.Equals(existing.Handle.MediaType, mediaType, StringComparison.OrdinalIgnoreCase))
+			if (plugin.Entries.TryGetValue(name, out var existing)
+				&& string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal)
+				&& string.Equals(existing.Handle.MediaType, mediaType, StringComparison.OrdinalIgnoreCase))
 			{
 				return new PluginUiResourceResult(PluginUiResourceOutcome.Registered, existing.Handle);
 			}
@@ -120,7 +123,8 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 		}
 	}
 
-	public PluginUiResourceResult RegisterContent(string pluginId,
+	public PluginUiResourceResult RegisterContent(
+		string pluginId,
 		string sessionId,
 		string name,
 		byte[] content,
@@ -154,7 +158,8 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 		}
 	}
 
-	private PluginUiResourceResult Commit(string pluginId,
+	private PluginUiResourceResult Commit(
+		string pluginId,
 		PluginResources plugin,
 		string name,
 		byte[] content,
@@ -163,9 +168,9 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 	{
 		plugin.Entries.TryGetValue(name, out var existing);
 
-		if (existing is not null &&
-			string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal) &&
-			string.Equals(existing.Handle.MediaType, mediaType, StringComparison.OrdinalIgnoreCase))
+		if (existing is not null
+			&& string.Equals(existing.Handle.ContentHash, contentHash, StringComparison.Ordinal)
+			&& string.Equals(existing.Handle.MediaType, mediaType, StringComparison.OrdinalIgnoreCase))
 		{
 			return new PluginUiResourceResult(PluginUiResourceOutcome.Registered, existing.Handle);
 		}
@@ -183,7 +188,7 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 			OwnerId = OwnerId(pluginId),
 			Name = name,
 			MediaType = mediaType.ToLowerInvariant(),
-			Content = content,
+			Content = content
 		});
 
 		plugin.Entries[name] = new Entry(handle, content.Length);
@@ -225,7 +230,9 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 	}
 
 	internal static string OwnerId(string pluginId)
-		=> "plugin-" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(pluginId)))[..16];
+	{
+		return "plugin-" + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(pluginId)))[..16];
+	}
 
 	// Mirrors PluginMessagingRegistrations: the registry maps a plugin to its new session before it
 	// announces the old one pruned, so checking under the lock the release also takes cannot resurrect one.
@@ -288,8 +295,8 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 			plugin.Pending.Add(e.ContentHash, new PendingUpload(e.Bytes, e.MimeType));
 			plugin.PendingBytes += e.Bytes.Length;
 
-			while (plugin.Pending.Count > ProtocolLimits.MaxUiResourcesPerPlugin ||
-				plugin.PendingBytes > ProtocolLimits.MaxUiResourceBytesPerPlugin)
+			while (plugin.Pending.Count > ProtocolLimits.MaxUiResourcesPerPlugin
+				|| plugin.PendingBytes > ProtocolLimits.MaxUiResourceBytesPerPlugin)
 			{
 				var oldest = plugin.Pending.GetAt(0);
 				plugin.Pending.RemoveAt(0);
@@ -307,8 +314,9 @@ public sealed class PluginUiResources : IPluginUiResources, IDisposable
 
 		lock (_lock)
 		{
-			if (!_byPlugin.TryGetValue(e.PluginId, out var plugin) ||
-				(plugin.SessionId is not null && !string.Equals(plugin.SessionId, e.SessionId, StringComparison.Ordinal)))
+			if (!_byPlugin.TryGetValue(e.PluginId, out var plugin)
+				|| plugin.SessionId is not null
+				&& !string.Equals(plugin.SessionId, e.SessionId, StringComparison.Ordinal))
 			{
 				return;
 			}

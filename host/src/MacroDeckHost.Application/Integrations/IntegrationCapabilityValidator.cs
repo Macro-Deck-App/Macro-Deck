@@ -45,8 +45,10 @@ public static class IntegrationCapabilityValidator
 	}
 
 	private static IEnumerable<string> DeclaredVariableDefinitionIds(IVariableProvider provider)
-		=> provider.DeclaredVariables
+	{
+		return provider.DeclaredVariables
 			.Where(definition => !VariableNameTemplate.IsTemplate(definition.Name))
 			.Select(definition => definition.ResolvedId)
 			.OfType<string>();
+	}
 }

@@ -12,11 +12,15 @@ public class UiIdentifierTests
 	[TestCase("a.b-c_d")]
 	[TestCase("a1.2-3_4")]
 	public void IsValid_accepts_the_documented_grammar(string value)
-		=> Assert.That(UiIdentifier.IsValid(value), Is.True);
+	{
+		Assert.That(UiIdentifier.IsValid(value), Is.True);
+	}
 
 	[Test]
 	public void IsValid_accepts_128_characters()
-		=> Assert.That(UiIdentifier.IsValid(new string('a', 128)), Is.True);
+	{
+		Assert.That(UiIdentifier.IsValid(new string('a', 128)), Is.True);
+	}
 
 	[TestCase(null)]
 	[TestCase("")]
@@ -28,17 +32,24 @@ public class UiIdentifierTests
 	[TestCase("a/b")]
 	[TestCase("a\n")]
 	public void IsValid_rejects_everything_outside_the_grammar(string? value)
-		=> Assert.DoesNotThrow(() => Assert.That(UiIdentifier.IsValid(value), Is.False));
+	{
+		Assert.DoesNotThrow(() => Assert.That(UiIdentifier.IsValid(value), Is.False));
+	}
 
 	[Test]
-	public void IsValid_rejects_129_characters() => Assert.That(UiIdentifier.IsValid(new string('a', 129)), Is.False);
+	public void IsValid_rejects_129_characters()
+	{
+		Assert.That(UiIdentifier.IsValid(new string('a', 129)), Is.False);
+	}
 
 	[TestCase("a:b")]
 	[TestCase("integrationId::localId")]
 	[TestCase(":")]
 	[TestCase("a:")]
 	public void IsValid_rejects_the_plugin_id_separator(string value)
-		=> Assert.That(UiIdentifier.IsValid(value), Is.False);
+	{
+		Assert.That(UiIdentifier.IsValid(value), Is.False);
+	}
 
 	[TestCase(null)]
 	[TestCase("")]
@@ -66,5 +77,7 @@ public class UiIdentifierTests
 	[TestCase(128, ExpectedResult = true)]
 	[TestCase(129, ExpectedResult = false)]
 	public bool Length_boundary_is_at_the_documented_maximum(int length)
-		=> UiIdentifier.IsValid(new string('a', length));
+	{
+		return UiIdentifier.IsValid(new string('a', length));
+	}
 }

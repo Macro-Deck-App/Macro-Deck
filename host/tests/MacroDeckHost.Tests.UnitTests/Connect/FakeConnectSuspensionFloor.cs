@@ -7,7 +7,9 @@ internal sealed class FakeConnectSuspensionFloor : IConnectSuspensionFloor
 	public DateTimeOffset? NotBefore { get; set; }
 
 	public Task<DateTimeOffset?> Read(CancellationToken cancellationToken = default)
-		=> Task.FromResult(NotBefore);
+	{
+		return Task.FromResult(NotBefore);
+	}
 
 	public Task Write(DateTimeOffset notBefore, CancellationToken cancellationToken = default)
 	{

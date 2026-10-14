@@ -47,7 +47,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ManifestValidationLevelTests
 			var pack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => artifactPath,
-				force: false);
+				false);
 			Assert.That(pack.Success, Is.True, pack.FailureMessage);
 
 			var (manifestOutput, _, manifestExit) =
@@ -108,7 +108,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 			if (File.Exists(artifactPath))
 			{
 				File.Delete(artifactPath);
@@ -128,7 +128,7 @@ public class ManifestValidationLevelTests
 			var pack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => artifactPath,
-				force: false);
+				false);
 			Assert.That(pack.Success, Is.True, pack.FailureMessage);
 
 			var (manifestOutput, _, manifestExit) =
@@ -167,7 +167,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 			if (File.Exists(artifactPath))
 			{
 				File.Delete(artifactPath);
@@ -208,7 +208,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -220,8 +220,8 @@ public class ManifestValidationLevelTests
 		var missing = rids[1];
 
 		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
-		WriteRuntimeEntrypoint(directory, present, create: true);
-		WriteRuntimeEntrypoint(directory, missing, create: false);
+		WriteRuntimeEntrypoint(directory, present, true);
+		WriteRuntimeEntrypoint(directory, missing, false);
 
 		var json = $$"""
 					 {
@@ -235,7 +235,7 @@ public class ManifestValidationLevelTests
 					 	}
 					 }
 					 """;
-		File.WriteAllText(Path.Combine(directory, "manifest.json"), json);
+		await File.WriteAllTextAsync(Path.Combine(directory, "manifest.json"), json);
 
 		var artifactPath = Path.Combine(Path.GetTempPath(),
 			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
@@ -245,7 +245,7 @@ public class ManifestValidationLevelTests
 			var pack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => artifactPath,
-				force: false);
+				false);
 			Assert.That(pack.Success, Is.True, pack.FailureMessage);
 
 			var result = await ManifestValidator.ValidateArtifactAsync(artifactPath);
@@ -266,7 +266,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 			if (File.Exists(artifactPath))
 			{
 				File.Delete(artifactPath);
@@ -280,7 +280,7 @@ public class ManifestValidationLevelTests
 		var rid = ManifestFixtures.PickForeignRids(1)[0];
 
 		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
-		WriteRuntimeEntrypoint(directory, rid, create: true);
+		WriteRuntimeEntrypoint(directory, rid, true);
 
 		var json = $$"""
 					 {
@@ -294,7 +294,7 @@ public class ManifestValidationLevelTests
 					 	}
 					 }
 					 """;
-		File.WriteAllText(Path.Combine(directory, "manifest.json"), json);
+		await File.WriteAllTextAsync(Path.Combine(directory, "manifest.json"), json);
 
 		var artifactPath = Path.Combine(Path.GetTempPath(),
 			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
@@ -304,7 +304,7 @@ public class ManifestValidationLevelTests
 			var pack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => artifactPath,
-				force: false);
+				false);
 			Assert.That(pack.Success, Is.True, pack.FailureMessage);
 
 			var result = await ManifestValidator.ValidateArtifactAsync(artifactPath);
@@ -322,7 +322,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 			if (File.Exists(artifactPath))
 			{
 				File.Delete(artifactPath);
@@ -336,7 +336,7 @@ public class ManifestValidationLevelTests
 		var rid = ManifestFixtures.PickForeignRids(1)[0];
 
 		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
-		File.WriteAllText(Path.Combine(directory, "App.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+		await File.WriteAllTextAsync(Path.Combine(directory, "App.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\" />");
 
 		var json = $$"""
 					 {
@@ -350,7 +350,7 @@ public class ManifestValidationLevelTests
 					 	}
 					 }
 					 """;
-		File.WriteAllText(Path.Combine(directory, "manifest.json"), json);
+		await File.WriteAllTextAsync(Path.Combine(directory, "manifest.json"), json);
 
 		try
 		{
@@ -374,7 +374,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -385,10 +385,11 @@ public class ManifestValidationLevelTests
 		var rid = ManifestFixtures.PickForeignRids(1)[0];
 
 		var sourceDirectory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
-		File.WriteAllText(Path.Combine(sourceDirectory, "App.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk\" />");
+		await File.WriteAllTextAsync(Path.Combine(sourceDirectory, "App.csproj"),
+			"<Project Sdk=\"Microsoft.NET.Sdk\" />");
 
 		var staleBytes = "stale"u8.ToArray();
-		File.WriteAllBytes(Path.Combine(sourceDirectory, "stale.bin"), staleBytes);
+		await File.WriteAllBytesAsync(Path.Combine(sourceDirectory, "stale.bin"), staleBytes);
 		var staleDigest = "sha256:" + Convert.ToHexStringLower(SHA256.HashData(staleBytes));
 
 		var sourceJson = $$"""
@@ -412,7 +413,7 @@ public class ManifestValidationLevelTests
 						   	"signature": { "algorithm": "ed25519", "keyId": "fixture-key", "value": "AA==" }
 						   }
 						   """;
-		File.WriteAllText(Path.Combine(sourceDirectory, "manifest.json"), sourceJson);
+		await File.WriteAllTextAsync(Path.Combine(sourceDirectory, "manifest.json"), sourceJson);
 
 		try
 		{
@@ -438,7 +439,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(sourceDirectory, recursive: true);
+			Directory.Delete(sourceDirectory, true);
 		}
 
 		// (b) An extracted directory: same shape, but a real matching payload and no project file.
@@ -446,8 +447,8 @@ public class ManifestValidationLevelTests
 		var payloadPath = Path.Combine(extractedDirectory,
 			RuntimeEntrypointPath(rid).Replace('/', Path.DirectorySeparatorChar));
 		Directory.CreateDirectory(Path.GetDirectoryName(payloadPath)!);
-		File.WriteAllBytes(payloadPath, "payload"u8.ToArray());
-		var digest = "sha256:" + Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(payloadPath)));
+		await File.WriteAllBytesAsync(payloadPath, "payload"u8.ToArray());
+		var digest = "sha256:" + Convert.ToHexStringLower(SHA256.HashData(await File.ReadAllBytesAsync(payloadPath)));
 
 		var extractedJson = $$"""
 							  {
@@ -468,7 +469,7 @@ public class ManifestValidationLevelTests
 							  	]
 							  }
 							  """;
-		File.WriteAllText(Path.Combine(extractedDirectory, "manifest.json"), extractedJson);
+		await File.WriteAllTextAsync(Path.Combine(extractedDirectory, "manifest.json"), extractedJson);
 
 		try
 		{
@@ -481,7 +482,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(extractedDirectory, recursive: true);
+			Directory.Delete(extractedDirectory, true);
 		}
 	}
 
@@ -525,7 +526,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -569,7 +570,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -589,7 +590,7 @@ public class ManifestValidationLevelTests
 			var packResult = await PluginPacker.PackAsync(project,
 				Path.Combine(project, "manifest.json"),
 				_ => packOutput,
-				force: false);
+				false);
 
 			var buildOutputDirectory = Path.Combine(project, "build-output");
 			Directory.CreateDirectory(buildOutputDirectory);
@@ -631,7 +632,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(project, recursive: true);
+			Directory.Delete(project, true);
 		}
 	}
 
@@ -667,7 +668,7 @@ public class ManifestValidationLevelTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -678,7 +679,7 @@ public class ManifestValidationLevelTests
 	{
 		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
 		var rid = PluginRuntimeIdentifiers.Current;
-		WriteRuntimeEntrypoint(directory, rid, create: true);
+		WriteRuntimeEntrypoint(directory, rid, true);
 
 		var json = $$"""
 					 {
@@ -701,7 +702,7 @@ public class ManifestValidationLevelTests
 	{
 		var directory = Directory.CreateTempSubdirectory("macrodeck-plugin-cli-tests-").FullName;
 		rid = PluginRuntimeIdentifiers.Current;
-		WriteRuntimeEntrypoint(directory, rid, create: true);
+		WriteRuntimeEntrypoint(directory, rid, true);
 
 		Directory.CreateDirectory(Path.Combine(directory, "assets"));
 		File.WriteAllText(Path.Combine(directory, "assets", "icon.svg"), "icon");
@@ -726,8 +727,10 @@ public class ManifestValidationLevelTests
 		return directory;
 	}
 
-	private static string RuntimeEntrypointPath(string rid) =>
-		rid.StartsWith("win-", StringComparison.Ordinal) ? $"runtimes/{rid}/App.exe" : $"runtimes/{rid}/App";
+	private static string RuntimeEntrypointPath(string rid)
+	{
+		return rid.StartsWith("win-", StringComparison.Ordinal) ? $"runtimes/{rid}/App.exe" : $"runtimes/{rid}/App";
+	}
 
 	private static void WriteRuntimeEntrypoint(string directory, string rid, bool create)
 	{

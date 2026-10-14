@@ -70,7 +70,10 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 			.. snapshot.Sinks.Select(sink =>
 				new AudioDevice(sink.Name, sink.Description, AudioFlow.Output, sink.Name == snapshot.Defaults.Sink)),
 			.. snapshot.Sources.Select(source =>
-				new AudioDevice(source.Name, source.Description, AudioFlow.Input, source.Name == snapshot.Defaults.Source))
+				new AudioDevice(source.Name,
+					source.Description,
+					AudioFlow.Input,
+					source.Name == snapshot.Defaults.Source))
 		];
 	}
 
@@ -86,7 +89,10 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 			: null;
 	}
 
-	public async Task<bool> SetVolumeAsync(AudioTarget target, float level, CancellationToken cancellationToken = default)
+	public async Task<bool> SetVolumeAsync(
+		AudioTarget target,
+		float level,
+		CancellationToken cancellationToken = default)
 	{
 		var percent = (int)Math.Round(Math.Clamp(level, 0f, 1f) * 100);
 		var value = $"{percent.ToString(CultureInfo.InvariantCulture)}%";
@@ -156,10 +162,10 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 	{
 		lock (_snapshotGate)
 		{
-			if (_snapshot is { } current &&
-				(!current.IsCompleted ||
-					(current.IsCompletedSuccessfully &&
-						Environment.TickCount64 - current.Result.TakenAt < SnapshotLifetimeMs)))
+			if (_snapshot is { } current
+				&& (!current.IsCompleted
+					|| current.IsCompletedSuccessfully
+					&& Environment.TickCount64 - current.Result.TakenAt < SnapshotLifetimeMs))
 			{
 				return current.WaitAsync(cancellationToken);
 			}
@@ -181,7 +187,11 @@ internal sealed class LinuxVolumeService : IVolumeService, IDisposable
 			Environment.TickCount64);
 	}
 
-	private async Task<bool> PactlSetAsync(AudioTarget target, string property, string value, CancellationToken cancellationToken)
+	private async Task<bool> PactlSetAsync(
+		AudioTarget target,
+		string property,
+		string value,
+		CancellationToken cancellationToken)
 	{
 		var kind = target.Flow == AudioFlow.Output ? "sink" : "source";
 		var device = target.DeviceId ?? (target.Flow == AudioFlow.Output ? "@DEFAULT_SINK@" : "@DEFAULT_SOURCE@");

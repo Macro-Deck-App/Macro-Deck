@@ -1,12 +1,12 @@
 using System.CommandLine;
-using System.Globalization;
 using MacroDeck.Plugin.Cli.Rendering;
 
 namespace MacroDeck.Plugin.Cli.Commands;
 
 internal static class PreviewCommand
 {
-	public static Command Create(Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory = null)
+	public static Command Create(
+		Func<string, CancellationToken, Task<IPreviewScreenshotter>>? screenshotterFactory = null)
 	{
 		var projectOption = new Option<string?>("--project") { Description = "A plugin's .csproj, or its directory." };
 		var executableOption = new Option<string?>("--executable")
@@ -32,34 +32,44 @@ internal static class PreviewCommand
 		var themeOption = CreateThemeOption();
 		var backgroundOption = new Option<string>("--background")
 		{
-			Description = "What shows behind the rounded tile: transparent, a color name or a #hex color. " +
-				"Defaults to transparent.",
+			Description = "What shows behind the rounded tile: transparent, a color name or a #hex color. "
+				+ "Defaults to transparent.",
 			DefaultValueFactory = _ => "transparent"
 		};
 		var radiusOption = new Option<int>("--radius")
 		{
-			Description = "The tile's corner radius in the 120 px reference cell, scaled with the tile. Defaults to the deck's 22.",
+			Description
+				= "The tile's corner radius in the 120 px reference cell, scaled with the tile. Defaults to the deck's 22.",
 			DefaultValueFactory = _ => PreviewMetrics.DefaultRadius
 		};
 		var localeOption = new Option<string>("--locale")
-			{ Description = "The culture dates and numbers format in. Defaults to en-US.", DefaultValueFactory = _ => "en-US" };
+		{
+			Description = "The culture dates and numbers format in. Defaults to en-US.",
+			DefaultValueFactory = _ => "en-US"
+		};
 		var videoStreamImageOption = new Option<string?>("--video-stream-image")
 		{
-			Description = "A PNG, JPEG or WebP (up to 8 MB) drawn in place of every video stream, which a preview cannot play."
+			Description
+				= "A PNG, JPEG or WebP (up to 8 MB) drawn in place of every video stream, which a preview cannot play."
 		};
 		var outputOption = new Option<string>("--output")
-			{ Description = "The directory the PNG files go to. Defaults to ./previews.", DefaultValueFactory = _ => "previews" };
+		{
+			Description = "The directory the PNG files go to. Defaults to ./previews.",
+			DefaultValueFactory = _ => "previews"
+		};
 		var browserOption = new Option<string?>("--browser")
 		{
-			Description = $"A Chrome, Chromium or Edge executable. Defaults to {BrowserLocator.EnvironmentVariable}, then a " +
-				"browser found in the usual places."
+			Description
+				= $"A Chrome, Chromium or Edge executable. Defaults to {BrowserLocator.EnvironmentVariable}, then a "
+				+ "browser found in the usual places."
 		};
 
 		var render = new Command("render", "Render a plugin's [UiPreview] scenarios to PNG files.");
 		foreach (var symbol in new Option[]
 			{
 				projectOption, executableOption, artifactOption, sizeOption, cellsOption, previewOption, scaleOption,
-				themeOption, backgroundOption, radiusOption, localeOption, videoStreamImageOption, outputOption, browserOption
+				themeOption, backgroundOption, radiusOption, localeOption, videoStreamImageOption, outputOption,
+				browserOption
 			})
 		{
 			render.Add(symbol);
@@ -102,13 +112,12 @@ internal static class PreviewCommand
 		var option = new Option<PreviewTheme>("--theme")
 		{
 			Description = "dark or light. Defaults to dark.",
-			DefaultValueFactory = _ => PreviewTheme.Dark
+			DefaultValueFactory = _ => PreviewTheme.Dark,
+			CustomParser = result => CliOptionParsing.ParseToken(result,
+				PreviewTheme.Dark,
+				("dark", PreviewTheme.Dark),
+				("light", PreviewTheme.Light))
 		};
-
-		option.CustomParser = result => CliOptionParsing.ParseToken(result,
-			PreviewTheme.Dark,
-			("dark", PreviewTheme.Dark),
-			("light", PreviewTheme.Light));
 
 		return option;
 	}

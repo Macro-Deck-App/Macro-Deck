@@ -10,9 +10,18 @@ public static class WidgetSafeArea
 
 	public const int BreathingRoom = UiWidgetSafeArea.BreathingRoom;
 
-	public static UiLength LengthFor(int cornerRadius) => UiWidgetSafeArea.LengthFor(cornerRadius);
+	public static UiLength LengthFor(int cornerRadius)
+	{
+		return UiWidgetSafeArea.LengthFor(cornerRadius);
+	}
 
-	public static UiSize For(int cornerRadius) => UiWidgetSafeArea.For(cornerRadius);
+	public static UiSize For(int cornerRadius)
+	{
+		return UiWidgetSafeArea.For(cornerRadius);
+	}
 
-	public static int RadiusOf(UiSurface surface) => UiWidgetSafeArea.RadiusOf(surface);
+	public static int RadiusOf(UiSurface surface)
+	{
+		return UiWidgetSafeArea.RadiusOf(surface);
+	}
 }

@@ -26,7 +26,10 @@ internal sealed class DiscordConfigFlowTests
 	}
 
 	[TearDown]
-	public void TearDown() => _client.Dispose();
+	public void TearDown()
+	{
+		_client.Dispose();
+	}
 
 	[Test]
 	public async Task The_first_step_collects_the_application_credentials()
@@ -69,7 +72,7 @@ internal sealed class DiscordConfigFlowTests
 	[Test]
 	public async Task A_client_id_that_is_not_a_snowflake_is_rejected()
 	{
-		var result = await Submit("credentials", Credentials(clientId: "my-app"));
+		var result = await Submit("credentials", Credentials("my-app"));
 
 		Assert.That(TestLocalization.Resolve(result.FieldErrors!["clientId"]), Does.Contain("only digits"));
 	}
@@ -157,7 +160,7 @@ internal sealed class DiscordConfigFlowTests
 	[Test]
 	public async Task A_refused_endpoint_explains_the_privilege_mismatch()
 	{
-		_client.ConnectException = new DiscordIpcUnavailableException("refused", accessDenied: true);
+		_client.ConnectException = new DiscordIpcUnavailableException("refused", true);
 		await Submit("credentials", Credentials());
 
 		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
@@ -184,7 +187,7 @@ internal sealed class DiscordConfigFlowTests
 	public async Task A_refused_endpoint_outranks_a_skipped_rich_presence_server()
 	{
 		_client.ConnectException =
-			new DiscordIpcUnavailableException("refused", accessDenied: true, richPresenceOnly: true);
+			new DiscordIpcUnavailableException("refused", true, true);
 		await Submit("credentials", Credentials());
 
 		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
@@ -261,14 +264,18 @@ internal sealed class DiscordConfigFlowTests
 	}
 
 	private static Dictionary<string, object?> Credentials(string clientId = "123456", string secret = "shh")
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal)
 		{
 			["clientId"] = clientId,
 			["clientSecret"] = secret
 		};
+	}
 
 	private Task<ConfigFlowResult> Submit(string stepId, IReadOnlyDictionary<string, object?> input)
-		=> _flow.SubmitAsync(stepId, input, new StubContext(), CancellationToken.None);
+	{
+		return _flow.SubmitAsync(stepId, input, new StubContext(), CancellationToken.None);
+	}
 
 	private sealed class StubContext : IConfigFlowContext
 	{

@@ -45,9 +45,10 @@ internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
 
 		try
 		{
-			await using var registration = cancellationToken.Register(
-				static state => ((TaskCompletionSource<HostAssetTransfer>)state!).TrySetCanceled(),
-				completion).ConfigureAwait(false);
+			await using var registration = cancellationToken.Register(static state
+						=> ((TaskCompletionSource<HostAssetTransfer>)state!).TrySetCanceled(),
+					completion)
+				.ConfigureAwait(false);
 
 			return await completion.Task.ConfigureAwait(false);
 		}
@@ -93,25 +94,27 @@ internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
 		{
 			if (_completions.TryRemove(transferId, out var completion))
 			{
-				completion.TrySetResult(Failed);
+				completion.TrySetResult(_failed);
 			}
 		}
 	}
 
-	private static readonly HostAssetTransfer Failed = new(false, string.Empty, []);
+	private static readonly HostAssetTransfer _failed = new(false, string.Empty, []);
 
 	private TaskCompletionSource<HostAssetTransfer> Completion(string transferId)
-		=> _completions.GetOrAdd(transferId,
+	{
+		return _completions.GetOrAdd(transferId,
 			static _ => new TaskCompletionSource<HostAssetTransfer>(TaskCreationOptions
 				.RunContinuationsAsynchronously));
+	}
 
 	private (string AssetId, int? Index, bool Accepted) Begin(HostAssetBeginPayload? payload)
 	{
-		if (payload is null ||
-			string.IsNullOrEmpty(payload.AssetId) ||
-			string.IsNullOrEmpty(payload.ContentHash) ||
-			payload.TotalBytes < 0 ||
-			payload.TotalBytes > ProtocolLimits.MaxAssetBytes)
+		if (payload is null
+			|| string.IsNullOrEmpty(payload.AssetId)
+			|| string.IsNullOrEmpty(payload.ContentHash)
+			|| payload.TotalBytes < 0
+			|| payload.TotalBytes > ProtocolLimits.MaxAssetBytes)
 		{
 			return (payload?.AssetId ?? string.Empty, null, false);
 		}
@@ -143,10 +146,10 @@ internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
 
 		lock (_gate)
 		{
-			if (!_transfers.TryGetValue(payload.AssetId, out var transfer) ||
-				payload.Index != transfer.NextIndex ||
-				data.Length > ProtocolLimits.MaxAssetChunkBytes ||
-				transfer.Buffer.Length + data.Length > transfer.TotalBytes)
+			if (!_transfers.TryGetValue(payload.AssetId, out var transfer)
+				|| payload.Index != transfer.NextIndex
+				|| data.Length > ProtocolLimits.MaxAssetChunkBytes
+				|| transfer.Buffer.Length + data.Length > transfer.TotalBytes)
 			{
 				return (payload.AssetId, payload.Index, false);
 			}
@@ -177,11 +180,11 @@ internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
 		var bytes = transfer.Buffer.ToArray();
 		transfer.Buffer.Dispose();
 
-		var accepted = bytes.Length == transfer.TotalBytes &&
-			string.Equals(AssetContentHash.Compute(bytes), transfer.ContentHash, StringComparison.Ordinal);
+		var accepted = bytes.Length == transfer.TotalBytes
+			&& string.Equals(AssetContentHash.Compute(bytes), transfer.ContentHash, StringComparison.Ordinal);
 
 		Completion(payload.AssetId)
-			.TrySetResult(accepted ? new HostAssetTransfer(true, transfer.MimeType, bytes) : Failed);
+			.TrySetResult(accepted ? new HostAssetTransfer(true, transfer.MimeType, bytes) : _failed);
 
 		return (payload.AssetId, null, accepted);
 	}

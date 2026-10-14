@@ -64,7 +64,15 @@ public class WidgetBatchNotificationFanOutTests
 		_sessionRegistry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_pluginConnection = new FakePluginConnection();
 		_statePusher
-			= new HostStatePusher(_sessionRegistry, new EmptyDeckNavigator(), new EmptyScriptApi(), _widgetApi, new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None), new MacroDeckHost.Tests.UnitTests.Adb.FakeAdbManager(), new MacroDeckHost.Tests.UnitTests.TestSupport.FixedAdbAccessPolicy(), Serilog.Core.Logger.None);
+			= new HostStatePusher(_sessionRegistry,
+				new EmptyDeckNavigator(),
+				new EmptyScriptApi(),
+				_widgetApi,
+				new StubEventBindingTracker(),
+				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+				new Adb.FakeAdbManager(),
+				new FixedAdbAccessPolicy(),
+				Serilog.Core.Logger.None);
 		_folderCache = new MutableFolderCache();
 
 		var services = new ServiceCollection();
@@ -237,7 +245,9 @@ public class WidgetBatchNotificationFanOutTests
 	}
 
 	private void AssertEvalQueueEnqueuedAllMembers(IReadOnlyList<WidgetEntity> widgets)
-		=> Assert.That(DrainEvalQueue(), Is.EquivalentTo(widgets.Select(w => w.Id)));
+	{
+		Assert.That(DrainEvalQueue(), Is.EquivalentTo(widgets.Select(w => w.Id)));
+	}
 
 	private List<Guid> DrainEvalQueue()
 	{
@@ -261,7 +271,8 @@ public class WidgetBatchNotificationFanOutTests
 		return ids;
 	}
 
-	private void AssertOneBatchedTransportEvent<TEvent>(Func<TEvent, IEnumerable<Guid>> memberIdsOf,
+	private void AssertOneBatchedTransportEvent<TEvent>(
+		Func<TEvent, IEnumerable<Guid>> memberIdsOf,
 		IReadOnlyList<WidgetEntity> widgets)
 		where TEvent : class
 	{
@@ -282,12 +293,15 @@ public class WidgetBatchNotificationFanOutTests
 	}
 
 	private VariableEntity? Toggled(Guid widgetId)
-		=> _registry.FindByName(VariableScope.Widget,
+	{
+		return _registry.FindByName(VariableScope.Widget,
 			widgetId.ToString(),
 			WidgetStateReconciler.StateVariableName);
+	}
 
 	private static List<WidgetEntity> ThreeToggleButtons(Guid folderId)
-		=> Enumerable.Range(0, 3)
+	{
+		return Enumerable.Range(0, 3)
 			.Select(_ => new WidgetEntity
 			{
 				Id = Guid.NewGuid(),
@@ -300,6 +314,7 @@ public class WidgetBatchNotificationFanOutTests
 				Data = "{\"mode\":\"toggle\",\"isToggled\":false}"
 			})
 			.ToList();
+	}
 
 	private void AttachConnectedSession()
 	{
@@ -326,7 +341,10 @@ public class WidgetBatchNotificationFanOutTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -336,51 +354,74 @@ public class WidgetBatchNotificationFanOutTests
 	private sealed class NoOpFlowExecutor : IFlowExecutor
 	{
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult(new FlowExecutionResult
+		{
+			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(),
 				Status = FlowExecutionStatus.Succeeded,
 				MatchedFlows = 0
 			});
+		}
 	}
 
 	private sealed class NotSupportedWidgetService : IWidgetService
 	{
-		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget) => throw new NotSupportedException();
+		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class MutableFolderCache : IFolderCache
@@ -388,19 +429,49 @@ public class WidgetBatchNotificationFanOutTests
 		private FolderEntity _folder = new() { Name = "f", Order = 0, Widgets = [] };
 
 		public void SetWidgets(IReadOnlyList<WidgetEntity> widgets)
-			=> _folder = new FolderEntity { Id = _folder.Id, Name = "f", Order = 0, Widgets = widgets.ToList() };
+		{
+			_folder = new FolderEntity { Id = _folder.Id, Name = "f", Order = 0, Widgets = widgets.ToList() };
+		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -439,13 +510,19 @@ public class WidgetBatchNotificationFanOutTests
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public List<object> Sent { get; } = [];
 
@@ -470,15 +547,30 @@ public class WidgetBatchNotificationFanOutTests
 
 		public List<EventTriggerOwner> RemovedOwners { get; } = [];
 
-		public bool HasSubscribers(string qualifiedEventId) => false;
+		public bool HasSubscribers(string qualifiedEventId)
+		{
+			return false;
+		}
 
-		public IReadOnlyList<EventSubscription> Find(string qualifiedEventId) => [];
+		public IReadOnlyList<EventSubscription> Find(string qualifiedEventId)
+		{
+			return [];
+		}
 
-		public EventSubscription? Find(EventTarget target) => null;
+		public EventSubscription? Find(EventTarget target)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<EventSubscription> FindByProvider(string providerId) => [];
+		public IReadOnlyList<EventSubscription> FindByProvider(string providerId)
+		{
+			return [];
+		}
 
-		public IReadOnlyCollection<string> ProviderIds() => [];
+		public IReadOnlyCollection<string> ProviderIds()
+		{
+			return [];
+		}
 
 		public event Action? Changed
 		{
@@ -490,13 +582,19 @@ public class WidgetBatchNotificationFanOutTests
 		{
 		}
 
-		public void ReindexWidget(Guid widgetId, string? widgetData) => ReindexedIds.Add(widgetId);
+		public void ReindexWidget(Guid widgetId, string? widgetData)
+		{
+			ReindexedIds.Add(widgetId);
+		}
 
 		public void ReindexAutomation(Guid automationId, string? flows, bool enabled)
 		{
 		}
 
-		public void Remove(EventTriggerOwner owner) => RemovedOwners.Add(owner);
+		public void Remove(EventTriggerOwner owner)
+		{
+			RemovedOwners.Add(owner);
+		}
 	}
 
 	private sealed class FakeWidgetVariableIndex : IWidgetVariableIndex
@@ -505,25 +603,49 @@ public class WidgetBatchNotificationFanOutTests
 
 		public List<Guid> RemovedIds { get; } = [];
 
-		public IReadOnlyList<Guid> FindLabelReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindLabelReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public bool LabelReferences(Guid widgetId, string variableName) => false;
+		public bool LabelReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
-		public bool StateMappingReferences(Guid widgetId, string variableName) => false;
+		public bool StateMappingReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
 		public void Rebuild()
 		{
 		}
 
-		public void ReindexWidget(Guid widgetId, string type, string? data) => ReindexedIds.Add(widgetId);
+		public void ReindexWidget(Guid widgetId, string type, string? data)
+		{
+			ReindexedIds.Add(widgetId);
+		}
 
-		public void Remove(Guid widgetId) => RemovedIds.Add(widgetId);
+		public void Remove(Guid widgetId)
+		{
+			RemovedIds.Add(widgetId);
+		}
 	}
 
 	private sealed class CountingWidgetApi : IWidgetApi
@@ -536,52 +658,86 @@ public class WidgetBatchNotificationFanOutTests
 			return [];
 		}
 
-		public bool Exists(string widgetId) => false;
+		public bool Exists(string widgetId)
+		{
+			return false;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public Task<WidgetStateWriteResult> SetStateAsync(
 			string widgetId,
 			string stateId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 
-		public Task<WidgetStateWriteResult> AdvanceStateAsync(string widgetId,
+		public Task<WidgetStateWriteResult> AdvanceStateAsync(
+			string widgetId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		{
+			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
+		}
 	}
 
 	private sealed class EmptyDeckNavigator : IDeckNavigator
 	{
-		public Task ChangeFolderAsync(string folderId,
+		public Task ChangeFolderAsync(
+			string folderId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ChangeProfileAsync(string profileId,
+		public Task ChangeProfileAsync(
+			string profileId,
 			string? originClientId = null,
-			CancellationToken cancellationToken = default) => Task.CompletedTask;
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public IReadOnlyList<DeckFolder> GetFolders() => [];
+		public IReadOnlyList<DeckFolder> GetFolders()
+		{
+			return [];
+		}
 
-		public IReadOnlyList<DeckProfile> GetProfiles() => [];
+		public IReadOnlyList<DeckProfile> GetProfiles()
+		{
+			return [];
+		}
 	}
 
 	private sealed class EmptyScriptApi : IScriptApi
 	{
-		public IReadOnlyList<Script> GetScripts() => [];
+		public IReadOnlyList<Script> GetScripts()
+		{
+			return [];
+		}
 
-		public Task<MacroDeck.Sdk.Actions.ActionResult> RunAsync(string scriptId,
+		public Task<MacroDeck.Sdk.Actions.ActionResult> RunAsync(
+			string scriptId,
 			IReadOnlyDictionary<string, object?>? inputs = null,
 			string? originClientId = null,
 			string? ownerWidgetId = null,
 			CancellationToken cancellationToken = default)
-			=> MacroDeck.Sdk.Actions.ActionResult.SucceededTask;
+		{
+			return MacroDeck.Sdk.Actions.ActionResult.SucceededTask;
+		}
 	}
 }

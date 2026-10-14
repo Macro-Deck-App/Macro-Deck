@@ -51,8 +51,7 @@ public sealed class StreamChatHub : IStreamChatSink, IStreamChatFeed, IDisposabl
 		_logger = logger.ForContext<StreamChatHub>();
 		_images = images;
 
-		_messages = Channel.CreateBounded<Sequenced>(
-			new BoundedChannelOptions(MessageQueueCapacity)
+		_messages = Channel.CreateBounded<Sequenced>(new BoundedChannelOptions(MessageQueueCapacity)
 			{
 				FullMode = BoundedChannelFullMode.DropOldest, SingleReader = true, SingleWriter = false
 			},
@@ -244,7 +243,10 @@ public sealed class StreamChatHub : IStreamChatSink, IStreamChatFeed, IDisposabl
 		_control.Writer.TryComplete();
 	}
 
-	private void OnImageResolved(object? sender, StreamChatImage image) => Post(new ChatImageResolved(image));
+	private void OnImageResolved(object? sender, StreamChatImage image)
+	{
+		Post(new ChatImageResolved(image));
+	}
 
 	private bool ReconcileAccounts()
 	{
@@ -340,7 +342,10 @@ public sealed class StreamChatHub : IStreamChatSink, IStreamChatFeed, IDisposabl
 		}
 	}
 
-	private History? Find(string accountId) => _histories.GetValueOrDefault(accountId);
+	private History? Find(string accountId)
+	{
+		return _histories.GetValueOrDefault(accountId);
+	}
 
 	private void PublishSnapshots(HashSet<string> changed)
 	{

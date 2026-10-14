@@ -8,27 +8,36 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 
 public static class ScriptDtoMapper
 {
-	public static Script ToDto(ScriptEntity script) => new()
+	public static Script ToDto(ScriptEntity script)
 	{
-		Id = script.Id.ToString(),
-		Name = script.Name,
-		Description = script.Description,
-		Flows = script.Flows,
-		Inputs = [.. script.Inputs],
-		RunsOnWidget = script.RunsOnWidget,
-		CreatedAt = script.CreatedAt,
-		UpdatedAt = script.UpdatedAt
-	};
+		return new Script
+		{
+			Id = script.Id.ToString(),
+			Name = script.Name,
+			Description = script.Description,
+			Flows = script.Flows,
+			Inputs = [.. script.Inputs],
+			RunsOnWidget = script.RunsOnWidget,
+			CreatedAt = script.CreatedAt,
+			UpdatedAt = script.UpdatedAt
+		};
+	}
 
-	public static TransportError ToError(ScriptError error, LocalizedText message) => new()
+	public static TransportError ToError(ScriptError error, LocalizedText message)
 	{
-		Code = error.ToString(),
-		Message = message
-	};
+		return new TransportError
+		{
+			Code = error.ToString(),
+			Message = message
+		};
+	}
 
-	public static TransportError InvalidId() => new()
+	public static TransportError InvalidId()
 	{
-		Code = nameof(ScriptError.ValidationError),
-		Message = "Invalid script id"
-	};
+		return new TransportError
+		{
+			Code = nameof(ScriptError.ValidationError),
+			Message = "Invalid script id"
+		};
+	}
 }

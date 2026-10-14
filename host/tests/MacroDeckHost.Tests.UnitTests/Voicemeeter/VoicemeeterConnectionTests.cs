@@ -203,7 +203,7 @@ internal sealed class VoicemeeterConnectionTests
 		_connection.Poll();
 		_publisher.Clear();
 
-		_remote.UserPressesMacroButton(7, state: true);
+		_remote.UserPressesMacroButton(7, true);
 		_connection.Poll();
 
 		Assert.Multiple(() =>
@@ -248,8 +248,10 @@ internal sealed class VoicemeeterConnectionTests
 
 	[Test]
 	public void The_packed_version_is_read_one_byte_per_component()
-		=> Assert.That(VoicemeeterConnection.FormatVersion((3 << 24) | (0 << 16) | (2 << 8) | 8),
+	{
+		Assert.That(VoicemeeterConnection.FormatVersion(3 << 24 | 0 << 16 | 2 << 8 | 8),
 			Is.EqualTo("3.0.2.8"));
+	}
 
 	private sealed class RecordingPublisher : IEventPublisher
 	{
@@ -257,9 +259,14 @@ internal sealed class VoicemeeterConnectionTests
 
 		public IEnumerable<string> Ids => Published.Select(entry => entry.EventId);
 
-		public void Clear() => Published.Clear();
+		public void Clear()
+		{
+			Published.Clear();
+		}
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

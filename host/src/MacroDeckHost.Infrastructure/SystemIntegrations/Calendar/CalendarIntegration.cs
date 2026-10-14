@@ -29,7 +29,7 @@ public sealed class CalendarIntegration : IIntegration, ISystemIntegration, IWid
 		[
 			new JoinMeetingActionDefinition(() => _services),
 			new ShowDetailsActionDefinition(() => _services),
-			new RefreshCalendarsActionDefinition(() => _services),
+			new RefreshCalendarsActionDefinition(() => _services)
 		];
 	}
 
@@ -45,11 +45,20 @@ public sealed class CalendarIntegration : IIntegration, ISystemIntegration, IWid
 
 	public bool IsInitialized => true;
 
-	public void UseCalendarServices(CalendarHostServices services) => _services = services;
+	public void UseCalendarServices(CalendarHostServices services)
+	{
+		_services = services;
+	}
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public async Task InitializeAsync(IWidgetTypeProviderContext context, CancellationToken cancellationToken = default)
 	{
@@ -61,18 +70,23 @@ public sealed class CalendarIntegration : IIntegration, ISystemIntegration, IWid
 		}
 	}
 
-	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes() => [CalendarWidgetType()];
+	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+	{
+		return [CalendarWidgetType()];
+	}
 
 	// showAllDay is left out on purpose: each layout has its own default until the widget is first saved.
 	private static WidgetTypeDescriptor CalendarWidgetType()
-		=> new(CalendarWidgetTypes.LocalId,
+	{
+		return new WidgetTypeDescriptor(CalendarWidgetTypes.LocalId,
 			AppStrings.Integrations.Calendar.Name(),
 			AppStrings.Integrations.Calendar.Widget.Description(),
-			DefaultData: """{"layout":"agenda","calendars":[],"days":1,"showDate":true,"showTime":true,"showLocation":false,"showCalendar":false,"whenStarted":"now"}""",
-			DataSchema: DataSchema,
-			HasConfiguration: true)
+			"""{"layout":"agenda","calendars":[],"days":1,"showDate":true,"showTime":true,"showLocation":false,"showCalendar":false,"whenStarted":"now"}""",
+			DataSchema,
+			true)
 		{
 			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor],
-			SupportsFlows = true,
+			SupportsFlows = true
 		};
+	}
 }

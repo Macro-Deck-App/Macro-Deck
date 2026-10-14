@@ -13,14 +13,16 @@ public class ImportIconsFromPathRequestMessageHandler
 	private readonly IIconImportService _iconImportService;
 	private readonly IconImportBatchTracker _batchTracker;
 
-	public ImportIconsFromPathRequestMessageHandler(IIconImportService iconImportService,
+	public ImportIconsFromPathRequestMessageHandler(
+		IIconImportService iconImportService,
 		IconImportBatchTracker batchTracker)
 	{
 		_iconImportService = iconImportService;
 		_batchTracker = batchTracker;
 	}
 
-	public async ValueTask<ImportIconsResponse> Handle(ImportIconsFromPathRequest request,
+	public async ValueTask<ImportIconsResponse> Handle(
+		ImportIconsFromPathRequest request,
 		CancellationToken cancellationToken)
 	{
 		Guid? packId = null;

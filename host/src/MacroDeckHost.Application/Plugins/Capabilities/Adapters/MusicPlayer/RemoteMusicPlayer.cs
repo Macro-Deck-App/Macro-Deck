@@ -51,7 +51,8 @@ public abstract class RemoteMusicPlayer(
 		}
 	}
 
-	public async Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+	public async Task<MusicPlayerArtwork?> GetArtworkAsync(
+		string artworkId,
 		CancellationToken cancellationToken = default)
 	{
 		try
@@ -81,9 +82,9 @@ public abstract class RemoteMusicPlayer(
 				return new MusicPlayerArtwork(Convert.FromBase64String(inline), dto.MimeType);
 			}
 
-			return dto.ContentHash is { } contentHash &&
-				AssetContentHash.IsValid(contentHash) &&
-				_assetCache.TryRead(contentHash, out var bytes, out var mimeType)
+			return dto.ContentHash is { } contentHash
+				&& AssetContentHash.IsValid(contentHash)
+				&& _assetCache.TryRead(contentHash, out var bytes, out var mimeType)
 					? new MusicPlayerArtwork(bytes, mimeType)
 					: null;
 		}
@@ -94,54 +95,74 @@ public abstract class RemoteMusicPlayer(
 	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Play,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Play,
 			new MusicPlayerInstanceArguments { InstanceId = InstanceId },
 			cancellationToken);
+	}
 
 	protected Task PlayItemCoreAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.PlayItem,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.PlayItem,
 			new MusicPlayerPlayItemArguments { InstanceId = InstanceId, Item = MusicPlayerCatalogMapper.ToDto(item) },
 			cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Pause,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Pause,
 			new MusicPlayerInstanceArguments { InstanceId = InstanceId },
 			cancellationToken);
+	}
 
 	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Toggle,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Toggle,
 			new MusicPlayerInstanceArguments { InstanceId = InstanceId },
 			cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Next,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Next,
 			new MusicPlayerInstanceArguments { InstanceId = InstanceId },
 			cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Previous,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Previous,
 			new MusicPlayerInstanceArguments { InstanceId = InstanceId },
 			cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Seek,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Seek,
 			new MusicPlayerSeekArguments { InstanceId = InstanceId, PositionSeconds = position.TotalSeconds },
 			cancellationToken);
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Volume,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Volume,
 			new MusicPlayerVolumeArguments { InstanceId = InstanceId, VolumePercent = volumePercent },
 			cancellationToken);
+	}
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Shuffle,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Shuffle,
 			new MusicPlayerShuffleArguments { InstanceId = InstanceId, Enabled = enabled },
 			cancellationToken);
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Repeat,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Repeat,
 			new MusicPlayerRepeatArguments { InstanceId = InstanceId, Mode = mode.ToString() },
 			cancellationToken);
+	}
 
 	protected async Task<IReadOnlyList<MusicPlayerCatalogItem>> GetCatalogCoreAsync(
 		MusicPlayerCatalogItemKind kind,
@@ -182,13 +203,16 @@ public abstract class RemoteMusicPlayer(
 	}
 
 	protected Task TransferPlaybackCoreAsync(string deviceId, bool startPlayback, CancellationToken cancellationToken)
-		=> InvokeCommandAsync(CapabilityOperations.MusicPlayer.Transfer,
+	{
+		return InvokeCommandAsync(CapabilityOperations.MusicPlayer.Transfer,
 			new MusicPlayerTransferArguments
 				{ InstanceId = InstanceId, DeviceId = deviceId, StartPlayback = startPlayback },
 			cancellationToken);
+	}
 
 	private async Task InvokeCommandAsync(string operation, object arguments, CancellationToken cancellationToken)
-		=> await Invoker.InvokeAsync(PluginId,
+	{
+		await Invoker.InvokeAsync(PluginId,
 				new CapabilityInvokeRequest
 				{
 					Kind = CapabilityKinds.MusicPlayer, LocalId = ProviderCapabilityId.LocalId, Operation = operation,
@@ -196,7 +220,10 @@ public abstract class RemoteMusicPlayer(
 				},
 				cancellationToken)
 			.ConfigureAwait(false);
+	}
 
 	private static MusicPlayerDevice ToDomain(MusicPlayerDeviceDto dto)
-		=> new(dto.Id, dto.Name, dto.Type, dto.IsActive, dto.VolumePercent);
+	{
+		return new MusicPlayerDevice(dto.Id, dto.Name, dto.Type, dto.IsActive, dto.VolumePercent);
+	}
 }

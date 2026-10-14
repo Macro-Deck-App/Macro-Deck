@@ -37,8 +37,8 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 	public async Task An_installed_plugin_is_managed_and_only_an_uninstalled_developer_session_is_unmanaged()
 	{
 		_catalog.Plugins.Add(Installed(InstalledId));
-		await SelfRegisteredSession(DeveloperId, connected: true);
-		await SelfRegisteredSession(InstalledId, connected: true);
+		await SelfRegisteredSession(DeveloperId, true);
+		await SelfRegisteredSession(InstalledId, true);
 		var supervisor = new FakeInstallSupervisor(_catalog, _sessions);
 
 		var beforeStart = supervisor.Snapshot();
@@ -71,7 +71,7 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 			Versions = [],
 			ActiveVersion = null
 		});
-		await SelfRegisteredSession(DeveloperId, connected: false);
+		await SelfRegisteredSession(DeveloperId, false);
 		await ManagedSession("com.example.managed-only");
 
 		var fake = new FakeInstallSupervisor(_catalog, _sessions);
@@ -81,7 +81,9 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 	}
 
 	private static (string, PluginRuntimeState, PluginHealthState, bool) Row(PluginRuntimeSnapshot snapshot)
-		=> (snapshot.PluginId, snapshot.State, snapshot.Health, snapshot.Managed);
+	{
+		return (snapshot.PluginId, snapshot.State, snapshot.Health, snapshot.Managed);
+	}
 
 	private static InstalledPlugin Installed(string pluginId)
 	{
@@ -103,10 +105,14 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 	}
 
 	private Task SelfRegisteredSession(string pluginId, bool connected)
-		=> CreateSession(pluginId, PluginSessionOrigin.SelfRegistered, connected);
+	{
+		return CreateSession(pluginId, PluginSessionOrigin.SelfRegistered, connected);
+	}
 
 	private Task ManagedSession(string pluginId)
-		=> CreateSession(pluginId, PluginSessionOrigin.Managed, connected: true);
+	{
+		return CreateSession(pluginId, PluginSessionOrigin.Managed, true);
+	}
 
 	private async Task CreateSession(string pluginId, PluginSessionOrigin origin, bool connected)
 	{
@@ -125,7 +131,7 @@ internal sealed class FakeInstallSupervisorSnapshotTests
 
 		if (connected)
 		{
-			_sessions.TryAttach(sessionId, new FakePluginConnection(sessionId), instanceId: null);
+			_sessions.TryAttach(sessionId, new FakePluginConnection(sessionId), null);
 		}
 	}
 

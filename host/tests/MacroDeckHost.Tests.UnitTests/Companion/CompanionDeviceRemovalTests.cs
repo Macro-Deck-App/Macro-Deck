@@ -159,5 +159,7 @@ internal sealed class CompanionDeviceRemovalTests
 	}
 
 	private static CompanionDeviceRemovedHandler Handler(CompanionHarness harness)
-		=> new(harness.DeviceRegistry, CompanionHarness.Logger);
+	{
+		return new CompanionDeviceRemovedHandler(harness.DeviceRegistry, CompanionHarness.Logger);
+	}
 }

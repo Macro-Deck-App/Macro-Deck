@@ -36,7 +36,8 @@ public sealed class WindowsLockStateReader : ILockStateReader
 	}
 
 	[DllImport("user32.dll", SetLastError = true)]
-	private static extern IntPtr OpenInputDesktop(uint flags,
+	private static extern IntPtr OpenInputDesktop(
+		uint flags,
 		[MarshalAs(UnmanagedType.Bool)] bool inherit,
 		uint desiredAccess);
 

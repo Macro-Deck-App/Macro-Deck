@@ -33,11 +33,15 @@ public class AutomationsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetAutomationsResponse> GetAll(CancellationToken ct)
-		=> _getAutomations.Handle(new GetAutomationsRequest(), ct).AsTask();
+	{
+		return _getAutomations.Handle(new GetAutomationsRequest(), ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateAutomationResponse> Create(CreateAutomationRequest body, CancellationToken ct)
-		=> _createAutomation.Handle(body, ct).AsTask();
+	{
+		return _createAutomation.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut("{id}")]
 	public Task<UpdateAutomationResponse> Update(string id, UpdateAutomationRequest body, CancellationToken ct)
@@ -48,9 +52,13 @@ public class AutomationsController : ControllerBase
 
 	[HttpPost("{id}/duplicate")]
 	public Task<DuplicateAutomationResponse> Duplicate(string id, CancellationToken ct)
-		=> _duplicateAutomation.Handle(new DuplicateAutomationRequest { Id = id }, ct).AsTask();
+	{
+		return _duplicateAutomation.Handle(new DuplicateAutomationRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DeleteAutomationResponse> Delete(string id, CancellationToken ct)
-		=> _deleteAutomation.Handle(new DeleteAutomationRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteAutomation.Handle(new DeleteAutomationRequest { Id = id }, ct).AsTask();
+	}
 }

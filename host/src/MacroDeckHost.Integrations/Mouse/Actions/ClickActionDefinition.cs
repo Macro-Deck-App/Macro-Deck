@@ -21,7 +21,6 @@ internal sealed class ClickActionDefinition : IActionDefinition
 	[
 		MouseParameters.Button,
 		ActionParameter.Choice("clickCount",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "1", Label = AppStrings.Integrations.Mouse.Actions.Click.SingleClick() },
@@ -30,25 +29,28 @@ internal sealed class ClickActionDefinition : IActionDefinition
 				new ActionParameterOption
 					{ Value = "3", Label = AppStrings.Integrations.Mouse.Actions.Click.TripleClick() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.Click.ClickTypeLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Click.ClickTypeDescription(),
-			defaultValue: "1"),
+			AppStrings.Integrations.Mouse.Actions.Click.ClickTypeLabel(),
+			AppStrings.Integrations.Mouse.Actions.Click.ClickTypeDescription(),
+			"1"),
 		.. MouseParameters.OptionalPosition,
 		ActionParameter.Number("repeat",
-			label: AppStrings.Integrations.Mouse.Actions.Click.RepeatLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Click.RepeatDescription(),
-			min: 1,
-			max: 10_000,
-			step: 1,
-			defaultValue: 1),
+			AppStrings.Integrations.Mouse.Actions.Click.RepeatLabel(),
+			AppStrings.Integrations.Mouse.Actions.Click.RepeatDescription(),
+			1,
+			10_000,
+			1,
+			1),
 		ActionParameter.Duration("repeatDelay",
-			label: AppStrings.Integrations.Mouse.Actions.Click.RepeatDelayLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Click.RepeatDelayDescription(),
-			min: 0,
+			AppStrings.Integrations.Mouse.Actions.Click.RepeatDelayLabel(),
+			AppStrings.Integrations.Mouse.Actions.Click.RepeatDelayDescription(),
+			0,
 			defaultMilliseconds: 0)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

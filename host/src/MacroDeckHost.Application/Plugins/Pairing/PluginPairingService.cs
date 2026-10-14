@@ -42,7 +42,8 @@ public sealed class PluginPairingService : IPluginPairingService
 		_takeovers = takeovers;
 	}
 
-	public async Task<PluginPairingCreateOutcome> Create(string pluginId,
+	public async Task<PluginPairingCreateOutcome> Create(
+		string pluginId,
 		string displayName,
 		string codeChallenge,
 		string codeChallengeMethod,
@@ -145,7 +146,8 @@ public sealed class PluginPairingService : IPluginPairingService
 		return items;
 	}
 
-	public async Task<PluginPairingApproveOutcome> Approve(string requestId,
+	public async Task<PluginPairingApproveOutcome> Approve(
+		string requestId,
 		bool replaceExistingRegistration,
 		bool takeOverInstalledPlugin = false)
 	{
@@ -178,7 +180,10 @@ public sealed class PluginPairingService : IPluginPairingService
 		return PluginPairingApproveOutcome.Success;
 	}
 
-	public bool Reject(string requestId) => _store.Reject(requestId);
+	public bool Reject(string requestId)
+	{
+		return _store.Reject(requestId);
+	}
 
 	public async Task<PluginPairingRedeemOutcome> Redeem(string requestId, string codeVerifier)
 	{
@@ -206,7 +211,7 @@ public sealed class PluginPairingService : IPluginPairingService
 		// plugin has proven, by producing the verifier, that it is still there to receive the secret.
 		var result = IsInstalled(record.PluginId)
 			? await RedeemTakeover(record)
-			: await RegisterOrReplace(record, allowInstalledId: false);
+			: await RegisterOrReplace(record, false);
 
 		_store.CompleteRedemption(requestId, result.Succeeded);
 
@@ -235,7 +240,7 @@ public sealed class PluginPairingService : IPluginPairingService
 				await _supervisor.SuspendForTakeover(pluginId);
 			}
 
-			result = await RegisterOrReplace(record, allowInstalledId: true);
+			result = await RegisterOrReplace(record, true);
 		}
 		catch
 		{
@@ -260,9 +265,9 @@ public sealed class PluginPairingService : IPluginPairingService
 		// Developer Mode, a revoke, an uninstall or an install can all land while the credential is
 		// written. Whatever raced in, no credential for an installed id may outlive its takeover.
 		var registration = await _registrationRepository.GetByPluginId(pluginId);
-		if (!(await _preferences.GetDeveloper()).Enabled ||
-			!_takeovers.IsCurrent(pluginId, ticket) ||
-			registration is not { RevokedAt: null })
+		if (!(await _preferences.GetDeveloper()).Enabled
+			|| !_takeovers.IsCurrent(pluginId, ticket)
+			|| registration is not { RevokedAt: null })
 		{
 			await _registrationService.Revoke(pluginId);
 			return PluginRegistrationResult.Fail(PluginRegistrationError.PluginInstalled);
@@ -272,16 +277,18 @@ public sealed class PluginPairingService : IPluginPairingService
 	}
 
 	private Task<PluginRegistrationResult> RegisterOrReplace(PluginPairingRequestRecord record, bool allowInstalledId)
-		=> record.ReplaceExistingRegistration
+	{
+		return record.ReplaceExistingRegistration
 			? _registrationService.ReplaceSecret(record.PluginId,
 				record.DisplayName,
-				accessTokenId: null,
+				null,
 				PluginRegistrationOrigins.Pairing)
 			: _registrationService.Register(record.PluginId,
 				record.DisplayName,
-				accessTokenId: null,
+				null,
 				PluginRegistrationOrigins.Pairing,
 				allowInstalledId);
+	}
 
 	public async Task<IReadOnlyList<PluginPairedRegistration>> PairedRegistrations()
 	{
@@ -305,6 +312,9 @@ public sealed class PluginPairingService : IPluginPairingService
 	}
 
 	private bool IsInstalled(string pluginId)
-		=> _catalog.Discover().Any(plugin =>
-			string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0);
+	{
+		return _catalog.Discover()
+			.Any(plugin =>
+				string.Equals(plugin.PluginId, pluginId, StringComparison.Ordinal) && plugin.Versions.Count > 0);
+	}
 }

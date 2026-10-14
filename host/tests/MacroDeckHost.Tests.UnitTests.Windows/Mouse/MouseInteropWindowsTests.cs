@@ -6,7 +6,10 @@ namespace MacroDeckHost.Tests.UnitTests.Windows.Mouse;
 [Platform("Win")]
 public class MouseInteropWindowsTests
 {
-	private static IMouseInputProvider Provider() => MouseInputProviderFactory.Create();
+	private static IMouseInputProvider Provider()
+	{
+		return MouseInputProviderFactory.Create();
+	}
 
 	[Test]
 	public void The_factory_produces_a_supported_provider_needing_no_permission()

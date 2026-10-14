@@ -9,8 +9,8 @@ namespace MacroDeckHost.Plugins;
 
 [SuppressMessage("Design",
 	"CA1001:Types that own disposable fields should be disposable",
-	Justification = "Callers may still use this connection after its socket ended; Send and Close must then " +
-		"act as closed, so the lock is never disposed. It holds no unmanaged resource.")]
+	Justification = "Callers may still use this connection after its socket ended; Send and Close must then "
+		+ "act as closed, so the lock is never disposed. It holds no unmanaged resource.")]
 public sealed class PluginWebSocketConnection : IPluginConnection
 {
 	private readonly WebSocket _socket;
@@ -43,11 +43,12 @@ public sealed class PluginWebSocketConnection : IPluginConnection
 			// loop that sends on this connection - keepalive, the receive loop's pongs and protocol
 			// errors, and capability invokes. Aborting here is what lets the keepalive loop's own
 			// silence check ever run again instead of parking on this same call forever.
-			await WebSocketMessageIO.SendTextAsync(_socket,
-				bytes,
-				ProtocolTimeouts.DefaultRequest,
-				_timeProvider,
-				cancellationToken).ConfigureAwait(false);
+			await WebSocketMessageIo.SendTextAsync(_socket,
+					bytes,
+					ProtocolTimeouts.DefaultRequest,
+					_timeProvider,
+					cancellationToken)
+				.ConfigureAwait(false);
 		}
 		finally
 		{

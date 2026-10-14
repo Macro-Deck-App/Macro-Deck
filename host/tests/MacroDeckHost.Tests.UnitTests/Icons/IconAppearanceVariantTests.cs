@@ -23,7 +23,9 @@ internal sealed class IconAppearanceVariantTests
 	[TestCase("style2", "Style2")]
 	[TestCase("iOS", "I OS")]
 	public void A_variant_token_reads_as_a_sentence_case_name(string token, string expected)
-		=> Assert.That(IconAppearanceTraits.Humanize(token), Is.EqualTo(expected));
+	{
+		Assert.That(IconAppearanceTraits.Humanize(token), Is.EqualTo(expected));
+	}
 
 	[TestCase("variant=duoTone", true, "Duo tone")]
 	[TestCase("variant=Duo", false, "")]
@@ -94,13 +96,15 @@ internal sealed class IconAppearanceVariantTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.AllowsCustomValue, Is.True);
-			Assert.That(result.Options.Select(option => option.Value), Is.EqualTo(new[]
-			{
-				WidgetAppearanceValues.Reset, "default", "colorScheme=light", "colorScheme=dark", "motion=static", "motion=animated",
-				"colorScheme=light;motion=static", "colorScheme=light;motion=animated",
-				"colorScheme=dark;motion=static", "colorScheme=dark;motion=animated",
-				"variant=duoTone", "variant=outlined"
-			}));
+			Assert.That(result.Options.Select(option => option.Value),
+				Is.EqualTo(new[]
+				{
+					WidgetAppearanceValues.Reset, "default", "colorScheme=light", "colorScheme=dark", "motion=static",
+					"motion=animated",
+					"colorScheme=light;motion=static", "colorScheme=light;motion=animated",
+					"colorScheme=dark;motion=static", "colorScheme=dark;motion=animated",
+					"variant=duoTone", "variant=outlined"
+				}));
 		});
 	}
 

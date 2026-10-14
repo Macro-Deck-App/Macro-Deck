@@ -18,7 +18,8 @@ public sealed class PluginTrustBaselineBackgroundService : HostReadyBackgroundSe
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
 
-	public PluginTrustBaselineBackgroundService(IHostApplicationLifetime lifetime,
+	public PluginTrustBaselineBackgroundService(
+		IHostApplicationLifetime lifetime,
 		IServiceScopeFactory scopeFactory,
 		TimeProvider timeProvider,
 		ILogger logger)
@@ -72,7 +73,7 @@ public sealed class PluginTrustBaselineBackgroundService : HostReadyBackgroundSe
 			await trustRecords.Upsert(plugin.PluginId,
 				active.Version,
 				PluginTrustRecordVerdicts.Unsigned,
-				certificateId: null,
+				null,
 				now);
 			grandfathered++;
 		}

@@ -34,7 +34,7 @@ public class ProtocolDiagnosticsTests
 		{
 			["secret"] = "s1",
 			["password"] = "p1",
-			["apiKey"] = "k1",
+			["apiKey"] = "k1"
 		};
 
 		var redacted = ProtocolDiagnostics.Redact(details);
@@ -52,7 +52,7 @@ public class ProtocolDiagnosticsTests
 		var details = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
 			["deviceId"] = "abc-123",
-			["reason"] = "timeout",
+			["reason"] = "timeout"
 		};
 
 		var redacted = ProtocolDiagnostics.Redact(details);
@@ -89,5 +89,7 @@ public class ProtocolDiagnosticsTests
 
 	[Test]
 	public void Redact_of_an_empty_dictionary_returns_an_empty_dictionary()
-		=> Assert.That(ProtocolDiagnostics.Redact(new Dictionary<string, string>(StringComparer.Ordinal)), Is.Empty);
+	{
+		Assert.That(ProtocolDiagnostics.Redact(new Dictionary<string, string>(StringComparer.Ordinal)), Is.Empty);
+	}
 }

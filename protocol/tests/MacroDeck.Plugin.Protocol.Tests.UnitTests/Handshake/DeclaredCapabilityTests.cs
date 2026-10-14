@@ -42,7 +42,7 @@ public class DeclaredCapabilityTests
 		{
 			Kind = CapabilityKinds.Actions,
 			LocalId = "set-volume",
-			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 },
+			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
 
 		Assert.Multiple(() =>
@@ -61,7 +61,7 @@ public class DeclaredCapabilityTests
 			Kind = CapabilityKinds.Weather,
 			LocalId = "current-conditions",
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 2 },
-			DisplayName = "Current Conditions",
+			DisplayName = "Current Conditions"
 		};
 
 		var json = JsonSerializer.Serialize(capability, PluginProtocolJson.Options);

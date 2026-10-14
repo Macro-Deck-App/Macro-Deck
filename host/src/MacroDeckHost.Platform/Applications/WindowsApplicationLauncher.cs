@@ -21,11 +21,11 @@ internal static class WindowsApplicationLauncher
 	{
 		try
 		{
-			start(BuildStartInfo(path, arguments, workingDirectory, useShellExecute: true, runAsAdmin));
+			start(BuildStartInfo(path, arguments, workingDirectory, true, runAsAdmin));
 		}
 		catch (Win32Exception exception) when (!runAsAdmin && exception.NativeErrorCode == ErrorCantAccessFile)
 		{
-			start(BuildStartInfo(path, arguments, workingDirectory, useShellExecute: false, runAsAdmin: false));
+			start(BuildStartInfo(path, arguments, workingDirectory, false, false));
 		}
 	}
 

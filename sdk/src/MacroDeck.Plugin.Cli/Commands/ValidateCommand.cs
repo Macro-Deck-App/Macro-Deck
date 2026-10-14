@@ -49,8 +49,8 @@ internal static class ValidateCommand
 			// Implied by the selector when --level is absent: an artifact is something that was already
 			// packed, so package readiness is the natural default; a loose manifest or version directory is
 			// still being developed, so development is.
-			var level = requestedLevel ??
-				(artifactPath is not null
+			var level = requestedLevel
+				?? (artifactPath is not null
 					? PluginManifestValidationLevel.Package
 					: PluginManifestValidationLevel.Development);
 
@@ -73,7 +73,10 @@ internal static class ValidateCommand
 		return command;
 	}
 
-	private static int CountSelectors(params string?[] selectors) => selectors.Count(selector => selector is not null);
+	private static int CountSelectors(params string?[] selectors)
+	{
+		return selectors.Count(selector => selector is not null);
+	}
 
 	/// <summary>Nullable rather than defaulted: <c>null</c> means "--level was not given", which the
 	/// command's own action then implies from the selector - the parser cannot know that on its own. An
@@ -85,26 +88,25 @@ internal static class ValidateCommand
 	{
 		var option = new Option<PluginManifestValidationLevel?>("--level")
 		{
-			Description = "How strictly to validate: development, package or publication. Defaults from the " +
-				"selector (development for --manifest/--directory, package for --artifact)."
-		};
-
-		option.CustomParser = result =>
-		{
-			if (result.Tokens.Count == 0)
+			Description = "How strictly to validate: development, package or publication. Defaults from the "
+				+ "selector (development for --manifest/--directory, package for --artifact).",
+			CustomParser = result =>
 			{
-				return null;
+				if (result.Tokens.Count == 0)
+				{
+					return null;
+				}
+
+				var raw = result.Tokens[0].Value;
+
+				return raw.ToLowerInvariant() switch
+				{
+					"development" => PluginManifestValidationLevel.Development,
+					"package" => PluginManifestValidationLevel.Package,
+					"publication" => PluginManifestValidationLevel.Publication,
+					_ => Reject(result, raw)
+				};
 			}
-
-			var raw = result.Tokens[0].Value;
-
-			return raw.ToLowerInvariant() switch
-			{
-				"development" => PluginManifestValidationLevel.Development,
-				"package" => PluginManifestValidationLevel.Package,
-				"publication" => PluginManifestValidationLevel.Publication,
-				_ => Reject(result, raw)
-			};
 		};
 
 		return option;
@@ -144,9 +146,9 @@ internal static class ValidationResultWriter
 		{
 			var isError = problem.Severity == ManifestProblemSeverity.Error;
 			var tag = isError ? "error" : "warning";
-			var line = $"{tag} {problem.Code}: {problem.Message}" +
-				(problem.Pointer is null ? string.Empty : $" [{problem.Pointer}]") +
-				(problem.Level is { } requiringLevel
+			var line = $"{tag} {problem.Code}: {problem.Message}"
+				+ (problem.Pointer is null ? string.Empty : $" [{problem.Pointer}]")
+				+ (problem.Level is { } requiringLevel
 					? $" ({requiringLevel.ToString().ToLowerInvariant()})"
 					: string.Empty);
 

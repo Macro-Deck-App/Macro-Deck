@@ -56,7 +56,8 @@ public class RemoteUiResourceRegistryTests
 		var host = new FakeResourceHost { ForgetUploads = true };
 		var registry = new RemoteUiResourceRegistry(host, host);
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("photo", _png, "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("photo", _png, "image/png"));
 
 		Assert.Multiple(() =>
 		{
@@ -75,7 +76,8 @@ public class RemoteUiResourceRegistryTests
 		var host = new FakeResourceHost { RefuseWith = wireCode };
 		var registry = new RemoteUiResourceRegistry(host, host);
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("photo", _png, "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("photo", _png, "image/png"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(expected));
 	}
@@ -153,7 +155,7 @@ public class RemoteUiResourceRegistryTests
 			Handle = new UiResourceHandleDto
 			{
 				ResourceId = "app.macro-deck.plugin-icon.1", ContentHash = "hash-1", MediaType = "image/png",
-				ByteLength = 42,
+				ByteLength = 42
 			}
 		};
 		var uploader = new FakeResourceHost();
@@ -165,7 +167,8 @@ public class RemoteUiResourceRegistryTests
 		{
 			Assert.That(host.Calls,
 				Is.EqualTo((List<(string, string)>)[(HostApis.IconPacks, HostOperations.IconPacks.GetIconResource)]));
-			Assert.That(host.LastArguments, Is.EqualTo(new GetIconResourceArguments { Key = "logos", Name = "spotify" }));
+			Assert.That(host.LastArguments,
+				Is.EqualTo(new GetIconResourceArguments { Key = "logos", Name = "spotify" }));
 			Assert.That(handle.ResourceId, Is.EqualTo("app.macro-deck.plugin-icon.1"));
 			Assert.That(handle.ContentHash, Is.EqualTo("hash-1"));
 			Assert.That(handle.MediaType, Is.EqualTo("image/png"));
@@ -198,7 +201,7 @@ public class RemoteUiResourceRegistryTests
 			Handle = new UiResourceHandleDto
 			{
 				ResourceId = "app.macro-deck.plugin-icon.1", ContentHash = "hash-1", MediaType = "image/gif",
-				ByteLength = 7,
+				ByteLength = 7
 			}
 		};
 		var uploader = new FakeResourceHost();
@@ -252,7 +255,7 @@ public class RemoteUiResourceRegistryTests
 			{
 				Resource = new UiResourceHandleDto
 				{
-					ResourceId = "plugin-x.cover", ContentHash = "hash-1", MediaType = "image/webp", ByteLength = 9,
+					ResourceId = "plugin-x.cover", ContentHash = "hash-1", MediaType = "image/webp", ByteLength = 9
 				}
 			}
 		};
@@ -341,10 +344,11 @@ public class RemoteUiResourceRegistryTests
 	[TestCase(ProtocolErrorCodes.InvalidPayload, UiResourceErrorCode.Failed)]
 	public void Refused_artwork_surfaces_as_its_error_code(string wireCode, UiResourceErrorCode expected)
 	{
-		var registry = new RemoteUiResourceRegistry(new FakeArtworkHost { RefuseWith = wireCode }, new FakeResourceHost());
+		var registry
+			= new RemoteUiResourceRegistry(new FakeArtworkHost { RefuseWith = wireCode }, new FakeResourceHost());
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(expected));
 	}
@@ -367,8 +371,8 @@ public class RemoteUiResourceRegistryTests
 	{
 		var registry = new RemoteUiResourceRegistry(new FakeArtworkHost(), new FakeResourceHost());
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Failed));
 	}
@@ -379,7 +383,8 @@ public class RemoteUiResourceRegistryTests
 
 		public (string Name, string InstanceId, string ArtworkId)? Requested { get; private set; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -388,20 +393,24 @@ public class RemoteUiResourceRegistryTests
 			var request = wire.Deserialize<ArtworkArgumentsBeforeTheSize>(PluginProtocolJson.Options)!;
 			Requested = (request.Name, request.InstanceId, request.ArtworkId);
 
-			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(new UiRegisterMusicPlayerArtworkResult
+			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(
+				new UiRegisterMusicPlayerArtworkResult
 				{
 					Resource = new UiResourceHandleDto
 					{
 						ResourceId = "plugin-x.cover",
 						ContentHash = "full",
 						MediaType = "image/webp",
-						ByteLength = FullSizeLength,
+						ByteLength = FullSizeLength
 					}
 				},
 				PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed record ArtworkArgumentsBeforeTheSize
@@ -423,7 +432,8 @@ public class RemoteUiResourceRegistryTests
 
 		public string? RefuseWith { get; init; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -441,7 +451,10 @@ public class RemoteUiResourceRegistryTests
 				: JsonSerializer.SerializeToElement(Answer, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeIconHost : IHostInvoker
@@ -454,7 +467,8 @@ public class RemoteUiResourceRegistryTests
 
 		public string? RefuseWith { get; init; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -472,7 +486,10 @@ public class RemoteUiResourceRegistryTests
 				: JsonSerializer.SerializeToElement(Handle, PluginProtocolJson.Options));
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeResourceHost : IHostInvoker, IPluginAssetUploader
@@ -496,7 +513,8 @@ public class RemoteUiResourceRegistryTests
 
 		public TimeSpan UploadDelay { get; init; }
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
@@ -532,27 +550,37 @@ public class RemoteUiResourceRegistryTests
 					ResourceId = "plugin-x." + register.Name,
 					ContentHash = register.ContentHash,
 					MediaType = register.MediaType,
-					ByteLength = _png.Length,
+					ByteLength = _png.Length
 				}
 			});
 		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			TimeSpan timeout,
 			CancellationToken cancellationToken)
-			=> InvokeAsync(api, operation, arguments, cancellationToken);
+		{
+			return InvokeAsync(api, operation, arguments, cancellationToken);
+		}
 
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			TimeSpan deadline,
 			TimeSpan timeout,
 			CancellationToken cancellationToken)
-			=> InvokeAsync(api, operation, arguments, cancellationToken);
+		{
+			return InvokeAsync(api, operation, arguments, cancellationToken);
+		}
 
-		public async Task<string> UploadAsync(string kind, string mimeType, byte[] data, CancellationToken cancellationToken)
+		public async Task<string> UploadAsync(
+			string kind,
+			string mimeType,
+			byte[] data,
+			CancellationToken cancellationToken)
 		{
 			var inFlight = Interlocked.Increment(ref _inFlight);
 			lock (Uploads)
@@ -573,9 +601,14 @@ public class RemoteUiResourceRegistryTests
 			return hash;
 		}
 
-		public bool TryComplete(ProtocolEnvelope ack) => false;
+		public bool TryComplete(ProtocolEnvelope ack)
+		{
+			return false;
+		}
 
 		private static Task<JsonElement?> Result(UiRegisterResourceResult result)
-			=> Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(result, PluginProtocolJson.Options));
+		{
+			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(result, PluginProtocolJson.Options));
+		}
 	}
 }

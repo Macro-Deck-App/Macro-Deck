@@ -124,7 +124,7 @@ internal sealed class StoreUpdateAutomationTests
 	[Test]
 	public async Task No_update_notification_is_shown_when_the_user_turned_them_off()
 	{
-		await _preferences.SetExtensions(null, null, notifyOnUpdates: false, null);
+		await _preferences.SetExtensions(null, null, false, null);
 
 		await _notifier.Notify([PluginUpdate("1.1.0")]);
 
@@ -158,7 +158,7 @@ internal sealed class StoreUpdateAutomationTests
 	[Test]
 	public async Task Automatic_updates_wait_for_a_registry_fetched_in_this_session()
 	{
-		await EnableAutoUpdate(markFresh: false);
+		await EnableAutoUpdate(false);
 		InstallFromStore("1.0.0");
 
 		await _autoUpdater.Apply([PluginUpdate("1.1.0")]);
@@ -278,12 +278,13 @@ internal sealed class StoreUpdateAutomationTests
 	[Test]
 	public async Task Updates_are_announced_while_no_registry_fetch_has_succeeded_yet()
 	{
-		await EnableAutoUpdate(markFresh: false);
+		await EnableAutoUpdate(false);
 		InstallFromStore("1.0.0");
 
 		await _notifier.Notify([PluginUpdate("1.1.0")]);
 
-		Assert.That(_notifications.Snapshot().Select(entry => entry.Title), Does.Contain("1 extension update available"));
+		Assert.That(_notifications.Snapshot().Select(entry => entry.Title),
+			Does.Contain("1 extension update available"));
 	}
 
 	[Test]
@@ -342,7 +343,7 @@ internal sealed class StoreUpdateAutomationTests
 		var afterBatchIsCovered = announced;
 		await coordinator.EnsureBeforePluginUpdate("com.acme.b", "batch", () => announced++);
 
-		await _preferences.SetBackups(null, null, null, null, null, null, null, beforePluginUpdate: false);
+		await _preferences.SetBackups(null, null, null, null, null, null, null, false);
 		await coordinator.EnsureBeforePluginUpdate("com.acme.c", null, () => announced++);
 
 		Assert.Multiple(() =>
@@ -390,7 +391,7 @@ internal sealed class StoreUpdateAutomationTests
 
 	private async Task EnableAutoUpdate(bool markFresh = true)
 	{
-		await _preferences.SetExtensions(null, null, null, null, autoUpdate: true);
+		await _preferences.SetExtensions(null, null, null, null, true);
 		if (markFresh)
 		{
 			_autoUpdater.MarkRegistryFresh();
@@ -403,7 +404,8 @@ internal sealed class StoreUpdateAutomationTests
 		_plugins.Active[PluginId] = version;
 	}
 
-	private void SaveRecord(StoreExtensionKind kind, string packageId, string version) =>
+	private void SaveRecord(StoreExtensionKind kind, string packageId, string version)
+	{
 		_installations.Save(new StoreInstallationRecord
 		{
 			Origin = "https://registry.example/",
@@ -411,6 +413,7 @@ internal sealed class StoreUpdateAutomationTests
 			PackageId = packageId,
 			Version = version
 		});
+	}
 
 	private async Task<UserNotification> WaitForNotification()
 	{
@@ -429,24 +432,28 @@ internal sealed class StoreUpdateAutomationTests
 		throw new AssertionException("No automatic update summary was raised.");
 	}
 
-	private static StoreAvailableUpdate PluginUpdate(string latest) => new()
+	private static StoreAvailableUpdate PluginUpdate(string latest)
 	{
-		Kind = StoreExtensionKind.Plugin,
-		PackageId = PluginId,
-		Name = "Hue Bridge",
-		InstalledVersion = "1.0.0",
-		LatestVersion = latest
-	};
+		return new StoreAvailableUpdate
+		{
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = PluginId,
+			Name = "Hue Bridge",
+			InstalledVersion = "1.0.0",
+			LatestVersion = latest
+		};
+	}
 
 	[Test]
-	public async Task Each_installed_withdrawn_version_raises_a_security_warning_with_the_registrys_reason_and_replacement()
+	public async Task
+		Each_installed_withdrawn_version_raises_a_security_warning_with_the_registrys_reason_and_replacement()
 	{
 		using var withdrawalNotifier = WithdrawalNotifier();
-		await _preferences.SetExtensions(null, null, notifyOnUpdates: false, null);
+		await _preferences.SetExtensions(null, null, false, null);
 
 		await withdrawalNotifier.Notify([
-			Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key", replacement: "com.acme.hue2"),
-			Withdrawal("com.acme.icons", "Material Icons", reason: "Malware", listed: false)
+			Withdrawal("com.acme.hue", "Hue Bridge", "Compromised signing key", "com.acme.hue2"),
+			Withdrawal("com.acme.icons", "Material Icons", "Malware", listed: false)
 		]);
 
 		var hue = _notifications.Snapshot().Single(entry => entry.Title.Contains("Hue Bridge"));
@@ -467,7 +474,7 @@ internal sealed class StoreUpdateAutomationTests
 	public async Task A_dismissed_warning_stays_dismissed_until_the_withdrawal_changes()
 	{
 		using var withdrawalNotifier = WithdrawalNotifier();
-		var withdrawal = Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key");
+		var withdrawal = Withdrawal("com.acme.hue", "Hue Bridge", "Compromised signing key");
 		await withdrawalNotifier.Notify([withdrawal]);
 		_notifications.DismissAll();
 
@@ -486,30 +493,36 @@ internal sealed class StoreUpdateAutomationTests
 	public async Task A_warning_is_retired_once_the_withdrawn_version_is_no_longer_installed()
 	{
 		using var withdrawalNotifier = WithdrawalNotifier();
-		await withdrawalNotifier.Notify([Withdrawal("com.acme.hue", "Hue Bridge", reason: "Compromised signing key")]);
+		await withdrawalNotifier.Notify([Withdrawal("com.acme.hue", "Hue Bridge", "Compromised signing key")]);
 
 		await withdrawalNotifier.Notify([]);
 
 		Assert.That(_notifications.Snapshot(), Is.Empty);
 	}
 
-	private StoreWithdrawalNotifier WithdrawalNotifier() =>
-		new(_notifications, _provider.GetRequiredService<IServiceScopeFactory>());
+	private StoreWithdrawalNotifier WithdrawalNotifier()
+	{
+		return new StoreWithdrawalNotifier(_notifications, _provider.GetRequiredService<IServiceScopeFactory>());
+	}
 
-	private static StoreInstalledWithdrawal Withdrawal(string id,
+	private static StoreInstalledWithdrawal Withdrawal(
+		string id,
 		string name,
 		string? reason = null,
 		string? replacement = null,
-		bool listed = true) => new()
+		bool listed = true)
 	{
-		Kind = StoreExtensionKind.Plugin,
-		PackageId = id,
-		Name = name,
-		InstalledVersion = "1.2.0",
-		Reason = reason,
-		Replacement = replacement,
-		Listed = listed
-	};
+		return new StoreInstalledWithdrawal
+		{
+			Kind = StoreExtensionKind.Plugin,
+			PackageId = id,
+			Name = name,
+			InstalledVersion = "1.2.0",
+			Reason = reason,
+			Replacement = replacement,
+			Listed = listed
+		};
+	}
 
 	private sealed class RecordingBatchInstaller(StoreOperationTracker tracker) : IStoreUpdateBatchInstaller
 	{
@@ -517,7 +530,8 @@ internal sealed class StoreUpdateAutomationTests
 
 		public List<string?> BatchIds { get; } = [];
 
-		public IReadOnlyList<StoreOperation> Install(IEnumerable<StoreAvailableUpdate> updates,
+		public IReadOnlyList<StoreOperation> Install(
+			IEnumerable<StoreAvailableUpdate> updates,
 			string? backupBatchId = null)
 		{
 			var operations = updates.Select(update => tracker.Create(StoreOperationKind.Update,
@@ -537,8 +551,9 @@ internal sealed class StoreUpdateAutomationTests
 	{
 		public Dictionary<string, string> Active { get; } = new(StringComparer.Ordinal);
 
-		public IReadOnlyList<InstalledPlugin> Discover() =>
-			Active.Select(pair => new InstalledPlugin
+		public IReadOnlyList<InstalledPlugin> Discover()
+		{
+			return Active.Select(pair => new InstalledPlugin
 				{
 					PluginId = pair.Key,
 					PluginDirectory = "/plugins/" + pair.Key,
@@ -551,6 +566,7 @@ internal sealed class StoreUpdateAutomationTests
 					}
 				})
 				.ToList();
+		}
 
 		public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 		{
@@ -567,7 +583,10 @@ internal sealed class StoreUpdateAutomationTests
 	{
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
-		public Task<AppPreferenceEntity?> GetByKey(string key) => Task.FromResult(_store.GetValueOrDefault(key));
+		public Task<AppPreferenceEntity?> GetByKey(string key)
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -591,7 +610,8 @@ internal sealed class StoreUpdateAutomationTests
 
 		public int CreateCount { get; private set; }
 
-		public Task<Result<BackupDescriptor, BackupError>> Create(CreateBackupRequest request,
+		public Task<Result<BackupDescriptor, BackupError>> Create(
+			CreateBackupRequest request,
 			CancellationToken cancellationToken = default)
 		{
 			CreateCount++;
@@ -615,19 +635,36 @@ internal sealed class StoreUpdateAutomationTests
 		}
 
 		public Task<Result<IReadOnlyList<BackupDescriptor>, BackupError>> List(
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public Task<Result<BackupInspection, BackupError>> Inspect(BackupSourceRef source,
-			string? recoveryKey,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public Task<Result<BackupDescriptor, BackupError>> Import(BackupSourceRef source,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public Task<Result<BackupExportHandle, BackupError>> OpenExport(Guid backupId,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public Task<Result<BackupError>> Delete(Guid backupId, CancellationToken cancellationToken = default) =>
+			CancellationToken cancellationToken = default)
+		{
 			throw new NotSupportedException();
+		}
+
+		public Task<Result<BackupInspection, BackupError>> Inspect(
+			BackupSourceRef source,
+			string? recoveryKey,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<BackupDescriptor, BackupError>> Import(
+			BackupSourceRef source,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<BackupExportHandle, BackupError>> OpenExport(
+			Guid backupId,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<BackupError>> Delete(Guid backupId, CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

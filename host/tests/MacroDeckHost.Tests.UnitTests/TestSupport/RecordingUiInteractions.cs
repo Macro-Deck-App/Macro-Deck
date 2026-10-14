@@ -8,7 +8,10 @@ internal sealed class RecordingUiInteractions : IUiInteractionsFactory, IUiInter
 	public TaskCompletionSource<(string? Client, ModalDefinition Modal)> Opened { get; }
 		= new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-	public IUiInteractions ForIntegration(string integrationId) => this;
+	public IUiInteractions ForIntegration(string integrationId)
+	{
+		return this;
+	}
 
 	public Task<bool> ShowModalAsync(
 		string? originClientId,
@@ -23,5 +26,7 @@ internal sealed class RecordingUiInteractions : IUiInteractionsFactory, IUiInter
 		string? originClientId,
 		ModalDefinition modal,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(ModalResult.FromCancellation<T>());
+	{
+		return Task.FromResult(ModalResult.FromCancellation<T>());
+	}
 }

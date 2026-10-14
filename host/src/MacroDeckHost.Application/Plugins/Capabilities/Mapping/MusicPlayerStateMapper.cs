@@ -7,12 +7,12 @@ public static class MusicPlayerStateMapper
 {
 	public static MusicPlayerState ToDomain(MusicPlayerStateDto dto)
 	{
-		if (!Enum.TryParse<PlaybackState>(dto.PlaybackState, ignoreCase: false, out var playbackState))
+		if (!Enum.TryParse<PlaybackState>(dto.PlaybackState, false, out var playbackState))
 		{
 			throw new InvalidOperationException($"Unknown playback state '{dto.PlaybackState}'.");
 		}
 
-		if (!Enum.TryParse<RepeatMode>(dto.RepeatMode, ignoreCase: false, out var repeatMode))
+		if (!Enum.TryParse<RepeatMode>(dto.RepeatMode, false, out var repeatMode))
 		{
 			throw new InvalidOperationException($"Unknown repeat mode '{dto.RepeatMode}'.");
 		}

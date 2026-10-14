@@ -7,9 +7,13 @@ namespace MacroDeck.LicenseTool.Collectors;
 
 internal static class NuGetCollector
 {
-	private static readonly string[] ShippedAssetGroups = ["runtime", "native", "resource"];
+	private static readonly string[] _shippedAssetGroups = ["runtime", "native", "resource"];
 
-	public static bool Collect(string repositoryRoot, NuGetSourceConfiguration source, ComponentSet components, Problems problems)
+	public static bool Collect(
+		string repositoryRoot,
+		NuGetSourceConfiguration source,
+		ComponentSet components,
+		Problems problems)
 	{
 		var projectPath = Path.Combine(repositoryRoot, source.Project);
 		var assetsPath = Path.Combine(Path.GetDirectoryName(projectPath)!, "obj", "project.assets.json");
@@ -25,7 +29,8 @@ internal static class NuGetCollector
 		var root = document.RootElement;
 		var targets = root.GetProperty("targets");
 		var libraries = root.GetProperty("libraries");
-		var packageFolders = root.GetProperty("packageFolders").EnumerateObject().Select(folder => folder.Name).ToList();
+		var packageFolders
+			= root.GetProperty("packageFolders").EnumerateObject().Select(folder => folder.Name).ToList();
 		var complete = true;
 
 		foreach (var runtime in source.RuntimeIdentifiers)
@@ -33,7 +38,8 @@ internal static class NuGetCollector
 			var targetName = $"{source.TargetFramework}/{runtime.Id}";
 			if (!targets.TryGetProperty(targetName, out var target))
 			{
-				problems.Add($"nuget: {source.Project} was restored without the {runtime.Id} graph; run: {restoreCommand}");
+				problems.Add(
+					$"nuget: {source.Project} was restored without the {runtime.Id} graph; run: {restoreCommand}");
 				complete = false;
 				continue;
 			}
@@ -58,13 +64,20 @@ internal static class NuGetCollector
 		return complete;
 	}
 
-	private static bool IsShipped(JsonElement library) =>
-		ShippedAssetGroups.Any(group =>
+	private static bool IsShipped(JsonElement library)
+	{
+		return _shippedAssetGroups.Any(group =>
 			library.TryGetProperty(group, out var assets)
-			&& assets.EnumerateObject().Any(asset => !asset.Name.EndsWith("/_._", StringComparison.Ordinal)
-				&& asset.Name != "_._"));
+			&& assets.EnumerateObject()
+				.Any(asset => !asset.Name.EndsWith("/_._", StringComparison.Ordinal)
+					&& asset.Name != "_._"));
+	}
 
-	private static void ReadPackage(JsonElement library, List<string> packageFolders, Component component, Problems problems)
+	private static void ReadPackage(
+		JsonElement library,
+		List<string> packageFolders,
+		Component component,
+		Problems problems)
 	{
 		var relative = library.GetProperty("path").GetString()!;
 		var directory = packageFolders
@@ -82,8 +95,10 @@ internal static class NuGetCollector
 		string? licenseFile = null;
 		if (nuspecFile is not null)
 		{
-			var metadata = XDocument.Load(Path.Combine(directory, nuspecFile)).Root?
-				.Elements().FirstOrDefault(element => element.Name.LocalName == "metadata");
+			var metadata = XDocument.Load(Path.Combine(directory, nuspecFile))
+				.Root?
+				.Elements()
+				.FirstOrDefault(element => element.Name.LocalName == "metadata");
 			var license = Child(metadata, "license");
 			if (license is not null && (string?)license.Attribute("type") == "expression")
 			{
@@ -94,14 +109,14 @@ internal static class NuGetCollector
 				licenseFile = license.Value.Trim().Replace('\\', '/');
 			}
 
-			component.Url = TextNormalizer.CleanUrl(
-				Child(metadata, "projectUrl")?.Value
+			component.Url = TextNormalizer.CleanUrl(Child(metadata, "projectUrl")?.Value
 				?? (string?)Child(metadata, "repository")?.Attribute("url"));
 			var copyright = Child(metadata, "copyright")?.Value ?? Child(metadata, "authors")?.Value;
 			component.Copyright = string.IsNullOrWhiteSpace(copyright) ? null : copyright.Trim();
 		}
 
-		foreach (var file in files.Where(file => !file.Contains('/', StringComparison.Ordinal)).Order(StringComparer.Ordinal))
+		foreach (var file in files.Where(file => !file.Contains('/', StringComparison.Ordinal))
+			.Order(StringComparer.Ordinal))
 		{
 			var kind = string.Equals(file, licenseFile, StringComparison.OrdinalIgnoreCase)
 				? LicenseTextKind.License
@@ -112,14 +127,18 @@ internal static class NuGetCollector
 			}
 		}
 
-		if (licenseFile is not null && licenseFile.Contains('/', StringComparison.Ordinal)
+		if (licenseFile is not null
+			&& licenseFile.Contains('/', StringComparison.Ordinal)
 			&& File.Exists(Path.Combine(directory, licenseFile)))
 		{
 			component.AddText(new LicenseText(Path.GetFileName(licenseFile),
-				File.ReadAllText(Path.Combine(directory, licenseFile)), LicenseTextKind.License));
+				File.ReadAllText(Path.Combine(directory, licenseFile)),
+				LicenseTextKind.License));
 		}
 	}
 
-	private static XElement? Child(XElement? parent, string name) =>
-		parent?.Elements().FirstOrDefault(element => element.Name.LocalName == name);
+	private static XElement? Child(XElement? parent, string name)
+	{
+		return parent?.Elements().FirstOrDefault(element => element.Name.LocalName == name);
+	}
 }

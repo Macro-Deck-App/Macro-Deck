@@ -33,7 +33,8 @@ internal static class BuildStaging
 		return directory;
 	}
 
-	public static IReadOnlyList<string> CopyDeclared(string sourceRoot,
+	public static IReadOnlyList<string> CopyDeclared(
+		string sourceRoot,
 		string stagingRoot,
 		IEnumerable<string> relativePaths,
 		IReadOnlyCollection<string> excludedDirectories,
@@ -47,8 +48,9 @@ internal static class BuildStaging
 		{
 			var source = Path.GetFullPath(Path.Combine(root, relativePath));
 
-			if (excluded.Any(directory => source.Equals(directory, PathComparison) ||
-				source.StartsWith(directory + Path.DirectorySeparatorChar, PathComparison)))
+			if (excluded.Any(directory
+				=> source.Equals(directory, PathComparison)
+				|| source.StartsWith(directory + Path.DirectorySeparatorChar, PathComparison)))
 			{
 				skipped.Add(relativePath);
 				continue;
@@ -62,7 +64,7 @@ internal static class BuildStaging
 			}
 			else if (Directory.Exists(source))
 			{
-				files = Walk(root, source, excluded, skipSources: false, cancellationToken);
+				files = Walk(root, source, excluded, false, cancellationToken);
 			}
 			else
 			{
@@ -86,19 +88,21 @@ internal static class BuildStaging
 		return skipped;
 	}
 
-	public static void CopyTargetOutput(string outputDirectory,
+	public static void CopyTargetOutput(
+		string outputDirectory,
 		string destinationDirectory,
 		CancellationToken cancellationToken)
 	{
 		var root = Path.GetFullPath(outputDirectory);
 
 		Directory.CreateDirectory(destinationDirectory);
-		CopyFiles(Walk(root, root, new HashSet<string>(StringComparer.Ordinal), skipSources: false, cancellationToken),
+		CopyFiles(Walk(root, root, new HashSet<string>(StringComparer.Ordinal), false, cancellationToken),
 			root,
 			destinationDirectory);
 	}
 
-	public static IReadOnlyList<string> Unpackaged(string sourceRoot,
+	public static IReadOnlyList<string> Unpackaged(
+		string sourceRoot,
 		string manifestPath,
 		string stagingRoot,
 		IReadOnlyCollection<string> excludedDirectories,
@@ -108,13 +112,14 @@ internal static class BuildStaging
 		var manifest = Path.GetFullPath(manifestPath);
 		var scanned = Path.GetDirectoryName(manifest) ?? root;
 
-		if (!scanned.Equals(root, PathComparison) &&
-			!scanned.StartsWith(Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar, PathComparison))
+		if (!scanned.Equals(root, PathComparison)
+			&& !scanned.StartsWith(Path.TrimEndingDirectorySeparator(root) + Path.DirectorySeparatorChar,
+				PathComparison))
 		{
 			scanned = root;
 		}
 
-		return Walk(root, scanned, ExcludedSet(excludedDirectories), skipSources: true, cancellationToken)
+		return Walk(root, scanned, ExcludedSet(excludedDirectories), true, cancellationToken)
 			.Where(file => !file.Equals(manifest, PathComparison))
 			.Select(file => Path.GetRelativePath(root, file))
 			.Where(relative => !File.Exists(Path.Combine(stagingRoot, relative)))
@@ -131,7 +136,7 @@ internal static class BuildStaging
 		{
 			if (Directory.Exists(stagingDirectory))
 			{
-				Directory.Delete(stagingDirectory, recursive: true);
+				Directory.Delete(stagingDirectory, true);
 			}
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -161,11 +166,12 @@ internal static class BuildStaging
 			var destination = Path.Combine(destinationRoot, Path.GetRelativePath(root, file));
 
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			File.Copy(file, destination, overwrite: true);
+			File.Copy(file, destination, true);
 		}
 	}
 
-	private static IEnumerable<string> Walk(string root,
+	private static IEnumerable<string> Walk(
+		string root,
 		string current,
 		IReadOnlySet<string> excluded,
 		bool skipSources,
@@ -177,12 +183,12 @@ internal static class BuildStaging
 
 			var name = Path.GetFileName(file);
 
-			if (_excludedFiles.Contains(name, StringComparer.OrdinalIgnoreCase) ||
-				PluginArtifactFiles.HasArtifactExtension(name) ||
-				name.Equals(PluginBuildConfigReader.FileName, StringComparison.OrdinalIgnoreCase) ||
-				(current.Equals(root, StringComparison.Ordinal) &&
-					name.Equals(PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase)) ||
-				(skipSources && IsSource(Path.GetRelativePath(root, file))))
+			if (_excludedFiles.Contains(name, StringComparer.OrdinalIgnoreCase)
+				|| PluginArtifactFiles.HasArtifactExtension(name)
+				|| name.Equals(PluginBuildConfigReader.FileName, StringComparison.OrdinalIgnoreCase)
+				|| current.Equals(root, StringComparison.Ordinal)
+				&& name.Equals(PluginArtifactFiles.ManifestFileName, StringComparison.OrdinalIgnoreCase)
+				|| skipSources && IsSource(Path.GetRelativePath(root, file)))
 			{
 				continue;
 			}
@@ -196,8 +202,8 @@ internal static class BuildStaging
 
 			var name = Path.GetFileName(directory);
 
-			if (_excludedDirectories.Contains(name, StringComparer.OrdinalIgnoreCase) ||
-				excluded.Contains(Path.GetFullPath(directory)))
+			if (_excludedDirectories.Contains(name, StringComparer.OrdinalIgnoreCase)
+				|| excluded.Contains(Path.GetFullPath(directory)))
 			{
 				continue;
 			}
@@ -213,14 +219,17 @@ internal static class BuildStaging
 	{
 		var segments = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-		return _sourceExtensions.Contains(Path.GetExtension(relativePath), StringComparer.OrdinalIgnoreCase) ||
-			segments.Any(segment => segment.StartsWith('.') ||
-				segment.Equals("Properties", StringComparison.OrdinalIgnoreCase));
+		return _sourceExtensions.Contains(Path.GetExtension(relativePath), StringComparer.OrdinalIgnoreCase)
+			|| segments.Any(segment
+				=> segment.StartsWith('.') || segment.Equals("Properties", StringComparison.OrdinalIgnoreCase));
 	}
 
 	private static HashSet<string> ExcludedSet(IReadOnlyCollection<string> excludedDirectories)
-		=> new(excludedDirectories.Select(path => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path))),
+	{
+		return new HashSet<string>(
+			excludedDirectories.Select(path => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path))),
 			PathComparer);
+	}
 
 	private static StringComparison PathComparison => OperatingSystem.IsLinux()
 		? StringComparison.Ordinal

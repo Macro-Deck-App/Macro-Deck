@@ -41,10 +41,16 @@ public class ProviderNameFallbackTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	[Test]
 	public async Task Events_describe_reports_the_manifest_name_when_the_provider_states_none()
@@ -122,9 +128,15 @@ public class ProviderNameFallbackTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class NamelessEventIntegration : NamelessIntegration, IEventProvider
@@ -134,20 +146,35 @@ public class ProviderNameFallbackTests
 
 	private sealed class NamelessWeatherIntegration : NamelessIntegration, IWeatherProvider
 	{
-		public IReadOnlyList<WeatherStationInstance> GetInstances() => [];
+		public IReadOnlyList<WeatherStationInstance> GetInstances()
+		{
+			return [];
+		}
 
-		public IWeatherStation? GetStation(string instanceId) => null;
+		public IWeatherStation? GetStation(string instanceId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NamelessMusicPlayerIntegration : NamelessIntegration, IMusicPlayerProvider
 	{
-		public IReadOnlyList<MusicPlayerInstance> GetInstances() => [];
+		public IReadOnlyList<MusicPlayerInstance> GetInstances()
+		{
+			return [];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NamelessProfileIntegration : NamelessIntegration, IProfileProvider
 	{
-		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles() => [];
+		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+		{
+			return [];
+		}
 	}
 }

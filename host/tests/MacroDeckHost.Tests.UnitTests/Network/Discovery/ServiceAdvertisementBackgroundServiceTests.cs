@@ -7,7 +7,6 @@ using MacroDeckHost.Application.Network.Tls;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Network.Discovery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,7 +50,10 @@ internal sealed class ServiceAdvertisementBackgroundServiceTests
 			NeedsRepublish = false;
 		}
 
-		public void Withdraw() => Withdrawals++;
+		public void Withdraw()
+		{
+			Withdrawals++;
+		}
 
 		public void Dispose()
 		{
@@ -65,21 +67,30 @@ internal sealed class ServiceAdvertisementBackgroundServiceTests
 			new(17, "en0", "Wi-Fi", NetworkInterfaceType.Wireless80211, true, [IPAddress.Parse("192.168.20.13")])
 		];
 
-		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces() => Interfaces;
+		public IReadOnlyList<NetworkInterfaceSnapshot> GetInterfaces()
+		{
+			return Interfaces;
+		}
 	}
 
 	private sealed class FakeHostNames : IHostNameProvider
 	{
 		public string MachineName => "Studio PC";
 
-		public IReadOnlyList<string> GetHostNames() => [];
+		public IReadOnlyList<string> GetHostNames()
+		{
+			return [];
+		}
 	}
 
 	private sealed class InMemoryPreferences : IAppPreferenceRepository
 	{
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
-		public Task<AppPreferenceEntity?> GetByKey(string key) => Task.FromResult(_store.GetValueOrDefault(key));
+		public Task<AppPreferenceEntity?> GetByKey(string key)
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{

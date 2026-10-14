@@ -34,8 +34,8 @@ public sealed class VariableValueChangedStateMappingHandler
 				return ValueTask.CompletedTask;
 			}
 
-			if (Guid.TryParse(variable.ScopeRefId, out var ownerId) &&
-				_index.StateMappingReferences(ownerId, variable.Name))
+			if (Guid.TryParse(variable.ScopeRefId, out var ownerId)
+				&& _index.StateMappingReferences(ownerId, variable.Name))
 			{
 				_evalQueue.Enqueue(ownerId);
 			}

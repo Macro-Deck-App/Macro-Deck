@@ -30,10 +30,17 @@ public class HostStatePusherCompanionDevicesTests
 		_connection = new FakePluginConnection();
 		_devices = new ScriptedCompanionDevices();
 		_access = new SwitchableAccess();
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled), Serilog.Core.Logger.None,
-			companionDevices: _devices, companionAccess: _access);
+		_pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new FakeAdbManager(),
+			new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled),
+			Serilog.Core.Logger.None,
+			companionDevices: _devices,
+			companionAccess: _access);
 
 		await _registry.Create(new PluginSessionRecord
 		{
@@ -51,7 +58,10 @@ public class HostStatePusherCompanionDevicesTests
 	}
 
 	[TearDown]
-	public void TearDown() => _pusher.Dispose();
+	public void TearDown()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task A_plugin_that_may_not_use_companion_devices_is_told_so_once_and_sees_no_device()
@@ -103,12 +113,14 @@ public class HostStatePusherCompanionDevicesTests
 	}
 
 	private List<CompanionDevicesStateDto> Pushes()
-		=> _connection.Sent.ToList()
+	{
+		return _connection.Sent.ToList()
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.CompanionDevices)
 			.Select(payload => payload.Data!.Value.Deserialize<CompanionDevicesStateDto>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 
 	private sealed class SwitchableAccess : IPluginCompanionDeviceAccessPolicy
 	{
@@ -122,14 +134,28 @@ public class HostStatePusherCompanionDevicesTests
 			Changed?.Invoke();
 		}
 
-		public Task<PluginCompanionDeviceAccess> EvaluateAsync(string pluginId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_allowed ? PluginCompanionDeviceAccess.Available : PluginCompanionDeviceAccess.NotAllowed);
+		public Task<PluginCompanionDeviceAccess> EvaluateAsync(
+			string pluginId,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(_allowed
+				? PluginCompanionDeviceAccess.Available
+				: PluginCompanionDeviceAccess.NotAllowed);
+		}
 
-		public bool CanBeGranted(string pluginId) => true;
+		public bool CanBeGranted(string pluginId)
+		{
+			return true;
+		}
 
-		public Task<bool> GetAllowPluginsAsync(CancellationToken cancellationToken = default) => Task.FromResult(_allowed);
+		public Task<bool> GetAllowPluginsAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(_allowed);
+		}
 
 		public Task SetAllowPluginsAsync(bool allow, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

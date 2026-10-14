@@ -81,9 +81,15 @@ public sealed class DeviceSurfaceSession : IDisposable
 	/// True for the caller that arms the debounce window; every further invalidation inside it coalesces
 	/// into the same rebuild, which is what makes a bulk edit one push instead of one per widget.
 	/// </summary>
-	public bool TryArmRebuild() => Interlocked.CompareExchange(ref _rebuildArmed, 1, 0) == 0;
+	public bool TryArmRebuild()
+	{
+		return Interlocked.CompareExchange(ref _rebuildArmed, 1, 0) == 0;
+	}
 
-	public void DisarmRebuild() => Interlocked.Exchange(ref _rebuildArmed, 0);
+	public void DisarmRebuild()
+	{
+		Interlocked.Exchange(ref _rebuildArmed, 0);
+	}
 
 	/// <summary>Stamps the next revision onto <paramref name="surface" /> and records it as pushed.</summary>
 	public DeviceSurface Advance(DeviceSurface surface, IReadOnlyDictionary<string, string> widgetFolderIds)
@@ -96,7 +102,9 @@ public sealed class DeviceSurfaceSession : IDisposable
 
 	/// <summary>The folder the widget lives in, which is the folder its trigger runs against.</summary>
 	public string? OwningFolderIdOf(string widgetId)
-		=> PushedWidgetFolderIds.TryGetValue(widgetId, out var folderId) ? folderId : FolderId;
+	{
+		return PushedWidgetFolderIds.TryGetValue(widgetId, out var folderId) ? folderId : FolderId;
+	}
 
 	public void PushHistory()
 	{
@@ -128,11 +136,16 @@ public sealed class DeviceSurfaceSession : IDisposable
 	/// exists, so "back" cannot land on one. Entries from other profiles are left alone - their folders
 	/// are not in <paramref name="knownFolderIds" /> to begin with.</summary>
 	public void PruneHistory(string profileId, IReadOnlyCollection<string> knownFolderIds)
-		=> _history.RemoveAll(entry =>
-			string.Equals(entry.ProfileId, profileId, StringComparison.Ordinal) &&
-			!knownFolderIds.Contains(entry.FolderId));
+	{
+		_history.RemoveAll(entry =>
+			string.Equals(entry.ProfileId, profileId, StringComparison.Ordinal)
+			&& !knownFolderIds.Contains(entry.FolderId));
+	}
 
-	public void ClearHistory() => _history.Clear();
+	public void ClearHistory()
+	{
+		_history.Clear();
+	}
 
 	// The gate is deliberately not disposed: a rebuild that was already scheduled when the session was
 	// discarded still takes it, sees Closed and gives up, and a disposed semaphore would turn that

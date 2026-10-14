@@ -7,7 +7,7 @@ namespace MacroDeckHost.Integrations.Twitch.Auth;
 
 internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 {
-	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -20,7 +20,7 @@ internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 
 	internal TwitchOAuthClient(HttpMessageHandler handler)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 	}
 
@@ -245,8 +245,8 @@ internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 			return TwitchTokenPollStatus.Denied;
 		}
 
-		if (normalised.Contains("expired", StringComparison.Ordinal) ||
-			normalised.Contains("invalid_device_code", StringComparison.Ordinal))
+		if (normalised.Contains("expired", StringComparison.Ordinal)
+			|| normalised.Contains("invalid_device_code", StringComparison.Ordinal))
 		{
 			return TwitchTokenPollStatus.Expired;
 		}
@@ -306,9 +306,11 @@ internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement root, string name)
 	{
@@ -347,5 +349,7 @@ internal sealed class TwitchOAuthClient : ITwitchOAuthClient, IDisposable
 	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	}
 }

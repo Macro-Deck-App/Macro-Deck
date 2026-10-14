@@ -46,27 +46,33 @@ internal sealed class PluginManifestRequirementsTests
 		throw new FileNotFoundException("Could not find plugin-manifest-v1.schema.json above the test output.");
 	}
 
-	private static PluginManifest MinimalManifest() => new()
+	private static PluginManifest MinimalManifest()
 	{
-		ManifestVersion = 1,
-		Id = "com.example.minimal",
-		Name = "Minimal Plugin",
-		Version = "1.0.0",
-		Entrypoints = new Dictionary<string, PluginEntrypoint>
+		return new PluginManifest
 		{
-			["win-x64"] = new() { Executable = "MinimalPlugin.exe" }
-		}
-	};
+			ManifestVersion = 1,
+			Id = "com.example.minimal",
+			Name = "Minimal Plugin",
+			Version = "1.0.0",
+			Entrypoints = new Dictionary<string, PluginEntrypoint>
+			{
+				["win-x64"] = new() { Executable = "MinimalPlugin.exe" }
+			}
+		};
+	}
 
-	private static PluginManifest PublicationCompleteManifest() => MinimalManifest() with
+	private static PluginManifest PublicationCompleteManifest()
 	{
-		Description = "Does the minimal thing.",
-		Icon = "icon.png",
-		License = "MIT",
-		Repository = "https://github.com/example/minimal",
-		Compatibility = new PluginCompatibility { MacroDeck = ">=3.0.0" },
-		Publisher = new PluginPublisher { Name = "Example Publisher" }
-	};
+		return MinimalManifest() with
+		{
+			Description = "Does the minimal thing.",
+			Icon = "icon.png",
+			License = "MIT",
+			Repository = "https://github.com/example/minimal",
+			Compatibility = new PluginCompatibility { MacroDeck = ">=3.0.0" },
+			Publisher = new PluginPublisher { Name = "Example Publisher" }
+		};
+	}
 
 	// --- Scenario 1 ---------------------------------------------------------------------------------
 
@@ -76,7 +82,10 @@ internal sealed class PluginManifestRequirementsTests
 	{
 		var camelCase = JsonNamingPolicy.CamelCase;
 
-		string Camel(string name) => camelCase.ConvertName(name);
+		string Camel(string name)
+		{
+			return camelCase.ConvertName(name);
+		}
 
 		IEnumerable<string> Walk(Type type, string basePointer)
 		{
@@ -86,22 +95,22 @@ internal sealed class PluginManifestRequirementsTests
 				yield return pointer;
 
 				var propertyType = property.PropertyType;
-				var elementType = propertyType.IsGenericType &&
-					(propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>))
+				var elementType = propertyType.IsGenericType
+					&& propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)
 						? propertyType.GetGenericArguments()[0]
-						: propertyType.IsGenericType &&
-						propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)
+						: propertyType.IsGenericType
+						&& propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)
 							? propertyType.GetGenericArguments()[1]
 							: Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
-				if (elementType.IsClass &&
-					elementType != typeof(string) &&
-					elementType.Namespace is
+				if (elementType.IsClass
+					&& elementType != typeof(string)
+					&& elementType.Namespace is
 						"MacroDeck.Plugin.Packaging.Manifest" or "MacroDeck.Plugin.Protocol.Versioning")
 				{
-					var isCollection = propertyType.IsGenericType &&
-						(propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
-							propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
+					var isCollection = propertyType.IsGenericType
+						&& (propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)
+							|| propertyType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
 
 					foreach (var nested in Walk(elementType, isCollection ? pointer + "/*" : pointer))
 					{
@@ -420,15 +429,16 @@ internal sealed class PluginManifestRequirementsTests
 
 			foreach (var pointer in ModelPointers())
 			{
-				Assert.That(schemaAnnotations.ContainsKey(pointer) ||
-					PluginManifestRequirements.All.Any(rule => PointerMatchesPattern(pointer, rule.PointerPattern)),
+				Assert.That(schemaAnnotations.ContainsKey(pointer)
+					|| PluginManifestRequirements.All.Any(rule => PointerMatchesPattern(pointer, rule.PointerPattern)),
 					Is.True,
 					$"Model pointer '{pointer}' has no schema annotation.");
 			}
 		});
 	}
 
-	private static void CollectAnnotations(JsonElement objectSchema,
+	private static void CollectAnnotations(
+		JsonElement objectSchema,
 		string basePointer,
 		Dictionary<string, string> found)
 	{

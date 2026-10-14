@@ -8,10 +8,13 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 public static class MusicPlayerCatalogMapper
 {
 	public static MusicPlayerInstance ToDomain(MusicPlayerInstanceDto dto)
-		=> new(dto.Id, dto.DisplayName) { Options = OptionsToDomain(dto.Options) };
+	{
+		return new MusicPlayerInstance(dto.Id, dto.DisplayName) { Options = OptionsToDomain(dto.Options) };
+	}
 
 	public static MusicPlayerInstanceDto ToDto(MusicPlayerInstance instance, bool hasCatalog, bool hasDevices)
-		=> new()
+	{
+		return new MusicPlayerInstanceDto
 		{
 			Id = instance.Id,
 			DisplayName = instance.DisplayName,
@@ -19,6 +22,7 @@ public static class MusicPlayerCatalogMapper
 			HasDevices = hasDevices,
 			Options = [.. instance.Options.Select(ActionParameterMapper.ToDto)]
 		};
+	}
 
 	// An option of a kind this host does not know costs only that option: a newer plugin must not lose
 	// its whole instance list, and the host could not render the option anyway.
@@ -32,7 +36,8 @@ public static class MusicPlayerCatalogMapper
 			{
 				mapped.Add(ActionParameterMapper.ToDomain(option));
 			}
-			catch (Exception exception) when (exception is InvalidOperationException or ArgumentException
+			catch (Exception exception) when (exception is InvalidOperationException
+				or ArgumentException
 				or FormatException)
 			{
 			}
@@ -43,7 +48,7 @@ public static class MusicPlayerCatalogMapper
 
 	public static MusicPlayerCatalogItem ToDomain(MusicPlayerCatalogItemDto dto)
 	{
-		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(dto.Kind, ignoreCase: false, out var kind))
+		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(dto.Kind, false, out var kind))
 		{
 			throw new InvalidOperationException($"Unknown music player catalog item kind '{dto.Kind}'.");
 		}
@@ -57,7 +62,8 @@ public static class MusicPlayerCatalogMapper
 	}
 
 	public static MusicPlayerCatalogItemDto ToDto(MusicPlayerCatalogItem item)
-		=> new()
+	{
+		return new MusicPlayerCatalogItemDto
 		{
 			Id = item.Id,
 			Title = item.Title,
@@ -66,4 +72,5 @@ public static class MusicPlayerCatalogMapper
 			ArtworkId = item.ArtworkId,
 			DurationSeconds = item.Duration?.TotalSeconds
 		};
+	}
 }

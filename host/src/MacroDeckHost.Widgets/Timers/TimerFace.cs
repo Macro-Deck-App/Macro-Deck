@@ -9,12 +9,17 @@ namespace MacroDeckHost.Widgets.Timers;
 internal sealed record TimerWidgetSettings(string? Label, bool ShowLabel, string? AccentColor, string? BackgroundColor)
 {
 	public static TimerWidgetSettings Parse(JsonElement data)
-		=> new(Trimmed(WidgetConfigJson.ReadString(data, "label")),
+	{
+		return new TimerWidgetSettings(Trimmed(WidgetConfigJson.ReadString(data, "label")),
 			WidgetConfigJson.ReadBool(data, "showLabel") ?? false,
 			Trimmed(WidgetConfigJson.ReadString(data, "accentColor")),
 			WidgetColor.NormalizeBackground(WidgetConfigJson.ReadString(data, "backgroundColor")));
+	}
 
-	private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	private static string? Trimmed(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 }
 
 internal sealed record TimerFace(
@@ -27,7 +32,7 @@ internal sealed record TimerFace(
 {
 	// The reader floors whole seconds, so the countdown's length carries 999 ms more than it runs: the
 	// readout then rounds up like the countdown_remaining_seconds variable and reaches 0:00 only at the end.
-	private const long _roundUpMs = 999;
+	private const long RoundUpMs = 999;
 
 	public bool IsRunning => Phase == TimerWidgetPhase.Running;
 
@@ -46,8 +51,8 @@ internal sealed record TimerFace(
 			{
 				PositionMs = snapshot.ElapsedMs,
 				Anchor = snapshot.Anchor,
-				DurationMs = duration + _roundUpMs,
-				Rate = snapshot.IsRunning ? null : 0,
+				DurationMs = duration + RoundUpMs,
+				Rate = snapshot.IsRunning ? null : 0
 			};
 
 			return new TimerFace(snapshot.Kind,
@@ -68,7 +73,7 @@ internal sealed record TimerFace(
 			{
 				PositionMs = snapshot.ElapsedMs,
 				Anchor = snapshot.Anchor,
-				Rate = snapshot.IsRunning ? null : 0,
+				Rate = snapshot.IsRunning ? null : 0
 			},
 			FormatSeconds(elapsedSeconds));
 	}
@@ -85,7 +90,7 @@ internal sealed record TimerFace(
 				DurationMs = config is { Kind: TimerWidgetKind.Countdown, AsksForDuration: false }
 					? config.DurationSeconds * 1000L
 					: null,
-				Anchor = now,
+				Anchor = now
 			},
 			now);
 	}

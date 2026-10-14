@@ -111,7 +111,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	private int _actionFollowUpsRemaining;
 	private int _transientPollFailure;
 
-	public SpotifyMusicPlayer(ILogger? logger = null,
+	public SpotifyMusicPlayer(
+		ILogger? logger = null,
 		TimeSpan? failureSummaryInterval = null,
 		TimeSpan? lastStateLifetime = null,
 		TimeSpan? stateReadBudget = null,
@@ -165,8 +166,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 				return state;
 			}
 
-			var advanced = position +
-				(_time.GetUtcNow() - new DateTimeOffset(Interlocked.Read(ref _stateReadAtTicks), TimeSpan.Zero));
+			var advanced = position
+				+ (_time.GetUtcNow() - new DateTimeOffset(Interlocked.Read(ref _stateReadAtTicks), TimeSpan.Zero));
 			var bound = state.Duration ?? TimeSpan.MaxValue;
 			return state with { Position = advanced < bound ? advanced : bound };
 		}
@@ -204,8 +205,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	{
 		lock (_lifecycle)
 		{
-			if (_disconnectTask is not null ||
-				(_autonomousPolling && (_client is not null || _pollCts is not null || _pollTask is not null)))
+			if (_disconnectTask is not null
+				|| _autonomousPolling && (_client is not null || _pollCts is not null || _pollTask is not null))
 			{
 				throw new InvalidOperationException("The Spotify player is already connected or disconnecting");
 			}
@@ -258,8 +259,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		_apiLimit = limit;
 		Interlocked.Exchange(ref _rateLimitPauseUntilTicks, limit.PausedUntil.UtcDateTime.Ticks);
 		_apiLimits.RecordFailure($"{limit.Kind} carried over from a previous run");
-		_logger.Warning("Spotify is still limiting entry {EntryId} from a previous run; reads stay paused until " +
-			"{ResumesAt:yyyy-MM-dd HH:mm:ss}",
+		_logger.Warning("Spotify is still limiting entry {EntryId} from a previous run; reads stay paused until "
+			+ "{ResumesAt:yyyy-MM-dd HH:mm:ss}",
 			_entryId,
 			limit.PausedUntil.ToLocalTime());
 	}
@@ -287,7 +288,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		}
 	}
 
-	private async Task CompleteDisconnectAsync(CancellationTokenSource? pollCts,
+	private async Task CompleteDisconnectAsync(
+		CancellationTokenSource? pollCts,
 		Task? pollTask,
 		TaskCompletionSource completion)
 	{
@@ -348,7 +350,10 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		Disconnect();
 	}
 
-	public void Disconnect() => DisconnectAsync().GetAwaiter().GetResult();
+	public void Disconnect()
+	{
+		DisconnectAsync().GetAwaiter().GetResult();
+	}
 
 	private async Task<SpotifyClient?> PrepareAsync(CancellationToken cancellationToken)
 	{
@@ -364,7 +369,9 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-		=> _autonomousPolling ? Task.FromResult(CurrentState) : ExecutePollAsync(cancellationToken);
+	{
+		return _autonomousPolling ? Task.FromResult(CurrentState) : ExecutePollAsync(cancellationToken);
+	}
 
 	internal Task<MusicPlayerState> RefreshStateAsync(CancellationToken cancellationToken = default)
 	{
@@ -555,8 +562,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 					{
 						_noClientLogged = true;
 						_logger.Information(
-							"Spotify state poll found no connected client; reporting disconnected until the " +
-							"integration (re)initializes");
+							"Spotify state poll found no connected client; reporting disconnected until the "
+							+ "integration (re)initializes");
 					}
 
 					return Publish(MusicPlayerState.Disconnected, null, "no client connected");
@@ -718,8 +725,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 				return false;
 			case FailureEpisodeSignalKind.SummaryDue:
 				_logger.Information(
-					"Spotify state reads for entry {EntryId} have been failing for {Duration} ({Failures} " +
-					"consecutive failures; last error: {LastError})",
+					"Spotify state reads for entry {EntryId} have been failing for {Duration} ({Failures} "
+					+ "consecutive failures; last error: {LastError})",
 					_entryId,
 					signal.Duration,
 					signal.ConsecutiveFailures,
@@ -765,17 +772,17 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		{
 			case FailureEpisodeSignalKind.Onset:
 				_logger.Warning(
-					"Spotify {What} for entry {EntryId}; pausing playback reads for {Pause}. The limit counts " +
-					"every application using these Spotify app credentials, so temporarily closing other apps " +
-					"on this account usually clears it",
+					"Spotify {What} for entry {EntryId}; pausing playback reads for {Pause}. The limit counts "
+					+ "every application using these Spotify app credentials, so temporarily closing other apps "
+					+ "on this account usually clears it",
 					what,
 					_entryId,
 					pause);
 				break;
 			case FailureEpisodeSignalKind.SummaryDue:
 				_logger.Information(
-					"Spotify has been limiting entry {EntryId} for {Duration} ({Hits} refused requests; last: " +
-					"{LastError}); reads paused until {ResumesAt:HH:mm:ss}",
+					"Spotify has been limiting entry {EntryId} for {Duration} ({Hits} refused requests; last: "
+					+ "{LastError}); reads paused until {ResumesAt:HH:mm:ss}",
 					_entryId,
 					signal.Duration,
 					signal.ConsecutiveFailures,
@@ -827,12 +834,14 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	// widget has to say "we cannot reach Spotify right now" rather than "no music player is configured",
 	// which is what "Not connected" reads as.
 	private MusicPlayerState Unavailable()
-		=> MusicPlayerState.Unavailable(_apiLimit?.Kind switch
+	{
+		return MusicPlayerState.Unavailable(_apiLimit?.Kind switch
 		{
 			SpotifyApiLimitKind.Quota => "Spotify quota reached",
 			SpotifyApiLimitKind.RateLimit => "Rate limited by Spotify",
 			_ => "Spotify is not responding"
 		});
+	}
 
 	private MusicPlayerState Publish(MusicPlayerState state, SpotifyPlayingItem? item, string reason)
 	{
@@ -851,17 +860,22 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		return LastState = state;
 	}
 
-	private static string Describe(MusicPlayerState state) => state switch
+	private static string Describe(MusicPlayerState state)
 	{
-		{ IsConnected: true } => "connected",
-		{ IsUnavailable: true } => "unavailable",
-		_ => "disconnected"
-	};
+		return state switch
+		{
+			{ IsConnected: true } => "connected",
+			{ IsUnavailable: true } => "unavailable",
+			_ => "disconnected"
+		};
+	}
 
 	private static string SafeFailure(Exception ex)
-		=> ex is APIException { Response: { } response }
+	{
+		return ex is APIException { Response: { } response }
 			? $"http-{(int)response.StatusCode}"
 			: ex.GetType().Name;
+	}
 
 	internal static bool IsTransient(Exception ex)
 	{
@@ -892,9 +906,10 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	private static bool MentionsInvalidGrant(APIException ex)
-		=> (ex.Response?.Body is string body &&
-				body.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase)) ||
-			ex.Message.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase);
+	{
+		return ex.Response?.Body is string body && body.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase)
+			|| ex.Message.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase);
+	}
 
 	public async Task<MusicPlayerArtwork?> GetArtworkAsync(
 		string artworkId,
@@ -918,40 +933,59 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	public Task PlayAsync(CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.ResumePlayback(cancellationToken), cancellationToken);
+	{
+		return Guard(client => client.Player.ResumePlayback(cancellationToken), cancellationToken);
+	}
 
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.PausePlayback(cancellationToken), cancellationToken);
+	{
+		return Guard(client => client.Player.PausePlayback(cancellationToken), cancellationToken);
+	}
 
 	public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
-		=> Guard(client => CurrentState.PlaybackState == PlaybackState.Playing
+	{
+		return Guard(client => CurrentState.PlaybackState == PlaybackState.Playing
 				? client.Player.PausePlayback(cancellationToken)
 				: client.Player.ResumePlayback(cancellationToken),
 			cancellationToken);
+	}
 
 	public Task NextAsync(CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SkipNext(cancellationToken), cancellationToken);
+	{
+		return Guard(client => client.Player.SkipNext(cancellationToken), cancellationToken);
+	}
 
 	public Task PreviousAsync(CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SkipPrevious(cancellationToken), cancellationToken);
+	{
+		return Guard(client => client.Player.SkipPrevious(cancellationToken), cancellationToken);
+	}
 
 	public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SeekTo(new PlayerSeekToRequest((long)position.TotalMilliseconds),
+	{
+		return Guard(client => client.Player.SeekTo(new PlayerSeekToRequest((long)position.TotalMilliseconds),
 				cancellationToken),
 			cancellationToken);
+	}
 
 	public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SetVolume(new PlayerVolumeRequest(Math.Clamp(volumePercent, 0, 100)),
+	{
+		return Guard(client => client.Player.SetVolume(new PlayerVolumeRequest(Math.Clamp(volumePercent, 0, 100)),
 				cancellationToken),
 			cancellationToken);
+	}
 
 	public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SetShuffle(new PlayerShuffleRequest(enabled), cancellationToken),
+	{
+		return Guard(client => client.Player.SetShuffle(new PlayerShuffleRequest(enabled), cancellationToken),
 			cancellationToken);
+	}
 
 	public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-		=> Guard(client => client.Player.SetRepeat(new PlayerSetRepeatRequest(ToRepeatState(mode)), cancellationToken),
+	{
+		return Guard(client
+				=> client.Player.SetRepeat(new PlayerSetRepeatRequest(ToRepeatState(mode)), cancellationToken),
 			cancellationToken);
+	}
 
 	public Task PlayItemAsync(MusicPlayerCatalogItem item, CancellationToken cancellationToken = default)
 	{
@@ -975,8 +1009,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		try
 		{
 			using var scope = SpotifyRequestScope.Interactive("catalog-read");
-			var client = await PrepareAsync(cancellationToken) ??
-				throw new InvalidOperationException("Spotify is not connected.");
+			var client = await PrepareAsync(cancellationToken)
+				?? throw new InvalidOperationException("Spotify is not connected.");
 
 			return kind == MusicPlayerCatalogItemKind.Playlist
 				? await GetPlaylistsAsync(client, filter, cancellationToken)
@@ -1010,9 +1044,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 			return;
 		}
 
-		throw new SpotifyThrottledException(
-			$"Spotify is limiting this Spotify app, so Macro Deck cannot {what} until " +
-			$"{_apiLimit?.PausedUntil.ToLocalTime():HH:mm}.");
+		throw new SpotifyThrottledException($"Spotify is limiting this Spotify app, so Macro Deck cannot {what} until "
+			+ $"{_apiLimit?.PausedUntil.ToLocalTime():HH:mm}.");
 	}
 
 	public async Task<IReadOnlyList<MusicPlayerDevice>> GetDevicesAsync(CancellationToken cancellationToken)
@@ -1024,8 +1057,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		try
 		{
 			using var scope = SpotifyRequestScope.Interactive("device-read");
-			var client = await PrepareAsync(cancellationToken) ??
-				throw new InvalidOperationException("Spotify is not connected.");
+			var client = await PrepareAsync(cancellationToken)
+				?? throw new InvalidOperationException("Spotify is not connected.");
 
 			var response = await client.Player.GetAvailableDevices(cancellationToken);
 			return MapDevices(response.Devices);
@@ -1067,15 +1100,19 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	// dropping unplayable entries. Static is fine here - unlike MapTracks/MapPlaylists this needs no
 	// RegisterArtwork.
 	internal static IReadOnlyList<MusicPlayerDevice> MapDevices(IEnumerable<Device?> devices)
-		=> devices
+	{
+		return devices
 			.Where(d => d?.Id is not null && !d.IsRestricted)
 			.Select(d => new MusicPlayerDevice(d!.Id, d.Name, d.Type, d.IsActive, d.VolumePercent))
 			.ToList();
+	}
 
 	private static string ToSpotifyUri(MusicPlayerCatalogItem item)
-		=> item.Id.StartsWith("spotify:", StringComparison.Ordinal)
+	{
+		return item.Id.StartsWith("spotify:", StringComparison.Ordinal)
 			? item.Id
 			: $"spotify:{(item.Kind == MusicPlayerCatalogItemKind.Playlist ? "playlist" : "track")}:{item.Id}";
+	}
 
 	private async Task<IReadOnlyList<MusicPlayerCatalogItem>> GetTracksAsync(
 		SpotifyClient client,
@@ -1113,8 +1150,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		IEnumerable<FullPlaylist?> playlists;
 		if (!string.IsNullOrWhiteSpace(filter))
 		{
-			var search = await client.Search.Item(
-				new SearchRequest(SearchRequest.Types.Playlist, filter) { Limit = CatalogSearchLimit },
+			var search = await client.Search.Item(new SearchRequest(SearchRequest.Types.Playlist, filter)
+					{ Limit = CatalogSearchLimit },
 				cancellationToken);
 			playlists = search.Playlists.Items ?? [];
 		}
@@ -1161,25 +1198,33 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	internal IReadOnlyList<MusicPlayerCatalogItem> MapTracks(IEnumerable<FullTrack?> tracks)
-		=> tracks.Where(t => t?.Id is not null).DistinctBy(t => t!.Id).Select(t => MapTrack(t!)).ToList();
+	{
+		return tracks.Where(t => t?.Id is not null).DistinctBy(t => t!.Id).Select(t => MapTrack(t!)).ToList();
+	}
 
 	internal IReadOnlyList<MusicPlayerCatalogItem> MapPlaylists(IEnumerable<FullPlaylist?> playlists)
-		=> playlists.Where(p => p?.Id is not null).DistinctBy(p => p!.Id).Select(p => MapPlaylist(p!)).ToList();
+	{
+		return playlists.Where(p => p?.Id is not null).DistinctBy(p => p!.Id).Select(p => MapPlaylist(p!)).ToList();
+	}
 
 	private MusicPlayerCatalogItem MapTrack(FullTrack track)
-		=> new(track.Id,
+	{
+		return new MusicPlayerCatalogItem(track.Id,
 			track.Name,
 			MusicPlayerCatalogItemKind.Track,
 			track.Artists.Count > 0 ? string.Join(", ", track.Artists.Select(a => a.Name)) : null,
 			RegisterArtwork(track.Album.Images),
 			track.DurationMs > 0 ? TimeSpan.FromMilliseconds(track.DurationMs) : null);
+	}
 
 	private MusicPlayerCatalogItem MapPlaylist(FullPlaylist playlist)
-		=> new(playlist.Id!,
+	{
+		return new MusicPlayerCatalogItem(playlist.Id!,
 			playlist.Name ?? string.Empty,
 			MusicPlayerCatalogItemKind.Playlist,
 			playlist.Owner?.DisplayName,
 			RegisterArtwork(playlist.Images));
+	}
 
 	public Task ToggleLikedAsync(string mode, CancellationToken cancellationToken = default)
 	{
@@ -1212,11 +1257,12 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 				ForgetSavedState();
 			},
 			cancellationToken,
-			playbackMutation: false,
-			reason: "library-liked-mutation");
+			false,
+			"library-liked-mutation");
 	}
 
-	private static async Task<bool> IsSavedNowAsync(SpotifyClient client,
+	private static async Task<bool> IsSavedNowAsync(
+		SpotifyClient client,
 		string uri,
 		CancellationToken cancellationToken)
 	{
@@ -1224,7 +1270,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		return result.Count > 0 && result[0];
 	}
 
-	public Task ChangePlaylistMembershipAsync(string playlist,
+	public Task ChangePlaylistMembershipAsync(
+		string playlist,
 		string mode,
 		CancellationToken cancellationToken = default)
 	{
@@ -1256,8 +1303,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 				ForgetPlaylistMembership(playlistId);
 			},
 			cancellationToken,
-			playbackMutation: false,
-			reason: "playlist-membership-mutation");
+			false,
+			"playlist-membership-mutation");
 	}
 
 	private static string? NormalizePlaylistId(string value)
@@ -1273,8 +1320,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 			return trimmed["spotify:playlist:".Length..];
 		}
 
-		if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) &&
-			uri.Host.Contains("open.spotify.com", StringComparison.OrdinalIgnoreCase))
+		if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+			&& uri.Host.Contains("open.spotify.com", StringComparison.OrdinalIgnoreCase))
 		{
 			var segments = uri.AbsolutePath.Trim('/').Split('/');
 			var index = Array.IndexOf(segments, "playlist");
@@ -1284,7 +1331,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		return trimmed;
 	}
 
-	private async Task Guard(Func<SpotifyClient, Task> command,
+	private async Task Guard(
+		Func<SpotifyClient, Task> command,
 		CancellationToken cancellationToken,
 		bool playbackMutation = true,
 		string reason = "playback-action")
@@ -1544,9 +1592,7 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		{
 			// A 403 on a track means the library scope is gone for good; on an episode it may be that
 			// endpoint refusing the kind, which must not disable the liked state for songs too.
-			if (IsForbidden(ex) &&
-				!SpotifyApiLimits.IsQuotaExceeded(ex) &&
-				item.Kind is SpotifyPlayingItemKind.Track)
+			if (IsForbidden(ex) && !SpotifyApiLimits.IsQuotaExceeded(ex) && item.Kind is SpotifyPlayingItemKind.Track)
 			{
 				LatchSavedStateOff();
 			}
@@ -1573,7 +1619,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	/// cannot be answered right now - nothing playing, no usable playlist value, the playlist is longer
 	/// than the walk cap, or the API is unreachable or rate limited.
 	/// </summary>
-	public async Task<bool?> IsCurrentItemInPlaylistAsync(string? playlist,
+	public async Task<bool?> IsCurrentItemInPlaylistAsync(
+		string? playlist,
 		CancellationToken cancellationToken = default)
 	{
 		var item = _currentItem;
@@ -1591,8 +1638,8 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		lock (_playlistMembershipLock)
 		{
 			var now = _time.GetUtcNow().UtcDateTime;
-			if (_playlistMembership.TryGetValue(playlistId, out var cached) &&
-				now - cached.FetchedAtUtc < _playlistMembershipTtl)
+			if (_playlistMembership.TryGetValue(playlistId, out var cached)
+				&& now - cached.FetchedAtUtc < _playlistMembershipTtl)
 			{
 				return cached.Uris.Contains(item.Uri);
 			}
@@ -1732,14 +1779,16 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	private static bool IsForbidden(Exception ex)
-		=> ex is APIException { Response: { } response } && (int)response.StatusCode == 403;
+	{
+		return ex is APIException { Response: { } response } && (int)response.StatusCode == 403;
+	}
 
 	public SpotifyTopItems? GetTopItems()
 	{
-		if (!_topItemsLatchedOff &&
-			!ReadsPaused &&
-			_time.GetUtcNow().UtcTicks >= Interlocked.Read(ref _topItemsNextFetchTicks) &&
-			Interlocked.CompareExchange(ref _topItemsFetching, 1, 0) == 0)
+		if (!_topItemsLatchedOff
+			&& !ReadsPaused
+			&& _time.GetUtcNow().UtcTicks >= Interlocked.Read(ref _topItemsNextFetchTicks)
+			&& Interlocked.CompareExchange(ref _topItemsFetching, 1, 0) == 0)
 		{
 			_ = RefreshTopItemsAsync();
 		}
@@ -1802,7 +1851,9 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 	}
 
 	private void ScheduleNextTopItemsAttempt(TimeSpan delay)
-		=> Interlocked.Exchange(ref _topItemsNextFetchTicks, _time.GetUtcNow().Add(delay).UtcTicks);
+	{
+		Interlocked.Exchange(ref _topItemsNextFetchTicks, _time.GetUtcNow().Add(delay).UtcTicks);
+	}
 
 	[SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract")]
 	private MusicPlayerState Map(CurrentlyPlayingContext playback)
@@ -1876,17 +1927,23 @@ internal sealed class SpotifyMusicPlayer : ICatalogMusicPlayer, IMusicPlayerDevi
 		return Convert.ToHexString(bytes[..8]).ToLowerInvariant();
 	}
 
-	private static RepeatMode FromRepeatState(string? state) => state switch
+	private static RepeatMode FromRepeatState(string? state)
 	{
-		"track" => RepeatMode.Track,
-		"context" => RepeatMode.Context,
-		_ => RepeatMode.Off
-	};
+		return state switch
+		{
+			"track" => RepeatMode.Track,
+			"context" => RepeatMode.Context,
+			_ => RepeatMode.Off
+		};
+	}
 
-	private static PlayerSetRepeatRequest.State ToRepeatState(RepeatMode mode) => mode switch
+	private static PlayerSetRepeatRequest.State ToRepeatState(RepeatMode mode)
 	{
-		RepeatMode.Track => PlayerSetRepeatRequest.State.Track,
-		RepeatMode.Context => PlayerSetRepeatRequest.State.Context,
-		_ => PlayerSetRepeatRequest.State.Off
-	};
+		return mode switch
+		{
+			RepeatMode.Track => PlayerSetRepeatRequest.State.Track,
+			RepeatMode.Context => PlayerSetRepeatRequest.State.Context,
+			_ => PlayerSetRepeatRequest.State.Off
+		};
+	}
 }

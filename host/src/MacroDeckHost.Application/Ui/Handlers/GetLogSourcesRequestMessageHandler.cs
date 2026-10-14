@@ -15,5 +15,7 @@ public class GetLogSourcesRequestMessageHandler
 	}
 
 	public ValueTask<GetLogSourcesResponse> Handle(GetLogSourcesRequest request, CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetLogSourcesResponse { Sources = _reader.ReadSources().ToList() });
+	{
+		return ValueTask.FromResult(new GetLogSourcesResponse { Sources = _reader.ReadSources().ToList() });
+	}
 }

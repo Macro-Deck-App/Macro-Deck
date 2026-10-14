@@ -15,5 +15,7 @@ internal sealed class MacOsNotificationService : IPlatformNotificationService
 	}
 
 	private static string Quote(string value)
-		=> $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+	{
+		return $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+	}
 }

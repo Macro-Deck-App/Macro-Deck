@@ -87,8 +87,8 @@ internal sealed class MeldEventEmitter
 
 		foreach (var (id, currentLayer) in currentSession.LayersById)
 		{
-			if (previousSession.LayersById.TryGetValue(id, out var previousLayer) &&
-				previousLayer.Visible != currentLayer.Visible)
+			if (previousSession.LayersById.TryGetValue(id, out var previousLayer)
+				&& previousLayer.Visible != currentLayer.Visible)
 			{
 				Publish(MeldEventIds.LayerVisibilityChanged,
 					new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -104,8 +104,8 @@ internal sealed class MeldEventEmitter
 
 		foreach (var (id, currentEffect) in currentSession.EffectsById)
 		{
-			if (previousSession.EffectsById.TryGetValue(id, out var previousEffect) &&
-				previousEffect.Enabled != currentEffect.Enabled)
+			if (previousSession.EffectsById.TryGetValue(id, out var previousEffect)
+				&& previousEffect.Enabled != currentEffect.Enabled)
 			{
 				Publish(MeldEventIds.EffectStateChanged,
 					new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -201,7 +201,8 @@ internal sealed class MeldEventEmitter
 		}
 	}
 
-	private void PublishSceneEvent(string eventId,
+	private void PublishSceneEvent(
+		string eventId,
 		MeldSession previousSession,
 		MeldSession currentSession,
 		string? sceneId)
@@ -215,8 +216,8 @@ internal sealed class MeldEventEmitter
 		var previousSceneId = eventId == MeldEventIds.SceneChanged
 			? previousSession.CurrentSceneId
 			: previousSession.StagedSceneId;
-		var previousSceneName = previousSceneId is not null &&
-			previousSession.ScenesById.TryGetValue(previousSceneId, out var previousScene)
+		var previousSceneName = previousSceneId is not null
+			&& previousSession.ScenesById.TryGetValue(previousSceneId, out var previousScene)
 				? previousScene.Name
 				: string.Empty;
 

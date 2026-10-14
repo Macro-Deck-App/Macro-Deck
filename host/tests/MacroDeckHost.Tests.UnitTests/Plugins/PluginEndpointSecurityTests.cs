@@ -76,7 +76,7 @@ public class PluginEndpointSecurityTests
 		var setup = await SendJson(HttpMethod.Post,
 			"/api/auth/setup",
 			new { username = "admin", password = "password123" },
-			shape: FakeConnectionShape.Loopback);
+			FakeConnectionShape.Loopback);
 		Assert.That(setup.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var login = await SendJson(HttpMethod.Post,
@@ -100,7 +100,7 @@ public class PluginEndpointSecurityTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -119,16 +119,16 @@ public class PluginEndpointSecurityTests
 	[Test]
 	public async Task Every_plugin_path_refuses_a_non_loopback_remote_on_both_ports()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var (method, path) in _pluginRoutes)
 			{
-				var onPublicPort = await Send(method, path, shape: FakeConnectionShape.PublicLan);
+				var onPublicPort = await Send(method, path, FakeConnectionShape.PublicLan);
 				Assert.That(onPublicPort.StatusCode,
 					Is.EqualTo(HttpStatusCode.Forbidden),
 					$"{method} {path} on the public port with a LAN remote");
 
-				var onPrivatePort = await Send(method, path, shape: FakeConnectionShape.LanOnPrivatePort);
+				var onPrivatePort = await Send(method, path, FakeConnectionShape.LanOnPrivatePort);
 				Assert.That(onPrivatePort.StatusCode,
 					Is.EqualTo(HttpStatusCode.Forbidden),
 					$"{method} {path} on the private listener with a LAN remote");
@@ -141,7 +141,7 @@ public class PluginEndpointSecurityTests
 	{
 		var response = await Send(HttpMethod.Get,
 			"/api/plugins/protocol",
-			shape: FakeConnectionShape.LoopbackOnPublicPort);
+			FakeConnectionShape.LoopbackOnPublicPort);
 
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
@@ -149,7 +149,7 @@ public class PluginEndpointSecurityTests
 	[Test]
 	public async Task Get_protocol_descriptor_is_anonymous()
 	{
-		var response = await Send(HttpMethod.Get, "/api/plugins/protocol", shape: FakeConnectionShape.Loopback);
+		var response = await Send(HttpMethod.Get, "/api/plugins/protocol", FakeConnectionShape.Loopback);
 		var body = await ReadJson(response);
 
 		Assert.Multiple(() =>
@@ -164,12 +164,12 @@ public class PluginEndpointSecurityTests
 	{
 		var pluginResponse = await Send(HttpMethod.Get,
 			"/api/plugins/protocol",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			extraHeaders: new Dictionary<string, string> { ["Origin"] = "https://evil.example" });
 
 		var ordinaryResponse = await Send(HttpMethod.Get,
 			"/api/system/version",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			extraHeaders: new Dictionary<string, string> { ["Origin"] = "https://evil.example" });
 
 		Assert.Multiple(() =>
@@ -190,13 +190,13 @@ public class PluginEndpointSecurityTests
 		// could be tricked into attaching.
 		var pairingResponse = await Send(HttpMethod.Get,
 			"/api/plugin-pairing/requests",
-			shape: FakeConnectionShape.Loopback,
-			bearerToken: _adminToken,
+			FakeConnectionShape.Loopback,
+			_adminToken,
 			extraHeaders: new Dictionary<string, string> { ["Origin"] = "https://evil.example" });
 
 		var ordinaryResponse = await Send(HttpMethod.Get,
 			"/api/system/version",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			extraHeaders: new Dictionary<string, string> { ["Origin"] = "https://evil.example" });
 
 		Assert.Multiple(() =>
@@ -247,8 +247,8 @@ public class PluginEndpointSecurityTests
 		var (revokedId, revokedSecret) = await EnrollPluginAsync();
 		var revoke = await Send(HttpMethod.Delete,
 			$"/api/plugins/registration/{revokedId}",
-			shape: FakeConnectionShape.Loopback,
-			bearerToken: _adminToken);
+			FakeConnectionShape.Loopback,
+			_adminToken);
 		Assert.That(revoke.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var (collidingId, collidingSecret) = await EnrollPluginAsync();
@@ -309,7 +309,8 @@ public class PluginEndpointSecurityTests
 		Assert.That(attempt.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 
 		var currentSessionId = sessionRegistry.Snapshot()
-			.Single(s => string.Equals(s.PluginId, pluginId, StringComparison.Ordinal)).SessionId;
+			.Single(s => string.Equals(s.PluginId, pluginId, StringComparison.Ordinal))
+			.SessionId;
 
 		Assert.That(currentSessionId, Is.EqualTo(managedSessionId));
 	}
@@ -366,19 +367,19 @@ public class PluginEndpointSecurityTests
 	{
 		var missing = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId = $"com.example.n{Guid.NewGuid():N}", displayName = "No token" });
 
 		var unknown = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId = $"com.example.n{Guid.NewGuid():N}", displayName = "Bad token" },
 			extraHeaders: new Dictionary<string, string>
 			{
 				[PluginAuthDefaults.EnrollmentTokenHeaderName] = "not-a-real-token"
 			});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(missing.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
 			Assert.That(unknown.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -401,7 +402,7 @@ public class PluginEndpointSecurityTests
 			{
 				var response = await Send(HttpMethod.Post,
 					"/api/plugins/registration",
-					shape: FakeConnectionShape.Loopback,
+					FakeConnectionShape.Loopback,
 					body: new { pluginId = $"com.example.g{Guid.NewGuid():N}", displayName = "Guess" },
 					extraHeaders: new Dictionary<string, string>
 					{
@@ -438,7 +439,7 @@ public class PluginEndpointSecurityTests
 
 		var terminate = await Send(HttpMethod.Post,
 			$"/api/plugin-sessions/{sessionId}/terminate",
-			bearerToken: _adminToken);
+			_adminToken);
 		Assert.That(terminate.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		var second = await CreateSessionAsync(pluginId, launchSecret);
@@ -519,7 +520,7 @@ public class PluginEndpointSecurityTests
 		var pluginId = $"com.example.t{Guid.NewGuid():N}";
 		var register = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "Enrolled Label" },
 			extraHeaders: new Dictionary<string, string>
 				{ [PluginAuthDefaults.EnrollmentTokenHeaderName] = enrollmentToken });
@@ -534,8 +535,8 @@ public class PluginEndpointSecurityTests
 		var firstSessionId = firstJson.GetProperty("sessionId").GetString()!;
 		var closeFirst = await Send(HttpMethod.Delete,
 			$"/api/plugins/sessions/{firstSessionId}",
-			shape: FakeConnectionShape.Loopback,
-			bearerToken: firstJson.GetProperty("sessionToken").GetString());
+			FakeConnectionShape.Loopback,
+			firstJson.GetProperty("sessionToken").GetString());
 		Assert.That(closeFirst.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var second = await CreateSessionAsync(pluginId, secret);
@@ -552,7 +553,9 @@ public class PluginEndpointSecurityTests
 	public async Task Ws_rejects_no_token_and_an_ambient_admin_jwt()
 	{
 		var noToken = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-			await ConnectWebSocketAsync(_ => { }));
+			await ConnectWebSocketAsync(_ =>
+			{
+			}));
 		Assert.That(noToken!.Message, Does.Contain("401"));
 
 		// The ambient-admin trap: a valid admin JWT is not a plugin session token, and must not be
@@ -601,8 +604,8 @@ public class PluginEndpointSecurityTests
 
 		var close = await Send(HttpMethod.Delete,
 			$"/api/plugins/sessions/{sessionId}",
-			shape: FakeConnectionShape.Loopback,
-			bearerToken: sessionToken);
+			FakeConnectionShape.Loopback,
+			sessionToken);
 		Assert.That(close.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var third = await CreateSessionAsync(pluginId, launchSecret);
@@ -625,7 +628,7 @@ public class PluginEndpointSecurityTests
 		var pluginId = $"com.example.e2e{Guid.NewGuid():N}";
 		var register = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "E2E Plugin" },
 			extraHeaders: new Dictionary<string, string>
 			{
@@ -653,7 +656,7 @@ public class PluginEndpointSecurityTests
 		var welcome = await ReceiveEnvelopeAsync(socket);
 		Assert.That(welcome?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
 
-		var revoke = await Send(HttpMethod.Post, $"/api/plugin-tokens/{tokenId}/revoke", bearerToken: _adminToken);
+		var revoke = await Send(HttpMethod.Post, $"/api/plugin-tokens/{tokenId}/revoke", _adminToken);
 		Assert.That(revoke.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		var afterRevoke = await ReceiveNonStateEnvelopeOrCloseAsync(socket);
@@ -708,7 +711,6 @@ public class PluginEndpointSecurityTests
 		var (pluginId, secret) = await EnrollPluginAsync();
 		var session = await CreateSessionAndReadAsync(pluginId,
 			secret,
-			capabilities:
 			[
 				new
 				{
@@ -764,8 +766,8 @@ public class PluginEndpointSecurityTests
 
 		Assert.That(integration,
 			Is.Not.Null,
-			"the plugin should be registered once its describes are answered - registration must run " +
-			"concurrently with the message loop that reads those replies, not before it");
+			"the plugin should be registered once its describes are answered - registration must run "
+			+ "concurrently with the message loop that reads those replies, not before it");
 	}
 
 	private static async Task RespondToCapabilityInvokesAsync(WebSocket socket, CancellationToken cancellationToken)
@@ -852,7 +854,7 @@ public class PluginEndpointSecurityTests
 		var pluginId = $"com.example.t{Guid.NewGuid():N}";
 		var register = await Send(HttpMethod.Post,
 			"/api/plugins/registration",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { pluginId, displayName = "Test Plugin" },
 			extraHeaders: new Dictionary<string, string>
 				{ [PluginAuthDefaults.EnrollmentTokenHeaderName] = enrollmentToken });
@@ -879,7 +881,8 @@ public class PluginEndpointSecurityTests
 
 	private sealed record PluginSessionResponse(string SessionId, string SessionToken, int NegotiatedVersion);
 
-	private Task<HttpResponseMessage> CreateSessionAsync(string pluginId,
+	private Task<HttpResponseMessage> CreateSessionAsync(
+		string pluginId,
 		string secret,
 		object[]? capabilities = null,
 		string? declaredName = null,
@@ -903,7 +906,7 @@ public class PluginEndpointSecurityTests
 
 		return Send(HttpMethod.Post,
 			"/api/plugins/sessions",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: body,
 			extraHeaders: new Dictionary<string, string>
 			{
@@ -924,7 +927,10 @@ public class PluginEndpointSecurityTests
 		return await client.ConnectAsync(WsUri(), CancellationToken.None);
 	}
 
-	private static Uri WsUri() => new($"ws://localhost{ProtocolConstants.WebSocketPath}");
+	private static Uri WsUri()
+	{
+		return new Uri($"ws://localhost{ProtocolConstants.WebSocketPath}");
+	}
 
 	private static async Task SendEnvelopeAsync(WebSocket socket, ProtocolEnvelope envelope)
 	{
@@ -977,7 +983,8 @@ public class PluginEndpointSecurityTests
 		while (true)
 		{
 			var envelope = await ReceiveEnvelopeAsync(socket);
-			if (envelope is not null && string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
+			if (envelope is not null
+				&& string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
 			{
 				await AnswerUnsupportedAsync(socket, envelope);
 				continue;
@@ -995,7 +1002,8 @@ public class PluginEndpointSecurityTests
 		while (true)
 		{
 			var envelope = await ReceiveEnvelopeOrCloseAsync(socket);
-			if (envelope is not null && string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
+			if (envelope is not null
+				&& string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
 			{
 				await AnswerUnsupportedAsync(socket, envelope);
 				continue;
@@ -1011,7 +1019,8 @@ public class PluginEndpointSecurityTests
 	// These sessions declare no capabilities, so registration's variables describe reaches them; they answer
 	// it the way a plugin without the capability does.
 	private static Task AnswerUnsupportedAsync(WebSocket socket, ProtocolEnvelope invoke)
-		=> SendEnvelopeAsync(socket,
+	{
+		return SendEnvelopeAsync(socket,
 			new ProtocolEnvelope
 			{
 				Type = MessageTypes.CapabilityResult,
@@ -1022,6 +1031,7 @@ public class PluginEndpointSecurityTests
 					Code = ProtocolErrorCodes.CapabilityUnsupported, Message = "Not implemented.", Retryable = false
 				}
 			});
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -1064,7 +1074,9 @@ public class PluginEndpointSecurityTests
 	}
 
 	private Task<HttpResponseMessage> Send(HttpMethod method, string path, string? bearerToken = null)
-		=> Send(method, path, FakeConnectionShape.PublicLan, bearerToken);
+	{
+		return Send(method, path, FakeConnectionShape.PublicLan, bearerToken);
+	}
 
 	private Task<HttpResponseMessage> SendJson(
 		HttpMethod method,
@@ -1072,14 +1084,20 @@ public class PluginEndpointSecurityTests
 		object body,
 		FakeConnectionShape shape = FakeConnectionShape.PublicLan,
 		string? bearerToken = null)
-		=> Send(method, path, shape, bearerToken, body);
+	{
+		return Send(method, path, shape, bearerToken, body);
+	}
 
 	private static string DescribeHeaders(HttpResponseMessage response)
-		=> string.Join('\n',
+	{
+		return string.Join('\n',
 			response.Headers.Concat(response.Content.Headers)
 				.Select(header => $"{header.Key}: {string.Join(',', header.Value)}")
 				.OrderBy(line => line, StringComparer.Ordinal));
+	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

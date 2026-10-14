@@ -26,14 +26,20 @@ public sealed class AppIconExtractor : IAppIconExtractor
 		_logger = logger;
 	}
 
-	public bool CanExtract(string path) => IconImportFiles.IsIconDropSource(path);
+	public bool CanExtract(string path)
+	{
+		return IconImportFiles.IsIconDropSource(path);
+	}
 
 	// .lnk/.url/.desktop are pure path indirection: a shortcut only resolves on the machine it came
 	// from, and uploaded bytes may point at a path that does not exist on this host.
 	public bool CanExtractContent(string fileName)
-		=> _containerExtensions.Contains(Path.GetExtension(fileName));
+	{
+		return _containerExtensions.Contains(Path.GetExtension(fileName));
+	}
 
-	public async Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(string fileName,
+	public async Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(
+		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
 	{
@@ -96,7 +102,7 @@ public sealed class AppIconExtractor : IAppIconExtractor
 
 	private static byte[]? ReadExecutableIcon(byte[] bytes)
 	{
-		using var stream = new MemoryStream(bytes, writable: false);
+		using var stream = new MemoryStream(bytes, false);
 		return ReadExecutableIcon(stream);
 	}
 
@@ -111,7 +117,8 @@ public sealed class AppIconExtractor : IAppIconExtractor
 		return IcoImageDecoder.LooksLikeIco(extracted) ? IcoImageDecoder.TryDecodeToPng(extracted) : extracted;
 	}
 
-	public async Task<Result<ExtractedAppIcon, IconError>> Extract(string path,
+	public async Task<Result<ExtractedAppIcon, IconError>> Extract(
+		string path,
 		CancellationToken cancellationToken)
 	{
 		string? source;
@@ -193,8 +200,9 @@ public sealed class AppIconExtractor : IAppIconExtractor
 	}
 
 	private static bool CarriesImageBytes(string path)
-		=> IconImportFiles.IsSupportedImportEntry(path) ||
-			_containerExtensions.Contains(Path.GetExtension(path));
+	{
+		return IconImportFiles.IsSupportedImportEntry(path) || _containerExtensions.Contains(Path.GetExtension(path));
+	}
 
 	private string? ResolveShellLink(string path)
 	{
@@ -221,7 +229,9 @@ public sealed class AppIconExtractor : IAppIconExtractor
 	}
 
 	private static string? ResolveInternetShortcut(string path)
-		=> InternetShortcutParser.TryReadIconFile(ReadCappedLines(path));
+	{
+		return InternetShortcutParser.TryReadIconFile(ReadCappedLines(path));
+	}
 
 	private static string? ResolveDesktopEntry(string path)
 	{
@@ -230,9 +240,12 @@ public sealed class AppIconExtractor : IAppIconExtractor
 	}
 
 	private static IEnumerable<string> ReadCappedLines(string path)
-		=> File.ReadLines(path).Take(MaxShortcutLines);
+	{
+		return File.ReadLines(path).Take(MaxShortcutLines);
+	}
 
-	private static async Task<Result<ExtractedAppIcon, IconError>> ReadIcon(string source,
+	private static async Task<Result<ExtractedAppIcon, IconError>> ReadIcon(
+		string source,
 		string name,
 		CancellationToken cancellationToken)
 	{
@@ -281,7 +294,10 @@ public sealed class AppIconExtractor : IAppIconExtractor
 		return await File.ReadAllBytesAsync(source, cancellationToken);
 	}
 
-	private static string FileName(string path) => Path.GetFileName(IconImportFiles.TrimTrailingSeparators(path));
+	private static string FileName(string path)
+	{
+		return Path.GetFileName(IconImportFiles.TrimTrailingSeparators(path));
+	}
 
 	private static string IconName(string path)
 	{

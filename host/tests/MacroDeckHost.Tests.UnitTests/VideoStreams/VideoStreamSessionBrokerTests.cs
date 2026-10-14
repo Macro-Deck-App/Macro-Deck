@@ -6,11 +6,9 @@ using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Handshake;
-using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Sdk.VideoStreams;
 using MacroDeckHost.Application.Events;
-using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -32,7 +30,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		return (world, provider);
 	}
 
-	private static async Task<string> OpenActiveAsync(VideoStreamWorld world,
+	private static async Task<string> OpenActiveAsync(
+		VideoStreamWorld world,
 		string providerId = Front,
 		string streamId = "main",
 		string connectionId = "ui-1")
@@ -72,7 +71,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		using var _ = world;
 		var sessionId = await OpenActiveAsync(world);
 
-		var keepAlive = Assert.Throws<VideoStreamBrokerException>(() => world.Broker.KeepAliveSession("ui-2", sessionId));
+		var keepAlive
+			= Assert.Throws<VideoStreamBrokerException>(() => world.Broker.KeepAliveSession("ui-2", sessionId));
 		world.Broker.CloseSession("ui-2", sessionId);
 		world.Broker.KeepAliveSession("ui-1", sessionId);
 
@@ -111,7 +111,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		var (world, _) = await BuiltInAsync();
 		using var __ = world;
 
-		var unknownProvider = Assert.Throws<VideoStreamBrokerException>(() => world.Open(VideoStreamWorld.BuiltIn + "::back", "main"));
+		var unknownProvider
+			= Assert.Throws<VideoStreamBrokerException>(() => world.Open(VideoStreamWorld.BuiltIn + "::back", "main"));
 		var unknownStream = Assert.Throws<VideoStreamBrokerException>(() => world.Open(Front, "side"));
 		var noTransport = Assert.Throws<VideoStreamBrokerException>(() =>
 			world.Broker.OpenSession("ui-1", Front, "main", []));
@@ -142,7 +143,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single(),
-				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId)).EqualTo(forgotten)
+				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId))
+					.EqualTo(forgotten)
 					.And.Property(nameof(VideoStreamSessionClosedNotification.Reason))
 					.EqualTo(VideoStreamSessionReason.LeaseExpired));
 			Assert.That(provider.Closes.Single(), Is.EqualTo((forgotten, VideoStreamSessionReason.LeaseExpired)));
@@ -176,8 +178,10 @@ internal sealed class VideoStreamSessionBrokerTests
 		using var _ = world;
 		var sessionId = await OpenActiveAsync(world);
 
-		await world.Context().CloseSessionAsync(sessionId, VideoStreamSessionReason.SourceLost,
-			LocalizedText.FromLiteral("Camera unplugged"));
+		await world.Context()
+			.CloseSessionAsync(sessionId,
+				VideoStreamSessionReason.SourceLost,
+				LocalizedText.FromLiteral("Camera unplugged"));
 		world.Broker.CloseSession("ui-1", sessionId);
 		await world.WaitForClosedAsync(sessionId);
 		await Task.Delay(50);
@@ -209,9 +213,11 @@ internal sealed class VideoStreamSessionBrokerTests
 
 		var ticket = world.Open(Front, "main");
 		var sessionId = await opened.Task.WaitAsync(TimeSpan.FromSeconds(10));
-		await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Reconnecting,
+		await context.UpdateSessionAsync(sessionId,
+			VideoStreamSessionState.Reconnecting,
 			reason: VideoStreamSessionReason.SourceLost);
-		await context.UpdateSessionAsync(sessionId, VideoStreamSessionState.Active,
+		await context.UpdateSessionAsync(sessionId,
+			VideoStreamSessionState.Active,
 			VideoStreamSessionDescription.Hls("https://camera.local/renegotiated"),
 			VideoStreamSessionReason.SourceRecovered);
 		var beforeOpen = world.Publisher.ForSession(sessionId).Count;
@@ -219,22 +225,24 @@ internal sealed class VideoStreamSessionBrokerTests
 		await VideoStreamWorld.WaitForAsync(() => world.Publisher.ForSession(sessionId).Count == 3,
 			"the buffered provider traffic never arrived");
 
-		var log = world.Publisher.ForSession(sessionId).Select(notification => notification switch
-		{
-			VideoStreamSessionChangedNotification changed =>
-				$"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Url.Split('/').Last()}",
-			_ => notification.ToString()
-		});
+		var log = world.Publisher.ForSession(sessionId)
+			.Select(notification => notification switch
+			{
+				VideoStreamSessionChangedNotification changed =>
+					$"rev{changed.Revision} {changed.State} {changed.Reason} {changed.Description?.Url.Split('/').Last()}",
+				_ => notification.ToString()
+			});
 		Assert.Multiple(() =>
 		{
 			Assert.That(ticket.SessionId, Is.EqualTo(sessionId));
 			Assert.That(beforeOpen, Is.Zero);
-			Assert.That(log, Is.EqualTo(new[]
-			{
-				"rev1 Active None offer",
-				"rev2 Reconnecting SourceLost offer",
-				"rev3 Active SourceRecovered renegotiated"
-			}));
+			Assert.That(log,
+				Is.EqualTo(new[]
+				{
+					"rev1 Active None offer",
+					"rev2 Reconnecting SourceLost offer",
+					"rev3 Active SourceRecovered renegotiated"
+				}));
 		});
 	}
 
@@ -294,7 +302,8 @@ internal sealed class VideoStreamSessionBrokerTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(provider.Closes.Single(), Is.EqualTo((ticket.SessionId, VideoStreamSessionReason.ConsumerClosed)));
+			Assert.That(provider.Closes.Single(),
+				Is.EqualTo((ticket.SessionId, VideoStreamSessionReason.ConsumerClosed)));
 			Assert.That(world.Publisher.Of<VideoStreamSessionChangedNotification>(), Is.Empty);
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>(), Has.Count.EqualTo(1));
 		});
@@ -318,17 +327,25 @@ internal sealed class VideoStreamSessionBrokerTests
 		await world.AttachPluginAsync();
 
 		var ticket = world.Open(VideoStreamWorld.PluginId + "::front", "main");
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Plugin.ArgumentsOf<VideoStreamSessionOpenArguments>(CapabilityOperations.VideoStreamProvider.SessionOpen).Count == 1,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Plugin
+					.ArgumentsOf<VideoStreamSessionOpenArguments>(CapabilityOperations.VideoStreamProvider.SessionOpen)
+					.Count
+				== 1,
 			"the open never reached the plugin");
 		world.Broker.CloseSession("ui-1", ticket.SessionId);
 		release.SetResult();
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose).Count == 1,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Plugin
+					.ArgumentsOf<VideoStreamSessionCloseArguments>(
+						CapabilityOperations.VideoStreamProvider.SessionClose)
+					.Count
+				== 1,
 			"the plugin never got a close");
 		await Task.Delay(100);
 
-		var closes = world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose);
+		var closes = world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider
+			.SessionClose);
 		Assert.Multiple(() =>
 		{
 			Assert.That(closes.Select(close => (close.SessionId, close.ProviderId, close.Reason)),
@@ -392,7 +409,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		var refusals = 2;
 		world.Plugin.Handler = (operation, arguments) =>
 		{
-			if (operation == CapabilityOperations.VideoStreamProvider.SessionClose && Interlocked.Decrement(ref refusals) >= 0)
+			if (operation == CapabilityOperations.VideoStreamProvider.SessionClose
+				&& Interlocked.Decrement(ref refusals) >= 0)
 			{
 				throw ScriptedVideoPlugin.Error(ProtocolErrorCodes.RateLimited);
 			}
@@ -403,12 +421,17 @@ internal sealed class VideoStreamSessionBrokerTests
 		var sessionId = await OpenActiveAsync(world, VideoStreamWorld.PluginId + "::front");
 
 		world.Broker.CloseSession("ui-1", sessionId);
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose).Count == 3,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Plugin
+					.ArgumentsOf<VideoStreamSessionCloseArguments>(
+						CapabilityOperations.VideoStreamProvider.SessionClose)
+					.Count
+				== 3,
 			"the close was not retried");
 		await Task.Delay(100);
 
-		Assert.That(world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
+		Assert.That(world.Plugin
+				.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
 				.Select(close => close.SessionId),
 			Is.EqualTo(Enumerable.Repeat(sessionId, 3)));
 	}
@@ -425,8 +448,13 @@ internal sealed class VideoStreamSessionBrokerTests
 				: Task.FromResult(world.Plugin.Default(operation, arguments));
 		await world.AttachPluginAsync();
 		var sessionId = await OpenActiveAsync(world, VideoStreamWorld.PluginId + "::front");
-		int Closes() => world.Plugin
-			.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose).Count;
+
+		int Closes()
+		{
+			return world.Plugin
+				.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
+				.Count;
+		}
 
 		world.Broker.CloseSession("ui-1", sessionId);
 		await VideoStreamWorld.WaitForAsync(() =>
@@ -456,7 +484,8 @@ internal sealed class VideoStreamSessionBrokerTests
 			world.Open(VideoStreamWorld.PluginId + "::front", "main", $"ui-{i / 16}");
 		}
 
-		await VideoStreamWorld.WaitForAsync(() => plugin.Count(CapabilityOperations.VideoStreamProvider.SessionOpen) == 8,
+		await VideoStreamWorld.WaitForAsync(()
+				=> plugin.Count(CapabilityOperations.VideoStreamProvider.SessionOpen) == 8,
 			"the opens never reached the plugin");
 		await Task.Delay(100);
 		var admitted = await plugin.ActionIsAdmittedAsync();
@@ -485,14 +514,16 @@ internal sealed class VideoStreamSessionBrokerTests
 			}
 		}
 
-		await VideoStreamWorld.WaitForAsync(() => world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 48,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Publisher.Of<VideoStreamSessionChangedNotification>().Count == 48,
 			"not every session opened");
 		for (var connection = 0; connection < 3; connection++)
 		{
 			world.Broker.CloseConnection($"ui-{connection}", VideoStreamSessionReason.ConsumerDisconnected);
 		}
 
-		await VideoStreamWorld.WaitForAsync(() => plugin.HeldCloses.Count == RemoteVideoStreamEndpoint.MaxConcurrentCloses,
+		await VideoStreamWorld.WaitForAsync(()
+				=> plugin.HeldCloses.Count == RemoteVideoStreamEndpoint.MaxConcurrentCloses,
 			"the closes never reached the plugin");
 		await Task.Delay(100);
 		var inFlight = plugin.HeldCloses.Count;
@@ -504,7 +535,9 @@ internal sealed class VideoStreamSessionBrokerTests
 			Assert.That(inFlight, Is.EqualTo(RemoteVideoStreamEndpoint.MaxConcurrentCloses));
 			Assert.That(admitted, Is.True);
 			Assert.That(plugin.ClosedSessions, Is.EquivalentTo(sessions));
-			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Select(closed => closed.Reason).Distinct(),
+			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>()
+					.Select(closed => closed.Reason)
+					.Distinct(),
 				Is.EqualTo(new[] { VideoStreamSessionReason.ConsumerDisconnected }));
 		});
 	}
@@ -526,7 +559,8 @@ internal sealed class VideoStreamSessionBrokerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single(),
-				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId)).EqualTo(ofFirst)
+				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId))
+					.EqualTo(ofFirst)
 					.And.Property(nameof(VideoStreamSessionClosedNotification.Reason))
 					.EqualTo(VideoStreamSessionReason.ProviderRemoved));
 			Assert.That(world.Publisher.ForSession(ofSecond), Has.Count.EqualTo(1));
@@ -595,11 +629,14 @@ internal sealed class VideoStreamSessionBrokerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single(),
-				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId)).EqualTo(onFront)
+				Has.Property(nameof(VideoStreamSessionClosedNotification.SessionId))
+					.EqualTo(onFront)
 					.And.Property(nameof(VideoStreamSessionClosedNotification.Reason))
 					.EqualTo(VideoStreamSessionReason.ProviderRemoved));
 			Assert.That(world.Publisher.ForSession(onBack), Has.Count.EqualTo(1));
-			Assert.That(world.Registry.GetProviders().Single(entry => entry.ProviderId == "front").Streams.Select(stream => stream.Id),
+			Assert.That(world.Registry.GetProviders()
+					.Single(entry => entry.ProviderId == "front")
+					.Streams.Select(stream => stream.Id),
 				Is.EqualTo(new[] { "main", "side" }));
 		});
 	}
@@ -640,13 +677,17 @@ internal sealed class VideoStreamSessionBrokerTests
 		await world.AttachPluginAsync("com.example.first");
 		var sessionId = await OpenActiveAsync(world, "com.example.first::front");
 
-		var update = Assert.Throws<VideoStreamBrokerException>(() => world.Broker.ApplyProviderUpdate("com.example.other",
+		var update = Assert.Throws<VideoStreamBrokerException>(() => world.Broker.ApplyProviderUpdate(
+			"com.example.other",
 			sessionId,
 			VideoStreamSessionState.Suspended,
 			null,
 			VideoStreamSessionReason.None,
 			null));
-		var closed = world.Broker.ApplyProviderClose("com.example.other", sessionId, VideoStreamSessionReason.ProviderClosed, null);
+		var closed = world.Broker.ApplyProviderClose("com.example.other",
+			sessionId,
+			VideoStreamSessionReason.ProviderClosed,
+			null);
 
 		Assert.Multiple(() =>
 		{
@@ -677,7 +718,10 @@ internal sealed class VideoStreamSessionBrokerTests
 		private readonly ConcurrentQueue<CapabilityInvokePayload> _received = new();
 		private readonly PluginCapabilityInvoker _invoker;
 
-		private WirePlugin(PluginCapabilityInvoker invoker) => _invoker = invoker;
+		private WirePlugin(PluginCapabilityInvoker invoker)
+		{
+			_invoker = invoker;
+		}
 
 		public bool AnswerOpens { get; set; }
 
@@ -694,7 +738,10 @@ internal sealed class VideoStreamSessionBrokerTests
 			return plugin;
 		}
 
-		public int Count(string operation) => _received.Count(payload => payload.Operation == operation);
+		public int Count(string operation)
+		{
+			return _received.Count(payload => payload.Operation == operation);
+		}
 
 		public async Task<bool> ActionIsAdmittedAsync()
 		{
@@ -732,8 +779,10 @@ internal sealed class VideoStreamSessionBrokerTests
 			{
 				if (HeldCloses.TryDequeue(out var close))
 				{
-					var arguments = close.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)!
-						.Arguments!.Value.Deserialize<VideoStreamSessionCloseArguments>(PluginProtocolJson.Options)!;
+					var arguments
+						= close.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)!
+							.Arguments!.Value
+							.Deserialize<VideoStreamSessionCloseArguments>(PluginProtocolJson.Options)!;
 					ClosedSessions.Add(arguments.SessionId);
 					Reply(close, null);
 					continue;
@@ -755,29 +804,36 @@ internal sealed class VideoStreamSessionBrokerTests
 			switch (payload.Operation)
 			{
 				case CapabilityOperations.VideoStreamProvider.Describe:
-					Reply(envelope, new VideoStreamProviderDescribePayload
-					{
-						Providers =
-						[
-							new VideoStreamProviderDto
-							{
-								Id = "front", Name = LocalizedText.FromLiteral("Front"), RegistrationId = "r1"
-							}
-						]
-					});
+					Reply(envelope,
+						new VideoStreamProviderDescribePayload
+						{
+							Providers =
+							[
+								new VideoStreamProviderDto
+								{
+									Id = "front", Name = LocalizedText.FromLiteral("Front"), RegistrationId = "r1"
+								}
+							]
+						});
 					break;
 				case CapabilityOperations.VideoStreamProvider.Streams:
-					Reply(envelope, new VideoStreamProviderStreamsResult
-					{
-						Streams = [new VideoStreamDescriptorDto { Id = "main", Name = LocalizedText.FromLiteral("Main") }]
-					});
+					Reply(envelope,
+						new VideoStreamProviderStreamsResult
+						{
+							Streams =
+							[
+								new VideoStreamDescriptorDto { Id = "main", Name = LocalizedText.FromLiteral("Main") }
+							]
+						});
 					break;
 				case CapabilityOperations.VideoStreamProvider.SessionOpen when AnswerOpens:
-					Reply(envelope, new VideoStreamSessionOpenResult
-					{
-						Description = new VideoStreamSessionDescriptionDto { Transport = "hls", Url = "https://camera.local/live" },
-						RegistrationId = "r1"
-					});
+					Reply(envelope,
+						new VideoStreamSessionOpenResult
+						{
+							Description = new VideoStreamSessionDescriptionDto
+								{ Transport = "hls", Url = "https://camera.local/live" },
+							RegistrationId = "r1"
+						});
 					break;
 				case CapabilityOperations.VideoStreamProvider.SessionClose:
 					HeldCloses.Enqueue(envelope);
@@ -788,18 +844,21 @@ internal sealed class VideoStreamSessionBrokerTests
 		}
 
 		private void Reply(ProtocolEnvelope request, object? data)
-			=> _ = Task.Run(() => _invoker.TryComplete(VideoStreamWorld.PluginId,
+		{
+			_ = Task.Run(() => _invoker.TryComplete(VideoStreamWorld.PluginId,
 				new ProtocolEnvelope
 				{
 					Type = MessageTypes.CapabilityResult,
 					Id = Guid.NewGuid().ToString(),
 					CorrelationId = request.Id,
-					Payload = JsonSerializer.SerializeToElement(
-						new CapabilityResultPayload
+					Payload = JsonSerializer.SerializeToElement(new CapabilityResultPayload
 						{
-							Data = data is null ? null : JsonSerializer.SerializeToElement(data, PluginProtocolJson.Options)
+							Data = data is null
+								? null
+								: JsonSerializer.SerializeToElement(data, PluginProtocolJson.Options)
 						},
 						PluginProtocolJson.Options)
 				}));
+		}
 	}
 }

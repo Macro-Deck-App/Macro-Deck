@@ -10,10 +10,10 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("fake-localappdata", "Android", "Sdk", "platform-tools", "adb.exe");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?> { ["LOCALAPPDATA"] = "fake-localappdata" },
-			isWindows: true);
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?> { ["LOCALAPPDATA"] = "fake-localappdata" },
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -27,14 +27,14 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("fake-programfiles", "Android", "platform-tools", "adb.exe");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>
 			{
 				["LOCALAPPDATA"] = "fake-localappdata",
 				["PROGRAMFILES"] = "fake-programfiles"
 			},
-			isWindows: true);
+			true);
 
 		Assert.Multiple(() =>
 		{
@@ -48,9 +48,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("fake-home", "Library", "Android", "sdk", "platform-tools", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?> { ["HOME"] = "fake-home" },
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?> { ["HOME"] = "fake-home" },
 			isMacOs: true);
 
 		Assert.Multiple(() =>
@@ -65,9 +65,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("/opt", "homebrew", "bin", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>(),
 			isMacOs: true);
 
 		Assert.Multiple(() =>
@@ -82,9 +82,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("/usr", "local", "bin", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>(),
 			isMacOs: true);
 
 		Assert.Multiple(() =>
@@ -99,9 +99,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("fake-home", "Android", "Sdk", "platform-tools", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?> { ["HOME"] = "fake-home" },
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?> { ["HOME"] = "fake-home" },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -116,9 +116,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("/usr", "lib", "android-sdk", "platform-tools", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>(),
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -133,9 +133,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("/usr", "local", "bin", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>(),
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -150,9 +150,9 @@ public class AdbExecutableLocatorTests
 	{
 		var expected = Path.Combine("/usr", "bin", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [expected],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[expected],
+			new Dictionary<string, string?>(),
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -168,9 +168,9 @@ public class AdbExecutableLocatorTests
 		const string configured = "fake-configured-adb";
 		var wellKnown = Path.Combine("/usr", "bin", "adb");
 
-		var result = Resolve(configuredPath: configured,
-			existingPaths: [configured, wellKnown],
-			environment: new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
+		var result = Resolve(configured,
+			[configured, wellKnown],
+			new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -186,9 +186,9 @@ public class AdbExecutableLocatorTests
 		const string configured = "fake-configured-adb-that-does-not-exist";
 		var androidHomeCandidate = Path.Combine("fake-android-home", "platform-tools", "adb");
 
-		var result = Resolve(configuredPath: configured,
-			existingPaths: [androidHomeCandidate],
-			environment: new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
+		var result = Resolve(configured,
+			[androidHomeCandidate],
+			new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -204,9 +204,9 @@ public class AdbExecutableLocatorTests
 		var androidHomeCandidate = Path.Combine("fake-android-home", "platform-tools", "adb");
 		var wellKnown = Path.Combine("/usr", "bin", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [androidHomeCandidate, wellKnown],
-			environment: new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
+		var result = Resolve(null,
+			[androidHomeCandidate, wellKnown],
+			new Dictionary<string, string?> { ["ANDROID_HOME"] = "fake-android-home" },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -221,9 +221,9 @@ public class AdbExecutableLocatorTests
 	{
 		var sdkRootCandidate = Path.Combine("fake-sdk-root", "platform-tools", "adb");
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [sdkRootCandidate],
-			environment: new Dictionary<string, string?> { ["ANDROID_SDK_ROOT"] = "fake-sdk-root" },
+		var result = Resolve(null,
+			[sdkRootCandidate],
+			new Dictionary<string, string?> { ["ANDROID_SDK_ROOT"] = "fake-sdk-root" },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -241,9 +241,9 @@ public class AdbExecutableLocatorTests
 		var candidate = Path.Combine(directory2, "adb");
 		var pathValue = string.Join(Path.PathSeparator, directory1, directory2);
 
-		var result = Resolve(configuredPath: null,
-			existingPaths: [candidate],
-			environment: new Dictionary<string, string?> { ["PATH"] = pathValue },
+		var result = Resolve(null,
+			[candidate],
+			new Dictionary<string, string?> { ["PATH"] = pathValue },
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -256,9 +256,9 @@ public class AdbExecutableLocatorTests
 	[Test]
 	public void Nothing_found_yields_a_null_path_and_source_None()
 	{
-		var result = Resolve(configuredPath: null,
-			existingPaths: [],
-			environment: new Dictionary<string, string?>(),
+		var result = Resolve(null,
+			[],
+			new Dictionary<string, string?>(),
 			isLinux: true);
 
 		Assert.Multiple(() =>
@@ -277,7 +277,7 @@ public class AdbExecutableLocatorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Resolve(null, [windowsCandidate], environment, isWindows: true).Path,
+			Assert.That(Resolve(null, [windowsCandidate], environment, true).Path,
 				Is.EqualTo(windowsCandidate));
 			Assert.That(Resolve(null, [otherCandidate], environment, isMacOs: true).Path,
 				Is.EqualTo(otherCandidate));

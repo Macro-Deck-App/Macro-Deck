@@ -35,7 +35,10 @@ public class PluginUiResourcesTests
 	}
 
 	[TearDown]
-	public void TearDown() => _resources.Dispose();
+	public void TearDown()
+	{
+		_resources.Dispose();
+	}
 
 	[Test]
 	public async Task Uploaded_bytes_registered_under_a_name_are_served_with_their_media_type()
@@ -147,7 +150,11 @@ public class PluginUiResourcesTests
 	{
 		await StartSessionAsync(PluginA, "s1");
 
-		var tooLarge = _resources.RegisterContent(PluginA, "s1", "cover", new byte[ProtocolLimits.MaxUiResourceBytes + 1], "image/png");
+		var tooLarge = _resources.RegisterContent(PluginA,
+			"s1",
+			"cover",
+			new byte[ProtocolLimits.MaxUiResourceBytes + 1],
+			"image/png");
 		var svg = _resources.RegisterContent(PluginA, "s1", "cover", _first, "image/svg+xml");
 
 		Assert.Multiple(() =>
@@ -217,7 +224,8 @@ public class PluginUiResourcesTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(refused.Outcome, Is.EqualTo(PluginUiResourceOutcome.QuotaExceeded));
-			Assert.That(replaced.Outcome, Is.EqualTo(PluginUiResourceOutcome.Registered),
+			Assert.That(replaced.Outcome,
+				Is.EqualTo(PluginUiResourceOutcome.Registered),
 				"replacing a name does not add to the count");
 		});
 	}
@@ -278,7 +286,10 @@ public class PluginUiResourcesTests
 	[TestCase("", "image/png", PluginUiResourceOutcome.InvalidName)]
 	[TestCase("photo", "image/svg+xml", PluginUiResourceOutcome.UnsupportedMediaType)]
 	[TestCase("photo", "image/jpeg", PluginUiResourceOutcome.MediaTypeMismatch)]
-	public async Task An_unusable_registration_is_refused(string name, string mediaType, PluginUiResourceOutcome expected)
+	public async Task An_unusable_registration_is_refused(
+		string name,
+		string mediaType,
+		PluginUiResourceOutcome expected)
 	{
 		await StartSessionAsync(PluginA, "s1");
 		var hash = Upload(PluginA, _first, "image/png");
@@ -321,7 +332,9 @@ public class PluginUiResourcesTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(late.Outcome, Is.EqualTo(PluginUiResourceOutcome.SessionNotCurrent));
-			Assert.That(_store.TryGet(old.ResourceId, out _), Is.False, "the replaced session's resources are released");
+			Assert.That(_store.TryGet(old.ResourceId, out _),
+				Is.False,
+				"the replaced session's resources are released");
 			Assert.That(_store.TryGet(PluginUiResources.OwnerId(PluginA) + ".late", out _), Is.False);
 		});
 	}
@@ -346,7 +359,7 @@ public class PluginUiResourcesTests
 			Capabilities = new Dictionary<string, MacroDeck.Plugin.Protocol.Versioning.CapabilityNegotiationResult>(),
 			DeclaredCapabilities = [],
 			State = PluginSessionState.Awaiting,
-			CreatedAt = TimeProvider.System.GetUtcNow(),
+			CreatedAt = TimeProvider.System.GetUtcNow()
 		});
 		_sessions.TryAttach(sessionId, new FakePluginConnection(), null);
 	}
@@ -371,11 +384,13 @@ public class PluginUiResourcesTests
 	}
 
 	private PluginUiResourceResult RegisterSmall(int index)
-		=> _resources.Register(PluginA,
+	{
+		return _resources.Register(PluginA,
 			"s1",
 			$"photo-{index}",
 			Upload(PluginA, [(byte)(index % 256), (byte)(index / 256)]),
 			"image/png");
+	}
 
 	private static byte[] Filled(int length, int seed)
 	{

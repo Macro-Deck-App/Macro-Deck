@@ -29,9 +29,11 @@ internal sealed class SingleDigestImplementationTests
 	/// is exactly "Tests" - e.g. <c>sdk/tests/...</c> or the <c>Tests</c> component of
 	/// <c>MacroDeck.Signing.Tests.UnitTests</c> - rather than merely containing "Tests" as a substring,
 	/// which would also wrongly exclude a production path like <c>TestHarness/</c>.</summary>
-	private static bool HasTestsPathSegment(string path) =>
-		path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, '.')
+	private static bool HasTestsPathSegment(string path)
+	{
+		return path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, '.')
 			.Any(segment => string.Equals(segment, "Tests", StringComparison.Ordinal));
+	}
 
 	private static string FindRepositoryRoot()
 	{
@@ -43,8 +45,8 @@ internal sealed class SingleDigestImplementationTests
 
 		if (current is null)
 		{
-			throw new InvalidOperationException("Could not locate the repository root (MacroDeck.slnx) above " +
-				AppContext.BaseDirectory);
+			throw new InvalidOperationException("Could not locate the repository root (MacroDeck.slnx) above "
+				+ AppContext.BaseDirectory);
 		}
 
 		return current.FullName;

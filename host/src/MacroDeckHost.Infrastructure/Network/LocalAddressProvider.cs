@@ -11,11 +11,11 @@ public sealed class LocalAddressProvider : ILocalAddressProvider
 	{
 		return NetworkInterface.GetAllNetworkInterfaces()
 			.Where(nic =>
-				nic.OperationalStatus == OperationalStatus.Up &&
-				nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+				nic.OperationalStatus == OperationalStatus.Up
+				&& nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
 			.SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
-			.Where(address => address.Address.AddressFamily == AddressFamily.InterNetwork &&
-				!IPAddress.IsLoopback(address.Address))
+			.Where(address => address.Address.AddressFamily == AddressFamily.InterNetwork
+				&& !IPAddress.IsLoopback(address.Address))
 			.Select(address => address.Address)
 			.Distinct()
 			.ToList();

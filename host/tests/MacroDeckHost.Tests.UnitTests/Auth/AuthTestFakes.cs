@@ -15,9 +15,15 @@ internal sealed class InMemoryUserRepository : IUserRepository
 {
 	public UserEntity? User { get; set; }
 
-	public Task<UserEntity?> GetSingle() => Task.FromResult(User);
+	public Task<UserEntity?> GetSingle()
+	{
+		return Task.FromResult(User);
+	}
 
-	public Task<bool> AnyExists() => Task.FromResult(User is not null);
+	public Task<bool> AnyExists()
+	{
+		return Task.FromResult(User is not null);
+	}
 
 	public Task Create(UserEntity user)
 	{
@@ -39,12 +45,17 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 	public Func<Task>? BeforeNextRevoke { get; set; }
 
 	public Task<RefreshTokenEntity?> GetByTokenHash(string tokenHash)
-		=> Task.FromResult(Tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+	{
+		return Task.FromResult(Tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+	}
 
 	public Task<RefreshTokenEntity?> GetById(Guid id)
-		=> Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
+	{
+		return Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
+	}
 
-	public async Task<bool> TryRevoke(Guid id,
+	public async Task<bool> TryRevoke(
+		Guid id,
 		DateTime revokedAt,
 		Guid? replacedById = null,
 		bool rotatedByGrace = false)
@@ -116,16 +127,19 @@ internal sealed class InMemoryRefreshTokenRepository : IRefreshTokenRepository
 	}
 
 	public Task<IReadOnlyList<Guid>> GetDeviceIdsWithLiveTokens(DateTime now)
-		=> Task.FromResult<IReadOnlyList<Guid>>(Tokens
+	{
+		return Task.FromResult<IReadOnlyList<Guid>>(Tokens
 			.Where(t => t.DeviceId is not null && t.RevokedAt is null && t.ExpiresAt >= now)
 			.Select(t => t.DeviceId!.Value)
 			.Distinct()
 			.ToList());
+	}
 
 	public Task DeleteExpired(DateTime now)
 	{
-		Tokens.RemoveAll(t => t.ExpiresAt < now ||
-			(t.RevokedAt is { } revokedAt && revokedAt < now - AuthDefaults.RevokedRefreshTokenRetention));
+		Tokens.RemoveAll(t
+			=> t.ExpiresAt < now
+			|| t.RevokedAt is { } revokedAt && revokedAt < now - AuthDefaults.RevokedRefreshTokenRetention);
 		return Task.CompletedTask;
 	}
 }
@@ -144,17 +158,26 @@ internal sealed class InMemoryDeviceRepository : IDeviceRepository
 	}
 
 	public Task<DeviceEntity?> GetByProviderIdentity(string providerId, string providerDeviceId)
-		=> Task.FromResult(Devices.FirstOrDefault(d =>
+	{
+		return Task.FromResult(Devices.FirstOrDefault(d =>
 			d.ProviderId == providerId && d.ProviderDeviceId == providerDeviceId));
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetByProviderId(string providerId)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.Where(d => d.ProviderId == providerId).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.Where(d => d.ProviderId == providerId).ToList());
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetAll()
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.OrderByDescending(d => d.LastSeenAt).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.OrderByDescending(d => d.LastSeenAt).ToList());
+	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetByStartupProfileId(string profileId)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.Where(d => d.StartupProfileId == profileId).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>(
+			Devices.Where(d => d.StartupProfileId == profileId).ToList());
+	}
 
 	public Task Create(DeviceEntity device)
 	{
@@ -202,7 +225,9 @@ internal sealed class InMemoryDeviceRepository : IDeviceRepository
 	}
 
 	public Task<IReadOnlyList<DeviceEntity>> GetStale(DateTime lastSeenBefore)
-		=> Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.Where(d => d.LastSeenAt < lastSeenBefore).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<DeviceEntity>>(Devices.Where(d => d.LastSeenAt < lastSeenBefore).ToList());
+	}
 
 	public Task DeleteMany(IReadOnlyCollection<Guid> ids)
 	{
@@ -215,13 +240,19 @@ internal sealed class RecordingUiTransport : IUiTransport
 {
 	public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 		where T : class
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public List<object> Sent { get; } = [];
 
@@ -244,9 +275,15 @@ internal sealed class RecordingUiTransport : IUiTransport
 
 internal sealed class FakePasswordHasher : IPasswordHasher
 {
-	public string Hash(string password) => "H:" + password;
+	public string Hash(string password)
+	{
+		return "H:" + password;
+	}
 
-	public bool Verify(string password, string encodedHash) => encodedHash == "H:" + password;
+	public bool Verify(string password, string encodedHash)
+	{
+		return encodedHash == "H:" + password;
+	}
 }
 
 internal sealed class FakeAccessTokenIssuer : IAccessTokenIssuer
@@ -299,7 +336,10 @@ internal sealed class FakeProfileRegistry : IProfileRegistry
 		return this;
 	}
 
-	public void RemoveProfile(string id) => _profiles.RemoveAll(p => p.Id == id);
+	public void RemoveProfile(string id)
+	{
+		_profiles.RemoveAll(p => p.Id == id);
+	}
 
 	public FakeProfileRegistry SetFolders(string profileId, params Folder[] folders)
 	{
@@ -307,15 +347,25 @@ internal sealed class FakeProfileRegistry : IProfileRegistry
 		return this;
 	}
 
-	public IReadOnlyList<Profile> GetProfiles() => _profiles;
+	public IReadOnlyList<Profile> GetProfiles()
+	{
+		return _profiles;
+	}
 
 	public IReadOnlyList<Folder> GetFoldersForProfile(string profileId)
-		=> _folders.TryGetValue(profileId, out var folders) ? folders : [];
+	{
+		return _folders.TryGetValue(profileId, out var folders) ? folders : [];
+	}
 
-	public bool IsVirtual(string profileId) => profileId.Contains("::", StringComparison.Ordinal);
+	public bool IsVirtual(string profileId)
+	{
+		return profileId.Contains("::", StringComparison.Ordinal);
+	}
 
 	public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 }
 
 internal sealed class FakeDeviceDeckNavigator : IDeviceDeckNavigator
@@ -326,7 +376,8 @@ internal sealed class FakeDeviceDeckNavigator : IDeviceDeckNavigator
 	public bool ChangeFolderResult { get; set; } = true;
 	public bool ChangeProfileResult { get; set; } = true;
 
-	public Task<bool> ChangeFolderOnDeviceAsync(Guid deviceId,
+	public Task<bool> ChangeFolderOnDeviceAsync(
+		Guid deviceId,
 		Guid folderId,
 		Guid navigationToken,
 		CancellationToken cancellationToken)
@@ -347,7 +398,13 @@ internal sealed class FakeLastServedRotation : ILastServedRotation
 {
 	public DateTime Recorded { get; private set; } = DateTime.MinValue;
 
-	public DateTime Read() => Recorded;
+	public DateTime Read()
+	{
+		return Recorded;
+	}
 
-	public void Record(DateTime rotatedAt) => Recorded = rotatedAt;
+	public void Record(DateTime rotatedAt)
+	{
+		Recorded = rotatedAt;
+	}
 }

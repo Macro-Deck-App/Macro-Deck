@@ -87,10 +87,11 @@ internal sealed class SteamTracker
 		}
 
 		Commit(() =>
-		{
-			_steamRoot = root;
-			_local = local;
-		}, localPoll: true);
+			{
+				_steamRoot = root;
+				_local = local;
+			},
+			true);
 	}
 
 	public async Task PollSelfAsync(CancellationToken cancellationToken)
@@ -106,7 +107,8 @@ internal sealed class SteamTracker
 			SteamWebState state;
 			try
 			{
-				summary = await account.Config.Client!.GetPlayerSummaryAsync(account.Config.SteamId!, cancellationToken);
+				summary = await account.Config.Client!.GetPlayerSummaryAsync(account.Config.SteamId!,
+					cancellationToken);
 				state = SteamWebState.Connected;
 			}
 			catch (SteamWebApiException exception)
@@ -160,7 +162,8 @@ internal sealed class SteamTracker
 
 			try
 			{
-				if (await account.Config.Client!.GetFriendIdsAsync(account.Config.SteamId!, cancellationToken) is not { } ids)
+				if (await account.Config.Client!.GetFriendIdsAsync(account.Config.SteamId!, cancellationToken) is not
+					{ } ids)
 				{
 					friendsState = SteamFriendsState.Private;
 				}
@@ -247,29 +250,36 @@ internal sealed class SteamTracker
 	}
 
 	private static SteamFriend ToFriend(SteamPlayerSummary summary)
-		=> new(summary.SteamId,
+	{
+		return new SteamFriend(summary.SteamId,
 			string.IsNullOrWhiteSpace(summary.Name) ? summary.SteamId : summary.Name,
 			summary.PersonaState,
 			summary.GameId,
 			summary.GameId is not null && !string.IsNullOrWhiteSpace(summary.GameName) ? summary.GameName : null,
 			summary.AvatarUrl);
+	}
 
 	private static IReadOnlyList<SteamFriend> Sort(IEnumerable<SteamFriend> friends)
-		=>
+	{
+		return
 		[
 			.. friends.OrderBy(friend => friend.IsInGame ? 0 : friend.IsOnline ? 1 : 2)
-				.ThenBy(friend => friend.PersonaState is SteamPersona.Online or SteamPersona.LookingToPlay
-					or SteamPersona.LookingToTrade ? 0 : 1)
+				.ThenBy(friend => friend.PersonaState is SteamPersona.Online
+					or SteamPersona.LookingToPlay
+					or SteamPersona.LookingToTrade
+					? 0
+					: 1)
 				.ThenBy(friend => friend.Name, StringComparer.CurrentCultureIgnoreCase)
 				.ThenBy(friend => friend.SteamId, StringComparer.Ordinal)
 		];
+	}
 
 	private bool IsOwnedGamesDue(AccountState account)
 	{
 		lock (_sync)
 		{
-			return account.Owned == SteamOwnedState.Unavailable ||
-				_time.GetUtcNow() - account.OwnedFetchedAt >= _ownedGamesRefresh;
+			return account.Owned == SteamOwnedState.Unavailable
+				|| _time.GetUtcNow() - account.OwnedFetchedAt >= _ownedGamesRefresh;
 		}
 	}
 
@@ -318,7 +328,9 @@ internal sealed class SteamTracker
 		{
 			if (previous.CurrentGame is { } stopped)
 			{
-				events.Add(SteamEventFactory.GameStopped(SteamEventPayload.ThisComputer, stopped.AppId, stopped.Name,
+				events.Add(SteamEventFactory.GameStopped(SteamEventPayload.ThisComputer,
+					stopped.AppId,
+					stopped.Name,
 					now - stopped.StartedAt));
 			}
 
@@ -372,7 +384,9 @@ internal sealed class SteamTracker
 		if (!account.RemoteObserved)
 		{
 			account.RemoteObserved = true;
-			account.RemoteGame = webAppId is { } first ? new SteamCurrentGame(first, NameOf(first, account.Self), now) : null;
+			account.RemoteGame = webAppId is { } first
+				? new SteamCurrentGame(first, NameOf(first, account.Self), now)
+				: null;
 			return;
 		}
 
@@ -383,11 +397,14 @@ internal sealed class SteamTracker
 
 		if (account.RemoteGame is { } stopped)
 		{
-			events.Add(SteamEventFactory.GameStopped(account.Config.EntryId, stopped.AppId, stopped.Name,
+			events.Add(SteamEventFactory.GameStopped(account.Config.EntryId,
+				stopped.AppId,
+				stopped.Name,
 				now - stopped.StartedAt));
 		}
 
-		account.RemoteGame = webAppId is { } appId ? new SteamCurrentGame(appId, NameOf(appId, account.Self), now) : null;
+		account.RemoteGame
+			= webAppId is { } appId ? new SteamCurrentGame(appId, NameOf(appId, account.Self), now) : null;
 		if (account.RemoteGame is { } started)
 		{
 			events.Add(SteamEventFactory.GameStarted(account.Config.EntryId, started.AppId, started.Name));
@@ -449,10 +466,10 @@ internal sealed class SteamTracker
 		account.LastLocalAppId = local?.AppId;
 
 		var game = local;
-		if (game is null &&
-			account.Web == SteamWebState.Connected &&
-			account.Self?.GameId is { } webAppId &&
-			webAppId != account.StaleWebAppId)
+		if (game is null
+			&& account.Web == SteamWebState.Connected
+			&& account.Self?.GameId is { } webAppId
+			&& webAppId != account.StaleWebAppId)
 		{
 			if (account.TrackedAppId != webAppId)
 			{
@@ -487,9 +504,11 @@ internal sealed class SteamTracker
 	}
 
 	private string NameOf(int appId, SteamPlayerSummary? self)
-		=> _local.Games.FirstOrDefault(game => game.AppId == appId)?.Name ??
-			(self?.GameId == appId && !string.IsNullOrWhiteSpace(self.GameName) ? self.GameName : null) ??
-			appId.ToString(CultureInfo.InvariantCulture);
+	{
+		return _local.Games.FirstOrDefault(game => game.AppId == appId)?.Name
+			?? (self?.GameId == appId && !string.IsNullOrWhiteSpace(self.GameName) ? self.GameName : null)
+			?? appId.ToString(CultureInfo.InvariantCulture);
+	}
 
 	private SteamCurrentGame? ResolveLocalGame()
 	{

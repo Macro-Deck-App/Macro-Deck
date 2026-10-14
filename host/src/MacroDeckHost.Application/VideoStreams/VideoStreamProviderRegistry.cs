@@ -35,12 +35,14 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 	private readonly IPluginSessionRegistry _pluginSessions;
 	private readonly IPublisher _publisher;
 	private readonly ConcurrentDictionary<string, PullRun> _pulls = new(StringComparer.Ordinal);
+
 	private readonly ConcurrentDictionary<string, RemoteVideoStreamEndpoint> _remoteEndpoints =
 		new(StringComparer.Ordinal);
 
 	private readonly TimeProvider _time;
 
-	public VideoStreamProviderRegistry(IIntegrationRegistry integrations,
+	public VideoStreamProviderRegistry(
+		IIntegrationRegistry integrations,
 		IPluginSessionRegistry pluginSessions,
 		IPluginCapabilityInvoker invoker,
 		IPublisher publisher,
@@ -113,9 +115,9 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 	public Task AttachRemoteAsync(string pluginId, string? pluginSessionId, IPluginConnection? connection)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(pluginId);
-		if (connection is not null &&
-			pluginSessionId is not null &&
-			!_pluginSessions.IsCurrentConnection(pluginSessionId, connection))
+		if (connection is not null
+			&& pluginSessionId is not null
+			&& !_pluginSessions.IsCurrentConnection(pluginSessionId, connection))
 		{
 			return Task.CompletedTask;
 		}
@@ -126,7 +128,7 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 			{
 				owner = new Owner(pluginId,
 					_remoteEndpoints.GetOrAdd(pluginId, id => new RemoteVideoStreamEndpoint(id, _invoker)),
-					isRemote: true);
+					true);
 				_owners[pluginId] = owner;
 			}
 
@@ -135,8 +137,8 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 				return Task.CompletedTask;
 			}
 
-			if (!string.Equals(owner.PluginSessionId, pluginSessionId, StringComparison.Ordinal) ||
-				!ReferenceEquals(owner.Connection, connection))
+			if (!string.Equals(owner.PluginSessionId, pluginSessionId, StringComparison.Ordinal)
+				|| !ReferenceEquals(owner.Connection, connection))
 			{
 				owner.PluginSessionId = pluginSessionId;
 				owner.Connection = connection;
@@ -148,7 +150,9 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 	}
 
 	public Task RequestProvidersPullAsync(string pluginId, string? pluginSessionId, IPluginConnection? connection)
-		=> AttachRemoteAsync(pluginId, pluginSessionId, connection);
+	{
+		return AttachRemoteAsync(pluginId, pluginSessionId, connection);
+	}
 
 	public Task RequestStreamsPullAsync(string ownerId, string providerId)
 	{
@@ -168,10 +172,10 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		List<VideoStreamProviderEntry> removed;
 		lock (_gate)
 		{
-			if (!_owners.TryGetValue(pluginId, out var owner) ||
-				!owner.IsRemote ||
-				(owner.PluginSessionId is not null &&
-					!string.Equals(owner.PluginSessionId, pluginSessionId, StringComparison.Ordinal)))
+			if (!_owners.TryGetValue(pluginId, out var owner)
+				|| !owner.IsRemote
+				|| owner.PluginSessionId is not null
+				&& !string.Equals(owner.PluginSessionId, pluginSessionId, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -199,7 +203,10 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		AnnounceRemoved(removed);
 	}
 
-	public Task PublishCatalogChangedAsync() => PublishAsync();
+	public Task PublishCatalogChangedAsync()
+	{
+		return PublishAsync();
+	}
 
 	internal bool TryGetEndpoint(string ownerId, out IVideoStreamEndpoint endpoint, out string? pluginSessionId)
 	{
@@ -232,11 +239,14 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 	{
 		lock (_gate)
 		{
-			return _owners.TryGetValue(integrationId, out var owner) ? owner.Endpoint as InProcessVideoStreamEndpoint : null;
+			return _owners.TryGetValue(integrationId, out var owner)
+				? owner.Endpoint as InProcessVideoStreamEndpoint
+				: null;
 		}
 	}
 
-	internal async Task<VideoStreamProviderRegistration> RegisterInProcessAsync(string integrationId,
+	internal async Task<VideoStreamProviderRegistration> RegisterInProcessAsync(
+		string integrationId,
 		IVideoStreamProvider provider)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(integrationId);
@@ -249,12 +259,12 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 			{
 				owner = new Owner(integrationId,
 					new InProcessVideoStreamEndpoint(_time, _inProcessTimeout, _logger),
-					isRemote: false);
+					false);
 				_owners[integrationId] = owner;
 			}
 
-			endpoint = owner.Endpoint as InProcessVideoStreamEndpoint ??
-				throw new InvalidOperationException($"'{integrationId}' provides its video streams as a plugin.");
+			endpoint = owner.Endpoint as InProcessVideoStreamEndpoint
+				?? throw new InvalidOperationException($"'{integrationId}' provides its video streams as a plugin.");
 		}
 
 		endpoint.Add(provider);
@@ -264,7 +274,8 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 
 	internal async Task UnregisterInProcessAsync(string integrationId, string providerId)
 	{
-		if (InProcessEndpoint(integrationId) is { } endpoint && await endpoint.RemoveAsync(providerId).ConfigureAwait(false))
+		if (InProcessEndpoint(integrationId) is { } endpoint
+			&& await endpoint.RemoveAsync(providerId).ConfigureAwait(false))
 		{
 			await PullProvidersAsync(integrationId).ConfigureAwait(false);
 		}
@@ -307,10 +318,15 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		}
 	}
 
-	private Task PullProvidersAsync(string ownerId) => CoalesceAsync("providers\n" + ownerId, () => DescribeAsync(ownerId));
+	private Task PullProvidersAsync(string ownerId)
+	{
+		return CoalesceAsync("providers\n" + ownerId, () => DescribeAsync(ownerId));
+	}
 
 	private Task PullStreamsAsync(string ownerId, string providerId)
-		=> CoalesceAsync("streams\n" + ownerId + "\n" + providerId, () => ReadStreamsAsync(ownerId, providerId));
+	{
+		return CoalesceAsync("streams\n" + ownerId + "\n" + providerId, () => ReadStreamsAsync(ownerId, providerId));
+	}
 
 	private async Task DescribeAsync(string ownerId)
 	{
@@ -341,9 +357,9 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		var changed = false;
 		lock (_gate)
 		{
-			if (!_owners.TryGetValue(ownerId, out var current) ||
-				!ReferenceEquals(current, owner) ||
-				owner.Generation != generation)
+			if (!_owners.TryGetValue(ownerId, out var current)
+				|| !ReferenceEquals(current, owner)
+				|| owner.Generation != generation)
 			{
 				return;
 			}
@@ -358,12 +374,13 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 			foreach (var (providerId, info) in accepted)
 			{
 				owner.Providers.TryGetValue(providerId, out var existing);
-				if (existing is not null &&
-					string.Equals(existing.RegistrationId, info.RegistrationId, StringComparison.Ordinal))
+				if (existing is not null
+					&& string.Equals(existing.RegistrationId, info.RegistrationId, StringComparison.Ordinal))
 				{
 					if (!Equals(existing.Name, info.Name) || !Equals(existing.Description, info.Description))
 					{
-						owner.Providers[providerId] = existing with { Name = info.Name, Description = info.Description };
+						owner.Providers[providerId]
+							= existing with { Name = info.Name, Description = info.Description };
 						changed = true;
 					}
 
@@ -420,7 +437,10 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
-			_logger.Warning(exception, "Could not read the video streams of {OwnerId}::{ProviderId}", ownerId, providerId);
+			_logger.Warning(exception,
+				"Could not read the video streams of {OwnerId}::{ProviderId}",
+				ownerId,
+				providerId);
 			return;
 		}
 
@@ -432,11 +452,11 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		var accepted = AcceptStreams(ownerId, providerId, streams);
 		lock (_gate)
 		{
-			if (!_owners.TryGetValue(ownerId, out var current) ||
-				!ReferenceEquals(current, owner) ||
-				owner.Generation != generation ||
-				!owner.Providers.TryGetValue(providerId, out var entry) ||
-				!string.Equals(entry.RegistrationId, registrationId, StringComparison.Ordinal))
+			if (!_owners.TryGetValue(ownerId, out var current)
+				|| !ReferenceEquals(current, owner)
+				|| owner.Generation != generation
+				|| !owner.Providers.TryGetValue(providerId, out var entry)
+				|| !string.Equals(entry.RegistrationId, registrationId, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -447,16 +467,17 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		await PublishAsync().ConfigureAwait(false);
 	}
 
-	private Dictionary<string, VideoStreamProviderInfo> Accept(string ownerId,
+	private Dictionary<string, VideoStreamProviderInfo> Accept(
+		string ownerId,
 		IReadOnlyList<VideoStreamProviderInfo> described)
 	{
 		var accepted = new Dictionary<string, VideoStreamProviderInfo>(StringComparer.Ordinal);
 		foreach (var info in described)
 		{
-			if (!MacroDeckId.IsValidLocalId(info.ProviderId, LocalIdKind.Resource) ||
-				info.Name.IsEmpty ||
-				string.IsNullOrEmpty(info.RegistrationId) ||
-				accepted.ContainsKey(info.ProviderId))
+			if (!MacroDeckId.IsValidLocalId(info.ProviderId, LocalIdKind.Resource)
+				|| info.Name.IsEmpty
+				|| string.IsNullOrEmpty(info.RegistrationId)
+				|| accepted.ContainsKey(info.ProviderId))
 			{
 				_logger.Warning("{OwnerId} described a video stream provider that was left out: {ProviderId}",
 					ownerId,
@@ -466,7 +487,8 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 
 			if (accepted.Count == VideoStreamLimits.MaxProvidersPerPlugin)
 			{
-				_logger.Warning("{OwnerId} describes more than {MaxProviders} video stream providers; the rest are left out",
+				_logger.Warning(
+					"{OwnerId} describes more than {MaxProviders} video stream providers; the rest are left out",
 					ownerId,
 					VideoStreamLimits.MaxProvidersPerPlugin);
 				break;
@@ -478,7 +500,8 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		return accepted;
 	}
 
-	private List<VideoStreamDescriptor> AcceptStreams(string ownerId,
+	private List<VideoStreamDescriptor> AcceptStreams(
+		string ownerId,
 		string providerId,
 		IReadOnlyList<VideoStreamDescriptor> streams)
 	{
@@ -510,7 +533,8 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 		return accepted;
 	}
 
-	private bool TryCapture(string ownerId,
+	private bool TryCapture(
+		string ownerId,
 		out Owner owner,
 		out long generation,
 		out string? pluginSessionId,
@@ -534,7 +558,11 @@ public sealed class VideoStreamProviderRegistry : IDisposable
 	}
 
 	private bool IsCurrent(string? pluginSessionId, IPluginConnection? connection)
-		=> connection is null || pluginSessionId is null || _pluginSessions.IsCurrentConnection(pluginSessionId, connection);
+	{
+		return connection is null
+			|| pluginSessionId is null
+			|| _pluginSessions.IsCurrentConnection(pluginSessionId, connection);
+	}
 
 	private async Task PublishAsync()
 	{

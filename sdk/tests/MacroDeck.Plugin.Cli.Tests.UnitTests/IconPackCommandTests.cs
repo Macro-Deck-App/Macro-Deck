@@ -31,8 +31,8 @@ public class IconPackCommandTests
 	[TearDown]
 	public void TearDown()
 	{
-		Directory.Delete(_project, recursive: true);
-		Directory.Delete(_outside, recursive: true);
+		Directory.Delete(_project, true);
+		Directory.Delete(_outside, true);
 	}
 
 	[Test]
@@ -53,7 +53,8 @@ public class IconPackCommandTests
 			Assert.That(File.Exists(source), Is.True, "A pack from outside the project is copied, never moved.");
 			Assert.That(File.Exists(Path.Combine(_project, "icon-packs", "service-logos.macroDeckIconPack")), Is.True);
 			Assert.That(entry.GetProperty("key").GetString(), Is.EqualTo("service-logos"));
-			Assert.That(entry.GetProperty("path").GetString(), Is.EqualTo("icon-packs/service-logos.macroDeckIconPack"));
+			Assert.That(entry.GetProperty("path").GetString(),
+				Is.EqualTo("icon-packs/service-logos.macroDeckIconPack"));
 			Assert.That(root.EnumerateObject().Select(property => property.Name).Take(_originalPropertyOrder.Length),
 				Is.EqualTo(_originalPropertyOrder));
 			Assert.That(root.GetProperty("somethingFromTheFuture").GetProperty("kept").GetBoolean(), Is.True);
@@ -64,16 +65,18 @@ public class IconPackCommandTests
 	[Test]
 	public async Task Add_keeps_a_tab_indented_manifest_with_a_trailing_comma_readable_and_tab_indented()
 	{
-		var original = File.ReadAllText(ManifestPath);
-		var tabbed = string.Join('\n', original.Split('\n').Select(line =>
-			new string('\t', (line.Length - line.TrimStart(' ').Length) / 2) + line.TrimStart(' ')));
-		File.WriteAllText(ManifestPath, tabbed.TrimEnd().TrimEnd('}').TrimEnd() + ",\n}\n");
+		var original = await File.ReadAllTextAsync(ManifestPath);
+		var tabbed = string.Join('\n',
+			original.Split('\n')
+				.Select(line =>
+					new string('\t', (line.Length - line.TrimStart(' ').Length) / 2) + line.TrimStart(' ')));
+		await File.WriteAllTextAsync(ManifestPath, tabbed.TrimEnd().TrimEnd('}').TrimEnd() + ",\n}\n");
 		var source = Path.Combine(_outside, "logos.macroDeckIconPack");
 		IconPackFixtures.Write(source, "Logos", _logoIcons);
 
 		var (_, error, exitCode) = await Add(source);
 
-		var written = File.ReadAllText(ManifestPath);
+		var written = await File.ReadAllTextAsync(ManifestPath);
 		Assert.Multiple(() =>
 		{
 			Assert.That(exitCode, Is.EqualTo(ExitCode.Success), error);
@@ -236,7 +239,7 @@ public class IconPackCommandTests
 	public async Task Add_refuses_a_pack_with_ai_generated_assets_unless_the_plugin_declares_them()
 	{
 		var source = Path.Combine(_outside, "pack.macroDeckIconPack");
-		IconPackFixtures.Write(source, "Logos", _logoIcons, ai: new JsonObject { ["generatedAssets"] = true });
+		IconPackFixtures.Write(source, "Logos", _logoIcons, new JsonObject { ["generatedAssets"] = true });
 
 		var refused = await Add(source);
 		WriteManifest(new JsonObject { ["generatedAssets"] = true });
@@ -284,7 +287,7 @@ public class IconPackCommandTests
 	[Test]
 	public async Task Add_refuses_a_new_pack_once_the_manifest_declares_the_maximum()
 	{
-		var manifest = JsonNode.Parse(File.ReadAllText(ManifestPath))!.AsObject();
+		var manifest = JsonNode.Parse(await File.ReadAllTextAsync(ManifestPath))!.AsObject();
 		manifest["bundledIconPacks"] = new JsonArray(Enumerable.Range(0, 32)
 			.Select(index => (JsonNode)new JsonObject
 				{ ["key"] = $"pack-{index}", ["path"] = $"icon-packs/pack-{index}.macroDeckIconPack" })
@@ -310,7 +313,7 @@ public class IconPackCommandTests
 		var source = Path.Combine(_outside, "pack.macroDeckIconPack");
 		IconPackFixtures.Write(source, "Logos", _logoIcons);
 		await Add(source);
-		var manifest = JsonNode.Parse(File.ReadAllText(ManifestPath))!.AsObject();
+		var manifest = JsonNode.Parse(await File.ReadAllTextAsync(ManifestPath))!.AsObject();
 		manifest["bundledIconPacks"]!.AsArray()
 			.Add(new JsonObject { ["key"] = "gone", ["path"] = "icon-packs/gone.macroDeckIconPack" });
 		await File.WriteAllTextAsync(ManifestPath, manifest.ToJsonString());
@@ -356,8 +359,9 @@ public class IconPackCommandTests
 			Assert.That(unknown.Error, Does.Contain("'brands'"));
 			Assert.That(removed.ExitCode, Is.EqualTo(ExitCode.Success), removed.Error);
 			Assert.That(File.Exists(Path.Combine(_project, "icon-packs", "logos.macroDeckIconPack")), Is.False);
-			Assert.That(manifest.RootElement.TryGetProperty("bundledIconPacks", out var packs) &&
-				packs.GetArrayLength() > 0, Is.False);
+			Assert.That(manifest.RootElement.TryGetProperty("bundledIconPacks", out var packs)
+				&& packs.GetArrayLength() > 0,
+				Is.False);
 			Assert.That(manifest.RootElement.GetProperty("somethingFromTheFuture").GetProperty("kept").GetBoolean(),
 				Is.True);
 		});
@@ -370,7 +374,9 @@ public class IconPackCommandTests
 		IconPackFixtures.Write(source, "Logos", _logoIcons);
 		await Add(source);
 
-		var read = ArtifactReaders.ManifestReader.Read(ManifestPath, ManifestFixtures.PluginId, ManifestFixtures.Version);
+		var read = ArtifactReaders.ManifestReader.Read(ManifestPath,
+			ManifestFixtures.PluginId,
+			ManifestFixtures.Version);
 
 		Assert.Multiple(() =>
 		{
@@ -382,7 +388,9 @@ public class IconPackCommandTests
 	private string ManifestPath => Path.Combine(_project, PluginArtifactFiles.ManifestFileName);
 
 	private Task<(string Output, string Error, int ExitCode)> Add(string source, params string[] extra)
-		=> CliRunner.Run(["icon-pack", "add", source, "--source", _project, "--no-color", .. extra]);
+	{
+		return CliRunner.Run(["icon-pack", "add", source, "--source", _project, "--no-color", .. extra]);
+	}
 
 	private List<string> DeclaredKeys()
 	{

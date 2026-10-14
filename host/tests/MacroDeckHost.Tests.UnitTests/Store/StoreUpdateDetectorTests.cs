@@ -48,15 +48,21 @@ internal sealed class StoreUpdateDetectorTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
-
-	private static StoreReleaseManifest Release(string version) => new()
+	public void TearDown()
 	{
-		Version = version,
-		ArtifactUrl = new Uri($"https://cdn.example/artifact-{version}.bin"),
-		Sha256 = new string('a', 64),
-		Size = 16
-	};
+		_paths.Cleanup();
+	}
+
+	private static StoreReleaseManifest Release(string version)
+	{
+		return new StoreReleaseManifest
+		{
+			Version = version,
+			ArtifactUrl = new Uri($"https://cdn.example/artifact-{version}.bin"),
+			Sha256 = new string('a', 64),
+			Size = 16
+		};
+	}
 
 	[Test]
 	public void An_out_of_date_plugin_and_icon_pack_are_reported_an_up_to_date_entry_is_not_and_no_operation_starts()
@@ -162,10 +168,11 @@ internal sealed class StoreUpdateDetectorTests
 	[Test]
 	public void An_installed_withdrawn_version_is_reported_and_still_offered_the_clean_latest()
 	{
-		SeedIconPack(latest: "1.3.0", new StoreRemovedPackage
-		{
-			Id = IconPackId, Version = "1.2.0", Reason = "Compromised signing key", Replacement = "com.acme.other"
-		});
+		SeedIconPack("1.3.0",
+			new StoreRemovedPackage
+			{
+				Id = IconPackId, Version = "1.2.0", Reason = "Compromised signing key", Replacement = "com.acme.other"
+			});
 		SaveIconPackRecord("https://registry.test/", "1.2.0");
 
 		var updates = _detector.Check();
@@ -173,26 +180,27 @@ internal sealed class StoreUpdateDetectorTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(updates.Select(update => update.LatestVersion), Is.EqualTo(new[] { "1.3.0" }));
-			Assert.That(_withdrawals.Current, Is.EqualTo(new[]
-			{
-				new StoreInstalledWithdrawal
+			Assert.That(_withdrawals.Current,
+				Is.EqualTo(new[]
 				{
-					Kind = StoreExtensionKind.IconPack,
-					PackageId = IconPackId,
-					Name = "Material Icons",
-					InstalledVersion = "1.2.0",
-					Reason = "Compromised signing key",
-					Replacement = "com.acme.other",
-					Listed = true
-				}
-			}));
+					new StoreInstalledWithdrawal
+					{
+						Kind = StoreExtensionKind.IconPack,
+						PackageId = IconPackId,
+						Name = "Material Icons",
+						InstalledVersion = "1.2.0",
+						Reason = "Compromised signing key",
+						Replacement = "com.acme.other",
+						Listed = true
+					}
+				}));
 		});
 	}
 
 	[Test]
 	public void No_update_is_offered_to_a_withdrawn_latest_version()
 	{
-		SeedIconPack(latest: "2.0.0", new StoreRemovedPackage { Id = IconPackId, Version = "2.0.0" });
+		SeedIconPack("2.0.0", new StoreRemovedPackage { Id = IconPackId, Version = "2.0.0" });
 		SaveIconPackRecord("https://registry.test/", "1.0.0");
 
 		var updates = _detector.Check();
@@ -239,7 +247,8 @@ internal sealed class StoreUpdateDetectorTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_withdrawals.Current.Select(withdrawal => (withdrawal.PackageId, withdrawal.Name, withdrawal.Listed)),
+			Assert.That(_withdrawals.Current.Select(withdrawal
+					=> (withdrawal.PackageId, withdrawal.Name, withdrawal.Listed)),
 				Is.EqualTo(new[] { (IconPackId, "Material Icons", false) }));
 			Assert.That(_withdrawals.Current.Single().Reason, Is.EqualTo("Malware"));
 		});
@@ -248,7 +257,7 @@ internal sealed class StoreUpdateDetectorTests
 	[Test]
 	public void A_check_without_a_loaded_catalog_keeps_the_known_withdrawals()
 	{
-		SeedIconPack(latest: "1.3.0", new StoreRemovedPackage { Id = IconPackId, Version = "1.2.0" });
+		SeedIconPack("1.3.0", new StoreRemovedPackage { Id = IconPackId, Version = "1.2.0" });
 		SaveIconPackRecord("https://registry.test/", "1.2.0");
 		_detector.Check();
 
@@ -258,7 +267,8 @@ internal sealed class StoreUpdateDetectorTests
 		Assert.That(_withdrawals.Current.Select(withdrawal => withdrawal.PackageId), Is.EqualTo(new[] { IconPackId }));
 	}
 
-	private void SeedIconPack(string latest, params StoreRemovedPackage[] removed) =>
+	private void SeedIconPack(string latest, params StoreRemovedPackage[] removed)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot
 		{
 			Sequence = 1,
@@ -275,8 +285,10 @@ internal sealed class StoreUpdateDetectorTests
 			],
 			RemovedPackages = removed
 		});
+	}
 
-	private void SaveIconPackRecord(string origin, string version, string? displayName = null) =>
+	private void SaveIconPackRecord(string origin, string version, string? displayName = null)
+	{
 		_installations.Save(new StoreInstallationRecord
 		{
 			Origin = origin,
@@ -286,6 +298,7 @@ internal sealed class StoreUpdateDetectorTests
 			DisplayName = displayName,
 			InstalledAt = DateTimeOffset.UtcNow
 		});
+	}
 
 	private void InstallPluginVersion(string pluginId, string version)
 	{

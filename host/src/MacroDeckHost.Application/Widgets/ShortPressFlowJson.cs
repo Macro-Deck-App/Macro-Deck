@@ -100,36 +100,42 @@ public static class ShortPressFlowJson
 		};
 	}
 
-	private static string ControlType(TransportParameterType type) => type switch
+	private static string ControlType(TransportParameterType type)
 	{
-		TransportParameterType.Number => "number",
-		TransportParameterType.Boolean => "boolean",
-		TransportParameterType.Choice => "choice",
-		TransportParameterType.Password => "password",
-		TransportParameterType.Secret => "secret",
-		TransportParameterType.DynamicChoice => "dynamic-choice",
-		TransportParameterType.Autocomplete => "autocomplete",
-		TransportParameterType.MultiSelect => "multiselect",
-		TransportParameterType.Color => "color",
-		TransportParameterType.File => "file",
-		TransportParameterType.Folder => "folder",
-		TransportParameterType.Hotkey => "hotkey",
-		TransportParameterType.Duration => "duration",
-		TransportParameterType.DateTime => "datetime",
-		TransportParameterType.Json => "json",
-		TransportParameterType.Code => "code",
-		TransportParameterType.KeyValue => "keyvalue",
-		TransportParameterType.Object => "object",
-		TransportParameterType.Array => "array",
-		TransportParameterType.IpAddress => "ipaddress",
-		TransportParameterType.Url => "url",
-		TransportParameterType.Icon => "icon",
-		TransportParameterType.Image => "image",
-		TransportParameterType.KeyboardSequence => "keyboard-sequence",
-		TransportParameterType.KeyboardCombo => "keyboard-combo",
-		TransportParameterType.WidgetTarget => "widget-target",
-		_ => "string"
-	};
+		return type switch
+		{
+			TransportParameterType.Number => "number",
+			TransportParameterType.Boolean => "boolean",
+			TransportParameterType.Choice => "choice",
+			TransportParameterType.Password => "password",
+			TransportParameterType.Secret => "secret",
+			TransportParameterType.DynamicChoice => "dynamic-choice",
+			TransportParameterType.Autocomplete => "autocomplete",
+			TransportParameterType.MultiSelect => "multiselect",
+			TransportParameterType.Color => "color",
+			TransportParameterType.File => "file",
+			TransportParameterType.Folder => "folder",
+			TransportParameterType.Hotkey => "hotkey",
+			TransportParameterType.Duration => "duration",
+			TransportParameterType.DateTime => "datetime",
+			TransportParameterType.Json => "json",
+			TransportParameterType.Code => "code",
+			TransportParameterType.KeyValue => "keyvalue",
+			TransportParameterType.Object => "object",
+			TransportParameterType.Array => "array",
+			TransportParameterType.IpAddress => "ipaddress",
+			TransportParameterType.Url => "url",
+			TransportParameterType.Icon => "icon",
+			TransportParameterType.Image => "image",
+			TransportParameterType.KeyboardSequence => "keyboard-sequence",
+			TransportParameterType.KeyboardCombo => "keyboard-combo",
+			TransportParameterType.WidgetTarget => "widget-target",
+			_ => "string"
+		};
+	}
 
-	private static string NewBlockId() => Guid.NewGuid().ToString();
+	private static string NewBlockId()
+	{
+		return Guid.NewGuid().ToString();
+	}
 }

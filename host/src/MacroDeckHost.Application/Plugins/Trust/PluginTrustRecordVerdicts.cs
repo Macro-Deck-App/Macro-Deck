@@ -14,12 +14,17 @@ public static class PluginTrustRecordVerdicts
 	public const string Unsigned = "Unsigned";
 
 	public static string From(PluginTrustVerdict verdict)
-		=> verdict == PluginTrustVerdict.Trusted ? Trusted : Unsigned;
-
-	public static PluginTrustVerdict? Parse(string? admittedVerdict) => admittedVerdict switch
 	{
-		Trusted => PluginTrustVerdict.Trusted,
-		Unsigned => PluginTrustVerdict.Unsigned,
-		_ => null
-	};
+		return verdict == PluginTrustVerdict.Trusted ? Trusted : Unsigned;
+	}
+
+	public static PluginTrustVerdict? Parse(string? admittedVerdict)
+	{
+		return admittedVerdict switch
+		{
+			Trusted => PluginTrustVerdict.Trusted,
+			Unsigned => PluginTrustVerdict.Unsigned,
+			_ => null
+		};
+	}
 }

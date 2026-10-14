@@ -31,7 +31,7 @@ public class PluginPackerTests
 			var result = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.Multiple(() =>
 			{
@@ -46,7 +46,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -67,19 +67,19 @@ public class PluginPackerTests
 			var first = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 			var second = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => renamedOutputPath,
-				force: false);
+				false);
 			var third = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => renamedOutputPath,
-				force: true);
+				true);
 
 			Assert.That(first.Success && second.Success && third.Success, Is.True);
 
-			using var archive = ZipFile.OpenRead(renamedOutputPath);
+			using var archive = await ZipFile.OpenReadAsync(renamedOutputPath);
 			var entries = archive.Entries.Select(entry => entry.FullName).ToList();
 
 			Assert.Multiple(() =>
@@ -91,7 +91,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -111,7 +111,7 @@ public class PluginPackerTests
 			var packResult = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.That(packResult.Success, Is.True, packResult.FailureMessage);
 
@@ -147,11 +147,11 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (extractDirectory is not null)
 			{
-				Directory.Delete(extractDirectory, recursive: true);
+				Directory.Delete(extractDirectory, true);
 			}
 
 			if (File.Exists(outputPath))
@@ -165,7 +165,7 @@ public class PluginPackerTests
 	public async Task Packing_a_self_contained_payload_whose_recomputed_manifest_exceeds_64_KiB_succeeds()
 	{
 		var foreignRids = ManifestFixtures.PickForeignRids(2);
-		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, createForeignFiles: true);
+		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, true);
 		var outputPath = Path.Combine(Path.GetTempPath(),
 			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
 
@@ -192,11 +192,11 @@ public class PluginPackerTests
 			var result = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.That(result.Success, Is.True, result.FailureMessage);
 
-			using var archive = ZipFile.OpenRead(outputPath);
+			using var archive = await ZipFile.OpenReadAsync(outputPath);
 			var manifestEntry = archive.GetEntry(PluginArtifactFiles.ManifestFileName);
 			Assert.That(manifestEntry, Is.Not.Null);
 
@@ -218,7 +218,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -231,7 +231,7 @@ public class PluginPackerTests
 	public async Task Packing_warns_for_an_entrypoint_absent_from_the_source_tree_and_still_succeeds()
 	{
 		var foreignRids = ManifestFixtures.PickForeignRids(2);
-		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, createForeignFiles: false);
+		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, false);
 		var outputPath = Path.Combine(Path.GetTempPath(),
 			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
 
@@ -240,12 +240,12 @@ public class PluginPackerTests
 			var result = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			var output = new StringWriter();
 			var error = new StringWriter();
-			var console = new CliConsole(Verbosity.Normal, noColor: true, output, error);
-			var exitCode = await PluginPackReporter.ReportAsync(console, result, showDigest: false);
+			var console = new CliConsole(Verbosity.Normal, true, output, error);
+			var exitCode = await PluginPackReporter.ReportAsync(console, result, false);
 
 			Assert.Multiple(() =>
 			{
@@ -268,7 +268,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -281,7 +281,7 @@ public class PluginPackerTests
 	public async Task Packing_a_complete_multi_platform_build_warns_about_no_missing_entrypoint()
 	{
 		var foreignRids = ManifestFixtures.PickForeignRids(2);
-		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, createForeignFiles: true);
+		var directory = ManifestFixtures.WriteMultiRidManifestDirectory(foreignRids, true);
 		var outputPath = Path.Combine(Path.GetTempPath(),
 			$"macrodeck-plugin-cli-tests-{Guid.NewGuid():N}.macroDeckPlugin");
 
@@ -290,7 +290,7 @@ public class PluginPackerTests
 			var result = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.Multiple(() =>
 			{
@@ -304,7 +304,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{
@@ -325,7 +325,7 @@ public class PluginPackerTests
 			var firstPack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 
 			Assert.That(firstPack.Success, Is.True, firstPack.FailureMessage);
 			Assert.That(firstPack.CreatedOutputDirectory,
@@ -335,7 +335,7 @@ public class PluginPackerTests
 			var secondPack = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: true);
+				true);
 
 			Assert.That(secondPack.Success, Is.True, secondPack.FailureMessage);
 			Assert.That(secondPack.CreatedOutputDirectory,
@@ -344,11 +344,11 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (Directory.Exists(nestedRoot))
 			{
-				Directory.Delete(nestedRoot, recursive: true);
+				Directory.Delete(nestedRoot, true);
 			}
 		}
 	}
@@ -388,12 +388,12 @@ public class PluginPackerTests
 				var debugResult = await PluginPacker.PackAsync(debugRoot,
 					Path.Combine(debugRoot, "manifest.json"),
 					_ => debugOutput,
-					force: false);
+					false);
 
 				var releaseResult = await PluginPacker.PackAsync(releaseRoot,
 					Path.Combine(releaseRoot, "manifest.json"),
 					_ => releaseOutput,
-					force: false);
+					false);
 
 				Assert.Multiple(() =>
 				{
@@ -422,9 +422,9 @@ public class PluginPackerTests
 		finally
 		{
 			Directory.Delete(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(debugRoot))!)!,
-				recursive: true);
+				true);
 			Directory.Delete(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(releaseRoot))!)!,
-				recursive: true);
+				true);
 		}
 	}
 
@@ -452,12 +452,12 @@ public class PluginPackerTests
 			var packResult = await PluginPacker.PackAsync(directory,
 				Path.Combine(directory, "manifest.json"),
 				_ => outputPath,
-				force: false);
+				false);
 			Assert.That(packResult.Success, Is.True, packResult.FailureMessage);
 
 			var validation = await ManifestValidator.ValidateArtifactAsync(outputPath);
 
-			using var archive = ZipFile.OpenRead(outputPath);
+			using var archive = await ZipFile.OpenReadAsync(outputPath);
 			await using var manifestStream = await archive.GetEntry(PluginArtifactFiles.ManifestFileName)!.OpenAsync();
 			using var packed = await JsonDocument.ParseAsync(manifestStream);
 			var links = packed.RootElement.GetProperty("additionalLinks");
@@ -466,11 +466,13 @@ public class PluginPackerTests
 			Assert.Multiple(() =>
 			{
 				Assert.That(validation.Problems.Where(problem => problem.Pointer?.StartsWith("/additionalLinks",
-						StringComparison.Ordinal) ==
-					true), Is.Empty);
+							StringComparison.Ordinal)
+						== true),
+					Is.Empty);
 				Assert.That(schemaProblems.Where(problem => problem.Pointer?.StartsWith("/additionalLinks",
-						StringComparison.Ordinal) ==
-					true), Is.Empty);
+							StringComparison.Ordinal)
+						== true),
+					Is.Empty);
 				Assert.That(links.GetArrayLength(), Is.EqualTo(2));
 				Assert.That(links[0].TryGetProperty("label", out _), Is.False);
 				Assert.That(links[1].GetProperty("label").GetString(), Is.EqualTo("Setup Guide"));
@@ -478,7 +480,7 @@ public class PluginPackerTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 
 			if (File.Exists(outputPath))
 			{

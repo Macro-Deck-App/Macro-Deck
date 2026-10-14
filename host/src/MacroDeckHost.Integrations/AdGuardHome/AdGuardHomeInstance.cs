@@ -11,7 +11,8 @@ internal sealed class AdGuardHomeInstance : IAsyncDisposable
 
 	public static readonly TimeSpan FailureInterval = TimeSpan.FromSeconds(30);
 
-	private static readonly ILogger _logger = IntegrationLog.For<AdGuardHomeInstance>(AdGuardHomeIntegration.IntegrationId);
+	private static readonly ILogger _logger
+		= IntegrationLog.For<AdGuardHomeInstance>(AdGuardHomeIntegration.IntegrationId);
 
 	private readonly IAdGuardHomeClient _client;
 	private readonly TimeProvider _time;
@@ -56,7 +57,10 @@ internal sealed class AdGuardHomeInstance : IAsyncDisposable
 
 	public AdGuardHomeConnectionSettings? Settings { get; }
 
-	public void Start() => _loop ??= Task.Run(RunAsync);
+	public void Start()
+	{
+		_loop ??= Task.Run(RunAsync);
+	}
 
 	public async Task PollAsync(bool includeStatistics, CancellationToken cancellationToken)
 	{
@@ -70,8 +74,8 @@ internal sealed class AdGuardHomeInstance : IAsyncDisposable
 			{
 				next = await FetchAsync(current, includeStatistics, cancellationToken);
 			}
-			catch (AdGuardHomeException exception) when (current.IsConnected &&
-				exception.Failure == AdGuardHomeConnection.Unreachable)
+			catch (AdGuardHomeException exception) when (current.IsConnected
+				&& exception.Failure == AdGuardHomeConnection.Unreachable)
 			{
 				next = await RetryAsync(current, includeStatistics, cancellationToken);
 			}
@@ -155,11 +159,13 @@ internal sealed class AdGuardHomeInstance : IAsyncDisposable
 			ProtectionEnabled = status.ProtectionEnabled,
 			DnsRunning = status.Running,
 			Version = status.Version,
-			DisabledUntil = status.ProtectionDisabledFor is { } pause ? now + pause : null,
+			DisabledUntil = status.ProtectionDisabledFor is { } pause ? now + pause : null
 		};
 
-		if (includeStatistics || current.Statistics is null || _statisticsFetchedAt is null ||
-			now - _statisticsFetchedAt >= StatisticsInterval)
+		if (includeStatistics
+			|| current.Statistics is null
+			|| _statisticsFetchedAt is null
+			|| now - _statisticsFetchedAt >= StatisticsInterval)
 		{
 			var stats = await _client.GetStatisticsAsync(cancellationToken);
 			_statisticsFetchedAt = now;
@@ -199,7 +205,7 @@ internal sealed class AdGuardHomeInstance : IAsyncDisposable
 		{
 			try
 			{
-				await PollAsync(includeStatistics: false, token);
+				await PollAsync(false, token);
 			}
 			catch (OperationCanceledException) when (token.IsCancellationRequested)
 			{

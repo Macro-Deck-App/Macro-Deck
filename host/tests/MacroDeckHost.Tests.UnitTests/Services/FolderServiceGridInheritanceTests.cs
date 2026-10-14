@@ -39,7 +39,10 @@ public class FolderServiceGridInheritanceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_YieldsAFullyInheritedGrid()
@@ -58,7 +61,7 @@ public class FolderServiceGridInheritanceTests
 	public async Task Create_PinsOnlyTheDeficientAxisForAPinnedWidget()
 	{
 		var home = await CreateFolder("Home");
-		_cache.AddWidget(home.Id, Widget(x: 6, y: 1, pinned: true));
+		_cache.AddWidget(home.Id, Widget(6, 1, true));
 
 		var result = await _service.Create(_profileId, "New", null);
 
@@ -102,7 +105,7 @@ public class FolderServiceGridInheritanceTests
 	{
 		var folder = await CreateFolder("Games");
 		await _service.Update(folder.Id, null, null, null, 6, 6, null, null, null, null);
-		_cache.AddWidget(folder.Id, Widget(x: 4, y: 4)); // needs 5 x 5; the profile default is only 5 x 3
+		_cache.AddWidget(folder.Id, Widget(4, 4)); // needs 5 x 5; the profile default is only 5 x 3
 
 		var result = await _service.Update(folder.Id, null, null, null, -1, null, null, null, null, null);
 
@@ -121,7 +124,7 @@ public class FolderServiceGridInheritanceTests
 		var parent = await CreateFolder("Parent");
 		await _service.Update(parent.Id, null, null, null, 6, 6, null, null, null, null);
 		var child = await CreateFolder("Games", parent.Id); // inherits 6 x 6 from the parent
-		_cache.AddWidget(child.Id, Widget(x: 4, y: 4)); // needs 5 x 5 - fits the inherited 6 x 6
+		_cache.AddWidget(child.Id, Widget(4, 4)); // needs 5 x 5 - fits the inherited 6 x 6
 
 		var result = await _service.Update(parent.Id, null, null, null, 2, 2, null, null, null, null);
 
@@ -147,7 +150,7 @@ public class FolderServiceGridInheritanceTests
 		var parent = await CreateFolder("Parent");
 		await _service.Update(parent.Id, null, null, null, 6, 6, null, null, null, null);
 		var child = await CreateFolder("Games", parent.Id);
-		_cache.AddWidget(child.Id, Widget(x: 4, y: 4));
+		_cache.AddWidget(child.Id, Widget(4, 4));
 
 		var result = await _service.Update(parent.Id, "Renamed", null, null, 2, 2, "#fff", null, null, null);
 
@@ -165,7 +168,7 @@ public class FolderServiceGridInheritanceTests
 	{
 		var stuck = await CreateFolder("Stuck");
 		await _service.Update(stuck.Id, null, null, null, 2, 2, null, null, null, null);
-		_cache.AddWidget(stuck.Id, Widget(x: 5, y: 5));
+		_cache.AddWidget(stuck.Id, Widget(5, 5));
 		var unrelated = await CreateFolder("Unrelated");
 
 		var result = await _service.Update(unrelated.Id, null, null, null, 4, 4, null, null, null, null);
@@ -179,7 +182,7 @@ public class FolderServiceGridInheritanceTests
 		var big = await CreateFolder("Big");
 		await _service.Update(big.Id, null, null, null, 8, 8, null, null, null, null);
 		var games = await CreateFolder("Games", big.Id); // inherits 8 x 8
-		_cache.AddWidget(games.Id, Widget(x: 0, y: 6)); // needs 7 rows; the profile default is only 3
+		_cache.AddWidget(games.Id, Widget(0, 6)); // needs 7 rows; the profile default is only 3
 
 		var result = await _service.Move(games.Id, big.Id, FolderMovePosition.After);
 
@@ -198,7 +201,7 @@ public class FolderServiceGridInheritanceTests
 		var big = await CreateFolder("Big");
 		await _service.Update(big.Id, null, null, null, 8, 8, null, null, null, null);
 		var games = await CreateFolder("Games", big.Id);
-		_cache.AddWidget(games.Id, Widget(x: 0, y: 1)); // fits the 3-row profile default too
+		_cache.AddWidget(games.Id, Widget(0, 1)); // fits the 3-row profile default too
 
 		var result = await _service.Move(games.Id, big.Id, FolderMovePosition.After);
 
@@ -212,7 +215,7 @@ public class FolderServiceGridInheritanceTests
 		var big = await CreateFolder("Big");
 		await _service.Update(big.Id, null, null, null, 8, 8, null, null, null, null);
 		var games = await CreateFolder("Games", big.Id);
-		_cache.AddWidget(games.Id, Widget(x: 0, y: 6));
+		_cache.AddWidget(games.Id, Widget(0, 6));
 
 		var result = await _service.Update(games.Id, null, Guid.Empty, null, null, null, null, null, null, null);
 
@@ -231,7 +234,7 @@ public class FolderServiceGridInheritanceTests
 		await _service.Update(big.Id, null, null, null, 8, 8, null, null, null, null);
 		var games = await CreateFolder("Games", big.Id);
 		await _service.Update(games.Id, null, null, null, 8, 8, null, null, null, null); // explicit 8 x 8
-		_cache.AddWidget(games.Id, Widget(x: 0, y: 6));
+		_cache.AddWidget(games.Id, Widget(0, 6));
 
 		var result = await _service.Update(games.Id, null, Guid.Empty, null, -1, -1, null, null, null, null);
 
@@ -244,16 +247,21 @@ public class FolderServiceGridInheritanceTests
 	}
 
 	private async Task<FolderEntity> CreateFolder(string name, Guid? parentId = null)
-		=> (await _service.Create(_profileId, name, parentId)).Data!;
-
-	private static WidgetEntity Widget(int x, int y, bool pinned = false) => new()
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1,
-		IsPinned = pinned
-	};
+		return (await _service.Create(_profileId, name, parentId)).Data!;
+	}
+
+	private static WidgetEntity Widget(int x, int y, bool pinned = false)
+	{
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1,
+			IsPinned = pinned
+		};
+	}
 }

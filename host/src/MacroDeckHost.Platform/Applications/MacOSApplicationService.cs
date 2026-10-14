@@ -61,8 +61,12 @@ internal sealed class MacOsApplicationService(ILogger logger) : ApplicationServi
 	}
 
 	private static bool IsAppBundle(string path)
-		=> path.TrimEnd('/').EndsWith(".app", StringComparison.OrdinalIgnoreCase);
+	{
+		return path.TrimEnd('/').EndsWith(".app", StringComparison.OrdinalIgnoreCase);
+	}
 
 	private static string[] SplitArguments(string arguments)
-		=> arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+	{
+		return arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+	}
 }

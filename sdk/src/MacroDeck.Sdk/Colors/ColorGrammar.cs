@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -25,11 +27,12 @@ internal static partial class ColorGrammar
 		}
 
 		var segments = trimmed[2..^2].Split('|');
-		return segments.Length >= 2 &&
-			segments.Length - 2 <= MaxReferenceSteps &&
-			RootPattern().IsMatch(segments[0]) &&
-			ColorFilterPattern().IsMatch(segments[1]) &&
-			segments.Skip(2).All(segment => AmountStepPattern().IsMatch(segment) || MixStepPattern().IsMatch(segment));
+		return segments.Length >= 2
+			&& segments.Length - 2 <= MaxReferenceSteps
+			&& RootPattern().IsMatch(segments[0])
+			&& ColorFilterPattern().IsMatch(segments[1])
+			&& segments.Skip(2)
+				.All(segment => AmountStepPattern().IsMatch(segment) || MixStepPattern().IsMatch(segment));
 	}
 
 	public static string? CanonicalLiteral(string? value)
@@ -62,14 +65,14 @@ internal static partial class ColorGrammar
 	private static string? Functional(string text)
 	{
 		var match = FunctionalPattern().Match(text);
-		if (!match.Success || (match.Groups["fn"].Value.Length == 4) != match.Groups["a"].Success)
+		if (!match.Success || match.Groups["fn"].Value.Length == 4 != match.Groups["a"].Success)
 		{
 			return null;
 		}
 
-		if (!byte.TryParse(match.Groups["r"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var r) ||
-			!byte.TryParse(match.Groups["g"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var g) ||
-			!byte.TryParse(match.Groups["b"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var b))
+		if (!byte.TryParse(match.Groups["r"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var r)
+			|| !byte.TryParse(match.Groups["g"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var g)
+			|| !byte.TryParse(match.Groups["b"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var b))
 		{
 			return null;
 		}
@@ -77,14 +80,16 @@ internal static partial class ColorGrammar
 		var a = 255;
 		if (match.Groups["a"].Success)
 		{
-			if (!double.TryParse(match.Groups["a"].Value, NumberStyles.Float, CultureInfo.InvariantCulture,
-					out var alpha) ||
-				alpha is < 0 or > 1)
+			if (!double.TryParse(match.Groups["a"].Value,
+					NumberStyles.Float,
+					CultureInfo.InvariantCulture,
+					out var alpha)
+				|| alpha is < 0 or > 1)
 			{
 				return null;
 			}
 
-			a = (int)Math.Floor((alpha * 255) + 0.5);
+			a = (int)Math.Floor(alpha * 255 + 0.5);
 		}
 
 		return a == 255
@@ -108,7 +113,8 @@ internal static partial class ColorGrammar
 		RegexOptions.CultureInvariant)]
 	private static partial Regex MixStepPattern();
 
-	[GeneratedRegex(@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d+(?:\.\d+)?|\.\d+)\s*)?\)\z",
+	[GeneratedRegex(
+		@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d+(?:\.\d+)?|\.\d+)\s*)?\)\z",
 		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
 	private static partial Regex FunctionalPattern();
 }

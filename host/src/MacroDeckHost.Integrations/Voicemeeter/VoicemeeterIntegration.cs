@@ -66,9 +66,15 @@ public sealed class VoicemeeterIntegration
 
 	internal VoicemeeterConnection? Connection => _connection;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	private void RequestVariableRefresh() => _ = _variableAccessor.Current?.RequestRefreshAsync();
+	private void RequestVariableRefresh()
+	{
+		_ = _variableAccessor.Current?.RequestRefreshAsync();
+	}
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
@@ -146,8 +152,8 @@ public sealed class VoicemeeterIntegration
 	{
 		var catalog = _connection?.Catalog ?? VoicemeeterChannelCatalog.Unknown;
 
-		var result = context.EventId == VoicemeeterEventIds.StripRoutingChanged &&
-			context.ParameterName == VoicemeeterActionValues.BusParameter
+		var result = context.EventId == VoicemeeterEventIds.StripRoutingChanged
+			&& context.ParameterName == VoicemeeterActionValues.BusParameter
 				? VoicemeeterOptions.BusAssignments(catalog)
 				: VoicemeeterOptions.ForParameter(catalog, context.ParameterName);
 
@@ -174,7 +180,10 @@ public sealed class VoicemeeterIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Voicemeeter.Issues.InstallInstructions()));
+	{
+		return Task.FromResult(
+			IssueResolution.Failed(AppStrings.Integrations.Voicemeeter.Issues.InstallInstructions()));
+	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new VoicemeeterMacroDeck2Migration()];
 

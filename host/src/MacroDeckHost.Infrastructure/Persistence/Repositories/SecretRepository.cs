@@ -13,7 +13,10 @@ public class SecretRepository : ISecretRepository
 		_context = context;
 	}
 
-	public Task<SecretEntity?> GetById(Guid id) => _context.Secrets.FirstOrDefaultAsync(s => s.Id == id);
+	public Task<SecretEntity?> GetById(Guid id)
+	{
+		return _context.Secrets.FirstOrDefaultAsync(s => s.Id == id);
+	}
 
 	public async Task Create(SecretEntity secret)
 	{
@@ -27,5 +30,8 @@ public class SecretRepository : ISecretRepository
 		await _context.SaveChangesAsync();
 	}
 
-	public Task TryDeleteById(Guid id) => _context.Secrets.Where(s => s.Id == id).ExecuteDeleteAsync();
+	public Task TryDeleteById(Guid id)
+	{
+		return _context.Secrets.Where(s => s.Id == id).ExecuteDeleteAsync();
+	}
 }

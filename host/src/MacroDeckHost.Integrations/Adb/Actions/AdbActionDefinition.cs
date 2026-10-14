@@ -38,18 +38,25 @@ internal sealed class AdbActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	internal static ActionParameter DeviceParameter(LocalizedText description)
-		=> ActionParameter.DynamicChoice(DeviceParameterName,
-			label: AppStrings.Integrations.Adb.Params.DeviceLabel(),
-			description: description,
-			optionsSourceId: HostOptionsSources.AndroidDevices,
-			placeholder: AppStrings.Integrations.Adb.Params.DeviceDefaultPlaceholder(),
-			required: false);
+	{
+		return ActionParameter.DynamicChoice(DeviceParameterName,
+			AppStrings.Integrations.Adb.Params.DeviceLabel(),
+			description,
+			HostOptionsSources.AndroidDevices,
+			AppStrings.Integrations.Adb.Params.DeviceDefaultPlaceholder(),
+			false);
+	}
 
 	internal static string? ReadDevice(IReadOnlyDictionary<string, object> parameters)
-		=> parameters.TryGetValue(DeviceParameterName, out var value) ? value as string : null;
+	{
+		return parameters.TryGetValue(DeviceParameterName, out var value) ? value as string : null;
+	}
 
 	internal static ActionResult MapResult(AdbOutcome outcome)
 	{

@@ -12,15 +12,16 @@ namespace MacroDeckHost.Tests.UnitTests.Licensing;
 [TestFixture]
 internal sealed class PlatformLicenseClientTests
 {
-	private static readonly StorePlatformOptions Options = new() { BaseUrl = new Uri("https://platform.test/") };
+	private static readonly StorePlatformOptions _options = new() { BaseUrl = new Uri("https://platform.test/") };
 
 	[Test]
 	public async Task A_proof_is_posted_to_the_platform_and_a_license_is_returned()
 	{
-		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "header.payload.signature" }"""));
+		var handler = new ScriptedHandler(_
+			=> Json(HttpStatusCode.OK, """{ "license": "header.payload.signature" }"""));
 		using var client = Client(handler);
 
-		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), default);
+		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), CancellationToken.None);
 
 		var body = JsonDocument.Parse(handler.Bodies.Single()).RootElement;
 		Assert.Multiple(() =>
@@ -40,7 +41,8 @@ internal sealed class PlatformLicenseClientTests
 	[Test]
 	public async Task A_macro_deck_2_app_transaction_is_posted_with_its_legacy_kind()
 	{
-		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "header.payload.signature" }"""));
+		var handler = new ScriptedHandler(_
+			=> Json(HttpStatusCode.OK, """{ "license": "header.payload.signature" }"""));
 		using var client = Client(handler);
 
 		var result = await client.IssueCompanionLicenseAsync(new CompanionLicenseProof
@@ -48,7 +50,7 @@ internal sealed class PlatformLicenseClientTests
 				Platform = "app-store-legacy", LegacyKind = "appTransaction", SignedPayload = "app.transaction.jws",
 				ProductId = CompanionLicenseTokens.Product
 			},
-			default);
+			CancellationToken.None);
 
 		var body = JsonDocument.Parse(handler.Bodies.Single()).RootElement;
 		Assert.Multiple(() =>
@@ -67,20 +69,20 @@ internal sealed class PlatformLicenseClientTests
 	[TestCase("app-store-legacy", "appTransaction", "something_else")]
 	[TestCase("test", null, CompanionLicenseTokens.Product)]
 	[TestCase("google-play", null, "something_else")]
-	public async Task A_proof_the_platform_does_not_issue_for_is_refused_without_a_request(string platform,
+	public async Task A_proof_the_platform_does_not_issue_for_is_refused_without_a_request(
+		string platform,
 		string? legacyKind,
 		string productId)
 	{
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """{ "license": "x.y.z" }"""));
 		using var client = Client(handler);
 
-		var result = await client.IssueCompanionLicenseAsync(
-			new CompanionLicenseProof
+		var result = await client.IssueCompanionLicenseAsync(new CompanionLicenseProof
 			{
 				Platform = platform, LegacyKind = legacyKind, ProductId = productId, PurchaseToken = "t",
 				SignedPayload = "a.b.c"
 			},
-			default);
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -98,7 +100,7 @@ internal sealed class PlatformLicenseClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(status, body)));
 
-		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), default);
+		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(new PlatformLicenseIssueResult.Refused(code)));
 	}
@@ -109,17 +111,20 @@ internal sealed class PlatformLicenseClientTests
 	[TestCase(HttpStatusCode.BadGateway, "<html>", false, null)]
 	[TestCase(HttpStatusCode.Forbidden, "<html>blocked</html>", false, null)]
 	[TestCase(HttpStatusCode.UnprocessableEntity, """{ "code": "purchase-not-found" }""", true, "purchase-not-found")]
-	[TestCase(HttpStatusCode.UnprocessableEntity, """{ "code": "purchase-not-completed" }""", true,
+	[TestCase(HttpStatusCode.UnprocessableEntity,
+		"""{ "code": "purchase-not-completed" }""",
+		true,
 		"purchase-not-completed")]
 	[TestCase(HttpStatusCode.OK, """{ "license": "" }""", false, null)]
-	public async Task A_transient_answer_is_retried_with_the_platform_code(HttpStatusCode status,
+	public async Task A_transient_answer_is_retried_with_the_platform_code(
+		HttpStatusCode status,
 		string body,
 		bool purchasePending,
 		string? code)
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(status, body)));
 
-		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), default);
+		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), CancellationToken.None);
 
 		Assert.That(result, Is.EqualTo(new PlatformLicenseIssueResult.Retry(null, purchasePending, code)));
 	}
@@ -134,7 +139,7 @@ internal sealed class PlatformLicenseClientTests
 			return response;
 		}));
 
-		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), default);
+		var result = await client.IssueCompanionLicenseAsync(GooglePlay(), CancellationToken.None);
 
 		Assert.That(result,
 			Is.EqualTo(new PlatformLicenseIssueResult.Retry(TimeSpan.FromSeconds(120), false, "store-busy")));
@@ -145,8 +150,8 @@ internal sealed class PlatformLicenseClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => throw new HttpRequestException("offline")));
 
-		var issued = await client.IssueCompanionLicenseAsync(GooglePlay(), default);
-		var revocations = await client.GetRevokedLicenseIdsAsync(default);
+		var issued = await client.IssueCompanionLicenseAsync(GooglePlay(), CancellationToken.None);
+		var revocations = await client.GetRevokedLicenseIdsAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -160,10 +165,11 @@ internal sealed class PlatformLicenseClientTests
 	{
 		var valid = new string('a', 32);
 		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK,
-			JsonSerializer.Serialize(new { revokedLicenseIds = new[] { valid, "NOT-AN-ID", new string('B', 32), valid } })));
+			JsonSerializer.Serialize(new
+				{ revokedLicenseIds = new[] { valid, "NOT-AN-ID", new string('B', 32), valid } })));
 		using var client = Client(handler);
 
-		var ids = await client.GetRevokedLicenseIdsAsync(default);
+		var ids = await client.GetRevokedLicenseIdsAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -181,7 +187,7 @@ internal sealed class PlatformLicenseClientTests
 		using var client = Client(new ScriptedHandler(_ =>
 			Json(HttpStatusCode.OK, JsonSerializer.Serialize(new { revokedLicenseIds = ids }))));
 
-		Assert.That(await client.GetRevokedLicenseIdsAsync(default), Is.Null);
+		Assert.That(await client.GetRevokedLicenseIdsAsync(CancellationToken.None), Is.Null);
 	}
 
 	[TestCase(HttpStatusCode.ServiceUnavailable, "")]
@@ -191,21 +197,27 @@ internal sealed class PlatformLicenseClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(status, body)));
 
-		Assert.That(await client.GetRevokedLicenseIdsAsync(default), Is.Null);
+		Assert.That(await client.GetRevokedLicenseIdsAsync(CancellationToken.None), Is.Null);
 	}
 
 	private static PlatformLicenseClient Client(ScriptedHandler handler)
-		=> new(handler, Options, new LoggerConfiguration().CreateLogger());
+	{
+		return new PlatformLicenseClient(handler, _options, new LoggerConfiguration().CreateLogger());
+	}
 
 	private static CompanionLicenseProof GooglePlay()
-		=> new()
+	{
+		return new CompanionLicenseProof
 		{
 			Platform = "google-play", ProductId = CompanionLicenseTokens.Product, PurchaseToken = "purchase-token",
 			PackageName = "app.macrodeck.companion", OrderId = "GPA.1", LegacyKind = "ignored"
 		};
+	}
 
 	private static HttpResponseMessage Json(HttpStatusCode status, string body)
-		=> new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	{
+		return new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	}
 
 	private sealed class ScriptedHandler(Func<HttpRequestMessage, HttpResponseMessage> answer) : HttpMessageHandler
 	{
@@ -213,11 +225,14 @@ internal sealed class PlatformLicenseClientTests
 
 		public List<string> Bodies { get; } = [];
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override async Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			Requests.Add(request);
-			Bodies.Add(request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken));
+			Bodies.Add(request.Content is null
+				? string.Empty
+				: await request.Content.ReadAsStringAsync(cancellationToken));
 			return answer(request);
 		}
 	}

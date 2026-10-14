@@ -11,11 +11,15 @@ internal sealed partial class ShippedSvgArtworkTests
 	// An integration's Icons/animated folder holds animated artwork its dialogs draw, held to the widget
 	// artwork rule; every other SVG of an integration must keep its colours without CSS.
 	public static IEnumerable<TestCaseData> IntegrationIcons()
-		=> EmbeddedSvgs(typeof(ObsIntegration).Assembly, name => !IsAnimatedArtwork(name));
+	{
+		return EmbeddedSvgs(typeof(ObsIntegration).Assembly, name => !IsAnimatedArtwork(name));
+	}
 
 	public static IEnumerable<TestCaseData> WidgetArtwork()
-		=> EmbeddedSvgs(typeof(WeatherWidgetUiProvider).Assembly, _ => true)
+	{
+		return EmbeddedSvgs(typeof(WeatherWidgetUiProvider).Assembly, _ => true)
 			.Concat(EmbeddedSvgs(typeof(ObsIntegration).Assembly, IsAnimatedArtwork));
+	}
 
 	[TestCaseSource(nameof(IntegrationIcons))]
 	public void An_integration_icon_keeps_its_colours_in_readers_that_ignore_css(string svg)
@@ -30,7 +34,9 @@ internal sealed partial class ShippedSvgArtworkTests
 	[TestCaseSource(nameof(WidgetArtwork))]
 	public void Widget_artwork_only_animates_through_css(string svg)
 	{
-		var css = StyleBlock().Matches(svg).Select(style => Keyframes().Replace(style.Groups[1].Value, string.Empty))
+		var css = StyleBlock()
+			.Matches(svg)
+			.Select(style => Keyframes().Replace(style.Groups[1].Value, string.Empty))
 			.Concat(StyleAttribute().Matches(svg).Select(style => style.Groups["css"].Value));
 
 		var properties = css
@@ -38,12 +44,15 @@ internal sealed partial class ShippedSvgArtworkTests
 			.Select(declaration => VendorPrefix().Replace(declaration.Groups[1].Value, string.Empty))
 			.Distinct();
 
-		Assert.That(properties.Where(p => !p.StartsWith("animation-", StringComparison.Ordinal) && p != "transform-origin"),
+		Assert.That(properties.Where(p
+				=> !p.StartsWith("animation-", StringComparison.Ordinal) && p != "transform-origin"),
 			Is.Empty);
 	}
 
 	private static bool IsAnimatedArtwork(string resourceName)
-		=> resourceName.Contains(".Icons.animated.", StringComparison.Ordinal);
+	{
+		return resourceName.Contains(".Icons.animated.", StringComparison.Ordinal);
+	}
 
 	private static IEnumerable<TestCaseData> EmbeddedSvgs(Assembly assembly, Func<string, bool> include)
 	{

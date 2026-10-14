@@ -23,48 +23,105 @@ public class IconPackWidgetIconSourceTests
 	{
 		public Dictionary<Guid, IconEntity> Icons { get; } = new();
 
-		public IconEntity? GetIconById(Guid iconId) => Icons.GetValueOrDefault(iconId);
+		public IconEntity? GetIconById(Guid iconId)
+		{
+			return Icons.GetValueOrDefault(iconId);
+		}
 
-		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId) => [];
+		public IReadOnlyList<IconEntity> GetAppearances(Guid parentId)
+		{
+			return [];
+		}
 
-		public Task InitializeCache() => throw new NotSupportedException();
-
-		public IconPackEntity? GetPackById(Guid id) => throw new NotSupportedException();
-
-		public List<IconPackEntity> GetAllPacks() => throw new NotSupportedException();
-
-		public IconPackEntity? GetDefaultPack() => throw new NotSupportedException();
-
-		public Task AddOrUpdatePack(IconPackEntity pack) => throw new NotSupportedException();
-
-		public Task RemovePack(Guid id) => throw new NotSupportedException();
-
-		public List<IconEntity> GetIconsByPackId(Guid packId) => throw new NotSupportedException();
-
-		public List<IconEntity> GetIconsByBatchId(Guid batchId) => throw new NotSupportedException();
-
-		public List<IconEntity> GetIconsByState(params IconProcessingState[] states) =>
+		public Task InitializeCache()
+		{
 			throw new NotSupportedException();
+		}
 
-		public int GetIconCount(Guid packId) => throw new NotSupportedException();
-
-		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null) =>
+		public IconPackEntity? GetPackById(Guid id)
+		{
 			throw new NotSupportedException();
+		}
 
-		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null) =>
+		public List<IconPackEntity> GetAllPacks()
+		{
 			throw new NotSupportedException();
+		}
 
-		public List<IconEntity> GetIconsMissingMasterContentHash() => throw new NotSupportedException();
+		public IconPackEntity? GetDefaultPack()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons) => throw new NotSupportedException();
+		public Task AddOrUpdatePack(IconPackEntity pack)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task UpdateIcon(IconEntity icon) => throw new NotSupportedException();
+		public Task RemovePack(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RemoveIcon(Guid iconId) => throw new NotSupportedException();
+		public List<IconEntity> GetIconsByPackId(Guid packId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds) => throw new NotSupportedException();
+		public List<IconEntity> GetIconsByBatchId(Guid batchId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task FlushPendingWrites() => throw new NotSupportedException();
+		public List<IconEntity> GetIconsByState(params IconProcessingState[] states)
+		{
+			throw new NotSupportedException();
+		}
+
+		public int GetIconCount(Guid packId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IconEntity? FindBySourceContentHash(SourceContentHash hash, Guid? withinPackId = null)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IconEntity? FindByMasterContentHash(MasterContentHash hash, Guid? withinPackId = null)
+		{
+			throw new NotSupportedException();
+		}
+
+		public List<IconEntity> GetIconsMissingMasterContentHash()
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task AddIcons(Guid packId, IReadOnlyList<IconEntity> icons)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task UpdateIcon(IconEntity icon)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task RemoveIcon(Guid iconId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task RemoveIcons(Guid packId, IReadOnlyList<Guid> iconIds)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task FlushPendingWrites()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class FakeIconService : IIconService
@@ -73,15 +130,23 @@ public class IconPackWidgetIconSourceTests
 
 		public int GetImageCallCount { get; private set; }
 
-		public Task<Result<IconEntity, IconError>> Rename(Guid iconId, string name) =>
+		public Task<Result<IconEntity, IconError>> Rename(Guid iconId, string name)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<IconError>> Delete(Guid iconId) => throw new NotSupportedException();
-
-		public Task<Result<int, IconError>> DeleteMany(IReadOnlyList<Guid> iconIds) =>
+		public Task<Result<IconError>> Delete(Guid iconId)
+		{
 			throw new NotSupportedException();
+		}
 
-		public Task<Result<IconImageResult, IconError>> GetImage(Guid iconId,
+		public Task<Result<int, IconError>> DeleteMany(IReadOnlyList<Guid> iconIds)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<IconImageResult, IconError>> GetImage(
+			Guid iconId,
 			int? size,
 			bool acceptWebp,
 			bool staticFrame,
@@ -105,7 +170,10 @@ public class IconPackWidgetIconSourceTests
 	}
 
 	[Test]
-	public void Type_IsIconPack() => Assert.That(Create().Source.Type, Is.EqualTo(WidgetIconReference.IconPackType));
+	public void Type_IsIconPack()
+	{
+		Assert.That(Create().Source.Type, Is.EqualTo(WidgetIconReference.IconPackType));
+	}
 
 	[Test]
 	public async Task GetImageAsync_AValidReference_ResolvesToTheSameBytesTheBareIdUsedTo()
@@ -120,8 +188,8 @@ public class IconPackWidgetIconSourceTests
 
 		var image = await source.GetImageAsync(id.ToString(),
 			256,
-			acceptWebp: true,
-			staticFrame: false,
+			true,
+			false,
 			CancellationToken.None);
 
 		Assert.That(image, Is.Not.Null);
@@ -141,8 +209,8 @@ public class IconPackWidgetIconSourceTests
 
 		var image = await source.GetImageAsync("not-a-guid",
 			256,
-			acceptWebp: true,
-			staticFrame: false,
+			true,
+			false,
 			CancellationToken.None);
 
 		Assert.Multiple(() =>

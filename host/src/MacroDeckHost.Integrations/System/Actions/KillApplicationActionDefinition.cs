@@ -21,16 +21,19 @@ internal sealed class KillApplicationActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete("process",
-			label: AppStrings.Integrations.System.Actions.KillApplication.ProcessLabel(),
-			description: AppStrings.Integrations.System.Actions.KillApplication.ProcessDescription(),
+			AppStrings.Integrations.System.Actions.KillApplication.ProcessLabel(),
+			AppStrings.Integrations.System.Actions.KillApplication.ProcessDescription(),
 			optionsSourceId: "system.processes"),
 		ActionParameter.Toggle("graceful",
-			label: AppStrings.Integrations.System.Actions.KillApplication.GracefulLabel(),
-			description: AppStrings.Integrations.System.Actions.KillApplication.GracefulDescription(),
-			defaultValue: true)
+			AppStrings.Integrations.System.Actions.KillApplication.GracefulLabel(),
+			AppStrings.Integrations.System.Actions.KillApplication.GracefulDescription(),
+			true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_applications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_applications);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

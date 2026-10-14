@@ -22,25 +22,28 @@ internal sealed class PressKeyActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.KeyboardCombo("combo",
-			label: AppStrings.Integrations.Keyboard.Actions.PressKeyComboLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.PressKeyComboDescription(),
-			required: true),
+			AppStrings.Integrations.Keyboard.Actions.PressKeyComboLabel(),
+			AppStrings.Integrations.Keyboard.Actions.PressKeyComboDescription(),
+			true),
 		ActionParameter.Number("repeat",
-			label: AppStrings.Integrations.Keyboard.Actions.RepeatLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.RepeatDescription(),
-			min: 1,
-			max: 10_000,
-			step: 1,
-			defaultValue: 1),
+			AppStrings.Integrations.Keyboard.Actions.RepeatLabel(),
+			AppStrings.Integrations.Keyboard.Actions.RepeatDescription(),
+			1,
+			10_000,
+			1,
+			1),
 		ActionParameter.Duration("repeatDelay",
-			label: AppStrings.Integrations.Keyboard.Actions.RepeatDelayLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.RepeatDelayDescription(),
-			min: 0,
+			AppStrings.Integrations.Keyboard.Actions.RepeatDelayLabel(),
+			AppStrings.Integrations.Keyboard.Actions.RepeatDelayDescription(),
+			0,
 			defaultMilliseconds: 0),
 		.. KeyboardTargetParameters.All
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input, _layout);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input, _layout);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -77,8 +80,8 @@ internal sealed class PressKeyActionDefinition : IActionDefinition
 			using var session = sessionValue;
 			if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(_input, target, modifiers, key))
 			{
-				return KeyboardActionValues.SessionUnavailableResult(
-					KeyboardSessionUnavailableReason.BackgroundModifiersUnsupported);
+				return KeyboardActionValues.SessionUnavailableResult(KeyboardSessionUnavailableReason
+					.BackgroundModifiersUnsupported);
 			}
 
 			await session.PressComboAsync(modifiers, key, repeat, repeatDelay, context.CancellationToken)

@@ -79,14 +79,15 @@ internal sealed class UiReplaceableWorkTests
 	{
 		var work = new UiReplaceableWork<string>();
 
-		var writers = Enumerable.Range(0, 4).Select(writer => Task.Run(() =>
-		{
-			for (var step = 0; step < 500; step++)
+		var writers = Enumerable.Range(0, 4)
+			.Select(writer => Task.Run(() =>
 			{
-				work.WriteReplaceable("move" + writer, "move");
-				work.Write($"{writer}:{step}");
-			}
-		}));
+				for (var step = 0; step < 500; step++)
+				{
+					work.WriteReplaceable("move" + writer, "move");
+					work.Write($"{writer}:{step}");
+				}
+			}));
 		await Task.WhenAll(writers);
 
 		var ordinary = (await DrainAsync(work)).Where(item => item != "move").ToList();

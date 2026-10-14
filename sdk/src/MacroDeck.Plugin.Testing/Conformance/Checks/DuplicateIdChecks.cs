@@ -23,7 +23,8 @@ internal sealed class NoDuplicateDeclaredIdsCheck() : ConformanceCheckBase("MDC0
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var seen = new HashSet<(string Kind, string LocalId)>();
@@ -51,7 +52,8 @@ internal sealed class NoDuplicateProviderInstanceIdsCheck() : ConformanceCheckBa
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Session!.Declared.All(capability =>
@@ -96,7 +98,8 @@ internal sealed class NoDuplicateVariableDefinitionIdsCheck() : ConformanceCheck
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Session!.Declared.All(capability =>

@@ -60,9 +60,12 @@ public sealed record WeatherSnapshot
 	public DateTimeOffset? Sunset { get; init; }
 
 	/// <summary>An unavailable snapshot carrying only the location name, if known.</summary>
-	public static WeatherSnapshot Unavailable(string locationName = "") => new()
+	public static WeatherSnapshot Unavailable(string locationName = "")
 	{
-		IsAvailable = false,
-		LocationName = locationName
-	};
+		return new WeatherSnapshot
+		{
+			IsAvailable = false,
+			LocationName = locationName
+		};
+	}
 }

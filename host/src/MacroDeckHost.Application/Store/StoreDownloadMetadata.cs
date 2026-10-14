@@ -54,9 +54,9 @@ public sealed partial record StoreDownloadMetadata
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		if (request.RequestUri is not { IsAbsoluteUri: true } uri ||
-			!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal) ||
-			!string.Equals(uri.Host, AssetHost, StringComparison.OrdinalIgnoreCase))
+		if (request.RequestUri is not { IsAbsoluteUri: true } uri
+			|| !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal)
+			|| !string.Equals(uri.Host, AssetHost, StringComparison.OrdinalIgnoreCase))
 		{
 			return;
 		}
@@ -64,21 +64,24 @@ public sealed partial record StoreDownloadMetadata
 		request.Headers.TryAddWithoutValidation(OperationHeader, WireName(Operation));
 		request.Headers.TryAddWithoutValidation(OperationIdHeader, OperationId.ToString("D"));
 
-		if (Operation != StoreDownloadOperation.Install &&
-			CurrentVersion is { } version &&
-			AcceptedVersion().IsMatch(version))
+		if (Operation != StoreDownloadOperation.Install
+			&& CurrentVersion is { } version
+			&& AcceptedVersion().IsMatch(version))
 		{
 			request.Headers.TryAddWithoutValidation(CurrentVersionHeader, version);
 		}
 	}
 
-	private static string WireName(StoreDownloadOperation operation) => operation switch
+	private static string WireName(StoreDownloadOperation operation)
 	{
-		StoreDownloadOperation.Install => "install",
-		StoreDownloadOperation.Update => "update",
-		StoreDownloadOperation.Repair => "repair",
-		_ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null)
-	};
+		return operation switch
+		{
+			StoreDownloadOperation.Install => "install",
+			StoreDownloadOperation.Update => "update",
+			StoreDownloadOperation.Repair => "repair",
+			_ => throw new ArgumentOutOfRangeException(nameof(operation), operation, null)
+		};
+	}
 
 	// Mirrors the download Worker's version rule, so a local version it would reject, or one that cannot
 	// travel in a header at all, is left out rather than failing the download.

@@ -46,10 +46,10 @@ public sealed class MusicPlayerEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				Instance(),
-				ActionParameter.Text("trackName", label: AppStrings.Events.MusicPlayer.TrackLabel()),
-				ActionParameter.Text("artistName", label: AppStrings.Events.MusicPlayer.ArtistLabel()),
-				ActionParameter.Text("albumName", label: AppStrings.Events.MusicPlayer.AlbumLabel()),
-				ActionParameter.Text("previousTrackName", label: AppStrings.Events.MusicPlayer.PreviousTrackLabel())
+				ActionParameter.Text("trackName", AppStrings.Events.MusicPlayer.TrackLabel()),
+				ActionParameter.Text("artistName", AppStrings.Events.MusicPlayer.ArtistLabel()),
+				ActionParameter.Text("albumName", AppStrings.Events.MusicPlayer.AlbumLabel()),
+				ActionParameter.Text("previousTrackName", AppStrings.Events.MusicPlayer.PreviousTrackLabel())
 			]
 		},
 		Playback(PlaybackStartedEventId, AppStrings.Events.MusicPlayer.PlaybackStartedName()),
@@ -64,8 +64,8 @@ public sealed class MusicPlayerEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				Instance(),
-				ActionParameter.Text("deviceName", label: AppStrings.Events.Common.DeviceLabel()),
-				ActionParameter.Text("previousDeviceName", label: AppStrings.Events.MusicPlayer.PreviousDeviceLabel())
+				ActionParameter.Text("deviceName", AppStrings.Events.Common.DeviceLabel()),
+				ActionParameter.Text("previousDeviceName", AppStrings.Events.MusicPlayer.PreviousDeviceLabel())
 			]
 		},
 		new()
@@ -77,8 +77,8 @@ public sealed class MusicPlayerEventProvider : IHostEventProvider
 			PayloadParameters =
 			[
 				Instance(),
-				ActionParameter.Number("volume", label: AppStrings.Events.MusicPlayer.VolumeLabel()),
-				ActionParameter.Number("previousVolume", label: AppStrings.Events.MusicPlayer.PreviousVolumeLabel())
+				ActionParameter.Number("volume", AppStrings.Events.MusicPlayer.VolumeLabel()),
+				ActionParameter.Number("previousVolume", AppStrings.Events.MusicPlayer.PreviousVolumeLabel())
 			]
 		},
 		Connection(PlayerConnectedEventId, AppStrings.Events.MusicPlayer.PlayerConnectedName()),
@@ -179,36 +179,48 @@ public sealed class MusicPlayerEventProvider : IHostEventProvider
 	}
 
 	private static string QualifiedEventId(string eventId)
-		=> QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
+	{
+		return QualifiedId.Create(ProviderIdValue, eventId, OwnerIdKind.HostProvider, LocalIdKind.Declared, "Event")
 			.ToString();
+	}
 
-	private static EventDefinition Playback(string id, LocalizedText name) => new()
+	private static EventDefinition Playback(string id, LocalizedText name)
 	{
-		Id = id,
-		Name = name,
-		Category = AppStrings.Events.MusicPlayer.PlaybackCategory(),
-		ConfigurationParameters = [InstanceFilter()],
-		PayloadParameters = [Instance()]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = AppStrings.Events.MusicPlayer.PlaybackCategory(),
+			ConfigurationParameters = [InstanceFilter()],
+			PayloadParameters = [Instance()]
+		};
+	}
 
-	private static EventDefinition Connection(string id, LocalizedText name) => new()
+	private static EventDefinition Connection(string id, LocalizedText name)
 	{
-		Id = id,
-		Name = name,
-		Category = AppStrings.Events.MusicPlayer.ConnectionCategory(),
-		ConfigurationParameters = [InstanceFilter()],
-		PayloadParameters = [Instance()]
-	};
+		return new EventDefinition
+		{
+			Id = id,
+			Name = name,
+			Category = AppStrings.Events.MusicPlayer.ConnectionCategory(),
+			ConfigurationParameters = [InstanceFilter()],
+			PayloadParameters = [Instance()]
+		};
+	}
 
-	private static ActionParameter Instance() =>
-		ActionParameter.DynamicChoice("instance",
-			label: AppStrings.Events.MusicPlayer.PlayerLabel(),
+	private static ActionParameter Instance()
+	{
+		return ActionParameter.DynamicChoice("instance",
+			AppStrings.Events.MusicPlayer.PlayerLabel(),
 			optionsSourceId: MusicPlayerOptionsSourceIds.Instances);
+	}
 
 	private static ActionParameter InstanceFilter()
-		=> ActionParameter.DynamicChoice("instance",
-			label: AppStrings.Events.MusicPlayer.PlayerLabel(),
-			description: AppStrings.Events.MusicPlayer.PlayerFilterDescription(),
-			optionsSourceId: MusicPlayerOptionsSourceIds.Instances,
-			placeholder: AppStrings.Events.MusicPlayer.AnyPlayerPlaceholder());
+	{
+		return ActionParameter.DynamicChoice("instance",
+			AppStrings.Events.MusicPlayer.PlayerLabel(),
+			AppStrings.Events.MusicPlayer.PlayerFilterDescription(),
+			MusicPlayerOptionsSourceIds.Instances,
+			AppStrings.Events.MusicPlayer.AnyPlayerPlaceholder());
+	}
 }

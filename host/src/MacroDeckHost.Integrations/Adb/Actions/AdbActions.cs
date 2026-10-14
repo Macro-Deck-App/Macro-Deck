@@ -8,16 +8,17 @@ namespace MacroDeckHost.Integrations.Adb.Actions;
 
 internal static class AdbActions
 {
-	private static readonly LocalizedText DeviceDescription = AppStrings.Integrations.Adb.Params.DeviceDescription();
+	private static readonly LocalizedText _deviceDescription = AppStrings.Integrations.Adb.Params.DeviceDescription();
 
 	public static IReadOnlyList<IActionDefinition> Create(AdbActionServices services)
-		=>
+	{
+		return
 		[
 			new AdbActionDefinition(services,
 				"wake",
 				AppStrings.Integrations.Adb.Actions.WakeName(),
 				AppStrings.Integrations.Adb.Actions.WakeDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[],
 				(target, parameters, ct) => target.RunAsync(device => device.SendKeyAsync(AndroidKey.Wakeup, ct))),
 
@@ -25,7 +26,7 @@ internal static class AdbActions
 				"sleep",
 				AppStrings.Integrations.Adb.Actions.SleepName(),
 				AppStrings.Integrations.Adb.Actions.SleepDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[],
 				(target, parameters, ct) => target.RunAsync(device => device.SendKeyAsync(AndroidKey.Sleep, ct))),
 
@@ -33,10 +34,10 @@ internal static class AdbActions
 				"start-app",
 				AppStrings.Integrations.Adb.Actions.StartAppName(),
 				AppStrings.Integrations.Adb.Actions.StartAppDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Text("package",
-						label: AppStrings.Integrations.Adb.Params.PackageLabel(),
+						AppStrings.Integrations.Adb.Params.PackageLabel(),
 						placeholder: "com.example.app",
 						required: true)
 				],
@@ -49,10 +50,10 @@ internal static class AdbActions
 				"stop-app",
 				AppStrings.Integrations.Adb.Actions.StopAppName(),
 				AppStrings.Integrations.Adb.Actions.StopAppDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Text("package",
-						label: AppStrings.Integrations.Adb.Params.PackageLabel(),
+						AppStrings.Integrations.Adb.Params.PackageLabel(),
 						placeholder: "com.example.app",
 						required: true)
 				],
@@ -65,10 +66,10 @@ internal static class AdbActions
 				"open-uri",
 				AppStrings.Integrations.Adb.Actions.OpenLinkName(),
 				AppStrings.Integrations.Adb.Actions.OpenLinkDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Text("uri",
-						label: AppStrings.Integrations.Adb.Params.UriLabel(),
+						AppStrings.Integrations.Adb.Params.UriLabel(),
 						placeholder: "https://example.com",
 						required: true)
 				],
@@ -81,10 +82,10 @@ internal static class AdbActions
 				"input-text",
 				AppStrings.Integrations.Adb.Actions.TypeTextName(),
 				AppStrings.Integrations.Adb.Actions.TypeTextDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Text("text",
-						label: AppStrings.Integrations.Adb.Params.TextLabel(),
+						AppStrings.Integrations.Adb.Params.TextLabel(),
 						required: true)
 				],
 				(target, parameters, ct) => RequireText(parameters,
@@ -96,11 +97,11 @@ internal static class AdbActions
 				"key-event",
 				AppStrings.Integrations.Adb.Actions.SendKeyName(),
 				AppStrings.Integrations.Adb.Actions.SendKeyDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Choice("key",
-						options: KeyOptions(),
-						label: AppStrings.Integrations.Adb.Params.KeyLabel(),
+						KeyOptions(),
+						AppStrings.Integrations.Adb.Params.KeyLabel(),
 						defaultValue: nameof(AndroidKey.Home),
 						required: true)
 				],
@@ -116,14 +117,14 @@ internal static class AdbActions
 				"tap",
 				AppStrings.Integrations.Adb.Actions.TapName(),
 				AppStrings.Integrations.Adb.Actions.TapDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Number("x",
-						label: AppStrings.Integrations.Adb.Params.XLabel(),
+						AppStrings.Integrations.Adb.Params.XLabel(),
 						min: 0,
 						required: true),
 					ActionParameter.Number("y",
-						label: AppStrings.Integrations.Adb.Params.YLabel(),
+						AppStrings.Integrations.Adb.Params.YLabel(),
 						min: 0,
 						required: true)
 				],
@@ -138,26 +139,26 @@ internal static class AdbActions
 				"swipe",
 				AppStrings.Integrations.Adb.Actions.SwipeName(),
 				AppStrings.Integrations.Adb.Actions.SwipeDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Number("x1",
-						label: AppStrings.Integrations.Adb.Actions.SwipeFromXLabel(),
+						AppStrings.Integrations.Adb.Actions.SwipeFromXLabel(),
 						min: 0,
 						required: true),
 					ActionParameter.Number("y1",
-						label: AppStrings.Integrations.Adb.Actions.SwipeFromYLabel(),
+						AppStrings.Integrations.Adb.Actions.SwipeFromYLabel(),
 						min: 0,
 						required: true),
 					ActionParameter.Number("x2",
-						label: AppStrings.Integrations.Adb.Actions.SwipeToXLabel(),
+						AppStrings.Integrations.Adb.Actions.SwipeToXLabel(),
 						min: 0,
 						required: true),
 					ActionParameter.Number("y2",
-						label: AppStrings.Integrations.Adb.Actions.SwipeToYLabel(),
+						AppStrings.Integrations.Adb.Actions.SwipeToYLabel(),
 						min: 0,
 						required: true),
 					ActionParameter.Number("durationMs",
-						label: AppStrings.Integrations.Adb.Actions.SwipeDurationLabel(),
+						AppStrings.Integrations.Adb.Actions.SwipeDurationLabel(),
 						min: 0,
 						defaultValue: 300)
 				],
@@ -176,10 +177,9 @@ internal static class AdbActions
 				"reboot",
 				AppStrings.Integrations.Adb.Actions.RebootName(),
 				AppStrings.Integrations.Adb.Actions.RebootDescription(),
-				DeviceDescription,
+				_deviceDescription,
 				[
 					ActionParameter.Choice("mode",
-						options:
 						[
 							new ActionParameterOption
 							{
@@ -197,7 +197,7 @@ internal static class AdbActions
 								Label = AppStrings.Integrations.Adb.Actions.RebootModeBootloader()
 							}
 						],
-						label: AppStrings.Integrations.Adb.Actions.RebootModeLabel(),
+						AppStrings.Integrations.Adb.Actions.RebootModeLabel(),
 						defaultValue: nameof(AndroidRebootMode.Normal))
 				],
 				(target, parameters, ct) =>
@@ -211,6 +211,7 @@ internal static class AdbActions
 
 			new ScreenshotActionDefinition(services)
 		];
+	}
 
 	private static Task<AdbOutcome> RequireText(
 		IReadOnlyDictionary<string, object> parameters,
@@ -225,10 +226,12 @@ internal static class AdbActions
 	}
 
 	private static List<ActionParameterOption> KeyOptions()
-		=> Enum.GetValues<AndroidKey>()
+	{
+		return Enum.GetValues<AndroidKey>()
 			.Select(key => new ActionParameterOption
 				{ Value = key.ToString(), Label = Humanize(key.ToString()) })
 			.ToList();
+	}
 
 	private static string Humanize(string pascalCase)
 	{

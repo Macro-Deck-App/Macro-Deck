@@ -172,7 +172,7 @@ public class UserNotificationStoreTests
 		var longTitle = new string('a', 250);
 		var longMessage = new string('b', 1200);
 
-		var entry = store.Raise(Draft(longTitle, message: longMessage))!;
+		var entry = store.Raise(Draft(longTitle, longMessage))!;
 
 		Assert.Multiple(() =>
 		{
@@ -188,7 +188,7 @@ public class UserNotificationStoreTests
 		const string raw = "Authorization: Bearer eyJabc.def.ghi";
 		var expected = LogRedactor.Redact(raw);
 
-		var entry = store.Raise(Draft(raw, message: raw))!;
+		var entry = store.Raise(Draft(raw, raw))!;
 
 		Assert.Multiple(() =>
 		{
@@ -360,7 +360,8 @@ public class UserNotificationStoreTests
 	}
 
 	private static UserNotificationDraft Draft(string title, string? message = null, string? dedupeKey = null)
-		=> new()
+	{
+		return new UserNotificationDraft
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.General,
@@ -368,11 +369,15 @@ public class UserNotificationStoreTests
 			Message = message,
 			DedupeKey = dedupeKey
 		};
+	}
 
-	private static UserNotificationDraft DraftWithProgress(string title,
+	private static UserNotificationDraft DraftWithProgress(
+		string title,
 		string dedupeKey,
 		UserNotificationProgress progress)
-		=> Draft(title, dedupeKey: dedupeKey) with { Progress = progress };
+	{
+		return Draft(title, dedupeKey: dedupeKey) with { Progress = progress };
+	}
 
 	[Test]
 	public void A_Running_Entry_Is_Not_The_Users_To_Dismiss()
@@ -520,7 +525,8 @@ public class UserNotificationStoreTests
 			Assert.That(markedAll, Is.True);
 			Assert.That(store.Snapshot().All(entry => entry.Read), Is.True);
 			Assert.That(store.MarkAllRead(), Is.False);
-			Assert.That(new[] { second.Id, third.Id }.All(id => store.Snapshot().Any(entry => entry.Id == id)), Is.True);
+			Assert.That(new[] { second.Id, third.Id }.All(id => store.Snapshot().Any(entry => entry.Id == id)),
+				Is.True);
 		});
 	}
 
@@ -545,7 +551,10 @@ public class UserNotificationStoreTests
 	{
 		var store = new UserNotificationStore(10);
 
-		var entry = store.Raise(Draft("from a popup") with { Id = "popup-1", SourceCategory = NotificationSourceCategory.Plugin })!;
+		var entry = store.Raise(Draft("from a popup") with
+		{
+			Id = "popup-1", SourceCategory = NotificationSourceCategory.Plugin
+		})!;
 
 		Assert.Multiple(() =>
 		{

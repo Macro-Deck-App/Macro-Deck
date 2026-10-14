@@ -28,12 +28,14 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 		FakeIntegrationConfigStore configStore,
 		VariableRegistry variableRegistry,
 		StartupReadiness? readiness = null)
-		=> new(registry,
+	{
+		return new GetIntegrationCapabilitiesRequestMessageHandler(registry,
 			configStore,
 			variableRegistry,
 			readiness ?? Ready(),
 			TestLocalization.Preferences,
 			TestLocalization.Resolver);
+	}
 
 	[Test]
 	public async Task Unconfigured_lists_both_catalogs_as_SetupRequired()
@@ -46,7 +48,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 			Variables = [],
 			DeclaredVariablesOverride = [VariableDefinition.Eager("cpu_usage", VariableType.Numeric)]
 		};
-		var registry = new ConfigurableIntegrationRegistry([integration], disabled: [integration.Id]);
+		var registry = new ConfigurableIntegrationRegistry([integration], [integration.Id]);
 		var configStore = new FakeIntegrationConfigStore();
 		configStore.SetConfiguredCount(integration.Id, 0);
 		var handler = CreateHandler(registry, configStore, new VariableRegistry());
@@ -100,7 +102,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 			Actions = [new CapturingActionDefinition()],
 			Variables = [VariableDefinition.Eager("cpu_usage", VariableType.Numeric)]
 		};
-		var registry = new ConfigurableIntegrationRegistry([integration], disabled: [integration.Id]);
+		var registry = new ConfigurableIntegrationRegistry([integration], [integration.Id]);
 		var configStore = new FakeIntegrationConfigStore();
 		configStore.SetConfiguredCount(integration.Id, 1);
 		var handler = CreateHandler(registry, configStore, new VariableRegistry());
@@ -151,7 +153,7 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 			Id = "int4",
 			IsInitialized = true,
 			Actions = [new CapturingActionDefinition()],
-			Variables = [VariableDefinition.Eager("cpu_usage", VariableType.Numeric, decimalPlaces: 1)]
+			Variables = [VariableDefinition.Eager("cpu_usage", VariableType.Numeric, 1)]
 		};
 		var registry = new ConfigurableIntegrationRegistry([integration]);
 		var variableRegistry = new VariableRegistry();
@@ -191,14 +193,14 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 		string? expectedValue)
 	{
 		var integration = new FakeVariableProviderIntegration { Id = "com.example.headsets", IsInitialized = true };
-		var registry = new ConfigurableIntegrationRegistry([integration], disabled: disabled ? [integration.Id] : []);
+		var registry = new ConfigurableIntegrationRegistry([integration], disabled ? [integration.Id] : []);
 		var variableRegistry = new VariableRegistry();
 		foreach (var (name, owner, value) in new[]
-		{
-			("battery_arctis_headset_d15c7416_level", integration.Id, "64"),
-			("battery_pixel_8_3f9a1c2e_level", "app.macro-deck.adb", "80"),
-			("headset_mode", integration.Id, "1"),
-		})
+			{
+				("battery_arctis_headset_d15c7416_level", integration.Id, "64"),
+				("battery_pixel_8_3f9a1c2e_level", "app.macro-deck.adb", "80"),
+				("headset_mode", integration.Id, "1")
+			})
 		{
 			variableRegistry.Upsert(new VariableEntity
 			{
@@ -265,7 +267,8 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 		};
 		var registry = new ConfigurableIntegrationRegistry([integration]);
 		var variableRegistry = new VariableRegistry();
-		foreach (var name in new[] { "headset_mode", "battery_arctis_headset_d15c7416_level", "battery_arctis_headset_d15c7416_charging" })
+		foreach (var name in new[]
+			{ "headset_mode", "battery_arctis_headset_d15c7416_level", "battery_arctis_headset_d15c7416_charging" })
 		{
 			variableRegistry.Upsert(new VariableEntity
 			{
@@ -556,11 +559,17 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ActionIconSnapshot?> GetActionIconAsync(IReadOnlyDictionary<string, object?> parameters,
+		public Task<ActionIconSnapshot?> GetActionIconAsync(
+			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<ActionIconSnapshot?>(null);
+		{
+			return Task.FromResult<ActionIconSnapshot?>(null);
+		}
 	}
 
 	private sealed class StateOnlyActionDefinition : IActionDefinition, IStateProviderActionDefinition
@@ -573,10 +582,16 @@ public class GetIntegrationCapabilitiesRequestMessageHandlerTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ActionStateSnapshot?> GetActionStateAsync(IReadOnlyDictionary<string, object?> parameters,
+		public Task<ActionStateSnapshot?> GetActionStateAsync(
+			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<ActionStateSnapshot?>(null);
+		{
+			return Task.FromResult<ActionStateSnapshot?>(null);
+		}
 	}
 }

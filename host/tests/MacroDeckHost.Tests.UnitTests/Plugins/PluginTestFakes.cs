@@ -12,14 +12,21 @@ internal sealed class InMemoryPluginAccessTokenRepository : IPluginAccessTokenRe
 {
 	public List<PluginAccessTokenEntity> Tokens { get; } = [];
 
-	public Task<PluginAccessTokenEntity?> GetById(Guid id) => Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
+	public Task<PluginAccessTokenEntity?> GetById(Guid id)
+	{
+		return Task.FromResult(Tokens.FirstOrDefault(t => t.Id == id));
+	}
 
 	public Task<PluginAccessTokenEntity?> GetByHash(string tokenHash)
-		=> Task.FromResult(Tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+	{
+		return Task.FromResult(Tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+	}
 
 	public Task<IReadOnlyList<PluginAccessTokenEntity>> GetAll()
-		=> Task.FromResult<IReadOnlyList<PluginAccessTokenEntity>>(Tokens.OrderByDescending(t => t.CreatedAt)
+	{
+		return Task.FromResult<IReadOnlyList<PluginAccessTokenEntity>>(Tokens.OrderByDescending(t => t.CreatedAt)
 			.ToList());
+	}
 
 	public Task Create(PluginAccessTokenEntity token)
 	{
@@ -61,19 +68,30 @@ internal sealed class InMemoryPluginRegistrationRepository : IPluginRegistration
 	public List<PluginRegistrationEntity> Registrations { get; } = [];
 
 	public Task<PluginRegistrationEntity?> GetByPluginId(string pluginId)
-		=> Task.FromResult(Registrations.FirstOrDefault(r => r.PluginId == pluginId));
+	{
+		return Task.FromResult(Registrations.FirstOrDefault(r => r.PluginId == pluginId));
+	}
 
 	public Task<IReadOnlyList<PluginRegistrationEntity>> GetByAccessTokenId(Guid accessTokenId)
-		=> Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
-			.Where(r => r.AccessTokenId == accessTokenId).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
+			.Where(r => r.AccessTokenId == accessTokenId)
+			.ToList());
+	}
 
 	public Task<IReadOnlyList<PluginRegistrationEntity>> GetAll()
-		=> Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
-			.OrderByDescending(r => r.CreatedAt).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
+			.OrderByDescending(r => r.CreatedAt)
+			.ToList());
+	}
 
 	public Task<IReadOnlyList<PluginRegistrationEntity>> GetNonRevoked()
-		=> Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
-			.Where(r => r.RevokedAt is null).ToList());
+	{
+		return Task.FromResult<IReadOnlyList<PluginRegistrationEntity>>(Registrations
+			.Where(r => r.RevokedAt is null)
+			.ToList());
+	}
 
 	public Task Create(PluginRegistrationEntity registration)
 	{
@@ -86,7 +104,8 @@ internal sealed class InMemoryPluginRegistrationRepository : IPluginRegistration
 		return Task.CompletedTask;
 	}
 
-	public Task<bool> Reactivate(string pluginId,
+	public Task<bool> Reactivate(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,
@@ -110,7 +129,8 @@ internal sealed class InMemoryPluginRegistrationRepository : IPluginRegistration
 		return Task.FromResult(true);
 	}
 
-	public Task<bool> RotateSecret(string pluginId,
+	public Task<bool> RotateSecret(
+		string pluginId,
 		string displayName,
 		string secretHash,
 		Guid? accessTokenId,
@@ -240,7 +260,8 @@ internal sealed class FakePluginManifestReader : IPluginManifestReader
 		return Default ?? PluginManifestReadResult.Fail(PluginManifestError.NotFound, "No fake result configured.");
 	}
 
-	public PluginManifestReadResult ReadFromJson(string json,
+	public PluginManifestReadResult ReadFromJson(
+		string json,
 		string? versionDirectory,
 		string expectedPluginId,
 		string expectedVersion)
@@ -260,7 +281,10 @@ internal sealed class FakePluginInstallationCatalog : IPluginInstallationCatalog
 {
 	public List<InstalledPlugin> Plugins { get; } = [];
 
-	public IReadOnlyList<InstalledPlugin> Discover() => Plugins;
+	public IReadOnlyList<InstalledPlugin> Discover()
+	{
+		return Plugins;
+	}
 
 	public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 	{
@@ -270,14 +294,20 @@ internal sealed class FakePluginInstallationCatalog : IPluginInstallationCatalog
 
 	public int InvalidateCount { get; private set; }
 
-	public void Invalidate() => InvalidateCount++;
+	public void Invalidate()
+	{
+		InvalidateCount++;
+	}
 }
 
 internal sealed class FakePluginRuntimeStateStore : IPluginRuntimeStateStore
 {
 	public Dictionary<string, bool> States { get; } = new(StringComparer.Ordinal);
 
-	public IReadOnlyDictionary<string, bool> Load() => States;
+	public IReadOnlyDictionary<string, bool> Load()
+	{
+		return States;
+	}
 
 	public Task Save(string pluginId, bool started)
 	{
@@ -324,7 +354,10 @@ internal sealed class FakePluginProcessJournal : IPluginProcessJournal
 		return Task.CompletedTask;
 	}
 
-	public Task Remove(string launchId) => Remove([launchId]);
+	public Task Remove(string launchId)
+	{
+		return Remove([launchId]);
+	}
 
 	public Task Remove(IReadOnlyCollection<string> launchIds)
 	{
@@ -346,10 +379,14 @@ internal sealed class FakeProcessTable : IProcessTable
 	public HashSet<int> KillTreeThrowsFor { get; } = [];
 
 	public void Seed(int processId, DateTimeOffset startedAt)
-		=> Processes[processId] = new RunningProcess(processId, startedAt);
+	{
+		Processes[processId] = new RunningProcess(processId, startedAt);
+	}
 
 	public RunningProcess? TryGet(int processId)
-		=> Processes.TryGetValue(processId, out var process) ? process : null;
+	{
+		return Processes.TryGetValue(processId, out var process) ? process : null;
+	}
 
 	public Task KillTree(int processId, CancellationToken cancellationToken = default)
 	{
@@ -409,7 +446,10 @@ internal sealed class FakePluginProcess : IPluginProcess
 		return Task.CompletedTask;
 	}
 
-	public void Dispose() => DisposeCalled = true;
+	public void Dispose()
+	{
+		DisposeCalled = true;
+	}
 }
 
 internal sealed class FakePluginProcessLauncher : IPluginProcessLauncher
@@ -450,7 +490,8 @@ internal sealed class FakePluginHealthProbe : IPluginHealthProbe
 
 	public List<(int Port, string Path)> Probes { get; } = [];
 
-	public Task<bool> Probe(int port,
+	public Task<bool> Probe(
+		int port,
 		string path,
 		TimeSpan timeout,
 		string pluginId,
@@ -483,7 +524,10 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 
 	public Func<string, Task>? OnSuspend { get; set; }
 
-	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot() => SnapshotToReturn;
+	public IReadOnlyList<PluginRuntimeSnapshot> Snapshot()
+	{
+		return SnapshotToReturn;
+	}
 
 	public Task<PluginSupervisorResult> Start(string pluginId, CancellationToken cancellationToken = default)
 	{
@@ -491,7 +535,8 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 		return Task.FromResult(StartResults.GetValueOrDefault(pluginId, PluginSupervisorResult.Ok()));
 	}
 
-	public Task<PluginSupervisorResult> Stop(string pluginId,
+	public Task<PluginSupervisorResult> Stop(
+		string pluginId,
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default)
 	{
@@ -506,7 +551,9 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 	}
 
 	public Task StopAll(PluginStopReason reason, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task Forget(string pluginId, CancellationToken cancellationToken = default)
 	{
@@ -514,7 +561,10 @@ internal sealed class FakePluginSupervisor : IPluginSupervisor
 		return Task.CompletedTask;
 	}
 
-	public Task Reconcile(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task Reconcile(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task SuspendForTakeover(string pluginId, CancellationToken cancellationToken = default)
 	{
@@ -547,5 +597,8 @@ internal sealed class FakeDotnetMuxerLocator : IDotnetMuxerLocator
 		return Selection;
 	}
 
-	public void Invalidate() => InvalidateCount++;
+	public void Invalidate()
+	{
+		InvalidateCount++;
+	}
 }

@@ -8,7 +8,9 @@ public class BackupScheduleCalculatorTests
 {
 	[Test]
 	public void ReportsNoDueTimeWhenSchedulingIsOff()
-		=> Assert.That(BackupScheduleCalculator.NextDue(Settings("off"), null, Now(2026, 8, 18, 1, 0)), Is.Null);
+	{
+		Assert.That(BackupScheduleCalculator.NextDue(Settings("off"), null, Now(2026, 8, 18, 1, 0)), Is.Null);
+	}
 
 	[Test]
 	public void SchedulesTheNextDailyRunAfterTheLastOne()
@@ -43,13 +45,15 @@ public class BackupScheduleCalculatorTests
 
 	[Test]
 	public void BuildsTheExpressionForEachSupportedFrequency()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(BackupScheduleCalculator.CronExpression(Settings("daily")), Is.EqualTo("0 3 * * *"));
 			Assert.That(BackupScheduleCalculator.CronExpression(Settings("weekly")), Is.EqualTo("0 3 * * 0"));
 			Assert.That(BackupScheduleCalculator.CronExpression(Settings("monthly")), Is.EqualTo("0 3 1 * *"));
 			Assert.That(BackupScheduleCalculator.CronExpression(Settings("off")), Is.Null);
 		});
+	}
 
 	// The 31st does not exist in every month; the schedule has to skip those months rather than clamp into
 	// a different day, which is what a naive day-of-month calculation does.
@@ -64,10 +68,14 @@ public class BackupScheduleCalculatorTests
 	}
 
 	private static BackupSettings Settings(string frequency)
-		=> new(frequency, "03:00", DayOfWeek.Sunday, 1, "keep-latest", 7, true, true);
+	{
+		return new BackupSettings(frequency, "03:00", DayOfWeek.Sunday, 1, "keep-latest", 7, true, true);
+	}
 
 	private static DateTimeOffset Now(int year, int month, int day, int hour, int minute)
-		=> Local(year, month, day, hour, minute);
+	{
+		return Local(year, month, day, hour, minute);
+	}
 
 	private static DateTimeOffset Local(int year, int month, int day, int hour, int minute)
 	{

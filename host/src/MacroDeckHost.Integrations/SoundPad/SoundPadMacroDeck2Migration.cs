@@ -17,21 +17,28 @@ internal sealed class SoundPadMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = [];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		ActionNamespace + "PlayAction" => MigratePlay(action),
-		ActionNamespace + "StopPlaybackAction" => Result(action, SoundPadActions.StopPlaybackId, []),
-		ActionNamespace + "StartRecordingAction" => MigrateStartRecording(action),
-		ActionNamespace + "StopRecordingAction" => Result(action, SoundPadActions.StopRecordingId, []),
-		_ => null
-	};
+		return Task.FromResult<IReadOnlyList<MigratedConfiguration>>([]);
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			ActionNamespace + "PlayAction" => MigratePlay(action),
+			ActionNamespace + "StopPlaybackAction" => Result(action, SoundPadActions.StopPlaybackId, []),
+			ActionNamespace + "StartRecordingAction" => MigrateStartRecording(action),
+			ActionNamespace + "StopRecordingAction" => Result(action, SoundPadActions.StopRecordingId, []),
+			_ => null
+		};
+	}
 
 	private static ActionMigrationResult? MigratePlay(ForeignAction action)
 	{
@@ -63,7 +70,7 @@ internal sealed class SoundPadMacroDeck2Migration : IIntegrationMigration
 		}
 
 		// An empty configuration deserialized to the enum default, Microphone, in Macro Deck 2.
-		string? source = TryGetProperty(config, "RecordingDevice", out var device)
+		var source = TryGetProperty(config, "RecordingDevice", out var device)
 			? device.ValueKind switch
 			{
 				JsonValueKind.Number when device.TryGetInt32(out var value) => FromEnumValue(value),
@@ -77,12 +84,15 @@ internal sealed class SoundPadMacroDeck2Migration : IIntegrationMigration
 			: Result(action, SoundPadActions.StartRecordingId, [(SoundPadActions.SourceParameter, source)]);
 	}
 
-	private static string? FromEnumValue(int value) => value switch
+	private static string? FromEnumValue(int value)
 	{
-		0 => SoundPadActions.SourceMicrophone,
-		1 => SoundPadActions.SourceSpeakers,
-		_ => SoundPadActions.SourceDefault
-	};
+		return value switch
+		{
+			0 => SoundPadActions.SourceMicrophone,
+			1 => SoundPadActions.SourceSpeakers,
+			_ => SoundPadActions.SourceDefault
+		};
+	}
 
 	private static string? FromEnumName(string? name)
 	{
@@ -101,15 +111,19 @@ internal sealed class SoundPadMacroDeck2Migration : IIntegrationMigration
 			: null;
 	}
 
-	private static ActionMigrationResult Result(ForeignAction action, string actionId,
+	private static ActionMigrationResult Result(
+		ForeignAction action,
+		string actionId,
 		IReadOnlyList<(string Name, string Value)> parameters)
-		=> new(SoundPadIntegration.IntegrationId,
+	{
+		return new ActionMigrationResult(SoundPadIntegration.IntegrationId,
 			actionId,
 			action.DisplayName ?? actionId,
 			parameters.ToDictionary(parameter => parameter.Name,
 				parameter => JsonSerializer.SerializeToElement(parameter.Value),
 				StringComparer.Ordinal),
 			[AppStrings.Integrations.SoundPad.Migration.SetUpIntegration()]);
+	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
 	{
@@ -153,8 +167,8 @@ internal sealed class SoundPadMacroDeck2Migration : IIntegrationMigration
 			return number;
 		}
 
-		return value.ValueKind == JsonValueKind.String &&
-			int.TryParse(value.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+		return value.ValueKind == JsonValueKind.String
+			&& int.TryParse(value.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
 				? parsed
 				: null;
 	}

@@ -464,11 +464,11 @@ internal sealed class TwitchEventSubSession : IDisposable
 
 	private static Uri? ReadReconnectUrl(JsonElement payload)
 	{
-		if (payload.ValueKind != JsonValueKind.Object ||
-			!payload.TryGetProperty("session", out var session) ||
-			session.ValueKind != JsonValueKind.Object ||
-			!session.TryGetProperty("reconnect_url", out var url) ||
-			url.ValueKind != JsonValueKind.String)
+		if (payload.ValueKind != JsonValueKind.Object
+			|| !payload.TryGetProperty("session", out var session)
+			|| session.ValueKind != JsonValueKind.Object
+			|| !session.TryGetProperty("reconnect_url", out var url)
+			|| url.ValueKind != JsonValueKind.String)
 		{
 			return null;
 		}
@@ -478,9 +478,9 @@ internal sealed class TwitchEventSubSession : IDisposable
 
 	private static (string? Type, string? Status) ReadRevocation(JsonElement payload)
 	{
-		if (payload.ValueKind != JsonValueKind.Object ||
-			!payload.TryGetProperty("subscription", out var subscription) ||
-			subscription.ValueKind != JsonValueKind.Object)
+		if (payload.ValueKind != JsonValueKind.Object
+			|| !payload.TryGetProperty("subscription", out var subscription)
+			|| subscription.ValueKind != JsonValueKind.Object)
 		{
 			return (null, null);
 		}
@@ -489,9 +489,11 @@ internal sealed class TwitchEventSubSession : IDisposable
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private enum SessionOutcome
 	{

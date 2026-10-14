@@ -13,7 +13,7 @@ public class DefaultLocalizedValueTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(value.Arguments, Is.Not.Null.And.Empty);
-			Assert.That(() => value.Equals(default(LocalizedString)), Throws.Nothing);
+			Assert.That(() => value.Equals(default), Throws.Nothing);
 			Assert.That(() => value.GetHashCode(), Throws.Nothing);
 			Assert.That(() => value.ToString(), Throws.Nothing);
 		});

@@ -45,16 +45,16 @@ public static class ConnectIdTokenReader
 			throw new ConnectAuthTransientException("The id token carries no subject.");
 		}
 
-		if (token.ValidTo != DateTime.MinValue &&
-			new DateTimeOffset(token.ValidTo, TimeSpan.Zero) + _clockSkew < timeProvider.GetUtcNow())
+		if (token.ValidTo != DateTime.MinValue
+			&& new DateTimeOffset(token.ValidTo, TimeSpan.Zero) + _clockSkew < timeProvider.GetUtcNow())
 		{
 			throw new ConnectAuthTransientException("The id token has already expired.");
 		}
 
 		// A refresh returns an id token without a nonce, so a nonce is only required where one was sent -
 		// the code exchange - and there it must match exactly.
-		if (expectedNonce is not null &&
-			!string.Equals(ReadClaim(token, "nonce"), expectedNonce, StringComparison.Ordinal))
+		if (expectedNonce is not null
+			&& !string.Equals(ReadClaim(token, "nonce"), expectedNonce, StringComparison.Ordinal))
 		{
 			throw new ConnectAuthRejectedException("The id token does not answer this sign-in attempt.");
 		}
@@ -66,10 +66,12 @@ public static class ConnectIdTokenReader
 	}
 
 	private static bool IssuerMatches(string? issuer)
-		=> issuer is not null &&
-			string.Equals(issuer.TrimEnd('/'),
+	{
+		return issuer is not null
+			&& string.Equals(issuer.TrimEnd('/'),
 				ConnectEndpoints.Issuer.TrimEnd('/'),
 				StringComparison.OrdinalIgnoreCase);
+	}
 
 	private static string? ReadClaim(JsonWebToken token, string type)
 	{

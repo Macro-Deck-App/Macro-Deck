@@ -29,29 +29,41 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 [TestFixture]
 internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 {
-	private static DeclaredCapability Action(string localId) => new()
+	private static DeclaredCapability Action(string localId)
 	{
-		Kind = CapabilityKinds.Actions, LocalId = localId,
-		VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
-	};
+		return new DeclaredCapability
+		{
+			Kind = CapabilityKinds.Actions, LocalId = localId,
+			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+		};
+	}
 
-	private static DeclaredCapability Variable(string localId) => new()
+	private static DeclaredCapability Variable(string localId)
 	{
-		Kind = CapabilityKinds.Variables, LocalId = localId,
-		VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
-	};
+		return new DeclaredCapability
+		{
+			Kind = CapabilityKinds.Variables, LocalId = localId,
+			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+		};
+	}
 
-	private static DeclaredCapability Provider(string kind) => new()
+	private static DeclaredCapability Provider(string kind)
 	{
-		Kind = kind, LocalId = ProviderCapabilityId.LocalId,
-		VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
-	};
+		return new DeclaredCapability
+		{
+			Kind = kind, LocalId = ProviderCapabilityId.LocalId,
+			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+		};
+	}
 
-	private static DeclaredCapability Icon() => new()
+	private static DeclaredCapability Icon()
 	{
-		Kind = CapabilityKinds.Icons, LocalId = IconsCapabilityHandler.LocalId,
-		VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
-	};
+		return new DeclaredCapability
+		{
+			Kind = CapabilityKinds.Icons, LocalId = IconsCapabilityHandler.LocalId,
+			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
+		};
+	}
 
 	[Test]
 	public async Task The_fixture_declares_every_capability_it_promises_and_each_kind_round_trips()
@@ -74,7 +86,7 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 				Has.Some.Matches<(string Kind, string? LocalId)>(call => call.Kind == CapabilityKinds.Variables));
 		});
 
-		var iconBytes = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Assets", "icon.svg"));
+		var iconBytes = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory, "Assets", "icon.svg"));
 
 		var configFlowSessions = new PluginConfigFlowSessions(TimeProvider.System);
 
@@ -107,7 +119,7 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 				CapabilityKinds.Actions, CapabilityKinds.Variables, CapabilityKinds.Events,
 				CapabilityKinds.ConfigFlow, CapabilityKinds.Weather, CapabilityKinds.Icons, CapabilityKinds.Ui
 			],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/svg+xml", iconBytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/svg+xml", iconBytes));
 
 		Assert.Multiple(() =>
 		{
@@ -124,7 +136,8 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 			.ExecuteAsync(new ActionExecutionContext { Parameters = new Dictionary<string, object>() });
 		Assert.That(refreshResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 
-		var thresholdResult = await integration.Actions.Single(a => a.Id == "set-alert-threshold").CreateExecutor()
+		var thresholdResult = await integration.Actions.Single(a => a.Id == "set-alert-threshold")
+			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
 				{ Parameters = new Dictionary<string, object> { ["thresholdCelsius"] = 10.0 } });
 		Assert.That(thresholdResult.Status, Is.EqualTo(ActionResultStatus.Succeeded));
@@ -134,7 +147,8 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 		var options = await conditionDefinition.GetDynamicOptionsAsync(new DynamicOptionsContext
 				{ ParameterName = "condition", CurrentParameters = new Dictionary<string, object?>() },
 			CancellationToken.None);
-		var conditionResult = await integration.Actions.Single(a => a.Id == "set-condition").CreateExecutor()
+		var conditionResult = await integration.Actions.Single(a => a.Id == "set-condition")
+			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
 			{
 				Parameters = new Dictionary<string, object> { ["condition"] = options.Options[0].Value }
@@ -193,7 +207,9 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 		public List<(string Kind, string? LocalId)> Changed { get; } = [];
 
 		public void CatalogChanged(string kind, string? localId = null, string? reason = null)
-			=> Changed.Add((kind, localId));
+		{
+			Changed.Add((kind, localId));
+		}
 	}
 
 	private sealed class RecordingEventPublisher : IEventPublisher
@@ -201,7 +217,9 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 		public List<(string EventId, IReadOnlyDictionary<string, object?>? Parameters)> Occurrences { get; } = [];
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Occurrences.Add((eventId, parameters));
+		{
+			Occurrences.Add((eventId, parameters));
+		}
 	}
 
 	private sealed class FakeIntegrationConfig(IReadOnlyDictionary<string, string?> values) : IIntegrationConfig
@@ -210,15 +228,22 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 		private readonly Dictionary<string, string?> _values = new(values, StringComparer.Ordinal);
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "Sample")]);
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "Sample")]);
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_values.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_values.GetValueOrDefault(key));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
-		public Task SetStringAsync(Guid entryId,
+		public Task SetStringAsync(
+			Guid entryId,
 			string key,
 			string? value,
 			CancellationToken cancellationToken = default)
@@ -227,11 +252,14 @@ internal sealed class WellBehavedPluginContractTests : CapabilityContractFixture
 			return Task.CompletedTask;
 		}
 
-		public Task SetSecretAsync(Guid entryId,
+		public Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeIntegrationContext(IIntegrationConfig config, IEventPublisher events) : IIntegrationContext

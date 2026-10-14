@@ -11,7 +11,8 @@ internal sealed class SteamLauncher(IApplicationService applications)
 	private static readonly ILogger _logger = IntegrationLog.For<SteamLauncher>(SteamIntegration.IntegrationId);
 
 	public static string? BuildUri(SteamCommand command)
-		=> command.Kind switch
+	{
+		return command.Kind switch
 		{
 			SteamCommandKind.LaunchSteam => "steam://open/main",
 			SteamCommandKind.LaunchGame when command.AppId > 0 => $"steam://rungameid/{Format(command.AppId)}",
@@ -20,14 +21,17 @@ internal sealed class SteamLauncher(IApplicationService applications)
 				=> $"steam://nav/games/details/{Format(command.AppId)}",
 			_ => null
 		};
+	}
 
 	public static int? ParseAppId(string? text)
-		=> text is { Length: > 0 and <= 10 } &&
-			text.All(char.IsAsciiDigit) &&
-			int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var appId) &&
-			appId > 0
+	{
+		return text is { Length: > 0 and <= 10 }
+			&& text.All(char.IsAsciiDigit)
+			&& int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var appId)
+			&& appId > 0
 				? appId
 				: null;
+	}
 
 	public Task<SteamCommandOutcome> ExecuteAsync(SteamCommand command, CancellationToken cancellationToken)
 	{
@@ -41,13 +45,18 @@ internal sealed class SteamLauncher(IApplicationService applications)
 			applications.OpenUri(uri);
 			return Task.FromResult(SteamCommandOutcome.Succeeded);
 		}
-		catch (Exception exception) when (exception is NotSupportedException or InvalidOperationException
-			or Win32Exception or IOException)
+		catch (Exception exception) when (exception is NotSupportedException
+			or InvalidOperationException
+			or Win32Exception
+			or IOException)
 		{
 			_logger.Warning(exception, "Failed to open {Uri}", uri);
 			return Task.FromResult(SteamCommandOutcome.Failed);
 		}
 	}
 
-	private static string Format(int appId) => appId.ToString(CultureInfo.InvariantCulture);
+	private static string Format(int appId)
+	{
+		return appId.ToString(CultureInfo.InvariantCulture);
+	}
 }

@@ -73,5 +73,8 @@ public sealed class GitHubStarPromptService : IGitHubStarPromptService, IDisposa
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 }

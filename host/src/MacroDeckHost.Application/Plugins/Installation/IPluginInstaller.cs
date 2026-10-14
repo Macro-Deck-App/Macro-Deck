@@ -85,7 +85,8 @@ public sealed record PluginInstallResult
 	public bool HasBlockingWarning =>
 		Warnings.Any(warning => warning.Severity == PluginInstallWarningSeverity.Blocking);
 
-	public static PluginInstallResult Ok(string pluginId,
+	public static PluginInstallResult Ok(
+		string pluginId,
 		string version,
 		string? previousVersion,
 		bool activated,
@@ -102,7 +103,8 @@ public sealed record PluginInstallResult
 		};
 	}
 
-	public static PluginInstallResult Fail(PluginInstallError error,
+	public static PluginInstallResult Fail(
+		PluginInstallError error,
 		string message,
 		string? pluginId = null,
 		string? version = null,
@@ -227,15 +229,18 @@ public interface IPluginInstaller
 {
 	Task<PluginInstallResult> Inspect(PluginArtifactSource source, CancellationToken cancellationToken = default);
 
-	Task<PluginInstallResult> Install(PluginArtifactSource source,
+	Task<PluginInstallResult> Install(
+		PluginArtifactSource source,
 		PluginInstallRequest request,
 		CancellationToken cancellationToken = default);
 
-	Task<PluginInstallResult> Activate(string pluginId,
+	Task<PluginInstallResult> Activate(
+		string pluginId,
 		string version,
 		CancellationToken cancellationToken = default);
 
-	Task<PluginInstallResult> Uninstall(string pluginId,
+	Task<PluginInstallResult> Uninstall(
+		string pluginId,
 		PluginUninstallRequest request,
 		CancellationToken cancellationToken = default);
 }

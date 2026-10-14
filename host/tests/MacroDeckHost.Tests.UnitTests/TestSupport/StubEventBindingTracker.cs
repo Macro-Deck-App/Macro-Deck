@@ -5,11 +5,20 @@ namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 
 internal sealed class StubEventBindingTracker : IEventBindingTracker
 {
-	public IReadOnlyList<EventBindingDto> BindingsFor(string providerId) => [];
+	public IReadOnlyList<EventBindingDto> BindingsFor(string providerId)
+	{
+		return [];
+	}
 
-	public IDisposable Subscribe(Func<string, IReadOnlyList<EventBindingDto>, Task> onChanged) => new Nothing();
+	public IDisposable Subscribe(Func<string, IReadOnlyList<EventBindingDto>, Task> onChanged)
+	{
+		return new Nothing();
+	}
 
-	public Task FlushAsync() => Task.CompletedTask;
+	public Task FlushAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	private sealed class Nothing : IDisposable
 	{

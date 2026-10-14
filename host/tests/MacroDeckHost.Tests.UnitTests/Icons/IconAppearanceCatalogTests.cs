@@ -41,7 +41,10 @@ internal sealed class IconAppearanceCatalogTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Appearances_survive_a_restart_nested_under_their_icon_and_never_listed_as_icons()
@@ -65,7 +68,8 @@ internal sealed class IconAppearanceCatalogTests
 				Is.EqualTo(dark.Id));
 			Assert.That(json.Split("\"traits\"").Length - 1, Is.EqualTo(1), "only the appearance carries traits");
 			Assert.That(json.Split("\"appearances\"").Length - 1, Is.EqualTo(1), "a plain icon writes no new field");
-			Assert.That(reloaded.GetIconsByPackId(pack.Id).Select(i => i.Id), Is.EquivalentTo(new[] { plain.Id, icon.Id }));
+			Assert.That(reloaded.GetIconsByPackId(pack.Id).Select(i => i.Id),
+				Is.EquivalentTo(new[] { plain.Id, icon.Id }));
 			Assert.That(reloaded.GetIconCount(pack.Id), Is.EqualTo(2));
 			Assert.That(reloaded.GetAppearances(icon.Id).Single().AppearanceTraits,
 				Is.EquivalentTo(new Dictionary<string, string> { ["colorScheme"] = "dark" }));
@@ -82,14 +86,14 @@ internal sealed class IconAppearanceCatalogTests
 		Directory.CreateDirectory(directory);
 		await File.WriteAllTextAsync(Path.Combine(directory, "pack.json"),
 			$$"""
-			{
-			  "id": "{{packId}}", "name": "Old", "isDefault": false, "isReadOnly": false, "sourceType": "User",
-			  "createdAt": "2025-01-01T00:00:00Z", "updatedAt": "2025-01-01T00:00:00Z",
-			  "icons": [ { "id": "{{iconId}}", "name": "bolt", "isAnimated": false, "state": "Ready",
-			    "masterContentHash": "sha256:{{new string('a', 64)}}", "availableSizes": [128],
-			    "createdAt": "2025-01-01T00:00:00Z", "updatedAt": "2025-01-01T00:00:00Z" } ]
-			}
-			""");
+			  {
+			    "id": "{{packId}}", "name": "Old", "isDefault": false, "isReadOnly": false, "sourceType": "User",
+			    "createdAt": "2025-01-01T00:00:00Z", "updatedAt": "2025-01-01T00:00:00Z",
+			    "icons": [ { "id": "{{iconId}}", "name": "bolt", "isAnimated": false, "state": "Ready",
+			      "masterContentHash": "sha256:{{new string('a', 64)}}", "availableSizes": [128],
+			      "createdAt": "2025-01-01T00:00:00Z", "updatedAt": "2025-01-01T00:00:00Z" } ]
+			  }
+			  """);
 
 		using var cache = new IconPackCache(_harness.PackStore, _harness.Storage, _harness.Logger);
 		await cache.InitializeCache();
@@ -132,7 +136,8 @@ internal sealed class IconAppearanceCatalogTests
 
 	[TestCase(true)]
 	[TestCase(false)]
-	public async Task Removing_an_appearance_keeps_the_icon_listed_and_reports_it_updated(bool throughAppearanceEndpoint)
+	public async Task Removing_an_appearance_keeps_the_icon_listed_and_reports_it_updated(
+		bool throughAppearanceEndpoint)
 	{
 		var pack = await _harness.CreatePack();
 		var icon = await _harness.AddReadyIcon(pack.Id, "lamp", Bytes("lamp"));
@@ -164,13 +169,15 @@ internal sealed class IconAppearanceCatalogTests
 		var icon = await _harness.AddReadyIcon(pack.Id, "lamp", Bytes("lamp"));
 		var before = IconMapper.ToDto(icon, _harness.Cache);
 
-		var added = await AppearanceService().AddOrReplace(icon.Id,
-			"colorScheme=dark",
-			new IconImportFile("lamp-dark.png", new MemoryStream(Png(new Rgba32(10, 10, 10)))),
-			CancellationToken.None);
+		var added = await AppearanceService()
+			.AddOrReplace(icon.Id,
+				"colorScheme=dark",
+				new IconImportFile("lamp-dark.png", new MemoryStream(Png(new Rgba32(10, 10, 10)))),
+				CancellationToken.None);
 		await using (var processing = await StartProcessing())
 		{
-			await WaitUntil(() => _harness.Cache.GetAppearances(icon.Id) is [{ ProcessingState: IconProcessingState.Ready }]);
+			await WaitUntil(() => _harness.Cache.GetAppearances(icon.Id) is
+				[{ ProcessingState: IconProcessingState.Ready }]);
 		}
 
 		var after = IconMapper.ToDto(_harness.Cache.GetIconById(icon.Id)!, _harness.Cache);
@@ -198,8 +205,10 @@ internal sealed class IconAppearanceCatalogTests
 		var dark = await AddAppearance(icon, "colorScheme=dark", Bytes("lamp-dark"));
 		var service = AppearanceService();
 
-		var onReadOnly = await service.AddOrReplace(locked.Id, "colorScheme=dark", Upload("a.png"), CancellationToken.None);
-		var onAppearance = await service.AddOrReplace(dark.Id, "motion=static", Upload("b.png"), CancellationToken.None);
+		var onReadOnly
+			= await service.AddOrReplace(locked.Id, "colorScheme=dark", Upload("a.png"), CancellationToken.None);
+		var onAppearance
+			= await service.AddOrReplace(dark.Id, "motion=static", Upload("b.png"), CancellationToken.None);
 		var badKey = await service.AddOrReplace(icon.Id, "Dark", Upload("c.png"), CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -218,15 +227,17 @@ internal sealed class IconAppearanceCatalogTests
 		var icon = await _harness.AddReadyIcon(pack.Id, "lamp", Bytes("lamp"));
 
 		var results = await Task.WhenAll(Enumerable.Range(0, 8)
-			.Select(index => Task.Run(() => AppearanceService().AddOrReplace(icon.Id,
-				"colorScheme=dark",
-				Upload($"lamp-dark-{index}.png"),
-				CancellationToken.None))));
+			.Select(index => Task.Run(() => AppearanceService()
+				.AddOrReplace(icon.Id,
+					"colorScheme=dark",
+					Upload($"lamp-dark-{index}.png"),
+					CancellationToken.None))));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(results.Select(result => result.Success), Is.All.True);
-			Assert.That(_harness.Cache.GetAppearances(icon.Id).Select(asset => IconAppearanceTraits.ToKey(asset.AppearanceTraits!)),
+			Assert.That(_harness.Cache.GetAppearances(icon.Id)
+					.Select(asset => IconAppearanceTraits.ToKey(asset.AppearanceTraits!)),
 				Is.EqualTo(new[] { "colorScheme=dark" }));
 		});
 	}
@@ -251,7 +262,8 @@ internal sealed class IconAppearanceCatalogTests
 	}
 
 	private IconAppearanceService AppearanceService(IIconReferenceRewriter? rewriter = null)
-		=> new(_harness.Cache,
+	{
+		return new IconAppearanceService(_harness.Cache,
 			_harness.Storage,
 			_harness.BatchTracker,
 			_harness.BatchFinalizer,
@@ -262,6 +274,7 @@ internal sealed class IconAppearanceCatalogTests
 			_transport,
 			_harness.Mediator,
 			_editLocks);
+	}
 
 	private async Task<IAsyncDisposable> StartProcessing()
 	{
@@ -297,13 +310,23 @@ internal sealed class IconAppearanceCatalogTests
 			CreatedAt = DateTime.UtcNow
 		};
 		await _harness.Cache.AddIcons(parent.PackId, [asset]);
-		await _harness.Storage.WriteVariant(parent.PackId, asset.Id, IconVariants.Master, master, CancellationToken.None);
+		await _harness.Storage.WriteVariant(parent.PackId,
+			asset.Id,
+			IconVariants.Master,
+			master,
+			CancellationToken.None);
 		return asset;
 	}
 
-	private static IconImportFile Upload(string name) => new(name, new MemoryStream(Png(new Rgba32(1, 2, 3))));
+	private static IconImportFile Upload(string name)
+	{
+		return new IconImportFile(name, new MemoryStream(Png(new Rgba32(1, 2, 3))));
+	}
 
-	private static byte[] Bytes(string text) => Encoding.UTF8.GetBytes(text);
+	private static byte[] Bytes(string text)
+	{
+		return Encoding.UTF8.GetBytes(text);
+	}
 
 	private static byte[] Png(Rgba32 color)
 	{
@@ -330,7 +353,9 @@ internal sealed class IconAppearanceCatalogTests
 	private sealed class NoReferences : IIconReferenceRewriter
 	{
 		public Task<int> Replace(Guid fromIconId, Guid toIconId, CancellationToken cancellationToken)
-			=> Task.FromResult(0);
+		{
+			return Task.FromResult(0);
+		}
 	}
 
 	private sealed class Running(IconProcessingBackgroundService service, ServiceProvider provider) : IAsyncDisposable
@@ -345,7 +370,7 @@ internal sealed class IconAppearanceCatalogTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

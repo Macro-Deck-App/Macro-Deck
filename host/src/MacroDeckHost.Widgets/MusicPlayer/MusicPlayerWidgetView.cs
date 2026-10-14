@@ -43,37 +43,37 @@ namespace MacroDeckHost.Widgets.MusicPlayer;
 /// </summary>
 internal static class MusicPlayerWidgetView
 {
-	private const double _gap = 0.027;
-	private const double _rowGap = 0.019;
-	private const double _infoGap = 0.00625;
-	private const double _timelineGap = 0.0104;
-	private const double _bottomGap = 0.021;
+	private const double Gap = 0.027;
+	private const double RowGap = 0.019;
+	private const double InfoGap = 0.00625;
+	private const double TimelineGap = 0.0104;
+	private const double BottomGap = 0.021;
 
-	private const double _providerIconSize = 0.067;
-	private const double _badgeSize = 0.083;
+	private const double ProviderIconSize = 0.067;
+	private const double BadgeSize = 0.083;
 
 	// The track's own thickness, and the box it sits centred in. Both, because a leaf in a vertical
 	// stack has no intrinsic height: a bar given only its thickness resolves to a zero-height box and
 	// paints its track outside the layout entirely.
-	private const double _trackThickness = 0.025;
+	private const double TrackThickness = 0.025;
 
 	// The full cover style dims its artwork instead of laying a gradient scrim over it: the profile has
 	// no gradient, and a uniform dim over the artwork's own darkened average keeps the overlaid text
 	// legible for the same reason the scrim did. Deliberately light - the scrim it replaces left the top
 	// of the cover untouched, so a heavy uniform dim reads as a duller widget rather than a legible one.
-	private const double _fullArtworkOpacity = 0.88;
+	private const double FullArtworkOpacity = 0.88;
 
 	// Paused reads as a dimmed, colourless widget, which is how the retired component told it apart from
 	// playing at a glance: the cover loses light and colour, and the timeline drops the album accent.
 	// Both survive the network hiccups that make "watch whether the bar moves" an unreliable way to tell
 	// the two apart. The two numbers are that component's own filter, which the profile gained a spelling
 	// for so this could stay the same picture rather than an approximation of it.
-	private const double _pausedBrightness = 0.6;
-	private const double _pausedSaturation = 0.55;
+	private const double PausedBrightnessFactor = 0.6;
+	private const double PausedSaturationFactor = 0.55;
 
 	// The timeline's colour while paused. A literal grey rather than a text role, because a bar takes
 	// only literal colours - and "no colour" is the point here, so it reads the same in either theme.
-	private const string _pausedTimelineColor = "#8c8c92";
+	private const string PausedTimelineColor = "#8c8c92";
 
 	/// <summary>
 	/// The whole tree, with the cover style chosen <b>inside</b> it rather than by which method built it.
@@ -108,15 +108,15 @@ internal static class MusicPlayerWidgetView
 				{
 					Key = "smallCoverGate",
 					Condition = () => !config.Value.IsFullCover,
-					Content = () => BuildSmallCover(state, config, icons, safeArea),
+					Content = () => BuildSmallCover(state, config, icons, safeArea)
 				},
 				new UiWhen
 				{
 					Key = "fullCoverGate",
 					Condition = () => config.Value.IsFullCover,
-					Content = () => BuildFullCover(state, config, icons, safeArea),
-				},
-			],
+					Content = () => BuildFullCover(state, config, icons, safeArea)
+				}
+			]
 		};
 	}
 
@@ -125,13 +125,14 @@ internal static class MusicPlayerWidgetView
 		UiState<MusicPlayerWidgetData> config,
 		MusicPlayerIconResources icons,
 		UiSize safeArea)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "smallCover",
 			Fill = true,
 			Direction = UiComponentDirections.Vertical,
 			Padding = safeArea,
-			Gap = _gap,
+			Gap = Gap,
 			Background = PaletteBackground(state, config),
 			Children =
 			[
@@ -139,7 +140,7 @@ internal static class MusicPlayerWidgetView
 				{
 					Key = "headerGate",
 					Condition = () => HasHeaderRow(state, config),
-					Content = () => BuildHeaderRow(state, config, icons),
+					Content = () => BuildHeaderRow(state, config, icons)
 				},
 				new UiStack
 				{
@@ -147,7 +148,7 @@ internal static class MusicPlayerWidgetView
 					Direction = UiComponentDirections.Vertical,
 					Justify = UiComponentJustify.Center,
 					Align = UiComponentAlignments.Center,
-					Gap = _gap,
+					Gap = Gap,
 					Fill = true,
 					Children =
 					[
@@ -156,18 +157,19 @@ internal static class MusicPlayerWidgetView
 						{
 							Key = "infoGate",
 							Condition = () => HasInfo(state, config),
-							Content = () => BuildInfo(state, config, UiComponentAlignments.Center),
-						},
-					],
+							Content = () => BuildInfo(state, config, UiComponentAlignments.Center)
+						}
+					]
 				},
 				new UiWhen
 				{
 					Key = "timelineGate",
 					Condition = () => config.Value.ShowTimeline,
-					Content = () => BuildTimeline(state),
-				},
-			],
+					Content = () => BuildTimeline(state)
+				}
+			]
 		};
+	}
 
 	private static UiStack BuildFullCover(
 		UiState<MusicPlayerViewState> state,
@@ -182,29 +184,29 @@ internal static class MusicPlayerWidgetView
 		{
 			Key = "headerGate",
 			Condition = () => HasHeaderRow(state, config),
-			Content = () => BuildHeaderRow(state, config, icons),
+			Content = () => BuildHeaderRow(state, config, icons)
 		};
 
 		var bottom = new UiStack
 		{
 			Key = "bottom",
 			Direction = UiComponentDirections.Vertical,
-			Gap = _bottomGap,
+			Gap = BottomGap,
 			Children =
 			[
 				new UiWhen
 				{
 					Key = "infoGate",
 					Condition = () => HasInfo(state, config),
-					Content = () => BuildInfo(state, config, UiComponentAlignments.Start),
+					Content = () => BuildInfo(state, config, UiComponentAlignments.Start)
 				},
 				new UiWhen
 				{
 					Key = "timelineGate",
 					Condition = () => config.Value.ShowTimeline,
-					Content = () => BuildTimeline(state),
-				},
-			],
+					Content = () => BuildTimeline(state)
+				}
+			]
 		};
 
 		return new UiStack
@@ -237,12 +239,12 @@ internal static class MusicPlayerWidgetView
 							? UiValue.Of(artwork)
 							: UiValue.None<UiResource>()),
 						Fit = UiComponentImageFits.Cover,
-						Opacity = _fullArtworkOpacity,
+						Opacity = FullArtworkOpacity,
 						Brightness = PausedBrightness(state),
 						Saturation = PausedSaturation(state),
 						Transition = UiComponentImageTransitions.Crossfade,
-						Children = [header, bottom],
-					},
+						Children = [header, bottom]
+					}
 				},
 				new UiWhen
 				{
@@ -265,13 +267,13 @@ internal static class MusicPlayerWidgetView
 								Direction = UiComponentDirections.Horizontal,
 								Justify = UiComponentJustify.Center,
 								Align = UiComponentAlignments.Center,
-								Children = [BuildPlaceholderIcon(state, icons, 0.32)],
+								Children = [BuildPlaceholderIcon(state, icons, 0.32)]
 							},
-							bottom,
-						],
-					},
-				},
-			],
+							bottom
+						]
+					}
+				}
+			]
 		};
 	}
 
@@ -279,13 +281,14 @@ internal static class MusicPlayerWidgetView
 		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config,
 		MusicPlayerIconResources icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "header",
 			Direction = UiComponentDirections.Horizontal,
 			Align = UiComponentAlignments.Center,
 			Justify = UiComponentJustify.SpaceBetween,
-			Gap = _rowGap,
+			Gap = RowGap,
 			Children =
 			[
 				new UiStack
@@ -294,7 +297,7 @@ internal static class MusicPlayerWidgetView
 					Fill = true,
 					Direction = UiComponentDirections.Horizontal,
 					Align = UiComponentAlignments.Center,
-					Gap = _rowGap,
+					Gap = RowGap,
 					Children =
 					[
 						new UiWhen
@@ -304,23 +307,23 @@ internal static class MusicPlayerWidgetView
 							Content = () => new UiImage
 							{
 								Key = "providerIcon",
-								Size = _providerIconSize,
+								Size = ProviderIconSize,
 								Source = UiValue.Optional(() => state.Value.ProviderIcon is { } icon
 									? UiValue.Of(icon)
-									: UiValue.None<UiResource>()),
-							},
+									: UiValue.None<UiResource>())
+							}
 						},
 						new UiWhen
 						{
 							Key = "labelsGate",
-							Condition = () => (config.Value.ShowHeader && HasLabel(state.Value.Label)) ||
-								VisibleSource(state, config) is not null,
+							Condition = () => config.Value.ShowHeader && HasLabel(state.Value.Label)
+								|| VisibleSource(state, config) is not null,
 							Content = () => new UiStack
 							{
 								Key = "labels",
 								Fill = true,
 								Direction = UiComponentDirections.Vertical,
-								Gap = _infoGap,
+								Gap = InfoGap,
 								Children =
 								[
 									new UiWhen
@@ -334,8 +337,8 @@ internal static class MusicPlayerWidgetView
 											MinSize = 0.034,
 											Weight = UiComponentTextWeights.SemiBold,
 											Role = UiComponentTextRoles.Secondary,
-											Text = UiText.Optional(() => state.Value.Label),
-										},
+											Text = UiText.Optional(() => state.Value.Label)
+										}
 									},
 									new UiWhen
 									{
@@ -347,33 +350,35 @@ internal static class MusicPlayerWidgetView
 											Size = 0.038,
 											MinSize = 0.03,
 											Role = UiComponentTextRoles.Muted,
-											Text = UiText.From(() => VisibleSource(state, config)),
-										},
-									},
-								],
-							},
-						},
-					],
+											Text = UiText.From(() => VisibleSource(state, config))
+										}
+									}
+								]
+							}
+						}
+					]
 				},
 				new UiWhen
 				{
 					Key = "trailingGate",
 					Condition = () => VisibleBadge(state, config) is not null || BadgeIcon(state, icons) is not null,
-					Content = () => BuildTrailing(state, config, icons),
-				},
-			],
+					Content = () => BuildTrailing(state, config, icons)
+				}
+			]
 		};
+	}
 
 	private static UiStack BuildTrailing(
 		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config,
 		MusicPlayerIconResources icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "trailing",
 			Direction = UiComponentDirections.Horizontal,
 			Align = UiComponentAlignments.Center,
-			Gap = _rowGap,
+			Gap = RowGap,
 			Children =
 			[
 				new UiWhen
@@ -393,8 +398,8 @@ internal static class MusicPlayerWidgetView
 						Weight = UiComponentTextWeights.SemiBold,
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.End,
-						Text = UiText.From(() => VisibleBadge(state, config)),
-					},
+						Text = UiText.From(() => VisibleBadge(state, config))
+					}
 				},
 				new UiWhen
 				{
@@ -403,17 +408,19 @@ internal static class MusicPlayerWidgetView
 					Content = () => new UiImage
 					{
 						Key = "badge",
-						Size = _badgeSize,
+						Size = BadgeSize,
 						Source = UiValue.Optional(() => BadgeIcon(state, icons) is { } badge
 							? UiValue.Of(badge)
-							: UiValue.None<UiResource>()),
-					},
-				},
-			],
+							: UiValue.None<UiResource>())
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack BuildCoverRow(UiState<MusicPlayerViewState> state, MusicPlayerIconResources icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "coverRow",
 			Fill = true,
@@ -439,17 +446,18 @@ internal static class MusicPlayerWidgetView
 						Saturation = PausedSaturation(state),
 						Source = UiValue.Optional(() => state.Value.Artwork is { } artwork
 							? UiValue.Of(artwork)
-							: UiValue.None<UiResource>()),
-					},
+							: UiValue.None<UiResource>())
+					}
 				},
 				new UiWhen
 				{
 					Key = "coverPlaceholderGate",
 					Condition = () => state.Value.Artwork is null,
-					Content = () => BuildPlaceholderIcon(state, icons, 0.45),
-				},
-			],
+					Content = () => BuildPlaceholderIcon(state, icons, 0.45)
+				}
+			]
 		};
+	}
 
 	/// <summary>The mark shown where there is no cover: a music note while nothing is loaded, a disc once
 	/// something is - turning while it plays, still while it does not.</summary>
@@ -457,7 +465,8 @@ internal static class MusicPlayerWidgetView
 		UiState<MusicPlayerViewState> state,
 		MusicPlayerIconResources icons,
 		double size)
-		=> new()
+	{
+		return new UiImage
 		{
 			Key = "coverPlaceholder",
 			Size = UiSize.FromBasis(size, size / 0.86),
@@ -471,19 +480,21 @@ internal static class MusicPlayerWidgetView
 				}
 
 				return value is { IsPlaying: true, IsConnected: true } ? icons.DiscSpinning : icons.Disc;
-			}),
+			})
 		};
+	}
 
 	private static UiStack BuildInfo(
 		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config,
 		string align)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "info",
 			Direction = UiComponentDirections.Vertical,
 			Align = align,
-			Gap = _infoGap,
+			Gap = InfoGap,
 			Children =
 			[
 				new UiWhen
@@ -498,8 +509,8 @@ internal static class MusicPlayerWidgetView
 						Weight = UiComponentTextWeights.SemiBold,
 						Role = UiComponentTextRoles.Primary,
 						Align = align,
-						Text = UiText.Optional(() => PlaceholderTitle(state.Value)),
-					},
+						Text = UiText.Optional(() => PlaceholderTitle(state.Value))
+					}
 				},
 				new UiWhen
 				{
@@ -512,15 +523,15 @@ internal static class MusicPlayerWidgetView
 						MinSize = 0.036,
 						Role = UiComponentTextRoles.Secondary,
 						Align = align,
-						Text = UiText.Optional(() => PlaceholderSubtitle(state.Value)),
-					},
+						Text = UiText.Optional(() => PlaceholderSubtitle(state.Value))
+					}
 				},
 				new UiWhen
 				{
 					Key = "albumGate",
-					Condition = () => config.Value.ShowAlbum &&
-						!config.Value.IsFullCover &&
-						!string.IsNullOrEmpty(state.Value.AlbumName),
+					Condition = () => config.Value.ShowAlbum
+						&& !config.Value.IsFullCover
+						&& !string.IsNullOrEmpty(state.Value.AlbumName),
 					Content = () => new UiTextRun
 					{
 						Key = "album",
@@ -528,25 +539,27 @@ internal static class MusicPlayerWidgetView
 						MinSize = 0.034,
 						Role = UiComponentTextRoles.Muted,
 						Align = align,
-						Text = UiText.From(() => state.Value.AlbumName),
-					},
-				},
-			],
+						Text = UiText.From(() => state.Value.AlbumName)
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack BuildTimeline(UiState<MusicPlayerViewState> state)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "timeline",
 			Direction = UiComponentDirections.Vertical,
-			Gap = _timelineGap,
+			Gap = TimelineGap,
 			Children =
 			[
 				new UiProgressBar
 				{
 					Key = "progress",
-					MainSize = _trackThickness,
-					Thickness = _trackThickness,
+					MainSize = TrackThickness,
+					Thickness = TrackThickness,
 					// One colour at both ends: the retired component painted a flat fill, and a gradient
 					// between two shades of one derived colour would be a change, not a migration. Absent
 					// leaves the reader on its own accent, which is what a widget with no artwork showed.
@@ -554,7 +567,7 @@ internal static class MusicPlayerWidgetView
 					EndColor = AccentColor(state),
 					Value = UiValue.Optional(() => state.Value.Position is { } position
 						? UiValue.Of(position)
-						: UiValue.None<UiProgressReference>()),
+						: UiValue.None<UiProgressReference>())
 				},
 				new UiStack
 				{
@@ -564,18 +577,20 @@ internal static class MusicPlayerWidgetView
 					Children =
 					[
 						BuildTime(state, "elapsed", UiProgressFormats.Elapsed, UiComponentAlignments.Start),
-						BuildTime(state, "duration", UiProgressFormats.Duration, UiComponentAlignments.End),
-					],
-				},
-			],
+						BuildTime(state, "duration", UiProgressFormats.Duration, UiComponentAlignments.End)
+					]
+				}
+			]
 		};
+	}
 
 	private static UiProgressText BuildTime(
 		UiState<MusicPlayerViewState> state,
 		string key,
 		string format,
 		string align)
-		=> new()
+	{
+		return new UiProgressText
 		{
 			Key = key,
 			Format = format,
@@ -585,56 +600,69 @@ internal static class MusicPlayerWidgetView
 			Align = align,
 			Value = UiValue.Optional(() => state.Value.Position is { } position
 				? UiValue.Of(position)
-				: UiValue.None<UiProgressReference>()),
+				: UiValue.None<UiProgressReference>())
 		};
+	}
 
 	/// <summary>The light a paused cover loses. Absent while playing, so an untouched cover carries
 	/// neither key.</summary>
 	private static UiValue<double> PausedBrightness(UiState<MusicPlayerViewState> state)
-		=> UiValue.Optional(() => state.Value.IsPaused
-			? UiValue.Of(_pausedBrightness)
+	{
+		return UiValue.Optional(() => state.Value.IsPaused
+			? UiValue.Of(PausedBrightnessFactor)
 			: UiValue.None<double>());
+	}
 
 	/// <summary>The colour a paused cover loses. See <see cref="PausedBrightness" />.</summary>
 	private static UiValue<double> PausedSaturation(UiState<MusicPlayerViewState> state)
-		=> UiValue.Optional(() => state.Value.IsPaused
-			? UiValue.Of(_pausedSaturation)
+	{
+		return UiValue.Optional(() => state.Value.IsPaused
+			? UiValue.Of(PausedSaturationFactor)
 			: UiValue.None<double>());
+	}
 
-	private static UiValue<string> PaletteBackground(UiState<MusicPlayerViewState> state,
+	private static UiValue<string> PaletteBackground(
+		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config)
-		=> UiValue.Optional(() => config.Value.BackgroundColor is null && state.Value.Background is { } background
+	{
+		return UiValue.Optional(() => config.Value.BackgroundColor is null && state.Value.Background is { } background
 			? UiValue.Of(background)
 			: UiValue.None<string>());
+	}
 
 	// A transparent tile still needs an opaque face behind artwork drawn at reduced opacity.
 	private static string ArtworkBackground(UiState<MusicPlayerViewState> state, UiState<MusicPlayerWidgetData> config)
-		=> config.Value.BackgroundColor is { } configured && configured != WidgetColor.Transparent
+	{
+		return config.Value.BackgroundColor is { } configured && configured != WidgetColor.Transparent
 			? configured
 			: state.Value.Background ?? "#000000";
+	}
 
 	/// <summary>The timeline's colour: the artwork's accent while playing, a flat grey while paused, and
 	/// absent - the reader's own accent - when there is no artwork to borrow a colour from.</summary>
 	private static UiValue<string> AccentColor(UiState<MusicPlayerViewState> state)
-		=> UiValue.Optional(() =>
+	{
+		return UiValue.Optional(() =>
 		{
 			if (state.Value.IsPaused)
 			{
-				return UiValue.Of(_pausedTimelineColor);
+				return UiValue.Of(PausedTimelineColor);
 			}
 
 			return state.Value.Accent is { } accent ? UiValue.Of(accent) : UiValue.None<string>();
 		});
+	}
 
-	private static bool HasHeaderRow(UiState<MusicPlayerViewState> state,
+	private static bool HasHeaderRow(
+		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config)
 	{
 		var value = state.Value;
 
-		if (value.ShowWarningBadge ||
-			value.ShowPlaybackBadge ||
-			VisibleSource(state, config) is not null ||
-			VisibleBadge(state, config) is not null)
+		if (value.ShowWarningBadge
+			|| value.ShowPlaybackBadge
+			|| VisibleSource(state, config) is not null
+			|| VisibleBadge(state, config) is not null)
 		{
 			return true;
 		}
@@ -643,17 +671,23 @@ internal static class MusicPlayerWidgetView
 	}
 
 	private static bool HasLabel(LocalizedText label)
-		=> label.Localized is not null || label.Literal is { Length: > 0 };
+	{
+		return label.Localized is not null || label.Literal is { Length: > 0 };
+	}
 
-	private static bool HasInfo(UiState<MusicPlayerViewState> state,
+	private static bool HasInfo(
+		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config)
-		=> config.Value.ShowTitle ||
-			config.Value.ShowArtist ||
-			(config.Value.ShowAlbum && !config.Value.IsFullCover && !string.IsNullOrEmpty(state.Value.AlbumName));
+	{
+		return config.Value.ShowTitle
+			|| config.Value.ShowArtist
+			|| config.Value.ShowAlbum && !config.Value.IsFullCover && !string.IsNullOrEmpty(state.Value.AlbumName);
+	}
 
 	// Hidden when the shown name already says it: a SinusBot entry is titled "SinusBot (Kitchen)" for source
 	// "Kitchen". A localized name is never compared, the host does not know what each reader resolves it to.
-	private static string? VisibleSource(UiState<MusicPlayerViewState> state,
+	private static string? VisibleSource(
+		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config)
 	{
 		var value = state.Value;
@@ -668,7 +702,8 @@ internal static class MusicPlayerWidgetView
 			: source;
 	}
 
-	private static string? VisibleBadge(UiState<MusicPlayerViewState> state,
+	private static string? VisibleBadge(
+		UiState<MusicPlayerViewState> state,
 		UiState<MusicPlayerWidgetData> config)
 	{
 		var value = state.Value;
@@ -677,7 +712,9 @@ internal static class MusicPlayerWidgetView
 	}
 
 	private static double BadgeWidth(string badge)
-		=> (Math.Min(new StringInfo(badge).LengthInTextElements, 8) * 0.03) + 0.01;
+	{
+		return Math.Min(new StringInfo(badge).LengthInTextElements, 8) * 0.03 + 0.01;
+	}
 
 	private static bool ContainsWord(string text, string word)
 	{
@@ -685,10 +722,12 @@ internal static class MusicPlayerWidgetView
 			index >= 0;
 			index = text.IndexOf(word, index + 1, StringComparison.OrdinalIgnoreCase))
 		{
-			var before = Rune.DecodeLastFromUtf16(text.AsSpan(0, index), out var previous, out _) == OperationStatus.Done &&
-				IsWordRune(previous);
-			var after = Rune.DecodeFromUtf16(text.AsSpan(index + word.Length), out var next, out _) == OperationStatus.Done &&
-				IsWordRune(next);
+			var before = Rune.DecodeLastFromUtf16(text.AsSpan(0, index), out var previous, out _)
+				== OperationStatus.Done
+				&& IsWordRune(previous);
+			var after = Rune.DecodeFromUtf16(text.AsSpan(index + word.Length), out var next, out _)
+				== OperationStatus.Done
+				&& IsWordRune(next);
 
 			if (!before && !after)
 			{
@@ -700,10 +739,12 @@ internal static class MusicPlayerWidgetView
 	}
 
 	private static bool IsWordRune(Rune rune)
-		=> Rune.IsLetterOrDigit(rune) ||
-			Rune.GetUnicodeCategory(rune) is UnicodeCategory.NonSpacingMark
+	{
+		return Rune.IsLetterOrDigit(rune)
+			|| Rune.GetUnicodeCategory(rune) is UnicodeCategory.NonSpacingMark
 				or UnicodeCategory.SpacingCombiningMark
 				or UnicodeCategory.EnclosingMark;
+	}
 
 	/// <summary>The badge in the header's trailing corner. A stale selection is the more specific problem,
 	/// so it wins over the outage hint, and both win over the playback badge.</summary>

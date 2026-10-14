@@ -16,7 +16,8 @@ public sealed record BackupOperationStatus(
 	DateTimeOffset UpdatedAt)
 {
 	public static BackupOperationStatus Idle(DateTimeOffset now)
-		=> new(null,
+	{
+		return new BackupOperationStatus(null,
 			BackupOperationKind.Create,
 			BackupOperationStage.Idle,
 			BackupTrigger.Manual,
@@ -27,6 +28,7 @@ public sealed record BackupOperationStatus(
 			null,
 			null,
 			now);
+	}
 }
 
 public interface IBackupProgressReporter

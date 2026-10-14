@@ -21,80 +21,100 @@ namespace MacroDeck.Ui.Tests.UnitTests.Config;
 [TestFixture]
 public class TypeScriptMirrorDriftTests
 {
-	private const string _versionPath = "ui/runtime/src/ui-framework/ui-model-version.ts";
-	private const string _primitivesPath = "ui/runtime/src/ui-config/config-primitives.ts";
-	private const string _eventsPath = "ui/runtime/src/ui-config/config-events.ts";
-	private const string _entryPointsPath = "ui/runtime/src/ui-config/config-entry-points.ts";
-	private const string _propertiesPath = "ui/runtime/src/ui-config/config-properties.ts";
-	private const string _componentPropertiesPath = "ui/runtime/src/ui-components/component-properties.ts";
-	private const string _componentEventsPath = "ui/runtime/src/ui-components/component-events.ts";
-	private const string _componentModifiersPath = "ui/runtime/src/ui-components/component-modifiers.ts";
-	private const string _componentTypesPath = "ui/runtime/src/ui-components/ui-component-types.ts";
-	private const string _responsivePath = "ui/runtime/src/ui-framework/responsive.ts";
+	private const string VersionPath = "ui/runtime/src/ui-framework/ui-model-version.ts";
+	private const string PrimitivesPath = "ui/runtime/src/ui-config/config-primitives.ts";
+	private const string EventsPath = "ui/runtime/src/ui-config/config-events.ts";
+	private const string EntryPointsPath = "ui/runtime/src/ui-config/config-entry-points.ts";
+	private const string PropertiesPath = "ui/runtime/src/ui-config/config-properties.ts";
+	private const string ComponentPropertiesPath = "ui/runtime/src/ui-components/component-properties.ts";
+	private const string ComponentEventsPath = "ui/runtime/src/ui-components/component-events.ts";
+	private const string ComponentModifiersPath = "ui/runtime/src/ui-components/component-modifiers.ts";
+	private const string ComponentTypesPath = "ui/runtime/src/ui-components/ui-component-types.ts";
+	private const string ResponsivePath = "ui/runtime/src/ui-framework/responsive.ts";
 
 	[Test]
 	public void The_client_speaks_the_same_ui_model_majors_this_package_does()
 	{
-		var mirrored = ReadNumericMembers(_versionPath, "UiModelVersions");
+		var mirrored = ReadNumericMembers(VersionPath, "UiModelVersions");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(mirrored.GetValueOrDefault("Minimum"),
 				Is.EqualTo(UiModelVersions.Minimum),
-				$"'{_versionPath}' advertises a different oldest major than this package speaks");
+				$"'{VersionPath}' advertises a different oldest major than this package speaks");
 			Assert.That(mirrored.GetValueOrDefault("Current"),
 				Is.EqualTo(UiModelVersions.Current),
-				$"'{_versionPath}' advertises a different newest major than this package speaks");
+				$"'{VersionPath}' advertises a different newest major than this package speaks");
 		});
 	}
 
 	[Test]
 	public void The_client_mirrors_the_configuration_primitives_in_declaration_order()
-		=> AssertMirrors(_primitivesPath, "UiConfigPrimitives", UiConfigPrimitives.WellKnown);
+	{
+		AssertMirrors(PrimitivesPath, "UiConfigPrimitives", UiConfigPrimitives.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_configuration_events_in_declaration_order()
-		=> AssertMirrors(_eventsPath, "UiConfigEvents", UiConfigEvents.WellKnown);
+	{
+		AssertMirrors(EventsPath, "UiConfigEvents", UiConfigEvents.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_configuration_entry_points_in_declaration_order()
-		=> AssertMirrors(_entryPointsPath, "UiConfigEntryPoints", UiConfigEntryPoints.WellKnown);
+	{
+		AssertMirrors(EntryPointsPath, "UiConfigEntryPoints", UiConfigEntryPoints.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_configuration_property_keys_in_declaration_order()
-		=> AssertMirrors(_propertiesPath, "UiConfigProperties", UiConfigProperties.WellKnown);
+	{
+		AssertMirrors(PropertiesPath, "UiConfigProperties", UiConfigProperties.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_component_property_keys_in_declaration_order()
-		=> AssertMirrors(_componentPropertiesPath, "UiComponentProperties", UiComponentProperties.WellKnown);
+	{
+		AssertMirrors(ComponentPropertiesPath, "UiComponentProperties", UiComponentProperties.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_component_types_in_declaration_order()
-		=> AssertMirrors(_componentTypesPath, "UiComponents", UiComponents.WellKnown);
+	{
+		AssertMirrors(ComponentTypesPath, "UiComponents", UiComponents.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_stack_overflows_in_declaration_order()
-		=> AssertMirrors(_componentTypesPath, "UiComponentOverflows", UiComponentOverflows.WellKnown);
+	{
+		AssertMirrors(ComponentTypesPath, "UiComponentOverflows", UiComponentOverflows.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_list_anchors_in_declaration_order()
-		=> AssertMirrors(_componentTypesPath, "UiComponentListAnchors", UiComponentListAnchors.WellKnown);
+	{
+		AssertMirrors(ComponentTypesPath, "UiComponentListAnchors", UiComponentListAnchors.WellKnown);
+	}
 
 	[Test]
 	public void The_client_chooses_a_responsive_layout_with_the_same_tolerance()
-		=> Assert.That(ReadTopLevelNumber(_responsivePath, "UI_RESPONSIVE_TOLERANCE"),
+	{
+		Assert.That(ReadTopLevelNumber(ResponsivePath, "UI_RESPONSIVE_TOLERANCE"),
 			Is.EqualTo(UiResponsiveSelection.Tolerance));
+	}
 
 	[Test]
 	public void The_client_mirrors_the_component_events_in_declaration_order()
-		=> AssertMirrors(_componentEventsPath, "UiComponentEvents", UiComponentEvents.WellKnown);
+	{
+		AssertMirrors(ComponentEventsPath, "UiComponentEvents", UiComponentEvents.WellKnown);
+	}
 
 	[Test]
 	public void The_client_mirrors_the_modifier_members_clips_and_border_lines_in_declaration_order()
 	{
-		AssertMirrors(_componentModifiersPath, "UiComponentModifiers", UiComponentModifiers.WellKnown);
-		AssertMirrors(_componentModifiersPath, "UiComponentClips", UiComponentClips.WellKnown);
-		AssertMirrors(_componentModifiersPath, "UiComponentBorderLines", UiComponentBorderLines.WellKnown);
+		AssertMirrors(ComponentModifiersPath, "UiComponentModifiers", UiComponentModifiers.WellKnown);
+		AssertMirrors(ComponentModifiersPath, "UiComponentClips", UiComponentClips.WellKnown);
+		AssertMirrors(ComponentModifiersPath, "UiComponentBorderLines", UiComponentBorderLines.WellKnown);
 	}
 
 	[Test]
@@ -102,21 +122,21 @@ public class TypeScriptMirrorDriftTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_MODIFIER_DIM_OPACITY"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_MODIFIER_DIM_OPACITY"),
 				Is.EqualTo(UiComponentModifiers.DimOpacity));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_GESTURE_SLOP"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_GESTURE_SLOP"),
 				Is.EqualTo(UiComponentModifiers.GestureSlop));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_SWIPE_MIN_DISTANCE"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_SWIPE_MIN_DISTANCE"),
 				Is.EqualTo(UiComponentModifiers.SwipeMinDistance));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_SWIPE_MAX_DURATION_MS"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_SWIPE_MAX_DURATION_MS"),
 				Is.EqualTo(UiComponentModifiers.SwipeMaxDurationMs));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_GESTURE_THROTTLE_MS"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_GESTURE_THROTTLE_MS"),
 				Is.EqualTo(UiComponentModifiers.GestureThrottleMs));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_POINTER_MOVE_INTERVAL_MS"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_POINTER_MOVE_INTERVAL_MS"),
 				Is.EqualTo(UiComponentModifiers.PointerMoveIntervalMs));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_POINTER_MOVE_MAX_SAMPLES"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_POINTER_MOVE_MAX_SAMPLES"),
 				Is.EqualTo(UiComponentModifiers.PointerMoveMaxSamples));
-			Assert.That(ReadTopLevelNumber(_componentModifiersPath, "UI_TAP_MAX_DURATION_MS"),
+			Assert.That(ReadTopLevelNumber(ComponentModifiersPath, "UI_TAP_MAX_DURATION_MS"),
 				Is.EqualTo(UiComponentModifiers.TapMaxDurationMs));
 		});
 	}
@@ -139,8 +159,8 @@ public class TypeScriptMirrorDriftTests
 
 		Assert.That(mirrored,
 			Is.EqualTo(declared),
-			$"'{path}' has drifted from {constName}. The mirror carries the values a client negotiates and " +
-			"renders with, so a difference is a silently unrenderable tree rather than a build error.");
+			$"'{path}' has drifted from {constName}. The mirror carries the values a client negotiates and "
+			+ "renders with, so a difference is a silently unrenderable tree rather than a build error.");
 	}
 
 	/// <summary>
@@ -210,7 +230,7 @@ public class TypeScriptMirrorDriftTests
 		}
 
 		throw new DirectoryNotFoundException(
-			"Could not locate the repository root by walking up from AppContext.BaseDirectory " +
-			$"('{AppContext.BaseDirectory}').");
+			"Could not locate the repository root by walking up from AppContext.BaseDirectory "
+			+ $"('{AppContext.BaseDirectory}').");
 	}
 }

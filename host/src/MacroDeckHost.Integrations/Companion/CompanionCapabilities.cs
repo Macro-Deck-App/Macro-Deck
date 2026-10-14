@@ -14,7 +14,8 @@ internal static class CompanionCapabilities
 	public const string ScreenshotFull = CompanionDeviceCapabilities.ScreenshotFull;
 	public const string Focus = CompanionDeviceCapabilities.Focus;
 
-	internal static (ActionResult? Error, bool Prompt, bool AwaitResult) Require(ICompanionDeviceApi devices,
+	internal static (ActionResult? Error, bool Prompt, bool AwaitResult) Require(
+		ICompanionDeviceApi devices,
 		Guid deviceId,
 		string capability)
 	{
@@ -34,7 +35,8 @@ internal static class CompanionCapabilities
 	}
 
 	internal static ActionResult Failed(CompanionDeviceFailure failure, string capability, bool prompted)
-		=> failure switch
+	{
+		return failure switch
 		{
 			CompanionDeviceFailure.NotConnected => CompanionTargetResolver.NotConnected(),
 			CompanionDeviceFailure.Removed => ActionResult.Failed(ActionErrorCodes.NotFound,
@@ -49,23 +51,32 @@ internal static class CompanionCapabilities
 					? AppStrings.Integrations.Companion.Errors.ScreenshotFailed()
 					: AppStrings.Integrations.Companion.Errors.CommandFailed())
 		};
+	}
 
 	internal static ActionResult Unavailable(string capability)
-		=> ActionResult.Failed(ActionErrorCodes.Unavailable, UnavailableMessage(capability));
-
-	private static LocalizedText TimedOutMessage(string capability, bool prompted) => capability switch
 	{
-		_ when prompted => AppStrings.Integrations.Companion.Errors.PermissionTimedOut(),
-		ScreenshotDeck or ScreenshotFull => AppStrings.Integrations.Companion.Errors.ScreenshotTimedOut(),
-		_ => AppStrings.Integrations.Companion.Errors.CommandFailed()
-	};
+		return ActionResult.Failed(ActionErrorCodes.Unavailable, UnavailableMessage(capability));
+	}
 
-	private static LocalizedText UnavailableMessage(string capability) => capability switch
+	private static LocalizedText TimedOutMessage(string capability, bool prompted)
 	{
-		ScreenOn => AppStrings.Integrations.Companion.Errors.ScreenOnUnavailable(),
-		ScreenOff => AppStrings.Integrations.Companion.Errors.ScreenOffUnavailable(),
-		Focus => AppStrings.Integrations.Companion.Errors.FocusUnavailable(),
-		ScreenshotDeck => AppStrings.Integrations.Companion.Errors.DeckNotOnScreen(),
-		_ => AppStrings.Integrations.Companion.Errors.FullScreenshotUnavailable()
-	};
+		return capability switch
+		{
+			_ when prompted => AppStrings.Integrations.Companion.Errors.PermissionTimedOut(),
+			ScreenshotDeck or ScreenshotFull => AppStrings.Integrations.Companion.Errors.ScreenshotTimedOut(),
+			_ => AppStrings.Integrations.Companion.Errors.CommandFailed()
+		};
+	}
+
+	private static LocalizedText UnavailableMessage(string capability)
+	{
+		return capability switch
+		{
+			ScreenOn => AppStrings.Integrations.Companion.Errors.ScreenOnUnavailable(),
+			ScreenOff => AppStrings.Integrations.Companion.Errors.ScreenOffUnavailable(),
+			Focus => AppStrings.Integrations.Companion.Errors.FocusUnavailable(),
+			ScreenshotDeck => AppStrings.Integrations.Companion.Errors.DeckNotOnScreen(),
+			_ => AppStrings.Integrations.Companion.Errors.FullScreenshotUnavailable()
+		};
+	}
 }

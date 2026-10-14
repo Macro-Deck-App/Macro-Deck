@@ -29,18 +29,23 @@ internal sealed class GetOutputStateActionDefinition : IDynamicOptionsActionDefi
 		ObsTargetResolver.Parameter(),
 		ObsOutputSupport.OutputChoice(),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
-			description: AppStrings.Integrations.Obs.Actions.GetOutputState.VariableDescription(),
+			AppStrings.Integrations.Obs.Params.SaveToVariable(),
+			AppStrings.Integrations.Obs.Actions.GetOutputState.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> ObsOutputSupport.OptionsAsync(_resolver, context);
+	{
+		return ObsOutputSupport.OptionsAsync(_resolver, context);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -65,8 +70,8 @@ internal sealed class GetOutputStateActionDefinition : IDynamicOptionsActionDefi
 				return ObsOutputSupport.NoOutputSelected();
 			}
 
-			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable ||
-				string.IsNullOrWhiteSpace(variable))
+			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable
+				|| string.IsNullOrWhiteSpace(variable))
 			{
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoTargetVariable());
@@ -87,7 +92,7 @@ internal sealed class GetOutputStateActionDefinition : IDynamicOptionsActionDefi
 			return written
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable: variable));
+					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable));
 		}
 	}
 }

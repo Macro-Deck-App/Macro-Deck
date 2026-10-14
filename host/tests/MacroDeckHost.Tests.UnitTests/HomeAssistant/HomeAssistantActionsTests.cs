@@ -144,7 +144,7 @@ internal sealed class HomeAssistantActionsTests
 	{
 		var definitions = HomeAssistantActions.Create(() => null, new HomeAssistantVariableAccessor());
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var definition in definitions)
 			{
@@ -261,7 +261,7 @@ internal sealed class HomeAssistantActionsTests
 	{
 		await ConnectAsync(
 			"""[{ "entity_id": "light.kitchen", "state": "on", "attributes": {} }, { "entity_id": "switch.fan", "state": "off", "attributes": {} }]""",
-			getServicesJson: """{ "light": { "turn_on": {} }, "switch": { "turn_on": {} } }""");
+			"""{ "light": { "turn_on": {} }, "switch": { "turn_on": {} } }""");
 
 		var definition = new CallServiceActionDefinition(() => _connection);
 		var options = await definition.GetDynamicOptionsAsync(new DynamicOptionsContext
@@ -619,7 +619,7 @@ internal sealed class HomeAssistantActionsTests
 				Parameters = new Dictionary<string, object> { ["entity"] = "sensor.temp", ["variable"] = "temp" }
 			});
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await targets.ValueOf("temp"), Is.EqualTo("21.5"));
@@ -797,9 +797,11 @@ internal sealed class HomeAssistantActionsTests
 	private static readonly string[] _missingEntity = ["light.gone"];
 
 	private IStateProviderActionDefinition Provider(string actionId)
-		=> (IStateProviderActionDefinition)HomeAssistantActions
+	{
+		return (IStateProviderActionDefinition)HomeAssistantActions
 			.Create(() => _connection, new HomeAssistantVariableAccessor())
 			.Single(action => action.Id == actionId);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition, string because)
 	{
@@ -813,7 +815,9 @@ internal sealed class HomeAssistantActionsTests
 	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 
 	private sealed class RecordingVariableApi : MacroDeck.Sdk.Variables.IVariableApi
 	{
@@ -822,10 +826,14 @@ internal sealed class HomeAssistantActionsTests
 		public Dictionary<string, object?> Written { get; } = new(StringComparer.Ordinal);
 
 		public Task<IReadOnlyList<MacroDeck.Sdk.Variables.VariableHandle>> GetAllAsync()
-			=> Task.FromResult<IReadOnlyList<MacroDeck.Sdk.Variables.VariableHandle>>([]);
+		{
+			return Task.FromResult<IReadOnlyList<MacroDeck.Sdk.Variables.VariableHandle>>([]);
+		}
 
 		public Task<MacroDeck.Sdk.Variables.VariableHandle?> GetByNameAsync(string name)
-			=> Task.FromResult<MacroDeck.Sdk.Variables.VariableHandle?>(null);
+		{
+			return Task.FromResult<MacroDeck.Sdk.Variables.VariableHandle?>(null);
+		}
 
 		public Task<MacroDeck.Sdk.Variables.VariableHandle> CreateAsync(
 			string name,
@@ -854,6 +862,9 @@ internal sealed class HomeAssistantActionsTests
 			return Task.CompletedTask;
 		}
 
-		public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
+		public Task DeleteAsync(Guid variableId)
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

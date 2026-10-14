@@ -36,7 +36,8 @@ public interface IUiResourceRegistry
 	/// content is empty or larger than one resource may be. Nothing was sent.</exception>
 	/// <exception cref="UiResourceException">Macro Deck refused or could not complete the registration; see
 	/// <see cref="UiResourceException.ErrorCode" />. What the name held before is unchanged.</exception>
-	Task<UiResource> RegisterAsync(string name,
+	Task<UiResource> RegisterAsync(
+		string name,
 		ReadOnlyMemory<byte> content,
 		string mediaType,
 		CancellationToken cancellationToken = default);
@@ -64,8 +65,10 @@ public interface IUiResourceRegistry
 	/// the icon cannot be served within the size one UI resource may have, or the call could not complete.
 	/// </exception>
 	Task<UiResource> GetPluginIconAsync(string key, string name, CancellationToken cancellationToken = default)
-		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
+	{
+		return Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot resolve bundled plugin icons."));
+	}
 
 	/// <summary>
 	/// Returns the handle of one icon from any icon pack installed in Macro Deck, named by the icon's id, to
@@ -85,8 +88,10 @@ public interface IUiResourceRegistry
 	/// context, that cannot look icons up by id; <see cref="UiResourceErrorCode.Failed" /> when the icon cannot
 	/// be served within the size one UI resource may have, or the call could not complete.</exception>
 	Task<UiResource> GetIconAsync(Guid iconId, CancellationToken cancellationToken = default)
-		=> Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
+	{
+		return Task.FromException<UiResource>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot look icons up by id."));
+	}
 
 	/// <summary>
 	/// Registers the current artwork of any music player, named by the player's qualified instance id and the
@@ -114,12 +119,15 @@ public interface IUiResourceRegistry
 	/// exceed the plugin's quota; <see cref="UiResourceErrorCode.Failed" /> when the artwork is larger than one
 	/// resource may be or of a media type Macro Deck does not accept, which retrying does not change, or when
 	/// the call could not complete. What the name held before is unchanged.</exception>
-	Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		CancellationToken cancellationToken = default)
-		=> Task.FromException<UiResource?>(new UiResourceException(UiResourceErrorCode.Unsupported,
+	{
+		return Task.FromException<UiResource?>(new UiResourceException(UiResourceErrorCode.Unsupported,
 			"This context cannot register the artwork of another music player."));
+	}
 
 	/// <summary>
 	/// Registers the current artwork of any music player like
@@ -138,7 +146,8 @@ public interface IUiResourceRegistry
 	/// <exception cref="ArgumentException">The name is not valid. Nothing was sent.</exception>
 	/// <exception cref="UiResourceException">As for
 	/// <see cref="RegisterMusicPlayerArtworkAsync(string, string, string, CancellationToken)" />.</exception>
-	Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int maxSize,

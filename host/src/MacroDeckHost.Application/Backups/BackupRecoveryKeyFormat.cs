@@ -30,7 +30,9 @@ public static class BackupRecoveryKeyFormat
 	/// when the database and every protector are unreadable.
 	/// </summary>
 	public static void DeriveChecksum(ReadOnlySpan<byte> recoveryKey, Span<byte> destination)
-		=> HKDF.DeriveKey(HashAlgorithmName.SHA256, recoveryKey, destination, salt: default, ChecksumInfo);
+	{
+		HKDF.DeriveKey(HashAlgorithmName.SHA256, recoveryKey, destination, default, ChecksumInfo);
+	}
 
 	/// <summary>
 	/// Parses an exported recovery key and verifies its checksum. Pure: no repository, no protector.
@@ -95,7 +97,8 @@ public static class BackupRecoveryKeyFormat
 
 	// The checksum only guards against transcription errors (typos, dropped or swapped characters); it is
 	// not a MAC, so tampering must still be caught by the archive's AEAD tag, not by this check.
-	public static bool TryParse(string? text,
+	public static bool TryParse(
+		string? text,
 		Span<byte> key,
 		Span<byte> checksum,
 		out BackupRecoveryKeyParseError error)
@@ -179,19 +182,19 @@ public static class BackupRecoveryKeyFormat
 
 		foreach (var b in data)
 		{
-			bitBuffer = (bitBuffer << 8) | b;
+			bitBuffer = bitBuffer << 8 | b;
 			bitCount += 8;
 
 			while (bitCount >= 5)
 			{
 				bitCount -= 5;
-				destination[charIndex++] = Alphabet[(bitBuffer >> bitCount) & 0b11111];
+				destination[charIndex++] = Alphabet[bitBuffer >> bitCount & 0b11111];
 			}
 		}
 
 		if (bitCount > 0)
 		{
-			destination[charIndex++] = Alphabet[(bitBuffer << (5 - bitCount)) & 0b11111];
+			destination[charIndex++] = Alphabet[bitBuffer << 5 - bitCount & 0b11111];
 		}
 	}
 
@@ -204,7 +207,7 @@ public static class BackupRecoveryKeyFormat
 		foreach (var ch in chars)
 		{
 			var value = Alphabet.IndexOf(ch);
-			bitBuffer = (bitBuffer << 5) | value;
+			bitBuffer = bitBuffer << 5 | value;
 			bitCount += 5;
 
 			if (bitCount >= 8)

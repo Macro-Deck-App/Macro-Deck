@@ -6,7 +6,6 @@ using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
-using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Adb;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -41,9 +40,15 @@ public class HostStatePusherAdbTests
 			]
 		};
 		_access = new FixedAdbAccessPolicy(PluginAdbAccess.Available);
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			_adb, _access, Serilog.Core.Logger.None);
+		_pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			_adb,
+			_access,
+			Serilog.Core.Logger.None);
 
 		await _registry.Create(new PluginSessionRecord
 		{
@@ -61,7 +66,10 @@ public class HostStatePusherAdbTests
 	}
 
 	[TearDown]
-	public void TearDown() => _pusher.Dispose();
+	public void TearDown()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task Registration_pushes_the_plugins_access_and_the_attached_devices()
@@ -138,9 +146,15 @@ public class HostStatePusherAdbTests
 				string.Empty,
 				false));
 		await harness.Manager.RefreshNowAsync(CancellationToken.None);
-		using var pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			harness.Manager, _access, Serilog.Core.Logger.None);
+		using var pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			harness.Manager,
+			_access,
+			Serilog.Core.Logger.None);
 
 		await pusher.PushAllAsync(PluginId);
 
@@ -210,7 +224,8 @@ public class HostStatePusherAdbTests
 			Assert.That(pushes[0].Devices.Select(device => (device.State, device.Mode)),
 				Is.EqualTo(new[]
 				{
-					(AdbDeviceStates.Offline, (string?)AdbDeviceModes.Recovery), (AdbDeviceStates.Offline, (string?)null)
+					(AdbDeviceStates.Offline, (string?)AdbDeviceModes.Recovery),
+					(AdbDeviceStates.Offline, (string?)null)
 				}));
 		});
 	}
@@ -238,13 +253,17 @@ public class HostStatePusherAdbTests
 	}
 
 	private List<AdbStateDto> AdbPushes()
-		=> _connection.Sent.ToList()
+	{
+		return _connection.Sent.ToList()
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Adb)
 			.Select(payload => payload.Data!.Value.Deserialize<AdbStateDto>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 
 	private static AdbDevice Device(string serial, AdbDeviceState state)
-		=> new(serial, state, "Pixel 8", "Google", "shiba", "1", null, DateTimeOffset.UtcNow);
+	{
+		return new AdbDevice(serial, state, "Pixel 8", "Google", "shiba", "1", null, DateTimeOffset.UtcNow);
+	}
 }

@@ -75,10 +75,16 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 	public IReadOnlyDictionary<string, DeviceDescriptor> Devices => _devices;
 
 	/// <summary>Whether a registered device is currently reported as online.</summary>
-	public bool IsOnline(string deviceId) => _online.TryGetValue(deviceId, out var online) && online;
+	public bool IsOnline(string deviceId)
+	{
+		return _online.TryGetValue(deviceId, out var online) && online;
+	}
 
 	/// <summary>The host-assigned id a device was registered under, or null when it never was.</summary>
-	public string? AssignedIdOf(string deviceId) => _deviceIds.GetValueOrDefault(deviceId);
+	public string? AssignedIdOf(string deviceId)
+	{
+		return _deviceIds.GetValueOrDefault(deviceId);
+	}
 
 	/// <summary>The sessions opened through <see cref="OpenSession" />, keyed by provider-local device id.</summary>
 	public IReadOnlyDictionary<string, FakeDeviceSession> Sessions => _sessions;
@@ -139,7 +145,9 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 
 	/// <summary>The session a plugin's <c>devices</c> call addresses, or null for an id nobody tracked.</summary>
 	internal FakeDeviceSession? ResolveSession(string? sessionId)
-		=> sessionId is not null ? _sessionsById.GetValueOrDefault(sessionId) : null;
+	{
+		return sessionId is not null ? _sessionsById.GetValueOrDefault(sessionId) : null;
+	}
 
 	internal void RecordInteraction(string deviceId, DeviceInteraction interaction)
 	{
@@ -148,7 +156,7 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 			_interactions.Add((deviceId, interaction));
 		}
 
-		Record(DeviceProviderCallKind.Interaction, deviceId, device: null, presence: null, interaction);
+		Record(DeviceProviderCallKind.Interaction, deviceId, null, null, interaction);
 	}
 
 	public Task<DeviceRegistration> RegisterDeviceAsync(
@@ -195,7 +203,7 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 			_online[deviceId] = presence == DevicePresence.Online;
 		}
 
-		Record(DeviceProviderCallKind.Presence, deviceId, device: null, presence);
+		Record(DeviceProviderCallKind.Presence, deviceId, null, presence);
 
 		return Task.CompletedTask;
 	}
@@ -204,12 +212,13 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 	{
 		_online[deviceId] = false;
 
-		Record(DeviceProviderCallKind.Unregister, deviceId, device: null, presence: null);
+		Record(DeviceProviderCallKind.Unregister, deviceId, null, null);
 
 		return Task.CompletedTask;
 	}
 
-	private void Record(DeviceProviderCallKind kind,
+	private void Record(
+		DeviceProviderCallKind kind,
 		string deviceId,
 		DeviceDescriptor? device,
 		DevicePresence? presence,

@@ -3,7 +3,6 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Files;
 using MacroDeckHost.Application.Variables.Templates;
-using MacroDeckHost.Domain.Entities;
 using Microsoft.Extensions.Hosting;
 using ILogger = Serilog.ILogger;
 
@@ -11,7 +10,7 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 
 public sealed class VariableInitializeBackgroundService : HostReadyBackgroundService
 {
-	private static readonly TimeSpan FileReadBudget = TimeSpan.FromSeconds(3);
+	private static readonly TimeSpan _fileReadBudget = TimeSpan.FromSeconds(3);
 
 	private readonly VariableRegistry _registry;
 	private readonly FileVariableSynchronizer _files;
@@ -60,7 +59,7 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 		var stored = _userStore.Load();
 		var fileVariables = stored.Where(variable => variable.FileSource is not null).ToList();
 		var reads = fileVariables.ToDictionary(variable => variable.Id, variable => _files.AttachAsync(variable));
-		await Task.WhenAny(Task.WhenAll(reads.Values), Task.Delay(FileReadBudget));
+		await Task.WhenAny(Task.WhenAll(reads.Values), Task.Delay(_fileReadBudget));
 
 		foreach (var variable in stored)
 		{
@@ -72,7 +71,8 @@ public sealed class VariableInitializeBackgroundService : HostReadyBackgroundSer
 
 			var read = reads[variable.Id];
 			var initial = read.IsCompletedSuccessfully ? read.Result : null;
-			variable.Value = initial?.Value ?? VariableValueSerializer.Serialize(variable.Type, null, variable.DecimalPlaces);
+			variable.Value = initial?.Value
+				?? VariableValueSerializer.Serialize(variable.Type, null, variable.DecimalPlaces);
 			_registry.Upsert(variable, initial?.Available ?? false);
 		}
 

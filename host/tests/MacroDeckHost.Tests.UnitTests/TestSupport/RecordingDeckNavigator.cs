@@ -9,27 +9,46 @@ internal sealed class RecordingDeckNavigator : IDeckNavigator
 	public List<DeckClient> Clients { get; init; } = [];
 	public List<(string Action, string? OriginClientId)> Calls { get; } = [];
 
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
-		=> Record("change-folder", originClientId);
+	{
+		return Record("change-folder", originClientId);
+	}
 
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
-		=> Record("change-profile", originClientId);
+	{
+		return Record("change-profile", originClientId);
+	}
 
 	public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Record("go-to-parent", originClientId);
+	{
+		return Record("go-to-parent", originClientId);
+	}
 
 	public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> Record("go-back", originClientId);
+	{
+		return Record("go-back", originClientId);
+	}
 
-	public IReadOnlyList<DeckFolder> GetFolders() => Folders;
+	public IReadOnlyList<DeckFolder> GetFolders()
+	{
+		return Folders;
+	}
 
-	public IReadOnlyList<DeckProfile> GetProfiles() => Profiles;
+	public IReadOnlyList<DeckProfile> GetProfiles()
+	{
+		return Profiles;
+	}
 
-	public IReadOnlyList<DeckClient> GetClients() => Clients;
+	public IReadOnlyList<DeckClient> GetClients()
+	{
+		return Clients;
+	}
 
 	private Task Record(string action, string? originClientId)
 	{

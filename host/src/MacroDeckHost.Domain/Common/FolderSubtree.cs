@@ -35,5 +35,7 @@ public static class FolderSubtree
 	}
 
 	public static HashSet<Guid> AncestorsAndSelf(IEnumerable<FolderEntity> profileFolders, FolderEntity folder)
-		=> FolderEntityChain.AncestorsAndSelf(folder, profileFolders).Select(f => f.Id).ToHashSet();
+	{
+		return FolderEntityChain.AncestorsAndSelf(folder, profileFolders).Select(f => f.Id).ToHashSet();
+	}
 }

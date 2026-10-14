@@ -36,16 +36,19 @@ internal sealed class SetStripRoutingActionDefinition : IDynamicOptionsActionDef
 	[
 		VoicemeeterChannelTarget.Strip.Picker(),
 		ActionParameter.DynamicChoice(VoicemeeterActionValues.BusParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusDescription(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetStripRouting.BusDescription(),
 			required: true),
 		ActionParameter.Choice(VoicemeeterActionValues.ModeParameter,
-			options: _modes,
-			label: AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
+			_modes,
+			AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
 			defaultValue: "toggle")
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -53,8 +56,8 @@ internal sealed class SetStripRoutingActionDefinition : IDynamicOptionsActionDef
 	{
 		var index = VoicemeeterActionValues.ReadChannelIndex(
 			parameters.GetValueOrDefault(VoicemeeterActionValues.StripParameter));
-		if (index is null ||
-			parameters.GetValueOrDefault(VoicemeeterActionValues.BusParameter)?.ToString()
+		if (index is null
+			|| parameters.GetValueOrDefault(VoicemeeterActionValues.BusParameter)?.ToString()
 				is not { Length: > 0 } bus)
 		{
 			return Task.FromResult<ActionStateSnapshot?>(null);

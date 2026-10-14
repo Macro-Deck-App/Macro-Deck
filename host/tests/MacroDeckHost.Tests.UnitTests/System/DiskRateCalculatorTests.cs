@@ -5,7 +5,9 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 public class DiskRateCalculatorTests
 {
 	private static DiskCounters Counters(ulong read, ulong written, double readMs, double writeMs)
-		=> new(read, written, TimeSpan.FromMilliseconds(readMs), TimeSpan.FromMilliseconds(writeMs));
+	{
+		return new DiskCounters(read, written, TimeSpan.FromMilliseconds(readMs), TimeSpan.FromMilliseconds(writeMs));
+	}
 
 	[Test]
 	public void Throughput_and_activity_come_from_the_change_over_the_interval()
@@ -25,17 +27,25 @@ public class DiskRateCalculatorTests
 
 	[Test]
 	public void The_first_sample_has_nothing_to_compare_with()
-		=> Assert.That(DiskRateCalculator.Calculate(null, Counters(10, 10, 1, 1), TimeSpan.FromSeconds(1)), Is.Null);
+	{
+		Assert.That(DiskRateCalculator.Calculate(null, Counters(10, 10, 1, 1), TimeSpan.FromSeconds(1)), Is.Null);
+	}
 
 	[Test]
 	public void Counters_that_went_backwards_give_no_rate()
-		=> Assert.That(DiskRateCalculator.Calculate(Counters(5000, 10, 1, 1), Counters(10, 10, 1, 1),
-			TimeSpan.FromSeconds(1)), Is.Null);
+	{
+		Assert.That(DiskRateCalculator.Calculate(Counters(5000, 10, 1, 1),
+				Counters(10, 10, 1, 1),
+				TimeSpan.FromSeconds(1)),
+			Is.Null);
+	}
 
 	[Test]
 	public void No_time_passing_gives_no_rate()
-		=> Assert.That(DiskRateCalculator.Calculate(Counters(0, 0, 0, 0), Counters(10, 10, 1, 1), TimeSpan.Zero),
+	{
+		Assert.That(DiskRateCalculator.Calculate(Counters(0, 0, 0, 0), Counters(10, 10, 1, 1), TimeSpan.Zero),
 			Is.Null);
+	}
 
 	[Test]
 	public void Overlapping_requests_never_report_more_than_full_activity()

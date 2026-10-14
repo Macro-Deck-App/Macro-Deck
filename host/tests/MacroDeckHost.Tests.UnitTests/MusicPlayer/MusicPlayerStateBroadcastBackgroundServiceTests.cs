@@ -310,7 +310,10 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 
 		public Task Due => _due.Task;
 
-		public void Fire() => _due.TrySetResult();
+		public void Fire()
+		{
+			_due.TrySetResult();
+		}
 
 		public void NoteActionExecuted(string integrationId)
 		{
@@ -320,7 +323,10 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		{
 		}
 
-		public void Rearm() => _due = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		public void Rearm()
+		{
+			_due = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		}
 	}
 
 	[Test]
@@ -462,12 +468,14 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 	}
 
 	private static MusicPlayerState Playing(string trackName)
-		=> new()
+	{
+		return new MusicPlayerState
 		{
 			IsConnected = true,
 			PlaybackState = PlaybackState.Playing,
 			TrackName = trackName
 		};
+	}
 
 	private static MusicPlayerStateBroadcastBackgroundService CreateService(
 		IMusicPlayerRegistry registry,
@@ -480,7 +488,8 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		IMusicPlayerStateNotifier? notifier = null,
 		IMusicPlayerVariants? variants = null,
 		IVariablePollingInvalidationSignal? variableInvalidation = null)
-		=> new(new StartedHostLifetime(),
+	{
+		return new MusicPlayerStateBroadcastBackgroundService(new StartedHostLifetime(),
 			registry,
 			transport,
 			new MusicPlayerEventProvider(new Triggers.RecordingEventBus()),
@@ -492,6 +501,7 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 			logger ?? SilentLogger(),
 			pollInterval: pollInterval,
 			variableInvalidation: variableInvalidation);
+	}
 
 	private sealed class NeverNudge : IMusicPlayerPollNudge
 	{
@@ -510,23 +520,35 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		}
 	}
 
-	private static Logger SilentLogger() => new LoggerConfiguration().CreateLogger();
+	private static Logger SilentLogger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 
 	private static Logger Collecting(CollectingSink sink)
-		=> new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	{
+		return new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
+	}
 
 	private sealed class CollectingSink : ILogEventSink
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 
 	private static List<MusicPlayerInstancesChangedNotification> InstanceBroadcasts(RecordingUiTransport transport)
-		=> transport.Broadcasts.OfType<MusicPlayerInstancesChangedNotification>().ToList();
+	{
+		return transport.Broadcasts.OfType<MusicPlayerInstancesChangedNotification>().ToList();
+	}
 
 	private static List<MusicPlayerStateChangedNotification> StateBroadcasts(RecordingUiTransport transport)
-		=> transport.Broadcasts.OfType<MusicPlayerStateChangedNotification>().ToList();
+	{
+		return transport.Broadcasts.OfType<MusicPlayerStateChangedNotification>().ToList();
+	}
 
 	private sealed class FakeMusicPlayerRegistry : IMusicPlayerRegistry
 	{
@@ -559,15 +581,28 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 			_players.Clear();
 		}
 
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => _descriptors.ToList();
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return _descriptors.ToList();
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => _players.GetValueOrDefault(instanceId);
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return _players.GetValueOrDefault(instanceId);
+		}
 
-		public Dictionary<string, Func<IReadOnlyDictionary<string, object>, FakeMusicPlayer>> PlayersWithOptions { get; }
+		public Dictionary<string, Func<IReadOnlyDictionary<string, object>, FakeMusicPlayer>> PlayersWithOptions
+		{
+			get;
+		}
 			= new(StringComparer.Ordinal);
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> PlayersWithOptions.TryGetValue(instanceId, out var resolve) ? resolve(options) : GetPlayer(instanceId);
+		{
+			return PlayersWithOptions.TryGetValue(instanceId, out var resolve)
+				? resolve(options)
+				: GetPlayer(instanceId);
+		}
 	}
 
 	private sealed class FakeMusicPlayer : IMusicPlayer
@@ -605,27 +640,54 @@ internal sealed class MusicPlayerStateBroadcastBackgroundServiceTests
 		public Task<MusicPlayerArtwork?> GetArtworkAsync(
 			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime

@@ -49,7 +49,7 @@ public class UpdateSecretRequestMessageHandler
 				? null
 				: new TransportError
 				{
-					Code = "SECRET_NOT_FOUND", Message = AppStrings.Errors.Secrets.NotFound(id: request.Id.ToString())
+					Code = "SECRET_NOT_FOUND", Message = AppStrings.Errors.Secrets.NotFound(request.Id.ToString())
 				}
 		};
 	}
@@ -97,7 +97,7 @@ public class CloneSecretRequestMessageHandler
 			Error = id is null
 				? new TransportError
 				{
-					Code = "SECRET_NOT_FOUND", Message = AppStrings.Errors.Secrets.NotFound(id: request.Id.ToString())
+					Code = "SECRET_NOT_FOUND", Message = AppStrings.Errors.Secrets.NotFound(request.Id.ToString())
 				}
 				: null
 		};

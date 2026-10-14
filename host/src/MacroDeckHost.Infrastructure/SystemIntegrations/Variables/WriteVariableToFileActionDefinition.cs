@@ -28,17 +28,20 @@ internal sealed class WriteVariableToFileActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete("variable",
-			label: AppStrings.Integrations.Variables.Actions.VariableLabel(),
-			description: AppStrings.Integrations.Variables.Actions.WriteToFileVariableDescription(),
+			AppStrings.Integrations.Variables.Actions.VariableLabel(),
+			AppStrings.Integrations.Variables.Actions.WriteToFileVariableDescription(),
 			optionsSourceId: HostOptionsSources.Variables,
 			required: true),
 		ActionParameter.File("file",
-			label: AppStrings.Integrations.Variables.Actions.FileLabel(),
-			description: AppStrings.Integrations.Variables.Actions.FileDescription(),
+			AppStrings.Integrations.Variables.Actions.FileLabel(),
+			AppStrings.Integrations.Variables.Actions.FileDescription(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_reader);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_reader);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

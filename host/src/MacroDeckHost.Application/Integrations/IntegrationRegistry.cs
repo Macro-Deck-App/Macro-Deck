@@ -3,7 +3,6 @@ using System.Reflection;
 using MacroDeckHost.Application.Persistence;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
-using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using ILogger = Serilog.ILogger;
@@ -52,7 +51,10 @@ public class IntegrationRegistry : IIntegrationRegistry
 		return integration.Actions.FirstOrDefault(a => a.Id == actionId && a.RunsHere());
 	}
 
-	public IActionDefinition? FindAction(QualifiedId id) => FindAction(id.OwnerId, id.LocalId);
+	public IActionDefinition? FindAction(QualifiedId id)
+	{
+		return FindAction(id.OwnerId, id.LocalId);
+	}
 
 	public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
 	{
@@ -110,7 +112,9 @@ public class IntegrationRegistry : IIntegrationRegistry
 	}
 
 	public IntegrationOrigin GetOrigin(string integrationId)
-		=> _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+	{
+		return _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+	}
 
 	public void SetEnabled(string integrationId, bool enabled)
 	{
@@ -136,9 +140,14 @@ public class IntegrationRegistry : IIntegrationRegistry
 	}
 
 	public bool IsExplicitlyDisabled(string integrationId)
-		=> _enabledState.TryGetValue(integrationId, out var enabled) && !enabled;
+	{
+		return _enabledState.TryGetValue(integrationId, out var enabled) && !enabled;
+	}
 
-	public long DisabledVersion(string integrationId) => _disabledVersions.GetValueOrDefault(integrationId);
+	public long DisabledVersion(string integrationId)
+	{
+		return _disabledVersions.GetValueOrDefault(integrationId);
+	}
 
 	// Both clears are compare-and-remove, so a choice a concurrent SetEnabled has just stored survives.
 	public bool ClearDisabledChoice(string integrationId)
@@ -154,7 +163,10 @@ public class IntegrationRegistry : IIntegrationRegistry
 		return true;
 	}
 
-	public void ClearEnabledChoice(string integrationId) => ClearChoice(integrationId, true);
+	public void ClearEnabledChoice(string integrationId)
+	{
+		ClearChoice(integrationId, true);
+	}
 
 	private bool ClearChoice(string integrationId, bool storedChoice)
 	{
@@ -193,16 +205,15 @@ public class IntegrationRegistry : IIntegrationRegistry
 			// A different owner claiming this id - a built-in integration, or another plugin - is still a
 			// real collision and stays rejected below. Enabled state deliberately survives: it lives in
 			// _enabledState, which this branch never touches, same as UnregisterAsync's own guarantee.
-			if (origin == IntegrationOrigin.Plugin &&
-				_origins.TryGetValue(integration.Id, out var existingOrigin) &&
-				existingOrigin == IntegrationOrigin.Plugin)
+			if (origin == IntegrationOrigin.Plugin
+				&& _origins.TryGetValue(integration.Id, out var existingOrigin)
+				&& existingOrigin == IntegrationOrigin.Plugin)
 			{
 				_integrations[integration.Id] = integration;
 				_origins[integration.Id] = origin;
 				_metadata[integration.Id] = metadata ?? MetadataFromAttribute(integration);
 
-				_logger.Information(
-					"Replacing integration '{IntegrationId}' ({IntegrationName} v{IntegrationVersion})",
+				_logger.Information("Replacing integration '{IntegrationId}' ({IntegrationName} v{IntegrationVersion})",
 					integration.Id,
 					// A LocalizedText would be destructured into its parts by Serilog; a log line wants the
 					// diagnostic rendering instead.
@@ -213,8 +224,8 @@ public class IntegrationRegistry : IIntegrationRegistry
 			}
 
 			_logger.Error(
-				"Rejecting integration '{IntegrationId}' ({IntegrationType}): that id is already registered by " +
-				"'{RegisteredType}'. Integration ids must be globally unique.",
+				"Rejecting integration '{IntegrationId}' ({IntegrationType}): that id is already registered by "
+				+ "'{RegisteredType}'. Integration ids must be globally unique.",
 				integration.Id,
 				integration.GetType().FullName,
 				_integrations[integration.Id].GetType().FullName);

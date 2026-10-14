@@ -22,7 +22,7 @@ internal sealed class WindowsPluginProcessJob : IPluginProcessJob
 
 	public static WindowsPluginProcessJob? TryCreate(ILogger logger)
 	{
-		var handle = WindowsJobObjectInterop.CreateJobObject(IntPtr.Zero, name: null);
+		var handle = WindowsJobObjectInterop.CreateJobObject(IntPtr.Zero, null);
 		if (handle == IntPtr.Zero)
 		{
 			return null;
@@ -48,7 +48,7 @@ internal sealed class WindowsPluginProcessJob : IPluginProcessJob
 
 		var process = WindowsJobObjectInterop.OpenProcess(
 			WindowsJobObjectInterop.ProcessSetQuota | WindowsJobObjectInterop.ProcessTerminate,
-			inheritHandle: false,
+			false,
 			processId);
 		if (process == IntPtr.Zero)
 		{
@@ -67,7 +67,9 @@ internal sealed class WindowsPluginProcessJob : IPluginProcessJob
 	}
 
 	public bool TryTerminate()
-		=> _handle != IntPtr.Zero && WindowsJobObjectInterop.TerminateJobObject(_handle, exitCode: 1);
+	{
+		return _handle != IntPtr.Zero && WindowsJobObjectInterop.TerminateJobObject(_handle, 1);
+	}
 
 	public void Dispose()
 	{
@@ -92,7 +94,7 @@ internal sealed class WindowsPluginProcessJob : IPluginProcessJob
 		var buffer = Marshal.AllocHGlobal(length);
 		try
 		{
-			Marshal.StructureToPtr(information, buffer, fDeleteOld: false);
+			Marshal.StructureToPtr(information, buffer, false);
 			return WindowsJobObjectInterop.SetInformationJobObject(handle,
 				WindowsJobObjectInterop.JobObjectExtendedLimitInformationClass,
 				buffer,

@@ -15,14 +15,14 @@ internal sealed class PluginWebSocketConnectionPair : IDisposable
 		_pluginSocket = pluginSocket;
 
 		Host = WebSocket.CreateFromStream(hostSocket.GetStream(),
-			isServer: true,
-			subProtocol: null,
-			keepAliveInterval: TimeSpan.FromMinutes(1));
+			true,
+			null,
+			TimeSpan.FromMinutes(1));
 
 		Plugin = WebSocket.CreateFromStream(pluginSocket.GetStream(),
-			isServer: false,
-			subProtocol: null,
-			keepAliveInterval: TimeSpan.FromMinutes(1));
+			false,
+			null,
+			TimeSpan.FromMinutes(1));
 	}
 
 	public WebSocket Host { get; }

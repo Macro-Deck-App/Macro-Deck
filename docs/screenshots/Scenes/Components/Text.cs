@@ -1,26 +1,31 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
 internal static partial class Scenes
 {
 	// A stack stretches a container child across its cross axis, so centring on both axes takes one stack per axis.
-	private static UiStack Centered(string key, params UiElement[] children) => new()
+	private static UiStack Centered(string key, params UiElement[] children)
 	{
-		Key = key,
-		Justify = UiComponentJustify.Center,
-		Padding = TilePadding,
-		Children =
-		[
-			new UiStack
-			{
-				Key = key + "Row",
-				Direction = UiComponentDirections.Horizontal,
-				Justify = UiComponentJustify.Center,
-				Align = UiComponentAlignments.Center,
-				Children = children,
-			},
-		],
-	};
+		return new UiStack
+		{
+			Key = key,
+			Justify = UiComponentJustify.Center,
+			Padding = TilePadding,
+			Children =
+			[
+				new UiStack
+				{
+					Key = key + "Row",
+					Direction = UiComponentDirections.Horizontal,
+					Justify = UiComponentJustify.Center,
+					Align = UiComponentAlignments.Center,
+					Children = children
+				}
+			]
+		};
+	}
 
 	private static IEnumerable<Scene> TextScenes()
 	{
@@ -44,9 +49,9 @@ internal static partial class Scenes
 							Text = "°C",
 							Size = 0.1,
 							Weight = UiComponentTextWeights.SemiBold,
-							Role = UiComponentTextRoles.Secondary,
-						},
-					],
+							Role = UiComponentTextRoles.Secondary
+						}
+					]
 				}));
 	}
 
@@ -60,7 +65,7 @@ internal static partial class Scenes
 				Children =
 				[
 					new UiTextField { Key = "search", Placeholder = "Search songs, albums, artists", Size = 0.045 }
-				],
+				]
 			},
 			600,
 			110);

@@ -11,7 +11,8 @@ public class BackupImportedFontsTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(BackupComponentGroups.Owner("data/fonts/0123456789abcdef.ttf"), Is.EqualTo(BackupComponentGroup.Icons));
+			Assert.That(BackupComponentGroups.Owner("data/fonts/0123456789abcdef.ttf"),
+				Is.EqualTo(BackupComponentGroup.Icons));
 			Assert.That(BackupComponentGroups.Definition(BackupComponentGroup.Profiles).Requires,
 				Does.Contain(BackupComponentGroup.Icons));
 		});

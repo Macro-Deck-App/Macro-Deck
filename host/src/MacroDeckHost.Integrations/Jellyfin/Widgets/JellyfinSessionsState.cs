@@ -49,7 +49,10 @@ internal sealed record JellyfinSessionsState(
 	{
 		var selected = string.IsNullOrEmpty(serverId)
 			? servers
-			: [.. servers.Where(server => string.Equals(server.ServerId, serverId, StringComparison.OrdinalIgnoreCase))];
+			:
+			[
+				.. servers.Where(server => string.Equals(server.ServerId, serverId, StringComparison.OrdinalIgnoreCase))
+			];
 
 		if (selected.Count == 0)
 		{
@@ -90,25 +93,39 @@ internal sealed record JellyfinSessionsState(
 
 	// UI node keys allow only ASCII letters, digits, dots, hyphens and underscores.
 	private static string RowKey(string serverId, string sessionKey)
-		=> "s-" + new string([
-			.. $"{serverId}-{sessionKey}".Select(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' ? c : '-')
-		]);
+	{
+		return "s-"
+			+ new string([
+				.. $"{serverId}-{sessionKey}".Select(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' ? c : '-')
+			]);
+	}
 
 	private static string Detail(JellyfinSessionSummary session)
-		=> string.IsNullOrEmpty(session.UserName) ? session.DeviceName : $"{session.UserName} · {session.DeviceName}";
+	{
+		return string.IsNullOrEmpty(session.UserName)
+			? session.DeviceName
+			: $"{session.UserName} · {session.DeviceName}";
+	}
 }
 
 internal static class JellyfinSessionsSettings
 {
-	public static string? Server(JsonElement data) => ReadString(data, JellyfinWidgetTypes.ServerKey);
+	public static string? Server(JsonElement data)
+	{
+		return ReadString(data, JellyfinWidgetTypes.ServerKey);
+	}
 
 	public static string? BackgroundColor(JsonElement data)
-		=> WidgetBackgroundColor.Normalize(ReadString(data, JellyfinWidgetTypes.BackgroundColorKey));
+	{
+		return WidgetBackgroundColor.Normalize(ReadString(data, JellyfinWidgetTypes.BackgroundColorKey));
+	}
 
 	private static string? ReadString(JsonElement data, string name)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }

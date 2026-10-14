@@ -54,21 +54,24 @@ internal sealed class BatteryCallbackRoutingTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			null!,
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new FakeHostLockState(),
 			Serilog.Core.Logger.None,
 			batteries: _batteries);
 	}
 
 	[TearDown]
-	public void TearDown() => _batteries.Dispose();
+	public void TearDown()
+	{
+		_batteries.Dispose();
+	}
 
 	[Test]
 	public async Task A_declared_provider_publishes_under_its_own_plugin_id()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 
-		var result = await PublishAsync(Device("phone", level: 55));
+		var result = await PublishAsync(Device("phone", 55));
 
 		Assert.Multiple(() =>
 		{
@@ -80,7 +83,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task A_plugin_that_did_not_declare_the_capability_is_refused_and_nothing_is_stored()
 	{
-		await OpenSessionAsync(declared: false);
+		await OpenSessionAsync(false);
 
 		var result = await PublishAsync(Device("phone"));
 
@@ -94,9 +97,9 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task One_invalid_device_refuses_the_whole_publish()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 
-		var result = await PublishAsync(Device("phone", level: 40), Device("watch", level: 150));
+		var result = await PublishAsync(Device("phone", 40), Device("watch", 150));
 
 		Assert.Multiple(() =>
 		{
@@ -108,7 +111,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task A_publish_of_more_than_64_devices_is_refused_and_64_fit_in_one_call()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 
 		var tooMany = await PublishAsync([.. Enumerable.Range(0, 65).Select(index => Device($"d{index}"))]);
 		var allowed = await PublishAsync([.. Enumerable.Range(0, 64).Select(index => Device($"d{index}"))]);
@@ -124,7 +127,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task An_invalid_sync_keeps_the_previous_set()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 		await PublishAsync(Device("phone"));
 
 		var result = await InvokeAsync(HostOperations.Batteries.Sync,
@@ -140,7 +143,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task Remove_and_sync_change_only_the_calling_plugins_devices()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 		_batteries.Publish("com.example.other", null, [new BatteryDevice { Id = "phone", Name = "Other" }]);
 		await PublishAsync(Device("phone"), Device("watch"));
 
@@ -154,7 +157,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task A_publish_is_tagged_with_its_session_so_the_session_end_withdraws_it()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 		await PublishAsync(Device("phone"));
 
 		_batteries.RemoveSession(PluginId, SessionId);
@@ -165,7 +168,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task Withdraw_hides_the_calling_sessions_devices_without_reporting_them_removed()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 		_batteries.Publish("com.example.other", null, [new BatteryDevice { Id = "phone", Name = "Other" }]);
 		await PublishAsync(Device("phone"), Device("watch"));
 		var changes = new List<BatteryDevicesChangedEventArgs>();
@@ -183,7 +186,8 @@ internal sealed class BatteryCallbackRoutingTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Error, Is.Null);
-			Assert.That(_batteries.Devices.Select(device => device.Id), Is.EqualTo(new[] { "com.example.other:phone" }));
+			Assert.That(_batteries.Devices.Select(device => device.Id),
+				Is.EqualTo(new[] { "com.example.other:phone" }));
 			Assert.That(Changes().SelectMany(change => change.RemovedIds), Is.Empty);
 		});
 
@@ -199,7 +203,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task Withdraw_from_an_ended_session_keeps_what_the_next_session_published()
 	{
-		await OpenSessionAsync(declared: true);
+		await OpenSessionAsync(true);
 		_batteries.Publish(PluginId, "session-2", [new BatteryDevice { Id = "phone", Name = "Phone" }]);
 
 		await InvokeAsync(HostOperations.Batteries.Withdraw, null);
@@ -210,7 +214,7 @@ internal sealed class BatteryCallbackRoutingTests
 	[Test]
 	public async Task Withdraw_requires_the_battery_provider_capability()
 	{
-		await OpenSessionAsync(declared: false);
+		await OpenSessionAsync(false);
 		_batteries.Publish(PluginId, SessionId, [new BatteryDevice { Id = "phone", Name = "Phone" }]);
 
 		var result = await InvokeAsync(HostOperations.Batteries.Withdraw, null);
@@ -238,7 +242,8 @@ internal sealed class BatteryCallbackRoutingTests
 		var capabilities = new Dictionary<string, CapabilityNegotiationResult>(StringComparer.Ordinal);
 		if (declared)
 		{
-			capabilities[CapabilityKinds.BatteryProvider] = CapabilityNegotiationResult.Accept(CapabilityKinds.BatteryProvider, 1);
+			capabilities[CapabilityKinds.BatteryProvider]
+				= CapabilityNegotiationResult.Accept(CapabilityKinds.BatteryProvider, 1);
 		}
 
 		await _sessions.Create(new PluginSessionRecord
@@ -256,10 +261,13 @@ internal sealed class BatteryCallbackRoutingTests
 	}
 
 	private Task<HostCallbackResult> PublishAsync(params BatteryDeviceDto[] devices)
-		=> InvokeAsync(HostOperations.Batteries.Publish, new BatteriesPublishArguments { Devices = devices });
+	{
+		return InvokeAsync(HostOperations.Batteries.Publish, new BatteriesPublishArguments { Devices = devices });
+	}
 
 	private Task<HostCallbackResult> InvokeAsync(string operation, object? arguments)
-		=> _router.RouteAsync(PluginId,
+	{
+		return _router.RouteAsync(PluginId,
 			SessionId,
 			Guid.CreateVersion7().ToString(),
 			new HostInvokePayload
@@ -271,7 +279,10 @@ internal sealed class BatteryCallbackRoutingTests
 					: JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 			},
 			CancellationToken.None);
+	}
 
 	private static BatteryDeviceDto Device(string id, int? level = null)
-		=> new() { Id = id, Name = id, Kind = BatteryDeviceKinds.Phone, LevelPercent = level };
+	{
+		return new BatteryDeviceDto { Id = id, Name = id, Kind = BatteryDeviceKinds.Phone, LevelPercent = level };
+	}
 }

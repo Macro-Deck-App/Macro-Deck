@@ -93,15 +93,30 @@ public sealed class PluginConnectionState
 
 	internal event Action? ConnectionEnded;
 
-	internal void SetReconnectAttempt(int attempt) => Volatile.Write(ref _reconnectAttempt, attempt);
+	internal void SetReconnectAttempt(int attempt)
+	{
+		Volatile.Write(ref _reconnectAttempt, attempt);
+	}
 
-	internal void InvocationStarted() => Interlocked.Increment(ref _inFlightInvocations);
+	internal void InvocationStarted()
+	{
+		Interlocked.Increment(ref _inFlightInvocations);
+	}
 
-	internal void InvocationFinished() => Interlocked.Decrement(ref _inFlightInvocations);
+	internal void InvocationFinished()
+	{
+		Interlocked.Decrement(ref _inFlightInvocations);
+	}
 
-	internal void RaiseConnected(bool resumed) => Connected?.Invoke(this, new PluginConnectedEventArgs(resumed));
+	internal void RaiseConnected(bool resumed)
+	{
+		Connected?.Invoke(this, new PluginConnectedEventArgs(resumed));
+	}
 
-	internal void RaiseConnectionEnded() => ConnectionEnded?.Invoke();
+	internal void RaiseConnectionEnded()
+	{
+		ConnectionEnded?.Invoke();
+	}
 }
 
 /// <summary>Raised by <see cref="PluginConnectionState.Connected"/>.</summary>

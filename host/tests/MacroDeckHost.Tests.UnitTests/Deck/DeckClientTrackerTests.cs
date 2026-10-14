@@ -135,5 +135,7 @@ public class DeckClientTrackerTests
 	}
 
 	private void Report(string clientId, Guid? deviceId, string profileId, string folderId)
-		=> _tracker.Publish(_tracker.Report(clientId, deviceId, profileId, folderId));
+	{
+		_tracker.Publish(_tracker.Report(clientId, deviceId, profileId, folderId));
+	}
 }

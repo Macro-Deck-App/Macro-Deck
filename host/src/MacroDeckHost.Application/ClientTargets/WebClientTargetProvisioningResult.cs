@@ -26,12 +26,19 @@ public sealed class WebClientTargetProvisioningResult
 	public LocalizedText Message { get; private init; }
 
 	public static WebClientTargetProvisioningResult Next(WebClientTargetProvisioningStep step)
-		=> new(WebClientTargetProvisioningResultKind.Step) { Step = step };
+	{
+		return new WebClientTargetProvisioningResult(WebClientTargetProvisioningResultKind.Step) { Step = step };
+	}
 
 	/// <summary>Re-displays <paramref name="step"/> with an explanation of what is still missing.</summary>
 	public static WebClientTargetProvisioningResult Failed(WebClientTargetProvisioningStep step, LocalizedText message)
-		=> new(WebClientTargetProvisioningResultKind.Error) { Step = step, Message = message };
+	{
+		return new WebClientTargetProvisioningResult(WebClientTargetProvisioningResultKind.Error)
+			{ Step = step, Message = message };
+	}
 
 	public static WebClientTargetProvisioningResult Done(WebClientTargetProvisioningStep step)
-		=> new(WebClientTargetProvisioningResultKind.Complete) { Step = step };
+	{
+		return new WebClientTargetProvisioningResult(WebClientTargetProvisioningResultKind.Complete) { Step = step };
+	}
 }

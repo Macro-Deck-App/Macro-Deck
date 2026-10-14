@@ -85,11 +85,16 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	/// <summary>The account this instance's configuration names, or the first one when it names none.</summary>
 	protected TwitchAccountConnection? ResolveAccount(object? accountId)
-		=> _accounts().Resolve(accountId as string);
+	{
+		return _accounts().Resolve(accountId as string);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -112,10 +117,12 @@ internal class TwitchActionDefinition : IDynamicOptionsActionDefinition
 	}
 
 	private static ActionParameter AccountParameter()
-		=> ActionParameter.DynamicChoice(AccountParameterName,
-			label: AppStrings.Integrations.Twitch.Actions.AccountLabel(),
-			description: AppStrings.Integrations.Twitch.Actions.AccountDescription(),
+	{
+		return ActionParameter.DynamicChoice(AccountParameterName,
+			AppStrings.Integrations.Twitch.Actions.AccountLabel(),
+			AppStrings.Integrations.Twitch.Actions.AccountDescription(),
 			placeholder: AppStrings.Integrations.Twitch.Actions.FirstAccountPlaceholder());
+	}
 
 	private static IReadOnlyList<ActionParameterOption> RewardOptions(TwitchAccountManager accounts, object? accountId)
 	{

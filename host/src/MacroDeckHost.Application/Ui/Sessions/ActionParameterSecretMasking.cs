@@ -19,7 +19,7 @@ namespace MacroDeckHost.Application.Ui.Sessions;
 /// </remarks>
 internal static class ActionParameterSecretMasking
 {
-	private static readonly JsonElement MaskedSentinel =
+	private static readonly JsonElement _maskedSentinel =
 		JsonSerializer.SerializeToElement(UiConfigSurfaceAttributes.MaskedSecretValue);
 
 	public static Dictionary<string, JsonElement> Mask(
@@ -39,7 +39,9 @@ internal static class ActionParameterSecretMasking
 			// A stored value the action no longer declares is masked rather than passed through: a
 			// parameter that was Secret before it was removed still has its value on disk, and letting
 			// an unrecognised name through would be the one way a secret still crossed in the clear.
-			masked[name] = byName.TryGetValue(name, out var definition) ? MaskValue(definition, value) : MaskedSentinel;
+			masked[name] = byName.TryGetValue(name, out var definition)
+				? MaskValue(definition, value)
+				: _maskedSentinel;
 		}
 
 		return masked;
@@ -65,7 +67,7 @@ internal static class ActionParameterSecretMasking
 		{
 			case ActionParameterType.Secret:
 			case ActionParameterType.Password:
-				return MaskedSentinel;
+				return _maskedSentinel;
 
 			case ActionParameterType.Object
 				when definition.Children is { Count: > 0 } children && value.ValueKind == JsonValueKind.Object:
@@ -89,7 +91,7 @@ internal static class ActionParameterSecretMasking
 		{
 			result[property.Name] = byName.TryGetValue(property.Name, out var child)
 				? MaskValue(child, property.Value)
-				: MaskedSentinel;
+				: _maskedSentinel;
 		}
 
 		return JsonSerializer.SerializeToElement(result);

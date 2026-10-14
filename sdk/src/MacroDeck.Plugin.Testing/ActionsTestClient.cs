@@ -27,15 +27,20 @@ public sealed class ActionsTestClient
 
 	private readonly ICapabilityInvoker _invoker;
 
-	internal ActionsTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal ActionsTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>The full action catalogue - see <see cref="ActionCatalogPayload" />.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			DescribeLocalId,
 			CapabilityOperations.Actions.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>Runs the action declared under <paramref name="localId" />.</summary>
 	public Task<CapabilityInvocationOutcome> ExecuteAsync(
@@ -44,7 +49,8 @@ public sealed class ActionsTestClient
 		string? originClientId = null,
 		string? ownerWidgetId = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			localId,
 			CapabilityOperations.Actions.Execute,
 			new ActionExecuteArguments
@@ -54,6 +60,7 @@ public sealed class ActionsTestClient
 				OwnerWidgetId = ownerWidgetId
 			},
 			options);
+	}
 
 	/// <summary>Asks a dynamic-options action declared under <paramref name="localId" /> for its current options.</summary>
 	public Task<CapabilityInvocationOutcome> GetOptionsAsync(
@@ -62,7 +69,8 @@ public sealed class ActionsTestClient
 		string? filter = null,
 		IReadOnlyDictionary<string, object?>? currentParameters = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			localId,
 			CapabilityOperations.Actions.Options,
 			new DynamicOptionsArguments
@@ -72,28 +80,33 @@ public sealed class ActionsTestClient
 				CurrentParameters = ToElements(currentParameters)
 			},
 			options);
+	}
 
 	/// <summary>Asks a state-provider action declared under <paramref name="localId" /> for its current state.</summary>
 	public Task<CapabilityInvocationOutcome> GetActionStateAsync(
 		string localId,
 		IReadOnlyDictionary<string, object?>? parameters = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			localId,
 			CapabilityOperations.Actions.State,
 			new ActionExecuteArguments { Parameters = ToElements(parameters) },
 			options);
+	}
 
 	/// <summary>Asks an icon-provider action declared under <paramref name="localId" /> for its current icon.</summary>
 	public Task<CapabilityInvocationOutcome> GetActionIconAsync(
 		string localId,
 		IReadOnlyDictionary<string, object?>? parameters = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			localId,
 			CapabilityOperations.Actions.Icon,
 			new ActionExecuteArguments { Parameters = ToElements(parameters) },
 			options);
+	}
 
 	/// <summary>Asks an icon-provider action declared under <paramref name="localId" /> for the bytes
 	/// behind the identity <paramref name="version" /> - normally the <c>Version</c> a prior
@@ -103,11 +116,13 @@ public sealed class ActionsTestClient
 		string version,
 		IReadOnlyDictionary<string, object?>? parameters = null,
 		CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.Actions,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.Actions,
 			localId,
 			CapabilityOperations.Actions.IconContent,
 			new ActionIconContentArguments { Parameters = ToElements(parameters), Version = version },
 			options);
+	}
 
 	private static Dictionary<string, JsonElement> ToElements(IReadOnlyDictionary<string, object?>? parameters)
 	{

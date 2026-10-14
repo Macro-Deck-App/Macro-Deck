@@ -9,7 +9,9 @@ internal sealed class FakeScreenshotter : IPreviewScreenshotter
 	public Func<PreviewShot, PreviewRenderException?>? Fail { get; init; }
 
 	public Task<IPreviewScreenshotter> Factory(string browser, CancellationToken cancellationToken)
-		=> Task.FromResult<IPreviewScreenshotter>(this);
+	{
+		return Task.FromResult<IPreviewScreenshotter>(this);
+	}
 
 	public Task CaptureAsync(PreviewShot shot, CancellationToken cancellationToken)
 	{
@@ -25,5 +27,8 @@ internal sealed class FakeScreenshotter : IPreviewScreenshotter
 		return Task.CompletedTask;
 	}
 
-	public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+	public ValueTask DisposeAsync()
+	{
+		return ValueTask.CompletedTask;
+	}
 }

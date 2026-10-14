@@ -30,21 +30,24 @@ internal sealed class CompanionDeviceControlTests
 
 	[SetUp]
 	public void CreateFolderName()
-		=> _folder = Path.Combine(Path.GetTempPath(), $"companion-screenshots-{Guid.NewGuid():N}");
+	{
+		_folder = Path.Combine(Path.GetTempPath(), $"companion-screenshots-{Guid.NewGuid():N}");
+	}
 
 	[TearDown]
 	public void DeleteFolder()
 	{
 		if (Directory.Exists(_folder))
 		{
-			Directory.Delete(_folder, recursive: true);
+			Directory.Delete(_folder, true);
 		}
 	}
 
 	[TestCase("screen-on", "screenOn", "screenOn")]
 	[TestCase("screen-off", "screenOff", "screenOff")]
 	[TestCase("focus-host", "focus", "focus")]
-	public async Task A_device_control_is_sent_only_when_the_device_reports_its_capability(string actionId,
+	public async Task A_device_control_is_sent_only_when_the_device_reports_its_capability(
+		string actionId,
 		string capability,
 		string command)
 	{
@@ -760,8 +763,9 @@ internal sealed class CompanionDeviceControlTests
 		var device = await ConnectRequestableAsync(harness, "screenshotFull");
 
 		var running = Screenshot(harness, device, TakeScreenshotAction.FullMode);
-		Controller(harness, device).ScreenshotFailed(SentCommand(harness).RequestId!,
-			new CompanionScreenshotFailedRequest { Reason = "consentDenied" });
+		Controller(harness, device)
+			.ScreenshotFailed(SentCommand(harness).RequestId!,
+				new CompanionScreenshotFailedRequest { Reason = "consentDenied" });
 		var result = await running.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
@@ -1116,11 +1120,13 @@ internal sealed class CompanionDeviceControlTests
 		return device;
 	}
 
-	private static Task<ActionResult> Run(CompanionHarness harness,
+	private static Task<ActionResult> Run(
+		CompanionHarness harness,
 		string actionId,
 		Guid device,
 		CancellationToken cancellationToken)
-		=> harness.Integration.Actions.Single(candidate => candidate.Id == actionId)
+	{
+		return harness.Integration.Actions.Single(candidate => candidate.Id == actionId)
 			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext
 			{
@@ -1128,6 +1134,7 @@ internal sealed class CompanionDeviceControlTests
 					{ [CompanionTargetResolver.ConfigurationParameter] = device.ToString("D") },
 				CancellationToken = cancellationToken
 			});
+	}
 
 	private static async Task<Guid> ConnectAsync(CompanionHarness harness, string capability)
 	{
@@ -1137,24 +1144,31 @@ internal sealed class CompanionDeviceControlTests
 	}
 
 	private Task<ActionResult> Screenshot(CompanionHarness harness, Guid device, string mode, string? variable = null)
-		=> CompanionStateAndActionsTests.ExecuteAsync(harness,
+	{
+		return CompanionStateAndActionsTests.ExecuteAsync(harness,
 			"take-screenshot",
 			device,
 			(TakeScreenshotAction.ModeParameter, mode),
 			(TakeScreenshotAction.FolderParameter, _folder),
 			(TakeScreenshotAction.FileNameVariableParameter, variable ?? string.Empty));
+	}
 
 	private static CompanionCommandEvent SentCommand(CompanionHarness harness)
-		=> (CompanionCommandEvent)harness.Transport.GroupMessages.Last().Message;
+	{
+		return (CompanionCommandEvent)harness.Transport.GroupMessages.Last().Message;
+	}
 
 	private static CompanionScreenshotsController Controller(CompanionHarness harness, Guid device, byte[]? body = null)
 	{
 		var context = new DefaultHttpContext
 		{
 			User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(AuthDefaults.DeviceClaim, device.ToString())],
-				"test"))
+				"test")),
+			Request =
+			{
+				Body = new MemoryStream(body ?? [])
+			}
 		};
-		context.Request.Body = new MemoryStream(body ?? []);
 		return new CompanionScreenshotsController(harness.Requests)
 		{
 			ControllerContext = new ControllerContext { HttpContext = context }

@@ -7,7 +7,6 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Tests.UnitTests.Auth;
-using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,20 +68,20 @@ public class InstallationIntegrityEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
 	private const string DamagedBody = """
-		{"status":"damaged","reason":"files","missing":1,"modified":0,"installKind":"windows"}
-		""";
+									   {"status":"damaged","reason":"files","missing":1,"modified":0,"installKind":"windows"}
+									   """;
 
 	[Test]
 	public async Task The_bootstrapper_on_loopback_gets_an_acknowledgement_and_the_user_a_notification()
 	{
 		var response = await PostIntegrity(FakeConnectionShape.Loopback);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 			Assert.That(await response.Content.ReadAsStringAsync(), Is.EqualTo("""{"accepted":true}"""));
@@ -111,7 +110,9 @@ public class InstallationIntegrityEndpointTests
 	}
 
 	private IEnumerable<UserNotification> DamageNotifications()
-		=> _host.Services.GetRequiredService<IUserNotificationStore>()
+	{
+		return _host.Services.GetRequiredService<IUserNotificationStore>()
 			.Snapshot()
 			.Where(n => n.Title == "Macro Deck was not updated completely");
+	}
 }

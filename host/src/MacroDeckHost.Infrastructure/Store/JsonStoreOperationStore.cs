@@ -14,7 +14,8 @@ public sealed class JsonStoreOperationStore : IStoreOperationStore
 	private readonly string _path;
 	private readonly DurableJsonFile _files;
 
-	public JsonStoreOperationStore(IMacroDeckPaths paths,
+	public JsonStoreOperationStore(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{

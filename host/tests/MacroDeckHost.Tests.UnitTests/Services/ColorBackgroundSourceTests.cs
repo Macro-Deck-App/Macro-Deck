@@ -68,13 +68,16 @@ public class ColorBackgroundSourceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task A_profile_background_reference_is_shown_resolved_and_survives_a_rename()
 	{
-		var set = await _updateProfile.Handle(
-			new UpdateProfileRequest { Id = _profileId.ToString(), DefaultBackgroundColorSource = Reference },
+		var set = await _updateProfile.Handle(new UpdateProfileRequest
+				{ Id = _profileId.ToString(), DefaultBackgroundColorSource = Reference },
 			CancellationToken.None);
 
 		var renamed = await _updateProfile.Handle(new UpdateProfileRequest
@@ -98,11 +101,12 @@ public class ColorBackgroundSourceTests
 	[Test]
 	public async Task A_folder_background_reference_is_kept_until_a_different_colour_is_chosen()
 	{
-		await _updateFolder.Handle(new UpdateFolderRequest { Id = _folderId.ToString(), BackgroundColorSource = Reference },
+		await _updateFolder.Handle(new UpdateFolderRequest
+				{ Id = _folderId.ToString(), BackgroundColorSource = Reference },
 			CancellationToken.None);
 
-		var echoed = await _updateFolder.Handle(
-			new UpdateFolderRequest { Id = _folderId.ToString(), Name = "Home", BackgroundColor = "#003DF5" },
+		var echoed = await _updateFolder.Handle(new UpdateFolderRequest
+				{ Id = _folderId.ToString(), Name = "Home", BackgroundColor = "#003DF5" },
 			CancellationToken.None);
 		var replaced = await _updateFolder.Handle(
 			new UpdateFolderRequest { Id = _folderId.ToString(), BackgroundColor = "#ff0000" },

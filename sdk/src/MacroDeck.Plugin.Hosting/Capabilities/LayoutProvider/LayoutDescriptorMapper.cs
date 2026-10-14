@@ -7,7 +7,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.LayoutProvider;
 internal static class LayoutDescriptorMapper
 {
 	public static LayoutDescriptorDto ToDto(LayoutDescriptor layout)
-		=> new()
+	{
+		return new LayoutDescriptorDto
 		{
 			Id = layout.Id,
 			Name = layout.Name,
@@ -15,18 +16,22 @@ internal static class LayoutDescriptorMapper
 			Capabilities = layout.Capabilities is { } capabilities ? ToDto(capabilities) : null,
 			Metadata = layout.Metadata ?? new Dictionary<string, string>(StringComparer.Ordinal)
 		};
+	}
 
 	public static LayoutDescriptor ToSdk(LayoutDescriptorDto dto)
-		=> new(dto.Id,
+	{
+		return new LayoutDescriptor(dto.Id,
 			dto.Name,
 			[.. dto.Regions.Select(ToSdk)],
 			dto.Capabilities is { } capabilities
 				? ToSdk(capabilities)
 				: null,
 			dto.Metadata);
+	}
 
 	private static LayoutRegionDto ToDto(LayoutRegion region)
-		=> new()
+	{
+		return new LayoutRegionDto
 		{
 			Id = region.Id,
 			Kind = region.Kind,
@@ -36,9 +41,11 @@ internal static class LayoutDescriptorMapper
 			Visuals = region.Visuals is { } visuals ? ToDto(visuals) : null,
 			Extra = region.Extra
 		};
+	}
 
 	private static LayoutRegion ToSdk(LayoutRegionDto dto)
-		=> new()
+	{
+		return new LayoutRegion
 		{
 			Id = dto.Id,
 			Kind = dto.Kind,
@@ -48,9 +55,11 @@ internal static class LayoutDescriptorMapper
 			Visuals = dto.Visuals is { } visuals ? ToSdk(visuals) : null,
 			Extra = dto.Extra
 		};
+	}
 
 	private static LayoutGridDto ToDto(LayoutGrid grid)
-		=> new()
+	{
+		return new LayoutGridDto
 		{
 			Rows = grid.Rows,
 			Columns = grid.Columns,
@@ -64,9 +73,11 @@ internal static class LayoutDescriptorMapper
 				? new LayoutKeySizeDto { Width = keySize.Width, Height = keySize.Height }
 				: null
 		};
+	}
 
 	private static LayoutGrid ToSdk(LayoutGridDto dto)
-		=> new()
+	{
+		return new LayoutGrid
 		{
 			Rows = dto.Rows,
 			Columns = dto.Columns,
@@ -78,9 +89,11 @@ internal static class LayoutDescriptorMapper
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
 			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
 		};
+	}
 
 	private static LayoutVisualCapabilitiesDto ToDto(LayoutVisualCapabilities visuals)
-		=> new()
+	{
+		return new LayoutVisualCapabilitiesDto
 		{
 			StaticIcons = visuals.StaticIcons,
 			AnimatedIcons = visuals.AnimatedIcons,
@@ -93,9 +106,11 @@ internal static class LayoutDescriptorMapper
 			CustomFolderViews = visuals.CustomFolderViews,
 			MaxUpdatesPerSecond = visuals.MaxUpdatesPerSecond
 		};
+	}
 
 	private static LayoutVisualCapabilities ToSdk(LayoutVisualCapabilitiesDto dto)
-		=> new()
+	{
+		return new LayoutVisualCapabilities
 		{
 			StaticIcons = dto.StaticIcons,
 			AnimatedIcons = dto.AnimatedIcons,
@@ -108,10 +123,17 @@ internal static class LayoutDescriptorMapper
 			CustomFolderViews = dto.CustomFolderViews,
 			MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 		};
+	}
 
 	private static LayoutCapabilitiesDto ToDto(LayoutCapabilities capabilities)
-		=> new() { Visuals = capabilities.Visuals is { } visuals ? ToDto(visuals) : null, Extra = capabilities.Extra };
+	{
+		return new LayoutCapabilitiesDto
+			{ Visuals = capabilities.Visuals is { } visuals ? ToDto(visuals) : null, Extra = capabilities.Extra };
+	}
 
 	private static LayoutCapabilities ToSdk(LayoutCapabilitiesDto dto)
-		=> new() { Visuals = dto.Visuals is { } visuals ? ToSdk(visuals) : null, Extra = dto.Extra };
+	{
+		return new LayoutCapabilities
+			{ Visuals = dto.Visuals is { } visuals ? ToSdk(visuals) : null, Extra = dto.Extra };
+	}
 }

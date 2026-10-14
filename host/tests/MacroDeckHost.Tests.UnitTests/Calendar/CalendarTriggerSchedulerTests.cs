@@ -77,8 +77,8 @@ public class CalendarTriggerSchedulerTests
 	public async Task Starts_soon_fires_at_each_subscriptions_own_lead_time_and_only_once()
 	{
 		_provider.WithEvent("work", Event("review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Review"));
-		var tenMinutes = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 10);
-		var fiveMinutes = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 5);
+		var tenMinutes = Automation(CalendarEventProvider.StartsSoonEventId, 10);
+		var fiveMinutes = Automation(CalendarEventProvider.StartsSoonEventId, 5);
 
 		await RunAtAsync(Noon.AddMinutes(19));
 		var beforeAnyLead = Runs().Count;
@@ -100,7 +100,10 @@ public class CalendarTriggerSchedulerTests
 	public async Task Started_fires_at_the_start_and_ended_at_the_end_with_the_event_as_payload()
 	{
 		_provider.WithEvent("work",
-			Event("review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Review",
+			Event("review",
+				Noon.AddMinutes(30),
+				TimeSpan.FromMinutes(30),
+				title: "Review",
 				meetingUrl: "https://meet.example.com/review"));
 		var started = Automation(CalendarEventProvider.StartedEventId);
 		var ended = Automation(CalendarEventProvider.EndedEventId);
@@ -127,8 +130,10 @@ public class CalendarTriggerSchedulerTests
 			Assert.That(payload["provider"], Is.EqualTo("Google Calendar"));
 			Assert.That(payload["meetingUrl"], Is.EqualTo("https://meet.example.com/review"));
 			Assert.That(payload["allDay"], Is.EqualTo(false));
-			Assert.That(DateTimeOffset.Parse((string)payload["start"]!, CultureInfo.InvariantCulture), Is.EqualTo(Noon.AddMinutes(30)));
-			Assert.That(DateTimeOffset.Parse((string)payload["end"]!, CultureInfo.InvariantCulture), Is.EqualTo(Noon.AddMinutes(60)));
+			Assert.That(DateTimeOffset.Parse((string)payload["start"]!, CultureInfo.InvariantCulture),
+				Is.EqualTo(Noon.AddMinutes(30)));
+			Assert.That(DateTimeOffset.Parse((string)payload["end"]!, CultureInfo.InvariantCulture),
+				Is.EqualTo(Noon.AddMinutes(60)));
 		});
 	}
 
@@ -143,9 +148,9 @@ public class CalendarTriggerSchedulerTests
 			.WithEvent("work", Event("w-review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Review"))
 			.WithEvent("home", Event("h-standup", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Standup"));
 		Automation(eventId,
-			leadMinutes: 10,
-			accountId: "app.google::work",
-			filter: """{"kind":"compare","id":"c1","left":{"$event":"title"},"operator":"==","right":"Standup"}""");
+			10,
+			"app.google::work",
+			"""{"kind":"compare","id":"c1","left":{"$event":"title"},"operator":"==","right":"Standup"}""");
 
 		await RunAtAsync(Noon.AddMinutes(dueMinute));
 
@@ -158,7 +163,7 @@ public class CalendarTriggerSchedulerTests
 		_provider.WithEvent("work", Event("first", Noon.AddMinutes(30), TimeSpan.FromMinutes(30)))
 			.WithEvent("work", Event("second", Noon.AddMinutes(60), TimeSpan.FromMinutes(30)));
 		var widget = StubFolderCache.Widget(WidgetFlowsJson.ToSource(Flows(CalendarEventProvider.StartsSoonEventId,
-			leadMinutes: 15,
+			15,
 			filter: """{"kind":"compare","id":"c1","left":{"$var":"armed"},"operator":"==","right":"yes"}""")));
 		_folders.AddFolder(widget);
 		_index.Rebuild();
@@ -191,7 +196,7 @@ public class CalendarTriggerSchedulerTests
 	[Test]
 	public async Task An_event_first_seen_inside_its_lead_window_fires_starts_soon_once()
 	{
-		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 15);
+		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, 15);
 		await RunAtAsync(Noon);
 
 		_provider.WithEvent("work", Event("moved", Noon.AddMinutes(10), TimeSpan.FromMinutes(30)));
@@ -205,7 +210,7 @@ public class CalendarTriggerSchedulerTests
 	public async Task A_host_that_starts_inside_the_lead_window_still_fires_starts_soon()
 	{
 		_provider.WithEvent("work", Event("soon", Noon.AddMinutes(8), TimeSpan.FromMinutes(30)));
-		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 10);
+		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, 10);
 
 		await RunAtAsync(Noon);
 
@@ -241,7 +246,7 @@ public class CalendarTriggerSchedulerTests
 	public async Task Replanning_never_fires_the_same_instant_twice()
 	{
 		_provider.WithEvent("work", Event("review", Noon.AddMinutes(10), TimeSpan.FromMinutes(20)));
-		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 15);
+		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, 15);
 		var started = Automation(CalendarEventProvider.StartedEventId);
 		var ended = Automation(CalendarEventProvider.EndedEventId);
 
@@ -284,7 +289,7 @@ public class CalendarTriggerSchedulerTests
 	public async Task Starts_soon_without_a_lead_time_fires_at_the_start()
 	{
 		_provider.WithEvent("work", Event("review", Noon.AddMinutes(10), TimeSpan.FromMinutes(30)));
-		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, leadMinutes: 0);
+		var startsSoon = Automation(CalendarEventProvider.StartsSoonEventId, 0);
 
 		await RunAtAsync(Noon);
 		await RunAtAsync(Noon.AddMinutes(10));
@@ -307,7 +312,7 @@ public class CalendarTriggerSchedulerTests
 
 		foreach (var occurrence in published)
 		{
-			IReadOnlyList<EventSubscription> subscriptions = occurrence.Target is { } target
+			var subscriptions = occurrence.Target is { } target
 				? _index.Find(target) is { } single ? [single] : []
 				: _index.Find(occurrence.EventId);
 
@@ -321,7 +326,10 @@ public class CalendarTriggerSchedulerTests
 		}
 	}
 
-	private List<string?> Runs() => [.. _executor.Requests.Select(r => r.FlowsSource)];
+	private List<string?> Runs()
+	{
+		return [.. _executor.Requests.Select(r => r.FlowsSource)];
+	}
 
 	private string Automation(
 		string eventId,
@@ -334,7 +342,11 @@ public class CalendarTriggerSchedulerTests
 		return WidgetFlowsJson.ToSource(automation.Flows);
 	}
 
-	private static string Flows(string eventId, int? leadMinutes = null, string? accountId = null, string? filter = null)
+	private static string Flows(
+		string eventId,
+		int? leadMinutes = null,
+		string? accountId = null,
+		string? filter = null)
 	{
 		var parameters = new List<object>();
 		if (leadMinutes is { } lead)

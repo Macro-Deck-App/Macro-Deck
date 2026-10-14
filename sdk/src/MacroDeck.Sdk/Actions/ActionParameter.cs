@@ -141,7 +141,8 @@ public sealed class ActionParameter
 		return copy;
 	}
 
-	public static ActionParameter Text(string name,
+	public static ActionParameter Text(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		LocalizedText placeholder = default,
@@ -149,7 +150,8 @@ public sealed class ActionParameter
 		bool required = false,
 		string? validationRegex = null,
 		int? maxLength = null)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.String,
@@ -161,15 +163,18 @@ public sealed class ActionParameter
 			ValidationRegex = validationRegex,
 			MaxLength = maxLength
 		};
+	}
 
-	public static ActionParameter MultilineText(string name,
+	public static ActionParameter MultilineText(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		LocalizedText placeholder = default,
 		string? defaultValue = null,
 		bool required = false,
 		int? maxLength = null)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.String,
@@ -181,8 +186,10 @@ public sealed class ActionParameter
 			Required = required,
 			MaxLength = maxLength
 		};
+	}
 
-	public static ActionParameter Number(string name,
+	public static ActionParameter Number(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		double? min = null,
@@ -190,7 +197,8 @@ public sealed class ActionParameter
 		double? step = null,
 		double? defaultValue = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Number,
@@ -202,15 +210,18 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Slider(string name,
+	public static ActionParameter Slider(
+		string name,
 		double min,
 		double max,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		double? step = null,
 		double? defaultValue = null)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Number,
@@ -222,13 +233,16 @@ public sealed class ActionParameter
 			Step = step,
 			DefaultValue = defaultValue
 		};
+	}
 
-	public static ActionParameter Toggle(string name,
+	public static ActionParameter Toggle(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool defaultValue = false,
 		bool literalOnly = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Boolean,
@@ -237,12 +251,15 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			LiteralOnly = literalOnly
 		};
+	}
 
-	public static ActionParameter Password(string name,
+	public static ActionParameter Password(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Password,
@@ -250,12 +267,15 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Secret(string name,
+	public static ActionParameter Secret(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Secret,
@@ -263,14 +283,17 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Choice(string name,
+	public static ActionParameter Choice(
+		string name,
 		IReadOnlyList<ActionParameterOption> options,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? defaultValue = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Choice,
@@ -280,6 +303,7 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			Required = required
 		};
+	}
 
 	/// <summary>
 	/// A pick list whose options the host resolves at edit time.
@@ -290,13 +314,15 @@ public sealed class ActionParameter
 	/// editor has no label for the current value and an empty field would otherwise read as "you still
 	/// have to choose something" for a parameter that is already doing the right thing.
 	/// </param>
-	public static ActionParameter DynamicChoice(string name,
+	public static ActionParameter DynamicChoice(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? optionsSourceId = null,
 		LocalizedText placeholder = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.DynamicChoice,
@@ -307,15 +333,18 @@ public sealed class ActionParameter
 			Placeholder = placeholder,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Autocomplete(string name,
+	public static ActionParameter Autocomplete(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		IReadOnlyList<ActionParameterOption>? options = null,
 		string? optionsSourceId = null,
 		LocalizedText placeholder = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Autocomplete,
@@ -327,14 +356,17 @@ public sealed class ActionParameter
 			Placeholder = placeholder,
 			Required = required
 		};
+	}
 
-	public static ActionParameter MultiSelect(string name,
+	public static ActionParameter MultiSelect(
+		string name,
 		IReadOnlyList<ActionParameterOption>? options = null,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? optionsSourceId = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.MultiSelect,
@@ -345,13 +377,16 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Color(string name,
+	public static ActionParameter Color(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? defaultValue = null,
 		bool supportsReset = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Color,
@@ -360,13 +395,16 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			SupportsReset = supportsReset
 		};
+	}
 
-	public static ActionParameter File(string name,
+	public static ActionParameter File(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		IReadOnlyList<string>? fileExtensions = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.File,
@@ -375,12 +413,15 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Folder(string name,
+	public static ActionParameter Folder(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Folder,
@@ -388,12 +429,15 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Hotkey(string name,
+	public static ActionParameter Hotkey(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Hotkey,
@@ -401,15 +445,18 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Duration(string name,
+	public static ActionParameter Duration(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		double? min = null,
 		double? max = null,
 		double? defaultMilliseconds = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Duration,
@@ -420,12 +467,15 @@ public sealed class ActionParameter
 			DefaultValue = defaultMilliseconds,
 			Required = required
 		};
+	}
 
-	public static ActionParameter DateTime(string name,
+	public static ActionParameter DateTime(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.DateTime,
@@ -433,13 +483,16 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Json(string name,
+	public static ActionParameter Json(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? defaultValue = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Json,
@@ -448,14 +501,17 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Code(string name,
+	public static ActionParameter Code(
+		string name,
 		string language,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		string? defaultValue = null,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Code,
@@ -465,12 +521,15 @@ public sealed class ActionParameter
 			DefaultValue = defaultValue,
 			Required = required
 		};
+	}
 
-	public static ActionParameter KeyValue(string name,
+	public static ActionParameter KeyValue(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.KeyValue,
@@ -478,13 +537,16 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
 #pragma warning disable CA1720 // Benennung folgt dem Parametertyp
-	public static ActionParameter Object(string name,
+	public static ActionParameter Object(
+		string name,
 		IReadOnlyList<ActionParameter> children,
 		LocalizedText label = default,
 		LocalizedText description = default)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Object,
@@ -492,13 +554,16 @@ public sealed class ActionParameter
 			Label = label,
 			Description = description
 		};
+	}
 #pragma warning restore CA1720
 
-	public static ActionParameter Array(string name,
+	public static ActionParameter Array(
+		string name,
 		ActionParameter itemTemplate,
 		LocalizedText label = default,
 		LocalizedText description = default)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Array,
@@ -506,12 +571,15 @@ public sealed class ActionParameter
 			Label = label,
 			Description = description
 		};
+	}
 
-	public static ActionParameter IpAddress(string name,
+	public static ActionParameter IpAddress(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.IpAddress,
@@ -519,14 +587,17 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Url(string name,
+	public static ActionParameter Url(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		LocalizedText placeholder = default,
 		bool required = false,
 		bool autoPrefixHttps = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Url,
@@ -536,12 +607,15 @@ public sealed class ActionParameter
 			Required = required,
 			AutoPrefixHttps = autoPrefixHttps
 		};
+	}
 
-	public static ActionParameter Icon(string name,
+	public static ActionParameter Icon(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Icon,
@@ -549,12 +623,15 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
-	public static ActionParameter Image(string name,
+	public static ActionParameter Image(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Image,
@@ -562,16 +639,19 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
 	/// <summary>
 	/// A multi-step keyboard sequence (key combos, text, delays, key down/up) edited by the dedicated
 	/// sequence editor. The value is a JSON object matching the keyboard sequence model.
 	/// </summary>
-	public static ActionParameter KeyboardSequence(string name,
+	public static ActionParameter KeyboardSequence(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.KeyboardSequence,
@@ -579,16 +659,19 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
 	/// <summary>
 	/// A single key combination (modifiers + key) edited with the keyboard combo editor (record a key
 	/// or pick a supported key from a dropdown, plus modifier toggles).
 	/// </summary>
-	public static ActionParameter KeyboardCombo(string name,
+	public static ActionParameter KeyboardCombo(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = false)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.KeyboardCombo,
@@ -596,6 +679,7 @@ public sealed class ActionParameter
 			Description = description,
 			Required = required
 		};
+	}
 
 	/// <summary>
 	/// Picks the widget an action acts on. The stored value is either a widget id or
@@ -606,17 +690,20 @@ public sealed class ActionParameter
 	/// as an empty picker everywhere else, because a script and an automation have no widget to mean
 	/// - which is why <paramref name="required" /> defaults to true.
 	/// </summary>
-	public static ActionParameter WidgetTarget(string name,
+	public static ActionParameter WidgetTarget(
+		string name,
 		LocalizedText label = default,
 		LocalizedText description = default,
 		bool required = true)
-		=> WidgetTarget(name,
+	{
+		return WidgetTarget(name,
 			new WidgetTargetOptions
 			{
 				Label = label,
 				Description = description,
 				Required = required
 			});
+	}
 
 	/// <summary>
 	/// Picks a widget, with the selection rules spelled out. An overload rather than more optional

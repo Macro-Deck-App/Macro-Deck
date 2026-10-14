@@ -14,7 +14,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 	private readonly StoreInstallConsent _consent;
 	private readonly StoreInstallBackupBatches _backupBatches;
 
-	public StoreInstallCoordinator(IStoreCatalogQueryService catalogQuery,
+	public StoreInstallCoordinator(
+		IStoreCatalogQueryService catalogQuery,
 		IStoreOperationTracker tracker,
 		StoreOperationChannel channel,
 		StoreOperationCancellation cancellation,
@@ -29,7 +30,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		_backupBatches = backupBatches;
 	}
 
-	public StoreOperation Install(StoreExtensionKind kind,
+	public StoreOperation Install(
+		StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
 		bool allowUnsigned = false,
@@ -83,7 +85,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		return found.Success && found.Data!.Entry.FindRelease(version) is null;
 	}
 
-	public StoreOperation InstallTestBuild(string packageId,
+	public StoreOperation InstallTestBuild(
+		string packageId,
 		string displayName,
 		StorePlatformTestBuild build,
 		bool consent)
@@ -102,7 +105,7 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 			packageId,
 			build.Version,
 			displayName,
-			previousVersion: null,
+			null,
 			testBuild: new StoreTestBuildReference(build.Id, build.Build));
 		if (consent)
 		{
@@ -127,7 +130,7 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 			operation.Version,
 			operation.DisplayName,
 			operation.PreviousVersion,
-			retryOf: operationId,
+			operationId,
 			versionPinned: operation.VersionPinned);
 		_channel.Writer.TryWrite(next.Id);
 		return next;
@@ -155,5 +158,8 @@ public sealed class StoreInstallCoordinator : IStoreInstallCoordinator
 		return true;
 	}
 
-	public bool Dismiss(Guid operationId) => _tracker.Dismiss(operationId);
+	public bool Dismiss(Guid operationId)
+	{
+		return _tracker.Dismiss(operationId);
+	}
 }

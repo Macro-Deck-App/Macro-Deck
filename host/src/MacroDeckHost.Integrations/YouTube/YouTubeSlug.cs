@@ -5,7 +5,9 @@ namespace MacroDeckHost.Integrations.YouTube;
 internal static class YouTubeSlug
 {
 	public static string ForChannel(string? handle, string? title, string channelId)
-		=> Slug(handle?.TrimStart('@')) ?? Slug(title) ?? ForChannelId(channelId);
+	{
+		return Slug(handle?.TrimStart('@')) ?? Slug(title) ?? ForChannelId(channelId);
+	}
 
 	public static string ForChannelId(string channelId)
 	{
@@ -13,7 +15,7 @@ internal static class YouTubeSlug
 
 		foreach (var character in channelId.ToLowerInvariant())
 		{
-			builder.Append(character is (>= 'a' and <= 'z') or (>= '0' and <= '9') ? character : '_');
+			builder.Append(character is >= 'a' and <= 'z' or >= '0' and <= '9' ? character : '_');
 		}
 
 		return builder.ToString();
@@ -31,7 +33,7 @@ internal static class YouTubeSlug
 
 		foreach (var character in text.ToLowerInvariant())
 		{
-			if (character is (>= 'a' and <= 'z') or (>= '0' and <= '9'))
+			if (character is >= 'a' and <= 'z' or >= '0' and <= '9')
 			{
 				builder.Append(character);
 				lastWasSeparator = false;

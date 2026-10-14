@@ -3,7 +3,6 @@ using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.Store;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using Serilog.Events;
 
@@ -19,7 +18,7 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 		var refresher = new CancelledOnRefreshRefresher();
 		var sink = new CapturingSink();
 		var logger = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(sink).CreateLogger();
-		using var lifetime = new StubHostApplicationLifetime(started: true);
+		using var lifetime = new StubHostApplicationLifetime(true);
 		using var service = new StoreRegistryRefreshBackgroundService(lifetime,
 			refresher,
 			StoreRegistryOptions.Default,
@@ -45,7 +44,7 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 	{
 		var time = new ManualTimeProvider();
 		var refresher = new CountingRefresher();
-		using var lifetime = new StubHostApplicationLifetime(started: true);
+		using var lifetime = new StubHostApplicationLifetime(true);
 		using var service = new StoreRegistryRefreshBackgroundService(lifetime,
 			refresher,
 			StoreRegistryOptions.Default,
@@ -84,17 +83,23 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 			Assert.That(_count, Is.GreaterThanOrEqualTo(expected));
 		}
 
-		public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
-			Refresh(StoreRegistryRefreshTrigger.Manual, cancellationToken);
+		public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default)
+		{
+			return Refresh(StoreRegistryRefreshTrigger.Manual, cancellationToken);
+		}
 
-		public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		public Task<Result<RegistryRefreshError>> Refresh(
+			StoreRegistryRefreshTrigger trigger,
 			CancellationToken cancellationToken = default)
 		{
 			Interlocked.Increment(ref _count);
 			return Task.FromResult(Result.Ok<RegistryRefreshError>());
 		}
 
-		public Task LoadCachedRegistry(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task LoadCachedRegistry(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class CancelledOnRefreshRefresher : IStoreRegistryRefresher
@@ -105,10 +110,13 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 
 		public StoreRegistryStatus Status => StoreRegistryStatus.Unavailable;
 
-		public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default) =>
-			Refresh(StoreRegistryRefreshTrigger.Manual, cancellationToken);
+		public Task<Result<RegistryRefreshError>> Refresh(CancellationToken cancellationToken = default)
+		{
+			return Refresh(StoreRegistryRefreshTrigger.Manual, cancellationToken);
+		}
 
-		public Task<Result<RegistryRefreshError>> Refresh(StoreRegistryRefreshTrigger trigger,
+		public Task<Result<RegistryRefreshError>> Refresh(
+			StoreRegistryRefreshTrigger trigger,
 			CancellationToken cancellationToken = default)
 		{
 			Trigger = trigger;
@@ -116,7 +124,10 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 			return Task.FromException<Result<RegistryRefreshError>>(new OperationCanceledException());
 		}
 
-		public Task LoadCachedRegistry(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task LoadCachedRegistry(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class CapturingSink : Serilog.Core.ILogEventSink

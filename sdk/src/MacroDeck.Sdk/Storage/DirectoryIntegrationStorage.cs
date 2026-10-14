@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using System.Text;
 
 namespace MacroDeck.Sdk.Storage;
@@ -9,7 +11,7 @@ internal sealed class DirectoryIntegrationStorage : IIntegrationStorage, IDispos
 	internal const string TempSuffix = ".tmp";
 	internal const string BackupSuffix = ".bak";
 
-	private static readonly UTF8Encoding _utf8 = new(encoderShouldEmitUTF8Identifier: false);
+	private static readonly UTF8Encoding _utf8 = new(false);
 
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly Action<string, string>? _beforeAccess;
@@ -24,9 +26,13 @@ internal sealed class DirectoryIntegrationStorage : IIntegrationStorage, IDispos
 
 	public string Directory { get; }
 
-	public string PathFor(string key) => Path.Combine(Directory, key);
+	public string PathFor(string key)
+	{
+		return Path.Combine(Directory, key);
+	}
 
-	public async Task<IntegrationStorageReadResult> ReadAsync(string key,
+	public async Task<IntegrationStorageReadResult> ReadAsync(
+		string key,
 		Func<string, bool>? isValid = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -81,17 +87,17 @@ internal sealed class DirectoryIntegrationStorage : IIntegrationStorage, IDispos
 
 				// The bytes must reach storage before the rename publishes them, or a power loss can leave an
 				// empty document behind.
-				stream.Flush(flushToDisk: true);
+				stream.Flush(true);
 			}
 
 			try
 			{
 				if (File.Exists(path))
 				{
-					File.Move(path, path + BackupSuffix, overwrite: true);
+					File.Move(path, path + BackupSuffix, true);
 				}
 
-				File.Move(tempPath, path, overwrite: true);
+				File.Move(tempPath, path, true);
 			}
 			catch
 			{
@@ -129,7 +135,10 @@ internal sealed class DirectoryIntegrationStorage : IIntegrationStorage, IDispos
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	private static string? TryRead(string path)
 	{

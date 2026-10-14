@@ -23,14 +23,19 @@ internal sealed class ToggleStationPowerAction(WellBehavedIntegration integratio
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(integration);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(integration);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<ActionStateSnapshot?>(new ActionStateSnapshot(
+	{
+		return Task.FromResult<ActionStateSnapshot?>(new ActionStateSnapshot(
 			[new ActionStateDefinition(OnStateId, "On"), new ActionStateDefinition(OffStateId, "Off")],
 			integration.StationPoweredOn ? OnStateId : OffStateId));
+	}
 
 	private sealed class Executor(WellBehavedIntegration integration) : IActionExecutor
 	{

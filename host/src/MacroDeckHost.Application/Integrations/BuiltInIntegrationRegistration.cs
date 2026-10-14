@@ -8,5 +8,8 @@ public sealed class BuiltInIntegrationRegistration
 
 	public Task Completed => _completed.Task;
 
-	public void Complete() => _completed.TrySetResult();
+	public void Complete()
+	{
+		_completed.TrySetResult();
+	}
 }

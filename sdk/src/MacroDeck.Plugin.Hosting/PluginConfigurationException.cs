@@ -24,22 +24,28 @@ public sealed class PluginConfigurationException : Exception
 
 	public PluginConfigurationException(string message, Exception innerException)
 		: base(message, innerException)
-		=> Problems = [message];
+	{
+		Problems = [message];
+	}
 
 	public PluginConfigurationException(IReadOnlyList<string> problems)
 		: base(Describe(problems))
-		=> Problems = problems;
+	{
+		Problems = problems;
+	}
 
 	/// <summary>One line per problem, in the order they were found.</summary>
 	public IReadOnlyList<string> Problems { get; } = [];
 
 	private static string Describe(IReadOnlyList<string> problems)
-		=> problems.Count switch
+	{
+		return problems.Count switch
 		{
 			0 => "The plugin is not configured correctly.",
 			1 => problems[0],
-			_ => "The plugin is not configured correctly:" +
-				Environment.NewLine +
-				string.Join(Environment.NewLine, problems.Select(problem => "  - " + problem))
+			_ => "The plugin is not configured correctly:"
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, problems.Select(problem => "  - " + problem))
 		};
+	}
 }

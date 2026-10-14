@@ -7,7 +7,7 @@ public static class IssueMapper
 {
 	public static IntegrationIssue ToDomain(IntegrationIssueDescriptorDto dto)
 	{
-		if (!Enum.TryParse<IntegrationIssueSeverity>(dto.Severity, ignoreCase: false, out var severity))
+		if (!Enum.TryParse<IntegrationIssueSeverity>(dto.Severity, false, out var severity))
 		{
 			throw new InvalidOperationException($"Unknown integration issue severity '{dto.Severity}'.");
 		}
@@ -21,7 +21,7 @@ public static class IssueMapper
 
 	public static IssueResolution ToDomain(IssueResolveResult dto)
 	{
-		if (!Enum.TryParse<IssueResolutionFollowUp>(dto.FollowUp, ignoreCase: false, out var followUp))
+		if (!Enum.TryParse<IssueResolutionFollowUp>(dto.FollowUp, false, out var followUp))
 		{
 			throw new InvalidOperationException($"Unknown issue resolution follow-up '{dto.FollowUp}'.");
 		}

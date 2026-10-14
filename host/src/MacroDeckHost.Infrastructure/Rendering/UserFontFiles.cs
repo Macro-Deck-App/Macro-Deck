@@ -17,15 +17,22 @@ internal static class UserFontFiles
 	private const int FontIdLength = 16;
 	private const uint CollectionSignature = 0x74746366;
 
-	private static readonly HashSet<string> Extensions = new([".ttf", ".otf"], StringComparer.OrdinalIgnoreCase);
+	private static readonly HashSet<string> _extensions = new([".ttf", ".otf"], StringComparer.OrdinalIgnoreCase);
 
-	public static bool HasFontExtension(string fileName) => Extensions.Contains(Path.GetExtension(fileName));
+	public static bool HasFontExtension(string fileName)
+	{
+		return _extensions.Contains(Path.GetExtension(fileName));
+	}
 
-	public static string FontIdOf(string contentHash) =>
-		contentHash[ContentHash.Sha256Prefix.Length..][..FontIdLength];
+	public static string FontIdOf(string contentHash)
+	{
+		return contentHash[ContentHash.Sha256Prefix.Length..][..FontIdLength];
+	}
 
-	public static bool IsFontId(string? value) =>
-		value is { Length: FontIdLength } && value.All(char.IsAsciiHexDigitLower);
+	public static bool IsFontId(string? value)
+	{
+		return value is { Length: FontIdLength } && value.All(char.IsAsciiHexDigitLower);
+	}
 
 	public static IEnumerable<string> Enumerate(string directory)
 	{

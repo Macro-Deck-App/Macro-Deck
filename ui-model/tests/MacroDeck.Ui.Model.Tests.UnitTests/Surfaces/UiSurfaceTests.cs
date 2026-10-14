@@ -76,5 +76,7 @@ public class UiSurfaceTests
 	}
 
 	private static bool HasMember(Type type, string name)
-		=> type.GetMember(name, BindingFlags.Public | BindingFlags.Static).Length > 0;
+	{
+		return type.GetMember(name, BindingFlags.Public | BindingFlags.Static).Length > 0;
+	}
 }

@@ -15,8 +15,8 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	[Test]
 	public async Task A_rich_presence_server_announcing_the_arrpc_user_is_passed_over_for_discord()
 	{
-		var endpoints = new FakeDiscordIpcEndpoints(
-			() => new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
 			() => new FakeDiscordIpcTransport { Name = "app/com.discordapp.Discord/discord-ipc-0" });
 		using var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
 		var disconnected = false;
@@ -40,8 +40,7 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	[Test]
 	public async Task A_server_rejecting_commands_as_unknown_is_passed_over_for_discord()
 	{
-		var endpoints = new FakeDiscordIpcEndpoints(
-			() => new FakeDiscordIpcTransport
+		var endpoints = new FakeDiscordIpcEndpoints(() => new FakeDiscordIpcTransport
 			{
 				Name = "discord-ipc-0",
 				Responder = command => FakeResponse.Error(1000, $"Unknown command: {command.Command}")
@@ -62,8 +61,8 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	[Test]
 	public void Finding_only_rich_presence_servers_reports_that_discord_itself_is_missing()
 	{
-		var endpoints = new FakeDiscordIpcEndpoints(
-			() => new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
 			() => new FakeDiscordIpcTransport
 			{
 				Name = "discord-ipc-1",
@@ -86,8 +85,8 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	[Test]
 	public void A_discord_refusing_access_is_reported_even_behind_a_rich_presence_server()
 	{
-		var endpoints = new FakeDiscordIpcEndpoints(
-			() => new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
 			() => new FakeDiscordIpcTransport { Name = "discord-ipc-1", AccessDenied = true });
 		using var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
 
@@ -149,8 +148,8 @@ internal sealed class DiscordRpcClientEndpointSelectionTests
 	[Test]
 	public async Task Disposing_after_passing_over_a_server_closes_the_discord_connection()
 	{
-		var endpoints = new FakeDiscordIpcEndpoints(
-			() => new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
+		var endpoints = new FakeDiscordIpcEndpoints(()
+				=> new FakeDiscordIpcTransport { Name = "discord-ipc-0", ReadyData = ArRpcReady },
 			() => new FakeDiscordIpcTransport { Name = "discord-ipc-1" });
 		var client = new DiscordRpcClient(endpoints.CreateTransport, _probeTimeout);
 		await client.ConnectAsync("1", CancellationToken.None);

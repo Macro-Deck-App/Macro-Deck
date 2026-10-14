@@ -48,13 +48,15 @@ public sealed record DeckNavigationCommand
 	public bool IsResync { get; init; }
 
 	public static DeckNavigationCommand ChangeTo(string folderId, string? profileId, string? navigationToken = null)
-		=> new()
+	{
+		return new DeckNavigationCommand
 		{
 			Command = DeckNavigationCommands.ChangeTo,
 			FolderId = folderId,
 			ProfileId = profileId,
 			NavigationToken = navigationToken
 		};
+	}
 }
 
 public static class DeckNavigationCommands
@@ -83,18 +85,23 @@ public sealed record DeviceInteractionOutcome
 	/// </summary>
 	public bool Unsupported { get; init; }
 
-	public static DeviceInteractionOutcome Reject(string errorCode) => new() { ErrorCode = errorCode };
+	public static DeviceInteractionOutcome Reject(string errorCode)
+	{
+		return new DeviceInteractionOutcome { ErrorCode = errorCode };
+	}
 
 	public static readonly DeviceInteractionOutcome NotSupported = new() { Handled = true, Unsupported = true };
 
 	/// <summary>The same verdict in the shape a provider sees it, so an in-process and a remote session
 	/// report identically.</summary>
 	public DeviceInteractionResult ToResult()
-		=> ErrorCode is { } code
+	{
+		return ErrorCode is { } code
 			? DeviceInteractionResult.Rejected(code)
 			: Unsupported
 				? DeviceInteractionResult.NotSupported
 				: DeviceInteractionResult.Accepted;
+	}
 }
 
 /// <summary>The host's own names for the codes a device session reports a refusal under. Deliberately
@@ -114,5 +121,8 @@ public static class DeviceSurfaceErrorCodes
 /// <summary>The realtime group key a device session subscribes widget state and label pushes under.</summary>
 public static class DeviceSessionGroups
 {
-	public static string For(Guid deviceId) => $"device-session:{deviceId:D}";
+	public static string For(Guid deviceId)
+	{
+		return $"device-session:{deviceId:D}";
+	}
 }

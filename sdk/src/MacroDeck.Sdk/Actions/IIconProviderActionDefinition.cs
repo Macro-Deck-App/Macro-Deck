@@ -14,7 +14,10 @@ public sealed record ActionIconReference(string Type, string Reference)
 	public const string PluginIconType = "plugin-icon";
 
 	/// <summary>An icon already in the host's icon pack catalog, named by its existing id.</summary>
-	public static ActionIconReference IconPack(string reference) => new(IconPackType, reference);
+	public static ActionIconReference IconPack(string reference)
+	{
+		return new ActionIconReference(IconPackType, reference);
+	}
 
 	/// <summary>
 	/// An icon from one of this plugin's own bundled icon packs, named by the pack's key in the manifest's
@@ -26,7 +29,9 @@ public sealed record ActionIconReference(string Type, string Reference)
 	/// letters, digits and inner hyphens, at most 64 characters), or <paramref name="name" /> is blank or
 	/// contains a slash.</exception>
 	public static ActionIconReference PluginIcon(string key, string name)
-		=> new(PluginIconType, PluginIconReferences.Format(key, name));
+	{
+		return new ActionIconReference(PluginIconType, PluginIconReferences.Format(key, name));
+	}
 }
 
 /// <summary>The bytes behind one <see cref="ActionIconSnapshot.Version" />, mirroring
@@ -113,7 +118,10 @@ public interface IIconProviderActionDefinition
 		IReadOnlyDictionary<string, object?> parameters,
 		string version,
 		CancellationToken cancellationToken)
-		=> Task.FromResult<ActionIconContent?>(null); // reference-only providers need no override
+	{
+		return Task.FromResult<ActionIconContent?>(null);
+		// reference-only providers need no override
+	}
 
 	/// <summary>
 	/// How often a widget following this instance should poll while it is on screen. A request, not a

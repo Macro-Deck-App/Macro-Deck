@@ -13,13 +13,19 @@ internal sealed class NullVoicemeeterRemote : IVoicemeeterRemote
 
 	public LocalizedText? UnavailableReason { get; }
 
-	public VoicemeeterResult Login() => VoicemeeterResult.Unavailable;
+	public VoicemeeterResult Login()
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
 	public void Logout()
 	{
 	}
 
-	public VoicemeeterResult RunVoicemeeter(int runType) => VoicemeeterResult.Unavailable;
+	public VoicemeeterResult RunVoicemeeter(int runType)
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
 	public VoicemeeterResult GetVoicemeeterType(out int rawType)
 	{
@@ -33,7 +39,10 @@ internal sealed class NullVoicemeeterRemote : IVoicemeeterRemote
 		return VoicemeeterResult.Unavailable;
 	}
 
-	public bool IsParametersDirty() => false;
+	public bool IsParametersDirty()
+	{
+		return false;
+	}
 
 	public VoicemeeterResult GetParameter(string name, out float value)
 	{
@@ -47,13 +56,25 @@ internal sealed class NullVoicemeeterRemote : IVoicemeeterRemote
 		return VoicemeeterResult.Unavailable;
 	}
 
-	public VoicemeeterResult SetParameter(string name, float value) => VoicemeeterResult.Unavailable;
+	public VoicemeeterResult SetParameter(string name, float value)
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
-	public VoicemeeterResult SetParameter(string name, string value) => VoicemeeterResult.Unavailable;
+	public VoicemeeterResult SetParameter(string name, string value)
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
-	public VoicemeeterResult RunScript(string script) => VoicemeeterResult.Unavailable;
+	public VoicemeeterResult RunScript(string script)
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
-	public bool IsMacroButtonDirty() => false;
+	public bool IsMacroButtonDirty()
+	{
+		return false;
+	}
 
 	public VoicemeeterResult GetMacroButton(int button, VoicemeeterMacroButtonMode mode, out bool state)
 	{
@@ -62,7 +83,9 @@ internal sealed class NullVoicemeeterRemote : IVoicemeeterRemote
 	}
 
 	public VoicemeeterResult SetMacroButton(int button, VoicemeeterMacroButtonMode mode, bool state)
-		=> VoicemeeterResult.Unavailable;
+	{
+		return VoicemeeterResult.Unavailable;
+	}
 
 	public void Dispose()
 	{

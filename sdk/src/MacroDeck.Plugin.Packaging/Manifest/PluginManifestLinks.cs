@@ -98,11 +98,14 @@ public static class PluginManifestLinks
 	}
 
 	internal static string? StringProperty(JsonElement entry, string name)
-		=> TryGetProperty(entry, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(entry, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
-	private static PluginManifestLink? Inspect(JsonElement entry,
+	private static PluginManifestLink? Inspect(
+		JsonElement entry,
 		int index,
 		SeenLinks seen,
 		List<PluginManifestLinkProblem> problems)
@@ -199,7 +202,8 @@ public static class PluginManifestLinks
 		return new PluginManifestLink { Type = type, Url = url, Label = isCustom ? trimmedLabel : null };
 	}
 
-	private static void ValidateLabel(string label,
+	private static void ValidateLabel(
+		string label,
 		int index,
 		bool isCustom,
 		List<PluginManifestLinkProblem> problems)
@@ -222,7 +226,8 @@ public static class PluginManifestLinks
 		}
 	}
 
-	private static string? ReadString(JsonElement entry,
+	private static string? ReadString(
+		JsonElement entry,
 		int index,
 		string name,
 		List<PluginManifestLinkProblem> problems)
@@ -242,7 +247,9 @@ public static class PluginManifestLinks
 	}
 
 	private static bool Present(JsonElement entry, string name)
-		=> TryGetProperty(entry, name, out var value) && value.ValueKind != JsonValueKind.Null;
+	{
+		return TryGetProperty(entry, name, out var value) && value.ValueKind != JsonValueKind.Null;
+	}
 
 	// Case-insensitive to match PluginManifestJson, which reads older PascalCase manifests.
 	private static bool TryGetProperty(JsonElement entry, string name, out JsonElement value)
@@ -261,13 +268,15 @@ public static class PluginManifestLinks
 	}
 
 	private static PluginManifestLinkProblem Error(int? index, string? property, string message)
-		=> new()
+	{
+		return new PluginManifestLinkProblem
 		{
 			Index = index,
 			Property = property,
 			Severity = PluginManifestLinkProblemSeverity.Error,
 			Message = message
 		};
+	}
 
 	private sealed class SeenLinks
 	{

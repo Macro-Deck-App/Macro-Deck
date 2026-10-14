@@ -24,17 +24,20 @@ public class AdbDeviceDto
 
 	public string? TunnelError { get; set; }
 
-	public static AdbDeviceDto From(AdbDevice device, string? defaultDeviceSerial) => new()
+	public static AdbDeviceDto From(AdbDevice device, string? defaultDeviceSerial)
 	{
-		Serial = device.Serial,
-		State = device.State.ToString(),
-		Model = device.Model,
-		Manufacturer = device.Manufacturer,
-		Authorized = device.IsAuthorized,
-		IsDefault = string.Equals(device.Serial, defaultDeviceSerial, StringComparison.Ordinal),
-		TunnelEstablished = device.Tunnel?.Established ?? false,
-		NetworkConnection = device.IsNetworkConnection,
-		TunnelDevicePort = device.Tunnel?.DevicePort,
-		TunnelError = device.Tunnel?.FailureMessage
-	};
+		return new AdbDeviceDto
+		{
+			Serial = device.Serial,
+			State = device.State.ToString(),
+			Model = device.Model,
+			Manufacturer = device.Manufacturer,
+			Authorized = device.IsAuthorized,
+			IsDefault = string.Equals(device.Serial, defaultDeviceSerial, StringComparison.Ordinal),
+			TunnelEstablished = device.Tunnel?.Established ?? false,
+			NetworkConnection = device.IsNetworkConnection,
+			TunnelDevicePort = device.Tunnel?.DevicePort,
+			TunnelError = device.Tunnel?.FailureMessage
+		};
+	}
 }

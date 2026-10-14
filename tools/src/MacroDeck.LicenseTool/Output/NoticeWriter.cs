@@ -19,8 +19,13 @@ internal static class NoticeWriter
 				continue;
 			}
 
-			builder.Append('\n').Append(title).Append('\n').Append(new string('-', title.Length)).Append('\n')
-				.Append(normalized).Append('\n');
+			builder.Append('\n')
+				.Append(title)
+				.Append('\n')
+				.Append(new string('-', title.Length))
+				.Append('\n')
+				.Append(normalized)
+				.Append('\n');
 		}
 
 		return builder.ToString();

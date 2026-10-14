@@ -23,8 +23,8 @@ public static class UiWidgetSurface
 		ArgumentNullException.ThrowIfNull(surface);
 		ArgumentException.ThrowIfNullOrEmpty(widgetType);
 
-		return surface.Kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Preview &&
-			ReadString(surface, UiWidgetSurfaceAttributes.WidgetType) == widgetType;
+		return surface.Kind is UiSurfaceKinds.Widget or UiSurfaceKinds.Preview
+			&& ReadString(surface, UiWidgetSurfaceAttributes.WidgetType) == widgetType;
 	}
 
 	/// <summary>
@@ -36,9 +36,9 @@ public static class UiWidgetSurface
 		ArgumentNullException.ThrowIfNull(surface);
 		ArgumentException.ThrowIfNullOrEmpty(widgetType);
 
-		return surface.Kind == UiSurfaceKinds.Config &&
-			ReadString(surface, UiConfigSurfaceAttributes.EntryPoint) == UiConfigEntryPoints.WidgetConfig &&
-			ReadString(surface, UiConfigSurfaceAttributes.WidgetType) == widgetType;
+		return surface.Kind == UiSurfaceKinds.Config
+			&& ReadString(surface, UiConfigSurfaceAttributes.EntryPoint) == UiConfigEntryPoints.WidgetConfig
+			&& ReadString(surface, UiConfigSurfaceAttributes.WidgetType) == widgetType;
 	}
 
 	/// <summary>
@@ -83,9 +83,9 @@ public static class UiWidgetSurface
 	{
 		ArgumentNullException.ThrowIfNull(surface);
 
-		return surface.Kind == UiSurfaceKinds.Preview &&
-			surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample) &&
-			sample.ValueKind == JsonValueKind.True;
+		return surface.Kind == UiSurfaceKinds.Preview
+			&& surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Sample, out var sample)
+			&& sample.ValueKind == JsonValueKind.True;
 	}
 
 	/// <summary>
@@ -100,7 +100,9 @@ public static class UiWidgetSurface
 	}
 
 	private static string? ReadString(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

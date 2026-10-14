@@ -18,7 +18,7 @@ public class PluginSubjectResolverTests
 
 		try
 		{
-			var console = new CliConsole(Verbosity.Normal, noColor: true, new StringWriter(), new StringWriter());
+			var console = new CliConsole(Verbosity.Normal, true, new StringWriter(), new StringWriter());
 
 			// The no-project-file check runs synchronously, before any process is ever spawned - this must
 			// complete immediately, not after a build attempt.
@@ -35,7 +35,7 @@ public class PluginSubjectResolverTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 
@@ -62,7 +62,7 @@ public class PluginSubjectResolverTests
 
 			await File.WriteAllTextAsync(Path.Combine(directory, "Program.cs"), "return 0;");
 
-			var console = new CliConsole(Verbosity.Normal, noColor: true, new StringWriter(), new StringWriter());
+			var console = new CliConsole(Verbosity.Normal, true, new StringWriter(), new StringWriter());
 
 			await PluginSubjectResolver.ResolveProjectAsync(directory, console, CancellationToken.None);
 
@@ -72,7 +72,7 @@ public class PluginSubjectResolverTests
 		}
 		finally
 		{
-			Directory.Delete(directory, recursive: true);
+			Directory.Delete(directory, true);
 		}
 	}
 

@@ -29,19 +29,19 @@ internal sealed partial class CompanionLicenseServiceTests
 	private const string ProductionKeyId = "prod-test-a";
 	private const string SecondProductionKeyId = "prod-test-b";
 
-	private static readonly ECDsa ProductionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-	private static readonly ECDsa SecondProductionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+	private static readonly ECDsa _productionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+	private static readonly ECDsa _secondProductionKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
-	private static readonly IReadOnlyDictionary<string, string> TrustedKeys = new Dictionary<string, string>
+	private static readonly IReadOnlyDictionary<string, string> _trustedKeys = new Dictionary<string, string>
 	{
-		[ProductionKeyId] = Point(ProductionKey), [SecondProductionKeyId] = Point(SecondProductionKey)
+		[ProductionKeyId] = Point(_productionKey), [SecondProductionKeyId] = Point(_secondProductionKey)
 	};
 
 	[OneTimeTearDown]
 	public static void DisposeKeys()
 	{
-		ProductionKey.Dispose();
-		SecondProductionKey.Dispose();
+		_productionKey.Dispose();
+		_secondProductionKey.Dispose();
 	}
 
 	[Test]
@@ -50,10 +50,12 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var device = fixture.Harness.AddDevice("Tablet");
 		await fixture.Harness.ReportAsync("connection-other", device);
-		var token = Sign(ProductionKey, ProductionKeyId);
+		var token = Sign(_productionKey, ProductionKeyId);
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
 
-		var answer = await fixture.Service.SyncAsync("connection-buyer", GooglePlay("purchase-a"), CancellationToken.None);
+		var answer = await fixture.Service.SyncAsync("connection-buyer",
+			GooglePlay("purchase-a"),
+			CancellationToken.None);
 		var callsBeforeWork = fixture.Platform.Proofs.Count;
 		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
@@ -65,7 +67,8 @@ internal sealed partial class CompanionLicenseServiceTests
 		{
 			Assert.That(answer.License, Is.Null);
 			Assert.That(callsBeforeWork, Is.Zero);
-			Assert.That(fixture.Platform.Proofs.Select(proof => proof.PurchaseToken), Is.EqualTo(new[] { "purchase-a" }));
+			Assert.That(fixture.Platform.Proofs.Select(proof => proof.PurchaseToken),
+				Is.EqualTo(new[] { "purchase-a" }));
 			Assert.That(status.Licensed, Is.True);
 			Assert.That(status.IssuePending, Is.False);
 			Assert.That(pushes.Select(push => push.ConnectionId),
@@ -79,12 +82,16 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_valid_submitted_token_is_stored_when_none_is_and_never_replaces_one()
 	{
 		var fixture = new Fixture();
-		var first = Sign(ProductionKey, ProductionKeyId, "license-1");
-		var second = Sign(ProductionKey, ProductionKeyId, "license-2");
+		var first = Sign(_productionKey, ProductionKeyId, "license-1");
+		var second = Sign(_productionKey, ProductionKeyId, "license-2");
 
-		var adopted = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = first }, default);
-		var kept = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = second }, default);
-		var status = await fixture.Service.GetStatusAsync(default);
+		var adopted = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = first },
+			CancellationToken.None);
+		var kept = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = second },
+			CancellationToken.None);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -107,7 +114,7 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task An_untrusted_token_is_rejected_and_not_stored(string kind)
 	{
 		var fixture = new Fixture();
-		var valid = Sign(ProductionKey, ProductionKeyId);
+		var valid = Sign(_productionKey, ProductionKeyId);
 		var parts = valid.Split('.');
 		var token = kind switch
 		{
@@ -118,27 +125,29 @@ internal sealed partial class CompanionLicenseServiceTests
 			}))}.{parts[2]}",
 			"tampered-signature" => $"{parts[0]}.{parts[1]}.{Flip(parts[2])}",
 			"unknown-kid" => Sign(ECDsa.Create(ECCurve.NamedCurves.nistP256), "prod-unknown"),
-			"key-a-labelled-b" => Sign(ProductionKey, SecondProductionKeyId),
+			"key-a-labelled-b" => Sign(_productionKey, SecondProductionKeyId),
 			"wrong-product" => WrongProduct(),
 			_ => "not.a.token"
 		};
 
-		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = token }, default);
+		var answer = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = token },
+			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(answer.License, Is.Null);
-			Assert.That((await fixture.Service.GetStatusAsync(default)).Licensed, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed, Is.False);
 		});
 	}
 
 	[Test]
 	public async Task Every_trusted_production_kid_verifies_so_rotation_keeps_old_licenses()
 	{
-		var tokens = new CompanionLicenseTokens(TrustedKeys);
+		var tokens = new CompanionLicenseTokens(_trustedKeys);
 
-		var fromFirst = await tokens.VerifyAsync(Sign(ProductionKey, ProductionKeyId), trustTestKey: false);
-		var fromSecond = await tokens.VerifyAsync(Sign(SecondProductionKey, SecondProductionKeyId), trustTestKey: false);
+		var fromFirst = await tokens.VerifyAsync(Sign(_productionKey, ProductionKeyId), false);
+		var fromSecond = await tokens.VerifyAsync(Sign(_secondProductionKey, SecondProductionKeyId), false);
 
 		Assert.Multiple(() =>
 		{
@@ -153,36 +162,49 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var test = TestKeyLicenses.Sign();
 
-		var refusedWhileOff = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = test }, default);
+		var refusedWhileOff = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = test },
+			CancellationToken.None);
 		fixture.Preferences.DeveloperMode = true;
-		var answeredWhileOn = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = test }, default);
-		var statusWhileOn = await fixture.Service.GetStatusAsync(default);
+		var answeredWhileOn = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = test },
+			CancellationToken.None);
+		var statusWhileOn = await fixture.Service.GetStatusAsync(CancellationToken.None);
 		fixture.Preferences.DeveloperMode = false;
 		var answeredAfterOff = await fixture.Service.SyncAsync("c",
 			new SyncCompanionLicenseRequest { License = answeredWhileOn.License },
-			default);
+			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(refusedWhileOff.License, Is.Null);
 			Assert.That(statusWhileOn.IsTest, Is.True);
 			Assert.That(statusWhileOn.KeyId, Is.EqualTo(CompanionLicenseTokens.TestKeyId));
 			Assert.That(answeredWhileOn.License, Is.EqualTo(test));
 			Assert.That(answeredAfterOff.License, Is.Null);
-			Assert.That((await fixture.Service.GetStatusAsync(default)).Licensed, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed, Is.False);
 		});
 	}
 
 	[Test]
 	public async Task A_production_license_replaces_a_stored_test_license()
 	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
-		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
+		var fixture = new Fixture
+		{
+			Preferences =
+			{
+				DeveloperMode = true
+			}
+		};
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() },
+			CancellationToken.None);
+		var production = Sign(_productionKey, ProductionKeyId, "license-real");
 
-		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
-		var status = await fixture.Service.GetStatusAsync(default);
+		var answer = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = production },
+			CancellationToken.None);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -195,34 +217,50 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_test_license_never_replaces_a_stored_production_license()
 	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		var production = Sign(ProductionKey, ProductionKeyId, "license-real");
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
+		var fixture = new Fixture
+		{
+			Preferences =
+			{
+				DeveloperMode = true
+			}
+		};
+		var production = Sign(_productionKey, ProductionKeyId, "license-real");
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = production },
+			CancellationToken.None);
 
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
-		var afterTest = await fixture.Service.GetStatusAsync(default);
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() },
+			CancellationToken.None);
+		var afterTest = await fixture.Service.GetStatusAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(afterTest?.IsTest, Is.False);
-			Assert.That(afterTest?.LicenseId, Is.EqualTo("license-real"));
+			Assert.That(afterTest.IsTest, Is.False);
+			Assert.That(afterTest.LicenseId, Is.EqualTo("license-real"));
 		});
 	}
 
 	[Test]
 	public async Task A_proof_is_exchanged_while_only_a_test_license_is_stored()
 	{
-		var fixture = new Fixture();
-		fixture.Preferences.DeveloperMode = true;
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() }, default);
-		var production = Sign(ProductionKey, ProductionKeyId, "license-bought");
+		var fixture = new Fixture
+		{
+			Preferences =
+			{
+				DeveloperMode = true
+			}
+		};
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = TestKeyLicenses.Sign() },
+			CancellationToken.None);
+		var production = Sign(_productionKey, ProductionKeyId, "license-bought");
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(production);
 
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		var status = await fixture.Service.GetStatusAsync(default);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(status.IsTest, Is.False);
@@ -235,10 +273,10 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 
-		var unknown = await fixture.Service.SyncAsync("c", Trial("device-a", started: false), default);
-		var started = await fixture.Service.SyncAsync("c", Trial("device-a", started: true), default);
+		var unknown = await fixture.Service.SyncAsync("c", Trial("device-a", false), CancellationToken.None);
+		var started = await fixture.Service.SyncAsync("c", Trial("device-a", true), CancellationToken.None);
 		fixture.Time.Advance(TimeSpan.FromDays(3));
-		var later = await fixture.Service.SyncAsync("c", Trial("device-a", started: true), default);
+		var later = await fixture.Service.SyncAsync("c", Trial("device-a", true), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -255,7 +293,7 @@ internal sealed partial class CompanionLicenseServiceTests
 
 		await Task.WhenAll(Enumerable.Range(0, 20)
 			.Select(index => Task.Run(() =>
-				fixture.Service.SyncAsync("c", Trial($"device-{index}", started: true), default))));
+				fixture.Service.SyncAsync("c", Trial($"device-{index}", true), CancellationToken.None))));
 
 		Assert.That(fixture.StoredTrials().Keys, Has.Count.EqualTo(20));
 	}
@@ -268,7 +306,7 @@ internal sealed partial class CompanionLicenseServiceTests
 			.ToDictionary(index => $"seeded-{index}", index => (long)index);
 		await fixture.Repository.SetValue(CompanionLicenseService.TrialsKey, JsonSerializer.Serialize(seeded));
 
-		await fixture.Service.SyncAsync("c", Trial("newcomer", started: true), default);
+		await fixture.Service.SyncAsync("c", Trial("newcomer", true), CancellationToken.None);
 
 		var trials = fixture.StoredTrials();
 		Assert.Multiple(() =>
@@ -286,8 +324,7 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var device = fixture.Harness.AddDevice("Phone");
 		using var dispatcher = CompanionStateAndActionsTests.Dispatcher(fixture.Harness,
-			new ClaimsPrincipal(new ClaimsIdentity(
-				[
+			new ClaimsPrincipal(new ClaimsIdentity([
 					new Claim(AuthDefaults.DeviceClaim, device.ToString()),
 					new Claim(AuthDefaults.ScopeClaim, AuthDefaults.ClientScope)
 				],
@@ -335,35 +372,36 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_transient_failure_keeps_the_proof_pending_and_retries_with_growing_delays()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId);
+		var token = Sign(_productionKey, ProductionKeyId);
 		var failures = 3;
 		fixture.Platform.Answer = _ => failures-- > 0
 			? new PlatformLicenseIssueResult.Retry(null, false)
 			: new PlatformLicenseIssueResult.Issued(token);
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
 
 		var delays = new List<TimeSpan>();
 		var pendingSeen = new List<bool>();
 		for (var attempt = 0; attempt < 3; attempt++)
 		{
-			await fixture.Service.RunDueWorkAsync(default);
-			var status = await fixture.Service.GetStatusAsync(default);
+			await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+			var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 			pendingSeen.Add(status.IssuePending);
 			var next = DateTimeOffset.FromUnixTimeMilliseconds(status.NextIssueAttemptAt!.Value);
 			delays.Add(next - fixture.Time.Now);
-			await fixture.Service.RunDueWorkAsync(default);
+			await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 			fixture.Time.Now = next;
 		}
 
 		var callsBeforeRecovery = fixture.Platform.Proofs.Count;
-		await fixture.Service.RunDueWorkAsync(default);
-		var recovered = await fixture.Service.GetStatusAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		var recovered = await fixture.Service.GetStatusAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(pendingSeen, Is.All.True);
 			Assert.That(callsBeforeRecovery, Is.EqualTo(3), "a retry never runs before its time");
-			Assert.That(delays[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)).And.LessThanOrEqualTo(TimeSpan.FromSeconds(10)));
+			Assert.That(delays[0],
+				Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)).And.LessThanOrEqualTo(TimeSpan.FromSeconds(10)));
 			Assert.That(delays[2], Is.GreaterThan(delays[0]));
 			Assert.That(recovered.Licensed, Is.True);
 			Assert.That(recovered.IssuePending, Is.False);
@@ -374,8 +412,10 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public void The_retry_delay_starts_at_a_few_seconds_is_jittered_capped_at_thirty_minutes_and_honours_retry_after()
 	{
-		var fixture = new Fixture();
-		fixture.RandomValue = 0;
+		var fixture = new Fixture
+		{
+			RandomValue = 0
+		};
 		var firstLow = fixture.Service.RetryDelay(1, null);
 		var manyLow = fixture.Service.RetryDelay(5000, null);
 		fixture.RandomValue = 1;
@@ -389,7 +429,8 @@ internal sealed partial class CompanionLicenseServiceTests
 			Assert.That(firstLow, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
 			Assert.That(firstHigh, Is.LessThanOrEqualTo(TimeSpan.FromSeconds(10)));
 			Assert.That(firstLow, Is.Not.EqualTo(firstHigh), "jitter");
-			Assert.That(manyLow, Is.GreaterThan(TimeSpan.FromMinutes(5)).And.LessThanOrEqualTo(TimeSpan.FromMinutes(30)));
+			Assert.That(manyLow,
+				Is.GreaterThan(TimeSpan.FromMinutes(5)).And.LessThanOrEqualTo(TimeSpan.FromMinutes(30)));
 			Assert.That(manyHigh, Is.EqualTo(TimeSpan.FromMinutes(30)));
 			Assert.That(requested, Is.EqualTo(TimeSpan.FromMinutes(10)));
 			Assert.That(excessive, Is.LessThanOrEqualTo(TimeSpan.FromMinutes(30)));
@@ -400,46 +441,51 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_pending_proof_survives_a_restart_and_is_encrypted_at_rest()
 	{
 		var fixture = new Fixture();
-		await fixture.Service.SyncAsync("c", GooglePlay("secret-purchase-token"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("secret-purchase-token"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var stored = string.Join("\n", fixture.Repository.Values.Values);
-		var token = Sign(ProductionKey, ProductionKeyId);
+		var token = Sign(_productionKey, ProductionKeyId);
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
 
 		var restarted = fixture.Restart();
-		var pendingAfterRestart = (await restarted.GetStatusAsync(default)).IssuePending;
+		var pendingAfterRestart = (await restarted.GetStatusAsync(CancellationToken.None)).IssuePending;
 		fixture.Time.Advance(TimeSpan.FromMinutes(1));
-		await restarted.RunDueWorkAsync(default);
+		await restarted.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(stored, Does.Not.Contain("secret-purchase-token"));
 			Assert.That(stored, Does.Not.Contain("GPA.1234"));
 			Assert.That(pendingAfterRestart, Is.True);
 			Assert.That(fixture.Platform.Proofs.Last().PurchaseToken, Is.EqualTo("secret-purchase-token"));
-			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+			Assert.That((await restarted.GetStatusAsync(CancellationToken.None)).Licensed, Is.True);
 		});
 	}
 
 	[Test]
 	public async Task A_refusal_stops_retrying_and_the_same_purchase_is_not_sent_again_even_after_a_restart()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-refunded");
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-refunded")
+			}
+		};
 
-		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
-		await fixture.Service.RunDueWorkAsync(default);
-		var afterRefusal = await fixture.Service.GetStatusAsync(default);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		var afterRefusal = await fixture.Service.GetStatusAsync(CancellationToken.None);
 		var restarted = fixture.Restart();
-		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), default);
+		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), CancellationToken.None);
 		fixture.Time.Advance(TimeSpan.FromHours(1));
-		await restarted.RunDueWorkAsync(default);
+		await restarted.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(afterRefusal.IssuePending, Is.False);
 			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
-			Assert.That((await restarted.GetStatusAsync(default)).IssuePending, Is.False);
+			Assert.That((await restarted.GetStatusAsync(CancellationToken.None)).IssuePending, Is.False);
 		});
 	}
 
@@ -447,24 +493,29 @@ internal sealed partial class CompanionLicenseServiceTests
 	[TestCase("bundle-mismatch")]
 	public async Task A_refused_proof_is_not_sent_again_but_a_different_proof_for_the_purchase_is(string code)
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = proof => proof.TransactionId == "2000001"
-			? new PlatformLicenseIssueResult.Refused(code)
-			: new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = proof => proof.TransactionId == "2000001"
+					? new PlatformLicenseIssueResult.Refused(code)
+					: new PlatformLicenseIssueResult.Issued(Sign(_productionKey, ProductionKeyId))
+			}
+		};
 
-		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
-		await fixture.Service.RunDueWorkAsync(default);
-		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var callsForTheRefusedProof = fixture.Platform.Proofs.Count;
 		var restarted = fixture.Restart();
-		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), default);
-		await restarted.RunDueWorkAsync(default);
+		await restarted.SyncAsync("c", AppStore("2000002", "1000001"), CancellationToken.None);
+		await restarted.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(callsForTheRefusedProof, Is.EqualTo(1));
-			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+			Assert.That((await restarted.GetStatusAsync(CancellationToken.None)).Licensed, Is.True);
 		});
 	}
 
@@ -475,46 +526,53 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var answers = new Queue<PlatformLicenseIssueResult>([
 			new PlatformLicenseIssueResult.Refused(code),
-			new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId))
+			new PlatformLicenseIssueResult.Issued(Sign(_productionKey, ProductionKeyId))
 		]);
 		fixture.Platform.Answer = _ => answers.Dequeue();
 
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		fixture.Time.Advance(TimeSpan.FromHours(2));
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var callsWithinADay = fixture.Platform.Proofs.Count;
 		var restarted = fixture.Restart();
 		fixture.Time.Advance(TimeSpan.FromDays(1));
-		await restarted.SyncAsync("c", GooglePlay("purchase-a"), default);
-		await restarted.RunDueWorkAsync(default);
+		await restarted.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
+		await restarted.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(callsWithinADay, Is.EqualTo(1));
-			Assert.That((await restarted.GetStatusAsync(default)).Licensed, Is.True);
+			Assert.That((await restarted.GetStatusAsync(CancellationToken.None)).Licensed, Is.True);
 		});
 	}
 
 	[Test]
 	public async Task A_full_refused_list_drops_a_one_day_block_before_a_refunded_purchase()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = proof => new PlatformLicenseIssueResult.Refused(
-			proof.PurchaseToken!.StartsWith("refunded", StringComparison.Ordinal) ? "purchase-refunded" : "package-mismatch");
-		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = proof => new PlatformLicenseIssueResult.Refused(
+					proof.PurchaseToken!.StartsWith("refunded", StringComparison.Ordinal)
+						? "purchase-refunded"
+						: "package-mismatch")
+			}
+		};
+		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		for (var index = 0; index < CompanionLicenseService.MaximumRefusedProofKeys; index++)
 		{
-			await fixture.Service.SyncAsync("c", GooglePlay($"misconfigured-{index}"), default);
-			await fixture.Service.RunDueWorkAsync(default);
+			await fixture.Service.SyncAsync("c", GooglePlay($"misconfigured-{index}"), CancellationToken.None);
+			await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		}
 
 		var calls = fixture.Platform.Proofs.Count;
-		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("refunded-0"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(calls));
 	}
@@ -524,9 +582,9 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 
-		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
-		await fixture.Service.SyncAsync("d", AppStore("2000002", "1000001"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), CancellationToken.None);
+		await fixture.Service.SyncAsync("d", AppStore("2000002", "1000001"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		Assert.That(fixture.Platform.Proofs.Select(proof => proof.TransactionId), Is.EqualTo(new[] { "2000002" }));
 	}
@@ -535,17 +593,17 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_different_purchase_is_still_issued_while_another_stays_pending_at_the_store()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId, "license-b");
+		var token = Sign(_productionKey, ProductionKeyId, "license-b");
 		fixture.Platform.Answer = proof => proof.PurchaseToken == "purchase-b"
 			? new PlatformLicenseIssueResult.Issued(token)
 			: new PlatformLicenseIssueResult.Retry(null, true);
 
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
-		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		var status = await fixture.Service.GetStatusAsync(default);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(status.LicenseId, Is.EqualTo("license-b"));
@@ -556,30 +614,35 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_purchase_the_store_never_completes_is_dropped_after_a_week()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Retry(null, true);
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Retry(null, true)
+			}
+		};
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var pendingAfterADay = false;
 
 		for (var day = 1; day <= 8; day++)
 		{
 			fixture.Time.Advance(TimeSpan.FromDays(1));
-			await fixture.Service.RunDueWorkAsync(default);
+			await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 			if (day == 1)
 			{
-				pendingAfterADay = (await fixture.Service.GetStatusAsync(default)).IssuePending;
+				pendingAfterADay = (await fixture.Service.GetStatusAsync(CancellationToken.None)).IssuePending;
 			}
 		}
 
 		var calls = fixture.Platform.Proofs.Count;
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(pendingAfterADay, Is.True);
-			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).IssuePending, Is.False);
 			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(calls));
 		});
 	}
@@ -587,15 +650,21 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_sync_during_an_attempt_is_answered_at_once_and_a_new_purchase_stays_pending()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
-		var run = fixture.Service.RunDueWorkAsync(default);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
+			}
+		};
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None);
+		var run = fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
-		var sameAnswer = await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default)
+		var sameAnswer = await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None)
 			.WaitAsync(TimeSpan.FromSeconds(5));
-		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), default).WaitAsync(TimeSpan.FromSeconds(5));
+		await fixture.Service.SyncAsync("b", GooglePlay("purchase-b"), CancellationToken.None)
+			.WaitAsync(TimeSpan.FromSeconds(5));
 		fixture.Platform.Gate.SetResult();
 		await run.WaitAsync(TimeSpan.FromSeconds(5));
 
@@ -614,21 +683,25 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		var revokedId = HexId(7);
-		var production = Sign(ProductionKey, ProductionKeyId, revokedId);
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
+		var production = Sign(_productionKey, ProductionKeyId, revokedId);
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = production },
+			CancellationToken.None);
 		var device = fixture.Harness.AddDevice("Tablet");
 		await fixture.Harness.ReportAsync("connection-a", device);
 		fixture.Platform.RevokedIds = [revokedId, HexId(8)];
 
-		await fixture.Service.RunDueWorkAsync(default);
-		var answer = await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = production }, default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		var answer = await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = production },
+			CancellationToken.None);
 
 		var pushes = fixture.Harness.Transport.ConnectionMessages
 			.Where(message => message.Message is CompanionLicenseRevokedEvent)
 			.ToList();
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That((await fixture.Service.GetStatusAsync(default)).Licensed, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed, Is.False);
 			Assert.That(answer.License, Is.Null);
 			Assert.That(answer.RevokedLicenseIds, Is.EquivalentTo(new[] { revokedId, HexId(8) }));
 			Assert.That(pushes.Select(push => push.ConnectionId), Is.EqualTo(new[] { "connection-a" }));
@@ -643,17 +716,17 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var revokedId = HexId(7);
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, HexId(1)) },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, HexId(1)) },
+			CancellationToken.None);
 		fixture.Platform.RevokedIds = [revokedId];
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		fixture.Platform.RevokedIds = null;
 		var restarted = fixture.Restart();
 		await fixture.Repository.SetValue(CompanionLicenseService.TokenKey,
-			Sign(ProductionKey, ProductionKeyId, revokedId));
+			Sign(_productionKey, ProductionKeyId, revokedId));
 
-		await restarted.RunDueWorkAsync(default);
-		var answer = await restarted.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
+		await restarted.RunDueWorkAsync(CancellationToken.None);
+		var answer = await restarted.SyncAsync("c", new SyncCompanionLicenseRequest(), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -667,10 +740,10 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var withoutCompanion = fixture.Platform.RevocationFetches;
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -681,20 +754,23 @@ internal sealed partial class CompanionLicenseServiceTests
 
 	[TestCase(4000, true)]
 	[TestCase(10_000, false)]
-	public async Task A_sync_answer_carries_the_platform_list_and_always_fits_in_one_websocket_message(int count,
+	public async Task A_sync_answer_carries_the_platform_list_and_always_fits_in_one_websocket_message(
+		int count,
 		bool complete)
 	{
 		var fixture = new Fixture();
 		var held = HexId(3);
 		fixture.Platform.RevokedIds = Enumerable.Range(0, count).Select(HexId).ToList();
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), default);
-		await fixture.Service.RunDueWorkAsync(default);
-		var stored = Sign(ProductionKey, ProductionKeyId, HexId(count + 1), billingId: new string('b', 256));
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = stored }, default);
+		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest(), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		var stored = Sign(_productionKey, ProductionKeyId, HexId(count + 1), billingId: new string('b', 256));
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = stored },
+			CancellationToken.None);
 
 		var answer = await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId, held) },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId, held) },
+			CancellationToken.None);
 		var bytes = JsonSerializer.SerializeToUtf8Bytes(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
 				"response",
 				"SyncCompanionLicense",
@@ -718,17 +794,19 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		var purchasedAt = Fixture.Now.AddDays(-2);
-		var detailed = Sign(ProductionKey, ProductionKeyId, "license-1", purchasedAt, "GPA.3344-5566");
+		var detailed = Sign(_productionKey, ProductionKeyId, "license-1", purchasedAt, "GPA.3344-5566");
 		var malformed = SignWithClaims(new Dictionary<string, object>
 		{
 			["sub"] = "license-2", ["product"] = CompanionLicenseTokens.Product, ["source"] = "app-store",
 			["purchased_at"] = "yesterday", ["billing_id"] = 42
 		});
 
-		await fixture.Service.SyncAsync("c", new SyncCompanionLicenseRequest { License = detailed }, default);
-		var status = await fixture.Service.GetStatusAsync(default);
-		var tokens = new CompanionLicenseTokens(TrustedKeys);
-		var malformedLicense = await tokens.VerifyAsync(malformed, trustTestKey: false);
+		await fixture.Service.SyncAsync("c",
+			new SyncCompanionLicenseRequest { License = detailed },
+			CancellationToken.None);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
+		var tokens = new CompanionLicenseTokens(_trustedKeys);
+		var malformedLicense = await tokens.VerifyAsync(malformed, false);
 
 		Assert.Multiple(() =>
 		{
@@ -745,14 +823,14 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task The_license_page_is_told_about_every_change_and_never_sees_the_token()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId, HexId(5));
+		var token = Sign(_productionKey, ProductionKeyId, HexId(5));
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
 
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
 		var afterQueue = ChangeEvents(fixture);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		var afterIssue = ChangeEvents(fixture);
-		var status = JsonSerializer.Serialize(await fixture.Service.GetStatusAsync(default));
+		var status = JsonSerializer.Serialize(await fixture.Service.GetStatusAsync(CancellationToken.None));
 
 		Assert.Multiple(() =>
 		{
@@ -766,7 +844,7 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task Nothing_secret_reaches_the_log()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId, HexId(5));
+		var token = Sign(_productionKey, ProductionKeyId, HexId(5));
 		var answers = new Queue<PlatformLicenseIssueResult>([
 			new PlatformLicenseIssueResult.Retry(null, false),
 			new PlatformLicenseIssueResult.Refused("purchase-refunded"),
@@ -774,18 +852,19 @@ internal sealed partial class CompanionLicenseServiceTests
 		]);
 		fixture.Platform.Answer = _ => answers.Dequeue();
 
-		await fixture.Service.SyncAsync("c", GooglePlay("secret-token-a"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.SyncAsync("c", GooglePlay("secret-token-a"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		fixture.Time.Advance(TimeSpan.FromMinutes(1));
-		await fixture.Service.RunDueWorkAsync(default);
-		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), default);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
+		await fixture.Service.SyncAsync("c", AppStore("2000001", "1000001"), CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		fixture.Platform.RevokedIds = [HexId(5)];
 		fixture.Time.Advance(TimeSpan.FromHours(2));
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		var logged = string.Join("\n", fixture.Sink.Events.Select(logEvent =>
-			logEvent.RenderMessage(CultureInfo.InvariantCulture) + string.Join(",", logEvent.Properties.Values)));
+		var logged = string.Join("\n",
+			fixture.Sink.Events.Select(logEvent =>
+				logEvent.RenderMessage(CultureInfo.InvariantCulture) + string.Join(",", logEvent.Properties.Values)));
 		Assert.Multiple(() =>
 		{
 			Assert.That(fixture.Sink.Events, Is.Not.Empty);
@@ -800,14 +879,14 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task The_worker_retries_a_proof_left_pending_before_a_restart_and_fetches_revocations()
 	{
 		var fixture = new Fixture();
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
+		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(_productionKey, ProductionKeyId));
 		var restarted = fixture.Restart();
 		var worker = Worker(fixture, restarted);
 
-		await worker.StartAsync(default);
-		var licensed = await Eventually(async () => (await restarted.GetStatusAsync(default)).Licensed);
-		await worker.StopAsync(default);
+		await worker.StartAsync(CancellationToken.None);
+		var licensed = await Eventually(async () => (await restarted.GetStatusAsync(CancellationToken.None)).Licensed);
+		await worker.StopAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -821,11 +900,11 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		var worker = Worker(fixture, fixture.Service);
-		await worker.StartAsync(default);
+		await worker.StartAsync(CancellationToken.None);
 
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
 		var called = await Eventually(() => Task.FromResult(!fixture.Platform.Proofs.IsEmpty));
-		await worker.StopAsync(default);
+		await worker.StopAsync(CancellationToken.None);
 
 		Assert.That(called, Is.True);
 	}
@@ -834,26 +913,27 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_failing_pass_is_logged_and_the_worker_keeps_going()
 	{
 		var fixture = new Fixture();
-		var token = Sign(ProductionKey, ProductionKeyId);
+		var token = Sign(_productionKey, ProductionKeyId);
 		var calls = 0;
 		fixture.Platform.Answer = _ => Interlocked.Increment(ref calls) == 1
 			? throw new InvalidOperationException("boom")
 			: new PlatformLicenseIssueResult.Issued(token);
 		var worker = Worker(fixture, fixture.Service);
-		await worker.StartAsync(default);
+		await worker.StartAsync(CancellationToken.None);
 
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
 		var licensed = await Eventually(async () =>
 		{
 			fixture.Time.Advance(CompanionLicenseBackgroundService.FailureDelay);
-			return (await fixture.Service.GetStatusAsync(default)).Licensed;
+			return (await fixture.Service.GetStatusAsync(CancellationToken.None)).Licensed;
 		});
-		await worker.StopAsync(default);
+		await worker.StopAsync(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(licensed, Is.True);
-			Assert.That(fixture.Sink.Events.Select(logEvent => logEvent.Exception), Has.Some.InstanceOf<InvalidOperationException>());
+			Assert.That(fixture.Sink.Events.Select(logEvent => logEvent.Exception),
+				Has.Some.InstanceOf<InvalidOperationException>());
 		});
 	}
 
@@ -863,14 +943,14 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		var device = fixture.Harness.AddDevice("Tablet");
 		await fixture.Harness.ReportAsync("connection-other", device);
-		var token = Sign(ProductionKey, ProductionKeyId);
+		var token = Sign(_productionKey, ProductionKeyId);
 		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(token);
 		var proof = Md2Purchase("app-transaction-1");
 
 		var result = await TransferAsync(fixture, proof);
 
 		var sent = fixture.Platform.Proofs.Single();
-		var status = await fixture.Service.GetStatusAsync(default);
+		var status = await fixture.Service.GetStatusAsync(CancellationToken.None);
 		var pushes = fixture.Harness.Transport.ConnectionMessages
 			.Where(message => message.Message is CompanionLicenseEvent)
 			.ToList();
@@ -893,10 +973,11 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 		await fixture.Service.SyncAsync("c",
-			new SyncCompanionLicenseRequest { License = Sign(ProductionKey, ProductionKeyId) },
-			default);
+			new SyncCompanionLicenseRequest { License = Sign(_productionKey, ProductionKeyId) },
+			CancellationToken.None);
 
-		var result = await fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+		var result = await fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -907,16 +988,24 @@ internal sealed partial class CompanionLicenseServiceTests
 	}
 
 	[Test]
-	public async Task A_refused_purchase_is_rejected_with_the_platform_code_and_asking_again_does_not_reach_the_platform()
+	public async Task
+		A_refused_purchase_is_rejected_with_the_platform_code_and_asking_again_does_not_reach_the_platform()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-before-paid-period");
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Refused("purchase-before-paid-period")
+			}
+		};
 		var proof = Md2Purchase("app-transaction-1");
 
 		var first = await TransferAsync(fixture, proof);
-		var second = await fixture.Service.TransferLegacyPurchaseAsync(proof, default).WaitAsync(TimeSpan.FromSeconds(5));
+		var second = await fixture.Service.TransferLegacyPurchaseAsync(proof, CancellationToken.None)
+			.WaitAsync(TimeSpan.FromSeconds(5));
 
-		var expected = new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected, "purchase-before-paid-period");
+		var expected
+			= new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Rejected, "purchase-before-paid-period");
 		Assert.Multiple(() =>
 		{
 			Assert.That(first, Is.EqualTo(expected));
@@ -928,28 +1017,40 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task A_platform_that_cannot_decide_yet_leaves_the_purchase_pending_with_its_code()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Retry(null, false, "store-unavailable");
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Retry(null, false, "store-unavailable")
+			}
+		};
 
 		var result = await TransferAsync(fixture, Md2Purchase("app-transaction-1"));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result,
-				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending, "store-unavailable")));
-			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.True);
+				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Pending,
+					"store-unavailable")));
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).IssuePending, Is.True);
 		});
 	}
 
 	[Test]
 	public async Task A_transfer_the_platform_does_not_answer_within_ten_seconds_is_reported_pending()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
+			}
+		};
 
-		var transfer = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+		var transfer
+			= fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), CancellationToken.None);
 		await WaitingTransfers(fixture, 1);
-		var run = fixture.Service.RunDueWorkAsync(default);
+		var run = fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
 		fixture.Time.Advance(CompanionLicenseService.LegacyTransferWait);
 		var result = await transfer.WaitAsync(TimeSpan.FromSeconds(5));
@@ -964,8 +1065,8 @@ internal sealed partial class CompanionLicenseServiceTests
 	{
 		var fixture = new Fixture();
 
-		await TransferAsync(fixture, Md2Purchase("app-transaction-1", signedDate: "1"));
-		await TransferAsync(fixture, Md2Purchase("app-transaction-1", signedDate: "2"));
+		await TransferAsync(fixture, Md2Purchase("app-transaction-1", "1"));
+		await TransferAsync(fixture, Md2Purchase("app-transaction-1", "2"));
 
 		Assert.Multiple(() =>
 		{
@@ -980,10 +1081,11 @@ internal sealed partial class CompanionLicenseServiceTests
 		var fixture = new Fixture();
 		for (var i = 0; i < CompanionLicenseService.MaximumPendingProofs; i++)
 		{
-			await fixture.Service.SyncAsync("c", GooglePlay($"purchase-{i}"), default);
+			await fixture.Service.SyncAsync("c", GooglePlay($"purchase-{i}"), CancellationToken.None);
 		}
 
-		var result = await fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default)
+		var result = await fixture.Service
+			.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), CancellationToken.None)
 			.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
@@ -998,7 +1100,7 @@ internal sealed partial class CompanionLicenseServiceTests
 	public async Task A_third_waiting_transfer_replaces_the_oldest_transfer_and_keeps_the_companion_proof()
 	{
 		var fixture = new Fixture();
-		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), default);
+		await fixture.Service.SyncAsync("c", GooglePlay("purchase-a"), CancellationToken.None);
 
 		await TransferAsync(fixture, Md2Purchase("app-transaction-1"));
 		fixture.Time.Advance(TimeSpan.FromSeconds(1));
@@ -1022,16 +1124,23 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task When_one_purchase_is_transferred_another_waiting_purchase_is_already_transferred()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(_productionKey, ProductionKeyId))
+			}
+		};
 
-		var first = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"), default);
+		var first = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-1"),
+			CancellationToken.None);
 		await WaitingTransfers(fixture, 1);
-		var second = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-2"), default);
+		var second = fixture.Service.TransferLegacyPurchaseAsync(Md2Purchase("app-transaction-2"),
+			CancellationToken.None);
 		await WaitingTransfers(fixture, 2);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await first.WaitAsync(TimeSpan.FromSeconds(5)),
 				Is.EqualTo(new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred)));
@@ -1044,17 +1153,22 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task Two_transfers_of_the_same_purchase_at_once_both_get_the_result()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(ProductionKey, ProductionKeyId));
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Issued(Sign(_productionKey, ProductionKeyId))
+			}
+		};
 		var proof = Md2Purchase("app-transaction-1");
 
-		var first = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
-		var second = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
+		var first = fixture.Service.TransferLegacyPurchaseAsync(proof, CancellationToken.None);
+		var second = fixture.Service.TransferLegacyPurchaseAsync(proof, CancellationToken.None);
 		await WaitingTransfers(fixture, 2);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
 		var expected = new LegacyPurchaseTransferResult(LegacyPurchaseTransferStatus.Transferred);
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await first.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(expected));
 			Assert.That(await second.WaitAsync(TimeSpan.FromSeconds(5)), Is.EqualTo(expected));
@@ -1065,22 +1179,28 @@ internal sealed partial class CompanionLicenseServiceTests
 	[Test]
 	public async Task An_identical_proof_resent_during_an_attempt_that_is_refused_is_not_sent_again()
 	{
-		var fixture = new Fixture();
-		fixture.Platform.Answer = _ => new PlatformLicenseIssueResult.Refused("invalid-signature");
-		fixture.Platform.Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default);
-		var run = fixture.Service.RunDueWorkAsync(default);
+		var fixture = new Fixture
+		{
+			Platform =
+			{
+				Answer = _ => new PlatformLicenseIssueResult.Refused("invalid-signature"),
+				Gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)
+			}
+		};
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None);
+		var run = fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		await fixture.Platform.Called.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
-		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), default).WaitAsync(TimeSpan.FromSeconds(5));
+		await fixture.Service.SyncAsync("a", GooglePlay("purchase-a"), CancellationToken.None)
+			.WaitAsync(TimeSpan.FromSeconds(5));
 		fixture.Platform.Gate.SetResult();
 		await run.WaitAsync(TimeSpan.FromSeconds(5));
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(fixture.Platform.Proofs, Has.Count.EqualTo(1));
-			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).IssuePending, Is.False);
 		});
 	}
 
@@ -1091,32 +1211,38 @@ internal sealed partial class CompanionLicenseServiceTests
 
 		await fixture.Service.SyncAsync("c",
 			new SyncCompanionLicenseRequest { Proof = Md2Purchase("app-transaction-1") },
-			default);
-		await fixture.Service.RunDueWorkAsync(default);
+			CancellationToken.None);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(fixture.Platform.Proofs, Is.Empty);
-			Assert.That((await fixture.Service.GetStatusAsync(default)).IssuePending, Is.False);
+			Assert.That((await fixture.Service.GetStatusAsync(CancellationToken.None)).IssuePending, Is.False);
 		});
 	}
 
 	private static async Task<LegacyPurchaseTransferResult> TransferAsync(Fixture fixture, CompanionLicenseProof proof)
 	{
-		var transfer = fixture.Service.TransferLegacyPurchaseAsync(proof, default);
+		var transfer = fixture.Service.TransferLegacyPurchaseAsync(proof, CancellationToken.None);
 		await WaitingTransfers(fixture, 1);
-		await fixture.Service.RunDueWorkAsync(default);
+		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 		return await transfer.WaitAsync(TimeSpan.FromSeconds(5));
 	}
 
 	private static async Task WaitingTransfers(Fixture fixture, int count)
-		=> Assert.That(await Eventually(() => Task.FromResult(fixture.Time.ActiveTimerCount >= count)), Is.True);
+	{
+		Assert.That(await Eventually(() => Task.FromResult(fixture.Time.ActiveTimerCount >= count)), Is.True);
+	}
 
 	private static List<JsonElement> PendingEntries(Fixture fixture)
-		=> JsonSerializer.Deserialize<List<JsonElement>>(fixture.Repository.Values[CompanionLicenseService.PendingProofsKey])!;
+	{
+		return JsonSerializer.Deserialize<List<JsonElement>>(
+			fixture.Repository.Values[CompanionLicenseService.PendingProofsKey])!;
+	}
 
 	private static CompanionLicenseProof Md2Purchase(string appTransactionId, string signedDate = "1")
-		=> new()
+	{
+		return new CompanionLicenseProof
 		{
 			Platform = "app-store-legacy", LegacyKind = "appTransaction", ProductId = CompanionLicenseTokens.Product,
 			SignedPayload = $"eyJhbGciOiJFUzI1NiJ9.{Base64Url(JsonSerializer.SerializeToUtf8Bytes(new
@@ -1124,9 +1250,14 @@ internal sealed partial class CompanionLicenseServiceTests
 				appTransactionId, bundleId = "com.suchbyte.macrodeck", signedDate
 			}))}.c2lnbmF0dXJl"
 		};
+	}
 
 	private static CompanionLicenseBackgroundService Worker(Fixture fixture, CompanionLicenseService service)
-		=> new(service, fixture.Time, new LoggerConfiguration().WriteTo.Sink(fixture.Sink).CreateLogger());
+	{
+		return new CompanionLicenseBackgroundService(service,
+			fixture.Time,
+			new LoggerConfiguration().WriteTo.Sink(fixture.Sink).CreateLogger());
+	}
 
 	private static async Task<bool> Eventually(Func<Task<bool>> condition)
 	{
@@ -1145,11 +1276,14 @@ internal sealed partial class CompanionLicenseServiceTests
 	}
 
 	private static int ChangeEvents(Fixture fixture)
-		=> fixture.Harness.Transport.GroupMessages.Count(message =>
+	{
+		return fixture.Harness.Transport.GroupMessages.Count(message =>
 			message.Group == UiAdminGroups.Admin && message.Message is CompanionLicenseChangedEvent);
+	}
 
 	private static SyncCompanionLicenseRequest GooglePlay(string purchaseToken, string? license = null)
-		=> new()
+	{
+		return new SyncCompanionLicenseRequest
 		{
 			License = license,
 			Proof = new CompanionLicenseProof
@@ -1158,9 +1292,11 @@ internal sealed partial class CompanionLicenseServiceTests
 				PackageName = "app.macrodeck.companion", OrderId = "GPA.1234"
 			}
 		};
+	}
 
 	private static SyncCompanionLicenseRequest AppStore(string transactionId, string originalTransactionId)
-		=> new()
+	{
+		return new SyncCompanionLicenseRequest
 		{
 			Proof = new CompanionLicenseProof
 			{
@@ -1171,21 +1307,31 @@ internal sealed partial class CompanionLicenseServiceTests
 				}))}.c2lnbmF0dXJl"
 			}
 		};
+	}
 
-	private static string HexId(int index) => index.ToString("x32", CultureInfo.InvariantCulture);
+	private static string HexId(int index)
+	{
+		return index.ToString("x32", CultureInfo.InvariantCulture);
+	}
 
 	private static SyncCompanionLicenseRequest Trial(string deviceId, bool started)
-		=> new() { TrialDeviceId = deviceId, TrialStarted = started };
+	{
+		return new SyncCompanionLicenseRequest { TrialDeviceId = deviceId, TrialStarted = started };
+	}
 
-	private static string Sign(ECDsa key,
+	private static string Sign(
+		ECDsa key,
 		string keyId,
 		string licenseId = "license-1",
 		DateTimeOffset? purchasedAt = null,
 		string? billingId = null)
-		=> CompanionLicenseTokens.Sign(key, keyId, licenseId, "google-play", Fixture.Now, purchasedAt, billingId);
+	{
+		return CompanionLicenseTokens.Sign(key, keyId, licenseId, "google-play", Fixture.Now, purchasedAt, billingId);
+	}
 
 	private static string SignWithClaims(Dictionary<string, object> claims)
-		=> new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false }
+	{
+		return new Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false }
 			.CreateToken(new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
 			{
 				Issuer = CompanionLicenseTokens.Issuer,
@@ -1193,9 +1339,10 @@ internal sealed partial class CompanionLicenseServiceTests
 				IssuedAt = Fixture.Now.UtcDateTime,
 				Claims = claims,
 				SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-					new Microsoft.IdentityModel.Tokens.ECDsaSecurityKey(ProductionKey) { KeyId = ProductionKeyId },
+					new Microsoft.IdentityModel.Tokens.ECDsaSecurityKey(_productionKey) { KeyId = ProductionKeyId },
 					Microsoft.IdentityModel.Tokens.SecurityAlgorithms.EcdsaSha256)
 			});
+	}
 
 	private static string WrongProduct()
 	{
@@ -1207,7 +1354,7 @@ internal sealed partial class CompanionLicenseServiceTests
 			IssuedAt = Fixture.Now.UtcDateTime,
 			Claims = new Dictionary<string, object> { ["sub"] = "x", ["product"] = "other", ["source"] = "test" },
 			SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
-				new Microsoft.IdentityModel.Tokens.ECDsaSecurityKey(ProductionKey) { KeyId = ProductionKeyId },
+				new Microsoft.IdentityModel.Tokens.ECDsaSecurityKey(_productionKey) { KeyId = ProductionKeyId },
 				Microsoft.IdentityModel.Tokens.SecurityAlgorithms.EcdsaSha256)
 		});
 	}
@@ -1219,10 +1366,14 @@ internal sealed partial class CompanionLicenseServiceTests
 	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	private static string Flip(string signature)
-		=> (signature[0] == 'A' ? 'B' : 'A') + signature[1..];
+	{
+		return (signature[0] == 'A' ? 'B' : 'A') + signature[1..];
+	}
 
 	private sealed class Fixture
 	{
@@ -1258,15 +1409,18 @@ internal sealed partial class CompanionLicenseServiceTests
 		}
 
 		public Dictionary<string, long> StoredTrials()
-			=> Repository.Values.TryGetValue(CompanionLicenseService.TrialsKey, out var json)
+		{
+			return Repository.Values.TryGetValue(CompanionLicenseService.TrialsKey, out var json)
 				? JsonSerializer.Deserialize<Dictionary<string, long>>(json)!
 				: [];
+		}
 
 		private CompanionLicenseService Create()
-			=> new(ScopeFactory,
+		{
+			return new CompanionLicenseService(ScopeFactory,
 				Platform,
 				Accounts,
-				new CompanionLicenseTokens(TrustedKeys),
+				new CompanionLicenseTokens(_trustedKeys),
 				Harness.DeviceRegistry,
 				Harness.Transport,
 				Notifications,
@@ -1275,6 +1429,7 @@ internal sealed partial class CompanionLicenseServiceTests
 				Time,
 				() => RandomValue,
 				new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(Sink).CreateLogger());
+		}
 	}
 
 	internal sealed class ScriptedPlatform : IPlatformLicenseClient
@@ -1292,7 +1447,8 @@ internal sealed partial class CompanionLicenseServiceTests
 
 		public int RevocationFetches;
 
-		public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(CompanionLicenseProof proof,
+		public async Task<PlatformLicenseIssueResult> IssueCompanionLicenseAsync(
+			CompanionLicenseProof proof,
 			CancellationToken cancellationToken)
 		{
 			Proofs.Enqueue(proof);

@@ -16,10 +16,16 @@ public class IconPackUpgradeTests
 	private IconTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new IconTestHarness();
+	public void SetUp()
+	{
+		_harness = new IconTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task An_upgrade_keeps_the_pack_id_and_the_ids_of_icons_the_new_version_still_carries()

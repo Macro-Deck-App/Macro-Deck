@@ -131,7 +131,8 @@ public class PluginTokenServiceTests
 	}
 
 	private void SeedRegistration(string pluginId, Guid accessTokenId)
-		=> _registrations.Registrations.Add(new Domain.Entities.PluginRegistrationEntity
+	{
+		_registrations.Registrations.Add(new Domain.Entities.PluginRegistrationEntity
 		{
 			Id = Guid.NewGuid(),
 			PluginId = pluginId,
@@ -141,13 +142,17 @@ public class PluginTokenServiceTests
 			Origin = PluginRegistrationOrigins.DeveloperToken,
 			CreatedAt = _time.GetUtcNow().UtcDateTime
 		});
+	}
 
-	private void RecordCompatibility(string pluginId) => _compatibility.Record(new PluginCompatibilityEvaluation
+	private void RecordCompatibility(string pluginId)
 	{
-		PluginId = pluginId,
-		DisplayName = pluginId,
-		NegotiatedProtocolVersion = 1
-	});
+		_compatibility.Record(new PluginCompatibilityEvaluation
+		{
+			PluginId = pluginId,
+			DisplayName = pluginId,
+			NegotiatedProtocolVersion = 1
+		});
+	}
 
 	[Test]
 	public async Task A_Revoked_Token_Cannot_Authenticate()

@@ -108,7 +108,8 @@ public class ImageSharpArtworkProcessorTests
 		Assert.That(result, Is.Null);
 	}
 
-	private static async Task<byte[]> CreateImage(int width,
+	private static async Task<byte[]> CreateImage(
+		int width,
 		int height,
 		Func<Image<Rgba32>, Stream, Task> save)
 	{

@@ -19,12 +19,14 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class MusicPlayerContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.MusicPlayer,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -126,7 +128,7 @@ internal sealed class MusicPlayerContractTests : CapabilityContractFixture
 		var devices = await deviceProvider.GetDevicesAsync(CancellationToken.None);
 		Assert.That(devices.Single().Id, Is.EqualTo("d1"));
 
-		await deviceProvider.TransferPlaybackAsync("d1", startPlayback: true, CancellationToken.None);
+		await deviceProvider.TransferPlaybackAsync("d1", true, CancellationToken.None);
 		Assert.That(catalogDevicePlayer.Calls, Does.Contain("transfer:d1:True"));
 	}
 

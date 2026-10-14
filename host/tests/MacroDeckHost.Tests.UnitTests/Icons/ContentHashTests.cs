@@ -7,12 +7,12 @@ namespace MacroDeckHost.Tests.UnitTests.Icons;
 public class ContentHashTests
 {
 	// The hash of "abc", so a change in algorithm or encoding cannot pass silently.
-	private const string _abcHash = "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+	private const string AbcHash = "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
 
 	[Test]
 	public void Compute_WritesTheAlgorithmAndLowercaseHex()
 	{
-		Assert.That(ContentHash.Compute("abc"u8), Is.EqualTo(_abcHash));
+		Assert.That(ContentHash.Compute("abc"u8), Is.EqualTo(AbcHash));
 	}
 
 	[Test]
@@ -33,7 +33,7 @@ public class ContentHashTests
 	public void Normalize_AcceptsTheLegacyBareHexForm()
 	{
 		Assert.That(ContentHash.Normalize("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD"),
-			Is.EqualTo(_abcHash));
+			Is.EqualTo(AbcHash));
 	}
 
 	[TestCase(null)]
@@ -59,8 +59,8 @@ public class ContentHashTests
 		// compile-time guarantee; this only pins the values so a refactor cannot quietly merge the types.
 		Assert.Multiple(() =>
 		{
-			Assert.That(source.Value, Is.EqualTo(_abcHash));
-			Assert.That(master.Value, Is.EqualTo(_abcHash));
+			Assert.That(source.Value, Is.EqualTo(AbcHash));
+			Assert.That(master.Value, Is.EqualTo(AbcHash));
 			Assert.That(source.GetType(), Is.Not.EqualTo(master.GetType()));
 		});
 	}
@@ -70,8 +70,8 @@ public class ContentHashTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(SourceContentHash.TryParse(_abcHash, out var source), Is.True);
-			Assert.That(source.Value, Is.EqualTo(_abcHash));
+			Assert.That(SourceContentHash.TryParse(AbcHash, out var source), Is.True);
+			Assert.That(source.Value, Is.EqualTo(AbcHash));
 			Assert.That(MasterContentHash.TryParse("not a hash", out _), Is.False);
 		});
 	}

@@ -72,7 +72,8 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 	public async Task<WidgetEntity> AddCountdownAsync(int seconds = 10, bool ask = false)
 	{
 		var mode = ask ? "ask" : "fixed";
-		var widget = Folders.Add(WidgetTypeIds.Countdown, $$"""{"mode":"{{mode}}","durationMinutes":{{seconds / 60}},"durationSeconds":{{seconds % 60}}}""");
+		var widget = Folders.Add(WidgetTypeIds.Countdown,
+			$$"""{"mode":"{{mode}}","durationMinutes":{{seconds / 60}},"durationSeconds":{{seconds % 60}}}""");
 		await Coordinator.SyncAsync(widget);
 
 		return widget;
@@ -87,10 +88,14 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 	}
 
 	public Task<bool> PressAsync(WidgetEntity widget, string? clientId = null, Guid? deviceId = null)
-		=> Coordinator.HandleGestureAsync(widget.Id, TimerGesture.Press, clientId, deviceId);
+	{
+		return Coordinator.HandleGestureAsync(widget.Id, TimerGesture.Press, clientId, deviceId);
+	}
 
 	public Task<bool> HoldAsync(WidgetEntity widget, string? clientId = null)
-		=> Coordinator.HandleGestureAsync(widget.Id, TimerGesture.LongPress, clientId, null);
+	{
+		return Coordinator.HandleGestureAsync(widget.Id, TimerGesture.LongPress, clientId, null);
+	}
 
 	public async Task AdvanceAsync(TimeSpan delta)
 	{
@@ -113,30 +118,42 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 		}
 	}
 
-	public static Task QuietPeriodAsync() => Task.Delay(100);
+	public static Task QuietPeriodAsync()
+	{
+		return Task.Delay(100);
+	}
 
 	public string? Variable(WidgetEntity widget, string name)
-		=> Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value?.ToLowerInvariant();
+	{
+		return Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value.ToLowerInvariant();
+	}
 
-	public TimerWidgetPhase? Phase(WidgetEntity widget) => Store.Get(widget.Id)?.Phase;
+	public TimerWidgetPhase? Phase(WidgetEntity widget)
+	{
+		return Store.Get(widget.Id)?.Phase;
+	}
 
-	public async ValueTask DisposeAsync() => await _services.DisposeAsync();
+	public async ValueTask DisposeAsync()
+	{
+		await _services.DisposeAsync();
+	}
 
 	internal sealed class RecordingTriggerService(TimerWidgetHarness harness) : IWidgetTriggerService
 	{
 		public List<TriggerCall> Calls { get; } = [];
 
-		public Task<ActionExecutionDispatch> ExecuteAsync(WidgetEntity widget,
+		public Task<ActionExecutionDispatch> ExecuteAsync(
+			WidgetEntity widget,
 			string triggerType,
 			string? originClientId,
 			Guid? originDeviceId,
 			CancellationToken cancellationToken)
 		{
 			var variables = harness.Registry.GetByScope(VariableScope.Widget, widget.Id.ToString())
-				.ToDictionary(variable => variable.Name, variable => variable.Value?.ToLowerInvariant());
+				.ToDictionary(variable => variable.Name, variable => variable.Value.ToLowerInvariant());
 			lock (Calls)
 			{
-				Calls.Add(new TriggerCall(widget.Id, triggerType, originClientId, originDeviceId, variables));
+				Calls.Add(new TriggerCall(widget.Id, triggerType, originClientId, originDeviceId, variables!));
 			}
 
 			return Task.FromResult(new ActionExecutionDispatch(Guid.NewGuid(), null));
@@ -160,17 +177,20 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 		{
 			var widgetId = request.OwnerWidgetId ?? Guid.Empty;
 			var variables = harness.Registry.GetByScope(VariableScope.Widget, widgetId.ToString())
-				.ToDictionary(variable => variable.Name, variable => variable.Value?.ToLowerInvariant());
+				.ToDictionary(variable => variable.Name, variable => variable.Value.ToLowerInvariant());
 			lock (Calls)
 			{
 				Requests.Add(request);
-				Calls.Add(new TriggerCall(widgetId, request.Trigger.Value, request.OriginClientId, request.OriginDeviceId,
-					variables));
+				Calls.Add(new TriggerCall(widgetId,
+					request.Trigger.Value,
+					request.OriginClientId,
+					request.OriginDeviceId,
+					variables!));
 			}
 
 			return Task.FromResult(new FlowExecutionResult
 			{
-				ExecutionId = request.ExecutionId, Status = FlowExecutionStatus.Succeeded,
+				ExecutionId = request.ExecutionId, Status = FlowExecutionStatus.Succeeded
 			});
 		}
 	}
@@ -179,7 +199,10 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 	{
 		public List<PromptCall> Calls { get; } = [];
 
-		public Task<int?> AskAsync(Guid widgetId, string originClientId, int? initialSeconds,
+		public Task<int?> AskAsync(
+			Guid widgetId,
+			string originClientId,
+			int? initialSeconds,
 			CancellationToken cancellationToken)
 		{
 			var answer = new TaskCompletionSource<int?>();
@@ -202,7 +225,10 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -222,23 +248,50 @@ internal sealed class MutableFolderCache : IFolderCache
 		return widget;
 	}
 
-	public void Remove(WidgetEntity widget) => _folders[0].Widgets.Remove(widget);
+	public void Remove(WidgetEntity widget)
+	{
+		_folders[0].Widgets.Remove(widget);
+	}
 
-	public List<FolderEntity> GetAllFolders() => [.. _folders];
+	public List<FolderEntity> GetAllFolders()
+	{
+		return [.. _folders];
+	}
 
-	public Task InitializeCache() => Task.CompletedTask;
+	public Task InitializeCache()
+	{
+		return Task.CompletedTask;
+	}
 
-	public FolderEntity? GetFolderById(Guid id) => _folders.FirstOrDefault(folder => folder.Id == id);
+	public FolderEntity? GetFolderById(Guid id)
+	{
+		return _folders.FirstOrDefault(folder => folder.Id == id);
+	}
 
-	public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [.. _folders];
+	public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+	{
+		return [.. _folders];
+	}
 
-	public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [.. _folders];
+	public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+	{
+		return [.. _folders];
+	}
 
-	public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+	public Task AddOrUpdate(FolderEntity folder)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+	public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId) => Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+	public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
+	{
+		return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+	}
 
 	public void AddWidget(Guid folderId, WidgetEntity widget)
 	{

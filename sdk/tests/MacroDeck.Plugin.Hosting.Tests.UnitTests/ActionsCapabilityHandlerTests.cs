@@ -23,20 +23,26 @@ public class ActionsCapabilityHandlerTests
 
 	[OneTimeSetUp]
 	public static void OneTimeSetUp()
-		=> _services = new ServiceCollection()
+	{
+		_services = new ServiceCollection()
 			.AddSingleton<IHostInvoker>(new HostInvoker(new PluginConnectionState(),
 				TimeProvider.System,
 				Serilog.Core.Logger.None))
 			.BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(
 		string localId,
 		string operation = "execute",
 		object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Actions,
 			LocalId = localId,
@@ -47,8 +53,12 @@ public class ActionsCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
-	private static ActionsCapabilityHandler Handler(params IPluginIntegration[] integrations) => new(integrations);
+	private static ActionsCapabilityHandler Handler(params IPluginIntegration[] integrations)
+	{
+		return new ActionsCapabilityHandler(integrations);
+	}
 
 	[Test]
 	public void Every_registered_action_is_declared()
@@ -149,7 +159,7 @@ public class ActionsCapabilityHandlerTests
 	{
 		var handler = Handler(new TestIntegration(new TestAction("play")));
 
-		var result = await handler.InvokeAsync(Invocation("play", operation: "rewind"), CancellationToken.None);
+		var result = await handler.InvokeAsync(Invocation("play", "rewind"), CancellationToken.None);
 
 		Assert.That(result.Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
 	}
@@ -250,7 +260,7 @@ public class ActionsCapabilityHandlerTests
 		var action = new TestAction("play") { Parameters = [ActionParameter.Number("volume")] };
 		var handler = Handler(new TestIntegration(action));
 
-		var result = await handler.InvokeAsync(Invocation("play", operation: "describe"), CancellationToken.None);
+		var result = await handler.InvokeAsync(Invocation("play", "describe"), CancellationToken.None);
 
 		Assert.That(result.IsFailure, Is.False);
 		var catalog = result.Data!.Value
@@ -268,7 +278,7 @@ public class ActionsCapabilityHandlerTests
 	{
 		var handler = Handler(new TestIntegration(new TestAction("play")));
 
-		var result = await handler.InvokeAsync(Invocation("play", operation: "options"), CancellationToken.None);
+		var result = await handler.InvokeAsync(Invocation("play", "options"), CancellationToken.None);
 
 		Assert.That(result.Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnavailable));
 	}

@@ -44,7 +44,8 @@ internal sealed class BatteryContractTests
 			NegotiatedVersion = 1,
 			Capabilities = new Dictionary<string, CapabilityNegotiationResult>(StringComparer.Ordinal)
 			{
-				[CapabilityKinds.BatteryProvider] = CapabilityNegotiationResult.Accept(CapabilityKinds.BatteryProvider, 1)
+				[CapabilityKinds.BatteryProvider]
+					= CapabilityNegotiationResult.Accept(CapabilityKinds.BatteryProvider, 1)
 			},
 			DeclaredCapabilities = [],
 			State = PluginSessionState.Awaiting,
@@ -71,7 +72,7 @@ internal sealed class BatteryContractTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			batteries: _registry);
@@ -82,7 +83,7 @@ internal sealed class BatteryContractTests
 		_link = new CallbackHostLink(PluginId, "session-batteries", router, new CallbackFakeEventBus());
 
 		var connection = new PluginSessionConnection(_link,
-			PluginTestSession.Create("session-batteries", negotiatedVersion: 1, DateTimeOffset.UnixEpoch),
+			PluginTestSession.Create("session-batteries", 1, DateTimeOffset.UnixEpoch),
 			PluginTestSession.Dispatcher([], _state, TimeProvider.System),
 			_state,
 			TimeProvider.System,
@@ -91,7 +92,7 @@ internal sealed class BatteryContractTests
 			_stateCache);
 
 		_state.ActiveConnection = connection;
-		_run = connection.RunAsync(resumeSessionId: null, instanceId: "battery-fixture", CancellationToken.None);
+		_run = connection.RunAsync(null, "battery-fixture", CancellationToken.None);
 		await WaitForAsync(() => _state.IsReady);
 
 		_provider = new RemoteBatteryProviderContext(hostInvoker, _state, Serilog.Core.Logger.None);
@@ -212,13 +213,15 @@ internal sealed class BatteryContractTests
 	}
 
 	private void OnRegistryChanged(object? sender, BatteryDevicesChangedEventArgs e)
-		=> _link.PushHostState(HostApis.Batteries,
+	{
+		_link.PushHostState(HostApis.Batteries,
 			new BatteryStateDto
 			{
 				Devices = [.. _registry.Devices.Select(device => BatteryWire.ToDto(device))],
 				RemovedIds = e.RemovedIds,
 				Revision = Interlocked.Increment(ref _revision)
 			});
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{

@@ -27,11 +27,13 @@ public class SystemMetricsLinuxTests
 	[Test]
 	public async Task The_root_file_system_is_listed_with_capacity_and_activity()
 	{
-		var rootSource = File.ReadAllLines("/proc/self/mountinfo")
+		var rootSource = (await File.ReadAllLinesAsync("/proc/self/mountinfo"))
 			.Where(line => line.Split(' ')[4] == "/")
 			.Select(line => line[(line.IndexOf(" - ", StringComparison.Ordinal) + 3)..].Split(' ')[1])
 			.LastOrDefault();
-		Assume.That(rootSource, Does.StartWith("/dev/"), "the root file system is not on a block device, as in a container");
+		Assume.That(rootSource,
+			Does.StartWith("/dev/"),
+			"the root file system is not on a block device, as in a container");
 
 		var metrics = SystemMetricsServiceFactory.Create();
 		using (metrics as IDisposable)

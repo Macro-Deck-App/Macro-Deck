@@ -108,9 +108,13 @@ internal sealed class PluginInstallerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
-	private string BuildArtifact(string version = "1.0.0",
+	private string BuildArtifact(
+		string version = "1.0.0",
 		string? extraManifestBlocks = null,
 		string pluginId = PluginId,
 		string payload = "binary",
@@ -141,12 +145,19 @@ internal sealed class PluginInstallerTests
 	}
 
 	private string VersionDirectory(string version)
-		=> PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+	{
+		return PluginInstallPaths.VersionDirectory(_paths.PluginsDirectory, PluginId, version);
+	}
 
 	private string ReadEntrypoint(string version)
-		=> File.ReadAllText(Path.Combine(VersionDirectory(version), ManifestJson.EntrypointExecutable));
+	{
+		return File.ReadAllText(Path.Combine(VersionDirectory(version), ManifestJson.EntrypointExecutable));
+	}
 
-	private string DataDirectory() => PluginInstallPaths.DataDirectory(_paths.PluginsDirectory, PluginId);
+	private string DataDirectory()
+	{
+		return PluginInstallPaths.DataDirectory(_paths.PluginsDirectory, PluginId);
+	}
 
 	private void WritePluginData(string content)
 	{
@@ -251,7 +262,7 @@ internal sealed class PluginInstallerTests
 		var result = await Install(BuildArtifact(payload: "replacement",
 			fileName: "again.macroDeckPlugin"));
 
-		var installedPayload = File.ReadAllText(
+		var installedPayload = await File.ReadAllTextAsync(
 			Path.Combine(VersionDirectory("1.0.0"), ManifestJson.EntrypointExecutable));
 
 		Assert.Multiple(() =>
@@ -267,7 +278,7 @@ internal sealed class PluginInstallerTests
 	public async Task A_forced_reinstall_replaces_the_version_contents()
 	{
 		await Install(BuildArtifact(payload: "original"));
-		File.WriteAllText(Path.Combine(VersionDirectory("1.0.0"), "stale.txt"), "left over");
+		await File.WriteAllTextAsync(Path.Combine(VersionDirectory("1.0.0"), "stale.txt"), "left over");
 
 		var result = await Install(BuildArtifact(payload: "replacement", fileName: "again.macroDeckPlugin"),
 			new PluginInstallRequest { Force = true });
@@ -665,7 +676,9 @@ internal sealed class PluginInstallerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
-			Assert.That(filesSeenWhenStopped, Is.EqualTo("original"), "the plugin must stop before its files are replaced");
+			Assert.That(filesSeenWhenStopped,
+				Is.EqualTo("original"),
+				"the plugin must stop before its files are replaced");
 			Assert.That(ReadEntrypoint("1.0.0"), Is.EqualTo("replacement"));
 			Assert.That(_supervisor.IsRunning(PluginId), Is.True);
 		});
@@ -795,7 +808,6 @@ internal sealed class PluginInstallerTests
 
 		await Install(hostile);
 		await Install(BuildArtifact("3.0.0",
-			extraManifestBlocks:
 			"""
 			"compatibility": { "protocol": { "minimum": 99, "maximum": 100 } }
 			""",
@@ -855,7 +867,7 @@ internal sealed class PluginInstallerTests
 		await Install(BuildArtifact("1.1.0", fileName: "plugin-110.macroDeckPlugin"));
 
 		Assert.That(_supervisor.Stops.Select(stop => stop.Reason),
-			Does.Contain(Application.Plugins.Runtime.PluginStopReason.Update));
+			Does.Contain(PluginStopReason.Update));
 	}
 
 	[Test]
@@ -957,8 +969,7 @@ internal sealed class PluginInstallerTests
 			Assert.That(result.Activated, Is.True);
 			Assert.That(ActiveVersion(), Is.EqualTo("1.0.0"));
 			Assert.That(result.Warnings.Where(w =>
-					w.Severity == PluginInstallWarningSeverity.Blocking &&
-					w.SubjectId == "com.other.dep"),
+					w.Severity == PluginInstallWarningSeverity.Blocking && w.SubjectId == "com.other.dep"),
 				Is.Not.Empty);
 			Assert.That(_supervisor.Starts, Does.Not.Contain(PluginId));
 		});
@@ -1040,8 +1051,7 @@ internal sealed class PluginInstallerTests
 			Assert.That(result.Success, Is.True, result.ErrorMessage);
 			Assert.That(result.Activated, Is.True);
 			Assert.That(result.Warnings.Any(w =>
-					w.Severity == PluginInstallWarningSeverity.Blocking &&
-					w.SubjectId == "com.other.rival"),
+					w.Severity == PluginInstallWarningSeverity.Blocking && w.SubjectId == "com.other.rival"),
 				Is.True);
 			Assert.That(_supervisor.Starts, Does.Not.Contain(PluginId));
 		});
@@ -1093,7 +1103,7 @@ internal sealed class PluginInstallerTests
 			""");
 
 		var result = await Install(artifact);
-		var installedManifest = File.ReadAllText(Path.Combine(VersionDirectory("1.0.0"), "manifest.json"));
+		var installedManifest = await File.ReadAllTextAsync(Path.Combine(VersionDirectory("1.0.0"), "manifest.json"));
 
 		Assert.Multiple(() =>
 		{
@@ -1156,7 +1166,7 @@ internal sealed class PluginInstallerTests
 		WritePluginData("keep me");
 
 		await _installer.Uninstall(PluginId, new PluginUninstallRequest());
-		Assert.That(File.ReadAllText(Path.Combine(DataDirectory(), "settings.json")), Is.EqualTo("keep me"));
+		Assert.That(await File.ReadAllTextAsync(Path.Combine(DataDirectory(), "settings.json")), Is.EqualTo("keep me"));
 
 		await Install(BuildArtifact(fileName: "again.macroDeckPlugin"));
 		await _installer.Uninstall(PluginId, new PluginUninstallRequest { KeepData = false });
@@ -1251,8 +1261,8 @@ internal sealed class PluginInstallerTests
 			Assert.That(result.Warnings,
 				Has.None.Matches<PluginInstallWarning>(warning =>
 					_publicationVocabulary.Any(word =>
-						warning.Code.Contains(word, StringComparison.OrdinalIgnoreCase) ||
-						warning.Message.Contains(word, StringComparison.OrdinalIgnoreCase))));
+						warning.Code.Contains(word, StringComparison.OrdinalIgnoreCase)
+						|| warning.Message.Contains(word, StringComparison.OrdinalIgnoreCase))));
 		});
 	}
 
@@ -1283,20 +1293,29 @@ internal sealed class PluginInstallerTests
 	{
 		var declaration = $"\"bundledIconPacks\": [{{ \"key\": \"logos\", \"path\": \"{BundledPackPath}\" }}]";
 		return signed
-			? declaration + ", \"files\": [" + FileDigest(BundledPackPath, archive) + ", " +
-				FileDigest(ManifestJson.EntrypointExecutable, Encoding.UTF8.GetBytes("binary")) + "]"
+			? declaration
+			+ ", \"files\": ["
+			+ FileDigest(BundledPackPath, archive)
+			+ ", "
+			+ FileDigest(ManifestJson.EntrypointExecutable, Encoding.UTF8.GetBytes("binary"))
+			+ "]"
 			: declaration;
 	}
 
 	private static string FileDigest(string path, byte[] content)
-		=> $"{{ \"path\": \"{path}\", \"sha256\": \"{PluginArtifactBuilder.Sha256Of(content)}\", \"size\": {content.Length} }}";
+	{
+		return
+			$"{{ \"path\": \"{path}\", \"sha256\": \"{PluginArtifactBuilder.Sha256Of(content)}\", \"size\": {content.Length} }}";
+	}
 
 	private string BuildArtifactWithPack(byte[] archive, bool signed = true)
-		=> new PluginArtifactBuilder()
+	{
+		return new PluginArtifactBuilder()
 			.WithManifest(ManifestJson.Build("1.0.0", PluginId, BundledPackBlocks(archive, signed)))
 			.WithFile(ManifestJson.EntrypointExecutable, "binary")
 			.WithFile(BundledPackPath, archive)
 			.WriteTo(_sourceDirectory, "bundled.macroDeckPlugin");
+	}
 
 	[Test]
 	public async Task Installing_a_plugin_adds_its_bundled_pack_without_starting_it_and_uninstalling_removes_it()
@@ -1327,7 +1346,7 @@ internal sealed class PluginInstallerTests
 		_installer = _newInstaller(icons.Sync);
 		var archive = await icons.BuildArchive("Logos", ("spotify", "green"));
 
-		var installed = await Install(BuildArtifactWithPack(archive, signed: false));
+		var installed = await Install(BuildArtifactWithPack(archive, false));
 
 		Assert.Multiple(() =>
 		{
@@ -1355,6 +1374,8 @@ internal sealed class PluginInstallerTests
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
 		public HttpClient CreateClient(string name)
-			=> throw new InvalidOperationException("A unit test must not reach the network.");
+		{
+			throw new InvalidOperationException("A unit test must not reach the network.");
+		}
 	}
 }

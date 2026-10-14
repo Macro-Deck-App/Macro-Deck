@@ -16,18 +16,25 @@ public sealed class VideoStreamProviderTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal VideoStreamProviderTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal VideoStreamProviderTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>The providers the plugin has registered. Deserializes to
 	/// <see cref="VideoStreamProviderDescribePayload" />.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.Describe, null, options);
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.Describe, null, options);
+	}
 
 	/// <summary>One provider's streams. Deserializes to <see cref="VideoStreamProviderStreamsResult" />.</summary>
 	public Task<CapabilityInvocationOutcome> GetStreamsAsync(string providerId, CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.Streams,
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.Streams,
 			new VideoStreamProviderStreamsArguments { ProviderId = providerId },
 			options);
+	}
 
 	/// <summary>
 	/// Opens a session. Deserializes to <see cref="VideoStreamSessionOpenResult" />.
@@ -41,7 +48,8 @@ public sealed class VideoStreamProviderTestClient
 		string streamId,
 		IReadOnlyList<string> acceptedTransports,
 		CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionOpen,
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.SessionOpen,
 			new VideoStreamSessionOpenArguments
 			{
 				SessionId = sessionId,
@@ -50,24 +58,29 @@ public sealed class VideoStreamProviderTestClient
 				AcceptedTransports = acceptedTransports
 			},
 			options);
+	}
 
 	/// <summary>Suspends an open session.</summary>
 	public Task<CapabilityInvocationOutcome> SuspendSessionAsync(
 		string sessionId,
 		string providerId,
 		CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionSuspend,
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.SessionSuspend,
 			new VideoStreamSessionArguments { SessionId = sessionId, ProviderId = providerId },
 			options);
+	}
 
 	/// <summary>Resumes a suspended session. Deserializes to <see cref="VideoStreamSessionResumeResult" />.</summary>
 	public Task<CapabilityInvocationOutcome> ResumeSessionAsync(
 		string sessionId,
 		string providerId,
 		CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionResume,
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.SessionResume,
 			new VideoStreamSessionArguments { SessionId = sessionId, ProviderId = providerId },
 			options);
+	}
 
 	/// <summary>Closes a session. Closing one that is already closed, or not open yet, succeeds; a close
 	/// that arrives before its open makes that open fail.</summary>
@@ -77,14 +90,21 @@ public sealed class VideoStreamProviderTestClient
 		string providerId,
 		string reason = "ConsumerClosed",
 		CapabilityInvokeOptions? options = null)
-		=> Invoke(CapabilityOperations.VideoStreamProvider.SessionClose,
+	{
+		return Invoke(CapabilityOperations.VideoStreamProvider.SessionClose,
 			new VideoStreamSessionCloseArguments { SessionId = sessionId, ProviderId = providerId, Reason = reason },
 			options);
+	}
 
-	private Task<CapabilityInvocationOutcome> Invoke(string operation, object? arguments, CapabilityInvokeOptions? options)
-		=> _invoker.InvokeAsync(CapabilityKinds.VideoStreamProvider,
+	private Task<CapabilityInvocationOutcome> Invoke(
+		string operation,
+		object? arguments,
+		CapabilityInvokeOptions? options)
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.VideoStreamProvider,
 			ProviderCapabilityId.LocalId,
 			operation,
 			arguments,
 			options);
+	}
 }

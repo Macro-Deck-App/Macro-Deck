@@ -14,7 +14,9 @@ public class AdbManagerPropertyProbeTests
 	private const string Serial = "123456";
 
 	private static int DumpsysCallCount(FakeAdbProcessRunner runner)
-		=> runner.Invocations.Count(argv => argv.Any(arg => arg.StartsWith("dumpsys", StringComparison.Ordinal)));
+	{
+		return runner.Invocations.Count(argv => argv.Any(arg => arg.StartsWith("dumpsys", StringComparison.Ordinal)));
+	}
 
 	private static async Task GivenOnlineDeviceAsync(AdbManagerHarness harness)
 	{

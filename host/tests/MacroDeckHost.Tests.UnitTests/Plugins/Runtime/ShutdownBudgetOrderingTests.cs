@@ -51,8 +51,8 @@ internal sealed class ShutdownBudgetOrderingTests
 
 		Assert.That(match.Success,
 			Is.True,
-			$"'{constantName}' was not found in the bootstrapper's host.rs; the shutdown budgets can no longer " +
-			"be checked against each other.");
+			$"'{constantName}' was not found in the bootstrapper's host.rs; the shutdown budgets can no longer "
+			+ "be checked against each other.");
 
 		return TimeSpan.FromSeconds(int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture));
 	}

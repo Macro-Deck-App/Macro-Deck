@@ -57,17 +57,22 @@ internal sealed class StoreRegistryRefresherTests
 		_paths.Cleanup();
 	}
 
-	private StoreRegistryRefresher Create(StoreRegistryFixture fixture,
+	private StoreRegistryRefresher Create(
+		StoreRegistryFixture fixture,
 		TimeSpan? maxSnapshotAge = null,
 		IReadOnlyList<TimeSpan>? retryDelays = null,
-		Mediator.IMediator? mediator = null) =>
-		Create(fixture.Build(), maxSnapshotAge, retryDelays, mediator);
+		Mediator.IMediator? mediator = null)
+	{
+		return Create(fixture.Build(), maxSnapshotAge, retryDelays, mediator);
+	}
 
-	private StoreRegistryRefresher Create(IHttpClientFactory transport,
+	private StoreRegistryRefresher Create(
+		IHttpClientFactory transport,
 		TimeSpan? maxSnapshotAge = null,
 		IReadOnlyList<TimeSpan>? retryDelays = null,
-		Mediator.IMediator? mediator = null) =>
-		new(transport,
+		Mediator.IMediator? mediator = null)
+	{
+		return new StoreRegistryRefresher(transport,
 			StoreRegistryOptions.Default with
 			{
 				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
@@ -84,28 +89,33 @@ internal sealed class StoreRegistryRefresherTests
 			mediator ?? _mediator,
 			_lifetime,
 			Log.Logger);
+	}
 
-	private static StoreRegistryFixture Registry(long sequence = 1,
+	private static StoreRegistryFixture Registry(
+		long sequence = 1,
 		TestPki.IssuedCertificate? certificate = null,
 		TestPki.IssuedCertificate? issuer = null)
 	{
-		var fixture = new StoreRegistryFixture(certificate, issuer) { Sequence = sequence };
-		fixture.SignedAt = _now;
+		var fixture = new StoreRegistryFixture(certificate, issuer)
+		{
+			Sequence = sequence,
+			SignedAt = _now
+		};
 		fixture.AddPackage("plugin",
 			"com.acme.hue",
 			"2.1.0",
-			name: "Hue Bridge",
-			description: "Philips Hue lights",
-			publisher: "Acme");
+			"Hue Bridge",
+			"Philips Hue lights",
+			"Acme");
 		fixture.AddPackage("icon-pack",
 			"com.acme.material",
 			"1.0.0",
-			name: "Material Icons",
+			"Material Icons",
 			publisher: "Acme");
 		fixture.AddPackage("profile",
 			"com.acme.streamer",
 			"1.0.0",
-			name: "Streamer Profile",
+			"Streamer Profile",
 			publisher: "Acme");
 		return fixture;
 	}
@@ -193,7 +203,8 @@ internal sealed class StoreRegistryRefresherTests
 			Assert.That(entry.FindRelease("1.0.0"), Is.Null);
 			Assert.That(entry.FindRelease(entry.LatestVersion), Is.Not.Null);
 			Assert.That(entry.History.Where(version => version.Version != entry.LatestVersion)
-				.Select(version => (version.HasRelease, version.Size)), Has.All.EqualTo((false, (long?)null)));
+					.Select(version => (version.HasRelease, version.Size)),
+				Has.All.EqualTo((false, (long?)null)));
 		});
 	}
 
@@ -206,7 +217,7 @@ internal sealed class StoreRegistryRefresherTests
 		fixture.AddPackage("plugin",
 			"com.acme.translated",
 			"1.0.0",
-			name: "Translated Plugin",
+			"Translated Plugin",
 			languages: ["en", "de", "zh-Hant-TW"]);
 
 		await Create(fixture).Refresh();
@@ -284,8 +295,10 @@ internal sealed class StoreRegistryRefresherTests
 		});
 	}
 
-	private IReadOnlyList<string> Tags(string id) =>
-		_catalog.Snapshot.Entries.Single(entry => entry.Id == id).Tags;
+	private IReadOnlyList<string> Tags(string id)
+	{
+		return _catalog.Snapshot.Entries.Single(entry => entry.Id == id).Tags;
+	}
 
 	[Test]
 	public async Task A_packages_valid_additional_links_reach_the_catalog_in_declared_order()
@@ -317,7 +330,9 @@ internal sealed class StoreRegistryRefresherTests
 	{
 		var fixture = Registry();
 		fixture.AddPackage("plugin", "com.acme.string-links", additionalLinks: "https://acme.test");
-		fixture.AddPackage("plugin", "com.acme.odd-links", additionalLinks: new object?[] { null, 5, new { type = 7, url = new[] { 1 } } });
+		fixture.AddPackage("plugin",
+			"com.acme.odd-links",
+			additionalLinks: new object?[] { null, 5, new { type = 7, url = new[] { 1 } } });
 
 		await Create(fixture).Refresh();
 
@@ -342,7 +357,11 @@ internal sealed class StoreRegistryRefresherTests
 				version = 1,
 				categories = new object[]
 				{
-					new { id = "streaming", names = new Dictionary<string, string> { ["en"] = "Streaming", ["cs"] = "Streamování" } },
+					new
+					{
+						id = "streaming",
+						names = new Dictionary<string, string> { ["en"] = "Streaming", ["cs"] = "Streamování" }
+					},
 					new { id = "music", names = new Dictionary<string, string> { ["en"] = "Music", ["de"] = "Musik" } }
 				}
 			});
@@ -387,10 +406,18 @@ internal sealed class StoreRegistryRefresherTests
 					new { id = "no-english", names = new Dictionary<string, object> { ["de"] = "Nur Deutsch" } },
 					new { id = "numeric-name", names = new Dictionary<string, object> { ["en"] = 42 } },
 					"not an object",
-					new { id = "gaming", names = new Dictionary<string, object> { ["en"] = " Gaming ", ["deu"] = "Spiele", ["fr"] = 7 } },
+					new
+					{
+						id = "gaming",
+						names = new Dictionary<string, object> { ["en"] = " Gaming ", ["deu"] = "Spiele", ["fr"] = 7 }
+					},
 					new { id = "gaming", names = new Dictionary<string, object> { ["en"] = "Duplicate" } },
 					new { id = new string('a', 33), names = new Dictionary<string, object> { ["en"] = "Too long" } },
-					new { id = "system", names = new Dictionary<string, object> { ["en"] = "System", ["de"] = new string('x', 65) } }
+					new
+					{
+						id = "system",
+						names = new Dictionary<string, object> { ["en"] = "System", ["de"] = new string('x', 65) }
+					}
 				}
 			});
 
@@ -500,7 +527,7 @@ internal sealed class StoreRegistryRefresherTests
 
 		var featuredResult = await Create(featuresAGhost).Refresh();
 
-		var listsAGhost = Registry(sequence: 2);
+		var listsAGhost = Registry(2);
 		listsAGhost.PluginIds.Add("com.acme.ghost");
 
 		var indexResult = await Create(listsAGhost).Refresh();
@@ -516,13 +543,13 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task A_lower_sequence_is_refused_and_the_verified_catalog_is_kept()
 	{
-		var certificate = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: _registryUsage);
-		var refresher = Create(Registry(sequence: 7, certificate: certificate));
+		var certificate = TestPki.IssueCertificate("service",
+			_registryUsage);
+		var refresher = Create(Registry(7, certificate));
 		await refresher.Refresh();
 
 		// Internally perfect, only older: nothing but the sequence check can reject this.
-		var rolledBack = Registry(sequence: 6, certificate: certificate);
+		var rolledBack = Registry(6, certificate);
 		rolledBack.PluginIds.Clear();
 		rolledBack.IconPackIds.Clear();
 		rolledBack.ProfileTemplateIds.Clear();
@@ -595,8 +622,8 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task A_package_usage_certificate_cannot_sign_the_registry()
 	{
-		var packageCertificate = TestPki.IssueCertificate(subjectKind: "creator",
-			keyUsage: _packageUsage);
+		var packageCertificate = TestPki.IssueCertificate("creator",
+			_packageUsage);
 
 		var result = await Create(Registry(certificate: packageCertificate)).Refresh();
 
@@ -610,12 +637,12 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task A_signing_key_the_cached_snapshot_revoked_cannot_publish_a_new_snapshot()
 	{
-		var retired = TestPki.IssueCertificate(subjectKind: "service", keyUsage: _registryUsage);
-		var revoking = Registry(sequence: 1);
+		var retired = TestPki.IssueCertificate("service", _registryUsage);
+		var revoking = Registry(1);
 		revoking.RevokedKeyIds.Add(retired.CertificateId);
 		await Create(revoking).Refresh();
 
-		var result = await Create(Registry(sequence: 2, certificate: retired)).Refresh();
+		var result = await Create(Registry(2, retired)).Refresh();
 
 		Assert.Multiple(() =>
 		{
@@ -667,12 +694,12 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task An_older_but_validly_signed_tree_dropped_into_the_cache_is_refused_on_load()
 	{
-		var certificate = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: _registryUsage);
-		var refresher = Create(Registry(sequence: 7, certificate: certificate));
+		var certificate = TestPki.IssueCertificate("service",
+			_registryUsage);
+		var refresher = Create(Registry(7, certificate));
 		await refresher.Refresh();
 
-		var older = Registry(sequence: 6, certificate: certificate);
+		var older = Registry(6, certificate);
 		older.PluginIds.Clear();
 		older.IconPackIds.Clear();
 		older.ProfileTemplateIds.Clear();
@@ -688,7 +715,7 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task A_snapshot_older_than_the_freshness_bound_is_reported_stale()
 	{
-		var refresher = Create(Registry(), maxSnapshotAge: TimeSpan.FromHours(1));
+		var refresher = Create(Registry(), TimeSpan.FromHours(1));
 		await refresher.Refresh();
 
 		_time.Now = _now.AddHours(2);
@@ -782,26 +809,28 @@ internal sealed class StoreRegistryRefresherTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(applied.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
-			Assert.That(applied.Entries.Select(entry => entry.Step), Is.EqualTo(new[]
-			{
-				StoreRegistryRefreshStep.Started,
-				StoreRegistryRefreshStep.FetchingManifest,
-				StoreRegistryRefreshStep.FetchingSignature,
-				StoreRegistryRefreshStep.DownloadingFiles,
-				StoreRegistryRefreshStep.Verifying,
-				StoreRegistryRefreshStep.ReadingCatalog,
-				StoreRegistryRefreshStep.Applied
-			}));
+			Assert.That(applied.Entries.Select(entry => entry.Step),
+				Is.EqualTo(new[]
+				{
+					StoreRegistryRefreshStep.Started,
+					StoreRegistryRefreshStep.FetchingManifest,
+					StoreRegistryRefreshStep.FetchingSignature,
+					StoreRegistryRefreshStep.DownloadingFiles,
+					StoreRegistryRefreshStep.Verifying,
+					StoreRegistryRefreshStep.ReadingCatalog,
+					StoreRegistryRefreshStep.Applied
+				}));
 			Assert.That(applied.FilesTotal, Is.GreaterThan(0));
 			Assert.That(applied.FilesCompleted, Is.EqualTo(applied.FilesTotal));
 			Assert.That(unchanged.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
-			Assert.That(unchanged.Entries.Select(entry => entry.Step), Is.EqualTo(new[]
-			{
-				StoreRegistryRefreshStep.Started,
-				StoreRegistryRefreshStep.FetchingManifest,
-				StoreRegistryRefreshStep.FetchingSignature,
-				StoreRegistryRefreshStep.UpToDate
-			}));
+			Assert.That(unchanged.Entries.Select(entry => entry.Step),
+				Is.EqualTo(new[]
+				{
+					StoreRegistryRefreshStep.Started,
+					StoreRegistryRefreshStep.FetchingManifest,
+					StoreRegistryRefreshStep.FetchingSignature,
+					StoreRegistryRefreshStep.UpToDate
+				}));
 		});
 	}
 
@@ -847,7 +876,8 @@ internal sealed class StoreRegistryRefresherTests
 	}
 
 	[TestCase(ChangedFile, TestName = "A_file_already_from_the_next_update_is_waited_out_and_that_update_applied")]
-	[TestCase("registry-signature.json", TestName = "A_signature_already_from_the_next_update_is_waited_out_and_that_update_applied")]
+	[TestCase("registry-signature.json",
+		TestName = "A_signature_already_from_the_next_update_is_waited_out_and_that_update_applied")]
 	[TestCase(DeletedFile, TestName = "A_file_the_next_update_deleted_is_waited_out_and_that_update_applied")]
 	public async Task A_refresh_that_straddles_a_registry_update_waits_for_the_update_and_applies_it(string servedEarly)
 	{
@@ -871,15 +901,18 @@ internal sealed class StoreRegistryRefresherTests
 			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl)?.AcceptedSequence, Is.EqualTo(2));
 			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History[0].Changelog,
 				Is.EqualTo(ChangedChangelog));
-			Assert.That(_tracker.Current!.Entries.Where(entry => entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate)
-				.Select(entry => entry.Count), Is.EqualTo(new int?[] { 30 }));
+			Assert.That(_tracker.Current!.Entries
+					.Where(entry => entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate)
+					.Select(entry => entry.Count),
+				Is.EqualTo(new int?[] { 30 }));
 			Assert.That(_tracker.Current.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
 		});
 	}
 
 	[TestCase(ChangedFile, RegistryRefreshError.SizeMismatch)]
 	[TestCase(DeletedFile, RegistryRefreshError.NetworkFailure)]
-	public async Task A_mismatch_that_outlasts_every_wait_still_fails_with_its_own_error(string servedEarly,
+	public async Task A_mismatch_that_outlasts_every_wait_still_fails_with_its_own_error(
+		string servedEarly,
 		RegistryRefreshError expected)
 	{
 		var (older, newer) = Generations();
@@ -895,7 +928,8 @@ internal sealed class StoreRegistryRefresherTests
 			Assert.That(result.Error, Is.EqualTo(expected));
 			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
 			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl), Is.Null);
-			Assert.That(_tracker.Current!.Entries.Count(entry => entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate),
+			Assert.That(_tracker.Current!.Entries.Count(entry
+					=> entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate),
 				Is.EqualTo(_productionDelays.Length));
 		});
 	}
@@ -923,7 +957,7 @@ internal sealed class StoreRegistryRefresherTests
 	[Test]
 	public async Task A_failure_no_registry_update_can_cause_is_reported_at_once_without_waiting()
 	{
-		var certificate = TestPki.IssueCertificate(subjectKind: "service", keyUsage: _packageUsage);
+		var certificate = TestPki.IssueCertificate("service", _packageUsage);
 		var refresher = Create(Registry(certificate: certificate), retryDelays: _productionDelays);
 		var armed = _time.ScheduledCount;
 
@@ -939,7 +973,8 @@ internal sealed class StoreRegistryRefresherTests
 	}
 
 	[Test]
-	public async Task Shutting_down_while_waiting_for_a_registry_update_ends_the_run_as_cancelled_and_announces_nothing()
+	public async Task
+		Shutting_down_while_waiting_for_a_registry_update_ends_the_run_as_cancelled_and_announces_nothing()
 	{
 		var (older, newer) = Generations();
 		older.ServeOverride = relative => relative == ChangedFile
@@ -1024,10 +1059,10 @@ internal sealed class StoreRegistryRefresherTests
 
 	private static (StoreRegistryFixture Older, StoreRegistryFixture Newer) Generations()
 	{
-		var certificate = TestPki.IssueCertificate(subjectKind: "service", keyUsage: _registryUsage);
-		var older = Registry(sequence: 1, certificate: certificate);
+		var certificate = TestPki.IssueCertificate("service", _registryUsage);
+		var older = Registry(1, certificate);
 		older.AddVersion("plugins", "com.acme.hue", "2.0.0");
-		var newer = Registry(sequence: 2, certificate: certificate);
+		var newer = Registry(2, certificate);
 		newer.WriteText(ChangedFile, ChangedChangelog);
 		newer.Build();
 		return (older, newer);
@@ -1064,36 +1099,70 @@ internal sealed class StoreRegistryRefresherTests
 
 	private sealed class ThrowingPublishMediator : Mediator.IMediator
 	{
-		public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
-			where TNotification : Mediator.INotification =>
+		public ValueTask Publish<TNotification>(
+			TNotification notification,
+			CancellationToken cancellationToken = default)
+			where TNotification : Mediator.INotification
+		{
 			throw new InvalidOperationException("listener failed");
+		}
 
-		public ValueTask Publish(object notification, CancellationToken cancellationToken = default) =>
+		public ValueTask Publish(object notification, CancellationToken cancellationToken = default)
+		{
 			throw new InvalidOperationException("listener failed");
+		}
 
-		public ValueTask<TResponse> Send<TResponse>(Mediator.IRequest<TResponse> request,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public ValueTask<TResponse> Send<TResponse>(Mediator.ICommand<TResponse> command,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public ValueTask<TResponse> Send<TResponse>(Mediator.IQuery<TResponse> query,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default) =>
+		public ValueTask<TResponse> Send<TResponse>(
+			Mediator.IRequest<TResponse> request,
+			CancellationToken cancellationToken = default)
+		{
 			throw new NotSupportedException();
+		}
 
-		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(Mediator.IStreamRequest<TResponse> request,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(Mediator.IStreamCommand<TResponse> command,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(Mediator.IStreamQuery<TResponse> query,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-		public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default) =>
+		public ValueTask<TResponse> Send<TResponse>(
+			Mediator.ICommand<TResponse> command,
+			CancellationToken cancellationToken = default)
+		{
 			throw new NotSupportedException();
+		}
+
+		public ValueTask<TResponse> Send<TResponse>(
+			Mediator.IQuery<TResponse> query,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public ValueTask<object?> Send(object message, CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
+			Mediator.IStreamRequest<TResponse> request,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
+			Mediator.IStreamCommand<TResponse> command,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IAsyncEnumerable<TResponse> CreateStream<TResponse>(
+			Mediator.IStreamQuery<TResponse> query,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
+
+		public IAsyncEnumerable<object?> CreateStream(object request, CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private async Task WriteTreeToCache(StoreRegistryFixture fixture)
@@ -1103,7 +1172,7 @@ internal sealed class StoreRegistryRefresherTests
 		var root = _paths.StoreRegistryCurrentDirectory;
 		if (Directory.Exists(root))
 		{
-			Directory.Delete(root, recursive: true);
+			Directory.Delete(root, true);
 		}
 
 		Directory.CreateDirectory(root);
@@ -1183,11 +1252,11 @@ internal sealed class StoreRegistryRefresherTests
 	public async Task An_issuer_the_cached_snapshot_revoked_cannot_vouch_for_a_new_snapshot()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var revoking = Registry(sequence: 1);
+		var revoking = Registry(1);
 		revoking.RevokedKeyIds.Add(issuer.CertificateId);
 		await Create(revoking).Refresh();
 
-		var result = await Create(Registry(sequence: 2, issuer: issuer)).Refresh();
+		var result = await Create(Registry(2, issuer: issuer)).Refresh();
 
 		Assert.Multiple(() =>
 		{

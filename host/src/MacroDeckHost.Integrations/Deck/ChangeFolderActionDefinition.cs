@@ -21,13 +21,16 @@ internal sealed class ChangeFolderActionDefinition : IDynamicOptionsActionDefini
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice("folderId",
-			label: AppStrings.Integrations.Deck.Actions.FolderLabel(),
-			description: AppStrings.Integrations.Deck.Actions.FolderDescription(),
+			AppStrings.Integrations.Deck.Actions.FolderLabel(),
+			AppStrings.Integrations.Deck.Actions.FolderDescription(),
 			required: true),
 		DeckDeviceTarget.Parameter()
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_navigator);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_navigator);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -35,8 +38,8 @@ internal sealed class ChangeFolderActionDefinition : IDynamicOptionsActionDefini
 	{
 		var folders = _navigator()?.GetFolders() ?? [];
 		var options = folders
-			.Where(folder => context.Filter is null ||
-				folder.Label.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
+			.Where(folder
+				=> context.Filter is null || folder.Label.Contains(context.Filter, StringComparison.OrdinalIgnoreCase))
 			.Select(folder => new ActionParameterOption { Value = folder.Id, Label = folder.Label })
 			.ToList();
 
@@ -79,7 +82,7 @@ internal sealed class ChangeFolderActionDefinition : IDynamicOptionsActionDefini
 			if (navigator.GetFolders().All(folder => folder.Id != folderId))
 			{
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Deck.Errors.FolderNotFound(folderId: folderId));
+					AppStrings.Integrations.Deck.Errors.FolderNotFound(folderId));
 			}
 
 			if (!DeckDeviceTarget.TryResolve(navigator, context, out var originClientId, out var failure))

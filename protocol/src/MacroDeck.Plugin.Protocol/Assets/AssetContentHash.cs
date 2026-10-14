@@ -17,8 +17,10 @@ public static class AssetContentHash
 	/// <summary>Length of the hex portion: a SHA-256 digest is 32 bytes, i.e. 64 hex characters.</summary>
 	private const int HexLength = 64;
 
-	public static string Compute(ReadOnlySpan<byte> content) =>
-		Sha256Prefix + Convert.ToHexStringLower(SHA256.HashData(content));
+	public static string Compute(ReadOnlySpan<byte> content)
+	{
+		return Sha256Prefix + Convert.ToHexStringLower(SHA256.HashData(content));
+	}
 
 	/// <summary>
 	/// True only for exactly <see cref="Sha256Prefix" /> followed by 64 lowercase hex characters - the one
@@ -30,9 +32,9 @@ public static class AssetContentHash
 	/// </summary>
 	public static bool IsValid(string? contentHash)
 	{
-		if (contentHash is null ||
-			contentHash.Length != Sha256Prefix.Length + HexLength ||
-			!contentHash.StartsWith(Sha256Prefix, StringComparison.Ordinal))
+		if (contentHash is null
+			|| contentHash.Length != Sha256Prefix.Length + HexLength
+			|| !contentHash.StartsWith(Sha256Prefix, StringComparison.Ordinal))
 		{
 			return false;
 		}

@@ -28,10 +28,9 @@ internal sealed class SetAudioVolumeActionDefinition : IDynamicOptionsActionDefi
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(StreamlabsActionValues.SourceParameter,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.AudioSourceLabel(),
 			required: true),
 		ActionParameter.Choice(StreamlabsActionValues.ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -46,18 +45,21 @@ internal sealed class SetAudioVolumeActionDefinition : IDynamicOptionsActionDefi
 					Value = ModeDecrease, Label = AppStrings.Integrations.StreamlabsDesktop.Params.DecreaseByLabel()
 				}
 			],
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.ModeLabel(),
 			defaultValue: ModeSet),
 		ActionParameter.Slider(VolumeParameter,
-			min: 0,
-			max: 100,
-			label: AppStrings.Integrations.StreamlabsDesktop.Params.VolumePercentLabel(),
-			description: AppStrings.Integrations.StreamlabsDesktop.Params.VolumeFaderDescription(),
-			step: 1,
-			defaultValue: 100)
+			0,
+			100,
+			AppStrings.Integrations.StreamlabsDesktop.Params.VolumePercentLabel(),
+			AppStrings.Integrations.StreamlabsDesktop.Params.VolumeFaderDescription(),
+			1,
+			100)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,

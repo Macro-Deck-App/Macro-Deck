@@ -19,7 +19,7 @@ internal enum LocalizationParameterType
 	Double,
 
 	/// <summary><c>true</c> or <c>false</c>.</summary>
-	Bool,
+	Bool
 }
 
 /// <summary>Maps between <see cref="LocalizationParameterType" /> and the names used in resources and code.</summary>

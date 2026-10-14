@@ -144,7 +144,7 @@ public class RunScriptActionDefinitionTests
 	{
 		_scripts.Seed(new SdkScript { Id = "s1", Name = "Alpha", RunsOnWidget = true });
 
-		await ExecuteAsync([("widget", "$self")], ownerWidgetId: "w1");
+		await ExecuteAsync([("widget", "$self")], "w1");
 
 		Assert.That(_scripts.Runs.Single().OwnerWidgetId, Is.EqualTo("w1"));
 	}
@@ -159,7 +159,7 @@ public class RunScriptActionDefinitionTests
 	{
 		_scripts.Seed(new SdkScript { Id = "s1", Name = "Alpha", RunsOnWidget = true });
 
-		await ExecuteAsync([("widget", "$self")], ownerWidgetId: null);
+		await ExecuteAsync([("widget", "$self")], null);
 
 		var forwarded = _scripts.Runs.Single().OwnerWidgetId;
 		Assert.That(forwarded, Is.Not.EqualTo("$self"));
@@ -171,7 +171,7 @@ public class RunScriptActionDefinitionTests
 	{
 		_scripts.Seed(new SdkScript { Id = "s1", Name = "Alpha", RunsOnWidget = false });
 
-		await ExecuteAsync([], ownerWidgetId: "w1");
+		await ExecuteAsync([], "w1");
 
 		Assert.That(_scripts.Runs.Single().OwnerWidgetId, Is.Null);
 	}
@@ -207,7 +207,9 @@ public class RunScriptActionDefinitionTests
 	}
 
 	private Task<ActionResult> ExecuteAsync(params (string Name, object Value)[] parameters)
-		=> ExecuteAsync(parameters, ownerWidgetId: null);
+	{
+		return ExecuteAsync(parameters, null);
+	}
 
 	private Task<ActionResult> ExecuteAsync(
 		(string Name, object Value)[] parameters,
@@ -219,12 +221,13 @@ public class RunScriptActionDefinitionTests
 			values[name] = value;
 		}
 
-		return _action.CreateExecutor().ExecuteAsync(new ActionExecutionContext
-		{
-			Parameters = values,
-			OwnerWidgetId = ownerWidgetId,
-			CancellationToken = CancellationToken.None
-		});
+		return _action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = values,
+				OwnerWidgetId = ownerWidgetId,
+				CancellationToken = CancellationToken.None
+			});
 	}
 
 	// The action deliberately renders nothing of its own: FlowExecutor resolves every block parameter
@@ -295,14 +298,16 @@ public class RunScriptActionDefinitionTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -317,9 +322,15 @@ public class RunScriptActionDefinitionTests
 		public List<(string ScriptId, IReadOnlyDictionary<string, object?> Inputs, string? OwnerWidgetId)> Runs { get; }
 			= [];
 
-		public void Seed(SdkScript script) => _seeded.Add(script);
+		public void Seed(SdkScript script)
+		{
+			_seeded.Add(script);
+		}
 
-		public IReadOnlyList<SdkScript> GetScripts() => _seeded;
+		public IReadOnlyList<SdkScript> GetScripts()
+		{
+			return _seeded;
+		}
 
 		public Task<ActionResult> RunAsync(
 			string scriptId,

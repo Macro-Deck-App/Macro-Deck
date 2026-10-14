@@ -73,8 +73,8 @@ public sealed class CalendarSyncBackgroundService : HostReadyBackgroundService
 
 	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e)
 	{
-		if (_calendars.IsCalendarIntegration(e.IntegrationId) ||
-			_cache.Snapshot.Accounts.Any(state => state.Account.IntegrationId == e.IntegrationId))
+		if (_calendars.IsCalendarIntegration(e.IntegrationId)
+			|| _cache.Snapshot.Accounts.Any(state => state.Account.IntegrationId == e.IntegrationId))
 		{
 			_signal.RequestSync();
 		}

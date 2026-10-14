@@ -84,7 +84,7 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 		{
 			return Failed(WidgetError.ValidationError,
 				AppStrings.Errors.Applications.NotAnApplication(
-					name: Path.GetFileName(IconImportFiles.TrimTrailingSeparators(request.Path))));
+					Path.GetFileName(IconImportFiles.TrimTrailingSeparators(request.Path))));
 		}
 
 		var launcher = FindLauncher();
@@ -138,20 +138,24 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 	// Only a built-in integration may receive a dropped application path; a plugin declaring the role is
 	// never chosen. Enablement is ignored here as it is for any action lookup by id.
 	private (string IntegrationId, IActionDefinition Action)? FindLauncher()
-		=> _integrations.Integrations
+	{
+		return _integrations.Integrations
 			.Where(integration => _integrations.GetOrigin(integration.Id) == IntegrationOrigin.BuiltIn)
 			.OrderBy(integration => integration.Id, StringComparer.Ordinal)
 			.SelectMany(integration => integration.Actions
 				.Where(action => action.Role == ActionRoles.LaunchApplication && action.RunsHere())
 				.Select(action => ((string IntegrationId, IActionDefinition Action)?)(integration.Id, action)))
 			.FirstOrDefault();
+	}
 
 	private static bool IsOccupied(FolderEntity folder, CreateWidgetFromApplicationRequest request)
-		=> folder.Widgets.Any(widget =>
-			request.PositionX >= widget.PositionX &&
-			request.PositionX < widget.PositionX + widget.Width &&
-			request.PositionY >= widget.PositionY &&
-			request.PositionY < widget.PositionY + widget.Height);
+	{
+		return folder.Widgets.Any(widget =>
+			request.PositionX >= widget.PositionX
+			&& request.PositionX < widget.PositionX + widget.Width
+			&& request.PositionY >= widget.PositionY
+			&& request.PositionY < widget.PositionY + widget.Height);
+	}
 
 	private async Task<Guid?> ImportIcon(string path, CancellationToken cancellationToken)
 	{
@@ -168,7 +172,7 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 		}
 
 		var icon = extracted.Data!;
-		await using var content = new MemoryStream(icon.Content, writable: false);
+		await using var content = new MemoryStream(icon.Content, false);
 		var imported = await _iconImportService.ImportSingle(null,
 			new IconImportFile(icon.FileName, content),
 			cancellationToken);
@@ -215,9 +219,11 @@ public class CreateWidgetFromApplicationRequestMessageHandler
 	}
 
 	private static CreateWidgetResponse Failed(WidgetError error, LocalizedText message)
-		=> new()
+	{
+		return new CreateWidgetResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = error.ToString(), Message = message }
 		};
+	}
 }

@@ -22,7 +22,7 @@ public interface IUiWebSocketTickets
 
 public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocketTickets
 {
-	private static readonly TimeSpan Lifetime = TimeSpan.FromSeconds(15);
+	private static readonly TimeSpan _lifetime = TimeSpan.FromSeconds(15);
 	private const int PerPrincipalLimit = 4;
 	private const int GlobalLimit = 1024;
 	private readonly Dictionary<string, Entry> _tickets = new(StringComparer.Ordinal);
@@ -30,7 +30,7 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 
 	public bool TryCreate(HttpContext context, ClaimsPrincipal principal, out UiWebSocketTicket ticket)
 	{
-		ticket = default!;
+		ticket = null!;
 		if (!TryClassify(context, out var listener))
 		{
 			return false;
@@ -40,13 +40,13 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 		var bytes = RandomNumberGenerator.GetBytes(32);
 		var value = Base64Url(bytes);
 		var hash = Convert.ToHexString(SHA256.HashData(bytes));
-		var entry = new Entry(Clone(principal), owner, listener, timeProvider.GetUtcNow() + Lifetime);
+		var entry = new Entry(Clone(principal), owner, listener, timeProvider.GetUtcNow() + _lifetime);
 		lock (_gate)
 		{
 			Prune();
-			if (_tickets.Count >= GlobalLimit ||
-				_tickets.Values.Count(candidate => candidate.Owner == owner) >= PerPrincipalLimit ||
-				!_tickets.TryAdd(hash, entry))
+			if (_tickets.Count >= GlobalLimit
+				|| _tickets.Values.Count(candidate => candidate.Owner == owner) >= PerPrincipalLimit
+				|| !_tickets.TryAdd(hash, entry))
 			{
 				return false;
 			}
@@ -132,21 +132,27 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 	}
 
 	private static string Owner(ClaimsPrincipal principal)
-		=> string.Join("|",
+	{
+		return string.Join("|",
 			principal.Claims
 				.Where(claim => claim.Type is "sub" or AuthDefaults.ScopeClaim or AuthDefaults.DeviceClaim)
 				.OrderBy(claim => claim.Type, StringComparer.Ordinal)
 				.Select(claim => $"{claim.Type}:{claim.Value}"));
+	}
 
 	private static ClaimsPrincipal Clone(ClaimsPrincipal principal)
-		=> new(principal.Identities.Select(identity =>
+	{
+		return new ClaimsPrincipal(principal.Identities.Select(identity =>
 			new ClaimsIdentity(identity.Claims,
 				identity.AuthenticationType,
 				identity.NameClaimType,
 				identity.RoleClaimType)));
+	}
 
 	private static string Base64Url(byte[] bytes)
-		=> Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	{
+		return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+	}
 
 	private static byte[] Base64UrlDecode(string value)
 	{

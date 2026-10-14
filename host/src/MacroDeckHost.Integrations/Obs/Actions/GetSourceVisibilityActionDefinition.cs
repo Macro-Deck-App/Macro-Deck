@@ -37,19 +37,22 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(SceneParameter,
-			label: AppStrings.Integrations.Obs.Params.Scene(),
+			AppStrings.Integrations.Obs.Params.Scene(),
 			required: true),
 		ActionParameter.DynamicChoice(SourceParameter,
-			label: AppStrings.Integrations.Obs.Params.Source(),
+			AppStrings.Integrations.Obs.Params.Source(),
 			required: true),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
-			description: AppStrings.Integrations.Obs.Actions.GetSourceVisibility.VariableDescription(),
+			AppStrings.Integrations.Obs.Params.SaveToVariable(),
+			AppStrings.Integrations.Obs.Actions.GetSourceVisibility.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -65,9 +68,9 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 
 		if (connection is not null)
 		{
-			if (context.ParameterName == SourceParameter &&
-				context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene &&
-				!string.IsNullOrWhiteSpace(scene))
+			if (context.ParameterName == SourceParameter
+				&& context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene
+				&& !string.IsNullOrWhiteSpace(scene))
 			{
 				options = await ObsSceneItemOptions.ItemsAsync(connection, scene);
 			}
@@ -105,18 +108,18 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene ||
-				string.IsNullOrWhiteSpace(scene) ||
-				context.Parameters.GetValueOrDefault(SourceParameter) is not string source ||
-				string.IsNullOrWhiteSpace(source))
+			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene
+				|| string.IsNullOrWhiteSpace(scene)
+				|| context.Parameters.GetValueOrDefault(SourceParameter) is not string source
+				|| string.IsNullOrWhiteSpace(source))
 			{
 				_logger.Warning("OBS get-visibility action skipped: scene or source not selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoSceneOrSourceSelected());
 			}
 
-			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable ||
-				string.IsNullOrWhiteSpace(variable))
+			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable
+				|| string.IsNullOrWhiteSpace(variable))
 			{
 				_logger.Warning("OBS get-visibility action skipped: no target variable");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
@@ -130,7 +133,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 					source,
 					scene);
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Obs.Errors.SourceNotFound(source: source, scene: scene));
+					AppStrings.Integrations.Obs.Errors.SourceNotFound(source, scene));
 			}
 
 			var written =
@@ -143,7 +146,7 @@ internal sealed class GetSourceVisibilityActionDefinition : IDynamicOptionsActio
 			return written
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable: variable));
+					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable));
 		}
 	}
 }

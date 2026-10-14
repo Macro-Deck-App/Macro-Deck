@@ -12,8 +12,8 @@ namespace MacroDeckHost.Infrastructure.Network.Discovery;
 
 public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundService, IDiscoveryAdvertisementRefresher
 {
-	private static readonly TimeSpan Debounce = TimeSpan.FromSeconds(2);
-	private static readonly TimeSpan RecheckInterval = TimeSpan.FromSeconds(60);
+	private static readonly TimeSpan _debounce = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _recheckInterval = TimeSpan.FromSeconds(60);
 
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IServiceAdvertiser _advertiser;
@@ -27,7 +27,8 @@ public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundS
 	private bool _advertised;
 	private string? _lastFailure;
 
-	public ServiceAdvertisementBackgroundService(IHostApplicationLifetime lifetime,
+	public ServiceAdvertisementBackgroundService(
+		IHostApplicationLifetime lifetime,
 		IServiceScopeFactory scopeFactory,
 		IServiceAdvertiser advertiser,
 		IHostNameProvider hostNames,
@@ -108,8 +109,8 @@ public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundS
 
 			if (changed)
 			{
-				_logger.Information("Handed {InstanceName} as {ServiceType} on port {Port} over {InterfaceCount} " +
-					"network interfaces to the system mDNS responder",
+				_logger.Information("Handed {InstanceName} as {ServiceType} on port {Port} over {InterfaceCount} "
+					+ "network interfaces to the system mDNS responder",
 					plan.WireName,
 					ServiceAdvertisementPlanner.ServiceType,
 					plan.Port,
@@ -139,8 +140,8 @@ public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundS
 	{
 		if (!_advertiser.IsAvailable)
 		{
-			_logger.Information("Network discovery is not available on this system, so Macro Deck is not advertised " +
-				"on the local network");
+			_logger.Information("Network discovery is not available on this system, so Macro Deck is not advertised "
+				+ "on the local network");
 			return;
 		}
 
@@ -152,10 +153,10 @@ public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundS
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				await Reconcile();
-				if (await _wake.WaitAsync(RecheckInterval, stoppingToken))
+				if (await _wake.WaitAsync(_recheckInterval, stoppingToken))
 				{
-					await Task.Delay(Debounce, stoppingToken);
-					_wake.Wait(0, CancellationToken.None);
+					await Task.Delay(_debounce, stoppingToken);
+					await _wake.WaitAsync(0, CancellationToken.None);
 				}
 			}
 		}
@@ -170,7 +171,10 @@ public sealed class ServiceAdvertisementBackgroundService : HostReadyBackgroundS
 		}
 	}
 
-	private void OnNetworkChanged(object? sender, EventArgs e) => RequestRefresh();
+	private void OnNetworkChanged(object? sender, EventArgs e)
+	{
+		RequestRefresh();
+	}
 
 	private async Task<bool> IsEnabled()
 	{

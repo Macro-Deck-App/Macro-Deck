@@ -67,7 +67,10 @@ public static partial class VariableNames
 	}
 
 	/// <summary>Whether <paramref name="name" /> is already a canonical variable name.</summary>
-	public static bool IsValid(string? name) => !string.IsNullOrEmpty(name) && ValidName().IsMatch(name);
+	public static bool IsValid(string? name)
+	{
+		return !string.IsNullOrEmpty(name) && ValidName().IsMatch(name);
+	}
 
 	[GeneratedRegex("_+", RegexOptions.CultureInvariant)]
 	private static partial Regex UnderscoreRuns();

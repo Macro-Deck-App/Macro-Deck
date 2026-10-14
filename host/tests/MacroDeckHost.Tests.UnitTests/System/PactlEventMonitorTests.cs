@@ -5,18 +5,24 @@ namespace MacroDeckHost.Tests.UnitTests.System;
 [Platform("Linux,MacOsX")]
 public class PactlEventMonitorTests
 {
-	private static readonly IReadOnlyDictionary<string, string?> NoEnvironment = new Dictionary<string, string?>();
+	private static readonly IReadOnlyDictionary<string, string?> _noEnvironment = new Dictionary<string, string?>();
 
 	private static PactlEventMonitor Monitor(string script, Action onEvent, TimeSpan? minBackoff = null)
-		=> new(onEvent, NoEnvironment, "sh", ["-c", script], TimeSpan.FromMilliseconds(20),
-			minBackoff ?? TimeSpan.FromMilliseconds(50), TimeSpan.FromMilliseconds(200));
+	{
+		return new PactlEventMonitor(onEvent,
+			_noEnvironment,
+			"sh",
+			["-c", script],
+			TimeSpan.FromMilliseconds(20),
+			minBackoff ?? TimeSpan.FromMilliseconds(50),
+			TimeSpan.FromMilliseconds(200));
+	}
 
 	[Test]
 	public async Task Starting_resyncs_once_and_client_noise_raises_nothing_more()
 	{
 		var raised = 0;
-		using var monitor = Monitor(
-			"echo \"Event 'new' on client #3\"; echo \"Event 'remove' on client #3\"; sleep 30",
+		using var monitor = Monitor("echo \"Event 'new' on client #3\"; echo \"Event 'remove' on client #3\"; sleep 30",
 			() => Interlocked.Increment(ref raised));
 
 		monitor.Start();
@@ -29,8 +35,7 @@ public class PactlEventMonitorTests
 	public async Task A_sink_event_after_the_start_raises_again()
 	{
 		var raised = 0;
-		using var monitor = Monitor(
-			"sleep 0.4; echo \"Event 'change' on sink #1\"; sleep 30",
+		using var monitor = Monitor("sleep 0.4; echo \"Event 'change' on sink #1\"; sleep 30",
 			() => Interlocked.Increment(ref raised));
 
 		monitor.Start();

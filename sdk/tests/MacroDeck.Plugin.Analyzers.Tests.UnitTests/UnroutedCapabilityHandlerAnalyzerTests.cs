@@ -31,16 +31,16 @@ public class UnroutedCapabilityHandlerAnalyzerTests
 	[Test]
 	public async Task Fires_when_a_handler_is_registered_with_AddSingleton_alone()
 	{
-		var source = HandlerDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(IServiceCollection services)
-				{
-					services.AddSingleton<MyHandler>();
-				}
-			}
-			""";
+		var source = HandlerDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(IServiceCollection services)
+			  	{
+			  		services.AddSingleton<MyHandler>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new UnroutedCapabilityHandlerAnalyzer());
@@ -57,16 +57,16 @@ public class UnroutedCapabilityHandlerAnalyzerTests
 		// AddMacroDeckCapabilityHandler<T>() is internal to MacroDeck.Plugin.Hosting since #560, so a
 		// plugin project - and this test snippet, compiled the same way one is - registers through the
 		// public door, PluginHostBuilder.RegisterCapabilityHandler<T>(), instead.
-		var source = HandlerDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(PluginHostBuilder builder)
-				{
-					builder.RegisterCapabilityHandler<MyHandler>();
-				}
-			}
-			""";
+		var source = HandlerDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(PluginHostBuilder builder)
+			  	{
+			  		builder.RegisterCapabilityHandler<MyHandler>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new UnroutedCapabilityHandlerAnalyzer());

@@ -20,8 +20,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	private const string PromoCodePath = "api/v1/companion-licenses/promo-code";
 	private const string AccountLicenseExists = "account-license-exists";
 
-	private static readonly TimeSpan RequestTimeoutMargin = TimeSpan.FromSeconds(20);
-	private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+	private static readonly TimeSpan _requestTimeoutMargin = TimeSpan.FromSeconds(20);
+	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -29,7 +29,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	private readonly IConnectSessionService _session;
 	private readonly ILogger _logger;
 
-	public PlatformLicenseAccountClient(IHttpClientFactory httpClientFactory,
+	public PlatformLicenseAccountClient(
+		IHttpClientFactory httpClientFactory,
 		StorePlatformOptions options,
 		IConnectSessionService session,
 		ILogger logger)
@@ -37,15 +38,17 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	{
 	}
 
-	internal PlatformLicenseAccountClient(HttpMessageHandler handler,
+	internal PlatformLicenseAccountClient(
+		HttpMessageHandler handler,
 		StorePlatformOptions options,
 		IConnectSessionService session,
 		ILogger logger)
-		: this(new HttpClient(handler, disposeHandler: false), true, options, session, logger)
+		: this(new HttpClient(handler, false), true, options, session, logger)
 	{
 	}
 
-	private PlatformLicenseAccountClient(HttpClient http,
+	private PlatformLicenseAccountClient(
+		HttpClient http,
 		bool ownsClient,
 		StorePlatformOptions options,
 		IConnectSessionService session,
@@ -58,7 +61,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		_logger = logger.ForContext<PlatformLicenseAccountClient>();
 	}
 
-	public Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(long? afterRevision,
+	public Task<PlatformAccountLicenseResult> GetAccountLicenseAsync(
+		long? afterRevision,
 		TimeSpan wait,
 		CancellationToken cancellationToken)
 	{
@@ -69,13 +73,16 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		return SendAsync(HttpMethod.Get, path, null, afterRevision is null ? TimeSpan.Zero : wait, cancellationToken);
 	}
 
-	public Task<PlatformAccountLicenseResult> StoreAccountLicenseAsync(string license,
+	public Task<PlatformAccountLicenseResult> StoreAccountLicenseAsync(
+		string license,
 		CancellationToken cancellationToken)
-		=> SendAsync(HttpMethod.Put,
+	{
+		return SendAsync(HttpMethod.Put,
 			AccountPath,
-			JsonContent.Create(new { license }, options: Json),
+			JsonContent.Create(new { license }, options: _json),
 			TimeSpan.Zero,
 			cancellationToken);
+	}
 
 	public void Dispose()
 	{
@@ -89,7 +96,7 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_baseUrl, PromoCodePath))
 		{
-			Content = JsonContent.Create(new { code }, options: Json)
+			Content = JsonContent.Create(new { code }, options: _json)
 		};
 		var authorization = await AuthorizeAsync(request, cancellationToken);
 		switch (authorization.Kind)
@@ -119,7 +126,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 			cancellationToken);
 	}
 
-	private async Task<PlatformAccountLicenseResult> SendAsync(HttpMethod method,
+	private async Task<PlatformAccountLicenseResult> SendAsync(
+		HttpMethod method,
 		string path,
 		HttpContent? content,
 		TimeSpan wait,
@@ -143,7 +151,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 				var result = Interpret(response, body);
 				if (result is PlatformAccountLicenseResult.Unavailable)
 				{
-					_logger.Warning("The Macro Deck Platform answered {Status} to {Method} on the account Companion license",
+					_logger.Warning(
+						"The Macro Deck Platform answered {Status} to {Method} on the account Companion license",
 						(int)response.StatusCode,
 						method.Method);
 				}
@@ -181,21 +190,23 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		}
 	}
 
-	private async Task<T> ExecuteAsync<T>(HttpRequestMessage request,
+	private async Task<T> ExecuteAsync<T>(
+		HttpRequestMessage request,
 		TimeSpan wait,
 		Func<HttpResponseMessage, JsonElement?, T> interpret,
 		T failed,
 		CancellationToken cancellationToken)
 	{
 		using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-		timeout.CancelAfter(wait + RequestTimeoutMargin);
+		timeout.CancelAfter(wait + _requestTimeoutMargin);
 		try
 		{
-			using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+			using var response
+				= await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
 			return interpret(response, await ReadBodyAsync(response, timeout.Token));
 		}
-		catch (Exception ex) when (ex is HttpRequestException or IOException or NotSupportedException ||
-			ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
+		catch (Exception ex) when (ex is HttpRequestException or IOException or NotSupportedException
+			|| ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning("The Companion license request {Method} failed: {Error}",
 				request.Method.Method,
@@ -211,7 +222,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		{
 			case HttpStatusCode.OK when ReadState(body) is { License: { Length: > 0 } license }:
 				return new PlatformPromoCodeResult.Redeemed(license);
-			case HttpStatusCode.Conflict when code == AccountLicenseExists && ReadState(body) is { License: { Length: > 0 } existing }:
+			case HttpStatusCode.Conflict when code == AccountLicenseExists
+				&& ReadState(body) is { License: { Length: > 0 } existing }:
 				return new PlatformPromoCodeResult.AccountLicenseExists(existing);
 			case HttpStatusCode.Conflict when code == "promo-code-redeemed":
 				return new PlatformPromoCodeResult.Rejected(PromoCodeRejection.AlreadyRedeemed);
@@ -247,7 +259,7 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 			case HttpStatusCode.Forbidden when Code(body) == "license-revoked":
 				return new PlatformAccountLicenseResult.Refused("license-revoked");
 			case HttpStatusCode.Forbidden:
-				return new PlatformAccountLicenseResult.Unavailable(retryAfter, AccountBlocked: true);
+				return new PlatformAccountLicenseResult.Unavailable(retryAfter, true);
 			default:
 				return new PlatformAccountLicenseResult.Unavailable(retryAfter);
 		}
@@ -255,11 +267,11 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 
 	private static (string? License, long Revision)? ReadState(JsonElement? body)
 	{
-		if (body is not { ValueKind: JsonValueKind.Object } root ||
-			!root.TryGetProperty("revision", out var revision) ||
-			revision.ValueKind != JsonValueKind.Number ||
-			!revision.TryGetInt64(out var value) ||
-			value < 0)
+		if (body is not { ValueKind: JsonValueKind.Object } root
+			|| !root.TryGetProperty("revision", out var revision)
+			|| revision.ValueKind != JsonValueKind.Number
+			|| !revision.TryGetInt64(out var value)
+			|| value < 0)
 		{
 			return null;
 		}
@@ -273,15 +285,19 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 	}
 
 	private static string? Code(JsonElement? body)
-		=> body is { ValueKind: JsonValueKind.Object } root &&
-			root.TryGetProperty("code", out var code) &&
-			code.ValueKind == JsonValueKind.String &&
-			code.GetString() is { } value &&
-			ProblemCode().IsMatch(value)
+	{
+		return body is { ValueKind: JsonValueKind.Object } root
+			&& root.TryGetProperty("code", out var code)
+			&& code.ValueKind == JsonValueKind.String
+			&& code.GetString() is { } value
+			&& ProblemCode().IsMatch(value)
 				? value
 				: null;
+	}
 
-	private static async Task<JsonElement?> ReadBodyAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+	private static async Task<JsonElement?> ReadBodyAsync(
+		HttpResponseMessage response,
+		CancellationToken cancellationToken)
 	{
 		if (response.Content.Headers.ContentLength > MaximumResponseBytes)
 		{
@@ -292,8 +308,8 @@ public sealed partial class PlatformLicenseAccountClient : IPlatformLicenseAccou
 		var buffer = new byte[MaximumResponseBytes + 1];
 		var length = 0;
 		int read;
-		while (length < buffer.Length &&
-			(read = await stream.ReadAsync(buffer.AsMemory(length, buffer.Length - length), cancellationToken)) > 0)
+		while (length < buffer.Length
+			&& (read = await stream.ReadAsync(buffer.AsMemory(length, buffer.Length - length), cancellationToken)) > 0)
 		{
 			length += read;
 		}

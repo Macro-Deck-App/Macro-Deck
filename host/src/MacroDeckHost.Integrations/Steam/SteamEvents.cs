@@ -36,12 +36,14 @@ internal static class SteamEventDefinitions
 {
 	public static IReadOnlyList<EventDefinition> All { get; } =
 	[
-		Game(SteamEventIds.GameStarted, Strings.GameStarted.Name(), Strings.GameStarted.Description(), withDuration: false),
-		Game(SteamEventIds.GameStopped, Strings.GameStopped.Name(), Strings.GameStopped.Description(), withDuration: true),
+		Game(SteamEventIds.GameStarted, Strings.GameStarted.Name(), Strings.GameStarted.Description(), false),
+		Game(SteamEventIds.GameStopped, Strings.GameStopped.Name(), Strings.GameStopped.Description(), true),
 		Friend(SteamEventIds.FriendOnline, Strings.FriendOnline.Name(), Strings.FriendOnline.Description()),
 		Friend(SteamEventIds.FriendOffline, Strings.FriendOffline.Name(), Strings.FriendOffline.Description()),
-		Friend(SteamEventIds.FriendStartedGame, Strings.FriendStartedGame.Name(), Strings.FriendStartedGame.Description()),
-		new EventDefinition
+		Friend(SteamEventIds.FriendStartedGame,
+			Strings.FriendStartedGame.Name(),
+			Strings.FriendStartedGame.Description()),
+		new()
 		{
 			Id = SteamEventIds.PersonaChanged,
 			Name = Strings.PersonaChanged.Name(),
@@ -52,14 +54,15 @@ internal static class SteamEventDefinitions
 			PayloadParameters =
 			[
 				ConfigurationParameter(),
-				ActionParameter.Text(SteamEventPayload.State, label: Params.Status()),
-				ActionParameter.Text(SteamEventPayload.PreviousState, label: Params.PreviousStatus())
+				ActionParameter.Text(SteamEventPayload.State, Params.Status()),
+				ActionParameter.Text(SteamEventPayload.PreviousState, Params.PreviousStatus())
 			]
 		}
 	];
 
 	private static EventDefinition Game(string id, LocalizedText name, LocalizedText description, bool withDuration)
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = id,
 			Name = name,
@@ -70,16 +73,18 @@ internal static class SteamEventDefinitions
 			PayloadParameters =
 			[
 				ConfigurationParameter(),
-				ActionParameter.Number(SteamEventPayload.GameId, label: Params.GameId()),
-				ActionParameter.Text(SteamEventPayload.GameName, label: Params.GameName()),
+				ActionParameter.Number(SteamEventPayload.GameId, Params.GameId()),
+				ActionParameter.Text(SteamEventPayload.GameName, Params.GameName()),
 				.. withDuration
-					? [ActionParameter.Number(SteamEventPayload.DurationSeconds, label: Params.DurationSeconds())]
+					? [ActionParameter.Number(SteamEventPayload.DurationSeconds, Params.DurationSeconds())]
 					: Array.Empty<ActionParameter>()
 			]
 		};
+	}
 
 	private static EventDefinition Friend(string id, LocalizedText name, LocalizedText description)
-		=> new()
+	{
+		return new EventDefinition
 		{
 			Id = id,
 			Name = name,
@@ -91,45 +96,59 @@ internal static class SteamEventDefinitions
 			[
 				ConfigurationParameter(),
 				FriendParameter(),
-				ActionParameter.Text(SteamEventPayload.FriendName, label: Params.FriendName()),
-				ActionParameter.Number(SteamEventPayload.GameId, label: Params.GameId()),
-				ActionParameter.Text(SteamEventPayload.GameName, label: Params.GameName())
+				ActionParameter.Text(SteamEventPayload.FriendName, Params.FriendName()),
+				ActionParameter.Number(SteamEventPayload.GameId, Params.GameId()),
+				ActionParameter.Text(SteamEventPayload.GameName, Params.GameName())
 			]
 		};
+	}
 
 	private static ActionParameter ConfigurationParameter()
-		=> ActionParameter.DynamicChoice(SteamEventPayload.Configuration, label: Params.Account());
+	{
+		return ActionParameter.DynamicChoice(SteamEventPayload.Configuration, Params.Account());
+	}
 
 	private static ActionParameter FriendParameter()
-		=> ActionParameter.DynamicChoice(SteamEventPayload.FriendId, label: Params.Friend());
+	{
+		return ActionParameter.DynamicChoice(SteamEventPayload.FriendId, Params.Friend());
+	}
 }
 
 internal static class SteamEventFactory
 {
 	public static SteamEvent GameStarted(string configuration, int appId, string name)
-		=> new(SteamEventIds.GameStarted, new Dictionary<string, object?>
-		{
-			[SteamEventPayload.Configuration] = configuration,
-			[SteamEventPayload.GameId] = appId,
-			[SteamEventPayload.GameName] = name
-		});
+	{
+		return new SteamEvent(SteamEventIds.GameStarted,
+			new Dictionary<string, object?>
+			{
+				[SteamEventPayload.Configuration] = configuration,
+				[SteamEventPayload.GameId] = appId,
+				[SteamEventPayload.GameName] = name
+			});
+	}
 
 	public static SteamEvent GameStopped(string configuration, int appId, string name, TimeSpan duration)
-		=> new(SteamEventIds.GameStopped, new Dictionary<string, object?>
-		{
-			[SteamEventPayload.Configuration] = configuration,
-			[SteamEventPayload.GameId] = appId,
-			[SteamEventPayload.GameName] = name,
-			[SteamEventPayload.DurationSeconds] = Math.Max(0L, (long)duration.TotalSeconds)
-		});
+	{
+		return new SteamEvent(SteamEventIds.GameStopped,
+			new Dictionary<string, object?>
+			{
+				[SteamEventPayload.Configuration] = configuration,
+				[SteamEventPayload.GameId] = appId,
+				[SteamEventPayload.GameName] = name,
+				[SteamEventPayload.DurationSeconds] = Math.Max(0L, (long)duration.TotalSeconds)
+			});
+	}
 
 	public static SteamEvent PersonaChanged(string configuration, int previous, int current)
-		=> new(SteamEventIds.PersonaChanged, new Dictionary<string, object?>
-		{
-			[SteamEventPayload.Configuration] = configuration,
-			[SteamEventPayload.State] = SteamPersona.Id(current),
-			[SteamEventPayload.PreviousState] = SteamPersona.Id(previous)
-		});
+	{
+		return new SteamEvent(SteamEventIds.PersonaChanged,
+			new Dictionary<string, object?>
+			{
+				[SteamEventPayload.Configuration] = configuration,
+				[SteamEventPayload.State] = SteamPersona.Id(current),
+				[SteamEventPayload.PreviousState] = SteamPersona.Id(previous)
+			});
+	}
 
 	public static IEnumerable<SteamEvent> FriendChanges(
 		string configuration,
@@ -161,12 +180,15 @@ internal static class SteamEventFactory
 	}
 
 	private static SteamEvent Friend(string id, string configuration, SteamFriend friend)
-		=> new(id, new Dictionary<string, object?>
-		{
-			[SteamEventPayload.Configuration] = configuration,
-			[SteamEventPayload.FriendId] = friend.SteamId,
-			[SteamEventPayload.FriendName] = friend.Name,
-			[SteamEventPayload.GameId] = friend.GameId ?? 0,
-			[SteamEventPayload.GameName] = friend.GameName ?? string.Empty
-		});
+	{
+		return new SteamEvent(id,
+			new Dictionary<string, object?>
+			{
+				[SteamEventPayload.Configuration] = configuration,
+				[SteamEventPayload.FriendId] = friend.SteamId,
+				[SteamEventPayload.FriendName] = friend.Name,
+				[SteamEventPayload.GameId] = friend.GameId ?? 0,
+				[SteamEventPayload.GameName] = friend.GameName ?? string.Empty
+			});
+	}
 }

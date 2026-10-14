@@ -42,9 +42,11 @@ internal static class DelegateEndpoint
 	}
 
 	public static bool IsThisMachine(Uri baseUrl, string? remoteMachineName)
-		=> !string.IsNullOrEmpty(remoteMachineName) &&
-			string.Equals(remoteMachineName, Environment.MachineName, StringComparison.OrdinalIgnoreCase) &&
-			IsLocalAddress(baseUrl);
+	{
+		return !string.IsNullOrEmpty(remoteMachineName)
+			&& string.Equals(remoteMachineName, Environment.MachineName, StringComparison.OrdinalIgnoreCase)
+			&& IsLocalAddress(baseUrl);
+	}
 
 	private static bool IsLocalAddress(Uri uri)
 	{

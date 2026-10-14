@@ -38,7 +38,10 @@ public static partial class CalendarText
 		return text[..length];
 	}
 
-	public static string? ClipOptional(string? text, int maxLength) => text is null ? null : Clip(text, maxLength);
+	public static string? ClipOptional(string? text, int maxLength)
+	{
+		return text is null ? null : Clip(text, maxLength);
+	}
 
 	// Measured with the default JSON encoder the UI wire uses, which writes a non-ASCII character as six bytes.
 	public static string ClipToJsonBytes(string text, int maxBytes)
@@ -68,7 +71,10 @@ public static partial class CalendarText
 		return Clip(text, low);
 	}
 
-	private static int JsonBytes(string text) => JsonEncodedText.Encode(text).EncodedUtf8Bytes.Length;
+	private static int JsonBytes(string text)
+	{
+		return JsonEncodedText.Encode(text).EncodedUtf8Bytes.Length;
+	}
 
 	[GeneratedRegex(@"<\s*(script|style)\b[^>]*>.*?<\s*/\s*\1\s*>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
 	private static partial Regex CodeBlocks();

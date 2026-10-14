@@ -7,7 +7,7 @@ namespace MacroDeckHost.Application.Timers;
 public enum TimerWidgetKind
 {
 	Countdown,
-	Stopwatch,
+	Stopwatch
 }
 
 public enum TimerWidgetPhase
@@ -15,13 +15,13 @@ public enum TimerWidgetPhase
 	Idle,
 	Running,
 	Paused,
-	Finished,
+	Finished
 }
 
 public enum TimerGesture
 {
 	Press,
-	LongPress,
+	LongPress
 }
 
 public sealed record TimerWidgetConfig(TimerWidgetKind Kind, bool AsksForDuration, int DurationSeconds)
@@ -35,7 +35,9 @@ public sealed record TimerWidgetConfig(TimerWidgetKind Kind, bool AsksForDuratio
 	public const string AskMode = "ask";
 
 	public static bool IsTimerType(string? widgetType)
-		=> widgetType is WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch;
+	{
+		return widgetType is WidgetTypeIds.Countdown or WidgetTypeIds.Stopwatch;
+	}
 
 	public static TimerWidgetConfig? FromWidget(WidgetEntity widget)
 	{
@@ -45,14 +47,18 @@ public sealed record TimerWidgetConfig(TimerWidgetKind Kind, bool AsksForDuratio
 		{
 			WidgetTypeIds.Countdown => ParseCountdown(widget.Data),
 			WidgetTypeIds.Stopwatch => new TimerWidgetConfig(TimerWidgetKind.Stopwatch, false, 0),
-			_ => null,
+			_ => null
 		};
 	}
 
 	public static int ClampSeconds(double seconds)
-		=> double.IsFinite(seconds)
-			? (int)Math.Clamp(Math.Round(seconds, MidpointRounding.AwayFromZero), MinDurationSeconds, MaxDurationSeconds)
+	{
+		return double.IsFinite(seconds)
+			? (int)Math.Clamp(Math.Round(seconds, MidpointRounding.AwayFromZero),
+				MinDurationSeconds,
+				MaxDurationSeconds)
 			: DefaultDurationSeconds;
+	}
 
 	private static TimerWidgetConfig ParseCountdown(string? data)
 	{
@@ -68,9 +74,9 @@ public sealed record TimerWidgetConfig(TimerWidgetKind Kind, bool AsksForDuratio
 
 				if (root.ValueKind == JsonValueKind.Object)
 				{
-					asks = root.TryGetProperty("mode", out var mode) &&
-						mode.ValueKind == JsonValueKind.String &&
-						string.Equals(mode.GetString(), AskMode, StringComparison.Ordinal);
+					asks = root.TryGetProperty("mode", out var mode)
+						&& mode.ValueKind == JsonValueKind.String
+						&& string.Equals(mode.GetString(), AskMode, StringComparison.Ordinal);
 
 					var hours = ReadNumber(root, "durationHours");
 					var minutes = ReadNumber(root, "durationMinutes");
@@ -91,10 +97,12 @@ public sealed record TimerWidgetConfig(TimerWidgetKind Kind, bool AsksForDuratio
 	}
 
 	private static double? ReadNumber(JsonElement data, string name)
-		=> data.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return data.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? Math.Max(0, number)
 				: null;
+	}
 }

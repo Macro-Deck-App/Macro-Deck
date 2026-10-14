@@ -28,10 +28,11 @@ internal static class StreamPlatformTestSupport
 		AccentColor = "#ff0000",
 		AccountLabel = TwitchStreamPlatform.Platform.AccountLabel,
 		Chat = TwitchStreamPlatform.Platform.Chat,
-		Stats = TwitchStreamPlatform.Platform.Stats,
+		Stats = TwitchStreamPlatform.Platform.Stats
 	};
 
-	public static StreamWidgetsUiProvider Provider(StreamPlatform platform,
+	public static StreamWidgetsUiProvider Provider(
+		StreamPlatform platform,
 		IStreamChatFeed feed,
 		IStreamChatImages? images = null,
 		IStreamStatsSource? stats = null,
@@ -39,7 +40,8 @@ internal static class StreamPlatformTestSupport
 		IIntegrationContext? context = null,
 		IStreamChatModerator? moderator = null,
 		TimeProvider? time = null)
-		=> new(platform,
+	{
+		return new StreamWidgetsUiProvider(platform,
 			feed,
 			images,
 			stats ?? new StreamStatsSource((_, _) => null),
@@ -48,6 +50,7 @@ internal static class StreamPlatformTestSupport
 			() => moderator,
 			time ?? TimeProvider.System,
 			Logger.None);
+	}
 }
 
 internal sealed class NoStreamThumbnails : IStreamThumbnails
@@ -58,7 +61,10 @@ internal sealed class NoStreamThumbnails : IStreamThumbnails
 		remove { }
 	}
 
-	public UiResource? Find(string accountId) => null;
+	public UiResource? Find(string accountId)
+	{
+		return null;
+	}
 
 	public void Track(string accountId, string? url)
 	{
@@ -80,11 +86,19 @@ internal sealed class StreamingUiIntegration(string id, IUiProvider provider) : 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces => provider.Surfaces;
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> provider.CreateSessionAsync(request, cancellationToken);
+	{
+		return provider.CreateSessionAsync(request, cancellationToken);
+	}
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class FakeStreamingContext : IIntegrationContext
@@ -132,7 +146,8 @@ internal sealed class FakeStreamingWidgets : IWidgetApi
 		using var document = JsonDocument.Parse(json);
 		lock (_gate)
 		{
-			_data[widgetId.ToString()] = new WidgetDataSnapshot(widgetId.ToString(), widgetTypeId,
+			_data[widgetId.ToString()] = new WidgetDataSnapshot(widgetId.ToString(),
+				widgetTypeId,
 				document.RootElement.Clone());
 		}
 	}
@@ -154,12 +169,20 @@ internal sealed class FakeStreamingWidgets : IWidgetApi
 		}
 	}
 
-	public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+	public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+	{
+		return [];
+	}
 
-	public bool Exists(string widgetId) => false;
+	public bool Exists(string widgetId)
+	{
+		return false;
+	}
 
 	public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-		=> Task.FromResult(false);
+	{
+		return Task.FromResult(false);
+	}
 }
 
 internal sealed class FakeStreamingVariables : IVariableApi
@@ -199,7 +222,8 @@ internal sealed class FakeStreamingVariables : IVariableApi
 		}
 	}
 
-	public Task<IVariableHistoryWindow> OpenHistoryAsync(string name,
+	public Task<IVariableHistoryWindow> OpenHistoryAsync(
+		string name,
 		int capacity,
 		CancellationToken cancellationToken = default)
 	{
@@ -212,20 +236,35 @@ internal sealed class FakeStreamingVariables : IVariableApi
 		return Task.FromResult<IVariableHistoryWindow>(window);
 	}
 
-	public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+	{
+		return Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+	}
 
-	public Task<VariableHandle?> GetByNameAsync(string name) => Task.FromResult<VariableHandle?>(null);
+	public Task<VariableHandle?> GetByNameAsync(string name)
+	{
+		return Task.FromResult<VariableHandle?>(null);
+	}
 
-	public Task<VariableHandle> CreateAsync(string name,
+	public Task<VariableHandle> CreateAsync(
+		string name,
 		VariableType type,
 		object? initialValue = null,
 		int? decimalPlaces = null,
 		string? definitionId = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task SetValueAsync(Guid variableId, object? value) => throw new NotSupportedException();
+	public Task SetValueAsync(Guid variableId, object? value)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
+	public Task DeleteAsync(Guid variableId)
+	{
+		return Task.CompletedTask;
+	}
 
 	private IReadOnlyList<double?> Values(string name, int capacity)
 	{
@@ -251,7 +290,10 @@ internal sealed class FakeStreamingVariables : IVariableApi
 
 		public event EventHandler? Changed;
 
-		public void Raise() => Changed?.Invoke(this, EventArgs.Empty);
+		public void Raise()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 
 		public ValueTask DisposeAsync()
 		{
@@ -266,14 +308,19 @@ internal sealed class RecordingEventOrigins
 	public TaskCompletionSource<(string? Client, ModalDefinition Modal)> Opened { get; }
 		= new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-	public IUiEventOrigin For(string? clientId) => new Origin(this, clientId);
+	public IUiEventOrigin For(string? clientId)
+	{
+		return new Origin(this, clientId);
+	}
 
 	private sealed class Origin(RecordingEventOrigins owner, string? clientId) : IUiEventOrigin
 	{
 		public string? ClientId => clientId;
 
 		public Task<bool> ReportFailureAsync(LocalizedText message, CancellationToken cancellationToken = default)
-			=> Task.FromResult(clientId is not null);
+		{
+			return Task.FromResult(clientId is not null);
+		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
 		{
@@ -281,7 +328,11 @@ internal sealed class RecordingEventOrigins
 			return Task.FromResult(clientId is not null);
 		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(ModalResult.FromCancellation<T>());
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
 	}
 }

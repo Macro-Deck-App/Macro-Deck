@@ -20,29 +20,36 @@ public sealed record DotnetFrameworkRequirement
 
 	public DotnetRollForward RollForward { get; init; } = DotnetRollForward.Minor;
 
-	public static DotnetFrameworkRequirement ForNetCoreApp(string majorMinor) => new()
+	public static DotnetFrameworkRequirement ForNetCoreApp(string majorMinor)
 	{
-		Name = NetCoreAppFramework,
-		Version = System.Version.Parse(majorMinor)
-	};
+		return new DotnetFrameworkRequirement
+		{
+			Name = NetCoreAppFramework,
+			Version = Version.Parse(majorMinor)
+		};
+	}
 
 	public bool IsSatisfiedBy(IReadOnlyList<Version> installed)
 	{
 		var required = Normalize(Version);
 
-		return installed.Select(Normalize).Any(candidate => RollForward switch
-		{
-			DotnetRollForward.Disable => candidate == required,
-			DotnetRollForward.LatestPatch => candidate.Major == required.Major &&
-				candidate.Minor == required.Minor &&
-				candidate >= required,
-			DotnetRollForward.Minor or DotnetRollForward.LatestMinor => candidate.Major == required.Major &&
-				candidate >= required,
-			_ => candidate >= required
-		});
+		return installed.Select(Normalize)
+			.Any(candidate => RollForward switch
+			{
+				DotnetRollForward.Disable => candidate == required,
+				DotnetRollForward.LatestPatch => candidate.Major == required.Major
+					&& candidate.Minor == required.Minor
+					&& candidate >= required,
+				DotnetRollForward.Minor or DotnetRollForward.LatestMinor => candidate.Major == required.Major
+					&& candidate >= required,
+				_ => candidate >= required
+			});
 	}
 
-	private static Version Normalize(Version version) => new(version.Major, version.Minor, Math.Max(version.Build, 0));
+	private static Version Normalize(Version version)
+	{
+		return new Version(version.Major, version.Minor, Math.Max(version.Build, 0));
+	}
 }
 
 public sealed record DotnetMuxer

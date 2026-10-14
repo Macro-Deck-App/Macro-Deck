@@ -10,7 +10,8 @@ public sealed class VideoStreamPluginSessions : IHostedService
 	private readonly IPluginSessionRegistry _pluginSessions;
 	private readonly VideoStreamProviderRegistry _registry;
 
-	public VideoStreamPluginSessions(IPluginSessionRegistry pluginSessions,
+	public VideoStreamPluginSessions(
+		IPluginSessionRegistry pluginSessions,
 		VideoStreamProviderRegistry registry,
 		IVideoStreamSessionBroker broker)
 	{
@@ -47,5 +48,8 @@ public sealed class VideoStreamPluginSessions : IHostedService
 		}
 	}
 
-	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e) => End(e.PluginId, e.SessionId);
+	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
+	{
+		End(e.PluginId, e.SessionId);
+	}
 }

@@ -7,8 +7,8 @@ namespace MacroDeckHost.Tests.UnitTests.Spotify;
 internal sealed class SpotifyScopesTests
 {
 	private const string OldSixScopeGrant =
-		"user-read-playback-state user-modify-playback-state user-read-currently-playing " +
-		"user-read-playback-position playlist-read-private user-library-read";
+		"user-read-playback-state user-modify-playback-state user-read-currently-playing "
+		+ "user-read-playback-position playlist-read-private user-library-read";
 
 	[Test]
 	public void Missing_NullGrant_ReturnsEveryRequiredScope()

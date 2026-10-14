@@ -20,7 +20,7 @@ internal sealed class ObsVariableCatalogTests
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
-		var all = await DiscoverTreeAsync(provider, pageSize: 3);
+		var all = await DiscoverTreeAsync(provider, 3);
 
 		Assert.Multiple(() =>
 		{
@@ -48,11 +48,14 @@ internal sealed class ObsVariableCatalogTests
 		var client = new FakeObsClient
 		{
 			IsConnected = true,
-			InputNames = ["Mic Aux", "Mic_Aux", "Mic  Aux"]
+			InputNames = ["Mic Aux", "Mic_Aux", "Mic  Aux"],
+			InputVolumes =
+			{
+				["Mic Aux"] = 0.10f,
+				["Mic_Aux"] = 0.50f,
+				["Mic  Aux"] = 0.90f
+			}
 		};
-		client.InputVolumes["Mic Aux"] = 0.10f;
-		client.InputVolumes["Mic_Aux"] = 0.50f;
-		client.InputVolumes["Mic  Aux"] = 0.90f;
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -81,8 +84,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Ids_survive_a_new_provider_instance()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Main Camera"] };
-		client.InputVolumes["Main Camera"] = 0.75f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Main Camera"],
+			InputVolumes =
+			{
+				["Main Camera"] = 0.75f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var firstProvider = new ObsVariableCatalog(() => [runtime]);
 
@@ -106,8 +115,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Ids_do_not_repoint_when_the_set_changes()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Main Camera"] };
-		client.InputVolumes["Main Camera"] = 0.75f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Main Camera"],
+			InputVolumes =
+			{
+				["Main Camera"] = 0.75f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -124,9 +139,18 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Disconnected_obs_is_resolvable_but_unavailable()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputVolumes["Mic Aux"] = 0.5f;
-		client.MutedInputs["Mic Aux"] = true;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputVolumes =
+			{
+				["Mic Aux"] = 0.5f
+			},
+			MutedInputs =
+			{
+				["Mic Aux"] = true
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -173,8 +197,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task A_deleted_source_keeps_resolving_and_resumes()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputVolumes["Mic Aux"] = 0.10f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputVolumes =
+			{
+				["Mic Aux"] = 0.10f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -203,9 +233,15 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task String_true_is_not_boolean_true_in_settings()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputSettingsJson["Mic Aux"] =
-			"""{"shutdown": true, "css_flag": "true", "fps": 30, "url_count": "75", "reroute_audio": false}""";
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputSettingsJson =
+			{
+				["Mic Aux"]
+					= """{"shutdown": true, "css_flag": "true", "fps": 30, "url_count": "75", "reroute_audio": false}"""
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -250,9 +286,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Nonscalar_settings_never_leak_a_json_element()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputSettingsJson["Mic Aux"]
-			= """{"font": {"face": "Arial", "size": 12}, "tags": ["a", "b"], "opt": null}""";
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputSettingsJson =
+			{
+				["Mic Aux"] = """{"font": {"face": "Arial", "size": 12}, "tags": ["a", "b"], "opt": null}"""
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -279,8 +320,14 @@ internal sealed class ObsVariableCatalogTests
 		// JSON numbers are arbitrary-precision; 1e999 is syntactically legal but overflows a double, so
 		// TryGetDouble reports failure for it. The dynamic-variable contract forbids substituting 0/false/""
 		// for a value that could not actually be read.
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputSettingsJson["Mic Aux"] = """{"overflow": 1e999}""";
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputSettingsJson =
+			{
+				["Mic Aux"] = """{"overflow": 1e999}"""
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -307,8 +354,14 @@ internal sealed class ObsVariableCatalogTests
 		// OBS's protocol carries a linear multiplier, but its own audio mixer is a -60..0 dB scale, and
 		// that is the number the user reads off OBS and expects to match. 0.13 is the multiplier behind
 		// the -17.7 dB OBS displays; a reading in percent would say 13 instead.
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio"] };
-		client.InputVolumes["Desktop Audio"] = 0.13f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 0.13f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -329,8 +382,14 @@ internal sealed class ObsVariableCatalogTests
 		// The scale is only half the contract: OBS is still told a multiplier, so a write has to convert
 		// back. Reading what was just written must return it unchanged, or a slider would jump under the
 		// finger on the next poll.
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio"] };
-		client.InputVolumes["Desktop Audio"] = 1.0f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 1.0f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -349,9 +408,15 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Volume_below_minus_60_decibels_is_reported_down_to_the_obs_floor()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio", "Muted Mic"] };
-		client.InputVolumes["Desktop Audio"] = (float)Math.Pow(10, -74.8 / 20);
-		client.InputVolumes["Muted Mic"] = 0f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio", "Muted Mic"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = (float)Math.Pow(10, -74.8 / 20),
+				["Muted Mic"] = 0f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -369,8 +434,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Writing_below_minus_60_decibels_is_applied_and_minus_100_is_silence()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Desktop Audio"] };
-		client.InputVolumes["Desktop Audio"] = 1.0f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 1.0f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 		var volumeId = await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume");
@@ -391,8 +462,14 @@ internal sealed class ObsVariableCatalogTests
 	{
 		// An input gain-boosted in Advanced Audio Properties sits above 0 dB. Reporting a ceiling of 0
 		// would make a slider that displays the boost unable to hold it: the first drag would cut it.
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Boosted Mic"] };
-		client.InputVolumes["Boosted Mic"] = 1.6f;
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Boosted Mic"],
+			InputVolumes =
+			{
+				["Boosted Mic"] = 1.6f
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -412,12 +489,18 @@ internal sealed class ObsVariableCatalogTests
 		var client = new FakeObsClient
 		{
 			IsConnected = true,
-			SceneNames = ["Gameplay", "Just Chatting"]
+			SceneNames = ["Gameplay", "Just Chatting"],
+			SceneItems =
+			{
+				["Gameplay"] = ["Webcam"],
+				["Just Chatting"] = ["Webcam"]
+			},
+			VisibleSources =
+			{
+				["Gameplay:Webcam"] = true,
+				["Just Chatting:Webcam"] = false
+			}
 		};
-		client.SceneItems["Gameplay"] = ["Webcam"];
-		client.SceneItems["Just Chatting"] = ["Webcam"];
-		client.VisibleSources["Gameplay:Webcam"] = true;
-		client.VisibleSources["Just Chatting:Webcam"] = false;
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -441,8 +524,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Active_and_showing_differ()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Preview Only Cam"] };
-		client.SourceActivity["Preview Only Cam"] = new ObsSourceActivity(false, true);
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Preview Only Cam"],
+			SourceActivity =
+			{
+				["Preview Only Cam"] = new ObsSourceActivity(false, true)
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -462,8 +551,14 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task The_six_audio_tracks_are_individual()
 	{
-		var client = new FakeObsClient { IsConnected = true, InputNames = ["Mic Aux"] };
-		client.InputAudioTracksByName["Mic Aux"] = new ObsAudioTracks([true, false, true, false, false, false]);
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic Aux"],
+			InputAudioTracksByName =
+			{
+				["Mic Aux"] = new ObsAudioTracks([true, false, true, false, false, false])
+			}
+		};
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -483,10 +578,13 @@ internal sealed class ObsVariableCatalogTests
 		var client = new FakeObsClient
 		{
 			IsConnected = true,
-			InputNames = ["Delayed Mic", "OnTime Mic"]
+			InputNames = ["Delayed Mic", "OnTime Mic"],
+			InputAudioSyncOffsetsMs =
+			{
+				["Delayed Mic"] = -250,
+				["OnTime Mic"] = 0
+			}
 		};
-		client.InputAudioSyncOffsetsMs["Delayed Mic"] = -250;
-		client.InputAudioSyncOffsetsMs["OnTime Mic"] = 0;
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
@@ -585,16 +683,25 @@ internal sealed class ObsVariableCatalogTests
 		{
 			IsConnected = true,
 			InputNames = ["Mic Aux"],
-			SceneNames = ["Gameplay"]
+			SceneNames = ["Gameplay"],
+			SceneItems =
+			{
+				["Gameplay"] = ["Webcam"]
+			},
+			SourceFilters =
+			{
+				["Mic Aux"] = ["Noise Suppress"],
+				["Gameplay"] = ["Color Correction"]
+			},
+			InputSettingsJson =
+			{
+				["Mic Aux"] = """{"gain": 3}"""
+			}
 		};
-		client.SceneItems["Gameplay"] = ["Webcam"];
-		client.SourceFilters["Mic Aux"] = ["Noise Suppress"];
-		client.SourceFilters["Gameplay"] = ["Color Correction"];
-		client.InputSettingsJson["Mic Aux"] = """{"gain": 3}""";
 		var runtime = CreateRuntime(client);
 		var provider = new ObsVariableCatalog(() => [runtime]);
 
-		var all = await DiscoverTreeAsync(provider, pageSize: 3);
+		var all = await DiscoverTreeAsync(provider, 3);
 
 		var parentIds = all.Where(d => d.ParentId is not null).Select(d => d.ParentId!).Distinct().ToList();
 		var resolvedParents = new List<(string ParentId, VariableDefinition? Definition)>();
@@ -620,10 +727,22 @@ internal sealed class ObsVariableCatalogTests
 	[Test]
 	public async Task Multi_connection_isolation()
 	{
-		var clientA = new FakeObsClient { IsConnected = true, InputNames = ["Mic"] };
-		clientA.InputVolumes["Mic"] = 0.20f;
-		var clientB = new FakeObsClient { IsConnected = true, InputNames = ["Mic"] };
-		clientB.InputVolumes["Mic"] = 0.80f;
+		var clientA = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic"],
+			InputVolumes =
+			{
+				["Mic"] = 0.20f
+			}
+		};
+		var clientB = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Mic"],
+			InputVolumes =
+			{
+				["Mic"] = 0.80f
+			}
+		};
 
 		var runtimeA = CreateRuntime(clientA, "Connection A");
 		var runtimeB = CreateRuntime(clientB, "Connection B");
@@ -640,11 +759,13 @@ internal sealed class ObsVariableCatalogTests
 	}
 
 	private static ObsRuntime CreateRuntime(FakeObsClient client, string title = "OBS", Guid? id = null)
-		=> new(id ?? Guid.NewGuid(),
+	{
+		return new ObsRuntime(id ?? Guid.NewGuid(),
 			title,
 			new ConfigurationIdentity(title, "key"),
 			new ObsConfigurationSettings("localhost", 4455, null),
 			new ObsConnection(client, "ws://localhost:4455", null));
+	}
 
 	private static async Task<List<VariableDefinition>> DiscoverAllAsync(
 		ObsVariableCatalog provider,
@@ -668,7 +789,8 @@ internal sealed class ObsVariableCatalogTests
 		return results;
 	}
 
-	private static async Task<List<VariableDefinition>> DiscoverTreeAsync(ObsVariableCatalog provider,
+	private static async Task<List<VariableDefinition>> DiscoverTreeAsync(
+		ObsVariableCatalog provider,
 		int pageSize = 100)
 	{
 		var all = new List<VariableDefinition>();
@@ -689,7 +811,8 @@ internal sealed class ObsVariableCatalogTests
 		return all;
 	}
 
-	private static async Task<string> InputContainerIdAsync(ObsVariableCatalog provider,
+	private static async Task<string> InputContainerIdAsync(
+		ObsVariableCatalog provider,
 		Guid runtimeId,
 		string inputName)
 	{
@@ -697,7 +820,8 @@ internal sealed class ObsVariableCatalogTests
 		return containers.Single(c => c.DisplayName.Literal == inputName).Id!;
 	}
 
-	private static async Task<string> SceneContainerIdAsync(ObsVariableCatalog provider,
+	private static async Task<string> SceneContainerIdAsync(
+		ObsVariableCatalog provider,
 		Guid runtimeId,
 		string sceneName)
 	{

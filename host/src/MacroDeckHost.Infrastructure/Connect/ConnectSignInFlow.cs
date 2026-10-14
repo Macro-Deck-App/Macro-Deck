@@ -218,7 +218,9 @@ public sealed class ConnectSignInFlow : IConnectSignInFlow, IAsyncDisposable
 	}
 
 	private static void Finish(Attempt attempt, ConnectSignInResult result, string message)
-		=> attempt.Completion.TrySetResult(new ConnectSignInOutcome(result, null, null, message));
+	{
+		attempt.Completion.TrySetResult(new ConnectSignInOutcome(result, null, null, message));
+	}
 
 	private async Task ReleaseCurrent()
 	{

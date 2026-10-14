@@ -30,8 +30,8 @@ internal sealed class MacOsLockStateWatcher : ILockStateWatcher
 	// Created once and never released: they live for the process, which removes any "callback reads a
 	// freed CFString" race. A native failure degrades the name to IntPtr.Zero rather than throwing out of
 	// the static initializer, and every constructor treats that as unsupported.
-	private static readonly IntPtr _lockedNotificationName = TryCreateCFString(ScreenIsLockedNotification);
-	private static readonly IntPtr _unlockedNotificationName = TryCreateCFString(ScreenIsUnlockedNotification);
+	private static readonly IntPtr _lockedNotificationName = TryCreateCfString(ScreenIsLockedNotification);
+	private static readonly IntPtr _unlockedNotificationName = TryCreateCfString(ScreenIsUnlockedNotification);
 
 	// Tokens are opaque values CoreFoundation only compares and never dereferences. Allocating them from
 	// a process-wide counter means a token is never reused, so a callback that arrives after an instance
@@ -60,9 +60,9 @@ internal sealed class MacOsLockStateWatcher : ILockStateWatcher
 		var unlockedToken = IntPtr.Zero;
 		try
 		{
-			if (_callbackPointer == IntPtr.Zero ||
-				_lockedNotificationName == IntPtr.Zero ||
-				_unlockedNotificationName == IntPtr.Zero)
+			if (_callbackPointer == IntPtr.Zero
+				|| _lockedNotificationName == IntPtr.Zero
+				|| _unlockedNotificationName == IntPtr.Zero)
 			{
 				return;
 			}
@@ -191,11 +191,11 @@ internal sealed class MacOsLockStateWatcher : ILockStateWatcher
 		}
 	}
 
-	private static IntPtr TryCreateCFString(string value)
+	private static IntPtr TryCreateCfString(string value)
 	{
 		try
 		{
-			return MacOsCoreFoundation.CreateCFString(value);
+			return MacOsCoreFoundation.CreateCfString(value);
 		}
 		catch
 		{
@@ -204,7 +204,8 @@ internal sealed class MacOsLockStateWatcher : ILockStateWatcher
 	}
 
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-	private delegate void NotificationCallback(IntPtr center,
+	private delegate void NotificationCallback(
+		IntPtr center,
 		IntPtr observer,
 		IntPtr name,
 		IntPtr obj,
@@ -214,7 +215,8 @@ internal sealed class MacOsLockStateWatcher : ILockStateWatcher
 	private static extern IntPtr CFNotificationCenterGetDistributedCenter();
 
 	[DllImport(CoreFoundation)]
-	private static extern void CFNotificationCenterAddObserver(IntPtr center,
+	private static extern void CFNotificationCenterAddObserver(
+		IntPtr center,
 		IntPtr observer,
 		IntPtr callback,
 		IntPtr name,

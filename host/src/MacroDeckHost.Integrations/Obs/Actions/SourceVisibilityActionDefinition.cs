@@ -38,13 +38,12 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(SceneParameter,
-			label: AppStrings.Integrations.Obs.Params.Scene(),
+			AppStrings.Integrations.Obs.Params.Scene(),
 			required: true),
 		ActionParameter.DynamicChoice(SourceParameter,
-			label: AppStrings.Integrations.Obs.Params.Source(),
+			AppStrings.Integrations.Obs.Params.Source(),
 			required: true),
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = ModeToggle, Label = AppStrings.Integrations.Obs.Params.ModeToggle() },
@@ -53,18 +52,21 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 				new ActionParameterOption
 					{ Value = ModeHide, Label = AppStrings.Integrations.Obs.Actions.SetSourceVisibility.ModeHide() }
 			],
-			label: AppStrings.Integrations.Obs.Params.Mode(),
+			AppStrings.Integrations.Obs.Params.Mode(),
 			defaultValue: ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
 	{
-		if (parameters.GetValueOrDefault(SceneParameter)?.ToString() is not { Length: > 0 } scene ||
-			parameters.GetValueOrDefault(SourceParameter)?.ToString() is not { Length: > 0 } source)
+		if (parameters.GetValueOrDefault(SceneParameter)?.ToString() is not { Length: > 0 } scene
+			|| parameters.GetValueOrDefault(SourceParameter)?.ToString() is not { Length: > 0 } source)
 		{
 			return null;
 		}
@@ -88,9 +90,9 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 
 		if (connection is not null)
 		{
-			if (context.ParameterName == SourceParameter &&
-				context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene &&
-				!string.IsNullOrWhiteSpace(scene))
+			if (context.ParameterName == SourceParameter
+				&& context.CurrentParameters.GetValueOrDefault(SceneParameter) is string scene
+				&& !string.IsNullOrWhiteSpace(scene))
 			{
 				options = await ObsSceneItemOptions.ItemsAsync(connection, scene);
 			}
@@ -126,10 +128,10 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene ||
-				string.IsNullOrWhiteSpace(scene) ||
-				context.Parameters.GetValueOrDefault(SourceParameter) is not string source ||
-				string.IsNullOrWhiteSpace(source))
+			if (context.Parameters.GetValueOrDefault(SceneParameter) is not string scene
+				|| string.IsNullOrWhiteSpace(scene)
+				|| context.Parameters.GetValueOrDefault(SourceParameter) is not string source
+				|| string.IsNullOrWhiteSpace(source))
 			{
 				_logger.Warning("OBS source action skipped: scene or source not selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

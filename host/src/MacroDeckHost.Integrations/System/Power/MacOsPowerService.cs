@@ -16,12 +16,14 @@ internal sealed class MacOsPowerService : IPowerService
 	public bool IsSupported => true;
 
 	public bool Supports(PowerOperation operation)
-		=> operation switch
+	{
+		return operation switch
 		{
 			PowerOperation.Lock => MacOsScreenLock.IsAvailable,
 			PowerOperation.Hibernate => false,
 			_ => true
 		};
+	}
 
 	public async Task<PowerResult> ExecuteAsync(
 		PowerOperation operation,
@@ -72,12 +74,15 @@ internal sealed class MacOsPowerService : IPowerService
 	}
 
 	private static LocalizedText UnsupportedReason(PowerOperation operation)
-		=> operation == PowerOperation.Hibernate
+	{
+		return operation == PowerOperation.Hibernate
 			? AppStrings.Integrations.System.Errors.Power.MacOsNoHibernation()
 			: AppStrings.Integrations.System.Errors.Power.MacOsNoLockMechanism();
+	}
 
 	private static LocalizedText FailureMessage(PowerOperation operation)
-		=> operation switch
+	{
+		return operation switch
 		{
 			PowerOperation.Lock => AppStrings.Integrations.System.Errors.Power.MacOsScreenLockFailed(),
 			PowerOperation.Sleep => AppStrings.Integrations.System.Errors.Power.SleepFailed(),
@@ -85,4 +90,5 @@ internal sealed class MacOsPowerService : IPowerService
 			PowerOperation.ShutDown => AppStrings.Integrations.System.Errors.Power.MacOsShutDownDenied(),
 			_ => AppStrings.Integrations.System.Errors.Power.OperationFailed()
 		};
+	}
 }

@@ -31,14 +31,14 @@ internal static class HomeAssistantResponses
 
 	public static HomeAssistantEntityState? ReadState(JsonElement element)
 	{
-		if (element.ValueKind != JsonValueKind.Object ||
-			ReadString(element, "entity_id") is not { Length: > 0 } entityId)
+		if (element.ValueKind != JsonValueKind.Object
+			|| ReadString(element, "entity_id") is not { Length: > 0 } entityId)
 		{
 			return null;
 		}
 
-		var attributes = element.TryGetProperty("attributes", out var attributesElement) &&
-			attributesElement.ValueKind == JsonValueKind.Object
+		var attributes = element.TryGetProperty("attributes", out var attributesElement)
+			&& attributesElement.ValueKind == JsonValueKind.Object
 				? attributesElement.Clone()
 				: default;
 
@@ -77,9 +77,11 @@ internal static class HomeAssistantResponses
 	}
 
 	public static (string? LocationName, string? Version) ReadConfig(JsonElement result)
-		=> result.ValueKind == JsonValueKind.Object
+	{
+		return result.ValueKind == JsonValueKind.Object
 			? (ReadString(result, "location_name"), ReadString(result, "version"))
 			: (null, null);
+	}
 
 	public static IReadOnlyList<HomeAssistantAreaInfo> ReadAreas(JsonElement result)
 	{
@@ -171,9 +173,11 @@ internal static class HomeAssistantResponses
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }

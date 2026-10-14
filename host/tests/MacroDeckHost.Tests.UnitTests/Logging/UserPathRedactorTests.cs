@@ -10,14 +10,16 @@ public class UserPathRedactorTests
 	private const string MacHome = "/Users/suchbyte";
 
 	private static UserPathRedactor For(string? home, bool ignoreCase = false)
-		=> new(home, [], ignoreCase);
+	{
+		return new UserPathRedactor(home, [], ignoreCase);
+	}
 
 	[Test]
 	public void Replaces_The_Current_Home_With_A_Tilde_On_Every_Platform_Shape()
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(For(WindowsHome, ignoreCase: true)
+			Assert.That(For(WindowsHome, true)
 					.Redact(@"C:\Users\suchbyte\AppData\Roaming\MacroDeck\database.db"),
 				Is.EqualTo(@"~\AppData\Roaming\MacroDeck\database.db"));
 
@@ -25,7 +27,7 @@ public class UserPathRedactorTests
 				Is.EqualTo("~/.local/share/MacroDeck/database.db"));
 
 			// The space in "Application Support" must not be read as the end of the path.
-			Assert.That(For(MacHome, ignoreCase: true)
+			Assert.That(For(MacHome, true)
 					.Redact("/Users/suchbyte/Library/Application Support/MacroDeck/database.db"),
 				Is.EqualTo("~/Library/Application Support/MacroDeck/database.db"));
 		});
@@ -36,16 +38,16 @@ public class UserPathRedactorTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(For(WindowsHome, ignoreCase: true).Redact(@"C:\Users\other-user\Documents\file.json"),
+			Assert.That(For(WindowsHome, true).Redact(@"C:\Users\other-user\Documents\file.json"),
 				Is.EqualTo(@"C:\Users\<user>\Documents\file.json"));
 
 			Assert.That(For(LinuxHome).Redact("/home/other-user/file.json"),
 				Is.EqualTo("/home/<user>/file.json"));
 
-			Assert.That(For(MacHome, ignoreCase: true).Redact("/Users/other-user/file.json"),
+			Assert.That(For(MacHome, true).Redact("/Users/other-user/file.json"),
 				Is.EqualTo("/Users/<user>/file.json"));
 
-			Assert.That(For(WindowsHome, ignoreCase: true).Redact(@"\\fileserver\Users\other-user\share\x.json"),
+			Assert.That(For(WindowsHome, true).Redact(@"\\fileserver\Users\other-user\share\x.json"),
 				Is.EqualTo(@"\\fileserver\Users\<user>\share\x.json"));
 		});
 	}
@@ -64,7 +66,7 @@ public class UserPathRedactorTests
 			Assert.That(For(LinuxHome).Redact("/home/suchbyte2/file.json"),
 				Is.EqualTo("/home/<user>/file.json"));
 
-			Assert.That(For(WindowsHome, ignoreCase: true).Redact(@"C:\Users\suchbyte.bak\file.json"),
+			Assert.That(For(WindowsHome, true).Redact(@"C:\Users\suchbyte.bak\file.json"),
 				Is.EqualTo(@"C:\Users\<user>\file.json"));
 		});
 	}
@@ -93,7 +95,7 @@ public class UserPathRedactorTests
 	[Test]
 	public void Matches_Regardless_Of_The_Separator_Form()
 	{
-		var redactor = For(WindowsHome, ignoreCase: true);
+		var redactor = For(WindowsHome, true);
 
 		Assert.Multiple(() =>
 		{
@@ -107,7 +109,7 @@ public class UserPathRedactorTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(For(WindowsHome, ignoreCase: true).Redact(@"c:\users\SUCHBYTE\AppData\x"),
+			Assert.That(For(WindowsHome, true).Redact(@"c:\users\SUCHBYTE\AppData\x"),
 				Is.EqualTo(@"~\AppData\x"));
 
 			Assert.That(For(LinuxHome).Redact("/home/SuchByte/file.json"),
@@ -123,7 +125,7 @@ public class UserPathRedactorTests
 	[TestCase("/Users/Shared/MacroDeck/plugins/weather.dll")]
 	public void Leaves_Profile_Directories_That_Belong_To_No_One(string path)
 	{
-		Assert.That(For(WindowsHome, ignoreCase: true).Redact(path), Is.EqualTo(path));
+		Assert.That(For(WindowsHome, true).Redact(path), Is.EqualTo(path));
 	}
 
 	[TestCase("/opt/suchbyte/data.db")]
@@ -175,7 +177,7 @@ public class UserPathRedactorTests
 		{
 			Assert.That(For(LinuxHome).Redact("/home/shared/x.json"), Is.EqualTo("/home/<user>/x.json"));
 			Assert.That(For(LinuxHome).Redact("/home/public/y.json"), Is.EqualTo("/home/<user>/y.json"));
-			Assert.That(For(MacHome, ignoreCase: true).Redact("/Users/Shared/x.json"),
+			Assert.That(For(MacHome, true).Redact("/Users/Shared/x.json"),
 				Is.EqualTo("/Users/Shared/x.json"));
 		});
 	}
@@ -183,7 +185,7 @@ public class UserPathRedactorTests
 	[Test]
 	public void Folds_Case_For_Ascii_Only()
 	{
-		Assert.That(For("/home/mänuel", ignoreCase: true).Redact("/home/MÄNUEL/x.json"),
+		Assert.That(For("/home/mänuel", true).Redact("/home/MÄNUEL/x.json"),
 			Is.EqualTo("/home/<user>/x.json"));
 	}
 
@@ -221,7 +223,7 @@ public class UserPathRedactorTests
 	{
 		var redactor = new UserPathRedactor(WindowsHome,
 			[new KeyValuePair<string, string>(@"\\fileserver\profiles\suchbyte\AppData\Roaming", "%APPDATA%")],
-			ignoreCase: true);
+			true);
 
 		var redacted = redactor.Redact(@"\\fileserver\profiles\suchbyte\AppData\Roaming\MacroDeck\database.db");
 
@@ -235,7 +237,7 @@ public class UserPathRedactorTests
 	[Test]
 	public void Is_Idempotent()
 	{
-		var redactor = For(WindowsHome, ignoreCase: true);
+		var redactor = For(WindowsHome, true);
 		var once = redactor.Redact(@"C:\Users\suchbyte\AppData\x.db and /home/other/y.json");
 
 		Assert.Multiple(() =>

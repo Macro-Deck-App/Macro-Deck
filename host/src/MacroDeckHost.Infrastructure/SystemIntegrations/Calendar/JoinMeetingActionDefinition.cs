@@ -33,19 +33,22 @@ internal sealed class JoinMeetingActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Duration(WindowParameter,
-			label: AppStrings.Integrations.Calendar.Actions.JoinMeeting.WindowLabel(),
-			description: AppStrings.Integrations.Calendar.Actions.JoinMeeting.WindowDescription(),
-			min: 0,
-			max: TimeSpan.FromDays(1).TotalMilliseconds,
-			defaultMilliseconds: CalendarMeetings.DefaultJoinWindow.TotalMilliseconds),
+			AppStrings.Integrations.Calendar.Actions.JoinMeeting.WindowLabel(),
+			AppStrings.Integrations.Calendar.Actions.JoinMeeting.WindowDescription(),
+			0,
+			TimeSpan.FromDays(1).TotalMilliseconds,
+			CalendarMeetings.DefaultJoinWindow.TotalMilliseconds),
 		ActionParameter.DynamicChoice(CalendarParameter,
-			label: AppStrings.Events.Calendar.CalendarLabel(),
-			description: AppStrings.Integrations.Calendar.Actions.JoinMeeting.CalendarDescription(),
-			optionsSourceId: CalendarOptionsSourceIds.Calendars,
-			placeholder: AppStrings.Events.Calendar.AnyCalendarPlaceholder())
+			AppStrings.Events.Calendar.CalendarLabel(),
+			AppStrings.Integrations.Calendar.Actions.JoinMeeting.CalendarDescription(),
+			CalendarOptionsSourceIds.Calendars,
+			AppStrings.Events.Calendar.AnyCalendarPlaceholder())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_services);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_services);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -85,7 +88,8 @@ internal sealed class JoinMeetingActionDefinition : IActionDefinition
 
 			return Task.FromResult(opened.Error == ExternalUrlOpenError.HostLocked
 				? ActionResult.Failed(HostLockedCode, AppStrings.Integrations.Calendar.Actions.JoinMeeting.HostLocked())
-				: ActionResult.Failed(OpenFailedCode, AppStrings.Integrations.Calendar.Actions.JoinMeeting.OpenFailed()));
+				: ActionResult.Failed(OpenFailedCode,
+					AppStrings.Integrations.Calendar.Actions.JoinMeeting.OpenFailed()));
 		}
 
 		private static TimeSpan ReadWindow(IReadOnlyDictionary<string, object> parameters)

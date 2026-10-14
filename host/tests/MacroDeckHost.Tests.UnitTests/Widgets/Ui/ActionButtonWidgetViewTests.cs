@@ -90,8 +90,8 @@ public class ActionButtonWidgetViewTests
 			states = new object[]
 			{
 				new { id = "a", appearance = new { labelBoxColor = "#222222" } },
-				new { id = "b", appearance = new { label = "B" } },
-			},
+				new { id = "b", appearance = new { label = "B" } }
+			}
 		};
 
 		var stateA = Render(data, activeStateId: "a");
@@ -171,8 +171,8 @@ public class ActionButtonWidgetViewTests
 			states = new object[]
 			{
 				new { id = "a", appearance = new { labelShadow = true, labelOutlineWidth = 3 } },
-				new { id = "b", appearance = new { label = "B" } },
-			},
+				new { id = "b", appearance = new { label = "B" } }
+			}
 		};
 
 		var stateA = Render(data, activeStateId: "a").ById("actionButton.labelRow.labelBox.label");
@@ -241,10 +241,10 @@ public class ActionButtonWidgetViewTests
 				activeStateId = "a",
 				states = new object[]
 				{
-					new { id = "a", label = "A", appearance = new { } },
-				},
+					new { id = "a", label = "A", appearance = new { } }
+				}
 			},
-			icons: new Dictionary<WidgetIconReference, UiResource>
+			new Dictionary<WidgetIconReference, UiResource>
 				{ [WidgetIconReference.IconPack("root-icon")] = Icon() });
 
 		var button = host.ById("actionButton");
@@ -274,8 +274,8 @@ public class ActionButtonWidgetViewTests
 			border = new { style = "static", color = "#00ff00" },
 			states = new object[]
 			{
-				new { id = "a", label = "A", appearance = new { fontSize = 30 } },
-			},
+				new { id = "a", label = "A", appearance = new { fontSize = 30 } }
+			}
 		});
 
 		var button = host.ById("actionButton");
@@ -300,7 +300,7 @@ public class ActionButtonWidgetViewTests
 		var button = Render(new
 			{
 				backgroundColor = string.Empty,
-				border = new { style = "static", color = string.Empty },
+				border = new { style = "static", color = string.Empty }
 			})
 			.ById("actionButton");
 
@@ -320,8 +320,8 @@ public class ActionButtonWidgetViewTests
 			activeStateId = "a",
 			states = new object[]
 			{
-				new { id = "a", label = "A", appearance = new { border = new { style = "off" } } },
-			},
+				new { id = "a", label = "A", appearance = new { border = new { style = "off" } } }
+			}
 		});
 
 		var button = host.ById("actionButton");
@@ -354,7 +354,7 @@ public class ActionButtonWidgetViewTests
 	public void Icon_framing_is_clamped_and_converted_to_fractions_and_defaults_are_omitted()
 	{
 		var host = Render(new { iconId = "icon-a", iconDisplay = new { zoom = 5000, offsetX = -400, opacity = 50 } },
-			icons: new Dictionary<WidgetIconReference, UiResource>
+			new Dictionary<WidgetIconReference, UiResource>
 				{ [WidgetIconReference.IconPack("icon-a")] = Icon() });
 
 		var button = host.ById("actionButton");
@@ -373,7 +373,7 @@ public class ActionButtonWidgetViewTests
 	public void An_opacity_that_clamps_to_the_default_is_omitted_even_though_it_was_configured()
 	{
 		var host = Render(new { iconId = "icon-a", iconDisplay = new { opacity = 250 } },
-			icons: new Dictionary<WidgetIconReference, UiResource>
+			new Dictionary<WidgetIconReference, UiResource>
 				{ [WidgetIconReference.IconPack("icon-a")] = Icon() });
 
 		Assert.That(host.ById("actionButton").HasProperty("opacity"),
@@ -384,10 +384,11 @@ public class ActionButtonWidgetViewTests
 	[Test]
 	public void A_root_icon_colour_tints_the_icon_and_no_colour_leaves_it_untinted()
 	{
-		var icons = new Dictionary<WidgetIconReference, UiResource> { [WidgetIconReference.IconPack("icon-a")] = Icon() };
-		var tinted = Render(new { iconId = "icon-a", iconColor = "#FF8800" }, icons: icons);
-		var untinted = Render(new { iconId = "icon-a" }, icons: icons);
-		var reset = Render(new { iconId = "icon-a", iconColor = "" }, icons: icons);
+		var icons = new Dictionary<WidgetIconReference, UiResource>
+			{ [WidgetIconReference.IconPack("icon-a")] = Icon() };
+		var tinted = Render(new { iconId = "icon-a", iconColor = "#FF8800" }, icons);
+		var untinted = Render(new { iconId = "icon-a" }, icons);
+		var reset = Render(new { iconId = "icon-a", iconColor = "" }, icons);
 
 		Assert.Multiple(() =>
 		{
@@ -407,13 +408,14 @@ public class ActionButtonWidgetViewTests
 			states = new object[]
 			{
 				new { id = "off", label = "Off", appearance = new { iconId = "icon-a", iconColor = "#ff0000" } },
-				new { id = "on", label = "On", appearance = new { iconId = "icon-a" } },
-			},
+				new { id = "on", label = "On", appearance = new { iconId = "icon-a" } }
+			}
 		};
-		var icons = new Dictionary<WidgetIconReference, UiResource> { [WidgetIconReference.IconPack("icon-a")] = Icon() };
+		var icons = new Dictionary<WidgetIconReference, UiResource>
+			{ [WidgetIconReference.IconPack("icon-a")] = Icon() };
 
-		var off = Render(data, icons: icons, activeStateId: "off");
-		var on = Render(data, icons: icons, activeStateId: "on");
+		var off = Render(data, icons, activeStateId: "off");
+		var on = Render(data, icons, activeStateId: "on");
 
 		Assert.Multiple(() =>
 		{
@@ -426,7 +428,7 @@ public class ActionButtonWidgetViewTests
 	public void Artwork_from_an_active_icon_provider_is_never_tinted()
 	{
 		var host = Render(new { iconId = "icon-a", iconColor = "#ff0000" },
-			icons: new Dictionary<WidgetIconReference, UiResource>
+			new Dictionary<WidgetIconReference, UiResource>
 				{ [WidgetIconReference.IconPack("icon-a")] = Icon() },
 			iconProvider: WidgetIconResolution.Active(new UiResource { ResourceId = "provider-1" }));
 		var button = host.ById("actionButton");
@@ -442,7 +444,8 @@ public class ActionButtonWidgetViewTests
 	[Test]
 	public void The_legacy_image_face_is_never_tinted()
 	{
-		var host = Render(new { iconColor = "#ff0000" }, imageResource: new UiResource { ResourceId = "legacy-image-1" });
+		var host = Render(new { iconColor = "#ff0000" },
+			imageResource: new UiResource { ResourceId = "legacy-image-1" });
 
 		Assert.That(host.ById("actionButton").HasProperty("tint"), Is.False);
 	}
@@ -505,26 +508,34 @@ public class ActionButtonWidgetViewTests
 		// substitute for an icon this session simply failed to fetch bytes for (see ActionButtonWidgetView.Backdrop).
 		var imageResource = new UiResource { ResourceId = "legacy-image-1" };
 		var host = Render(new { iconId = "icon-a" },
-			icons: new Dictionary<WidgetIconReference, UiResource>
+			new Dictionary<WidgetIconReference, UiResource>
 				{ [WidgetIconReference.IconPack("icon-a")] = Icon() },
-			imageResource: imageResource);
+			imageResource);
 		var button = host.ById("actionButton");
 
 		Assert.That(button.Property("source")!.Value.GetProperty("resourceId").GetString(), Is.EqualTo("res-1"));
 	}
 
-	private static UiResource Icon() => new() { ResourceId = "res-1" };
+	private static UiResource Icon()
+	{
+		return new UiResource { ResourceId = "res-1" };
+	}
 
 	private static double BoxPadding(UiTestNode box)
-		=> box.Property("padding")!.Value.GetProperty("basis").GetDouble();
+	{
+		return box.Property("padding")!.Value.GetProperty("basis").GetDouble();
+	}
 
 	private static string? BoxBackground(UiTestNode box)
-		=> box.Property("modifiers") is { ValueKind: JsonValueKind.Object } modifiers &&
-			modifiers.TryGetProperty("background", out var background)
+	{
+		return box.Property("modifiers") is { ValueKind: JsonValueKind.Object } modifiers
+			&& modifiers.TryGetProperty("background", out var background)
 				? background.GetString()
 				: null;
+	}
 
-	private static UiTestHost Render(object data,
+	private static UiTestHost Render(
+		object data,
 		IReadOnlyDictionary<WidgetIconReference, UiResource>? icons = null,
 		UiResource? imageResource = null,
 		WidgetIconResolution? iconProvider = null,
@@ -537,11 +548,11 @@ public class ActionButtonWidgetViewTests
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
 			labelText,
-			new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(icons ??
-				new Dictionary<WidgetIconReference, UiResource>()),
+			new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(icons
+				?? new Dictionary<WidgetIconReference, UiResource>()),
 			new UiState<WidgetIconResolution>(iconProvider ?? WidgetIconResolution.Inactive),
 			imageResource,
-			events: []);
+			[]);
 
 		return UiTestHost.Render(element,
 			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared });

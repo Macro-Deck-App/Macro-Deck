@@ -16,7 +16,10 @@ internal sealed class PluginRuntimeConfigReaderTests
 	}
 
 	[TearDown]
-	public void DeleteDirectory() => Directory.Delete(_directory, recursive: true);
+	public void DeleteDirectory()
+	{
+		Directory.Delete(_directory, true);
+	}
 
 	private string Entrypoint(string? runtimeConfig)
 	{
@@ -46,19 +49,21 @@ internal sealed class PluginRuntimeConfigReaderTests
 
 		var requirements = PluginRuntimeConfigReader.TryRead(entrypoint);
 
-		Assert.That(requirements, Is.EqualTo(new[]
-		{
-			new DotnetFrameworkRequirement
+		Assert.That(requirements,
+			Is.EqualTo(new[]
 			{
-				Name = "Microsoft.NETCore.App", Version = new Version(10, 0, 0), RollForward = DotnetRollForward.Major
-			},
-			new DotnetFrameworkRequirement
-			{
-				Name = "Microsoft.AspNetCore.App",
-				Version = new Version(10, 0, 0),
-				RollForward = DotnetRollForward.Disable
-			}
-		}));
+				new DotnetFrameworkRequirement
+				{
+					Name = "Microsoft.NETCore.App", Version = new Version(10, 0, 0),
+					RollForward = DotnetRollForward.Major
+				},
+				new DotnetFrameworkRequirement
+				{
+					Name = "Microsoft.AspNetCore.App",
+					Version = new Version(10, 0, 0),
+					RollForward = DotnetRollForward.Disable
+				}
+			}));
 	}
 
 	[Test]
@@ -70,18 +75,21 @@ internal sealed class PluginRuntimeConfigReaderTests
 
 		var requirements = PluginRuntimeConfigReader.TryRead(entrypoint);
 
-		Assert.That(requirements, Is.EqualTo(new[]
-		{
-			new DotnetFrameworkRequirement
+		Assert.That(requirements,
+			Is.EqualTo(new[]
 			{
-				Name = "Microsoft.NETCore.App", Version = new Version(9, 0, 0), RollForward = DotnetRollForward.Minor
-			}
-		}));
+				new DotnetFrameworkRequirement
+				{
+					Name = "Microsoft.NETCore.App", Version = new Version(9, 0, 0),
+					RollForward = DotnetRollForward.Minor
+				}
+			}));
 	}
 
 	[TestCase(null)]
 	[TestCase("{ not json")]
-	[TestCase("""{ "runtimeOptions": { "includedFrameworks": [ { "name": "Microsoft.NETCore.App", "version": "10.0.12" } ] } }""")]
+	[TestCase(
+		"""{ "runtimeOptions": { "includedFrameworks": [ { "name": "Microsoft.NETCore.App", "version": "10.0.12" } ] } }""")]
 	public void Without_a_readable_framework_list_there_is_nothing_to_go_by(string? runtimeConfig)
 	{
 		Assert.That(PluginRuntimeConfigReader.TryRead(Entrypoint(runtimeConfig)), Is.Null);

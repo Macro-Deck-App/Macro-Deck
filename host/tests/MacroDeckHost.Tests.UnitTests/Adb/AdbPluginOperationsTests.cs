@@ -8,7 +8,7 @@ public class AdbPluginOperationsTests
 {
 	private const string Serial = "R58M12ABCDE";
 
-	private static readonly string LocalFile = OperatingSystem.IsWindows() ? @"C:\data\app.apk" : "/data/app.apk";
+	private static readonly string _localFile = OperatingSystem.IsWindows() ? @"C:\data\app.apk" : "/data/app.apk";
 
 	[Test]
 	public void A_shell_command_reaches_the_device_shell_as_one_argument()
@@ -24,64 +24,86 @@ public class AdbPluginOperationsTests
 	[TestCase("  -t cat")]
 	[TestCase("echo\0hidden")]
 	public void A_shell_command_adb_would_misread_or_that_is_empty_is_refused(string command)
-		=> Assert.That(AdbCommandBuilder.BuildPluginShell(Serial, command).Error, Is.EqualTo(AdbFailureCode.InvalidParameter));
+	{
+		Assert.That(AdbCommandBuilder.BuildPluginShell(Serial, command).Error,
+			Is.EqualTo(AdbFailureCode.InvalidParameter));
+	}
 
 	[Test]
 	public void An_empty_serial_is_refused_rather_than_falling_back_to_a_default_device()
-		=> Assert.That(AdbCommandBuilder.BuildPluginShell(string.Empty, "true").Error, Is.EqualTo(AdbFailureCode.InvalidParameter));
+	{
+		Assert.That(AdbCommandBuilder.BuildPluginShell(string.Empty, "true").Error,
+			Is.EqualTo(AdbFailureCode.InvalidParameter));
+	}
 
 	[Test]
 	public void Install_replaces_an_existing_app_and_passes_the_apk_as_its_own_argument()
-		=> Assert.That(AdbCommandBuilder.BuildInstall(Serial, LocalFile).Data,
-			Is.EqualTo(new[] { "-s", Serial, "install", "-r", LocalFile }));
+	{
+		Assert.That(AdbCommandBuilder.BuildInstall(Serial, _localFile).Data,
+			Is.EqualTo(new[] { "-s", Serial, "install", "-r", _localFile }));
+	}
 
 	[TestCase("app.apk")]
 	[TestCase("-r")]
 	[TestCase("../app.apk")]
 	public void A_local_path_that_is_not_absolute_is_refused(string path)
-		=> Assert.That(AdbCommandBuilder.BuildInstall(Serial, path).Error, Is.EqualTo(AdbFailureCode.InvalidParameter));
+	{
+		Assert.That(AdbCommandBuilder.BuildInstall(Serial, path).Error, Is.EqualTo(AdbFailureCode.InvalidParameter));
+	}
 
 	[TestCase("sdcard/file.txt")]
 	[TestCase("-a")]
 	[TestCase("/sdcard/a\nb")]
 	public void A_device_path_that_is_not_absolute_is_refused(string remotePath)
-		=> Assert.That(AdbCommandBuilder.BuildPush(Serial, LocalFile, remotePath).Error,
+	{
+		Assert.That(AdbCommandBuilder.BuildPush(Serial, _localFile, remotePath).Error,
 			Is.EqualTo(AdbFailureCode.InvalidParameter));
+	}
 
 	[TestCase("com.example.app; reboot")]
 	[TestCase("-k")]
 	public void A_package_name_outside_the_package_grammar_is_refused(string packageName)
-		=> Assert.That(AdbCommandBuilder.BuildUninstall(Serial, packageName).Error, Is.EqualTo(AdbFailureCode.InvalidParameter));
+	{
+		Assert.That(AdbCommandBuilder.BuildUninstall(Serial, packageName).Error,
+			Is.EqualTo(AdbFailureCode.InvalidParameter));
+	}
 
 	[Test]
 	public void A_charging_battery_is_normalised()
 	{
 		var reading = AdbPropertyParsers.ParseBatteryState(
-			"Current Battery Service state:\n  AC powered: false\n  USB powered: true\n  Wireless powered: false\n" +
-			"  status: 2\n  health: 2\n  present: true\n  level: 87\n  scale: 100\n");
+			"Current Battery Service state:\n  AC powered: false\n  USB powered: true\n  Wireless powered: false\n"
+			+ "  status: 2\n  health: 2\n  present: true\n  level: 87\n  scale: 100\n");
 
-		Assert.That(reading, Is.EqualTo(new AdbBatteryReading(87, true, AdbBatteryStatus.Charging, AdbBatteryHealth.Good)));
+		Assert.That(reading,
+			Is.EqualTo(new AdbBatteryReading(87, true, AdbBatteryStatus.Charging, AdbBatteryHealth.Good)));
 	}
 
 	[Test]
 	public void A_full_battery_on_the_charger_still_reports_that_power_is_connected()
 	{
-		var reading = AdbPropertyParsers.ParseBatteryState("  AC powered: true\n  status: 5\n  health: 3\n  level: 100\n");
+		var reading = AdbPropertyParsers.ParseBatteryState(
+			"  AC powered: true\n  status: 5\n  health: 3\n  level: 100\n");
 
-		Assert.That(reading, Is.EqualTo(new AdbBatteryReading(100, true, AdbBatteryStatus.Full, AdbBatteryHealth.Overheat)));
+		Assert.That(reading,
+			Is.EqualTo(new AdbBatteryReading(100, true, AdbBatteryStatus.Full, AdbBatteryHealth.Overheat)));
 	}
 
 	[Test]
 	public void A_level_on_another_scale_is_converted_to_percent()
 	{
-		var reading = AdbPropertyParsers.ParseBatteryState("  AC powered: false\n  status: 3\n  health: 7\n  level: 50\n  scale: 200\n");
+		var reading = AdbPropertyParsers.ParseBatteryState(
+			"  AC powered: false\n  status: 3\n  health: 7\n  level: 50\n  scale: 200\n");
 
-		Assert.That(reading, Is.EqualTo(new AdbBatteryReading(25, false, AdbBatteryStatus.Discharging, AdbBatteryHealth.Cold)));
+		Assert.That(reading,
+			Is.EqualTo(new AdbBatteryReading(25, false, AdbBatteryStatus.Discharging, AdbBatteryHealth.Cold)));
 	}
 
 	[Test]
 	public void Output_without_a_level_is_not_a_battery_reading()
-		=> Assert.That(AdbPropertyParsers.ParseBatteryState("sh: dumpsys: not found\n"), Is.Null);
+	{
+		Assert.That(AdbPropertyParsers.ParseBatteryState("sh: dumpsys: not found\n"), Is.Null);
+	}
 
 	[Test]
 	public async Task A_non_zero_exit_code_from_a_shell_command_is_a_result_not_a_failure()
@@ -139,7 +161,10 @@ public class AdbPluginOperationsTests
 	[TestCase("package:/data/app/com.example.app-1/base.apk\n", 0, true)]
 	[TestCase("", 1, false)]
 	[TestCase("", 0, false)]
-	public async Task A_package_counts_as_installed_only_when_pm_names_its_path(string output, int exitCode, bool expected)
+	public async Task A_package_counts_as_installed_only_when_pm_names_its_path(
+		string output,
+		int exitCode,
+		bool expected)
 	{
 		using var harness = await OnlineHarnessAsync();
 		harness.Runner.When(argv => IsShell(argv) && argv[3].StartsWith("pm path", StringComparison.Ordinal),
@@ -180,20 +205,24 @@ public class AdbPluginOperationsTests
 		harness.Runner.When(IsDevicesList,
 			new AdbProcessResult(true,
 				0,
-				"List of devices attached\n" +
-				$"{Serial} device usb:1-1 product:shiba model:Pixel_8 transport_id:1\n" +
-				"192.168.1.20:5555 device product:tokay model:Pixel_9 transport_id:2\n",
+				"List of devices attached\n"
+				+ $"{Serial} device usb:1-1 product:shiba model:Pixel_8 transport_id:1\n"
+				+ "192.168.1.20:5555 device product:tokay model:Pixel_9 transport_id:2\n",
 				string.Empty,
 				false));
 
 		await harness.Manager.RefreshNowAsync(CancellationToken.None);
 
-		var reversed = harness.Runner.Invocations.Where(argv => argv.Contains("reverse")).Select(argv => argv[1]).ToList();
+		var reversed = harness.Runner.Invocations.Where(argv => argv.Contains("reverse"))
+			.Select(argv => argv[1])
+			.ToList();
 		Assert.Multiple(() =>
 		{
 			Assert.That(reversed, Does.Contain(Serial));
 			Assert.That(reversed, Does.Not.Contain("192.168.1.20:5555"));
-			Assert.That(harness.Manager.Devices.Single(device => device.Serial == "192.168.1.20:5555").IsNetworkConnection, Is.True);
+			Assert.That(harness.Manager.Devices.Single(device => device.Serial == "192.168.1.20:5555")
+					.IsNetworkConnection,
+				Is.True);
 		});
 	}
 
@@ -207,7 +236,14 @@ public class AdbPluginOperationsTests
 	[TestCase("[::1]:5555", false)]
 	public void Only_a_device_reached_over_the_network_counts_as_a_network_connection(string serial, bool network)
 	{
-		var device = new AdbDevice(serial, AdbDeviceState.Device, null, null, null, null, null, DateTimeOffset.UnixEpoch);
+		var device = new AdbDevice(serial,
+			AdbDeviceState.Device,
+			null,
+			null,
+			null,
+			null,
+			null,
+			DateTimeOffset.UnixEpoch);
 
 		Assert.That(device.IsNetworkConnection, Is.EqualTo(network));
 	}
@@ -284,7 +320,11 @@ public class AdbPluginOperationsTests
 	{
 		using var harness = await OnlineHarnessAsync();
 		harness.Runner.When(argv => IsShell(argv) && argv[3] == "dumpsys battery",
-			new AdbProcessResult(true, 0, "  AC powered: false\n  status: 3\n  health: 2\n  level: 40\n", string.Empty, false));
+			new AdbProcessResult(true,
+				0,
+				"  AC powered: false\n  status: 3\n  health: 2\n  level: 40\n",
+				string.Empty,
+				false));
 
 		await harness.Manager.GetBatteryAsync(Serial, CancellationToken.None);
 		await harness.Manager.GetBatteryAsync(Serial, CancellationToken.None);
@@ -356,14 +396,22 @@ public class AdbPluginOperationsTests
 	}
 
 	private static int BatteryReads(AdbManagerHarness harness)
-		=> harness.Runner.Invocations.Count(argv => IsShell(argv) && argv[3] == "dumpsys battery");
+	{
+		return harness.Runner.Invocations.Count(argv => IsShell(argv) && argv[3] == "dumpsys battery");
+	}
 
 	private static bool IsDevicesList(IReadOnlyList<string> argv)
-		=> argv.Count == 2 && argv[0] == "devices" && argv[1] == "-l";
+	{
+		return argv.Count == 2 && argv[0] == "devices" && argv[1] == "-l";
+	}
 
 	private static bool IsShell(IReadOnlyList<string> argv)
-		=> argv.Count == 4 && argv[0] == "-s" && argv[2] == "shell";
+	{
+		return argv.Count == 4 && argv[0] == "-s" && argv[2] == "shell";
+	}
 
 	private static string Devices(string state)
-		=> $"List of devices attached\n{Serial} {state} product:shiba model:Pixel_8 transport_id:1\n";
+	{
+		return $"List of devices attached\n{Serial} {state} product:shiba model:Pixel_8 transport_id:1\n";
+	}
 }

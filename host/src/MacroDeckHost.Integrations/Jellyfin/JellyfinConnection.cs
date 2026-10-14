@@ -49,7 +49,10 @@ internal sealed class JellyfinConnection : IDisposable
 	private JellyfinServerState _state = JellyfinServerState.Initial;
 	private Task? _loop;
 
-	public JellyfinConnection(IJellyfinClient client, string ownDeviceId, TimeProvider? time = null,
+	public JellyfinConnection(
+		IJellyfinClient client,
+		string ownDeviceId,
+		TimeProvider? time = null,
 		JellyfinConnectionTimings? timings = null)
 	{
 		_client = client;
@@ -73,7 +76,10 @@ internal sealed class JellyfinConnection : IDisposable
 		}
 	}
 
-	public void Start() => _loop ??= Task.Run(() => RunAsync(_cts.Token), CancellationToken.None);
+	public void Start()
+	{
+		_loop ??= Task.Run(() => RunAsync(_cts.Token), CancellationToken.None);
+	}
 
 	public void Dispose()
 	{
@@ -82,9 +88,11 @@ internal sealed class JellyfinConnection : IDisposable
 	}
 
 	public void PublishSessions(IReadOnlyList<JellyfinSessionDto> sessions)
-		=> Update(current => new JellyfinServerState(JellyfinConnectionStatus.Connected,
+	{
+		Update(current => new JellyfinServerState(JellyfinConnectionStatus.Connected,
 			JellyfinSessionMapper.Map(sessions, _ownDeviceId, _time.GetUtcNow()),
 			_time.GetUtcNow()));
+	}
 
 	private async Task RunAsync(CancellationToken cancellationToken)
 	{
@@ -182,7 +190,9 @@ internal sealed class JellyfinConnection : IDisposable
 	}
 
 	private void SetStatus(JellyfinConnectionStatus status)
-		=> Update(current => current.Status == status ? current : current with { Status = status });
+	{
+		Update(current => current.Status == status ? current : current with { Status = status });
+	}
 
 	private void Update(Func<JellyfinServerState, JellyfinServerState> change)
 	{

@@ -24,7 +24,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 {
 	private const int MaximumTextLength = 64;
 
-	private static readonly HashSet<string> _knownCapabilities = new HashSet<string>(StringComparer.Ordinal)
+	private static readonly HashSet<string> _knownCapabilities = new(StringComparer.Ordinal)
 	{
 		CompanionDeviceCapabilities.ScreenOn,
 		CompanionDeviceCapabilities.ScreenOff,
@@ -36,7 +36,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		CompanionDeviceCapabilities.Memory
 	};
 
-	private static readonly HashSet<string> _requestableCapabilities = new HashSet<string>(StringComparer.Ordinal)
+	private static readonly HashSet<string> _requestableCapabilities = new(StringComparer.Ordinal)
 	{
 		CompanionDeviceCapabilities.ScreenOn,
 		CompanionDeviceCapabilities.ScreenOff,
@@ -121,7 +121,10 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 
 	public IReadOnlyList<CompanionDevice> Devices => [.. _states.Values];
 
-	public CompanionDevice? FindDevice(Guid deviceId) => _states.GetValueOrDefault(deviceId);
+	public CompanionDevice? FindDevice(Guid deviceId)
+	{
+		return _states.GetValueOrDefault(deviceId);
+	}
 
 	public void Report(string connectionId, Guid deviceId, ReportCompanionStateRequest report)
 	{
@@ -143,6 +146,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		{
 			Raise(DeviceReady, deviceId, device);
 		}
+
 		if (firstOfConnection)
 		{
 			// Off the dispatcher's path: reading the network adapters can block.
@@ -173,10 +177,14 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	}
 
 	public Task SendLicenseAsync(CompanionLicenseEvent license, string? submittingConnectionId)
-		=> SendToCompanionsAsync(license, submittingConnectionId);
+	{
+		return SendToCompanionsAsync(license, submittingConnectionId);
+	}
 
 	public Task SendLicenseRevokedAsync(CompanionLicenseRevokedEvent revoked)
-		=> SendToCompanionsAsync(revoked, null);
+	{
+		return SendToCompanionsAsync(revoked, null);
+	}
 
 	private async Task SendToCompanionsAsync<T>(T message, string? submittingConnectionId)
 		where T : class
@@ -200,7 +208,10 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			}
 			catch (Exception ex)
 			{
-				_logger.Warning(ex, "Could not send {Message} to connection {ConnectionId}", typeof(T).Name, connectionId);
+				_logger.Warning(ex,
+					"Could not send {Message} to connection {ConnectionId}",
+					typeof(T).Name,
+					connectionId);
 			}
 		}
 	}
@@ -247,6 +258,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		}
 
 		var signal = Channel.CreateUnbounded<bool>();
+
 		void OnDeviceChanged(object? sender, CompanionDeviceEventArgs changed)
 		{
 			if (changed.DeviceId == deviceId)
@@ -255,7 +267,10 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			}
 		}
 
-		void OnConnectionClosed() => signal.Writer.TryWrite(true);
+		void OnConnectionClosed()
+		{
+			signal.Writer.TryWrite(true);
+		}
 
 		DeviceChanged += OnDeviceChanged;
 		ConnectionClosed += OnConnectionClosed;
@@ -285,9 +300,12 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	}
 
 	public IReadOnlyList<KeyValuePair<Guid, CompanionDeviceState>> ConnectedStates()
-		=> [.. _states.Select(pair => KeyValuePair.Create(pair.Key, pair.Value.State))];
+	{
+		return [.. _states.Select(pair => KeyValuePair.Create(pair.Key, pair.Value.State))];
+	}
 
-	public Task<bool> SendAsync(Guid deviceId,
+	public Task<bool> SendAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -295,7 +313,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		return SendWireAsync(deviceId, ToWire(command), cancellationToken);
 	}
 
-	public async Task<CompanionDeviceCommandResult> RequestAsync(Guid deviceId,
+	public async Task<CompanionDeviceCommandResult> RequestAsync(
+		Guid deviceId,
 		CompanionDeviceCommand command,
 		CancellationToken cancellationToken = default)
 	{
@@ -311,7 +330,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 				: CompanionDeviceCommandResult.Done;
 	}
 
-	public async Task<CompanionScreenshotResult> CaptureScreenshotAsync(Guid deviceId,
+	public async Task<CompanionScreenshotResult> CaptureScreenshotAsync(
+		Guid deviceId,
 		CompanionScreenshotMode mode,
 		CancellationToken cancellationToken = default)
 	{
@@ -331,7 +351,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	private const string ScreenshotCommand = "screenshot";
 	private const string CancelRequestCommand = "cancelRequest";
 
-	private async Task<bool> SendWireAsync(Guid deviceId,
+	private async Task<bool> SendWireAsync(
+		Guid deviceId,
 		CompanionCommandEvent command,
 		CancellationToken cancellationToken)
 	{
@@ -344,7 +365,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		return true;
 	}
 
-	private async Task<CompanionCommandResult> RequestWireAsync(Guid deviceId,
+	private async Task<CompanionCommandResult> RequestWireAsync(
+		Guid deviceId,
 		CompanionCommandEvent command,
 		CompanionRequestKind kind,
 		CancellationToken cancellationToken)
@@ -366,7 +388,8 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	}
 
 	private static CompanionCommandEvent With(CompanionCommandEvent command, string requestId)
-		=> new()
+	{
+		return new CompanionCommandEvent
 		{
 			Command = command.Command,
 			BrightnessPercent = command.BrightnessPercent,
@@ -374,9 +397,11 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			RequestId = requestId,
 			ScreenshotMode = command.ScreenshotMode
 		};
+	}
 
 	private static CompanionCommandEvent ToWire(CompanionDeviceCommand command)
-		=> new()
+	{
+		return new CompanionCommandEvent
 		{
 			Command = command.Kind switch
 			{
@@ -391,6 +416,7 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			BrightnessPercent = command.BrightnessPercent,
 			Orientation = command.Orientation
 		};
+	}
 
 	private void Raise(EventHandler<CompanionDeviceEventArgs>? handlers, Guid deviceId, CompanionDevice? device)
 	{
@@ -447,9 +473,9 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		}
 
 		var owner = ResolveOwner();
-		if (owner is not null &&
-			(!string.Equals(owner, before, StringComparison.Ordinal) ||
-				(string.Equals(owner, integrationId, StringComparison.Ordinal) && OwnerIsPlugin())))
+		if (owner is not null
+			&& (!string.Equals(owner, before, StringComparison.Ordinal)
+				|| string.Equals(owner, integrationId, StringComparison.Ordinal) && OwnerIsPlugin()))
 		{
 			ScheduleCreationForConnectedDevices();
 		}
@@ -483,14 +509,16 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 				return fixedOwner.Id;
 			}
 
-			if (integrations.FirstOrDefault(integration => !IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
+			if (integrations.FirstOrDefault(integration
+					=> !IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
 				is { } builtIn)
 			{
 				_owner = (builtIn.Id, false);
 			}
-			else if (_owner is null &&
-				_builtInRegistration.IsComplete &&
-				integrations.FirstOrDefault(integration => IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
+			else if (_owner is null
+				&& _builtInRegistration.IsComplete
+				&& integrations.FirstOrDefault(integration
+						=> IsPlugin(integration.Id) && DeclaresDeviceEntries(integration))
 					is { } plugin)
 			{
 				_owner = (plugin.Id, true);
@@ -509,17 +537,25 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 	}
 
 	private static bool DeclaresDeviceEntries(IIntegration integration)
-		=> integration is IDeclaredCapabilityKinds declared
+	{
+		return integration is IDeclaredCapabilityKinds declared
 			? declared.DeclaredCapabilityKinds.Contains(CapabilityKinds.CompanionDeviceEntries, StringComparer.Ordinal)
 			: integration is ICompanionDeviceConfigEntries;
+	}
 
-	private bool IsPlugin(string integrationId) => _registry.GetOrigin(integrationId) == IntegrationOrigin.Plugin;
+	private bool IsPlugin(string integrationId)
+	{
+		return _registry.GetOrigin(integrationId) == IntegrationOrigin.Plugin;
+	}
 
 	private async Task<bool> OwnerMayUseDevicesAsync(string ownerId)
-		=> _registry.Integrations.Any(integration => string.Equals(integration.Id, ownerId, StringComparison.Ordinal)) &&
-			(!IsPlugin(ownerId) ||
-				(_pluginAccess is not null &&
-					await _pluginAccess.EvaluateAsync(ownerId) == PluginCompanionDeviceAccess.Available));
+	{
+		return _registry.Integrations.Any(integration
+				=> string.Equals(integration.Id, ownerId, StringComparison.Ordinal))
+			&& (!IsPlugin(ownerId)
+				|| _pluginAccess is not null
+				&& await _pluginAccess.EvaluateAsync(ownerId) == PluginCompanionDeviceAccess.Available);
+	}
 
 	private void ScheduleCreationForConnectedDevices()
 	{
@@ -576,7 +612,10 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 
 	internal Task WakeOnLanSent { get; private set; } = Task.CompletedTask;
 
-	internal Task CreationFor(Guid deviceId) => _creations.GetValueOrDefault(deviceId) ?? Task.CompletedTask;
+	internal Task CreationFor(Guid deviceId)
+	{
+		return _creations.GetValueOrDefault(deviceId) ?? Task.CompletedTask;
+	}
 
 	private async Task EnsureConfigurationAsync(Guid deviceId)
 	{
@@ -591,18 +630,18 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 
 			await using var scope = _scopeFactory.CreateAsyncScope();
 			var device = await scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetById(deviceId);
-			if (device is null ||
-				device.ClientType != DeviceClientType.Native ||
-				_registry.IsExplicitlyDisabled(ownerId) ||
-				!await OwnerMayUseDevicesAsync(ownerId))
+			if (device is null
+				|| device.ClientType != DeviceClientType.Native
+				|| _registry.IsExplicitlyDisabled(ownerId)
+				|| !await OwnerMayUseDevicesAsync(ownerId))
 			{
 				return;
 			}
 
 			var coordinator = _coordinator();
 			var existing = await scope.ServiceProvider.GetRequiredService<IIntegrationConfigStore>().Find(deviceId);
-			if (existing is not null &&
-				(await coordinator.DescribeAsync(ownerId, CancellationToken.None))
+			if (existing is not null
+				&& (await coordinator.DescribeAsync(ownerId, CancellationToken.None))
 				.Any(entry => entry.Id == deviceId && entry.Usable))
 			{
 				return;
@@ -660,7 +699,10 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			: null;
 	}
 
-	private SemaphoreSlim GateFor(Guid deviceId) => _deviceGates.GetOrAdd(deviceId, _ => new SemaphoreSlim(1, 1));
+	private SemaphoreSlim GateFor(Guid deviceId)
+	{
+		return _deviceGates.GetOrAdd(deviceId, _ => new SemaphoreSlim(1, 1));
+	}
 
 	private static CompanionDeviceState Sanitize(ReportCompanionStateRequest report)
 	{
@@ -681,12 +723,15 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 			Capabilities = capabilities,
 			ConfirmsCommands = report.RequestableCapabilities is not null,
 			RequestableCapabilities = (report.RequestableCapabilities ?? [])
-				.Where(capability => _requestableCapabilities.Contains(capability) &&
-					!capabilities.Contains(capability))
+				.Where(capability
+					=> _requestableCapabilities.Contains(capability) && !capabilities.Contains(capability))
 				.ToHashSet(StringComparer.Ordinal),
 			InFocus = report.InFocus,
-			NetworkType = report.NetworkType is CompanionNetworkTypes.Wifi or CompanionNetworkTypes.Cellular
-				or CompanionNetworkTypes.Ethernet or CompanionNetworkTypes.Vpn or CompanionNetworkTypes.None
+			NetworkType = report.NetworkType is CompanionNetworkTypes.Wifi
+				or CompanionNetworkTypes.Cellular
+				or CompanionNetworkTypes.Ethernet
+				or CompanionNetworkTypes.Vpn
+				or CompanionNetworkTypes.None
 				? report.NetworkType
 				: null,
 			NetworkMetered = report.NetworkMetered,
@@ -697,8 +742,13 @@ public sealed class CompanionDeviceRegistry : ICompanionDeviceApi
 		};
 	}
 
-	private static int? Percent(int? value) => value is { } percent ? Math.Clamp(percent, 0, 100) : null;
+	private static int? Percent(int? value)
+	{
+		return value is { } percent ? Math.Clamp(percent, 0, 100) : null;
+	}
 
 	private static string? Text(string? value)
-		=> value is { Length: > MaximumTextLength } ? value[..MaximumTextLength] : value;
+	{
+		return value is { Length: > MaximumTextLength } ? value[..MaximumTextLength] : value;
+	}
 }

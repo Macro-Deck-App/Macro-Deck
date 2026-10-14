@@ -129,7 +129,7 @@ internal sealed class DiscordActionsTests
 	[Test]
 	public async Task Pressing_mute_once_while_deafened_puts_the_microphone_back_live()
 	{
-		var client = BuildClient(deaf: true);
+		var client = BuildClient(true);
 		using var connection = await ConnectAsync(client);
 		var mute = DiscordActions.Create(() => connection, new StubWebhookClient()).Single(a => a.Id == "mute");
 
@@ -321,9 +321,9 @@ internal sealed class DiscordActionsTests
 			new FakeDiscordOAuthClient(),
 			"123456",
 			"secret",
-			new DiscordTokens("stored-access", "stored-refresh", ExpiresAt: null, "rpc rpc.voice.read rpc.voice.write"),
+			new DiscordTokens("stored-access", "stored-refresh", null, "rpc rpc.voice.read rpc.voice.write"),
 			(_, _) => Task.CompletedTask,
-			events: null,
+			null,
 			TimeSpan.FromMinutes(5));
 		var action = DiscordActions.Create(() => connection, new StubWebhookClient()).Single(a => a.Id == "mute");
 
@@ -336,7 +336,7 @@ internal sealed class DiscordActionsTests
 	[Test]
 	public async Task The_mute_action_reports_whether_the_user_is_muted()
 	{
-		using var connection = await ConnectAsync(BuildClient(deaf: true));
+		using var connection = await ConnectAsync(BuildClient(true));
 		var provider = (IStateProviderActionDefinition)DiscordActions
 			.Create(() => connection, new StubWebhookClient())
 			.Single(a => a.Id == "mute");
@@ -379,10 +379,15 @@ internal sealed class DiscordActionsTests
 
 	private static readonly Dictionary<string, object?> _noParameters = new(StringComparer.Ordinal);
 
-	private static ActionExecutionContext Context() => Context(new Dictionary<string, object>(StringComparer.Ordinal));
+	private static ActionExecutionContext Context()
+	{
+		return Context(new Dictionary<string, object>(StringComparer.Ordinal));
+	}
 
 	private static ActionExecutionContext Context(Dictionary<string, object> parameters)
-		=> new() { Parameters = parameters };
+	{
+		return new ActionExecutionContext { Parameters = parameters };
+	}
 
 	private static FakeDiscordRpcClient BuildClient(
 		bool deaf = false,
@@ -416,9 +421,9 @@ internal sealed class DiscordActionsTests
 			new FakeDiscordOAuthClient(),
 			"123456",
 			"secret",
-			new DiscordTokens("stored-access", "stored-refresh", ExpiresAt: null, "rpc rpc.voice.read rpc.voice.write"),
+			new DiscordTokens("stored-access", "stored-refresh", null, "rpc rpc.voice.read rpc.voice.write"),
 			(_, _) => Task.CompletedTask,
-			events: null,
+			null,
 			TimeSpan.FromMinutes(5));
 
 		connection.Start();
@@ -437,6 +442,8 @@ internal sealed class DiscordActionsTests
 			string webhookUrl,
 			DiscordWebhookRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 	}
 }

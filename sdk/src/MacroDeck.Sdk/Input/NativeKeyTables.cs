@@ -26,7 +26,8 @@ internal static class NativeKeyTables
 
 	private static readonly Dictionary<int, KeyCode> _byScan = _positions.ToDictionary(p => (int)p.Scan, p => p.Key);
 
-	private static readonly Dictionary<int, KeyCode> _byMacKeyCode = _positions.ToDictionary(p => (int)p.MacKeyCode, p => p.Key);
+	private static readonly Dictionary<int, KeyCode> _byMacKeyCode
+		= _positions.ToDictionary(p => (int)p.MacKeyCode, p => p.Key);
 
 	private static readonly Dictionary<KeyCode, (ushort Scan, ushort MacKeyCode)> _byKey =
 		_positions.ToDictionary(p => p.Key, p => (p.Scan, p.MacKeyCode));
@@ -110,7 +111,9 @@ internal static class NativeKeyTables
 	};
 
 	public static bool IsPositional(KeyCode key)
-		=> key is >= KeyCode.Semicolon and <= KeyCode.Quote or KeyCode.IntlBackslash;
+	{
+		return key is >= KeyCode.Semicolon and <= KeyCode.Quote or KeyCode.IntlBackslash;
+	}
 
 	public static bool TryGetScanCode(KeyCode key, out ushort scan)
 	{
@@ -126,7 +129,10 @@ internal static class NativeKeyTables
 		return found;
 	}
 
-	public static bool TryFromScanCode(ushort scan, out KeyCode key) => _byScan.TryGetValue(scan, out key);
+	public static bool TryFromScanCode(ushort scan, out KeyCode key)
+	{
+		return _byScan.TryGetValue(scan, out key);
+	}
 
 	public static KeyCode FromWindows(int virtualKey, int scanCode, bool isExtended, Func<int, int> scanCodeOf)
 	{
@@ -167,7 +173,7 @@ internal static class NativeKeyTables
 			: KeyCode.None;
 	}
 
-	public static KeyCode FromMacOS(int keyCode, Func<ushort, string?> translate)
+	public static KeyCode FromMacOs(int keyCode, Func<ushort, string?> translate)
 	{
 		if (keyCode is < 0 or > 127)
 		{
@@ -179,7 +185,8 @@ internal static class NativeKeyTables
 			return fixedKey;
 		}
 
-		if (translate((ushort)keyCode) is [var character] && char.ToUpperInvariant(character) is >= 'A' and <= 'Z' and var upper)
+		if (translate((ushort)keyCode) is [var character]
+			&& char.ToUpperInvariant(character) is >= 'A' and <= 'Z' and var upper)
 		{
 			return KeyCode.A + (upper - 'A');
 		}
@@ -188,9 +195,13 @@ internal static class NativeKeyTables
 	}
 
 	public static KeyCode FromLinux(int evdevCode)
-		=> evdevCode is >= 183 and <= 194
+	{
+		return evdevCode is >= 183 and <= 194
 			? KeyCode.F13 + (evdevCode - 183)
-			: _linuxKeys.TryGetValue(evdevCode, out var key) ? key : _byScan.GetValueOrDefault(evdevCode);
+			: _linuxKeys.TryGetValue(evdevCode, out var key)
+				? key
+				: _byScan.GetValueOrDefault(evdevCode);
+	}
 
 	private static KeyCode FromWindowsPunctuation(int virtualKey, int scanCode, Func<int, int> scanCodeOf)
 	{

@@ -30,21 +30,27 @@ public class UiEventDispatchTests
 	/// <summary>Why the declining handler declines. The test owns it, so the reason reaching
 	/// <see cref="UiDispatchResult.Reason" /> is checked against what the handler said rather than against
 	/// whatever the runtime composed around it.</summary>
-	private const string _declineReason = "An API key is required.";
+	private const string DeclineReason = "An API key is required.";
 
 	private static UiSurface ConfigSurface()
-		=> new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	{
+		return new UiSurface { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive };
+	}
 
 	private static UiDispatchResult Change(UiView view, string nodeId, string value)
-		=> view.Dispatch(new UiEvent
+	{
+		return view.Dispatch(new UiEvent
 		{
 			NodeId = nodeId,
 			Name = UiConfigEvents.Change,
-			Data = UiCanonicalJson.ToElement(value),
+			Data = UiCanonicalJson.ToElement(value)
 		});
+	}
 
 	private static UiDispatchResult Submit(UiView view, string nodeId)
-		=> view.Dispatch(new UiEvent { NodeId = nodeId, Name = UiConfigEvents.Submit });
+	{
+		return view.Dispatch(new UiEvent { NodeId = nodeId, Name = UiConfigEvents.Submit });
+	}
 
 	private static UiNode? FindById(UiNode node, string id)
 	{
@@ -83,10 +89,10 @@ public class UiEventDispatchTests
 						Children =
 						[
 							new UiStringInput { Key = "apiKey", Binding = Bind.To(apiKeyState) },
-							new UiChoiceInput { Key = "mode", Binding = Bind.To(modeState) },
-						],
-					},
-				],
+							new UiChoiceInput { Key = "mode", Binding = Bind.To(modeState) }
+						]
+					}
+				]
 			});
 
 		return (view, apiKeyState);
@@ -133,7 +139,7 @@ public class UiEventDispatchTests
 		var notAnInput = view.Dispatch(new UiEvent
 		{
 			NodeId = "setup.credentials",
-			Name = UiConfigEvents.Change,
+			Name = UiConfigEvents.Change
 		});
 
 		Assert.Multiple(() =>
@@ -163,7 +169,7 @@ public class UiEventDispatchTests
 			new UiFlow
 			{
 				Key = "setup",
-				Children = [new UiStringInput { Key = "field", Events = handlers }],
+				Children = [new UiStringInput { Key = "field", Events = handlers }]
 			});
 
 		Assert.Multiple(() =>
@@ -190,8 +196,8 @@ public class UiEventDispatchTests
 				Key = "setup",
 				Children =
 				[
-					new UiStringInput { Key = "readOnly", Binding = Bind.ReadOnly(UiValue.From(() => backing.Value)) },
-				],
+					new UiStringInput { Key = "readOnly", Binding = Bind.ReadOnly(UiValue.From(() => backing.Value)) }
+				]
 			});
 
 		view.DrainPatches();
@@ -226,10 +232,10 @@ public class UiEventDispatchTests
 					{
 						Key = "faulting",
 						Binding = Bind.Custom<string>(() => "stored",
-							_ => throw new InvalidOperationException("the handler broke")),
+							_ => throw new InvalidOperationException("the handler broke"))
 					},
-					new UiStringInput { Key = "healthy", Binding = Bind.To(healthyState) },
-				],
+					new UiStringInput { Key = "healthy", Binding = Bind.To(healthyState) }
+				]
 			});
 
 		view.DrainPatches();
@@ -303,8 +309,8 @@ public class UiEventDispatchTests
 									// Written before declining, so the refusal has to carry it out with it.
 									submitAttempted.Value = true;
 
-									return UiEventOutcome.Rejected(_declineReason);
-								}),
+									return UiEventOutcome.Rejected(DeclineReason);
+								})
 						],
 						Children =
 						[
@@ -316,13 +322,13 @@ public class UiEventDispatchTests
 								Content = () => new UiValidationMessage
 								{
 									Key = "apiKeyMessage",
-									Text = _declineReason,
-									For = "apiKey",
-								},
-							},
-						],
-					},
-				],
+									Text = DeclineReason,
+									For = "apiKey"
+								}
+							}
+						]
+					}
+				]
 			});
 
 		view.DrainPatches();
@@ -337,7 +343,7 @@ public class UiEventDispatchTests
 		{
 			Assert.That(declined.Outcome, Is.EqualTo(UiDispatchOutcome.Rejected));
 			Assert.That(declined.Reason,
-				Is.EqualTo(_declineReason),
+				Is.EqualTo(DeclineReason),
 				"the handler's own reason is what the client is told, verbatim");
 			Assert.That(faults, Is.Empty, "declining an event is not a defect and must not be reported as one");
 
@@ -373,7 +379,7 @@ public class UiEventDispatchTests
 			new UiFlow
 			{
 				Key = "setup",
-				Children = [new UiNumberInput { Key = "count", Binding = Bind.To(count) }],
+				Children = [new UiNumberInput { Key = "count", Binding = Bind.To(count) }]
 			});
 
 		view.DrainPatches();
@@ -382,7 +388,7 @@ public class UiEventDispatchTests
 		{
 			NodeId = "count",
 			Name = UiConfigEvents.Change,
-			Data = UiCanonicalJson.ToElement("not-a-number"),
+			Data = UiCanonicalJson.ToElement("not-a-number")
 		});
 
 		var absent = view.Dispatch(new UiEvent { NodeId = "count", Name = UiConfigEvents.Change });
@@ -399,7 +405,7 @@ public class UiEventDispatchTests
 		{
 			NodeId = "count",
 			Name = UiConfigEvents.Change,
-			Data = JsonSerializer.SerializeToElement(7),
+			Data = JsonSerializer.SerializeToElement(7)
 		});
 
 		Assert.That(accepted.IsAccepted, Is.True, accepted.Reason);

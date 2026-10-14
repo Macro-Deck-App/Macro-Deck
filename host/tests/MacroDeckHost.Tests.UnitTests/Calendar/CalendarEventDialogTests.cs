@@ -22,17 +22,24 @@ public class CalendarEventDialogTests
 	public async Task SetUp()
 	{
 		_harness = new CalendarWidgetHarness();
-		var planning = Event("planning", Noon.AddHours(2), TimeSpan.FromHours(1), title: "Planning",
-			meetingUrl: MeetingUrl) with { Location = "Room 4" };
+		var planning = Event("planning",
+				Noon.AddHours(2),
+				TimeSpan.FromHours(1),
+				title: "Planning",
+				meetingUrl: MeetingUrl) with
+			{
+				Location = "Room 4"
+			};
 		_harness.With(planning);
 		_harness.Google.Details["planning"] = planning with
 		{
 			Description = "<p>Bring the <b>roadmap</b></p>",
 			Participants =
 			[
-				new CalendarParticipant { Name = "Alice", IsOrganizer = true, Response = CalendarResponseStatus.Accepted },
-				new CalendarParticipant { Email = "bob@example.com", Response = CalendarResponseStatus.Declined },
-			],
+				new CalendarParticipant
+					{ Name = "Alice", IsOrganizer = true, Response = CalendarResponseStatus.Accepted },
+				new CalendarParticipant { Email = "bob@example.com", Response = CalendarResponseStatus.Declined }
+			]
 		};
 		await _harness.SyncAsync();
 	}
@@ -49,10 +56,14 @@ public class CalendarEventDialogTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(texts, Does.Not.Contain("Planning"), "the dialog's own title already names the event");
-			Assert.That(texts, Does.Contain(Resolve(Strings.Details.TimedRange(date: "Thursday, January 1, 2026",
-				start: "14:00", end: "15:00"))));
-			Assert.That(texts, Does.Contain(Resolve(Strings.Details.Source(calendar: "Calendar main",
-				account: "alice@example.com", provider: "Google Calendar"))));
+			Assert.That(texts,
+				Does.Contain(Resolve(Strings.Details.TimedRange("Thursday, January 1, 2026",
+					"14:00",
+					"15:00"))));
+			Assert.That(texts,
+				Does.Contain(Resolve(Strings.Details.Source("Calendar main",
+					"alice@example.com",
+					"Google Calendar"))));
 			Assert.That(texts, Does.Contain("Room 4"));
 			Assert.That(texts, Does.Contain("Alice"));
 			Assert.That(texts, Does.Contain(Resolve(Strings.Details.Organizer())));
@@ -108,8 +119,13 @@ public class CalendarEventDialogTests
 	[Test]
 	public async Task An_all_day_event_shows_its_date_without_times()
 	{
-		var holiday = Event("holiday", new DateTimeOffset(Noon.Date, TimeSpan.Zero), TimeSpan.FromDays(1),
-			title: "Holiday") with { IsAllDay = true };
+		var holiday = Event("holiday",
+				new DateTimeOffset(Noon.Date, TimeSpan.Zero),
+				TimeSpan.FromDays(1),
+				title: "Holiday") with
+			{
+				IsAllDay = true
+			};
 		_harness.With(holiday);
 		_harness.Google.Details["holiday"] = holiday;
 		await _harness.SyncAsync();
@@ -117,7 +133,7 @@ public class CalendarEventDialogTests
 		await using var dialog = await Open("holiday");
 
 		Assert.That(Texts(dialog.BuildTree().Root),
-			Does.Contain(Resolve(Strings.Details.AllDayDate(date: "Thursday, January 1, 2026"))));
+			Does.Contain(Resolve(Strings.Details.AllDayDate("Thursday, January 1, 2026"))));
 	}
 
 	[TestCase('x')]
@@ -131,13 +147,14 @@ public class CalendarEventDialogTests
 			Description = new string(letter, 50_000),
 			Participants =
 			[
-				.. Enumerable.Range(0, 300).Select(index => new CalendarParticipant
-				{
-					Name = $"{index:000} " + new string(letter, 300),
-					Email = $"person{index}@example.com",
-					Response = CalendarResponseStatus.Tentative,
-				}),
-			],
+				.. Enumerable.Range(0, 300)
+					.Select(index => new CalendarParticipant
+					{
+						Name = $"{index:000} " + new string(letter, 300),
+						Email = $"person{index}@example.com",
+						Response = CalendarResponseStatus.Tentative
+					})
+			]
 		};
 		await _harness.SyncAsync();
 
@@ -146,7 +163,9 @@ public class CalendarEventDialogTests
 			"the details never arrived");
 		var tree = dialog.BuildTree();
 		var description = Text(Get(tree.Root, "description.text"))!;
-		var people = Flatten(tree.Root).Where(node => node.Id.EndsWith(".lines.name", StringComparison.Ordinal)).ToList();
+		var people = Flatten(tree.Root)
+			.Where(node => node.Id.EndsWith(".lines.name", StringComparison.Ordinal))
+			.ToList();
 
 		Assert.Multiple(() =>
 		{
@@ -156,14 +175,20 @@ public class CalendarEventDialogTests
 					: Is.InRange(1, ProtocolLimits.MaxCalendarDescriptionLength),
 				"a text the wire escapes is shortened further to fit");
 			Assert.That(people, Has.Count.EqualTo(ProtocolLimits.MaxCalendarParticipants));
-			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length, Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
+			Assert.That(UiCanonicalJson.SerializeToUtf8Bytes(tree).Length,
+				Is.LessThanOrEqualTo(ProtocolLimits.MaxUiTreeBytes));
 			Assert.That(Flatten(tree.Root).Count(), Is.LessThanOrEqualTo(ProtocolLimits.MaxUiNodesPerTree));
 		});
 	}
 
 	private Task<IUiSession> Open(string eventId)
-		=> _harness.OpenDialogAsync(CalendarWidgetHarness.CalendarKey(), eventId);
+	{
+		return _harness.OpenDialogAsync(CalendarWidgetHarness.CalendarKey(), eventId);
+	}
 
 	private static void PressJoin(IUiSession dialog)
-		=> dialog.Dispatch(new UiEvent { NodeId = Get(dialog.BuildTree().Root, "joinButton").Id, Name = UiComponentEvents.Press });
+	{
+		dialog.Dispatch(new UiEvent
+			{ NodeId = Get(dialog.BuildTree().Root, "joinButton").Id, Name = UiComponentEvents.Press });
+	}
 }

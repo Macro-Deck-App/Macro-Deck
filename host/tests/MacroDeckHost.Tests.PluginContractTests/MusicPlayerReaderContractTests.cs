@@ -1,7 +1,6 @@
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Callbacks;
-using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
@@ -65,7 +64,13 @@ internal sealed class MusicPlayerReaderContractTests
 				Instances =
 				[
 					.. MusicPlayerInstanceSnapshots
-						.From([new MusicPlayerInstanceDescriptor("spotify::alice", "spotify", "Spotify", "Spotify (alice)", true)])
+						.From([
+							new MusicPlayerInstanceDescriptor("spotify::alice",
+								"spotify",
+								"Spotify",
+								"Spotify (alice)",
+								true)
+						])
 						.Select(MusicPlayerWire.ToDto)
 				],
 				Revision = 1
@@ -87,7 +92,7 @@ internal sealed class MusicPlayerReaderContractTests
 	{
 		var reader = await ConnectAsync(null);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(reader.Instances, Is.Empty);
 			Assert.That(await reader.GetAlbumColorAsync("spotify::alice"), Is.Null);
@@ -128,7 +133,7 @@ internal sealed class MusicPlayerReaderContractTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			albumColor: albumColor);
@@ -139,7 +144,7 @@ internal sealed class MusicPlayerReaderContractTests
 		_link = new CallbackHostLink(PluginId, "session-music", router, new CallbackFakeEventBus());
 
 		var connection = new PluginSessionConnection(_link,
-			PluginTestSession.Create("session-music", negotiatedVersion: 1, DateTimeOffset.UnixEpoch),
+			PluginTestSession.Create("session-music", 1, DateTimeOffset.UnixEpoch),
 			PluginTestSession.Dispatcher([], state, TimeProvider.System),
 			state,
 			TimeProvider.System,
@@ -148,7 +153,7 @@ internal sealed class MusicPlayerReaderContractTests
 			stateCache);
 
 		state.ActiveConnection = connection;
-		_run = connection.RunAsync(resumeSessionId: null, instanceId: "music-fixture", CancellationToken.None);
+		_run = connection.RunAsync(null, "music-fixture", CancellationToken.None);
 		await WaitForAsync(() => state.IsReady);
 
 		_reader = new RemoteMusicPlayerApi(stateCache, hostInvoker, Serilog.Core.Logger.None);
@@ -174,6 +179,8 @@ internal sealed class MusicPlayerReaderContractTests
 	private sealed class FixedAlbumColor : IMusicPlayerAlbumColor
 	{
 		public Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(instanceId == "spotify::alice" ? "#102030" : null);
+		{
+			return Task.FromResult(instanceId == "spotify::alice" ? "#102030" : null);
+		}
 	}
 }

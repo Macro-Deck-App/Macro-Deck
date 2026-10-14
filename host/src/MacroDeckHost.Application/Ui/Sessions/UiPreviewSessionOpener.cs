@@ -92,7 +92,11 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 		return _broker.Open(providerId, surface, ownerPrincipal);
 	}
 
-	private string? ResolveProviderId(string previewId, string ownerPrincipal, out string profile, out bool servedByPlugin)
+	private string? ResolveProviderId(
+		string previewId,
+		string ownerPrincipal,
+		out string profile,
+		out bool servedByPlugin)
 	{
 		servedByPlugin = false;
 
@@ -113,7 +117,8 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 				continue;
 			}
 
-			var match = _snapshots.GetSnapshot(integration.Id).UiPreviews
+			var match = _snapshots.GetSnapshot(integration.Id)
+				.UiPreviews
 				.FirstOrDefault(preview => string.Equals(preview.Id, previewId, StringComparison.Ordinal));
 
 			if (match is not null)
@@ -136,10 +141,10 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 	{
 		foreach (var session in _registry.SessionsForProvider(providerId))
 		{
-			if (string.Equals(session.Surface.Kind, UiSurfaceKinds.DeveloperPreview, StringComparison.Ordinal) &&
-				PreviewIdOf(session.Surface) == previewId &&
-				string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal) &&
-				session.State is not (UiSessionState.Closed or UiSessionState.Invalidated))
+			if (string.Equals(session.Surface.Kind, UiSurfaceKinds.DeveloperPreview, StringComparison.Ordinal)
+				&& PreviewIdOf(session.Surface) == previewId
+				&& string.Equals(session.OwnerPrincipal, ownerPrincipal, StringComparison.Ordinal)
+				&& session.State is not (UiSessionState.Closed or UiSessionState.Invalidated))
 			{
 				_broker.CloseOwned(session.SessionId, ownerPrincipal, "The preview was refreshed.");
 			}
@@ -147,15 +152,19 @@ public sealed class UiPreviewSessionOpener : IUiPreviewSessionOpener
 	}
 
 	private static string? PreviewIdOf(UiSurface surface)
-		=> surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static Dictionary<string, JsonElement> BuildAttributes(string previewId, string profile)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiDeveloperPreviewSurfaceAttributes.PreviewId] = JsonSerializer.SerializeToElement(previewId),
 			[UiDeveloperPreviewSurfaceAttributes.Profile] = JsonSerializer.SerializeToElement(profile)
 		};
+	}
 }

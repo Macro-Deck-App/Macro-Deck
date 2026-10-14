@@ -7,7 +7,8 @@ namespace MacroDeckHost.Integrations.Companion;
 
 public sealed partial class CompanionIntegration
 {
-	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(preparation);
@@ -36,7 +37,8 @@ public sealed partial class CompanionIntegration
 			});
 	}
 
-	public Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	public Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entry);
@@ -65,13 +67,17 @@ public sealed partial class CompanionIntegration
 		return true;
 	}
 
-	public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
-		=> _context is { } context
+	{
+		return _context is { } context
 			? SynchronizeEntriesAsync(entries, context.Variables, cancellationToken)
 			: Task.CompletedTask;
+	}
 
-	public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		IVariableApi variables,
 		CancellationToken cancellationToken)
 	{
@@ -80,17 +86,22 @@ public sealed partial class CompanionIntegration
 
 		return ConfigurationIdentityPreparation.SynchronizeAsync(variables,
 			[.. entries.Where(IsUsable).Select(entry => (entry, ReadIdentity(entry)!))],
-			definitionId => CompanionVariables.TryGetConfigurationEntryId(definitionId, out var entryId) ? entryId : null,
+			definitionId
+				=> CompanionVariables.TryGetConfigurationEntryId(definitionId, out var entryId) ? entryId : null,
 			(key, entryId, title) => CompanionVariables.Declare(key, entryId, title),
 			cancellationToken);
 	}
 
 	private static bool IsUsable(StoredConfigEntry entry)
-		=> ConfigurationIdentityPreparation.HasSchema(entry,
+	{
+		return ConfigurationIdentityPreparation.HasSchema(entry,
 				CompanionConfigurationMetadata.SchemaKey,
-				CompanionConfigurationMetadata.SchemaVersion) &&
-			ReadIdentity(entry) is not null;
+				CompanionConfigurationMetadata.SchemaVersion)
+			&& ReadIdentity(entry) is not null;
+	}
 
 	private static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
-		=> ConfigurationIdentityPreparation.ReadIdentity(entry, CompanionConfigurationMetadata.VariableIdentityKey);
+	{
+		return ConfigurationIdentityPreparation.ReadIdentity(entry, CompanionConfigurationMetadata.VariableIdentityKey);
+	}
 }

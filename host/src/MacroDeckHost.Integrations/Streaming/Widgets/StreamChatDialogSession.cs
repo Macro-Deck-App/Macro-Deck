@@ -49,18 +49,25 @@ internal sealed class StreamChatDialogSession : IUiSession
 		_logger = logger;
 
 		_state = new UiState<StreamChatDialogState>(new StreamChatDialogState(StreamChatViewState.Offline, false));
-		_view = new UiView(surface, StreamChatDialogView.Build(platform, _state, new StreamChatDialogActions(Select,
-			Deselect,
-			ct => RunAsync(message => ChatModerationRequest.Delete(message.MessageId),
-				_ => AppStrings.Integrations.StreamChat.Dialog.Deleted(), ct),
-			(seconds, ct) => RunAsync(message => ChatModerationRequest.Timeout(message.AuthorId, seconds),
-				name => AppStrings.Integrations.StreamChat.Dialog.TimedOut(name: name), ct),
-			AskBan,
-			ct => RunAsync(message => ChatModerationRequest.Ban(message.AuthorId),
-				name => AppStrings.Integrations.StreamChat.Dialog.Banned(name: name), ct),
-			CancelBan,
-			ct => RunAsync(message => ChatModerationRequest.Unban(message.AuthorId),
-				name => AppStrings.Integrations.StreamChat.Dialog.Unbanned(name: name), ct))));
+		_view = new UiView(surface,
+			StreamChatDialogView.Build(platform,
+				_state,
+				new StreamChatDialogActions(Select,
+					Deselect,
+					ct => RunAsync(message => ChatModerationRequest.Delete(message.MessageId),
+						_ => AppStrings.Integrations.StreamChat.Dialog.Deleted(),
+						ct),
+					(seconds, ct) => RunAsync(message => ChatModerationRequest.Timeout(message.AuthorId, seconds),
+						name => AppStrings.Integrations.StreamChat.Dialog.TimedOut(name),
+						ct),
+					AskBan,
+					ct => RunAsync(message => ChatModerationRequest.Ban(message.AuthorId),
+						name => AppStrings.Integrations.StreamChat.Dialog.Banned(name),
+						ct),
+					CancelBan,
+					ct => RunAsync(message => ChatModerationRequest.Unban(message.AuthorId),
+						name => AppStrings.Integrations.StreamChat.Dialog.Unbanned(name),
+						ct))));
 
 		_feed.Changed += OnChanged;
 		_view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
@@ -78,9 +85,15 @@ internal sealed class StreamChatDialogSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
 	// Held across the view's dispatch so handlers and chat updates take this lock and the view's in one order.
 	public void Dispatch(UiEvent uiEvent)
@@ -123,12 +136,13 @@ internal sealed class StreamChatDialogSession : IUiSession
 			}
 
 			var snapshot = _accountId is null ? ChatSnapshot.None : _feed.Snapshot(_accountId);
-			var ownChannel = snapshot.Account is { } account &&
-				string.Equals(account.AccountId, _accountId, StringComparison.Ordinal);
+			var ownChannel = snapshot.Account is { } account
+				&& string.Equals(account.AccountId, _accountId, StringComparison.Ordinal);
 			var chat = ownChannel ? _lines.Build(snapshot) : StreamChatViewState.Offline;
 
 			_messages = ownChannel
-				? snapshot.Messages.ToDictionary(message => ChatStyle.MessageKey(message.MessageId), StringComparer.Ordinal)
+				? snapshot.Messages.ToDictionary(message => ChatStyle.MessageKey(message.MessageId),
+					StringComparer.Ordinal)
 				: new Dictionary<string, ChatMessage>(StringComparer.Ordinal);
 
 			var canModerate = ownChannel && snapshot.IsConnected && _allowed;
@@ -137,7 +151,7 @@ internal sealed class StreamChatDialogSession : IUiSession
 			{
 				Chat = chat,
 				CanModerate = canModerate,
-				Selection = canModerate ? state.Selection : null,
+				Selection = canModerate ? state.Selection : null
 			});
 		}
 	}
@@ -146,8 +160,9 @@ internal sealed class StreamChatDialogSession : IUiSession
 	{
 		lock (_sync)
 		{
-			if (!_messages.TryGetValue(key, out var message) || !_state.Value.CanModerate ||
-				_state.Value.Step == StreamChatDialogStep.Busy)
+			if (!_messages.TryGetValue(key, out var message)
+				|| !_state.Value.CanModerate
+				|| _state.Value.Step == StreamChatDialogStep.Busy)
 			{
 				return;
 			}
@@ -158,7 +173,8 @@ internal sealed class StreamChatDialogSession : IUiSession
 			{
 				note = StreamChatSelectionNote.OwnMessage;
 			}
-			else if (message.SourceChannelId is { } source && !string.Equals(source, _accountId, StringComparison.Ordinal))
+			else if (message.SourceChannelId is { } source
+				&& !string.Equals(source, _accountId, StringComparison.Ordinal))
 			{
 				note = StreamChatSelectionNote.SharedChat;
 			}
@@ -174,7 +190,7 @@ internal sealed class StreamChatDialogSession : IUiSession
 					note,
 					message.SourceChannelName ?? message.SourceChannelId),
 				Step = StreamChatDialogStep.Actions,
-				Result = null,
+				Result = null
 			});
 		}
 
@@ -204,7 +220,8 @@ internal sealed class StreamChatDialogSession : IUiSession
 		_ = ApplyLaterAsync(check, apply);
 	}
 
-	private async Task ApplyLaterAsync(Task<StreamChatWidgetPermission> check,
+	private async Task ApplyLaterAsync(
+		Task<StreamChatWidgetPermission> check,
 		Action<StreamChatWidgetPermission> apply)
 	{
 		StreamChatWidgetPermission permission;
@@ -222,22 +239,28 @@ internal sealed class StreamChatDialogSession : IUiSession
 	}
 
 	private void Deselect()
-		=> UpdateLocked(state => state with
+	{
+		UpdateLocked(state => state with
 		{
 			Selection = null,
 			Step = state.Step == StreamChatDialogStep.Busy ? StreamChatDialogStep.Busy : StreamChatDialogStep.Actions,
-			Result = null,
+			Result = null
 		});
+	}
 
 	private void AskBan()
-		=> UpdateLocked(state => state.Step == StreamChatDialogStep.Actions
+	{
+		UpdateLocked(state => state.Step == StreamChatDialogStep.Actions
 			? state with { Step = StreamChatDialogStep.ConfirmBan, Result = null }
 			: state);
+	}
 
 	private void CancelBan()
-		=> UpdateLocked(state => state.Step == StreamChatDialogStep.ConfirmBan
+	{
+		UpdateLocked(state => state.Step == StreamChatDialogStep.ConfirmBan
 			? state with { Step = StreamChatDialogStep.Actions }
 			: state);
+	}
 
 	private async Task RunAsync(
 		Func<StreamChatSelection, ChatModerationRequest> request,
@@ -249,8 +272,9 @@ internal sealed class StreamChatDialogSession : IUiSession
 
 		lock (_sync)
 		{
-			if (_disposed || _state.Value is not { Selection: { Note: StreamChatSelectionNote.None } current } ||
-				_state.Value.Step == StreamChatDialogStep.Busy)
+			if (_disposed
+				|| _state.Value is not { Selection: { Note: StreamChatSelectionNote.None } current }
+				|| _state.Value.Step == StreamChatDialogStep.Busy)
 			{
 				return;
 			}
@@ -272,8 +296,8 @@ internal sealed class StreamChatDialogSession : IUiSession
 			{
 				permission = await check.ConfigureAwait(false);
 			}
-			catch (Exception exception) when (exception is not OperationCanceledException ||
-				!cancellationToken.IsCancellationRequested)
+			catch (Exception exception) when (exception is not OperationCanceledException
+				|| !cancellationToken.IsCancellationRequested)
 			{
 				_logger.Warning(exception, "{Platform} chat moderation could not be checked", _platform.OwnerId);
 				permission = StreamChatWidgetPermission.TurnedOff;
@@ -298,8 +322,8 @@ internal sealed class StreamChatDialogSession : IUiSession
 					.ConfigureAwait(false);
 			}
 		}
-		catch (Exception exception) when (exception is not OperationCanceledException ||
-			!cancellationToken.IsCancellationRequested)
+		catch (Exception exception) when (exception is not OperationCanceledException
+			|| !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Warning(exception, "{Platform} chat moderation from the chat dialog failed", _platform.OwnerId);
 			result = ChatModerationResult.Failed;
@@ -327,29 +351,33 @@ internal sealed class StreamChatDialogSession : IUiSession
 		{
 			Step = StreamChatDialogStep.Actions,
 			Result = refusal,
-			CanModerate = state.CanModerate && _allowed,
+			CanModerate = state.CanModerate && _allowed
 		});
 		return true;
 	}
 
 	private LocalizedString? Refusal(StreamChatWidgetPermission permission)
-		=> permission switch
+	{
+		return permission switch
 		{
 			StreamChatWidgetPermission.Allowed => null,
 			StreamChatWidgetPermission.AccountChanged => _platform.Chat.AccountChanged(),
-			_ => AppStrings.Integrations.StreamChat.Dialog.ModerationUnavailable(),
+			_ => AppStrings.Integrations.StreamChat.Dialog.ModerationUnavailable()
 		};
+	}
 
 	private LocalizedString FailureText(ChatModerationResult result)
-		=> result switch
+	{
+		return result switch
 		{
 			ChatModerationResult.AccountUnavailable => _platform.Chat.AccountUnavailable(),
 			ChatModerationResult.MissingScope => _platform.Chat.MissingScope(),
 			ChatModerationResult.NotPermitted => _platform.Chat.NotPermitted(),
 			ChatModerationResult.Refused => _platform.Chat.Refused(),
 			ChatModerationResult.Unsupported when _platform.Chat.Unsupported is { } unsupported => unsupported(),
-			_ => AppStrings.Integrations.StreamChat.Dialog.Failed(),
+			_ => AppStrings.Integrations.StreamChat.Dialog.Failed()
 		};
+	}
 
 	private void UpdateLocked(Func<StreamChatDialogState, StreamChatDialogState> change)
 	{

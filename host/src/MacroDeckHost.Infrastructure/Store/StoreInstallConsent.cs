@@ -10,7 +10,13 @@ public sealed class StoreInstallConsent
 {
 	private readonly ConcurrentDictionary<Guid, byte> _consented = new();
 
-	public void Record(Guid operationId) => _consented[operationId] = 0;
+	public void Record(Guid operationId)
+	{
+		_consented[operationId] = 0;
+	}
 
-	public bool Consume(Guid operationId) => _consented.TryRemove(operationId, out _);
+	public bool Consume(Guid operationId)
+	{
+		return _consented.TryRemove(operationId, out _);
+	}
 }

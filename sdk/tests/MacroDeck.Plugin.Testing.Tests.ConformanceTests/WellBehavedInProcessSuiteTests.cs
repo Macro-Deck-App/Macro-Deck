@@ -13,5 +13,8 @@ namespace MacroDeck.Plugin.Testing.Tests.ConformanceTests;
 [TestFixture]
 internal sealed class WellBehavedInProcessSuiteTests : ConformanceFixture
 {
-	protected override Task<ConformanceReport> GetReportAsync() => SharedInProcessConformanceRun.GetReportAsync();
+	protected override Task<ConformanceReport> GetReportAsync()
+	{
+		return SharedInProcessConformanceRun.GetReportAsync();
+	}
 }

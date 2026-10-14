@@ -26,5 +26,8 @@ internal static class CapabilityKindVocabulary
 		"companion-device-entries"
 	];
 
-	public static bool IsKnown(string? kind) => kind is not null && All.Contains(kind);
+	public static bool IsKnown(string? kind)
+	{
+		return kind is not null && All.Contains(kind);
+	}
 }

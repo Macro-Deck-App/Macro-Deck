@@ -35,7 +35,7 @@ public class DatabaseConcurrencyTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -90,5 +90,8 @@ public class DatabaseConcurrencyTests
 		Assert.That(command.ExecuteScalar(), Is.EqualTo("wal"));
 	}
 
-	private static DeviceEntity NewDevice(string name) => new() { SecretHash = string.Empty, Name = name };
+	private static DeviceEntity NewDevice(string name)
+	{
+		return new DeviceEntity { SecretHash = string.Empty, Name = name };
+	}
 }

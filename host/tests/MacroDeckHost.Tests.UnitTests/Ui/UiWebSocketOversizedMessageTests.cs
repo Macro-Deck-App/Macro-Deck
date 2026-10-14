@@ -23,7 +23,7 @@ public sealed class UiWebSocketOversizedMessageTests
 		var socket = new RecordingWebSocket();
 		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
 		using var cancellation = new CancellationTokenSource();
-		channel.Writer.TryWrite(Oversized("response", correlationId: "request-1"));
+		channel.Writer.TryWrite(Oversized("response", "request-1"));
 		channel.Writer.TryComplete();
 
 		await UiWebSocketEndpoint.WriteAsync(socket, channel.Reader, cancellation, TimeProvider.System);
@@ -48,7 +48,7 @@ public sealed class UiWebSocketOversizedMessageTests
 		var socket = new RecordingWebSocket();
 		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
 		using var cancellation = new CancellationTokenSource();
-		channel.Writer.TryWrite(Oversized("response", correlationId: "request-1"));
+		channel.Writer.TryWrite(Oversized("response", "request-1"));
 		channel.Writer.TryWrite(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
 			"message",
 			"AfterTheFailure",
@@ -77,7 +77,7 @@ public sealed class UiWebSocketOversizedMessageTests
 		var socket = new RecordingWebSocket();
 		var channel = Channel.CreateUnbounded<UiWebSocketEnvelope>();
 		using var cancellation = new CancellationTokenSource();
-		channel.Writer.TryWrite(Oversized("message", correlationId: null));
+		channel.Writer.TryWrite(Oversized("message", null));
 		channel.Writer.TryComplete();
 
 		await UiWebSocketEndpoint.WriteAsync(socket, channel.Reader, cancellation, TimeProvider.System);
@@ -147,16 +147,20 @@ public sealed class UiWebSocketOversizedMessageTests
 	}
 
 	private static UiWebSocketEnvelope Oversized(string kind, string? correlationId)
-		=> new(UiWebSocketProtocol.Version,
+	{
+		return new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
 			kind,
 			"Big",
 			null,
 			correlationId,
 			new string('x', UiWebSocketProtocol.MaxMessageBytes + 1),
 			null);
+	}
 
 	private static UiWebSocketEnvelope Read(byte[] bytes)
-		=> JsonSerializer.Deserialize<UiWebSocketEnvelope>(bytes, UiWebSocketProtocol.Json)!;
+	{
+		return JsonSerializer.Deserialize<UiWebSocketEnvelope>(bytes, UiWebSocketProtocol.Json)!;
+	}
 
 	private sealed class RecordingWebSocket : WebSocket
 	{
@@ -184,12 +188,16 @@ public sealed class UiWebSocketOversizedMessageTests
 			_state = WebSocketState.Aborted;
 		}
 
-		public override Task CloseAsync(WebSocketCloseStatus closeStatus,
+		public override Task CloseAsync(
+			WebSocketCloseStatus closeStatus,
 			string? statusDescription,
 			CancellationToken cancellationToken)
-			=> CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
+		{
+			return CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
+		}
 
-		public override Task CloseOutputAsync(WebSocketCloseStatus closeStatus,
+		public override Task CloseOutputAsync(
+			WebSocketCloseStatus closeStatus,
 			string? statusDescription,
 			CancellationToken cancellationToken)
 		{
@@ -203,11 +211,15 @@ public sealed class UiWebSocketOversizedMessageTests
 		{
 		}
 
-		public override Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer,
+		public override Task<WebSocketReceiveResult> ReceiveAsync(
+			ArraySegment<byte> buffer,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public override Task SendAsync(ArraySegment<byte> buffer,
+		public override Task SendAsync(
+			ArraySegment<byte> buffer,
 			WebSocketMessageType messageType,
 			bool endOfMessage,
 			CancellationToken cancellationToken)

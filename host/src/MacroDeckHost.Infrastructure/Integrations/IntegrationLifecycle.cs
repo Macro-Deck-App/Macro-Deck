@@ -164,10 +164,13 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 	}
 
 	private Task StopBatteryProviderAsync(IIntegration integration, CancellationToken cancellationToken)
-		=> _batteryProviders?.StopAsync(integration, cancellationToken) ?? Task.CompletedTask;
+	{
+		return _batteryProviders?.StopAsync(integration, cancellationToken) ?? Task.CompletedTask;
+	}
 
 	private Task<bool> PushConfigChangedAsync(string integrationId, CancellationToken cancellationToken)
-		=> _pluginSessionRegistry.SendToPlugin(integrationId,
+	{
+		return _pluginSessionRegistry.SendToPlugin(integrationId,
 			new ProtocolEnvelope
 			{
 				Type = MessageTypes.HostState,
@@ -176,4 +179,5 @@ public class IntegrationLifecycle : IIntegrationLifecycle
 					PluginProtocolJson.Options)
 			},
 			cancellationToken);
+	}
 }

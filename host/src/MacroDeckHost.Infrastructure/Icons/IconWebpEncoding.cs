@@ -11,7 +11,8 @@ internal static class IconWebpEncoding
 	// Animations stay lossy at Level2: lossless took tens of seconds per icon and produced resized
 	// renditions larger than the master. The alpha plane stays exact, so transparent frames still clear.
 	public static WebpEncoder For(bool isAnimated)
-		=> isAnimated
+	{
+		return isAnimated
 			? new WebpEncoder
 			{
 				FileFormat = WebpFileFormatType.Lossy,
@@ -19,8 +20,10 @@ internal static class IconWebpEncoding
 				Method = WebpEncodingMethod.Level2
 			}
 			: new WebpEncoder { FileFormat = WebpFileFormatType.Lossy, Quality = StaticQuality };
+	}
 
-	public static async Task<byte[]> EncodeToBytes(Image image,
+	public static async Task<byte[]> EncodeToBytes(
+		Image image,
 		WebpEncoder encoder,
 		CancellationToken cancellationToken)
 	{

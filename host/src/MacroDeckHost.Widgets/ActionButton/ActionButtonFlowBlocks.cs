@@ -82,8 +82,8 @@ internal static class ActionButtonFlowBlocks
 			{
 				foreach (var branch in branches.EnumerateArray())
 				{
-					if (branch.ValueKind == JsonValueKind.Object &&
-						branch.TryGetProperty("children", out var branchChildren))
+					if (branch.ValueKind == JsonValueKind.Object
+						&& branch.TryGetProperty("children", out var branchChildren))
 					{
 						CollectBlocks(branchChildren, result);
 					}
@@ -121,18 +121,23 @@ internal static class ActionButtonFlowBlocks
 		return result;
 	}
 
-	private static object? ConvertValue(JsonElement value) => value.ValueKind switch
+	private static object? ConvertValue(JsonElement value)
 	{
-		JsonValueKind.String => value.GetString(),
-		JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
-		JsonValueKind.True => true,
-		JsonValueKind.False => false,
-		JsonValueKind.Object or JsonValueKind.Array => value.Clone(),
-		_ => null,
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.String => value.GetString(),
+			JsonValueKind.Number => value.TryGetInt64(out var integer) ? integer : value.GetDouble(),
+			JsonValueKind.True => true,
+			JsonValueKind.False => false,
+			JsonValueKind.Object or JsonValueKind.Array => value.Clone(),
+			_ => null
+		};
+	}
 
 	private static string? ReadString(JsonElement obj, string name)
-		=> obj.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return obj.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

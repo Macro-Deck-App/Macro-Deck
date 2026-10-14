@@ -20,7 +20,9 @@ public class NetworkRestartNotifierTests
 		private readonly Dictionary<string, AppPreferenceEntity> _store = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(_store.GetValueOrDefault(key));
+		{
+			return Task.FromResult(_store.GetValueOrDefault(key));
+		}
 
 		public Task SetValue(string key, string value)
 		{
@@ -44,7 +46,10 @@ public class NetworkRestartNotifierTests
 
 		public bool RestartRequested => false;
 
-		public Result<RestartError> Request(string reason) => Result.Ok<RestartError>();
+		public Result<RestartError> Request(string reason)
+		{
+			return Result.Ok<RestartError>();
+		}
 	}
 
 	private sealed record Fixture(
@@ -52,7 +57,8 @@ public class NetworkRestartNotifierTests
 		UserNotificationStore Notifications,
 		NetworkRestartNotifier Notifier);
 
-	private static Fixture CreateFixture(bool restartSupported = true,
+	private static Fixture CreateFixture(
+		bool restartSupported = true,
 		bool overriddenByEnvironment = false,
 		bool publicListenerAvailable = true)
 	{
@@ -129,7 +135,7 @@ public class NetworkRestartNotifierTests
 	[Test]
 	public async Task The_button_is_left_off_where_restarting_is_unsupported()
 	{
-		var fixture = CreateFixture(restartSupported: false);
+		var fixture = CreateFixture(false);
 		await fixture.Preferences.SetNetwork(9100);
 
 		await fixture.Notifier.Sync();

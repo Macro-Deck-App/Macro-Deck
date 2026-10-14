@@ -23,7 +23,10 @@ internal sealed class ButtonDownActionDefinition : IActionDefinition
 		.. MouseParameters.OptionalPosition
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

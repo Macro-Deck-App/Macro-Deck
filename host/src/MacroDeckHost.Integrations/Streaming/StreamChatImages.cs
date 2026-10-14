@@ -24,13 +24,20 @@ public sealed record StreamChatImage(StreamChatImageKind Kind, string Id, string
 			? "emote-" + Id
 			: (Kind == StreamChatImageKind.Emote ? "emote-" : "badge-") + ShortHash(Id);
 
-	public static StreamChatImage Emote(string emoteId) => new(StreamChatImageKind.Emote, emoteId);
+	public static StreamChatImage Emote(string emoteId)
+	{
+		return new StreamChatImage(StreamChatImageKind.Emote, emoteId);
+	}
 
 	public static StreamChatImage Badge(string setId, string id, string url)
-		=> new(StreamChatImageKind.Badge, setId + "/" + id, url);
+	{
+		return new StreamChatImage(StreamChatImageKind.Badge, setId + "/" + id, url);
+	}
 
 	public static string ShortHash(string value)
-		=> Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)))[..16];
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)))[..16];
+	}
 }
 
 public interface IStreamChatImages

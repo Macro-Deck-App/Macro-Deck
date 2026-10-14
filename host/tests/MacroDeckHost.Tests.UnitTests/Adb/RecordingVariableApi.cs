@@ -12,10 +12,14 @@ internal sealed class RecordingVariableApi : IVariableApi
 	public IReadOnlyCollection<string> Names => _byName.Keys;
 
 	public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
-		=> Task.FromResult<IReadOnlyList<VariableHandle>>(_byId.Values.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<VariableHandle>>(_byId.Values.ToList());
+	}
 
 	public Task<VariableHandle?> GetByNameAsync(string name)
-		=> Task.FromResult(_byName.TryGetValue(name, out var id) ? _byId[id] : null);
+	{
+		return Task.FromResult(_byName.TryGetValue(name, out var id) ? _byId[id] : null);
+	}
 
 	public Task<VariableHandle> CreateAsync(
 		string name,

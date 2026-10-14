@@ -224,7 +224,8 @@ public class HistoryGraphViewStateResolverTests
 				Is.EqualTo(3),
 				"100 needs three digits, so 99 must not sit where 100 would not fit");
 			Assert.That(Resolver(new { valueVariable = Metric, maxValue = 100 }, Registry("7.25", 2))
-					.Resolve(_nothing).Digits,
+					.Resolve(_nothing)
+					.Digits,
 				Is.EqualTo(3 + 2 + 0.5),
 				"a separator takes room too, but materially less than a digit");
 		});
@@ -264,13 +265,15 @@ public class HistoryGraphViewStateResolverTests
 			Assert.That(Resolver(new
 							{ valueVariable = Metric, subtitle = "Current value: {{ vars.system_cpu_usage_percent }}" },
 						variables)
-					.Resolve(_nothing).Subtitle,
+					.Resolve(_nothing)
+					.Subtitle,
 				Is.EqualTo("Current value: 73"),
 				"a numeric variable is what the issue asks the subtitle to be able to show");
 			Assert.That(Resolver(new
 							{ valueVariable = Metric, subtitle = "{{ vars.room }} / {{ vars.system_cpu_name }}" },
 						variables)
-					.Resolve(_nothing).Subtitle,
+					.Resolve(_nothing)
+					.Subtitle,
 				Is.EqualTo("Living Room / Apple M3 Max"));
 			Assert.That(Resolver(new { valueVariable = Metric, subtitle = "Plain words" }).Resolve(_nothing).Subtitle,
 				Is.EqualTo("Plain words"));
@@ -280,10 +283,11 @@ public class HistoryGraphViewStateResolverTests
 	[Test]
 	public void A_numeric_subtitle_variable_keeps_the_decimal_places_it_declares()
 	{
-		var variables = Registry().WithVariable("load", "7.25", VariableType.Numeric, decimalPlaces: 1);
+		var variables = Registry().WithVariable("load", "7.25", VariableType.Numeric, 1);
 
 		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "{{ vars.load }}" }, variables)
-				.Resolve(_nothing).Subtitle,
+				.Resolve(_nothing)
+				.Subtitle,
 			Is.EqualTo("7.3"));
 	}
 
@@ -316,16 +320,19 @@ public class HistoryGraphViewStateResolverTests
 			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption }).Resolve(_nothing).Subtitle,
 				Is.EqualTo("Apple M3 Max"));
 			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "" })
-					.Resolve(_nothing).Subtitle,
+					.Resolve(_nothing)
+					.Subtitle,
 				Is.Empty,
 				"a subtitle the user cleared stays cleared, rather than the older key resurrecting it");
 			Assert.That(Resolver(new
 						{ valueVariable = Metric, subtitleVariable = "not a name }} {{", subtitle = (string?)null })
-					.Resolve(_nothing).Subtitle,
+					.Resolve(_nothing)
+					.Subtitle,
 				Is.Empty,
 				"a legacy key holding something that is not a variable name is not interpolated");
 			Assert.That(Resolver(new { valueVariable = Metric, subtitleVariable = Caption, subtitle = "Mine" })
-					.Resolve(_nothing).Subtitle,
+					.Resolve(_nothing)
+					.Subtitle,
 				Is.EqualTo("Mine"),
 				"the freetext field is the one the editor writes, so it decides over the key it replaced");
 		});
@@ -339,7 +346,8 @@ public class HistoryGraphViewStateResolverTests
 		variables.SetAvailable(caption.Id, false);
 
 		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "on {{ vars.system_cpu_name }}" }, variables)
-				.Resolve(_nothing).Subtitle,
+				.Resolve(_nothing)
+				.Subtitle,
 			Is.EqualTo($"on {VariableTemplateRenderer.UnavailablePlaceholder}"),
 			"a provider that stopped reporting is worth showing, the way every other template shows it");
 	}
@@ -350,7 +358,8 @@ public class HistoryGraphViewStateResolverTests
 		var variables = Registry(caption: null);
 
 		Assert.That(Resolver(new { valueVariable = Metric, subtitle = "on {{ vars.system_cpu_name }}" }, variables)
-				.Resolve(_nothing).Subtitle,
+				.Resolve(_nothing)
+				.Subtitle,
 			Is.EqualTo("on "),
 			"a name the registry does not know renders as nothing, the way every other template reads it");
 	}
@@ -370,7 +379,8 @@ public class HistoryGraphViewStateResolverTests
 	{
 		Assert.That(Resolver(new
 					{ valueVariable = Metric, subtitle = "{{ vars.system_cpu_name }}", showSubtitle = false })
-				.Resolve(_nothing).Subtitle,
+				.Resolve(_nothing)
+				.Subtitle,
 			Is.Empty);
 	}
 
@@ -406,7 +416,7 @@ public class HistoryGraphViewStateResolverTests
 	[TestCase("widget-a", "5")]
 	public void The_value_reads_the_same_variable_its_history_window_samples(string? windowScope, string expected)
 	{
-		var variables = Registry(value: "73")
+		var variables = Registry("73")
 			.WithVariable(Metric, "5", VariableType.Numeric, scope: VariableScope.Widget, scopeRefId: "widget-a");
 		var resolver = new HistoryGraphViewStateResolver(Config(new { valueVariable = Metric }),
 			variables,
@@ -436,7 +446,7 @@ public class HistoryGraphViewStateResolverTests
 	[Test]
 	public void The_graphs_own_widget_variable_wins_over_a_global_of_the_same_name_and_no_other_widget_is_read()
 	{
-		var variables = Registry(value: "73")
+		var variables = Registry("73")
 			.WithVariable(Metric, "5", VariableType.Numeric, scope: VariableScope.Widget, scopeRefId: "widget-a");
 
 		Assert.Multiple(() =>

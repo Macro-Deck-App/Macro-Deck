@@ -25,8 +25,9 @@ public sealed class ProfilesOptionsSource : IHostOptionsSource
 	{
 		var options = _profiles.GetProfiles()
 			.Select(profile => new ActionParameterOption { Value = profile.Id, Label = profile.Name })
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 
@@ -54,8 +55,9 @@ public sealed class FoldersOptionsSource : IHostOptionsSource
 	{
 		var options = _navigator.GetFolders()
 			.Select(folder => new ActionParameterOption { Value = folder.Id, Label = folder.Label })
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.ToList();
 
 		return Task.FromResult(new DynamicOptionsResult
@@ -86,8 +88,9 @@ public sealed class DevicesOptionsSource : IHostOptionsSource
 
 		var options = devices
 			.Select(device => new ActionParameterOption { Value = device.Id.ToString(), Label = device.Name })
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 
@@ -130,8 +133,9 @@ public sealed class IntegrationsOptionsSource : IHostOptionsSource
 				Value = integration.Id,
 				Label = _localization.Resolve(integration.Name, culture)
 			})
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 

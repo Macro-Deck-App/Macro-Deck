@@ -10,7 +10,6 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
-using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Notifications;
@@ -47,10 +46,12 @@ public class PluginCompanionDeviceAccessTests
 		await declaring.Policy.SetAllowPluginsAsync(true);
 		await adbOnly.Policy.SetAllowPluginsAsync(true);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That(await declaring.Policy.EvaluateAsync(PluginId), Is.EqualTo(PluginCompanionDeviceAccess.Available));
-			Assert.That(await adbOnly.Policy.EvaluateAsync(PluginId), Is.EqualTo(PluginCompanionDeviceAccess.NotAllowed));
+			Assert.That(await declaring.Policy.EvaluateAsync(PluginId),
+				Is.EqualTo(PluginCompanionDeviceAccess.Available));
+			Assert.That(await adbOnly.Policy.EvaluateAsync(PluginId),
+				Is.EqualTo(PluginCompanionDeviceAccess.NotAllowed));
 		});
 	}
 
@@ -76,7 +77,8 @@ public class PluginCompanionDeviceAccessTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(world.Preferences.Values[PluginCompanionDeviceAccessPolicy.AllowPluginsKey], Is.EqualTo("true"));
+			Assert.That(world.Preferences.Values[PluginCompanionDeviceAccessPolicy.AllowPluginsKey],
+				Is.EqualTo("true"));
 			Assert.That(changes, Is.EqualTo(1));
 		});
 	}
@@ -110,7 +112,8 @@ public class PluginCompanionDeviceAccessTests
 	[TestCase(true, false, false)]
 	[TestCase(false, true, false)]
 	[TestCase(false, false, true)]
-	public async Task Nothing_is_asked_when_there_is_nothing_to_decide(bool allowPlugins,
+	public async Task Nothing_is_asked_when_there_is_nothing_to_decide(
+		bool allowPlugins,
 		bool previouslyDeclared,
 		bool declaresNothing)
 	{
@@ -189,7 +192,8 @@ public class PluginCompanionDeviceAccessTests
 			Payload(HostOperations.CompanionDevices.Request,
 				new CompanionDeviceCommandArguments
 				{
-					DeviceId = _phone.ToString("D"), Command = CompanionDeviceCommands.SetBrightness, BrightnessPercent = 30
+					DeviceId = _phone.ToString("D"), Command = CompanionDeviceCommands.SetBrightness,
+					BrightnessPercent = 30
 				}),
 			CancellationToken.None);
 
@@ -197,12 +201,14 @@ public class PluginCompanionDeviceAccessTests
 		{
 			Assert.That(admitted, Is.Null);
 			Assert.That(Read<CompanionDeviceSendResultDto>(sent)?.Sent, Is.True);
-			Assert.That(Read<CompanionDeviceRequestResultDto>(requested)?.Outcome, Is.EqualTo(CompanionDeviceOutcomes.Unconfirmed));
-			Assert.That(world.Devices.Calls, Is.EqualTo(new[]
-			{
-				("send", _phone, (CompanionDeviceCommand?)CompanionDeviceCommand.Vibrate),
-				("request", _phone, (CompanionDeviceCommand?)CompanionDeviceCommand.SetBrightness(30))
-			}));
+			Assert.That(Read<CompanionDeviceRequestResultDto>(requested)?.Outcome,
+				Is.EqualTo(CompanionDeviceOutcomes.Unconfirmed));
+			Assert.That(world.Devices.Calls,
+				Is.EqualTo(new[]
+				{
+					("send", _phone, (CompanionDeviceCommand?)CompanionDeviceCommand.Vibrate),
+					("request", _phone, (CompanionDeviceCommand?)CompanionDeviceCommand.SetBrightness(30))
+				}));
 		});
 	}
 
@@ -211,10 +217,11 @@ public class PluginCompanionDeviceAccessTests
 	{
 		var world = new World();
 
-		var result = await world.Callbacks().ExecuteAsync(PluginId,
-			Payload(HostOperations.CompanionDevices.Send,
-				new CompanionDeviceCommandArguments { DeviceId = _phone.ToString("D"), Command = "cancelRequest" }),
-			CancellationToken.None);
+		var result = await world.Callbacks()
+			.ExecuteAsync(PluginId,
+				Payload(HostOperations.CompanionDevices.Send,
+					new CompanionDeviceCommandArguments { DeviceId = _phone.ToString("D"), Command = "cancelRequest" }),
+				CancellationToken.None);
 
 		Assert.That(result.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
 	}
@@ -223,8 +230,13 @@ public class PluginCompanionDeviceAccessTests
 	public async Task A_screenshot_is_announced_in_the_reply_and_sent_over_the_host_asset_channel()
 	{
 		byte[] png = [137, 80, 78, 71];
-		var world = new World();
-		world.Devices.ScreenshotResult = CompanionScreenshotResult.Of(png);
+		var world = new World
+		{
+			Devices =
+			{
+				ScreenshotResult = CompanionScreenshotResult.Of(png)
+			}
+		};
 
 		var result = await world.Callbacks().ExecuteAsync(PluginId, Screenshot("full"), CancellationToken.None);
 		var announced = Read<CompanionScreenshotResultDto>(result);
@@ -243,37 +255,53 @@ public class PluginCompanionDeviceAccessTests
 	[Test]
 	public async Task A_screenshot_the_user_declined_on_the_device_reports_consent_denied()
 	{
-		var world = new World();
-		world.Devices.ScreenshotResult = CompanionScreenshotResult.Failed(CompanionDeviceFailure.ConsentDenied);
+		var world = new World
+		{
+			Devices =
+			{
+				ScreenshotResult = CompanionScreenshotResult.Failed(CompanionDeviceFailure.ConsentDenied)
+			}
+		};
 
 		var result = await world.Callbacks().ExecuteAsync(PluginId, Screenshot("full"), CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(Read<CompanionScreenshotResultDto>(result)?.Failure, Is.EqualTo(CompanionDeviceFailures.ConsentDenied));
+			Assert.That(Read<CompanionScreenshotResultDto>(result)?.Failure,
+				Is.EqualTo(CompanionDeviceFailures.ConsentDenied));
 			Assert.That(world.Assets.Sent.Task.IsCompleted, Is.False);
 		});
 	}
 
 	private static HostInvokePayload Send()
-		=> Payload(HostOperations.CompanionDevices.Send,
-			new CompanionDeviceCommandArguments { DeviceId = _phone.ToString("D"), Command = CompanionDeviceCommands.Vibrate });
+	{
+		return Payload(HostOperations.CompanionDevices.Send,
+			new CompanionDeviceCommandArguments
+				{ DeviceId = _phone.ToString("D"), Command = CompanionDeviceCommands.Vibrate });
+	}
 
 	private static HostInvokePayload Screenshot(string mode)
-		=> Payload(HostOperations.CompanionDevices.Screenshot,
+	{
+		return Payload(HostOperations.CompanionDevices.Screenshot,
 			new CompanionScreenshotArguments { DeviceId = _phone.ToString("D"), Mode = mode });
+	}
 
 	private static HostInvokePayload Payload(string operation, object arguments)
-		=> new()
+	{
+		return new HostInvokePayload
 		{
 			Api = HostApis.CompanionDevices,
 			Operation = operation,
 			Arguments = JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 		};
+	}
 
-	private static T? Read<T>(HostCallbackResult result) => result.Data is { } data
-		? data.Deserialize<T>(PluginProtocolJson.Options)
-		: default;
+	private static T? Read<T>(HostCallbackResult result)
+	{
+		return result.Data is { } data
+			? data.Deserialize<T>(PluginProtocolJson.Options)
+			: default;
+	}
 
 	private sealed class World
 	{
@@ -311,7 +339,10 @@ public class PluginCompanionDeviceAccessTests
 
 		public PluginCompanionDeviceConsentNotifier Notifier => _notifier.Value;
 
-		public PluginCompanionDeviceCallbacks Callbacks() => new(Devices, Policy, Notifier, Sessions, Assets);
+		public PluginCompanionDeviceCallbacks Callbacks()
+		{
+			return new PluginCompanionDeviceCallbacks(Devices, Policy, Notifier, Sessions, Assets);
+		}
 
 		public async Task ConnectAsync(PluginSessionOrigin origin)
 		{
@@ -333,13 +364,17 @@ public class PluginCompanionDeviceAccessTests
 
 	private sealed class SingleInstalledPlugin(IReadOnlyList<string>? permissions) : IPluginInstallationCatalog
 	{
-		public IReadOnlyList<InstalledPlugin> Discover() => [];
+		public IReadOnlyList<InstalledPlugin> Discover()
+		{
+			return [];
+		}
 
 		public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 		{
 			version = permissions is null
 				? null
-				: new InstalledPluginVersion { Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
+				: new InstalledPluginVersion
+					{ Version = "1.0.0", VersionDirectory = "v", ManifestPath = "v/manifest.json" };
 			return version is not null;
 		}
 
@@ -351,7 +386,8 @@ public class PluginCompanionDeviceAccessTests
 	private sealed class FixedManifestReader(IReadOnlyList<string>? permissions) : IPluginManifestReader
 	{
 		public PluginManifestReadResult Read(string manifestPath, string expectedPluginId, string expectedVersion)
-			=> PluginManifestReadResult.Ok(new PluginManifest
+		{
+			return PluginManifestReadResult.Ok(new PluginManifest
 			{
 				ManifestVersion = 1,
 				Id = expectedPluginId,
@@ -360,12 +396,16 @@ public class PluginCompanionDeviceAccessTests
 				Entrypoints = new Dictionary<string, PluginEntrypoint>(),
 				Permissions = permissions
 			});
+		}
 
-		public PluginManifestReadResult ReadFromJson(string json,
+		public PluginManifestReadResult ReadFromJson(
+			string json,
 			string? versionDirectory,
 			string expectedPluginId,
 			string expectedVersion)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	internal sealed class RecordingHostAssetSender : IPluginHostAssetSender
@@ -373,7 +413,8 @@ public class PluginCompanionDeviceAccessTests
 		public TaskCompletionSource<(string PluginId, string? TransferId, string Kind)> Sent { get; } =
 			new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		public Task<bool> SendAsync(string pluginId,
+		public Task<bool> SendAsync(
+			string pluginId,
 			string transferId,
 			string kind,
 			string mimeType,
@@ -385,7 +426,10 @@ public class PluginCompanionDeviceAccessTests
 			return Task.FromResult(true);
 		}
 
-		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope ack) => false;
+		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope ack)
+		{
+			return false;
+		}
 
 		public void DropSession(string pluginId)
 		{

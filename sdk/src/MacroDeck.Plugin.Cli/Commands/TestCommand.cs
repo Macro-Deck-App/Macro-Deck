@@ -78,14 +78,13 @@ internal static class TestCommand
 		var option = new Option<ConformanceReportFormat>("--report")
 		{
 			Description = "text, json or markdown. Defaults to text.",
-			DefaultValueFactory = _ => ConformanceReportFormat.Text
+			DefaultValueFactory = _ => ConformanceReportFormat.Text,
+			CustomParser = result => CliOptionParsing.ParseToken(result,
+				ConformanceReportFormat.Text,
+				("text", ConformanceReportFormat.Text),
+				("json", ConformanceReportFormat.Json),
+				("markdown", ConformanceReportFormat.Markdown))
 		};
-
-		option.CustomParser = result => CliOptionParsing.ParseToken(result,
-			ConformanceReportFormat.Text,
-			("text", ConformanceReportFormat.Text),
-			("json", ConformanceReportFormat.Json),
-			("markdown", ConformanceReportFormat.Markdown));
 
 		return option;
 	}

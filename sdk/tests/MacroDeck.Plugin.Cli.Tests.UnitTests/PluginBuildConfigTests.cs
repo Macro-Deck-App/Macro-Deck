@@ -9,17 +9,20 @@ public class PluginBuildConfigTests
 	private static readonly string[] _forbiddenPropertyNames =
 		["command", "script", "shell", "run", "cmd", "csproj", "project", "tfm", "targetFramework", "sdk", "msbuild"];
 
-	private static PluginScaffoldRequest CanonicalRequest(IReadOnlyList<string>? platforms = null) => new()
+	private static PluginScaffoldRequest CanonicalRequest(IReadOnlyList<string>? platforms = null)
 	{
-		Name = "Spotify Controller",
-		Id = "com.example.spotify",
-		Publisher = "Example Publisher",
-		Description = "A Macro Deck plugin.",
-		License = "MIT",
-		ProjectName = "SpotifyController",
-		Output = "SpotifyController",
-		Platforms = platforms ?? ["win-x64", "osx-arm64", "linux-x64"]
-	};
+		return new PluginScaffoldRequest
+		{
+			Name = "Spotify Controller",
+			Id = "com.example.spotify",
+			Publisher = "Example Publisher",
+			Description = "A Macro Deck plugin.",
+			License = "MIT",
+			ProjectName = "SpotifyController",
+			Output = "SpotifyController",
+			Platforms = platforms ?? ["win-x64", "osx-arm64", "linux-x64"]
+		};
+	}
 
 	[Test]
 	public void Version_is_the_json_number_one()

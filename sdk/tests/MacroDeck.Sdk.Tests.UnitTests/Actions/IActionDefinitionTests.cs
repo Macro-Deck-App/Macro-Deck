@@ -4,7 +4,7 @@ using MacroDeck.Localization;
 namespace MacroDeck.Sdk.Tests.UnitTests.Actions;
 
 [TestFixture]
-public class IActionDefinitionTests
+public class ActionDefinitionTests
 {
 	/// <summary>
 	/// A default interface member does not dispatch off the concrete type - reading
@@ -59,12 +59,18 @@ public class IActionDefinitionTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class Restricted : IActionDefinition
 	{
-		public Restricted(MacroDeckPlatform platforms) => Platforms = platforms;
+		public Restricted(MacroDeckPlatform platforms)
+		{
+			Platforms = platforms;
+		}
 
 		public string Id => "restricted";
 
@@ -76,6 +82,9 @@ public class IActionDefinitionTests
 
 		public MacroDeckPlatform Platforms { get; }
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

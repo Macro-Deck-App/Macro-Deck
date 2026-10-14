@@ -24,7 +24,8 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	private bool _lacksUsbPermission;
 	private AndroidDeviceMode _mode;
 
-	internal FakeAndroidDevice(FakeAndroidDeviceManager manager,
+	internal FakeAndroidDevice(
+		FakeAndroidDeviceManager manager,
 		string serial,
 		AndroidDeviceInfo info,
 		AndroidDeviceState state)
@@ -111,7 +112,8 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	public AndroidDeviceStatus? Status { get; set; }
 
 	/// <summary>Answers <see cref="ExecuteShellAsync" />. By default every command exits 0 with no output.</summary>
-	public Func<string, AndroidShellResult> ShellHandler { get; set; } = _ => new AndroidShellResult(0, string.Empty, string.Empty, false);
+	public Func<string, AndroidShellResult> ShellHandler { get; set; } = _
+		=> new AndroidShellResult(0, string.Empty, string.Empty, false);
 
 	/// <summary>What <see cref="GetBatteryStateAsync" /> returns.</summary>
 	public AndroidBatteryState Battery { get; set; } = new()
@@ -217,7 +219,8 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	}
 
 	/// <inheritdoc />
-	public Task SwipeAsync(int fromX,
+	public Task SwipeAsync(
+		int fromX,
 		int fromY,
 		int toX,
 		int toY,
@@ -263,7 +266,9 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 	}
 
 	/// <inheritdoc />
-	public Task RebootAsync(AndroidRebootMode mode = AndroidRebootMode.Normal, CancellationToken cancellationToken = default)
+	public Task RebootAsync(
+		AndroidRebootMode mode = AndroidRebootMode.Normal,
+		CancellationToken cancellationToken = default)
 	{
 		Begin(nameof(RebootAsync), cancellationToken, mode.ToString());
 		return Task.CompletedTask;
@@ -310,7 +315,10 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 		}
 	}
 
-	private static string Invariant(int value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+	private static string Invariant(int value)
+	{
+		return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+	}
 
 	internal void SetState(AndroidDeviceState state)
 	{
@@ -330,12 +338,13 @@ public sealed class FakeAndroidDevice : IAndroidDevice
 		cancellationToken.ThrowIfCancellationRequested();
 
 		var refusal = _manager.Access switch
-		{
-			AndroidDeviceAccess.Available => (AndroidDeviceErrorCode?)null,
-			AndroidDeviceAccess.AdbNotEnabled => AndroidDeviceErrorCode.AdbNotEnabled,
-			AndroidDeviceAccess.AdbNotAllowed => AndroidDeviceErrorCode.AdbNotAllowed,
-			_ => AndroidDeviceErrorCode.Unsupported
-		} ?? Failure;
+			{
+				AndroidDeviceAccess.Available => (AndroidDeviceErrorCode?)null,
+				AndroidDeviceAccess.AdbNotEnabled => AndroidDeviceErrorCode.AdbNotEnabled,
+				AndroidDeviceAccess.AdbNotAllowed => AndroidDeviceErrorCode.AdbNotAllowed,
+				_ => AndroidDeviceErrorCode.Unsupported
+			}
+			?? Failure;
 
 		if (refusal is { } code)
 		{

@@ -182,7 +182,7 @@ internal sealed class SpotifyIntegrationIssueTests
 	{
 		var oauth = new FakeSpotifyOAuthClient();
 		oauth.Results.Enqueue(FakeSpotifyOAuthClient.Unreachable());
-		var integration = new SpotifyIntegration(oauth, OfflineTransport(), unreachableIssueThreshold: TimeSpan.Zero);
+		var integration = new SpotifyIntegration(oauth, OfflineTransport(), TimeSpan.Zero);
 		var config = new SpotifyConfigStub().WithExpiredAccessToken();
 		await integration.InitializeAsync(new SpotifyContextStub(config));
 
@@ -207,7 +207,7 @@ internal sealed class SpotifyIntegrationIssueTests
 		var transport = new SwitchableTransport { Fail = new HttpRequestException("connection reset") };
 		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(),
 			transport,
-			unreachableIssueThreshold: TimeSpan.Zero);
+			TimeSpan.Zero);
 		var config = new SpotifyConfigStub();
 		await integration.InitializeAsync(new SpotifyContextStub(config));
 
@@ -227,7 +227,7 @@ internal sealed class SpotifyIntegrationIssueTests
 		var transport = new SwitchableTransport { Fail = new HttpRequestException("connection reset") };
 		var integration = new SpotifyIntegration(new FakeSpotifyOAuthClient(),
 			transport,
-			unreachableIssueThreshold: TimeSpan.Zero);
+			TimeSpan.Zero);
 		var config = new SpotifyConfigStub();
 		await integration.InitializeAsync(new SpotifyContextStub(config));
 
@@ -327,7 +327,10 @@ internal sealed class SpotifyIntegrationIssueTests
 		await player.RefreshStateAsync();
 	}
 
-	private static IdleTransport OfflineTransport() => new();
+	private static IdleTransport OfflineTransport()
+	{
+		return new IdleTransport();
+	}
 
 	private sealed class SwitchableTransport : IHTTPClient
 	{
@@ -367,10 +370,12 @@ internal sealed class SpotifyIntegrationIssueTests
 		}
 
 		private static Response Error(HttpStatusCode statusCode, string body)
-			=> new(new Dictionary<string, string>())
+		{
+			return new Response(new Dictionary<string, string>())
 			{
 				StatusCode = statusCode, ContentType = "application/json", Body = body
 			};
+		}
 
 		public void SetRequestTimeout(TimeSpan timeout)
 		{
@@ -384,12 +389,14 @@ internal sealed class SpotifyIntegrationIssueTests
 	private sealed class IdleTransport : IHTTPClient
 	{
 		public Task<IResponse> DoRequest(IRequest request, CancellationToken cancel)
-			=> Task.FromResult<IResponse>(new Response(new Dictionary<string, string>())
+		{
+			return Task.FromResult<IResponse>(new Response(new Dictionary<string, string>())
 			{
 				StatusCode = HttpStatusCode.NoContent,
 				ContentType = "application/json",
 				Body = string.Empty
 			});
+		}
 
 		public void SetRequestTimeout(TimeSpan timeout)
 		{

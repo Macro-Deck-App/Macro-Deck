@@ -74,5 +74,7 @@ public sealed record MusicPlayerState
 	/// which means there is nothing to reach in the first place.
 	/// </summary>
 	public static MusicPlayerState Unavailable(string? statusMessage = null)
-		=> new() { IsUnavailable = true, StatusMessage = statusMessage };
+	{
+		return new MusicPlayerState { IsUnavailable = true, StatusMessage = statusMessage };
+	}
 }

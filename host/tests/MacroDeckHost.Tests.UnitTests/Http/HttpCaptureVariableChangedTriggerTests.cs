@@ -44,7 +44,7 @@ internal sealed class HttpCaptureVariableChangedTriggerTests
 				false,
 				"text/plain",
 				5),
-			statusExpected: true,
+			true,
 			new LoggerConfiguration().CreateLogger());
 
 		var bus = new RecordingEventBus();

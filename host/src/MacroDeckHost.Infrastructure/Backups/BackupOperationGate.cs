@@ -29,7 +29,8 @@ public sealed class BackupOperationGate : IBackupOperationGate, IDisposable
 		return Result.Ok<IBackupOperationLease, BackupError>(new Lease(_lease));
 	}
 
-	public async Task<Result<IBackupOperationLease, BackupError>> Acquire(BackupOperationKind kind,
+	public async Task<Result<IBackupOperationLease, BackupError>> Acquire(
+		BackupOperationKind kind,
 		BackupTrigger trigger,
 		TimeSpan timeout,
 		CancellationToken cancellationToken = default)
@@ -49,14 +50,20 @@ public sealed class BackupOperationGate : IBackupOperationGate, IDisposable
 		return Result.Ok<IBackupOperationLease, BackupError>(new Lease(_lease));
 	}
 
-	public void Dispose() => _lease.Dispose();
+	public void Dispose()
+	{
+		_lease.Dispose();
+	}
 
 	private sealed class Lease : IBackupOperationLease
 	{
 		private readonly SemaphoreSlim _semaphore;
 		private int _released;
 
-		public Lease(SemaphoreSlim semaphore) => _semaphore = semaphore;
+		public Lease(SemaphoreSlim semaphore)
+		{
+			_semaphore = semaphore;
+		}
 
 		public Guid OperationId { get; } = Guid.NewGuid();
 

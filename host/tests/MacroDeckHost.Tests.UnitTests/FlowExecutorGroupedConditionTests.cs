@@ -53,74 +53,85 @@ public class FlowExecutorGroupedConditionTests
 			_logger);
 	}
 
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
-	private const string _thenBlock =
+	private const string ThenBlock =
 		"""
 		{ "id": "then", "type": "action", "blockType": "integration.capture",
 		  "integrationId": "integration", "actionId": "capture", "parameters": [] }
 		""";
 
-	private const string _elseBlock =
+	private const string ElseBlock =
 		"""
 		{ "id": "else", "type": "action", "blockType": "integration.capture",
 		  "integrationId": "integration", "actionId": "capture-2", "parameters": [] }
 		""";
 
-	private static string IfElseFlow(string condition) =>
-		$$"""
-		  {
-		    "flows": [
-		      {
-		        "triggerId": "t1", "triggerType": "onShortPress",
-		        "children": [
-		          {
-		            "id": "if", "type": "condition", "blockType": "ifElse",
-		            "branches": [
-		              {
-		                "id": "br-if", "kind": "if",
-		                "condition": {{condition}},
-		                "children": [ {{_thenBlock}} ]
-		              },
-		              { "id": "br-else", "kind": "else", "children": [ {{_elseBlock}} ] }
-		            ]
-		          }
-		        ]
-		      }
-		    ]
-		  }
-		  """;
+	private static string IfElseFlow(string condition)
+	{
+		return $$"""
+				 {
+				   "flows": [
+				     {
+				       "triggerId": "t1", "triggerType": "onShortPress",
+				       "children": [
+				         {
+				           "id": "if", "type": "condition", "blockType": "ifElse",
+				           "branches": [
+				             {
+				               "id": "br-if", "kind": "if",
+				               "condition": {{condition}},
+				               "children": [ {{ThenBlock}} ]
+				             },
+				             { "id": "br-else", "kind": "else", "children": [ {{ElseBlock}} ] }
+				           ]
+				         }
+				       ]
+				     }
+				   ]
+				 }
+				 """;
+	}
 
 	private async Task<FlowExecutionResult> Run(string widgetData)
-		=> await _executor.ExecuteAsync(new FlowExecutionRequest
+	{
+		return await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
 				FlowsSource = widgetData,
 				Trigger = TriggerSelector.ByType("onShortPress"),
 				Scope = VariableScope.Global
 			},
 			CancellationToken.None);
+	}
 
 	private void AssertThenBranchRan()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(_thenAction.ExecuteCount, Is.EqualTo(1), "then-branch should have run");
 			Assert.That(_elseAction.ExecuteCount, Is.Zero, "else-branch should not have run");
 		});
+	}
 
 	private void AssertElseBranchRan()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(_thenAction.ExecuteCount, Is.Zero, "then-branch should not have run");
 			Assert.That(_elseAction.ExecuteCount, Is.EqualTo(1), "else-branch should have run");
 		});
+	}
 
 	[Test]
 	public async Task And_group_with_both_sides_true_runs_the_then_branch()
@@ -223,7 +234,7 @@ public class FlowExecutorGroupedConditionTests
 					            {
 					              "id": "br-if", "kind": "if",
 					              "condition": { "kind": "compare", "id": "c0", "left": { "$var": "recording" }, "operator": "==", "right": true },
-					              "children": [ {{_elseBlock}} ]
+					              "children": [ {{ElseBlock}} ]
 					            },
 					            {
 					              "id": "br-elseif", "kind": "elseif",
@@ -234,7 +245,7 @@ public class FlowExecutorGroupedConditionTests
 					                  { "kind": "compare", "id": "c2", "left": { "$var": "viewers" }, "operator": ">=", "right": 12 }
 					                ]
 					              },
-					              "children": [ {{_thenBlock}} ]
+					              "children": [ {{ThenBlock}} ]
 					            }
 					          ]
 					        }
@@ -265,7 +276,7 @@ public class FlowExecutorGroupedConditionTests
 					              { "kind": "compare", "id": "c2", "left": { "$var": "recording" }, "operator": "==", "right": true }
 					            ]
 					          },
-					          "children": [ {{_thenBlock}} ]
+					          "children": [ {{ThenBlock}} ]
 					        }
 					      ]
 					    }
@@ -295,7 +306,7 @@ public class FlowExecutorGroupedConditionTests
 					            ]
 					          },
 					          "children": [
-					            {{_thenBlock}},
+					            {{ThenBlock}},
 					            { "id": "stop", "type": "flow-control", "blockType": "break", "parameters": [] }
 					          ]
 					        }
@@ -344,14 +355,16 @@ public class FlowExecutorGroupedConditionTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)

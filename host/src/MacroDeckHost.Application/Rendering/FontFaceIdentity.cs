@@ -39,17 +39,21 @@ public static class FontFaceIdentity
 	/// and as a CSS family name suffix.
 	/// </summary>
 	public static string Build(string family, int weight, int width, string slant)
-		=> $"{Slug(family)}-{weight}-{width}-{slant}";
+	{
+		return $"{Slug(family)}-{weight}-{width}-{slant}";
+	}
 
 	/// <summary>
 	/// Builds a face id from a legacy family + bold + italic triple, assuming normal width. Used to
 	/// migrate stored widget configuration, including for a family this machine does not have.
 	/// </summary>
 	public static string BuildLegacy(string family, bool bold, bool italic)
-		=> Build(family,
+	{
+		return Build(family,
 			bold ? BoldWeight : RegularWeight,
 			NormalWidth,
 			italic ? ItalicSlant : UprightSlant);
+	}
 
 	private static string Slug(string family)
 	{
@@ -57,7 +61,7 @@ public static class FontFaceIdentity
 		foreach (var character in family)
 		{
 			var lower = char.ToLowerInvariant(character);
-			if (lower is (>= 'a' and <= 'z') or (>= '0' and <= '9'))
+			if (lower is >= 'a' and <= 'z' or >= '0' and <= '9')
 			{
 				builder.Append(lower);
 			}

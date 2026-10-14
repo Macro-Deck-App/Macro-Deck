@@ -26,7 +26,6 @@ using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui;
 using MacroDeckHost.Tests.UnitTests.VideoStreams;
-using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.VideoStreams;
 using MacroDeck.Sdk;
@@ -36,6 +35,7 @@ using MacroDeck.Sdk.FolderViews;
 using MacroDeck.Sdk.Identity;
 using MacroDeck.Sdk.Layouts;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -119,7 +119,10 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	[TearDown]
-	public void TearDown() => _registrar.Dispose();
+	public void TearDown()
+	{
+		_registrar.Dispose();
+	}
 
 	private async Task<string> ConnectSessionAsync(
 		string pluginId,
@@ -166,20 +169,31 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	private static DeclaredCapability Action(string localId)
-		=> new() { Kind = CapabilityKinds.Actions, LocalId = localId, VersionRange = Version() };
+	{
+		return new DeclaredCapability { Kind = CapabilityKinds.Actions, LocalId = localId, VersionRange = Version() };
+	}
 
 	private static DeclaredCapability Provider(string kind, string localId = "provider")
-		=> new() { Kind = kind, LocalId = localId, VersionRange = Version() };
+	{
+		return new DeclaredCapability { Kind = kind, LocalId = localId, VersionRange = Version() };
+	}
 
-	private static CapabilityVersionRange Version() => new() { Minimum = 1, Maximum = 1 };
+	private static CapabilityVersionRange Version()
+	{
+		return new CapabilityVersionRange { Minimum = 1, Maximum = 1 };
+	}
 
 	private static Dictionary<string, CapabilityNegotiationResult> Accepted(params string[] kinds)
-		=> kinds.ToDictionary(kind => kind,
+	{
+		return kinds.ToDictionary(kind => kind,
 			kind => CapabilityNegotiationResult.Accept(kind, 1),
 			StringComparer.Ordinal);
+	}
 
 	private List<string> CatalogChanges()
-		=> [.. _mediator.Published.OfType<IntegrationCatalogChangedNotification>().Select(n => n.IntegrationId)];
+	{
+		return [.. _mediator.Published.OfType<IntegrationCatalogChangedNotification>().Select(n => n.IntegrationId)];
+	}
 
 	[Test]
 	public async Task Registering_an_installed_plugin_detached_announces_the_catalogue_change()
@@ -211,8 +225,10 @@ public class RemotePluginIntegrationRegistrarTests
 		await _registrar.RegisterInstalledDetachedAsync(pluginId);
 
 		var adapter = _integrationRegistry.Registered.Single(i => i.Id == pluginId);
-		Assert.That(adapter, Is.InstanceOf<IConfigFlowProvider>()
-			.With.Property(nameof(IConfigFlowProvider.RequiresConfiguration)).False);
+		Assert.That(adapter,
+			Is.InstanceOf<IConfigFlowProvider>()
+				.With.Property(nameof(IConfigFlowProvider.RequiresConfiguration))
+				.False);
 	}
 
 	[Test]
@@ -298,7 +314,7 @@ public class RemotePluginIntegrationRegistrarTests
 		var sessionId = await ConnectSessionAsync(pluginId,
 			[Action("play")],
 			Accepted(CapabilityKinds.Actions),
-			declaredVersion: version);
+			version);
 		await _registrar.RegisterAsync(pluginId);
 		return sessionId;
 	}
@@ -452,7 +468,7 @@ public class RemotePluginIntegrationRegistrarTests
 
 		await _snapshotStore.SaveAsync(RemotePluginCapabilitySnapshot.Empty(pluginId) with
 		{
-			Actions = [new("play", "Play", string.Empty, [], null, false, false)]
+			Actions = [new RemoteActionDescriptor("play", "Play", string.Empty, [], null, false, false)]
 		});
 
 		_invoker.ThrowOnActionsDescribe = true;
@@ -785,7 +801,7 @@ public class RemotePluginIntegrationRegistrarTests
 		await ConnectSessionAsync(pluginId,
 			[Action("play")],
 			Accepted(CapabilityKinds.Actions),
-			declaredVersion: "1.0.0");
+			"1.0.0");
 
 		await _registrar.RegisterAsync(pluginId);
 
@@ -802,7 +818,7 @@ public class RemotePluginIntegrationRegistrarTests
 		await ConnectSessionAsync(pluginId,
 			[Action("play")],
 			Accepted(CapabilityKinds.Actions),
-			declaredVersion: "1.0.0");
+			"1.0.0");
 
 		await _registrar.RegisterAsync(pluginId);
 
@@ -1212,7 +1228,8 @@ public class RemotePluginIntegrationRegistrarTests
 	}
 
 	private RemotePluginIntegrationRegistrar VideoRegistrar(VideoStreamWorld world)
-		=> new(world.PluginSessions,
+	{
+		return new RemotePluginIntegrationRegistrar(world.PluginSessions,
 			_integrationRegistry,
 			_snapshotStore,
 			new RemotePluginSnapshotRefresher(_invoker, _snapshotStore),
@@ -1234,6 +1251,7 @@ public class RemotePluginIntegrationRegistrarTests
 			Serilog.Log.Logger,
 			videoStreamProviders: world.Registry,
 			videoStreamSessions: world.Broker);
+	}
 
 	private static async Task<(string SessionId, VideoStreamPluginConnection Connection)> ConnectVideoPluginAsync(
 		VideoStreamWorld world,
@@ -1279,7 +1297,8 @@ public class RemotePluginIntegrationRegistrarTests
 			Assert.That(afterFirstAttach, Is.EqualTo(new[] { pluginId + "::front" }));
 			Assert.That(world.Registry.GetProviders().Select(entry => entry.QualifiedId),
 				Is.EqualTo(new[] { pluginId + "::back", pluginId + "::front" }));
-			Assert.That(world.Plugin.Calls.Count(call => call.Operation == CapabilityOperations.VideoStreamProvider.Describe),
+			Assert.That(world.Plugin.Calls.Count(call
+					=> call.Operation == CapabilityOperations.VideoStreamProvider.Describe),
 				Is.EqualTo(2));
 		});
 	}
@@ -1298,19 +1317,27 @@ public class RemotePluginIntegrationRegistrarTests
 
 		await registrar.UnregisterAsync(pluginId);
 		await world.WaitForClosedAsync(ticket.SessionId);
-		await VideoStreamWorld.WaitForAsync(
-			() => world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose).Count == 1,
+		await VideoStreamWorld.WaitForAsync(()
+				=> world.Plugin
+					.ArgumentsOf<VideoStreamSessionCloseArguments>(
+						CapabilityOperations.VideoStreamProvider.SessionClose)
+					.Count
+				== 1,
 			"the plugin never heard of the close");
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(world.Registry.GetProviders(), Is.Empty);
-			Assert.That(world.Publisher.Of<MacroDeckHost.Application.Events.VideoStreamSessionClosedNotification>().Single().Reason,
+			Assert.That(world.Publisher.Of<VideoStreamSessionClosedNotification>().Single().Reason,
 				Is.EqualTo(VideoStreamSessionReason.ProviderRemoved));
-			Assert.That(world.Plugin.ArgumentsOf<VideoStreamSessionCloseArguments>(CapabilityOperations.VideoStreamProvider.SessionClose)
+			Assert.That(world.Plugin
+					.ArgumentsOf<VideoStreamSessionCloseArguments>(
+						CapabilityOperations.VideoStreamProvider.SessionClose)
 					.Single(),
-				Has.Property(nameof(VideoStreamSessionCloseArguments.SessionId)).EqualTo(ticket.SessionId)
-					.And.Property(nameof(VideoStreamSessionCloseArguments.Reason)).EqualTo("ProviderRemoved"));
+				Has.Property(nameof(VideoStreamSessionCloseArguments.SessionId))
+					.EqualTo(ticket.SessionId)
+					.And.Property(nameof(VideoStreamSessionCloseArguments.Reason))
+					.EqualTo("ProviderRemoved"));
 		});
 	}
 
@@ -1331,7 +1358,8 @@ public class RemotePluginIntegrationRegistrarTests
 
 		public HashSet<string> AbsentPluginIds { get; } = new(StringComparer.Ordinal);
 
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
 		{
@@ -1340,16 +1368,16 @@ public class RemotePluginIntegrationRegistrarTests
 				throw RemoteCapabilityException.CreateRetryable(ProtocolErrorCodes.Timeout, "No attached connection.");
 			}
 
-			if (request.Kind == CapabilityKinds.Localization &&
-				request.Operation == CapabilityOperations.Localization.Describe)
+			if (request.Kind == CapabilityKinds.Localization
+				&& request.Operation == CapabilityOperations.Localization.Describe)
 			{
 				return Task.FromResult<JsonElement?>(LocalizationDescribeResult is null
 					? null
 					: JsonSerializer.SerializeToElement(LocalizationDescribeResult, PluginProtocolJson.Options));
 			}
 
-			if (request.Kind == CapabilityKinds.Localization &&
-				request.Operation == CapabilityOperations.Localization.Catalog)
+			if (request.Kind == CapabilityKinds.Localization
+				&& request.Operation == CapabilityOperations.Localization.Catalog)
 			{
 				var culture = ((LocalizationCatalogArguments)request.Arguments!).Culture;
 				return Task.FromResult<JsonElement?>(LocalizationCatalogsByCulture.TryGetValue(culture, out var result)
@@ -1417,13 +1445,19 @@ public class RemotePluginIntegrationRegistrarTests
 			throw new NotSupportedException($"Not scripted for kind '{request.Kind}'.");
 		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class InMemorySnapshotStore : IRemotePluginSnapshotStore
@@ -1431,11 +1465,16 @@ public class RemotePluginIntegrationRegistrarTests
 		private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
 		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-			=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+		{
+			return _byPluginId.TryGetValue(pluginId, out var snapshot)
 				? snapshot
 				: RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+		public bool Has(string pluginId)
+		{
+			return _byPluginId.ContainsKey(pluginId);
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 		{
@@ -1460,22 +1499,37 @@ public class RemotePluginIntegrationRegistrarTests
 
 		public IReadOnlyList<IIntegration> Integrations => Registered;
 
-		public IActionDefinition? FindAction(string integrationId, string actionId) => null;
+		public IActionDefinition? FindAction(string integrationId, string actionId)
+		{
+			return null;
+		}
 
-		public IActionDefinition? FindAction(QualifiedId id) => null;
+		public IActionDefinition? FindAction(QualifiedId id)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true) => [];
+		public IReadOnlyList<ActionDescriptor> GetActions(bool enabledOnly = true)
+		{
+			return [];
+		}
 
-		public bool IsEnabled(string integrationId) => true;
+		public bool IsEnabled(string integrationId)
+		{
+			return true;
+		}
 
 		public void SetEnabled(string integrationId, bool enabled)
 		{
 		}
 
 		public IntegrationOrigin GetOrigin(string integrationId)
-			=> _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+		{
+			return _origins.TryGetValue(integrationId, out var origin) ? origin : IntegrationOrigin.BuiltIn;
+		}
 
-		public Task<IntegrationRegistrationResult> RegisterAsync(IIntegration integration,
+		public Task<IntegrationRegistrationResult> RegisterAsync(
+			IIntegration integration,
 			IntegrationOrigin origin = IntegrationOrigin.BuiltIn,
 			IntegrationMetadata? metadata = null)
 		{
@@ -1512,25 +1566,55 @@ public class RemotePluginIntegrationRegistrarTests
 			return null;
 		}
 
-		public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => Raise(draft);
+		public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+		{
+			return Raise(draft);
+		}
 
-		public IReadOnlyList<UserNotification> Snapshot() => [];
+		public IReadOnlyList<UserNotification> Snapshot()
+		{
+			return [];
+		}
 
-		public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress) => false;
+		public bool UpdateProgress(string dedupeKey, UserNotificationProgress progress)
+		{
+			return false;
+		}
 
-		public bool Dismiss(string id) => false;
+		public bool Dismiss(string id)
+		{
+			return false;
+		}
 
-		public bool DismissByKey(string dedupeKey) => false;
+		public bool DismissByKey(string dedupeKey)
+		{
+			return false;
+		}
 
-		public bool Retire(string dedupeKey) => false;
+		public bool Retire(string dedupeKey)
+		{
+			return false;
+		}
 
-		public UserNotification? RaiseIfPresent(UserNotificationDraft draft) => null;
+		public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
+		{
+			return null;
+		}
 
-		public bool MarkRead(string id) => false;
+		public bool MarkRead(string id)
+		{
+			return false;
+		}
 
-		public bool MarkAllRead() => false;
+		public bool MarkAllRead()
+		{
+			return false;
+		}
 
-		public bool DismissAll() => false;
+		public bool DismissAll()
+		{
+			return false;
+		}
 
 		public event Action? Changed
 		{
@@ -1543,7 +1627,10 @@ public class RemotePluginIntegrationRegistrarTests
 	{
 		public List<InstalledPlugin> Plugins { get; } = [];
 
-		public IReadOnlyList<InstalledPlugin> Discover() => Plugins;
+		public IReadOnlyList<InstalledPlugin> Discover()
+		{
+			return Plugins;
+		}
 
 		public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 		{
@@ -1559,29 +1646,46 @@ public class RemotePluginIntegrationRegistrarTests
 	private sealed class NeverFindsManifest : IPluginManifestReader
 	{
 		public PluginManifestReadResult Read(string manifestPath, string expectedPluginId, string expectedVersion)
-			=> PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+		{
+			return PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+		}
 
-		public PluginManifestReadResult ReadFromJson(string json,
+		public PluginManifestReadResult ReadFromJson(
+			string json,
 			string? versionDirectory,
 			string expectedPluginId,
 			string expectedVersion)
-			=> PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+		{
+			return PluginManifestReadResult.Fail(PluginManifestError.NotFound, "Not found.");
+		}
 	}
 
 	private sealed class AlwaysDisconnected : IRemotePluginConnectionState
 	{
-		public bool IsConnected(string pluginId) => false;
+		public bool IsConnected(string pluginId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class FakeLocalizationPreferenceService : IAppPreferenceService
 	{
 		public string Culture { get; set; } = LocalizationDefaults.Culture;
 
-		public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings(Culture));
+		public Task<LocalizationSettings> GetLocalization()
+		{
+			return Task.FromResult(new LocalizationSettings(Culture));
+		}
 
-		public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+		public Task<string> GetTimeFormat()
+		{
+			return Task.FromResult(AppPreferenceService.TimeFormatSystem);
+		}
 
-		public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+		public Task<string> SetTimeFormat(string? timeFormat)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<LocalizationSettings> SetLocalization(string? culture)
 		{
@@ -1593,79 +1697,151 @@ public class RemotePluginIntegrationRegistrarTests
 			return Task.FromResult(new LocalizationSettings(Culture));
 		}
 
-		public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
+		public Task<AppearanceSettings> GetAppearance()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Guid> GetInstallationId() => throw new NotSupportedException();
+		public Task<Guid> GetInstallationId()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+		public Task<byte[]> GetAdbDeviceIdKey()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
+		public Task<LoggingSettings> GetLogging()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<LoggingSettings> SetLogging(Application.Logging.LogEntryLevel? minimumLevel)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> GetNetwork() => throw new NotSupportedException();
+		public Task<NetworkSettings> GetNetwork()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> SetNetwork(int? publicPort,
+		public Task<NetworkSettings> SetNetwork(
+			int? publicPort,
 			bool? tlsEnabled = null,
 			string? tlsMode = null,
 			int? tlsHttpsPort = null,
 			bool? discoveryEnabled = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> GetAdb() => throw new NotSupportedException();
+		public Task<AdbSettings> GetAdb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> SetAdb(bool? enabled,
+		public Task<AdbSettings> SetAdb(
+			bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
 			string? defaultDeviceSerial,
 			bool? stopServerOnExit,
 			bool allowPlugins)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+		public Task<NativeUsbSettings> GetNativeUsb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
-			=> throw new NotSupportedException();
+		public Task<NativeUsbSettings> SetNativeUsb(
+			bool? enabled,
+			IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
+		public Task<DeveloperSettings> GetDeveloper()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DeveloperSettings> SetDeveloper(bool? enabled) => throw new NotSupportedException();
+		public Task<DeveloperSettings> SetDeveloper(bool? enabled)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
+		public Task<OnboardingSettings> GetOnboarding()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> SetOnboarding(bool? pending) => throw new NotSupportedException();
+		public Task<OnboardingSettings> SetOnboarding(bool? pending)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> GetLockScreen() => throw new NotSupportedException();
+		public Task<LockScreenSettings> GetLockScreen()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> SetLockScreen(bool? enabled) => throw new NotSupportedException();
+		public Task<LockScreenSettings> SetLockScreen(bool? enabled)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<BackupSettings> GetBackups() => throw new NotSupportedException();
+		public Task<BackupSettings> GetBackups()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<BackupSettings> SetBackups(string? scheduleFrequency,
+		public Task<BackupSettings> SetBackups(
+			string? scheduleFrequency,
 			string? scheduleTimeOfDay,
 			string? scheduleDayOfWeek,
 			int? scheduleDayOfMonth,
 			string? retentionPolicy,
 			int? retentionKeepLatest,
 			bool? beforeHostUpdate,
-			bool? beforePluginUpdate) => throw new NotSupportedException();
+			bool? beforePluginUpdate)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DateTimeOffset?> GetBackupScheduleLastRun() => throw new NotSupportedException();
+		public Task<DateTimeOffset?> GetBackupScheduleLastRun()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task SetBackupScheduleLastRun(DateTimeOffset value) => throw new NotSupportedException();
+		public Task SetBackupScheduleLastRun(DateTimeOffset value)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ExtensionSettings> GetExtensions() => throw new NotSupportedException();
+		public Task<ExtensionSettings> GetExtensions()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+		public Task<ExtensionSettings> SetExtensions(
+			bool? storeEnabled,
 			bool? checkForUpdates,
 			bool? notifyOnUpdates,
 			int? refreshIntervalMinutes,
 			bool? autoUpdate = null,
 			bool? askForRatings = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

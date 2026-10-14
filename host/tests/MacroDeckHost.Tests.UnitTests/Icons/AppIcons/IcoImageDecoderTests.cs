@@ -113,7 +113,7 @@ public class IcoImageDecoderTests
 		WriteUInt16LittleEndian(stream, 1);
 		WriteUInt16LittleEndian(stream, (ushort)frames.Length);
 
-		var offset = 6 + (frames.Length * DirectoryEntryLength);
+		var offset = 6 + frames.Length * DirectoryEntryLength;
 		foreach (var frame in frames)
 		{
 			stream.WriteByte(frame.Size >= 256 ? (byte)0 : (byte)frame.Size);

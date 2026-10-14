@@ -160,14 +160,17 @@ internal sealed class CompanionReadinessTests
 		var (harness, device) = await PairedDeviceAsync();
 		var other = Guid.NewGuid();
 		var definition = harness.Integration.EventDefinitions.Single(candidate => candidate.Id == DeviceReadyId);
-		var descriptor = new EventDefinitionDescriptor(QualifiedId.Create(CompanionHarness.IntegrationId, DeviceReadyId),
+		var descriptor = new EventDefinitionDescriptor(
+			QualifiedId.Create(CompanionHarness.IntegrationId, DeviceReadyId),
 			CompanionHarness.IntegrationId,
 			harness.Integration.Name,
 			true,
 			definition);
 		var published = ReadyEvents(harness).Single();
-		var matcher = new EventSubscriptionMatcher(new ActionConditionEvaluator(new VariableTemplateRenderer(new())));
-		var context = await new VariableTemplateRenderer(new()).CreateContextAsync(VariableScope.Global, null);
+		var matcher = new EventSubscriptionMatcher(
+			new ActionConditionEvaluator(new VariableTemplateRenderer(new VariableRegistry())));
+		var context
+			= await new VariableTemplateRenderer(new VariableRegistry()).CreateContextAsync(VariableScope.Global, null);
 
 		Assert.Multiple(() =>
 		{
@@ -187,7 +190,8 @@ internal sealed class CompanionReadinessTests
 			Assert.That(definition.Description.IsLocalized, Is.True);
 			Assert.That(definition.Category.IsLocalized, Is.True);
 			Assert.That(definition.ConfigurationParameters.Concat(definition.PayloadParameters)
-				.All(parameter => parameter.Label.IsLocalized), Is.True);
+					.All(parameter => parameter.Label.IsLocalized),
+				Is.True);
 		});
 	}
 
@@ -204,7 +208,11 @@ internal sealed class CompanionReadinessTests
 
 	private static void Connect(CompanionHarness harness, string connectionId, Guid device)
 	{
-		harness.Connections.Attach(connectionId, device, () => { });
+		harness.Connections.Attach(connectionId,
+			device,
+			() =>
+			{
+			});
 		harness.Connections.Register(connectionId, $"client-{connectionId}");
 	}
 
@@ -215,14 +223,27 @@ internal sealed class CompanionReadinessTests
 	}
 
 	private static List<IReadOnlyDictionary<string, object?>> ReadyEvents(CompanionHarness harness)
-		=> [.. harness.Events.Published.Where(entry => entry.EventId == DeviceReadyId).Select(entry => entry.Parameters!)];
+	{
+		return
+		[
+			.. harness.Events.Published.Where(entry => entry.EventId == DeviceReadyId)
+				.Select(entry => entry.Parameters!)
+		];
+	}
 
 	private static List<string> SentCommands(CompanionHarness harness)
-		=> [.. harness.Transport.GroupMessages.Select(entry => entry.Message).OfType<CompanionCommandEvent>()
-			.Select(message => message.Command)];
+	{
+		return
+		[
+			.. harness.Transport.GroupMessages.Select(entry => entry.Message)
+				.OfType<CompanionCommandEvent>()
+				.Select(message => message.Command)
+		];
+	}
 
 	private static EventSubscription FilteredTo(Guid device)
-		=> new(EventTriggerOwner.ForAutomation(Guid.NewGuid()),
+	{
+		return new EventSubscription(EventTriggerOwner.ForAutomation(Guid.NewGuid()),
 			"t1",
 			$"{CompanionHarness.IntegrationId}::{DeviceReadyId}",
 			new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
@@ -230,6 +251,7 @@ internal sealed class CompanionReadinessTests
 				["deviceId"] = new(JsonSerializer.SerializeToElement(device.ToString("D")), null)
 			},
 			null);
+	}
 
 	private static async Task WaitUntilAsync(Func<bool> condition)
 	{

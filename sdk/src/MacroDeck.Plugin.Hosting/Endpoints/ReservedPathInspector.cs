@@ -14,7 +14,8 @@ namespace MacroDeck.Plugin.Hosting.Endpoints;
 internal static class ReservedPathInspector
 {
 	public static IReadOnlyList<string> FindConflicts(IEnumerable<EndpointDataSource> dataSources)
-		=>
+	{
+		return
 		[
 			.. dataSources
 				.SelectMany(source => source.Endpoints)
@@ -23,11 +24,14 @@ internal static class ReservedPathInspector
 				.Where(pattern => ReservedPaths.IsReserved(pattern))
 				.Where(pattern => !ReservedPaths.All.Any(route
 					=> string.Equals(route, Normalize(pattern), StringComparison.OrdinalIgnoreCase)))
-				.Select(pattern => $"The route '{pattern}' is under '{ReservedPaths.Prefix}', which the SDK " +
-					"reserves for its own endpoints. Map it somewhere else.")
+				.Select(pattern => $"The route '{pattern}' is under '{ReservedPaths.Prefix}', which the SDK "
+					+ "reserves for its own endpoints. Map it somewhere else.")
 				.Distinct(StringComparer.Ordinal)
 		];
+	}
 
 	private static string? Normalize(string? pattern)
-		=> pattern is null || pattern.StartsWith('/') ? pattern : "/" + pattern;
+	{
+		return pattern is null || pattern.StartsWith('/') ? pattern : "/" + pattern;
+	}
 }

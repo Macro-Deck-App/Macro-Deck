@@ -17,17 +17,26 @@ public sealed record ChatModerationRequest(
 	string? AuthorId = null,
 	int DurationSeconds = 0)
 {
-	public static ChatModerationRequest Delete(string messageId) => new(ChatModerationKind.DeleteMessage,
-		MessageId: messageId);
+	public static ChatModerationRequest Delete(string messageId)
+	{
+		return new ChatModerationRequest(ChatModerationKind.DeleteMessage,
+			messageId);
+	}
 
 	public static ChatModerationRequest Timeout(string authorId, int seconds)
-		=> new(ChatModerationKind.Timeout, AuthorId: authorId, DurationSeconds: seconds);
+	{
+		return new ChatModerationRequest(ChatModerationKind.Timeout, AuthorId: authorId, DurationSeconds: seconds);
+	}
 
 	public static ChatModerationRequest Ban(string authorId)
-		=> new(ChatModerationKind.Ban, AuthorId: authorId);
+	{
+		return new ChatModerationRequest(ChatModerationKind.Ban, AuthorId: authorId);
+	}
 
 	public static ChatModerationRequest Unban(string authorId)
-		=> new(ChatModerationKind.Unban, AuthorId: authorId);
+	{
+		return new ChatModerationRequest(ChatModerationKind.Unban, AuthorId: authorId);
+	}
 }
 
 public enum ChatModerationResult

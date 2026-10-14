@@ -43,17 +43,17 @@ public class UsbmuxTests
 	public void A_usbmuxd_style_document_with_a_doctype_is_read()
 	{
 		const string document = """
-			<?xml version="1.0" encoding="UTF-8"?>
-			<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-			<plist version="1.0">
-			<dict>
-				<key>MessageType</key>
-				<string>Result</string>
-				<key>Number</key>
-				<integer>3</integer>
-			</dict>
-			</plist>
-			""";
+								<?xml version="1.0" encoding="UTF-8"?>
+								<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+								<plist version="1.0">
+								<dict>
+									<key>MessageType</key>
+									<string>Result</string>
+									<key>Number</key>
+									<integer>3</integer>
+								</dict>
+								</plist>
+								""";
 
 		var parsed = UsbmuxPlist.Read(Encoding.UTF8.GetBytes(document));
 
@@ -124,13 +124,13 @@ public class UsbmuxTests
 		usbmuxd.Start();
 		var client = new UsbmuxClient(usbmuxd.LocalEndpoint);
 
-		var accepted = ServeOneAsync(usbmuxd, resultNumber: 0, thenSend: "tunnel"u8.ToArray());
+		var accepted = ServeOneAsync(usbmuxd, 0, "tunnel"u8.ToArray());
 		using var tunnel = await client.ConnectAsync(9, UsbmuxProtocol.CompanionLinkPort, CancellationToken.None);
 		var request = await accepted;
 		var buffer = new byte[6];
 		await tunnel!.ReceiveAsync(buffer);
 
-		var refused = ServeOneAsync(usbmuxd, resultNumber: 3, thenSend: []);
+		var refused = ServeOneAsync(usbmuxd, 3, []);
 		var none = await client.ConnectAsync(9, UsbmuxProtocol.CompanionLinkPort, CancellationToken.None);
 		await refused;
 
@@ -200,7 +200,8 @@ public class UsbmuxTests
 		await Eventually.True(() => coordinator.Available, "the listen connection is up");
 		connector.Raise(new UsbmuxDeviceEvent(true, 1, "IPHONE-UDID", true));
 		coordinator.Poll(true, now);
-		await Eventually.True(() => coordinator.Devices.Single().State == NativeUsbDeviceState.Linked, "the link opened");
+		await Eventually.True(() => coordinator.Devices.Single().State == NativeUsbDeviceState.Linked,
+			"the link opened");
 
 		coordinator.StopAll();
 		var stopped = coordinator.WhenStopped();
@@ -215,7 +216,8 @@ public class UsbmuxTests
 		});
 	}
 
-	private static async Task<Dictionary<string, object>> ServeOneAsync(TcpListener listener,
+	private static async Task<Dictionary<string, object>> ServeOneAsync(
+		TcpListener listener,
 		long resultNumber,
 		byte[] thenSend)
 	{
@@ -225,7 +227,8 @@ public class UsbmuxTests
 		var payload = new byte[BinaryPrimitives.ReadUInt32LittleEndian(header) - 16];
 		await ReceiveExactlyAsync(socket, payload);
 		var result = new Dictionary<string, object> { ["MessageType"] = "Result", ["Number"] = resultNumber };
-		await socket.SendAsync(UsbmuxProtocol.Encode(BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(12)), result));
+		await socket.SendAsync(
+			UsbmuxProtocol.Encode(BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(12)), result));
 		if (thenSend.Length > 0)
 		{
 			await socket.SendAsync(thenSend);
@@ -255,7 +258,10 @@ public class UsbmuxTests
 
 		public Task Completion => Task.CompletedTask;
 
-		public void Stop() => Ended = true;
+		public void Stop()
+		{
+			Ended = true;
+		}
 	}
 
 	private sealed class FakeConnector : IUsbmuxConnector
@@ -271,9 +277,15 @@ public class UsbmuxTests
 
 		public List<ushort> Ports { get; } = [];
 
-		public void Raise(UsbmuxDeviceEvent deviceEvent) => _onEvent!(deviceEvent);
+		public void Raise(UsbmuxDeviceEvent deviceEvent)
+		{
+			_onEvent!(deviceEvent);
+		}
 
-		public async Task ListenAsync(Action onListening, Action<UsbmuxDeviceEvent> onEvent, CancellationToken cancellationToken)
+		public async Task ListenAsync(
+			Action onListening,
+			Action<UsbmuxDeviceEvent> onEvent,
+			CancellationToken cancellationToken)
 		{
 			_onEvent = onEvent;
 			onListening();

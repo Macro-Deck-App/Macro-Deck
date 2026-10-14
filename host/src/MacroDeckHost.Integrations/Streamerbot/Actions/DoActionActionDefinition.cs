@@ -27,20 +27,25 @@ internal sealed class DoActionActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(ActionParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.DoActionActionLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.DoActionActionDescription(),
+			AppStrings.Integrations.Streamerbot.Actions.DoActionActionLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.DoActionActionDescription(),
 			required: true),
 		ActionParameter.KeyValue(ArgumentsParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.ArgumentsLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.DoActionArgumentsDescription())
+			AppStrings.Integrations.Streamerbot.Actions.ArgumentsLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.DoActionArgumentsDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(StreamerbotOptions.Actions(_resolver()));
+	{
+		return Task.FromResult(StreamerbotOptions.Actions(_resolver()));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

@@ -9,7 +9,7 @@ public static class LockedHostApplicationBuilderExtensions
 	/// /api is refused while the key ring is locked, because it would be answering with a secret store
 	/// the host cannot read.
 	/// </summary>
-	private static readonly string[] AllowedWhileLocked =
+	private static readonly string[] _allowedWhileLocked =
 	[
 		"/api/key-ring",
 
@@ -34,9 +34,9 @@ public static class LockedHostApplicationBuilderExtensions
 
 		return app.Use(async (context, next) =>
 		{
-			if (!KeyRingStartupState.IsLocked ||
-				!context.Request.Path.StartsWithSegments("/api") ||
-				AllowedWhileLocked.Any(path => context.Request.Path.StartsWithSegments(path)))
+			if (!KeyRingStartupState.IsLocked
+				|| !context.Request.Path.StartsWithSegments("/api")
+				|| _allowedWhileLocked.Any(path => context.Request.Path.StartsWithSegments(path)))
 			{
 				await next();
 

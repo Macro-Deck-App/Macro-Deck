@@ -264,8 +264,11 @@ public class AdbCommandBuilderTests
 				Is.EqualTo(new[] { "-s", Serial, "shell", "getprop ro.build.version.sdk" }));
 			Assert.That(AdbCommandBuilder.Build(new AdbPackageInfoCommand(Serial, "app.macrodeck.companion")).Data,
 				Is.EqualTo(new[] { "-s", Serial, "shell", "dumpsys package 'app.macrodeck.companion'" }));
-			Assert.That(AdbCommandBuilder.Build(new AdbPackageRunningCommand(Serial, "app.macrodeck.companion")).Data![3],
-				Does.Contain("pidof 'app.macrodeck.companion'").And.Contain("echo unknown").And.Contain("echo stopped"));
+			Assert.That(
+				AdbCommandBuilder.Build(new AdbPackageRunningCommand(Serial, "app.macrodeck.companion")).Data![3],
+				Does.Contain("pidof 'app.macrodeck.companion'")
+					.And.Contain("echo unknown")
+					.And.Contain("echo stopped"));
 		});
 	}
 

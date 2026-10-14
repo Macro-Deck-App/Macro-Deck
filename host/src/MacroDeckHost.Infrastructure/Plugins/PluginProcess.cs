@@ -22,7 +22,8 @@ internal sealed class PluginProcess : IPluginProcess
 	private volatile bool _hasExited;
 	private int _disposed;
 
-	public PluginProcess(Process process,
+	public PluginProcess(
+		Process process,
 		IPluginProcessJob job,
 		int bootstrapOutputMaxLines,
 		int bootstrapOutputMaxBytes,

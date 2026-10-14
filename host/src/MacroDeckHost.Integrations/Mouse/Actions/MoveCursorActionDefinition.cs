@@ -20,16 +20,15 @@ internal sealed class MoveCursorActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice("positionMode",
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "absolute", Label = AppStrings.Integrations.Mouse.Actions.MoveCursor.Absolute() },
 				new ActionParameterOption
 					{ Value = "relative", Label = AppStrings.Integrations.Mouse.Actions.MoveCursor.Relative() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.MoveCursor.MoveLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.MoveCursor.MoveDescription(),
-			defaultValue: "absolute"),
+			AppStrings.Integrations.Mouse.Actions.MoveCursor.MoveLabel(),
+			AppStrings.Integrations.Mouse.Actions.MoveCursor.MoveDescription(),
+			"absolute"),
 		MouseParameters.X("x",
 			AppStrings.Integrations.Mouse.Actions.Shared.XLabel(),
 			AppStrings.Integrations.Mouse.Actions.Shared.XDescription()),
@@ -38,7 +37,10 @@ internal sealed class MoveCursorActionDefinition : IActionDefinition
 			AppStrings.Integrations.Mouse.Actions.Shared.YDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

@@ -25,7 +25,7 @@ public class ResolveCatalogVariableRequestMessageHandler
 		{
 			return new ResolveCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.ProviderUnavailable),
+				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.ProviderUnavailable)
 			};
 		}
 
@@ -34,13 +34,13 @@ public class ResolveCatalogVariableRequestMessageHandler
 		{
 			return new ResolveCatalogVariableResponse
 			{
-				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.Unresolvable),
+				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.Unresolvable)
 			};
 		}
 
 		return new ResolveCatalogVariableResponse
 		{
-			Node = DiscoverCatalogVariablesRequestMessageHandler.ToDto(definition, request.IntegrationId, _registry),
+			Node = DiscoverCatalogVariablesRequestMessageHandler.ToDto(definition, request.IntegrationId, _registry)
 		};
 	}
 }

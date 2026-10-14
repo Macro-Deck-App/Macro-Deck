@@ -50,7 +50,7 @@ public class ContractIsolationTests
 		}
 
 		throw new FileNotFoundException(
-			"Could not locate MacroDeck.Ui.Testing.csproj by walking up from AppContext.BaseDirectory " +
-			$"('{AppContext.BaseDirectory}').");
+			"Could not locate MacroDeck.Ui.Testing.csproj by walking up from AppContext.BaseDirectory "
+			+ $"('{AppContext.BaseDirectory}').");
 	}
 }

@@ -67,7 +67,7 @@ internal sealed class CalendarSyncBackgroundServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

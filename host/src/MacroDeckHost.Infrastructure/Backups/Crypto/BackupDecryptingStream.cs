@@ -23,7 +23,8 @@ public sealed class BackupDecryptingStream : Stream
 	private uint _segment;
 	private bool _finished;
 
-	public BackupDecryptingStream(Stream source,
+	public BackupDecryptingStream(
+		Stream source,
 		BackupPayloadHeader header,
 		byte[] headerBytes,
 		byte[] dataKey,
@@ -52,7 +53,10 @@ public sealed class BackupDecryptingStream : Stream
 		set => throw new NotSupportedException();
 	}
 
-	public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
+	public override int Read(byte[] buffer, int offset, int count)
+	{
+		return Read(buffer.AsSpan(offset, count));
+	}
 
 	public override int Read(Span<byte> buffer)
 	{
@@ -77,11 +81,20 @@ public sealed class BackupDecryptingStream : Stream
 	{
 	}
 
-	public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+	public override long Seek(long offset, SeekOrigin origin)
+	{
+		throw new NotSupportedException();
+	}
 
-	public override void SetLength(long value) => throw new NotSupportedException();
+	public override void SetLength(long value)
+	{
+		throw new NotSupportedException();
+	}
 
-	public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+	public override void Write(byte[] buffer, int offset, int count)
+	{
+		throw new NotSupportedException();
+	}
 
 	protected override void Dispose(bool disposing)
 	{

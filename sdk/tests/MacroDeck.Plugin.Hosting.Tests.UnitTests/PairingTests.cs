@@ -44,7 +44,7 @@ public class PairingTests
 	public async Task TearDown()
 	{
 		await _host.DisposeAsync();
-		Directory.Delete(_stateDirectory, recursive: true);
+		Directory.Delete(_stateDirectory, true);
 		_manifest.Dispose();
 	}
 
@@ -69,28 +69,36 @@ public class PairingTests
 	}
 
 	private Task<PluginCredentials?> LoadStoredCredentialsAsync()
-		=> new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
+	{
+		return new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
 			new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
 			Serilog.Core.Logger.None).LoadAsync();
+	}
 
-	private static readonly string StaleSecret = new('x', PluginAuthDefaults.MinPluginSecretLength);
+	private static readonly string _staleSecret = new('x', PluginAuthDefaults.MinPluginSecretLength);
 
-	private static readonly string PairedSecret = new('p', PluginAuthDefaults.MinPluginSecretLength);
+	private static readonly string _pairedSecret = new('p', PluginAuthDefaults.MinPluginSecretLength);
 
 	private Task SaveStoredCredentialsAsync(string secret)
-		=> new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
+	{
+		return new FilePluginCredentialStore(Options.Create(new PluginHostOptions { StateDirectory = _stateDirectory }),
 			new PluginMetadata { Id = "com.example.test", Name = "Test Plugin", Version = "1.0.0" },
 			Serilog.Core.Logger.None).SaveAsync(new PluginCredentials("com.example.test", _host.Url, secret));
+	}
 
 	private sealed class ReadOnlyCredentialStore(PluginCredentials credentials) : IPluginCredentialStore
 	{
 		public bool CanSave => false;
 
 		public Task<PluginCredentials?> LoadAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<PluginCredentials?>(credentials);
+		{
+			return Task.FromResult<PluginCredentials?>(credentials);
+		}
 
 		public Task SaveAsync(PluginCredentials credentials, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private static async Task<PluginConnectionStatus> WaitForFaultAsync(PluginApplication plugin)
@@ -209,8 +217,8 @@ public class PairingTests
 	[Test]
 	public async Task A_stored_credential_rejected_before_connecting_pairs_once_and_replaces_it()
 	{
-		await SaveStoredCredentialsAsync(StaleSecret);
-		_host.RejectedSecrets[StaleSecret] = true;
+		await SaveStoredCredentialsAsync(_staleSecret);
+		_host.RejectedSecrets[_staleSecret] = true;
 		_host.PairingApproveAfterPolls = 1;
 
 		await using var plugin = Builder().Build();
@@ -222,15 +230,15 @@ public class PairingTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_host.PairingCreates, Has.Count.EqualTo(1));
-			Assert.That(stored!.Secret, Is.EqualTo(PairedSecret));
+			Assert.That(stored!.Secret, Is.EqualTo(_pairedSecret));
 		});
 	}
 
 	[Test]
 	public async Task A_rejected_re_pairing_prompt_keeps_the_stored_credential()
 	{
-		await SaveStoredCredentialsAsync(StaleSecret);
-		_host.RejectedSecrets[StaleSecret] = true;
+		await SaveStoredCredentialsAsync(_staleSecret);
+		_host.RejectedSecrets[_staleSecret] = true;
 		_host.PairingRejected = true;
 
 		await using var plugin = Builder().Build();
@@ -243,16 +251,16 @@ public class PairingTests
 		{
 			Assert.That(status, Is.EqualTo(PluginConnectionStatus.Faulted));
 			Assert.That(_host.PairingCreates, Has.Count.EqualTo(1));
-			Assert.That(stored!.Secret, Is.EqualTo(StaleSecret));
+			Assert.That(stored!.Secret, Is.EqualTo(_staleSecret));
 		});
 	}
 
 	[Test]
 	public async Task A_credential_rejected_again_after_re_pairing_faults_without_a_second_prompt()
 	{
-		await SaveStoredCredentialsAsync(StaleSecret);
-		_host.RejectedSecrets[StaleSecret] = true;
-		_host.RejectedSecrets[PairedSecret] = true;
+		await SaveStoredCredentialsAsync(_staleSecret);
+		_host.RejectedSecrets[_staleSecret] = true;
+		_host.RejectedSecrets[_pairedSecret] = true;
 		_host.PairingApproveAfterPolls = 1;
 
 		await using var plugin = Builder().Build();
@@ -270,12 +278,12 @@ public class PairingTests
 	[Test]
 	public async Task A_custom_credential_store_that_cannot_save_keeps_a_rejected_credential_fatal()
 	{
-		_host.RejectedSecrets[StaleSecret] = true;
+		_host.RejectedSecrets[_staleSecret] = true;
 		_host.PairingApproveAfterPolls = 1;
 
 		var builder = Builder();
 		builder.Services.AddSingleton<IPluginCredentialStore>(
-			new ReadOnlyCredentialStore(new PluginCredentials("com.example.test", _host.Url, StaleSecret)));
+			new ReadOnlyCredentialStore(new PluginCredentials("com.example.test", _host.Url, _staleSecret)));
 
 		await using var plugin = builder.Build();
 		await plugin.StartAsync();
@@ -292,7 +300,7 @@ public class PairingTests
 	[Test]
 	public async Task A_credential_revoked_after_the_plugin_connected_faults_without_a_prompt()
 	{
-		await SaveStoredCredentialsAsync(StaleSecret);
+		await SaveStoredCredentialsAsync(_staleSecret);
 		_host.PairingApproveAfterPolls = 1;
 
 		await using var plugin = Builder().Build();
@@ -301,7 +309,7 @@ public class PairingTests
 		var socket = await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));
 		await _host.WelcomedAsync();
 
-		_host.RejectedSecrets[StaleSecret] = true;
+		_host.RejectedSecrets[_staleSecret] = true;
 		await socket.CloseOutputAsync((WebSocketCloseStatus)ProtocolCloseCodes.SessionExpired,
 			"expired",
 			CancellationToken.None);
@@ -321,7 +329,7 @@ public class PairingTests
 		// Never approved: a plugin that tried pairing before the token would hang here until the test
 		// itself times out, which is the point - this fails by timeout, not by assertion, if the
 		// precedence is wrong.
-		await using var plugin = Builder(enrollmentToken: "enrollment-token").Build();
+		await using var plugin = Builder("enrollment-token").Build();
 		await plugin.StartAsync();
 
 		await _host.ConnectedAsync().WaitAsync(TimeSpan.FromSeconds(10));
@@ -450,7 +458,7 @@ public class PairingTests
 	{
 		_host.AlreadyRegisteredReason = "plugin_installed";
 
-		await using var plugin = Builder(enrollmentToken: "enrollment-token").Build();
+		await using var plugin = Builder("enrollment-token").Build();
 		await plugin.StartAsync();
 
 		var status = await WaitForFaultAsync(plugin);

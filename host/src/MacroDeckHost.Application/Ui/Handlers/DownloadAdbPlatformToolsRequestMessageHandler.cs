@@ -14,7 +14,8 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 	private readonly IAdbPlatformToolsInstaller _installer;
 	private readonly IHostListenerState _listenerState;
 
-	public DownloadAdbPlatformToolsRequestMessageHandler(IAppPreferenceService preferences,
+	public DownloadAdbPlatformToolsRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IAdbManager adbManager,
 		IAdbPlatformToolsInstaller installer,
 		IHostListenerState listenerState)
@@ -25,7 +26,8 @@ public class DownloadAdbPlatformToolsRequestMessageHandler
 		_listenerState = listenerState;
 	}
 
-	public async ValueTask<DownloadAdbPlatformToolsResponse> Handle(DownloadAdbPlatformToolsRequest request,
+	public async ValueTask<DownloadAdbPlatformToolsResponse> Handle(
+		DownloadAdbPlatformToolsRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _installer.InstallAsync(cancellationToken);

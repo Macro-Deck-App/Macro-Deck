@@ -28,13 +28,25 @@ internal sealed class FakeKeyboardInputProvider : IKeyboardInputProvider
 	{
 	}
 
-	public void KeyDown(KeyCode key) => Events.Add((key, true));
+	public void KeyDown(KeyCode key)
+	{
+		Events.Add((key, true));
+	}
 
-	public void KeyUp(KeyCode key) => Events.Add((key, false));
+	public void KeyUp(KeyCode key)
+	{
+		Events.Add((key, false));
+	}
 
-	public void TypeUnicode(string text) => TypedText.Add(text);
+	public void TypeUnicode(string text)
+	{
+		TypedText.Add(text);
+	}
 
-	public string? GetForegroundProcessName() => ForegroundProcessName;
+	public string? GetForegroundProcessName()
+	{
+		return ForegroundProcessName;
+	}
 
 	public IKeyboardTargetWindow? ResolveTarget(string processName)
 	{
@@ -59,13 +71,25 @@ internal sealed class FakeTargetWindow : IKeyboardTargetWindow
 		return CanFocus ? new Restore(this) : null;
 	}
 
-	public void KeyDown(KeyCode key) => Events.Add((key, true));
+	public void KeyDown(KeyCode key)
+	{
+		Events.Add((key, true));
+	}
 
-	public void KeyUp(KeyCode key) => Events.Add((key, false));
+	public void KeyUp(KeyCode key)
+	{
+		Events.Add((key, false));
+	}
 
-	public void TypeUnicode(string text) => TypedText.Add(text);
+	public void TypeUnicode(string text)
+	{
+		TypedText.Add(text);
+	}
 
-	public void Dispose() => Disposed = true;
+	public void Dispose()
+	{
+		Disposed = true;
+	}
 
 	private sealed class Restore : IDisposable
 	{
@@ -76,6 +100,9 @@ internal sealed class FakeTargetWindow : IKeyboardTargetWindow
 			_owner = owner;
 		}
 
-		public void Dispose() => _owner.RestoreCalls++;
+		public void Dispose()
+		{
+			_owner.RestoreCalls++;
+		}
 	}
 }

@@ -81,7 +81,8 @@ internal sealed class DiscordRpcClient : IDiscordRpcClient
 
 				if (await IsRichPresenceOnlyAsync(connection, ready, linked.Token).ConfigureAwait(false))
 				{
-					_logger.Information("Skipping Discord IPC endpoint {Endpoint}: it only serves Rich Presence", endpoint);
+					_logger.Information("Skipping Discord IPC endpoint {Endpoint}: it only serves Rich Presence",
+						endpoint);
 					skipped.Add(endpoint);
 					continue;
 				}
@@ -233,11 +234,13 @@ internal sealed class DiscordRpcClient : IDiscordRpcClient
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private sealed class Connection : IDisposable
 	{

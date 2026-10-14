@@ -10,7 +10,12 @@ public sealed class MusicPlayerArtworkCallbackThrottle
 	}
 
 	public MusicPlayerArtworkCallbackThrottle(TimeProvider timeProvider, int capacity, double refillPerSecond)
-		=> _bucket = new HostCallbackThrottle(timeProvider, capacity, refillPerSecond);
+	{
+		_bucket = new HostCallbackThrottle(timeProvider, capacity, refillPerSecond);
+	}
 
-	public bool TryConsume(string pluginId) => _bucket.TryConsume(pluginId);
+	public bool TryConsume(string pluginId)
+	{
+		return _bucket.TryConsume(pluginId);
+	}
 }

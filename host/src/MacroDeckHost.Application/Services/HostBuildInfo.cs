@@ -59,7 +59,8 @@ public static class HostBuildInfo
 	private static string? ResolveInformationalVersion()
 	{
 		return ResolveAssembly()
-			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+			?
 			.InformationalVersion;
 	}
 
@@ -67,7 +68,8 @@ public static class HostBuildInfo
 	{
 		var value = ResolveAssembly()
 			.GetCustomAttributes<AssemblyMetadataAttribute>()
-			.FirstOrDefault(attribute => attribute.Key == key)?
+			.FirstOrDefault(attribute => attribute.Key == key)
+			?
 			.Value;
 
 		return string.IsNullOrWhiteSpace(value) ? null : value;

@@ -16,13 +16,19 @@ public sealed class IntegrationsChangedUiNotificationHandler
 	}
 
 	public ValueTask Handle(IntegrationStateChangedNotification notification, CancellationToken cancellationToken)
-		=> Send(notification.IntegrationId, cancellationToken);
+	{
+		return Send(notification.IntegrationId, cancellationToken);
+	}
 
 	public ValueTask Handle(IntegrationCatalogChangedNotification notification, CancellationToken cancellationToken)
-		=> Send(notification.IntegrationId, cancellationToken);
+	{
+		return Send(notification.IntegrationId, cancellationToken);
+	}
 
 	private ValueTask Send(string integrationId, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new IntegrationsChangedEvent { IntegrationId = integrationId },
 			cancellationToken));
+	}
 }

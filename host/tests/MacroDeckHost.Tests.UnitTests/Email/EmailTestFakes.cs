@@ -47,15 +47,30 @@ internal sealed class FakeEmailIntegration : IIntegration, IEmailInboxProvider
 		return this;
 	}
 
-	public void Set(string inboxId, EmailInboxSnapshot snapshot) => _snapshots[inboxId] = snapshot;
+	public void Set(string inboxId, EmailInboxSnapshot snapshot)
+	{
+		_snapshots[inboxId] = snapshot;
+	}
 
-	public void RaiseChanged(string? inboxId) => Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	public void RaiseChanged(string? inboxId)
+	{
+		Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	}
 
-	public IReadOnlyList<EmailInbox> GetInboxes() => Inboxes;
+	public IReadOnlyList<EmailInbox> GetInboxes()
+	{
+		return Inboxes;
+	}
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<EmailInboxSnapshot> GetSnapshotAsync(
 		string inboxId,
@@ -91,7 +106,10 @@ internal sealed class RecordingEmailEventPublisher : IEmailEventPublisher
 {
 	public List<EmailInboxChange> Changes { get; } = [];
 
-	public void Publish(IReadOnlyList<EmailInboxChange> changes) => Changes.AddRange(changes);
+	public void Publish(IReadOnlyList<EmailInboxChange> changes)
+	{
+		Changes.AddRange(changes);
+	}
 }
 
 internal sealed class EmailWorld : IDisposable
@@ -120,9 +138,15 @@ internal sealed class EmailWorld : IDisposable
 
 	public EmailInboxCache Cache { get; }
 
-	public Task SyncAllAsync() => Cache.SyncAsync(EmailSyncRequest.Everything, CancellationToken.None);
+	public Task SyncAllAsync()
+	{
+		return Cache.SyncAsync(EmailSyncRequest.Everything, CancellationToken.None);
+	}
 
-	public Task SyncPendingAsync() => Cache.SyncAsync(Signal.TakePending(), CancellationToken.None);
+	public Task SyncPendingAsync()
+	{
+		return Cache.SyncAsync(Signal.TakePending(), CancellationToken.None);
+	}
 
 	public void Dispose()
 	{
@@ -136,9 +160,14 @@ internal static class EmailTesting
 {
 	public static readonly DateTimeOffset Noon = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-	public static EmailMessage Message(string id, int minutesAfterNoon, bool isRead = false, string? sender = null,
+	public static EmailMessage Message(
+		string id,
+		int minutesAfterNoon,
+		bool isRead = false,
+		string? sender = null,
 		string? subject = null)
-		=> new()
+	{
+		return new EmailMessage
 		{
 			Id = id,
 			SenderName = sender ?? "Sender " + id,
@@ -148,13 +177,15 @@ internal static class EmailTesting
 			ReceivedAt = Noon.AddMinutes(minutesAfterNoon),
 			IsRead = isRead
 		};
+	}
 
 	public static EmailInboxSnapshot Snapshot(
 		EmailInboxStatus status,
 		int unreadCount,
 		IReadOnlyList<EmailMessage> messages,
 		int? totalCount = null)
-		=> new()
+	{
+		return new EmailInboxSnapshot
 		{
 			Status = status,
 			UnreadCount = unreadCount,
@@ -162,6 +193,10 @@ internal static class EmailTesting
 			Messages = [.. messages.OrderByDescending(message => message.ReceivedAt)],
 			SyncedAt = Noon
 		};
+	}
 
-	public static ILogger Logger() => new LoggerConfiguration().CreateLogger();
+	public static ILogger Logger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

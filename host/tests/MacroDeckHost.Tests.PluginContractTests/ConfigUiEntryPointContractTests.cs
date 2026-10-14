@@ -35,26 +35,32 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 {
 	private static DeclaredCapability ConfigFlowProvider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.ConfigFlow,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static DeclaredCapability UiProvider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Ui, LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private static DeclaredCapability Action(string localId)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Actions, LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	/// <summary>Wires the fixture with config-flow, actions and ui all served out of the same
 	/// <see cref="PluginConfigFlowSessions"/> instance, exactly as <c>PluginHostBuilder</c> wires a real
@@ -93,24 +99,28 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 	}
 
 	private IReadOnlyList<JsonElement> SessionOpenInvocations()
-		=>
+	{
+		return
 		[
 			.. Link.SentByHost
 				.Where(envelope =>
 					string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
 				.Select(envelope =>
 					envelope.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)!)
-				.Where(payload => string.Equals(payload.Kind, CapabilityKinds.Ui, StringComparison.Ordinal) &&
-					string.Equals(payload.Operation, CapabilityOperations.Ui.SessionOpen, StringComparison.Ordinal))
+				.Where(payload => string.Equals(payload.Kind, CapabilityKinds.Ui, StringComparison.Ordinal)
+					&& string.Equals(payload.Operation, CapabilityOperations.Ui.SessionOpen, StringComparison.Ordinal))
 				.Select(payload => payload.Arguments!.Value)
 		];
+	}
 
 	private int ConfigFlowSubmitInvocationCount()
-		=> Link.SentByHost.Count(envelope =>
-			string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal) &&
-			envelope.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)! is
-				{ Kind: CapabilityKinds.ConfigFlow } payload &&
-			string.Equals(payload.Operation, CapabilityOperations.ConfigFlow.FlowSubmit, StringComparison.Ordinal));
+	{
+		return Link.SentByHost.Count(envelope =>
+			string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal)
+			&& envelope.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)! is
+				{ Kind: CapabilityKinds.ConfigFlow } payload
+			&& string.Equals(payload.Operation, CapabilityOperations.ConfigFlow.FlowSubmit, StringComparison.Ordinal));
+	}
 
 	[Test]
 	public async Task
@@ -165,7 +175,7 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 			"The client never received the config flow's tree.");
 
 		var pushed = UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Single();
-		var treeText = System.Text.Encoding.UTF8.GetString(pushed.Tree.Utf8.Span);
+		var treeText = Encoding.UTF8.GetString(pushed.Tree.Utf8.Span);
 
 		Assert.That(treeText,
 			Does.Contain("\"id\":\"location\""),
@@ -231,7 +241,8 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 	}
 
 	[Test]
-	public async Task S12b_A_thresholds_value_crosses_the_wire_into_the_plugin_binding_and_a_mode_breaking_one_does_not()
+	public async Task
+		S12b_A_thresholds_value_crosses_the_wire_into_the_plugin_binding_and_a_mode_breaking_one_does_not()
 	{
 		await ConnectFixtureAsync();
 		var (flow, _) = await StartConfigFlowAsync();
@@ -255,11 +266,13 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 		await WaitForUiAsync(() => UiTransport.MessagesFor<UiSessionTreeUpdatedEvent>("c1").Count == 1,
 			"The client never received the config flow's tree.");
 
-		var tree = Encoding.UTF8.GetString(UiTransport.For("c1").Single(recorded => recorded.Message is UiSessionTreeUpdatedEvent)
+		var tree = Encoding.UTF8.GetString(UiTransport.For("c1")
+			.Single(recorded => recorded.Message is UiSessionTreeUpdatedEvent)
 			.Payload!);
 
 		UiSendEventResponse Send(object bands)
-			=> Broker.SendEvent(new UiSendEventRequest
+		{
+			return Broker.SendEvent(new UiSendEventRequest
 				{
 					SessionId = ticket.SessionId,
 					NodeId = WellBehavedConfigFlow.AlertBandsFieldName,
@@ -267,6 +280,7 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 					Data = UiRawJson.FromElement(JsonSerializer.SerializeToElement(new { bands }))
 				},
 				"c1");
+		}
 
 		var fourBands = Send(new object[]
 		{
@@ -369,12 +383,11 @@ internal sealed class ConfigUiEntryPointContractTests : UiContractFixture
 		var definitions = new List<ActionParameter>
 		{
 			ActionParameter.Object("credentials",
-				children:
 				[
-					ActionParameter.Text("username", label: "Username"),
-					ActionParameter.Secret("apiKey", label: "API key")
+					ActionParameter.Text("username", "Username"),
+					ActionParameter.Secret("apiKey", "API key")
 				],
-				label: "Credentials")
+				"Credentials")
 		};
 
 		var stored = new Dictionary<string, JsonElement>(StringComparer.Ordinal)

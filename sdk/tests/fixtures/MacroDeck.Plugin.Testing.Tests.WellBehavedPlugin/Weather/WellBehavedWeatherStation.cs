@@ -18,11 +18,17 @@ internal sealed class WellBehavedWeatherStation(WellBehavedIntegration integrati
 	/// can echo the same value <see cref="GetSnapshotAsync"/> serves, without a second round of I/O.</summary>
 	internal WeatherSnapshot LastSnapshot { get; private set; } = WeatherSnapshot.Unavailable();
 
-	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct) => Task.FromResult(LastSnapshot);
+	public Task<WeatherSnapshot> GetSnapshotAsync(CancellationToken ct)
+	{
+		return Task.FromResult(LastSnapshot);
+	}
 
 	/// <summary>Overrides the condition the next <see cref="Tick"/> reports - what the "force weather
 	/// condition" action drives, so a demo deck can show every icon the Weather widget knows on demand.</summary>
-	internal void SetForcedCondition(WeatherCondition condition) => _forcedCondition = condition;
+	internal void SetForcedCondition(WeatherCondition condition)
+	{
+		_forcedCondition = condition;
+	}
 
 	/// <summary>
 	/// Advances the synthetic reading by one step, caches it, and republishes the plugin's
@@ -38,14 +44,14 @@ internal sealed class WellBehavedWeatherStation(WellBehavedIntegration integrati
 		// A gentle sine wave rather than randomness, so a demo deck shows a believable rise and fall
 		// instead of jumping around - and so this fixture's own tests get a deterministic reading.
 		var temperature = Math.Round(15 + 6 * Math.Sin(_tickCount * 0.5), 1);
-		var condition = _forcedCondition ??
-			(temperature switch
+		var condition = _forcedCondition
+			?? temperature switch
 			{
 				< 0 => WeatherCondition.Snow,
 				< 12 => WeatherCondition.Overcast,
 				< 20 => WeatherCondition.PartlyCloudy,
 				_ => WeatherCondition.Clear
-			});
+			};
 
 		var today = DateOnly.FromDateTime(DateTime.UtcNow);
 		LastSnapshot = new WeatherSnapshot
@@ -60,6 +66,6 @@ internal sealed class WellBehavedWeatherStation(WellBehavedIntegration integrati
 			Days = [new WeatherForecastDay(today, condition, temperature - 4, temperature + 4)]
 		};
 
-		integration.PublishWeatherRefreshed(LastSnapshot, isAlert: temperature >= integration.AlertThresholdCelsius);
+		integration.PublishWeatherRefreshed(LastSnapshot, temperature >= integration.AlertThresholdCelsius);
 	}
 }

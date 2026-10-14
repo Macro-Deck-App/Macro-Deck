@@ -22,11 +22,13 @@ internal static class VoicemeeterVariableWriter
 		string? ownerWidgetId,
 		VariableType type,
 		object value)
-		=> ActionVariableTarget.WriteAsync(accessor.UserVariables,
+	{
+		return ActionVariableTarget.WriteAsync(accessor.UserVariables,
 			accessor.Current,
 			variableName,
 			ownerWidgetId,
 			type,
 			value,
 			_logger);
+	}
 }

@@ -19,9 +19,13 @@ internal sealed class CapabilityCatalog(IEnumerable<ICapabilityHandler> handlers
 
 	/// <summary>Everything the plugin currently declares, across all handlers.</summary>
 	public IReadOnlyList<DeclaredCapability> Declare()
-		=> [.. _handlers.SelectMany(handler => handler.DeclareCapabilities())];
+	{
+		return [.. _handlers.SelectMany(handler => handler.DeclareCapabilities())];
+	}
 
 	/// <summary>The handler serving <paramref name="kind" />, or null when nothing does.</summary>
 	public ICapabilityHandler? Find(string kind)
-		=> _handlers.FirstOrDefault(handler => string.Equals(handler.Kind, kind, StringComparison.Ordinal));
+	{
+		return _handlers.FirstOrDefault(handler => string.Equals(handler.Kind, kind, StringComparison.Ordinal));
+	}
 }

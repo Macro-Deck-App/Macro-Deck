@@ -26,13 +26,19 @@ public class TemplatesController : ControllerBase
 
 	[HttpPost("render")]
 	public Task<RenderTemplateResponse> Render(RenderTemplateRequest body, CancellationToken ct)
-		=> _renderTemplate.Handle(body, ct).AsTask();
+	{
+		return _renderTemplate.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("evaluate-condition")]
 	public Task<EvaluateConditionResponse> EvaluateCondition(EvaluateConditionRequest body, CancellationToken ct)
-		=> _evaluateCondition.Handle(body, ct).AsTask();
+	{
+		return _evaluateCondition.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("evaluate-expression")]
 	public Task<EvaluateExpressionResponse> EvaluateExpression(EvaluateExpressionRequest body, CancellationToken ct)
-		=> _evaluateExpression.Handle(body, ct).AsTask();
+	{
+		return _evaluateExpression.Handle(body, ct).AsTask();
+	}
 }

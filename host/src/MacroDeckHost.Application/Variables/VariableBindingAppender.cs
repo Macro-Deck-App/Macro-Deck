@@ -16,7 +16,8 @@ public sealed class VariableBindingAppender
 		_time = time ?? TimeProvider.System;
 	}
 
-	public async Task<IReadOnlyList<VariableBindingOutcome>> AppendAsync(string integrationId,
+	public async Task<IReadOnlyList<VariableBindingOutcome>> AppendAsync(
+		string integrationId,
 		IReadOnlyCollection<VariableBindingRequest> requests,
 		CancellationToken cancellationToken = default)
 	{

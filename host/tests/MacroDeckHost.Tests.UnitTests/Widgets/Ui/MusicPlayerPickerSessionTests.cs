@@ -28,11 +28,11 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 [NonParallelizable]
 public class MusicPlayerPickerSessionTests
 {
-	private const string _searchNodeId = "picker.search";
+	private const string SearchNodeId = "picker.search";
 
-	private const string _rowPrefix = "picker.results.";
+	private const string RowPrefix = "picker.results.";
 
-	private const string _listNodeId = "picker.results";
+	private const string ListNodeId = "picker.results";
 
 	[Test]
 	[CancelAfter(60_000)]
@@ -48,7 +48,7 @@ public class MusicPlayerPickerSessionTests
 		// The first load is the one the constructor starts, and its answer is what puts a cover fetch in
 		// flight - so by the time the race begins the session has one of each outstanding.
 		var first = fixture.NextCatalogCall();
-		first.Completion.SetResult(Items("a", withArtwork: true));
+		first.Completion.SetResult(Items("a", true));
 
 		var cover = fixture.NextArtworkCall();
 
@@ -77,7 +77,7 @@ public class MusicPlayerPickerSessionTests
 				fixture.Session.DisposeAsync().AsTask().GetAwaiter().GetResult();
 				Volatile.Write(ref disposeReturned, true);
 			},
-			() => second.Completion.SetResult(Items("b", withArtwork: true)),
+			() => second.Completion.SetResult(Items("b", true)),
 			() => cover.Completion.SetResult(new ArtworkImageResult([1, 2, 3, 4], "image/webp", "\"a\"")));
 
 		AssertNoWorkerFaulted(failures);
@@ -104,7 +104,7 @@ public class MusicPlayerPickerSessionTests
 		await settled.Session.DisposeAsync();
 
 		settled.Session.DrainPatches();
-		pending.Completion.SetResult(Items("late", withArtwork: false));
+		pending.Completion.SetResult(Items("late", false));
 
 		Assert.That(settled.Session.DrainPatches(),
 			Is.Empty,
@@ -149,7 +149,7 @@ public class MusicPlayerPickerSessionTests
 		{
 			fixture.Session.Changed += (_, _) => changed.Set();
 
-			fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: false));
+			fixture.NextCatalogCall().Completion.SetResult(Items("a", false));
 
 			WaitForRows(fixture, changed, Rows("a"), "the first answer never reached the view");
 
@@ -161,13 +161,13 @@ public class MusicPlayerPickerSessionTests
 
 			Assert.That(second.Filter, Is.EqualTo("B"), "the session stopped asking for what the user typed");
 
-			second.Completion.SetResult(Items("b", withArtwork: false));
+			second.Completion.SetResult(Items("b", false));
 
 			WaitForRows(fixture,
 				changed,
 				Rows("b"),
-				"the second search's rows never replaced the first one's - the session stopped updating after " +
-				"the first concurrent access");
+				"the second search's rows never replaced the first one's - the session stopped updating after "
+				+ "the first concurrent access");
 		}
 		finally
 		{
@@ -291,7 +291,7 @@ public class MusicPlayerPickerSessionTests
 	{
 		var fixture = new PickerFixture();
 
-		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", true));
 
 		var cover = fixture.NextArtworkCall();
 
@@ -327,14 +327,14 @@ public class MusicPlayerPickerSessionTests
 	{
 		await using var fixture = new PickerFixture();
 
-		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", true));
 
 		var failed = fixture.NextArtworkCall();
 		failed.Completion.SetResult(null);
 
 		fixture.Type("A");
 
-		fixture.NextCatalogCall().Completion.SetResult(Items("a", withArtwork: true));
+		fixture.NextCatalogCall().Completion.SetResult(Items("a", true));
 
 		Assert.That(fixture.NextArtworkCall().Filter,
 			Is.EqualTo(failed.Filter),
@@ -376,17 +376,23 @@ public class MusicPlayerPickerSessionTests
 	}
 
 	private static List<MusicPlayerCatalogItem> ManyItems(string prefix, int count)
-		=> Enumerable.Range(0, count)
+	{
+		return Enumerable.Range(0, count)
 			.Select(index => new MusicPlayerCatalogItem($"{prefix}{index}",
 				$"{prefix} {index}",
 				MusicPlayerCatalogItemKind.Track))
 			.ToList();
+	}
 
 	private static List<string> ManyRows(string prefix, int count)
-		=> ManyItems(prefix, count).Select(item => _rowPrefix + item.Id).ToList();
+	{
+		return ManyItems(prefix, count).Select(item => RowPrefix + item.Id).ToList();
+	}
 
 	private static List<string> Rows(string prefix)
-		=> Items(prefix, withArtwork: false).Select(item => _rowPrefix + item.Id).ToList();
+	{
+		return Items(prefix, false).Select(item => RowPrefix + item.Id).ToList();
+	}
 
 	/// <summary>Waits for the tree to hold the rows the test asserts on rather than for one Changed signal -
 	/// a pass raises that event for anything it writes, so a single signal says nothing about which answer
@@ -416,33 +422,42 @@ public class MusicPlayerPickerSessionTests
 
 			Assert.That(remaining > TimeSpan.Zero && changed.Wait(remaining),
 				Is.True,
-				$"{because}. Expected rows [{string.Join(", ", expected)}] but the tree last held " +
-				$"[{string.Join(", ", rows)}]");
+				$"{because}. Expected rows [{string.Join(", ", expected)}] but the tree last held "
+				+ $"[{string.Join(", ", rows)}]");
 		}
 	}
 
 	private static IReadOnlyList<MusicPlayerCatalogItem> Items(string prefix, bool withArtwork)
-		=>
+	{
+		return
 		[
-			new($"{prefix}1",
+			new MusicPlayerCatalogItem($"{prefix}1",
 				$"{prefix} one",
 				MusicPlayerCatalogItemKind.Track,
 				ArtworkId: withArtwork ? $"{prefix}-art" : null),
-			new($"{prefix}2", $"{prefix} two", MusicPlayerCatalogItemKind.Track),
+			new MusicPlayerCatalogItem($"{prefix}2", $"{prefix} two", MusicPlayerCatalogItemKind.Track)
 		];
+	}
 
 	private static List<MusicPlayerCatalogItem> Covered(string prefix, int count)
-		=> Enumerable.Range(0, count)
+	{
+		return Enumerable.Range(0, count)
 			.Select(index => new MusicPlayerCatalogItem($"{prefix}{index:00}",
 				$"{prefix} {index}",
 				MusicPlayerCatalogItemKind.Track,
 				ArtworkId: $"{prefix}-art-{index:00}"))
 			.ToList();
+	}
 
-	private static ArtworkImageResult Image() => new([1, 2, 3, 4], "image/webp", "\"cover\"");
+	private static ArtworkImageResult Image()
+	{
+		return new ArtworkImageResult([1, 2, 3, 4], "image/webp", "\"cover\"");
+	}
 
 	private static string ItemFor(PendingCall<ArtworkImageResult?> call)
-		=> call.Filter!.Replace("-art-", string.Empty, StringComparison.Ordinal);
+	{
+		return call.Filter!.Replace("-art-", string.Empty, StringComparison.Ordinal);
+	}
 
 	private static void WaitForCovers(PickerFixture fixture, List<string> expected, string because)
 	{
@@ -459,8 +474,8 @@ public class MusicPlayerPickerSessionTests
 
 			Assert.That(DateTime.UtcNow < deadline,
 				Is.True,
-				$"{because}. Expected covers on [{string.Join(", ", expected)}] but the tree held them on " +
-				$"[{string.Join(", ", covered.Order(StringComparer.Ordinal))}]");
+				$"{because}. Expected covers on [{string.Join(", ", expected)}] but the tree held them on "
+				+ $"[{string.Join(", ", covered.Order(StringComparer.Ordinal))}]");
 
 			Thread.Sleep(10);
 		}
@@ -476,14 +491,14 @@ public class MusicPlayerPickerSessionTests
 
 		static void Walk(UiNode node, string? row, HashSet<string> into)
 		{
-			if (node.Id.StartsWith(_rowPrefix, StringComparison.Ordinal) &&
-				node.Id.LastIndexOf('.') == _rowPrefix.Length - 1)
+			if (node.Id.StartsWith(RowPrefix, StringComparison.Ordinal)
+				&& node.Id.LastIndexOf('.') == RowPrefix.Length - 1)
 			{
-				row = node.Id[_rowPrefix.Length..];
+				row = node.Id[RowPrefix.Length..];
 			}
 
-			if (row is not null &&
-				node.Properties.Values.Any(value => value.GetRawText().Contains(".pick.", StringComparison.Ordinal)))
+			if (row is not null
+				&& node.Properties.Values.Any(value => value.GetRawText().Contains(".pick.", StringComparison.Ordinal)))
 			{
 				into.Add(row);
 			}
@@ -500,15 +515,24 @@ public class MusicPlayerPickerSessionTests
 	{
 		private readonly Exception _exception;
 
-		public PoisonedList(Exception exception) => _exception = exception;
+		public PoisonedList(Exception exception)
+		{
+			_exception = exception;
+		}
 
 		public int Count => 1;
 
 		public MusicPlayerCatalogItem this[int index] => throw _exception;
 
-		public IEnumerator<MusicPlayerCatalogItem> GetEnumerator() => throw _exception;
+		public IEnumerator<MusicPlayerCatalogItem> GetEnumerator()
+		{
+			throw _exception;
+		}
 
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 	}
 
 	private static List<string> RowIds(UiNode root)
@@ -522,8 +546,8 @@ public class MusicPlayerPickerSessionTests
 		static void Walk(UiNode node, List<string> into)
 		{
 			// A row is a direct child of the results list, so its id is the list's plus the item's own.
-			if (node.Id.StartsWith(_rowPrefix, StringComparison.Ordinal) &&
-				node.Id.LastIndexOf('.') == _rowPrefix.Length - 1)
+			if (node.Id.StartsWith(RowPrefix, StringComparison.Ordinal)
+				&& node.Id.LastIndexOf('.') == RowPrefix.Length - 1)
 			{
 				into.Add(node.Id);
 			}
@@ -556,7 +580,8 @@ public class MusicPlayerPickerSessionTests
 		private readonly FakeArtworkService _artwork = new();
 
 		public PickerFixture()
-			=> Session = new MusicPlayerPickerSession(
+		{
+			Session = new MusicPlayerPickerSession(
 				new UiSurface { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
 				new FakeCatalogRegistry(_player),
 				_artwork,
@@ -564,34 +589,51 @@ public class MusicPlayerPickerSessionTests
 				"spotify.1",
 				MusicPlayerCatalogItemKind.Track,
 				new LoggerConfiguration().CreateLogger());
+		}
 
 		public MusicPlayerPickerSession Session { get; }
 
 		public void Type(string text)
-			=> Session.Dispatch(new UiEvent
+		{
+			Session.Dispatch(new UiEvent
 			{
-				NodeId = _searchNodeId,
+				NodeId = SearchNodeId,
 				Name = UiComponentEvents.Change,
-				Data = UiCanonicalJson.ToElement(text),
+				Data = UiCanonicalJson.ToElement(text)
 			});
+		}
 
 		public void Reveal(int index)
-			=> Session.Dispatch(new UiEvent
+		{
+			Session.Dispatch(new UiEvent
 			{
-				NodeId = _listNodeId,
+				NodeId = ListNodeId,
 				Name = UiComponentEvents.Reveal,
-				Data = UiCanonicalJson.ToElement(index),
+				Data = UiCanonicalJson.ToElement(index)
 			});
+		}
 
 		/// <summary>The next catalog read the session performs, waited for rather than slept for - the
 		/// session's own debounce is what decides when it happens.</summary>
-		public PendingCall<IReadOnlyList<MusicPlayerCatalogItem>> NextCatalogCall() => _player.Next();
+		public PendingCall<IReadOnlyList<MusicPlayerCatalogItem>> NextCatalogCall()
+		{
+			return _player.Next();
+		}
 
-		public PendingCall<ArtworkImageResult?> NextArtworkCall() => _artwork.Next();
+		public PendingCall<ArtworkImageResult?> NextArtworkCall()
+		{
+			return _artwork.Next();
+		}
 
-		public bool TryNextArtworkCall(out PendingCall<ArtworkImageResult?>? call) => _artwork.TryNext(out call);
+		public bool TryNextArtworkCall(out PendingCall<ArtworkImageResult?>? call)
+		{
+			return _artwork.TryNext(out call);
+		}
 
-		public ValueTask DisposeAsync() => Session.DisposeAsync();
+		public ValueTask DisposeAsync()
+		{
+			return Session.DisposeAsync();
+		}
 	}
 
 	/// <summary>One call the session made: what it asked for, the token it was handed, and the answer the
@@ -615,16 +657,27 @@ public class MusicPlayerPickerSessionTests
 	{
 		private readonly IMusicPlayer _player;
 
-		public FakeCatalogRegistry(IMusicPlayer player) => _player = player;
+		public FakeCatalogRegistry(IMusicPlayer player)
+		{
+			_player = player;
+		}
 
 		public IMusicPlayer? DefaultPlayer => _player;
 
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => [];
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return [];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => _player;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return _player;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> GetPlayer(instanceId);
+		{
+			return GetPlayer(instanceId);
+		}
 	}
 
 	private sealed class FakeCatalogPlayer : IMusicPlayer, IMusicPlayerCatalogProvider
@@ -649,34 +702,67 @@ public class MusicPlayerPickerSessionTests
 			return call.Completion.Task;
 		}
 
-		public PendingCall<IReadOnlyList<MusicPlayerCatalogItem>> Next() => Take(_gate, _calls, "read the catalog");
+		public PendingCall<IReadOnlyList<MusicPlayerCatalogItem>> Next()
+		{
+			return Take(_gate, _calls, "read the catalog");
+		}
 
 		public Task<MusicPlayerState> GetStateAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(MusicPlayerState.Disconnected);
+		{
+			return Task.FromResult(MusicPlayerState.Disconnected);
+		}
 
-		public Task<MusicPlayerArtwork?> GetArtworkAsync(string artworkId,
+		public Task<MusicPlayerArtwork?> GetArtworkAsync(
+			string artworkId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<MusicPlayerArtwork?>(null);
+		{
+			return Task.FromResult<MusicPlayerArtwork?>(null);
+		}
 
-		public Task PlayAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PlayAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task TogglePlayPauseAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task NextAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task NextAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task PreviousAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task PreviousAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetVolumeAsync(int volumePercent, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task SetShuffleAsync(bool enabled, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetRepeatModeAsync(RepeatMode mode, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeArtworkService : IMusicPlayerArtworkService
@@ -684,13 +770,19 @@ public class MusicPlayerPickerSessionTests
 		private readonly Queue<PendingCall<ArtworkImageResult?>> _calls = new();
 		private readonly object _gate = new();
 
-		public string GetETag(string artworkId, int? size) => $"\"{artworkId}\"";
+		public string GetETag(string artworkId, int? size)
+		{
+			return $"\"{artworkId}\"";
+		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		{
+			return GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		}
 
 		public Task<ArtworkImageResult?> GetImage(
 			string instanceId,
@@ -709,7 +801,10 @@ public class MusicPlayerPickerSessionTests
 			return call.Completion.Task.WaitAsync(cancellationToken);
 		}
 
-		public PendingCall<ArtworkImageResult?> Next() => Take(_gate, _calls, "fetch a cover");
+		public PendingCall<ArtworkImageResult?> Next()
+		{
+			return Take(_gate, _calls, "fetch a cover");
+		}
 
 		public bool TryNext(out PendingCall<ArtworkImageResult?>? call)
 		{

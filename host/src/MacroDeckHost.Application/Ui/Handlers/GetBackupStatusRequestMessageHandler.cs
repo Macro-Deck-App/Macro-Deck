@@ -10,9 +10,12 @@ public sealed class GetBackupStatusRequestMessageHandler
 	private readonly IBackupProgressReporter _progressReporter;
 
 	public GetBackupStatusRequestMessageHandler(IBackupProgressReporter progressReporter)
-		=> _progressReporter = progressReporter;
+	{
+		_progressReporter = progressReporter;
+	}
 
-	public ValueTask<GetBackupStatusResponse> Handle(GetBackupStatusRequest request,
+	public ValueTask<GetBackupStatusResponse> Handle(
+		GetBackupStatusRequest request,
 		CancellationToken cancellationToken)
 	{
 		var status = _progressReporter.Current;

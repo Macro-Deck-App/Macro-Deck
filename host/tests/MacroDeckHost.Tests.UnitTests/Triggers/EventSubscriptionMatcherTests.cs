@@ -21,8 +21,8 @@ public class EventSubscriptionMatcherTests
 		{
 			Id = "scene-changed",
 			Name = "Scene Changed",
-			ConfigurationParameters = [ActionParameter.Text("sceneName", label: "Scene")],
-			PayloadParameters = [ActionParameter.Text("sceneName", label: "Scene")]
+			ConfigurationParameters = [ActionParameter.Text("sceneName", "Scene")],
+			PayloadParameters = [ActionParameter.Text("sceneName", "Scene")]
 		});
 
 	private static readonly EventDefinitionDescriptor _valueChanged = new(QualifiedId.Parse("var::value-changed"),
@@ -33,8 +33,8 @@ public class EventSubscriptionMatcherTests
 		{
 			Id = "value-changed",
 			Name = "Variable Changed",
-			ConfigurationParameters = [ActionParameter.Number("value", label: "Value")],
-			PayloadParameters = [ActionParameter.Number("value", label: "Value")]
+			ConfigurationParameters = [ActionParameter.Number("value", "Value")],
+			PayloadParameters = [ActionParameter.Number("value", "Value")]
 		});
 
 	private static readonly EventDefinitionDescriptor _targetedSceneChanged = new(
@@ -58,7 +58,10 @@ public class EventSubscriptionMatcherTests
 			]
 		});
 
-	private static EventSubscriptionMatcher Matcher() => new(new ActionConditionEvaluator(Renderer()));
+	private static EventSubscriptionMatcher Matcher()
+	{
+		return new EventSubscriptionMatcher(new ActionConditionEvaluator(Renderer()));
+	}
 
 	private static VariableTemplateRenderer Renderer(params VariableEntity[] vars)
 	{
@@ -74,13 +77,18 @@ public class EventSubscriptionMatcherTests
 	private static VariableContext Context(
 		IReadOnlyDictionary<string, object?> eventParameters,
 		params VariableEntity[] vars)
-		=> Renderer(vars).CreateContextAsync(VariableScope.Global, null)
+	{
+		return Renderer(vars)
+			.CreateContextAsync(VariableScope.Global, null)
 			.GetAwaiter()
 			.GetResult()
 			.WithEvent(eventParameters);
+	}
 
 	private static EventConfigurationValue Config(string json, string? op = null)
-		=> new(JsonDocument.Parse(json).RootElement.Clone(), op);
+	{
+		return new EventConfigurationValue(JsonDocument.Parse(json).RootElement.Clone(), op);
+	}
 
 	private static EventSubscription Subscription(string? configuredScene, string? filterJson = null, string? op = null)
 	{
@@ -102,10 +110,14 @@ public class EventSubscriptionMatcherTests
 	}
 
 	private static Dictionary<string, object?> Payload(string sceneName)
-		=> new(StringComparer.Ordinal) { ["sceneName"] = sceneName };
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal) { ["sceneName"] = sceneName };
+	}
 
 	private static EventOccurrence Occurrence(string sceneName, EventTarget? target = null)
-		=> new("obs::scene-changed", Payload(sceneName), target);
+	{
+		return new EventOccurrence("obs::scene-changed", Payload(sceneName), target);
+	}
 
 	private static EventSubscription NumericSubscription(JsonElement configuredValue, string? op = null)
 	{
@@ -122,10 +134,14 @@ public class EventSubscriptionMatcherTests
 	}
 
 	private static Dictionary<string, object?> NumericPayload(double value)
-		=> new(StringComparer.Ordinal) { ["value"] = value };
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal) { ["value"] = value };
+	}
 
 	private static EventOccurrence NumericOccurrence(double value, EventTarget? target = null)
-		=> new("var::value-changed", NumericPayload(value), target);
+	{
+		return new EventOccurrence("var::value-changed", NumericPayload(value), target);
+	}
 
 	// B2-B5: state operator filters on the "sceneName" payload parameter, configured by operator alone (no
 	// configured value).
@@ -143,7 +159,10 @@ public class EventSubscriptionMatcherTests
 			null);
 	}
 
-	private static Dictionary<string, object?> Omitted() => new(StringComparer.Ordinal);
+	private static Dictionary<string, object?> Omitted()
+	{
+		return new Dictionary<string, object?>(StringComparer.Ordinal);
+	}
 
 	private const string EditorCombo = """{"modifiers":["Ctrl","Shift"],"key":"F3"}""";
 
@@ -162,7 +181,8 @@ public class EventSubscriptionMatcherTests
 		});
 
 	private static EventSubscription ComboSubscription(string configuredJson, string? op = null)
-		=> new(EventTriggerOwner.ForWidget(Guid.NewGuid()),
+	{
+		return new EventSubscription(EventTriggerOwner.ForWidget(Guid.NewGuid()),
 			"t1",
 			"hotkey::pressed",
 			new Dictionary<string, EventConfigurationValue>(StringComparer.Ordinal)
@@ -170,11 +190,15 @@ public class EventSubscriptionMatcherTests
 				["combo"] = Config(configuredJson, op)
 			},
 			null);
+	}
 
 	private static bool ComboMatches(string configuredJson, object? published, string? op = null)
-		=> Matcher().Matches(ComboSubscription(configuredJson, op),
-			_hotkeyPressed,
-			Context(new Dictionary<string, object?>(StringComparer.Ordinal) { ["combo"] = published }));
+	{
+		return Matcher()
+			.Matches(ComboSubscription(configuredJson, op),
+				_hotkeyPressed,
+				Context(new Dictionary<string, object?>(StringComparer.Ordinal) { ["combo"] = published }));
+	}
 
 	[TestCase(EditorCombo)]
 	[TestCase(ReorderedCombo)]
@@ -182,7 +206,9 @@ public class EventSubscriptionMatcherTests
 	[TestCase("""{"modifiers":["Shift","Ctrl"],"key":"F3"}""")]
 	[TestCase("""{"key":"f3","modifiers":["ctrl","shift"]}""")]
 	public void A_combo_trigger_matches_the_same_combo_published_in_any_order(string published)
-		=> Assert.That(ComboMatches(EditorCombo, published), Is.True);
+	{
+		Assert.That(ComboMatches(EditorCombo, published), Is.True);
+	}
 
 	[Test]
 	public void A_combo_configured_as_a_json_string_is_not_quick_rejected_for_a_reordered_combo()
@@ -200,7 +226,9 @@ public class EventSubscriptionMatcherTests
 
 	[Test]
 	public void A_combo_configured_with_modifiers_in_click_order_matches_the_recorded_order()
-		=> Assert.That(ComboMatches("""{"modifiers":["Shift","Ctrl"],"key":"F3"}""", EditorCombo), Is.True);
+	{
+		Assert.That(ComboMatches("""{"modifiers":["Shift","Ctrl"],"key":"F3"}""", EditorCombo), Is.True);
+	}
 
 	[Test]
 	public void A_combo_trigger_matches_a_combo_published_as_a_structured_value()
@@ -226,7 +254,9 @@ public class EventSubscriptionMatcherTests
 	[TestCase("""{"foo":1}""")]
 	[TestCase("Ctrl+Shift+F3")]
 	public void A_combo_trigger_does_not_match_a_different_combo(string published)
-		=> Assert.That(ComboMatches(EditorCombo, published), Is.False);
+	{
+		Assert.That(ComboMatches(EditorCombo, published), Is.False);
+	}
 
 	[Test]
 	public void A_not_equal_combo_trigger_compares_combos_regardless_of_order()
@@ -243,25 +273,35 @@ public class EventSubscriptionMatcherTests
 	[TestCase("""{"modifiers":["Meta"],"key":"F3"}""", """{"modifiers":["Cmd"],"key":"F3"}""")]
 	[TestCase("""{"modifiers":["Win"],"key":"F3"}""", """{"modifiers":["Command"],"key":"F3"}""")]
 	[TestCase("""{"modifiers":["Alt"],"key":"Escape"}""", """{"modifiers":["Option"],"key":"Esc"}""")]
-	[TestCase("""{"modifiers":["Ctrl","Shift"],"key":"Enter"}""", """{"modifiers":["shift","Control"],"key":"Return"}""")]
+	[TestCase("""{"modifiers":["Ctrl","Shift"],"key":"Enter"}""",
+		"""{"modifiers":["shift","Control"],"key":"Return"}""")]
 	[TestCase("""{"modifiers":["AltGr"],"key":"q"}""", """{"modifiers":["Alt"],"key":"Q"}""")]
 	[TestCase("""{"modifiers":["Ctrl"],"key":"5"}""", """{"modifiers":["Ctrl"],"key":"D5"}""")]
 	[TestCase("""{"modifiers":["Hyper"],"key":"LaunchMail"}""", """{"modifiers":["hyper"],"key":"launchmail"}""")]
-	public void A_combo_trigger_matches_the_same_combo_spelled_with_equivalent_names(string configured, string published)
-		=> Assert.That(ComboMatches(configured, published), Is.True);
+	public void A_combo_trigger_matches_the_same_combo_spelled_with_equivalent_names(
+		string configured,
+		string published)
+	{
+		Assert.That(ComboMatches(configured, published), Is.True);
+	}
 
 	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl"],"key":"="}""")]
 	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["RightCtrl"],"key":"-"}""")]
 	[TestCase("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl","Hyper"],"key":"Minus"}""")]
 	[TestCase("""{"modifiers":["Hyper"],"key":"LaunchMail"}""", """{"modifiers":["Hyper"],"key":"LaunchApp1"}""")]
 	public void A_combo_trigger_does_not_match_a_different_key_behind_a_known_name(string configured, string published)
-		=> Assert.That(ComboMatches(configured, published), Is.False);
+	{
+		Assert.That(ComboMatches(configured, published), Is.False);
+	}
 
 	[Test]
 	public void A_not_equal_combo_trigger_treats_equivalent_names_as_the_same_combo()
-		=> Assert.That(
-			ComboMatches("""{"modifiers":["Ctrl"],"key":"Minus"}""", """{"modifiers":["Ctrl"],"key":"-"}""", "!="),
+	{
+		Assert.That(ComboMatches("""{"modifiers":["Ctrl"],"key":"Minus"}""",
+				"""{"modifiers":["Ctrl"],"key":"-"}""",
+				"!="),
 			Is.False);
+	}
 
 	[Test]
 	public void A_hotkey_trigger_matches_the_same_hotkey_spelled_with_equivalent_names()
@@ -286,12 +326,13 @@ public class EventSubscriptionMatcherTests
 			},
 			null);
 
-		Assert.That(Matcher().Matches(subscription,
-				hotkey,
-				Context(new Dictionary<string, object?>(StringComparer.Ordinal)
-				{
-					["hotkey"] = """{"modifiers":["Control"],"key":"-"}"""
-				})),
+		Assert.That(Matcher()
+				.Matches(subscription,
+					hotkey,
+					Context(new Dictionary<string, object?>(StringComparer.Ordinal)
+					{
+						["hotkey"] = """{"modifiers":["Control"],"key":"-"}"""
+					})),
 			Is.True);
 	}
 
@@ -413,8 +454,8 @@ public class EventSubscriptionMatcherTests
 					{
 						Assert.That(quickReject,
 							Is.False,
-							$"{op} / configured={configuredLabel} / occurrence={occurrenceLabel}: " +
-							"Matches was true but QuickReject rejected it");
+							$"{op} / configured={configuredLabel} / occurrence={occurrenceLabel}: "
+							+ "Matches was true but QuickReject rejected it");
 					}
 				}
 			}
@@ -674,7 +715,8 @@ public class EventSubscriptionMatcherTests
 	[TestCase(">=", 50, 49, false)]
 	[TestCase("<=", 50, 50, true)]
 	[TestCase("<=", 50, 51, false)]
-	public void Matches_and_QuickReject_agree_on_every_operator(string op,
+	public void Matches_and_QuickReject_agree_on_every_operator(
+		string op,
 		double configured,
 		double actual,
 		bool shouldMatch)

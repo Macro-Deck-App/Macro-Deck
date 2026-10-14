@@ -12,7 +12,8 @@ namespace MacroDeck.Plugin.Cli.Scaffolding;
 /// </summary>
 internal static class PluginScaffolder
 {
-	public static async Task<PluginScaffoldResult> ScaffoldAsync(PluginScaffoldRequest request,
+	public static async Task<PluginScaffoldResult> ScaffoldAsync(
+		PluginScaffoldRequest request,
 		IPluginScaffoldGenerator generator,
 		CancellationToken cancellationToken = default)
 	{
@@ -124,8 +125,8 @@ internal static class PluginScaffolder
 			{
 				CleanUpIfWeCreatedIt(request.Output, weCreatedOutputDirectory);
 				return PluginScaffoldResult.Fail(PluginScaffoldFailureReason.ManifestRewriteFailed,
-					"The rewritten manifest.json failed schema validation - this is a bug in 'new', not the " +
-					"supplied values.",
+					"The rewritten manifest.json failed schema validation - this is a bug in 'new', not the "
+					+ "supplied values.",
 					string.Join(Environment.NewLine, problems.Select(problem => problem.Message)));
 			}
 		}
@@ -166,7 +167,7 @@ internal static class PluginScaffolder
 
 		try
 		{
-			Directory.Delete(outputDirectory, recursive: true);
+			Directory.Delete(outputDirectory, true);
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{

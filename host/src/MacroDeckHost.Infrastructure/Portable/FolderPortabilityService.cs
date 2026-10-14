@@ -48,7 +48,8 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		return Result.Ok<string, PortabilityError>(fileName);
 	}
 
-	public async Task<Result<byte[], PortabilityError>> Export(Guid folderId,
+	public async Task<Result<byte[], PortabilityError>> Export(
+		Guid folderId,
 		PortableExportOptions options,
 		CancellationToken cancellationToken)
 	{
@@ -106,7 +107,8 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		return Result.Ok<byte[], PortabilityError>(bytes);
 	}
 
-	public async Task<Result<IReadOnlyList<FolderEntity>, PortabilityError>> Import(Guid profileId,
+	public async Task<Result<IReadOnlyList<FolderEntity>, PortabilityError>> Import(
+		Guid profileId,
 		Guid? parentFolderId,
 		byte[] archiveBytes,
 		string? password,
@@ -146,8 +148,8 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 			return Fail(PortabilityError.InvalidArchive, "The archived folder tree is malformed");
 		}
 
-		if (ordered.Any(folder => folder.Rows is null or < 1 or > MaxGridSize ||
-			folder.Columns is null or < 1 or > MaxGridSize))
+		if (ordered.Any(folder
+			=> folder.Rows is null or < 1 or > MaxGridSize || folder.Columns is null or < 1 or > MaxGridSize))
 		{
 			return Fail(PortabilityError.InvalidArchive, "The archived folder grid is out of range");
 		}
@@ -178,7 +180,10 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 
 		try
 		{
-			foreach (var (oldId, newId) in await _assetManager.Import(content, outcome.Icons, outcome.Fonts, cancellationToken))
+			foreach (var (oldId, newId) in await _assetManager.Import(content,
+				outcome.Icons,
+				outcome.Fonts,
+				cancellationToken))
 			{
 				idMap[oldId] = newId;
 			}
@@ -277,7 +282,8 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		return idMap;
 	}
 
-	private List<FolderEntity> BuildFolders(List<ProfileFolder> ordered,
+	private List<FolderEntity> BuildFolders(
+		List<ProfileFolder> ordered,
 		Guid profileId,
 		Guid? parentFolderId,
 		Dictionary<Guid, Guid> idMap)
@@ -354,9 +360,12 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		return true;
 	}
 
-	private static Result<IReadOnlyList<FolderEntity>, PortabilityError> Fail(PortabilityError error,
+	private static Result<IReadOnlyList<FolderEntity>, PortabilityError> Fail(
+		PortabilityError error,
 		string? message = null)
-		=> message is null
+	{
+		return message is null
 			? Result.Fail<IReadOnlyList<FolderEntity>, PortabilityError>(error)
 			: Result.Fail<IReadOnlyList<FolderEntity>, PortabilityError>(error, message);
+	}
 }

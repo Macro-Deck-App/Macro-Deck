@@ -29,15 +29,15 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 	private const int MaxPages = 40;
 
 	private const string ListFields
-		= "id,subject,start,end,isAllDay,isCancelled,location,organizer,attendees,onlineMeeting,onlineMeetingUrl," +
-		"originalStartTimeZone";
+		= "id,subject,start,end,isAllDay,isCancelled,location,organizer,attendees,onlineMeeting,onlineMeetingUrl,"
+		+ "originalStartTimeZone";
 
 	private static readonly TimeSpan _defaultRetryAfter = TimeSpan.FromSeconds(60);
 	private static readonly TimeSpan _maxRetryAfter = TimeSpan.FromMinutes(10);
 
 	private static readonly HttpClient _shared = CreateClient(
 		IntegrationHttp.CreateHandler(handler => handler.PooledConnectionLifetime = TimeSpan.FromMinutes(10)),
-		disposeHandler: true);
+		true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -52,7 +52,7 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 
 	internal MicrosoftGraphClient(HttpMessageHandler handler, TimeProvider time)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 		_time = time;
 	}
@@ -74,8 +74,8 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 				continue;
 			}
 
-			var owner = item.TryGetProperty("owner", out var ownerElement) &&
-				ownerElement.ValueKind is JsonValueKind.Object
+			var owner = item.TryGetProperty("owner", out var ownerElement)
+				&& ownerElement.ValueKind is JsonValueKind.Object
 					? ownerElement
 					: default;
 			calendars.Add(new MicrosoftCalendarSummary(id,
@@ -96,10 +96,10 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 		DateTimeOffset to,
 		CancellationToken cancellationToken)
 	{
-		var path = $"me/calendars/{Uri.EscapeDataString(calendarId)}/calendarView" +
-			$"?startDateTime={Uri.EscapeDataString(Iso(from))}" +
-			$"&endDateTime={Uri.EscapeDataString(Iso(to))}" +
-			$"&$top=250&$select={ListFields}";
+		var path = $"me/calendars/{Uri.EscapeDataString(calendarId)}/calendarView"
+			+ $"?startDateTime={Uri.EscapeDataString(Iso(from))}"
+			+ $"&endDateTime={Uri.EscapeDataString(Iso(to))}"
+			+ $"&$top=250&$select={ListFields}";
 
 		var events = new List<CalendarEvent>();
 		await foreach (var item in PagedItemsAsync(account.Tokens, account, path, cancellationToken))
@@ -119,8 +119,8 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 		string eventId,
 		CancellationToken cancellationToken)
 	{
-		var path = $"me/calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}" +
-			$"?$select={ListFields},body";
+		var path = $"me/calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}"
+			+ $"?$select={ListFields},body";
 
 		using var response = await SendAsync(account.Tokens, account, BaseUrl + path, cancellationToken);
 		if (response.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
@@ -143,10 +143,10 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 	internal static CalendarEvent? MapEvent(JsonElement item, string calendarId)
 	{
 		var id = ReadString(item, "id");
-		if (string.IsNullOrEmpty(id) ||
-			ReadBool(item, "isCancelled") ||
-			ReadTime(item, "start") is not { } start ||
-			ReadTime(item, "end") is not { } end)
+		if (string.IsNullOrEmpty(id)
+			|| ReadBool(item, "isCancelled")
+			|| ReadTime(item, "start") is not { } start
+			|| ReadTime(item, "end") is not { } end)
 		{
 			return null;
 		}
@@ -227,7 +227,8 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 			response = await SendOnceAsync(url, refreshed, cancellationToken);
 		}
 
-		if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable
+		if (response.StatusCode is HttpStatusCode.TooManyRequests
+			or HttpStatusCode.ServiceUnavailable
 			or HttpStatusCode.GatewayTimeout)
 		{
 			var retryAt = _time.GetUtcNow() + RetryAfter(response);
@@ -266,8 +267,7 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 	private TimeSpan RetryAfter(HttpResponseMessage response)
 	{
 		var retryAfter = response.Headers.RetryAfter;
-		var wait = retryAfter?.Delta ??
-			(retryAfter?.Date is { } date ? date - _time.GetUtcNow() : _defaultRetryAfter);
+		var wait = retryAfter?.Delta ?? (retryAfter?.Date is { } date ? date - _time.GetUtcNow() : _defaultRetryAfter);
 		return wait <= TimeSpan.Zero ? _defaultRetryAfter : wait > _maxRetryAfter ? _maxRetryAfter : wait;
 	}
 
@@ -289,10 +289,10 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 
 	private static DateTimeOffset? ReadTime(JsonElement item, string name)
 	{
-		if (!item.TryGetProperty(name, out var time) ||
-			time.ValueKind is not JsonValueKind.Object ||
-			ReadString(time, "dateTime") is not { } dateTime ||
-			!DateTime.TryParse(dateTime,
+		if (!item.TryGetProperty(name, out var time)
+			|| time.ValueKind is not JsonValueKind.Object
+			|| ReadString(time, "dateTime") is not { } dateTime
+			|| !DateTime.TryParse(dateTime,
 				CultureInfo.InvariantCulture,
 				DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
 				out var parsed))
@@ -301,8 +301,9 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 		}
 
 		var zoneName = ReadString(time, "timeZone");
-		if (zoneName is null || string.Equals(zoneName, "UTC", StringComparison.OrdinalIgnoreCase) ||
-			FindZone(zoneName) is not { } zone)
+		if (zoneName is null
+			|| string.Equals(zoneName, "UTC", StringComparison.OrdinalIgnoreCase)
+			|| FindZone(zoneName) is not { } zone)
 		{
 			return new DateTimeOffset(DateTime.SpecifyKind(parsed, DateTimeKind.Utc));
 		}
@@ -345,31 +346,37 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 		}
 		catch (Exception ex) when (ex is TimeZoneNotFoundException or InvalidTimeZoneException)
 		{
-			return TimeZoneInfo.TryConvertWindowsIdToIanaId(id, out var iana) &&
-				TimeZoneInfo.TryFindSystemTimeZoneById(iana, out var zone)
+			return TimeZoneInfo.TryConvertWindowsIdToIanaId(id, out var iana)
+				&& TimeZoneInfo.TryFindSystemTimeZoneById(iana, out var zone)
 					? zone
 					: null;
 		}
 	}
 
 	private static string? ReadLocation(JsonElement item)
-		=> item.TryGetProperty("location", out var location) && location.ValueKind is JsonValueKind.Object &&
-			ReadString(location, "displayName") is { Length: > 0 } name
+	{
+		return item.TryGetProperty("location", out var location)
+			&& location.ValueKind is JsonValueKind.Object
+			&& ReadString(location, "displayName") is { Length: > 0 } name
 				? name
 				: null;
+	}
 
 	private static string? ReadDescription(JsonElement item)
-		=> item.TryGetProperty("body", out var body) && body.ValueKind is JsonValueKind.Object &&
-			ReadString(body, "content") is { } content &&
-			content.Trim() is { Length: > 0 } trimmed
+	{
+		return item.TryGetProperty("body", out var body)
+			&& body.ValueKind is JsonValueKind.Object
+			&& ReadString(body, "content") is { } content
+			&& content.Trim() is { Length: > 0 } trimmed
 				? trimmed
 				: null;
+	}
 
 	private static string? ReadMeetingUrl(JsonElement item)
 	{
-		if (item.TryGetProperty("onlineMeeting", out var meeting) &&
-			meeting.ValueKind is JsonValueKind.Object &&
-			ReadString(meeting, "joinUrl") is { Length: > 0 } joinUrl)
+		if (item.TryGetProperty("onlineMeeting", out var meeting)
+			&& meeting.ValueKind is JsonValueKind.Object
+			&& ReadString(meeting, "joinUrl") is { Length: > 0 } joinUrl)
 		{
 			return joinUrl;
 		}
@@ -382,8 +389,7 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 		var participants = new List<CalendarParticipant>();
 		var organizerEmail = default(string);
 
-		if (item.TryGetProperty("organizer", out var organizer) &&
-			ReadEmailAddress(organizer) is { } organizerAddress)
+		if (item.TryGetProperty("organizer", out var organizer) && ReadEmailAddress(organizer) is { } organizerAddress)
 		{
 			organizerEmail = organizerAddress.Email;
 			participants.Add(new CalendarParticipant
@@ -402,14 +408,14 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 
 		foreach (var attendee in attendees.EnumerateArray())
 		{
-			if (string.Equals(ReadString(attendee, "type"), "resource", StringComparison.OrdinalIgnoreCase) ||
-				ReadEmailAddress(attendee) is not { } address)
+			if (string.Equals(ReadString(attendee, "type"), "resource", StringComparison.OrdinalIgnoreCase)
+				|| ReadEmailAddress(attendee) is not { } address)
 			{
 				continue;
 			}
 
-			if (address.Email is not null &&
-				string.Equals(address.Email, organizerEmail, StringComparison.OrdinalIgnoreCase))
+			if (address.Email is not null
+				&& string.Equals(address.Email, organizerEmail, StringComparison.OrdinalIgnoreCase))
 			{
 				continue;
 			}
@@ -438,9 +444,9 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 
 	private static (string? Name, string? Email)? ReadEmailAddress(JsonElement recipient)
 	{
-		if (recipient.ValueKind is not JsonValueKind.Object ||
-			!recipient.TryGetProperty("emailAddress", out var address) ||
-			address.ValueKind is not JsonValueKind.Object)
+		if (recipient.ValueKind is not JsonValueKind.Object
+			|| !recipient.TryGetProperty("emailAddress", out var address)
+			|| address.ValueKind is not JsonValueKind.Object)
 		{
 			return null;
 		}
@@ -453,25 +459,35 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 	}
 
 	private static string? NormalizeColor(string? color)
-		=> color is not null && HexColor().IsMatch(color) ? color.ToUpperInvariant() : null;
+	{
+		return color is not null && HexColor().IsMatch(color) ? color.ToUpperInvariant() : null;
+	}
 
 	private static string Iso(DateTimeOffset value)
-		=> value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+	{
+		return value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.ValueKind is JsonValueKind.Object &&
-			root.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.String
+	{
+		return root.ValueKind is JsonValueKind.Object
+			&& root.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	private static bool ReadBool(JsonElement root, string name)
-		=> root.ValueKind is JsonValueKind.Object &&
-			root.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.True;
+	{
+		return root.ValueKind is JsonValueKind.Object
+			&& root.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.True;
+	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(20) };
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(20) };
+	}
 
 	[GeneratedRegex("^#[0-9A-Fa-f]{6}$")]
 	private static partial Regex HexColor();

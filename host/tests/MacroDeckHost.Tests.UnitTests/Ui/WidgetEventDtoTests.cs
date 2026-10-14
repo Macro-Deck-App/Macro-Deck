@@ -83,7 +83,10 @@ public class WidgetEventDtoTests
 		var broker = new RecordingUiSessionBroker();
 		var signals = new WidgetRenderSignals();
 		var widget = PinnedWidget();
-		using var subscription = signals.SubscribeDataChanged(widget.Id.ToString(), _ => { });
+		using var subscription = signals.SubscribeDataChanged(widget.Id.ToString(),
+			_ =>
+			{
+			});
 		var handler = new WidgetUpdatedNotificationHandler(_transport, _renderQueue, signals, broker, TestColors.None);
 
 		await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
@@ -104,7 +107,7 @@ public class WidgetEventDtoTests
 			broker,
 			TestColors.None);
 
-		await handler.Handle(new WidgetUpdatedNotification(widget, DataChanged: false), CancellationToken.None);
+		await handler.Handle(new WidgetUpdatedNotification(widget, false), CancellationToken.None);
 
 		Assert.That(broker.InvalidatedWidgets, Is.Empty);
 	}
@@ -122,7 +125,7 @@ public class WidgetEventDtoTests
 		var folder = FolderWithOneWidget();
 		var handler = new FolderUpdatedNotificationHandler(_transport, broker, TestColors.None);
 
-		await handler.Handle(new FolderUpdatedNotification(folder, CornerRadiusChanged: true),
+		await handler.Handle(new FolderUpdatedNotification(folder, true),
 			CancellationToken.None);
 
 		Assert.That(broker.InvalidatedWidgets, Is.EqualTo(new[] { folder.Widgets[0].Id }));
@@ -219,29 +222,38 @@ public class WidgetEventDtoTests
 		Assert.That(evt.Widgets.Single().IsPinned, Is.True);
 	}
 
-	private static WidgetEntity PinnedWidget() => new()
+	private static WidgetEntity PinnedWidget()
 	{
-		Id = Guid.NewGuid(),
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.Clock,
-		PositionX = 1,
-		PositionY = 2,
-		Width = 1,
-		Height = 1,
-		IsPinned = true
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.Clock,
+			PositionX = 1,
+			PositionY = 2,
+			Width = 1,
+			Height = 1,
+			IsPinned = true
+		};
+	}
 
 	private sealed class RecordingTransport : IUiTransport
 	{
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public List<object> Sent { get; } = [];
 

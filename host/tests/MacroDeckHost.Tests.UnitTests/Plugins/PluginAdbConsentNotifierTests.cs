@@ -19,9 +19,9 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task Installing_a_plugin_that_declares_adb_while_plugins_may_not_use_it_asks_the_user()
 	{
-		var world = new World(allowPlugins: false);
+		var world = new World(false);
 
-		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", declaresAdb: true, previouslyDeclaredAdb: false);
+		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		var notification = world.Store.Snapshot().Single();
 		Assert.Multiple(() =>
@@ -36,9 +36,9 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task Installing_a_plugin_that_declares_adb_while_adb_is_off_asks_to_turn_it_on()
 	{
-		var world = new World(allowPlugins: true, adbEnabled: false);
+		var world = new World(true, false);
 
-		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", declaresAdb: true, previouslyDeclaredAdb: false);
+		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		var notification = world.Store.Snapshot().Single();
 		Assert.Multiple(() =>
@@ -52,14 +52,16 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task Allowing_plugins_while_adb_stays_off_keeps_the_question()
 	{
-		var world = new World(allowPlugins: false, adbEnabled: false);
+		var world = new World(false, false);
 		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 		var handler = new PluginAdbConsentDismissHandler(world.Notifier);
 
-		await handler.Handle(new AdbSettingsChangedNotification(new AdbSettings(false, null, true, null, AllowPlugins: true)),
+		await handler.Handle(
+			new AdbSettingsChangedNotification(new AdbSettings(false, null, true, null, AllowPlugins: true)),
 			CancellationToken.None);
 		var whileAdbOff = world.Store.Snapshot().Count;
-		await handler.Handle(new AdbSettingsChangedNotification(new AdbSettings(true, null, true, null, AllowPlugins: true)),
+		await handler.Handle(
+			new AdbSettingsChangedNotification(new AdbSettings(true, null, true, null, AllowPlugins: true)),
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -72,7 +74,7 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task A_plugin_refused_adb_asks_once_per_run_even_after_the_user_dismissed_the_question()
 	{
-		var world = new World(allowPlugins: false);
+		var world = new World(false);
 
 		await world.Notifier.AskAfterRefusalAsync(PluginId, "Android Tools");
 		world.Store.Dismiss(world.Store.Snapshot().Single().Id);
@@ -85,9 +87,9 @@ public class PluginAdbConsentNotifierTests
 	public async Task A_plugin_that_needs_adb_while_adb_is_on_but_missing_offers_to_set_it_up()
 	{
 		var adbManager = new FakeAdbManager { Status = AdbStatus.Disabled with { Enabled = true } };
-		var world = new World(allowPlugins: true, adbEnabled: true, adbManager);
+		var world = new World(true, true, adbManager);
 
-		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", declaresAdb: true, previouslyDeclaredAdb: false);
+		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		Assert.That(world.Store.Snapshot().Single().Message, Does.Contain("cannot find adb"));
 	}
@@ -99,9 +101,9 @@ public class PluginAdbConsentNotifierTests
 		{
 			Status = AdbStatus.Disabled with { Enabled = true, ResolvedExecutablePath = "/usr/local/bin/adb" }
 		};
-		var world = new World(allowPlugins: true, adbEnabled: true, adbManager);
+		var world = new World(true, true, adbManager);
 
-		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", declaresAdb: true, previouslyDeclaredAdb: false);
+		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		Assert.That(world.Store.Snapshot(), Is.Empty);
 	}
@@ -109,7 +111,7 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task Uninstalling_the_plugin_takes_its_question_away()
 	{
-		var world = new World(allowPlugins: false);
+		var world = new World(false);
 		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		world.Notifier.Dismiss(PluginId);
@@ -120,7 +122,8 @@ public class PluginAdbConsentNotifierTests
 	[TestCase(true, false, false)]
 	[TestCase(false, true, false)]
 	[TestCase(false, false, true)]
-	public async Task Nothing_is_asked_when_there_is_nothing_to_decide(bool allowPlugins,
+	public async Task Nothing_is_asked_when_there_is_nothing_to_decide(
+		bool allowPlugins,
 		bool previouslyDeclaredAdb,
 		bool declaresNothing)
 	{
@@ -134,7 +137,7 @@ public class PluginAdbConsentNotifierTests
 	[Test]
 	public async Task Allowing_plugins_clears_the_question_and_a_later_install_asks_again()
 	{
-		var world = new World(allowPlugins: false);
+		var world = new World(false);
 		await world.Notifier.NotifyIfNeededAsync(PluginId, "Android Tools", true, false);
 
 		world.Notifier.DismissAll();

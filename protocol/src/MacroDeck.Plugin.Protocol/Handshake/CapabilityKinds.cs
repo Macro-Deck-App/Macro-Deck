@@ -89,10 +89,13 @@ public static class CapabilityKinds
 		Actions, Events, Variables, Icons, ConfigFlow, MusicPlayer, Weather, VirtualProfiles, Issues, Ui,
 		Localization, DeviceProvider, LayoutProvider, FolderViewProvider, Migration, WidgetTypeProvider,
 		ScreenSaverProvider, Messaging, VideoStreamProvider, Calendar, ConfigEntries, BatteryProvider,
-		EmailInbox, CompanionDeviceEntries,
+		EmailInbox, CompanionDeviceEntries
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? kind) => kind is not null && _known.Contains(kind);
+	public static bool IsKnown(string? kind)
+	{
+		return kind is not null && _known.Contains(kind);
+	}
 }

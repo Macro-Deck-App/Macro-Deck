@@ -23,7 +23,7 @@ public class UnbindCatalogVariableRequestMessageHandler
 			return new UnbindCatalogVariableResponse
 			{
 				Success = false,
-				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound),
+				Error = VariableBindingErrorMapper.ToTransportError(VariableBindingError.NotFound)
 			};
 		}
 
@@ -33,7 +33,7 @@ public class UnbindCatalogVariableRequestMessageHandler
 			return new UnbindCatalogVariableResponse
 			{
 				Success = false,
-				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage),
+				Error = VariableBindingErrorMapper.ToTransportError(result.Error!.Value, result.ErrorMessage)
 			};
 		}
 

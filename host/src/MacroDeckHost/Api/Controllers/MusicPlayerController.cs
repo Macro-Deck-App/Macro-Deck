@@ -18,7 +18,8 @@ public class MusicPlayerController : ControllerBase
 
 	[HttpGet("artwork/{artworkId}")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
-	public async Task<IActionResult> GetArtwork(string artworkId,
+	public async Task<IActionResult> GetArtwork(
+		string artworkId,
 		[FromQuery] string instanceId,
 		[FromQuery] int? size,
 		CancellationToken ct)

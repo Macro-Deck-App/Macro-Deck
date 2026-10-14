@@ -42,8 +42,8 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 				if (!QualifiedId.TryCreate(integration.Id, localId, out var id))
 				{
 					_logger.Warning(
-						"Integration {IntegrationId} announced an invalid music player instance id {LocalId}; " +
-						"skipping it",
+						"Integration {IntegrationId} announced an invalid music player instance id {LocalId}; "
+						+ "skipping it",
 						integration.Id,
 						localId);
 					continue;
@@ -53,8 +53,8 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 				if (!seen.Add(instanceId))
 				{
 					_logger.Warning(
-						"Integration {IntegrationId} announced music player instance {LocalId} more than once; " +
-						"skipping the duplicate",
+						"Integration {IntegrationId} announced music player instance {LocalId} more than once; "
+						+ "skipping the duplicate",
 						integration.Id,
 						localId);
 					continue;
@@ -72,7 +72,9 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 	}
 
 	public IMusicPlayer? GetPlayer(string instanceId)
-		=> Resolve(instanceId, (provider, localId) => provider.GetPlayer(localId));
+	{
+		return Resolve(instanceId, (provider, localId) => provider.GetPlayer(localId));
+	}
 
 	public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
 	{
@@ -111,20 +113,22 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 	{
 		var supported = MusicPlayerOptionValues.Supported(instance.Options);
 
-		if (supported.Count != instance.Options.Count)
+		if (supported.Count == instance.Options.Count)
 		{
-			var skipped = instance.Options.Where(option => !supported.Contains(option))
-				.Select(option => option?.Name ?? string.Empty)
-				.ToList();
+			return supported;
+		}
 
-			if (_reportedSkippedOptions.TryAdd($"{instanceId}\n{string.Join('\n', skipped)}", 0))
-			{
-				_logger.Warning(
-					"Music player instance {InstanceId} declares options {Options} with an invalid or duplicate name " +
-					"or an unsupported kind; skipping them",
-					instanceId,
-					skipped);
-			}
+		var skipped = instance.Options.Where(option => !supported.Contains(option))
+			.Select(option => option.Name)
+			.ToList();
+
+		if (_reportedSkippedOptions.TryAdd($"{instanceId}\n{string.Join('\n', skipped)}", 0))
+		{
+			_logger.Warning(
+				"Music player instance {InstanceId} declares options {Options} with an invalid or duplicate name "
+				+ "or an unsupported kind; skipping them",
+				instanceId,
+				skipped);
 		}
 
 		return supported;
@@ -140,8 +144,13 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 	}
 
 	private static bool IsSingleConfiguration(IIntegration integration)
-		=> integration is IConfigFlowProvider { AllowsMultipleConfigurations: false };
+	{
+		return integration is IConfigFlowProvider { AllowsMultipleConfigurations: false };
+	}
 
-	private IEnumerable<IIntegration> EnabledProviders() => _integrations.Integrations
-		.Where(integration => integration is IMusicPlayerProvider && _integrations.IsEnabled(integration.Id));
+	private IEnumerable<IIntegration> EnabledProviders()
+	{
+		return _integrations.Integrations
+			.Where(integration => integration is IMusicPlayerProvider && _integrations.IsEnabled(integration.Id));
+	}
 }

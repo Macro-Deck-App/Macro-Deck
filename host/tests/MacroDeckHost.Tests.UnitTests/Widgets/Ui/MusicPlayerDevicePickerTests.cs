@@ -19,14 +19,15 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 [TestFixture]
 public class MusicPlayerDevicePickerTests
 {
-	private const string _rowPrefix = "picker.results.";
+	private const string RowPrefix = "picker.results.";
 
-	private static UiSurface Surface(string viewId = MusicPlayerDevicePickerUiProvider.PickViewId,
+	private static UiSurface Surface(
+		string viewId = MusicPlayerDevicePickerUiProvider.PickViewId,
 		string? instanceId = "inst-1")
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(viewId),
+			[UiDialogSurfaceAttributes.ViewId] = JsonSerializer.SerializeToElement(viewId)
 		};
 
 		if (instanceId is not null)
@@ -39,18 +40,21 @@ public class MusicPlayerDevicePickerTests
 		{
 			Kind = UiSurfaceKinds.Dialog,
 			SessionMode = UiSessionModes.Exclusive,
-			Attributes = attributes,
+			Attributes = attributes
 		};
 	}
 
 	private static MusicPlayerDevicePickerUiProvider Provider(IMusicPlayer? player)
-		=> new(new SinglePlayerRegistry(player), new LoggerConfiguration().CreateLogger());
+	{
+		return new MusicPlayerDevicePickerUiProvider(new SinglePlayerRegistry(player),
+			new LoggerConfiguration().CreateLogger());
+	}
 
 	private static async Task<UiNode> OpenAsync(IMusicPlayer? player)
 	{
-		var session = await Provider(player).CreateSessionAsync(
-			new UiSessionRequest { Surface = Surface(), UiModelVersion = 1 },
-			CancellationToken.None);
+		var session = await Provider(player)
+			.CreateSessionAsync(new UiSessionRequest { Surface = Surface(), UiModelVersion = 1 },
+				CancellationToken.None);
 
 		Assert.That(session, Is.Not.Null);
 
@@ -81,9 +85,9 @@ public class MusicPlayerDevicePickerTests
 
 		static void Walk(UiNode node, List<UiNode> into)
 		{
-			if (node.Id.StartsWith(_rowPrefix, StringComparison.Ordinal) &&
-				node.Id.LastIndexOf('.') == _rowPrefix.Length - 1 &&
-				node.Properties.ContainsKey(UiComponentProperties.Answer))
+			if (node.Id.StartsWith(RowPrefix, StringComparison.Ordinal)
+				&& node.Id.LastIndexOf('.') == RowPrefix.Length - 1
+				&& node.Properties.ContainsKey(UiComponentProperties.Answer))
 			{
 				into.Add(node);
 			}
@@ -101,7 +105,9 @@ public class MusicPlayerDevicePickerTests
 	/// there is no English string in the tree to look for.
 	/// </summary>
 	private static bool HasNode(UiNode node, string id)
-		=> string.Equals(node.Id, id, StringComparison.Ordinal) || node.Children.Any(child => HasNode(child, id));
+	{
+		return string.Equals(node.Id, id, StringComparison.Ordinal) || node.Children.Any(child => HasNode(child, id));
+	}
 
 	/// <summary>Whether any literal string in the subtree contains this text. Only for the values the
 	/// player itself supplies - a device's name, its type, its volume - which are not localized.</summary>
@@ -109,8 +115,8 @@ public class MusicPlayerDevicePickerTests
 	{
 		foreach (var property in node.Properties)
 		{
-			if (property.Value.ValueKind == JsonValueKind.String &&
-				property.Value.GetString()?.Contains(text, StringComparison.Ordinal) == true)
+			if (property.Value.ValueKind == JsonValueKind.String
+				&& property.Value.GetString()?.Contains(text, StringComparison.Ordinal) == true)
 			{
 				return true;
 			}
@@ -124,7 +130,7 @@ public class MusicPlayerDevicePickerTests
 	{
 		var session = await Provider(new FakeDevicePlayer())
 			.CreateSessionAsync(new UiSessionRequest
-					{ Surface = Surface(viewId: "weather-details"), UiModelVersion = 1 },
+					{ Surface = Surface("weather-details"), UiModelVersion = 1 },
 				CancellationToken.None);
 
 		Assert.That(session, Is.Null);
@@ -149,8 +155,8 @@ public class MusicPlayerDevicePickerTests
 			Devices =
 			[
 				new MusicPlayerDevice("d1", "Living Room"),
-				new MusicPlayerDevice("d2", "Kitchen"),
-			],
+				new MusicPlayerDevice("d2", "Kitchen")
+			]
 		};
 
 		var rows = Rows(await OpenAsync(player));
@@ -170,7 +176,7 @@ public class MusicPlayerDevicePickerTests
 	{
 		var player = new FakeDevicePlayer
 		{
-			Devices = [new MusicPlayerDevice("d1", "Living Room", Type: "Speaker")],
+			Devices = [new MusicPlayerDevice("d1", "Living Room", "Speaker")]
 		};
 
 		var row = Rows(await OpenAsync(player)).Single();
@@ -190,16 +196,16 @@ public class MusicPlayerDevicePickerTests
 			Devices =
 			[
 				new MusicPlayerDevice("d1", "Living Room", IsActive: true),
-				new MusicPlayerDevice("d2", "Kitchen"),
-			],
+				new MusicPlayerDevice("d2", "Kitchen")
+			]
 		};
 
 		var rows = Rows(await OpenAsync(player));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(HasNode(rows[0], _rowPrefix + "d1.active"), Is.True);
-			Assert.That(HasNode(rows[1], _rowPrefix + "d2.active"), Is.False);
+			Assert.That(HasNode(rows[0], RowPrefix + "d1.active"), Is.True);
+			Assert.That(HasNode(rows[1], RowPrefix + "d2.active"), Is.False);
 		});
 	}
 
@@ -215,8 +221,8 @@ public class MusicPlayerDevicePickerTests
 			Devices =
 			[
 				new MusicPlayerDevice("muted", "Muted", VolumePercent: 0),
-				new MusicPlayerDevice("unknown", "Unknown"),
-			],
+				new MusicPlayerDevice("unknown", "Unknown")
+			]
 		};
 
 		var rows = Rows(await OpenAsync(player));
@@ -236,7 +242,7 @@ public class MusicPlayerDevicePickerTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(Rows(root), Is.Empty);
-			Assert.That(HasNode(root, _rowPrefix + "unsupported"), Is.True);
+			Assert.That(HasNode(root, RowPrefix + "unsupported"), Is.True);
 		});
 	}
 
@@ -249,18 +255,18 @@ public class MusicPlayerDevicePickerTests
 	{
 		var failed = await OpenAsync(new FakeDevicePlayer
 		{
-			ListFailure = new InvalidOperationException("unreachable"),
+			ListFailure = new InvalidOperationException("unreachable")
 		});
 
 		var empty = await OpenAsync(new FakeDevicePlayer());
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(HasNode(failed, _rowPrefix + "failed"), Is.True);
-			Assert.That(HasNode(failed, _rowPrefix + "empty"), Is.False);
+			Assert.That(HasNode(failed, RowPrefix + "failed"), Is.True);
+			Assert.That(HasNode(failed, RowPrefix + "empty"), Is.False);
 
-			Assert.That(HasNode(empty, _rowPrefix + "empty"), Is.True);
-			Assert.That(HasNode(empty, _rowPrefix + "failed"), Is.False);
+			Assert.That(HasNode(empty, RowPrefix + "empty"), Is.True);
+			Assert.That(HasNode(empty, RowPrefix + "failed"), Is.False);
 		});
 	}
 }

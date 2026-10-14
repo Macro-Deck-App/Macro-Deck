@@ -32,13 +32,25 @@ internal sealed class UiViewSession : IUiSession
 
 	public IUiEventOrigin? Origin => _origin;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => Deliver(uiEvent, null);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		Deliver(uiEvent, null);
+	}
 
-	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => Deliver(uiEvent, origin);
+	public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+	{
+		Deliver(uiEvent, origin);
+	}
 
 	public async ValueTask DisposeAsync()
 	{

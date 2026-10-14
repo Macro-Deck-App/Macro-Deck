@@ -54,8 +54,10 @@ internal static class ConnectJwt
 	}
 
 	private static string Segment(Dictionary<string, object?> values)
-		=> Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(values)))
+	{
+		return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(values)))
 			.TrimEnd('=')
 			.Replace('+', '-')
 			.Replace('/', '_');
+	}
 }

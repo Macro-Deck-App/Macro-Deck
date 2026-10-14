@@ -20,9 +20,9 @@ internal static partial class YtmDesktopUrls
 			return false;
 		}
 
-		if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) &&
-			(uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) &&
-			_youtubeHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase))
+		if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+			&& (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+			&& _youtubeHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase))
 		{
 			ParseYoutubeUrl(uri, out videoId, out playlistId);
 			return videoId is not null || playlistId is not null;

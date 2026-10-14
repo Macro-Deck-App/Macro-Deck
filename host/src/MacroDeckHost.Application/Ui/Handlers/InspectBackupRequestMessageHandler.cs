@@ -14,7 +14,8 @@ public sealed class InspectBackupRequestMessageHandler
 	private readonly IBackupStorageRegistry _storageRegistry;
 	private readonly ILogger _logger;
 
-	public InspectBackupRequestMessageHandler(IBackupService backupService,
+	public InspectBackupRequestMessageHandler(
+		IBackupService backupService,
 		IBackupStorageRegistry storageRegistry,
 		ILogger logger)
 	{
@@ -23,7 +24,8 @@ public sealed class InspectBackupRequestMessageHandler
 		_logger = logger.ForContext<InspectBackupRequestMessageHandler>();
 	}
 
-	public async ValueTask<InspectBackupResponse> Handle(InspectBackupRequest request,
+	public async ValueTask<InspectBackupResponse> Handle(
+		InspectBackupRequest request,
 		CancellationToken cancellationToken)
 	{
 		var list = await _backupService.List(cancellationToken);

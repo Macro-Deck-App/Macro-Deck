@@ -239,7 +239,9 @@ public class StreamlabsDesktopConfigFlowTests
 	private static Task<ConfigFlowResult> Submit(
 		StreamlabsDesktopConfigFlow flow,
 		IReadOnlyDictionary<string, object?> input)
-		=> flow.SubmitAsync("connection", input, null!, CancellationToken.None);
+	{
+		return flow.SubmitAsync("connection", input, null!, CancellationToken.None);
+	}
 
 	private FakeStreamlabsClient Track(FakeStreamlabsClient client)
 	{

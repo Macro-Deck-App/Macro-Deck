@@ -114,14 +114,22 @@ public sealed class MeldIntegration
 
 	public string CatalogName => MeldVariableCatalog.CatalogName;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new MeldConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new MeldConfigFlow();
+	}
 
 	public ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> _catalog.DiscoverAsync(query, cancellationToken);
+	{
+		return _catalog.DiscoverAsync(query, cancellationToken);
+	}
 
 	public async ValueTask<VariableDefinition?> ResolveAsync(
 		string localId,
@@ -182,7 +190,9 @@ public sealed class MeldIntegration
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> _catalog.SetValueAsync(localId, value, cancellationToken);
+	{
+		return _catalog.SetValueAsync(localId, value, cancellationToken);
+	}
 
 	public Task<DynamicOptionsResult> GetEventOptionsAsync(
 		EventOptionsContext context,
@@ -230,12 +240,16 @@ public sealed class MeldIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId == WrongEndpointIssueId
+	{
+		return Task.FromResult(issueId == WrongEndpointIssueId
 			? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	private static string? SceneName(MeldSession session, string? sceneId)
-		=> sceneId is not null && session.ScenesById.TryGetValue(sceneId, out var scene) ? scene.Name : null;
+	{
+		return sceneId is not null && session.ScenesById.TryGetValue(sceneId, out var scene) ? scene.Name : null;
+	}
 
 	private async Task ConnectFromConfig(IIntegrationContext context)
 	{
@@ -253,8 +267,8 @@ public sealed class MeldIntegration
 		var host = await context.Config.GetStringAsync(entry.Id, MeldConfigKeys.Host).ConfigureAwait(false);
 		var portRaw = await context.Config.GetStringAsync(entry.Id, MeldConfigKeys.Port).ConfigureAwait(false);
 
-		if (string.IsNullOrEmpty(host) ||
-			!int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port))
+		if (string.IsNullOrEmpty(host)
+			|| !int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port))
 		{
 			_logger.Warning("Meld Studio config entry {EntryId} is incomplete; skipping", entry.Id);
 			return;

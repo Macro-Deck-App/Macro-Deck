@@ -9,21 +9,28 @@ public sealed class WidgetTypeProviderTestClient
 {
 	private readonly ICapabilityInvoker _invoker;
 
-	internal WidgetTypeProviderTestClient(ICapabilityInvoker invoker) => _invoker = invoker;
+	internal WidgetTypeProviderTestClient(ICapabilityInvoker invoker)
+	{
+		_invoker = invoker;
+	}
 
 	/// <summary>What this provider declares about itself.</summary>
 	public Task<CapabilityInvocationOutcome> DescribeAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.WidgetTypeProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.WidgetTypeProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.WidgetTypeProvider.Describe,
 			null,
 			options);
+	}
 
 	/// <summary>The widget types the provider currently offers.</summary>
 	public Task<CapabilityInvocationOutcome> GetWidgetTypesAsync(CapabilityInvokeOptions? options = null)
-		=> _invoker.InvokeAsync(CapabilityKinds.WidgetTypeProvider,
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.WidgetTypeProvider,
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.WidgetTypeProvider.WidgetTypes,
 			null,
 			options);
+	}
 }

@@ -26,8 +26,8 @@ internal static class PluginCapabilityValidator
 			conflicts.Add(new CapabilityIdConflict(pluginId,
 				"Capability",
 				string.Empty,
-				$"Declares {capabilities.Count} capabilities; the protocol allows at most " +
-				$"{ProtocolLimits.MaxDeclaredCapabilities}."));
+				$"Declares {capabilities.Count} capabilities; the protocol allows at most "
+				+ $"{ProtocolLimits.MaxDeclaredCapabilities}."));
 		}
 
 		foreach (var kind in capabilities.Select(capability => capability.Kind).Distinct(StringComparer.Ordinal))
@@ -37,8 +37,8 @@ internal static class PluginCapabilityValidator
 				conflicts.Add(new CapabilityIdConflict(pluginId,
 					"Capability",
 					kind,
-					$"'{kind}' is not a capability kind this protocol version knows. " +
-					$"Known kinds: {string.Join(", ", CapabilityKinds.All)}."));
+					$"'{kind}' is not a capability kind this protocol version knows. "
+					+ $"Known kinds: {string.Join(", ", CapabilityKinds.All)}."));
 				continue;
 			}
 

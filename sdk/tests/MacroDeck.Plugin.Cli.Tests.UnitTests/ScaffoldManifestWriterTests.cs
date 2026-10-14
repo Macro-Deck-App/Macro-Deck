@@ -23,7 +23,8 @@ public class ScaffoldManifestWriterTests
 												}
 												""";
 
-	private static PluginScaffoldRequest CanonicalRequest(string description = "A Macro Deck plugin.",
+	private static PluginScaffoldRequest CanonicalRequest(
+		string description = "A Macro Deck plugin.",
 		string? repository = null,
 		string? homepage = null,
 		string license = "MIT",
@@ -110,7 +111,8 @@ public class ScaffoldManifestWriterTests
 	[TestCase("3.1.0", true)]
 	[TestCase("4.0.0", true)]
 	[TestCase("2.9.9", false)]
-	public void The_written_macro_deck_range_admits_3_0_prerelease_and_later_hosts(string hostVersion,
+	public void The_written_macro_deck_range_admits_3_0_prerelease_and_later_hosts(
+		string hostVersion,
 		bool expected)
 	{
 		var json = ScaffoldManifestWriter.BuildManifestJson(TemplateManifestJson, CanonicalRequest());

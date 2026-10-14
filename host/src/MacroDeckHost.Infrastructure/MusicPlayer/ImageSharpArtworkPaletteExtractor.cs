@@ -82,13 +82,22 @@ public sealed class ImageSharpArtworkPaletteExtractor : IArtworkPaletteExtractor
 	}
 
 	private static int Mean(long channelSum)
-		=> (int)Math.Round((double)channelSum / (SampleEdge * SampleEdge), MidpointRounding.AwayFromZero);
+	{
+		return (int)Math.Round((double)channelSum / (SampleEdge * SampleEdge), MidpointRounding.AwayFromZero);
+	}
 
-	private static int Darken(long channel) => (int)Math.Round(channel * 0.5, MidpointRounding.AwayFromZero);
+	private static int Darken(long channel)
+	{
+		return (int)Math.Round(channel * 0.5, MidpointRounding.AwayFromZero);
+	}
 
 	private static int Lighten(long channel)
-		=> (int)Math.Round(channel + ((255 - channel) * 0.4), MidpointRounding.AwayFromZero);
+	{
+		return (int)Math.Round(channel + (255 - channel) * 0.4, MidpointRounding.AwayFromZero);
+	}
 
 	private static string Hex(int red, int green, int blue)
-		=> string.Create(CultureInfo.InvariantCulture, $"#{red:x2}{green:x2}{blue:x2}");
+	{
+		return string.Create(CultureInfo.InvariantCulture, $"#{red:x2}{green:x2}{blue:x2}");
+	}
 }

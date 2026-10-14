@@ -28,16 +28,25 @@ public sealed class ClientLayoutProviderIntegration : IIntegration, ISystemInteg
 	public bool IsActive => true;
 	public bool IsInitialized => true;
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public async Task InitializeAsync(ILayoutProviderContext context, CancellationToken cancellationToken = default)
 	{
 		await context.RegisterLayoutAsync(BuildLayout(), cancellationToken);
 	}
 
-	public IReadOnlyList<LayoutDescriptor> GetLayouts() => [BuildLayout()];
+	public IReadOnlyList<LayoutDescriptor> GetLayouts()
+	{
+		return [BuildLayout()];
+	}
 
 	// LayoutDescriptor.Name is a plain string by contract - every provider, this host's own included,
 	// supplies it already resolved. A built-in integration is instantiated by reflection with no DI
@@ -47,7 +56,8 @@ public sealed class ClientLayoutProviderIntegration : IIntegration, ISystemInteg
 	private const string LayoutDisplayName = "Software Client";
 
 	private static LayoutDescriptor BuildLayout()
-		=> new(LayoutLocalId,
+	{
+		return new LayoutDescriptor(LayoutLocalId,
 			LayoutDisplayName,
 			[
 				new LayoutRegion
@@ -69,4 +79,5 @@ public sealed class ClientLayoutProviderIntegration : IIntegration, ISystemInteg
 					Visuals = LayoutVisualCapabilities.Full
 				}
 			]);
+	}
 }

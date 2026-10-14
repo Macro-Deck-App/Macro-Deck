@@ -19,7 +19,7 @@ internal static class WidgetThresholds
 		("green", Green, 0),
 		("yellow", Yellow, 0.5),
 		("orange", Orange, 0.75),
-		("red", Red, 0.9),
+		("red", Red, 0.9)
 	];
 
 	public static UiThresholds Defaults(double min, double max)
@@ -36,21 +36,28 @@ internal static class WidgetThresholds
 		return new UiThresholds([
 			.. _defaultBands.Select((band, index) => new UiThresholdBand(band.Id,
 				band.Color,
-				index == 0 ? null : low + (band.Fraction * span))),
+				index == 0 ? null : low + band.Fraction * span))
 		]);
 	}
 
 	public static bool ReadEnabled(JsonElement data)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(EnabledKey, out var enabled) &&
-			enabled.ValueKind == JsonValueKind.True;
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(EnabledKey, out var enabled)
+			&& enabled.ValueKind == JsonValueKind.True;
+	}
 
 	public static UiThresholds? ReadStored(JsonElement data)
-		=> data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty(ValueKey, out var stored) &&
-			UiThresholds.TryParse(stored, out var thresholds)
+	{
+		return data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty(ValueKey, out var stored)
+			&& UiThresholds.TryParse(stored, out var thresholds)
 				? thresholds
 				: null;
+	}
 
-	public static UiThresholds Effective(UiThresholds? stored, double min, double max) => stored ?? Defaults(min, max);
+	public static UiThresholds Effective(UiThresholds? stored, double min, double max)
+	{
+		return stored ?? Defaults(min, max);
+	}
 }

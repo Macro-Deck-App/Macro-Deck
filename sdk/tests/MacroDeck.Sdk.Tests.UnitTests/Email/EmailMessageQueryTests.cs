@@ -20,12 +20,16 @@ public class EmailMessageQueryTests
 	[TestCase(1)]
 	[TestCase(EmailMessageQuery.MaxMessagesLimit)]
 	public void A_provider_is_asked_for_between_one_and_fifty_messages(int maxMessages)
-		=> Assert.That(new EmailMessageQuery { MaxMessages = maxMessages }.MaxMessages, Is.EqualTo(maxMessages));
+	{
+		Assert.That(new EmailMessageQuery { MaxMessages = maxMessages }.MaxMessages, Is.EqualTo(maxMessages));
+	}
 
 	[TestCase(0)]
 	[TestCase(-1)]
 	[TestCase(EmailMessageQuery.MaxMessagesLimit + 1)]
 	public void A_query_outside_that_range_cannot_be_built(int maxMessages)
-		=> Assert.That(() => new EmailMessageQuery { MaxMessages = maxMessages },
+	{
+		Assert.That(() => new EmailMessageQuery { MaxMessages = maxMessages },
 			Throws.TypeOf<ArgumentOutOfRangeException>());
+	}
 }

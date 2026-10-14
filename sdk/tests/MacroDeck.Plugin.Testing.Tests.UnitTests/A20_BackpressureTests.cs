@@ -11,7 +11,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// exempt, so an in-flight invocation still completes.
 /// </summary>
 [TestFixture]
-public class A20_BackpressureTests
+public class A20BackpressureTests
 {
 	[Test]
 	public async Task Pausing_the_drain_withholds_exactly_the_non_exempt_traffic()

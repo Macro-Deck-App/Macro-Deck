@@ -67,7 +67,10 @@ internal sealed class MicrosoftTokenProvider : IDisposable
 	}
 
 	// Only blocks new refreshes. Disposing the semaphore could race a refresh still releasing it.
-	public void Dispose() => Interlocked.Exchange(ref _stopping, 1);
+	public void Dispose()
+	{
+		Interlocked.Exchange(ref _stopping, 1);
+	}
 
 	private async Task<string> RefreshAsync(MicrosoftTokens observed, CancellationToken cancellationToken)
 	{
@@ -101,8 +104,8 @@ internal sealed class MicrosoftTokenProvider : IDisposable
 				throw;
 			}
 
-			var rotated = !string.IsNullOrEmpty(response.RefreshToken) &&
-				!string.Equals(response.RefreshToken, current.RefreshToken, StringComparison.Ordinal);
+			var rotated = !string.IsNullOrEmpty(response.RefreshToken)
+				&& !string.Equals(response.RefreshToken, current.RefreshToken, StringComparison.Ordinal);
 			var refreshed = new MicrosoftTokens(response.AccessToken,
 				rotated ? response.RefreshToken! : current.RefreshToken,
 				_time.GetUtcNow() + response.ExpiresIn);

@@ -13,9 +13,12 @@ public static class WidgetTypeDtoMapper
 {
 	private static readonly JsonElement _emptyObject = JsonDocument.Parse("{}").RootElement;
 
-	public static List<WidgetTypeDto> MapToDto(IEnumerable<WidgetTypeCatalogEntry> entries,
+	public static List<WidgetTypeDto> MapToDto(
+		IEnumerable<WidgetTypeCatalogEntry> entries,
 		IIntegrationRegistry integrations)
-		=> [.. entries.Select(entry => MapToDto(entry, integrations))];
+	{
+		return [.. entries.Select(entry => MapToDto(entry, integrations))];
+	}
 
 	public static WidgetTypeDto MapToDto(WidgetTypeCatalogEntry entry, IIntegrationRegistry integrations)
 	{

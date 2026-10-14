@@ -9,10 +9,16 @@ public class PortableScriptBundlingTests
 	private PortabilityTestHarness _harness = null!;
 
 	[SetUp]
-	public void SetUp() => _harness = new PortabilityTestHarness();
+	public void SetUp()
+	{
+		_harness = new PortabilityTestHarness();
+	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task Export_ThenImport_RecreatesTheScriptAndRepointsTheWidget()
@@ -68,7 +74,7 @@ public class PortableScriptBundlingTests
 	public async Task Export_BundlesAnIconThatOnlyABundledScriptReferences()
 	{
 		var pack = await _harness.Icons.CreatePack("Source Pack");
-		var icon = await _harness.AddReadyIcon(pack.Id, "star", sizes: [128]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "star", [128]);
 		var script = (await _harness.Scripts.Create("Notify", null, $"{{\"iconId\":\"{icon.Id}\"}}")).Data!;
 		var (source, _, _) = await _harness.SeedProfile(RunScriptWidgetData(script.Id));
 
@@ -146,17 +152,21 @@ public class PortableScriptBundlingTests
 		});
 	}
 
-	private static string RunScriptWidgetData(Guid scriptId) =>
-		"{\"flows\":\"[{\\\"triggerType\\\":\\\"onShortPress\\\",\\\"children\\\":[{\\\"actionId\\\":" +
-		"\\\"run-script\\\",\\\"parameters\\\":[{\\\"name\\\":\\\"scriptId\\\",\\\"value\\\":\\\"" +
-		scriptId +
-		"\\\"}]}]}]\"}";
+	private static string RunScriptWidgetData(Guid scriptId)
+	{
+		return "{\"flows\":\"[{\\\"triggerType\\\":\\\"onShortPress\\\",\\\"children\\\":[{\\\"actionId\\\":"
+			+ "\\\"run-script\\\",\\\"parameters\\\":[{\\\"name\\\":\\\"scriptId\\\",\\\"value\\\":\\\""
+			+ scriptId
+			+ "\\\"}]}]}]\"}";
+	}
 
-	private static string RunScriptWidgetData(Guid scriptId, string sceneValue) =>
-		"{\"flows\":\"[{\\\"triggerType\\\":\\\"onShortPress\\\",\\\"children\\\":[{\\\"actionId\\\":" +
-		"\\\"run-script\\\",\\\"parameters\\\":[{\\\"name\\\":\\\"scriptId\\\",\\\"value\\\":\\\"" +
-		scriptId +
-		"\\\"},{\\\"name\\\":\\\"input:scene\\\",\\\"value\\\":\\\"" +
-		sceneValue +
-		"\\\"}]}]}]\"}";
+	private static string RunScriptWidgetData(Guid scriptId, string sceneValue)
+	{
+		return "{\"flows\":\"[{\\\"triggerType\\\":\\\"onShortPress\\\",\\\"children\\\":[{\\\"actionId\\\":"
+			+ "\\\"run-script\\\",\\\"parameters\\\":[{\\\"name\\\":\\\"scriptId\\\",\\\"value\\\":\\\""
+			+ scriptId
+			+ "\\\"},{\\\"name\\\":\\\"input:scene\\\",\\\"value\\\":\\\""
+			+ sceneValue
+			+ "\\\"}]}]}]\"}";
+	}
 }

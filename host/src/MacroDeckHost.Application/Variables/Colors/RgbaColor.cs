@@ -21,41 +21,68 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 		return value[0] == '#' ? TryParseHex(value[1..], out color) : TryParseFunctional(value, out color);
 	}
 
-	public static RgbaColor? Parse(string? text) => TryParse(text, out var color) ? color : null;
+	public static RgbaColor? Parse(string? text)
+	{
+		return TryParse(text, out var color) ? color : null;
+	}
 
-	public static string? Canonicalize(string? text) => TryParse(text, out var color) ? color.ToString() : null;
+	public static string? Canonicalize(string? text)
+	{
+		return TryParse(text, out var color) ? color.ToString() : null;
+	}
 
 	public override string ToString()
-		=> IsOpaque
+	{
+		return IsOpaque
 			? string.Create(CultureInfo.InvariantCulture, $"#{R:x2}{G:x2}{B:x2}")
 			: string.Create(CultureInfo.InvariantCulture, $"#{R:x2}{G:x2}{B:x2}{A:x2}");
+	}
 
-	public string ToOpaqueString() => (this with { A = 255 }).ToString();
+	public string ToOpaqueString()
+	{
+		return (this with { A = 255 }).ToString();
+	}
 
 	public RgbaColor Lighten(double percent)
-		=> WithHls((h, l, s) => (h, l + ((1 - l) * Fraction(percent)), s));
+	{
+		return WithHls((h, l, s) => (h, l + (1 - l) * Fraction(percent), s));
+	}
 
 	public RgbaColor Darken(double percent)
-		=> WithHls((h, l, s) => (h, l * (1 - Fraction(percent)), s));
+	{
+		return WithHls((h, l, s) => (h, l * (1 - Fraction(percent)), s));
+	}
 
 	public RgbaColor Saturate(double percent)
-		=> WithHls((h, l, s) => (h, l, s + ((1 - s) * Fraction(percent))));
+	{
+		return WithHls((h, l, s) => (h, l, s + (1 - s) * Fraction(percent)));
+	}
 
 	public RgbaColor Desaturate(double percent)
-		=> WithHls((h, l, s) => (h, l, s * (1 - Fraction(percent))));
+	{
+		return WithHls((h, l, s) => (h, l, s * (1 - Fraction(percent))));
+	}
 
 	public RgbaColor ShiftHue(double degrees)
-		=> WithHls((h, l, s) => (PositiveModulo((h * 360) + degrees, 360) / 360, l, s));
+	{
+		return WithHls((h, l, s) => (PositiveModulo(h * 360 + degrees, 360) / 360, l, s));
+	}
 
-	public RgbaColor WithOpacity(double percent) => this with { A = ToByte(Fraction(percent)) };
+	public RgbaColor WithOpacity(double percent)
+	{
+		return this with { A = ToByte(Fraction(percent)) };
+	}
 
 	public RgbaColor IncreaseOpacity(double percent)
 	{
 		var alpha = A / 255d;
-		return this with { A = ToByte(alpha + ((1 - alpha) * Fraction(percent))) };
+		return this with { A = ToByte(alpha + (1 - alpha) * Fraction(percent)) };
 	}
 
-	public RgbaColor ReduceOpacity(double percent) => this with { A = ToByte(A / 255d * (1 - Fraction(percent))) };
+	public RgbaColor ReduceOpacity(double percent)
+	{
+		return this with { A = ToByte(A / 255d * (1 - Fraction(percent))) };
+	}
 
 	public RgbaColor Mix(RgbaColor other, double percent)
 	{
@@ -67,9 +94,14 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 	}
 
 	private static byte MixChannel(byte from, byte to, double t)
-		=> (byte)Math.Clamp(Math.Floor(from + ((to - from) * t) + 0.5), 0, 255);
+	{
+		return (byte)Math.Clamp(Math.Floor(from + (to - from) * t + 0.5), 0, 255);
+	}
 
-	private static double Fraction(double percent) => Math.Clamp(double.IsNaN(percent) ? 0 : percent, 0, 100) / 100;
+	private static double Fraction(double percent)
+	{
+		return Math.Clamp(double.IsNaN(percent) ? 0 : percent, 0, 100) / 100;
+	}
 
 	private static double PositiveModulo(double value, double modulus)
 	{
@@ -77,7 +109,10 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 		return result < 0 ? result + modulus : result;
 	}
 
-	private static byte ToByte(double unit) => (byte)Math.Clamp(Math.Floor((unit * 255) + 0.5), 0, 255);
+	private static byte ToByte(double unit)
+	{
+		return (byte)Math.Clamp(Math.Floor(unit * 255 + 0.5), 0, 255);
+	}
 
 	// Mirrors Python's colorsys rgb_to_hls and hls_to_rgb, which the shared fixture vectors were generated with.
 	private RgbaColor WithHls(Func<double, double, double, (double H, double L, double S)> change)
@@ -119,9 +154,9 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 			return (l, l, l);
 		}
 
-		var m2 = l <= 0.5 ? l * (1 + s) : l + s - (l * s);
-		var m1 = (2 * l) - m2;
-		return (Channel(m1, m2, h + (1d / 3)), Channel(m1, m2, h), Channel(m1, m2, h - (1d / 3)));
+		var m2 = l <= 0.5 ? l * (1 + s) : l + s - l * s;
+		var m1 = 2 * l - m2;
+		return (Channel(m1, m2, h + 1d / 3), Channel(m1, m2, h), Channel(m1, m2, h - 1d / 3));
 	}
 
 	private static double Channel(double m1, double m2, double hue)
@@ -129,7 +164,7 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 		hue = PositiveModulo(hue, 1);
 		if (hue < 1d / 6)
 		{
-			return m1 + ((m2 - m1) * hue * 6);
+			return m1 + (m2 - m1) * hue * 6;
 		}
 
 		if (hue < 0.5)
@@ -139,7 +174,7 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 
 		if (hue < 2d / 3)
 		{
-			return m1 + ((m2 - m1) * ((2d / 3) - hue) * 6);
+			return m1 + (m2 - m1) * (2d / 3 - hue) * 6;
 		}
 
 		return m1;
@@ -166,10 +201,15 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 		return true;
 	}
 
-	private static byte Nibble(char c) => (byte)(Convert.ToInt32(c.ToString(), 16) * 17);
+	private static byte Nibble(char c)
+	{
+		return (byte)(Convert.ToInt32(c.ToString(), 16) * 17);
+	}
 
 	private static byte Pair(string hex, int index)
-		=> byte.Parse(hex.AsSpan(index, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+	{
+		return byte.Parse(hex.AsSpan(index, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+	}
 
 	private static bool TryParseFunctional(string value, out RgbaColor color)
 	{
@@ -186,9 +226,9 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 			return false;
 		}
 
-		if (!TryChannel(match.Groups["r"].Value, out var r) ||
-			!TryChannel(match.Groups["g"].Value, out var g) ||
-			!TryChannel(match.Groups["b"].Value, out var b))
+		if (!TryChannel(match.Groups["r"].Value, out var r)
+			|| !TryChannel(match.Groups["g"].Value, out var g)
+			|| !TryChannel(match.Groups["b"].Value, out var b))
 		{
 			return false;
 		}
@@ -196,9 +236,11 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 		var a = (byte)255;
 		if (isRgba)
 		{
-			if (!double.TryParse(match.Groups["a"].Value, NumberStyles.Float, CultureInfo.InvariantCulture,
-					out var alpha) ||
-				alpha is < 0 or > 1)
+			if (!double.TryParse(match.Groups["a"].Value,
+					NumberStyles.Float,
+					CultureInfo.InvariantCulture,
+					out var alpha)
+				|| alpha is < 0 or > 1)
 			{
 				return false;
 			}
@@ -211,9 +253,12 @@ public readonly partial record struct RgbaColor(byte R, byte G, byte B, byte A =
 	}
 
 	private static bool TryChannel(string text, out byte channel)
-		=> byte.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out channel);
+	{
+		return byte.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out channel);
+	}
 
-	[GeneratedRegex(@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d+(?:\.\d+)?|\.\d+)\s*)?\)\z",
+	[GeneratedRegex(
+		@"\A(?<fn>rgba?)\(\s*(?<r>\d{1,3})\s*,\s*(?<g>\d{1,3})\s*,\s*(?<b>\d{1,3})\s*(?:,\s*(?<a>\d+(?:\.\d+)?|\.\d+)\s*)?\)\z",
 		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
 	private static partial Regex FunctionalPattern();
 }

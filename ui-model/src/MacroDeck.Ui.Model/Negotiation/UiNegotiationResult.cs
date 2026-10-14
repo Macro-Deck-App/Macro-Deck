@@ -23,9 +23,13 @@ public sealed record UiNegotiationResult
 
 	/// <summary>Builds a supported result.</summary>
 	public static UiNegotiationResult Accept(string subject, int negotiatedVersion)
-		=> new() { Subject = subject, IsSupported = true, NegotiatedVersion = negotiatedVersion };
+	{
+		return new UiNegotiationResult { Subject = subject, IsSupported = true, NegotiatedVersion = negotiatedVersion };
+	}
 
 	/// <summary>Builds an unsupported result that degrades rather than throwing.</summary>
 	public static UiNegotiationResult Fallback(string subject, string reason)
-		=> new() { Subject = subject, IsSupported = false, FallbackReason = reason };
+	{
+		return new UiNegotiationResult { Subject = subject, IsSupported = false, FallbackReason = reason };
+	}
 }

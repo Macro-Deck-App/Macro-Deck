@@ -58,8 +58,9 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 	/// explicitly rather than the type check dropped.
 	/// </summary>
 	private static bool IsRestatedName(IPropertySymbol property)
-		=> property.Name == "Name" &&
-			property.Type.ToDisplayString() == WellKnownTypeNames.LocalizedTextDisplay;
+	{
+		return property.Name == "Name" && property.Type.ToDisplayString() == WellKnownTypeNames.LocalizedTextDisplay;
+	}
 
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
 		[DiagnosticDescriptors.RestatedManifestIdentityMember];
@@ -80,8 +81,8 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 				return;
 			}
 
-			startContext.RegisterSyntaxNodeAction(
-				nodeContext => Analyze(nodeContext, pluginIntegrationType, iconProviderType),
+			startContext.RegisterSyntaxNodeAction(nodeContext
+					=> Analyze(nodeContext, pluginIntegrationType, iconProviderType),
 				SyntaxKind.ClassDeclaration,
 				SyntaxKind.StructDeclaration,
 				SyntaxKind.RecordDeclaration,
@@ -97,8 +98,8 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 		var declaration = (TypeDeclarationSyntax)nodeContext.Node;
 
 		if (nodeContext.SemanticModel.GetDeclaredSymbol(declaration, nodeContext.CancellationToken) is not
-				INamedTypeSymbol type ||
-			!type.ImplementsInterface(pluginIntegrationType))
+				INamedTypeSymbol type
+			|| !type.ImplementsInterface(pluginIntegrationType))
 		{
 			return;
 		}
@@ -128,8 +129,8 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 			}
 
 			var isRestated = _restatedMembers.Any(candidate =>
-					candidate.Name == property.Name && property.Type.SpecialType == candidate.Type) ||
-				IsRestatedName(property);
+					candidate.Name == property.Name && property.Type.SpecialType == candidate.Type)
+				|| IsRestatedName(property);
 
 			if (!isRestated)
 			{
@@ -138,8 +139,8 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 
 			nodeContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.RestatedManifestIdentityMember,
 				property.Locations.FirstOrDefault() ?? type.Locations.FirstOrDefault(),
-				$"'{type.Name}.{property.Name}' restates identity manifest.json already declares. " +
-				"Nothing out of process reads this property - delete it."));
+				$"'{type.Name}.{property.Name}' restates identity manifest.json already declares. "
+				+ "Nothing out of process reads this property - delete it."));
 		}
 	}
 
@@ -164,20 +165,22 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 
 		// The base-list entry when this part names the interface itself, so the squiggle sits on the
 		// interface reference; the type name when it is inherited from a base class and no entry exists.
-		var location = FindBaseListLocation(nodeContext.SemanticModel, declaration, iconProviderType) ??
-			declaration.Identifier.GetLocation();
+		var location = FindBaseListLocation(nodeContext.SemanticModel, declaration, iconProviderType)
+			?? declaration.Identifier.GetLocation();
 
 		nodeContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.RestatedManifestIdentityMember,
 			location,
-			$"'{type.Name}' implements IIntegrationIconProvider. An out-of-process plugin's icon comes " +
-			"from manifest.json's \"icon\" path - delete the icon-provider implementation."));
+			$"'{type.Name}' implements IIntegrationIconProvider. An out-of-process plugin's icon comes "
+			+ "from manifest.json's \"icon\" path - delete the icon-provider implementation."));
 	}
 
 	/// <summary>Whether <paramref name="property" /> is written inside <paramref name="declaration" />
 	/// itself, rather than in another part of the same partial type.</summary>
 	private static bool IsDeclaredIn(IPropertySymbol property, TypeDeclarationSyntax declaration)
-		=> property.DeclaringSyntaxReferences.Any(reference =>
+	{
+		return property.DeclaringSyntaxReferences.Any(reference =>
 			reference.SyntaxTree == declaration.SyntaxTree && declaration.Span.Contains(reference.Span));
+	}
 
 	/// <summary>Whether <paramref name="declaration" /> is the first of <paramref name="type" />'s parts,
 	/// so that a type-level diagnostic is raised once rather than once per part.</summary>
@@ -185,9 +188,7 @@ public sealed class RestatedManifestIdentityMemberAnalyzer : DiagnosticAnalyzer
 	{
 		var first = type.DeclaringSyntaxReferences.FirstOrDefault();
 
-		return first is not null &&
-			first.SyntaxTree == declaration.SyntaxTree &&
-			first.Span == declaration.Span;
+		return first is not null && first.SyntaxTree == declaration.SyntaxTree && first.Span == declaration.Span;
 	}
 
 	/// <summary>The exact base-list entry that names <paramref name="interfaceType" /> on

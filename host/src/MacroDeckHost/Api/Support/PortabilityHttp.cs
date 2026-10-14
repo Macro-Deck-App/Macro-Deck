@@ -11,16 +11,20 @@ public static class PortabilityHttp
 	public const long MaxRequestBytes = 134_217_728;
 
 	public static TransportError? RefuseUnlessDesktop(HttpContext context)
-		=> LoopbackConnection.IsTrusted(context)
+	{
+		return LoopbackConnection.IsTrusted(context)
 			? null
 			: ToTransportError(PortabilityError.DesktopOnly, null);
+	}
 
 	public static TransportError ToTransportError(PortabilityError error, string? message)
-		=> new()
+	{
+		return new TransportError
 		{
 			Code = error.ToString(),
 			Message = message ?? DefaultMessage(error)
 		};
+	}
 
 	public static IActionResult ToErrorResult(ControllerBase controller, PortabilityError error, string? message)
 	{
@@ -29,7 +33,8 @@ public static class PortabilityHttp
 	}
 
 	private static string DefaultMessage(PortabilityError error)
-		=> error switch
+	{
+		return error switch
 		{
 			PortabilityError.NotFound => "Not found",
 			PortabilityError.IsVirtual => "Integration-owned items cannot be exported",
@@ -43,4 +48,5 @@ public static class PortabilityHttp
 			PortabilityError.DesktopOnly => "Importing from a file path is only allowed from the desktop app.",
 			_ => "The operation failed"
 		};
+	}
 }

@@ -4,7 +4,6 @@ using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
 using MacroDeck.Sdk;
-using MacroDeck.Sdk.ConfigFlow;
 
 namespace MacroDeckHost.Infrastructure.Portable;
 
@@ -19,7 +18,8 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 		_configStore = configStore;
 	}
 
-	public async Task<Result<PortableArchiveInfo, PortabilityError>> Inspect(byte[] archiveBytes,
+	public async Task<Result<PortableArchiveInfo, PortabilityError>> Inspect(
+		byte[] archiveBytes,
 		CancellationToken cancellationToken)
 	{
 		var manifest = PortableArchive.ReadManifest(archiveBytes);
@@ -82,7 +82,8 @@ public sealed class PortableArchiveInspector : IPortableArchiveInspector
 			availability);
 	}
 
-	private async Task<PortableIntegrationAvailability> Availability(IIntegration integration,
+	private async Task<PortableIntegrationAvailability> Availability(
+		IIntegration integration,
 		bool needsConfiguration)
 	{
 		if (!_integrationRegistry.IsEnabled(integration.Id))

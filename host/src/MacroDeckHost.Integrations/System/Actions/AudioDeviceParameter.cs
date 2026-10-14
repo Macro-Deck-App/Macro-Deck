@@ -9,13 +9,17 @@ internal static class AudioDeviceParameter
 	public const string Name = "device";
 
 	public static ActionParameter Create()
-		=> ActionParameter.DynamicChoice(Name,
-			label: AppStrings.Integrations.System.Actions.AudioDevice.Label(),
-			description: AppStrings.Integrations.System.Actions.AudioDevice.Description(),
+	{
+		return ActionParameter.DynamicChoice(Name,
+			AppStrings.Integrations.System.Actions.AudioDevice.Label(),
+			AppStrings.Integrations.System.Actions.AudioDevice.Description(),
 			placeholder: AppStrings.Integrations.System.Actions.AudioDevice.DefaultOutput());
+	}
 
 	public static bool TryRead(object? value, out AudioTarget target)
-		=> AudioTarget.TryParse(value?.ToString(), out target);
+	{
+		return AudioTarget.TryParse(value?.ToString(), out target);
+	}
 
 	public static async Task<DynamicOptionsResult> GetOptionsAsync(
 		IVolumeService volume,
@@ -47,7 +51,8 @@ internal static class AudioDeviceParameter
 			}
 		};
 
-		foreach (var device in devices.OrderBy(d => d.Flow).ThenBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase))
+		foreach (var device in devices.OrderBy(d => d.Flow)
+			.ThenBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase))
 		{
 			var twin = devices.Count(other => other.Flow == device.Flow && other.Name == device.Name) > 1;
 			var name = twin ? $"{device.Name} #{AudioDeviceVariables.ShortId(device.Id)}" : device.Name;
@@ -55,20 +60,20 @@ internal static class AudioDeviceParameter
 			{
 				Value = new AudioTarget(device.Flow, device.Id).ToParameterValue(),
 				Label = device.Flow == AudioFlow.Output
-					? AppStrings.Integrations.System.Actions.AudioDevice.OutputOption(device: name)
-					: AppStrings.Integrations.System.Actions.AudioDevice.InputOption(device: name)
+					? AppStrings.Integrations.System.Actions.AudioDevice.OutputOption(name)
+					: AppStrings.Integrations.System.Actions.AudioDevice.InputOption(name)
 			});
 		}
 
-		if (TryRead(context.CurrentParameters.GetValueOrDefault(Name), out var current) &&
-			!current.IsDefault &&
-			options.All(option => option.Value != current.ToParameterValue()))
+		if (TryRead(context.CurrentParameters.GetValueOrDefault(Name), out var current)
+			&& !current.IsDefault
+			&& options.All(option => option.Value != current.ToParameterValue()))
 		{
 			options.Add(new ActionParameterOption
 			{
 				Value = current.ToParameterValue(),
 				Label = knownName(current) is { } name
-					? AppStrings.Integrations.System.Actions.AudioDevice.UnavailableOption(device: name)
+					? AppStrings.Integrations.System.Actions.AudioDevice.UnavailableOption(name)
 					: AppStrings.Integrations.System.Actions.AudioDevice.UnknownUnavailableOption()
 			});
 		}

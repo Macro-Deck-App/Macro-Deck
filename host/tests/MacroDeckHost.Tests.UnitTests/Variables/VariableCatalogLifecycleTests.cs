@@ -307,12 +307,14 @@ internal sealed class VariableCatalogLifecycleTests
 	}
 
 	private static IntegrationStateChangedNotificationHandler CreateStateChangedHandler(VariableCatalogHarness harness)
-		=> new(new NoOpWeatherBroadcastTrigger(),
+	{
+		return new IntegrationStateChangedNotificationHandler(new NoOpWeatherBroadcastTrigger(),
 			new NoOpIssueBroadcastTrigger(),
 			new VariablePollingInvalidationSignal(),
 			harness.Coordinator,
 			new NoOpWidgetVariableIndex(),
 			new WidgetStateEvalChannel());
+	}
 
 	private sealed class NoOpWeatherBroadcastTrigger : IWeatherBroadcastTrigger
 	{
@@ -320,7 +322,10 @@ internal sealed class VariableCatalogLifecycleTests
 		{
 		}
 
-		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken) => Task.FromResult(false);
+		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class
@@ -330,22 +335,43 @@ internal sealed class VariableCatalogLifecycleTests
 		{
 		}
 
-		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken) => Task.FromResult(false);
+		public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
+		{
+			return Task.FromResult(false);
+		}
 	}
 
 	private sealed class NoOpWidgetVariableIndex : IWidgetVariableIndex
 	{
-		public IReadOnlyList<Guid> FindLabelReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindLabelReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName) => [];
+		public IReadOnlyList<Guid> FindStateMappingReferences(string variableName)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null) => [];
+		public IReadOnlyList<Guid> FindIconProviderReferences(string integrationId, string? actionId = null)
+		{
+			return [];
+		}
 
-		public bool LabelReferences(Guid widgetId, string variableName) => false;
+		public bool LabelReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
-		public bool StateMappingReferences(Guid widgetId, string variableName) => false;
+		public bool StateMappingReferences(Guid widgetId, string variableName)
+		{
+			return false;
+		}
 
 		public void Rebuild()
 		{

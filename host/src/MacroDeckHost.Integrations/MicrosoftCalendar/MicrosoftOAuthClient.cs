@@ -57,12 +57,14 @@ internal sealed record MicrosoftTokenResponse(
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.ValueKind is JsonValueKind.Object &&
-			root.TryGetProperty(name, out var value) &&
-			value.ValueKind is JsonValueKind.String &&
-			value.GetString() is { Length: > 0 } text
+	{
+		return root.ValueKind is JsonValueKind.Object
+			&& root.TryGetProperty(name, out var value)
+			&& value.ValueKind is JsonValueKind.String
+			&& value.GetString() is { Length: > 0 } text
 				? text
 				: null;
+	}
 }
 
 internal sealed class MicrosoftOAuthTransientException : Exception
@@ -112,7 +114,7 @@ internal sealed class MicrosoftOAuthRejectedException : Exception
 
 internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 {
-	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -125,7 +127,7 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 
 	internal MicrosoftOAuthClient(HttpMessageHandler handler)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 	}
 
@@ -136,7 +138,8 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 		string codeVerifier,
 		string redirectUri,
 		CancellationToken cancellationToken)
-		=> RequestTokenAsync(tenant,
+	{
+		return RequestTokenAsync(tenant,
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["client_id"] = clientId,
@@ -147,13 +150,15 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 				["redirect_uri"] = redirectUri
 			},
 			cancellationToken);
+	}
 
 	public Task<MicrosoftTokenResponse> RefreshAsync(
 		string clientId,
 		string tenant,
 		string refreshToken,
 		CancellationToken cancellationToken)
-		=> RequestTokenAsync(tenant,
+	{
+		return RequestTokenAsync(tenant,
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["client_id"] = clientId,
@@ -162,6 +167,7 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 				["grant_type"] = "refresh_token"
 			},
 			cancellationToken);
+	}
 
 	public void Dispose()
 	{
@@ -187,8 +193,8 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 		{
 			using var document = Parse(body);
 			var root = document.RootElement;
-			var accessToken = ReadString(root, "access_token") ??
-				throw new MicrosoftOAuthTransientException(
+			var accessToken = ReadString(root, "access_token")
+				?? throw new MicrosoftOAuthTransientException(
 					"Microsoft returned a token response without an access token.");
 
 			return new MicrosoftTokenResponse(accessToken,
@@ -202,9 +208,9 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 
 		// A 5xx, a rate limit or an outage reported as an error code is Microsoft having a bad minute;
 		// the stored refresh token is still the right one and must not be given up over it.
-		if (response.StatusCode is HttpStatusCode.TooManyRequests ||
-			(int)response.StatusCode >= 500 ||
-			error is "temporarily_unavailable")
+		if (response.StatusCode is HttpStatusCode.TooManyRequests
+			|| (int)response.StatusCode >= 500
+			|| error is "temporarily_unavailable")
 		{
 			throw new MicrosoftOAuthTransientException(
 				$"Microsoft answered {(int)response.StatusCode} at the token endpoint.");
@@ -283,9 +289,11 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement root, string name)
 	{
@@ -306,5 +314,7 @@ internal sealed class MicrosoftOAuthClient : IMicrosoftOAuthClient, IDisposable
 	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	}
 }

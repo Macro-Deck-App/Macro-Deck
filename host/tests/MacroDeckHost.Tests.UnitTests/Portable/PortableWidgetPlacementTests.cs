@@ -10,7 +10,7 @@ public class PortableWidgetPlacementTests
 	{
 		var group = new List<PortableCell> { new(0, 0, 1, 1) };
 
-		var placed = PortableWidgetPlacement.Place(group, columns: 5, rows: 3, occupied: [], anchorX: 2, anchorY: 1);
+		var placed = PortableWidgetPlacement.Place(group, 5, 3, [], 2, 1);
 
 		Assert.That(placed, Is.EqualTo(new List<(int, int)> { (2, 1) }));
 	}
@@ -21,7 +21,7 @@ public class PortableWidgetPlacementTests
 		var group = new List<PortableCell> { new(0, 0, 1, 1) };
 		var occupied = new List<PortableCell> { new(0, 0, 1, 1) };
 
-		var placed = PortableWidgetPlacement.Place(group, columns: 2, rows: 1, occupied, anchorX: 0, anchorY: 0);
+		var placed = PortableWidgetPlacement.Place(group, 2, 1, occupied, 0, 0);
 
 		Assert.That(placed, Is.EqualTo(new List<(int, int)> { (1, 0) }));
 	}
@@ -31,7 +31,7 @@ public class PortableWidgetPlacementTests
 	{
 		var group = new List<PortableCell> { new(0, 0, 1, 1), new(1, 1, 1, 1) };
 
-		var placed = PortableWidgetPlacement.Place(group, columns: 4, rows: 4, occupied: [], anchorX: 1, anchorY: 1);
+		var placed = PortableWidgetPlacement.Place(group, 4, 4, [], 1, 1);
 
 		Assert.That(placed, Is.EqualTo(new List<(int, int)> { (1, 1), (2, 2) }));
 	}
@@ -41,7 +41,7 @@ public class PortableWidgetPlacementTests
 	{
 		var group = new List<PortableCell> { new(0, 0, 2, 2) };
 
-		var placed = PortableWidgetPlacement.Place(group, columns: 1, rows: 1, occupied: [], anchorX: 0, anchorY: 0);
+		var placed = PortableWidgetPlacement.Place(group, 1, 1, [], 0, 0);
 
 		Assert.That(placed, Is.Null);
 	}
@@ -52,7 +52,7 @@ public class PortableWidgetPlacementTests
 		var group = new List<PortableCell> { new(0, 0, 1, 1) };
 		var occupied = new List<PortableCell> { new(0, 0, 1, 1) };
 
-		var placed = PortableWidgetPlacement.Place(group, columns: 1, rows: 1, occupied, anchorX: 0, anchorY: 0);
+		var placed = PortableWidgetPlacement.Place(group, 1, 1, occupied, 0, 0);
 
 		Assert.That(placed, Is.Null);
 	}

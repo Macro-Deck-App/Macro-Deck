@@ -22,7 +22,8 @@ public sealed class StoreWithdrawalNotifier : IDisposable
 		_scopeFactory = scopeFactory;
 	}
 
-	public async Task Notify(IReadOnlyList<StoreInstalledWithdrawal> withdrawals,
+	public async Task Notify(
+		IReadOnlyList<StoreInstalledWithdrawal> withdrawals,
 		CancellationToken cancellationToken = default)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -57,10 +58,15 @@ public sealed class StoreWithdrawalNotifier : IDisposable
 		}
 	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
-	public static string DedupeKey(StoreInstalledWithdrawal withdrawal) =>
-		$"{DedupeKeyPrefix}{withdrawal.Kind}:{withdrawal.PackageId.ToLowerInvariant()}";
+	public static string DedupeKey(StoreInstalledWithdrawal withdrawal)
+	{
+		return $"{DedupeKeyPrefix}{withdrawal.Kind}:{withdrawal.PackageId.ToLowerInvariant()}";
+	}
 
 	private async Task<UserNotificationDraft> Draft(string key, StoreInstalledWithdrawal withdrawal)
 	{
@@ -68,13 +74,13 @@ public sealed class StoreWithdrawalNotifier : IDisposable
 		if (!string.IsNullOrWhiteSpace(withdrawal.Reason))
 		{
 			lines.Add(await ActiveLocalization.Resolve(_scopeFactory,
-				AppStrings.Store.Withdrawal.Reason(reason: withdrawal.Reason)));
+				AppStrings.Store.Withdrawal.Reason(withdrawal.Reason)));
 		}
 
 		if (!string.IsNullOrWhiteSpace(withdrawal.Replacement))
 		{
 			lines.Add(await ActiveLocalization.Resolve(_scopeFactory,
-				AppStrings.Store.Withdrawal.Replacement(replacement: withdrawal.Replacement)));
+				AppStrings.Store.Withdrawal.Replacement(withdrawal.Replacement)));
 		}
 
 		if (!withdrawal.Listed)
@@ -88,10 +94,11 @@ public sealed class StoreWithdrawalNotifier : IDisposable
 			Severity = UserNotificationSeverity.Warning,
 			Kind = UserNotificationKind.Security,
 			Title = await ActiveLocalization.Resolve(_scopeFactory,
-				AppStrings.Notifications.StoreVersionWithdrawn(name: withdrawal.Name, version: withdrawal.InstalledVersion)),
+				AppStrings.Notifications.StoreVersionWithdrawn(withdrawal.Name, withdrawal.InstalledVersion)),
 			Message = lines.Count == 0 ? null : string.Join("\n", lines),
 			Action = withdrawal.Listed
-				? new UserNotificationAction(UserNotificationActionKind.OpenExtensionStore, StoreUpdateNotifier.InstalledTarget)
+				? new UserNotificationAction(UserNotificationActionKind.OpenExtensionStore,
+					StoreUpdateNotifier.InstalledTarget)
 				: null,
 			DedupeKey = key
 		};

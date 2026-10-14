@@ -15,7 +15,8 @@ public sealed class JsonIconPackStore : IIconPackStore
 	private readonly ILogger _logger;
 	private readonly DurableJsonFile _files;
 
-	public JsonIconPackStore(IMacroDeckPaths paths,
+	public JsonIconPackStore(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		IPersistenceRecoveryReporter? recoveryReporter = null)
 	{
@@ -94,7 +95,7 @@ public sealed class JsonIconPackStore : IIconPackStore
 				var packDirectory = PackDirectoryFor(packId);
 				if (Directory.Exists(packDirectory))
 				{
-					Directory.Delete(packDirectory, recursive: true);
+					Directory.Delete(packDirectory, true);
 				}
 			}
 			catch (Exception ex)
@@ -104,7 +105,13 @@ public sealed class JsonIconPackStore : IIconPackStore
 		}
 	}
 
-	private object LockFor(Guid id) => _locks.GetOrAdd(id, _ => new object());
+	private object LockFor(Guid id)
+	{
+		return _locks.GetOrAdd(id, _ => new object());
+	}
 
-	private string PackDirectoryFor(Guid id) => Path.Combine(_directory, id.ToString());
+	private string PackDirectoryFor(Guid id)
+	{
+		return Path.Combine(_directory, id.ToString());
+	}
 }

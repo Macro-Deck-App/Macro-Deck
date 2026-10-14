@@ -10,12 +10,20 @@ internal sealed class FakeDeveloperModePreferences : IAppPreferenceService
 {
 	public bool DeveloperMode { get; set; }
 
-	public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+	public Task<NativeUsbSettings> GetNativeUsb()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<DeveloperSettings> GetDeveloper() => Task.FromResult(new DeveloperSettings(DeveloperMode));
+	public Task<DeveloperSettings> GetDeveloper()
+	{
+		return Task.FromResult(new DeveloperSettings(DeveloperMode));
+	}
 
 	public Task<DeveloperSettings> SetDeveloper(bool? enabled)
 	{
@@ -23,78 +31,150 @@ internal sealed class FakeDeveloperModePreferences : IAppPreferenceService
 		return Task.FromResult(new DeveloperSettings(DeveloperMode));
 	}
 
-	public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
+	public Task<AppearanceSettings> GetAppearance()
+	{
+		throw new NotSupportedException();
+	}
 
 	public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<Guid> GetInstallationId() => throw new NotSupportedException();
+	public Task<Guid> GetInstallationId()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+	public Task<byte[]> GetAdbDeviceIdKey()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
+	public Task<LoggingSettings> GetLogging()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel) => throw new NotSupportedException();
+	public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<NetworkSettings> GetNetwork() => throw new NotSupportedException();
+	public Task<NetworkSettings> GetNetwork()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<NetworkSettings> SetNetwork(int? publicPort,
+	public Task<NetworkSettings> SetNetwork(
+		int? publicPort,
 		bool? tlsEnabled = null,
 		string? tlsMode = null,
 		int? tlsHttpsPort = null,
 		bool? discoveryEnabled = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<AdbSettings> GetAdb() => throw new NotSupportedException();
+	public Task<AdbSettings> GetAdb()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<AdbSettings> SetAdb(bool? enabled,
+	public Task<AdbSettings> SetAdb(
+		bool? enabled,
 		string? executablePath,
 		bool? usbConnectionsEnabled,
 		string? defaultDeviceSerial,
 		bool? stopServerOnExit,
 		bool allowPlugins)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
+	public Task<OnboardingSettings> GetOnboarding()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<OnboardingSettings> SetOnboarding(bool? pending) => throw new NotSupportedException();
+	public Task<OnboardingSettings> SetOnboarding(bool? pending)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LockScreenSettings> GetLockScreen() => throw new NotSupportedException();
+	public Task<LockScreenSettings> GetLockScreen()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<LockScreenSettings> SetLockScreen(bool? enabled) => throw new NotSupportedException();
+	public Task<LockScreenSettings> SetLockScreen(bool? enabled)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<ExtensionSettings> GetExtensions() => throw new NotSupportedException();
+	public Task<ExtensionSettings> GetExtensions()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+	public Task<ExtensionSettings> SetExtensions(
+		bool? storeEnabled,
 		bool? checkForUpdates,
 		bool? notifyOnUpdates,
 		int? refreshIntervalMinutes,
 		bool? autoUpdate = null,
 		bool? askForRatings = null)
-		=> throw new NotSupportedException();
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<BackupSettings> GetBackups() => throw new NotSupportedException();
+	public Task<BackupSettings> GetBackups()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<BackupSettings> SetBackups(string? scheduleFrequency,
+	public Task<BackupSettings> SetBackups(
+		string? scheduleFrequency,
 		string? scheduleTimeOfDay,
 		string? scheduleDayOfWeek,
 		int? scheduleDayOfMonth,
 		string? retentionPolicy,
 		int? retentionKeepLatest,
 		bool? beforeHostUpdate,
-		bool? beforePluginUpdate) => throw new NotSupportedException();
+		bool? beforePluginUpdate)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<DateTimeOffset?> GetBackupScheduleLastRun() => throw new NotSupportedException();
+	public Task<DateTimeOffset?> GetBackupScheduleLastRun()
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task SetBackupScheduleLastRun(DateTimeOffset value) => throw new NotSupportedException();
+	public Task SetBackupScheduleLastRun(DateTimeOffset value)
+	{
+		throw new NotSupportedException();
+	}
 
 	public string Culture { get; set; } = "en";
 
-	public Task<LocalizationSettings> GetLocalization() => Task.FromResult(new LocalizationSettings(Culture));
+	public Task<LocalizationSettings> GetLocalization()
+	{
+		return Task.FromResult(new LocalizationSettings(Culture));
+	}
 
-	public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+	public Task<LocalizationSettings> SetLocalization(string? culture)
+	{
+		throw new NotSupportedException();
+	}
 
-	public Task<string> GetTimeFormat() => Task.FromResult(AppPreferenceService.TimeFormatSystem);
+	public Task<string> GetTimeFormat()
+	{
+		return Task.FromResult(AppPreferenceService.TimeFormatSystem);
+	}
 
-	public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+	public Task<string> SetTimeFormat(string? timeFormat)
+	{
+		throw new NotSupportedException();
+	}
 }

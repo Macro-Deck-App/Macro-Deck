@@ -22,7 +22,10 @@ public class AppImageOpenerLinuxTests
 	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_root, recursive: true);
+	public void TearDown()
+	{
+		Directory.Delete(_root, true);
+	}
 
 	private static string Executable(string directory, string name)
 	{
@@ -32,15 +35,18 @@ public class AppImageOpenerLinuxTests
 		return path;
 	}
 
-	private Dictionary<string, string> AppImageEnvironmentWith(string path) => new()
+	private Dictionary<string, string> AppImageEnvironmentWith(string path)
 	{
-		["APPDIR"] = _appDir,
-		["PATH"] = path,
-		["LD_LIBRARY_PATH"] = $"{_appDir}/usr/lib/:",
-		["GTK_THEME"] = "Adwaita:light",
-		["HOME"] = _root,
-		["KDE_SESSION_VERSION"] = "6"
-	};
+		return new Dictionary<string, string>
+		{
+			["APPDIR"] = _appDir,
+			["PATH"] = path,
+			["LD_LIBRARY_PATH"] = $"{_appDir}/usr/lib/:",
+			["GTK_THEME"] = "Adwaita:light",
+			["HOME"] = _root,
+			["KDE_SESSION_VERSION"] = "6"
+		};
+	}
 
 	[Test]
 	public void A_link_reaches_the_system_xdg_open_with_the_environment_outside_the_bundle()
@@ -48,8 +54,7 @@ public class AppImageOpenerLinuxTests
 		Executable(Path.Combine(_appDir, "usr", "bin"), "xdg-open");
 		var system = Executable(_systemBin, "xdg-open");
 
-		var opener = AppImageEnvironment.TryCreateOpener(
-			"https://example.com",
+		var opener = AppImageEnvironment.TryCreateOpener("https://example.com",
 			AppImageEnvironmentWith($"{_appDir}/usr/bin/:{_systemBin}"));
 
 		Assert.That(opener, Is.Not.Null);
@@ -85,7 +90,8 @@ public class AppImageOpenerLinuxTests
 	{
 		var bundled = Executable(Path.Combine(_appDir, "usr", "bin"), "xdg-open");
 
-		var opener = AppImageEnvironment.TryCreateOpener("https://example.com", AppImageEnvironmentWith($"{_appDir}/usr/bin/:{_systemBin}"));
+		var opener = AppImageEnvironment.TryCreateOpener("https://example.com",
+			AppImageEnvironmentWith($"{_appDir}/usr/bin/:{_systemBin}"));
 
 		Assert.That(opener, Is.Not.Null);
 		Assert.Multiple(() =>
@@ -97,7 +103,10 @@ public class AppImageOpenerLinuxTests
 
 	[Test]
 	public void No_launcher_anywhere_leaves_the_caller_on_its_own_path()
-		=> Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com", AppImageEnvironmentWith(_systemBin)), Is.Null);
+	{
+		Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com", AppImageEnvironmentWith(_systemBin)),
+			Is.Null);
+	}
 
 	[Test]
 	public void A_target_that_looks_like_an_option_is_passed_as_a_path()
@@ -151,9 +160,11 @@ public class AppImageOpenerLinuxTests
 
 	[Test]
 	public void A_bare_or_relative_name_is_left_to_the_platform_lookup()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(LinuxApplicationService.OpensWithDefaultApplication("firefox"), Is.False);
 			Assert.That(LinuxApplicationService.OpensWithDefaultApplication("docs/notes.txt"), Is.False);
 		});
+	}
 }

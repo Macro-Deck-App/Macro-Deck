@@ -31,25 +31,35 @@ internal sealed class FakeSystemMetricsService : ISystemMetricsService
 	public List<DiskSample> Disks { get; } = [];
 
 	public Task<double?> GetCpuUsageAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(CpuUsage);
+	{
+		return Task.FromResult(CpuUsage);
+	}
 
 	public Task<MemoryInfo?> GetMemoryAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(Memory);
+	{
+		return Task.FromResult(Memory);
+	}
 
 	public Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default)
-		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
+	{
+		return Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
 			? null
 			: GpuUsageByIndex.TryGetValue(gpuIndex, out var usage)
 				? usage
 				: GpuUsage);
+	}
 
 	public Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
-		=> Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
+	{
+		return Task.FromResult(gpuIndex < 0 || gpuIndex >= GpuCount
 			? null
 			: GpuNameByIndex.TryGetValue(gpuIndex, out var name)
 				? name
 				: GpuName);
+	}
 
 	public Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<DiskSample>>(Disks.ToList());
+	{
+		return Task.FromResult<IReadOnlyList<DiskSample>>(Disks.ToList());
+	}
 }

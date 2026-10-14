@@ -58,9 +58,11 @@ public class MoveProfileRequestMessageHandler : IUiTransportMessageHandler<MoveP
 	}
 
 	private static MoveProfileResponse Fail(ProfileError error, LocalizedText message)
-		=> new()
+	{
+		return new MoveProfileResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = error.ToString(), Message = message }
 		};
+	}
 }

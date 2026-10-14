@@ -51,17 +51,21 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 		FlowExecutionRequest request,
 		TimeSpan bound,
 		CancellationToken cancellationToken)
-		=> RunBoundedAsync(request.ExecutionId,
+	{
+		return RunBoundedAsync(request.ExecutionId,
 			(services, token) => services.GetRequiredService<IFlowExecutor>().ExecuteAsync(request, token),
 			bound,
 			result => PublishStatus(request, result),
 			cancellationToken);
+	}
 
 	public Task<ActionExecutionDispatch> RunBoundedAsync(
 		Func<IServiceProvider, CancellationToken, Task<FlowExecutionResult>> run,
 		TimeSpan bound,
 		CancellationToken cancellationToken)
-		=> RunBoundedAsync(Guid.NewGuid(), run, bound, _ => Task.CompletedTask, cancellationToken);
+	{
+		return RunBoundedAsync(Guid.NewGuid(), run, bound, _ => Task.CompletedTask, cancellationToken);
+	}
 
 	private async Task<ActionExecutionDispatch> RunBoundedAsync(
 		Guid executionId,
@@ -91,7 +95,7 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 		using var delayCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		var winner = await Task.WhenAny(run, Task.Delay(bound, delayCts.Token));
 
-		delayCts.Cancel();
+		await delayCts.CancelAsync();
 
 		if (winner == run)
 		{
@@ -171,19 +175,25 @@ public sealed class ActionExecutionCoordinator : IActionExecutionCoordinator
 		await _transport.SendToGroup(UiClientGroups.For(request.OriginClientId), statusEvent);
 	}
 
-	private static FlowExecutionResult UnavailableResult(Guid executionId) => new()
+	private static FlowExecutionResult UnavailableResult(Guid executionId)
 	{
-		ExecutionId = executionId,
-		Status = FlowExecutionStatus.Failed,
-		ErrorCode = ActionExecutionErrorCodes.Unavailable,
-		ErrorMessage = AppStrings.Errors.Actions.TooManyRunning()
-	};
+		return new FlowExecutionResult
+		{
+			ExecutionId = executionId,
+			Status = FlowExecutionStatus.Failed,
+			ErrorCode = ActionExecutionErrorCodes.Unavailable,
+			ErrorMessage = AppStrings.Errors.Actions.TooManyRunning()
+		};
+	}
 
-	private static FlowExecutionResult FaultedResult(Guid executionId) => new()
+	private static FlowExecutionResult FaultedResult(Guid executionId)
 	{
-		ExecutionId = executionId,
-		Status = FlowExecutionStatus.Failed,
-		ErrorCode = ActionExecutionErrorCodes.FlowError,
-		ErrorMessage = AppStrings.Errors.Actions.FlowFailedUnexpectedly()
-	};
+		return new FlowExecutionResult
+		{
+			ExecutionId = executionId,
+			Status = FlowExecutionStatus.Failed,
+			ErrorCode = ActionExecutionErrorCodes.FlowError,
+			ErrorMessage = AppStrings.Errors.Actions.FlowFailedUnexpectedly()
+		};
+	}
 }

@@ -6,7 +6,10 @@ namespace MacroDeckHost.Tests.UnitTests.MacOS.Mouse;
 [Platform("MacOsX")]
 public class MouseInteropMacOsTests
 {
-	private static IMouseInputProvider Provider() => MouseInputProviderFactory.Create();
+	private static IMouseInputProvider Provider()
+	{
+		return MouseInputProviderFactory.Create();
+	}
 
 	private static void RequireAccessibility(IMouseInputProvider provider)
 	{

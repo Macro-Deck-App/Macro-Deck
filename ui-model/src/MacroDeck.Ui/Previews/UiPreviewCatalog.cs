@@ -30,7 +30,8 @@ public static class UiPreviewCatalog
 		var diagnostics = new List<UiPreviewDiagnostic>();
 		var claimed = new HashSet<string>(StringComparer.Ordinal);
 
-		foreach (var method in assemblies.Distinct().SelectMany(DeclaredPreviewMethods)
+		foreach (var method in assemblies.Distinct()
+			.SelectMany(DeclaredPreviewMethods)
 			.OrderBy(Id, StringComparer.Ordinal))
 		{
 			var attribute = method.GetCustomAttribute<UiPreviewAttribute>()!;
@@ -67,13 +68,15 @@ public static class UiPreviewCatalog
 	}
 
 	private static IEnumerable<MethodInfo> DeclaredPreviewMethods(Assembly assembly)
-		=> SafeTypes(assembly)
-			.SelectMany(type => type.GetMethods(BindingFlags.Public |
-				BindingFlags.NonPublic |
-				BindingFlags.Static |
-				BindingFlags.Instance |
-				BindingFlags.DeclaredOnly))
-			.Where(method => method.IsDefined(typeof(UiPreviewAttribute), inherit: false));
+	{
+		return SafeTypes(assembly)
+			.SelectMany(type => type.GetMethods(BindingFlags.Public
+				| BindingFlags.NonPublic
+				| BindingFlags.Static
+				| BindingFlags.Instance
+				| BindingFlags.DeclaredOnly))
+			.Where(method => method.IsDefined(typeof(UiPreviewAttribute), false));
+	}
 
 	// A plugin can reference an assembly it does not ship every type's dependencies for. The types that
 	// did load are still discoverable, and one unresolvable reference must not blank the whole catalogue.
@@ -106,9 +109,9 @@ public static class UiPreviewCatalog
 			return "A preview method must not be generic.";
 		}
 
-		return typeof(UiElement).IsAssignableFrom(method.ReturnType) ||
-			typeof(UiView).IsAssignableFrom(method.ReturnType) ||
-			typeof(UiPreview).IsAssignableFrom(method.ReturnType)
+		return typeof(UiElement).IsAssignableFrom(method.ReturnType)
+			|| typeof(UiView).IsAssignableFrom(method.ReturnType)
+			|| typeof(UiPreview).IsAssignableFrom(method.ReturnType)
 				? null
 				: "A preview method must return a UiElement, a UiView or a UiPreview.";
 	}
@@ -120,16 +123,21 @@ public static class UiPreviewCatalog
 		return built switch
 		{
 			UiPreview preview => new UiPreviewInstance(new UiView(surface, preview.Root), preview.Resources),
-			UiView view => new UiPreviewInstance(view, resources: null),
-			UiElement element => new UiPreviewInstance(new UiView(surface, element), resources: null),
+			UiView view => new UiPreviewInstance(view, null),
+			UiElement element => new UiPreviewInstance(new UiView(surface, element), null),
 			_ => throw new UiViewException($"The preview '{Member(method)}' returned null.")
 		};
 	}
 
 	private static string Id(MethodInfo method)
-		=> $"{method.DeclaringType!.Assembly.GetName().Name}:{method.DeclaringType.FullName}.{method.Name}";
+	{
+		return $"{method.DeclaringType!.Assembly.GetName().Name}:{method.DeclaringType.FullName}.{method.Name}";
+	}
 
-	private static string Member(MethodInfo method) => $"{method.DeclaringType!.FullName}.{method.Name}";
+	private static string Member(MethodInfo method)
+	{
+		return $"{method.DeclaringType!.FullName}.{method.Name}";
+	}
 
 	private static string ViewNameOf(Type declaringType)
 	{

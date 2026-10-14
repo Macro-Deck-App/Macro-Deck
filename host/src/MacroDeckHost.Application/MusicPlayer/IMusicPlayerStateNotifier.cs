@@ -41,7 +41,12 @@ public sealed class MusicPlayerStateNotifier : IMusicPlayerStateNotifier
 	public event EventHandler? InstancesChanged;
 
 	public void Publish(string instanceId, MusicPlayerStatePayload state)
-		=> StateChanged?.Invoke(this, new MusicPlayerStateChangedEventArgs(instanceId, state));
+	{
+		StateChanged?.Invoke(this, new MusicPlayerStateChangedEventArgs(instanceId, state));
+	}
 
-	public void PublishInstancesChanged() => InstancesChanged?.Invoke(this, EventArgs.Empty);
+	public void PublishInstancesChanged()
+	{
+		InstancesChanged?.Invoke(this, EventArgs.Empty);
+	}
 }

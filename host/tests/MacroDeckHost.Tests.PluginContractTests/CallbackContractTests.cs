@@ -127,7 +127,7 @@ internal sealed class CallbackContractTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			variableRefresh: _refreshSignal,
@@ -145,7 +145,7 @@ internal sealed class CallbackContractTests
 		_link = new CallbackHostLink(PluginId, "session-callback", router, _eventBus);
 
 		var dispatcher = PluginTestSession.Dispatcher([], _state, TimeProvider.System);
-		var session = PluginTestSession.Create("session-callback", negotiatedVersion: 1, DateTimeOffset.UnixEpoch);
+		var session = PluginTestSession.Create("session-callback", 1, DateTimeOffset.UnixEpoch);
 		var connection = new PluginSessionConnection(_link,
 			session,
 			dispatcher,
@@ -156,7 +156,7 @@ internal sealed class CallbackContractTests
 			_stateCache);
 
 		_state.ActiveConnection = connection;
-		_run = connection.RunAsync(resumeSessionId: null, instanceId: "callback-fixture", CancellationToken.None);
+		_run = connection.RunAsync(null, "callback-fixture", CancellationToken.None);
 
 		await WaitForAsync(() => _state.IsReady);
 
@@ -179,12 +179,15 @@ internal sealed class CallbackContractTests
 			_notifications,
 			new RemoteMessageChannel(_hostInvoker,
 				_state,
-				new MacroDeck.Plugin.Hosting.PluginMetadata { Id = "com.example.callbacks", Name = "Callbacks", Version = "1.0.0" },
+				new MacroDeck.Plugin.Hosting.PluginMetadata
+					{ Id = "com.example.callbacks", Name = "Callbacks", Version = "1.0.0" },
 				TimeProvider.System,
 				Serilog.Core.Logger.None),
 			new RemoteUiResourceRegistry(_hostInvoker, new FakeAssetUploader()),
 			new RemoteColorApi(_hostInvoker, _state, _stateCache, Serilog.Core.Logger.None),
-			new RemoteNotificationService(_hostInvoker, _state, new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()),
+			new RemoteNotificationService(_hostInvoker,
+				_state,
+				new MacroDeck.Plugin.Hosting.Capabilities.Ui.NotificationResultStore()),
 			weatherProvider: new RemoteWeatherProviderApi(_hostInvoker),
 			locale: new RemoteLocaleApi(_hostInvoker));
 	}
@@ -205,7 +208,9 @@ internal sealed class CallbackContractTests
 	private sealed class FixedLocale(TimeOfDayFormat format) : ILocaleApi
 	{
 		public Task<TimeOfDayFormat> GetTimeOfDayFormatAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(format);
+		{
+			return Task.FromResult(format);
+		}
 	}
 
 	[TearDown]
@@ -241,7 +246,8 @@ internal sealed class CallbackContractTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId), Is.EquivalentTo(new[] { "volume-percent", "muted" }));
+			Assert.That(_refreshSignal.DrainDefinitionsFor(PluginId),
+				Is.EquivalentTo(new[] { "volume-percent", "muted" }));
 			Assert.That(_refreshSignal.DrainEagerRefreshRequested(PluginId), Is.False);
 		});
 	}
@@ -379,7 +385,7 @@ internal sealed class CallbackContractTests
 	{
 		await _devices.RegisterDeviceAsync(new DeviceDescriptor("SERIAL-1", "Deck"));
 
-		await _devices.UpdateDeviceAsync(new DeviceDescriptor("SERIAL-1", "Deck", Model: "Stream Deck Mini"));
+		await _devices.UpdateDeviceAsync(new DeviceDescriptor("SERIAL-1", "Deck", "Stream Deck Mini"));
 
 		Assert.That(DeviceRegistry.Devices[(PluginId, "SERIAL-1")].Model, Is.EqualTo("Stream Deck Mini"));
 	}
@@ -387,7 +393,7 @@ internal sealed class CallbackContractTests
 	[Test]
 	public async Task A_variable_written_through_IVariableApi_is_readable_from_the_hosts_variable_service_afterwards()
 	{
-		var handle = await _context.Variables.CreateAsync("counter", VariableType.Numeric, initialValue: 1);
+		var handle = await _context.Variables.CreateAsync("counter", VariableType.Numeric, 1);
 		await _context.Variables.SetValueAsync(handle.Id, 42);
 
 		Assert.That(_variableService.ValueOf(handle.Id), Is.EqualTo("42"));
@@ -428,11 +434,11 @@ internal sealed class CallbackContractTests
 				Has.Exactly(1)
 					.Matches<(string Name, string? OwnerWidgetId, SdkVariableType Type, string? InitialValue, int?
 						DecimalPlaces)>(call =>
-						call.Name == "track" &&
-						call.OwnerWidgetId == "widget-1" &&
-						call.Type == SdkVariableType.Numeric &&
-						call.InitialValue == "1" &&
-						call.DecimalPlaces == 2));
+						call.Name == "track"
+						&& call.OwnerWidgetId == "widget-1"
+						&& call.Type == SdkVariableType.Numeric
+						&& call.InitialValue == "1"
+						&& call.DecimalPlaces == 2));
 		});
 	}
 
@@ -529,7 +535,9 @@ internal sealed class CallbackContractTests
 
 	[Test]
 	public void GetScripts_is_empty_before_the_first_host_state_push()
-		=> Assert.That(_context.Scripts.GetScripts(), Is.Empty);
+	{
+		Assert.That(_context.Scripts.GetScripts(), Is.Empty);
+	}
 
 	[Test]
 	public void GetWidgets_is_empty_and_Exists_is_false_before_the_first_host_state_push()
@@ -638,7 +646,8 @@ internal sealed class CallbackContractTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(devices.DefaultDevice?.Serial, Is.EqualTo("emulator-5554"));
-			Assert.That(devices.FindDevice("R5CT20ABCDE")!.State, Is.EqualTo(MacroDeck.Sdk.Android.AndroidDeviceState.Unauthorized));
+			Assert.That(devices.FindDevice("R5CT20ABCDE")!.State,
+				Is.EqualTo(MacroDeck.Sdk.Android.AndroidDeviceState.Unauthorized));
 			Assert.That(devices.FindDevice("R5CT20ABCDE")!.LacksUsbPermission, Is.True);
 			Assert.That(devices.FindDevice("emulator-5554")!.LacksUsbPermission, Is.False);
 		});
@@ -676,7 +685,8 @@ internal sealed class CallbackContractTests
 				[
 					new CompanionDeviceStateDto
 					{
-						DeviceId = phone.ToString("D"), ReadySequence = 4, BatteryLevelPercent = 64, Capabilities = ["focus"]
+						DeviceId = phone.ToString("D"), ReadySequence = 4, BatteryLevelPercent = 64,
+						Capabilities = ["focus"]
 					}
 				],
 				Revision = 1
@@ -706,7 +716,8 @@ internal sealed class CallbackContractTests
 	}
 
 	[Test]
-	public async Task A_desktop_notification_from_a_plugin_without_the_permission_is_refused_without_failing_the_plugin()
+	public async Task
+		A_desktop_notification_from_a_plugin_without_the_permission_is_refused_without_failing_the_plugin()
 	{
 		_desktopAccess.Allowed = false;
 		var notifier = new RemoteDesktopNotifier(_hostInvoker, _stateCache, Serilog.Core.Logger.None);
@@ -760,7 +771,10 @@ internal sealed class CallbackContractTests
 	{
 		public bool Allowed { get; set; }
 
-		public bool IsAllowed(string pluginId) => Allowed;
+		public bool IsAllowed(string pluginId)
+		{
+			return Allowed;
+		}
 	}
 
 	[Test]
@@ -837,7 +851,7 @@ internal sealed class CallbackContractTests
 	{
 		var interactions = new RemoteActionInteractions(_hostInvoker, Serilog.Core.Logger.None, "forged-correlation");
 
-		Assert.DoesNotThrow(() => interactions.RequestDevicePicker(null, "instance-1", startPlayback: true));
+		Assert.DoesNotThrow(() => interactions.RequestDevicePicker(null, "instance-1", true));
 
 		await Task.Delay(50);
 		Assert.That(_actionInteractions.DevicePickerRequests, Is.Empty);
@@ -855,8 +869,8 @@ internal sealed class CallbackContractTests
 	[Test]
 	public async Task A_snapshot_a_patch_and_a_fault_reach_the_hosts_ui_session_sink()
 	{
-		var tree = "{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\"," +
-			"\"attributes\":{}},\"root\":{\"id\":\"root\",\"type\":\"panel\"}}";
+		var tree = "{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\","
+			+ "\"attributes\":{}},\"root\":{\"id\":\"root\",\"type\":\"panel\"}}";
 		var patch = "{\"fromRevision\":1,\"toRevision\":2,\"operations\":[]}";
 
 		await _hostInvoker.InvokeAsync(HostApis.Ui,
@@ -959,10 +973,14 @@ internal sealed class RecordingUiSessionSink : IUiSessionSink
 	}
 
 	public void PublishFault(string providerId, string sessionId, string code, string? message)
-		=> Faults.Add((providerId, sessionId, code, message));
+	{
+		Faults.Add((providerId, sessionId, code, message));
+	}
 
 	public void PublishReload(string providerId, string sessionId)
-		=> Reloads.Add((providerId, sessionId));
+	{
+		Reloads.Add((providerId, sessionId));
+	}
 }
 
 internal sealed class RecordingWidgetDataReader : IWidgetDataReader
@@ -998,7 +1016,8 @@ internal sealed class FixedVariableHistory : IVariableHistory
 
 	public int OpenWindows => Volatile.Read(ref _open);
 
-	public MacroDeckHost.Application.Variables.IVariableHistoryWindow Open(string variableName,
+	public Application.Variables.IVariableHistoryWindow Open(
+		string variableName,
 		int capacity,
 		string? scopeRefId = null)
 	{
@@ -1007,7 +1026,7 @@ internal sealed class FixedVariableHistory : IVariableHistory
 		return new Window(this);
 	}
 
-	private sealed class Window(FixedVariableHistory owner) : MacroDeckHost.Application.Variables.IVariableHistoryWindow
+	private sealed class Window(FixedVariableHistory owner) : Application.Variables.IVariableHistoryWindow
 	{
 		public IReadOnlyList<double> Values => owner.Values;
 
@@ -1019,23 +1038,29 @@ internal sealed class FixedVariableHistory : IVariableHistory
 			remove { }
 		}
 
-		public void Dispose() => Interlocked.Decrement(ref owner._open);
+		public void Dispose()
+		{
+			Interlocked.Decrement(ref owner._open);
+		}
 	}
 }
 
 internal sealed class CallbackBindingStore : IVariableBindingStore
 {
-	public List<MacroDeckHost.Domain.Entities.VariableBinding> Bindings { get; private set; } = [];
+	public List<Domain.Entities.VariableBinding> Bindings { get; private set; } = [];
 
-	public IReadOnlyList<MacroDeckHost.Domain.Entities.VariableBinding> Load() => Bindings;
+	public IReadOnlyList<Domain.Entities.VariableBinding> Load()
+	{
+		return Bindings;
+	}
 
-	public bool TryLoad(out IReadOnlyList<MacroDeckHost.Domain.Entities.VariableBinding> bindings)
+	public bool TryLoad(out IReadOnlyList<Domain.Entities.VariableBinding> bindings)
 	{
 		bindings = [.. Bindings];
 		return true;
 	}
 
-	public bool Save(IEnumerable<MacroDeckHost.Domain.Entities.VariableBinding> bindings)
+	public bool Save(IEnumerable<Domain.Entities.VariableBinding> bindings)
 	{
 		Bindings = [.. bindings];
 		return true;

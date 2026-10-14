@@ -59,5 +59,8 @@ public sealed class StoreRegistryRefreshBroadcastBackgroundService : BackgroundS
 		}
 	}
 
-	private void OnChanged(StoreRegistryRefreshRun run) => _channel.Writer.TryWrite(run);
+	private void OnChanged(StoreRegistryRefreshRun run)
+	{
+		_channel.Writer.TryWrite(run);
+	}
 }

@@ -6,7 +6,6 @@ using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Localization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,8 +20,8 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	private const string RenewedDedupeKey = "host-identity-renewed";
 	private const string P256Oid = "1.2.840.10045.3.1.7";
 	private const int FlagAttempts = 8;
-	private static readonly TimeSpan FlagRetryDelay = TimeSpan.FromMilliseconds(250);
-	private static readonly TimeSpan ShutdownWait = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _flagRetryDelay = TimeSpan.FromMilliseconds(250);
+	private static readonly TimeSpan _shutdownWait = TimeSpan.FromSeconds(5);
 
 	private readonly SemaphoreSlim _loadGate = new(1, 1);
 	private readonly Lock _signGate = new();
@@ -40,7 +39,8 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	private readonly CancellationTokenSource _shutdown = new();
 	private Task _recording = Task.CompletedTask;
 
-	public FileHostIdentityKeyProvider(IDataProtectionProvider dataProtectionProvider,
+	public FileHostIdentityKeyProvider(
+		IDataProtectionProvider dataProtectionProvider,
 		IMacroDeckPaths paths,
 		IServiceScopeFactory scopeFactory,
 		IUserNotificationStore notifications,
@@ -58,7 +58,9 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	}
 
 	public async ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-		=> (await EnsureLoaded(cancellationToken)).PublicKey;
+	{
+		return (await EnsureLoaded(cancellationToken)).PublicKey;
+	}
 
 	public async ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
 	{
@@ -76,7 +78,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		_shutdown.Cancel();
 		try
 		{
-			_recording.Wait(ShutdownWait);
+			_recording.Wait(_shutdownWait);
 		}
 		catch (AggregateException e)
 		{
@@ -134,7 +136,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 				_logger.Information("The host identity key is available again");
 			}
 
-			var point = key.ExportParameters(includePrivateParameters: false).Q;
+			var point = key.ExportParameters(false).Q;
 			var fresh = new LoadedKey(key, [0x04, .. point.X!, .. point.Y!]);
 			_loaded = fresh;
 			return fresh;
@@ -185,16 +187,17 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			return Import(await File.ReadAllBytesAsync(_keyFilePath));
 		}
 
-		RecordCreationInBackground(renewed: false);
+		RecordCreationInBackground(false);
 		return key;
 	}
 
 	private async Task<ECDsa> Renew(CryptographicException cause)
 	{
-		var stamp = _timeProvider.GetUtcNow().UtcDateTime.ToString("yyyyMMdd'T'HHmmss'Z'",
-			CultureInfo.InvariantCulture);
+		var stamp = _timeProvider.GetUtcNow()
+			.UtcDateTime.ToString("yyyyMMdd'T'HHmmss'Z'",
+				CultureInfo.InvariantCulture);
 		var aside = $"{_keyFilePath}.unreadable-{stamp}";
-		File.Move(_keyFilePath, aside, overwrite: true);
+		File.Move(_keyFilePath, aside, true);
 		_logger.Warning(cause,
 			"The host identity key could not be unprotected and has been renewed; the old file is kept as {Path}",
 			aside);
@@ -206,7 +209,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			return Import(await File.ReadAllBytesAsync(_keyFilePath));
 		}
 
-		RecordCreationInBackground(renewed: true);
+		RecordCreationInBackground(true);
 		return key;
 	}
 
@@ -216,7 +219,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		try
 		{
 			key.ImportPkcs8PrivateKey(_protector.Unprotect(protectedBytes), out _);
-			if (key.ExportParameters(includePrivateParameters: false).Curve.Oid.Value != P256Oid)
+			if (key.ExportParameters(false).Curve.Oid.Value != P256Oid)
 			{
 				throw new CryptographicException("The host identity key is not a P-256 key.");
 			}
@@ -238,7 +241,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 		File.WriteAllBytes(tempPath, _protector.Protect(key.ExportPkcs8PrivateKey()));
 		try
 		{
-			File.Move(tempPath, _keyFilePath, overwrite: false);
+			File.Move(tempPath, _keyFilePath, false);
 			return true;
 		}
 		catch (IOException) when (File.Exists(_keyFilePath))
@@ -297,7 +300,9 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 	}
 
 	// False when the host is shutting down: its services are gone, so retrying would only log noise.
-	private async Task<bool> WithFlagRetry(Func<IAppPreferenceRepository, Task> operation, string failureMessage,
+	private async Task<bool> WithFlagRetry(
+		Func<IAppPreferenceRepository, Task> operation,
+		string failureMessage,
 		CancellationToken cancellationToken)
 	{
 		for (var attempt = 1;; attempt++)
@@ -316,7 +321,7 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 			}
 			catch (Exception) when (attempt < FlagAttempts)
 			{
-				await Task.Delay(FlagRetryDelay * attempt, _timeProvider, cancellationToken)
+				await Task.Delay(_flagRetryDelay * attempt, _timeProvider, cancellationToken)
 					.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 			}
 			catch (Exception e)
@@ -363,10 +368,17 @@ public sealed class FileHostIdentityKeyProvider : IHostIdentityKeyProvider, IDis
 public sealed class LockedHostIdentityKeyProvider : IHostIdentityKeyProvider
 {
 	public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-		=> ValueTask.FromException<byte[]>(Locked());
+	{
+		return ValueTask.FromException<byte[]>(Locked());
+	}
 
 	public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-		=> ValueTask.FromException<byte[]>(Locked());
+	{
+		return ValueTask.FromException<byte[]>(Locked());
+	}
 
-	private static HostIdentityUnavailableException Locked() => new("The key ring is locked.");
+	private static HostIdentityUnavailableException Locked()
+	{
+		return new HostIdentityUnavailableException("The key ring is locked.");
+	}
 }

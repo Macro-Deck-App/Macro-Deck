@@ -16,7 +16,7 @@ namespace MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
 [SupportedOSPlatform("windows")]
 public sealed class WindowsCredentialManagerKekStore : IKekStore
 {
-	private static readonly byte[] Entropy = Encoding.UTF8.GetBytes("MacroDeck.KeyRing.v1");
+	private static readonly byte[] _entropy = Encoding.UTF8.GetBytes("MacroDeck.KeyRing.v1");
 
 	public KeyRingBackend Backend => KeyRingBackend.WindowsCredentialManager;
 
@@ -50,7 +50,7 @@ public sealed class WindowsCredentialManagerKekStore : IKekStore
 			try
 			{
 				return KekStoreReadResult.Found(ProtectedData.Unprotect(protectedKek,
-					Entropy,
+					_entropy,
 					DataProtectionScope.CurrentUser));
 			}
 			catch (CryptographicException e)
@@ -71,7 +71,7 @@ public sealed class WindowsCredentialManagerKekStore : IKekStore
 		byte[] protectedKek;
 		try
 		{
-			protectedKek = ProtectedData.Protect(kek.ToArray(), Entropy, DataProtectionScope.CurrentUser);
+			protectedKek = ProtectedData.Protect(kek.ToArray(), _entropy, DataProtectionScope.CurrentUser);
 		}
 		catch (CryptographicException)
 		{
@@ -122,5 +122,8 @@ public sealed class WindowsCredentialManagerKekStore : IKekStore
 			: KekStoreStatus.Unavailable;
 	}
 
-	private static string TargetName(KekStoreIdentity identity) => $"{identity.Service}:{identity.Account}";
+	private static string TargetName(KekStoreIdentity identity)
+	{
+		return $"{identity.Service}:{identity.Account}";
+	}
 }

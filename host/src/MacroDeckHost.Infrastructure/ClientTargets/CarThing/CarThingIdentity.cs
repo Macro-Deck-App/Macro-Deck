@@ -17,7 +17,9 @@ internal static class CarThingIdentity
 	private static readonly string[] _markers = ["superbird", "carthing"];
 
 	internal static bool Matches(AdbDevice device)
-		=> ContainsMarker(device.Product) || ContainsMarker(device.Model);
+	{
+		return ContainsMarker(device.Product) || ContainsMarker(device.Model);
+	}
 
 	internal static bool ContainsMarker(string? value)
 	{

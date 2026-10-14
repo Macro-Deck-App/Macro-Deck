@@ -25,7 +25,7 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 
 	internal ConnectIdentityClient(HttpMessageHandler handler)
 	{
-		_http = new HttpClient(handler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(15) };
+		_http = new HttpClient(handler, false) { Timeout = TimeSpan.FromSeconds(15) };
 		_ownsClient = true;
 	}
 
@@ -130,9 +130,9 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 
 		// ZITADEL answers a dead credential with invalid_request carrying its message key, never invalid_grant.
 		// Only these keys mean the credential is gone; Errors.Internal and the rest are its own outages.
-		if (response.StatusCode is HttpStatusCode.BadRequest &&
-			ReadError(body) is ("invalid_request", { } key) &&
-			_deadCredentialErrors.Contains(key))
+		if (response.StatusCode is HttpStatusCode.BadRequest
+			&& ReadError(body) is ("invalid_request", { } key)
+			&& _deadCredentialErrors.Contains(key))
 		{
 			throw new ConnectAuthRejectedException("Macro Deck Connect rejected the credential.");
 		}
@@ -302,16 +302,20 @@ public sealed class ConnectIdentityClient : IConnectIdentityClient, IDisposable
 	}
 
 	private static Uri? ReadUri(JsonElement root, string name)
-		=> ReadString(root, name) is { Length: > 0 } value &&
-			Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
-			uri.Scheme == Uri.UriSchemeHttps
+	{
+		return ReadString(root, name) is { Length: > 0 } value
+			&& Uri.TryCreate(value, UriKind.Absolute, out var uri)
+			&& uri.Scheme == Uri.UriSchemeHttps
 				? uri
 				: null;
+	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement root, string name)
 	{

@@ -12,7 +12,9 @@ public static class VariableFileText
 	private static readonly Encoding _utf8WithoutBom = new UTF8Encoding(false);
 
 	public static bool IsValidPath(string? path)
-		=> !string.IsNullOrWhiteSpace(path) && Path.IsPathFullyQualified(path) && !Directory.Exists(path);
+	{
+		return !string.IsNullOrWhiteSpace(path) && Path.IsPathFullyQualified(path) && !Directory.Exists(path);
+	}
 
 	public static bool TryToValue(VariableType type, int? decimalPlaces, string content, out string value)
 	{
@@ -23,7 +25,10 @@ public static class VariableFileText
 				return true;
 
 			case VariableType.Numeric
-				when decimal.TryParse(content.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var number):
+				when decimal.TryParse(content.Trim(),
+					NumberStyles.Number,
+					CultureInfo.InvariantCulture,
+					out var number):
 				value = VariableValueSerializer.Serialize(type, number, decimalPlaces);
 				return true;
 

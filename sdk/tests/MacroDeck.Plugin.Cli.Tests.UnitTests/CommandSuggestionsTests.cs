@@ -6,8 +6,10 @@ namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 [TestFixture]
 public class CommandSuggestionsTests
 {
-	private static List<string> RealCommandNames() =>
-		CliEntryPoint.CreateRootCommand().Subcommands.Select(command => command.Name).ToList();
+	private static List<string> RealCommandNames()
+	{
+		return CliEntryPoint.CreateRootCommand().Subcommands.Select(command => command.Name).ToList();
+	}
 
 	[Test]
 	public void A_single_character_typo_suggests_the_intended_command()

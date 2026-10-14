@@ -38,9 +38,9 @@ internal static class GeneratorTestHarness
 
 		if (compileErrors.Count > 0)
 		{
-			Assert.Fail("Test source does not compile:" +
-				Environment.NewLine +
-				string.Join(Environment.NewLine, compileErrors));
+			Assert.Fail("Test source does not compile:"
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, compileErrors));
 		}
 
 		var driver = CSharpGeneratorDriver.Create(new SdkUsageManifestGenerator());

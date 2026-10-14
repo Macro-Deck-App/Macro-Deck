@@ -11,10 +11,18 @@ public sealed class IconPackOwnerRegistry : IIconPackOwnerRegistry
 		_owners = owners.ToList();
 	}
 
-	public IIconPackOwner? Resolve(IconPackEntity pack) => _owners.FirstOrDefault(owner => owner.Owns(pack));
+	public IIconPackOwner? Resolve(IconPackEntity pack)
+	{
+		return _owners.FirstOrDefault(owner => owner.Owns(pack));
+	}
 
-	public IconPackOwnerDescriptor Describe(IconPackEntity pack) =>
-		Resolve(pack)?.Describe(pack) ?? IconPackOwnerDescriptor.UserCreated;
+	public IconPackOwnerDescriptor Describe(IconPackEntity pack)
+	{
+		return Resolve(pack)?.Describe(pack) ?? IconPackOwnerDescriptor.UserCreated;
+	}
 
-	public bool IsReadOnly(IconPackEntity pack) => pack.IsReadOnly || Describe(pack).IsReadOnly;
+	public bool IsReadOnly(IconPackEntity pack)
+	{
+		return pack.IsReadOnly || Describe(pack).IsReadOnly;
+	}
 }

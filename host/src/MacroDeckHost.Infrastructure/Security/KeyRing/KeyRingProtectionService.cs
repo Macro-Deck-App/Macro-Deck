@@ -28,7 +28,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 	private KeyRingProtectionPlan _plan;
 	private bool _recoveryKeyExported;
 
-	public KeyRingProtectionService(IMacroDeckPaths paths,
+	public KeyRingProtectionService(
+		IMacroDeckPaths paths,
 		IKekStore store,
 		KekStoreIdentity identity,
 		KeyRingKekHolder holder,
@@ -74,7 +75,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		}
 	}
 
-	public async Task<Result<KeyRingProtectionError>> EnsureProtected(ReadOnlyMemory<byte> recoveryKey,
+	public async Task<Result<KeyRingProtectionError>> EnsureProtected(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -160,7 +162,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		}
 	}
 
-	public async Task<Result<KeyRingProtectionError>> AddEscrowWrap(ReadOnlyMemory<byte> recoveryKey,
+	public async Task<Result<KeyRingProtectionError>> AddEscrowWrap(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -202,7 +205,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		}
 	}
 
-	public async Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(ReadOnlyMemory<byte> recoveryKey,
+	public async Task<Result<KeyRingProtectionError>> PruneEscrowWrapsExcept(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -227,7 +231,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		}
 	}
 
-	public async Task<Result<KeyRingProtectionError>> Unlock(ReadOnlyMemory<byte> recoveryKey,
+	public async Task<Result<KeyRingProtectionError>> Unlock(
+		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default)
 	{
 		await _gate.WaitAsync(cancellationToken);
@@ -256,8 +261,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 				// An escrow can name a key that is not the one this ring was wrapped with - a restored
 				// escrow beside a local ring, say. Storing it would report success and come straight
 				// back locked.
-				if (_plan.RingKekId is not null &&
-					!string.Equals(KeyRingKeyDerivation.DeriveKekId(kek), _plan.RingKekId, StringComparison.Ordinal))
+				if (_plan.RingKekId is not null
+					&& !string.Equals(KeyRingKeyDerivation.DeriveKekId(kek), _plan.RingKekId, StringComparison.Ordinal))
 				{
 					return Result.Fail(KeyRingProtectionError.RecoveryKeyInvalid);
 				}
@@ -321,11 +326,16 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 	}
 
 	public Result<KeyRingProtectionError> AdoptKek(ReadOnlyMemory<byte> kek)
-		=> _store.Write(_identity, kek.Span) == KekStoreStatus.Found
+	{
+		return _store.Write(_identity, kek.Span) == KekStoreStatus.Found
 			? Result.Ok<KeyRingProtectionError>()
 			: Result.Fail(KeyRingProtectionError.KeystoreUnavailable);
+	}
 
-	public void Dispose() => _gate.Dispose();
+	public void Dispose()
+	{
+		_gate.Dispose();
+	}
 
 	private void TryDeleteEscrow()
 	{
@@ -363,10 +373,12 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 	}
 
 	private static KeyRingProtectionState ToState(KeyRingProtectionMode mode)
-		=> mode switch
+	{
+		return mode switch
 		{
 			KeyRingProtectionMode.Protected => KeyRingProtectionState.Protected,
 			KeyRingProtectionMode.Locked => KeyRingProtectionState.Locked,
 			_ => KeyRingProtectionState.Unprotected
 		};
+	}
 }

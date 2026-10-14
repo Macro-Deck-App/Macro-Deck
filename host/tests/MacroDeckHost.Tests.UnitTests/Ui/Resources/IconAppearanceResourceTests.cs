@@ -47,7 +47,10 @@ internal sealed class IconAppearanceResourceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _host.Dispose();
+	public void TearDown()
+	{
+		_host.Dispose();
+	}
 
 	[Test]
 	public async Task A_plain_icon_keeps_its_resource_id_version_and_etag()
@@ -56,7 +59,7 @@ internal sealed class IconAppearanceResourceTests
 		var withoutCatalog = new WidgetIconResources(new WidgetIconSourceRegistry([_iconPackSource]),
 			new UiResourceStore(),
 			Serilog.Core.Logger.None,
-			new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache());
 		var reference = WidgetIconReference.IconPack(icon.Id.ToString());
 		var iconService = IconService();
 
@@ -113,7 +116,7 @@ internal sealed class IconAppearanceResourceTests
 			CancellationToken.None))!;
 
 		var dark = await Serve(resource, "?colorScheme=dark&motion=animated");
-		var darkSmall = await Serve(resource, "?colorScheme=dark&motion=animated", size: "128");
+		var darkSmall = await Serve(resource, "?colorScheme=dark&motion=animated", "128");
 		var light = await Serve(resource, "?colorScheme=light&motion=animated");
 		var noContext = await Serve(resource, string.Empty);
 
@@ -140,7 +143,7 @@ internal sealed class IconAppearanceResourceTests
 			CancellationToken.None);
 		var missingKind = await _widgetIcons.ResolveAsync(reference with { Appearance = "colorScheme=light" },
 			CancellationToken.None);
-		var served = await Serve(pinned, string.Empty, size: "128");
+		var served = await Serve(pinned, string.Empty, "128");
 
 		Assert.Multiple(() =>
 		{
@@ -175,7 +178,8 @@ internal sealed class IconAppearanceResourceTests
 	}
 
 	[Test]
-	public async Task A_plugin_icon_handle_with_appearances_serves_the_dark_one_to_a_dark_viewer_and_the_default_without_context()
+	public async Task
+		A_plugin_icon_handle_with_appearances_serves_the_dark_one_to_a_dark_viewer_and_the_default_without_context()
 	{
 		var icon = await Icon(_lightColor);
 		await Appearance(icon, "colorScheme=dark", _darkColor);
@@ -212,13 +216,15 @@ internal sealed class IconAppearanceResourceTests
 	}
 
 	private IconService IconService()
-		=> new(_host.Icons.Cache,
+	{
+		return new IconService(_host.Icons.Cache,
 			_host.Icons.Storage,
 			_host.Icons.FallbackStore,
 			_host.Icons.VariantDeriver,
 			_host.Icons.Coalescer,
 			_host.Icons.Mediator,
 			new IconPackOwnerRegistry([]));
+	}
 
 	private async Task<IconEntity> Icon(Rgba32 color)
 	{
@@ -226,7 +232,8 @@ internal sealed class IconAppearanceResourceTests
 		return await _host.Icons.AddReadyIcon(pack.Id, "lamp", Png(color));
 	}
 
-	private async Task<IconEntity> Appearance(IconEntity parent,
+	private async Task<IconEntity> Appearance(
+		IconEntity parent,
 		string key,
 		Rgba32 color,
 		IconProcessingState state = IconProcessingState.Ready)
@@ -266,7 +273,8 @@ internal sealed class IconAppearanceResourceTests
 		return await controller.Get(resource.ResourceId, resource.ContentHash, size) as FileContentResult;
 	}
 
-	private async Task<(FileStreamResult? Result, string ETag, string CacheControl)> FetchImage(Guid iconId,
+	private async Task<(FileStreamResult? Result, string ETag, string CacheControl)> FetchImage(
+		Guid iconId,
 		string? version,
 		string query)
 	{
@@ -294,30 +302,38 @@ internal sealed class IconAppearanceResourceTests
 
 	private static DefaultHttpContext Context(string query)
 	{
-		var context = new DefaultHttpContext();
-		context.Request.QueryString = new QueryString(query.Length == 0 ? null : query);
-		context.Request.Headers.Accept = "image/webp,image/png";
+		var context = new DefaultHttpContext
+		{
+			Request =
+			{
+				QueryString = new QueryString(query.Length == 0 ? null : query),
+				Headers =
+				{
+					Accept = "image/webp,image/png"
+				}
+			}
+		};
 		return context;
 	}
 
 	private static Rgba32 ColorOf(FileContentResult? served)
 	{
 		Assert.That(served, Is.Not.Null);
-		using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(served!.FileContents);
+		using var image = Image.Load<Rgba32>(served!.FileContents);
 		return image[image.Width / 2, image.Height / 2];
 	}
 
 	private static Rgba32 ColorOf(FileStreamResult? served)
 	{
 		Assert.That(served, Is.Not.Null);
-		using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(served!.FileStream);
+		using var image = Image.Load<Rgba32>(served!.FileStream);
 		return image[image.Width / 2, image.Height / 2];
 	}
 
 	private static int EdgeOf(FileContentResult? served)
 	{
 		Assert.That(served, Is.Not.Null);
-		var info = SixLabors.ImageSharp.Image.Identify(served!.FileContents);
+		var info = Image.Identify(served!.FileContents);
 		return Math.Max(info.Width, info.Height);
 	}
 

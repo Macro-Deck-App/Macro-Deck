@@ -27,7 +27,8 @@ public class GetActionProviderStatesRequestMessageHandler
 	}
 
 	private static ActionProviderStateDto ToDto(ActionStateDefinition state)
-		=> new()
+	{
+		return new ActionProviderStateDto
 		{
 			Id = state.Id,
 			Label = state.Label,
@@ -41,13 +42,14 @@ public class GetActionProviderStatesRequestMessageHandler
 				}
 				: null
 		};
+	}
 
 	public async ValueTask<GetActionProviderStatesResponse> Handle(
 		GetActionProviderStatesRequest request,
 		CancellationToken cancellationToken)
 	{
-		if (!_integrationRegistry.IsEnabled(request.IntegrationId) ||
-			_integrationRegistry.FindAction(request.IntegrationId, request.ActionId) is not
+		if (!_integrationRegistry.IsEnabled(request.IntegrationId)
+			|| _integrationRegistry.FindAction(request.IntegrationId, request.ActionId) is not
 				IStateProviderActionDefinition provider)
 		{
 			return new GetActionProviderStatesResponse
@@ -55,8 +57,8 @@ public class GetActionProviderStatesRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "ACTION_NOT_FOUND",
-					Message = AppStrings.Errors.Actions.ProviderNotFound(integrationId: request.IntegrationId,
-						actionId: request.ActionId)
+					Message = AppStrings.Errors.Actions.ProviderNotFound(request.IntegrationId,
+						request.ActionId)
 				}
 			};
 		}

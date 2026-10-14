@@ -27,20 +27,25 @@ internal sealed class ExecuteCodeTriggerActionDefinition : IDynamicOptionsAction
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(TriggerParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.TriggerLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.TriggerDescription(),
+			AppStrings.Integrations.Streamerbot.Actions.TriggerLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.TriggerDescription(),
 			required: true),
 		ActionParameter.KeyValue(ArgumentsParameterName,
-			label: AppStrings.Integrations.Streamerbot.Actions.ArgumentsLabel(),
-			description: AppStrings.Integrations.Streamerbot.Actions.TriggerArgumentsDescription())
+			AppStrings.Integrations.Streamerbot.Actions.ArgumentsLabel(),
+			AppStrings.Integrations.Streamerbot.Actions.TriggerArgumentsDescription())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(StreamerbotOptions.CodeTriggers(_resolver()));
+	{
+		return Task.FromResult(StreamerbotOptions.CodeTriggers(_resolver()));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

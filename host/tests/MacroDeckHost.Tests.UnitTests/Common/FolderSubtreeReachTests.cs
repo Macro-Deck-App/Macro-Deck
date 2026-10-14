@@ -194,11 +194,14 @@ public class FolderSubtreeReachTests
 		Assert.That(result, Is.EquivalentTo(new[] { a.Id }));
 	}
 
-	private static FolderEntity Folder(string name, Guid? parentId) => new()
+	private static FolderEntity Folder(string name, Guid? parentId)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Order = 0,
-		ParentId = parentId
-	};
+		return new FolderEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Order = 0,
+			ParentId = parentId
+		};
+	}
 }

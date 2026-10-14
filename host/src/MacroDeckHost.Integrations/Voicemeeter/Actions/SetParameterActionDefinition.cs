@@ -27,17 +27,20 @@ internal sealed class SetParameterActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text(ParameterNameParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ParameterLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ParameterDescription(),
-			placeholder: "Strip[0].Comp",
+			AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ParameterLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ParameterDescription(),
+			"Strip[0].Comp",
 			required: true),
 		ActionParameter.Text(ValueParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ValueLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ValueDescription(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ValueLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.SetParameter.ValueDescription(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

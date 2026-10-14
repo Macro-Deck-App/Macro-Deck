@@ -9,7 +9,8 @@ internal sealed class UserAgentHandlerTests
 	{
 		public List<string?> UserAgents { get; } = [];
 
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			UserAgents.Add(request.Headers.TryGetValues("User-Agent", out var values)

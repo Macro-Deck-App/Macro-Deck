@@ -8,7 +8,8 @@ namespace MacroDeckHost.Widgets.Slider;
 /// while somebody is choosing a widget type.</summary>
 internal static class SliderWidgetSample
 {
-	internal static async ValueTask<SliderWidgetData> BuildAsync(SliderWidgetData config,
+	internal static async ValueTask<SliderWidgetData> BuildAsync(
+		SliderWidgetData config,
 		IWidgetSampleTextResolver text)
 	{
 		var label = await text.ResolveAsync(AppStrings.Widgets.SamplePreview.SliderLabel()).ConfigureAwait(false);

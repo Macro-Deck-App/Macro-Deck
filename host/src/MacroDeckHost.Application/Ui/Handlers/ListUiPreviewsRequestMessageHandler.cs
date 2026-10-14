@@ -54,14 +54,15 @@ public sealed class ListUiPreviewsRequestMessageHandler
 				continue;
 			}
 
-			previews.AddRange(_snapshots.GetSnapshot(integration.Id).UiPreviews.Select(preview => new UiPreviewEntry
-			{
-				Id = preview.Id,
-				View = preview.View,
-				Scenario = preview.Scenario,
-				Profile = preview.Profile,
-				OwnerId = integration.Id
-			}));
+			previews.AddRange(_snapshots.GetSnapshot(integration.Id)
+				.UiPreviews.Select(preview => new UiPreviewEntry
+				{
+					Id = preview.Id,
+					View = preview.View,
+					Scenario = preview.Scenario,
+					Profile = preview.Profile,
+					OwnerId = integration.Id
+				}));
 		}
 
 		return ValueTask.FromResult(new ListUiPreviewsResponse { Previews = previews, Diagnostics = diagnostics });

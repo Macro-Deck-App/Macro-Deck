@@ -18,11 +18,16 @@ public sealed class UnsupportedAndroidDeviceManager : IAndroidDeviceManager
 
 	public IReadOnlyCollection<IAndroidDevice> Devices => [];
 
-	public IAndroidDevice? FindDevice(string serial) => null;
+	public IAndroidDevice? FindDevice(string serial)
+	{
+		return null;
+	}
 
 	public Task<IAndroidDevice> ConnectAsync(string address, CancellationToken cancellationToken = default)
-		=> Task.FromException<IAndroidDevice>(new AndroidDeviceException(AndroidDeviceErrorCode.Unsupported,
+	{
+		return Task.FromException<IAndroidDevice>(new AndroidDeviceException(AndroidDeviceErrorCode.Unsupported,
 			"This context offers no ADB."));
+	}
 
 	public event EventHandler<AndroidDeviceEventArgs>? DeviceConnected
 	{

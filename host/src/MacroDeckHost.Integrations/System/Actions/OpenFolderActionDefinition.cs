@@ -21,11 +21,14 @@ internal sealed class OpenFolderActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Folder("path",
-			label: AppStrings.Integrations.System.Actions.OpenFolder.PathLabel(),
+			AppStrings.Integrations.System.Actions.OpenFolder.PathLabel(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_applications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_applications);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

@@ -41,7 +41,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 	public string Kind => CapabilityKinds.MusicPlayer;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -50,6 +51,7 @@ internal sealed class MusicPlayerCapabilityHandler(
 					Kind = CapabilityKinds.MusicPlayer, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -104,8 +106,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 	{
 		var payload = new MusicPlayerDescribePayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? metadata.Name,
 			Instances = BuildInstances()
 		};
 
@@ -116,10 +118,13 @@ internal sealed class MusicPlayerCapabilityHandler(
 	/// The <c>instances</c> operation: the same instance list <c>describe</c> carries, exposed as its
 	/// own narrow round trip - see <see cref="MusicPlayerInstancesResult" />'s remarks.
 	/// </summary>
-	private CapabilityInvocationResult Instances() => CapabilityInvocationResult.Ok(new MusicPlayerInstancesResult
+	private CapabilityInvocationResult Instances()
 	{
-		Instances = BuildInstances()
-	});
+		return CapabilityInvocationResult.Ok(new MusicPlayerInstancesResult
+		{
+			Instances = BuildInstances()
+		});
+	}
 
 	/// <summary>
 	/// Never re-sorted, and always walks providers/instances in the same order: a music player
@@ -127,13 +132,16 @@ internal sealed class MusicPlayerCapabilityHandler(
 	/// its default-instance resolution on the host side.
 	/// </summary>
 	private IReadOnlyList<MusicPlayerInstanceDto> BuildInstances()
-		=>
+	{
+		return
 		[
 			.. _providers.SelectMany(provider => provider.GetInstances()
 				.Select(instance => MusicPlayerDescriptorMapper.ToDto(instance, provider.GetPlayer(instance.Id))))
 		];
+	}
 
-	private async Task<CapabilityInvocationResult> StateAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> StateAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerStateArguments>(PluginProtocolJson.Options);
@@ -152,7 +160,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok(MusicPlayerDescriptorMapper.ToDto(state));
 	}
 
-	private async Task<CapabilityInvocationResult> ArtworkAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> ArtworkAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerArtworkArguments>(PluginProtocolJson.Options);
@@ -204,7 +213,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		}
 	}
 
-	private async Task<CapabilityInvocationResult> PlayItemAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> PlayItemAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerPlayItemArguments>(PluginProtocolJson.Options);
@@ -230,7 +240,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
-	private async Task<CapabilityInvocationResult> SeekAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> SeekAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerSeekArguments>(PluginProtocolJson.Options);
@@ -250,7 +261,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
-	private async Task<CapabilityInvocationResult> VolumeAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> VolumeAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerVolumeArguments>(PluginProtocolJson.Options);
@@ -269,7 +281,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
-	private async Task<CapabilityInvocationResult> ShuffleAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> ShuffleAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerShuffleArguments>(PluginProtocolJson.Options);
@@ -288,7 +301,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		return CapabilityInvocationResult.Ok();
 	}
 
-	private async Task<CapabilityInvocationResult> RepeatAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> RepeatAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerRepeatArguments>(PluginProtocolJson.Options);
@@ -303,7 +317,7 @@ internal sealed class MusicPlayerCapabilityHandler(
 			return failure!;
 		}
 
-		if (!Enum.TryParse<RepeatMode>(arguments.Mode, ignoreCase: false, out var mode))
+		if (!Enum.TryParse<RepeatMode>(arguments.Mode, false, out var mode))
 		{
 			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
 				$"Unknown repeat mode '{arguments.Mode}'.");
@@ -322,7 +336,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 	/// exception does (see <c>CapabilityDispatcher.RunAsync</c>), which the host adapter then lets
 	/// propagate rather than swallowing - see <c>RemoteMusicPlayer.GetCatalogCoreAsync</c>.
 	/// </summary>
-	private async Task<CapabilityInvocationResult> CatalogAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> CatalogAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerCatalogArguments>(PluginProtocolJson.Options);
@@ -343,7 +358,7 @@ internal sealed class MusicPlayerCapabilityHandler(
 				$"Music player '{arguments.InstanceId}' does not support browsing its catalog.");
 		}
 
-		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(arguments.Kind, ignoreCase: false, out var kind))
+		if (!Enum.TryParse<MusicPlayerCatalogItemKind>(arguments.Kind, false, out var kind))
 		{
 			return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
 				$"Unknown catalog item kind '{arguments.Kind}'.");
@@ -361,7 +376,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 
 	/// <summary><c>IMusicPlayerDeviceProvider.GetDevicesAsync</c> throws on failure too - see
 	/// <see cref="CatalogAsync" />'s identical remarks.</summary>
-	private async Task<CapabilityInvocationResult> DevicesAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> DevicesAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerInstanceArguments>(PluginProtocolJson.Options);
@@ -390,7 +406,8 @@ internal sealed class MusicPlayerCapabilityHandler(
 		});
 	}
 
-	private async Task<CapabilityInvocationResult> TransferAsync(CapabilityInvocation invocation,
+	private async Task<CapabilityInvocationResult> TransferAsync(
+		CapabilityInvocation invocation,
 		CancellationToken cancellationToken)
 	{
 		var arguments = invocation.Arguments?.Deserialize<MusicPlayerTransferArguments>(PluginProtocolJson.Options);
@@ -438,7 +455,9 @@ internal sealed class MusicPlayerCapabilityHandler(
 	}
 
 	private bool TryResolvePlayer(string instanceId, out IMusicPlayer player, out CapabilityInvocationResult? failure)
-		=> TryResolvePlayer(instanceId, options: null, out player, out failure);
+	{
+		return TryResolvePlayer(instanceId, null, out player, out failure);
+	}
 
 	private bool TryResolvePlayer(
 		string instanceId,

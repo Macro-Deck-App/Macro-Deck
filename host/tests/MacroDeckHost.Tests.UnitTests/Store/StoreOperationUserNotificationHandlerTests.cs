@@ -26,7 +26,7 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 	[Test]
 	public async Task Installing_an_older_version_over_a_newer_one_is_announced_as_such()
 	{
-		var entry = await Raise(Operation("1.0.0", previousVersion: "2.0.0", StoreOperationState.Completed));
+		var entry = await Raise(Operation("1.0.0", "2.0.0", StoreOperationState.Completed));
 
 		Assert.That(entry.Title, Is.EqualTo("Installed an older version of SoundBox"));
 	}
@@ -34,7 +34,7 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 	[Test]
 	public async Task A_failed_downgrade_is_announced_as_a_failed_downgrade()
 	{
-		var entry = await Raise(Operation("1.0.0", previousVersion: "2.0.0", StoreOperationState.Failed) with
+		var entry = await Raise(Operation("1.0.0", "2.0.0", StoreOperationState.Failed) with
 		{
 			Error = StoreOperationError.DownloadFailed,
 			ErrorMessage = "offline"
@@ -50,7 +50,7 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 	[Test]
 	public async Task An_ordinary_update_keeps_its_update_wording()
 	{
-		var completed = await Raise(Operation("2.0.0", previousVersion: "1.0.0", StoreOperationState.Completed));
+		var completed = await Raise(Operation("2.0.0", "1.0.0", StoreOperationState.Completed));
 
 		Assert.That(completed.Title, Is.EqualTo("Updated SoundBox"));
 	}
@@ -58,7 +58,7 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 	[Test]
 	public async Task A_plugin_needing_a_newer_Macro_Deck_explains_why_and_leads_to_the_update_settings()
 	{
-		var entry = await Raise(Operation("1.0.0", previousVersion: null, StoreOperationState.Failed) with
+		var entry = await Raise(Operation("1.0.0", null, StoreOperationState.Failed) with
 		{
 			Kind = StoreOperationKind.Install,
 			Error = StoreOperationError.RequiresNewerMacroDeck,
@@ -77,7 +77,7 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 	[TestCase(StoreOperationError.VersionNotFound, "This version is not available in the store.")]
 	public async Task A_version_refusal_is_explained_in_the_users_language(StoreOperationError error, string message)
 	{
-		var entry = await Raise(Operation("1.0.0", previousVersion: null, StoreOperationState.Failed) with
+		var entry = await Raise(Operation("1.0.0", null, StoreOperationState.Failed) with
 		{
 			Kind = StoreOperationKind.Install,
 			Error = error,
@@ -97,15 +97,18 @@ internal sealed class StoreOperationUserNotificationHandlerTests
 		return _notifications.Snapshot().Single();
 	}
 
-	private static StoreOperation Operation(string version, string? previousVersion, StoreOperationState state) => new()
+	private static StoreOperation Operation(string version, string? previousVersion, StoreOperationState state)
 	{
-		Id = Guid.CreateVersion7(),
-		Kind = StoreOperationKind.Update,
-		ExtensionKind = StoreExtensionKind.Plugin,
-		PackageId = "com.acme.soundbox",
-		Version = version,
-		PreviousVersion = previousVersion,
-		DisplayName = "SoundBox",
-		State = state
-	};
+		return new StoreOperation
+		{
+			Id = Guid.CreateVersion7(),
+			Kind = StoreOperationKind.Update,
+			ExtensionKind = StoreExtensionKind.Plugin,
+			PackageId = "com.acme.soundbox",
+			Version = version,
+			PreviousVersion = previousVersion,
+			DisplayName = "SoundBox",
+			State = state
+		};
+	}
 }

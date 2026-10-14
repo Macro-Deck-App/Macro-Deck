@@ -13,7 +13,8 @@ internal sealed class CliPromptReader
 	private readonly Func<string?> _readLine;
 	private readonly Func<TextWriter, bool, IAnsiConsole?>? _interactiveConsole;
 
-	public CliPromptReader(bool isInteractive,
+	public CliPromptReader(
+		bool isInteractive,
 		Func<string?> readLine,
 		Func<TextWriter, bool, IAnsiConsole?>? interactiveConsole = null)
 	{
@@ -29,10 +30,15 @@ internal sealed class CliPromptReader
 	public static CliPromptReader Console { get; } =
 		new(!System.Console.IsInputRedirected, System.Console.In.ReadLine, SpectreConsole.TryCreate);
 
-	public string? ReadLine() => _readLine();
+	public string? ReadLine()
+	{
+		return _readLine();
+	}
 
 	/// <summary><c>null</c> when this reader has no raw-key console seam, or when the seam itself decides
 	/// the terminal cannot run one - either way the caller falls back to the line-based prompt.</summary>
-	public IAnsiConsole? CreateInteractiveConsole(TextWriter output, bool noColor) =>
-		_interactiveConsole?.Invoke(output, noColor);
+	public IAnsiConsole? CreateInteractiveConsole(TextWriter output, bool noColor)
+	{
+		return _interactiveConsole?.Invoke(output, noColor);
+	}
 }

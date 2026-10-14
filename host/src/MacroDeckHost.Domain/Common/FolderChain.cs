@@ -85,12 +85,14 @@ public static class FolderChain
 		return folders
 			.Where(candidate => !idComparer.Equals(idOf(candidate), ownId))
 			.SelectMany(candidate => widgetsOf(candidate)
-				.Where(widget => isPinned(widget) &&
-					(pinnedProfileWide(widget) || reaching.Contains(idOf(candidate)))));
+				.Where(widget
+					=> isPinned(widget) && (pinnedProfileWide(widget) || reaching.Contains(idOf(candidate)))));
 	}
 
 	private static IReadOnlyCollection<TFolder> Materialize<TFolder>(IEnumerable<TFolder> folders)
-		=> folders as IReadOnlyCollection<TFolder> ?? folders.ToList();
+	{
+		return folders as IReadOnlyCollection<TFolder> ?? folders.ToList();
+	}
 
 	private static Dictionary<TId, TFolder> Index<TFolder, TId>(
 		IEnumerable<TFolder> folders,
@@ -111,7 +113,10 @@ public static class FolderChain
 /// <summary>The <see cref="FolderChain" /> shape of the persisted folder entities.</summary>
 public static class FolderEntityChain
 {
-	public static Guid IdOf(FolderEntity folder) => folder.Id;
+	public static Guid IdOf(FolderEntity folder)
+	{
+		return folder.Id;
+	}
 
 	public static bool ParentIdOf(FolderEntity folder, out Guid parentId)
 	{
@@ -119,10 +124,15 @@ public static class FolderEntityChain
 		return folder.ParentId.HasValue;
 	}
 
-	public static IEnumerable<WidgetEntity> WidgetsOf(FolderEntity folder) => folder.Widgets;
+	public static IEnumerable<WidgetEntity> WidgetsOf(FolderEntity folder)
+	{
+		return folder.Widgets;
+	}
 
 	public static IEnumerable<FolderEntity> AncestorsAndSelf(
 		FolderEntity folder,
 		IEnumerable<FolderEntity> profileFolders)
-		=> FolderChain.AncestorsAndSelf<FolderEntity, Guid>(folder, profileFolders, IdOf, ParentIdOf);
+	{
+		return FolderChain.AncestorsAndSelf<FolderEntity, Guid>(folder, profileFolders, IdOf, ParentIdOf);
+	}
 }

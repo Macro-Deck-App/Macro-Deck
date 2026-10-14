@@ -15,14 +15,14 @@ internal static class StreamChatWidgetConfigView
 		ArgumentNullException.ThrowIfNull(platform);
 		ArgumentNullException.ThrowIfNull(accounts);
 
-		var account = new UiState<string>(StreamWidgetJson.ReadString(data, StreamChatWidgetType.AccountKey) ??
-			string.Empty);
+		var account = new UiState<string>(StreamWidgetJson.ReadString(data, StreamChatWidgetType.AccountKey)
+			?? string.Empty);
 		var allowModeration = new UiState<bool>(StreamChatWidgetSettings.AllowsModeration(data));
 		var fontSize = new UiState<double>(StreamChatWidgetSettings.FontScale(data) * 100);
 		var messageColor = new UiState<string>(
 			StreamWidgetJson.ReadString(data, StreamChatWidgetSettings.MessageColorKey) ?? string.Empty);
-		var nameColor = new UiState<string>(
-			StreamWidgetJson.ReadString(data, StreamChatWidgetSettings.NameColorKey) ?? string.Empty);
+		var nameColor = new UiState<string>(StreamWidgetJson.ReadString(data, StreamChatWidgetSettings.NameColorKey)
+			?? string.Empty);
 
 		return new UiWidgetConfiguration
 		{
@@ -42,17 +42,16 @@ internal static class StreamChatWidgetConfigView
 						Binding = Bind.To(account),
 						SupportsReset = true,
 						DefaultValue = string.Empty,
-						Options = UiValue.Of<IReadOnlyList<UiOption>>(
-						[
-							.. accounts.Select(candidate => UiOption.Of(candidate.AccountId, candidate.Label)),
-						]),
+						Options = UiValue.Of<IReadOnlyList<UiOption>>([
+							.. accounts.Select(candidate => UiOption.Of(candidate.AccountId, candidate.Label))
+						])
 					},
 					new UiBooleanInput
 					{
 						Key = StreamChatWidgetType.AllowModerationKey,
 						Label = AppStrings.Integrations.StreamChat.Dialog.AllowModeration(),
 						Description = AppStrings.Integrations.StreamChat.Dialog.AllowModerationDescription(),
-						Binding = Bind.To(allowModeration),
+						Binding = Bind.To(allowModeration)
 					},
 					new UiNumberInput
 					{
@@ -61,7 +60,7 @@ internal static class StreamChatWidgetConfigView
 						Min = StreamChatWidgetSettings.MinFontSizePercent,
 						Max = StreamChatWidgetSettings.MaxFontSizePercent,
 						Step = 5,
-						Binding = Bind.To(fontSize),
+						Binding = Bind.To(fontSize)
 					},
 					new UiColorInput
 					{
@@ -70,7 +69,7 @@ internal static class StreamChatWidgetConfigView
 						Label = AppStrings.Integrations.StreamChat.Widget.MessageColor(),
 						Binding = Bind.To(messageColor),
 						SupportsReset = true,
-						DefaultValue = string.Empty,
+						DefaultValue = string.Empty
 					},
 					new UiColorInput
 					{
@@ -80,14 +79,15 @@ internal static class StreamChatWidgetConfigView
 						Description = AppStrings.Integrations.StreamChat.Widget.NameColorDescription(),
 						Binding = Bind.To(nameColor),
 						SupportsReset = true,
-						DefaultValue = string.Empty,
+						DefaultValue = string.Empty
 					},
 					UiWidgetAppearance.Section(data,
-						UiWidgetAppearanceFields.Border | UiWidgetAppearanceFields.BackgroundColor |
-						UiWidgetAppearanceFields.TransparentBackground |
-						UiWidgetAppearanceFields.ColorVariables),
-				],
-			},
+						UiWidgetAppearanceFields.Border
+						| UiWidgetAppearanceFields.BackgroundColor
+						| UiWidgetAppearanceFields.TransparentBackground
+						| UiWidgetAppearanceFields.ColorVariables)
+				]
+			}
 		};
 	}
 }

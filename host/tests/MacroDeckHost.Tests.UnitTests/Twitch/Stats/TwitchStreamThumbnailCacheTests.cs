@@ -26,7 +26,11 @@ internal sealed class TwitchStreamThumbnailCacheTests
 		_store = new UiResourceStore();
 		_handler = new Handler();
 		var resources = new BuiltInUiResources(TwitchIntegration.IntegrationId, _store, typeof(TwitchIntegration));
-		_cache = new StreamThumbnailCache(TwitchStreamPlatform.Platform, new HttpClient(_handler, disposeHandler: false), () => resources, _time, Logger.None);
+		_cache = new StreamThumbnailCache(TwitchStreamPlatform.Platform,
+			new HttpClient(_handler, false),
+			() => resources,
+			_time,
+			Logger.None);
 	}
 
 	[TearDown]
@@ -116,7 +120,11 @@ internal sealed class TwitchStreamThumbnailCacheTests
 	{
 		var changed = new TaskCompletionSource();
 		var requestsBefore = _handler.Requests;
-		void OnChanged(object? sender, string id) => changed.TrySetResult();
+
+		void OnChanged(object? sender, string id)
+		{
+			changed.TrySetResult();
+		}
 
 		_cache.Changed += OnChanged;
 		_cache.Track(userId, url);
@@ -146,7 +154,7 @@ internal sealed class TwitchStreamThumbnailCacheTests
 			return Task.FromResult(new HttpResponseMessage(Status)
 			{
 				Content = new ByteArrayContent(Body),
-				RequestMessage = request,
+				RequestMessage = request
 			});
 		}
 	}

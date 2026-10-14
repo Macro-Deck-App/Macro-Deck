@@ -37,7 +37,7 @@ public sealed class MacOsKeychainKekStore : IKekStore
 					MacOsKeychainInterop.SecMatchLimit
 				],
 				[
-					MacOsKeychainInterop.CFBooleanTrue,
+					MacOsKeychainInterop.CfBooleanTrue,
 					MacOsKeychainInterop.SecMatchLimitOne
 				]);
 			handles.Add(query);
@@ -149,7 +149,8 @@ public sealed class MacOsKeychainKekStore : IKekStore
 		}
 	}
 
-	private static IntPtr BuildQuery(KekStoreIdentity identity,
+	private static IntPtr BuildQuery(
+		KekStoreIdentity identity,
 		List<IntPtr> handles,
 		IntPtr[] extraKeys,
 		IntPtr[] extraValues)
@@ -186,11 +187,13 @@ public sealed class MacOsKeychainKekStore : IKekStore
 	}
 
 	private static string Describe(int status)
-		=> status switch
+	{
+		return status switch
 		{
 			-25308 => "The keychain refused access without user interaction (errSecInteractionNotAllowed)",
 			-25293 => "The keychain rejected the authorisation (errSecAuthFailed)",
 			-128 => "The keychain prompt was cancelled (errSecUserCanceled)",
 			_ => $"The keychain returned OSStatus {status}"
 		};
+	}
 }

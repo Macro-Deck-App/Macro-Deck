@@ -120,8 +120,8 @@ internal sealed class YouTubeStatePoller : IDisposable
 		var read = await TryAsync("broadcast", () => ReadBroadcastAsync(cancellationToken));
 
 		var now = _options.Time.GetUtcNow();
-		if (_budget.Level is not YouTubeQuotaLevel.Paused &&
-			(_channelReadAt is null || now - _channelReadAt >= _options.ChannelInterval))
+		if (_budget.Level is not YouTubeQuotaLevel.Paused
+			&& (_channelReadAt is null || now - _channelReadAt >= _options.ChannelInterval))
 		{
 			if (await TryAsync("channel", () => ReadChannelAsync(cancellationToken)))
 			{

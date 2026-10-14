@@ -17,5 +17,8 @@ public static class CompatibilitySeverities
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? severity) => severity is not null && _known.Contains(severity);
+	public static bool IsKnown(string? severity)
+	{
+		return severity is not null && _known.Contains(severity);
+	}
 }

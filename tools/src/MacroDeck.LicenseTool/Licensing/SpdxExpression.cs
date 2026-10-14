@@ -118,17 +118,30 @@ internal abstract record SpdxExpression
 			return new SpdxLicense(token.TrimEnd('+'), null);
 		}
 
-		private string? Peek() => _position < tokens.Count ? tokens[_position] : null;
+		private string? Peek()
+		{
+			return _position < tokens.Count ? tokens[_position] : null;
+		}
 
-		private string Next() => _position < tokens.Count ? tokens[_position++] : throw Invalid();
+		private string Next()
+		{
+			return _position < tokens.Count ? tokens[_position++] : throw Invalid();
+		}
 
-		private static bool IsOperator(string token, string name) =>
-			string.Equals(token, name, StringComparison.OrdinalIgnoreCase);
+		private static bool IsOperator(string token, string name)
+		{
+			return string.Equals(token, name, StringComparison.OrdinalIgnoreCase);
+		}
 
-		private static bool IsKeyword(string token) =>
-			IsOperator(token, "AND") || IsOperator(token, "OR") || IsOperator(token, "WITH");
+		private static bool IsKeyword(string token)
+		{
+			return IsOperator(token, "AND") || IsOperator(token, "OR") || IsOperator(token, "WITH");
+		}
 
-		private FormatException Invalid() => new($"invalid SPDX license expression '{source}'");
+		private FormatException Invalid()
+		{
+			return new FormatException($"invalid SPDX license expression '{source}'");
+		}
 	}
 }
 

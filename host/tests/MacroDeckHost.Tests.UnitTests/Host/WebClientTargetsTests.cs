@@ -23,14 +23,14 @@ public class WebClientTargetsTests
 	{
 		if (Directory.Exists(_webRoot))
 		{
-			Directory.Delete(_webRoot, recursive: true);
+			Directory.Delete(_webRoot, true);
 		}
 	}
 
 	[Test]
 	public void A_packaged_target_is_discovered()
 	{
-		GivenTarget("carthing", withShell: true);
+		GivenTarget("carthing", true);
 
 		Assert.That(WebClientTargets.Discover(_webRoot), Is.EqualTo(new[] { "carthing" }));
 	}
@@ -38,8 +38,8 @@ public class WebClientTargetsTests
 	[Test]
 	public void A_directory_without_a_shell_is_not_a_target()
 	{
-		GivenTarget("carthing", withShell: true);
-		GivenTarget("leftovers", withShell: false);
+		GivenTarget("carthing", true);
+		GivenTarget("leftovers", false);
 
 		Assert.That(WebClientTargets.Discover(_webRoot),
 			Is.EqualTo(new[] { "carthing" }),
@@ -49,8 +49,8 @@ public class WebClientTargetsTests
 	[Test]
 	public void Several_targets_are_discovered_in_a_stable_order()
 	{
-		GivenTarget("zebra", withShell: true);
-		GivenTarget("carthing", withShell: true);
+		GivenTarget("zebra", true);
+		GivenTarget("carthing", true);
 
 		Assert.That(WebClientTargets.Discover(_webRoot), Is.EqualTo(new[] { "carthing", "zebra" }));
 	}
@@ -78,12 +78,15 @@ public class WebClientTargetsTests
 	[TestCase("..", ExpectedResult = false)]
 	[TestCase("a/b", ExpectedResult = false)]
 	[TestCase("a{b}", ExpectedResult = false, Description = "route templates would read braces as a parameter")]
-	public bool Ids_are_drawn_from_a_closed_character_set(string id) => WebClientTargets.IsValidId(id);
+	public bool Ids_are_drawn_from_a_closed_character_set(string id)
+	{
+		return WebClientTargets.IsValidId(id);
+	}
 
 	[Test]
 	public void An_id_outside_the_character_set_is_not_discovered()
 	{
-		GivenTarget("Not Valid", withShell: true);
+		GivenTarget("Not Valid", true);
 
 		Assert.That(WebClientTargets.Discover(_webRoot), Is.Empty);
 	}

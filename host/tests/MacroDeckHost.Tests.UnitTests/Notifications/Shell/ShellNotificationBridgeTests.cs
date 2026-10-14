@@ -5,7 +5,7 @@ namespace MacroDeckHost.Tests.UnitTests.Notifications.Shell;
 
 public class ShellNotificationBridgeTests
 {
-	private static readonly TimeSpan Hold = TimeSpan.FromSeconds(20);
+	private static readonly TimeSpan _hold = TimeSpan.FromSeconds(20);
 
 	private FakeTimeProvider _time = null!;
 	private ShellNotificationBridge _bridge = null!;
@@ -18,7 +18,10 @@ public class ShellNotificationBridgeTests
 	}
 
 	[TearDown]
-	public void TearDown() => _bridge.Dispose();
+	public void TearDown()
+	{
+		_bridge.Dispose();
+	}
 
 	[Test]
 	public async Task Without_a_shell_the_caller_is_told_so_before_any_time_passes()
@@ -68,13 +71,13 @@ public class ShellNotificationBridgeTests
 		await Attach();
 
 		var dispatch = _bridge.TryDispatchAsync("A plugin wants to pair", "Example Plugin");
-		var polled = await _bridge.WaitAsync(Hold);
+		var polled = await _bridge.WaitAsync(_hold);
 
 		Assert.That(polled, Has.Count.EqualTo(1));
 		Assert.That(polled[0].Title, Is.EqualTo("A plugin wants to pair"));
 		Assert.That(polled[0].Message, Is.EqualTo("Example Plugin"));
 
-		_bridge.Report(polled[0].Id, shown: true);
+		_bridge.Report(polled[0].Id, true);
 
 		Assert.That(await dispatch, Is.True);
 	}
@@ -85,8 +88,8 @@ public class ShellNotificationBridgeTests
 		await Attach();
 
 		var dispatch = _bridge.TryDispatchAsync("Title", "Message");
-		var polled = await _bridge.WaitAsync(Hold);
-		_bridge.Report(polled[0].Id, shown: false);
+		var polled = await _bridge.WaitAsync(_hold);
+		_bridge.Report(polled[0].Id, false);
 
 		Assert.That(await dispatch, Is.False);
 	}
@@ -97,7 +100,7 @@ public class ShellNotificationBridgeTests
 		await Attach();
 
 		var dispatch = _bridge.TryDispatchAsync("Title", "Message");
-		await _bridge.WaitAsync(Hold);
+		await _bridge.WaitAsync(_hold);
 
 		_time.Advance(ShellNotificationBridge.Lease - TimeSpan.FromSeconds(1));
 		Assert.That(dispatch.IsCompleted, Is.False);
@@ -115,11 +118,11 @@ public class ShellNotificationBridgeTests
 		var dispatch = _bridge.TryDispatchAsync("Title", "Message");
 		_time.Advance(ShellNotificationBridge.Lease - TimeSpan.FromSeconds(1));
 
-		var polled = await _bridge.WaitAsync(Hold);
+		var polled = await _bridge.WaitAsync(_hold);
 		Assert.That(polled, Has.Count.EqualTo(1));
 
 		_time.Advance(ShellNotificationBridge.Lease - TimeSpan.FromSeconds(1));
-		_bridge.Report(polled[0].Id, shown: true);
+		_bridge.Report(polled[0].Id, true);
 
 		Assert.That(await dispatch, Is.True);
 	}
@@ -144,15 +147,15 @@ public class ShellNotificationBridgeTests
 	{
 		await Attach();
 
-		var poll = _bridge.WaitAsync(Hold);
+		var poll = _bridge.WaitAsync(_hold);
 
-		Assert.ThrowsAsync<InvalidOperationException>(async () => await _bridge.WaitAsync(Hold));
+		Assert.ThrowsAsync<InvalidOperationException>(async () => await _bridge.WaitAsync(_hold));
 
 		var dispatch = _bridge.TryDispatchAsync("Title", "Message");
 		var polled = await poll;
 
 		Assert.That(polled, Has.Count.EqualTo(1));
-		_bridge.Report(polled[0].Id, shown: true);
+		_bridge.Report(polled[0].Id, true);
 		Assert.That(await dispatch, Is.True);
 	}
 
@@ -179,7 +182,7 @@ public class ShellNotificationBridgeTests
 
 		Assert.That(await dispatches[32], Is.False);
 
-		var polled = await _bridge.WaitAsync(Hold);
+		var polled = await _bridge.WaitAsync(_hold);
 
 		Assert.That(polled, Has.Count.EqualTo(32));
 		Assert.That(polled[0].Title, Is.EqualTo("Title 0"));
@@ -189,6 +192,6 @@ public class ShellNotificationBridgeTests
 	{
 		using var abandoned = new CancellationTokenSource();
 		await abandoned.CancelAsync();
-		await _bridge.WaitAsync(Hold, abandoned.Token);
+		await _bridge.WaitAsync(_hold, abandoned.Token);
 	}
 }

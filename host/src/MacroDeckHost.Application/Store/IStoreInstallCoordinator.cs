@@ -13,7 +13,8 @@ public interface IStoreInstallCoordinator
 	/// warning for this one install. It is a request, not a permission: the host still refuses unless
 	/// developer mode is on and the package is unsigned rather than failing verification, and it applies
 	/// to plugins only. A retry does not inherit it.</summary>
-	StoreOperation Install(StoreExtensionKind kind,
+	StoreOperation Install(
+		StoreExtensionKind kind,
 		string packageId,
 		string? version = null,
 		bool allowUnsigned = false,
@@ -21,7 +22,8 @@ public interface IStoreInstallCoordinator
 
 	bool IsUnavailableVersion(StoreExtensionKind kind, string packageId, string version);
 
-	StoreOperation InstallTestBuild(string packageId,
+	StoreOperation InstallTestBuild(
+		string packageId,
 		string displayName,
 		StorePlatformTestBuild build,
 		bool consent);

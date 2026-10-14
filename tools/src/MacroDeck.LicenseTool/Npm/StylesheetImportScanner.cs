@@ -2,7 +2,7 @@ namespace MacroDeck.LicenseTool.Npm;
 
 internal static class StylesheetImportScanner
 {
-	private static readonly string[] LoadRules = ["@use", "@forward", "@import"];
+	private static readonly string[] _loadRules = ["@use", "@forward", "@import"];
 
 	public static IReadOnlyList<string> Scan(string source, bool lineComments)
 	{
@@ -43,7 +43,7 @@ internal static class StylesheetImportScanner
 				}
 
 				var rule = source[start..index];
-				pendingRule = LoadRules.Contains(rule, StringComparer.Ordinal) ? rule : null;
+				pendingRule = _loadRules.Contains(rule, StringComparer.Ordinal) ? rule : null;
 			}
 			else if (character is ';' or '{' or '}')
 			{
@@ -81,5 +81,8 @@ internal static class StylesheetImportScanner
 		return value;
 	}
 
-	private static char Peek(string source, int index) => index < source.Length ? source[index] : '\0';
+	private static char Peek(string source, int index)
+	{
+		return index < source.Length ? source[index] : '\0';
+	}
 }

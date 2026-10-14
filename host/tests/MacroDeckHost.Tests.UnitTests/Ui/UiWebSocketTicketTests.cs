@@ -139,13 +139,16 @@ public sealed class UiWebSocketTicketTests
 	}
 
 	private static ClaimsPrincipal Principal(string deviceId)
-		=> new(new ClaimsIdentity([
+	{
+		return new ClaimsPrincipal(new ClaimsIdentity([
 				new Claim(AuthDefaults.DeviceClaim, deviceId),
 				new Claim(AuthDefaults.ScopeClaim, AuthDefaults.ClientScope)
 			],
 			"test"));
+	}
 
-	private static DefaultHttpContext PublicContext(string? origin,
+	private static DefaultHttpContext PublicContext(
+		string? origin,
 		string host = "macrodeck.local",
 		IPAddress? remoteAddress = null)
 	{
@@ -159,7 +162,9 @@ public sealed class UiWebSocketTicketTests
 	}
 
 	private static DefaultHttpContext LoopbackContext()
-		=> Context(LoopbackPort, IPAddress.Loopback, "localhost");
+	{
+		return Context(LoopbackPort, IPAddress.Loopback, "localhost");
+	}
 
 	private static DefaultHttpContext DesktopSessionContext()
 	{
@@ -172,9 +177,12 @@ public sealed class UiWebSocketTicketTests
 	{
 		var context = new DefaultHttpContext
 		{
-			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress }
+			Connection = { LocalPort = localPort, RemoteIpAddress = remoteAddress },
+			Request =
+			{
+				Host = new HostString(host, localPort)
+			}
 		};
-		context.Request.Host = new HostString(host, localPort);
 		return context;
 	}
 }

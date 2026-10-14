@@ -63,8 +63,10 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	private readonly ConcurrentDictionary<string, string> _stableIdCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, AdbDeviceProperties> _propertiesCache = new(StringComparer.Ordinal);
 	private readonly ConcurrentDictionary<string, DateTimeOffset> _propertiesRequestedAt = new(StringComparer.Ordinal);
+
 	private readonly ConcurrentDictionary<string, (DateTimeOffset At, AdbBatteryReading Reading)> _batteryCache
 		= new(StringComparer.Ordinal);
+
 	private readonly ConcurrentDictionary<string, Lazy<Task<Result<AdbBatteryReading, AdbFailureCode>>>> _batteryProbes
 		= new(StringComparer.Ordinal);
 
@@ -103,7 +105,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		_logger = logger.ForContext<AdbManager>();
 
 		_ownershipMarker = new AdbOwnershipMarker(paths, logger);
-		_tunnelCoordinator = new AdbTunnelCoordinator(processRunner, listenerState, _ownershipMarker, logger, nativeUsb);
+		_tunnelCoordinator
+			= new AdbTunnelCoordinator(processRunner, listenerState, _ownershipMarker, logger, nativeUsb);
 
 		var priorState = _ownershipMarker.Read();
 		if (priorState is not null)
@@ -310,7 +313,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return Task.FromResult(_propertiesCache.GetValueOrDefault(device.Serial));
 	}
 
-	public async Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(string serial,
+	public async Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(
+		string serial,
 		string command,
 		CancellationToken cancellationToken)
 	{
@@ -334,7 +338,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 		if (!result.Started)
 		{
-			return Result.Fail<AdbShellOutput, AdbFailureCode>(AdbFailureCode.CommandFailed, "adb could not be started.");
+			return Result.Fail<AdbShellOutput, AdbFailureCode>(AdbFailureCode.CommandFailed,
+				"adb could not be started.");
 		}
 
 		return result.TimedOut
@@ -345,13 +350,15 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 				result.Truncated));
 	}
 
-	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(string serial,
+	public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(
+		string serial,
 		CancellationToken cancellationToken)
 	{
 		var built = AdbCommandBuilder.BuildBattery(serial);
 		if (!built.Success)
 		{
-			return Task.FromResult(Result.Fail<AdbBatteryReading, AdbFailureCode>(built.Error!.Value, built.ErrorMessage));
+			return Task.FromResult(
+				Result.Fail<AdbBatteryReading, AdbFailureCode>(built.Error!.Value, built.ErrorMessage));
 		}
 
 		var failure = PreflightForPlugin(serial, out var executablePath);
@@ -366,8 +373,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 				"This device does not report its battery."));
 		}
 
-		if (_batteryCache.TryGetValue(serial, out var cached) &&
-			_timeProvider.GetUtcNow() - cached.At < _batteryFreshness)
+		if (_batteryCache.TryGetValue(serial, out var cached)
+			&& _timeProvider.GetUtcNow() - cached.At < _batteryFreshness)
 		{
 			return Task.FromResult(Result.Ok<AdbBatteryReading, AdbFailureCode>(cached.Reading));
 		}
@@ -379,7 +386,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return probe.Value.WaitAsync(cancellationToken);
 	}
 
-	public async Task<Result<AdbFailureCode>> PushFileAsync(string serial,
+	public async Task<Result<AdbFailureCode>> PushFileAsync(
+		string serial,
 		string localPath,
 		string remotePath,
 		CancellationToken cancellationToken)
@@ -393,7 +401,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
 	}
 
-	public async Task<Result<AdbFailureCode>> PullFileAsync(string serial,
+	public async Task<Result<AdbFailureCode>> PullFileAsync(
+		string serial,
 		string remotePath,
 		string localPath,
 		CancellationToken cancellationToken)
@@ -408,7 +417,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
 	}
 
-	public async Task<Result<AdbFailureCode>> InstallApkAsync(string serial,
+	public async Task<Result<AdbFailureCode>> InstallApkAsync(
+		string serial,
 		string apkPath,
 		CancellationToken cancellationToken)
 	{
@@ -421,15 +431,19 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return await RunTransferAsync(serial, built, _pluginTransferTimeout, cancellationToken);
 	}
 
-	public Task<Result<AdbFailureCode>> UninstallPackageAsync(string serial,
+	public Task<Result<AdbFailureCode>> UninstallPackageAsync(
+		string serial,
 		string packageName,
 		CancellationToken cancellationToken)
-		=> RunTransferAsync(serial,
+	{
+		return RunTransferAsync(serial,
 			AdbCommandBuilder.BuildUninstall(serial, packageName),
 			_pluginUninstallTimeout,
 			cancellationToken);
+	}
 
-	public async Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(string serial,
+	public async Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(
+		string serial,
 		string packageName,
 		CancellationToken cancellationToken)
 	{
@@ -500,10 +514,11 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 		// adb connect exits 0 even when it could not connect; only its output tells.
 		var output = (result.StandardOutput + result.StandardError).Trim();
-		if (result.ExitCode != 0 || !output.Contains("connected to", StringComparison.OrdinalIgnoreCase) ||
-			output.Contains("failed", StringComparison.OrdinalIgnoreCase) ||
-			output.Contains("cannot", StringComparison.OrdinalIgnoreCase) ||
-			output.Contains("unable", StringComparison.OrdinalIgnoreCase))
+		if (result.ExitCode != 0
+			|| !output.Contains("connected to", StringComparison.OrdinalIgnoreCase)
+			|| output.Contains("failed", StringComparison.OrdinalIgnoreCase)
+			|| output.Contains("cannot", StringComparison.OrdinalIgnoreCase)
+			|| output.Contains("unable", StringComparison.OrdinalIgnoreCase))
 		{
 			return Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed,
 				output.Length > MaxFailureMessageLength ? output[..MaxFailureMessageLength] : output);
@@ -857,9 +872,11 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	}
 
 	private Task ReleaseOwnedTunnelsAsync(CancellationToken cancellationToken)
-		=> _tunnelCoordinator.ReleaseOwnedTunnelsAsync(_staleSweepPerDeviceTimeout,
+	{
+		return _tunnelCoordinator.ReleaseOwnedTunnelsAsync(_staleSweepPerDeviceTimeout,
 			_staleSweepTotalBudget,
 			cancellationToken);
+	}
 
 	private async Task ProbePropertiesCoreAsync(CancellationToken cancellationToken)
 	{
@@ -899,7 +916,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		}
 	}
 
-	private async Task ProbeDevicePropertiesAsync(string executablePath,
+	private async Task ProbeDevicePropertiesAsync(
+		string executablePath,
 		string serial,
 		CancellationToken cancellationToken)
 	{
@@ -931,9 +949,9 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 		// Every probe command failing means this is not a device that answers them at all - a Linux
 		// appliance rather than Android. Record that once and stop asking for the rest of the session.
-		if (battery is not { Started: true, ExitCode: 0 } &&
-			power is not { Started: true, ExitCode: 0 } &&
-			window is not { Started: true, ExitCode: 0 })
+		if (battery is not { Started: true, ExitCode: 0 }
+			&& power is not { Started: true, ExitCode: 0 }
+			&& window is not { Started: true, ExitCode: 0 })
 		{
 			_propertiesUnavailable[serial] = 0;
 		}
@@ -942,7 +960,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			new AdbDeviceProperties(batteryLevel, screenOn, locked, foregroundPackage, _timeProvider.GetUtcNow());
 	}
 
-	private async Task<string?> GetOrFetchManufacturerAsync(string executablePath,
+	private async Task<string?> GetOrFetchManufacturerAsync(
+		string executablePath,
 		string serial,
 		CancellationToken cancellationToken)
 	{
@@ -964,7 +983,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return manufacturer;
 	}
 
-	private async Task<string?> GetOrFetchStableIdAsync(string executablePath,
+	private async Task<string?> GetOrFetchStableIdAsync(
+		string executablePath,
 		string serial,
 		CancellationToken cancellationToken)
 	{
@@ -997,7 +1017,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		}
 	}
 
-	private async Task<(bool Answered, string? Value)> RunPropertyQueryAsync(string executablePath,
+	private async Task<(bool Answered, string? Value)> RunPropertyQueryAsync(
+		string executablePath,
 		AdbQueryCommand command,
 		CancellationToken cancellationToken)
 	{
@@ -1156,12 +1177,14 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 	// Only what the plugin adb push carries, so a poll that merely refreshes LastSeenAt raises nothing.
 	private static string VisibleToPlugins(Snapshot snapshot)
-		=> string.Join('\n',
+	{
+		return string.Join('\n',
 			new[] { $"{snapshot.Status.Enabled}|{snapshot.Status.Supported}" }.Concat(snapshot.Devices
 				.Where(device => device.State != AdbDeviceState.Disconnected)
 				.OrderBy(device => device.Serial, StringComparer.Ordinal)
 				.Select(device =>
 					$"{device.Serial}|{device.State}|{device.Model}|{device.Manufacturer}|{device.Product}|{device.StableId}")));
+	}
 
 	private (AdbFailureCode Code, string Message)? PreflightForPlugin(string serial, out string executablePath)
 	{
@@ -1177,7 +1200,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 			return (AdbFailureCode.ExecutableNotFound, "The adb executable could not be located.");
 		}
 
-		var device = Devices.FirstOrDefault(candidate => string.Equals(candidate.Serial, serial, StringComparison.Ordinal));
+		var device = Devices.FirstOrDefault(candidate
+			=> string.Equals(candidate.Serial, serial, StringComparison.Ordinal));
 		var failure = ValidateDeviceState(device, serial);
 		if (failure is not null)
 		{
@@ -1188,7 +1212,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return null;
 	}
 
-	private async Task<Result<AdbFailureCode>> RunTransferAsync(string serial,
+	private async Task<Result<AdbFailureCode>> RunTransferAsync(
+		string serial,
 		Result<IReadOnlyList<string>, AdbFailureCode> built,
 		TimeSpan timeout,
 		CancellationToken cancellationToken)
@@ -1232,7 +1257,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		return Result.Ok<AdbFailureCode>();
 	}
 
-	private async Task<Result<AdbBatteryReading, AdbFailureCode>> ProbeBatteryAsync(string executablePath,
+	private async Task<Result<AdbBatteryReading, AdbFailureCode>> ProbeBatteryAsync(
+		string executablePath,
 		string serial,
 		IReadOnlyList<string> arguments)
 	{
@@ -1246,7 +1272,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 
 			if (result.TimedOut)
 			{
-				return Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.Timeout, "Reading the battery timed out.");
+				return Result.Fail<AdbBatteryReading, AdbFailureCode>(AdbFailureCode.Timeout,
+					"Reading the battery timed out.");
 			}
 
 			// 127 is the shell's command-not-found: the device has no dumpsys, which will not change.
@@ -1283,7 +1310,8 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 		}
 	}
 
-	private static (AdbFailureCode Code, string Message)? ValidateDeviceState(AdbDevice? device,
+	private static (AdbFailureCode Code, string Message)? ValidateDeviceState(
+		AdbDevice? device,
 		string? requestedSerial)
 	{
 		if (device is null)
@@ -1304,8 +1332,10 @@ public sealed class AdbManager : IAdbManager, IAdbDeviceOperations, IDisposable
 	}
 
 	private static bool StartedDaemon(AdbProcessResult result)
-		=> result.StandardError.Contains(DaemonStartedMarker, StringComparison.Ordinal) ||
-		   result.StandardOutput.Contains(DaemonStartedMarker, StringComparison.Ordinal);
+	{
+		return result.StandardError.Contains(DaemonStartedMarker, StringComparison.Ordinal)
+			|| result.StandardOutput.Contains(DaemonStartedMarker, StringComparison.Ordinal);
+	}
 
 	private static TimeSpan Clamp(TimeSpan value, TimeSpan min, TimeSpan max)
 	{

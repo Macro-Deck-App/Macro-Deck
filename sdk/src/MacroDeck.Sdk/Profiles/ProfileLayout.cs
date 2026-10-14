@@ -8,5 +8,7 @@ public sealed record ProfileLayout(LayoutKind Kind, int Rows, int Columns, bool 
 {
 	/// <summary>A grid layout; locks both dimensions by default (virtual profiles are read-only).</summary>
 	public static ProfileLayout Grid(int rows, int columns, bool locked = true)
-		=> new(LayoutKind.Grid, rows, columns, locked, locked);
+	{
+		return new ProfileLayout(LayoutKind.Grid, rows, columns, locked, locked);
+	}
 }

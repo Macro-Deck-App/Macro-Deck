@@ -12,14 +12,16 @@ namespace MacroDeck.Localization.Tests.UnitTests;
 [TestFixture]
 public class PluralResolutionTests
 {
-	private const string _pluginId = "com.example.test";
-	private const string _key = "Icons";
+	private const string PluginId = "com.example.test";
+	private const string Key = "Icons";
 
 	private static LocalizedString Icons(object? count)
-		=> new(LocalizationKey.Plugin(_pluginId, _key),
+	{
+		return new LocalizedString(LocalizationKey.Plugin(PluginId, Key),
 			count is null
 				? new Dictionary<string, object?>(StringComparer.Ordinal)
 				: new Dictionary<string, object?>(StringComparer.Ordinal) { ["count"] = count });
+	}
 
 	private static LocalizationResolver Resolver(
 		params (string Culture, (string Key, string Template)[] Entries)[] cultures)
@@ -39,24 +41,30 @@ public class PluralResolutionTests
 		}
 
 		var registry = new LocalizationCatalogRegistry();
-		registry.Register(new LocalizationCatalog(LocalizationScope.ForPlugin(_pluginId), "en", templates));
+		registry.Register(new LocalizationCatalog(LocalizationScope.ForPlugin(PluginId), "en", templates));
 
 		return new LocalizationResolver(registry);
 	}
 
 	private static LocalizationResolver English()
-		=> Resolver(("en", [("Icons.One", "{count} icon"), ("Icons.Other", "{count} icons")]));
+	{
+		return Resolver(("en", [("Icons.One", "{count} icon"), ("Icons.Other", "{count} icons")]));
+	}
 
 	[TestCase(1, "1 icon")]
 	[TestCase(0, "0 icons")]
 	[TestCase(2, "2 icons")]
 	[TestCase(17, "17 icons")]
 	public void The_count_selects_the_form(int count, string expected)
-		=> Assert.That(English().Resolve(Icons(count), "en"), Is.EqualTo(expected));
+	{
+		Assert.That(English().Resolve(Icons(count), "en"), Is.EqualTo(expected));
+	}
 
 	[Test]
 	public void A_count_of_one_in_another_numeric_type_still_selects_the_singular()
-		=> Assert.That(English().Resolve(Icons(1L), "en"), Is.EqualTo("1 icon"));
+	{
+		Assert.That(English().Resolve(Icons(1L), "en"), Is.EqualTo("1 icon"));
+	}
 
 	[Test]
 	public void A_family_with_only_the_other_form_answers_every_count()
@@ -72,7 +80,9 @@ public class PluralResolutionTests
 
 	[Test]
 	public void A_reference_carrying_no_count_does_not_resolve_to_a_form()
-		=> Assert.That(English().Resolve(Icons(null), "en"), Is.EqualTo($"[[plugin:{_pluginId}:{_key}]]"));
+	{
+		Assert.That(English().Resolve(Icons(null), "en"), Is.EqualTo($"[[plugin:{PluginId}:{Key}]]"));
+	}
 
 	/// <summary>
 	/// The regression the per-culture probe exists for: German carries both forms, so a German reader must

@@ -50,7 +50,7 @@ internal static class LocalizationCultureName
 		}
 
 		var region = parts[next];
-		return (region.Length == 2 && IsAlpha(region)) || (region.Length == 3 && IsDigits(region));
+		return region.Length == 2 && IsAlpha(region) || region.Length == 3 && IsDigits(region);
 	}
 
 	/// <summary>The neutral culture of <paramref name="culture" />, or <c>null</c> when it is already

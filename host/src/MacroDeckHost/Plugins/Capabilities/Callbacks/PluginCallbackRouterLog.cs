@@ -10,9 +10,11 @@ internal static class PluginCallbackRouterLog
 		string operation,
 		string pluginId,
 		Exception exception)
-		=> logger.Error(exception,
+	{
+		logger.Error(exception,
 			"host.invoke '{Api}/{Operation}' for plugin '{PluginId}' failed.",
 			api,
 			operation,
 			pluginId);
+	}
 }

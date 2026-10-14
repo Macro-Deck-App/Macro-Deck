@@ -54,9 +54,15 @@ public class AuthService : IAuthService
 		_logger = logger;
 	}
 
-	public Task<bool> IsSetupComplete() => _userRepository.AnyExists();
+	public Task<bool> IsSetupComplete()
+	{
+		return _userRepository.AnyExists();
+	}
 
-	public async Task<string?> GetUsername() => (await _userRepository.GetSingle())?.Username;
+	public async Task<string?> GetUsername()
+	{
+		return (await _userRepository.GetSingle())?.Username;
+	}
 
 	public async Task<Result<AuthError>> Setup(string username, string password)
 	{
@@ -160,9 +166,9 @@ public class AuthService : IAuthService
 		DeviceRegistration? device = null)
 	{
 		var user = await _userRepository.GetSingle();
-		if (user is null ||
-			!string.Equals(user.Username, username.Trim(), StringComparison.OrdinalIgnoreCase) ||
-			!_passwordHasher.Verify(password, user.PasswordHash))
+		if (user is null
+			|| !string.Equals(user.Username, username.Trim(), StringComparison.OrdinalIgnoreCase)
+			|| !_passwordHasher.Verify(password, user.PasswordHash))
 		{
 			return Result.Fail<LoginResult, AuthError>(AuthError.InvalidCredentials, "Invalid username or password.");
 		}
@@ -276,11 +282,11 @@ public class AuthService : IAuthService
 		}
 
 		var successor = await _refreshTokenRepository.GetById(token.ReplacedById!.Value);
-		return successor is { RevokedAt: null } &&
-			successor.ExpiresAt >= now &&
-			successor.UserId == token.UserId &&
-			successor.DeviceId == token.DeviceId &&
-			successor.Scope == token.Scope
+		return successor is { RevokedAt: null }
+			&& successor.ExpiresAt >= now
+			&& successor.UserId == token.UserId
+			&& successor.DeviceId == token.DeviceId
+			&& successor.Scope == token.Scope
 				? successor
 				: null;
 	}
@@ -297,11 +303,11 @@ public class AuthService : IAuthService
 		var servingSince = _servingEpoch.StartedAt;
 		var previousRotation = _servingEpoch.PreviousRotationAt;
 
-		return previousRotation > DateTime.MinValue &&
-			revokedAt <= previousRotation &&
-			previousRotation - revokedAt <= AuthDefaults.RefreshTokenReuseGrace &&
-			revokedAt < servingSince &&
-			now - servingSince <= AuthDefaults.RefreshTokenReuseGraceAfterRestart;
+		return previousRotation > DateTime.MinValue
+			&& revokedAt <= previousRotation
+			&& previousRotation - revokedAt <= AuthDefaults.RefreshTokenReuseGrace
+			&& revokedAt < servingSince
+			&& now - servingSince <= AuthDefaults.RefreshTokenReuseGraceAfterRestart;
 	}
 
 	private async Task<Result<LoginResult, AuthError>> RevokeFamilyAsReuse(RefreshTokenEntity token, DateTime now)
@@ -446,9 +452,18 @@ public class AuthService : IAuthService
 		return (login, entity.Id);
 	}
 
-	private DateTime UtcNow() => _timeProvider.GetUtcNow().UtcDateTime;
+	private DateTime UtcNow()
+	{
+		return _timeProvider.GetUtcNow().UtcDateTime;
+	}
 
-	private static string GenerateRefreshToken() => TokenHasher.Generate();
+	private static string GenerateRefreshToken()
+	{
+		return TokenHasher.Generate();
+	}
 
-	internal static string HashToken(string rawToken) => TokenHasher.Hash(rawToken);
+	internal static string HashToken(string rawToken)
+	{
+		return TokenHasher.Hash(rawToken);
+	}
 }

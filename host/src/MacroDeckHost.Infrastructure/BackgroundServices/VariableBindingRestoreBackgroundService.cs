@@ -102,8 +102,8 @@ public sealed class VariableBindingRestoreBackgroundService : HostReadyBackgroun
 
 		if (rewritten && !_bindingStore.Save(bindings))
 		{
-			_logger.Error("Could not persist variable bindings renamed during restore; " +
-				"the renamed bindings will be re-derived again on the next start");
+			_logger.Error("Could not persist variable bindings renamed during restore; "
+				+ "the renamed bindings will be re-derived again on the next start");
 		}
 
 		_logger.Information("Restored {Count} variable binding(s)", bindings.Count);

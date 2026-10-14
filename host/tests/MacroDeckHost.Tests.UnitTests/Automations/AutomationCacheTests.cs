@@ -9,18 +9,23 @@ namespace MacroDeckHost.Tests.UnitTests.Automations;
 [TestFixture]
 public class AutomationCacheTests
 {
-	private static AutomationEntity Automation(string name = "Automation", bool enabled = true) => new()
+	private static AutomationEntity Automation(string name = "Automation", bool enabled = true)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Enabled = enabled,
-		Flows = """[{"triggerId":"t1","triggerType":"onEvent","children":[]}]""",
-		CreatedAt = DateTime.UtcNow,
-		UpdatedAt = DateTime.UtcNow
-	};
+		return new AutomationEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Enabled = enabled,
+			Flows = """[{"triggerId":"t1","triggerType":"onEvent","children":[]}]""",
+			CreatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
+		};
+	}
 
 	private static AutomationCache Cache(InMemoryAutomationStore store)
-		=> new(store, new LoggerConfiguration().CreateLogger());
+	{
+		return new AutomationCache(store, new LoggerConfiguration().CreateLogger());
+	}
 
 	[Test]
 	public async Task InitializeCache_loads_every_stored_automation()

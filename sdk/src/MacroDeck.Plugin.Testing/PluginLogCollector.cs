@@ -37,12 +37,14 @@ public sealed class PluginLogCollector
 
 	/// <summary>Events carrying a property named <paramref name="key" /> whose value equals <paramref name="value" />.</summary>
 	public IReadOnlyList<CollectedLogEvent> WithProperty(string key, string value)
-		=>
+	{
+		return
 		[
 			.. Events.Where(collected
-				=> collected.Properties.TryGetValue(key, out var actual) &&
-				string.Equals(actual, value, StringComparison.Ordinal))
+				=> collected.Properties.TryGetValue(key, out var actual)
+				&& string.Equals(actual, value, StringComparison.Ordinal))
 		];
+	}
 
 	/// <summary>
 	/// Waits until an event matching <paramref name="predicate" /> has been collected.
@@ -51,12 +53,18 @@ public sealed class PluginLogCollector
 	public Task WaitForAsync(Func<CollectedLogEvent, bool> predicate, TimeSpan? timeout = null)
 	{
 		ArgumentNullException.ThrowIfNull(predicate);
-		return Wait.UntilAsync(() => Events.Any(predicate), timeout, because: "no matching log event was collected");
+		return Wait.UntilAsync(() => Events.Any(predicate), timeout, "no matching log event was collected");
 	}
 
-	internal void Record(CollectedLogEvent logEvent) => _events.Enqueue(logEvent);
+	internal void Record(CollectedLogEvent logEvent)
+	{
+		_events.Enqueue(logEvent);
+	}
 
-	internal void RecordDropped(int count) => Interlocked.Add(ref _dropped, count);
+	internal void RecordDropped(int count)
+	{
+		Interlocked.Add(ref _dropped, count);
+	}
 
 	private static int IndexOf(string level)
 	{

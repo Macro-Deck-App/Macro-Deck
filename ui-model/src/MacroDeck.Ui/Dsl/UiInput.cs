@@ -67,9 +67,9 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 		{
 			var names = new List<string>(base.DeclaredEvents);
 
-			if (Binding.CanWrite && !names.Contains(_changeEvent, StringComparer.Ordinal))
+			if (Binding.CanWrite && !names.Contains(ChangeEvent, StringComparer.Ordinal))
 			{
-				names.Insert(0, _changeEvent);
+				names.Insert(0, ChangeEvent);
 			}
 
 			return names;
@@ -82,32 +82,32 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 
 		base.DeclareProperties(properties);
 
-		properties.Set(_valueProperty, Binding.Value);
-		properties.Set(_labelProperty, Label.Value);
-		properties.Set(_hideLabelProperty, HideLabel);
-		properties.Set(_descriptionProperty, Description.Value);
-		properties.Set(_placeholderProperty, Placeholder.Value);
-		properties.Set(_defaultValueProperty, DefaultValue);
-		properties.Set(_requiredProperty, Required);
-		properties.Set(_disabledProperty, Disabled);
-		properties.Set(_literalOnlyProperty, LiteralOnly);
-		properties.Set(_supportsResetProperty, SupportsReset);
-		properties.Set(_transientProperty, Transient);
-		properties.Set(_validationRegexProperty, ValidationRegex);
-		properties.Set(_maxLengthProperty, MaxLength);
-		properties.Set(_visibleWhenProperty, VisibleWhen);
+		properties.Set(ValueProperty, Binding.Value);
+		properties.Set(LabelProperty, Label.Value);
+		properties.Set(HideLabelProperty, HideLabel);
+		properties.Set(DescriptionProperty, Description.Value);
+		properties.Set(PlaceholderProperty, Placeholder.Value);
+		properties.Set(DefaultValueProperty, DefaultValue);
+		properties.Set(RequiredProperty, Required);
+		properties.Set(DisabledProperty, Disabled);
+		properties.Set(LiteralOnlyProperty, LiteralOnly);
+		properties.Set(SupportsResetProperty, SupportsReset);
+		properties.Set(TransientProperty, Transient);
+		properties.Set(ValidationRegexProperty, ValidationRegex);
+		properties.Set(MaxLengthProperty, MaxLength);
+		properties.Set(VisibleWhenProperty, VisibleWhen);
 
 		if (!HasValidation)
 		{
 			return;
 		}
 
-		properties.Set(_invalidProperty,
+		properties.Set(InvalidProperty,
 			Invalid.IsDeclared
 				? Invalid
 				: UiValue.Optional(() => Validate().IsValid ? UiValue.None<bool>() : UiValue.Of(true)));
 
-		properties.Set(_validationMessageProperty,
+		properties.Set(ValidationMessageProperty,
 			ValidationMessage.IsDeclared
 				? ValidationMessage.Value
 				: UiValue.Optional(() => Validate() is { IsValid: false, Message: { } message }
@@ -121,7 +121,7 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 
 	private UiValidationOutcome Validate()
 	{
-		var visible = !VisibleWhen.TryEvaluate(out var visibleWhen) || visibleWhen is null || visibleWhen.IsSatisfied();
+		var visible = !VisibleWhen.TryEvaluate(out var visibleWhen) || visibleWhen.IsSatisfied();
 
 		return new UiValidation
 		{
@@ -135,19 +135,19 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 			MaxLength = MaxLength.TryEvaluate(out var maxLength) ? maxLength : null,
 			Min = MinConstraint.TryEvaluate(out var min) ? min : null,
 			Max = MaxConstraint.TryEvaluate(out var max) ? max : null,
-			Rules = ValidationRules,
+			Rules = ValidationRules
 		}.Validate();
 	}
 
 	private bool HasValidation
-		=> Invalid.IsDeclared ||
-			ValidationMessage.IsDeclared ||
-			Required.IsDeclared ||
-			ValidationRegex.IsDeclared ||
-			MaxLength.IsDeclared ||
-			MinConstraint.IsDeclared ||
-			MaxConstraint.IsDeclared ||
-			ValidationRules.Count > 0;
+		=> Invalid.IsDeclared
+			|| ValidationMessage.IsDeclared
+			|| Required.IsDeclared
+			|| ValidationRegex.IsDeclared
+			|| MaxLength.IsDeclared
+			|| MinConstraint.IsDeclared
+			|| MaxConstraint.IsDeclared
+			|| ValidationRules.Count > 0;
 
 	bool IUiInputElement.CanWriteValue => Binding.CanWrite;
 
@@ -204,31 +204,31 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 		return true;
 	}
 
-	private protected virtual bool AcceptsValue(T? value, out string? rejection)
+	protected private virtual bool AcceptsValue(T? value, out string? rejection)
 	{
 		rejection = null;
 
 		return true;
 	}
 
-	private const string _valueProperty = "value";
+	private const string ValueProperty = "value";
 
-	private const string _labelProperty = "label";
-	private const string _hideLabelProperty = "hideLabel";
-	private const string _descriptionProperty = "description";
-	private const string _placeholderProperty = "placeholder";
-	private const string _defaultValueProperty = "defaultValue";
-	private const string _requiredProperty = "required";
-	private const string _disabledProperty = "disabled";
-	private const string _literalOnlyProperty = "literalOnly";
-	private const string _supportsResetProperty = "supportsReset";
-	private const string _transientProperty = "transient";
-	private const string _validationRegexProperty = "validationRegex";
-	private const string _maxLengthProperty = "maxLength";
-	private const string _visibleWhenProperty = "visibleWhen";
-	private const string _invalidProperty = "invalid";
-	private const string _validationMessageProperty = "validationMessage";
-	private const string _changeEvent = "change";
+	private const string LabelProperty = "label";
+	private const string HideLabelProperty = "hideLabel";
+	private const string DescriptionProperty = "description";
+	private const string PlaceholderProperty = "placeholder";
+	private const string DefaultValueProperty = "defaultValue";
+	private const string RequiredProperty = "required";
+	private const string DisabledProperty = "disabled";
+	private const string LiteralOnlyProperty = "literalOnly";
+	private const string SupportsResetProperty = "supportsReset";
+	private const string TransientProperty = "transient";
+	private const string ValidationRegexProperty = "validationRegex";
+	private const string MaxLengthProperty = "maxLength";
+	private const string VisibleWhenProperty = "visibleWhen";
+	private const string InvalidProperty = "invalid";
+	private const string ValidationMessageProperty = "validationMessage";
+	private const string ChangeEvent = "change";
 }
 
 /// <summary>An input that groups children and opens an input-ID scope.</summary>

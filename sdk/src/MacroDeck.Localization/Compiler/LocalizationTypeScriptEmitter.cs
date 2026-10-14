@@ -19,7 +19,8 @@ internal static class LocalizationTypeScriptEmitter
 	/// built from - and its forms - which is what the defaults are built from - are kept or dropped
 	/// together.
 	/// </param>
-	public static string Emit(string constName,
+	public static string Emit(
+		string constName,
 		LocalizationCompilationResult result,
 		IReadOnlyList<string>? keyPrefixes = null)
 	{
@@ -29,7 +30,10 @@ internal static class LocalizationTypeScriptEmitter
 		builder.Append(
 			"// Regenerate: MACRODECK_UPDATE_GENERATED=1 dotnet test sdk/tests/MacroDeck.Localization.Tests.UnitTests\n\n");
 		builder.Append("/** The scope every key below belongs to. */\n");
-		builder.Append("export const ").Append(constName).Append("Scope = '").Append(Escape(result.Scope))
+		builder.Append("export const ")
+			.Append(constName)
+			.Append("Scope = '")
+			.Append(Escape(result.Scope))
 			.Append("' as const;\n\n");
 		builder.Append("/** Fully qualified localization keys, as the host's catalog serves them. */\n");
 		builder.Append("export const ").Append(constName).Append(" = {\n");
@@ -40,8 +44,11 @@ internal static class LocalizationTypeScriptEmitter
 		builder.Append("} as const;\n\n");
 
 		builder.Append("/** Any key of this catalog - what a call site is checked against. */\n");
-		builder.Append("export type ").Append(constName)
-			.Append("Key = LocalizationKeyLeaves<typeof ").Append(constName).Append(">;\n\n");
+		builder.Append("export type ")
+			.Append(constName)
+			.Append("Key = LocalizationKeyLeaves<typeof ")
+			.Append(constName)
+			.Append(">;\n\n");
 		builder.Append("type LocalizationKeyLeaves<T> = T extends string ? T\n");
 		builder.Append("\t: { [K in keyof T]: LocalizationKeyLeaves<T[K]> }[keyof T];\n\n");
 
@@ -60,7 +67,8 @@ internal static class LocalizationTypeScriptEmitter
 	/// contributes its forms - the keys resolution actually looks up - rather than the base key, which is
 	/// a member name and never a template.
 	/// </remarks>
-	private static void EmitDefaults(StringBuilder builder,
+	private static void EmitDefaults(
+		StringBuilder builder,
 		string constName,
 		LocalizationCompilationResult result,
 		IReadOnlyList<string>? keyPrefixes)
@@ -80,8 +88,13 @@ internal static class LocalizationTypeScriptEmitter
 					continue;
 				}
 
-				builder.Append("\t'").Append(Escape(result.Scope)).Append(':').Append(Escape(key))
-					.Append("': '").Append(Escape(templates[key])).Append("',\n");
+				builder.Append("\t'")
+					.Append(Escape(result.Scope))
+					.Append(':')
+					.Append(Escape(key))
+					.Append("': '")
+					.Append(Escape(templates[key]))
+					.Append("',\n");
 			}
 		}
 
@@ -110,8 +123,13 @@ internal static class LocalizationTypeScriptEmitter
 	{
 		foreach (var entry in node.Entries)
 		{
-			builder.Append(indent).Append(Member(entry.Key)).Append(": '").Append(Escape(scope))
-				.Append(':').Append(Escape(entry.Value)).Append("',\n");
+			builder.Append(indent)
+				.Append(Member(entry.Key))
+				.Append(": '")
+				.Append(Escape(scope))
+				.Append(':')
+				.Append(Escape(entry.Value))
+				.Append("',\n");
 		}
 
 		foreach (var child in node.Children)
@@ -143,8 +161,10 @@ internal static class LocalizationTypeScriptEmitter
 
 		// Newlines matter here because a resource value may legitimately span lines; a raw one would end
 		// the emitted string literal mid-module.
-		return value!.Replace("\\", "\\\\").Replace("'", "\\'")
-			.Replace("\r", "\\r").Replace("\n", "\\n");
+		return value!.Replace("\\", "\\\\")
+			.Replace("'", "\\'")
+			.Replace("\r", "\\r")
+			.Replace("\n", "\\n");
 	}
 
 	/// <summary>The dotted keys arranged as the nested object they produce.</summary>

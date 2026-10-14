@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// or an empty string.
 /// </summary>
 [TestFixture]
-public class A11_FakeIntegrationConfigTests
+public class A11FakeIntegrationConfigTests
 {
 	[Test]
 	public async Task Plain_and_secret_values_are_separate_namespaces_and_missing_keys_are_null()

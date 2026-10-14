@@ -35,18 +35,22 @@ internal sealed class MeldSceneActionDefinition : IDynamicOptionsActionDefinitio
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Scene,
-			label: AppStrings.Integrations.Meld.Parameters.Scene(),
+			AppStrings.Integrations.Meld.Parameters.Scene(),
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	// Whether *this* scene is the one showing (or staged), not which scene that is: one button per scene
 	// is the normal layout, and each has to answer for the scene it names.
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MeldActionStates.Snapshot(_resolver(),
+	{
+		return Task.FromResult(MeldActionStates.Snapshot(_resolver(),
 			parameters.GetValueOrDefault(MeldActionParameters.Scene),
 			ActionStates.ActiveInactive,
 			session => session.ScenesById,
@@ -54,8 +58,10 @@ internal sealed class MeldSceneActionDefinition : IDynamicOptionsActionDefinitio
 			scene => scene.Name,
 			(connection, scene) =>
 				string.Equals(_readTargetSceneId(connection.State.Session), scene.Id, StringComparison.Ordinal)));
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -67,7 +73,8 @@ internal sealed class MeldSceneActionDefinition : IDynamicOptionsActionDefinitio
 		private readonly Func<MeldConnection?> _resolver;
 		private readonly Func<MeldConnection, string, CancellationToken, Task<ActionResult>> _command;
 
-		public Executor(Func<MeldConnection?> resolver,
+		public Executor(
+			Func<MeldConnection?> resolver,
 			Func<MeldConnection, string, CancellationToken, Task<ActionResult>> command)
 		{
 			_resolver = resolver;

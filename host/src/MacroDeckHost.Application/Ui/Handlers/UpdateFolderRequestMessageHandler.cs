@@ -13,7 +13,8 @@ public class UpdateFolderRequestMessageHandler : IUiTransportMessageHandler<Upda
 	private readonly IColorReferenceResolver _colors;
 	private readonly IFolderCache _folders;
 
-	public UpdateFolderRequestMessageHandler(IFolderService folderService,
+	public UpdateFolderRequestMessageHandler(
+		IFolderService folderService,
 		IColorReferenceResolver colors,
 		IFolderCache folders)
 	{

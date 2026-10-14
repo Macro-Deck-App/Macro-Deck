@@ -56,7 +56,8 @@ internal sealed record StreamlabsStreamingModel(
 internal static class StreamlabsModelReader
 {
 	public static StreamlabsStreamingState ReadStreamingState(JsonElement value)
-		=> ReadString(value) switch
+	{
+		return ReadString(value) switch
 		{
 			"starting" => StreamlabsStreamingState.Starting,
 			"live" => StreamlabsStreamingState.Live,
@@ -64,56 +65,72 @@ internal static class StreamlabsModelReader
 			"reconnecting" => StreamlabsStreamingState.Reconnecting,
 			_ => StreamlabsStreamingState.Offline
 		};
+	}
 
 	public static StreamlabsRecordingState ReadRecordingState(JsonElement value)
-		=> ReadString(value) switch
+	{
+		return ReadString(value) switch
 		{
 			"starting" => StreamlabsRecordingState.Starting,
 			"recording" => StreamlabsRecordingState.Recording,
 			"stopping" => StreamlabsRecordingState.Stopping,
 			_ => StreamlabsRecordingState.Offline
 		};
+	}
 
 	public static StreamlabsReplayBufferState ReadReplayBufferState(JsonElement value)
-		=> ReadString(value) switch
+	{
+		return ReadString(value) switch
 		{
 			"running" => StreamlabsReplayBufferState.Running,
 			"stopping" => StreamlabsReplayBufferState.Stopping,
 			"saving" => StreamlabsReplayBufferState.Saving,
 			_ => StreamlabsReplayBufferState.Offline
 		};
+	}
 
-	public static string ToWireString(StreamlabsStreamingState state) => state switch
+	public static string ToWireString(StreamlabsStreamingState state)
 	{
-		StreamlabsStreamingState.Starting => "starting",
-		StreamlabsStreamingState.Live => "live",
-		StreamlabsStreamingState.Ending => "ending",
-		StreamlabsStreamingState.Reconnecting => "reconnecting",
-		_ => "offline"
-	};
+		return state switch
+		{
+			StreamlabsStreamingState.Starting => "starting",
+			StreamlabsStreamingState.Live => "live",
+			StreamlabsStreamingState.Ending => "ending",
+			StreamlabsStreamingState.Reconnecting => "reconnecting",
+			_ => "offline"
+		};
+	}
 
-	public static string ToWireString(StreamlabsRecordingState state) => state switch
+	public static string ToWireString(StreamlabsRecordingState state)
 	{
-		StreamlabsRecordingState.Starting => "starting",
-		StreamlabsRecordingState.Recording => "recording",
-		StreamlabsRecordingState.Stopping => "stopping",
-		_ => "offline"
-	};
+		return state switch
+		{
+			StreamlabsRecordingState.Starting => "starting",
+			StreamlabsRecordingState.Recording => "recording",
+			StreamlabsRecordingState.Stopping => "stopping",
+			_ => "offline"
+		};
+	}
 
-	public static string ToWireString(StreamlabsReplayBufferState state) => state switch
+	public static string ToWireString(StreamlabsReplayBufferState state)
 	{
-		StreamlabsReplayBufferState.Running => "running",
-		StreamlabsReplayBufferState.Stopping => "stopping",
-		StreamlabsReplayBufferState.Saving => "saving",
-		_ => "offline"
-	};
+		return state switch
+		{
+			StreamlabsReplayBufferState.Running => "running",
+			StreamlabsReplayBufferState.Stopping => "stopping",
+			StreamlabsReplayBufferState.Saving => "saving",
+			_ => "offline"
+		};
+	}
 
-	public static StreamlabsStreamingModel ReadStreamingModel(JsonElement value) => new(
-		ReadStreamingState(Property(value, "streamingStatus")),
-		ReadTimestamp(Property(value, "streamingStatusTime")),
-		ReadRecordingState(Property(value, "recordingStatus")),
-		ReadTimestamp(Property(value, "recordingStatusTime")),
-		ReadReplayBufferState(Property(value, "replayBufferStatus")));
+	public static StreamlabsStreamingModel ReadStreamingModel(JsonElement value)
+	{
+		return new StreamlabsStreamingModel(ReadStreamingState(Property(value, "streamingStatus")),
+			ReadTimestamp(Property(value, "streamingStatusTime")),
+			ReadRecordingState(Property(value, "recordingStatus")),
+			ReadTimestamp(Property(value, "recordingStatusTime")),
+			ReadReplayBufferState(Property(value, "replayBufferStatus")));
+	}
 
 	public static bool ReadStudioMode(JsonElement value)
 	{
@@ -190,8 +207,8 @@ internal static class StreamlabsModelReader
 		}
 
 		var owningSceneId = ReadString(Property(value, "sceneId")) ?? sceneId;
-		var resourceId = ReadString(Property(value, "resourceId")) ??
-			StreamlabsRpcFrames.SceneItemResource(owningSceneId, sceneItemId, sourceId);
+		var resourceId = ReadString(Property(value, "resourceId"))
+			?? StreamlabsRpcFrames.SceneItemResource(owningSceneId, sceneItemId, sourceId);
 
 		var name = lookupName(sourceId) ?? ReadString(Property(value, "name")) ?? sourceId;
 		var visible = Property(value, "visible").ValueKind != JsonValueKind.False;
@@ -207,18 +224,26 @@ internal static class StreamlabsModelReader
 	}
 
 	public static JsonElement Property(JsonElement value, string name)
-		=> value.ValueKind == JsonValueKind.Object && value.TryGetProperty(name, out var property)
+	{
+		return value.ValueKind == JsonValueKind.Object && value.TryGetProperty(name, out var property)
 			? property
 			: default;
+	}
 
 	public static string? ReadString(JsonElement value)
-		=> value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+	{
+		return value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+	}
 
 	public static double? ReadNumber(JsonElement value)
-		=> value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var number) ? number : null;
+	{
+		return value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var number) ? number : null;
+	}
 
 	private static DateTimeOffset? ReadTimestamp(JsonElement value)
-		=> value.ValueKind == JsonValueKind.String && value.TryGetDateTimeOffset(out var timestamp)
+	{
+		return value.ValueKind == JsonValueKind.String && value.TryGetDateTimeOffset(out var timestamp)
 			? timestamp
 			: null;
+	}
 }

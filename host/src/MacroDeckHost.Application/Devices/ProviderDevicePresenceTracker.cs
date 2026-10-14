@@ -19,7 +19,13 @@ public sealed class ProviderDevicePresenceTracker
 	}
 
 	/// <summary>Drops the device entirely. Returns whether it was online, which withdrawing it ends.</summary>
-	public bool Forget(Guid deviceId) => _online.TryRemove(deviceId, out var online) && online;
+	public bool Forget(Guid deviceId)
+	{
+		return _online.TryRemove(deviceId, out var online) && online;
+	}
 
-	public bool IsOnline(Guid deviceId) => _online.TryGetValue(deviceId, out var online) && online;
+	public bool IsOnline(Guid deviceId)
+	{
+		return _online.TryGetValue(deviceId, out var online) && online;
+	}
 }

@@ -21,5 +21,7 @@ public static class PluginRuntimeIdentifiers
 
 	/// <summary>Candidate RIDs to look up in a manifest's entrypoints, most specific first.</summary>
 	public static IReadOnlyList<string> CandidatesFor(string rid)
-		=> _fallbacks.TryGetValue(rid, out var fallback) ? [rid, fallback] : [rid];
+	{
+		return _fallbacks.TryGetValue(rid, out var fallback) ? [rid, fallback] : [rid];
+	}
 }

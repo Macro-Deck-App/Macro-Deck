@@ -17,7 +17,8 @@ public interface IWidgetIconResources
 	/// exception.</summary>
 	Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken);
 
-	Task<UiResource?> ResolveAsync(WidgetIconReference? reference,
+	Task<UiResource?> ResolveAsync(
+		WidgetIconReference? reference,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken);
 
@@ -73,7 +74,8 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	private readonly Dictionary<CacheKey, UiResource> _registered = new();
 	private readonly Lock _sync = new();
 
-	public WidgetIconResources(IWidgetIconSourceRegistry sources,
+	public WidgetIconResources(
+		IWidgetIconSourceRegistry sources,
 		IUiResourceStore resourceStore,
 		ILogger logger,
 		IIconPackCache iconPackCache)
@@ -94,8 +96,8 @@ public sealed class WidgetIconResources : IWidgetIconResources
 		lock (_sync)
 		{
 			foreach (var key in _registered.Keys
-				.Where(key => key.Reference.Type == reference.Type &&
-					string.Equals(key.Reference.Reference, reference.Reference, StringComparison.Ordinal))
+				.Where(key => key.Reference.Type == reference.Type
+					&& string.Equals(key.Reference.Reference, reference.Reference, StringComparison.Ordinal))
 				.ToList())
 			{
 				if (_order.Remove(key, out var node))
@@ -109,9 +111,12 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	}
 
 	public Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken)
-		=> ResolveAsync(reference, WidgetIconLimit.Host, cancellationToken);
+	{
+		return ResolveAsync(reference, WidgetIconLimit.Host, cancellationToken);
+	}
 
-	public async Task<UiResource?> ResolveAsync(WidgetIconReference? reference,
+	public async Task<UiResource?> ResolveAsync(
+		WidgetIconReference? reference,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken)
 	{
@@ -154,7 +159,7 @@ public sealed class WidgetIconResources : IWidgetIconResources
 						MediaType = rendition.MediaType!,
 						Content = rendition.Content!,
 						MaxBytes = maxBytes,
-						Variation = target.Variation,
+						Variation = target.Variation
 					});
 
 					Store(key, resource);
@@ -189,9 +194,11 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	}
 
 	internal static string ResourceName(WidgetIconReference reference, WidgetIconLimit limit)
-		=> limit == WidgetIconLimit.Protocol
+	{
+		return limit == WidgetIconLimit.Protocol
 			? $"{reference.Type}.{reference.Reference}{ProtocolNameSuffix}"
 			: $"{reference.Type}.{reference.Reference}";
+	}
 
 	internal const string ProtocolNameSuffix = ".protocol";
 
@@ -200,9 +207,9 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	private ResolveTarget Target(WidgetIconReference reference, WidgetIconLimit limit)
 	{
 		var plain = new ResolveTarget(reference.Reference, ResourceName(reference, limit), null);
-		if (reference.Type != WidgetIconReference.IconPackType ||
-			!Guid.TryParse(reference.Reference, out var iconId) ||
-			_iconPackCache.GetIconById(iconId) is not { AppearanceOfId: null } icon)
+		if (reference.Type != WidgetIconReference.IconPackType
+			|| !Guid.TryParse(reference.Reference, out var iconId)
+			|| _iconPackCache.GetIconById(iconId) is not { AppearanceOfId: null } icon)
 		{
 			return plain;
 		}
@@ -229,9 +236,11 @@ public sealed class WidgetIconResources : IWidgetIconResources
 	private readonly record struct ResolveTarget(string Reference, string Name, string? Variation);
 
 	private static int MaxBytes(WidgetIconLimit limit)
-		=> limit == WidgetIconLimit.Protocol
+	{
+		return limit == WidgetIconLimit.Protocol
 			? ProtocolLimits.MaxUiResourceBytes
 			: HostUiResourceLimits.MaxHostIconResourceBytes;
+	}
 
 	private bool TryGetCached(CacheKey reference, out UiResource resource)
 	{

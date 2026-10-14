@@ -14,13 +14,13 @@ public class AdbPlatformToolsInstallerTests
 		("/etc/passwd", "absolute path, Unix separator"),
 		(@"C:\evil.exe", "absolute path with a Windows drive letter"),
 		(@"\evil", "rooted path with no drive letter (Windows semantics)"),
-		(@"\\server\share\evil", "UNC path"),
+		(@"\\server\share\evil", "UNC path")
 	];
 
 	[Test]
 	public void ResolveDownloadUrl_returns_the_windows_archive_url()
 	{
-		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(isWindows: true, isMacOs: false, isLinux: false);
+		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(true, false, false);
 
 		Assert.That(url, Is.EqualTo("https://dl.google.com/android/repository/platform-tools-latest-windows.zip"));
 	}
@@ -28,7 +28,7 @@ public class AdbPlatformToolsInstallerTests
 	[Test]
 	public void ResolveDownloadUrl_returns_the_macos_archive_url()
 	{
-		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(isWindows: false, isMacOs: true, isLinux: false);
+		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(false, true, false);
 
 		Assert.That(url, Is.EqualTo("https://dl.google.com/android/repository/platform-tools-latest-darwin.zip"));
 	}
@@ -36,7 +36,7 @@ public class AdbPlatformToolsInstallerTests
 	[Test]
 	public void ResolveDownloadUrl_returns_the_linux_archive_url()
 	{
-		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(isWindows: false, isMacOs: false, isLinux: true);
+		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(false, false, true);
 
 		Assert.That(url, Is.EqualTo("https://dl.google.com/android/repository/platform-tools-latest-linux.zip"));
 	}
@@ -44,7 +44,7 @@ public class AdbPlatformToolsInstallerTests
 	[Test]
 	public void ResolveDownloadUrl_returns_null_when_no_platform_flag_is_set()
 	{
-		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(isWindows: false, isMacOs: false, isLinux: false);
+		var url = AdbPlatformToolsInstaller.ResolveDownloadUrl(false, false, false);
 
 		Assert.That(url, Is.Null);
 	}
@@ -66,8 +66,10 @@ public class AdbPlatformToolsInstallerTests
 	}
 
 	private static IEnumerable<TestCaseData> MaliciousEntryNames()
-		=> _maliciousEntries.Select(entry =>
+	{
+		return _maliciousEntries.Select(entry =>
 			new TestCaseData(entry.Entry, entry.Reason).SetName($"Zip_slip_entries_are_rejected({entry.Reason})"));
+	}
 
 	[Test]
 	public void A_normal_entry_resolves_inside_the_target_and_keeps_its_subdirectory()

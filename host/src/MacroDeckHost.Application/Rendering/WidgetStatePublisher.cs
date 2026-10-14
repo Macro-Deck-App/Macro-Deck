@@ -12,7 +12,8 @@ namespace MacroDeckHost.Application.Rendering;
 /// </summary>
 public interface IWidgetStatePublisher
 {
-	Task PublishIfChanged(Guid widgetId,
+	Task PublishIfChanged(
+		Guid widgetId,
 		WidgetStateReconciliation result,
 		CancellationToken cancellationToken = default);
 }
@@ -39,12 +40,12 @@ public sealed class WidgetStatePublisher : IWidgetStatePublisher
 		_deviceSurfaces = deviceSurfaces;
 	}
 
-	public async Task PublishIfChanged(Guid widgetId,
+	public async Task PublishIfChanged(
+		Guid widgetId,
 		WidgetStateReconciliation result,
 		CancellationToken cancellationToken = default)
 	{
-		if (result.OptimisticState is { } optimisticState &&
-			_optimisticStates?.IsCurrent(optimisticState) == false)
+		if (result.OptimisticState is { } optimisticState && _optimisticStates?.IsCurrent(optimisticState) == false)
 		{
 			return;
 		}
@@ -52,9 +53,9 @@ public sealed class WidgetStatePublisher : IWidgetStatePublisher
 		// A provider that renames a state or changes which states it offers moves the set without
 		// moving the active id, so gating on Changed alone would leave every live deck rendering a
 		// stale set - and a stale label for the state it is already showing - until it reconnected.
-		if (result.StateId is null ||
-			(!result.Changed && !result.SetChanged) ||
-			!_subscriptions.HasSubscribers(widgetId.ToString()))
+		if (result.StateId is null
+			|| !result.Changed && !result.SetChanged
+			|| !_subscriptions.HasSubscribers(widgetId.ToString()))
 		{
 			return;
 		}

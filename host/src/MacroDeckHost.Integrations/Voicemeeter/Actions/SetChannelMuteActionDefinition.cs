@@ -20,8 +20,8 @@ internal sealed class SetChannelMuteActionDefinition : IDynamicOptionsActionDefi
 		[
 			target.Picker(),
 			ActionParameter.Choice(VoicemeeterActionValues.ModeParameter,
-				options: VoicemeeterActionValues.SwitchModeOptions,
-				label: AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
+				VoicemeeterActionValues.SwitchModeOptions,
+				AppStrings.Integrations.Voicemeeter.Common.ModeLabel(),
 				defaultValue: "toggle")
 		];
 	}
@@ -38,7 +38,10 @@ internal sealed class SetChannelMuteActionDefinition : IDynamicOptionsActionDefi
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_target, _resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_target, _resolver);
+	}
 
 	public Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
@@ -92,7 +95,7 @@ internal sealed class SetChannelMuteActionDefinition : IDynamicOptionsActionDefi
 			{
 				_logger.Warning("Voicemeeter mute action skipped: no {Target} selected", _target.Title);
 				return Task.FromResult(ActionResult.Failed(ActionErrorCodes.InvalidParameter,
-					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(target: _target.NounText)));
+					AppStrings.Integrations.Voicemeeter.Errors.NoTargetSelected(_target.NounText)));
 			}
 
 			var applied = ChannelSwitch.Apply(connection,

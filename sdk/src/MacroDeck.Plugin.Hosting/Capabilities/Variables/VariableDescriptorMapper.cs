@@ -9,7 +9,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Variables;
 internal static class VariableDescriptorMapper
 {
 	public static VariableDefinitionDto ToDto(VariableDefinition definition)
-		=> new()
+	{
+		return new VariableDefinitionDto
 		{
 			Id = definition.Id,
 			Name = definition.Name,
@@ -35,6 +36,7 @@ internal static class VariableDescriptorMapper
 				? null
 				: new VariableWriteCapabilityDto { CommitOnRelease = definition.Write.CommitOnRelease }
 		};
+	}
 
 	/// <summary>
 	/// The declared capability local id for an eager variable: its own id where the provider set one,
@@ -42,5 +44,8 @@ internal static class VariableDescriptorMapper
 	/// name with no explicit id) - such a variable is still shown in the <c>describe</c> catalogue, it
 	/// simply cannot be addressed as its own capability.
 	/// </summary>
-	public static string? LocalIdOf(VariableDefinition definition) => definition.ResolvedId;
+	public static string? LocalIdOf(VariableDefinition definition)
+	{
+		return definition.ResolvedId;
+	}
 }

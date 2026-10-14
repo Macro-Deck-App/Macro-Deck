@@ -42,5 +42,8 @@ public sealed class VariablesIntegration : IIntegration, ISystemIntegration
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 }

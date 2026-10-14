@@ -28,7 +28,8 @@ public sealed class StoreAutoUpdater : IDisposable
 	private string? _batchId;
 	private bool _registryFresh;
 
-	public StoreAutoUpdater(IStoreInstallationStore installations,
+	public StoreAutoUpdater(
+		IStoreInstallationStore installations,
 		IPluginInstallationCatalog plugins,
 		IStoreUpdateBatchInstaller installer,
 		IStoreOperationTracker tracker,
@@ -46,7 +47,10 @@ public sealed class StoreAutoUpdater : IDisposable
 		_tracker.Changed += OnOperationChanged;
 	}
 
-	public void Dispose() => _tracker.Changed -= OnOperationChanged;
+	public void Dispose()
+	{
+		_tracker.Changed -= OnOperationChanged;
+	}
 
 	public void MarkRegistryFresh()
 	{
@@ -75,8 +79,10 @@ public sealed class StoreAutoUpdater : IDisposable
 		return IsInstalledFromStore(update);
 	}
 
-	public bool IsHeld(StoreAvailableUpdate update) =>
-		_installations.Find(update.Kind, update.PackageId) is { Held: true };
+	public bool IsHeld(StoreAvailableUpdate update)
+	{
+		return _installations.Find(update.Kind, update.PackageId) is { Held: true };
+	}
 
 	public async Task Apply(IReadOnlyList<StoreAvailableUpdate> updates, CancellationToken cancellationToken = default)
 	{
@@ -151,13 +157,14 @@ public sealed class StoreAutoUpdater : IDisposable
 		}
 
 		var active = _plugins.Discover()
-			.FirstOrDefault(plugin => string.Equals(plugin.PluginId, update.PackageId, StringComparison.OrdinalIgnoreCase))
+			.FirstOrDefault(plugin
+				=> string.Equals(plugin.PluginId, update.PackageId, StringComparison.OrdinalIgnoreCase))
 			?.ActiveVersion?.Version;
 
-		return active is not null &&
-			SemanticVersion.TryParse(active, out var activeVersion) &&
-			SemanticVersion.TryParse(record.Version, out var recordedVersion) &&
-			activeVersion.CompareTo(recordedVersion) == 0;
+		return active is not null
+			&& SemanticVersion.TryParse(active, out var activeVersion)
+			&& SemanticVersion.TryParse(record.Version, out var recordedVersion)
+			&& activeVersion.CompareTo(recordedVersion) == 0;
 	}
 
 	private void OnOperationChanged(StoreOperation operation)
@@ -196,19 +203,21 @@ public sealed class StoreAutoUpdater : IDisposable
 			}
 
 			var title = failed.Count > 0
-				? await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Notifications.StoreAutoUpdateFailed(count: failed.Count))
-				: await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Notifications.StoreAutoUpdated(count: updated.Count));
+				? await ActiveLocalization.Resolve(_scopeFactory,
+					AppStrings.Notifications.StoreAutoUpdateFailed(failed.Count))
+				: await ActiveLocalization.Resolve(_scopeFactory,
+					AppStrings.Notifications.StoreAutoUpdated(updated.Count));
 			var sentences = new List<string>();
 			if (updated.Count > 0)
 			{
 				sentences.Add(await ActiveLocalization.Resolve(_scopeFactory,
-					AppStrings.Notifications.StoreAutoUpdatedMessage(names: Names(updated))));
+					AppStrings.Notifications.StoreAutoUpdatedMessage(Names(updated))));
 			}
 
 			if (failed.Count > 0)
 			{
 				sentences.Add(await ActiveLocalization.Resolve(_scopeFactory,
-					AppStrings.Notifications.StoreAutoUpdateFailedMessage(names: Names(failed))));
+					AppStrings.Notifications.StoreAutoUpdateFailedMessage(Names(failed))));
 			}
 
 			var message = string.Join(" ", sentences);
@@ -230,6 +239,8 @@ public sealed class StoreAutoUpdater : IDisposable
 		}
 	}
 
-	private static string Names(IEnumerable<StoreOperation> operations) =>
-		string.Join(", ", operations.Select(entry => $"{entry.DisplayName} {entry.Version}"));
+	private static string Names(IEnumerable<StoreOperation> operations)
+	{
+		return string.Join(", ", operations.Select(entry => $"{entry.DisplayName} {entry.Version}"));
+	}
 }

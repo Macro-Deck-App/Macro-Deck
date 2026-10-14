@@ -7,20 +7,24 @@ internal interface IDelegateClient : IDisposable
 {
 	Task ProbeAsync(Uri baseUrl, CancellationToken cancellationToken);
 
-	Task<DelegateLoginResult> LoginAsync(Uri baseUrl,
+	Task<DelegateLoginResult> LoginAsync(
+		Uri baseUrl,
 		string username,
 		string password,
 		CancellationToken cancellationToken);
 
-	Task<DelegateConnectionInfo> GetConnectionInfoAsync(Uri baseUrl,
+	Task<DelegateConnectionInfo> GetConnectionInfoAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken);
 
-	Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(Uri baseUrl,
+	Task<IReadOnlyList<DelegateScriptSummary>> GetScriptsAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken);
 
-	Task<DelegateRunResult> RunScriptAsync(Uri baseUrl,
+	Task<DelegateRunResult> RunScriptAsync(
+		Uri baseUrl,
 		string token,
 		string scriptId,
 		string? clientId,
@@ -28,11 +32,13 @@ internal interface IDelegateClient : IDisposable
 		IReadOnlyDictionary<string, object?>? inputs,
 		CancellationToken cancellationToken);
 
-	Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(Uri baseUrl,
+	Task<IReadOnlyList<DelegateSharedVariable>> GetSharedVariablesAsync(
+		Uri baseUrl,
 		string token,
 		CancellationToken cancellationToken);
 
-	Task<DelegateWriteResult> SetSharedVariableAsync(Uri baseUrl,
+	Task<DelegateWriteResult> SetSharedVariableAsync(
+		Uri baseUrl,
 		string token,
 		string name,
 		string? value,

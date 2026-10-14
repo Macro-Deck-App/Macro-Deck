@@ -165,7 +165,9 @@ public sealed record UiBackground
 	/// <exception cref="ArgumentException"><paramref name="color" /> is not written <c>#rrggbb</c> or
 	/// <c>#rrggbbaa</c>.</exception>
 	public static UiBackground Solid(string color)
-		=> new(UiModifierValidation.HexColor(color, nameof(color)), null);
+	{
+		return new UiBackground(UiModifierValidation.HexColor(color, nameof(color)), null);
+	}
 
 	/// <summary>A gradient.</summary>
 	public static UiBackground Of(UiGradient gradient)
@@ -176,10 +178,16 @@ public sealed record UiBackground
 	}
 
 	/// <summary>Reads as <see cref="Solid" />.</summary>
-	public static implicit operator UiBackground(string color) => Solid(color);
+	public static implicit operator UiBackground(string color)
+	{
+		return Solid(color);
+	}
 
 	/// <summary>Reads as <see cref="Of" />.</summary>
-	public static implicit operator UiBackground(UiGradient gradient) => Of(gradient);
+	public static implicit operator UiBackground(UiGradient gradient)
+	{
+		return Of(gradient);
+	}
 }
 
 /// <summary>
@@ -193,7 +201,10 @@ public sealed record UiBackground
 /// </remarks>
 public readonly record struct UiBackgroundValue
 {
-	private UiBackgroundValue(UiValue<UiBackground> value) => Value = value;
+	private UiBackgroundValue(UiValue<UiBackground> value)
+	{
+		Value = value;
+	}
 
 	internal UiValue<UiBackground> Value { get; }
 
@@ -201,17 +212,28 @@ public readonly record struct UiBackgroundValue
 	public bool IsDeclared => Value.IsDeclared;
 
 	/// <summary>A literal colour, as <c>#rrggbb</c>.</summary>
-	public static implicit operator UiBackgroundValue(string color) => new(UiValue.Of(UiBackground.Solid(color)));
+	public static implicit operator UiBackgroundValue(string color)
+	{
+		return new UiBackgroundValue(UiValue.Of(UiBackground.Solid(color)));
+	}
 
 	/// <summary>An already-built background.</summary>
-	public static implicit operator UiBackgroundValue(UiBackground background) => new(UiValue.Of(background));
+	public static implicit operator UiBackgroundValue(UiBackground background)
+	{
+		return new UiBackgroundValue(UiValue.Of(background));
+	}
 
 	/// <summary>A gradient.</summary>
 	public static implicit operator UiBackgroundValue(UiGradient gradient)
-		=> new(UiValue.Of(UiBackground.Of(gradient)));
+	{
+		return new UiBackgroundValue(UiValue.Of(UiBackground.Of(gradient)));
+	}
 
 	/// <summary>An already-wrapped value, so computed and optional values assign directly.</summary>
-	public static implicit operator UiBackgroundValue(UiValue<UiBackground> value) => new(value);
+	public static implicit operator UiBackgroundValue(UiValue<UiBackground> value)
+	{
+		return new UiBackgroundValue(value);
+	}
 
 	/// <summary>A background computed on each evaluation.</summary>
 	public static UiBackgroundValue From(Func<UiBackground> compute)
@@ -222,7 +244,10 @@ public readonly record struct UiBackgroundValue
 	}
 
 	/// <summary>The absent value.</summary>
-	public static UiBackgroundValue None() => default;
+	public static UiBackgroundValue None()
+	{
+		return default;
+	}
 }
 
 /// <summary>
@@ -261,17 +286,25 @@ public sealed record UiGradient
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="angle" /> is not finite.</exception>
 	/// <exception cref="ArgumentException"><paramref name="stops" /> holds fewer than two stops; a reader draws nothing for fewer.</exception>
 	public static UiGradient Linear(double angle, params IReadOnlyList<UiGradientStop> stops)
-		=> new(false, UiModifierValidation.Finite(angle, nameof(angle)), 0, 0, UiModifierValidation.Stops(stops));
+	{
+		return new UiGradient(false,
+			UiModifierValidation.Finite(angle, nameof(angle)),
+			0,
+			0,
+			UiModifierValidation.Stops(stops));
+	}
 
 	/// <summary>A radial gradient around a centre given as fractions of the box.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">A centre coordinate is outside <c>0..1</c>.</exception>
 	/// <exception cref="ArgumentException"><paramref name="stops" /> holds fewer than two stops; a reader draws nothing for fewer.</exception>
 	public static UiGradient Radial(double centerX, double centerY, params IReadOnlyList<UiGradientStop> stops)
-		=> new(true,
+	{
+		return new UiGradient(true,
 			0,
 			UiModifierValidation.Fraction(centerX, nameof(centerX)),
 			UiModifierValidation.Fraction(centerY, nameof(centerY)),
 			UiModifierValidation.Stops(stops));
+	}
 }
 
 /// <summary>One colour stop of a <see cref="UiGradient" />.</summary>
@@ -334,17 +367,25 @@ public sealed record UiMask
 	/// <exception cref="ArgumentOutOfRangeException"><paramref name="angle" /> is not finite.</exception>
 	/// <exception cref="ArgumentException"><paramref name="stops" /> holds fewer than two stops; a reader draws nothing for fewer.</exception>
 	public static UiMask Linear(double angle, params IReadOnlyList<UiMaskStop> stops)
-		=> new(false, UiModifierValidation.Finite(angle, nameof(angle)), 0, 0, UiModifierValidation.Stops(stops));
+	{
+		return new UiMask(false,
+			UiModifierValidation.Finite(angle, nameof(angle)),
+			0,
+			0,
+			UiModifierValidation.Stops(stops));
+	}
 
 	/// <summary>A radial mask around a centre given as fractions of the box.</summary>
 	/// <exception cref="ArgumentOutOfRangeException">A centre coordinate is outside <c>0..1</c>.</exception>
 	/// <exception cref="ArgumentException"><paramref name="stops" /> holds fewer than two stops; a reader draws nothing for fewer.</exception>
 	public static UiMask Radial(double centerX, double centerY, params IReadOnlyList<UiMaskStop> stops)
-		=> new(true,
+	{
+		return new UiMask(true,
 			0,
 			UiModifierValidation.Fraction(centerX, nameof(centerX)),
 			UiModifierValidation.Fraction(centerY, nameof(centerY)),
 			UiModifierValidation.Stops(stops));
+	}
 }
 
 /// <summary>One opacity stop of a <see cref="UiMask" />.</summary>
@@ -437,7 +478,7 @@ public sealed record UiFrame
 	public double? AspectRatio
 	{
 		get;
-		init => field = value is null || (double.IsFinite(value.Value) && value.Value > 0)
+		init => field = value is null || double.IsFinite(value.Value) && value.Value > 0
 			? value
 			: throw new ArgumentOutOfRangeException(nameof(AspectRatio), value, "An aspect ratio must be above zero.");
 	}
@@ -446,21 +487,29 @@ public sealed record UiFrame
 internal static class UiModifierValidation
 {
 	internal static double Fraction(double value, string name)
-		=> value is >= 0 and <= 1
+	{
+		return value is >= 0 and <= 1
 			? value
 			: throw new ArgumentOutOfRangeException(name, value, "The value must lie in 0..1.");
+	}
 
 	internal static double Finite(double value, string name)
-		=> double.IsFinite(value)
+	{
+		return double.IsFinite(value)
 			? value
 			: throw new ArgumentOutOfRangeException(name, value, "The value must be finite.");
+	}
 
 	internal static UiLength? NonNegative(UiLength? length, string name)
-		=> length is null ||
-			(length.Basis >= 0 && length.MaxOfCross is null or >= 0 && length.MaxOfCell is null or >= 0
-				&& length.ParentFraction is null or >= 0)
+	{
+		return length is null
+			|| length.Basis >= 0
+			&& length.MaxOfCross is null or >= 0
+			&& length.MaxOfCell is null or >= 0
+			&& length.ParentFraction is null or >= 0
 				? length
 				: throw new ArgumentOutOfRangeException(name, length, "A length must not be negative.");
+	}
 
 	internal static IReadOnlyList<TStop> Stops<TStop>(IReadOnlyList<TStop> stops)
 	{
@@ -472,9 +521,12 @@ internal static class UiModifierValidation
 	}
 
 	internal static string HexColor(string value, string name)
-		=> value is not null && System.Text.RegularExpressions.Regex.IsMatch(value, "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
-			? value
-			: throw new ArgumentException("A colour must be written #rrggbb or #rrggbbaa.", name);
+	{
+		return value is not null
+			&& System.Text.RegularExpressions.Regex.IsMatch(value, "^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+				? value
+				: throw new ArgumentException("A colour must be written #rrggbb or #rrggbbaa.", name);
+	}
 }
 
 internal sealed record UiShapeWire<TStop>
@@ -510,64 +562,74 @@ internal sealed record UiRadialWire<TStop>
 internal sealed class UiGradientJsonConverter : JsonConverter<UiGradient>
 {
 	public override UiGradient Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> JsonSerializer.Deserialize<UiShapeWire<UiGradientStop>>(ref reader, options) switch
+	{
+		return JsonSerializer.Deserialize<UiShapeWire<UiGradientStop>>(ref reader, options) switch
 		{
 			{ Linear: { } linear } => UiGradient.Linear(linear.Angle, linear.Stops),
 			{ Radial: { } radial } => UiGradient.Radial(radial.CenterX, radial.CenterY, radial.Stops),
-			_ => throw new JsonException("A gradient is either linear or radial."),
+			_ => throw new JsonException("A gradient is either linear or radial.")
 		};
+	}
 
 	public override void Write(Utf8JsonWriter writer, UiGradient value, JsonSerializerOptions options)
-		=> JsonSerializer.Serialize(writer,
+	{
+		JsonSerializer.Serialize(writer,
 			value.IsRadial
 				? new UiShapeWire<UiGradientStop>
 				{
 					Radial = new UiRadialWire<UiGradientStop>
 					{
-						CenterX = value.CenterX, CenterY = value.CenterY, Stops = value.Stops,
-					},
+						CenterX = value.CenterX, CenterY = value.CenterY, Stops = value.Stops
+					}
 				}
 				: new UiShapeWire<UiGradientStop>
 				{
-					Linear = new UiLinearWire<UiGradientStop> { Angle = value.Angle, Stops = value.Stops },
+					Linear = new UiLinearWire<UiGradientStop> { Angle = value.Angle, Stops = value.Stops }
 				},
 			options);
+	}
 }
 
 internal sealed class UiMaskJsonConverter : JsonConverter<UiMask>
 {
 	public override UiMask Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> JsonSerializer.Deserialize<UiShapeWire<UiMaskStop>>(ref reader, options) switch
+	{
+		return JsonSerializer.Deserialize<UiShapeWire<UiMaskStop>>(ref reader, options) switch
 		{
 			{ Linear: { } linear } => UiMask.Linear(linear.Angle, linear.Stops),
 			{ Radial: { } radial } => UiMask.Radial(radial.CenterX, radial.CenterY, radial.Stops),
-			_ => throw new JsonException("A mask is either linear or radial."),
+			_ => throw new JsonException("A mask is either linear or radial.")
 		};
+	}
 
 	public override void Write(Utf8JsonWriter writer, UiMask value, JsonSerializerOptions options)
-		=> JsonSerializer.Serialize(writer,
+	{
+		JsonSerializer.Serialize(writer,
 			value.IsRadial
 				? new UiShapeWire<UiMaskStop>
 				{
 					Radial = new UiRadialWire<UiMaskStop>
 					{
-						CenterX = value.CenterX, CenterY = value.CenterY, Stops = value.Stops,
-					},
+						CenterX = value.CenterX, CenterY = value.CenterY, Stops = value.Stops
+					}
 				}
 				: new UiShapeWire<UiMaskStop>
 				{
-					Linear = new UiLinearWire<UiMaskStop> { Angle = value.Angle, Stops = value.Stops },
+					Linear = new UiLinearWire<UiMaskStop> { Angle = value.Angle, Stops = value.Stops }
 				},
 			options);
+	}
 }
 
 internal sealed class UiBackgroundJsonConverter : JsonConverter<UiBackground>
 {
 	public override UiBackground Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-		=> reader.TokenType == JsonTokenType.String
+	{
+		return reader.TokenType == JsonTokenType.String
 			? UiBackground.Solid(reader.GetString()!)
-			: UiBackground.Of(JsonSerializer.Deserialize<UiGradient>(ref reader, options) ??
-				throw new JsonException("A background is a colour or a gradient."));
+			: UiBackground.Of(JsonSerializer.Deserialize<UiGradient>(ref reader, options)
+				?? throw new JsonException("A background is a colour or a gradient."));
+	}
 
 	public override void Write(Utf8JsonWriter writer, UiBackground value, JsonSerializerOptions options)
 	{

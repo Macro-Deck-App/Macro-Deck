@@ -1,4 +1,3 @@
-using MacroDeck.Localization;
 using MacroDeck.Plugin.Packaging.Artifacts;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -8,7 +7,6 @@ using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
-using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Localization;
@@ -105,7 +103,7 @@ internal sealed class PluginInstallerTakeoverTests
 		await BeginTakeover();
 		var stopsBefore = _supervisor.Stops.Count;
 
-		var update = await InstallVersion("2.0.0", expectSuccess: false);
+		var update = await InstallVersion("2.0.0", false);
 
 		Assert.Multiple(() =>
 		{
@@ -182,14 +180,14 @@ internal sealed class PluginInstallerTakeoverTests
 		_takeovers.Begin(PluginId);
 		using var scope = _provider.CreateScope();
 		var registered = await scope.ServiceProvider.GetRequiredService<IPluginRegistrationService>()
-			.Register(PluginId, "Development Build", null, PluginRegistrationOrigins.Pairing, allowInstalledId: true);
+			.Register(PluginId, "Development Build", null, PluginRegistrationOrigins.Pairing, true);
 		Assert.That(registered.Succeeded, Is.True, "precondition: the takeover credential exists");
 	}
 
 	private async Task<PluginInstallResult> InstallVersion(string version, bool expectSuccess = true)
 	{
 		var artifact = new PluginArtifactBuilder()
-			.WithManifest(ManifestJson.Build(version, PluginId, extraBlocks: null))
+			.WithManifest(ManifestJson.Build(version, PluginId, null))
 			.WithFile(ManifestJson.EntrypointExecutable, "binary")
 			.WriteTo(_sourceDirectory, $"plugin-{version}.macroDeckPlugin");
 
@@ -211,6 +209,8 @@ internal sealed class PluginInstallerTakeoverTests
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
 		public HttpClient CreateClient(string name)
-			=> throw new InvalidOperationException("A unit test must not reach the network.");
+		{
+			throw new InvalidOperationException("A unit test must not reach the network.");
+		}
 	}
 }

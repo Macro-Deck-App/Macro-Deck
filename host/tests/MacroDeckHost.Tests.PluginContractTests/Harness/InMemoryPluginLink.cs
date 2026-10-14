@@ -56,7 +56,10 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	/// <summary>Puts bytes on the wire exactly as a plugin process would, with no serializer of the
 	/// host's own in between. Byte fidelity cannot be shown any other way: anything that re-serializes
 	/// the payload on the way in normalises it before the host ever sees it.</summary>
-	public Task SendRawFromPluginAsync(byte[] utf8) => SendAsync(utf8, CancellationToken.None);
+	public Task SendRawFromPluginAsync(byte[] utf8)
+	{
+		return SendAsync(utf8, CancellationToken.None);
+	}
 
 	public Func<LogPublishPayload, CancellationToken, Task>? LogPublishHandler { get; set; }
 
@@ -66,7 +69,10 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	private string? _dropReplyToOperation;
 	private TaskCompletionSource? _heldReply;
 
-	public InMemoryPluginLink(string sessionId) => _sessionId = sessionId;
+	public InMemoryPluginLink(string sessionId)
+	{
+		_sessionId = sessionId;
+	}
 
 	public event Action<ProtocolEnvelope>? CapabilityResultReceived;
 
@@ -85,7 +91,10 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 	public string? CloseDescription { get; private set; }
 
-	public void DropNextReply() => _dropNextReply = true;
+	public void DropNextReply()
+	{
+		_dropNextReply = true;
+	}
 
 	public void DropReplyTo(string operation)
 	{
@@ -179,8 +188,8 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 		if (string.Equals(envelope.Type, MessageTypes.StateUpdate, StringComparison.Ordinal))
 		{
-			if (StateUpdateHandler is { } handler &&
-				envelope.Payload?.Deserialize<StateUpdatePayload>(PluginProtocolJson.Options) is
+			if (StateUpdateHandler is { } handler
+				&& envelope.Payload?.Deserialize<StateUpdatePayload>(PluginProtocolJson.Options) is
 					{ Kind.Length: > 0 } payload)
 			{
 				LastStateUpdate = handler(payload.Kind, CancellationToken.None);
@@ -192,8 +201,8 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 		if (string.Equals(envelope.Type, MessageTypes.LogPublish, StringComparison.Ordinal))
 		{
-			if (LogPublishHandler is { } logHandler &&
-				envelope.Payload?.Deserialize<LogPublishPayload>(PluginProtocolJson.Options) is { } payload)
+			if (LogPublishHandler is { } logHandler
+				&& envelope.Payload?.Deserialize<LogPublishPayload>(PluginProtocolJson.Options) is { } payload)
 			{
 				_ = logHandler(payload, CancellationToken.None);
 			}
@@ -303,8 +312,8 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 			}
 
 			var invoke = _sentByHost.Find(sent =>
-				string.Equals(sent.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal) &&
-				string.Equals(sent.Id, result.CorrelationId, StringComparison.Ordinal));
+				string.Equals(sent.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal)
+				&& string.Equals(sent.Id, result.CorrelationId, StringComparison.Ordinal));
 			var invoked = invoke?.Payload?.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options);
 			if (!string.Equals(invoked?.Operation, operation, StringComparison.Ordinal))
 			{
@@ -388,6 +397,9 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 	private sealed class Releaser(TaskCompletionSource held) : IDisposable
 	{
-		public void Dispose() => held.TrySetResult();
+		public void Dispose()
+		{
+			held.TrySetResult();
+		}
 	}
 }

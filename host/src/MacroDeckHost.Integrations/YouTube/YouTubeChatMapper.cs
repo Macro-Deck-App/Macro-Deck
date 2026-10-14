@@ -6,7 +6,9 @@ namespace MacroDeckHost.Integrations.YouTube;
 internal static class YouTubeChatMapper
 {
 	public static bool EndsChat(YouTubeChatMessage message)
-		=> string.Equals(message.Type, YouTubeChatMessageTypes.ChatEnded, StringComparison.Ordinal);
+	{
+		return string.Equals(message.Type, YouTubeChatMessageTypes.ChatEnded, StringComparison.Ordinal);
+	}
 
 	public static ChatEvent? ToChatEvent(string accountId, YouTubeChatMessage message)
 	{
@@ -36,13 +38,15 @@ internal static class YouTubeChatMapper
 	}
 
 	private static ChatMessage Line(YouTubeChatMessage message, string text)
-		=> new(message.Id,
+	{
+		return new ChatMessage(message.Id,
 			message.Author.ChannelId,
 			message.Author.ChannelId,
 			message.Author.DisplayName,
 			ChatStyle.DefaultColor(message.Author.ChannelId),
 			[],
 			[new ChatFragment(ChatFragmentKind.Text, text)]);
+	}
 
 	private static string? LineText(YouTubeChatMessage message)
 	{

@@ -43,6 +43,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 	/// own asset id. See <see cref="HandleAssetBeginAsync" />'s remarks for why this test host acks them
 	/// at all.</summary>
 	private readonly ConcurrentDictionary<string, PendingAssetUpload> _pendingAssets = new(StringComparer.Ordinal);
+
 	private readonly UiResourceUploads _uiResourceUploads = new();
 
 	private readonly FakeIntegrationContext _context = new();
@@ -93,7 +94,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 	/// <summary>Runs the receive loop until the socket closes or <paramref name="hostStopping" /> fires.</summary>
 	public async Task RunAsync(CancellationToken hostStopping)
 	{
-		using var linked = CancellationTokenSource.CreateLinkedTokenSource(hostStopping, _stopping.Token, _closeDrain.Token);
+		using var linked
+			= CancellationTokenSource.CreateLinkedTokenSource(hostStopping, _stopping.Token, _closeDrain.Token);
 
 		try
 		{
@@ -115,7 +117,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 
 			foreach (var pendingAsset in _pendingAssets.Values)
 			{
-				pendingAsset.Buffer.Dispose();
+				await pendingAsset.Buffer.DisposeAsync();
 			}
 
 			_pendingAssets.Clear();
@@ -123,14 +125,15 @@ internal sealed class PluginConnection : IAsyncDisposable
 	}
 
 	/// <summary>Sends <paramref name="envelope" /> and awaits the <c>capability.result</c> correlated to it.</summary>
-	public async Task<ProtocolEnvelope> InvokeAndWaitAsync(ProtocolEnvelope envelope,
+	public async Task<ProtocolEnvelope> InvokeAndWaitAsync(
+		ProtocolEnvelope envelope,
 		CancellationToken cancellationToken)
 	{
 		var completion = new TaskCompletionSource<ProtocolEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously);
 		_pending[envelope.Id] = completion;
 
-		await using var registration = cancellationToken.Register(
-			static state => ((TaskCompletionSource<ProtocolEnvelope>)state!).TrySetCanceled(),
+		await using var registration = cancellationToken.Register(static state
+				=> ((TaskCompletionSource<ProtocolEnvelope>)state!).TrySetCanceled(),
 			completion);
 
 		try
@@ -152,7 +155,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 		await _sending.WaitAsync(cancellationToken).ConfigureAwait(false);
 		try
 		{
-			await _socket.SendAsync(bytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken)
+			await _socket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken)
 				.ConfigureAwait(false);
 		}
 		finally
@@ -195,7 +198,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 			await _socket
 				.SendAsync(System.Text.Encoding.UTF8.GetBytes(rawJson),
 					WebSocketMessageType.Text,
-					endOfMessage: true,
+					true,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
@@ -265,11 +268,15 @@ internal sealed class PluginConnection : IAsyncDisposable
 
 	/// <summary>Tells the plugin to hold back everything but pause-exempt traffic.</summary>
 	public Task PauseAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(new ProtocolEnvelope { Type = MessageTypes.FlowPause, Id = NewId() }, cancellationToken);
+	{
+		return SendAsync(new ProtocolEnvelope { Type = MessageTypes.FlowPause, Id = NewId() }, cancellationToken);
+	}
 
 	/// <summary>Tells the plugin to resume normal sending.</summary>
 	public Task ResumeAsync(CancellationToken cancellationToken = default)
-		=> SendAsync(new ProtocolEnvelope { Type = MessageTypes.FlowResume, Id = NewId() }, cancellationToken);
+	{
+		return SendAsync(new ProtocolEnvelope { Type = MessageTypes.FlowResume, Id = NewId() }, cancellationToken);
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -283,8 +290,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 	{
 		// Keeps reading after this side's close until the peer closes too: releasing the socket with
 		// frames still unread makes Windows reset the connection, and the peer never sees the close code.
-		while (_socket.State is WebSocketState.Open or WebSocketState.CloseSent &&
-			!cancellationToken.IsCancellationRequested)
+		while (_socket.State is WebSocketState.Open or WebSocketState.CloseSent
+			&& !cancellationToken.IsCancellationRequested)
 		{
 			byte[]? message;
 
@@ -414,8 +421,8 @@ internal sealed class PluginConnection : IAsyncDisposable
 				Payload = JsonSerializer.SerializeToElement(new HostStatePayload
 					{
 						Api = HostApis.DesktopNotifications,
-						Data = JsonSerializer.SerializeToElement(
-							new DesktopNotificationsStateDto { Supported = _context.DesktopNotifications.IsSupported },
+						Data = JsonSerializer.SerializeToElement(new DesktopNotificationsStateDto
+								{ Supported = _context.DesktopNotifications.IsSupported },
 							PluginProtocolJson.Options)
 					},
 					PluginProtocolJson.Options)
@@ -533,7 +540,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 		_pendingAssets[payload.AssetId] =
 			new PendingAssetUpload(payload.Kind, payload.MimeType, payload.TotalBytes, payload.ContentHash);
 
-		await AcknowledgeAssetAsync(envelope, payload.AssetId, index: null, accepted: true).ConfigureAwait(false);
+		await AcknowledgeAssetAsync(envelope, payload.AssetId, null, true).ConfigureAwait(false);
 	}
 
 	private async Task HandleAssetChunkAsync(ProtocolEnvelope envelope)
@@ -551,7 +558,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 			pending.Buffer.Write(bytes, 0, bytes.Length);
 		}
 
-		await AcknowledgeAssetAsync(envelope, payload.AssetId, payload.Index, accepted: true).ConfigureAwait(false);
+		await AcknowledgeAssetAsync(envelope, payload.AssetId, payload.Index, true).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -575,9 +582,9 @@ internal sealed class PluginConnection : IAsyncDisposable
 		if (_pendingAssets.TryRemove(payload.AssetId, out var pending))
 		{
 			var bytes = pending.Buffer.ToArray();
-			accepted = bytes.Length == pending.TotalBytes &&
-				string.Equals(AssetContentHash.Compute(bytes), pending.ContentHash, StringComparison.Ordinal);
-			pending.Buffer.Dispose();
+			accepted = bytes.Length == pending.TotalBytes
+				&& string.Equals(AssetContentHash.Compute(bytes), pending.ContentHash, StringComparison.Ordinal);
+			await pending.Buffer.DisposeAsync();
 
 			if (accepted && string.Equals(pending.Kind, AssetKinds.UiResource, StringComparison.Ordinal))
 			{
@@ -585,11 +592,12 @@ internal sealed class PluginConnection : IAsyncDisposable
 			}
 		}
 
-		await AcknowledgeAssetAsync(envelope, payload.AssetId, index: null, accepted).ConfigureAwait(false);
+		await AcknowledgeAssetAsync(envelope, payload.AssetId, null, accepted).ConfigureAwait(false);
 	}
 
 	private Task AcknowledgeAssetAsync(ProtocolEnvelope envelope, string assetId, int? index, bool accepted)
-		=> SendUnpromptedAsync(new ProtocolEnvelope
+	{
+		return SendUnpromptedAsync(new ProtocolEnvelope
 		{
 			Type = MessageTypes.AssetAck,
 			Id = NewId(),
@@ -598,6 +606,7 @@ internal sealed class PluginConnection : IAsyncDisposable
 				new AssetAckPayload { AssetId = assetId, Index = index, Accepted = accepted },
 				PluginProtocolJson.Options)
 		});
+	}
 
 	/// <summary>Bytes received so far for one in-progress upload, plus what <c>asset.begin</c> declared
 	/// they must add up to.</summary>
@@ -615,16 +624,23 @@ internal sealed class PluginConnection : IAsyncDisposable
 	}
 
 	private Task<byte[]?> ReceiveFullMessageAsync(CancellationToken cancellationToken)
-		=> WebSocketIo.ReceiveOneMessageAsync(_socket, _options.Limits.MaxMessageBytes, cancellationToken);
+	{
+		return WebSocketIo.ReceiveOneMessageAsync(_socket, _options.Limits.MaxMessageBytes, cancellationToken);
+	}
 
 	private static ProtocolEnvelope ProtocolErrorEnvelope(string code, string? correlationId)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.ProtocolError,
 			Id = NewId(),
 			CorrelationId = correlationId,
 			Error = new ProtocolError { Code = code, Message = ProtocolErrorMessages.For(code), Retryable = false }
 		};
+	}
 
-	private static string NewId() => Guid.CreateVersion7().ToString();
+	private static string NewId()
+	{
+		return Guid.CreateVersion7().ToString();
+	}
 }

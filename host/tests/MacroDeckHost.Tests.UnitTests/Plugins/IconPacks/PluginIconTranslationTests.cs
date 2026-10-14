@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Capabilities.Actions;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -32,14 +31,17 @@ internal sealed class PluginIconTranslationTests
 	}
 
 	[TearDown]
-	public void TearDown() => _host.Dispose();
+	public void TearDown()
+	{
+		_host.Dispose();
+	}
 
 	[Test]
 	public async Task A_provider_action_naming_its_own_icon_draws_that_icon_pack_icon()
 	{
-		var snapshot = await ProviderAction(PluginId, "logos/spotify").GetActionIconAsync(
-			new Dictionary<string, object?>(),
-			CancellationToken.None);
+		var snapshot = await ProviderAction(PluginId, "logos/spotify")
+			.GetActionIconAsync(new Dictionary<string, object?>(),
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -51,9 +53,9 @@ internal sealed class PluginIconTranslationTests
 	[Test]
 	public async Task A_provider_action_of_another_plugin_never_reaches_this_plugins_pack()
 	{
-		var snapshot = await ProviderAction(OtherPluginId, "logos/spotify").GetActionIconAsync(
-			new Dictionary<string, object?>(),
-			CancellationToken.None);
+		var snapshot = await ProviderAction(OtherPluginId, "logos/spotify")
+			.GetActionIconAsync(new Dictionary<string, object?>(),
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -72,7 +74,8 @@ internal sealed class PluginIconTranslationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(rewritten.GetProperty("value").GetProperty("type").GetString(), Is.EqualTo("icon-pack"));
-			Assert.That(rewritten.GetProperty("value").GetProperty("reference").GetString(), Is.EqualTo(_spotifyId.ToString()));
+			Assert.That(rewritten.GetProperty("value").GetProperty("reference").GetString(),
+				Is.EqualTo(_spotifyId.ToString()));
 			Assert.That(rewritten.GetProperty("label").GetString(), Is.EqualTo("x"));
 		});
 	}
@@ -129,7 +132,8 @@ internal sealed class PluginIconTranslationTests
 	}
 
 	private RemoteIconProviderAction ProviderAction(string pluginId, string reference)
-		=> new(pluginId,
+	{
+		return new RemoteIconProviderAction(pluginId,
 			"now-playing",
 			new AnsweringInvoker(new ActionIconResult
 			{
@@ -139,22 +143,35 @@ internal sealed class PluginIconTranslationTests
 			}),
 			new InMemoryPluginAssetCache(),
 			_host.Resolver);
+	}
 
-	private static UiRawJson Raw(string json) => UiRawJson.FromUtf8(Encoding.UTF8.GetBytes(json));
+	private static UiRawJson Raw(string json)
+	{
+		return UiRawJson.FromUtf8(Encoding.UTF8.GetBytes(json));
+	}
 
 	private sealed class AnsweringInvoker(object answer) : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(answer, PluginProtocolJson.Options));
+		{
+			return Task.FromResult<JsonElement?>(JsonSerializer.SerializeToElement(answer, PluginProtocolJson.Options));
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

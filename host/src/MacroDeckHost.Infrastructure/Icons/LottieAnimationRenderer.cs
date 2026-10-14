@@ -38,7 +38,8 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	private readonly string? _assetDirectory;
 	private readonly double _fps;
 
-	private LottieAnimationRenderer(Animation animation,
+	private LottieAnimationRenderer(
+		Animation animation,
 		ResourceProvider resourceProvider,
 		ResourceProvider? assetProvider,
 		string? assetDirectory,
@@ -56,9 +57,11 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	public int FrameCount { get; }
 
 	public static bool LooksLikeLottie(string fileName, byte[] bytes)
-		=> IsZip(bytes)
+	{
+		return IsZip(bytes)
 			? Path.GetExtension(fileName).Equals(".lottie", StringComparison.OrdinalIgnoreCase)
 			: LooksLikeLottieJson(StripByteOrderMark(bytes));
+	}
 
 	public static Result<LottieAnimationRenderer, IconError> Open(byte[] bytes)
 	{
@@ -90,10 +93,10 @@ internal sealed class LottieAnimationRenderer : IDisposable
 
 		var assetProvider = assetDirectory is null
 			? null
-			: new FileResourceProvider(assetDirectory, preDecode: false);
+			: new FileResourceProvider(assetDirectory, false);
 		var resourceProvider = assetProvider is null
-			? new DataUriResourceProvider(preDecode: false)
-			: new DataUriResourceProvider(assetProvider, preDecode: false);
+			? new DataUriResourceProvider(false)
+			: new DataUriResourceProvider(assetProvider, false);
 
 		Animation? animation = null;
 		var handedOver = false;
@@ -142,7 +145,9 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	}
 
 	private static Result<LottieAnimationRenderer, IconError> Fail(IconError error, string message)
-		=> Result.Fail<LottieAnimationRenderer, IconError>(error, message);
+	{
+		return Result.Fail<LottieAnimationRenderer, IconError>(error, message);
+	}
 
 	public Image<Rgba32> Render(int longestEdge, CancellationToken cancellationToken)
 	{
@@ -239,16 +244,20 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	}
 
 	private static byte[] StripByteOrderMark(byte[] bytes)
-		=> bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF
+	{
+		return bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF
 			? bytes[3..]
 			: bytes;
+	}
 
 	private static bool IsZip(byte[] bytes)
-		=> bytes.Length > 4 && bytes[0] == 'P' && bytes[1] == 'K' && bytes[2] == 3 && bytes[3] == 4;
+	{
+		return bytes.Length > 4 && bytes[0] == 'P' && bytes[1] == 'K' && bytes[2] == 3 && bytes[3] == 4;
+	}
 
 	private static Result<(byte[] Json, string? AssetDirectory), IconError> TryUnpack(byte[] bytes)
 	{
-		using var stream = new MemoryStream(bytes, writable: false);
+		using var stream = new MemoryStream(bytes, false);
 		ZipArchive archive;
 		try
 		{
@@ -277,9 +286,7 @@ internal sealed class LottieAnimationRenderer : IDisposable
 			{
 				// Only the assets a Lottie layer can actually reference are unpacked, and the total stays
 				// bounded: a small archive of highly compressible entries must not fill the temp directory.
-				if (entry == animationEntry ||
-					entry.Name.Length == 0 ||
-					!IsRenderableAsset(entry.FullName))
+				if (entry == animationEntry || entry.Name.Length == 0 || !IsRenderableAsset(entry.FullName))
 				{
 					continue;
 				}
@@ -337,7 +344,9 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	}
 
 	private static bool IsRenderableAsset(string fullName)
-		=> _assetExtensions.Contains(Path.GetExtension(fullName));
+	{
+		return _assetExtensions.Contains(Path.GetExtension(fullName));
+	}
 
 	private static ZipArchiveEntry? FindAnimationEntry(List<ZipArchiveEntry> entries)
 	{
@@ -350,10 +359,10 @@ internal sealed class LottieAnimationRenderer : IDisposable
 			: entries.FirstOrDefault(e => e.FullName.Equals($"animations/{animationId}.json",
 				StringComparison.OrdinalIgnoreCase));
 
-		return byId ??
-			entries.FirstOrDefault(e
-				=> e.FullName.StartsWith("animations/", StringComparison.OrdinalIgnoreCase) &&
-				e.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase));
+		return byId
+			?? entries.FirstOrDefault(e
+				=> e.FullName.StartsWith("animations/", StringComparison.OrdinalIgnoreCase)
+				&& e.FullName.EndsWith(".json", StringComparison.OrdinalIgnoreCase));
 	}
 
 	private static string? ReadFirstAnimationId(ZipArchiveEntry manifest)
@@ -367,17 +376,17 @@ internal sealed class LottieAnimationRenderer : IDisposable
 		try
 		{
 			using var document = JsonDocument.Parse(bytes);
-			if (!document.RootElement.TryGetProperty("animations", out var animations) ||
-				animations.ValueKind != JsonValueKind.Array)
+			if (!document.RootElement.TryGetProperty("animations", out var animations)
+				|| animations.ValueKind != JsonValueKind.Array)
 			{
 				return null;
 			}
 
 			foreach (var entry in animations.EnumerateArray())
 			{
-				if (entry.ValueKind == JsonValueKind.Object &&
-					entry.TryGetProperty("id", out var id) &&
-					id.ValueKind == JsonValueKind.String)
+				if (entry.ValueKind == JsonValueKind.Object
+					&& entry.TryGetProperty("id", out var id)
+					&& id.ValueKind == JsonValueKind.String)
 				{
 					return id.GetString();
 				}
@@ -393,9 +402,9 @@ internal sealed class LottieAnimationRenderer : IDisposable
 
 	private static string? SafeRelativePath(string fullName)
 	{
-		if (fullName.Contains("..", StringComparison.Ordinal) ||
-			fullName.Contains(':', StringComparison.Ordinal) ||
-			Path.IsPathRooted(fullName))
+		if (fullName.Contains("..", StringComparison.Ordinal)
+			|| fullName.Contains(':', StringComparison.Ordinal)
+			|| Path.IsPathRooted(fullName))
 		{
 			return null;
 		}
@@ -420,7 +429,7 @@ internal sealed class LottieAnimationRenderer : IDisposable
 
 		try
 		{
-			Directory.Delete(path, recursive: true);
+			Directory.Delete(path, true);
 		}
 		catch (Exception)
 		{
@@ -475,13 +484,13 @@ internal sealed class LottieAnimationRenderer : IDisposable
 		{
 			using var document = JsonDocument.Parse(bytes);
 			var root = document.RootElement;
-			return root.ValueKind == JsonValueKind.Object &&
-				root.TryGetProperty("v", out _) &&
-				root.TryGetProperty("layers", out var layers) &&
-				layers.ValueKind == JsonValueKind.Array &&
-				HasNumber(root, "fr") &&
-				HasNumber(root, "ip") &&
-				HasNumber(root, "op");
+			return root.ValueKind == JsonValueKind.Object
+				&& root.TryGetProperty("v", out _)
+				&& root.TryGetProperty("layers", out var layers)
+				&& layers.ValueKind == JsonValueKind.Array
+				&& HasNumber(root, "fr")
+				&& HasNumber(root, "ip")
+				&& HasNumber(root, "op");
 		}
 		catch (Exception)
 		{
@@ -490,5 +499,7 @@ internal sealed class LottieAnimationRenderer : IDisposable
 	}
 
 	private static bool HasNumber(JsonElement element, string name)
-		=> element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Number;
+	{
+		return element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Number;
+	}
 }

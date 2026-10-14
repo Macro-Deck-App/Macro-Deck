@@ -68,9 +68,9 @@ public class IconProcessingBackgroundServiceTests
 
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() =>
-			_harness.Cache.GetIconsByPackId(pack.Id).All(IsTerminal) &&
-			_harness.BatchTracker.Get(batchId) is null &&
-			_harness.Storage.EnumerateStagedBatchIds().Count == 0);
+			_harness.Cache.GetIconsByPackId(pack.Id).All(IsTerminal)
+			&& _harness.BatchTracker.Get(batchId) is null
+			&& _harness.Storage.EnumerateStagedBatchIds().Count == 0);
 
 		var icons = _harness.Cache.GetIconsByPackId(pack.Id);
 		var good = icons.Single(i => i.Name == "good");
@@ -111,9 +111,9 @@ public class IconProcessingBackgroundServiceTests
 
 		var result = await importService.Import(pack.Id,
 			"drop",
-			Files(("a.png", CreatePng(32, 32, tint: 1)),
-				("b.png", CreatePng(32, 32, tint: 2)),
-				("c.png", CreatePng(32, 32, tint: 3))),
+			Files(("a.png", CreatePng(32, 32, 1)),
+				("b.png", CreatePng(32, 32, 2)),
+				("c.png", CreatePng(32, 32, 3))),
 			CancellationToken.None);
 		Assert.That(result.Success, Is.True);
 		var batchId = result.Data!.Id;
@@ -180,9 +180,9 @@ public class IconProcessingBackgroundServiceTests
 		await WaitUntil(() =>
 		{
 			var current = _harness.Cache.GetIconsByPackId(pack.Id);
-			return current.Count == 2 &&
-				current.All(i => i.ProcessingState == IconProcessingState.Ready) &&
-				_harness.BatchTracker.Get(batchId) is null;
+			return current.Count == 2
+				&& current.All(i => i.ProcessingState == IconProcessingState.Ready)
+				&& _harness.BatchTracker.Get(batchId) is null;
 		});
 
 		var icons = _harness.Cache.GetIconsByPackId(pack.Id);
@@ -194,17 +194,20 @@ public class IconProcessingBackgroundServiceTests
 	{
 		var pack = await _harness.CreatePack();
 		var importService = _harness.CreateImportService();
-		var zip = CreateZip(("media/play.dark.static.png", CreatePng(32, 32, tint: 1)),
-			("media/play.png", CreatePng(32, 32, tint: 2)),
-			("media/play.LIGHT.png", CreatePng(32, 32, tint: 3)),
-			("other/play.dark.png", CreatePng(32, 32, tint: 4)));
+		var zip = CreateZip(("media/play.dark.static.png", CreatePng(32, 32, 1)),
+			("media/play.png", CreatePng(32, 32, 2)),
+			("media/play.LIGHT.png", CreatePng(32, 32, 3)),
+			("other/play.dark.png", CreatePng(32, 32, 4)));
 
-		var result = await importService.Import(pack.Id, "icons.zip", Files(("icons.zip", zip)), CancellationToken.None);
+		var result = await importService.Import(pack.Id,
+			"icons.zip",
+			Files(("icons.zip", zip)),
+			CancellationToken.None);
 		var batchId = result.Data!.Id;
 
 		await _service.StartAsync(CancellationToken.None);
-		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
-			_harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
+		await WaitUntil(()
+			=> _harness.BatchTracker.Get(batchId) is null && _harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
 
 		var icons = _harness.Cache.GetIconsByPackId(pack.Id);
 		var play = icons.Single(icon => icon.OriginalFileName == "icons.zip/media/play.png");
@@ -213,13 +216,16 @@ public class IconProcessingBackgroundServiceTests
 		var finished = _harness.Mediator.Published.OfType<IconImportProgressNotification>().Last();
 		Assert.Multiple(() =>
 		{
-			Assert.That(icons.Select(icon => icon.Name), Is.EquivalentTo(new[] { "play", "play.dark" }),
+			Assert.That(icons.Select(icon => icon.Name),
+				Is.EquivalentTo(new[] { "play", "play.dark" }),
 				"a suffixed file whose icon lives in another folder imports as an icon of its own");
 			Assert.That(appearances.Select(appearance => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!)),
 				Is.EqualTo(new[] { "colorScheme=dark;motion=static", "colorScheme=light" }));
-			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready), Is.True);
+			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready),
+				Is.True);
 			Assert.That(added.Select(icon => icon.Id), Is.EquivalentTo(icons.Select(icon => icon.Id)));
-			Assert.That((finished.Total, finished.Processed), Is.EqualTo((2, 2)),
+			Assert.That((finished.Total, finished.Processed),
+				Is.EqualTo((2, 2)),
 				"the user-facing count is the two icons, not their two appearances");
 		});
 	}
@@ -228,10 +234,10 @@ public class IconProcessingBackgroundServiceTests
 	public async Task ArchiveImport_ThatOnlyAddsAppearances_KeepsThemWhenAnotherArchiveFails()
 	{
 		var pack = await _harness.CreatePack();
-		var playPng = CreatePng(32, 32, tint: 2);
-		var play = await _harness.AddReadyIcon(pack.Id, "play", playPng, source: playPng);
+		var playPng = CreatePng(32, 32, 2);
+		var play = await _harness.AddReadyIcon(pack.Id, "play", playPng, playPng);
 		var importService = _harness.CreateImportService();
-		var zip = CreateZip(("play.png", playPng), ("play.dark.png", CreatePng(32, 32, tint: 1)));
+		var zip = CreateZip(("play.png", playPng), ("play.dark.png", CreatePng(32, 32, 1)));
 
 		var result = await importService.Import(pack.Id,
 			"icons.zip",
@@ -240,8 +246,8 @@ public class IconProcessingBackgroundServiceTests
 		var batchId = result.Data!.Id;
 
 		await _service.StartAsync(CancellationToken.None);
-		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
-			_harness.Cache.GetAppearances(play.Id).All(IsTerminal));
+		await WaitUntil(()
+			=> _harness.BatchTracker.Get(batchId) is null && _harness.Cache.GetAppearances(play.Id).All(IsTerminal));
 
 		var appearances = _harness.Cache.GetAppearances(play.Id);
 		var states = _harness.Mediator.Published.OfType<IconImportProgressNotification>()
@@ -251,8 +257,10 @@ public class IconProcessingBackgroundServiceTests
 		{
 			Assert.That(appearances.Select(appearance => IconAppearanceTraits.ToKey(appearance.AppearanceTraits!)),
 				Is.EqualTo(new[] { "colorScheme=dark" }));
-			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready), Is.True);
-			Assert.That(states, Does.Not.Contain(IconImportBatchState.Failed),
+			Assert.That(appearances.All(appearance => appearance.ProcessingState == IconProcessingState.Ready),
+				Is.True);
+			Assert.That(states,
+				Does.Not.Contain(IconImportBatchState.Failed),
 				"an import that still has appearances to process is not a failed import");
 		});
 	}
@@ -260,7 +268,7 @@ public class IconProcessingBackgroundServiceTests
 	[Test]
 	public async Task StreamDeckIconPack_WithoutExplicitDestination_CreatesItsOwnPack()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var importService = _harness.CreateImportService();
 		var package = CreateZip(("manifest.json",
 				Encoding.UTF8.GetBytes("""{"Name":"Cool Pack","Author":"Elgato","Version":"2.1"}""")),
@@ -274,11 +282,11 @@ public class IconProcessingBackgroundServiceTests
 
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() =>
-			_harness.Cache.GetAllPacks().Any(p => p.Name == "Cool Pack") &&
-			_harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Pack").Id)
-				.All(i => i.ProcessingState == IconProcessingState.Ready) &&
-			_harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Pack").Id).Count ==
-			1);
+			_harness.Cache.GetAllPacks().Any(p => p.Name == "Cool Pack")
+			&& _harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Pack").Id)
+				.All(i => i.ProcessingState == IconProcessingState.Ready)
+			&& _harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Pack").Id).Count
+			== 1);
 
 		var created = _harness.Cache.GetAllPacks().SingleOrDefault(p => p.Name == "Cool Pack");
 		Assert.That(created, Is.Not.Null);
@@ -306,27 +314,28 @@ public class IconProcessingBackgroundServiceTests
 			CancellationToken.None);
 		var batchId = result.Data!.Id;
 		await _service.StartAsync(CancellationToken.None);
-		await WaitUntil(() => _harness.BatchTracker.Get(batchId) is null &&
-			_harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
+		await WaitUntil(()
+			=> _harness.BatchTracker.Get(batchId) is null && _harness.Cache.GetIconsByBatchId(batchId).All(IsTerminal));
 
-		Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Name), Is.EqualTo(new[] { "Mute (night)" }));
+		Assert.That(_harness.Cache.GetIconsByPackId(pack.Id).Select(icon => icon.Name),
+			Is.EqualTo(new[] { "Mute (night)" }));
 	}
 
 	[Test]
 	public async Task ImportPacks_Zip_CreatesPackNamedAfterArchive()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var importService = _harness.CreateImportService();
-		var zip = CreateZip(("a.png", CreatePng(32, 32, tint: 1)), ("nested/b.png", CreatePng(32, 32, tint: 2)));
+		var zip = CreateZip(("a.png", CreatePng(32, 32, 1)), ("nested/b.png", CreatePng(32, 32, 2)));
 
 		var result = await importService.ImportPacks(Files(("Cool Icons.zip", zip)), CancellationToken.None);
 		Assert.That(result.Success, Is.True);
 
 		await _service.StartAsync(CancellationToken.None);
-		await WaitUntil(() => _harness.Cache.GetAllPacks().Any(p => p.Name == "Cool Icons") &&
-			_harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Icons").Id)
-				.Count(i => i.ProcessingState == IconProcessingState.Ready) ==
-			2);
+		await WaitUntil(() => _harness.Cache.GetAllPacks().Any(p => p.Name == "Cool Icons")
+			&& _harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Icons").Id)
+				.Count(i => i.ProcessingState == IconProcessingState.Ready)
+			== 2);
 
 		var created = _harness.Cache.GetAllPacks().Single(p => p.Name == "Cool Icons");
 		Assert.Multiple(() =>
@@ -340,15 +349,15 @@ public class IconProcessingBackgroundServiceTests
 	[Test]
 	public async Task ImportPacks_Tpi_CreatesOnePackPerInfoFolder_AndFallbackForOtherEntries()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var importService = _harness.CreateImportService();
 		var tpi = CreateZip(("GICO-Misc/info.txt",
 				Encoding.UTF8.GetBytes("name=BashTux-GICO-Misc\nauthor=BashTux\nlink=https://example.com")),
-			("GICO-Misc/Back.png", CreatePng(32, 32, tint: 1)),
+			("GICO-Misc/Back.png", CreatePng(32, 32, 1)),
 			("GICO-Games/info.txt", Encoding.UTF8.GetBytes("name=BashTux-GICO-Games\nauthor=BashTux")),
-			("GICO-Games/Steam.png", CreatePng(32, 32, tint: 2)),
-			("Loose/NoInfo.png", CreatePng(32, 32, tint: 3)),
-			("Root.png", CreatePng(32, 32, tint: 4)));
+			("GICO-Games/Steam.png", CreatePng(32, 32, 2)),
+			("Loose/NoInfo.png", CreatePng(32, 32, 3)),
+			("Root.png", CreatePng(32, 32, 4)));
 
 		var result = await importService.ImportPacks(Files(("BashTux.tpi", tpi)), CancellationToken.None);
 		Assert.That(result.Success, Is.True);
@@ -357,9 +366,10 @@ public class IconProcessingBackgroundServiceTests
 		// The icon count has to be waited for as well as the pack count: All() over an empty list is
 		// vacuously true, so waiting on the states alone lets the wait fall through the moment the packs
 		// exist but before a single icon has been attached to them.
-		await WaitUntil(() => _harness.Cache.GetAllPacks().Count == 4 &&
-			_harness.Cache.GetIconsByBatchId(result.Data!.Batch!.Id) is { Count: 4 } icons &&
-			icons.All(i => i.ProcessingState == IconProcessingState.Ready));
+		await WaitUntil(()
+			=> _harness.Cache.GetAllPacks().Count == 4
+			&& _harness.Cache.GetIconsByBatchId(result.Data!.Batch!.Id) is { Count: 4 } icons
+			&& icons.All(i => i.ProcessingState == IconProcessingState.Ready));
 
 		var packs = _harness.Cache.GetAllPacks();
 		var misc = packs.Single(p => p.Name == "BashTux-GICO-Misc");
@@ -381,18 +391,18 @@ public class IconProcessingBackgroundServiceTests
 	[Test]
 	public async Task ImportPacks_FlatTpi_CreatesSinglePackNamedAfterFile()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var importService = _harness.CreateImportService();
-		var tpi = CreateZip(("One.png", CreatePng(32, 32, tint: 1)), ("Two.png", CreatePng(32, 32, tint: 2)));
+		var tpi = CreateZip(("One.png", CreatePng(32, 32, 1)), ("Two.png", CreatePng(32, 32, 2)));
 
 		var result = await importService.ImportPacks(Files(("Flat Pack.tpi", tpi)), CancellationToken.None);
 		Assert.That(result.Success, Is.True);
 
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() =>
-			_harness.Cache.GetAllPacks().Any(p => p.Name == "Flat Pack") &&
-			_harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Flat Pack").Id).Count ==
-			2);
+			_harness.Cache.GetAllPacks().Any(p => p.Name == "Flat Pack")
+			&& _harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "Flat Pack").Id).Count
+			== 2);
 
 		Assert.That(_harness.Cache.GetAllPacks(), Has.Count.EqualTo(2), "default pack + one imported pack");
 	}
@@ -413,8 +423,8 @@ public class IconProcessingBackgroundServiceTests
 
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() => _harness.Cache.GetIconsByPackId(target.Id)
-				.Count(i => i.ProcessingState == IconProcessingState.Ready) ==
-			1);
+				.Count(i => i.ProcessingState == IconProcessingState.Ready)
+			== 1);
 
 		Assert.Multiple(() =>
 		{
@@ -426,7 +436,7 @@ public class IconProcessingBackgroundServiceTests
 	[Test]
 	public async Task ImportPacks_StreamDeckIconPack_UsesManifestMetadata()
 	{
-		await _harness.CreatePack("Imported Icons", isDefault: true);
+		await _harness.CreatePack("Imported Icons", true);
 		var importService = _harness.CreateImportService();
 		var package = CreateZip(("manifest.json",
 				Encoding.UTF8.GetBytes("""{"Name":"SD Pack","Author":"Elgato","Version":"3.0"}""")),
@@ -438,9 +448,9 @@ public class IconProcessingBackgroundServiceTests
 
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() =>
-			_harness.Cache.GetAllPacks().Any(p => p.Name == "SD Pack") &&
-			_harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "SD Pack").Id).Count ==
-			1);
+			_harness.Cache.GetAllPacks().Any(p => p.Name == "SD Pack")
+			&& _harness.Cache.GetIconsByPackId(_harness.Cache.GetAllPacks().Single(p => p.Name == "SD Pack").Id).Count
+			== 1);
 
 		var created = _harness.Cache.GetAllPacks().Single(p => p.Name == "SD Pack");
 		Assert.Multiple(() =>
@@ -454,7 +464,7 @@ public class IconProcessingBackgroundServiceTests
 	[Test]
 	public async Task ImportPacks_ReExtractionAfterCrash_ReusesTheAlreadyCreatedPack()
 	{
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 		var batch = new IconImportBatchEntity
 		{
 			Id = Guid.CreateVersion7(),
@@ -465,8 +475,8 @@ public class IconProcessingBackgroundServiceTests
 		};
 		_harness.BatchTracker.Register(batch);
 		var tpi = CreateZip(("Folder/info.txt", Encoding.UTF8.GetBytes("name=Recovered Pack")),
-			("Folder/a.png", CreatePng(32, 32, tint: 1)),
-			("Folder/b.png", CreatePng(32, 32, tint: 2)));
+			("Folder/a.png", CreatePng(32, 32, 1)),
+			("Folder/b.png", CreatePng(32, 32, 2)));
 		await _harness.Storage.StageArchive(batch.Id,
 			"recover.tpi",
 			new MemoryStream(tpi),
@@ -487,8 +497,8 @@ public class IconProcessingBackgroundServiceTests
 		_harness.ProcessingChannel.Enqueue(new ExtractBatchWorkItem(batch.Id));
 		await _service.StartAsync(CancellationToken.None);
 		await WaitUntil(() => _harness.Cache.GetIconsByPackId(existing.Id)
-				.Count(i => i.ProcessingState == IconProcessingState.Ready) ==
-			2);
+				.Count(i => i.ProcessingState == IconProcessingState.Ready)
+			== 2);
 
 		Assert.Multiple(() =>
 		{
@@ -505,7 +515,7 @@ public class IconProcessingBackgroundServiceTests
 		var pack = await _harness.CreatePack();
 		var (batch, icon) = await ArrangeInterruptedImport(pack,
 			IconProcessingState.Processing,
-			stageOriginal: true);
+			true);
 		Assert.That(batch.State, Is.EqualTo(IconImportBatchState.Processing));
 
 		await _service.StartAsync(CancellationToken.None);
@@ -519,7 +529,7 @@ public class IconProcessingBackgroundServiceTests
 		var pack = await _harness.CreatePack();
 		var (batch, icon) = await ArrangeInterruptedImport(pack,
 			IconProcessingState.Pending,
-			stageOriginal: false);
+			false);
 		Assert.That(batch.State, Is.EqualTo(IconImportBatchState.Processing));
 
 		await _service.StartAsync(CancellationToken.None);
@@ -607,7 +617,9 @@ public class IconProcessingBackgroundServiceTests
 	}
 
 	private static bool IsTerminal(IconEntity icon)
-		=> icon.ProcessingState is IconProcessingState.Ready or IconProcessingState.Failed;
+	{
+		return icon.ProcessingState is IconProcessingState.Ready or IconProcessingState.Failed;
+	}
 
 	private static async Task WaitUntil(Func<bool> condition, int timeoutMs = 15000)
 	{
@@ -644,7 +656,7 @@ public class IconProcessingBackgroundServiceTests
 	private static byte[] CreateZip(params (string Name, byte[] Content)[] entries)
 	{
 		using var stream = new MemoryStream();
-		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true))
+		using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			foreach (var (name, content) in entries)
 			{
@@ -658,7 +670,7 @@ public class IconProcessingBackgroundServiceTests
 
 	private sealed class StartedHostLifetime : IHostApplicationLifetime
 	{
-		public CancellationToken ApplicationStarted { get; } = new(canceled: true);
+		public CancellationToken ApplicationStarted { get; } = new(true);
 		public CancellationToken ApplicationStopping { get; } = CancellationToken.None;
 		public CancellationToken ApplicationStopped { get; } = CancellationToken.None;
 

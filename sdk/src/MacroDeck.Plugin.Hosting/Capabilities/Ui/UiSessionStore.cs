@@ -153,7 +153,10 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			_pump = Task.Run(RunAsync);
 		}
 
-		public void RequestSnapshot() => _work.Write((WorkKind.Snapshot, null, null));
+		public void RequestSnapshot()
+		{
+			_work.Write((WorkKind.Snapshot, null, null));
+		}
 
 		public void Dispatch(UiEvent uiEvent, string? clientId)
 		{
@@ -218,7 +221,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 		}
 
 		private void OnFaulted(object? sender, UiSessionFaultedEventArgs e)
-			=> _ = FaultAsync(ProtocolErrorCodes.InternalError);
+		{
+			_ = FaultAsync(ProtocolErrorCodes.InternalError);
+		}
 
 		private async Task RunAsync()
 		{
@@ -236,15 +241,18 @@ internal sealed class UiSessionStore : IAsyncDisposable
 			}
 		}
 
-		private Task HandleAsync(WorkKind kind, UiEvent? uiEvent, string? clientId) => kind switch
+		private Task HandleAsync(WorkKind kind, UiEvent? uiEvent, string? clientId)
 		{
-			WorkKind.Drain => DrainAsync(),
-			WorkKind.Snapshot => PublishSnapshotAsync(),
-			WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent, clientId),
-			WorkKind.Rebuild => RebuildAsync(),
-			WorkKind.Reload => ReloadAsync(),
-			_ => Task.CompletedTask
-		};
+			return kind switch
+			{
+				WorkKind.Drain => DrainAsync(),
+				WorkKind.Snapshot => PublishSnapshotAsync(),
+				WorkKind.Event when uiEvent is not null => DispatchAsync(uiEvent, clientId),
+				WorkKind.Rebuild => RebuildAsync(),
+				WorkKind.Reload => ReloadAsync(),
+				_ => Task.CompletedTask
+			};
+		}
 
 		private async Task DrainAsync()
 		{

@@ -6,7 +6,8 @@ namespace MacroDeckHost.Integrations.AdGuardHome;
 
 public sealed partial class AdGuardHomeIntegration
 {
-	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(preparation);
@@ -30,7 +31,8 @@ public sealed partial class AdGuardHomeIntegration
 		return Task.FromResult(ConfigEntryPreparationResult.Accept(values));
 	}
 
-	public Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	public Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entry);
@@ -41,7 +43,7 @@ public sealed partial class AdGuardHomeIntegration
 			AdGuardHomeConnection.Connected => ConfigEntryStatus.Connected,
 			AdGuardHomeConnection.Connecting => ConfigEntryStatus.Connecting,
 			AdGuardHomeConnection.Unauthorized => ConfigEntryStatus.NeedsReconfiguration,
-			_ => ConfigEntryStatus.Disconnected,
+			_ => ConfigEntryStatus.Disconnected
 		});
 	}
 
@@ -55,7 +57,8 @@ public sealed partial class AdGuardHomeIntegration
 		return true;
 	}
 
-	public async Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public async Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entries);
@@ -79,7 +82,8 @@ public sealed partial class AdGuardHomeIntegration
 		return Task.CompletedTask;
 	}
 
-	internal static IReadOnlyList<Guid> OrphanedVariables(IReadOnlyList<VariableHandle> variables,
+	internal static IReadOnlyList<Guid> OrphanedVariables(
+		IReadOnlyList<VariableHandle> variables,
 		IReadOnlyList<StoredConfigEntry> entries)
 	{
 		var keys = entries.Select(ReadKey).ToList();
@@ -91,17 +95,19 @@ public sealed partial class AdGuardHomeIntegration
 		return
 		[
 			.. variables
-				.Where(variable => variable.DefinitionId is { } definitionId &&
-					AdGuardHomeVariables.SplitDefinitionId(definitionId) is { } split &&
-					!keys.Contains(split.VariableKey, StringComparer.Ordinal))
-				.Select(variable => variable.Id),
+				.Where(variable => variable.DefinitionId is { } definitionId
+					&& AdGuardHomeVariables.SplitDefinitionId(definitionId) is { } split
+					&& !keys.Contains(split.VariableKey, StringComparer.Ordinal))
+				.Select(variable => variable.Id)
 		];
 	}
 
 	private static string? ReadKey(StoredConfigEntry entry)
-		=> entry.Values.TryGetValue(AdGuardHomeConfigKeys.VariableKey, out var element) &&
-			element.ValueKind == JsonValueKind.String &&
-			element.GetString() is { Length: > 0 } key
+	{
+		return entry.Values.TryGetValue(AdGuardHomeConfigKeys.VariableKey, out var element)
+			&& element.ValueKind == JsonValueKind.String
+			&& element.GetString() is { Length: > 0 } key
 				? key
 				: null;
+	}
 }

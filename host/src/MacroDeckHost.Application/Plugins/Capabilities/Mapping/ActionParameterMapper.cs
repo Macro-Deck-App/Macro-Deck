@@ -7,7 +7,10 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 
 public static class ActionParameterMapper
 {
-	public static ActionParameterDto ToDto(ActionParameter parameter) => ToDto(parameter, depth: 0);
+	public static ActionParameterDto ToDto(ActionParameter parameter)
+	{
+		return ToDto(parameter, 0);
+	}
 
 	private static ActionParameterDto ToDto(ActionParameter parameter, int depth)
 	{
@@ -58,9 +61,15 @@ public static class ActionParameterMapper
 	}
 
 	private static ActionParameterOptionDto ToDto(ActionParameterOption option)
-		=> new() { Value = option.Value, Label = option.Label.Literal, Metadata = option.Metadata };
+	{
+		return new ActionParameterOptionDto
+			{ Value = option.Value, Label = option.Label.Literal, Metadata = option.Metadata };
+	}
 
-	public static ActionParameter ToDomain(ActionParameterDto dto) => ToDomain(dto, depth: 0);
+	public static ActionParameter ToDomain(ActionParameterDto dto)
+	{
+		return ToDomain(dto, 0);
+	}
 
 	private static ActionParameter ToDomain(ActionParameterDto dto, int depth)
 	{
@@ -72,7 +81,7 @@ public static class ActionParameterMapper
 				$"Action parameter '{dto.Name}' nests deeper than {ProtocolLimits.MaxJsonDepth} levels.");
 		}
 
-		if (!Enum.TryParse<ActionParameterType>(dto.Type, ignoreCase: false, out var type))
+		if (!Enum.TryParse<ActionParameterType>(dto.Type, false, out var type))
 		{
 			throw new InvalidOperationException($"Unknown action parameter type '{dto.Type}'.");
 		}
@@ -111,13 +120,18 @@ public static class ActionParameterMapper
 	}
 
 	private static ActionParameter ApplyVisibility(this ActionParameter parameter, ParameterVisibilityDto? visibility)
-		=> visibility is null ? parameter : parameter.OnlyWhen(visibility.ParameterName, [.. visibility.Values]);
+	{
+		return visibility is null ? parameter : parameter.OnlyWhen(visibility.ParameterName, [.. visibility.Values]);
+	}
 
 	private static ActionParameterOption ToDomain(ActionParameterOptionDto dto)
-		=> new() { Value = dto.Value, Label = dto.Label ?? default, Metadata = dto.Metadata };
+	{
+		return new ActionParameterOption { Value = dto.Value, Label = dto.Label ?? default, Metadata = dto.Metadata };
+	}
 
 	private static object? ToValue(JsonElement? element)
-		=> element is { } value
+	{
+		return element is { } value
 			? value.ValueKind switch
 			{
 				JsonValueKind.String => value.GetString(),
@@ -129,4 +143,5 @@ public static class ActionParameterMapper
 				_ => value.Clone()
 			}
 			: null;
+	}
 }

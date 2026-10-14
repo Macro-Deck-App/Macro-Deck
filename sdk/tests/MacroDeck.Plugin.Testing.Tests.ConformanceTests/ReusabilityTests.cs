@@ -31,8 +31,8 @@ internal sealed class ReusabilityTests
 		{
 			Assert.That(referencedNames,
 				Has.None.Matches<string>(name => name.Contains(forbidden, StringComparison.OrdinalIgnoreCase)),
-				$"MacroDeck.Plugin.Testing.dll references an assembly matching '{forbidden}', which would tie the " +
-				"framework-agnostic conformance core to one specific test framework.");
+				$"MacroDeck.Plugin.Testing.dll references an assembly matching '{forbidden}', which would tie the "
+				+ "framework-agnostic conformance core to one specific test framework.");
 		}
 	}
 

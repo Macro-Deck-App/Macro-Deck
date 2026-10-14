@@ -8,7 +8,6 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Widgets.Configuration;
@@ -20,7 +19,8 @@ namespace MacroDeckHost.Widgets.Slider;
 /// </summary>
 internal static class SliderWidgetConfigView
 {
-	public static UiElement Build(JsonElement data,
+	public static UiElement Build(
+		JsonElement data,
 		VariableRegistry variables,
 		IIconPackCache icons,
 		Guid? widgetId = null)
@@ -52,7 +52,10 @@ internal static class SliderWidgetConfigView
 		var thresholdsEnabled = new UiState<bool>(WidgetThresholds.ReadEnabled(data));
 		var thresholds = new UiState<UiThresholds>(WidgetThresholds.ReadStored(data)!);
 
-		(double Min, double Max) Range() => SliderRange.Resolve(Picked(variables, widgetId, valueVariable.Value), min.Value, max.Value);
+		(double Min, double Max) Range()
+		{
+			return SliderRange.Resolve(Picked(variables, widgetId, valueVariable.Value), min.Value, max.Value);
+		}
 
 		return new UiWidgetConfiguration
 		{
@@ -64,7 +67,7 @@ internal static class SliderWidgetConfigView
 				[
 					new UiHeading
 					{
-						Key = "binding-heading", Text = AppStrings.Widgets.Editor.Binding(),
+						Key = "binding-heading", Text = AppStrings.Widgets.Editor.Binding()
 					},
 					new UiVariablePickerInput
 					{
@@ -74,7 +77,7 @@ internal static class SliderWidgetConfigView
 						Description = AppStrings.Widgets.Slider.DefaultVariableDescription(),
 						Binding = Bind.To(valueVariable),
 						VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
-						WritableOnly = true,
+						WritableOnly = true
 					},
 					new UiWhen
 					{
@@ -89,17 +92,17 @@ internal static class SliderWidgetConfigView
 							Binding = Bind.Custom(() => customStep.Value,
 								value =>
 								{
-									if (value &&
-										!customStep.Peek() &&
-										Picked(variables, widgetId, valueVariable.Peek())?.Step is { } declared &&
-										double.IsFinite(declared))
+									if (value
+										&& !customStep.Peek()
+										&& Picked(variables, widgetId, valueVariable.Peek())?.Step is { } declared
+										&& double.IsFinite(declared))
 									{
 										step.Value = declared;
 									}
 
 									customStep.Value = value;
-								}),
-						},
+								})
+						}
 					},
 					// One row, the way the original binding form laid the three bounds out: each is a
 					// short number and a column apiece would push the region three rows taller.
@@ -118,7 +121,7 @@ internal static class SliderWidgetConfigView
 								{
 									Key = "min",
 									Label = AppStrings.Widgets.Slider.Minimum(),
-									Binding = Bind.To(min),
+									Binding = Bind.To(min)
 								}),
 							WhenNotDeclared("max",
 								variables,
@@ -129,7 +132,7 @@ internal static class SliderWidgetConfigView
 								{
 									Key = "max",
 									Label = AppStrings.Widgets.Slider.Maximum(),
-									Binding = Bind.To(max),
+									Binding = Bind.To(max)
 								}),
 							WhenNotDeclared("step",
 								variables,
@@ -140,28 +143,28 @@ internal static class SliderWidgetConfigView
 								{
 									Key = "step",
 									Label = AppStrings.Widgets.Slider.Step(),
-									Binding = Bind.To(step),
+									Binding = Bind.To(step)
 								},
-								overridden: () => customStep.Value),
-						],
+								() => customStep.Value)
+						]
 					},
 					new UiHeading
 					{
-						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance(),
+						Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance()
 					},
 					new UiStringInput
 					{
 						Key = "label",
 						Label = AppStrings.Widgets.Editor.Label(),
-						Binding = Bind.To(label),
+						Binding = Bind.To(label)
 					},
 					new UiBooleanInput
 					{
-						Key = "showLabel", Label = AppStrings.Widgets.Slider.ShowLabel(), Binding = Bind.To(showLabel),
+						Key = "showLabel", Label = AppStrings.Widgets.Slider.ShowLabel(), Binding = Bind.To(showLabel)
 					},
 					new UiBooleanInput
 					{
-						Key = "showValue", Label = AppStrings.Widgets.Slider.ShowValue(), Binding = Bind.To(showValue),
+						Key = "showValue", Label = AppStrings.Widgets.Slider.ShowValue(), Binding = Bind.To(showValue)
 					},
 					WidgetIconField.Build("icon",
 						AppStrings.Widgets.Editor.Icon(),
@@ -179,8 +182,8 @@ internal static class SliderWidgetConfigView
 							Label = AppStrings.Widgets.Editor.IconColor(),
 							Binding = Bind.To(iconColor),
 							SupportsReset = true,
-							DefaultValue = string.Empty,
-						},
+							DefaultValue = string.Empty
+						}
 					},
 					new UiChoiceInput
 					{
@@ -189,8 +192,8 @@ internal static class SliderWidgetConfigView
 						Binding = Bind.To(orientation),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("horizontal", AppStrings.Widgets.Slider.Horizontal()),
-							UiOption.Of("vertical", AppStrings.Widgets.Slider.Vertical()),
-						]),
+							UiOption.Of("vertical", AppStrings.Widgets.Slider.Vertical())
+						])
 					},
 					new UiChoiceInput
 					{
@@ -200,8 +203,8 @@ internal static class SliderWidgetConfigView
 						Binding = Bind.To(interaction),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of("absolute", AppStrings.Widgets.Slider.InteractionAbsolute()),
-							UiOption.Of("relative", AppStrings.Widgets.Slider.InteractionRelative()),
-						]),
+							UiOption.Of("relative", AppStrings.Widgets.Slider.InteractionRelative())
+						])
 					},
 					// All three reset to unset rather than to a literal hex (issue #896): each one's real
 					// default is a theme colour the view substitutes for a blank value, so clearing keeps
@@ -213,14 +216,14 @@ internal static class SliderWidgetConfigView
 						Label = AppStrings.Widgets.Slider.SliderColor(),
 						Binding = Bind.To(color),
 						SupportsReset = true,
-						DefaultValue = string.Empty,
+						DefaultValue = string.Empty
 					},
 					new UiBooleanInput
 					{
 						Key = WidgetThresholds.EnabledKey,
 						Label = AppStrings.Widgets.Editor.ColorThresholds(),
 						Description = AppStrings.Widgets.Slider.ColorThresholdsDescription(),
-						Binding = Bind.To(thresholdsEnabled),
+						Binding = Bind.To(thresholdsEnabled)
 					},
 					new UiThresholdsInput
 					{
@@ -234,7 +237,8 @@ internal static class SliderWidgetConfigView
 						Unit = UiText.Optional(() => Unit(Picked(variables, widgetId, valueVariable.Value))),
 						DefaultValue = UiValue.From(() => WidgetThresholds.Defaults(Range().Min, Range().Max)),
 						SupportsReset = true,
-						VisibleWhen = new UiVisibleWhen { ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] },
+						VisibleWhen = new UiVisibleWhen
+							{ ParameterName = WidgetThresholds.EnabledKey, Values = ["true"] }
 					},
 					new UiColorInput
 					{
@@ -242,12 +246,12 @@ internal static class SliderWidgetConfigView
 						AllowVariables = true,
 						Binding = Bind.To(labelColor),
 						SupportsReset = true,
-						DefaultValue = string.Empty,
+						DefaultValue = string.Empty
 					},
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
 			Editor = new UiWidgetEditor
 			{
@@ -259,10 +263,10 @@ internal static class SliderWidgetConfigView
 						Key = "flows",
 						Binding = Bind.To(flows),
 						CanRun = true,
-						Triggers = UiValue.Of<IReadOnlyList<string>>([WidgetTriggerTypes.DoublePress]),
-					},
-				],
-			},
+						Triggers = UiValue.Of<IReadOnlyList<string>>([WidgetTriggerTypes.DoublePress])
+					}
+				]
+			}
 		};
 	}
 
@@ -289,7 +293,8 @@ internal static class SliderWidgetConfigView
 		Func<VariableEntity, double?> ownBound,
 		Func<UiElement> content,
 		Func<bool>? overridden = null)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = $"{key}Bound",
 			Condition = () =>
@@ -306,22 +311,27 @@ internal static class SliderWidgetConfigView
 
 				return Picked(variables, widgetId, valueVariable.Value) is { } entity && ownBound(entity) is null;
 			},
-			Content = content,
+			Content = content
 		};
+	}
 
 	private static UiText Unit(VariableEntity? variable)
-		=> variable?.Unit is { Length: > 0 } unit
+	{
+		return variable?.Unit is { Length: > 0 } unit
 			? VariableValueFormatter.Format(0, null, unit, null).Unit
 			: UiText.None();
+	}
 
 	private static VariableEntity? Picked(VariableRegistry variables, Guid? widgetId, string name)
-		=> string.IsNullOrEmpty(name) ? null : SliderDefaultVariable.Find(variables, widgetId, name);
+	{
+		return string.IsNullOrEmpty(name) ? null : SliderDefaultVariable.Find(variables, widgetId, name);
+	}
 
 	private static WidgetIconReference? ReadIcon(JsonElement data)
 	{
-		var icon = data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty("icon", out var iconElement) &&
-			iconElement.ValueKind == JsonValueKind.Object
+		var icon = data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty("icon", out var iconElement)
+			&& iconElement.ValueKind == JsonValueKind.Object
 				? JsonNode.Parse(iconElement.GetRawText())
 				: null;
 

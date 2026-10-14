@@ -17,19 +17,21 @@ internal sealed class PackageAiDeclarationTests
 		new(PluginManifestJson.Options) { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
 	private static PluginManifestReadResult Read(string extra)
-		=> new PluginManifestReader().ReadFromJson($$"""
-			{
-				"manifestVersion": 1,
-				"id": "com.example.plugin",
-				"name": "Example",
-				"version": "1.0.0",
-				"entrypoints": { "win-x64": { "executable": "Example.exe" } }
-				{{extra}}
-			}
-			""",
-			versionDirectory: null,
+	{
+		return new PluginManifestReader().ReadFromJson($$"""
+														 {
+														 	"manifestVersion": 1,
+														 	"id": "com.example.plugin",
+														 	"name": "Example",
+														 	"version": "1.0.0",
+														 	"entrypoints": { "win-x64": { "executable": "Example.exe" } }
+														 	{{extra}}
+														 }
+														 """,
+			null,
 			"com.example.plugin",
 			"1.0.0");
+	}
 
 	[Test]
 	public void A_manifest_without_a_declaration_declares_nothing()
@@ -47,13 +49,13 @@ internal sealed class PackageAiDeclarationTests
 	public void A_declaration_is_read_as_authored()
 	{
 		var result = Read("""
-			, "ai": {
-				"interaction": true,
-				"generatedContent": false,
-				"generatedAssets": true,
-				"services": ["OpenAI", "ElevenLabs"]
-			}
-			""");
+						  , "ai": {
+						  	"interaction": true,
+						  	"generatedContent": false,
+						  	"generatedAssets": true,
+						  	"services": ["OpenAI", "ElevenLabs"]
+						  }
+						  """);
 
 		Assert.Multiple(() =>
 		{
@@ -69,14 +71,16 @@ internal sealed class PackageAiDeclarationTests
 	public void An_explicit_declaration_of_no_ai_stays_distinct_from_no_declaration()
 	{
 		var result = Read("""
-			, "ai": { "interaction": false, "generatedContent": false, "generatedAssets": false }
-			""");
+						  , "ai": { "interaction": false, "generatedContent": false, "generatedAssets": false }
+						  """);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Manifest!.Ai, Is.Not.Null);
-			Assert.That(result.Manifest.Ai!.Interaction || result.Manifest.Ai.GeneratedContent ||
-				result.Manifest.Ai.GeneratedAssets, Is.False);
+			Assert.That(result.Manifest.Ai!.Interaction
+				|| result.Manifest.Ai.GeneratedContent
+				|| result.Manifest.Ai.GeneratedAssets,
+				Is.False);
 		});
 	}
 
@@ -118,13 +122,13 @@ internal sealed class PackageAiDeclarationTests
 	{
 		var tooLong = new string('x', PackageAiDeclaration.MaxServiceLength + 1);
 		var result = Read($$"""
-			, "ai": {
-				"generatedAssets": true,
-				"interaction": false,
-				"services": ["  OpenAI  ", "", 7, "openai", "{{tooLong}}", "Mistral"],
-				"futureFlag": true
-			}
-			""");
+							, "ai": {
+								"generatedAssets": true,
+								"interaction": false,
+								"services": ["  OpenAI  ", "", 7, "openai", "{{tooLong}}", "Mistral"],
+								"futureFlag": true
+							}
+							""");
 
 		Assert.Multiple(() =>
 		{
@@ -171,8 +175,9 @@ internal sealed class PackageAiDeclarationTests
 	public void A_packed_manifest_keeps_the_declaration_in_the_published_shape()
 	{
 		var manifest = Read("""
-			, "ai": { "generatedContent": true, "services": ["OpenAI"] }
-			""").Manifest!;
+							, "ai": { "generatedContent": true, "services": ["OpenAI"] }
+							""")
+			.Manifest!;
 		using var written = JsonDocument.Parse(JsonSerializer.Serialize(manifest, _packOptions));
 		var ai = written.RootElement.GetProperty("ai");
 		var reread = Read($", \"ai\": {ai.GetRawText()}").Manifest!.Ai!;
@@ -200,14 +205,14 @@ internal sealed class PackageAiDeclarationTests
 	public void A_consumer_that_predates_the_declaration_still_reads_the_manifest()
 	{
 		const string json = """
-			{
-				"manifestVersion": 1,
-				"id": "com.example.plugin",
-				"name": "Example",
-				"version": "1.0.0",
-				"ai": { "interaction": true, "services": ["OpenAI"] }
-			}
-			""";
+							{
+								"manifestVersion": 1,
+								"id": "com.example.plugin",
+								"name": "Example",
+								"version": "1.0.0",
+								"ai": { "interaction": true, "services": ["OpenAI"] }
+							}
+							""";
 
 		var manifest = JsonSerializer.Deserialize<ManifestBeforeAiDeclaration>(json, PluginManifestJson.Options);
 

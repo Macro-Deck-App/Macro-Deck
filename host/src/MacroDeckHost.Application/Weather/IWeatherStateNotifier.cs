@@ -27,5 +27,7 @@ public sealed class WeatherStateNotifier : IWeatherStateNotifier
 	public event EventHandler<WeatherStateChangedEventArgs>? StateChanged;
 
 	public void Publish(string instanceId, WeatherStatePayload state)
-		=> StateChanged?.Invoke(this, new WeatherStateChangedEventArgs(instanceId, state));
+	{
+		StateChanged?.Invoke(this, new WeatherStateChangedEventArgs(instanceId, state));
+	}
 }

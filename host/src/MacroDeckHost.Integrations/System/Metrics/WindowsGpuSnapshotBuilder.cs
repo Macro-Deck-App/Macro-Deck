@@ -11,7 +11,8 @@ internal static class WindowsGpuSnapshotBuilder
 	// Adapters a user would call a GPU, discrete first, so that GPU 0 is the card a hybrid laptop's
 	// user means. Plain DXGI order would normally put the integrated adapter there.
 	public static IReadOnlyList<WindowsGpuAdapter> Surviving(IReadOnlyList<WindowsGpuAdapter> adapters)
-		=> adapters
+	{
+		return adapters
 			.Where(a => !a.IsSoftware && (a.DedicatedVideoMemory > 0 || a.SharedSystemMemory > 0))
 			// On multi-GPU machines DXGI can list the default adapter again under another LUID. Two
 			// physically identical cards are indistinguishable here and collapse too.
@@ -19,6 +20,7 @@ internal static class WindowsGpuSnapshotBuilder
 			.Select(g => g.First() with { Luids = g.SelectMany(a => a.Luids).ToArray() })
 			.OrderByDescending(a => a.DedicatedVideoMemory)
 			.ToArray();
+	}
 
 	public static bool NeedsNvidiaFallback(
 		IReadOnlyList<WindowsGpuAdapter> survivingAdapters,
@@ -91,5 +93,7 @@ internal static class WindowsGpuSnapshotBuilder
 	}
 
 	private static GpuSample Sample(WindowsGpuAdapter adapter, double usage)
-		=> new(adapter.Name, Math.Clamp(usage, 0d, 100d));
+	{
+		return new GpuSample(adapter.Name, Math.Clamp(usage, 0d, 100d));
+	}
 }

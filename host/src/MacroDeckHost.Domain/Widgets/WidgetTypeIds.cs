@@ -48,14 +48,17 @@ public static class WidgetTypeIds
 	/// retired <c>WidgetType</c> enum persisted, and this is the only place that still knows them - the
 	/// database migration and the readers of any file written by a pre-string build.
 	/// </summary>
-	public static string? FromLegacyValue(int value) => value switch
+	public static string? FromLegacyValue(int value)
 	{
-		1 => ActionButton,
-		2 => MusicPlayer,
-		3 => Slider,
-		4 => Weather,
-		5 => HistoryGraph,
-		6 => Clock,
-		_ => null,
-	};
+		return value switch
+		{
+			1 => ActionButton,
+			2 => MusicPlayer,
+			3 => Slider,
+			4 => Weather,
+			5 => HistoryGraph,
+			6 => Clock,
+			_ => null
+		};
+	}
 }

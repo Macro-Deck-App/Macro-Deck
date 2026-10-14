@@ -140,8 +140,11 @@ public static class ActionParameterLiteralCoercion
 			_ => (0d, 0)
 		};
 
-		if (suffixLength > 0 &&
-			double.TryParse(trimmed[..^suffixLength], NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
+		if (suffixLength > 0
+			&& double.TryParse(trimmed[..^suffixLength],
+				NumberStyles.Float,
+				CultureInfo.InvariantCulture,
+				out var number))
 		{
 			return number * factor;
 		}

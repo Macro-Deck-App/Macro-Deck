@@ -22,12 +22,15 @@ internal sealed class TakeScreenshotActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice(MeldActionParameters.Orientation,
-			options: MeldActionParameters.ScreenshotOrientations,
-			label: AppStrings.Integrations.Meld.Parameters.Orientation(),
+			MeldActionParameters.ScreenshotOrientations,
+			AppStrings.Integrations.Meld.Parameters.Orientation(),
 			defaultValue: MeldActionParameters.OrientationHorizontal)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -46,8 +49,8 @@ internal sealed class TakeScreenshotActionDefinition : IActionDefinition
 				return error!;
 			}
 
-			var orientation = context.Parameters.GetValueOrDefault(MeldActionParameters.Orientation) as string ??
-				MeldActionParameters.OrientationHorizontal;
+			var orientation = context.Parameters.GetValueOrDefault(MeldActionParameters.Orientation) as string
+				?? MeldActionParameters.OrientationHorizontal;
 			var command = orientation == MeldActionParameters.OrientationVertical
 				? MeldObjects.CommandScreenshotVertical
 				: MeldObjects.CommandScreenshot;

@@ -14,7 +14,9 @@ public static class EventTriggerParser
 	};
 
 	public static bool MightContainEventTriggers(string? flowsSource)
-		=> flowsSource is not null && flowsSource.Contains(WidgetTriggerTypes.Event, StringComparison.Ordinal);
+	{
+		return flowsSource is not null && flowsSource.Contains(WidgetTriggerTypes.Event, StringComparison.Ordinal);
+	}
 
 	public static IReadOnlyList<EventSubscription> Parse(EventTriggerOwner owner, string? widgetData)
 	{
@@ -57,12 +59,12 @@ public static class EventTriggerParser
 		var subscriptions = new List<EventSubscription>();
 		foreach (var flow in flows)
 		{
-			if (!string.Equals(flow.TriggerType, WidgetTriggerTypes.Event, StringComparison.OrdinalIgnoreCase) ||
-				string.IsNullOrWhiteSpace(flow.TriggerId) ||
-				flow.Event is not { } binding ||
-				string.IsNullOrWhiteSpace(binding.ProviderId) ||
-				string.IsNullOrWhiteSpace(binding.EventId) ||
-				!QualifiedId.TryCreate(binding.ProviderId, binding.EventId, out var eventId))
+			if (!string.Equals(flow.TriggerType, WidgetTriggerTypes.Event, StringComparison.OrdinalIgnoreCase)
+				|| string.IsNullOrWhiteSpace(flow.TriggerId)
+				|| flow.Event is not { } binding
+				|| string.IsNullOrWhiteSpace(binding.ProviderId)
+				|| string.IsNullOrWhiteSpace(binding.EventId)
+				|| !QualifiedId.TryCreate(binding.ProviderId, binding.EventId, out var eventId))
 			{
 				continue;
 			}

@@ -28,13 +28,19 @@ public class ColorPaletteController : ControllerBase
 
 	[HttpGet]
 	public Task<GetColorPaletteResponse> Get(CancellationToken ct)
-		=> _getPalette.Handle(new GetColorPaletteRequest(), ct).AsTask();
+	{
+		return _getPalette.Handle(new GetColorPaletteRequest(), ct).AsTask();
+	}
 
 	[HttpPut]
 	public Task<SetColorPaletteEntryResponse> SetEntry(SetColorPaletteEntryRequest body, CancellationToken ct)
-		=> _setPaletteEntry.Handle(body, ct).AsTask();
+	{
+		return _setPaletteEntry.Handle(body, ct).AsTask();
+	}
 
 	[HttpPost("restore-defaults")]
 	public Task<GetColorPaletteResponse> RestoreDefaults(CancellationToken ct)
-		=> _restoreDefaults.Handle(new RestoreDefaultColorPaletteRequest(), ct).AsTask();
+	{
+		return _restoreDefaults.Handle(new RestoreDefaultColorPaletteRequest(), ct).AsTask();
+	}
 }

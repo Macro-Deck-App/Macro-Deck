@@ -20,11 +20,15 @@ internal sealed class UiPreviewSink
 		_attached = true;
 
 		return _waiting.GetOrAdd(sessionId,
-			static _ => new TaskCompletionSource<UiPreviewFrame>(TaskCreationOptions.RunContinuationsAsynchronously))
+				static _
+					=> new TaskCompletionSource<UiPreviewFrame>(TaskCreationOptions.RunContinuationsAsynchronously))
 			.Task;
 	}
 
-	public void Forget(string sessionId) => _waiting.TryRemove(sessionId, out _);
+	public void Forget(string sessionId)
+	{
+		_waiting.TryRemove(sessionId, out _);
+	}
 
 	public HostInvokeOutcome Dispatch(HostInvokePayload payload)
 	{
@@ -49,8 +53,11 @@ internal sealed class UiPreviewSink
 		}
 	}
 
-	private static T? Arguments<T>(HostInvokePayload payload) where T : class
-		=> payload.Arguments?.Deserialize<T>(PluginProtocolJson.Options);
+	private static T? Arguments<T>(HostInvokePayload payload)
+		where T : class
+	{
+		return payload.Arguments?.Deserialize<T>(PluginProtocolJson.Options);
+	}
 }
 
 internal sealed record UiPreviewFrame(JsonElement? Tree, string? FaultCode, string? FaultMessage);

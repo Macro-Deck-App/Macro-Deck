@@ -24,7 +24,10 @@ internal sealed class GoogleCalendarEventsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _harness.Dispose();
+	public void TearDown()
+	{
+		_harness.Dispose();
+	}
 
 	[Test]
 	public async Task A_timed_event_carries_its_times_place_meeting_link_and_guests()
@@ -124,13 +127,15 @@ internal sealed class GoogleCalendarEventsTests
 			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.CalendarListPath,
 				HttpStatusCode.OK,
 				$$"""{"items":[{"id":"{{Primary}}","summary":"Me","primary":true}],"nextPageToken":"list-2"}""")
-			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.CalendarListPath && r.Query.GetValueOrDefault("pageToken") == "list-2",
+			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.CalendarListPath
+					&& r.Query.GetValueOrDefault("pageToken") == "list-2",
 				HttpStatusCode.OK,
 				$$"""{"items":[{"id":"{{Holidays}}","summary":"Holidays"}]}""")
 			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Primary),
 				HttpStatusCode.OK,
 				"""{"items":[{"id":"p1","summary":"One","start":{"dateTime":"2026-10-05T09:00:00Z"},"end":{"dateTime":"2026-10-05T10:00:00Z"}}],"nextPageToken":"events-2"}""")
-			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Primary) && r.Query.GetValueOrDefault("pageToken") == "events-2",
+			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Primary)
+					&& r.Query.GetValueOrDefault("pageToken") == "events-2",
 				HttpStatusCode.OK,
 				"""{"items":[{"id":"p2","summary":"Two","start":{"dateTime":"2026-10-05T11:00:00Z"},"end":{"dateTime":"2026-10-05T12:00:00Z"}}]}""")
 			.On(r => r.Uri.AbsolutePath == GoogleCalendarHarness.EventsPath(Holidays),
@@ -141,8 +146,9 @@ internal sealed class GoogleCalendarEventsTests
 			new CalendarEventQuery { From = _from, To = _to },
 			CancellationToken.None);
 
-		var holidayRequest = _harness.Server.Requests.Single(r => r.Uri.AbsolutePath.EndsWith("/events", StringComparison.Ordinal) &&
-			r.Uri.AbsolutePath.Contains("holiday", StringComparison.Ordinal));
+		var holidayRequest = _harness.Server.Requests.Single(r
+			=> r.Uri.AbsolutePath.EndsWith("/events", StringComparison.Ordinal)
+			&& r.Uri.AbsolutePath.Contains("holiday", StringComparison.Ordinal));
 		Assert.Multiple(() =>
 		{
 			Assert.That(events.Select(e => (e.CalendarId, e.Id)),
@@ -238,7 +244,9 @@ internal sealed class GoogleCalendarEventsTests
 	[TestCase(HttpStatusCode.Gone)]
 	public async Task A_deleted_event_reads_as_gone(HttpStatusCode status)
 	{
-		_harness.Server.On(r => r.Uri.AbsolutePath.StartsWith(GoogleCalendarHarness.EventsPath(Primary) + "/", StringComparison.Ordinal),
+		_harness.Server.On(r
+				=> r.Uri.AbsolutePath.StartsWith(GoogleCalendarHarness.EventsPath(Primary) + "/",
+					StringComparison.Ordinal),
 			status,
 			"""{"error":{"code":404}}""");
 
@@ -258,7 +266,8 @@ internal sealed class GoogleCalendarEventsTests
 				HttpStatusCode.OK,
 				"""{"id":"live","summary":"Review","description":"Notes","start":{"dateTime":"2026-10-05T09:00:00Z"},"end":{"dateTime":"2026-10-05T10:00:00Z"}}""");
 
-		var cancelled = await _harness.Integration.GetEventAsync(_accountId, Primary, "cancelled", CancellationToken.None);
+		var cancelled
+			= await _harness.Integration.GetEventAsync(_accountId, Primary, "cancelled", CancellationToken.None);
 		var live = await _harness.Integration.GetEventAsync(_accountId, Primary, "live", CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -293,7 +302,9 @@ internal sealed class GoogleCalendarEventsTests
 	}
 
 	private Task<IReadOnlyList<CalendarEvent>> ReadAsync(string calendarId)
-		=> _harness.Integration.GetEventsAsync(_accountId,
+	{
+		return _harness.Integration.GetEventsAsync(_accountId,
 			new CalendarEventQuery { From = _from, To = _to, CalendarIds = [calendarId] },
 			CancellationToken.None);
+	}
 }

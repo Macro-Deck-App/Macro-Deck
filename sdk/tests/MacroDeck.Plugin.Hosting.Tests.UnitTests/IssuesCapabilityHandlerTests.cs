@@ -18,13 +18,20 @@ public class IssuesCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	private static CapabilityInvocation Invocation(string localId, string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.Issues,
 			LocalId = localId,
@@ -35,9 +42,13 @@ public class IssuesCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static IntegrationIssue NotConnected()
-		=> new() { Id = "not-connected", Title = "Not connected", Severity = IntegrationIssueSeverity.Error };
+	{
+		return new IntegrationIssue
+			{ Id = "not-connected", Title = "Not connected", Severity = IntegrationIssueSeverity.Error };
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id()

@@ -4,7 +4,8 @@ namespace MacroDeckHost.Application.Messaging;
 
 public interface IMessageBroker
 {
-	IReadOnlyList<MessageRegistrationRejection> Replace(string participantId,
+	IReadOnlyList<MessageRegistrationRejection> Replace(
+		string participantId,
 		string registrationKey,
 		IMessageParticipant participant,
 		MessageRegistrations registrations);
@@ -15,13 +16,15 @@ public interface IMessageBroker
 
 	void Publish(string senderId, string topic, JsonElement? payload);
 
-	Task SendAsync(string senderId,
+	Task SendAsync(
+		string senderId,
 		string topic,
 		JsonElement? payload,
 		TimeSpan timeout,
 		CancellationToken cancellationToken);
 
-	Task<JsonElement?> RequestAsync(string senderId,
+	Task<JsonElement?> RequestAsync(
+		string senderId,
 		string topic,
 		JsonElement? payload,
 		TimeSpan timeout,

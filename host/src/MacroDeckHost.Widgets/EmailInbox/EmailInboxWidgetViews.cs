@@ -30,61 +30,61 @@ internal static class EmailInboxWidgetView
 	private const int MaxBadgeCount = 999;
 
 	private static readonly MessageStyle _list = new("list",
-		MaxRows: EmailWidgetTypes.MaxMessages,
-		Title: 15,
-		AccentTitle: false,
-		Badge: 10.5,
-		HeaderGap: 8,
-		Sender: 12.5,
-		Subject: 11.5,
-		Preview: 10.5,
-		Time: 10.5,
-		SubjectLines: 1,
-		SubjectLinesAlone: 1,
-		PreviewLines: 2,
-		SingleLine: false,
-		DotColumn: 7,
-		DotGap: 5,
-		LineGap: 3,
-		SeparatorGap: 6);
+		EmailWidgetTypes.MaxMessages,
+		15,
+		false,
+		10.5,
+		8,
+		12.5,
+		11.5,
+		10.5,
+		10.5,
+		1,
+		1,
+		2,
+		false,
+		7,
+		5,
+		3,
+		6);
 
 	private static readonly MessageStyle _glance = new("glance",
-		MaxRows: MaxGlanceRows,
-		Title: 11,
-		AccentTitle: true,
-		Badge: 9.5,
-		HeaderGap: 6,
-		Sender: 11.5,
-		Subject: 11,
-		Preview: 9.5,
-		Time: 9,
-		SubjectLines: 2,
-		SubjectLinesAlone: 3,
-		PreviewLines: 1,
-		SingleLine: false,
-		DotColumn: 6,
-		DotGap: 3.5,
-		LineGap: 3,
-		SeparatorGap: 5);
+		MaxGlanceRows,
+		11,
+		true,
+		9.5,
+		6,
+		11.5,
+		11,
+		9.5,
+		9,
+		2,
+		3,
+		1,
+		false,
+		6,
+		3.5,
+		3,
+		5);
 
 	private static readonly MessageStyle _strip = new("strip",
-		MaxRows: MaxStripRows,
-		Title: 13,
-		AccentTitle: false,
-		Badge: 9.5,
-		HeaderGap: 6,
-		Sender: 11.5,
-		Subject: 11.5,
-		Preview: 0,
-		Time: 9.5,
-		SubjectLines: 1,
-		SubjectLinesAlone: 1,
-		PreviewLines: 0,
-		SingleLine: true,
-		DotColumn: 6,
-		DotGap: 4,
-		LineGap: 0,
-		SeparatorGap: 4);
+		MaxStripRows,
+		13,
+		false,
+		9.5,
+		6,
+		11.5,
+		11.5,
+		0,
+		9.5,
+		1,
+		1,
+		0,
+		true,
+		6,
+		4,
+		0,
+		4);
 
 	private static readonly UiLength _countText = UiLength.Capped(0.33, 72);
 	private static readonly UiLength _wideCountText = UiLength.Capped(0.4, 46);
@@ -116,32 +116,35 @@ internal static class EmailInboxWidgetView
 				{
 					Key = "noInboxesGate",
 					Condition = () => state.Value.Status == EmailInboxWidgetStatus.NoInboxes,
-					Content = () => NoInboxes(icon),
+					Content = () => NoInboxes(icon)
 				},
 				new UiWhen
 				{
 					Key = "readyGate",
 					Condition = () => state.Value.Status == EmailInboxWidgetStatus.Ready,
-					Content = () => settings.IsList ? ListLayout(state, settings) : CountLayout(state, icon),
-				},
-			],
+					Content = () => settings.IsList ? ListLayout(state, settings) : CountLayout(state, icon)
+				}
+			]
 		};
 	}
 
 	private static UiResponsive CountLayout(UiState<EmailInboxWidgetState> state, UiResource icon)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
 			Default = Counter(state, icon),
 			Variants =
 			[
-				new UiResponsiveVariant { MinWidth = 1.5, MaxHeight = 1.5, Content = WideCounter(state, icon) },
-			],
+				new UiResponsiveVariant { MinWidth = 1.5, MaxHeight = 1.5, Content = WideCounter(state, icon) }
+			]
 		};
+	}
 
 	private static UiResponsive ListLayout(UiState<EmailInboxWidgetState> state, EmailInboxWidgetSettings settings)
-		=> new()
+	{
+		return new UiResponsive
 		{
 			Key = "layout",
 			Fill = true,
@@ -149,12 +152,14 @@ internal static class EmailInboxWidgetView
 			Variants =
 			[
 				new UiResponsiveVariant { MinWidth = 1.5, MinHeight = 1.5, Content = Messages(state, settings, _list) },
-				new UiResponsiveVariant { MinWidth = 1.5, Content = Messages(state, settings, _strip) },
-			],
+				new UiResponsiveVariant { MinWidth = 1.5, Content = Messages(state, settings, _strip) }
+			]
 		};
+	}
 
 	private static UiStack Counter(UiState<EmailInboxWidgetState> state, UiResource icon)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "counter",
 			Direction = UiComponentDirections.Vertical,
@@ -166,12 +171,14 @@ internal static class EmailInboxWidgetView
 				MailIcon(UiSize.Capped(0.25, 56), icon),
 				Count("count", state, _countText, UiComponentAlignments.Center),
 				Caption(state, _counterCaptionText, UiComponentAlignments.Center),
-				ProblemGate(state, offline: true),
-			],
+				ProblemGate(state, true)
+			]
 		};
+	}
 
 	private static UiStack WideCounter(UiState<EmailInboxWidgetState> state, UiResource icon)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "counterWide",
 			Direction = UiComponentDirections.Horizontal,
@@ -192,11 +199,12 @@ internal static class EmailInboxWidgetView
 					[
 						Count("count", state, _wideCountText, UiComponentAlignments.Start),
 						Caption(state, _captionText, UiComponentAlignments.Start),
-						ProblemGate(state, offline: true),
-					],
-				},
-			],
+						ProblemGate(state, true)
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Messages(
 		UiState<EmailInboxWidgetState> state,
@@ -225,17 +233,18 @@ internal static class EmailInboxWidgetView
 							Key = "rowItems",
 							Items = UiValue.From(() => PlacedRows(state.Value, style)),
 							KeySelector = placed => placed.Row.Key,
-							Template = (placed, _) => Placed(placed, style, shape),
-						},
-					],
+							Template = (placed, _) => Placed(placed, style, shape)
+						}
+					]
 				},
-				.. ReferenceEquals(style, _list) ? [ProblemGate(state, offline: false)] : Array.Empty<UiElement>(),
-			],
+				.. ReferenceEquals(style, _list) ? [ProblemGate(state, false)] : Array.Empty<UiElement>()
+			]
 		};
 	}
 
 	private static UiStack Header(UiState<EmailInboxWidgetState> state, MessageStyle style)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "header",
 			Direction = UiComponentDirections.Horizontal,
@@ -253,7 +262,7 @@ internal static class EmailInboxWidgetView
 					Role = UiComponentTextRoles.Primary,
 					Color = style.AccentTitle ? UiValue.Of(AccentColor) : UiValue.None<string>(),
 					MaxLines = 1,
-					Fill = true,
+					Fill = true
 				},
 				.. ReferenceEquals(style, _list)
 					? Array.Empty<UiElement>()
@@ -269,21 +278,23 @@ internal static class EmailInboxWidgetView
 								Icon = UiIcons.AlertTriangle,
 								Size = Px(style.Badge * 1.2),
 								MainSize = Px(style.Badge * 1.2),
-								Role = UiComponentTextRoles.Secondary,
-							},
-						},
+								Role = UiComponentTextRoles.Secondary
+							}
+						}
 					],
 				new UiWhen
 				{
 					Key = "badgeGate",
 					Condition = () => state.Value.HasUnread,
-					Content = () => Badge(state, style),
-				},
-			],
+					Content = () => Badge(state, style)
+				}
+			]
 		};
+	}
 
 	private static UiModifier Badge(UiState<EmailInboxWidgetState> state, MessageStyle style)
-		=> new()
+	{
+		return new UiModifier
 		{
 			Key = "badgeFace",
 			Radius = Px(BadgeHeight(style) / 2),
@@ -307,11 +318,12 @@ internal static class EmailInboxWidgetView
 						Color = BadgeTextColor,
 						Align = UiComponentAlignments.Center,
 						MaxLines = 1,
-						Shadow = false,
-					},
-				],
-			},
+						Shadow = false
+					}
+				]
+			}
 		};
+	}
 
 	private static IReadOnlyList<PlacedRow> PlacedRows(EmailInboxWidgetState state, MessageStyle style)
 	{
@@ -342,18 +354,18 @@ internal static class EmailInboxWidgetView
 						{
 							Key = "mark",
 							Fill = true,
-							Default = First(placed, style, shape, "placed", marked: false),
+							Default = First(placed, style, shape, "placed", false),
 							Variants =
 							[
 								new UiResponsiveVariant
 								{
 									MinHeight = markedFrom,
-									Content = First(placed, style, shape, "marked", marked: true),
-								},
-							],
-						},
+									Content = First(placed, style, shape, "marked", true)
+								}
+							]
+						}
 					]
-					: [Row(placed.Row, style, shape, marked)],
+					: [Row(placed.Row, style, shape, marked)]
 			};
 		}
 
@@ -377,32 +389,34 @@ internal static class EmailInboxWidgetView
 								new UiResponsiveVariant
 								{
 									MinHeight = markedFrom,
-									Content = Following(placed, style, shape, "marked", marked: true),
-								},
+									Content = Following(placed, style, shape, "marked", true)
+								}
 							]
 							: Array.Empty<UiResponsiveVariant>(),
 						new UiResponsiveVariant
 						{
 							MinHeight = shape.Needs(placed.Index) / UiLength.Cell,
-							Content = Following(placed, style, shape, "placed", marked),
-						},
-					],
-				},
-			],
+							Content = Following(placed, style, shape, "placed", marked)
+						}
+					]
+				}
+			]
 		};
 	}
 
 	private static UiStack First(PlacedRow placed, MessageStyle style, RowShape shape, string key, bool marked)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
-			Children = [Row(placed.Row, style, shape, marked)],
+			Children = [Row(placed.Row, style, shape, marked)]
 		};
+	}
 
 	private static UiStack Following(PlacedRow placed, MessageStyle style, RowShape shape, string key, bool marked)
 	{
-		var separator = (2 * style.SeparatorGap) + Hairline;
+		var separator = 2 * style.SeparatorGap + Hairline;
 
 		return new UiStack
 		{
@@ -413,21 +427,22 @@ internal static class EmailInboxWidgetView
 				new UiStack
 				{
 					Key = "offset",
-					MainSize = Px((placed.Index * shape.Pitch) - separator),
+					MainSize = Px(placed.Index * shape.Pitch - separator)
 				},
 				Separator(style, marked),
-				Row(placed.Row, style, shape, marked),
-			],
+				Row(placed.Row, style, shape, marked)
+			]
 		};
 	}
 
 	private static UiStack Separator(MessageStyle style, bool marked)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "separator",
 			Direction = UiComponentDirections.Vertical,
 			Justify = UiComponentJustify.Center,
-			MainSize = Px((2 * style.SeparatorGap) + Hairline),
+			MainSize = Px(2 * style.SeparatorGap + Hairline),
 			Children =
 			[
 				new UiStack
@@ -444,12 +459,13 @@ internal static class EmailInboxWidgetView
 						{
 							Key = "lineFace",
 							Background = SeparatorColor,
-							Child = new UiStack { Key = "line", Fill = true },
-						},
-					],
-				},
-			],
+							Child = new UiStack { Key = "line", Fill = true }
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Row(EmailInboxRow row, MessageStyle style, RowShape shape, bool marked)
 	{
@@ -469,11 +485,11 @@ internal static class EmailInboxWidgetView
 								Key = "dot",
 								Shape = UiComponentShapes.Circle,
 								Color = AccentColor,
-								MainSize = Px(shape.Lead),
-							},
+								MainSize = Px(shape.Lead)
+							}
 						]
-						: [],
-				},
+						: []
+				}
 			]
 			: [];
 
@@ -486,7 +502,7 @@ internal static class EmailInboxWidgetView
 			Gap = Px(style.DotGap),
 			Children = style.SingleLine
 				? [.. lead, .. SingleLine(row, style)]
-				: [.. lead, Lines(row, style, shape)],
+				: [.. lead, Lines(row, style, shape)]
 		};
 	}
 
@@ -506,7 +522,7 @@ internal static class EmailInboxWidgetView
 				Size = Px(style.Subject),
 				Role = UiComponentTextRoles.Secondary,
 				MaxLines = 1,
-				Fill = true,
+				Fill = true
 			};
 		}
 
@@ -545,7 +561,7 @@ internal static class EmailInboxWidgetView
 				Align = UiComponentAlignments.End,
 				MainSize = Px(shape.FirstLine),
 				Gap = Px(style.DotGap),
-				Children = firstLine,
+				Children = firstLine
 			});
 		}
 
@@ -558,7 +574,7 @@ internal static class EmailInboxWidgetView
 				Size = Px(style.Subject),
 				Role = UiComponentTextRoles.Primary,
 				MaxLines = shape.SubjectLines,
-				Wrap = shape.SubjectLines > 1,
+				Wrap = shape.SubjectLines > 1
 			});
 		}
 
@@ -571,7 +587,7 @@ internal static class EmailInboxWidgetView
 				Size = Px(style.Preview),
 				Role = UiComponentTextRoles.Secondary,
 				MaxLines = style.PreviewLines,
-				Wrap = style.PreviewLines > 1,
+				Wrap = style.PreviewLines > 1
 			});
 		}
 
@@ -581,12 +597,13 @@ internal static class EmailInboxWidgetView
 			Direction = UiComponentDirections.Vertical,
 			Fill = true,
 			Gap = Px(style.LineGap),
-			Children = lines,
+			Children = lines
 		};
 	}
 
 	private static UiTextRun Title(EmailInboxRow row, MessageStyle style)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = "title",
 			Text = row.Title,
@@ -594,12 +611,14 @@ internal static class EmailInboxWidgetView
 			Weight = row.IsUnread ? UiComponentTextWeights.Bold : UiComponentTextWeights.Regular,
 			Role = UiComponentTextRoles.Primary,
 			MaxLines = 1,
-			Fill = true,
+			Fill = true
 		};
+	}
 
 	// The reserved digits are the time's floor: the sender beside it gives way, the time never ellipsizes.
 	private static UiTextRun Time(EmailInboxRow row, MessageStyle style)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = "time",
 			Text = row.Time.Text,
@@ -607,14 +626,18 @@ internal static class EmailInboxWidgetView
 			Role = UiComponentTextRoles.Secondary,
 			Align = UiComponentAlignments.End,
 			MaxLines = 1,
-			Digits = row.Time.Digits,
+			Digits = row.Time.Digits
 		};
+	}
 
 	private static UiImage MailIcon(UiSize size, UiResource icon)
-		=> new() { Key = "icon", Source = icon, Size = size, Tint = AccentColor };
+	{
+		return new UiImage { Key = "icon", Source = icon, Size = size, Tint = AccentColor };
+	}
 
 	private static UiTextRun Count(string key, UiState<EmailInboxWidgetState> state, UiLength size, string align)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = UiText.Optional(() => state.Value.Count),
@@ -622,11 +645,13 @@ internal static class EmailInboxWidgetView
 			Weight = UiComponentTextWeights.Bold,
 			Role = UiComponentTextRoles.Primary,
 			Align = align,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 
 	private static UiTextRun Caption(UiState<EmailInboxWidgetState> state, UiLength size, string align)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = "caption",
 			Text = UiText.Optional(() => state.Value.Title),
@@ -634,11 +659,13 @@ internal static class EmailInboxWidgetView
 			Weight = UiComponentTextWeights.Medium,
 			Role = UiComponentTextRoles.Secondary,
 			Align = align,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 
 	private static UiWhen EmptyGate(UiState<EmailInboxWidgetState> state, MessageStyle style)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = "emptyGate",
 			Condition = () => state.Value.ShowsEmpty,
@@ -657,14 +684,16 @@ internal static class EmailInboxWidgetView
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center,
 						Wrap = true,
-						MaxLines = 2,
-					},
-				],
-			},
+						MaxLines = 2
+					}
+				]
+			}
 		};
+	}
 
 	private static UiWhen ProblemGate(UiState<EmailInboxWidgetState> state, bool offline)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = "problemGate",
 			Condition = () => state.Value.HasProblem,
@@ -683,7 +712,7 @@ internal static class EmailInboxWidgetView
 						Icon = UiIcons.AlertTriangle,
 						Size = _detailText,
 						MainSize = _detailText,
-						Role = UiComponentTextRoles.Secondary,
+						Role = UiComponentTextRoles.Secondary
 					},
 					new UiTextRun
 					{
@@ -693,14 +722,16 @@ internal static class EmailInboxWidgetView
 						Role = UiComponentTextRoles.Secondary,
 						MaxLines = offline ? 1 : 2,
 						Wrap = !offline,
-						Fill = !offline,
-					},
-				],
-			},
+						Fill = !offline
+					}
+				]
+			}
 		};
+	}
 
 	private static UiStack NoInboxes(UiResource icon)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "noInboxes",
 			Direction = UiComponentDirections.Vertical,
@@ -720,21 +751,33 @@ internal static class EmailInboxWidgetView
 					Role = UiComponentTextRoles.Secondary,
 					Align = UiComponentAlignments.Center,
 					Wrap = true,
-					MaxLines = 3,
-				},
-			],
+					MaxLines = 3
+				}
+			]
 		};
+	}
 
-	private static UiLength Px(double px) => UiLength.Capped(px / FullSizeBasis, px);
+	private static UiLength Px(double px)
+	{
+		return UiLength.Capped(px / FullSizeBasis, px);
+	}
 
-	private static double BadgeHeight(MessageStyle style) => style.Badge * 1.55;
+	private static double BadgeHeight(MessageStyle style)
+	{
+		return style.Badge * 1.55;
+	}
 
 	private static double BadgeWidth(MessageStyle style, int characters)
-		=> Math.Max(BadgeHeight(style), (style.Badge * 0.62 * Math.Max(1, characters)) + style.Badge);
+	{
+		return Math.Max(BadgeHeight(style), style.Badge * 0.62 * Math.Max(1, characters) + style.Badge);
+	}
 
 	private static int BadgeCharacters(int unread)
-		=> unread > MaxBadgeCount ? MaxBadgeCount.ToString(System.Globalization.CultureInfo.InvariantCulture).Length + 1
+	{
+		return unread > MaxBadgeCount
+			? MaxBadgeCount.ToString(System.Globalization.CultureInfo.InvariantCulture).Length + 1
 			: Math.Max(1, unread).ToString(System.Globalization.CultureInfo.InvariantCulture).Length;
+	}
 
 	private sealed record PlacedRow(EmailInboxRow Row, int Index, int FirstUnread);
 
@@ -770,7 +813,7 @@ internal static class EmailInboxWidgetView
 			if (style.SingleLine)
 			{
 				var line = Math.Max(firstLine, style.Subject);
-				return new RowShape(line, line, line, line + (2 * style.SeparatorGap) + Hairline, 1);
+				return new RowShape(line, line, line, line + 2 * style.SeparatorGap + Hairline, 1);
 			}
 
 			var parts = new List<double>();
@@ -790,7 +833,7 @@ internal static class EmailInboxWidgetView
 				parts.Add(style.Preview * style.PreviewLines);
 			}
 
-			var height = parts.Sum() + (Math.Max(0, parts.Count - 1) * style.LineGap);
+			var height = parts.Sum() + Math.Max(0, parts.Count - 1) * style.LineGap;
 			var lead = firstLine > 0 ? firstLine : style.Preview;
 
 			var rowHeight = Math.Max(height, lead);
@@ -798,13 +841,18 @@ internal static class EmailInboxWidgetView
 			return new RowShape(firstLine,
 				lead,
 				rowHeight,
-				rowHeight + (2 * style.SeparatorGap) + Hairline,
+				rowHeight + 2 * style.SeparatorGap + Hairline,
 				LinesOfSubject(settings, style));
 		}
 
 		public static int LinesOfSubject(EmailInboxWidgetSettings settings, MessageStyle style)
-			=> settings.ShowPreview ? style.SubjectLines : style.SubjectLinesAlone;
+		{
+			return settings.ShowPreview ? style.SubjectLines : style.SubjectLinesAlone;
+		}
 
-		public double Needs(int index) => (index * Pitch) + Height - FitSlack;
+		public double Needs(int index)
+		{
+			return index * Pitch + Height - FitSlack;
+		}
 	}
 }

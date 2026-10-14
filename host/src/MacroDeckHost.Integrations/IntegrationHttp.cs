@@ -32,7 +32,7 @@ internal static class IntegrationHttp
 		Action<SocketsHttpHandler>? configure = null,
 		IHostHttp? source = null)
 	{
-		var client = new HttpClient(CreateHandler(configure, source), disposeHandler: true);
+		var client = new HttpClient(CreateHandler(configure, source), true);
 		if (timeout is { } value)
 		{
 			client.Timeout = value;
@@ -62,7 +62,8 @@ internal static class IntegrationHttp
 
 	private sealed class UserAgentHandler(IHostHttp source, HttpMessageHandler inner) : DelegatingHandler(inner)
 	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			if (request.Headers.UserAgent.Count == 0)

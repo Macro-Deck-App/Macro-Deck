@@ -23,7 +23,10 @@ internal sealed class PluginArtifactCacheTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	private PluginArtifactCache CreateCache(long cacheBudgetBytes = 512L * 1024 * 1024)
 	{
@@ -38,7 +41,10 @@ internal sealed class PluginArtifactCacheTests
 		return path;
 	}
 
-	private static string HexOf(byte[] content) => Convert.ToHexStringLower(SHA256.HashData(content));
+	private static string HexOf(byte[] content)
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(content));
+	}
 
 	[Test]
 	public async Task A_put_artifact_is_retrievable_and_the_returned_file_really_hashes_to_the_key()
@@ -125,7 +131,7 @@ internal sealed class PluginArtifactCacheTests
 		var orphanHex = HexOf("orphan"u8.ToArray());
 		var orphanPath = Path.Combine(_paths.PluginCacheDirectory,
 			orphanHex + PluginArtifactFiles.MacroDeckPluginExtension);
-		File.WriteAllText(orphanPath, "orphan");
+		await File.WriteAllTextAsync(orphanPath, "orphan");
 
 		cache.Prune();
 

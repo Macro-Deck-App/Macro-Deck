@@ -52,8 +52,8 @@ public sealed class InertIntegrationAttributeAnalyzer : DiagnosticAnalyzer
 				{
 					var type = (INamedTypeSymbol)symbolContext.Symbol;
 
-					if (type.TypeKind is not (TypeKind.Class or TypeKind.Struct) ||
-						!type.ImplementsInterface(pluginIntegrationType))
+					if (type.TypeKind is not (TypeKind.Class or TypeKind.Struct)
+						|| !type.ImplementsInterface(pluginIntegrationType))
 					{
 						return;
 					}
@@ -67,8 +67,8 @@ public sealed class InertIntegrationAttributeAnalyzer : DiagnosticAnalyzer
 						return;
 					}
 
-					var location = attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() ??
-						type.Locations.FirstOrDefault();
+					var location = attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation()
+						?? type.Locations.FirstOrDefault();
 
 					symbolContext.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.InertIntegrationAttribute,
 						location,

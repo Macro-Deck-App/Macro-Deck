@@ -53,9 +53,9 @@ internal sealed class StartupServiceLifetimeTests
 
 		foreach (var descriptor in services)
 		{
-			if (descriptor.Lifetime != ServiceLifetime.Singleton ||
-				descriptor.ImplementationType is not { } implementation ||
-				!IsOurs(implementation))
+			if (descriptor.Lifetime != ServiceLifetime.Singleton
+				|| descriptor.ImplementationType is not { } implementation
+				|| !IsOurs(implementation))
 			{
 				continue;
 			}
@@ -85,11 +85,15 @@ internal sealed class StartupServiceLifetimeTests
 	}
 
 	private static bool IsOurs(Type type)
-		=> type.Namespace?.StartsWith("MacroDeckHost", StringComparison.Ordinal) == true;
+	{
+		return type.Namespace?.StartsWith("MacroDeckHost", StringComparison.Ordinal) == true;
+	}
 
 	private static IEnumerable<Type> ConstructorParameters(Type implementation)
-		=> implementation
+	{
+		return implementation
 			.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
 			.SelectMany(constructor => constructor.GetParameters())
 			.Select(parameter => parameter.ParameterType);
+	}
 }

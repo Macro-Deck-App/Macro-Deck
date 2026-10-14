@@ -13,7 +13,10 @@ namespace MacroDeck.Ui.Model.Tests.UnitTests.Serialization;
 [TestFixture]
 public class CanonicalFormTests
 {
-	private static JsonElement Element(string json) => JsonDocument.Parse(json).RootElement.Clone();
+	private static JsonElement Element(string json)
+	{
+		return JsonDocument.Parse(json).RootElement.Clone();
+	}
 
 	[Test]
 	public void Property_map_keys_are_ordered_ordinal_ascending_regardless_of_insertion_order()
@@ -21,7 +24,7 @@ public class CanonicalFormTests
 		var properties = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			["b"] = Element("1"), ["A"] = Element("2"), ["a"] = Element("3"), ["B"] = Element("4"),
-			["_x"] = Element("5"), ["10"] = Element("6"), ["2"] = Element("7"),
+			["_x"] = Element("5"), ["10"] = Element("6"), ["2"] = Element("7")
 		};
 		var node = new UiNode { Id = "root", Type = "t", Properties = properties };
 
@@ -35,11 +38,11 @@ public class CanonicalFormTests
 	{
 		var first = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			["b"] = Element("1"), ["a"] = Element("2"),
+			["b"] = Element("1"), ["a"] = Element("2")
 		};
 		var second = new SortedDictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			["a"] = Element("2"), ["b"] = Element("1"),
+			["a"] = Element("2"), ["b"] = Element("1")
 		};
 
 		var nodeA = new UiNode { Id = "root", Type = "t", Properties = first };
@@ -58,8 +61,8 @@ public class CanonicalFormTests
 			Children =
 			[
 				new UiNode { Id = "z", Type = "t" }, new UiNode { Id = "a", Type = "t" },
-				new UiNode { Id = "m", Type = "t" },
-			],
+				new UiNode { Id = "m", Type = "t" }
+			]
 		};
 
 		var deserialized
@@ -75,7 +78,7 @@ public class CanonicalFormTests
 		var properties = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			["a"] = Element("1.50"), ["b"] = Element("1e3"), ["c"] = Element("-0.0"),
-			["d"] = Element("1.0"), ["e"] = Element("10000000000000000000000"),
+			["d"] = Element("1.0"), ["e"] = Element("10000000000000000000000")
 		};
 		var node = new UiNode { Id = "root", Type = "t", Properties = properties };
 
@@ -90,23 +93,23 @@ public class CanonicalFormTests
 		var spelledOneFifty = new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["n"] = Element("1.50") },
+			Properties = new Dictionary<string, JsonElement> { ["n"] = Element("1.50") }
 		};
 		var spelledOneFive = new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["n"] = Element("1.5") },
+			Properties = new Dictionary<string, JsonElement> { ["n"] = Element("1.5") }
 		};
 
 		var xThenY = new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["v"] = Element("""{"x":1,"y":2}""") },
+			Properties = new Dictionary<string, JsonElement> { ["v"] = Element("""{"x":1,"y":2}""") }
 		};
 		var yThenX = new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["v"] = Element("""{"y":2,"x":1}""") },
+			Properties = new Dictionary<string, JsonElement> { ["v"] = Element("""{"y":2,"x":1}""") }
 		};
 
 		Assert.Multiple(() =>
@@ -125,8 +128,8 @@ public class CanonicalFormTests
 			Id = "root", Type = "t",
 			Properties = new Dictionary<string, JsonElement>
 			{
-				["text"] = Element("\"<>&'+`é😀\""),
-			},
+				["text"] = Element("\"<>&'+`é😀\"")
+			}
 		};
 
 		var json = UiCanonicalJson.Serialize(node);
@@ -156,7 +159,10 @@ public class CanonicalFormTests
 	}
 
 	[Test]
-	public void Canonical_options_are_read_only() => Assert.That(UiCanonicalJson.Options.IsReadOnly, Is.True);
+	public void Canonical_options_are_read_only()
+	{
+		Assert.That(UiCanonicalJson.Options.IsReadOnly, Is.True);
+	}
 
 	[Test]
 	public void Serialize_and_SerializeToUtf8Bytes_agree()
@@ -183,7 +189,7 @@ public class CanonicalFormTests
 		var outer = new UiNode
 		{
 			Id = "outer", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["child"] = UiCanonicalJson.ToElement(inner) },
+			Properties = new Dictionary<string, JsonElement> { ["child"] = UiCanonicalJson.ToElement(inner) }
 		};
 
 		var outerJson = UiCanonicalJson.Serialize(outer);
@@ -221,7 +227,7 @@ public class CanonicalFormTests
 		var node = new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["text"] = Element("\"has spaces  and\\ttabs\"") },
+			Properties = new Dictionary<string, JsonElement> { ["text"] = Element("\"has spaces  and\\ttabs\"") }
 		};
 
 		var json = UiCanonicalJson.Serialize(node);
@@ -236,12 +242,12 @@ public class CanonicalFormTests
 		yield return new UiNode
 		{
 			Id = "root", Type = "t",
-			Properties = new Dictionary<string, JsonElement> { ["a"] = Element("1") },
+			Properties = new Dictionary<string, JsonElement> { ["a"] = Element("1") }
 		};
 		yield return new UiNode
 		{
 			Id = "root", Type = "t",
-			Children = [new UiNode { Id = "child", Type = "t" }],
+			Children = [new UiNode { Id = "child", Type = "t" }]
 		};
 	}
 

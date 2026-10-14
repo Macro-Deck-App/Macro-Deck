@@ -14,12 +14,12 @@ namespace MacroDeckHost.Tests.UnitTests;
 
 public class RunActionFlowRequestMessageHandlerTests
 {
-	private const string _flows = """
-								  [
-								    { "triggerId": "t1", "triggerType": "onShortPress", "children": [] },
-								    { "triggerId": "event-a", "triggerType": "onEvent", "children": [] }
-								  ]
-								  """;
+	private const string Flows = """
+								 [
+								   { "triggerId": "t1", "triggerType": "onShortPress", "children": [] },
+								   { "triggerId": "event-a", "triggerType": "onEvent", "children": [] }
+								 ]
+								 """;
 
 	private RecordingFlowExecutor _executor = null!;
 	private RunActionFlowRequestMessageHandler _handler = null!;
@@ -77,14 +77,16 @@ public class RunActionFlowRequestMessageHandlerTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)
@@ -97,7 +99,7 @@ public class RunActionFlowRequestMessageHandlerTests
 	{
 		var response = await _handler.Handle(new RunActionFlowRequest
 			{
-				Flows = _flows,
+				Flows = Flows,
 				TriggerId = "t1",
 				Scope = "actionButton",
 				ScopeRefId = "widget-1",
@@ -120,24 +122,24 @@ public class RunActionFlowRequestMessageHandlerTests
 	[Test]
 	public async Task Wraps_the_flow_array_in_the_envelope_the_executor_reads()
 	{
-		await _handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		await _handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 			CancellationToken.None);
 
 		Assert.That(WidgetFlowsJson.TryExtract(_executor.Request?.FlowsSource, out var extracted), Is.True);
-		Assert.That(extracted, Is.EqualTo(_flows));
+		Assert.That(extracted, Is.EqualTo(Flows));
 	}
 
 	[Test]
 	public async Task Defaults_to_the_global_scope()
 	{
-		await _handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		await _handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 			CancellationToken.None);
 
 		Assert.That(_executor.Request?.Scope, Is.EqualTo(VariableScope.Global));
 	}
 
 	[TestCase("", "t1", TestName = "Missing_flows_are_rejected")]
-	[TestCase(_flows, "", TestName = "Missing_trigger_id_is_rejected")]
+	[TestCase(Flows, "", TestName = "Missing_trigger_id_is_rejected")]
 	public async Task Incomplete_requests_are_rejected(string flows, string triggerId)
 	{
 		var response = await _handler.Handle(new RunActionFlowRequest { Flows = flows, TriggerId = triggerId },
@@ -156,7 +158,7 @@ public class RunActionFlowRequestMessageHandlerTests
 	{
 		var response = await _handler.Handle(new RunActionFlowRequest
 			{
-				Flows = _flows,
+				Flows = Flows,
 				TriggerId = "t1",
 				Scope = "somethingElse"
 			},
@@ -175,7 +177,7 @@ public class RunActionFlowRequestMessageHandlerTests
 	{
 		_executor.Throw = new InvalidOperationException("boom");
 
-		var response = await _handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		var response = await _handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -209,7 +211,7 @@ public class RunActionFlowRequestMessageHandlerTests
 			]
 		};
 
-		var response = await handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		var response = await handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -229,7 +231,7 @@ public class RunActionFlowRequestMessageHandlerTests
 		_executor.WaitForTimeout = true;
 		aborted.Cancel();
 
-		Assert.That(async () => await handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		Assert.That(async () => await handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 				aborted.Token),
 			Throws.InstanceOf<OperationCanceledException>());
 	}
@@ -244,7 +246,7 @@ public class RunActionFlowRequestMessageHandlerTests
 			MatchedFlows = 0
 		};
 
-		var response = await _handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "does-not-exist" },
+		var response = await _handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "does-not-exist" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -272,7 +274,7 @@ public class RunActionFlowRequestMessageHandlerTests
 			ErrorMessage = "It broke."
 		};
 
-		var response = await _handler.Handle(new RunActionFlowRequest { Flows = _flows, TriggerId = "t1" },
+		var response = await _handler.Handle(new RunActionFlowRequest { Flows = Flows, TriggerId = "t1" },
 			CancellationToken.None);
 
 		Assert.Multiple(() =>
@@ -313,8 +315,8 @@ public class RunActionFlowRequestMessageHandlerTests
 					await completion.Task;
 				}
 
-				return Result ??
-					new FlowExecutionResult
+				return Result
+					?? new FlowExecutionResult
 					{
 						ExecutionId = request.ExecutionId,
 						Status = FlowExecutionStatus.Cancelled,
@@ -322,8 +324,8 @@ public class RunActionFlowRequestMessageHandlerTests
 					};
 			}
 
-			return Result ??
-				new FlowExecutionResult
+			return Result
+				?? new FlowExecutionResult
 				{
 					ExecutionId = request.ExecutionId,
 					Status = FlowExecutionStatus.Succeeded,

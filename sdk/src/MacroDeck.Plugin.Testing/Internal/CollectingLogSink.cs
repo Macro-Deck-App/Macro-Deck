@@ -35,22 +35,27 @@ internal sealed class CollectingLogSink(PluginLogCollector logs, TimeProvider cl
 		});
 	}
 
-	private static string MapLevel(LogEventLevel level) => level switch
+	private static string MapLevel(LogEventLevel level)
 	{
-		LogEventLevel.Verbose => LogLevels.Verbose,
-		LogEventLevel.Debug => LogLevels.Debug,
-		LogEventLevel.Information => LogLevels.Information,
-		LogEventLevel.Warning => LogLevels.Warning,
-		LogEventLevel.Error => LogLevels.Error,
-		LogEventLevel.Fatal => LogLevels.Fatal,
-		_ => LogLevels.Information
-	};
+		return level switch
+		{
+			LogEventLevel.Verbose => LogLevels.Verbose,
+			LogEventLevel.Debug => LogLevels.Debug,
+			LogEventLevel.Information => LogLevels.Information,
+			LogEventLevel.Warning => LogLevels.Warning,
+			LogEventLevel.Error => LogLevels.Error,
+			LogEventLevel.Fatal => LogLevels.Fatal,
+			_ => LogLevels.Information
+		};
+	}
 
 	private static string? SourceContextOf(LogEvent logEvent)
-		=> logEvent.Properties.TryGetValue(SourceContextPropertyName, out var value) &&
-			value is ScalarValue { Value: string text }
+	{
+		return logEvent.Properties.TryGetValue(SourceContextPropertyName, out var value)
+			&& value is ScalarValue { Value: string text }
 				? text
 				: null;
+	}
 
 	private static Dictionary<string, string> BuildProperties(LogEvent logEvent)
 	{
@@ -71,20 +76,24 @@ internal sealed class CollectingLogSink(PluginLogCollector logs, TimeProvider cl
 	}
 
 	private static string Render(LogEventPropertyValue value)
-		=> value switch
+	{
+		return value switch
 		{
 			ScalarValue { Value: null } => string.Empty,
 			ScalarValue { Value: IFormattable formattable } => formattable.ToString(null, CultureInfo.InvariantCulture),
 			ScalarValue scalar => scalar.Value?.ToString() ?? string.Empty,
 			_ => value.ToString()
 		};
+	}
 
 	private static LogExceptionDto BuildException(Exception exception)
-		=> new()
+	{
+		return new LogExceptionDto
 		{
 			Type = exception.GetType().FullName ?? exception.GetType().Name,
 			Message = exception.Message,
 			StackTrace = exception.StackTrace,
 			Inner = exception.InnerException is null ? null : BuildException(exception.InnerException)
 		};
+	}
 }

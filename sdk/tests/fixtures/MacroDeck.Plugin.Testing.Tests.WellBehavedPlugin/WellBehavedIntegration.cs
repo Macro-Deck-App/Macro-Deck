@@ -144,7 +144,7 @@ public sealed class WellBehavedIntegration : IPluginIntegration, IVariableProvid
 	public IReadOnlyList<VariableDefinition> Variables { get; } =
 	[
 		VariableDefinition.Eager("sample_location", VariableType.Text) with { Id = "location" },
-		VariableDefinition.Eager("sample_temperature_celsius", VariableType.Numeric, decimalPlaces: 1) with
+		VariableDefinition.Eager("sample_temperature_celsius", VariableType.Numeric, 1) with
 		{
 			Id = "temperature-celsius"
 		},
@@ -152,23 +152,25 @@ public sealed class WellBehavedIntegration : IPluginIntegration, IVariableProvid
 		// The writable one: a client may offer a control for this variable because the definition says so,
 		// and the range a control needs travels with the reading rather than the declaration, because a
 		// provider's bounds can move while its definition does not.
-		VariableDefinition.Eager("sample_alert_threshold_celsius", VariableType.Numeric, decimalPlaces: 0) with
+		VariableDefinition.Eager("sample_alert_threshold_celsius", VariableType.Numeric, 0) with
 		{
 			Id = AlertThresholdVariableId, Unit = "°C", Write = new VariableWriteCapability()
 		}
 	];
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(localId switch
+	{
+		return ValueTask.FromResult(localId switch
 		{
 			"location" => VariableReading.Of(LocationName),
 			"temperature-celsius" => VariableReading.Of(Station.LastSnapshot.Temperature),
 			AlertThresholdVariableId => VariableReading.Of(AlertThresholdCelsius,
 				AlertThresholdMin,
 				AlertThresholdMax,
-				step: 1),
+				1),
 			_ => VariableReading.Unavailable
 		});
+	}
 
 	public ValueTask<VariableWriteResult> SetValueAsync(
 		string localId,
@@ -219,26 +221,35 @@ public sealed class WellBehavedIntegration : IPluginIntegration, IVariableProvid
 	/// a normally driven plugin process ever does.
 	/// </summary>
 	internal void PublishWeatherRefreshed(WeatherSnapshot snapshot, bool isAlert)
-		=> _context?.Events.Publish(WeatherRefreshedEventId,
+	{
+		_context?.Events.Publish(WeatherRefreshedEventId,
 			new Dictionary<string, object?>
 			{
 				["temperatureCelsius"] = snapshot.Temperature,
 				["condition"] = snapshot.Condition.ToString(),
 				["isAlert"] = isAlert
 			});
+	}
 
 	// ----- IUiConfigFlowProvider (extends IConfigFlowProvider): ServesConfigUiTree defaults to true, so
 	// declaring the interface is the whole opt-in - the flow itself is what renders the tree. -----
 
-	public IConfigFlow CreateConfigFlow() => new WellBehavedConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new WellBehavedConfigFlow();
+	}
 
 	public bool AllowsMultipleConfigurations => false;
 
 	// ----- IWeatherProvider: the provider capability, deliberately the synchronous-snapshot kind. -----
 
-	public IReadOnlyList<WeatherStationInstance> GetInstances() =>
-		[new(StationId, LocationName)];
+	public IReadOnlyList<WeatherStationInstance> GetInstances()
+	{
+		return [new WeatherStationInstance(StationId, LocationName)];
+	}
 
 	public IWeatherStation? GetStation(string instanceId)
-		=> string.Equals(instanceId, StationId, StringComparison.Ordinal) ? Station : null;
+	{
+		return string.Equals(instanceId, StationId, StringComparison.Ordinal) ? Station : null;
+	}
 }

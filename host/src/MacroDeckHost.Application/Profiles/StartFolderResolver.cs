@@ -5,7 +5,9 @@ namespace MacroDeckHost.Application.Profiles;
 public static class StartFolderResolver
 {
 	public static Folder? Resolve(IProfileRegistry profiles, string profileId)
-		=> SelectStartFolder(profiles.GetFoldersForProfile(profileId));
+	{
+		return SelectStartFolder(profiles.GetFoldersForProfile(profileId));
+	}
 
 	public static Folder? SelectStartFolder(IReadOnlyList<Folder> folders)
 	{

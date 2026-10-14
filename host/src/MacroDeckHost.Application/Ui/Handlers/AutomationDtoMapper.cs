@@ -7,26 +7,35 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 
 public static class AutomationDtoMapper
 {
-	public static Automation ToDto(AutomationEntity automation) => new()
+	public static Automation ToDto(AutomationEntity automation)
 	{
-		Id = automation.Id.ToString(),
-		Name = automation.Name,
-		Description = automation.Description,
-		Enabled = automation.Enabled,
-		Flows = automation.Flows,
-		CreatedAt = automation.CreatedAt,
-		UpdatedAt = automation.UpdatedAt
-	};
+		return new Automation
+		{
+			Id = automation.Id.ToString(),
+			Name = automation.Name,
+			Description = automation.Description,
+			Enabled = automation.Enabled,
+			Flows = automation.Flows,
+			CreatedAt = automation.CreatedAt,
+			UpdatedAt = automation.UpdatedAt
+		};
+	}
 
-	public static TransportError ToError(AutomationError error, string? message) => new()
+	public static TransportError ToError(AutomationError error, string? message)
 	{
-		Code = error.ToString(),
-		Message = message ?? string.Empty
-	};
+		return new TransportError
+		{
+			Code = error.ToString(),
+			Message = message ?? string.Empty
+		};
+	}
 
-	public static TransportError InvalidId() => new()
+	public static TransportError InvalidId()
 	{
-		Code = nameof(AutomationError.ValidationError),
-		Message = "Invalid automation id"
-	};
+		return new TransportError
+		{
+			Code = nameof(AutomationError.ValidationError),
+			Message = "Invalid automation id"
+		};
+	}
 }

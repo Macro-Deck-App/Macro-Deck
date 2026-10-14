@@ -22,13 +22,16 @@ internal sealed record VoicemeeterLayout(int Strips, int PhysicalStrips, int Bus
 
 	public bool HasRecorder => Buses > _standard.Buses;
 
-	public static VoicemeeterLayout For(VoicemeeterEdition edition) => edition switch
+	public static VoicemeeterLayout For(VoicemeeterEdition edition)
 	{
-		VoicemeeterEdition.Standard => _standard,
-		VoicemeeterEdition.Banana => _banana,
-		VoicemeeterEdition.Potato => _potato,
-		_ => None
-	};
+		return edition switch
+		{
+			VoicemeeterEdition.Standard => _standard,
+			VoicemeeterEdition.Banana => _banana,
+			VoicemeeterEdition.Potato => _potato,
+			_ => None
+		};
+	}
 
 	public IReadOnlyList<string> BusAssignmentNames()
 	{
@@ -59,27 +62,36 @@ internal sealed record VoicemeeterLayout(int Strips, int PhysicalStrips, int Bus
 
 internal static class VoicemeeterEditions
 {
-	public static VoicemeeterEdition FromRawType(int rawType) => rawType switch
+	public static VoicemeeterEdition FromRawType(int rawType)
 	{
-		1 => VoicemeeterEdition.Standard,
-		2 => VoicemeeterEdition.Banana,
-		3 => VoicemeeterEdition.Potato,
-		_ => VoicemeeterEdition.None
-	};
+		return rawType switch
+		{
+			1 => VoicemeeterEdition.Standard,
+			2 => VoicemeeterEdition.Banana,
+			3 => VoicemeeterEdition.Potato,
+			_ => VoicemeeterEdition.None
+		};
+	}
 
-	public static string DisplayName(VoicemeeterEdition edition) => edition switch
+	public static string DisplayName(VoicemeeterEdition edition)
 	{
-		VoicemeeterEdition.Standard => "Voicemeeter",
-		VoicemeeterEdition.Banana => "Voicemeeter Banana",
-		VoicemeeterEdition.Potato => "Voicemeeter Potato",
-		_ => "Unknown"
-	};
+		return edition switch
+		{
+			VoicemeeterEdition.Standard => "Voicemeeter",
+			VoicemeeterEdition.Banana => "Voicemeeter Banana",
+			VoicemeeterEdition.Potato => "Voicemeeter Potato",
+			_ => "Unknown"
+		};
+	}
 
-	public static int ToRunType(VoicemeeterEdition edition) => edition switch
+	public static int ToRunType(VoicemeeterEdition edition)
 	{
-		VoicemeeterEdition.Standard => 1,
-		VoicemeeterEdition.Banana => 2,
-		VoicemeeterEdition.Potato => Environment.Is64BitProcess ? 6 : 3,
-		_ => 0
-	};
+		return edition switch
+		{
+			VoicemeeterEdition.Standard => 1,
+			VoicemeeterEdition.Banana => 2,
+			VoicemeeterEdition.Potato => Environment.Is64BitProcess ? 6 : 3,
+			_ => 0
+		};
+	}
 }

@@ -34,10 +34,10 @@ public sealed class RemoteDeviceProviderRegistry : IDisposable
 
 	public IDeviceSurfaceProvider? Resolve(string providerId)
 	{
-		if (_sessions.GetCapabilities(providerId) is not { } capabilities ||
-			!capabilities.Capabilities.TryGetValue(CapabilityKinds.DeviceProvider, out var negotiated) ||
-			!negotiated.Accepted ||
-			negotiated.NegotiatedVersion is not >= SessionsMinimumVersion)
+		if (_sessions.GetCapabilities(providerId) is not { } capabilities
+			|| !capabilities.Capabilities.TryGetValue(CapabilityKinds.DeviceProvider, out var negotiated)
+			|| !negotiated.Accepted
+			|| negotiated.NegotiatedVersion is not >= SessionsMinimumVersion)
 		{
 			return null;
 		}
@@ -47,11 +47,16 @@ public sealed class RemoteDeviceProviderRegistry : IDisposable
 			(Invoker: _invoker, Sessions: _deviceSessions));
 	}
 
-	public void Dispose() => _sessions.SessionEnded -= OnSessionEnded;
+	public void Dispose()
+	{
+		_sessions.SessionEnded -= OnSessionEnded;
+	}
 
 	// An adapter caches the session ids it opened, and a reconnect negotiates its capability versions
 	// afresh - an entry that outlived the session would keep addressing sessions the plugin has forgotten
 	// and would keep whatever version the previous session happened to accept.
-	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e) =>
+	private void OnSessionEnded(object? sender, PluginSessionEndedEventArgs e)
+	{
 		_adapters.TryRemove(e.PluginId, out _);
+	}
 }

@@ -27,10 +27,12 @@ public sealed class PluginNotificationResultDelivery : BackgroundService
 	private readonly ILogger _logger;
 	private readonly object _lock = new();
 	private readonly Dictionary<string, List<PendingResult>> _pending = new(StringComparer.Ordinal);
-	private readonly Channel<byte> _wake = Channel.CreateBounded<byte>(
-		new BoundedChannelOptions(1) { FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true });
 
-	public PluginNotificationResultDelivery(INotificationManager manager,
+	private readonly Channel<byte> _wake = Channel.CreateBounded<byte>(new BoundedChannelOptions(1)
+		{ FullMode = BoundedChannelFullMode.DropWrite, SingleReader = true });
+
+	public PluginNotificationResultDelivery(
+		INotificationManager manager,
 		IPluginSessionRegistry sessions,
 		IPluginCapabilityInvoker invoker,
 		TimeProvider time,
@@ -146,8 +148,8 @@ public sealed class PluginNotificationResultDelivery : BackgroundService
 			}
 			catch (Exception exception) when (exception is not OutOfMemoryException)
 			{
-				var permanent = exception is RemoteCapabilityException { Retryable: false } ||
-					_time.GetUtcNow() - next.Since > _giveUpAfter;
+				var permanent = exception is RemoteCapabilityException { Retryable: false }
+					|| _time.GetUtcNow() - next.Since > _giveUpAfter;
 
 				if (permanent)
 				{
@@ -179,10 +181,10 @@ public sealed class PluginNotificationResultDelivery : BackgroundService
 
 	private void OnPublished(NotificationEvent notification)
 	{
-		if (notification.Kind != NotificationEventKind.Closed ||
-			notification.Notification.Owner.Category != NotificationSourceCategory.Plugin ||
-			notification.Result is not { } result ||
-			result.CloseReason == NotificationCloseReason.OwnerGone)
+		if (notification.Kind != NotificationEventKind.Closed
+			|| notification.Notification.Owner.Category != NotificationSourceCategory.Plugin
+			|| notification.Result is not { } result
+			|| result.CloseReason == NotificationCloseReason.OwnerGone)
 		{
 			return;
 		}
@@ -215,7 +217,10 @@ public sealed class PluginNotificationResultDelivery : BackgroundService
 		_wake.Writer.TryWrite(1);
 	}
 
-	private void OnAttached(object? sender, PluginSessionAttachedEventArgs e) => _wake.Writer.TryWrite(1);
+	private void OnAttached(object? sender, PluginSessionAttachedEventArgs e)
+	{
+		_wake.Writer.TryWrite(1);
+	}
 
 	private void OnEnded(object? sender, PluginSessionEndedEventArgs e)
 	{

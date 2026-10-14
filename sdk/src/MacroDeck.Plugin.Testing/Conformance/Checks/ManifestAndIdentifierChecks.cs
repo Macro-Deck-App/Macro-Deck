@@ -26,7 +26,8 @@ internal sealed class PluginIdIsValidCheck() : ConformanceCheckBase("MDC0101",
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var report = await context.Plugin.ProbeHealthAsync().ConfigureAwait(false);
@@ -39,8 +40,8 @@ internal sealed class PluginIdIsValidCheck() : ConformanceCheckBase("MDC0101",
 		return MacroDeckId.TryValidateOwnerId(id, OwnerIdKind.Package, out var error)
 			? ConformanceCheckResult.Pass([ConformanceCheckSupport.Observe("plugin id", id)])
 			: ConformanceCheckResult.Fail(
-				"The plugin id passes MacroDeckId.IsValidOwnerId(_, OwnerIdKind.Package). A build declaring an " +
-				"invalid id never starts - PluginHostBuilder.Build rejects it - so this is a regression guard.",
+				"The plugin id passes MacroDeckId.IsValidOwnerId(_, OwnerIdKind.Package). A build declaring an "
+				+ "invalid id never starts - PluginHostBuilder.Build rejects it - so this is a regression guard.",
 				$"'{id}' failed validation: {error}");
 	}
 }
@@ -52,7 +53,8 @@ internal sealed class DeclaredLocalIdsAreValidCheck() : ConformanceCheckBase("MD
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		foreach (var capability in context.Session!.Declared)
@@ -60,9 +62,9 @@ internal sealed class DeclaredLocalIdsAreValidCheck() : ConformanceCheckBase("MD
 			if (!MacroDeckId.TryValidateLocalId(capability.LocalId, LocalIdKind.Declared, out var error))
 			{
 				return Task.FromResult(ConformanceCheckResult.Fail(
-					"Every declared local id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Declared). A " +
-					"build declaring an invalid one never starts - PluginHostBuilder.Build rejects it - so " +
-					"this is a regression guard, read from the wire rather than from source.",
+					"Every declared local id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Declared). A "
+					+ "build declaring an invalid one never starts - PluginHostBuilder.Build rejects it - so "
+					+ "this is a regression guard, read from the wire rather than from source.",
 					$"'{capability.LocalId}' (kind '{capability.Kind}') failed validation: {error}"));
 			}
 		}
@@ -83,7 +85,8 @@ internal sealed class RuntimeInstanceIdsAreValidCheck() : ConformanceCheckBase("
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Session)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		if (context.Session!.Declared.All(capability =>
@@ -108,9 +111,9 @@ internal sealed class RuntimeInstanceIdsAreValidCheck() : ConformanceCheckBase("
 			if (!MacroDeckId.TryValidateLocalId(instance.Id, LocalIdKind.Resource, out var error))
 			{
 				return ConformanceCheckResult.Fail(
-					"Every runtime instance id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Resource): " +
-					$"non-empty, at most {MacroDeckId.MaxResourceLocalIdLength} characters, free of " +
-					"QualifiedId.Separator and of whitespace or control characters.",
+					"Every runtime instance id passes MacroDeckId.TryValidateLocalId(_, LocalIdKind.Resource): "
+					+ $"non-empty, at most {MacroDeckId.MaxResourceLocalIdLength} characters, free of "
+					+ "QualifiedId.Separator and of whitespace or control characters.",
 					$"Weather instance id '{instance.Id}' failed validation: {error}");
 			}
 		}
@@ -139,7 +142,8 @@ internal sealed class ArtifactManifestIsWellFormedCheck() : ConformanceCheckBase
 	ConformanceRequirement.Required,
 	ConformancePrecondition.Manifest)
 {
-	public override Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var manifest = context.Manifest!;
@@ -151,8 +155,8 @@ internal sealed class ArtifactManifestIsWellFormedCheck() : ConformanceCheckBase
 				$"manifestVersion is {manifest.ManifestVersion}."));
 		}
 
-		if (manifest.Compatibility?.Protocol is { } protocol &&
-			(protocol.Minimum > ProtocolVersions.Current || protocol.Maximum < ProtocolVersions.Minimum))
+		if (manifest.Compatibility?.Protocol is { } protocol
+			&& (protocol.Minimum > ProtocolVersions.Current || protocol.Maximum < ProtocolVersions.Minimum))
 		{
 			return Task.FromResult(ConformanceCheckResult.Fail(
 				$"compatibility.protocol overlaps the protocol range this suite speaks ({ProtocolVersions.Minimum}-{ProtocolVersions.Current}).",
@@ -184,7 +188,8 @@ internal sealed class ManifestIdMatchesReportedIdCheck() : ConformanceCheckBase(
 	ConformancePrecondition.Session,
 	ConformancePrecondition.Manifest)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var report = await context.Plugin.ProbeHealthAsync().ConfigureAwait(false);
@@ -219,7 +224,8 @@ internal sealed class ManifestNameAndVersionAreReportedCheck() : ConformanceChec
 	ConformancePrecondition.Session,
 	ConformancePrecondition.Manifest)
 {
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var report = await context.Plugin.ProbeHealthAsync().ConfigureAwait(false);
@@ -288,7 +294,8 @@ internal sealed class ManifestIconMediaTypeIsReportedCheck() : ConformanceCheckB
 			[".webp"] = "image/webp"
 		};
 
-	public override async Task<ConformanceCheckResult> RunAsync(ConformanceContext context,
+	public override async Task<ConformanceCheckResult> RunAsync(
+		ConformanceContext context,
 		CancellationToken cancellationToken)
 	{
 		var icon = context.Manifest!.Icon;

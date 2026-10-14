@@ -9,11 +9,16 @@ internal static class TestFolderViewProviders
 {
 	/// <summary>A fresh, empty folder view registry - so a test about something else gets the built-in
 	/// widget grid and nothing more.</summary>
-	public static IFolderViewRegistry Registry() => new FolderViewRegistry(new RecordingMediator());
+	public static IFolderViewRegistry Registry()
+	{
+		return new FolderViewRegistry(new RecordingMediator());
+	}
 
 	/// <summary>A folder-view-provider host wired to a fresh registry, for tests about something else.</summary>
-	public static FolderViewProviderHost Host() =>
-		new(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	public static FolderViewProviderHost Host()
+	{
+		return new FolderViewProviderHost(Registry(), TimeProvider.System, Serilog.Core.Logger.None);
+	}
 
 	/// <summary>
 	/// A registry already offering one provider's view, and the qualified id a folder would store to

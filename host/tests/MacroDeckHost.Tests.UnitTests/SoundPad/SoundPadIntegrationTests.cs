@@ -1,6 +1,5 @@
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.ConfigFlow;
-using MacroDeck.Sdk.MusicPlayer;
 using MacroDeckHost.Integrations.SoundPad;
 using MacroDeckHost.Tests.UnitTests.SinusBot;
 
@@ -207,7 +206,10 @@ public class SoundPadIntegrationTests
 	{
 		var flow = _integration.CreateConfigFlow();
 
-		var result = await flow.SubmitAsync("connect", new Dictionary<string, object?>(), null!, CancellationToken.None);
+		var result = await flow.SubmitAsync("connect",
+			new Dictionary<string, object?>(),
+			null!,
+			CancellationToken.None);
 
 		Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
 	}
@@ -218,7 +220,10 @@ public class SoundPadIntegrationTests
 		_client.Reachable = false;
 		var flow = _integration.CreateConfigFlow();
 
-		var result = await flow.SubmitAsync("connect", new Dictionary<string, object?>(), null!, CancellationToken.None);
+		var result = await flow.SubmitAsync("connect",
+			new Dictionary<string, object?>(),
+			null!,
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{

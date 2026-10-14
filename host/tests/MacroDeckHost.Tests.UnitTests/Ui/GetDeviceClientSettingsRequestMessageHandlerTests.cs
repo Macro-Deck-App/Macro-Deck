@@ -33,8 +33,8 @@ public class GetDeviceClientSettingsRequestMessageHandlerTests
 	[Test]
 	public async Task The_device_reads_its_own_stored_setting()
 	{
-		var hidden = await SeedDevice(settingsButtonHidden: true);
-		var shown = await SeedDevice(settingsButtonHidden: false);
+		var hidden = await SeedDevice(true);
+		var shown = await SeedDevice(false);
 
 		var hiddenResponse = await _handler.Handle(new GetDeviceClientSettingsRequest { DeviceId = hidden.Id },
 			CancellationToken.None);

@@ -22,19 +22,23 @@ internal sealed class AdjustTrackVolumeActionDefinition : IDynamicOptionsActionD
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice(MeldActionParameters.Track,
-			label: AppStrings.Integrations.Meld.Parameters.Track(),
+			AppStrings.Integrations.Meld.Parameters.Track(),
 			required: true),
 		ActionParameter.Number(MeldActionParameters.Amount,
-			label: AppStrings.Integrations.Meld.Parameters.ChangeBy(),
+			AppStrings.Integrations.Meld.Parameters.ChangeBy(),
 			min: -100,
 			max: 100,
 			step: 1,
 			defaultValue: 5)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
-	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(DynamicOptionsContext context,
+	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
+		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var session = _resolver()?.State.Session ?? MeldSession.Empty;
@@ -77,9 +81,9 @@ internal sealed class AdjustTrackVolumeActionDefinition : IDynamicOptionsActionD
 			}
 
 			var amount = MeldActionParameters.ReadNumber(
-					context.Parameters.GetValueOrDefault(MeldActionParameters.Amount)) ??
-				0;
-			var gain01 = Math.Clamp((gain.Gain * 100) + amount, 0, 100) / 100.0;
+					context.Parameters.GetValueOrDefault(MeldActionParameters.Amount))
+				?? 0;
+			var gain01 = Math.Clamp(gain.Gain * 100 + amount, 0, 100) / 100.0;
 
 			return await connection.SetGainAsync(target.Id, gain01, context.CancellationToken).ConfigureAwait(false);
 		}

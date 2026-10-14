@@ -11,7 +11,8 @@ internal static class YtmDesktopActions
 	public static IReadOnlyList<IActionDefinition> Create(
 		MusicPlayerResolver resolver,
 		Func<IReadOnlyList<MusicPlayerInstance>> getInstances)
-		=>
+	{
+		return
 		[
 			new YtmDesktopActionDefinition(resolver,
 				getInstances,
@@ -36,18 +37,19 @@ internal static class YtmDesktopActions
 				AppStrings.Integrations.YtmDesktop.Actions.PlayVideoDescription(),
 				[
 					ActionParameter.Text("video",
-						label: AppStrings.Integrations.YtmDesktop.Actions.VideoLabel(),
-						description: AppStrings.Integrations.YtmDesktop.Actions.VideoDescription(),
-						placeholder: "https://music.youtube.com/watch?v=...",
+						AppStrings.Integrations.YtmDesktop.Actions.VideoLabel(),
+						AppStrings.Integrations.YtmDesktop.Actions.VideoDescription(),
+						"https://music.youtube.com/watch?v=...",
 						required: true)
 				],
 				(player, values, ct) =>
 					player.PlayVideoOrUrlAsync(GetString(values, "video") ?? string.Empty, ct))
 		];
+	}
 
 	private static ActionParameter RateModeChoice()
-		=> ActionParameter.Choice("mode",
-			options:
+	{
+		return ActionParameter.Choice("mode",
 			[
 				new ActionParameterOption
 					{ Value = "like", Label = AppStrings.Integrations.YtmDesktop.Actions.RateLike() },
@@ -62,12 +64,13 @@ internal static class YtmDesktopActions
 					Value = "toggle-dislike", Label = AppStrings.Integrations.YtmDesktop.Actions.RateToggleDislike()
 				}
 			],
-			label: AppStrings.Integrations.YtmDesktop.Actions.ModeLabel(),
+			AppStrings.Integrations.YtmDesktop.Actions.ModeLabel(),
 			defaultValue: "like");
+	}
 
 	private static ActionParameter MuteModeChoice()
-		=> ActionParameter.Choice("mode",
-			options:
+	{
+		return ActionParameter.Choice("mode",
 			[
 				new ActionParameterOption
 					{ Value = "toggle", Label = AppStrings.Integrations.YtmDesktop.Actions.MuteToggle() },
@@ -76,11 +79,14 @@ internal static class YtmDesktopActions
 				new ActionParameterOption
 					{ Value = "off", Label = AppStrings.Integrations.YtmDesktop.Actions.MuteOff() }
 			],
-			label: AppStrings.Integrations.YtmDesktop.Actions.ModeLabel(),
+			AppStrings.Integrations.YtmDesktop.Actions.ModeLabel(),
 			defaultValue: "toggle");
+	}
 
 	private static string? GetString(IReadOnlyDictionary<string, object> values, string name)
-		=> values.TryGetValue(name, out var value) ? value.ToString() : null;
+	{
+		return values.TryGetValue(name, out var value) ? value.ToString() : null;
+	}
 
 	private sealed class YtmDesktopActionDefinition : MusicPlayerActionDefinition
 	{
@@ -101,14 +107,19 @@ internal static class YtmDesktopActions
 			_command = command;
 		}
 
-		public override IActionExecutor CreateExecutor() => new Executor(this);
+		public override IActionExecutor CreateExecutor()
+		{
+			return new Executor(this);
+		}
 
 		private static Task NoOp(
 			IMusicPlayer player,
 			IReadOnlyDictionary<string, object> values,
 			IActionInteractions? interactions,
 			CancellationToken cancellationToken)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		private sealed class Executor : IActionExecutor
 		{

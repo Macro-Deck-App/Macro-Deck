@@ -25,5 +25,7 @@ public static class BackupRetentionRules
 	/// safety backup taken before a restore is the only way back from it.
 	/// </summary>
 	public static bool IsExempt(BackupDescriptor backup)
-		=> backup.Imported || backup.Trigger == BackupTrigger.BeforeRestore;
+	{
+		return backup.Imported || backup.Trigger == BackupTrigger.BeforeRestore;
+	}
 }

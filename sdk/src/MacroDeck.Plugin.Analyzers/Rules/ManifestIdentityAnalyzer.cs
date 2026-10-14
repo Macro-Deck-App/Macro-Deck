@@ -74,8 +74,8 @@ public sealed class ManifestIdentityAnalyzer : DiagnosticAnalyzer
 			Report(context,
 				text,
 				fallback,
-				"manifest.json declares no \"id\", or it is not a string. Set \"id\" to a reverse-domain " +
-				"value such as 'com.example.my-plugin'.");
+				"manifest.json declares no \"id\", or it is not a string. Set \"id\" to a reverse-domain "
+				+ "value such as 'com.example.my-plugin'.");
 			return;
 		}
 
@@ -84,8 +84,8 @@ public sealed class ManifestIdentityAnalyzer : DiagnosticAnalyzer
 			Report(context,
 				text,
 				id.ValueSpan,
-				$"manifest.json declares id '{id.Value}', which is not usable. {error} Set \"id\" to a " +
-				"reverse-domain value such as 'com.example.my-plugin'.");
+				$"manifest.json declares id '{id.Value}', which is not usable. {error} Set \"id\" to a "
+				+ "reverse-domain value such as 'com.example.my-plugin'.");
 		}
 	}
 
@@ -108,8 +108,8 @@ public sealed class ManifestIdentityAnalyzer : DiagnosticAnalyzer
 		Report(context,
 			text,
 			found ? property.ValueSpan : fallback,
-			$"manifest.json declares no \"{key}\", or an empty one. PluginHostBuilder.Build() requires a " +
-			$"non-empty {key}.");
+			$"manifest.json declares no \"{key}\", or an empty one. PluginHostBuilder.Build() requires a "
+			+ $"non-empty {key}.");
 	}
 
 	private static void Report(AdditionalFileAnalysisContext context, SourceText text, TextSpan span, string message)

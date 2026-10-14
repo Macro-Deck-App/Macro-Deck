@@ -23,9 +23,15 @@ internal sealed class FakeKekStore : IKekStore
 
 	public byte[]? Stored => _kek?.ToArray();
 
-	public void Seed(byte[] kek) => _kek = kek.ToArray();
+	public void Seed(byte[] kek)
+	{
+		_kek = kek.ToArray();
+	}
 
-	public void Forget() => _kek = null;
+	public void Forget()
+	{
+		_kek = null;
+	}
 
 	public KekStoreReadResult Read(KekStoreIdentity identity)
 	{

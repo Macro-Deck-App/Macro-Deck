@@ -71,15 +71,21 @@ public class SystemController : ControllerBase
 	[HttpGet("version")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetVersionResponse> GetVersion(CancellationToken ct)
-		=> _getVersion.Handle(new GetVersionRequest(), ct).AsTask();
+	{
+		return _getVersion.Handle(new GetVersionRequest(), ct).AsTask();
+	}
 
 	[HttpGet("about")]
 	public Task<GetAboutInfoResponse> GetAbout(CancellationToken ct)
-		=> _getAboutInfo.Handle(new GetAboutInfoRequest(), ct).AsTask();
+	{
+		return _getAboutInfo.Handle(new GetAboutInfoRequest(), ct).AsTask();
+	}
 
 	[HttpGet("third-party-notices")]
 	public ActionResult<ThirdPartyNoticesDocument> GetThirdPartyNotices()
-		=> _thirdPartyNotices.Read() is { } document ? document : NotFound();
+	{
+		return _thirdPartyNotices.Read() is { } document ? document : NotFound();
+	}
 
 	// Public on purpose: every device that receives the web client may read the notices of what it runs.
 	[HttpGet("third-party-notices.txt")]
@@ -106,7 +112,9 @@ public class SystemController : ControllerBase
 	[HttpGet("fonts")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetSystemFontsResponse> GetFonts(CancellationToken ct)
-		=> _getSystemFonts.Handle(new GetSystemFontsRequest(), ct).AsTask();
+	{
+		return _getSystemFonts.Handle(new GetSystemFontsRequest(), ct).AsTask();
+	}
 
 	[HttpGet("build-info")]
 	[AllowAnonymous]
@@ -155,11 +163,11 @@ public class SystemController : ControllerBase
 	{
 		return NetworkInterface.GetAllNetworkInterfaces()
 			.Where(nic =>
-				nic.OperationalStatus == OperationalStatus.Up &&
-				nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+				nic.OperationalStatus == OperationalStatus.Up
+				&& nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
 			.SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
-			.Where(address => address.Address.AddressFamily == AddressFamily.InterNetwork &&
-				!IPAddress.IsLoopback(address.Address))
+			.Where(address => address.Address.AddressFamily == AddressFamily.InterNetwork
+				&& !IPAddress.IsLoopback(address.Address))
 			.Select(address => address.Address.ToString())
 			.Distinct()
 			.ToList();
@@ -167,17 +175,24 @@ public class SystemController : ControllerBase
 
 	[HttpGet("application-focus")]
 	public Task<GetApplicationFocusCapabilityResponse> GetApplicationFocusCapability(CancellationToken ct)
-		=> _getApplicationFocusCapability.Handle(new GetApplicationFocusCapabilityRequest(), ct).AsTask();
+	{
+		return _getApplicationFocusCapability.Handle(new GetApplicationFocusCapabilityRequest(), ct).AsTask();
+	}
 
 	[HttpGet("running-applications")]
-	public Task<GetRunningApplicationsResponse> GetRunningApplications([FromQuery] string? filter,
+	public Task<GetRunningApplicationsResponse> GetRunningApplications(
+		[FromQuery] string? filter,
 		CancellationToken ct)
-		=> _getRunningApplications.Handle(new GetRunningApplicationsRequest { Filter = filter }, ct).AsTask();
+	{
+		return _getRunningApplications.Handle(new GetRunningApplicationsRequest { Filter = filter }, ct).AsTask();
+	}
 
 	[HttpGet("lock-state")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetLockStateResponse> GetLockState(CancellationToken ct)
-		=> _getLockState.Handle(new GetLockStateRequest(), ct).AsTask();
+	{
+		return _getLockState.Handle(new GetLockStateRequest(), ct).AsTask();
+	}
 
 	[HttpGet("fonts/{faceId}/file")]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
@@ -193,19 +208,21 @@ public class SystemController : ControllerBase
 		if (_fontCatalog.FindFace(faceId!) is { UserImported: true, ContentHash: { } contentHash })
 		{
 			Response.Headers.CacheControl = "no-cache";
-			return File(bytes, SfntContentType(bytes), lastModified: null, new EntityTagHeaderValue($"\"{contentHash}\""));
+			return File(bytes, SfntContentType(bytes), null, new EntityTagHeaderValue($"\"{contentHash}\""));
 		}
 
 		Response.Headers.CacheControl = "public, max-age=31536000, immutable";
-		return File(bytes, SfntContentType(bytes), lastModified: null, new EntityTagHeaderValue($"\"{faceId}\""));
+		return File(bytes, SfntContentType(bytes), null, new EntityTagHeaderValue($"\"{faceId}\""));
 	}
 
 	private static string SfntContentType(byte[] sfnt)
-		=> sfnt.Length >= 4 &&
-			sfnt[0] == (byte)'O' &&
-			sfnt[1] == (byte)'T' &&
-			sfnt[2] == (byte)'T' &&
-			sfnt[3] == (byte)'O'
+	{
+		return sfnt.Length >= 4
+			&& sfnt[0] == (byte)'O'
+			&& sfnt[1] == (byte)'T'
+			&& sfnt[2] == (byte)'T'
+			&& sfnt[3] == (byte)'O'
 				? "font/otf"
 				: "font/ttf";
+	}
 }

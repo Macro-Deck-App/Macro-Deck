@@ -18,8 +18,12 @@ public sealed class TestHostMessaging
 	private readonly ConcurrentQueue<ChannelMessage> _published = new();
 	private readonly ConcurrentQueue<ChannelMessage> _sent = new();
 	private readonly ConcurrentQueue<ChannelMessage> _requested = new();
-	private readonly ConcurrentDictionary<string, MessagingSubscriptionsArguments> _subscriptions = new(StringComparer.Ordinal);
-	private readonly ConcurrentDictionary<string, Func<ChannelMessage, JsonElement?>> _stubs = new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, MessagingSubscriptionsArguments> _subscriptions
+		= new(StringComparer.Ordinal);
+
+	private readonly ConcurrentDictionary<string, Func<ChannelMessage, JsonElement?>> _stubs
+		= new(StringComparer.Ordinal);
 
 	/// <summary>Every event a hosted plugin published, in order. <see cref="ChannelMessage.Sender" /> is its plugin id.</summary>
 	public IReadOnlyList<ChannelMessage> Published => [.. _published];
@@ -32,15 +36,21 @@ public sealed class TestHostMessaging
 
 	/// <summary>The event patterns <paramref name="pluginId" /> last synced; empty when it synced none.</summary>
 	public IReadOnlyList<string> SubscriptionsOf(string pluginId)
-		=> _subscriptions.TryGetValue(pluginId, out var table) ? table.Events : [];
+	{
+		return _subscriptions.TryGetValue(pluginId, out var table) ? table.Events : [];
+	}
 
 	/// <summary>The command topics <paramref name="pluginId" /> last said it handles.</summary>
 	public IReadOnlyList<string> HandledCommandsOf(string pluginId)
-		=> _subscriptions.TryGetValue(pluginId, out var table) ? table.Commands : [];
+	{
+		return _subscriptions.TryGetValue(pluginId, out var table) ? table.Commands : [];
+	}
 
 	/// <summary>The request topics <paramref name="pluginId" /> last said it handles.</summary>
 	public IReadOnlyList<string> HandledRequestsOf(string pluginId)
-		=> _subscriptions.TryGetValue(pluginId, out var table) ? table.Requests : [];
+	{
+		return _subscriptions.TryGetValue(pluginId, out var table) ? table.Requests : [];
+	}
 
 	/// <summary>
 	/// Answers commands and requests a hosted plugin sends to <paramref name="topic" />. Without a stub they
@@ -56,8 +66,9 @@ public sealed class TestHostMessaging
 	{
 		if (payload.Operation == HostOperations.Messaging.Subscriptions)
 		{
-			_subscriptions[pluginId] = payload.Arguments?.Deserialize<MessagingSubscriptionsArguments>(PluginProtocolJson.Options) ??
-				new MessagingSubscriptionsArguments();
+			_subscriptions[pluginId]
+				= payload.Arguments?.Deserialize<MessagingSubscriptionsArguments>(PluginProtocolJson.Options)
+				?? new MessagingSubscriptionsArguments();
 			return HostInvokeOutcome.Ok(new MessagingSubscriptionsResult());
 		}
 

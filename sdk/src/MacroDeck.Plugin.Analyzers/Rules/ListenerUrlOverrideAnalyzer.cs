@@ -40,15 +40,15 @@ public sealed class ListenerUrlOverrideAnalyzer : DiagnosticAnalyzer
 
 			if (webHostBuilderType is not null)
 			{
-				startContext.RegisterOperationAction(
-					operationContext => AnalyzeUseUrls(operationContext, webHostBuilderType),
+				startContext.RegisterOperationAction(operationContext
+						=> AnalyzeUseUrls(operationContext, webHostBuilderType),
 					OperationKind.Invocation);
 			}
 
 			if (configurationType is not null)
 			{
-				startContext.RegisterOperationAction(
-					operationContext => AnalyzeConfigurationIndexerAssignment(operationContext, configurationType),
+				startContext.RegisterOperationAction(operationContext
+						=> AnalyzeConfigurationIndexerAssignment(operationContext, configurationType),
 					OperationKind.SimpleAssignment);
 			}
 		});
@@ -71,7 +71,8 @@ public sealed class ListenerUrlOverrideAnalyzer : DiagnosticAnalyzer
 			"UseUrls(...)"));
 	}
 
-	private static void AnalyzeConfigurationIndexerAssignment(OperationAnalysisContext context,
+	private static void AnalyzeConfigurationIndexerAssignment(
+		OperationAnalysisContext context,
 		INamedTypeSymbol configurationType)
 	{
 		var assignment = (ISimpleAssignmentOperation)context.Operation;

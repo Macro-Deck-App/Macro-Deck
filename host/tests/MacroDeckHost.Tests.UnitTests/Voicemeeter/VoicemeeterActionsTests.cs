@@ -503,12 +503,13 @@ internal sealed class VoicemeeterActionsTests
 		_remote.UserSets("Strip[0].Label", "Mic");
 		_connection.Poll();
 
-		var options = await Gain(VoicemeeterChannelTarget.Strip).GetDynamicOptionsAsync(new DynamicOptionsContext
-			{
-				ParameterName = "strip",
-				CurrentParameters = new Dictionary<string, object?>()
-			},
-			CancellationToken.None);
+		var options = await Gain(VoicemeeterChannelTarget.Strip)
+			.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = "strip",
+					CurrentParameters = new Dictionary<string, object?>()
+				},
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -522,12 +523,13 @@ internal sealed class VoicemeeterActionsTests
 	[Test]
 	public async Task The_channel_picker_still_answers_before_Voicemeeter_has_ever_run()
 	{
-		var options = await Gain(VoicemeeterChannelTarget.Bus).GetDynamicOptionsAsync(new DynamicOptionsContext
-			{
-				ParameterName = "bus",
-				CurrentParameters = new Dictionary<string, object?>()
-			},
-			CancellationToken.None);
+		var options = await Gain(VoicemeeterChannelTarget.Bus)
+			.GetDynamicOptionsAsync(new DynamicOptionsContext
+				{
+					ParameterName = "bus",
+					CurrentParameters = new Dictionary<string, object?>()
+				},
+				CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -630,7 +632,9 @@ internal sealed class VoicemeeterActionsTests
 	}
 
 	private SetChannelGainActionDefinition Gain(VoicemeeterChannelTarget target)
-		=> new(target, () => _connection);
+	{
+		return new SetChannelGainActionDefinition(target, () => _connection);
+	}
 
 	[Test]
 	public async Task A_strip_mute_button_reports_the_strips_real_mute_state()
@@ -661,7 +665,7 @@ internal sealed class VoicemeeterActionsTests
 	[Test]
 	public async Task A_mute_button_is_unavailable_while_voicemeeter_is_not_running()
 	{
-		var provider = Provider("set-strip-mute", running: false);
+		var provider = Provider("set-strip-mute", false);
 
 		var snapshot = await provider.GetActionStateAsync(
 			new Dictionary<string, object?> { [VoicemeeterActionValues.StripParameter] = 0 },
@@ -714,9 +718,11 @@ internal sealed class VoicemeeterActionsTests
 	}
 
 	private IStateProviderActionDefinition Provider(string actionId, bool running = true)
-		=> (IStateProviderActionDefinition)VoicemeeterActions
+	{
+		return (IStateProviderActionDefinition)VoicemeeterActions
 			.Create(() => running ? _connection : null, new VoicemeeterVariableAccessor())
 			.Single(action => action.Id == actionId);
+	}
 
 	private void Connected()
 	{
@@ -726,5 +732,7 @@ internal sealed class VoicemeeterActionsTests
 	}
 
 	private static Task<ActionResult> Run(IActionDefinition action, Dictionary<string, object> parameters)
-		=> action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	{
+		return action.CreateExecutor().ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 }

@@ -35,15 +35,22 @@ internal sealed class DeviceTileTreeClaimTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	private void TreeIs(string root)
-		=> _fixture.UiBroker.Tree = new UiRawJson(Encoding.UTF8.GetBytes(
+	{
+		_fixture.UiBroker.Tree = new UiRawJson(Encoding.UTF8.GetBytes(
 			$$"""{"revision":7,"surface":{"kind":"widget"},"root":{{root}}}"""));
+	}
 
 	private Task<DeviceInteractionOutcome> SubmitAsync(DeviceInteractionKind kind, string widgetId = PluginTileId)
-		=> _fixture.Service.SubmitInteractionAsync(_deviceId,
+	{
+		return _fixture.Service.SubmitInteractionAsync(_deviceId,
 			new DeviceInteraction { Kind = kind, Target = new DeviceInteractionTarget { WidgetId = widgetId } });
+	}
 
 	private async Task HoldAsync(int milliseconds, string widgetId = PluginTileId)
 	{
@@ -58,7 +65,10 @@ internal sealed class DeviceTileTreeClaimTests
 	private string[] SentEvents => [.. _fixture.UiBroker.HostEvents.Select(sent => sent.Command.Name)];
 
 	private static UiRawJson Snapshot(string root)
-		=> new(Encoding.UTF8.GetBytes($$"""{"revision":7,"surface":{"kind":"widget"},"root":{{root}}}"""));
+	{
+		return new UiRawJson(
+			Encoding.UTF8.GetBytes($$"""{"revision":7,"surface":{"kind":"widget"},"root":{{root}}}"""));
+	}
 
 	private async Task PressSettledAsync()
 	{
@@ -101,7 +111,8 @@ internal sealed class DeviceTileTreeClaimTests
 			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
 			Assert.That(SentEvents, Is.EqualTo(new[] { "press-start", "press-end", "press" }));
 			Assert.That(_fixture.UiBroker.HostEvents
-					.Select(sent => (sent.SessionId, sent.Command.NodeId, sent.Command.Revision)).Distinct(),
+					.Select(sent => (sent.SessionId, sent.Command.NodeId, sent.Command.Revision))
+					.Distinct(),
 				Is.EqualTo(new[] { ("session-1", "mute", (int?)7) }));
 			Assert.That(_fixture.UiOpener.OpenedWidgetIds, Has.Count.EqualTo(1));
 			Assert.That(_fixture.UiBroker.ClosedSessions, Is.EqualTo(new[] { "session-1" }));

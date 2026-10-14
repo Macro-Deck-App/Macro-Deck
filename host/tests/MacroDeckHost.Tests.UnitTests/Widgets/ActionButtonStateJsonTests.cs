@@ -83,25 +83,25 @@ public class ActionButtonStateJsonTests
 	public void Normalize_DropsATopLevelMappingWhileAProviderOwnsTheStates_AndKeepsTheStashedOne(string fallback)
 	{
 		var data = (JsonObject)JsonNode.Parse($$$"""
-												{
-												  "stateMode": true,
-												  "states": [{"id":"muted","label":"Muted"},{"id":"unmuted","label":"Unmuted"}],
-												  "activeStateId": "muted",
-												  "stateMapping": {
-												    "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
-												    "fallbackStateId": "{{{fallback}}}"
-												  },
-												  "stateProvider": {"blockId":"b1","integrationId":"app.macro-deck.system","actionId":"mute-volume"},
-												  "manualStateBackup": {
-												    "states": [{"id":"on","label":"On"},{"id":"off","label":"Off"}],
-												    "stateMapping": {
-												      "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
-												      "fallbackStateId": "off"
-												    },
-												    "activeStateId": "on"
-												  }
-												}
-												""")!;
+												 {
+												   "stateMode": true,
+												   "states": [{"id":"muted","label":"Muted"},{"id":"unmuted","label":"Unmuted"}],
+												   "activeStateId": "muted",
+												   "stateMapping": {
+												     "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
+												     "fallbackStateId": "{{{fallback}}}"
+												   },
+												   "stateProvider": {"blockId":"b1","integrationId":"app.macro-deck.system","actionId":"mute-volume"},
+												   "manualStateBackup": {
+												     "states": [{"id":"on","label":"On"},{"id":"off","label":"Off"}],
+												     "stateMapping": {
+												       "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
+												       "fallbackStateId": "off"
+												     },
+												     "activeStateId": "on"
+												   }
+												 }
+												 """)!;
 		var expectedBackup = data["manualStateBackup"]!.DeepClone();
 
 		ActionButtonStateJson.Normalize(data);
@@ -325,19 +325,49 @@ public class ActionButtonStateJsonTests
 		private readonly FolderEntity _folder;
 
 		public SingleWidgetFolderCache(WidgetEntity widget)
-			=> _folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		{
+			_folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

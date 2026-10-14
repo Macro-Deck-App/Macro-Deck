@@ -12,7 +12,10 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 /// real round trip, since it has to report the run's actual outcome.</summary>
 internal sealed class RemoteScriptApi(IHostInvoker invoker, HostStateCache stateCache) : IScriptApi
 {
-	public IReadOnlyList<Script> GetScripts() => stateCache.GetList<Script>(Protocol.Callbacks.HostApis.Scripts);
+	public IReadOnlyList<Script> GetScripts()
+	{
+		return stateCache.GetList<Script>(Protocol.Callbacks.HostApis.Scripts);
+	}
 
 	public async Task<ActionResult> RunAsync(
 		string scriptId,
@@ -32,7 +35,7 @@ internal sealed class RemoteScriptApi(IHostInvoker invoker, HostStateCache state
 			},
 			cancellationToken);
 
-		return result?.Deserialize<ActionResult>(PluginProtocolJson.Options) ??
-			ActionResult.Failed(ActionErrorCodes.ProviderError, "The host returned no result.");
+		return result?.Deserialize<ActionResult>(PluginProtocolJson.Options)
+			?? ActionResult.Failed(ActionErrorCodes.ProviderError, "The host returned no result.");
 	}
 }

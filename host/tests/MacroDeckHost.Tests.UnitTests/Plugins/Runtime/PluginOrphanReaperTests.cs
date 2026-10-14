@@ -19,19 +19,25 @@ internal sealed class PluginOrphanReaperTests
 	}
 
 	private PluginOrphanReaper CreateReaper()
-		=> new(_journal, _processTable, Serilog.Core.Logger.None);
+	{
+		return new PluginOrphanReaper(_journal, _processTable, Serilog.Core.Logger.None);
+	}
 
 	private void PreviousSessionOwner()
-		=> _journal.Owner = new PluginProcessJournalOwner { ProcessId = 999_001, StartedAt = _hostStartedAt };
+	{
+		_journal.Owner = new PluginProcessJournalOwner { ProcessId = 999_001, StartedAt = _hostStartedAt };
+	}
 
 	private void Journalled(string launchId, int processId, DateTimeOffset startedAt)
-		=> _journal.Entries.Add(new PluginProcessJournalEntry
+	{
+		_journal.Entries.Add(new PluginProcessJournalEntry
 		{
 			LaunchId = launchId,
 			PluginId = "com.example." + launchId,
 			ProcessId = processId,
 			StartedAt = startedAt
 		});
+	}
 
 	[Test]
 	public async Task A_journalled_process_left_by_a_dead_host_is_killed_and_dropped()

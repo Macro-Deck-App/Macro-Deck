@@ -121,8 +121,14 @@ public class FailureEpisodeTrackerTests
 	{
 		public DateTimeOffset Now { get; private set; } = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-		public override DateTimeOffset GetUtcNow() => Now;
+		public override DateTimeOffset GetUtcNow()
+		{
+			return Now;
+		}
 
-		public void Advance(TimeSpan delta) => Now += delta;
+		public void Advance(TimeSpan delta)
+		{
+			Now += delta;
+		}
 	}
 }

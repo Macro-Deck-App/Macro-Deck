@@ -25,17 +25,21 @@ internal sealed class AdGuardHomeIntegrationTests
 		_createdClients = 0;
 		_time = new FakeTimeProvider();
 		_integration = new AdGuardHomeIntegration(settings =>
-		{
-			var client = new FakeAdGuardHomeClient();
-			_clients[settings.ControlUrl.Host] = client;
-			_createdClients++;
-			return client;
-		}, _time);
+			{
+				var client = new FakeAdGuardHomeClient();
+				_clients[settings.ControlUrl.Host] = client;
+				_createdClients++;
+				return client;
+			},
+			_time);
 		_hub = _integration.Instances;
 	}
 
 	[TearDown]
-	public Task TearDown() => _integration.ShutdownAsync();
+	public Task TearDown()
+	{
+		return _integration.ShutdownAsync();
+	}
 
 	[Test]
 	public async Task Each_instance_is_polled_on_its_own_and_published_to_the_shared_hub()
@@ -136,7 +140,8 @@ internal sealed class AdGuardHomeIntegrationTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.ErrorCode, Is.Null);
-			Assert.That(_clients["office.lan"].ProtectionCalls, Is.EqualTo(new[] { (false, (TimeSpan?)TimeSpan.FromHours(1)) }));
+			Assert.That(_clients["office.lan"].ProtectionCalls,
+				Is.EqualTo(new[] { (false, (TimeSpan?)TimeSpan.FromHours(1)) }));
 			Assert.That(_clients["home.lan"].ProtectionCalls, Is.Empty);
 		});
 	}
@@ -177,7 +182,8 @@ internal sealed class AdGuardHomeIntegrationTests
 		await StartAsync();
 		_clients["home.lan"].Failure = AdGuardHomeConnection.Unauthorized;
 
-		var result = await Execute("toggle-protection", new Dictionary<string, object> { ["instance"] = home.ToString("D") });
+		var result = await Execute("toggle-protection",
+			new Dictionary<string, object> { ["instance"] = home.ToString("D") });
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.ProviderRejected));
 	}
@@ -253,7 +259,9 @@ internal sealed class AdGuardHomeIntegrationTests
 		{
 			Assert.That(observed, Is.Not.Empty);
 			Assert.That(observed, Has.None.EqualTo(AdGuardHomeConnection.Connecting));
-			Assert.That(_createdClients, Is.EqualTo(2), "the existing instance kept its client instead of being rebuilt");
+			Assert.That(_createdClients,
+				Is.EqualTo(2),
+				"the existing instance kept its client instead of being rebuilt");
 		});
 	}
 
@@ -292,25 +300,34 @@ internal sealed class AdGuardHomeIntegrationTests
 	}
 
 	private Guid AddInstance(string title, string host, string key)
-		=> _context.AddEntry(title,
+	{
+		return _context.AddEntry(title,
 			new Dictionary<string, string?>
 			{
 				[AdGuardHomeConfigKeys.BaseUrl] = $"http://{host}:3000",
 				[AdGuardHomeConfigKeys.Username] = "admin",
-				[AdGuardHomeConfigKeys.VariableKey] = key,
+				[AdGuardHomeConfigKeys.VariableKey] = key
 			},
 			"secret");
+	}
 
-	private Task StartAsync() => _integration.InitializeAsync(_context);
+	private Task StartAsync()
+	{
+		return _integration.InitializeAsync(_context);
+	}
 
 	private Task ConnectedAsync(int count)
-		=> CalendarTree.WaitForAsync(() => _hub.Instances.Count(instance => instance.IsConnected) == count,
+	{
+		return CalendarTree.WaitForAsync(() => _hub.Instances.Count(instance => instance.IsConnected) == count,
 			"the instances never connected");
+	}
 
 	private Task<ActionResult> Execute(string actionId, Dictionary<string, object> parameters)
-		=> _integration.Actions.Single(action => action.Id == actionId)
+	{
+		return _integration.Actions.Single(action => action.Id == actionId)
 			.CreateExecutor()
 			.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 
 	private sealed class RecordingWidgetTypeContext : IWidgetTypeProviderContext
 	{
@@ -325,6 +342,8 @@ internal sealed class AdGuardHomeIntegrationTests
 		}
 
 		public Task UnregisterWidgetTypeAsync(string widgetTypeId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

@@ -28,13 +28,16 @@ internal sealed class RunSequenceActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.KeyboardSequence("sequence",
-			label: AppStrings.Integrations.Keyboard.Actions.SequenceLabel(),
-			description: AppStrings.Integrations.Keyboard.Actions.SequenceDescription(),
-			required: true),
+			AppStrings.Integrations.Keyboard.Actions.SequenceLabel(),
+			AppStrings.Integrations.Keyboard.Actions.SequenceDescription(),
+			true),
 		.. KeyboardTargetParameters.All
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_executor);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_executor);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -56,8 +59,8 @@ internal sealed class RunSequenceActionDefinition : IActionDefinition
 			KeyboardSequence sequence;
 			try
 			{
-				sequence = JsonSerializer.Deserialize<KeyboardSequence>(json, SerializerOptions) ??
-					new KeyboardSequence();
+				sequence = JsonSerializer.Deserialize<KeyboardSequence>(json, SerializerOptions)
+					?? new KeyboardSequence();
 			}
 			catch (JsonException)
 			{

@@ -36,13 +36,18 @@ public sealed class ShellNotificationBridge : IShellNotificationBridge, IDisposa
 	public ShellNotificationBridge(TimeProvider time)
 	{
 		_time = time;
-		_detach = time.CreateTimer(_ => OnAttachmentWindowElapsed(), null, Timeout.InfiniteTimeSpan,
+		_detach = time.CreateTimer(_ => OnAttachmentWindowElapsed(),
+			null,
+			Timeout.InfiniteTimeSpan,
 			Timeout.InfiniteTimeSpan);
 	}
 
 	public event Action? AttachmentChanged;
 
-	public void Dispose() => _detach.Dispose();
+	public void Dispose()
+	{
+		_detach.Dispose();
+	}
 
 	public bool IsAttached
 	{
@@ -150,7 +155,8 @@ public sealed class ShellNotificationBridge : IShellNotificationBridge, IDisposa
 	{
 		lock (_attachment)
 		{
-			var remaining = AttachmentWindow.Ticks - (_time.GetUtcNow().UtcTicks - Interlocked.Read(ref _lastPollTicks));
+			var remaining = AttachmentWindow.Ticks
+				- (_time.GetUtcNow().UtcTicks - Interlocked.Read(ref _lastPollTicks));
 			if (remaining > 0)
 			{
 				_detach.Change(TimeSpan.FromTicks(remaining), Timeout.InfiniteTimeSpan);

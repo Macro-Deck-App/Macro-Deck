@@ -8,7 +8,6 @@ using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.Notifications;
-using MacroDeckHost.Localization;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 using Microsoft.Extensions.Hosting;
@@ -46,7 +45,7 @@ internal sealed class CompanionConfigFlowTests
 	[Test]
 	public async Task Submitting_while_off_is_stored_and_no_entry_exists_resumes_automatic_creation()
 	{
-		var harness = new CompanionHarness(storedOff: true);
+		var harness = new CompanionHarness(true);
 		var manager = Manager(harness);
 		var outcome = await SubmitThroughManagerAsync(manager,
 			manager.StartAsync(IntegrationId, CancellationToken.None));
@@ -65,7 +64,7 @@ internal sealed class CompanionConfigFlowTests
 	[Test]
 	public async Task Resuming_automatic_creation_creates_entries_for_devices_already_connected()
 	{
-		var harness = new CompanionHarness(storedOff: true);
+		var harness = new CompanionHarness(true);
 		var device = harness.AddDevice("Phone");
 		await harness.ReportAsync("connection-1", device);
 		var manager = Manager(harness);
@@ -109,7 +108,7 @@ internal sealed class CompanionConfigFlowTests
 	[Test]
 	public async Task After_a_restart_with_off_stored_the_flow_can_resume_automatic_creation_without_initializing()
 	{
-		var harness = new CompanionHarness(storedOff: true, register: false);
+		var harness = new CompanionHarness(true, register: false);
 		var initializer = new IntegrationInitializer(harness.ScopeFactory,
 			null!,
 			null!,
@@ -187,15 +186,24 @@ internal sealed class CompanionConfigFlowTests
 	{
 		public string RedirectUri => "http://127.0.0.1/api/integrations/oauth/callback";
 
-		public OAuthRegistration Register(Guid flowId) => new(RedirectUri, flowId.ToString("N"));
+		public OAuthRegistration Register(Guid flowId)
+		{
+			return new OAuthRegistration(RedirectUri, flowId.ToString("N"));
+		}
 
-		public string? GetCode(string state) => null;
+		public string? GetCode(string state)
+		{
+			return null;
+		}
 
-		public Task<bool> HandleCallbackAsync(string state,
+		public Task<bool> HandleCallbackAsync(
+			string state,
 			string? code,
 			string? errorCode,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
 		public void Release(string state)
 		{

@@ -145,13 +145,15 @@ public class MacAppBundleIconLocatorTests
 
 	private void WritePlist(string body)
 	{
-		var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-			"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" " +
-			"\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" +
-			$"<plist version=\"1.0\"><dict>{body}</dict></plist>";
+		var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+			+ "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
+			+ $"<plist version=\"1.0\"><dict>{body}</dict></plist>";
 		File.WriteAllText(Path.Combine(_contents, "Info.plist"), xml, Encoding.UTF8);
 	}
 
 	private static void WriteBytes(string path, int length)
-		=> File.WriteAllBytes(path, new byte[length]);
+	{
+		File.WriteAllBytes(path, new byte[length]);
+	}
 }

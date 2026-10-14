@@ -36,12 +36,15 @@ internal static class WidgetActionParameters
 	public static readonly IReadOnlyList<ActionParameterOption> SingleStateOptions = [_currentStateOption];
 
 	public static ActionParameter TargetParameter()
-		=> ActionParameter.WidgetTarget(Target,
-			label: AppStrings.Integrations.Widgets.Actions.TargetWidgetLabel(),
-			description: AppStrings.Integrations.Widgets.Actions.TargetWidgetDescription());
+	{
+		return ActionParameter.WidgetTarget(Target,
+			AppStrings.Integrations.Widgets.Actions.TargetWidgetLabel(),
+			AppStrings.Integrations.Widgets.Actions.TargetWidgetDescription());
+	}
 
 	public static ActionParameter StateParameter(string defaultValue = "current")
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = State,
 			Type = ActionParameterType.DynamicChoice,
@@ -50,6 +53,7 @@ internal static class WidgetActionParameters
 			Description = AppStrings.Integrations.Widgets.Actions.StateDescription(),
 			DefaultValue = defaultValue
 		};
+	}
 
 	public static DynamicOptionsResult ResolveStateOptions(IWidgetApi? widgets, DynamicOptionsContext context)
 	{
@@ -83,7 +87,9 @@ internal static class WidgetActionParameters
 	/// separate rather than being merged.
 	/// </summary>
 	internal static IEnumerable<ActionParameterOption> ProjectStateOptions(IReadOnlyList<WidgetStateInfo> states)
-		=> states.Select(state => new ActionParameterOption { Value = state.Id, Label = state.Label });
+	{
+		return states.Select(state => new ActionParameterOption { Value = state.Id, Label = state.Label });
+	}
 
 	public static string TargetOf(ActionExecutionContext context)
 	{
@@ -119,7 +125,9 @@ internal static class WidgetActionParameters
 	}
 
 	public static bool IsReset(ActionExecutionContext context, string name)
-		=> WidgetAppearanceValues.IsReset(ReadString(context, name));
+	{
+		return WidgetAppearanceValues.IsReset(ReadString(context, name));
+	}
 
 	public static double? ReadNumber(ActionExecutionContext context, string name)
 	{
@@ -140,5 +148,7 @@ internal static class WidgetActionParameters
 	}
 
 	private static string ReadString(ActionExecutionContext context, string name)
-		=> context.Parameters.TryGetValue(name, out var value) ? value.ToString() ?? string.Empty : string.Empty;
+	{
+		return context.Parameters.TryGetValue(name, out var value) ? value.ToString() ?? string.Empty : string.Empty;
+	}
 }

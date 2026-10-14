@@ -32,7 +32,7 @@ internal sealed class YtmDesktopStateMapperTests
 	[Test]
 	public void Without_a_video_the_track_fields_are_empty_but_the_player_is_still_connected()
 	{
-		var snapshot = Map(Player(YtmTrackState.Playing, volume: 42), video: null);
+		var snapshot = Map(Player(YtmTrackState.Playing, volume: 42), null);
 
 		Assert.Multiple(() =>
 		{
@@ -50,7 +50,7 @@ internal sealed class YtmDesktopStateMapperTests
 	[Test]
 	public void The_track_details_map_across()
 	{
-		var snapshot = Map(Player(YtmTrackState.Playing, progress: 30), Video(album: "Album"));
+		var snapshot = Map(Player(YtmTrackState.Playing, 30), Video(album: "Album"));
 
 		Assert.Multiple(() =>
 		{
@@ -66,7 +66,7 @@ internal sealed class YtmDesktopStateMapperTests
 	[Test]
 	public void A_blank_author_yields_no_artists()
 	{
-		var snapshot = Map(Player(YtmTrackState.Playing), Video(author: "   "));
+		var snapshot = Map(Player(YtmTrackState.Playing), Video("   "));
 
 		Assert.That(snapshot.Player.Artists, Is.Empty);
 	}
@@ -175,7 +175,7 @@ internal sealed class YtmDesktopStateMapperTests
 	public void The_shuffle_belief_is_what_gets_reported()
 	{
 		var snapshot = YtmDesktopStateMapper.Map(new YtmPlayerState(Player(YtmTrackState.Playing), Video()),
-			shuffleBelief: true,
+			true,
 			_registerArtwork);
 
 		Assert.Multiple(() =>
@@ -194,12 +194,12 @@ internal sealed class YtmDesktopStateMapperTests
 			null,
 			null,
 			null,
-			LikeStatus: null,
+			null,
 			[],
 			180,
-			IsLive: null,
-			VideoType: null,
-			MetadataFilled: null);
+			null,
+			null,
+			null);
 
 		var snapshot = Map(Player(YtmTrackState.Playing, muted: null), video);
 
@@ -235,9 +235,11 @@ internal sealed class YtmDesktopStateMapperTests
 	}
 
 	private static YtmDesktopSnapshot Map(YtmPlayerInfo player, YtmVideoInfo? video)
-		=> YtmDesktopStateMapper.Map(new YtmPlayerState(player, video),
-			shuffleBelief: false,
+	{
+		return YtmDesktopStateMapper.Map(new YtmPlayerState(player, video),
+			false,
 			_registerArtwork);
+	}
 
 	private static YtmPlayerInfo Player(
 		YtmTrackState trackState,
@@ -245,7 +247,9 @@ internal sealed class YtmDesktopStateMapperTests
 		int volume = 50,
 		bool? muted = false,
 		YtmQueueInfo? queue = null)
-		=> new(trackState, progress, volume, muted, AdPlaying: false, queue);
+	{
+		return new YtmPlayerInfo(trackState, progress, volume, muted, false, queue);
+	}
 
 	private static YtmVideoInfo Video(
 		string? author = "Author",
@@ -254,7 +258,8 @@ internal sealed class YtmDesktopStateMapperTests
 		IReadOnlyList<YtmThumbnail>? thumbnails = null,
 		YtmLikeStatus? likeStatus = YtmLikeStatus.Indifferent,
 		YtmVideoType? videoType = YtmVideoType.Audio)
-		=> new("abc",
+	{
+		return new YtmVideoInfo("abc",
 			"Title",
 			author,
 			"channel",
@@ -263,7 +268,8 @@ internal sealed class YtmDesktopStateMapperTests
 			likeStatus,
 			thumbnails ?? [],
 			durationSeconds,
-			IsLive: false,
+			false,
 			videoType,
-			MetadataFilled: true);
+			true);
+	}
 }

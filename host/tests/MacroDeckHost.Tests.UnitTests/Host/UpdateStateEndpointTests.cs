@@ -7,7 +7,6 @@ using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Persistence;
 using MacroDeckHost.Tests.UnitTests.Auth;
-using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,7 +68,7 @@ public class UpdateStateEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -94,8 +93,8 @@ public class UpdateStateEndpointTests
 	{
 		var failed = await PostUpdateState(CheckFailedBody);
 		var upToDate = await PostUpdateState("""
-			{"version":null,"phase":"upToDate","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":null,"canInstall":false}
-			""");
+											 {"version":null,"phase":"upToDate","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":null,"canInstall":false}
+											 """);
 
 		Assert.Multiple(() =>
 		{
@@ -109,13 +108,14 @@ public class UpdateStateEndpointTests
 	public async Task A_failed_check_reported_with_its_failure_kind_and_a_known_version_is_accepted()
 	{
 		var response = await PostUpdateState($$"""
-			{"version":"3.1.0","phase":"failed","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":"{{CheckFailedError}}","failure":"check","canInstall":true}
-			""");
+											   {"version":"3.1.0","phase":"failed","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":"{{CheckFailedError}}","failure":"check","canInstall":true}
+											   """);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-			Assert.That(UpdateNotifications().Select(n => n.Title), Is.EqualTo(new[] { "Could not check for updates" }));
+			Assert.That(UpdateNotifications().Select(n => n.Title),
+				Is.EqualTo(new[] { "Could not check for updates" }));
 		});
 	}
 
@@ -123,8 +123,8 @@ public class UpdateStateEndpointTests
 		= "could not check for updates on any feed (https://updates.example/stable.json: connection refused)";
 
 	private const string CheckFailedBody = $$"""
-		{"version":null,"phase":"failed","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":"{{CheckFailedError}}","canInstall":false}
-		""";
+											 {"version":null,"phase":"failed","publishedAt":null,"downloaded":null,"total":null,"percent":null,"error":"{{CheckFailedError}}","canInstall":false}
+											 """;
 
 	private async Task<HttpResponseMessage> PostUpdateState(string body)
 	{
@@ -135,7 +135,9 @@ public class UpdateStateEndpointTests
 	}
 
 	private IEnumerable<UserNotification> UpdateNotifications()
-		=> _host.Services.GetRequiredService<IUserNotificationStore>()
+	{
+		return _host.Services.GetRequiredService<IUserNotificationStore>()
 			.Snapshot()
 			.Where(n => n.Kind == UserNotificationKind.Update);
+	}
 }

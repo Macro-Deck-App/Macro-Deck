@@ -1,5 +1,4 @@
 using MacroDeckHost.Integrations.Adb;
-using MacroDeck.Sdk.Android;
 using MacroDeck.Sdk.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Adb;
@@ -31,13 +30,17 @@ internal sealed class AdbDeviceVariableWriterTests
 	}
 
 	private void SetBatteryLevel(string serial, int level)
-		=> Phone(serial).Battery = Phone(serial).Battery with { Level = level };
+	{
+		Phone(serial).Battery = Phone(serial).Battery with { Level = level };
+	}
 
 	private AdbTrackedDevice Device(
 		string serial = "ABC123",
 		AdbDeviceStatus state = AdbDeviceStatus.Device,
 		string? model = "Pixel 8")
-		=> new(Phone(serial), state, model, Manufacturer: "Google");
+	{
+		return new AdbTrackedDevice(Phone(serial), state, model, "Google");
+	}
 
 	[Test]
 	public async Task Authorization_creates_all_four_variables_named_after_the_model()
@@ -49,7 +52,7 @@ internal sealed class AdbDeviceVariableWriterTests
 			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device("ABC123")),
 			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _variables.GetByNameAsync("adb_device_pixel_8_connected"))!.Value, Is.EqualTo(true));
 			Assert.That((await _variables.GetByNameAsync("adb_device_pixel_8_authorized"))!.Value, Is.EqualTo(true));
@@ -85,7 +88,7 @@ internal sealed class AdbDeviceVariableWriterTests
 				Device(state: AdbDeviceStatus.Offline)),
 			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _variables.GetByNameAsync("adb_device_pixel_8_connected"))!.Value, Is.EqualTo(true));
 			Assert.That((await _variables.GetByNameAsync("adb_device_pixel_8_authorized"))!.Value, Is.EqualTo(false));
@@ -108,7 +111,7 @@ internal sealed class AdbDeviceVariableWriterTests
 				Device(state: AdbDeviceStatus.Disconnected)),
 			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			var connected = await _variables.GetByNameAsync("adb_device_pixel_8_connected");
 			Assert.That(connected, Is.Not.Null, "cleared, not deleted");
@@ -157,7 +160,7 @@ internal sealed class AdbDeviceVariableWriterTests
 			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, Device()),
 			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_variables.CreateCount,
 				Is.EqualTo(createCountAfterFirstRun),
@@ -227,7 +230,7 @@ internal sealed class AdbDeviceVariableWriterTests
 			new AdbDeviceChange(AdbDeviceChangeKind.Authorized, second),
 			CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _variables.GetByNameAsync("adb_device_pixel_8_connected"), Is.Not.Null);
 			Assert.That(await _variables.GetByNameAsync("adb_device_pixel_8_2_connected"), Is.Not.Null);

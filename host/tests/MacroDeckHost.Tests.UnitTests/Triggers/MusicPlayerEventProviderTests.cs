@@ -33,16 +33,19 @@ public class MusicPlayerEventProviderTests
 		string? track = "Track A",
 		string? artist = "Artist A",
 		string? device = "Desktop",
-		int? volume = 50) => new()
+		int? volume = 50)
 	{
-		InstanceId = instanceId,
-		IsConnected = connected,
-		PlaybackState = playbackState,
-		TrackName = track,
-		ArtistName = artist,
-		DeviceName = device,
-		Volume = volume
-	};
+		return new MusicPlayerStatePayload
+		{
+			InstanceId = instanceId,
+			IsConnected = connected,
+			PlaybackState = playbackState,
+			TrackName = track,
+			ArtistName = artist,
+			DeviceName = device,
+			Volume = volume
+		};
+	}
 
 	private void Seed(MusicPlayerStatePayload state)
 	{
@@ -134,8 +137,8 @@ public class MusicPlayerEventProviderTests
 	[Test]
 	public void A_payload_without_an_instance_id_is_ignored()
 	{
-		_provider.Observe(State(instanceId: ""));
-		_provider.Observe(State(instanceId: "", track: "Track B"));
+		_provider.Observe(State(""));
+		_provider.Observe(State("", track: "Track B"));
 
 		Assert.That(_bus.Published, Is.Empty);
 	}

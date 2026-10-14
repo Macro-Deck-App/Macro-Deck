@@ -31,7 +31,10 @@ public class WidgetDataChangedRebuildTests
 		};
 		var key = widget.Id.ToString();
 
-		using (signals.SubscribeDataChanged(key, _ => { }))
+		using (signals.SubscribeDataChanged(key,
+			_ =>
+			{
+			}))
 		using (signals.SubscribeDataChanged(key, (WidgetEntity _) => true))
 		{
 			await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
@@ -39,7 +42,10 @@ public class WidgetDataChangedRebuildTests
 
 		var rebuiltWhenAllTookIt = sessions.InvalidatedWidgets.ToList();
 
-		using (signals.SubscribeDataChanged(key, _ => { }))
+		using (signals.SubscribeDataChanged(key,
+			_ =>
+			{
+			}))
 		using (signals.SubscribeDataChanged(key, (WidgetEntity _) => false))
 		{
 			await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
@@ -80,11 +86,12 @@ public class WidgetDataChangedRebuildTests
 		};
 		WidgetEntity? received = null;
 
-		using (signals.SubscribeDataChanged(widget.Id.ToString(), entity =>
-		{
-			received = entity;
-			return true;
-		}))
+		using (signals.SubscribeDataChanged(widget.Id.ToString(),
+			entity =>
+			{
+				received = entity;
+				return true;
+			}))
 		{
 			await handler.Handle(new WidgetUpdatedNotification(widget), CancellationToken.None);
 		}

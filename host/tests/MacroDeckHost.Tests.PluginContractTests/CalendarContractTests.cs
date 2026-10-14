@@ -18,18 +18,21 @@ internal sealed class CalendarContractTests : CapabilityContractFixture
 	private static readonly DateTimeOffset _monday = new(2026, 10, 5, 0, 0, 0, TimeSpan.FromHours(2));
 
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Calendar,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	private async Task<ICalendarProvider> ConnectAsync(TestCalendarIntegration calendar)
-		=> (ICalendarProvider)await ConnectAsync(
-			[new CalendarCapabilityHandler([calendar], TestMetadata.Default)],
+	{
+		return (ICalendarProvider)await ConnectAsync([new CalendarCapabilityHandler([calendar], TestMetadata.Default)],
 			[Provider()],
 			[CapabilityKinds.Calendar]);
+	}
 
 	[Test]
 	public async Task A_plugin_calendar_provider_surfaces_its_accounts_through_the_host_integration()
@@ -50,29 +53,37 @@ internal sealed class CalendarContractTests : CapabilityContractFixture
 	public async Task Every_read_round_trips_to_the_sdk_types()
 	{
 		var start = _monday.AddHours(9);
-		var calendar = new TestCalendarIntegration("Google Calendar", "alice");
-		calendar.Calendars["alice"] = [new CalendarInfo { Id = "primary", Name = "Alice", IsPrimary = true }];
-		calendar.Events["alice"] =
-		[
-			new CalendarEvent
+		var calendar = new TestCalendarIntegration("Google Calendar", "alice")
+		{
+			Calendars =
 			{
-				Id = "standup",
-				CalendarId = "primary",
-				Title = "Stand-up",
-				Start = start,
-				End = start.AddMinutes(15),
-				Location = "Room 4",
-				Description = "<p>Daily</p>",
-				MeetingUrl = "https://meet.example.com/abc",
-				Participants =
+				["alice"] = [new CalendarInfo { Id = "primary", Name = "Alice", IsPrimary = true }]
+			},
+			Events =
+			{
+				["alice"] =
 				[
-					new CalendarParticipant
+					new CalendarEvent
 					{
-						Name = "Bob", IsOrganizer = true, Response = CalendarResponseStatus.Declined
+						Id = "standup",
+						CalendarId = "primary",
+						Title = "Stand-up",
+						Start = start,
+						End = start.AddMinutes(15),
+						Location = "Room 4",
+						Description = "<p>Daily</p>",
+						MeetingUrl = "https://meet.example.com/abc",
+						Participants =
+						[
+							new CalendarParticipant
+							{
+								Name = "Bob", IsOrganizer = true, Response = CalendarResponseStatus.Declined
+							}
+						]
 					}
 				]
 			}
-		];
+		};
 		var provider = await ConnectAsync(calendar);
 
 		var calendars = await provider.GetCalendarsAsync("alice", CancellationToken.None);
@@ -109,8 +120,7 @@ internal sealed class CalendarContractTests : CapabilityContractFixture
 		};
 		var provider = await ConnectAsync(calendar);
 
-		var exception = Assert.CatchAsync<RemoteCapabilityException>(async () => await provider.GetEventsAsync(
-			"alice",
+		var exception = Assert.CatchAsync<RemoteCapabilityException>(async () => await provider.GetEventsAsync("alice",
 			new CalendarEventQuery { From = _monday, To = _monday.AddDays(1) },
 			CancellationToken.None));
 
@@ -124,19 +134,27 @@ internal sealed class CalendarContractTests : CapabilityContractFixture
 	[Test]
 	public async Task A_plugin_calendar_reaches_the_host_registry_and_event_cache()
 	{
-		var calendar = new TestCalendarIntegration("Google Calendar", "alice");
-		calendar.Calendars["alice"] = [new CalendarInfo { Id = "primary", Name = "Alice" }];
-		calendar.Events["alice"] =
-		[
-			new CalendarEvent
+		var calendar = new TestCalendarIntegration("Google Calendar", "alice")
+		{
+			Calendars =
 			{
-				Id = "standup",
-				CalendarId = "primary",
-				Title = "Stand-up",
-				Start = _monday.AddHours(9),
-				End = _monday.AddHours(9).AddMinutes(15)
+				["alice"] = [new CalendarInfo { Id = "primary", Name = "Alice" }]
+			},
+			Events =
+			{
+				["alice"] =
+				[
+					new CalendarEvent
+					{
+						Id = "standup",
+						CalendarId = "primary",
+						Title = "Stand-up",
+						Start = _monday.AddHours(9),
+						End = _monday.AddHours(9).AddMinutes(15)
+					}
+				]
 			}
-		];
+		};
 		await ConnectAsync(calendar);
 
 		var registry = new CalendarRegistry(IntegrationRegistry, Serilog.Core.Logger.None);
@@ -174,12 +192,17 @@ internal sealed class CalendarContractTests : CapabilityContractFixture
 			Is.EqualTo(new[] { "alice", "bob" }));
 
 		ICalendarProvider CurrentProvider()
-			=> (ICalendarProvider)IntegrationRegistry.Integrations
+		{
+			return (ICalendarProvider)IntegrationRegistry.Integrations
 				.Single(candidate => string.Equals(candidate.Id, PluginId, StringComparison.Ordinal));
+		}
 	}
 
 	private sealed class FixedTime(DateTimeOffset now) : TimeProvider
 	{
-		public override DateTimeOffset GetUtcNow() => now;
+		public override DateTimeOffset GetUtcNow()
+		{
+			return now;
+		}
 	}
 }

@@ -36,7 +36,8 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 		string clientSecret,
 		string code,
 		CancellationToken cancellationToken)
-		=> PostAsync(clientId,
+	{
+		return PostAsync(clientId,
 			clientSecret,
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
@@ -45,13 +46,15 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 				["redirect_uri"] = RedirectUri
 			},
 			cancellationToken);
+	}
 
 	public Task<DiscordTokens> RefreshAsync(
 		string clientId,
 		string clientSecret,
 		string refreshToken,
 		CancellationToken cancellationToken)
-		=> PostAsync(clientId,
+	{
+		return PostAsync(clientId,
 			clientSecret,
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
@@ -59,6 +62,7 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 				["refresh_token"] = refreshToken
 			},
 			cancellationToken);
+	}
 
 	private static async Task<DiscordTokens> PostAsync(
 		string clientId,
@@ -116,9 +120,9 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 		try
 		{
 			using var document = JsonDocument.Parse(body);
-			return document.RootElement.ValueKind == JsonValueKind.Object &&
-				document.RootElement.TryGetProperty("error", out var error) &&
-				error.ValueKind == JsonValueKind.String
+			return document.RootElement.ValueKind == JsonValueKind.Object
+				&& document.RootElement.TryGetProperty("error", out var error)
+				&& error.ValueKind == JsonValueKind.String
 					? error.GetString()
 					: null;
 		}

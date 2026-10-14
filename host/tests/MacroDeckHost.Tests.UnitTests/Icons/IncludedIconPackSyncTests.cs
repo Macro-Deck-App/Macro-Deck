@@ -12,7 +12,6 @@ using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Icons;
 using MacroDeckHost.Infrastructure.IconPacks;
 using MacroDeckHost.Infrastructure.Icons;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +20,7 @@ namespace MacroDeckHost.Tests.UnitTests.Icons;
 [TestFixture]
 internal sealed class IncludedIconPackSyncTests
 {
-	private static readonly IReadOnlyList<IncludedIconAsset> Embedded = new EmbeddedIncludedIconAssets().Load();
+	private static readonly IReadOnlyList<IncludedIconAsset> _embedded = new EmbeddedIncludedIconAssets().Load();
 
 	private IconTestHarness _harness = null!;
 	private FakeAssets _assets = null!;
@@ -61,16 +60,19 @@ internal sealed class IncludedIconPackSyncTests
 
 	[Test]
 	public void Every_included_icon_name_is_embedded()
-		=> Assert.That(Embedded.Select(asset => asset.Name), Is.EqualTo(IncludedIconPack.Names));
+	{
+		Assert.That(_embedded.Select(asset => asset.Name), Is.EqualTo(IncludedIconPack.Names));
+	}
 
 	[Test]
 	public async Task The_first_sync_adds_a_read_only_pack_holding_every_included_icon_under_its_fixed_id()
 	{
-		_assets.Set(Embedded);
+		_assets.Set(_embedded);
 
 		var stopwatch = Stopwatch.StartNew();
 		await Sync();
-		TestContext.Progress.WriteLine($"First sync of {Embedded.Count} included icons took {stopwatch.ElapsedMilliseconds} ms");
+		await TestContext.Progress.WriteLineAsync(
+			$"First sync of {_embedded.Count} included icons took {stopwatch.ElapsedMilliseconds} ms");
 
 		var pack = _harness.Cache.GetPackById(IncludedIconPack.PackId);
 		Assert.That(pack, Is.Not.Null);
@@ -100,7 +102,7 @@ internal sealed class IncludedIconPackSyncTests
 		var source = new IconPackWidgetIconSource(_harness.Cache, _services.GetRequiredService<IServiceScopeFactory>());
 		var reference = IncludedIconPack.IconId(IncludedIconPack.Cpu).ToString();
 
-		var image = await source.GetImageAsync(reference, 128, acceptWebp: true, staticFrame: false, CancellationToken.None);
+		var image = await source.GetImageAsync(reference, 128, true, false, CancellationToken.None);
 
 		Assert.That(image, Is.Not.Null);
 		using var bytes = new MemoryStream();
@@ -116,7 +118,10 @@ internal sealed class IncludedIconPackSyncTests
 	public async Task A_second_sync_of_the_same_set_keeps_every_id_and_rewrites_nothing()
 	{
 		await Sync();
-		var idsAfterFirst = _harness.Cache.GetIconsByPackId(IncludedIconPack.PackId).Select(icon => icon.Id).Order().ToList();
+		var idsAfterFirst = _harness.Cache.GetIconsByPackId(IncludedIconPack.PackId)
+			.Select(icon => icon.Id)
+			.Order()
+			.ToList();
 		var updatedAt = _harness.Cache.GetPackById(IncludedIconPack.PackId)!.UpdatedAt;
 		var processed = _processor.Calls;
 		var published = _harness.Mediator.Published.Count;
@@ -127,7 +132,8 @@ internal sealed class IncludedIconPackSyncTests
 		{
 			Assert.That(_harness.Cache.GetIconsByPackId(IncludedIconPack.PackId).Select(icon => icon.Id).Order(),
 				Is.EqualTo(idsAfterFirst));
-			Assert.That(idsAfterFirst, Is.EquivalentTo(_assets.Load().Select(asset => IncludedIconPack.IconId(asset.Name))));
+			Assert.That(idsAfterFirst,
+				Is.EquivalentTo(_assets.Load().Select(asset => IncludedIconPack.IconId(asset.Name))));
 			Assert.That(_processor.Calls, Is.EqualTo(processed));
 			Assert.That(_harness.Mediator.Published.Count, Is.EqualTo(published));
 			Assert.That(_harness.Cache.GetPackById(IncludedIconPack.PackId)!.UpdatedAt, Is.EqualTo(updatedAt));
@@ -175,7 +181,8 @@ internal sealed class IncludedIconPackSyncTests
 			Assert.That(delete.Success, Is.False);
 			Assert.That(rename.Success, Is.False);
 			Assert.That(import.Error, Is.EqualTo(IconError.PackReadOnly));
-			Assert.That(_harness.Cache.GetPackById(IncludedIconPack.PackId)?.Name, Is.EqualTo(IncludedIconPackSync.PackName));
+			Assert.That(_harness.Cache.GetPackById(IncludedIconPack.PackId)?.Name,
+				Is.EqualTo(IncludedIconPackSync.PackName));
 			Assert.That(_harness.Cache.GetIconCount(IncludedIconPack.PackId), Is.EqualTo(3));
 		});
 	}
@@ -185,7 +192,11 @@ internal sealed class IncludedIconPackSyncTests
 	{
 		await Sync();
 		var cpu = IncludedIconPack.IconId(IncludedIconPack.Cpu);
-		await _harness.Storage.WriteVariant(IncludedIconPack.PackId, cpu, "64-0123456789abcdef", new byte[] { 1 }, CancellationToken.None);
+		await _harness.Storage.WriteVariant(IncludedIconPack.PackId,
+			cpu,
+			"64-0123456789abcdef",
+			new byte[] { 1 },
+			CancellationToken.None);
 		var redrawn = Pick("gauge")[0].Content;
 		_assets.Set([new IncludedIconAsset(IncludedIconPack.Cpu, redrawn), .. Pick(IncludedIconPack.Battery, "zap")]);
 
@@ -195,7 +206,8 @@ internal sealed class IncludedIconPackSyncTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(icon?.SourceContentHash, Is.EqualTo(SourceContentHash.Compute(redrawn).Value));
-			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, cpu), Does.Not.Contain("64-0123456789abcdef"));
+			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, cpu),
+				Does.Not.Contain("64-0123456789abcdef"));
 			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, cpu), Does.Contain(IconVariants.Master));
 		});
 	}
@@ -239,7 +251,8 @@ internal sealed class IncludedIconPackSyncTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_harness.Cache.GetPackById(IncludedIconPack.PackId)?.SourceRevision, Is.Not.Null);
-			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, IncludedIconPack.IconId(IncludedIconPack.Battery)),
+			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId,
+					IncludedIconPack.IconId(IncludedIconPack.Battery)),
 				Does.Contain(IconVariants.Master));
 		});
 	}
@@ -261,7 +274,8 @@ internal sealed class IncludedIconPackSyncTests
 			Assert.That(_harness.Cache.GetIconById(zap), Is.Null);
 			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, zap), Is.Empty);
 			Assert.That(_harness.Cache.GetIconById(battery), Is.Not.Null);
-			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, battery), Does.Contain(IconVariants.Master));
+			Assert.That(_harness.Storage.ListVariants(IncludedIconPack.PackId, battery),
+				Does.Contain(IconVariants.Master));
 		});
 	}
 
@@ -281,12 +295,19 @@ internal sealed class IncludedIconPackSyncTests
 		});
 	}
 
-	private string? Revision() => _harness.Cache.GetPackById(IncludedIconPack.PackId)?.SourceRevision;
+	private string? Revision()
+	{
+		return _harness.Cache.GetPackById(IncludedIconPack.PackId)?.SourceRevision;
+	}
 
-	private Task Sync(IncludedIconPackSyncOptions? options = null) => CreateSync(options).SyncAsync(CancellationToken.None);
+	private Task Sync(IncludedIconPackSyncOptions? options = null)
+	{
+		return CreateSync(options).SyncAsync(CancellationToken.None);
+	}
 
 	private IncludedIconPackSync CreateSync(IncludedIconPackSyncOptions? options = null)
-		=> new(_assets,
+	{
+		return new IncludedIconPackSync(_assets,
 			_harness.Cache,
 			_harness.Storage,
 			_processor,
@@ -296,20 +317,31 @@ internal sealed class IncludedIconPackSyncTests
 			TimeProvider.System,
 			_harness.Logger,
 			options);
+	}
 
 	private static IconPackOwnerRegistry Registry()
-		=> new([new BuiltInIconPackOwner()]);
+	{
+		return new IconPackOwnerRegistry([new BuiltInIconPackOwner()]);
+	}
 
 	private static List<IncludedIconAsset> Pick(params string[] names)
-		=> names.Select(name => Embedded.Single(asset => asset.Name == name)).ToList();
+	{
+		return names.Select(name => _embedded.Single(asset => asset.Name == name)).ToList();
+	}
 
 	internal sealed class FakeAssets(IReadOnlyList<IncludedIconAsset> assets) : IIncludedIconAssets
 	{
 		private IReadOnlyList<IncludedIconAsset> _assets = assets;
 
-		public void Set(IReadOnlyList<IncludedIconAsset> assets) => _assets = assets;
+		public void Set(IReadOnlyList<IncludedIconAsset> assets)
+		{
+			_assets = assets;
+		}
 
-		public IReadOnlyList<IncludedIconAsset> Load() => _assets;
+		public IReadOnlyList<IncludedIconAsset> Load()
+		{
+			return _assets;
+		}
 	}
 
 	internal sealed class CountingProcessor(IIconProcessor inner) : IIconProcessor
@@ -320,7 +352,8 @@ internal sealed class IncludedIconPackSyncTests
 
 		public string? FailFor { get; set; }
 
-		public Task<Result<ProcessedIconResult, IconError>> Process(Stream original,
+		public Task<Result<ProcessedIconResult, IconError>> Process(
+			Stream original,
 			string originalFileName,
 			CancellationToken cancellationToken)
 		{
@@ -335,6 +368,9 @@ internal sealed class IncludedIconPackSyncTests
 	{
 		public HashSet<Guid> Referenced { get; } = [];
 
-		public IReadOnlySet<Guid> FindReferencedIconIds() => Referenced;
+		public IReadOnlySet<Guid> FindReferencedIconIds()
+		{
+			return Referenced;
+		}
 	}
 }

@@ -14,7 +14,9 @@ public class ExampleConfigFlow : IConfigFlow
 	private string _baseUrl = string.Empty;
 
 	public Task<ConfigFlowResult> StartAsync(IConfigFlowContext context, CancellationToken cancellationToken)
-		=> Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	{
+		return Task.FromResult(ConfigFlowResult.Step(ConnectionStep()));
+	}
 
 	public Task<ConfigFlowResult> SubmitAsync(
 		string stepId,
@@ -75,7 +77,8 @@ public class ExampleConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowStep ConnectionStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "connection",
 			Title = AppStrings.Integrations.Example.Config.ConnectionTitle(),
@@ -90,18 +93,20 @@ public class ExampleConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Url("baseUrl",
-					label: AppStrings.Integrations.Example.Config.BaseUrlLabel(),
+					AppStrings.Integrations.Example.Config.BaseUrlLabel(),
 					placeholder: "https://api.example.com",
 					required: true),
 				ActionParameter.Password("apiKey",
-					label: AppStrings.Integrations.Example.Config.ApiKeyLabel(),
-					description: AppStrings.Integrations.Example.Config.ApiKeyDescription(),
-					required: true)
+					AppStrings.Integrations.Example.Config.ApiKeyLabel(),
+					AppStrings.Integrations.Example.Config.ApiKeyDescription(),
+					true)
 			]
 		};
+	}
 
 	private static ConfigFlowStep WorkspaceStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = "workspace",
 			Title = AppStrings.Integrations.Example.Config.WorkspaceTitle(),
@@ -109,7 +114,6 @@ public class ExampleConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Choice("workspace",
-					options:
 					[
 						new ActionParameterOption
 							{ Value = "personal", Label = AppStrings.Integrations.Example.Config.WorkspacePersonal() },
@@ -118,8 +122,9 @@ public class ExampleConfigFlow : IConfigFlow
 						new ActionParameterOption
 							{ Value = "shared", Label = AppStrings.Integrations.Example.Config.WorkspaceShared() }
 					],
-					label: AppStrings.Integrations.Example.Config.WorkspaceLabel(),
+					AppStrings.Integrations.Example.Config.WorkspaceLabel(),
 					required: true)
 			]
 		};
+	}
 }

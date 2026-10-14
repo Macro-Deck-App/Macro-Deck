@@ -62,14 +62,20 @@ internal sealed class DeviceSurfaceComparisonTests
 
 	[Test]
 	public void An_unchanged_surface_compares_equal()
-		=> Assert.That(DeviceSurfaceComparison.SameContent(_surface, _surface with { Revision = 7 }), Is.True);
+	{
+		Assert.That(DeviceSurfaceComparison.SameContent(_surface, _surface with { Revision = 7 }), Is.True);
+	}
 
 	private static bool SameWith(DeviceSurfaceWidget widget)
-		=> DeviceSurfaceComparison.SameContent(_surface, _surface with { Widgets = [widget] });
+	{
+		return DeviceSurfaceComparison.SameContent(_surface, _surface with { Widgets = [widget] });
+	}
 
 	private static IEnumerable<PropertyInfo> Properties(Type type)
-		=> type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+	{
+		return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
 			.Where(property => property.CanWrite || property.SetMethod is not null);
+	}
 
 	/// <summary>Replaces the property's value with one that differs from the fixture's.</summary>
 	private static void Mutate(object target, PropertyInfo property)
@@ -89,8 +95,8 @@ internal sealed class DeviceSurfaceComparisonTests
 				var type when type == typeof(IReadOnlyDictionary<string, string>)
 					=> new Dictionary<string, string>(StringComparer.Ordinal) { ["changed"] = "1" },
 				_ => throw new NotSupportedException(
-					$"{property.DeclaringType?.Name}.{property.Name} is a {property.PropertyType.Name}, which this " +
-					"test does not know how to change - teach it, and teach DeviceSurfaceComparison too.")
+					$"{property.DeclaringType?.Name}.{property.Name} is a {property.PropertyType.Name}, which this "
+					+ "test does not know how to change - teach it, and teach DeviceSurfaceComparison too.")
 			});
 	}
 }

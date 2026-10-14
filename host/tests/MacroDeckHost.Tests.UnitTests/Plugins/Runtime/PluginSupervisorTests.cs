@@ -71,25 +71,43 @@ internal sealed class PluginSupervisorTests
 		};
 	}
 
-	private static PluginManifestReadResult OkManifestResult() => PluginManifestReadResult.Ok(new PluginManifest
+	private static PluginManifestReadResult OkManifestResult()
 	{
-		ManifestVersion = 1,
-		Id = PluginId,
-		Name = "Example",
-		Version = Version,
-		Entrypoints = new Dictionary<string, PluginEntrypoint>
+		return PluginManifestReadResult.Ok(new PluginManifest
 		{
-			[PluginRuntimeIdentifiers.Current] = new() { Executable = "app" }
-		}
-	});
+			ManifestVersion = 1,
+			Id = PluginId,
+			Name = "Example",
+			Version = Version,
+			Entrypoints = new Dictionary<string, PluginEntrypoint>
+			{
+				[PluginRuntimeIdentifiers.Current] = new() { Executable = "app" }
+			}
+		});
+	}
 
-	private static InstalledPlugin InstalledFor(string pluginId, string version) => new()
+	private static InstalledPlugin InstalledFor(string pluginId, string version)
 	{
-		PluginId = pluginId,
-		PluginDirectory = Path.Combine(Path.GetTempPath(), "md-plugins-fake", pluginId),
-		Versions =
-		[
-			new InstalledPluginVersion
+		return new InstalledPlugin
+		{
+			PluginId = pluginId,
+			PluginDirectory = Path.Combine(Path.GetTempPath(), "md-plugins-fake", pluginId),
+			Versions =
+			[
+				new InstalledPluginVersion
+				{
+					Version = version,
+					VersionDirectory
+						= Path.Combine(Path.GetTempPath(), "md-plugins-fake", pluginId, "versions", version),
+					ManifestPath = Path.Combine(Path.GetTempPath(),
+						"md-plugins-fake",
+						pluginId,
+						"versions",
+						version,
+						"manifest.json")
+				}
+			],
+			ActiveVersion = new InstalledPluginVersion
 			{
 				Version = version,
 				VersionDirectory = Path.Combine(Path.GetTempPath(), "md-plugins-fake", pluginId, "versions", version),
@@ -100,19 +118,8 @@ internal sealed class PluginSupervisorTests
 					version,
 					"manifest.json")
 			}
-		],
-		ActiveVersion = new InstalledPluginVersion
-		{
-			Version = version,
-			VersionDirectory = Path.Combine(Path.GetTempPath(), "md-plugins-fake", pluginId, "versions", version),
-			ManifestPath = Path.Combine(Path.GetTempPath(),
-				"md-plugins-fake",
-				pluginId,
-				"versions",
-				version,
-				"manifest.json")
-		}
-	};
+		};
+	}
 
 	private void AddInstalledPlugin(string pluginId)
 	{
@@ -601,7 +608,7 @@ internal sealed class PluginSupervisorTests
 	public async Task A_self_registering_plugins_snapshot_reports_its_declared_version()
 	{
 		_catalog.Plugins.Clear();
-		await CreateSelfRegisteringSession(PluginId, declaredVersion: "1.0.0");
+		await CreateSelfRegisteringSession(PluginId, "1.0.0");
 		var supervisor = CreateSupervisor();
 
 		var snapshot = supervisor.Snapshot().Single(s => s.PluginId == PluginId);
@@ -828,7 +835,10 @@ internal sealed class PluginSupervisorTests
 		_launchTokenService.Bind(launch!.LaunchId, sessionId);
 	}
 
-	private static string SessionIdFor(string launchId) => $"session-{launchId}";
+	private static string SessionIdFor(string launchId)
+	{
+		return $"session-{launchId}";
+	}
 
 	[Test]
 	public async Task A_started_plugin_is_journalled_with_its_pid_start_time_and_launch_id()

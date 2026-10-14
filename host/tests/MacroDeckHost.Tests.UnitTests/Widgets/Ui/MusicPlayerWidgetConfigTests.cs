@@ -35,7 +35,7 @@ public class MusicPlayerWidgetConfigTests
 		showAlbum = true,
 		showTimeline = true,
 		showSource = true,
-		border = new { style = "static", color = "#ff0000" },
+		border = new { style = "static", color = "#ff0000" }
 	};
 
 	[Test]
@@ -78,7 +78,8 @@ public class MusicPlayerWidgetConfigTests
 		{
 			Assert.That(stored.ById("showSource").Flag(UiConfigProperties.Value), Is.False);
 			Assert.That(older.ById("showSource").Flag(UiConfigProperties.Value), Is.True);
-			Assert.That(MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { showSource = false })).ShowSource,
+			Assert.That(MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { showSource = false }))
+					.ShowSource,
 				Is.False);
 			Assert.That(MusicPlayerWidgetData.Parse(JsonSerializer.SerializeToElement(new { })).ShowSource, Is.True);
 		});
@@ -156,13 +157,16 @@ public class MusicPlayerWidgetConfigTests
 	}
 
 	private static UiTestHost Render(object data, params string[] instanceIds)
-		=> UiTestHost.Render(MusicPlayerWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
+	{
+		return UiTestHost.Render(MusicPlayerWidgetConfigView.Build(JsonSerializer.SerializeToElement(data),
 			new StubMusicPlayerRegistry(instanceIds
 				.Select(id => new MusicPlayerInstanceDescriptor(id, "spotify", default, id, false))
 				.ToList())));
+	}
 
 	private static UiSurface ConfigSurface(string widgetType, string widgetData)
-		=> new()
+	{
+		return new UiSurface
 		{
 			Kind = UiSurfaceKinds.Config,
 			SessionMode = UiSessionModes.Exclusive,
@@ -172,9 +176,10 @@ public class MusicPlayerWidgetConfigTests
 					= JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
 				[UiConfigSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(Guid.NewGuid().ToString()),
 				[UiConfigSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData),
-			},
+				[UiConfigSurfaceAttributes.WidgetData] = JsonSerializer.Deserialize<JsonElement>(widgetData)
+			}
 		};
+	}
 
 	private static List<string> OptionValues(UiTestNode node)
 	{
@@ -185,7 +190,8 @@ public class MusicPlayerWidgetConfigTests
 			return [];
 		}
 
-		return array.EnumerateArray().Select(option => option.GetProperty("value").GetString() ?? string.Empty)
+		return array.EnumerateArray()
+			.Select(option => option.GetProperty("value").GetString() ?? string.Empty)
 			.ToList();
 	}
 
@@ -194,7 +200,7 @@ public class MusicPlayerWidgetConfigTests
 		var border = new Dictionary<string, object?>
 		{
 			["style"] = host.ById("border.style").Text(UiConfigProperties.Value),
-			["color"] = host.ById("border.color").Text(UiConfigProperties.Value),
+			["color"] = host.ById("border.color").Text(UiConfigProperties.Value)
 		};
 
 		var data = new Dictionary<string, object?>
@@ -208,7 +214,7 @@ public class MusicPlayerWidgetConfigTests
 			["showAlbum"] = host.ById("showAlbum").Flag(UiConfigProperties.Value),
 			["showTimeline"] = host.ById("showTimeline").Flag(UiConfigProperties.Value),
 			["showSource"] = host.ById("showSource").Flag(UiConfigProperties.Value),
-			["border"] = border,
+			["border"] = border
 		};
 
 		return JsonSerializer.SerializeToElement(data);
@@ -217,21 +223,35 @@ public class MusicPlayerWidgetConfigTests
 	private sealed class StubMusicPlayerRegistry(IReadOnlyList<MusicPlayerInstanceDescriptor> instances)
 		: IMusicPlayerRegistry
 	{
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => instances;
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return instances;
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
 		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
-			=> GetPlayer(instanceId);
+		{
+			return GetPlayer(instanceId);
+		}
 
 		public IMusicPlayer? DefaultPlayer => null;
 	}
 
 	private sealed class NullStateCache : IMusicPlayerStateCache
 	{
-		public MusicPlayerStatePayload? GetState(string instanceId) => null;
+		public MusicPlayerStatePayload? GetState(string instanceId)
+		{
+			return null;
+		}
 
-		public IReadOnlyList<MusicPlayerStatePayload> GetAll() => [];
+		public IReadOnlyList<MusicPlayerStatePayload> GetAll()
+		{
+			return [];
+		}
 
 		public string? ActiveInstanceId => null;
 
@@ -246,43 +266,62 @@ public class MusicPlayerWidgetConfigTests
 
 	private sealed class NullArtworkService : IMusicPlayerArtworkService
 	{
-		public string GetETag(string artworkId, int? size) => string.Empty;
+		public string GetETag(string artworkId, int? size)
+		{
+			return string.Empty;
+		}
 
-		public Task<ArtworkImageResult?> GetImage(MusicPlayerVariant variant,
+		public Task<ArtworkImageResult?> GetImage(
+			MusicPlayerVariant variant,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		{
+			return GetImage(variant.InstanceId, artworkId, size, cancellationToken);
+		}
 
-		public Task<ArtworkImageResult?> GetImage(string instanceId,
+		public Task<ArtworkImageResult?> GetImage(
+			string instanceId,
 			string artworkId,
 			int? size,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<ArtworkImageResult?>(null);
+		{
+			return Task.FromResult<ArtworkImageResult?>(null);
+		}
 	}
 
 	private sealed class NullPaletteExtractor : IArtworkPaletteExtractor
 	{
-		public ArtworkPalette? Extract(byte[] image) => null;
+		public ArtworkPalette? Extract(byte[] image)
+		{
+			return null;
+		}
 	}
 
 	private sealed class NullResourceStore : IUiResourceStore
 	{
 		public UiResource Register(UiResourceRegistration registration)
-			=> new() { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		{
+			return new UiResource { ResourceId = $"{registration.OwnerId}.{registration.Name}", ContentHash = "hash" };
+		}
 
 		public bool TryGet(string resourceId, out UiResourceContent content)
 		{
-			content = default!;
+			content = null!;
 			return false;
 		}
 
-		public bool Remove(string resourceId) => false;
+		public bool Remove(string resourceId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class PassThroughSampleText : MacroDeckHost.Widgets.Preview.IWidgetSampleTextResolver
 	{
-		public ValueTask<string> ResolveAsync(LocalizedString value) =>
-			ValueTask.FromResult(value.ToString() ?? string.Empty);
+		public ValueTask<string> ResolveAsync(LocalizedString value)
+		{
+			return ValueTask.FromResult(value.ToString() ?? string.Empty);
+		}
 	}
 }

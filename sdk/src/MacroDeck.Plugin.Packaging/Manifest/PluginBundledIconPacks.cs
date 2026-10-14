@@ -16,7 +16,10 @@ public static partial class PluginBundledIconPacks
 	/// <summary>The project folder the Plugin CLI places bundled packs in.</summary>
 	public const string DefaultDirectory = "icon-packs";
 
-	public static bool IsValidKey(string? key) => key is { Length: > 0 and <= MaxKeyLength } && KeyPattern().IsMatch(key);
+	public static bool IsValidKey(string? key)
+	{
+		return key is { Length: > 0 and <= MaxKeyLength } && KeyPattern().IsMatch(key);
+	}
 
 	/// <summary>Turns a pack name into a key: lowercase ASCII letters and digits, runs of anything else
 	/// collapsed into one hyphen. Null when nothing usable is left.</summary>
@@ -36,7 +39,10 @@ public static partial class PluginBundledIconPacks
 		return IsValidKey(slug) ? slug : null;
 	}
 
-	public static string DefaultPath(string key) => $"{DefaultDirectory}/{key}{FileExtension}";
+	public static string DefaultPath(string key)
+	{
+		return $"{DefaultDirectory}/{key}{FileExtension}";
+	}
 
 	[GeneratedRegex(@"\A[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\z", RegexOptions.CultureInvariant)]
 	private static partial Regex KeyPattern();

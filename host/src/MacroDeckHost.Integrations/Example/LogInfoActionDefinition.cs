@@ -15,13 +15,16 @@ public class LogInfoActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text("message",
-			label: AppStrings.Integrations.Example.Actions.MessageLabel(),
-			description: AppStrings.Integrations.Example.Actions.MessageDescription(),
-			placeholder: "Hello from Example Integration!",
+			AppStrings.Integrations.Example.Actions.MessageLabel(),
+			AppStrings.Integrations.Example.Actions.MessageDescription(),
+			"Hello from Example Integration!",
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new LogInfoActionExecutor();
+	public IActionExecutor CreateExecutor()
+	{
+		return new LogInfoActionExecutor();
+	}
 
 	private sealed class LogInfoActionExecutor : IActionExecutor
 	{

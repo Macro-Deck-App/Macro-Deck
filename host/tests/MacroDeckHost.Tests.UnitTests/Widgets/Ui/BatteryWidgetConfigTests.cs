@@ -37,7 +37,8 @@ public class BatteryWidgetConfigTests
 			Assert.That(device.GetProperty("id").GetString(), Is.EqualTo("adb:pods"));
 			Assert.That(device.GetProperty("name").GetString(), Is.EqualTo("Buds"));
 			Assert.That(device.GetProperty("kind").GetString(), Is.EqualTo(BatteryDeviceKinds.Headphones));
-			Assert.That(OptionLabels(host.ById("device.id")), Has.Some.Contains("ADB"),
+			Assert.That(OptionLabels(host.ById("device.id")),
+				Has.Some.Contains("ADB"),
 				"a device is offered with the provider that reports it");
 			Assert.That(WidgetDataSchema.Validate(Schema(), composed), Is.Empty);
 		});
@@ -66,13 +67,17 @@ public class BatteryWidgetConfigTests
 		var whileGone = Compose(Render(stored));
 
 		_batteries.Set(FakeBatteries.Device("phone", "Pixel 9", 40));
-		var host = Render(new { mode = "one", device = JsonSerializer.Deserialize<JsonElement>(whileGone.GetProperty("device").GetRawText()) });
+		var host = Render(new
+		{
+			mode = "one", device = JsonSerializer.Deserialize<JsonElement>(whileGone.GetProperty("device").GetRawText())
+		});
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(whileGone.GetProperty("device").GetProperty("id").GetString(), Is.EqualTo("adb:phone"));
 			Assert.That(host.ById("device.id").Text(UiConfigProperties.Value), Is.EqualTo("adb:phone"));
-			Assert.That(Compose(host).GetProperty("device").GetProperty("name").GetString(), Is.EqualTo("Pixel 9"),
+			Assert.That(Compose(host).GetProperty("device").GetProperty("name").GetString(),
+				Is.EqualTo("Pixel 9"),
 				"the stored name follows the device once it reports again");
 		});
 	}
@@ -153,7 +158,11 @@ public class BatteryWidgetConfigTests
 			showChargingBadge = false,
 			colorMode = "level",
 			chargingColor = false,
-			thresholds = new { bands = new object[] { new { id = "a", color = "#111111" }, new { id = "b", color = "#222222", from = 50 } } },
+			thresholds = new
+			{
+				bands = new object[]
+					{ new { id = "a", color = "#111111" }, new { id = "b", color = "#222222", from = 50 } }
+			}
 		};
 
 		var composed = Compose(Render(stored));
@@ -162,7 +171,8 @@ public class BatteryWidgetConfigTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(parsed.Mode, Is.EqualTo(BatteryWidgetData.ModeOne));
-			Assert.That(parsed.Device, Is.EqualTo(new BatteryDeviceReference("adb:phone", "Pixel", BatteryDeviceKinds.Phone)));
+			Assert.That(parsed.Device,
+				Is.EqualTo(new BatteryDeviceReference("adb:phone", "Pixel", BatteryDeviceKinds.Phone)));
 			Assert.That(parsed.IsBar, Is.True);
 			Assert.That(parsed.ShowPercentage, Is.False);
 			Assert.That(parsed.ShowName, Is.False);
@@ -176,7 +186,8 @@ public class BatteryWidgetConfigTests
 	[Test]
 	public void The_default_data_validates_and_shows_every_device()
 	{
-		var data = JsonSerializer.Deserialize<JsonElement>(BuiltInWidgetTypes.All(new HashSet<string>(StringComparer.Ordinal))
+		var data = JsonSerializer.Deserialize<JsonElement>(BuiltInWidgetTypes
+			.All(new HashSet<string>(StringComparer.Ordinal))
 			.Single(type => type.Id == WidgetTypeIds.Battery)
 			.DefaultData!);
 
@@ -190,7 +201,9 @@ public class BatteryWidgetConfigTests
 	private const string WidgetThresholdsKey = "thresholds";
 
 	private UiTestHost Render(object data)
-		=> UiTestHost.Render(BatteryWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), _batteries));
+	{
+		return UiTestHost.Render(BatteryWidgetConfigView.Build(JsonSerializer.SerializeToElement(data), _batteries));
+	}
 
 	private static Json.Schema.JsonSchema Schema()
 	{
@@ -201,14 +214,18 @@ public class BatteryWidgetConfigTests
 	}
 
 	private static List<string> OptionValues(UiTestNode node)
-		=> node.Property(UiConfigProperties.Options) is { ValueKind: JsonValueKind.Array } options
+	{
+		return node.Property(UiConfigProperties.Options) is { ValueKind: JsonValueKind.Array } options
 			? [.. options.EnumerateArray().Select(option => option.GetProperty("value").GetString() ?? string.Empty)]
 			: [];
+	}
 
 	private static List<string> OptionLabels(UiTestNode node)
-		=> node.Property(UiConfigProperties.Options) is { ValueKind: JsonValueKind.Array } options
+	{
+		return node.Property(UiConfigProperties.Options) is { ValueKind: JsonValueKind.Array } options
 			? [.. options.EnumerateArray().Select(option => option.GetProperty("label").GetRawText())]
 			: [];
+	}
 
 	private static JsonElement Compose(UiTestHost host)
 	{
@@ -217,10 +234,11 @@ public class BatteryWidgetConfigTests
 		foreach (var key in new[]
 			{
 				"mode", "device", "selection", "style", "showPercentage", "showName", "showChargingBadge", "colorMode",
-				"chargingColor", "thresholds", "color", "backgroundColor",
+				"chargingColor", "thresholds", "color", "backgroundColor"
 			})
 		{
-			if (host.FindById(key)?.Property(UiConfigProperties.Value) is { } value && value.ValueKind != JsonValueKind.Null)
+			if (host.FindById(key)?.Property(UiConfigProperties.Value) is { } value
+				&& value.ValueKind != JsonValueKind.Null)
 			{
 				data[key] = value;
 			}

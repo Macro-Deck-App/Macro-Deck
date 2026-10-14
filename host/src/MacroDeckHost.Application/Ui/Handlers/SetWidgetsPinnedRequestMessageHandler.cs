@@ -58,9 +58,11 @@ public class SetWidgetsPinnedRequestMessageHandler
 	}
 
 	private static SetWidgetsPinnedResponse ValidationError(LocalizedText message)
-		=> new()
+	{
+		return new SetWidgetsPinnedResponse
 		{
 			Success = false,
 			Error = new TransportError { Code = "VALIDATION_ERROR", Message = message }
 		};
+	}
 }

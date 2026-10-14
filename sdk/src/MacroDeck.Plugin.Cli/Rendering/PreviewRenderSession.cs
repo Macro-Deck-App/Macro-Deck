@@ -34,7 +34,8 @@ internal static class PreviewRenderSession
 			spec = options.Artifact is { } artifact
 				? await PluginLaunchSpec.ForArtifactAsync(artifact, cancellationToken).ConfigureAwait(false)
 				: options.Project is { } project
-					? await PluginSubjectResolver.ResolveProjectAsync(project, console, cancellationToken).ConfigureAwait(false)
+					? await PluginSubjectResolver.ResolveProjectAsync(project, console, cancellationToken)
+						.ConfigureAwait(false)
 					: PluginSubjectResolver.ResolveExecutable(options.Executable!);
 		}
 		catch (PluginSubjectException exception)
@@ -70,8 +71,16 @@ internal static class PreviewRenderSession
 
 		await using (plugin.ConfigureAwait(false))
 		{
-			return await RenderAsync(console, options, explicitSizes, videoStreamImage, browser, session, previews,
-				screenshotterFactory, cancellationToken).ConfigureAwait(false);
+			return await RenderAsync(console,
+					options,
+					explicitSizes,
+					videoStreamImage,
+					browser,
+					session,
+					previews,
+					screenshotterFactory,
+					cancellationToken)
+				.ConfigureAwait(false);
 		}
 	}
 
@@ -97,8 +106,9 @@ internal static class PreviewRenderSession
 		if (unknown.Count > 0)
 		{
 			console.WriteError("unknown-preview",
-				$"No preview matches '{string.Join("', '", unknown)}'. Available: " +
-				string.Join(", ", declared.Select(preview => preview.Scenario)) + ".");
+				$"No preview matches '{string.Join("', '", unknown)}'. Available: "
+				+ string.Join(", ", declared.Select(preview => preview.Scenario))
+				+ ".");
 			return ExitCode.UsageError;
 		}
 
@@ -121,14 +131,16 @@ internal static class PreviewRenderSession
 			}
 			catch (Exception exception) when (exception is PluginTestTimeoutException or PluginProcessExitedException)
 			{
-				console.WriteError("preview-failed", $"'{preview.Scenario}' could not be rendered: {exception.Message}");
+				console.WriteError("preview-failed",
+					$"'{preview.Scenario}' could not be rendered: {exception.Message}");
 				failures++;
 				continue;
 			}
 
 			if (!outcome.Accepted)
 			{
-				console.WriteError("preview-failed", $"'{preview.Scenario}' could not be rendered: {outcome.FailureReason}");
+				console.WriteError("preview-failed",
+					$"'{preview.Scenario}' could not be rendered: {outcome.FailureReason}");
 				failures++;
 				continue;
 			}
@@ -145,9 +157,13 @@ internal static class PreviewRenderSession
 
 					try
 					{
-						await screenshotter.CaptureAsync(
-							new PreviewShot(PreviewScene.Build(root, size, options, resources, translations, videoStreamImage), size, options.Scale, target),
-							cancellationToken).ConfigureAwait(false);
+						await screenshotter.CaptureAsync(new PreviewShot(
+									PreviewScene.Build(root, size, options, resources, translations, videoStreamImage),
+									size,
+									options.Scale,
+									target),
+								cancellationToken)
+							.ConfigureAwait(false);
 						console.Info($"Wrote {CliText.DisplayPath(target)}");
 						written++;
 					}
@@ -177,14 +193,18 @@ internal static class PreviewRenderSession
 			}
 		}
 
-		console.Info($"Rendered {written} image(s) to {CliText.DisplayPath(options.Output)}" +
-			(skipped > 0 ? $", skipped {skipped} preview(s) that are not widgets." : "."));
+		console.Info($"Rendered {written} image(s) to {CliText.DisplayPath(options.Output)}"
+			+ (skipped > 0 ? $", skipped {skipped} preview(s) that are not widgets." : "."));
 
 		return failures == 0 ? ExitCode.Success : ExitCode.SubjectInvalid;
 	}
 
-	private static async Task<IPreviewScreenshotter> StartChromeAsync(string browser, CancellationToken cancellationToken)
-		=> await ChromeScreenshotter.StartAsync(browser, cancellationToken).ConfigureAwait(false);
+	private static async Task<IPreviewScreenshotter> StartChromeAsync(
+		string browser,
+		CancellationToken cancellationToken)
+	{
+		return await ChromeScreenshotter.StartAsync(browser, cancellationToken).ConfigureAwait(false);
+	}
 
 	private static Dictionary<string, string> CollectResources(PluginSessionView session, JsonElement root)
 	{
@@ -218,8 +238,8 @@ internal static class PreviewRenderSession
 		foreach (var filter in filters)
 		{
 			var matches = declared
-				.Where(preview => string.Equals(preview.Id, filter, StringComparison.Ordinal) ||
-					string.Equals(preview.Scenario, filter, StringComparison.OrdinalIgnoreCase))
+				.Where(preview => string.Equals(preview.Id, filter, StringComparison.Ordinal)
+					|| string.Equals(preview.Scenario, filter, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
 			if (matches.Count == 0)
@@ -233,28 +253,34 @@ internal static class PreviewRenderSession
 		return selected;
 	}
 
-	private static bool TryValidate(CliConsole console, PreviewRenderOptions options, out List<PreviewSize> sizes,
+	private static bool TryValidate(
+		CliConsole console,
+		PreviewRenderOptions options,
+		out List<PreviewSize> sizes,
 		out string? videoStreamImage)
 	{
 		sizes = [];
 		videoStreamImage = null;
 
-		var selectors = new[] { options.Project, options.Executable, options.Artifact }.Count(value => value is not null);
+		var selectors
+			= new[] { options.Project, options.Executable, options.Artifact }.Count(value => value is not null);
 		if (selectors != 1)
 		{
-			console.WriteError("invalid-selector-count", "Specify exactly one of --project, --executable or --artifact.");
+			console.WriteError("invalid-selector-count",
+				"Specify exactly one of --project, --executable or --artifact.");
 			return false;
 		}
 
-		foreach (var (values, cells, flag) in new[] { (options.Sizes, false, "--size"), (options.Cells, true, "--cells") })
+		foreach (var (values, cells, flag) in new[]
+			{ (options.Sizes, false, "--size"), (options.Cells, true, "--cells") })
 		{
 			foreach (var value in values)
 			{
 				if (!PreviewSize.TryParse(value, cells, out var size))
 				{
 					console.WriteError("invalid-size",
-						$"'{value}' is not a valid {flag} value. Expected WIDTHxHEIGHT, each 1 to {PreviewMetrics.MaxPixels}" +
-						(cells ? " cells." : " pixels."));
+						$"'{value}' is not a valid {flag} value. Expected WIDTHxHEIGHT, each 1 to {PreviewMetrics.MaxPixels}"
+						+ (cells ? " cells." : " pixels."));
 					return false;
 				}
 
@@ -280,7 +306,8 @@ internal static class PreviewRenderSession
 			return false;
 		}
 
-		if (options.VideoStreamImage is { } imagePath && !VideoStreamStill.TryRead(console, imagePath, out videoStreamImage))
+		if (options.VideoStreamImage is { } imagePath
+			&& !VideoStreamStill.TryRead(console, imagePath, out videoStreamImage))
 		{
 			return false;
 		}
@@ -289,7 +316,9 @@ internal static class PreviewRenderSession
 	}
 
 	private static bool IsColor(string value)
-		=> value.Length > 0 &&
-			(value.All(char.IsAsciiLetter) ||
-				(value[0] == '#' && value.Length is 4 or 5 or 7 or 9 && value.Skip(1).All(char.IsAsciiHexDigit)));
+	{
+		return value.Length > 0
+			&& (value.All(char.IsAsciiLetter)
+				|| value[0] == '#' && value.Length is 4 or 5 or 7 or 9 && value.Skip(1).All(char.IsAsciiHexDigit));
+	}
 }

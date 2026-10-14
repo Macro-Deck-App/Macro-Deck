@@ -10,64 +10,73 @@ namespace MacroDeck.Plugin.Protocol.Handshake;
 /// </summary>
 public static class ProtocolDescriptorFactory
 {
-	public static PluginProtocolDescriptor CreateProtocolDescriptor() => new()
+	public static PluginProtocolDescriptor CreateProtocolDescriptor()
 	{
-		SupportedVersions = ProtocolVersions.Supported,
-		CapabilityKinds = CapabilityKinds.All,
-		Limits = CreateLimitsDescriptor(),
-		Timeouts = CreateTimeoutsDescriptor()
-	};
+		return new PluginProtocolDescriptor
+		{
+			SupportedVersions = ProtocolVersions.Supported,
+			CapabilityKinds = CapabilityKinds.All,
+			Limits = CreateLimitsDescriptor(),
+			Timeouts = CreateTimeoutsDescriptor()
+		};
+	}
 
-	public static PluginProtocolLimitsDescriptor CreateLimitsDescriptor() => new()
+	public static PluginProtocolLimitsDescriptor CreateLimitsDescriptor()
 	{
-		MaxMessageBytes = ProtocolLimits.MaxMessageBytes,
-		MaxAssetBytes = ProtocolLimits.MaxAssetBytes,
-		MaxAssetChunkBytes = ProtocolLimits.MaxAssetChunkBytes,
-		MaxInboundQueueDepth = ProtocolLimits.MaxInboundQueueDepth,
-		MaxOutboundQueueDepth = ProtocolLimits.MaxOutboundQueueDepth,
-		QueueHighWatermark = ProtocolLimits.QueueHighWatermark,
-		QueueLowWatermark = ProtocolLimits.QueueLowWatermark,
-		MaxConcurrentInvocations = ProtocolLimits.MaxConcurrentInvocations,
-		MaxDeclaredCapabilities = ProtocolLimits.MaxDeclaredCapabilities,
-		MaxIdempotencyKeyLength = ProtocolLimits.MaxIdempotencyKeyLength,
-		MaxErrorMessageLength = ProtocolLimits.MaxErrorMessageLength,
-		MaxErrorDetailEntries = ProtocolLimits.MaxErrorDetailEntries,
-		MaxJsonDepth = ProtocolLimits.MaxJsonDepth,
-		MaxSessionsPerPlugin = ProtocolLimits.MaxSessionsPerPlugin,
-		MaxLogEventsPerBatch = ProtocolLimits.MaxLogEventsPerBatch,
-		MaxLogMessageLength = ProtocolLimits.MaxLogMessageLength,
-		MaxLogPropertiesPerEvent = ProtocolLimits.MaxLogPropertiesPerEvent,
-		MaxLogPropertyNameLength = ProtocolLimits.MaxLogPropertyNameLength,
-		MaxLogPropertyValueLength = ProtocolLimits.MaxLogPropertyValueLength,
-		MaxLogSourceContextLength = ProtocolLimits.MaxLogSourceContextLength,
-		MaxLogExceptionLength = ProtocolLimits.MaxLogExceptionLength,
-		MaxLogExceptionDepth = ProtocolLimits.MaxLogExceptionDepth,
-		MaxLogInboundQueueDepth = ProtocolLimits.MaxLogInboundQueueDepth,
-		MaxLogEventsPerSecond = ProtocolLimits.MaxLogEventsPerSecond,
-		MaxLogEventBurst = ProtocolLimits.MaxLogEventBurst,
-		MaxUiTreeBytes = ProtocolLimits.MaxUiTreeBytes,
-		MaxUiPatchBytes = ProtocolLimits.MaxUiPatchBytes,
-		MaxUiNodesPerTree = ProtocolLimits.MaxUiNodesPerTree,
-		MaxUiUpdatesPerSecond = ProtocolLimits.MaxUiUpdatesPerSecond,
-		MaxUiUpdateBurst = ProtocolLimits.MaxUiUpdateBurst,
-		MaxUiResourceBytes = ProtocolLimits.MaxUiResourceBytes,
-		MaxUiResourceBytesPerPlugin = ProtocolLimits.MaxUiResourceBytesPerPlugin,
-		MaxUiResourcesPerPlugin = ProtocolLimits.MaxUiResourcesPerPlugin,
-		MaxUiAttachmentsPerSession = ProtocolLimits.MaxUiAttachmentsPerSession,
-		MaxUiSessionsPerProvider = ProtocolLimits.MaxUiSessionsPerProvider,
-		MaxUiWidgetSessionsPerProvider = ProtocolLimits.MaxUiWidgetSessionsPerProvider,
-		MaxColorWatches = ProtocolLimits.MaxColorWatches
-	};
+		return new PluginProtocolLimitsDescriptor
+		{
+			MaxMessageBytes = ProtocolLimits.MaxMessageBytes,
+			MaxAssetBytes = ProtocolLimits.MaxAssetBytes,
+			MaxAssetChunkBytes = ProtocolLimits.MaxAssetChunkBytes,
+			MaxInboundQueueDepth = ProtocolLimits.MaxInboundQueueDepth,
+			MaxOutboundQueueDepth = ProtocolLimits.MaxOutboundQueueDepth,
+			QueueHighWatermark = ProtocolLimits.QueueHighWatermark,
+			QueueLowWatermark = ProtocolLimits.QueueLowWatermark,
+			MaxConcurrentInvocations = ProtocolLimits.MaxConcurrentInvocations,
+			MaxDeclaredCapabilities = ProtocolLimits.MaxDeclaredCapabilities,
+			MaxIdempotencyKeyLength = ProtocolLimits.MaxIdempotencyKeyLength,
+			MaxErrorMessageLength = ProtocolLimits.MaxErrorMessageLength,
+			MaxErrorDetailEntries = ProtocolLimits.MaxErrorDetailEntries,
+			MaxJsonDepth = ProtocolLimits.MaxJsonDepth,
+			MaxSessionsPerPlugin = ProtocolLimits.MaxSessionsPerPlugin,
+			MaxLogEventsPerBatch = ProtocolLimits.MaxLogEventsPerBatch,
+			MaxLogMessageLength = ProtocolLimits.MaxLogMessageLength,
+			MaxLogPropertiesPerEvent = ProtocolLimits.MaxLogPropertiesPerEvent,
+			MaxLogPropertyNameLength = ProtocolLimits.MaxLogPropertyNameLength,
+			MaxLogPropertyValueLength = ProtocolLimits.MaxLogPropertyValueLength,
+			MaxLogSourceContextLength = ProtocolLimits.MaxLogSourceContextLength,
+			MaxLogExceptionLength = ProtocolLimits.MaxLogExceptionLength,
+			MaxLogExceptionDepth = ProtocolLimits.MaxLogExceptionDepth,
+			MaxLogInboundQueueDepth = ProtocolLimits.MaxLogInboundQueueDepth,
+			MaxLogEventsPerSecond = ProtocolLimits.MaxLogEventsPerSecond,
+			MaxLogEventBurst = ProtocolLimits.MaxLogEventBurst,
+			MaxUiTreeBytes = ProtocolLimits.MaxUiTreeBytes,
+			MaxUiPatchBytes = ProtocolLimits.MaxUiPatchBytes,
+			MaxUiNodesPerTree = ProtocolLimits.MaxUiNodesPerTree,
+			MaxUiUpdatesPerSecond = ProtocolLimits.MaxUiUpdatesPerSecond,
+			MaxUiUpdateBurst = ProtocolLimits.MaxUiUpdateBurst,
+			MaxUiResourceBytes = ProtocolLimits.MaxUiResourceBytes,
+			MaxUiResourceBytesPerPlugin = ProtocolLimits.MaxUiResourceBytesPerPlugin,
+			MaxUiResourcesPerPlugin = ProtocolLimits.MaxUiResourcesPerPlugin,
+			MaxUiAttachmentsPerSession = ProtocolLimits.MaxUiAttachmentsPerSession,
+			MaxUiSessionsPerProvider = ProtocolLimits.MaxUiSessionsPerProvider,
+			MaxUiWidgetSessionsPerProvider = ProtocolLimits.MaxUiWidgetSessionsPerProvider,
+			MaxColorWatches = ProtocolLimits.MaxColorWatches
+		};
+	}
 
-	public static PluginProtocolTimeoutsDescriptor CreateTimeoutsDescriptor() => new()
+	public static PluginProtocolTimeoutsDescriptor CreateTimeoutsDescriptor()
 	{
-		Handshake = ProtocolTimeouts.Handshake,
-		DefaultRequest = ProtocolTimeouts.DefaultRequest,
-		CapabilityInvoke = ProtocolTimeouts.CapabilityInvoke,
-		AssetUpload = ProtocolTimeouts.AssetUpload,
-		KeepAliveInterval = ProtocolTimeouts.KeepAliveInterval,
-		KeepAliveTimeout = ProtocolTimeouts.KeepAliveTimeout,
-		SessionResumeWindow = ProtocolTimeouts.SessionResumeWindow,
-		GracefulClose = ProtocolTimeouts.GracefulClose
-	};
+		return new PluginProtocolTimeoutsDescriptor
+		{
+			Handshake = ProtocolTimeouts.Handshake,
+			DefaultRequest = ProtocolTimeouts.DefaultRequest,
+			CapabilityInvoke = ProtocolTimeouts.CapabilityInvoke,
+			AssetUpload = ProtocolTimeouts.AssetUpload,
+			KeepAliveInterval = ProtocolTimeouts.KeepAliveInterval,
+			KeepAliveTimeout = ProtocolTimeouts.KeepAliveTimeout,
+			SessionResumeWindow = ProtocolTimeouts.SessionResumeWindow,
+			GracefulClose = ProtocolTimeouts.GracefulClose
+		};
+	}
 }

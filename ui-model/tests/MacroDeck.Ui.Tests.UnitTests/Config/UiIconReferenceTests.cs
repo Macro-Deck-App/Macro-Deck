@@ -9,8 +9,10 @@ public class UiIconReferenceTests
 {
 	[Test]
 	public void A_plugin_icon_names_the_pack_key_and_the_icon_name()
-		=> Assert.That(UiIconReference.PluginIcon("logos", "spotify"),
+	{
+		Assert.That(UiIconReference.PluginIcon("logos", "spotify"),
 			Is.EqualTo(new UiIconReference("plugin-icon", "logos/spotify")));
+	}
 
 	[TestCase("")]
 	[TestCase("Logos")]
@@ -19,15 +21,19 @@ public class UiIconReferenceTests
 	[TestCase("lo/gos")]
 	[TestCase("a1234567890123456789012345678901234567890123456789012345678901234")]
 	public void A_key_that_is_not_a_bundled_pack_key_is_refused(string key)
-		=> Assert.That(() => UiIconReference.PluginIcon(key, "spotify"),
+	{
+		Assert.That(() => UiIconReference.PluginIcon(key, "spotify"),
 			Throws.ArgumentException.With.Property(nameof(ArgumentException.ParamName)).EqualTo("key"));
+	}
 
 	[TestCase("")]
 	[TestCase(" ")]
 	[TestCase("brand/spotify")]
 	public void A_blank_name_or_one_with_a_slash_is_refused(string name)
-		=> Assert.That(() => UiIconReference.PluginIcon("logos", name),
+	{
+		Assert.That(() => UiIconReference.PluginIcon("logos", name),
 			Throws.ArgumentException.With.Property(nameof(ArgumentException.ParamName)).EqualTo("name"));
+	}
 
 	[Test]
 	public void A_plugin_icon_default_travels_as_an_ordinary_typed_icon_reference()

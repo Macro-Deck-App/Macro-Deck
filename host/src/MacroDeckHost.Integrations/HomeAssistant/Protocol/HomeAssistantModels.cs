@@ -62,9 +62,9 @@ internal sealed record HomeAssistantEntityState(string EntityId, string State, J
 
 	public IReadOnlyList<string> ReadStringList(string name)
 	{
-		if (Attributes.ValueKind != JsonValueKind.Object ||
-			!Attributes.TryGetProperty(name, out var value) ||
-			value.ValueKind != JsonValueKind.Array)
+		if (Attributes.ValueKind != JsonValueKind.Object
+			|| !Attributes.TryGetProperty(name, out var value)
+			|| value.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -82,11 +82,13 @@ internal sealed record HomeAssistantEntityState(string EntityId, string State, J
 	}
 
 	private string? ReadString(string name)
-		=> Attributes.ValueKind == JsonValueKind.Object &&
-			Attributes.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return Attributes.ValueKind == JsonValueKind.Object
+			&& Attributes.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 }
 
 internal sealed record HomeAssistantAreaInfo(string AreaId, string Name);

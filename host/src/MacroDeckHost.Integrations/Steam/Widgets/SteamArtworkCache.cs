@@ -54,9 +54,15 @@ internal sealed partial class SteamArtworkCache : IDisposable
 
 	public event EventHandler? Changed;
 
-	public UiResource? Find(int appId) => Find(CoverName(appId));
+	public UiResource? Find(int appId)
+	{
+		return Find(CoverName(appId));
+	}
 
-	public UiResource? FindAvatar(string? url) => AvatarName(url) is { } name ? Find(name) : null;
+	public UiResource? FindAvatar(string? url)
+	{
+		return AvatarName(url) is { } name ? Find(name) : null;
+	}
 
 	public void Track(int appId)
 	{
@@ -164,10 +170,15 @@ internal sealed partial class SteamArtworkCache : IDisposable
 	}
 
 	internal static HttpClient CreateClient()
-		=> IntegrationHttp.CreateClient(TimeSpan.FromSeconds(15), PinToTheCdn);
+	{
+		return IntegrationHttp.CreateClient(TimeSpan.FromSeconds(15), PinToTheCdn);
+	}
 
 	// Redirects stay off so a response can never move the request away from the pinned CDN host.
-	internal static void PinToTheCdn(SocketsHttpHandler handler) => handler.AllowAutoRedirect = false;
+	internal static void PinToTheCdn(SocketsHttpHandler handler)
+	{
+		handler.AllowAutoRedirect = false;
+	}
 
 	internal static Uri? UriFor(int appId)
 	{
@@ -178,29 +189,40 @@ internal sealed partial class SteamArtworkCache : IDisposable
 	}
 
 	internal static bool IsAllowed(Uri uri)
-		=> uri.Scheme == Uri.UriSchemeHttps &&
-			uri.IsDefaultPort &&
-			string.IsNullOrEmpty(uri.UserInfo) &&
-			string.Equals(uri.Host, AllowedHost, StringComparison.OrdinalIgnoreCase) &&
-			uri.AbsolutePath.StartsWith("/steam/apps/", StringComparison.Ordinal);
+	{
+		return uri.Scheme == Uri.UriSchemeHttps
+			&& uri.IsDefaultPort
+			&& string.IsNullOrEmpty(uri.UserInfo)
+			&& string.Equals(uri.Host, AllowedHost, StringComparison.OrdinalIgnoreCase)
+			&& uri.AbsolutePath.StartsWith("/steam/apps/", StringComparison.Ordinal);
+	}
 
 	internal static bool IsAllowedAvatar(Uri uri)
-		=> uri.Scheme == Uri.UriSchemeHttps &&
-			uri.IsDefaultPort &&
-			string.IsNullOrEmpty(uri.UserInfo) &&
-			string.IsNullOrEmpty(uri.Query) &&
-			AvatarHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase) &&
-			AvatarPath().IsMatch(uri.AbsolutePath);
+	{
+		return uri.Scheme == Uri.UriSchemeHttps
+			&& uri.IsDefaultPort
+			&& string.IsNullOrEmpty(uri.UserInfo)
+			&& string.IsNullOrEmpty(uri.Query)
+			&& AvatarHosts.Contains(uri.Host, StringComparer.OrdinalIgnoreCase)
+			&& AvatarPath().IsMatch(uri.AbsolutePath);
+	}
 
 	internal static string? AvatarName(string? url)
-		=> Uri.TryCreate(url, UriKind.Absolute, out var uri) && IsAllowedAvatar(uri)
+	{
+		return Uri.TryCreate(url, UriKind.Absolute, out var uri) && IsAllowedAvatar(uri)
 			? $"avatar-{uri.AbsolutePath[1..41].ToLowerInvariant()}"
 			: null;
+	}
 
 	internal static bool IsJpeg(byte[] bytes)
-		=> bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+	{
+		return bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
+	}
 
-	private static string CoverName(int appId) => $"cover-{appId.ToString(CultureInfo.InvariantCulture)}";
+	private static string CoverName(int appId)
+	{
+		return $"cover-{appId.ToString(CultureInfo.InvariantCulture)}";
+	}
 
 	[GeneratedRegex("^/[0-9a-fA-F]{40}_medium\\.jpg$", RegexOptions.CultureInvariant)]
 	private static partial Regex AvatarPath();
@@ -324,8 +346,8 @@ internal sealed partial class SteamArtworkCache : IDisposable
 				return buffer.ToArray();
 			}
 		}
-		catch (Exception exception) when (exception is HttpRequestException or IOException ||
-			(exception is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception exception) when (exception is HttpRequestException or IOException
+			|| exception is TaskCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			_logger.Debug(exception, "Steam artwork could not be fetched");
 			return null;

@@ -38,13 +38,12 @@ internal sealed class SetSourceFilterActionDefinition : IDynamicOptionsActionDef
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(SourceParameter,
-			label: AppStrings.Integrations.Obs.Params.Source(),
+			AppStrings.Integrations.Obs.Params.Source(),
 			required: true),
 		ActionParameter.DynamicChoice(FilterParameter,
-			label: AppStrings.Integrations.Obs.Params.Filter(),
+			AppStrings.Integrations.Obs.Params.Filter(),
 			required: true),
 		ActionParameter.Choice(ModeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = ModeToggle, Label = AppStrings.Integrations.Obs.Params.ModeToggle() },
@@ -53,18 +52,21 @@ internal sealed class SetSourceFilterActionDefinition : IDynamicOptionsActionDef
 				new ActionParameterOption
 					{ Value = ModeDisable, Label = AppStrings.Integrations.Obs.Actions.SetSourceFilter.ModeDisable() }
 			],
-			label: AppStrings.Integrations.Obs.Params.Mode(),
+			AppStrings.Integrations.Obs.Params.Mode(),
 			defaultValue: ModeToggle)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public async Task<ActionStateSnapshot?> GetActionStateAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
 	{
-		if (parameters.GetValueOrDefault(SourceParameter)?.ToString() is not { Length: > 0 } source ||
-			parameters.GetValueOrDefault(FilterParameter)?.ToString() is not { Length: > 0 } filter)
+		if (parameters.GetValueOrDefault(SourceParameter)?.ToString() is not { Length: > 0 } source
+			|| parameters.GetValueOrDefault(FilterParameter)?.ToString() is not { Length: > 0 } filter)
 		{
 			return null;
 		}
@@ -88,9 +90,9 @@ internal sealed class SetSourceFilterActionDefinition : IDynamicOptionsActionDef
 
 		if (connection is not null)
 		{
-			if (context.ParameterName == FilterParameter &&
-				context.CurrentParameters.GetValueOrDefault(SourceParameter) is string source &&
-				!string.IsNullOrWhiteSpace(source))
+			if (context.ParameterName == FilterParameter
+				&& context.CurrentParameters.GetValueOrDefault(SourceParameter) is string source
+				&& !string.IsNullOrWhiteSpace(source))
 			{
 				values = await connection.GetSourceFilterNamesAsync(source);
 			}
@@ -126,10 +128,10 @@ internal sealed class SetSourceFilterActionDefinition : IDynamicOptionsActionDef
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SourceParameter) is not string source ||
-				string.IsNullOrWhiteSpace(source) ||
-				context.Parameters.GetValueOrDefault(FilterParameter) is not string filter ||
-				string.IsNullOrWhiteSpace(filter))
+			if (context.Parameters.GetValueOrDefault(SourceParameter) is not string source
+				|| string.IsNullOrWhiteSpace(source)
+				|| context.Parameters.GetValueOrDefault(FilterParameter) is not string filter
+				|| string.IsNullOrWhiteSpace(filter))
 			{
 				_logger.Warning("OBS filter action skipped: source or filter not selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,

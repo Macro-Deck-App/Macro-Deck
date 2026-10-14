@@ -93,7 +93,7 @@ internal sealed class MeldIntegrationTests
 	[Test]
 	public async Task Everything_but_the_connection_flag_is_unknown_while_disconnected()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await _integration.ReadAsync("meld-is-connected", CancellationToken.None)).Value,
 				Is.EqualTo(false));
@@ -276,12 +276,14 @@ internal sealed class MeldIntegrationTests
 	}
 
 	private static EventOptionsContext Options(string eventId, string parameterName)
-		=> new()
+	{
+		return new EventOptionsContext
 		{
 			EventId = eventId,
 			ParameterName = parameterName,
 			CurrentParameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 		};
+	}
 
 	private sealed class FakeContext : IIntegrationContext
 	{
@@ -313,9 +315,15 @@ internal sealed class MeldIntegrationTests
 
 	private sealed class NullVariableApi : IVariableApi
 	{
-		public Task<IReadOnlyList<VariableHandle>> GetAllAsync() => Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		public Task<IReadOnlyList<VariableHandle>> GetAllAsync()
+		{
+			return Task.FromResult<IReadOnlyList<VariableHandle>>([]);
+		}
 
-		public Task<VariableHandle?> GetByNameAsync(string name) => Task.FromResult<VariableHandle?>(null);
+		public Task<VariableHandle?> GetByNameAsync(string name)
+		{
+			return Task.FromResult<VariableHandle?>(null);
+		}
 
 		public Task<VariableHandle> CreateAsync(
 			string name,
@@ -323,14 +331,22 @@ internal sealed class MeldIntegrationTests
 			object? initialValue = null,
 			int? decimalPlaces = null,
 			string? definitionId = null)
-			=> Task.FromResult(new VariableHandle(Guid.NewGuid(), name, type, initialValue, decimalPlaces)
+		{
+			return Task.FromResult(new VariableHandle(Guid.NewGuid(), name, type, initialValue, decimalPlaces)
 			{
 				DefinitionId = definitionId
 			});
+		}
 
-		public Task SetValueAsync(Guid variableId, object? value) => Task.CompletedTask;
+		public Task SetValueAsync(Guid variableId, object? value)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task DeleteAsync(Guid variableId) => Task.CompletedTask;
+		public Task DeleteAsync(Guid variableId)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class FakeConfig : IIntegrationConfig
@@ -352,13 +368,19 @@ internal sealed class MeldIntegrationTests
 		}
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>(_entries.ToList());
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		{
+			return Task.FromResult(_strings.GetValueOrDefault((entryId, key)));
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
 		public Task SetStringAsync(
 			Guid entryId,
@@ -370,10 +392,13 @@ internal sealed class MeldIntegrationTests
 			return Task.CompletedTask;
 		}
 
-		public Task SetSecretAsync(Guid entryId,
+		public Task SetSecretAsync(
+			Guid entryId,
 			string key,
 			string value,
 			CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

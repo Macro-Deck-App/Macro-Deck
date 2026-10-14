@@ -21,8 +21,12 @@ internal sealed class IntegrationFolderViewProviderContext : IFolderViewProvider
 	public Task<FolderViewRegistration> RegisterFolderViewAsync(
 		FolderViewDescriptor folderView,
 		CancellationToken cancellationToken = default)
-		=> _registry.Register(_integrationId, folderView, cancellationToken);
+	{
+		return _registry.Register(_integrationId, folderView, cancellationToken);
+	}
 
 	public Task UnregisterFolderViewAsync(string folderViewId, CancellationToken cancellationToken = default)
-		=> _registry.Unregister(_integrationId, folderViewId, cancellationToken);
+	{
+		return _registry.Unregister(_integrationId, folderViewId, cancellationToken);
+	}
 }

@@ -53,13 +53,22 @@ internal sealed class MicrosoftCalendarAccount
 		set => Interlocked.Exchange(ref _notBeforeTicks, value.UtcTicks);
 	}
 
-	public bool IsSelected(string calendarId) => SelectedCalendarIds.Contains(calendarId);
+	public bool IsSelected(string calendarId)
+	{
+		return SelectedCalendarIds.Contains(calendarId);
+	}
 
 	public IReadOnlyCollection<string> UnreadableCalendarIds => _unreadable.Keys.ToList();
 
-	public void MarkUnreadable(string calendarId) => _unreadable[calendarId] = 0;
+	public void MarkUnreadable(string calendarId)
+	{
+		_unreadable[calendarId] = 0;
+	}
 
-	public void MarkReadable(string calendarId) => _unreadable.TryRemove(calendarId, out _);
+	public void MarkReadable(string calendarId)
+	{
+		_unreadable.TryRemove(calendarId, out _);
+	}
 }
 
 internal sealed record MicrosoftCalendarList(IReadOnlyList<CalendarInfo> Calendars, DateTimeOffset ReadAt);
@@ -91,12 +100,16 @@ internal sealed class MicrosoftCalendarAccountManager
 	public IReadOnlyList<CalendarAccount> CalendarAccounts => _calendarAccounts;
 
 	public MicrosoftCalendarAccount? Resolve(string accountId)
-		=> _accounts.FirstOrDefault(account => string.Equals(account.Id, accountId, StringComparison.Ordinal));
+	{
+		return _accounts.FirstOrDefault(account => string.Equals(account.Id, accountId, StringComparison.Ordinal));
+	}
 
 	public IReadOnlySet<string>? SelectionOf(string accountKey)
-		=> _accounts.FirstOrDefault(account =>
+	{
+		return _accounts.FirstOrDefault(account =>
 				string.Equals(account.AccountKey, accountKey, StringComparison.OrdinalIgnoreCase))
 			?.SelectedCalendarIds;
+	}
 
 	public async Task ReloadAsync(IIntegrationConfig config, CancellationToken cancellationToken = default)
 	{
@@ -139,22 +152,21 @@ internal sealed class MicrosoftCalendarAccountManager
 			issues.Add(new IntegrationIssue
 			{
 				Id = SignInIssuePrefix + account.Id,
-				Title = AppStrings.Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle(
-					account: account.DisplayName),
+				Title = AppStrings.Integrations.MicrosoftCalendar.Issues.SignInExpiredTitle(account.DisplayName),
 				Description = AppStrings.Integrations.MicrosoftCalendar.Issues.SignInExpiredDescription(),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.Twitch.Issues.ReconnectAction()
 			});
 		}
 
-		foreach (var account in _accounts.Where(a => !a.Tokens.NeedsReauthorization &&
-			(a.SelectedCalendarIds.Count == 0 || a.UnreadableCalendarIds.Count > 0)))
+		foreach (var account in _accounts.Where(a
+			=> !a.Tokens.NeedsReauthorization
+			&& (a.SelectedCalendarIds.Count == 0 || a.UnreadableCalendarIds.Count > 0)))
 		{
 			issues.Add(new IntegrationIssue
 			{
 				Id = UnreadableCalendarIssuePrefix + account.Id,
-				Title = AppStrings.Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle(
-					account: account.DisplayName),
+				Title = AppStrings.Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableTitle(account.DisplayName),
 				Description = AppStrings.Integrations.MicrosoftCalendar.Issues.CalendarsUnreadableDescription(),
 				Severity = IntegrationIssueSeverity.Warning
 			});
@@ -166,8 +178,7 @@ internal sealed class MicrosoftCalendarAccountManager
 			{
 				Id = DuplicateIssuePrefix + stale.EntryId.ToString("D"),
 				Title = AppStrings.Integrations.MicrosoftCalendar.Issues.DuplicateAccountTitle(),
-				Description = AppStrings.Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription(
-					title: stale.Title),
+				Description = AppStrings.Integrations.MicrosoftCalendar.Issues.DuplicateAccountDescription(stale.Title),
 				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
@@ -304,9 +315,14 @@ internal sealed class MicrosoftCalendarAccountManager
 	}
 
 	private static DateTimeOffset? ParseTimestamp(string? value)
-		=> DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+	{
+		return DateTimeOffset.TryParse(value,
+			CultureInfo.InvariantCulture,
+			DateTimeStyles.RoundtripKind,
+			out var parsed)
 			? parsed
 			: null;
+	}
 
 	private sealed record Candidate(
 		Guid EntryId,

@@ -37,7 +37,10 @@ internal sealed class BackupScheduleBackgroundServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _service.Dispose();
+	public void TearDown()
+	{
+		_service.Dispose();
+	}
 
 	[Test]
 	public async Task A_failing_schedule_check_is_retried_and_the_due_backup_still_runs()
@@ -103,7 +106,8 @@ internal sealed class BackupScheduleBackgroundServiceTests
 	{
 		public List<CreateBackupRequest> Requests { get; } = [];
 
-		public Task<Result<BackupDescriptor, BackupError>> Create(CreateBackupRequest request,
+		public Task<Result<BackupDescriptor, BackupError>> Create(
+			CreateBackupRequest request,
 			CancellationToken cancellationToken = default)
 		{
 			lock (Requests)
@@ -115,20 +119,37 @@ internal sealed class BackupScheduleBackgroundServiceTests
 		}
 
 		public Task<Result<IReadOnlyList<BackupDescriptor>, BackupError>> List(
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<BackupInspection, BackupError>> Inspect(BackupSourceRef source,
+		public Task<Result<BackupInspection, BackupError>> Inspect(
+			BackupSourceRef source,
 			string? recoveryKey,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<BackupDescriptor, BackupError>> Import(BackupSourceRef source,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+		public Task<Result<BackupDescriptor, BackupError>> Import(
+			BackupSourceRef source,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<BackupExportHandle, BackupError>> OpenExport(Guid backupId,
-			CancellationToken cancellationToken = default) => throw new NotSupportedException();
+		public Task<Result<BackupExportHandle, BackupError>> OpenExport(
+			Guid backupId,
+			CancellationToken cancellationToken = default)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<BackupError>> Delete(Guid backupId, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SchedulePreferences : IAppPreferenceService
@@ -138,64 +159,124 @@ internal sealed class BackupScheduleBackgroundServiceTests
 		public DateTimeOffset? LastRun { get; set; }
 
 
-		public Task<NativeUsbSettings> GetNativeUsb() => throw new NotSupportedException();
+		public Task<NativeUsbSettings> GetNativeUsb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NativeUsbSettings> SetNativeUsb(bool? enabled, IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
-			=> throw new NotSupportedException();
+		public Task<NativeUsbSettings> SetNativeUsb(
+			bool? enabled,
+			IReadOnlyList<RememberedUsbDevice>? rememberedDevices)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DeveloperSettings> GetDeveloper() => throw new NotSupportedException();
+		public Task<DeveloperSettings> GetDeveloper()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DeveloperSettings> SetDeveloper(bool? enabled) => throw new NotSupportedException();
+		public Task<DeveloperSettings> SetDeveloper(bool? enabled)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AppearanceSettings> GetAppearance() => throw new NotSupportedException();
+		public Task<AppearanceSettings> GetAppearance()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Guid> GetInstallationId() => throw new NotSupportedException();
+		public Task<Guid> GetInstallationId()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<byte[]> GetAdbDeviceIdKey() => throw new NotSupportedException();
+		public Task<byte[]> GetAdbDeviceIdKey()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LoggingSettings> GetLogging() => throw new NotSupportedException();
+		public Task<LoggingSettings> GetLogging()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel) => throw new NotSupportedException();
+		public Task<LoggingSettings> SetLogging(LogEntryLevel? minimumLevel)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> GetNetwork() => throw new NotSupportedException();
+		public Task<NetworkSettings> GetNetwork()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<NetworkSettings> SetNetwork(int? publicPort,
+		public Task<NetworkSettings> SetNetwork(
+			int? publicPort,
 			bool? tlsEnabled = null,
 			string? tlsMode = null,
 			int? tlsHttpsPort = null,
 			bool? discoveryEnabled = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> GetAdb() => throw new NotSupportedException();
+		public Task<AdbSettings> GetAdb()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<AdbSettings> SetAdb(bool? enabled,
+		public Task<AdbSettings> SetAdb(
+			bool? enabled,
 			string? executablePath,
 			bool? usbConnectionsEnabled,
 			string? defaultDeviceSerial,
 			bool? stopServerOnExit,
 			bool allowPlugins)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> GetOnboarding() => throw new NotSupportedException();
+		public Task<OnboardingSettings> GetOnboarding()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<OnboardingSettings> SetOnboarding(bool? pending) => throw new NotSupportedException();
+		public Task<OnboardingSettings> SetOnboarding(bool? pending)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> GetLockScreen() => throw new NotSupportedException();
+		public Task<LockScreenSettings> GetLockScreen()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LockScreenSettings> SetLockScreen(bool? enabled) => throw new NotSupportedException();
+		public Task<LockScreenSettings> SetLockScreen(bool? enabled)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ExtensionSettings> GetExtensions() => throw new NotSupportedException();
+		public Task<ExtensionSettings> GetExtensions()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<ExtensionSettings> SetExtensions(bool? storeEnabled,
+		public Task<ExtensionSettings> SetExtensions(
+			bool? storeEnabled,
 			bool? checkForUpdates,
 			bool? notifyOnUpdates,
 			int? refreshIntervalMinutes,
 			bool? autoUpdate = null,
-		bool? askForRatings = null)
-			=> throw new NotSupportedException();
+			bool? askForRatings = null)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<BackupSettings> GetBackups()
 		{
@@ -205,19 +286,33 @@ internal sealed class BackupScheduleBackgroundServiceTests
 				throw new ObjectDisposedException("SQLitePCL.sqlite3");
 			}
 
-			return Task.FromResult(new BackupSettings("daily", "03:00", DayOfWeek.Monday, 1, "keepLatest", 5, true, true));
+			return Task.FromResult(new BackupSettings("daily",
+				"03:00",
+				DayOfWeek.Monday,
+				1,
+				"keepLatest",
+				5,
+				true,
+				true));
 		}
 
-		public Task<BackupSettings> SetBackups(string? scheduleFrequency,
+		public Task<BackupSettings> SetBackups(
+			string? scheduleFrequency,
 			string? scheduleTimeOfDay,
 			string? scheduleDayOfWeek,
 			int? scheduleDayOfMonth,
 			string? retentionPolicy,
 			int? retentionKeepLatest,
 			bool? beforeHostUpdate,
-			bool? beforePluginUpdate) => throw new NotSupportedException();
+			bool? beforePluginUpdate)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<DateTimeOffset?> GetBackupScheduleLastRun() => Task.FromResult(LastRun);
+		public Task<DateTimeOffset?> GetBackupScheduleLastRun()
+		{
+			return Task.FromResult(LastRun);
+		}
 
 		public Task SetBackupScheduleLastRun(DateTimeOffset value)
 		{
@@ -225,12 +320,24 @@ internal sealed class BackupScheduleBackgroundServiceTests
 			return Task.CompletedTask;
 		}
 
-		public Task<LocalizationSettings> GetLocalization() => throw new NotSupportedException();
+		public Task<LocalizationSettings> GetLocalization()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<LocalizationSettings> SetLocalization(string? culture) => throw new NotSupportedException();
+		public Task<LocalizationSettings> SetLocalization(string? culture)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<string> GetTimeFormat() => throw new NotSupportedException();
+		public Task<string> GetTimeFormat()
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<string> SetTimeFormat(string? timeFormat) => throw new NotSupportedException();
+		public Task<string> SetTimeFormat(string? timeFormat)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

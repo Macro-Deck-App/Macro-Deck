@@ -30,12 +30,19 @@ internal sealed class ActionVariableTargets : IDisposable
 	public IntegrationVariableApi IntegrationVariables { get; }
 
 	public Task CreateUserVariable(string name, DomainVariableType type, object? value)
-		=> Service.CreateUserVariable(name, VariableScope.Global, null, type, value, null);
+	{
+		return Service.CreateUserVariable(name, VariableScope.Global, null, type, value, null);
+	}
 
-	public Task<VariableEntity?> Find(string name) => Service.Resolve(name, VariableScope.Global, null);
+	public Task<VariableEntity?> Find(string name)
+	{
+		return Service.Resolve(name, VariableScope.Global, null);
+	}
 
 	public async Task<object?> ValueOf(string name)
-		=> await Find(name) is { } entity ? VariableValueSerializer.Deserialize(entity.Type, entity.Value) : null;
+	{
+		return await Find(name) is { } entity ? VariableValueSerializer.Deserialize(entity.Type, entity.Value) : null;
+	}
 
 	public void Dispose()
 	{
@@ -45,7 +52,10 @@ internal sealed class ActionVariableTargets : IDisposable
 
 	private sealed class NullStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{

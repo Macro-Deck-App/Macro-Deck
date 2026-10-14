@@ -55,11 +55,13 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			StepId => await SubmitConnectionAsync(input, context, cancellationToken).ConfigureAwait(false),
 			_ => ConfigFlowResult.Error(ConnectionStep(context), Strings.UnknownStep())
 		};
+	}
 
 	private async Task<ConfigFlowResult> SubmitConnectionAsync(
 		IReadOnlyDictionary<string, object?> input,
@@ -91,9 +93,9 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 			fieldErrors[JellyfinConfigKeys.Url] = Strings.EnterValidUrl();
 		}
 
-		var reuseToken = method == JellyfinConfigKeys.AuthLogin &&
-			string.IsNullOrEmpty(password) &&
-			!string.IsNullOrEmpty(storedToken);
+		var reuseToken = method == JellyfinConfigKeys.AuthLogin
+			&& string.IsNullOrEmpty(password)
+			&& !string.IsNullOrEmpty(storedToken);
 
 		if (method == JellyfinConfigKeys.AuthApiKey && apiKey.Length == 0)
 		{
@@ -157,7 +159,9 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		}
 		catch (JellyfinAuthenticationException)
 		{
-			var field = method == JellyfinConfigKeys.AuthApiKey ? JellyfinConfigKeys.ApiKey : JellyfinConfigKeys.Password;
+			var field = method == JellyfinConfigKeys.AuthApiKey
+				? JellyfinConfigKeys.ApiKey
+				: JellyfinConfigKeys.Password;
 			return ConfigFlowResult.Error(ConnectionStep(context),
 				fieldErrors: new Dictionary<string, LocalizedText>
 				{
@@ -168,12 +172,12 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		}
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
-			return ConfigFlowResult.Error(ConnectionStep(context), Strings.ConnectionTimedOut(url: baseUri.ToString()));
+			return ConfigFlowResult.Error(ConnectionStep(context), Strings.ConnectionTimedOut(baseUri.ToString()));
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			_logger.Warning(ex, "Jellyfin connection test failed for {Url}", baseUri);
-			return ConfigFlowResult.Error(ConnectionStep(context), Strings.ConnectionFailed(url: baseUri.ToString()));
+			return ConfigFlowResult.Error(ConnectionStep(context), Strings.ConnectionFailed(baseUri.ToString()));
 		}
 
 		return ConfigFlowResult.Complete(name, values);
@@ -188,9 +192,9 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		}
 
 		var candidate = text.Contains("://", StringComparison.Ordinal) ? text : $"http://{text}";
-		if (!Uri.TryCreate(candidate, UriKind.Absolute, out var parsed) ||
-			(parsed.Scheme != Uri.UriSchemeHttp && parsed.Scheme != Uri.UriSchemeHttps) ||
-			string.IsNullOrEmpty(parsed.Host))
+		if (!Uri.TryCreate(candidate, UriKind.Absolute, out var parsed)
+			|| parsed.Scheme != Uri.UriSchemeHttp && parsed.Scheme != Uri.UriSchemeHttps
+			|| string.IsNullOrEmpty(parsed.Host))
 		{
 			return false;
 		}
@@ -200,7 +204,9 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 	}
 
 	private static string Read(IReadOnlyDictionary<string, object?> input, string key)
-		=> input.GetValueOrDefault(key) as string ?? string.Empty;
+	{
+		return input.GetValueOrDefault(key) as string ?? string.Empty;
+	}
 
 	private static ConfigFlowStep ConnectionStep(IConfigFlowContext context)
 	{
@@ -208,34 +214,34 @@ public sealed class JellyfinConfigFlow : IConfigFlow
 		if ((context as IConfigFlowEntryContext)?.EntryTitle is null)
 		{
 			fields.Add(ActionParameter.Text(JellyfinConfigKeys.ConfigurationName,
-				label: AppStrings.Integrations.Detail.ConfigurationNameLabel(),
+				AppStrings.Integrations.Detail.ConfigurationNameLabel(),
 				placeholder: AppStrings.Integrations.Detail.ConfigurationNamePlaceholder(),
 				required: true));
 		}
 
 		fields.AddRange([
 			ActionParameter.Url(JellyfinConfigKeys.Url,
-				label: Strings.UrlLabel(),
-				description: Strings.UrlDescription(),
-				placeholder: "http://192.168.1.10:8096",
-				required: true),
+				Strings.UrlLabel(),
+				Strings.UrlDescription(),
+				"http://192.168.1.10:8096",
+				true),
 			ActionParameter.Choice(JellyfinConfigKeys.AuthMethod,
 				[
 					new ActionParameterOption { Value = JellyfinConfigKeys.AuthApiKey, Label = Strings.AuthApiKey() },
 					new ActionParameterOption { Value = JellyfinConfigKeys.AuthLogin, Label = Strings.AuthLogin() }
 				],
-				label: Strings.AuthMethodLabel(),
+				Strings.AuthMethodLabel(),
 				defaultValue: JellyfinConfigKeys.AuthApiKey,
 				required: true),
 			ActionParameter.Secret(JellyfinConfigKeys.ApiKey,
-					label: Strings.ApiKeyLabel(),
-					description: Strings.ApiKeyDescription())
+					Strings.ApiKeyLabel(),
+					Strings.ApiKeyDescription())
 				.OnlyWhen(JellyfinConfigKeys.AuthMethod, JellyfinConfigKeys.AuthApiKey),
-			ActionParameter.Text(JellyfinConfigKeys.Username, label: Strings.UsernameLabel())
+			ActionParameter.Text(JellyfinConfigKeys.Username, Strings.UsernameLabel())
 				.OnlyWhen(JellyfinConfigKeys.AuthMethod, JellyfinConfigKeys.AuthLogin),
 			ActionParameter.Secret(JellyfinConfigKeys.Password,
-					label: Strings.PasswordLabel(),
-					description: Strings.PasswordDescription())
+					Strings.PasswordLabel(),
+					Strings.PasswordDescription())
 				.OnlyWhen(JellyfinConfigKeys.AuthMethod, JellyfinConfigKeys.AuthLogin)
 		]);
 

@@ -22,7 +22,9 @@ public class WidgetDataSchemaTests
 	}
 
 	private static string Describe(IReadOnlyList<WidgetDataProblem> problems)
-		=> string.Join("; ", problems.Select(p => $"{p.Pointer}:{p.Keyword}:{p.Message}"));
+	{
+		return string.Join("; ", problems.Select(p => $"{p.Pointer}:{p.Keyword}:{p.Message}"));
+	}
 
 	[Test]
 	public void Every_widget_type_has_a_schema_and_an_empty_object_validates()
@@ -193,7 +195,8 @@ public class WidgetDataSchemaTests
 	[TestCase("""{"icon":{"type":"icon-pack","reference":"0198bbbb-1111-2222-3333-444444444444"}}""", true)]
 	[TestCase("""{"icon":{"type":"plugin-asset","reference":"spotify:album/4aawyAB9vmqN3uQ7FjRGTy"}}""", true)]
 	[TestCase("""{"iconId":"0198bbbb-1111-2222-3333-444444444444"}""", true)]
-	public void Slider_icon_validates_including_a_non_GUID_reference_and_the_legacy_iconId(string json,
+	public void Slider_icon_validates_including_a_non_GUID_reference_and_the_legacy_iconId(
+		string json,
 		bool expectedValid)
 	{
 		var problems = Validate(WidgetTypeIds.Slider, json);

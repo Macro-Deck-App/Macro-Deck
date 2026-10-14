@@ -29,8 +29,9 @@ internal static class SteamRunningApp
 	{
 		foreach (var path in RegistryFiles(platform, steamRoot))
 		{
-			if (SteamLibrary.ReadFile(path) is not { } text ||
-				ValveKeyValues.TryParse(text)?.Find("Registry", "HKCU", "Software", "Valve", "Steam", "RunningAppID")
+			if (SteamLibrary.ReadFile(path) is not { } text
+				|| ValveKeyValues.TryParse(text)
+					?.Find("Registry", "HKCU", "Software", "Valve", "Steam", "RunningAppID")
 					?.Value is not { } value)
 			{
 				continue;
@@ -46,7 +47,10 @@ internal static class SteamRunningApp
 	{
 		if (platform.Os == SteamOs.MacOs)
 		{
-			yield return Path.Combine(platform.HomeDirectory, "Library", "Application Support", "Steam",
+			yield return Path.Combine(platform.HomeDirectory,
+				"Library",
+				"Application Support",
+				"Steam",
 				"registry.vdf");
 			yield break;
 		}
@@ -58,7 +62,11 @@ internal static class SteamRunningApp
 			yield return Path.Combine(steamRoot, "registry.vdf");
 		}
 
-		yield return Path.Combine(platform.HomeDirectory, ".var", "app", "com.valvesoftware.Steam", ".steam",
+		yield return Path.Combine(platform.HomeDirectory,
+			".var",
+			"app",
+			"com.valvesoftware.Steam",
+			".steam",
 			"registry.vdf");
 	}
 
@@ -70,9 +78,10 @@ internal static class SteamRunningApp
 		}
 
 		var arguments = commandLine.Split('\0');
-		if (!arguments.Any(argument => argument.EndsWith("/reaper", StringComparison.Ordinal) ||
-			argument.EndsWith("/SteamLaunch", StringComparison.Ordinal) ||
-			argument is "reaper" or "SteamLaunch"))
+		if (!arguments.Any(argument
+			=> argument.EndsWith("/reaper", StringComparison.Ordinal)
+			|| argument.EndsWith("/SteamLaunch", StringComparison.Ordinal)
+			|| argument is "reaper" or "SteamLaunch"))
 		{
 			return null;
 		}
@@ -80,9 +89,12 @@ internal static class SteamRunningApp
 		const string marker = "AppId=";
 		foreach (var argument in arguments)
 		{
-			if (argument.StartsWith(marker, StringComparison.Ordinal) &&
-				int.TryParse(argument.AsSpan(marker.Length), NumberStyles.None, CultureInfo.InvariantCulture, out var appId) &&
-				appId > 0)
+			if (argument.StartsWith(marker, StringComparison.Ordinal)
+				&& int.TryParse(argument.AsSpan(marker.Length),
+					NumberStyles.None,
+					CultureInfo.InvariantCulture,
+					out var appId)
+				&& appId > 0)
 			{
 				return appId;
 			}

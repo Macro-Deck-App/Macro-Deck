@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -25,7 +24,10 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		_reader = Task.Run(ReadLoopAsync);
 	}
 
-	public static async Task<CdpConnection> LaunchAsync(string browser, string profileDirectory, CancellationToken cancellationToken)
+	public static async Task<CdpConnection> LaunchAsync(
+		string browser,
+		string profileDirectory,
+		CancellationToken cancellationToken)
 	{
 		var start = new ProcessStartInfo(browser)
 		{
@@ -54,8 +56,8 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 			start.ArgumentList.Add("--no-sandbox");
 		}
 
-		var process = Process.Start(start) ??
-			throw new PreviewRenderException("browser-launch-failed", $"The browser '{browser}' did not start.");
+		var process = Process.Start(start)
+			?? throw new PreviewRenderException("browser-launch-failed", $"The browser '{browser}' did not start.");
 		_ = process.StandardOutput.ReadToEndAsync(CancellationToken.None);
 
 		try
@@ -72,7 +74,7 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		}
 		catch (Exception exception) when (exception is OperationCanceledException or WebSocketException)
 		{
-			process.Kill(entireProcessTree: true);
+			process.Kill(true);
 			cancellationToken.ThrowIfCancellationRequested();
 
 			throw new PreviewRenderException("browser-launch-failed",
@@ -80,19 +82,24 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		}
 	}
 
-	public async Task<JsonElement> SendAsync(string method, object? parameters, string? sessionId, CancellationToken cancellationToken)
+	public async Task<JsonElement> SendAsync(
+		string method,
+		object? parameters,
+		string? sessionId,
+		CancellationToken cancellationToken)
 	{
 		var id = Interlocked.Increment(ref _nextId);
 		var completion = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
 		_pending[id] = completion;
 
 		var message = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object?>
-		{
-			["id"] = id,
-			["method"] = method,
-			["params"] = parameters ?? new { },
-			["sessionId"] = sessionId
-		}.Where(pair => pair.Value is not null).ToDictionary(pair => pair.Key, pair => pair.Value));
+			{
+				["id"] = id,
+				["method"] = method,
+				["params"] = parameters ?? new { },
+				["sessionId"] = sessionId
+			}.Where(pair => pair.Value is not null)
+			.ToDictionary(pair => pair.Key, pair => pair.Value));
 
 		await _socket.SendAsync(message, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
 
@@ -107,7 +114,7 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 		{
 			if (!_process.HasExited)
 			{
-				_process.Kill(entireProcessTree: true);
+				_process.Kill(true);
 			}
 
 			await _process.WaitForExitAsync().ConfigureAwait(false);
@@ -132,7 +139,8 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 			}
 		}
 
-		throw new PreviewRenderException("browser-launch-failed", "The browser exited before it opened a debugging endpoint.");
+		throw new PreviewRenderException("browser-launch-failed",
+			"The browser exited before it opened a debugging endpoint.");
 	}
 
 	private async Task ReadLoopAsync()
@@ -150,8 +158,7 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 				{
 					received = await _socket.ReceiveAsync(buffer.AsMemory(), _stopping.Token).ConfigureAwait(false);
 					message.Write(buffer, 0, received.Count);
-				}
-				while (!received.EndOfMessage);
+				} while (!received.EndOfMessage);
 
 				if (received.MessageType == WebSocketMessageType.Close)
 				{
@@ -160,14 +167,16 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 
 				using var document = JsonDocument.Parse(message.ToArray());
 
-				if (!document.RootElement.TryGetProperty("id", out var id) || !_pending.TryRemove(id.GetInt32(), out var completion))
+				if (!document.RootElement.TryGetProperty("id", out var id)
+					|| !_pending.TryRemove(id.GetInt32(), out var completion))
 				{
 					continue;
 				}
 
 				if (document.RootElement.TryGetProperty("error", out var error))
 				{
-					completion.TrySetException(new PreviewRenderException("browser-protocol-error", error.GetRawText()));
+					completion.TrySetException(new PreviewRenderException("browser-protocol-error",
+						error.GetRawText()));
 				}
 				else
 				{
@@ -175,13 +184,16 @@ internal sealed partial class CdpConnection : IAsyncDisposable
 				}
 			}
 		}
-		catch (Exception exception) when (exception is OperationCanceledException or WebSocketException or ObjectDisposedException)
+		catch (Exception exception) when (exception is OperationCanceledException
+			or WebSocketException
+			or ObjectDisposedException)
 		{
 		}
 
 		foreach (var completion in _pending.Values)
 		{
-			completion.TrySetException(new PreviewRenderException("browser-closed", "The browser closed the connection."));
+			completion.TrySetException(new PreviewRenderException("browser-closed",
+				"The browser closed the connection."));
 		}
 	}
 

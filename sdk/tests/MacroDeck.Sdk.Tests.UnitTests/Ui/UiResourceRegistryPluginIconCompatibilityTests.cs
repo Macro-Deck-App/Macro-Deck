@@ -38,8 +38,8 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 	{
 		IIntegrationContext context = new ContextWrittenBeforeUiResources();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => context.UiResources.GetPluginIconAsync("logos", "spotify"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(() => context.UiResources.GetPluginIconAsync("logos", "spotify"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
@@ -69,8 +69,8 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 	{
 		IUiResourceRegistry registry = new RegistryWrittenBeforeBundledIcons();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
@@ -80,19 +80,23 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 	{
 		IIntegrationContext context = new ContextWrittenBeforeUiResources();
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => context.UiResources.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> context.UiResources.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.Unsupported));
 	}
 
 	[Test]
-	public async Task A_registry_written_before_the_artwork_size_existed_registers_the_full_size_cover_for_a_sized_request()
+	public async Task
+		A_registry_written_before_the_artwork_size_existed_registers_the_full_size_cover_for_a_sized_request()
 	{
 		var written = new RegistryWrittenBeforeTheArtworkSize();
 		IUiResourceRegistry registry = written;
 
-		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1", 256);
+		var handle = await registry.RegisterMusicPlayerArtworkAsync("cover",
+			"net.example.jukebox::default",
+			"cover-1",
+			256);
 
 		Assert.Multiple(() =>
 		{
@@ -114,15 +118,22 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 	{
 		public List<(string Name, string InstanceId, string ArtworkId)> Requests { get; } = [];
 
-		public Task<UiResource> RegisterAsync(string name,
+		public Task<UiResource> RegisterAsync(
+			string name,
 			ReadOnlyMemory<byte> content,
 			string mediaType,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(new UiResource { ResourceId = "test." + name });
+		{
+			return Task.FromResult(new UiResource { ResourceId = "test." + name });
+		}
 
-		public Task RemoveAsync(string name, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+		public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+			string name,
 			string instanceId,
 			string artworkId,
 			CancellationToken cancellationToken = default)
@@ -134,13 +145,19 @@ public class UiResourceRegistryPluginIconCompatibilityTests
 
 	private sealed class RegistryWrittenBeforeBundledIcons : IUiResourceRegistry
 	{
-		public Task<UiResource> RegisterAsync(string name,
+		public Task<UiResource> RegisterAsync(
+			string name,
 			ReadOnlyMemory<byte> content,
 			string mediaType,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(new UiResource { ResourceId = "test." + name });
+		{
+			return Task.FromResult(new UiResource { ResourceId = "test." + name });
+		}
 
-		public Task RemoveAsync(string name, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task RemoveAsync(string name, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class ContextWrittenBeforeUiResources : IIntegrationContext

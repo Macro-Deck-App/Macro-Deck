@@ -8,7 +8,8 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Issues;
 internal static class IssueDescriptorMapper
 {
 	public static IntegrationIssueDescriptorDto ToDto(IntegrationIssue issue)
-		=> new()
+	{
+		return new IntegrationIssueDescriptorDto
 		{
 			Id = issue.Id,
 			Title = PluginText.ToWire(issue.Title),
@@ -16,11 +17,14 @@ internal static class IssueDescriptorMapper
 			Severity = issue.Severity.ToString(),
 			ActionLabel = PluginText.ToWireOrNull(issue.ActionLabel)
 		};
+	}
 
 	public static IssueResolveResult ToDto(IssueResolution resolution)
-		=> new()
+	{
+		return new IssueResolveResult
 		{
 			Success = resolution.Success, Message = PluginText.ToWireOrNull(resolution.Message),
 			FollowUp = resolution.FollowUp.ToString()
 		};
+	}
 }

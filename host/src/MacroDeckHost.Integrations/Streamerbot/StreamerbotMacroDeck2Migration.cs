@@ -27,19 +27,26 @@ internal sealed class StreamerbotMacroDeck2Migration : IIntegrationMigration
 		["mrvibes_rsa_streamer.bot plugin", "dichternebel_yet another streamer.bot"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"MrVibesRSA.StreamerbotPlugin.Actions.StreamerBotAction" => MigrateMrVibes(action),
-		"dichternebel.YaSB.MacroDeckPlug.YaSBAction" => MigrateYaSB(action),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"MrVibesRSA.StreamerbotPlugin.Actions.StreamerBotAction" => MigrateMrVibes(action),
+			"dichternebel.YaSB.MacroDeckPlug.YaSBAction" => MigrateYaSb(action),
+			_ => null
+		};
+	}
 
 	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings config)
 	{
@@ -115,7 +122,7 @@ internal sealed class StreamerbotMacroDeck2Migration : IIntegrationMigration
 		var profile = ReadString(config, "profile");
 		IReadOnlyList<LocalizedText>? warnings = string.IsNullOrWhiteSpace(profile)
 			? null
-			: [AppStrings.Migration.Warning.Streamerbot.ProfileIgnored(profile: profile)];
+			: [AppStrings.Migration.Warning.Streamerbot.ProfileIgnored(profile)];
 
 		return new ActionMigrationResult(StreamerbotIntegration.IntegrationId,
 			"do-action",
@@ -124,7 +131,7 @@ internal sealed class StreamerbotMacroDeck2Migration : IIntegrationMigration
 			warnings);
 	}
 
-	private static ActionMigrationResult? MigrateYaSB(ForeignAction action)
+	private static ActionMigrationResult? MigrateYaSb(ForeignAction action)
 	{
 		if (!TryParseConfig(action.Configuration, out var config))
 		{
@@ -206,8 +213,7 @@ internal sealed class StreamerbotMacroDeck2Migration : IIntegrationMigration
 			ReadString(config, "Port"),
 			ReadString(config, "Endpoint"),
 			ReadString(config, "Password"),
-			TryGetProperty(config, "AutoConnect", out var autoConnect) &&
-			autoConnect.ValueKind == JsonValueKind.True);
+			TryGetProperty(config, "AutoConnect", out var autoConnect) && autoConnect.ValueKind == JsonValueKind.True);
 	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
@@ -241,7 +247,9 @@ internal sealed class StreamerbotMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 }

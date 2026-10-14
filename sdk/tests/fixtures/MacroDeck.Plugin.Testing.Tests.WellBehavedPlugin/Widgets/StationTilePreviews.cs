@@ -8,7 +8,8 @@ internal static class StationTilePreviews
 {
 	[UiPreview("Station tile", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement StationTile()
-		=> new UiStack
+	{
+		return new UiStack
 		{
 			Key = "station",
 			Justify = UiComponentJustify.Center,
@@ -29,4 +30,5 @@ internal static class StationTilePreviews
 				}
 			]
 		};
+	}
 }

@@ -20,5 +20,7 @@ public class LocalizationController : ControllerBase
 	[HttpGet]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetLocalizationResponse> Get(CancellationToken ct)
-		=> _get.Handle(new GetLocalizationRequest(), ct).AsTask();
+	{
+		return _get.Handle(new GetLocalizationRequest(), ct).AsTask();
+	}
 }

@@ -32,7 +32,8 @@ public static class SigningCertificateChain
 	/// <summary>Verifies a root-signed <paramref name="certificateBytes"/> against <see cref="MacroDeckRootKey"/>.
 	/// A certificate that names an issuer fails with <see cref="SigningError.CertificateIssuerMissing"/>; use
 	/// <see cref="Verify(byte[], byte[], byte[], byte[], string)"/> for it.</summary>
-	public static SigningCertificateVerificationResult Verify(byte[] certificateBytes,
+	public static SigningCertificateVerificationResult Verify(
+		byte[] certificateBytes,
 		byte[] certificateSignatureFile,
 		string requiredKeyUsage)
 	{
@@ -53,7 +54,8 @@ public static class SigningCertificateChain
 	/// artifact carries it.
 	/// </para>
 	/// </summary>
-	public static SigningCertificateVerificationResult Verify(byte[] certificateBytes,
+	public static SigningCertificateVerificationResult Verify(
+		byte[] certificateBytes,
 		byte[] certificateSignatureFile,
 		ReadOnlySpan<byte> rootPublicKey,
 		string requiredKeyUsage)
@@ -64,7 +66,8 @@ public static class SigningCertificateChain
 	/// <summary>Verifies <paramref name="certificateBytes"/> against <see cref="MacroDeckRootKey"/>, through
 	/// the issuer certificate when one is supplied. See
 	/// <see cref="Verify(byte[], byte[], byte[], byte[], ReadOnlySpan{byte}, string)"/>.</summary>
-	public static SigningCertificateVerificationResult Verify(byte[] certificateBytes,
+	public static SigningCertificateVerificationResult Verify(
+		byte[] certificateBytes,
 		byte[] certificateSignatureFile,
 		byte[]? issuerCertificateBytes,
 		byte[]? issuerCertificateSignatureFile,
@@ -95,7 +98,8 @@ public static class SigningCertificateChain
 	/// evaluated here - see <see cref="EnsureValidAt(TrustedSigningCertificate, DateTimeOffset)"/>.
 	/// </para>
 	/// </summary>
-	public static SigningCertificateVerificationResult Verify(byte[] certificateBytes,
+	public static SigningCertificateVerificationResult Verify(
+		byte[] certificateBytes,
 		byte[] certificateSignatureFile,
 		byte[]? issuerCertificateBytes,
 		byte[]? issuerCertificateSignatureFile,
@@ -106,8 +110,9 @@ public static class SigningCertificateChain
 		ArgumentNullException.ThrowIfNull(certificateSignatureFile);
 		ArgumentException.ThrowIfNullOrWhiteSpace(requiredKeyUsage);
 
-		var rootKey = Ed25519VerificationKey.TryImport(rootPublicKey) ??
-			throw new ArgumentException($"The root public key must be exactly {Ed25519KeyPair.PublicKeyLength} bytes.",
+		var rootKey = Ed25519VerificationKey.TryImport(rootPublicKey)
+			?? throw new ArgumentException(
+				$"The root public key must be exactly {Ed25519KeyPair.PublicKeyLength} bytes.",
 				nameof(rootPublicKey));
 
 		if (issuerCertificateBytes is null != issuerCertificateSignatureFile is null)
@@ -177,8 +182,8 @@ public static class SigningCertificateChain
 	{
 		ArgumentNullException.ThrowIfNull(trusted);
 
-		return (trusted.Issuer is { } issuer ? EnsureWindow(issuer, at, "issuer certificate") : null) ??
-			EnsureWindow(trusted.Certificate, at, "certificate");
+		return (trusted.Issuer is { } issuer ? EnsureWindow(issuer, at, "issuer certificate") : null)
+			?? EnsureWindow(trusted.Certificate, at, "certificate");
 	}
 
 	private static SigningFailure? EnsureWindow(SigningCertificate certificate, DateTimeOffset at, string subject)
@@ -198,7 +203,8 @@ public static class SigningCertificateChain
 		return null;
 	}
 
-	private static SigningCertificateVerificationResult VerifySigned(byte[] certificateBytes,
+	private static SigningCertificateVerificationResult VerifySigned(
+		byte[] certificateBytes,
 		byte[] certificateSignatureFile,
 		Ed25519VerificationKey signerKey,
 		string requiredKeyUsage,
@@ -229,16 +235,16 @@ public static class SigningCertificateChain
 				"The certificate document is empty.");
 		}
 
-		if (certificate.SchemaVersion is not (1 or 2) ||
-			certificate.Algorithm != "ed25519" ||
-			string.IsNullOrWhiteSpace(certificate.CertificateId))
+		if (certificate.SchemaVersion is not (1 or 2)
+			|| certificate.Algorithm != "ed25519"
+			|| string.IsNullOrWhiteSpace(certificate.CertificateId))
 		{
 			return SigningCertificateVerificationResult.Fail(SigningError.CertificateMalformed,
 				"The certificate has an unsupported shape or algorithm.");
 		}
 
-		if (certificate.Issuer is not null &&
-			(certificate.SchemaVersion != 2 || string.IsNullOrWhiteSpace(certificate.Issuer)))
+		if (certificate.Issuer is not null
+			&& (certificate.SchemaVersion != 2 || string.IsNullOrWhiteSpace(certificate.Issuer)))
 		{
 			return SigningCertificateVerificationResult.Fail(SigningError.CertificateMalformed,
 				"Only a schema version 2 certificate can name an issuer, and the name must not be empty.");
@@ -279,8 +285,8 @@ public static class SigningCertificateChain
 
 		if (issuer is not null)
 		{
-			if (!string.Equals(certificate.Issuer, issuer.CertificateId, StringComparison.Ordinal) ||
-				!string.Equals(certificate.RootKeyId, issuer.RootKeyId, StringComparison.Ordinal))
+			if (!string.Equals(certificate.Issuer, issuer.CertificateId, StringComparison.Ordinal)
+				|| !string.Equals(certificate.RootKeyId, issuer.RootKeyId, StringComparison.Ordinal))
 			{
 				return SigningCertificateVerificationResult.Fail(SigningError.CertificateIssuerMismatch,
 					"The certificate does not name the supplied issuer certificate and its root.");
@@ -300,8 +306,8 @@ public static class SigningCertificateChain
 				"The certificate's public key is not a valid base64-encoded Ed25519 key.");
 		}
 
-		var certificatePublicKey = Ed25519VerificationKey.TryImport(certificatePublicBytes) ??
-			throw new InvalidOperationException("An already-length-checked key failed to import.");
+		var certificatePublicKey = Ed25519VerificationKey.TryImport(certificatePublicBytes)
+			?? throw new InvalidOperationException("An already-length-checked key failed to import.");
 
 		return SigningCertificateVerificationResult.Ok(new TrustedSigningCertificate(certificate,
 			certificatePublicKey,
@@ -313,9 +319,9 @@ public static class SigningCertificateChain
 		try
 		{
 			using var document = JsonDocument.Parse(certificateBytes);
-			return document.RootElement.ValueKind == JsonValueKind.Object &&
-				document.RootElement.TryGetProperty(IssuerPropertyName, out var issuer) &&
-				issuer.ValueKind != JsonValueKind.Null;
+			return document.RootElement.ValueKind == JsonValueKind.Object
+				&& document.RootElement.TryGetProperty(IssuerPropertyName, out var issuer)
+				&& issuer.ValueKind != JsonValueKind.Null;
 		}
 		catch (JsonException)
 		{
@@ -323,9 +329,11 @@ public static class SigningCertificateChain
 		}
 	}
 
-	private static byte[]? DecodeSignatureFile(byte[] certificateSignatureFile) =>
-		Base64Material.TryDecode(Encoding.UTF8.GetString(certificateSignatureFile),
+	private static byte[]? DecodeSignatureFile(byte[] certificateSignatureFile)
+	{
+		return Base64Material.TryDecode(Encoding.UTF8.GetString(certificateSignatureFile),
 			Ed25519KeyPair.SignatureLength);
+	}
 }
 
 /// <summary>The outcome of <see cref="SigningCertificateChain.Verify(byte[], byte[], byte[], byte[], ReadOnlySpan{byte}, string)"/>.</summary>
@@ -339,9 +347,13 @@ public sealed record SigningCertificateVerificationResult
 
 	public string? Message { get; init; }
 
-	public static SigningCertificateVerificationResult Ok(TrustedSigningCertificate trustedCertificate) =>
-		new() { Success = true, TrustedCertificate = trustedCertificate };
+	public static SigningCertificateVerificationResult Ok(TrustedSigningCertificate trustedCertificate)
+	{
+		return new SigningCertificateVerificationResult { Success = true, TrustedCertificate = trustedCertificate };
+	}
 
-	public static SigningCertificateVerificationResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static SigningCertificateVerificationResult Fail(SigningError error, string message)
+	{
+		return new SigningCertificateVerificationResult { Success = false, Error = error, Message = message };
+	}
 }

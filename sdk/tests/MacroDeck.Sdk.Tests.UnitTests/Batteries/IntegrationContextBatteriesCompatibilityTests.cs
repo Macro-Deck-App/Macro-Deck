@@ -1,4 +1,3 @@
-using MacroDeck.Sdk.Batteries;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Events;

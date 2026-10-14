@@ -39,12 +39,20 @@ public sealed class UserNotificationStore : IUserNotificationStore
 
 	public event Action? Changed;
 
-	public UserNotification? Raise(UserNotificationDraft draft) => RaiseCore(draft, onlyIfAbsent: false);
+	public UserNotification? Raise(UserNotificationDraft draft)
+	{
+		return RaiseCore(draft, false);
+	}
 
-	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft) => RaiseCore(draft, onlyIfAbsent: true);
+	public UserNotification? RaiseIfAbsent(UserNotificationDraft draft)
+	{
+		return RaiseCore(draft, true);
+	}
 
 	public UserNotification? RaiseIfPresent(UserNotificationDraft draft)
-		=> RaiseCore(draft, onlyIfAbsent: false, onlyIfPresent: true);
+	{
+		return RaiseCore(draft, false, true);
+	}
 
 	private UserNotification? RaiseCore(UserNotificationDraft draft, bool onlyIfAbsent, bool onlyIfPresent = false)
 	{
@@ -71,8 +79,8 @@ public sealed class UserNotificationStore : IUserNotificationStore
 		{
 			var now = DateTimeOffset.Now;
 			var dedupeKey = draft.DedupeKey;
-			var hasExisting = !string.IsNullOrEmpty(dedupeKey) &&
-				(_idByDedupeKey.ContainsKey(dedupeKey) || _retiredKeys.ContainsKey(dedupeKey));
+			var hasExisting = !string.IsNullOrEmpty(dedupeKey)
+				&& (_idByDedupeKey.ContainsKey(dedupeKey) || _retiredKeys.ContainsKey(dedupeKey));
 
 			if (onlyIfAbsent && hasExisting)
 			{
@@ -394,7 +402,9 @@ public sealed class UserNotificationStore : IUserNotificationStore
 	}
 
 	private static string Clamp(string value, int maxLength)
-		=> value.Length <= maxLength ? value : value[..maxLength];
+	{
+		return value.Length <= maxLength ? value : value[..maxLength];
+	}
 
 	private void RaiseChanged()
 	{

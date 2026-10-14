@@ -13,15 +13,23 @@ public sealed class VideoStreamUiPushHandler :
 {
 	private readonly IUiTransport _transport;
 
-	public VideoStreamUiPushHandler(IUiTransport transport) => _transport = transport;
+	public VideoStreamUiPushHandler(IUiTransport transport)
+	{
+		_transport = transport;
+	}
 
-	public async ValueTask Handle(VideoStreamCatalogChangedNotification notification,
+	public async ValueTask Handle(
+		VideoStreamCatalogChangedNotification notification,
 		CancellationToken cancellationToken)
-		=> await _transport.Send(new VideoStreamCatalogChangedEvent(), cancellationToken);
+	{
+		await _transport.Send(new VideoStreamCatalogChangedEvent(), cancellationToken);
+	}
 
-	public async ValueTask Handle(VideoStreamSessionChangedNotification notification,
+	public async ValueTask Handle(
+		VideoStreamSessionChangedNotification notification,
 		CancellationToken cancellationToken)
-		=> await _transport.SendToConnection(notification.ConnectionId,
+	{
+		await _transport.SendToConnection(notification.ConnectionId,
 			new VideoStreamSessionChangedEvent
 			{
 				SessionId = notification.SessionId,
@@ -32,17 +40,23 @@ public sealed class VideoStreamUiPushHandler :
 				Message = notification.Message
 			},
 			cancellationToken);
+	}
 
-	public async ValueTask Handle(VideoStreamSessionClosedNotification notification,
+	public async ValueTask Handle(
+		VideoStreamSessionClosedNotification notification,
 		CancellationToken cancellationToken)
-		=> await _transport.SendToConnection(notification.ConnectionId,
+	{
+		await _transport.SendToConnection(notification.ConnectionId,
 			new VideoStreamSessionClosedEvent
 			{
 				SessionId = notification.SessionId,
 				Reason = VideoStreamUiMapping.WireName(notification.Reason),
 				Error = notification.Error is { } error ? VideoStreamUiMapping.WireName(error) : null,
-				Message = notification.Message ??
-					(notification.Error is { } failure ? VideoStreamUiMapping.ErrorText(failure) : (LocalizedText?)null)
+				Message = notification.Message
+					?? (notification.Error is { } failure
+						? VideoStreamUiMapping.ErrorText(failure)
+						: (LocalizedText?)null)
 			},
 			cancellationToken);
+	}
 }

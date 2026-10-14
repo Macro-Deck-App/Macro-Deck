@@ -25,8 +25,9 @@ internal static class WeatherDetailsView
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(icons);
 
-		Func<string, string> displayTime = text => formatTime is not null &&
-			TimeOnly.TryParseExact(text, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
+		Func<string, string> displayTime = text
+			=> formatTime is not null
+			&& TimeOnly.TryParseExact(text, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
 				? formatTime(time)
 				: text;
 
@@ -42,26 +43,27 @@ internal static class WeatherDetailsView
 				{
 					Key = "unknownStationGate",
 					Condition = () => !state.Value.StationExists,
-					Content = () => Message(AppStrings.Integrations.Weather.Details.NoStation()),
+					Content = () => Message(AppStrings.Integrations.Weather.Details.NoStation())
 				},
 				new UiWhen
 				{
 					Key = "unavailableGate",
 					Condition = () => state.Value.StationExists && !state.Value.IsAvailable,
-					Content = () => Message(AppStrings.Integrations.Weather.Details.Unavailable()),
+					Content = () => Message(AppStrings.Integrations.Weather.Details.Unavailable())
 				},
 				new UiWhen
 				{
 					Key = "availableGate",
 					Condition = () => state.Value.IsAvailable,
-					Content = () => Available(state, icons, displayTime),
-				},
-			],
+					Content = () => Available(state, icons, displayTime)
+				}
+			]
 		};
 	}
 
 	private static UiStack Message(LocalizedText text)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "message",
 			Direction = UiComponentDirections.Vertical,
@@ -69,8 +71,9 @@ internal static class WeatherDetailsView
 			Align = UiComponentAlignments.Center,
 			Fill = true,
 			Children =
-				[new UiTextRun { Key = "text", Text = text, Size = 0.06, Role = UiComponentTextRoles.Secondary }],
+				[new UiTextRun { Key = "text", Text = text, Size = 0.06, Role = UiComponentTextRoles.Secondary }]
 		};
+	}
 
 	// A list, not a stack: neither client scrolls a dialog on the tree's behalf, and this part can outgrow
 	// its box, so a stack would cut off the days below the fold.
@@ -78,7 +81,8 @@ internal static class WeatherDetailsView
 		UiState<WeatherDetailsState> state,
 		UiState<WeatherDetailsIcons> icons,
 		Func<string, string> displayTime)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "available",
 			Gap = UiSize.FromBasis(0.035),
@@ -91,19 +95,21 @@ internal static class WeatherDetailsView
 				{
 					Key = "hourlyGate",
 					Condition = () => state.Value.Hours.Count > 0,
-					Content = () => Hourly(state, icons, displayTime),
+					Content = () => Hourly(state, icons, displayTime)
 				},
 				new UiWhen
 				{
 					Key = "forecastGate",
 					Condition = () => state.Value.Days.Count > 0,
-					Content = () => Forecast(state, icons),
-				},
-			],
+					Content = () => Forecast(state, icons)
+				}
+			]
 		};
+	}
 
 	private static UiStack Current(UiState<WeatherDetailsState> state, UiState<WeatherDetailsIcons> icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "current",
 			Direction = UiComponentDirections.Horizontal,
@@ -116,7 +122,7 @@ internal static class WeatherDetailsView
 					Key = "icon",
 					Source = UiValue.Optional(() =>
 						Resource(icons.Value.AnimatedFor(state.Value.Condition, state.Value.IsDay))),
-					Size = 0.16,
+					Size = 0.16
 				},
 				new UiStack
 				{
@@ -130,14 +136,14 @@ internal static class WeatherDetailsView
 							Key = "location",
 							Text = UiText.From(() => state.Value.LocationName),
 							Size = 0.05,
-							Role = UiComponentTextRoles.Secondary,
+							Role = UiComponentTextRoles.Secondary
 						},
 						new UiTextRun
 						{
 							Key = "temperature",
 							Text = UiText.From(() => Temperature(state.Value.Temperature, state.Value.Unit)),
 							Size = 0.12,
-							Weight = UiComponentTextWeights.SemiBold,
+							Weight = UiComponentTextWeights.SemiBold
 						},
 						new UiTextRun
 						{
@@ -145,15 +151,17 @@ internal static class WeatherDetailsView
 							Text = UiText.FromLocalized(() => AppStrings.Integrations.Weather.Details.FeelsLike(
 								Temperature(state.Value.ApparentTemperature, state.Value.Unit))),
 							Size = 0.045,
-							Role = UiComponentTextRoles.Muted,
-						},
-					],
-				},
-			],
+							Role = UiComponentTextRoles.Muted
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiStack Measurements(UiState<WeatherDetailsState> state, Func<string, string> displayTime)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "measurements",
 			Direction = UiComponentDirections.Vertical,
@@ -172,7 +180,7 @@ internal static class WeatherDetailsView
 							: Placeholder()),
 					Measurement("precipitation",
 						AppStrings.Integrations.Weather.Details.Precipitation(),
-						() => Precipitation(state.Value)),
+						() => Precipitation(state.Value))
 				]),
 				MeasurementRow("sun",
 				[
@@ -183,23 +191,27 @@ internal static class WeatherDetailsView
 							: "-")),
 					Measurement("sunset",
 						AppStrings.Integrations.Weather.Details.Sunset(),
-						() => LocalizedText.FromLiteral(state.Value.Sunset is { } sunset ? displayTime(sunset) : "-")),
-				]),
-			],
+						() => LocalizedText.FromLiteral(state.Value.Sunset is { } sunset ? displayTime(sunset) : "-"))
+				])
+			]
 		};
+	}
 
 	private static UiStack MeasurementRow(string key, IReadOnlyList<UiElement> measurements)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
 			Justify = UiComponentJustify.SpaceBetween,
 			Gap = 0.02,
-			Children = measurements,
+			Children = measurements
 		};
+	}
 
 	private static UiStack Measurement(string key, LocalizedText label, Func<LocalizedText> value)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -209,20 +221,22 @@ internal static class WeatherDetailsView
 			[
 				new UiTextRun
 				{
-					Key = "label", Text = label, Size = 0.035, Role = UiComponentTextRoles.Muted,
+					Key = "label", Text = label, Size = 0.035, Role = UiComponentTextRoles.Muted
 				},
 				new UiTextRun
 				{
-					Key = "value", Text = UiText.Optional(() => value()), Size = 0.05,
-				},
-			],
+					Key = "value", Text = UiText.Optional(() => value()), Size = 0.05
+				}
+			]
 		};
+	}
 
 	private static UiStack Hourly(
 		UiState<WeatherDetailsState> state,
 		UiState<WeatherDetailsIcons> icons,
 		Func<string, string> displayTime)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "hourly",
 			Direction = UiComponentDirections.Vertical,
@@ -235,7 +249,7 @@ internal static class WeatherDetailsView
 					Text = AppStrings.Integrations.Weather.Details.Hourly(),
 					Size = 0.04,
 					Role = UiComponentTextRoles.Secondary,
-					Weight = UiComponentTextWeights.SemiBold,
+					Weight = UiComponentTextWeights.SemiBold
 				},
 				new UiList
 				{
@@ -250,26 +264,29 @@ internal static class WeatherDetailsView
 						Direction = UiComponentDirections.Horizontal,
 						Justify = UiComponentJustify.SpaceBetween,
 						Gap = 0.015,
-						Children = [HourRepeat(state, icons, displayTime, state => Take(state.Hours, HourlyColumns))],
-					},
-				},
-			],
+						Children = [HourRepeat(state, icons, displayTime, state => Take(state.Hours, HourlyColumns))]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiRepeat<WeatherDetailsHour> HourRepeat(
 		UiState<WeatherDetailsState> state,
 		UiState<WeatherDetailsIcons> icons,
 		Func<string, string> displayTime,
 		Func<WeatherDetailsState, List<WeatherDetailsHour>> hours)
-		=> new()
+	{
+		return new UiRepeat<WeatherDetailsHour>
 		{
 			Key = "hourRepeat",
 			Items = UiValue.From<IReadOnlyList<WeatherDetailsHour>>(() => hours(state.Value)),
 			// A repeat key composes into a node id, whose grammar has no colon - the payload's
 			// own HH:mm would make the whole tree unbuildable rather than just this row.
 			KeySelector = hour => hour.Time.Replace(':', '-'),
-			Template = (hour, key) => Hour(hour, key, state, icons, displayTime),
+			Template = (hour, key) => Hour(hour, key, state, icons, displayTime)
 		};
+	}
 
 	private static UiStack Hour(
 		WeatherDetailsHour hour,
@@ -277,7 +294,8 @@ internal static class WeatherDetailsView
 		UiState<WeatherDetailsState> state,
 		UiState<WeatherDetailsIcons> icons,
 		Func<string, string> displayTime)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Vertical,
@@ -294,26 +312,28 @@ internal static class WeatherDetailsView
 					Text = displayTime(hour.Time),
 					Size = 0.032,
 					Align = UiComponentAlignments.Center,
-					Role = UiComponentTextRoles.Muted,
+					Role = UiComponentTextRoles.Muted
 				},
 				// Hours are the only place the day/night variant cannot be read off the snapshot: an hour
 				// twelve hours out is not the current daylight. The still icon avoids implying otherwise.
 				new UiImage
 				{
-					Key = "icon", Source = Still(icons, hour.Condition), Size = 0.05,
+					Key = "icon", Source = Still(icons, hour.Condition), Size = 0.05
 				},
 				new UiTextRun
 				{
 					Key = "temperature",
 					Text = UiText.From(() => Temperature(hour.Temperature, state.Value.Unit)),
 					Size = 0.036,
-					Align = UiComponentAlignments.Center,
-				},
-			],
+					Align = UiComponentAlignments.Center
+				}
+			]
 		};
+	}
 
 	private static UiStack Forecast(UiState<WeatherDetailsState> state, UiState<WeatherDetailsIcons> icons)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "forecast",
 			Direction = UiComponentDirections.Vertical,
@@ -326,17 +346,18 @@ internal static class WeatherDetailsView
 					Text = AppStrings.Integrations.Weather.Details.Forecast(),
 					Size = 0.04,
 					Role = UiComponentTextRoles.Secondary,
-					Weight = UiComponentTextWeights.SemiBold,
+					Weight = UiComponentTextWeights.SemiBold
 				},
 				new UiRepeat<ForecastRow>
 				{
 					Key = "dayRepeat",
 					Items = UiValue.From<IReadOnlyList<ForecastRow>>(() => Rows(state.Value.Days, state.Value.Unit)),
 					KeySelector = row => row.Key,
-					Template = (row, key) => Day(row, key, state, icons),
-				},
-			],
+					Template = (row, key) => Day(row, key, state, icons)
+				}
+			]
 		};
+	}
 
 	private static UiStack Day(
 		ForecastRow row,
@@ -370,9 +391,9 @@ internal static class WeatherDetailsView
 							Key = "icon",
 							Source = Still(icons, day.Condition),
 							MainSize = 0.045,
-							Size = 0.045,
-						},
-					],
+							Size = 0.045
+						}
+					]
 				},
 				// Every text in this row declares its own main size: a text measures zero along a
 				// horizontal stack, so the filling bar would otherwise be handed their width as well.
@@ -383,7 +404,7 @@ internal static class WeatherDetailsView
 					MainSize = 0.12,
 					Size = 0.036,
 					Align = UiComponentAlignments.End,
-					Role = UiComponentTextRoles.Muted,
+					Role = UiComponentTextRoles.Muted
 				},
 				new UiRangeBar
 				{
@@ -401,7 +422,7 @@ internal static class WeatherDetailsView
 							WeatherForecastBar.MarkerFraction(state.Value.Temperature, row.WeekMin, row.Span) is { } at
 								? UiValue.Of(at)
 								: UiValue.None<double>())
-						: UiValue.None<double>(),
+						: UiValue.None<double>()
 				},
 				new UiTextRun
 				{
@@ -409,9 +430,9 @@ internal static class WeatherDetailsView
 					Text = UiText.From(() => Temperature(day.Max, state.Value.Unit)),
 					MainSize = 0.12,
 					Size = 0.036,
-					Align = UiComponentAlignments.End,
-				},
-			],
+					Align = UiComponentAlignments.End
+				}
+			]
 		};
 	}
 
@@ -491,27 +512,44 @@ internal static class WeatherDetailsView
 	}
 
 	private static UiValue<UiResource> Still(UiState<WeatherDetailsIcons> icons, string condition)
-		=> UiValue.Optional(() => Resource(icons.Value.StillFor(condition)));
+	{
+		return UiValue.Optional(() => Resource(icons.Value.StillFor(condition)));
+	}
 
 	private static UiValue<UiResource> Resource(UiResource? resource)
-		=> resource is not null ? UiValue.Of(resource) : UiValue.None<UiResource>();
+	{
+		return resource is not null ? UiValue.Of(resource) : UiValue.None<UiResource>();
+	}
 
 	private static bool IsFahrenheit(string unit)
-		=> string.Equals(unit, "fahrenheit", StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(unit, "fahrenheit", StringComparison.OrdinalIgnoreCase);
+	}
 
-	private static LocalizedText Placeholder() => LocalizedText.FromLiteral("-");
+	private static LocalizedText Placeholder()
+	{
+		return LocalizedText.FromLiteral("-");
+	}
 
 	private static string Number(double value, int decimals)
-		=> value.ToString($"F{decimals}", CultureInfo.CurrentCulture);
+	{
+		return value.ToString($"F{decimals}", CultureInfo.CurrentCulture);
+	}
 
 	private static string Temperature(double? value, string unit)
-		=> value is null ? "-" : $"{Number(value.Value, 0)}{(IsFahrenheit(unit) ? "°F" : "°C")}";
+	{
+		return value is null ? "-" : $"{Number(value.Value, 0)}{(IsFahrenheit(unit) ? "°F" : "°C")}";
+	}
 
 	private static string DayLabel(string isoDate)
-		=> DateOnly.TryParse(isoDate, CultureInfo.InvariantCulture, out var date)
+	{
+		return DateOnly.TryParse(isoDate, CultureInfo.InvariantCulture, out var date)
 			? date.ToString("ddd", CultureInfo.CurrentCulture)
 			: isoDate;
+	}
 
 	private static List<T> Take<T>(List<T> items, int count)
-		=> items.Count <= count ? items : items.GetRange(0, count);
+	{
+		return items.Count <= count ? items : items.GetRange(0, count);
+	}
 }

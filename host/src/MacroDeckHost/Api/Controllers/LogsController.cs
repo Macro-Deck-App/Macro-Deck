@@ -21,9 +21,13 @@ public class LogsController : ControllerBase
 
 	[HttpGet]
 	public Task<GetLogsResponse> GetLogs([FromQuery] GetLogsRequest request, CancellationToken ct)
-		=> _getLogs.Handle(request, ct).AsTask();
+	{
+		return _getLogs.Handle(request, ct).AsTask();
+	}
 
 	[HttpGet("sources")]
 	public Task<GetLogSourcesResponse> GetSources(CancellationToken ct)
-		=> _getSources.Handle(new GetLogSourcesRequest(), ct).AsTask();
+	{
+		return _getSources.Handle(new GetLogSourcesRequest(), ct).AsTask();
+	}
 }

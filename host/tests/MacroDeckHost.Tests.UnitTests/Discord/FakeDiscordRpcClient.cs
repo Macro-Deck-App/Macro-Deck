@@ -99,7 +99,9 @@ internal sealed class FakeDiscordRpcClient : IDiscordRpcClient
 	}
 
 	public void RaiseEvent(string eventName, string dataJson)
-		=> EventReceived?.Invoke(this, new DiscordRpcEventArgs(eventName, Parse(dataJson)));
+	{
+		EventReceived?.Invoke(this, new DiscordRpcEventArgs(eventName, Parse(dataJson)));
+	}
 
 	public void RaiseDisconnected(string reason)
 	{
@@ -107,7 +109,10 @@ internal sealed class FakeDiscordRpcClient : IDiscordRpcClient
 		Disconnected?.Invoke(this, reason);
 	}
 
-	public IEnumerable<RpcCall> CallsTo(string command) => Calls.Where(c => c.Command == command);
+	public IEnumerable<RpcCall> CallsTo(string command)
+	{
+		return Calls.Where(c => c.Command == command);
+	}
 
 	private static string? ReadChannelId(string argsJson)
 	{

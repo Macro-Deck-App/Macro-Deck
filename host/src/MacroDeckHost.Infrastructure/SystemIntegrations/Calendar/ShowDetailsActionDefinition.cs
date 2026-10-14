@@ -27,7 +27,10 @@ internal sealed class ShowDetailsActionDefinition : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(_services);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_services);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -48,8 +51,7 @@ internal sealed class ShowDetailsActionDefinition : IActionDefinition
 				return ActionResult.Success();
 			}
 
-			if (_services() is not { } services ||
-				!Guid.TryParse(context.OwnerWidgetId, out var widgetId))
+			if (_services() is not { } services || !Guid.TryParse(context.OwnerWidgetId, out var widgetId))
 			{
 				return ActionResult.Failed(NotCalendarWidgetCode, Strings.NotCalendarWidget());
 			}

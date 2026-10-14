@@ -63,7 +63,7 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 	{
 		try
 		{
-			return File.ResolveLinkTarget($"/proc/{pid}/exe", returnFinalTarget: true)?.FullName;
+			return File.ResolveLinkTarget($"/proc/{pid}/exe", true)?.FullName;
 		}
 		catch (IOException)
 		{

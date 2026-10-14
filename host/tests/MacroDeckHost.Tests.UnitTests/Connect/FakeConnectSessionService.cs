@@ -14,7 +14,10 @@ internal sealed class FakeConnectSessionService : IConnectSessionService
 
 	public int SignOutCount { get; private set; }
 
-	public Task Initialize(CancellationToken cancellationToken = default) => Task.CompletedTask;
+	public Task Initialize(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 
 	public Task<ConnectSignInStart> StartSignIn(CancellationToken cancellationToken = default)
 	{
@@ -40,7 +43,9 @@ internal sealed class FakeConnectSessionService : IConnectSessionService
 	}
 
 	public Task<string> GetAccessToken(CancellationToken cancellationToken = default)
-		=> Task.FromResult("access-token");
+	{
+		return Task.FromResult("access-token");
+	}
 
 	public void Publish(ConnectSessionSnapshot snapshot)
 	{
@@ -49,10 +54,12 @@ internal sealed class FakeConnectSessionService : IConnectSessionService
 	}
 
 	public static ConnectSessionSnapshot SignedIn(string? pictureUrl, string subject = "sub-1")
-		=> new(ConnectAccountStatus.SignedIn,
+	{
+		return new ConnectSessionSnapshot(ConnectAccountStatus.SignedIn,
 			ConnectConnectivity.Ok,
 			new ConnectAccount(subject, "Ada Lovelace", pictureUrl, null, []),
 			null,
 			null,
 			null);
+	}
 }

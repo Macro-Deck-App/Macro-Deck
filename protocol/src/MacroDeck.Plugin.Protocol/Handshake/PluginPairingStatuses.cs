@@ -13,6 +13,6 @@ public static class PluginPairingStatuses
 
 	public static readonly IReadOnlyList<string> All =
 	[
-		Pending, Approved, Rejected, Expired,
+		Pending, Approved, Rejected, Expired
 	];
 }

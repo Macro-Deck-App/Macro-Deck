@@ -19,7 +19,7 @@ namespace MacroDeckHost.Tests.UnitTests.Twitch;
 [TestFixture]
 internal sealed class TwitchActionFlowTemplateTests
 {
-	private const string _category = "{{ vars.stream_category }}";
+	private const string Category = "{{ vars.stream_category }}";
 
 	private FakeTwitchHelixClient _helix = null!;
 	private TwitchAccountManager _accounts = null!;
@@ -86,12 +86,15 @@ internal sealed class TwitchActionFlowTemplateTests
 	}
 
 	[TearDown]
-	public void TearDown() => _accounts.Dispose();
+	public void TearDown()
+	{
+		_accounts.Dispose();
+	}
 
 	[Test]
 	public async Task A_stream_marker_description_resolves_a_variable_next_to_static_text()
 	{
-		await Run("create-stream-marker", Text("description", $"Game Change: {_category}"));
+		await Run("create-stream-marker", Text("description", $"Game Change: {Category}"));
 
 		Assert.That(_helix.Calls, Does.Contain("marker:Game Change: Minecraft"));
 	}
@@ -100,7 +103,7 @@ internal sealed class TwitchActionFlowTemplateTests
 	public async Task A_chat_message_keeps_its_line_breaks_and_resolves_the_reply_id()
 	{
 		await Run("send-chat-message",
-			Text("message", $"Now playing {_category}\\nenjoy"),
+			Text("message", $"Now playing {Category}\\nenjoy"),
 			Text("replyToMessageId", "{{ vars.stream_category }}-1"));
 
 		Assert.That(_helix.Calls, Does.Contain("chat:Now playing Minecraft\nenjoy|Minecraft-1"));
@@ -110,9 +113,9 @@ internal sealed class TwitchActionFlowTemplateTests
 	public async Task Stream_info_resolves_the_title_the_category_lookup_and_the_tag_list()
 	{
 		await Run("set-stream-info",
-			Text("title", $"Playing {_category}"),
-			Text("category", _category),
-			Text("tags", $"{_category}, English"));
+			Text("title", $"Playing {Category}"),
+			Text("category", Category),
+			Text("tags", $"{Category}, English"));
 
 		Assert.That(_helix.Calls,
 			Is.EqualTo(new[] { "resolveCategory:Minecraft", "modifyChannel:Playing Minecraft||Minecraft+English" }));
@@ -121,7 +124,7 @@ internal sealed class TwitchActionFlowTemplateTests
 	[Test]
 	public async Task Poll_choices_are_resolved_before_they_are_split_into_lines()
 	{
-		await Run("create-poll", Text("title", "Next game"), Text("choices", $"{_category}\\nCreative"));
+		await Run("create-poll", Text("title", "Next game"), Text("choices", $"{Category}\\nCreative"));
 
 		Assert.That(_helix.Calls, Does.Contain("createPoll:Next game|Minecraft+Creative|60|"));
 	}
@@ -129,7 +132,7 @@ internal sealed class TwitchActionFlowTemplateTests
 	[Test]
 	public async Task Prediction_outcomes_are_resolved_before_they_are_split_into_lines()
 	{
-		await Run("create-prediction", Text("title", "Who wins"), Text("outcomes", $"{_category}\\nCreative"));
+		await Run("create-prediction", Text("title", "Who wins"), Text("outcomes", $"{Category}\\nCreative"));
 
 		Assert.That(_helix.Calls, Does.Contain("createPrediction:Who wins|Minecraft+Creative|120"));
 	}
@@ -138,7 +141,7 @@ internal sealed class TwitchActionFlowTemplateTests
 	public async Task Identifier_and_reason_fields_resolve_variables()
 	{
 		await Run("delete-chat-message", Text("messageId", "id-{{ vars.stream_category }}"));
-		await Run("ban-user", Text("targetLogin", "target"), Text("reason", $"Spam in {_category}"));
+		await Run("ban-user", Text("targetLogin", "target"), Text("reason", $"Spam in {Category}"));
 
 		Assert.That(_helix.Calls, Does.Contain("deleteChat:id-Minecraft"));
 		Assert.That(_helix.Calls, Does.Contain("ban:999||Spam in Minecraft"));
@@ -166,22 +169,24 @@ internal sealed class TwitchActionFlowTemplateTests
 	{
 		await Run("send-announcement",
 			Text("message", "Hello"),
-			$$"""{ "name": "color", "type": "choice", "value": "{{_category}}" }""");
+			$$"""{ "name": "color", "type": "choice", "value": "{{Category}}" }""");
 
 		Assert.That(_helix.Calls, Does.Contain("announce:Hello|{{ vars.stream_category }}"));
 	}
 
 	private static string Text(string name, string value)
-		=> $$"""{ "name": "{{name}}", "type": "string", "value": "{{value}}" }""";
+	{
+		return $$"""{ "name": "{{name}}", "type": "string", "value": "{{value}}" }""";
+	}
 
 	private async Task Run(string actionId, params string[] parameters)
 	{
 		var flow = $$"""
-			{ "flows": [ { "triggerId": "t1", "triggerType": "onShortPress", "children": [
-			  { "id": "b1", "type": "action", "blockType": "{{TwitchIntegration.IntegrationId}}.{{actionId}}",
-			    "integrationId": "{{TwitchIntegration.IntegrationId}}", "actionId": "{{actionId}}",
-			    "parameters": [ {{string.Join(",", parameters)}} ] } ] } ] }
-			""";
+					 { "flows": [ { "triggerId": "t1", "triggerType": "onShortPress", "children": [
+					   { "id": "b1", "type": "action", "blockType": "{{TwitchIntegration.IntegrationId}}.{{actionId}}",
+					     "integrationId": "{{TwitchIntegration.IntegrationId}}", "actionId": "{{actionId}}",
+					     "parameters": [ {{string.Join(",", parameters)}} ] } ] } ] }
+					 """;
 
 		var result = await _executor.ExecuteAsync(new FlowExecutionRequest
 			{
@@ -196,14 +201,16 @@ internal sealed class TwitchActionFlowTemplateTests
 
 	private sealed class NullActionInteractions : IActionInteractions
 	{
-		public void RequestItemPicker(string? originClientId,
+		public void RequestItemPicker(
+			string? originClientId,
 			string instanceId,
 			MusicPlayerCatalogItemKind kind,
 			string? prompt = null)
 		{
 		}
 
-		public void RequestDevicePicker(string? originClientId,
+		public void RequestDevicePicker(
+			string? originClientId,
 			string instanceId,
 			bool startPlayback,
 			string? prompt = null)

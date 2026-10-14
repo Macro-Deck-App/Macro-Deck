@@ -59,16 +59,19 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 	}
 
 	private static string ServerStartedFlows()
-		=> JsonSerializer.Serialize(new[]
+	{
+		return JsonSerializer.Serialize(new[]
 		{
 			new
 			{
 				triggerId = "t1",
 				triggerType = "onEvent",
-				@event = new { providerId = "macro-deck", eventId = "server-started", parameters = Array.Empty<object>() },
+				@event = new
+					{ providerId = "macro-deck", eventId = "server-started", parameters = Array.Empty<object>() },
 				children = Array.Empty<object>()
 			}
 		});
+	}
 
 	[Test]
 	public async Task Server_stopped_flows_can_still_reach_clients_and_clients_are_closed_before_the_web_server_stops()
@@ -125,7 +128,8 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 		{
 			Runs.Enqueue((subscription.Owner, occurrence.EventId));
 			_firstRun.TrySetResult();
-			return Task.FromResult(new FlowExecutionResult { ExecutionId = Guid.NewGuid(), Status = FlowExecutionStatus.Succeeded });
+			return Task.FromResult(new FlowExecutionResult
+				{ ExecutionId = Guid.NewGuid(), Status = FlowExecutionStatus.Succeeded });
 		}
 	}
 
@@ -152,7 +156,10 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 	{
 		public bool? ClientClosedWhenStopping { get; private set; }
 
-		public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+		public Task StartAsync(CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task StopAsync(CancellationToken cancellationToken)
 		{

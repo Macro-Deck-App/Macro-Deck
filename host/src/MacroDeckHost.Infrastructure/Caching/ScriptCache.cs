@@ -58,7 +58,10 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 		return script;
 	}
 
-	public List<ScriptEntity> GetAll() => _scripts.Values.ToList();
+	public List<ScriptEntity> GetAll()
+	{
+		return _scripts.Values.ToList();
+	}
 
 	public async Task AddOrUpdate(ScriptEntity script)
 	{
@@ -102,27 +105,33 @@ public sealed class ScriptCache : IScriptCache, IDisposable
 		_updateLock.Dispose();
 	}
 
-	private static ScriptEntity ToEntity(ScriptFile file) => new()
+	private static ScriptEntity ToEntity(ScriptFile file)
 	{
-		Id = file.Id,
-		Name = file.Name,
-		Description = file.Description,
-		Flows = file.Flows,
-		Inputs = [.. file.Inputs],
-		RunsOnWidget = file.RunsOnWidget,
-		CreatedAt = file.CreatedAt,
-		UpdatedAt = file.UpdatedAt
-	};
+		return new ScriptEntity
+		{
+			Id = file.Id,
+			Name = file.Name,
+			Description = file.Description,
+			Flows = file.Flows,
+			Inputs = [.. file.Inputs],
+			RunsOnWidget = file.RunsOnWidget,
+			CreatedAt = file.CreatedAt,
+			UpdatedAt = file.UpdatedAt
+		};
+	}
 
-	private static ScriptFile ToFile(ScriptEntity script) => new()
+	private static ScriptFile ToFile(ScriptEntity script)
 	{
-		Id = script.Id,
-		Name = script.Name,
-		Description = script.Description,
-		Flows = script.Flows,
-		Inputs = [.. script.Inputs],
-		RunsOnWidget = script.RunsOnWidget,
-		CreatedAt = script.CreatedAt,
-		UpdatedAt = script.UpdatedAt
-	};
+		return new ScriptFile
+		{
+			Id = script.Id,
+			Name = script.Name,
+			Description = script.Description,
+			Flows = script.Flows,
+			Inputs = [.. script.Inputs],
+			RunsOnWidget = script.RunsOnWidget,
+			CreatedAt = script.CreatedAt,
+			UpdatedAt = script.UpdatedAt
+		};
+	}
 }

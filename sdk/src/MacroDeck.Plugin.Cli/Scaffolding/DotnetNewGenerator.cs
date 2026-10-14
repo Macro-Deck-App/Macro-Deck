@@ -12,7 +12,8 @@ internal sealed class DotnetNewGenerator : IPluginScaffoldGenerator
 		return installed ? PluginTemplateStatus.UpToDate : PluginTemplateStatus.NotInstalled;
 	}
 
-	public async Task<PluginTemplateOperationResult> InstallAsync(string? templateVersion,
+	public async Task<PluginTemplateOperationResult> InstallAsync(
+		string? templateVersion,
 		CancellationToken cancellationToken)
 	{
 		var result = await DotnetTemplateInstaller.InstallAsync(templateVersion, cancellationToken)
@@ -25,9 +26,12 @@ internal sealed class DotnetNewGenerator : IPluginScaffoldGenerator
 	}
 
 	public Task<PluginTemplateOperationResult> UpdateAsync(CancellationToken cancellationToken)
-		=> InstallAsync(null, cancellationToken);
+	{
+		return InstallAsync(null, cancellationToken);
+	}
 
-	public async Task<PluginTemplateOperationResult> CreateAsync(PluginScaffoldRequest request,
+	public async Task<PluginTemplateOperationResult> CreateAsync(
+		PluginScaffoldRequest request,
 		CancellationToken cancellationToken)
 	{
 		List<string> arguments =

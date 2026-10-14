@@ -19,7 +19,10 @@ public class WriteVariableToFileActionTests
 	}
 
 	[TearDown]
-	public void TearDown() => Directory.Delete(_folder, true);
+	public void TearDown()
+	{
+		Directory.Delete(_folder, true);
+	}
 
 	[Test]
 	public async Task It_writes_the_current_value_of_any_variable_and_replaces_the_file()
@@ -30,7 +33,7 @@ public class WriteVariableToFileActionTests
 
 		var result = await Execute("system_cpu_load", path);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await File.ReadAllTextAsync(path), Is.EqualTo("12.5"));
@@ -44,7 +47,7 @@ public class WriteVariableToFileActionTests
 		_variables[("count", null)] = new HostVariableValue("1", true);
 		_variables[("count", "widget-1")] = new HostVariableValue("10", true);
 
-		await Execute("count", path, ownerWidgetId: "widget-1");
+		await Execute("count", path, "widget-1");
 
 		Assert.That(await File.ReadAllTextAsync(path), Is.EqualTo("10"));
 	}
@@ -110,7 +113,8 @@ public class WriteVariableToFileActionTests
 
 		var result = await executor.ExecuteAsync(new ActionExecutionContext
 		{
-			Parameters = new Dictionary<string, object> { ["variable"] = "count", ["file"] = Path.Combine(_folder, "x") }
+			Parameters = new Dictionary<string, object>
+				{ ["variable"] = "count", ["file"] = Path.Combine(_folder, "x") }
 		});
 
 		Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.Unavailable));
@@ -119,8 +123,8 @@ public class WriteVariableToFileActionTests
 	private Task<ActionResult> Execute(string variable, string path, string? ownerWidgetId = null)
 	{
 		VariableReader reader = (name, widget, _) =>
-			Task.FromResult(_variables.TryGetValue((name, widget), out var value) ||
-				_variables.TryGetValue((name, null), out value)
+			Task.FromResult(_variables.TryGetValue((name, widget), out var value)
+				|| _variables.TryGetValue((name, null), out value)
 					? value
 					: null);
 		var executor = new WriteVariableToFileActionDefinition(() => reader).CreateExecutor();

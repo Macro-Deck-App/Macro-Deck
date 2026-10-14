@@ -111,11 +111,13 @@ public class LogEventProjectionTests
 	private sealed class RetimingSink(ILogEventSink inner, DateTimeOffset timestamp) : ILogEventSink
 	{
 		public void Emit(LogEvent logEvent)
-			=> inner.Emit(new LogEvent(timestamp,
+		{
+			inner.Emit(new LogEvent(timestamp,
 				logEvent.Level,
 				logEvent.Exception,
 				logEvent.MessageTemplate,
 				logEvent.Properties.Select(property => new LogEventProperty(property.Key, property.Value))));
+		}
 	}
 
 	private sealed class SceneSwitchException : Exception

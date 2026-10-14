@@ -90,8 +90,9 @@ public class GetIntegrationsRequestMessageHandler
 			.Select(variable => variable.Name ?? variable.ResolvedId ?? string.Empty)
 			.ToHashSet(StringComparer.Ordinal);
 
-		return (variableProvider?.DeclaredVariables.Count ?? 0) + (_variables is null
-			? 0
-			: HostPublishedIntegrationVariables.Of(_variables, integrationId, declared).Count);
+		return (variableProvider?.DeclaredVariables.Count ?? 0)
+			+ (_variables is null
+				? 0
+				: HostPublishedIntegrationVariables.Of(_variables, integrationId, declared).Count);
 	}
 }

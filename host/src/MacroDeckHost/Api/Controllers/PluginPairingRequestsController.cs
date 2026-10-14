@@ -101,7 +101,8 @@ public class PluginPairingRequestsController : ControllerBase
 	}
 
 	[HttpPost("requests/{requestId}/approve")]
-	public async Task<IActionResult> Approve(string requestId,
+	public async Task<IActionResult> Approve(
+		string requestId,
 		ApprovePluginPairingRequestBody body,
 		CancellationToken cancellationToken)
 	{

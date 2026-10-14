@@ -47,8 +47,8 @@ public sealed class ObsoleteSdkMemberAnalyzer : DiagnosticAnalyzer
 		{
 			var compilation = startContext.Compilation;
 
-			var referencesTrackedAssembly = _trackedAssemblyNames.Contains(compilation.AssemblyName ?? string.Empty) ||
-				compilation.SourceModule.ReferencedAssemblySymbols.Any(assembly
+			var referencesTrackedAssembly = _trackedAssemblyNames.Contains(compilation.AssemblyName ?? string.Empty)
+				|| compilation.SourceModule.ReferencedAssemblySymbols.Any(assembly
 					=> _trackedAssemblyNames.Contains(assembly.Name));
 
 			if (!referencesTrackedAssembly)
@@ -70,9 +70,9 @@ public sealed class ObsoleteSdkMemberAnalyzer : DiagnosticAnalyzer
 	{
 		var symbol = ReferencedSymbol(context.Operation);
 
-		if (symbol is null ||
-			!_trackedAssemblyNames.Contains(symbol.ContainingAssembly?.Name ?? string.Empty) ||
-			!HasObsoleteAttribute(symbol))
+		if (symbol is null
+			|| !_trackedAssemblyNames.Contains(symbol.ContainingAssembly?.Name ?? string.Empty)
+			|| !HasObsoleteAttribute(symbol))
 		{
 			return;
 		}
@@ -90,16 +90,19 @@ public sealed class ObsoleteSdkMemberAnalyzer : DiagnosticAnalyzer
 			symbol.Name));
 	}
 
-	private static ISymbol? ReferencedSymbol(IOperation operation) => operation switch
+	private static ISymbol? ReferencedSymbol(IOperation operation)
 	{
-		IInvocationOperation invocation => invocation.TargetMethod,
-		IPropertyReferenceOperation property => property.Property,
-		IFieldReferenceOperation field => field.Field,
-		IEventReferenceOperation eventReference => eventReference.Event,
-		IObjectCreationOperation creation => creation.Constructor,
-		IMethodReferenceOperation methodReference => methodReference.Method,
-		_ => null
-	};
+		return operation switch
+		{
+			IInvocationOperation invocation => invocation.TargetMethod,
+			IPropertyReferenceOperation property => property.Property,
+			IFieldReferenceOperation field => field.Field,
+			IEventReferenceOperation eventReference => eventReference.Event,
+			IObjectCreationOperation creation => creation.Constructor,
+			IMethodReferenceOperation methodReference => methodReference.Method,
+			_ => null
+		};
+	}
 
 	private static bool HasObsoleteAttribute(ISymbol symbol)
 	{

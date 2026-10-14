@@ -11,7 +11,9 @@ public sealed class StoreUpdateBatchInstaller : IStoreUpdateBatchInstaller
 		_coordinator = coordinator;
 	}
 
-	public IReadOnlyList<StoreOperation> Install(IEnumerable<StoreAvailableUpdate> updates, string? backupBatchId = null)
+	public IReadOnlyList<StoreOperation> Install(
+		IEnumerable<StoreAvailableUpdate> updates,
+		string? backupBatchId = null)
 	{
 		var batchId = backupBatchId ?? Guid.NewGuid().ToString("N");
 		return updates

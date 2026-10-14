@@ -17,11 +17,13 @@ public class LogRedactorTests
 		Assert.That(redacted, Is.EqualTo("?id=abc&ticket=***"));
 	}
 
-	[TestCase("GET /api/video-streams/relay/{0}/live/index.m3u8?x=1", "GET /api/video-streams/relay/***/live/index.m3u8?x=1")]
+	[TestCase("GET /api/video-streams/relay/{0}/live/index.m3u8?x=1",
+		"GET /api/video-streams/relay/***/live/index.m3u8?x=1")]
 	[TestCase("with value 'api/video-streams/relay/{0}/cam.jpg'", "with value 'api/video-streams/relay/***/cam.jpg'")]
 	[TestCase("GET /api/video-streams/relay//{0}/live/seg1.ts", "GET /api/video-streams/relay//***/live/seg1.ts")]
 	[TestCase("GET /api/video-streams//relay/{0}/live/seg1.ts", "GET /api/video-streams//relay/***/live/seg1.ts")]
-	[TestCase("GET //api///video-streams//relay///{0}/live/seg1.ts", "GET //api///video-streams//relay///***/live/seg1.ts")]
+	[TestCase("GET //api///video-streams//relay///{0}/live/seg1.ts",
+		"GET //api///video-streams//relay///***/live/seg1.ts")]
 	[TestCase("GET /API/Video-Streams/Relay/{0}", "GET /API/Video-Streams/Relay/***")]
 	public void Redacts_The_Video_Stream_Relay_Token_Whatever_The_Slashes_Around_It(string line, string expected)
 	{
@@ -196,10 +198,10 @@ public class LogRedactorTests
 	[TestCase("ENCRYPTED PRIVATE KEY")]
 	public void Redacts_A_Whole_Pem_Private_Key_Block(string label)
 	{
-		var message = $"failed to load: -----BEGIN {label}-----\n" +
-			"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDb3sEcRETuUgxK\n" +
-			"c2VjcmV0LWtleS1tYXRlcmlhbC10aGF0LW11c3Qtbm90LWJlLWxvZ2dlZAo=\n" +
-			$"-----END {label}-----\n after";
+		var message = $"failed to load: -----BEGIN {label}-----\n"
+			+ "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDb3sEcRETuUgxK\n"
+			+ "c2VjcmV0LWtleS1tYXRlcmlhbC10aGF0LW11c3Qtbm90LWJlLWxvZ2dlZAo=\n"
+			+ $"-----END {label}-----\n after";
 
 		var redacted = LogRedactor.Redact(message);
 

@@ -123,8 +123,8 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			null,
 			null));
 
-		if (_timeProvider.GetUtcNow() - credential.IssuedAtUtc >= ColdStartRefreshAge &&
-			await SuspensionRetryDue(cancellationToken))
+		if (_timeProvider.GetUtcNow() - credential.IssuedAtUtc >= ColdStartRefreshAge
+			&& await SuspensionRetryDue(cancellationToken))
 		{
 			_ = Task.Run(() => KeepAlive(_lifetimeToken), CancellationToken.None);
 		}
@@ -168,7 +168,9 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 	}
 
 	public Task CancelSignIn(CancellationToken cancellationToken = default)
-		=> _signInFlow.Cancel(cancellationToken);
+	{
+		return _signInFlow.Cancel(cancellationToken);
+	}
 
 	public async Task SignOut(CancellationToken cancellationToken = default)
 	{
@@ -215,8 +217,8 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 		switch (snapshot.Status)
 		{
 			case ConnectAccountStatus.ReauthenticationRequired:
-				throw new ConnectAuthRejectedException(snapshot.Message ??
-					"Macro Deck Connect requires a new sign-in.");
+				throw new ConnectAuthRejectedException(snapshot.Message
+					?? "Macro Deck Connect requires a new sign-in.");
 			case ConnectAccountStatus.Suspended when !await SuspensionRetryDue(cancellationToken):
 				throw new ConnectAccountSuspendedException(snapshot.Message ?? "This account has been suspended.");
 			case ConnectAccountStatus.SignedOut or ConnectAccountStatus.SigningIn:
@@ -759,12 +761,12 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 
 		// LastSuccessfulRefreshUtc moving on its own is not a transition any client reacts to; broadcasting
 		// it would wake every connected UI once an hour for nothing.
-		return previous.Status != next.Status ||
-			previous.Connectivity != next.Connectivity ||
-			previous.OfflineSince != next.OfflineSince ||
-			previous.SignInFailure != next.SignInFailure ||
-			!string.Equals(previous.Message, next.Message, StringComparison.Ordinal) ||
-			!SameAccount(previous.Account, next.Account);
+		return previous.Status != next.Status
+			|| previous.Connectivity != next.Connectivity
+			|| previous.OfflineSince != next.OfflineSince
+			|| previous.SignInFailure != next.SignInFailure
+			|| !string.Equals(previous.Message, next.Message, StringComparison.Ordinal)
+			|| !SameAccount(previous.Account, next.Account);
 	}
 
 	private void Notify(bool changed, ConnectSessionSnapshot next)
@@ -782,18 +784,22 @@ public sealed class ConnectSessionService : IConnectSessionService, IAsyncDispos
 			return ReferenceEquals(left, right);
 		}
 
-		return string.Equals(left.Subject, right.Subject, StringComparison.Ordinal) &&
-			string.Equals(left.DisplayName, right.DisplayName, StringComparison.Ordinal) &&
-			string.Equals(left.PictureUrl, right.PictureUrl, StringComparison.Ordinal) &&
-			string.Equals(left.CreatorUsername, right.CreatorUsername, StringComparison.Ordinal) &&
-			left.Roles.SequenceEqual(right.Roles, StringComparer.Ordinal);
+		return string.Equals(left.Subject, right.Subject, StringComparison.Ordinal)
+			&& string.Equals(left.DisplayName, right.DisplayName, StringComparison.Ordinal)
+			&& string.Equals(left.PictureUrl, right.PictureUrl, StringComparison.Ordinal)
+			&& string.Equals(left.CreatorUsername, right.CreatorUsername, StringComparison.Ordinal)
+			&& left.Roles.SequenceEqual(right.Roles, StringComparer.Ordinal);
 	}
 
 	private static ConnectAccount ToAccount(ConnectIdTokenClaims claims)
-		=> new(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, []);
+	{
+		return new ConnectAccount(claims.Subject, claims.DisplayName, claims.PictureUrl, claims.CreatorUsername, []);
+	}
 
 	private static TimeSpan DefaultJitter(TimeSpan span)
-		=> span * (0.8 + (Random.Shared.NextDouble() * 0.4));
+	{
+		return span * (0.8 + Random.Shared.NextDouble() * 0.4);
+	}
 
 	private enum RefreshResult
 	{

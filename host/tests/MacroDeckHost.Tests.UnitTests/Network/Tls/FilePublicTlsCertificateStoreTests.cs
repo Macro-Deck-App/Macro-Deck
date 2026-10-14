@@ -29,7 +29,10 @@ public class FilePublicTlsCertificateStoreTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Absent_Files_Report_NotConfigured()

@@ -17,13 +17,28 @@ public sealed class StartupReadiness
 
 	public bool IsReady => _caches.Task.IsCompletedSuccessfully && _variables.Task.IsCompletedSuccessfully;
 
-	public void MarkCachesReady() => _caches.TrySetResult();
+	public void MarkCachesReady()
+	{
+		_caches.TrySetResult();
+	}
 
-	public void MarkVariablesReady() => _variables.TrySetResult();
+	public void MarkVariablesReady()
+	{
+		_variables.TrySetResult();
+	}
 
-	public void MarkIconPacksReady() => _iconPacks.TrySetResult();
+	public void MarkIconPacksReady()
+	{
+		_iconPacks.TrySetResult();
+	}
 
-	public void MarkIconPacksFailed(Exception exception) => _iconPacks.TrySetException(exception);
+	public void MarkIconPacksFailed(Exception exception)
+	{
+		_iconPacks.TrySetException(exception);
+	}
 
-	public void MarkEventDispatchReady() => _eventDispatch.TrySetResult();
+	public void MarkEventDispatchReady()
+	{
+		_eventDispatch.TrySetResult();
+	}
 }

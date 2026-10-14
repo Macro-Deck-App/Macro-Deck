@@ -28,6 +28,6 @@ public class ResolvedListenerPortsSetup
 	public void PublishLoopbackPort()
 	{
 		ResolvedLoopbackPort.Set(TestListenerPorts.Loopback);
-		global::MacroDeckHost.Application.Configuration.LoopbackSecret.Set(TestListenerPorts.LoopbackSecret);
+		LoopbackSecret.Set(TestListenerPorts.LoopbackSecret);
 	}
 }

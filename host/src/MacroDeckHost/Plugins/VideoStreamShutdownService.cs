@@ -8,9 +8,18 @@ public sealed class VideoStreamShutdownService : IHostedService
 
 	private readonly IVideoStreamSessionBroker _broker;
 
-	public VideoStreamShutdownService(IVideoStreamSessionBroker broker) => _broker = broker;
+	public VideoStreamShutdownService(IVideoStreamSessionBroker broker)
+	{
+		_broker = broker;
+	}
 
-	public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task StartAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task StopAsync(CancellationToken cancellationToken) => _broker.ShutdownAsync(_bound);
+	public Task StopAsync(CancellationToken cancellationToken)
+	{
+		return _broker.ShutdownAsync(_bound);
+	}
 }

@@ -5,11 +5,11 @@ namespace MacroDeck.Sdk;
 public enum MacroDeckPlatform
 {
 	Windows = 1,
-	MacOS = 2,
+	MacOs = 2,
 	Linux = 4,
 
 	/// <summary>Every platform. What an integration gets unless it says otherwise.</summary>
-	All = Windows | MacOS | Linux
+	All = Windows | MacOs | Linux
 }
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
@@ -43,7 +43,10 @@ public sealed class MacroDeckIntegrationAttribute : Attribute
 	public bool EnabledByDefault { get; set; } = true;
 
 	/// <summary>Whether this integration should be discovered on the operating system running now.</summary>
-	public bool RunsHere() => Platforms.HasFlag(Current);
+	public bool RunsHere()
+	{
+		return Platforms.HasFlag(Current);
+	}
 
 	/// <summary>The platform the host is running on.</summary>
 	public static MacroDeckPlatform Current
@@ -55,7 +58,7 @@ public sealed class MacroDeckIntegrationAttribute : Attribute
 				return MacroDeckPlatform.Windows;
 			}
 
-			return OperatingSystem.IsMacOS() ? MacroDeckPlatform.MacOS : MacroDeckPlatform.Linux;
+			return OperatingSystem.IsMacOS() ? MacroDeckPlatform.MacOs : MacroDeckPlatform.Linux;
 		}
 	}
 }

@@ -80,8 +80,8 @@ public class CompanionScriptsEndpointTests
 		_clientToken = (await ReadJson(login)).GetProperty("accessToken").GetString()!;
 
 		await CreateOutputVariable("companion_scene", "text", "unset");
-		_standaloneId = await CreateScript("Set Scene", runsOnWidget: false);
-		_onWidgetId = await CreateScript("On A Widget", runsOnWidget: true);
+		_standaloneId = await CreateScript("Set Scene", false);
+		_onWidgetId = await CreateScript("On A Widget", true);
 	}
 
 	[OneTimeTearDown]
@@ -94,7 +94,7 @@ public class CompanionScriptsEndpointTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -123,7 +123,7 @@ public class CompanionScriptsEndpointTests
 		var response = await Send(HttpMethod.Post,
 			$"/api/companion/scripts/{_standaloneId}/run",
 			new { inputs = new { scene = "Gaming" }, clientId = "companion-1" },
-			token: _clientToken);
+			_clientToken);
 		var run = await ReadJson(response);
 		var scene = await SceneVariable();
 
@@ -145,7 +145,7 @@ public class CompanionScriptsEndpointTests
 		var run = await ReadJson(await Send(HttpMethod.Post,
 			$"/api/companion/scripts/{_onWidgetId}/run",
 			new { inputs = new { scene = "Gaming" } },
-			token: _clientToken));
+			_clientToken));
 		var scene = await SceneVariable();
 
 		Assert.Multiple(() =>
@@ -162,7 +162,7 @@ public class CompanionScriptsEndpointTests
 		var run = await ReadJson(await Send(HttpMethod.Post,
 			$"/api/companion/scripts/{_standaloneId}/run",
 			new { inputs = new { } },
-			token: _clientToken));
+			_clientToken));
 
 		Assert.Multiple(() =>
 		{
@@ -175,7 +175,7 @@ public class CompanionScriptsEndpointTests
 	public async Task The_admin_scripts_routes_stay_closed_to_a_client_and_the_new_ones_to_anonymous_callers()
 	{
 		var adminList = await Send(HttpMethod.Get, "/api/scripts", token: _clientToken);
-		var adminRun = await Send(HttpMethod.Post, $"/api/scripts/{_standaloneId}/run", new { }, token: _clientToken);
+		var adminRun = await Send(HttpMethod.Post, $"/api/scripts/{_standaloneId}/run", new { }, _clientToken);
 		var anonymousList = await Send(HttpMethod.Get, "/api/companion/scripts");
 		var anonymousRun = await Send(HttpMethod.Post, $"/api/companion/scripts/{_standaloneId}/run", new { });
 
@@ -286,7 +286,9 @@ public class CompanionScriptsEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -300,7 +302,8 @@ public class CompanionScriptsEndpointTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -320,5 +323,6 @@ public class CompanionScriptsEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 }

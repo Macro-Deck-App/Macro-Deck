@@ -20,7 +20,8 @@ internal sealed class RemoteDeckNavigator : IDeckNavigator
 	private readonly Lock _clientsGate = new();
 	private IReadOnlyList<DeckClient> _clients;
 
-	public RemoteDeckNavigator(IHostInvoker invoker,
+	public RemoteDeckNavigator(
+		IHostInvoker invoker,
 		HostStateCache stateCache,
 		PluginConnectionState connectionState,
 		ILogger logger)
@@ -35,39 +36,53 @@ internal sealed class RemoteDeckNavigator : IDeckNavigator
 
 	public event EventHandler<DeckClientChangedEventArgs>? ClientChanged;
 
-	public Task ChangeFolderAsync(string folderId,
+	public Task ChangeFolderAsync(
+		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
-		=> _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
+	{
+		return _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
 			HostOperations.Deck.ChangeFolder,
 			new DeckChangeFolderArguments { FolderId = folderId, OriginClientId = originClientId },
 			cancellationToken);
+	}
 
-	public Task ChangeProfileAsync(string profileId,
+	public Task ChangeProfileAsync(
+		string profileId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
-		=> _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
+	{
+		return _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
 			HostOperations.Deck.ChangeProfile,
 			new DeckChangeProfileArguments { ProfileId = profileId, OriginClientId = originClientId },
 			cancellationToken);
+	}
 
 	public Task GoToParentAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
+	{
+		return _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
 			HostOperations.Deck.Parent,
 			new DeckOriginArguments { OriginClientId = originClientId },
 			cancellationToken);
+	}
 
 	public Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default)
-		=> _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
+	{
+		return _invoker.InvokeAsync(Protocol.Callbacks.HostApis.Deck,
 			HostOperations.Deck.Back,
 			new DeckOriginArguments { OriginClientId = originClientId },
 			cancellationToken);
+	}
 
-	public IReadOnlyList<DeckFolder> GetFolders() =>
-		_stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Folders ?? [];
+	public IReadOnlyList<DeckFolder> GetFolders()
+	{
+		return _stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Folders ?? [];
+	}
 
-	public IReadOnlyList<DeckProfile> GetProfiles() =>
-		_stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Profiles ?? [];
+	public IReadOnlyList<DeckProfile> GetProfiles()
+	{
+		return _stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Profiles ?? [];
+	}
 
 	public IReadOnlyList<DeckClient> GetClients()
 	{
@@ -78,7 +93,13 @@ internal sealed class RemoteDeckNavigator : IDeckNavigator
 	}
 
 	private IReadOnlyList<DeckClient> ReadClients()
-		=> [.. (_stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Clients ?? []).Select(DeckClientMapper.ToSdk)];
+	{
+		return
+		[
+			.. (_stateCache.Get<DeckStateDto>(Protocol.Callbacks.HostApis.Deck)?.Clients ?? []).Select(DeckClientMapper
+				.ToSdk)
+		];
+	}
 
 	private void OnConnected(object? sender, PluginConnectedEventArgs e)
 	{
@@ -111,8 +132,8 @@ internal sealed class RemoteDeckNavigator : IDeckNavigator
 				{
 					changes.Add(new DeckClientChangedEventArgs(client, null, null));
 				}
-				else if (!string.Equals(previous.ProfileId, client.ProfileId, StringComparison.Ordinal) ||
-					!string.Equals(previous.FolderId, client.FolderId, StringComparison.Ordinal))
+				else if (!string.Equals(previous.ProfileId, client.ProfileId, StringComparison.Ordinal)
+					|| !string.Equals(previous.FolderId, client.FolderId, StringComparison.Ordinal))
 				{
 					changes.Add(new DeckClientChangedEventArgs(client, previous.ProfileId, previous.FolderId));
 				}
@@ -137,7 +158,9 @@ internal sealed class RemoteDeckNavigator : IDeckNavigator
 				}
 				catch (Exception exception) when (exception is not OutOfMemoryException)
 				{
-					_logger.Error(exception, "A ClientChanged handler failed for client {ClientId}", change.Client.ClientId);
+					_logger.Error(exception,
+						"A ClientChanged handler failed for client {ClientId}",
+						change.Client.ClientId);
 				}
 			}
 		}

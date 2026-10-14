@@ -2,8 +2,6 @@ using System.Globalization;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Calendar;
 using MacroDeck.Sdk.Locale;
-using MacroDeckHost.Application.Services;
-using MacroDeckHost.Localization;
 using Strings = MacroDeckHost.Localization.AppStrings.Widgets.Calendar;
 
 namespace MacroDeckHost.Widgets.Calendar;
@@ -25,10 +23,15 @@ internal sealed class CalendarFormat
 
 	private CultureInfo Culture => _time.Culture;
 
-	public DateOnly Date(DateTimeOffset instant) => CalendarTime.LocalDate(instant, TimeZone);
+	public DateOnly Date(DateTimeOffset instant)
+	{
+		return CalendarTime.LocalDate(instant, TimeZone);
+	}
 
 	public string Time(DateTimeOffset instant)
-		=> _time.Format(TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, TimeZone).DateTime));
+	{
+		return _time.Format(TimeOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, TimeZone).DateTime));
+	}
 
 	public LocalizedText DayName(DateOnly day, DateOnly today)
 	{
@@ -43,18 +46,32 @@ internal sealed class CalendarFormat
 	}
 
 	public LocalizedText DayHeading(DateOnly day, DateOnly today)
-		=> day == today || day == today.AddDays(1)
+	{
+		return day == today || day == today.AddDays(1)
 			? DayName(day, today)
-			: Strings.DayHeading(weekday: day.ToString("dddd", Culture),
-				date: day.ToString(Culture.DateTimeFormat.MonthDayPattern, Culture));
+			: Strings.DayHeading(day.ToString("dddd", Culture),
+				day.ToString(Culture.DateTimeFormat.MonthDayPattern, Culture));
+	}
 
-	public string Weekday(DateOnly day) => day.ToString("dddd", Culture).ToUpper(Culture);
+	public string Weekday(DateOnly day)
+	{
+		return day.ToString("dddd", Culture).ToUpper(Culture);
+	}
 
-	public string DayOfMonth(DateOnly day) => day.Day.ToString(Culture);
+	public string DayOfMonth(DateOnly day)
+	{
+		return day.Day.ToString(Culture);
+	}
 
-	public LocalizedText DateLine(DateOnly day) => Strings.DateLine(weekday: Weekday(day), day: DayOfMonth(day));
+	public LocalizedText DateLine(DateOnly day)
+	{
+		return Strings.DateLine(Weekday(day), DayOfMonth(day));
+	}
 
-	public string LongDate(DateOnly day) => day.ToString(Culture.DateTimeFormat.LongDatePattern, Culture);
+	public string LongDate(DateOnly day)
+	{
+		return day.ToString(Culture.DateTimeFormat.LongDatePattern, Culture);
+	}
 
 	public LocalizedText AgendaTime(CalendarEventSummary calendarEvent, DateOnly day)
 	{
@@ -64,7 +81,7 @@ internal sealed class CalendarFormat
 		}
 
 		return Date(calendarEvent.Start) < day
-			? Strings.Until(time: Time(calendarEvent.End))
+			? Strings.Until(Time(calendarEvent.End))
 			: Time(calendarEvent.Start);
 	}
 
@@ -74,13 +91,16 @@ internal sealed class CalendarFormat
 
 		if (calendarEvent.IsAllDay)
 		{
-			return day <= today ? Strings.AllDay() : Strings.DayAllDay(day: DayName(day, today));
+			return day <= today ? Strings.AllDay() : Strings.DayAllDay(DayName(day, today));
 		}
 
-		var range = Strings.TimeRange(start: Time(calendarEvent.Start), end: Time(calendarEvent.End));
+		var range = Strings.TimeRange(Time(calendarEvent.Start), Time(calendarEvent.End));
 
-		return day <= today ? range : Strings.DayTimeRange(day: DayName(day, today), start: Time(calendarEvent.Start),
-			end: Time(calendarEvent.End));
+		return day <= today
+			? range
+			: Strings.DayTimeRange(DayName(day, today),
+				Time(calendarEvent.Start),
+				Time(calendarEvent.End));
 	}
 
 	public LocalizedText DetailsRange(CalendarEventSummary calendarEvent)
@@ -92,21 +112,24 @@ internal sealed class CalendarFormat
 			var lastDay = Date(calendarEvent.End).AddDays(-1);
 
 			return lastDay <= startDay
-				? Strings.Details.AllDayDate(date: LongDate(startDay))
-				: Strings.Details.DateRange(start: LongDate(startDay), end: LongDate(lastDay));
+				? Strings.Details.AllDayDate(LongDate(startDay))
+				: Strings.Details.DateRange(LongDate(startDay), LongDate(lastDay));
 		}
 
 		var endDay = Date(calendarEvent.End);
 
 		return endDay == startDay
-			? Strings.Details.TimedRange(date: LongDate(startDay),
-				start: Time(calendarEvent.Start),
-				end: Time(calendarEvent.End))
-			: Strings.Details.TimedRangeAcrossDays(startDate: LongDate(startDay),
-				startTime: Time(calendarEvent.Start),
-				endDate: LongDate(endDay),
-				endTime: Time(calendarEvent.End));
+			? Strings.Details.TimedRange(LongDate(startDay),
+				Time(calendarEvent.Start),
+				Time(calendarEvent.End))
+			: Strings.Details.TimedRangeAcrossDays(LongDate(startDay),
+				Time(calendarEvent.Start),
+				LongDate(endDay),
+				Time(calendarEvent.End));
 	}
 
-	public static LocalizedText Title(string? title) => CalendarCountdown.Title(title);
+	public static LocalizedText Title(string? title)
+	{
+		return CalendarCountdown.Title(title);
+	}
 }

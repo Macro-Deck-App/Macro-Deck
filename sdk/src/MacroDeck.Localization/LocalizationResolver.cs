@@ -20,7 +20,10 @@ public sealed class LocalizationResolver : ILocalizationResolver
 	private const int MaxArgumentDepth = 4;
 
 	/// <inheritdoc />
-	public string Resolve(LocalizedString value, string? culture) => Resolve(value, culture, 0);
+	public string Resolve(LocalizedString value, string? culture)
+	{
+		return Resolve(value, culture, 0);
+	}
 
 	private string Resolve(LocalizedString value, string? culture, int depth)
 	{
@@ -33,8 +36,8 @@ public sealed class LocalizationResolver : ILocalizationResolver
 				// The plural probe sits inside the culture loop on purpose: probing it only after the
 				// whole chain had failed could answer a German request with an English singular while a
 				// German plural was sitting right there.
-				if (catalog.TryGetTemplate(candidate, value.Key.Name, out var template) ||
-					TryPluralTemplate(catalog, candidate, value, out template))
+				if (catalog.TryGetTemplate(candidate, value.Key.Name, out var template)
+					|| TryPluralTemplate(catalog, candidate, value, out template))
 				{
 					return LocalizationTemplate.Format(template, ResolveArguments(value.Arguments, culture, depth));
 				}
@@ -52,7 +55,8 @@ public sealed class LocalizationResolver : ILocalizationResolver
 	/// when the selected one is missing, which is what makes a family with only <c>Other</c> - the
 	/// minimum the compiler enforces - resolve for every count.
 	/// </summary>
-	private static bool TryPluralTemplate(ILocalizationCatalog catalog,
+	private static bool TryPluralTemplate(
+		ILocalizationCatalog catalog,
 		string candidate,
 		LocalizedString value,
 		out string template)
@@ -63,8 +67,8 @@ public sealed class LocalizationResolver : ILocalizationResolver
 
 			if (catalog.TryGetTemplate(candidate,
 					LocalizationPluralForms.FormKey(name, LocalizationPluralForms.FormOf(count)),
-					out template) ||
-				catalog.TryGetTemplate(candidate,
+					out template)
+				|| catalog.TryGetTemplate(candidate,
 					LocalizationPluralForms.FormKey(name, LocalizationPluralForms.Other),
 					out template))
 			{
@@ -77,10 +81,15 @@ public sealed class LocalizationResolver : ILocalizationResolver
 	}
 
 	/// <inheritdoc />
-	public string? Resolve(LocalizedText text, string? culture) => Resolve(text, culture, 0);
+	public string? Resolve(LocalizedText text, string? culture)
+	{
+		return Resolve(text, culture, 0);
+	}
 
 	private string? Resolve(LocalizedText text, string? culture, int depth)
-		=> text.Localized is { } localized ? Resolve(localized, culture, depth) : text.Literal;
+	{
+		return text.Localized is { } localized ? Resolve(localized, culture, depth) : text.Literal;
+	}
 
 	private IReadOnlyDictionary<string, object?> ResolveArguments(
 		IReadOnlyDictionary<string, object?> arguments,
@@ -100,7 +109,7 @@ public sealed class LocalizationResolver : ILocalizationResolver
 			{
 				LocalizedText text => Resolve(text, culture, depth + 1),
 				LocalizedString reference => Resolve(reference, culture, depth + 1),
-				_ => null,
+				_ => null
 			};
 
 			if (replacement is null)

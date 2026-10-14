@@ -104,7 +104,8 @@ public static class CompanionDeviceWire
 			case CompanionDeviceCommands.SetBrightness when arguments.BrightnessPercent is >= 0 and <= 100:
 				return CompanionDeviceCommand.SetBrightness(arguments.BrightnessPercent.Value);
 			case CompanionDeviceCommands.SetOrientation when arguments.Orientation is CompanionOrientations.Automatic
-				or CompanionOrientations.Portrait or CompanionOrientations.Landscape:
+				or CompanionOrientations.Portrait
+				or CompanionOrientations.Landscape:
 				return CompanionDeviceCommand.SetOrientation(arguments.Orientation);
 			case CompanionDeviceCommands.Vibrate:
 				return CompanionDeviceCommand.Vibrate;
@@ -120,34 +121,47 @@ public static class CompanionDeviceWire
 	}
 
 	public static string ToWire(CompanionScreenshotMode mode)
-		=> mode == CompanionScreenshotMode.FullScreen ? CompanionScreenshotModes.Full : CompanionScreenshotModes.Deck;
-
-	public static CompanionScreenshotMode? ToMode(string? mode) => mode switch
 	{
-		CompanionScreenshotModes.Deck => CompanionScreenshotMode.Deck,
-		CompanionScreenshotModes.Full => CompanionScreenshotMode.FullScreen,
-		_ => null
-	};
+		return mode == CompanionScreenshotMode.FullScreen
+			? CompanionScreenshotModes.Full
+			: CompanionScreenshotModes.Deck;
+	}
 
-	public static string ToWire(CompanionDeviceFailure failure) => failure switch
+	public static CompanionScreenshotMode? ToMode(string? mode)
 	{
-		CompanionDeviceFailure.NotConnected => CompanionDeviceFailures.NotConnected,
-		CompanionDeviceFailure.Removed => CompanionDeviceFailures.Removed,
-		CompanionDeviceFailure.TimedOut => CompanionDeviceFailures.TimedOut,
-		CompanionDeviceFailure.ConsentDenied => CompanionDeviceFailures.ConsentDenied,
-		CompanionDeviceFailure.Unavailable => CompanionDeviceFailures.Unavailable,
-		_ => CompanionDeviceFailures.Failed
-	};
+		return mode switch
+		{
+			CompanionScreenshotModes.Deck => CompanionScreenshotMode.Deck,
+			CompanionScreenshotModes.Full => CompanionScreenshotMode.FullScreen,
+			_ => null
+		};
+	}
 
-	public static CompanionDeviceFailure ToFailure(string? failure) => failure switch
+	public static string ToWire(CompanionDeviceFailure failure)
 	{
-		CompanionDeviceFailures.NotConnected => CompanionDeviceFailure.NotConnected,
-		CompanionDeviceFailures.Removed => CompanionDeviceFailure.Removed,
-		CompanionDeviceFailures.TimedOut => CompanionDeviceFailure.TimedOut,
-		CompanionDeviceFailures.ConsentDenied => CompanionDeviceFailure.ConsentDenied,
-		CompanionDeviceFailures.Unavailable => CompanionDeviceFailure.Unavailable,
-		_ => CompanionDeviceFailure.Failed
-	};
+		return failure switch
+		{
+			CompanionDeviceFailure.NotConnected => CompanionDeviceFailures.NotConnected,
+			CompanionDeviceFailure.Removed => CompanionDeviceFailures.Removed,
+			CompanionDeviceFailure.TimedOut => CompanionDeviceFailures.TimedOut,
+			CompanionDeviceFailure.ConsentDenied => CompanionDeviceFailures.ConsentDenied,
+			CompanionDeviceFailure.Unavailable => CompanionDeviceFailures.Unavailable,
+			_ => CompanionDeviceFailures.Failed
+		};
+	}
+
+	public static CompanionDeviceFailure ToFailure(string? failure)
+	{
+		return failure switch
+		{
+			CompanionDeviceFailures.NotConnected => CompanionDeviceFailure.NotConnected,
+			CompanionDeviceFailures.Removed => CompanionDeviceFailure.Removed,
+			CompanionDeviceFailures.TimedOut => CompanionDeviceFailure.TimedOut,
+			CompanionDeviceFailures.ConsentDenied => CompanionDeviceFailure.ConsentDenied,
+			CompanionDeviceFailures.Unavailable => CompanionDeviceFailure.Unavailable,
+			_ => CompanionDeviceFailure.Failed
+		};
+	}
 
 	public static CompanionDeviceRequestResultDto ToDto(CompanionDeviceCommandResult result)
 	{
@@ -155,7 +169,8 @@ public static class CompanionDeviceWire
 
 		return result.Outcome switch
 		{
-			CompanionDeviceCommandOutcome.Done => new CompanionDeviceRequestResultDto { Outcome = CompanionDeviceOutcomes.Done },
+			CompanionDeviceCommandOutcome.Done => new CompanionDeviceRequestResultDto
+				{ Outcome = CompanionDeviceOutcomes.Done },
 			CompanionDeviceCommandOutcome.Unconfirmed => new CompanionDeviceRequestResultDto
 			{
 				Outcome = CompanionDeviceOutcomes.Unconfirmed

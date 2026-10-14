@@ -19,17 +19,17 @@ internal static class CompanionEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("deviceId",
-					label: AppStrings.Events.Common.DeviceLabel(),
-					description: AppStrings.Events.Common.DeviceFilterDescription(),
-					optionsSourceId: HostOptionsSources.Devices,
-					placeholder: AppStrings.Events.Common.AnyDevicePlaceholder())
+					AppStrings.Events.Common.DeviceLabel(),
+					AppStrings.Events.Common.DeviceFilterDescription(),
+					HostOptionsSources.Devices,
+					AppStrings.Events.Common.AnyDevicePlaceholder())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("deviceId",
-					label: AppStrings.Events.Core.DeviceIdLabel(),
+					AppStrings.Events.Core.DeviceIdLabel(),
 					optionsSourceId: HostOptionsSources.Devices),
-				ActionParameter.Text("deviceName", label: AppStrings.Events.Common.DeviceLabel())
+				ActionParameter.Text("deviceName", AppStrings.Events.Common.DeviceLabel())
 			]
 		}
 	];

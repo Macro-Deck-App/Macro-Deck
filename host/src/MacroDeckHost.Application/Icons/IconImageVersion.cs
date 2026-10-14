@@ -6,7 +6,10 @@ namespace MacroDeckHost.Application.Icons;
 
 public static class IconImageVersion
 {
-	public static string? Of(IconEntity icon) => icon.MasterContentHash ?? icon.SourceContentHash;
+	public static string? Of(IconEntity icon)
+	{
+		return icon.MasterContentHash ?? icon.SourceContentHash;
+	}
 
 	public static string? Of(IconEntity icon, IReadOnlyList<IconEntity> appearances)
 	{
@@ -33,5 +36,7 @@ public static class IconImageVersion
 	}
 
 	private static string Key(IconEntity appearance)
-		=> appearance.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty;
+	{
+		return appearance.AppearanceTraits is { } traits ? IconAppearanceTraits.ToKey(traits) : string.Empty;
+	}
 }

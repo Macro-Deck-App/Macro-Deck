@@ -26,7 +26,6 @@ using MacroDeckHost.Tests.UnitTests.Plugins.Trust;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using MacroDeckHost.Application.Plugins.Runtime;
-
 using MacroDeckHost.Tests.UnitTests.Store.Reviews;
 
 namespace MacroDeckHost.Tests.UnitTests.Store;
@@ -119,7 +118,11 @@ internal sealed class StoreTestBuildInstallTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None);
 
-		_catalogQuery = new StoreCatalogQueryService(_catalog, _pluginCatalog, installations, _testInstallations, new InstalledPluginSigners());
+		_catalogQuery = new StoreCatalogQueryService(_catalog,
+			_pluginCatalog,
+			installations,
+			_testInstallations,
+			new InstalledPluginSigners());
 		_coordinator = new StoreInstallCoordinator(_catalogQuery,
 			_tracker,
 			new StoreOperationChannel(),
@@ -159,18 +162,26 @@ internal sealed class StoreTestBuildInstallTests
 	}
 
 	private Task<string> TrustedArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
+	{
+		return SignedPluginArtifacts.CreateSignedAsync(_sourceDirectory,
 			pluginId,
 			version,
 			fileName: $"trusted-{version}-{Guid.NewGuid():N}.macroDeckPlugin");
+	}
 
 	private string UnsignedArtifact(string version = "1.0.0", string pluginId = PluginId)
-		=> new PluginArtifactBuilder()
-			.WithManifest(ManifestJson.Build(version, pluginId, extraBlocks: null))
+	{
+		return new PluginArtifactBuilder()
+			.WithManifest(ManifestJson.Build(version, pluginId, null))
 			.WithFile(ManifestJson.EntrypointExecutable, "binary")
 			.WriteTo(_sourceDirectory, $"unsigned-{version}-{Guid.NewGuid():N}.macroDeckPlugin");
+	}
 
-	private async Task<StorePlatformTestBuild> ShareTestBuild(string artifactPath, string version, string build, string? servedDigest = null)
+	private async Task<StorePlatformTestBuild> ShareTestBuild(
+		string artifactPath,
+		string version,
+		string build,
+		string? servedDigest = null)
 	{
 		var bytes = await File.ReadAllBytesAsync(artifactPath);
 		var sha256 = Convert.ToHexStringLower(SHA256.HashData(bytes));
@@ -204,7 +215,9 @@ internal sealed class StoreTestBuildInstallTests
 	}
 
 	private string? ActiveVersion()
-		=> _pluginCatalog.Discover().FirstOrDefault(plugin => plugin.PluginId == PluginId)?.ActiveVersion?.Version;
+	{
+		return _pluginCatalog.Discover().FirstOrDefault(plugin => plugin.PluginId == PluginId)?.ActiveVersion?.Version;
+	}
 
 	private async Task Publish(string artifactPath, string version)
 	{
@@ -240,7 +253,10 @@ internal sealed class StoreTestBuildInstallTests
 		return _tracker.Find(operation.Id)!;
 	}
 
-	private string? CatalogTestBuild() => _catalogQuery.Find(StoreExtensionKind.Plugin, PluginId).Data?.InstalledTestBuild;
+	private string? CatalogTestBuild()
+	{
+		return _catalogQuery.Find(StoreExtensionKind.Plugin, PluginId).Data?.InstalledTestBuild;
+	}
 
 	[Test]
 	public async Task An_unsigned_test_build_installs_with_consent_without_developer_mode_and_is_remembered()
@@ -285,7 +301,7 @@ internal sealed class StoreTestBuildInstallTests
 	{
 		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
 
-		var result = await InstallTestBuild(build, consent: false);
+		var result = await InstallTestBuild(build, false);
 
 		Assert.Multiple(() =>
 		{
@@ -348,7 +364,7 @@ internal sealed class StoreTestBuildInstallTests
 	[Test]
 	public async Task Bytes_that_do_not_match_the_platforms_digest_are_refused()
 	{
-		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42", servedDigest: new string('0', 64));
+		var build = await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42", new string('0', 64));
 
 		var result = await InstallTestBuild(build);
 
@@ -365,7 +381,7 @@ internal sealed class StoreTestBuildInstallTests
 	{
 		await ShareTestBuild(UnsignedArtifact("1.2.0"), "1.2.0", "42");
 
-		var result = await _tests.Install(PluginId, Guid.NewGuid(), consent: true);
+		var result = await _tests.Install(PluginId, Guid.NewGuid(), true);
 
 		Assert.Multiple(() =>
 		{

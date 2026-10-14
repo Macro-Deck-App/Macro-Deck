@@ -92,12 +92,14 @@ internal sealed class SpotifyThrottledHttpClient : IHTTPClient
 	}
 
 	private static LogEventLevel LevelFor(int status)
-		=> status switch
+	{
+		return status switch
 		{
 			>= 500 => LogEventLevel.Warning,
 			>= 400 => LogEventLevel.Information,
 			_ => LogEventLevel.Debug
 		};
+	}
 
 	private static string SafeEndpoint(string endpoint)
 	{
@@ -150,7 +152,10 @@ internal sealed class SpotifyThrottledHttpClient : IHTTPClient
 		return "spotify-api";
 	}
 
-	public void SetRequestTimeout(TimeSpan timeout) => _inner.SetRequestTimeout(timeout);
+	public void SetRequestTimeout(TimeSpan timeout)
+	{
+		_inner.SetRequestTimeout(timeout);
+	}
 
 	public void Dispose()
 	{

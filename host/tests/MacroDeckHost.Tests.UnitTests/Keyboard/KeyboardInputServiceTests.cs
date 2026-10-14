@@ -67,7 +67,7 @@ public class KeyboardInputServiceTests
 	[Test]
 	public async Task PressCombo_repeats_the_requested_number_of_times()
 	{
-		await _service.PressComboAsync(KeyModifier.None, KeyCode.Enter, repeat: 3);
+		await _service.PressComboAsync(KeyModifier.None, KeyCode.Enter, 3);
 
 		var enterPresses = _provider.Events.Count(e => e is { Key: KeyCode.Enter, Down: true });
 		Assert.That(enterPresses, Is.EqualTo(3));
@@ -152,7 +152,9 @@ public class KeyboardInputServiceTests
 		var target = BackgroundTarget();
 
 		await _service.KeyDownAsync(KeyModifier.Shift, KeyCode.None, _backgroundCode);
-		await _service.KeyDownAsync(KeyModifier.None, KeyCode.A, new KeyboardTarget("Code.exe", KeyboardTargetMode.Background));
+		await _service.KeyDownAsync(KeyModifier.None,
+			KeyCode.A,
+			new KeyboardTarget("Code.exe", KeyboardTargetMode.Background));
 		await _service.KeyUpAsync(KeyModifier.None, KeyCode.A);
 
 		Assert.Multiple(() =>
@@ -241,7 +243,8 @@ public class KeyboardInputServiceTests
 		_provider.SupportsWindowTargeting = true;
 		_provider.ForegroundProcessName = "notepad";
 
-		var unavailable = await _service.KeyDownAsync(KeyModifier.None, KeyCode.W,
+		var unavailable = await _service.KeyDownAsync(KeyModifier.None,
+			KeyCode.W,
 			new KeyboardTarget("code", KeyboardTargetMode.WhenFocused));
 
 		Assert.Multiple(() =>
@@ -256,7 +259,9 @@ public class KeyboardInputServiceTests
 	{
 		_provider.SupportsWindowTargeting = true;
 		_provider.ForegroundProcessName = "code";
-		await _service.KeyDownAsync(KeyModifier.None, KeyCode.W, new KeyboardTarget("code", KeyboardTargetMode.WhenFocused));
+		await _service.KeyDownAsync(KeyModifier.None,
+			KeyCode.W,
+			new KeyboardTarget("code", KeyboardTargetMode.WhenFocused));
 
 		_provider.ForegroundProcessName = "notepad";
 		await _service.KeyUpAsync(KeyModifier.None, KeyCode.W);
@@ -269,7 +274,8 @@ public class KeyboardInputServiceTests
 	{
 		var target = BackgroundTarget();
 
-		var unavailable = await _service.KeyDownAsync(KeyModifier.None, KeyCode.W,
+		var unavailable = await _service.KeyDownAsync(KeyModifier.None,
+			KeyCode.W,
 			new KeyboardTarget("code", KeyboardTargetMode.FocusThenSend));
 
 		Assert.Multiple(() =>

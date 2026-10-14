@@ -10,7 +10,10 @@ public sealed class ConnectSuspensionFloor : IConnectSuspensionFloor
 {
 	private readonly IServiceScopeFactory _scopeFactory;
 
-	public ConnectSuspensionFloor(IServiceScopeFactory scopeFactory) => _scopeFactory = scopeFactory;
+	public ConnectSuspensionFloor(IServiceScopeFactory scopeFactory)
+	{
+		_scopeFactory = scopeFactory;
+	}
 
 	public async Task<DateTimeOffset?> Read(CancellationToken cancellationToken = default)
 	{

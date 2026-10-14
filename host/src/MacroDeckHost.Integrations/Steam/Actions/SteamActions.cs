@@ -14,31 +14,55 @@ internal static class SteamActions
 
 	public const string ForceParameter = "force";
 
-	public static IReadOnlyList<IActionDefinition> Create(ISteamSource target) =>
-	[
-		new SteamAction("launch-game", ActionStrings.LaunchGame.Name(), ActionStrings.LaunchGame.Description(), target,
-			SteamCommandKind.LaunchGame),
-		new SteamAction("launch-steam", ActionStrings.LaunchSteam.Name(), ActionStrings.LaunchSteam.Description(),
-			target, SteamCommandKind.LaunchSteam),
-		new SteamAction("open-store-page", ActionStrings.OpenStorePage.Name(), ActionStrings.OpenStorePage.Description(),
-			target, SteamCommandKind.OpenStorePage),
-		new SteamAction("open-library-page", ActionStrings.OpenLibraryPage.Name(),
-			ActionStrings.OpenLibraryPage.Description(), target, SteamCommandKind.OpenLibraryPage),
-		new SteamAction("close-game", ActionStrings.CloseGame.Name(), ActionStrings.CloseGame.Description(), target,
-			SteamCommandKind.CloseGame)
-	];
+	public static IReadOnlyList<IActionDefinition> Create(ISteamSource target)
+	{
+		return
+		[
+			new SteamAction("launch-game",
+				ActionStrings.LaunchGame.Name(),
+				ActionStrings.LaunchGame.Description(),
+				target,
+				SteamCommandKind.LaunchGame),
+			new SteamAction("launch-steam",
+				ActionStrings.LaunchSteam.Name(),
+				ActionStrings.LaunchSteam.Description(),
+				target,
+				SteamCommandKind.LaunchSteam),
+			new SteamAction("open-store-page",
+				ActionStrings.OpenStorePage.Name(),
+				ActionStrings.OpenStorePage.Description(),
+				target,
+				SteamCommandKind.OpenStorePage),
+			new SteamAction("open-library-page",
+				ActionStrings.OpenLibraryPage.Name(),
+				ActionStrings.OpenLibraryPage.Description(),
+				target,
+				SteamCommandKind.OpenLibraryPage),
+			new SteamAction("close-game",
+				ActionStrings.CloseGame.Name(),
+				ActionStrings.CloseGame.Description(),
+				target,
+				SteamCommandKind.CloseGame)
+		];
+	}
 
 	internal static bool TakesGame(SteamCommandKind kind)
-		=> kind is not (SteamCommandKind.LaunchSteam or SteamCommandKind.CloseGame);
+	{
+		return kind is not (SteamCommandKind.LaunchSteam or SteamCommandKind.CloseGame);
+	}
 
-	internal static ActionResult ToResult(SteamCommandOutcome outcome, SteamCommandKind kind = SteamCommandKind.LaunchGame)
-		=> outcome switch
+	internal static ActionResult ToResult(
+		SteamCommandOutcome outcome,
+		SteamCommandKind kind = SteamCommandKind.LaunchGame)
+	{
+		return outcome switch
 		{
 			SteamCommandOutcome.Succeeded => ActionResult.Success(),
 			SteamCommandOutcome.InvalidAppId => ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 				Errors.InvalidGame()),
 			SteamCommandOutcome.NotAvailable when kind == SteamCommandKind.CloseGame => ActionResult.Failed(
-				ActionErrorCodes.Unavailable, Errors.CloseNotSupported()),
+				ActionErrorCodes.Unavailable,
+				Errors.CloseNotSupported()),
 			SteamCommandOutcome.NotAvailable => ActionResult.Failed(ActionErrorCodes.Unavailable,
 				Errors.NotAvailable()),
 			SteamCommandOutcome.NotRunning => ActionResult.Failed(ActionErrorCodes.Unavailable, Errors.NoGameRunning()),
@@ -46,6 +70,7 @@ internal static class SteamActions
 				Errors.CloseFailed()),
 			_ => ActionResult.Failed(ActionErrorCodes.ProviderError, Errors.LaunchFailed())
 		};
+	}
 }
 
 internal sealed class SteamAction : IDynamicOptionsActionDefinition
@@ -70,14 +95,14 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 			SteamCommandKind.CloseGame =>
 			[
 				ActionParameter.Toggle(SteamActions.ForceParameter,
-					label: Params.Force(),
-					description: Params.ForceDescription())
+					Params.Force(),
+					Params.ForceDescription())
 			],
 			_ when SteamActions.TakesGame(kind) =>
 			[
 				ActionParameter.Autocomplete(SteamActions.GameParameter,
-					label: Params.Game(),
-					description: Params.GameDescription(),
+					Params.Game(),
+					Params.GameDescription(),
 					placeholder: Params.GamePlaceholder(),
 					required: true)
 			],
@@ -93,15 +118,18 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(this);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(this);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
 	{
 		var filter = context.Filter?.Trim();
-		var games = _target.Snapshot.Games.Where(game => string.IsNullOrEmpty(filter) ||
-			game.Name.Contains(filter, StringComparison.CurrentCultureIgnoreCase));
+		var games = _target.Snapshot.Games.Where(game
+			=> string.IsNullOrEmpty(filter) || game.Name.Contains(filter, StringComparison.CurrentCultureIgnoreCase));
 
 		return Task.FromResult(new DynamicOptionsResult
 		{
@@ -119,13 +147,15 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 	}
 
 	private static bool ReadFlag(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			bool flag => flag,
 			JsonElement { ValueKind: JsonValueKind.True } => true,
 			string text => bool.TryParse(text.Trim(), out var parsed) && parsed,
 			_ => false
 		};
+	}
 
 	private sealed class Executor(SteamAction action) : IActionExecutor
 	{
@@ -135,7 +165,8 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 			if (SteamActions.TakesGame(action._kind))
 			{
 				var text = Convert.ToString(context.Parameters.GetValueOrDefault(SteamActions.GameParameter),
-					CultureInfo.InvariantCulture)?.Trim();
+						CultureInfo.InvariantCulture)
+					?.Trim();
 				if (SteamLauncher.ParseAppId(text) is not { } parsed)
 				{
 					return SteamActions.ToResult(SteamCommandOutcome.InvalidAppId, action._kind);
@@ -144,11 +175,11 @@ internal sealed class SteamAction : IDynamicOptionsActionDefinition
 				appId = parsed;
 			}
 
-			var force = action._kind == SteamCommandKind.CloseGame &&
-				ReadFlag(context.Parameters.GetValueOrDefault(SteamActions.ForceParameter));
+			var force = action._kind == SteamCommandKind.CloseGame
+				&& ReadFlag(context.Parameters.GetValueOrDefault(SteamActions.ForceParameter));
 
-			return SteamActions.ToResult(
-				await action._target.ExecuteAsync(new SteamCommand(action._kind, appId, force), context.CancellationToken),
+			return SteamActions.ToResult(await action._target.ExecuteAsync(new SteamCommand(action._kind, appId, force),
+					context.CancellationToken),
 				action._kind);
 		}
 	}

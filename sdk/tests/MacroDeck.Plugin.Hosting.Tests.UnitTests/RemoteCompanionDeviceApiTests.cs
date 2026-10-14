@@ -31,7 +31,8 @@ public class RemoteCompanionDeviceApiTests
 		var events = _events = new ConcurrentQueue<string>();
 		_api.AccessChanged += (_, _) => events.Enqueue("access");
 		_api.DeviceReady += (_, e) => events.Enqueue($"ready:{Name(e.DeviceId)}:{e.Device!.ReadySequence}");
-		_api.DeviceChanged += (_, e) => events.Enqueue($"changed:{Name(e.DeviceId)}:{(e.Device is null ? "gone" : "here")}");
+		_api.DeviceChanged += (_, e)
+			=> events.Enqueue($"changed:{Name(e.DeviceId)}:{(e.Device is null ? "gone" : "here")}");
 	}
 
 	[TearDown]
@@ -52,7 +53,8 @@ public class RemoteCompanionDeviceApiTests
 			Assert.That(_api.Access, Is.EqualTo(CompanionDeviceAccess.Unsupported));
 			Assert.That(_api.Devices, Is.Empty);
 			Assert.That(sent, Is.False);
-			Assert.That(requested, Is.EqualTo(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected)));
+			Assert.That(requested,
+				Is.EqualTo(CompanionDeviceCommandResult.Failed(CompanionDeviceFailure.NotConnected)));
 			Assert.That(_invoker.LastApi, Is.Null);
 		});
 	}
@@ -60,7 +62,7 @@ public class RemoteCompanionDeviceApiTests
 	[Test]
 	public async Task A_push_lists_the_devices_with_their_state_and_reports_each_as_ready()
 	{
-		Push(1, CompanionDeviceAccessStates.Available, Device(_phone, 1, battery: 80), Device(_tablet, 2));
+		Push(1, CompanionDeviceAccessStates.Available, Device(_phone, 1, 80), Device(_tablet, 2));
 
 		await WaitForEventsAsync(5);
 		Assert.Multiple(() =>
@@ -68,29 +70,31 @@ public class RemoteCompanionDeviceApiTests
 			Assert.That(_api.Access, Is.EqualTo(CompanionDeviceAccess.Available));
 			Assert.That(_api.Devices.Select(device => device.Id), Is.EquivalentTo(new[] { _phone, _tablet }));
 			Assert.That(_api.FindDevice(_phone)!.State.BatteryLevelPercent, Is.EqualTo(80));
-			Assert.That(_events, Is.EqualTo(new[]
-			{
-				"access", "changed:phone:here", "ready:phone:1", "changed:tablet:here", "ready:tablet:2"
-			}));
+			Assert.That(_events,
+				Is.EqualTo(new[]
+				{
+					"access", "changed:phone:here", "ready:phone:1", "changed:tablet:here", "ready:tablet:2"
+				}));
 		});
 	}
 
 	[Test]
 	public async Task A_new_report_is_a_change_a_new_connection_is_ready_again_and_a_device_that_left_is_gone()
 	{
-		Push(1, CompanionDeviceAccessStates.Available, Device(_phone, 1, battery: 80), Device(_tablet, 2));
+		Push(1, CompanionDeviceAccessStates.Available, Device(_phone, 1, 80), Device(_tablet, 2));
 		await WaitForEventsAsync(5);
 		_events.Clear();
 
-		Push(2, CompanionDeviceAccessStates.Available, Device(_phone, 1, battery: 75));
-		Push(3, CompanionDeviceAccessStates.Available, Device(_phone, 1, battery: 75));
-		Push(4, CompanionDeviceAccessStates.Available, Device(_phone, 3, battery: 75));
+		Push(2, CompanionDeviceAccessStates.Available, Device(_phone, 1, 75));
+		Push(3, CompanionDeviceAccessStates.Available, Device(_phone, 1, 75));
+		Push(4, CompanionDeviceAccessStates.Available, Device(_phone, 3, 75));
 
 		await WaitForEventsAsync(4);
-		Assert.That(_events, Is.EqualTo(new[]
-		{
-			"changed:phone:here", "changed:tablet:gone", "changed:phone:here", "ready:phone:3"
-		}));
+		Assert.That(_events,
+			Is.EqualTo(new[]
+			{
+				"changed:phone:here", "changed:tablet:gone", "changed:phone:here", "ready:phone:3"
+			}));
 	}
 
 	[Test]
@@ -170,7 +174,8 @@ public class RemoteCompanionDeviceApiTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Png, Is.EqualTo(png));
-			Assert.That(((CompanionScreenshotArguments)_invoker.LastArguments!).Mode, Is.EqualTo(CompanionScreenshotModes.Full));
+			Assert.That(((CompanionScreenshotArguments)_invoker.LastArguments!).Mode,
+				Is.EqualTo(CompanionScreenshotModes.Full));
 		});
 		api.Dispose();
 	}
@@ -180,7 +185,8 @@ public class RemoteCompanionDeviceApiTests
 	{
 		var api = new RemoteCompanionDeviceApi(_invoker, _cache, Serilog.Core.Logger.None, new ScriptedHostAssets());
 		Push(1, CompanionDeviceAccessStates.Available, Device(_phone, 1));
-		_invoker.NextResult = Json(new CompanionScreenshotResultDto { Failure = CompanionDeviceFailures.ConsentDenied });
+		_invoker.NextResult = Json(new CompanionScreenshotResultDto
+			{ Failure = CompanionDeviceFailures.ConsentDenied });
 
 		var result = await api.CaptureScreenshotAsync(_phone, CompanionScreenshotMode.FullScreen);
 
@@ -198,7 +204,7 @@ public class RemoteCompanionDeviceApiTests
 		await _invoker.WaitForCallAsync();
 		Push(2, CompanionDeviceAccessStates.Available, Device(_phone, 1));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await waiting.WaitAsync(TimeSpan.FromSeconds(5)), Is.True);
 			Assert.That(_api.FindDevice(_phone), Is.Not.Null);
@@ -214,10 +220,14 @@ public class RemoteCompanionDeviceApiTests
 		}
 	}
 
-	private static string Name(Guid id) => id == _phone ? "phone" : "tablet";
+	private static string Name(Guid id)
+	{
+		return id == _phone ? "phone" : "tablet";
+	}
 
 	private void Push(long revision, string access, params CompanionDeviceStateDto[] devices)
-		=> _cache.Apply(new ProtocolEnvelope
+	{
+		_cache.Apply(new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -232,21 +242,34 @@ public class RemoteCompanionDeviceApiTests
 				},
 				PluginProtocolJson.Options)
 		});
+	}
 
 	private static CompanionDeviceStateDto Device(Guid id, long readySequence, int? battery = null)
-		=> new() { DeviceId = id.ToString("D"), ReadySequence = readySequence, BatteryLevelPercent = battery };
+	{
+		return new CompanionDeviceStateDto
+			{ DeviceId = id.ToString("D"), ReadySequence = readySequence, BatteryLevelPercent = battery };
+	}
 
-	private static JsonElement Json(object value) => JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	private static JsonElement Json(object value)
+	{
+		return JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 
 	private sealed class FailingHostInvoker(ProtocolError error) : IHostInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string api,
+		public Task<JsonElement?> InvokeAsync(
+			string api,
 			string operation,
 			object? arguments,
 			CancellationToken cancellationToken)
-			=> Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		{
+			return Task.FromException<JsonElement?>(HostInvocationException.From(error));
+		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 
 	private sealed class ScriptedHostAssets : IPluginHostAssetReceiver
@@ -254,9 +277,14 @@ public class RemoteCompanionDeviceApiTests
 		public Dictionary<string, HostAssetTransfer> Transfers { get; } = new(StringComparer.Ordinal);
 
 		public Task<HostAssetTransfer> AwaitAsync(string transferId, CancellationToken cancellationToken)
-			=> Task.FromResult(Transfers[transferId]);
+		{
+			return Task.FromResult(Transfers[transferId]);
+		}
 
-		public ProtocolEnvelope Handle(ProtocolEnvelope envelope) => throw new NotSupportedException();
+		public ProtocolEnvelope Handle(ProtocolEnvelope envelope)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void Reset()
 		{

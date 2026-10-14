@@ -63,7 +63,8 @@ public class ActionButtonWidgetDataTests
 		var config = ActionButtonWidgetData.Parse(JsonDocument.Parse($$"""
 																	   {"stateMode":false,"icon":{"type":"icon-pack","reference":"{{danglingReference}}"},
 																	    "label":"Old","backgroundColor":"#333333","labelColor":"#eeeeee"}
-																	   """).RootElement);
+																	   """)
+			.RootElement);
 
 		var icon = config.ResolveIcon(null);
 		var appearance = config.Resolve(null);
@@ -80,11 +81,13 @@ public class ActionButtonWidgetDataTests
 	[Test]
 	public void LabelBoxColor_IsAbsentForStoredDataWithoutTheKey_AndCascadesStateThenRoot()
 	{
-		var legacy = ActionButtonWidgetData.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""").RootElement);
+		var legacy = ActionButtonWidgetData.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""")
+			.RootElement);
 		var staged = ActionButtonWidgetData.Parse(JsonDocument.Parse("""
-			{"stateMode":true,"labelBoxColor":"#111111",
-			 "states":[{"id":"a","appearance":{"labelBoxColor":"#222222"}},{"id":"b","appearance":{"label":"B"}}]}
-			""").RootElement);
+																	 {"stateMode":true,"labelBoxColor":"#111111",
+																	  "states":[{"id":"a","appearance":{"labelBoxColor":"#222222"}},{"id":"b","appearance":{"label":"B"}}]}
+																	 """)
+			.RootElement);
 
 		Assert.Multiple(() =>
 		{
@@ -97,7 +100,8 @@ public class ActionButtonWidgetDataTests
 	[Test]
 	public void Label_styling_keeps_the_shadow_and_draws_no_outline_or_box_border_for_stored_data_without_the_keys()
 	{
-		var legacy = ActionButtonWidgetData.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""").RootElement)
+		var legacy = ActionButtonWidgetData
+			.Parse(JsonDocument.Parse("""{"label":"Old","labelColor":"#eeeeee"}""").RootElement)
 			.Resolve(null);
 
 		Assert.Multiple(() =>
@@ -112,13 +116,14 @@ public class ActionButtonWidgetDataTests
 	public void Label_styling_cascades_state_then_root()
 	{
 		var staged = ActionButtonWidgetData.Parse(JsonDocument.Parse("""
-			{"stateMode":true,"labelShadow":false,"labelOutlineColor":"#111111","labelOutlineWidth":2,
-			 "labelBoxBorderColor":"#333333","labelBoxBorderWidth":3,
-			 "states":[
-			   {"id":"a","appearance":{"labelShadow":true,"labelOutlineColor":"#222222","labelOutlineWidth":2.5,
-			     "labelBoxBorderColor":"#444444","labelBoxBorderWidth":1}},
-			   {"id":"b","appearance":{"label":"B"}}]}
-			""").RootElement);
+																	 {"stateMode":true,"labelShadow":false,"labelOutlineColor":"#111111","labelOutlineWidth":2,
+																	  "labelBoxBorderColor":"#333333","labelBoxBorderWidth":3,
+																	  "states":[
+																	    {"id":"a","appearance":{"labelShadow":true,"labelOutlineColor":"#222222","labelOutlineWidth":2.5,
+																	      "labelBoxBorderColor":"#444444","labelBoxBorderWidth":1}},
+																	    {"id":"b","appearance":{"label":"B"}}]}
+																	 """)
+			.RootElement);
 
 		var a = staged.Resolve("a");
 		var b = staged.Resolve("b");

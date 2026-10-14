@@ -35,9 +35,9 @@ public sealed class DeviceSurfaceProviderRegistry : IDisposable
 		// A remote plugin is registered as an integration too, so without this exclusion every plugin
 		// would match here as well as in the remote registry. A plugin's provider lives in its own
 		// process and is served over the plugin transport or not at all.
-		if (integration is not IDeviceProvider provider ||
-			integration is RemotePluginIntegration ||
-			!_integrations.IsEnabled(providerId))
+		if (integration is not IDeviceProvider provider
+			|| integration is RemotePluginIntegration
+			|| !_integrations.IsEnabled(providerId))
 		{
 			return null;
 		}
@@ -57,7 +57,9 @@ public sealed class DeviceSurfaceProviderRegistry : IDisposable
 	// integration re-instantiates it, so an entry that outlived the change would keep serving sessions
 	// from the object the host has already thrown away.
 	private void OnAvailabilityChanged(object? sender, IntegrationAvailabilityChangedEventArgs e)
-		=> _adapters.TryRemove(e.IntegrationId, out _);
+	{
+		_adapters.TryRemove(e.IntegrationId, out _);
+	}
 }
 
 /// <summary>
@@ -77,5 +79,7 @@ public sealed class DeviceSurfaceProviderResolver : IDeviceSurfaceProviderResolv
 	}
 
 	public IDeviceSurfaceProvider? Resolve(string providerId)
-		=> _inProcess.Resolve(providerId) ?? _remote.Resolve(providerId);
+	{
+		return _inProcess.Resolve(providerId) ?? _remote.Resolve(providerId);
+	}
 }

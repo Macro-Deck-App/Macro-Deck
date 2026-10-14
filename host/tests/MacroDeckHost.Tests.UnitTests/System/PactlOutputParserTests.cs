@@ -6,38 +6,38 @@ public class PactlOutputParserTests
 {
 	// Shape of LC_MESSAGES=C pactl list as printed by pactl 17 (PulseAudio 17).
 	private const string Listing = """
-		Module #0
-			Name: module-device-restore
-			Argument:
-		Sink #52
-			State: SUSPENDED
-			Name: alsa_output.pci-0000_00_1f.3.analog-stereo
-			Description: Built-in Audio Analog Stereo
-			Mute: no
-			Volume: front-left: 26214 /  40% / -23.88 dB,   front-right: 26214 /  40% / -23.88 dB
-			        balance 0.00
-			Base Volume: 65536 / 100% / 0.00 dB
-		Source #53
-			Name: alsa_output.pci-0000_00_1f.3.analog-stereo.monitor
-			Description: Monitor of Built-in Audio Analog Stereo
-			Mute: no
-		Source #54
-			State: RUNNING
-			Name: alsa_input.usb-Logitech_Webcam-02.mono-fallback
-			Description: Écouteurs Logitech
-			Mute: yes
-			Volume: mono: 45875 /  70% / -9.29 dB
-			Properties:
-				device.description = "Logitech Webcam"
-		Sink Input #7
-			Driver: protocol-native.c
-			Mute: no
-			Volume: front-left: 65536 / 100% / 0.00 dB
-			Properties:
-				application.name = "Firefox"
-		Client #3
-			Driver: protocol-native.c
-		""";
+								   Module #0
+								   	Name: module-device-restore
+								   	Argument:
+								   Sink #52
+								   	State: SUSPENDED
+								   	Name: alsa_output.pci-0000_00_1f.3.analog-stereo
+								   	Description: Built-in Audio Analog Stereo
+								   	Mute: no
+								   	Volume: front-left: 26214 /  40% / -23.88 dB,   front-right: 26214 /  40% / -23.88 dB
+								   	        balance 0.00
+								   	Base Volume: 65536 / 100% / 0.00 dB
+								   Source #53
+								   	Name: alsa_output.pci-0000_00_1f.3.analog-stereo.monitor
+								   	Description: Monitor of Built-in Audio Analog Stereo
+								   	Mute: no
+								   Source #54
+								   	State: RUNNING
+								   	Name: alsa_input.usb-Logitech_Webcam-02.mono-fallback
+								   	Description: Écouteurs Logitech
+								   	Mute: yes
+								   	Volume: mono: 45875 /  70% / -9.29 dB
+								   	Properties:
+								   		device.description = "Logitech Webcam"
+								   Sink Input #7
+								   	Driver: protocol-native.c
+								   	Mute: no
+								   	Volume: front-left: 65536 / 100% / 0.00 dB
+								   	Properties:
+								   		application.name = "Firefox"
+								   Client #3
+								   	Driver: protocol-native.c
+								   """;
 
 	[Test]
 	public void A_full_listing_yields_sinks_and_sources_with_mute_and_volume()
@@ -49,7 +49,10 @@ public class PactlOutputParserTests
 			Assert.That(listing.Sinks,
 				Is.EqualTo(new[]
 				{
-					new PactlDevice("alsa_output.pci-0000_00_1f.3.analog-stereo", "Built-in Audio Analog Stereo", false, 0.4f)
+					new PactlDevice("alsa_output.pci-0000_00_1f.3.analog-stereo",
+						"Built-in Audio Analog Stereo",
+						false,
+						0.4f)
 				}));
 			Assert.That(listing.Sources,
 				Is.EqualTo(new[]
@@ -63,11 +66,11 @@ public class PactlOutputParserTests
 	public void Defaults_are_read_from_info()
 	{
 		var defaults = PactlOutputParser.ParseDefaults("""
-			Server Name: PulseAudio (on PipeWire 1.0.5)
-			Default Sample Specification: s16le 2ch 44100Hz
-			Default Sink: alsa_output.pci-0000_00_1f.3.analog-stereo
-			Default Source: alsa_input.usb-Logitech_Webcam-02.mono-fallback
-			""");
+													   Server Name: PulseAudio (on PipeWire 1.0.5)
+													   Default Sample Specification: s16le 2ch 44100Hz
+													   Default Sink: alsa_output.pci-0000_00_1f.3.analog-stereo
+													   Default Source: alsa_input.usb-Logitech_Webcam-02.mono-fallback
+													   """);
 
 		Assert.That(defaults,
 			Is.EqualTo(new PactlDefaults("alsa_output.pci-0000_00_1f.3.analog-stereo",
@@ -109,7 +112,9 @@ public class PactlOutputParserTests
 	[TestCase("Event 'new' on source #62")]
 	[TestCase("Event 'change' on server #4294967295")]
 	public void A_device_or_default_event_is_recognised(string line)
-		=> Assert.That(PactlOutputParser.IsAudioEvent(line), Is.True);
+	{
+		Assert.That(PactlOutputParser.IsAudioEvent(line), Is.True);
+	}
 
 	[TestCase("Event 'new' on client #3")]
 	[TestCase("Event 'change' on sink-input #12")]
@@ -117,5 +122,7 @@ public class PactlOutputParserTests
 	[TestCase("")]
 	[TestCase("Connection failure: Connection refused")]
 	public void Client_module_stream_and_unrelated_lines_are_not_audio_events(string line)
-		=> Assert.That(PactlOutputParser.IsAudioEvent(line), Is.False);
+	{
+		Assert.That(PactlOutputParser.IsAudioEvent(line), Is.False);
+	}
 }

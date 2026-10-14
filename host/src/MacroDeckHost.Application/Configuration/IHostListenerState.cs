@@ -29,7 +29,8 @@ public sealed class HostListenerState : IHostListenerState
 {
 	private int _loopbackPort;
 
-	public HostListenerState(PublicEndpointSet publicEndpoints,
+	public HostListenerState(
+		PublicEndpointSet publicEndpoints,
 		bool publicPortOverriddenByEnvironment,
 		int? refusedConfiguredPublicPort = null,
 		PublicTlsFailure tlsFailure = PublicTlsFailure.None,
@@ -62,5 +63,8 @@ public sealed class HostListenerState : IHostListenerState
 
 	public string? ActiveCertificateFingerprint { get; }
 
-	public void SetLoopbackPort(int port) => Volatile.Write(ref _loopbackPort, port);
+	public void SetLoopbackPort(int port)
+	{
+		Volatile.Write(ref _loopbackPort, port);
+	}
 }

@@ -9,7 +9,8 @@ namespace MacroDeckHost.Infrastructure.Backups.Crypto;
 /// </summary>
 public static class BackupPayloadCrypto
 {
-	public static BackupEncryptingStream CreateEncryptor(Stream destination,
+	public static BackupEncryptingStream CreateEncryptor(
+		Stream destination,
 		ReadOnlySpan<byte> recoveryKey,
 		ReadOnlySpan<byte> manifestBytes,
 		bool leaveOpen = false)
@@ -37,7 +38,8 @@ public static class BackupPayloadCrypto
 		}
 	}
 
-	public static BackupDecryptingStream CreateDecryptor(Stream source,
+	public static BackupDecryptingStream CreateDecryptor(
+		Stream source,
 		ReadOnlySpan<byte> recoveryKey,
 		ReadOnlySpan<byte> manifestBytes,
 		bool leaveOpen = false)

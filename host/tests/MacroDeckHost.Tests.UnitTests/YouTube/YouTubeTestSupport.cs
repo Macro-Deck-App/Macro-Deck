@@ -19,11 +19,13 @@ internal static class YouTubeTestSupport
 	public static ILogger Silent { get; } = Logger.None;
 
 	public static YouTubePollerOptions ManualOptions(TimeProvider? time = null)
-		=> new()
+	{
+		return new YouTubePollerOptions
 		{
 			Delay = (_, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken),
 			Time = time ?? new YouTubeManualClock(Now)
 		};
+	}
 
 	public static Guid AddChannel(
 		RecordingIntegrationConfig config,
@@ -34,7 +36,8 @@ internal static class YouTubeTestSupport
 		DateTimeOffset? connectedAt = null,
 		string? entryTitle = null,
 		string? dailyQuota = null)
-		=> config.AddEntry(entryTitle ?? $"YouTube ({title})",
+	{
+		return config.AddEntry(entryTitle ?? $"YouTube ({title})",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[YouTubeConfigKeys.ClientId] = clientId,
@@ -52,19 +55,24 @@ internal static class YouTubeTestSupport
 				[YouTubeConfigKeys.AccessToken] = "access-" + channelId,
 				[YouTubeConfigKeys.RefreshToken] = "refresh-" + channelId
 			});
+	}
 
 	public static YouTubeAccountManager Manager(
 		Func<YouTubeAccount, IYouTubeApiClient> api,
 		YouTubeQuotaBudgets? budgets = null,
 		YouTubePollerOptions? options = null)
-		=> new(() => new FakeYouTubeOAuthClient(),
+	{
+		return new YouTubeAccountManager(() => new FakeYouTubeOAuthClient(),
 			Silent,
 			(account, _, _) => api(account),
 			budgets ?? new YouTubeQuotaBudgets(new YouTubeManualClock(Now)),
 			options ?? ManualOptions());
+	}
 
 	public static YouTubeAccount Account(string channelId = "UCchannel", string title = "Channel")
-		=> new(Guid.NewGuid(), "client-1", channelId, title, null, "channel", Now);
+	{
+		return new YouTubeAccount(Guid.NewGuid(), "client-1", channelId, title, null, "channel", Now);
+	}
 
 	public static YouTubeBroadcast Broadcast(
 		string id,
@@ -74,7 +82,8 @@ internal static class YouTubeTestSupport
 		DateTimeOffset? scheduledStart = null,
 		string title = "My stream",
 		bool enableMonitorStream = false)
-		=> new(id,
+	{
+		return new YouTubeBroadcast(id,
 			title,
 			liveChatId,
 			lifeCycleStatus == YouTubeLifeCycleStatus.Live ? Now.AddMinutes(-30) : null,
@@ -82,6 +91,7 @@ internal static class YouTubeTestSupport
 			lifeCycleStatus,
 			enableAutoStart,
 			enableMonitorStream);
+	}
 
 	public static YouTubeVideo Video(
 		string id,
@@ -89,7 +99,8 @@ internal static class YouTubeTestSupport
 		long? likes = 7,
 		string title = "My stream",
 		string? liveChatId = "chat-1")
-		=> new(id,
+	{
+		return new YouTubeVideo(id,
 			new YouTubeVideoSnippet(title,
 				"An old description",
 				["old", "tags"],
@@ -101,15 +112,23 @@ internal static class YouTubeTestSupport
 			viewers,
 			Now.AddMinutes(-30),
 			liveChatId);
+	}
 
 	public static YouTubeChatAuthor Author(string channelId = "UCviewer", string name = "Viewer")
-		=> new(channelId, name, null, false, false, false, false);
+	{
+		return new YouTubeChatAuthor(channelId, name, null, false, false, false, false);
+	}
 
 	public static YouTubeChatMessage Text(string id, string text, string authorId = "UCviewer")
-		=> new(id, YouTubeChatMessageTypes.Text, Now, text, Author(authorId)) { TextMessage = text };
+	{
+		return new YouTubeChatMessage(id, YouTubeChatMessageTypes.Text, Now, text, Author(authorId))
+			{ TextMessage = text };
+	}
 
 	public static YouTubeApiException ApiError(string reason, HttpStatusCode status = HttpStatusCode.Forbidden)
-		=> new(status, reason, $"YouTube answered {(int)status} {reason}");
+	{
+		return new YouTubeApiException(status, reason, $"YouTube answered {(int)status} {reason}");
+	}
 }
 
 internal sealed class FakeYouTubeOAuthClient : IYouTubeOAuthClient
@@ -157,8 +176,12 @@ internal sealed class FakeYouTubeOAuthClient : IYouTubeOAuthClient
 		string clientSecret,
 		string refreshToken,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(new YouTubeTokens("refreshed", refreshToken, DateTimeOffset.UtcNow.AddHours(1),
+	{
+		return Task.FromResult(new YouTubeTokens("refreshed",
+			refreshToken,
+			DateTimeOffset.UtcNow.AddHours(1),
 			[YouTubeOAuthEndpoints.Scope]));
+	}
 
 	public void Dispose()
 	{
@@ -344,7 +367,10 @@ internal sealed class RecordingYouTubeChatSink : IStreamChatSink
 		}
 	}
 
-	public void SetAccounts(IReadOnlyList<ChatAccount> accounts) => AccountLists.Add(accounts);
+	public void SetAccounts(IReadOnlyList<ChatAccount> accounts)
+	{
+		AccountLists.Add(accounts);
+	}
 
 	public void Post(ChatEvent chatEvent)
 	{
@@ -362,8 +388,12 @@ internal sealed class RecordingYouTubeEventPublisher : IEventPublisher
 	public IEnumerable<string> Ids => Published.Select(entry => entry.EventId);
 
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-		=> Published.Add((eventId, parameters ?? new Dictionary<string, object?>()));
+	{
+		Published.Add((eventId, parameters ?? new Dictionary<string, object?>()));
+	}
 
 	public IReadOnlyDictionary<string, object?> Single(string eventId)
-		=> Published.Single(entry => entry.EventId == eventId).Payload;
+	{
+		return Published.Single(entry => entry.EventId == eventId).Payload;
+	}
 }

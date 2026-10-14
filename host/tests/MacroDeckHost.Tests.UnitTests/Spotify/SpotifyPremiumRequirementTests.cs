@@ -61,10 +61,12 @@ internal sealed class SpotifyPremiumRequirementTests
 	}
 
 	private static APIException Forbidden(string body)
-		=> new(new Response(new Dictionary<string, string>())
+	{
+		return new APIException(new Response(new Dictionary<string, string>())
 		{
 			StatusCode = HttpStatusCode.Forbidden,
 			ContentType = "application/json",
 			Body = body
 		});
+	}
 }

@@ -23,33 +23,40 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 	public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["macro deck_sinusbot plugin"];
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
-
-	private static ActionMigrationResult? Migrate(ForeignAction action) => action.TypeName switch
 	{
-		"SuchByte.SinusBotPlugin.Actions.IncreaseVolumeAction" => VolumeStep(action, "volume-up", 5),
-		"SuchByte.SinusBotPlugin.Actions.DecreaseVolumeAction" => VolumeStep(action, "volume-down", 5),
-		// SinusBot's real pause endpoint is a separate action from Macro Deck 3's music-player set - the
-		// bot only exposes a hard stop here, and Macro Deck 3's action set has no "stop" command that
-		// would not also change what the button does (its "pause" calls SinusBot's own pause endpoint).
-		"SuchByte.SinusBotPlugin.Actions.StopPlayBackAction" => null,
-		"SuchByte.SinusBotPlugin.Actions.PlayBackFileAction" => MigratePlayBackFile(action),
-		_ => null
-	};
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
+
+	private static ActionMigrationResult? Migrate(ForeignAction action)
+	{
+		return action.TypeName switch
+		{
+			"SuchByte.SinusBotPlugin.Actions.IncreaseVolumeAction" => VolumeStep(action, "volume-up", 5),
+			"SuchByte.SinusBotPlugin.Actions.DecreaseVolumeAction" => VolumeStep(action, "volume-down", 5),
+			// SinusBot's real pause endpoint is a separate action from Macro Deck 3's music-player set - the
+			// bot only exposes a hard stop here, and Macro Deck 3's action set has no "stop" command that
+			// would not also change what the button does (its "pause" calls SinusBot's own pause endpoint).
+			"SuchByte.SinusBotPlugin.Actions.StopPlayBackAction" => null,
+			"SuchByte.SinusBotPlugin.Actions.PlayBackFileAction" => MigratePlayBackFile(action),
+			_ => null
+		};
+	}
 
 	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
 	{
 		var url = ReadCredential(settings.Credentials, "url");
 		var username = ReadCredential(settings.Credentials, "username");
 		var password = ReadCredential(settings.Credentials, "password");
-		if (string.IsNullOrWhiteSpace(url) ||
-			string.IsNullOrWhiteSpace(username) ||
-			string.IsNullOrWhiteSpace(password))
+		if (string.IsNullOrWhiteSpace(url)
+			|| string.IsNullOrWhiteSpace(username)
+			|| string.IsNullOrWhiteSpace(password))
 		{
 			return [];
 		}
@@ -114,11 +121,13 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static ActionMigrationResult VolumeStep(ForeignAction action, string actionId, int configuredStep)
-		=> new(SinusBotIntegration.IntegrationId,
+	{
+		return new ActionMigrationResult(SinusBotIntegration.IntegrationId,
 			actionId,
 			action.DisplayName ?? actionId,
 			Parameters(),
-			[AppStrings.Migration.Warning.VolumeStepFixed(value: configuredStep, step: FixedVolumeStepPercent)]);
+			[AppStrings.Migration.Warning.VolumeStepFixed(configuredStep, FixedVolumeStepPercent)]);
+	}
 
 	private const int FixedVolumeStepPercent = 10;
 
@@ -138,7 +147,7 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 		var warnings = new List<LocalizedText>();
 		if (ReadInt(config, "volume") is { } volume and > -1)
 		{
-			warnings.Add(AppStrings.Migration.Warning.SinusBot.PlaybackVolumeNotMigrated(volume: volume));
+			warnings.Add(AppStrings.Migration.Warning.SinusBot.PlaybackVolumeNotMigrated(volume));
 		}
 
 		if (ReadBool(config, "syncButtonState") ?? false)
@@ -153,12 +162,15 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 			warnings.Count > 0 ? warnings : null);
 	}
 
-	private static string? ReadCredential(IReadOnlyList<IReadOnlyDictionary<string, string>> credentials,
+	private static string? ReadCredential(
+		IReadOnlyList<IReadOnlyDictionary<string, string>> credentials,
 		string name)
-		=> credentials
+	{
+		return credentials
 			.SelectMany(dict => dict)
 			.FirstOrDefault(pair => string.Equals(pair.Key, name, StringComparison.OrdinalIgnoreCase))
 			.Value;
+	}
 
 	private static bool TryParseConfig(string? configuration, out JsonElement config)
 	{
@@ -191,9 +203,11 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static string? ReadString(JsonElement config, string name)
-		=> TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return TryGetProperty(config, name, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool? ReadBool(JsonElement config, string name)
 	{
@@ -229,5 +243,7 @@ internal sealed class SinusBotMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

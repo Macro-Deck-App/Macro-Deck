@@ -33,7 +33,7 @@ public class ImportSingleIconFromPathRequestMessageHandlerTests
 	[Test]
 	public async Task Handle_ReturnsTheCreatedIconForTheDefaultPack()
 	{
-		var pack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var pack = await _harness.CreatePack("Imported Icons", true);
 		_extractor.Result = Result.Ok<ExtractedAppIcon, IconError>(new ExtractedAppIcon([1, 2, 3], "Spotify.png"));
 
 		var response = await _handler.Handle(new ImportSingleIconFromPathRequest { Path = "/Applications/Spotify.app" },

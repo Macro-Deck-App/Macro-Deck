@@ -16,7 +16,7 @@ internal static partial class ApkSigningCertificates
 	private const uint SignatureSchemeV3 = 0xf05368c0;
 	private const long MaxSigningBlockSize = 16 * 1024 * 1024;
 
-	private static readonly byte[] SigningBlockMagic = "APK Sig Block 42"u8.ToArray();
+	private static readonly byte[] _signingBlockMagic = "APK Sig Block 42"u8.ToArray();
 
 	// Reads the signer certificates without verifying the signatures: Android does that at install.
 	public static IReadOnlyList<string> ReadSignerCertificateSha256(Stream apk)
@@ -65,7 +65,7 @@ internal static partial class ApkSigningCertificates
 		try
 		{
 			apk.Seek(0, SeekOrigin.Begin);
-			using var archive = new ZipArchive(apk, ZipArchiveMode.Read, leaveOpen: true);
+			using var archive = new ZipArchive(apk, ZipArchiveMode.Read, true);
 			var certificates = new List<string>();
 			foreach (var entry in archive.Entries.Where(entry => JarSignatureRegex().IsMatch(entry.FullName)))
 			{
@@ -103,15 +103,15 @@ internal static partial class ApkSigningCertificates
 
 			var signedData = contentInfo.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0)).ReadSequence();
 			signedData.ReadInteger();
-			signedData.ReadSetOf(skipSortOrderValidation: true);
+			signedData.ReadSetOf(true);
 			signedData.ReadSequence();
-			var tag = new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
+			var tag = new Asn1Tag(TagClass.ContextSpecific, 0, true);
 			if (!signedData.HasData || !signedData.PeekTag().HasSameClassAndValue(tag))
 			{
 				return false;
 			}
 
-			var set = signedData.ReadSetOf(skipSortOrderValidation: true, tag);
+			var set = signedData.ReadSetOf(true, tag);
 			var found = false;
 			while (set.HasData)
 			{
@@ -143,9 +143,9 @@ internal static partial class ApkSigningCertificates
 		var eocd = -1;
 		for (var index = tailLength - EndOfCentralDirectorySize; index >= 0; index--)
 		{
-			if (BinaryPrimitives.ReadUInt32LittleEndian(tail.AsSpan(index)) == EndOfCentralDirectoryMagic &&
-				BinaryPrimitives.ReadUInt16LittleEndian(tail.AsSpan(index + 20)) ==
-				tailLength - EndOfCentralDirectorySize - index)
+			if (BinaryPrimitives.ReadUInt32LittleEndian(tail.AsSpan(index)) == EndOfCentralDirectoryMagic
+				&& BinaryPrimitives.ReadUInt16LittleEndian(tail.AsSpan(index + 20))
+				== tailLength - EndOfCentralDirectorySize - index)
 			{
 				eocd = index;
 				break;
@@ -166,7 +166,7 @@ internal static partial class ApkSigningCertificates
 		var footer = new byte[24];
 		apk.Seek(centralDirectory - 24, SeekOrigin.Begin);
 		apk.ReadExactly(footer);
-		if (!footer.AsSpan(8).SequenceEqual(SigningBlockMagic))
+		if (!footer.AsSpan(8).SequenceEqual(_signingBlockMagic))
 		{
 			return null;
 		}
@@ -198,12 +198,12 @@ internal static partial class ApkSigningCertificates
 
 		while (!signers.IsEmpty)
 		{
-			if (!TryReadPrefixed(ref signers, out var signer) ||
-				!TryReadPrefixed(ref signer, out var signedData) ||
-				!TryReadPrefixed(ref signedData, out _) ||
-				!TryReadPrefixed(ref signedData, out var certificateList) ||
-				!TryReadPrefixed(ref certificateList, out var certificate) ||
-				certificate.IsEmpty)
+			if (!TryReadPrefixed(ref signers, out var signer)
+				|| !TryReadPrefixed(ref signer, out var signedData)
+				|| !TryReadPrefixed(ref signedData, out _)
+				|| !TryReadPrefixed(ref signedData, out var certificateList)
+				|| !TryReadPrefixed(ref certificateList, out var certificate)
+				|| certificate.IsEmpty)
 			{
 				return false;
 			}

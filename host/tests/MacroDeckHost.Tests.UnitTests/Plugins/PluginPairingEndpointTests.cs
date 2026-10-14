@@ -60,22 +60,22 @@ public class PluginPairingEndpointTests
 
 		var setup = await Send(HttpMethod.Post,
 			"/api/auth/setup",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { username = "admin", password = "password123" });
 		Assert.That(setup.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
 		var login = await Send(HttpMethod.Post,
 			"/api/auth/login",
-			shape: FakeConnectionShape.PublicLan,
+			FakeConnectionShape.PublicLan,
 			body: new { username = "admin", password = "password123", scope = "admin" });
 		Assert.That(login.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		_adminToken = (await ReadJson(login)).GetProperty("accessToken").GetString()!;
 
 		var enableDeveloperMode = await Send(HttpMethod.Put,
 			"/api/settings/developer",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { enabled = true });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { enabled = true });
 		Assert.That(enableDeveloperMode.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
 
@@ -97,7 +97,7 @@ public class PluginPairingEndpointTests
 		// shared by every test in this fixture. A test that deliberately leaves requests pending (to
 		// exercise the cap or the duplicate check) would otherwise starve every later test of capacity
 		// for the rest of the fixture's real-time 5-minute request lifetime.
-		var pending = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", shape: FakeConnectionShape.Loopback);
+		var pending = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", FakeConnectionShape.Loopback);
 		if (pending.StatusCode != HttpStatusCode.OK)
 		{
 			return;
@@ -108,7 +108,7 @@ public class PluginPairingEndpointTests
 			var requestId = request.GetProperty("requestId").GetString()!;
 			await Send(HttpMethod.Post,
 				$"/api/plugin-pairing/requests/{requestId}/reject",
-				shape: FakeConnectionShape.Loopback);
+				FakeConnectionShape.Loopback);
 		}
 	}
 
@@ -121,7 +121,7 @@ public class PluginPairingEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -143,13 +143,13 @@ public class PluginPairingEndpointTests
 
 		var approve = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{requestId}/approve",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false });
 		Assert.That(approve.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		await Send(HttpMethod.Post,
 			$"/api/plugins/pairing/{requestId}/redemption",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { codeVerifier = verifier });
 
 		Assert.Multiple(() =>
@@ -221,15 +221,15 @@ public class PluginPairingEndpointTests
 	{
 		var response = await Send(HttpMethod.Put,
 			"/api/settings/developer",
-			shape: FakeConnectionShape.PublicLan,
-			bearerToken: _adminToken,
-			body: new { enabled });
+			FakeConnectionShape.PublicLan,
+			_adminToken,
+			new { enabled });
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
 
 	private async Task<JsonElement> ReadProtocolDescriptor()
 	{
-		var response = await Send(HttpMethod.Get, "/api/plugins/protocol", shape: FakeConnectionShape.Loopback);
+		var response = await Send(HttpMethod.Get, "/api/plugins/protocol", FakeConnectionShape.Loopback);
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		return await ReadJson(response);
 	}
@@ -246,7 +246,7 @@ public class PluginPairingEndpointTests
 	[Test]
 	public async Task Every_desktop_pairing_route_refuses_every_non_loopback_shape_even_with_a_valid_admin_token()
 	{
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			foreach (var (method, path) in _desktopRoutes)
 			{
@@ -258,9 +258,9 @@ public class PluginPairingEndpointTests
 				{
 					var response = await Send(method,
 						path,
-						shape: shape,
-						bearerToken: _adminToken,
-						body: method == HttpMethod.Post ? new { replaceExistingRegistration = false } : null);
+						shape,
+						_adminToken,
+						method == HttpMethod.Post ? new { replaceExistingRegistration = false } : null);
 
 					Assert.That(response.StatusCode,
 						Is.EqualTo(HttpStatusCode.Forbidden),
@@ -273,7 +273,7 @@ public class PluginPairingEndpointTests
 	[Test]
 	public async Task A_loopback_remote_succeeds_on_the_desktop_pairing_routes()
 	{
-		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", shape: FakeConnectionShape.Loopback);
+		var response = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", FakeConnectionShape.Loopback);
 
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 	}
@@ -299,7 +299,7 @@ public class PluginPairingEndpointTests
 
 		var approve = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{approveRequestId}/approve",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false },
 			extraHeaders: originHeader);
 		Assert.That(approve.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -312,7 +312,7 @@ public class PluginPairingEndpointTests
 
 		var reject = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{rejectRequestId}/reject",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			extraHeaders: originHeader);
 		Assert.That(reject.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		Assert.That((await ReadJson(reject)).GetProperty("success").GetBoolean(), Is.True);
@@ -336,7 +336,10 @@ public class PluginPairingEndpointTests
 	[Test]
 	public async Task Exceeding_the_pending_request_cap_is_rejected_with_the_fixed_capacity_retry_after()
 	{
-		string LiveOnly(int i) => $"com.example.cap{i}z{Guid.NewGuid():N}";
+		string LiveOnly(int i)
+		{
+			return $"com.example.cap{i}z{Guid.NewGuid():N}";
+		}
 
 		var throttle = _host.Services.GetRequiredKeyedService<Application.Auth.LoginThrottle>("plugin");
 		var options = _host.Services.GetRequiredService<PluginPairingOptions>();
@@ -356,8 +359,8 @@ public class PluginPairingEndpointTests
 			Assert.That(overCap, Is.Not.Null);
 			Assert.That(overCap!.Headers.RetryAfter?.Delta,
 				Is.EqualTo(options.PollInterval).Within(TimeSpan.FromSeconds(1)),
-				"a capacity-exceeded 429 carries PluginPairingOptions.PollInterval as its retry-after, not the " +
-				"throttle's own (larger, backed-off) lockout - this is what distinguishes the two 429 causes.");
+				"a capacity-exceeded 429 carries PluginPairingOptions.PollInterval as its retry-after, not the "
+				+ "throttle's own (larger, backed-off) lockout - this is what distinguishes the two 429 causes.");
 		}
 		finally
 		{
@@ -405,15 +408,16 @@ public class PluginPairingEndpointTests
 
 		var status = await Send(HttpMethod.Get,
 			$"/api/plugins/pairing/{requestId}",
-			shape: FakeConnectionShape.Loopback);
+			FakeConnectionShape.Loopback);
 		AssertNoSecretOrChallenge(await ReadJson(status), challenge);
 
-		var pending = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", shape: FakeConnectionShape.Loopback);
+		var pending = await Send(HttpMethod.Get, "/api/plugin-pairing/requests", FakeConnectionShape.Loopback);
 		var pendingBody = await pending.Content.ReadAsStringAsync();
 		Assert.That(pendingBody, Does.Not.Contain(challenge));
 
 		var pendingJson = await ReadJson(pending);
-		var pendingItem = pendingJson.GetProperty("requests").EnumerateArray()
+		var pendingItem = pendingJson.GetProperty("requests")
+			.EnumerateArray()
 			.Single(item => item.GetProperty("requestId").GetString() == requestId);
 		Assert.That(pendingItem.GetProperty("arrivedOnPublicListener").GetBoolean(),
 			Is.False,
@@ -423,7 +427,7 @@ public class PluginPairingEndpointTests
 		var (_, publicChallenge) = NewPkcePair();
 		var createdOnPublicListener = await Send(HttpMethod.Post,
 			"/api/plugins/pairing",
-			shape: FakeConnectionShape.LoopbackOnPublicPort,
+			FakeConnectionShape.LoopbackOnPublicPort,
 			body: new
 			{
 				pluginId = publicPluginId,
@@ -436,8 +440,9 @@ public class PluginPairingEndpointTests
 
 		var pendingAfterPublic = await Send(HttpMethod.Get,
 			"/api/plugin-pairing/requests",
-			shape: FakeConnectionShape.Loopback);
-		var publicPendingItem = (await ReadJson(pendingAfterPublic)).GetProperty("requests").EnumerateArray()
+			FakeConnectionShape.Loopback);
+		var publicPendingItem = (await ReadJson(pendingAfterPublic)).GetProperty("requests")
+			.EnumerateArray()
 			.Single(item => item.GetProperty("requestId").GetString() == publicRequestId);
 		Assert.That(publicPendingItem.GetProperty("arrivedOnPublicListener").GetBoolean(),
 			Is.True,
@@ -445,13 +450,13 @@ public class PluginPairingEndpointTests
 
 		var approve = await Send(HttpMethod.Post,
 			$"/api/plugin-pairing/requests/{requestId}/approve",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { replaceExistingRegistration = false });
 		Assert.That(approve.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 		var redemption = await Send(HttpMethod.Post,
 			$"/api/plugins/pairing/{requestId}/redemption",
-			shape: FakeConnectionShape.Loopback,
+			FakeConnectionShape.Loopback,
 			body: new { codeVerifier = verifier });
 		Assert.That(redemption.StatusCode, Is.EqualTo(HttpStatusCode.Created));
 		var redemptionJson = await ReadJson(redemption);
@@ -478,13 +483,15 @@ public class PluginPairingEndpointTests
 	}
 
 	private Task<HttpResponseMessage> CreatePairingRequestAsync(string pluginId, string challenge)
-		=> Send(HttpMethod.Post,
+	{
+		return Send(HttpMethod.Post,
 			"/api/plugins/pairing",
-			shape: FakeConnectionShape.LoopbackWithoutCredential,
+			FakeConnectionShape.LoopbackWithoutCredential,
 			body: new
 			{
 				pluginId, displayName = "Example Plugin", codeChallenge = challenge, codeChallengeMethod = "S256"
 			});
+	}
 
 	private static StartupReadiness CompletedStartupReadiness()
 	{
@@ -527,5 +534,7 @@ public class PluginPairingEndpointTests
 	}
 
 	private static async Task<JsonElement> ReadJson(HttpResponseMessage response)
-		=> JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	{
+		return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+	}
 }

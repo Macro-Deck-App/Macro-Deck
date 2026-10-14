@@ -45,15 +45,19 @@ public abstract class RemoteActionDefinition(
 
 	public string? Role => Descriptor.Role;
 
-	public IActionExecutor CreateExecutor() => new RemoteActionExecutor(Invoker, PluginId, Descriptor.LocalId);
+	public IActionExecutor CreateExecutor()
+	{
+		return new RemoteActionExecutor(Invoker, PluginId, Descriptor.LocalId);
+	}
 
 	protected async Task<ActionStateSnapshot?> GetActionStateCoreAsync(
 		IReadOnlyDictionary<string, object?> parameters,
 		CancellationToken cancellationToken)
 	{
 		var data = await InvokeAsync(CapabilityOperations.Actions.State,
-			new ActionExecuteArguments { Parameters = ToWireParameters(parameters) },
-			cancellationToken).ConfigureAwait(false);
+				new ActionExecuteArguments { Parameters = ToWireParameters(parameters) },
+				cancellationToken)
+			.ConfigureAwait(false);
 
 		var result = data?.Deserialize<ActionStateResult>(PluginProtocolJson.Options);
 
@@ -81,13 +85,14 @@ public abstract class RemoteActionDefinition(
 		CancellationToken cancellationToken)
 	{
 		var data = await InvokeAsync(CapabilityOperations.Actions.Options,
-			new DynamicOptionsArguments
-			{
-				ParameterName = context.ParameterName,
-				Filter = context.Filter,
-				CurrentParameters = ToWireParameters(context.CurrentParameters)
-			},
-			cancellationToken).ConfigureAwait(false);
+				new DynamicOptionsArguments
+				{
+					ParameterName = context.ParameterName,
+					Filter = context.Filter,
+					CurrentParameters = ToWireParameters(context.CurrentParameters)
+				},
+				cancellationToken)
+			.ConfigureAwait(false);
 
 		var result = data?.Deserialize<DynamicOptionsResultDto>(PluginProtocolJson.Options);
 
@@ -97,8 +102,8 @@ public abstract class RemoteActionDefinition(
 					{
 						Value = option.Value, Label = option.Label ?? default, Metadata = option.Metadata
 					})
-					.ToList() ??
-				[],
+					.ToList()
+				?? [],
 			AllowsCustomValue = result?.AllowsCustomValue ?? false,
 			CacheSeconds = result?.CacheSeconds,
 			Error = result?.Error ?? default
@@ -106,13 +111,15 @@ public abstract class RemoteActionDefinition(
 	}
 
 	private Task<JsonElement?> InvokeAsync(string operation, object arguments, CancellationToken cancellationToken)
-		=> Invoker.InvokeAsync(PluginId,
+	{
+		return Invoker.InvokeAsync(PluginId,
 			new CapabilityInvokeRequest
 			{
 				Kind = CapabilityKinds.Actions, LocalId = Descriptor.LocalId, Operation = operation,
 				Arguments = arguments
 			},
 			cancellationToken);
+	}
 
 	private static Dictionary<string, JsonElement> ToWireParameters(
 		IReadOnlyDictionary<string, object?> parameters)

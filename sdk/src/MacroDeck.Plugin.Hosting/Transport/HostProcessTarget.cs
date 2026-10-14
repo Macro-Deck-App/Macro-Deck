@@ -10,7 +10,7 @@ internal readonly record struct HostProcessTarget(int ProcessId, DateTimeOffset 
 {
 	// Process.StartTime on Linux is reconstructed from /proc and is not bit-stable across reads, so an
 	// exact comparison would flag a live host as gone.
-	private static readonly TimeSpan StartTimeTolerance = TimeSpan.FromSeconds(2);
+	private static readonly TimeSpan _startTimeTolerance = TimeSpan.FromSeconds(2);
 
 	// Anything short of a positive id with a parseable timestamp means no watch at all. A fallback to
 	// pid 0 or a negative id would reach the OS, where those select whole process groups.
@@ -57,7 +57,7 @@ internal readonly record struct HostProcessTarget(int ProcessId, DateTimeOffset 
 		try
 		{
 			var drift = process.StartTime.ToUniversalTime() - StartedAt.UtcDateTime;
-			return drift.Duration() <= StartTimeTolerance;
+			return drift.Duration() <= _startTimeTolerance;
 		}
 		catch (Exception exception) when (exception is InvalidOperationException
 			or NotSupportedException

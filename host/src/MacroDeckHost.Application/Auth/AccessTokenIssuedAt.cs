@@ -17,5 +17,8 @@ public static class AccessTokenIssuedAt
 			out unixSeconds);
 	}
 
-	public static long UnixSeconds(DateTime utc) => (long)Math.Floor((utc - DateTime.UnixEpoch).TotalSeconds);
+	public static long UnixSeconds(DateTime utc)
+	{
+		return (long)Math.Floor((utc - DateTime.UnixEpoch).TotalSeconds);
+	}
 }

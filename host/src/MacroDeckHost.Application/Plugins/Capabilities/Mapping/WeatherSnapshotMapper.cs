@@ -7,7 +7,7 @@ public static class WeatherSnapshotMapper
 {
 	public static WeatherForecastDay ToDomain(WeatherForecastDayDto dto)
 	{
-		if (!Enum.TryParse<WeatherCondition>(dto.Condition, ignoreCase: false, out var condition))
+		if (!Enum.TryParse<WeatherCondition>(dto.Condition, false, out var condition))
 		{
 			throw new InvalidOperationException($"Unknown weather condition '{dto.Condition}'.");
 		}
@@ -19,7 +19,7 @@ public static class WeatherSnapshotMapper
 	{
 		ArgumentNullException.ThrowIfNull(dto);
 
-		if (!Enum.TryParse<WeatherCondition>(dto.Condition, ignoreCase: false, out var condition))
+		if (!Enum.TryParse<WeatherCondition>(dto.Condition, false, out var condition))
 		{
 			throw new InvalidOperationException($"Unknown weather condition '{dto.Condition}'.");
 		}
@@ -29,12 +29,12 @@ public static class WeatherSnapshotMapper
 
 	public static WeatherSnapshot ToDomain(WeatherSnapshotDto dto)
 	{
-		if (!Enum.TryParse<WeatherCondition>(dto.Condition, ignoreCase: false, out var condition))
+		if (!Enum.TryParse<WeatherCondition>(dto.Condition, false, out var condition))
 		{
 			throw new InvalidOperationException($"Unknown weather condition '{dto.Condition}'.");
 		}
 
-		if (!Enum.TryParse<TemperatureUnit>(dto.Unit, ignoreCase: false, out var unit))
+		if (!Enum.TryParse<TemperatureUnit>(dto.Unit, false, out var unit))
 		{
 			throw new InvalidOperationException($"Unknown temperature unit '{dto.Unit}'.");
 		}

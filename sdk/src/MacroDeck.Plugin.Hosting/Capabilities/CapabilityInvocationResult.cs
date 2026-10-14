@@ -25,14 +25,23 @@ public sealed record CapabilityInvocationResult
 	public bool IsFailure => Error is not null;
 
 	/// <summary>Succeeded, with nothing to return.</summary>
-	public static CapabilityInvocationResult Ok() => new();
+	public static CapabilityInvocationResult Ok()
+	{
+		return new CapabilityInvocationResult();
+	}
 
 	/// <summary>Succeeded, returning <paramref name="value" /> serialized with the protocol's options.</summary>
 	public static CapabilityInvocationResult Ok<T>(T value)
-		=> new() { Data = JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options) };
+	{
+		return new CapabilityInvocationResult
+			{ Data = JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options) };
+	}
 
 	/// <summary>Succeeded, returning an already-serialized value.</summary>
-	public static CapabilityInvocationResult Ok(JsonElement data) => new() { Data = data };
+	public static CapabilityInvocationResult Ok(JsonElement data)
+	{
+		return new CapabilityInvocationResult { Data = data };
+	}
 
 	/// <summary>
 	/// Failed, for a reason the caller can act on.
@@ -44,7 +53,8 @@ public sealed record CapabilityInvocationResult
 	/// </param>
 	/// <param name="retryable">Whether repeating the same invocation could succeed.</param>
 	public static CapabilityInvocationResult Failed(string code, string message, bool retryable = false)
-		=> new()
+	{
+		return new CapabilityInvocationResult
 		{
 			Error = new ProtocolError
 			{
@@ -53,8 +63,11 @@ public sealed record CapabilityInvocationResult
 				Retryable = retryable
 			}
 		};
+	}
 
 	/// <summary>Failed, with an error already shaped by the protocol.</summary>
 	public static CapabilityInvocationResult Failed(ProtocolError error)
-		=> new() { Error = error };
+	{
+		return new CapabilityInvocationResult { Error = error };
+	}
 }

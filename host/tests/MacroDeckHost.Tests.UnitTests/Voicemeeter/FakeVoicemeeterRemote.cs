@@ -19,7 +19,7 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 
 	public List<VoicemeeterEdition> InstalledEditions { get; } = [];
 
-	public int PackedVersion { get; set; } = (3 << 24) | (0 << 16) | (2 << 8) | 8;
+	public int PackedVersion { get; set; } = 3 << 24 | 0 << 16 | 2 << 8 | 8;
 
 	public bool ParametersDirty { get; set; }
 
@@ -80,7 +80,10 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 		return this;
 	}
 
-	public void Close() => Edition = VoicemeeterEdition.None;
+	public void Close()
+	{
+		Edition = VoicemeeterEdition.None;
+	}
 
 	public void UserSets(string parameter, float value)
 	{
@@ -100,7 +103,10 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 		MacroButtonsDirty = true;
 	}
 
-	public float Float(string parameter) => _floats.GetValueOrDefault(parameter);
+	public float Float(string parameter)
+	{
+		return _floats.GetValueOrDefault(parameter);
+	}
 
 	public VoicemeeterResult Login()
 	{
@@ -108,7 +114,10 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 		return Edition == VoicemeeterEdition.None ? VoicemeeterResult.OkNotLaunched : VoicemeeterResult.Ok;
 	}
 
-	public void Logout() => LogoutCount++;
+	public void Logout()
+	{
+		LogoutCount++;
+	}
 
 	public VoicemeeterResult RunVoicemeeter(int runType)
 	{
@@ -215,8 +224,8 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 		foreach (var assignment in script.Split([';', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries))
 		{
 			var parts = assignment.Split('=', 2);
-			if (parts.Length == 2 &&
-				float.TryParse(parts[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+			if (parts.Length == 2
+				&& float.TryParse(parts[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
 			{
 				_floats[parts[0].Trim()] = value;
 			}
@@ -256,5 +265,8 @@ internal sealed class FakeVoicemeeterRemote : IVoicemeeterRemote
 		return VoicemeeterResult.Ok;
 	}
 
-	public void Dispose() => IsDisposed = true;
+	public void Dispose()
+	{
+		IsDisposed = true;
+	}
 }

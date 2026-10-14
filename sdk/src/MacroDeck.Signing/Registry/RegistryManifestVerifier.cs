@@ -23,7 +23,8 @@ public static class RegistryManifestVerifier
 	/// <summary>Verifies <paramref name="signaturePath"/> against <paramref name="manifestPath"/>'s exact
 	/// bytes, and every file <paramref name="manifestPath"/> declares against the files on disk beside it.
 	/// <paramref name="rootPublicKey"/> defaults to <see cref="MacroDeckRootKey"/> when omitted.</summary>
-	public static Task<RegistryManifestVerifyResult> VerifyAsync(string manifestPath,
+	public static Task<RegistryManifestVerifyResult> VerifyAsync(
+		string manifestPath,
 		string signaturePath,
 		byte[] certificateBytes,
 		byte[] certificateSignatureBytes,
@@ -47,7 +48,8 @@ public static class RegistryManifestVerifier
 	/// <see langword="null"/> for a root-signed registry certificate; see
 	/// <see cref="SigningCertificateChain.Verify(byte[], byte[], byte[], byte[], ReadOnlySpan{byte}, string)"/>.
 	/// </summary>
-	public static async Task<RegistryManifestVerifyResult> VerifyAsync(string manifestPath,
+	public static async Task<RegistryManifestVerifyResult> VerifyAsync(
+		string manifestPath,
 		string signaturePath,
 		byte[] certificateBytes,
 		byte[] certificateSignatureBytes,
@@ -160,19 +162,19 @@ public static class RegistryManifestVerifier
 		JsonObject manifest;
 		try
 		{
-			manifest = JsonNode.Parse(manifestBytes) as JsonObject ??
-				throw new JsonException("The registry manifest must contain a JSON object.");
+			manifest = JsonNode.Parse(manifestBytes) as JsonObject
+				?? throw new JsonException("The registry manifest must contain a JSON object.");
 		}
 		catch (JsonException ex)
 		{
 			return new SigningFailure(SigningError.ManifestMalformed, ex.Message);
 		}
 
-		if (manifest["schemaVersion"]?.GetValue<int>() != 1 ||
-			manifest["sequence"] is not { } sequenceNode ||
-			sequenceNode.GetValue<long>() < 1 ||
-			manifest["files"] is not JsonArray files ||
-			files.Count == 0)
+		if (manifest["schemaVersion"]?.GetValue<int>() != 1
+			|| manifest["sequence"] is not { } sequenceNode
+			|| sequenceNode.GetValue<long>() < 1
+			|| manifest["files"] is not JsonArray files
+			|| files.Count == 0)
 		{
 			return new SigningFailure(SigningError.ManifestMalformed,
 				"The registry manifest has an unsupported or incomplete shape.");
@@ -304,9 +306,13 @@ public sealed record RegistryManifestVerifyResult
 
 	public string? Message { get; init; }
 
-	public static RegistryManifestVerifyResult Ok(string certificateId) =>
-		new() { Success = true, CertificateId = certificateId };
+	public static RegistryManifestVerifyResult Ok(string certificateId)
+	{
+		return new RegistryManifestVerifyResult { Success = true, CertificateId = certificateId };
+	}
 
-	public static RegistryManifestVerifyResult Fail(SigningError error, string message) =>
-		new() { Success = false, Error = error, Message = message };
+	public static RegistryManifestVerifyResult Fail(SigningError error, string message)
+	{
+		return new RegistryManifestVerifyResult { Success = false, Error = error, Message = message };
+	}
 }

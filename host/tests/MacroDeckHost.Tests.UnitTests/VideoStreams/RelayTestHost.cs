@@ -58,7 +58,8 @@ internal sealed class ScriptedUpstream : IAsyncDisposable
 			return upstream.Handler(context);
 		});
 		await app.StartAsync();
-		var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.First();
+		var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses
+			.First();
 		upstream = new ScriptedUpstream(app, new Uri(address).Port);
 		return upstream;
 	}
@@ -180,7 +181,9 @@ internal sealed class RelayTestHost : IAsyncDisposable
 	}
 
 	public string Arm(string sessionId, string upstreamUrl, string transport)
-		=> Relay.Arm(sessionId, new Uri(upstreamUrl), transport);
+	{
+		return Relay.Arm(sessionId, new Uri(upstreamUrl), transport);
+	}
 
 	public Task<HttpResponseMessage> GetAsync(
 		string relayPath,
@@ -206,7 +209,9 @@ internal sealed class RelayTestHost : IAsyncDisposable
 	}
 
 	public static string TokenOf(string relayPath)
-		=> relayPath[VideoStreamRelay.PathPrefix.Length..].Split('/', '?')[0];
+	{
+		return relayPath[VideoStreamRelay.PathPrefix.Length..].Split('/', '?')[0];
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -228,7 +233,7 @@ internal sealed class RelayTestHost : IAsyncDisposable
 		{
 			try
 			{
-				Directory.Delete(_dataDir, recursive: true);
+				Directory.Delete(_dataDir, true);
 			}
 			catch (IOException)
 			{
@@ -236,5 +241,8 @@ internal sealed class RelayTestHost : IAsyncDisposable
 		}
 	}
 
-	public async Task StopAsync() => await _host!.StopAsync();
+	public async Task StopAsync()
+	{
+		await _host!.StopAsync();
+	}
 }

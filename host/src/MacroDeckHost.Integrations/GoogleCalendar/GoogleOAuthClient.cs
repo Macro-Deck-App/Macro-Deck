@@ -45,10 +45,9 @@ internal sealed record GoogleTokenResponse(
 			// Not verified: the token came straight from Google's token endpoint over TLS, which is
 			// the case OpenID Connect allows to skip signature validation for.
 			using var payload = JsonDocument.Parse(Base64Url.DecodeFromChars(parts[1]));
-			return payload.RootElement.TryGetProperty("email", out var email) &&
-				email.ValueKind is JsonValueKind.String
-					? email.GetString()
-					: null;
+			return payload.RootElement.TryGetProperty("email", out var email) && email.ValueKind is JsonValueKind.String
+				? email.GetString()
+				: null;
 		}
 		catch (Exception ex) when (ex is FormatException or JsonException)
 		{
@@ -93,7 +92,7 @@ internal sealed class GoogleOAuthRejectedException : Exception
 
 internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 {
-	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), true);
 
 	private readonly HttpClient _http;
 	private readonly bool _ownsClient;
@@ -106,7 +105,7 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 
 	internal GoogleOAuthClient(HttpMessageHandler handler)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 	}
 
@@ -117,7 +116,8 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 		string codeVerifier,
 		string redirectUri,
 		CancellationToken cancellationToken)
-		=> RequestTokenAsync(new Dictionary<string, string>(StringComparer.Ordinal)
+	{
+		return RequestTokenAsync(new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["client_id"] = clientId,
 				["client_secret"] = clientSecret,
@@ -127,13 +127,15 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 				["redirect_uri"] = redirectUri
 			},
 			cancellationToken);
+	}
 
 	public Task<GoogleTokenResponse> RefreshAsync(
 		string clientId,
 		string clientSecret,
 		string refreshToken,
 		CancellationToken cancellationToken)
-		=> RequestTokenAsync(new Dictionary<string, string>(StringComparer.Ordinal)
+	{
+		return RequestTokenAsync(new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				["client_id"] = clientId,
 				["client_secret"] = clientSecret,
@@ -141,6 +143,7 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 				["grant_type"] = "refresh_token"
 			},
 			cancellationToken);
+	}
 
 	public async Task<string?> GetEmailAsync(string accessToken, CancellationToken cancellationToken)
 	{
@@ -180,8 +183,8 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 		{
 			using var document = Parse(body);
 			var root = document.RootElement;
-			var accessToken = ReadString(root, "access_token") ??
-				throw new GoogleOAuthTransientException("Google returned a token response without an access token.");
+			var accessToken = ReadString(root, "access_token")
+				?? throw new GoogleOAuthTransientException("Google returned a token response without an access token.");
 
 			return new GoogleTokenResponse(accessToken,
 				ReadString(root, "refresh_token"),
@@ -259,9 +262,11 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 	}
 
 	private static string? ReadString(JsonElement root, string name)
-		=> root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
+	{
+		return root.TryGetProperty(name, out var value) && value.ValueKind is JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static int? ReadInt(JsonElement root, string name)
 	{
@@ -282,5 +287,7 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	}
 }

@@ -25,8 +25,14 @@ public sealed record ModalResult<T>
 public static class ModalResult
 {
 	/// <summary>A completion carrying <paramref name="value" />.</summary>
-	public static ModalResult<T> FromValue<T>(T? value) => new() { Cancelled = false, Value = value };
+	public static ModalResult<T> FromValue<T>(T? value)
+	{
+		return new ModalResult<T> { Cancelled = false, Value = value };
+	}
 
 	/// <summary>A cancellation, whatever caused it.</summary>
-	public static ModalResult<T> FromCancellation<T>() => new() { Cancelled = true };
+	public static ModalResult<T> FromCancellation<T>()
+	{
+		return new ModalResult<T> { Cancelled = true };
+	}
 }

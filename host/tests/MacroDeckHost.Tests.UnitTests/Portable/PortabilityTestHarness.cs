@@ -48,7 +48,7 @@ internal sealed class PortabilityTestHarness : IDisposable
 		ScriptCache.InitializeCache().GetAwaiter().GetResult();
 		Scripts = new ScriptService(ScriptCache, Icons.Mediator);
 		Integrations = new ConfigurableIntegrationRegistry([
-			StubIntegration.Create("app.macro-deck.obs", "OBS Studio", configFlow: true),
+			StubIntegration.Create("app.macro-deck.obs", "OBS Studio", true),
 			StubIntegration.Create("app.macro-deck.keyboard", "Keyboard"),
 			StubIntegration.Create("app.macro-deck.music-player", "Music Player", system: true)
 		]);
@@ -113,7 +113,10 @@ internal sealed class PortabilityTestHarness : IDisposable
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -148,7 +151,10 @@ internal sealed class PortabilityTestHarness : IDisposable
 		return icon;
 	}
 
-	public static byte[] MasterBytesFor(string name) => Encoding.UTF8.GetBytes($"master:{name}");
+	public static byte[] MasterBytesFor(string name)
+	{
+		return Encoding.UTF8.GetBytes($"master:{name}");
+	}
 
 	public async Task<(ProfileEntity Profile, FolderEntity Folder, WidgetEntity Widget)> SeedProfile(string? widgetData)
 	{
@@ -190,7 +196,8 @@ internal sealed class PortabilityTestHarness : IDisposable
 		return profile;
 	}
 
-	public async Task<FolderEntity> AddFolder(Guid profileId,
+	public async Task<FolderEntity> AddFolder(
+		Guid profileId,
 		string name,
 		Guid? parentId = null,
 		int rows = 3,
@@ -211,7 +218,8 @@ internal sealed class PortabilityTestHarness : IDisposable
 		return folder;
 	}
 
-	public WidgetEntity AddWidget(Guid folderId,
+	public WidgetEntity AddWidget(
+		Guid folderId,
 		string? data = null,
 		int x = 0,
 		int y = 0,

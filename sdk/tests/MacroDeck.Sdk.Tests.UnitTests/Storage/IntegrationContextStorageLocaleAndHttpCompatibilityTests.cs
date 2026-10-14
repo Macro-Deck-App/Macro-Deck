@@ -48,7 +48,8 @@ public class IntegrationContextStorageLocaleAndHttpCompatibilityTests
 	{
 		IIntegrationContext context = new ContextWrittenBeforeStorage();
 
-		Assert.That(context.Http.UserAgent, Is.EqualTo(DefaultHostHttp.Instance.UserAgent).And.StartsWith("MacroDeck/"));
+		Assert.That(context.Http.UserAgent,
+			Is.EqualTo(DefaultHostHttp.Instance.UserAgent).And.StartsWith("MacroDeck/"));
 	}
 
 	[Test]
@@ -72,15 +73,19 @@ public class IntegrationContextStorageLocaleAndHttpCompatibilityTests
 	[TestCase("state.json.tmp", false)]
 	[TestCase("state.json.bak", false)]
 	public void Keys_follow_the_documented_rules(string key, bool valid)
-		=> Assert.That(IntegrationStorageKeys.IsValid(key), Is.EqualTo(valid));
+	{
+		Assert.That(IntegrationStorageKeys.IsValid(key), Is.EqualTo(valid));
+	}
 
 	[Test]
 	public void Keys_are_at_most_64_characters()
-		=> Assert.Multiple(() =>
+	{
+		Assert.Multiple(() =>
 		{
 			Assert.That(IntegrationStorageKeys.IsValid(new string('a', 64)), Is.True);
 			Assert.That(IntegrationStorageKeys.IsValid(new string('a', 65)), Is.False);
 		});
+	}
 
 	[Test]
 	public void A_time_of_day_follows_the_hour_cycle_in_the_cultures_own_pattern()

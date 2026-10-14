@@ -9,7 +9,10 @@ public sealed class VariableBroadcastChannel
 		SingleReader = true
 	});
 
-	public void Enqueue(Guid variableId) => _channel.Writer.TryWrite(variableId);
+	public void Enqueue(Guid variableId)
+	{
+		_channel.Writer.TryWrite(variableId);
+	}
 
 	public ChannelReader<Guid> Reader => _channel.Reader;
 }

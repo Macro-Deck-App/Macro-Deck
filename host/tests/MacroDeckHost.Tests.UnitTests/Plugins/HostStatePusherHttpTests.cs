@@ -3,7 +3,6 @@ using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
-using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -28,9 +27,15 @@ public class HostStatePusherHttpTests
 		_registry = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		_connection = new FakePluginConnection();
 		_userAgent = new HttpUserAgentState();
-		_pusher = new HostStatePusher(_registry, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled), Serilog.Core.Logger.None,
+		_pusher = new HostStatePusher(_registry,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new FakeAdbManager(),
+			new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled),
+			Serilog.Core.Logger.None,
 			userAgent: _userAgent);
 
 		await _registry.Create(new PluginSessionRecord
@@ -49,7 +54,10 @@ public class HostStatePusherHttpTests
 	}
 
 	[TearDown]
-	public void TearDown() => _pusher.Dispose();
+	public void TearDown()
+	{
+		_pusher.Dispose();
+	}
 
 	[Test]
 	public async Task Registration_pushes_the_default_user_agent_when_none_is_configured()
@@ -72,14 +80,17 @@ public class HostStatePusherHttpTests
 			await Task.Delay(10);
 		}
 
-		Assert.That(HttpPushes().Select(push => push.UserAgent), Is.EqualTo(new[] { HttpUserAgent.Default, "Custom/2.0" }));
+		Assert.That(HttpPushes().Select(push => push.UserAgent),
+			Is.EqualTo(new[] { HttpUserAgent.Default, "Custom/2.0" }));
 	}
 
 	private List<HttpStateDto> HttpPushes()
-		=> _connection.Sent.ToList()
+	{
+		return _connection.Sent.ToList()
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Http)
 			.Select(payload => payload.Data!.Value.Deserialize<HttpStateDto>(PluginProtocolJson.Options)!)
 			.ToList();
+	}
 }

@@ -67,11 +67,12 @@ internal sealed class CompanionIntegrationSdkTests
 	{
 		var (harness, device) = await WithEntryAsync();
 		var devices = new ScriptedCompanionDevices { RequestResult = CompanionDeviceCommandResult.Unconfirmed };
-		devices.Connect(device, new CompanionDeviceState
-		{
-			Capabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenOn },
-			ConfirmsCommands = true
-		});
+		devices.Connect(device,
+			new CompanionDeviceState
+			{
+				Capabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenOn },
+				ConfirmsCommands = true
+			});
 		var integration = new CompanionIntegration();
 		await integration.InitializeAsync(Context(harness, devices));
 
@@ -80,7 +81,8 @@ internal sealed class CompanionIntegrationSdkTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-			Assert.That(devices.Calls.Single(), Is.EqualTo(("request", device, (CompanionDeviceCommand?)CompanionDeviceCommand.ScreenOn)));
+			Assert.That(devices.Calls.Single(),
+				Is.EqualTo(("request", device, (CompanionDeviceCommand?)CompanionDeviceCommand.ScreenOn)));
 		});
 	}
 
@@ -92,11 +94,12 @@ internal sealed class CompanionIntegrationSdkTests
 		{
 			ScreenshotResult = CompanionScreenshotResult.Failed(CompanionDeviceFailure.ConsentDenied)
 		};
-		devices.Connect(device, new CompanionDeviceState
-		{
-			RequestableCapabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenshotFull },
-			ConfirmsCommands = true
-		});
+		devices.Connect(device,
+			new CompanionDeviceState
+			{
+				RequestableCapabilities = new HashSet<string> { CompanionDeviceCapabilities.ScreenshotFull },
+				ConfirmsCommands = true
+			});
 		var integration = new CompanionIntegration();
 		await integration.InitializeAsync(Context(harness, devices));
 
@@ -130,7 +133,8 @@ internal sealed class CompanionIntegrationSdkTests
 	}
 
 	private static IntegrationContext Context(CompanionHarness harness, ICompanionDeviceApi devices)
-		=> new(harness.VariableApi,
+	{
+		return new IntegrationContext(harness.VariableApi,
 			harness.UserVariables,
 			new IntegrationConfig(CompanionHarness.IntegrationId, harness.ScopeFactory),
 			null!,
@@ -142,13 +146,16 @@ internal sealed class CompanionIntegrationSdkTests
 			null!,
 			UnavailableNotificationService.Instance,
 			companionDevices: devices);
+	}
 
-	private static Task<ActionResult> ExecuteAsync(CompanionIntegration integration,
+	private static Task<ActionResult> ExecuteAsync(
+		CompanionIntegration integration,
 		string actionId,
 		Guid device,
 		params (string Name, object Value)[] parameters)
 	{
-		var values = new Dictionary<string, object> { [CompanionTargetResolver.ConfigurationParameter] = device.ToString("D") };
+		var values = new Dictionary<string, object>
+			{ [CompanionTargetResolver.ConfigurationParameter] = device.ToString("D") };
 		foreach (var (name, value) in parameters)
 		{
 			values[name] = value;

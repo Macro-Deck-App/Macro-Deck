@@ -78,10 +78,10 @@ internal static class MusicPlayerPickerView
 					Text = UiValue.From(() => filter.Value),
 					Placeholder = AppStrings.Dialogs.ItemPicker.SearchPlaceholder(),
 					Size = UiSize.FromBasis(0.045),
-					Events = searchEvents,
+					Events = searchEvents
 				},
-				Results(state, window, artwork, icons, listEvents),
-			],
+				Results(state, window, artwork, icons, listEvents)
+			]
 		};
 	}
 
@@ -91,7 +91,8 @@ internal static class MusicPlayerPickerView
 		UiState<IReadOnlyDictionary<string, UiResource>> artwork,
 		MusicPlayerIconResources icons,
 		IReadOnlyList<UiEventHandler> events)
-		=> new()
+	{
+		return new UiList
 		{
 			Key = "results",
 			Fill = true,
@@ -114,10 +115,11 @@ internal static class MusicPlayerPickerView
 					Items
 						= UiValue.From<IReadOnlyList<MusicPlayerCatalogItem>>(() => Window(state.Value, window.Value)),
 					KeySelector = item => item.Id,
-					Template = (item, _) => Row(item, artwork, icons),
-				},
-			],
+					Template = (item, _) => Row(item, artwork, icons)
+				}
+			]
 		};
+	}
 
 	private static IReadOnlyList<MusicPlayerCatalogItem> Window(MusicPlayerPickerState state, int window)
 	{
@@ -136,7 +138,8 @@ internal static class MusicPlayerPickerView
 	}
 
 	private static UiWhen Message(string key, Func<bool> when, LocalizedText text)
-		=> new()
+	{
+		return new UiWhen
 		{
 			Key = $"{key}When",
 			Condition = when,
@@ -155,11 +158,12 @@ internal static class MusicPlayerPickerView
 						Size = UiSize.FromBasis(0.04),
 						Role = UiComponentTextRoles.Secondary,
 						Align = UiComponentAlignments.Center,
-						Wrap = true,
-					},
-				],
-			},
+						Wrap = true
+					}
+				]
+			}
 		};
+	}
 
 	private static UiStack Row(
 			MusicPlayerCatalogItem item,
@@ -168,7 +172,8 @@ internal static class MusicPlayerPickerView
 		// A stack rather than a button: both press the same way - the affordance follows the declared
 		// events - but a button's absent background is the accent colour, which is right for a deck tile
 		// and wrong for every row of a list.
-		=> new()
+	{
+		return new UiStack
 		{
 			// The item's own id, not its position: rows are patched in place as the window grows and the
 			// filter narrows, and a key that moved with the position would re-key everything below a change.
@@ -188,7 +193,7 @@ internal static class MusicPlayerPickerView
 				{
 					Key = "art",
 					Source = UiValue.From(() => Cover(item, artwork.Value) ?? Placeholder(item, icons)),
-					Size = UiSize.FromBasis(0.09),
+					Size = UiSize.FromBasis(0.09)
 				},
 				new UiStack
 				{
@@ -204,7 +209,7 @@ internal static class MusicPlayerPickerView
 							Key = "title",
 							Text = item.Title,
 							Size = UiSize.FromBasis(0.038),
-							Weight = UiComponentTextWeights.Medium,
+							Weight = UiComponentTextWeights.Medium
 						},
 						new UiWhen
 						{
@@ -215,24 +220,29 @@ internal static class MusicPlayerPickerView
 								Key = "subtitle",
 								Text = item.Subtitle,
 								Size = UiSize.FromBasis(0.032),
-								Role = UiComponentTextRoles.Secondary,
-							},
-						},
-					],
-				},
-			],
+								Role = UiComponentTextRoles.Secondary
+							}
+						}
+					]
+				}
+			]
 		};
+	}
 
 	private static UiResource? Cover(
 		MusicPlayerCatalogItem item,
 		IReadOnlyDictionary<string, UiResource> artwork)
-		=> item.ArtworkId is { Length: > 0 } artworkId && artwork.TryGetValue(artworkId, out var resource)
+	{
+		return item.ArtworkId is { Length: > 0 } artworkId && artwork.TryGetValue(artworkId, out var resource)
 			? resource
 			: null;
+	}
 
 	/// <summary>What a row shows before its cover arrives, and instead of one that never does.</summary>
 	private static UiResource Placeholder(MusicPlayerCatalogItem item, MusicPlayerIconResources icons)
-		=> item.Kind == MusicPlayerCatalogItemKind.Playlist ? icons.Disc : icons.MusicNote;
+	{
+		return item.Kind == MusicPlayerCatalogItemKind.Playlist ? icons.Disc : icons.MusicNote;
+	}
 
 	/// <summary>
 	/// Declared so the row is pressable, and deliberately empty: the answer settles the dialog on the

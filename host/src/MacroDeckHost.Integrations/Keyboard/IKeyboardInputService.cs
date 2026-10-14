@@ -25,9 +25,15 @@ public readonly struct KeyboardSessionResult
 
 	public KeyboardSessionUnavailableReason? UnavailableReason { get; }
 
-	public static KeyboardSessionResult Opened(IKeyboardInputSession session) => new(session, unavailableReason: null);
+	public static KeyboardSessionResult Opened(IKeyboardInputSession session)
+	{
+		return new KeyboardSessionResult(session, null);
+	}
 
-	public static KeyboardSessionResult Unavailable(KeyboardSessionUnavailableReason reason) => new(null, reason);
+	public static KeyboardSessionResult Unavailable(KeyboardSessionUnavailableReason reason)
+	{
+		return new KeyboardSessionResult(null, reason);
+	}
 }
 
 public interface IKeyboardInputService

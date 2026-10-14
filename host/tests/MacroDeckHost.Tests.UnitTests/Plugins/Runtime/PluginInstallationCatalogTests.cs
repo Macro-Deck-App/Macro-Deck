@@ -9,12 +9,21 @@ internal sealed class PluginInstallationCatalogTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
-	private PluginInstallationCatalog CreateCatalog() => new(_paths, Serilog.Core.Logger.None);
+	private PluginInstallationCatalog CreateCatalog()
+	{
+		return new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None);
+	}
 
 	private void WritePlugin(string pluginId, IEnumerable<string> versions, string? currentVersion)
 	{

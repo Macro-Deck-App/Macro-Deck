@@ -6,9 +6,9 @@ internal static class MeldSessionParser
 {
 	public static MeldSession Parse(JsonElement session)
 	{
-		if (session.ValueKind != JsonValueKind.Object ||
-			!session.TryGetProperty("items", out var itemsElement) ||
-			itemsElement.ValueKind != JsonValueKind.Object)
+		if (session.ValueKind != JsonValueKind.Object
+			|| !session.TryGetProperty("items", out var itemsElement)
+			|| itemsElement.ValueKind != JsonValueKind.Object)
 		{
 			return MeldSession.Empty;
 		}
@@ -193,10 +193,10 @@ internal static class MeldSessionParser
 	private static bool TryParseScene(JsonElement value, out RawScene scene)
 	{
 		scene = default;
-		if (ReadString(value, "name") is not { } name ||
-			!TryReadInt(value, "index", out var index) ||
-			!TryReadBool(value, "current", out var current) ||
-			!TryReadBool(value, "staged", out var staged))
+		if (ReadString(value, "name") is not { } name
+			|| !TryReadInt(value, "index", out var index)
+			|| !TryReadBool(value, "current", out var current)
+			|| !TryReadBool(value, "staged", out var staged))
 		{
 			return false;
 		}
@@ -208,10 +208,10 @@ internal static class MeldSessionParser
 	private static bool TryParseLayer(JsonElement value, out RawLayer layer)
 	{
 		layer = default;
-		if (ReadString(value, "parent") is not { } parentSceneId ||
-			ReadString(value, "name") is not { } name ||
-			!TryReadInt(value, "index", out var index) ||
-			!TryReadBool(value, "visible", out var visible))
+		if (ReadString(value, "parent") is not { } parentSceneId
+			|| ReadString(value, "name") is not { } name
+			|| !TryReadInt(value, "index", out var index)
+			|| !TryReadBool(value, "visible", out var visible))
 		{
 			return false;
 		}
@@ -223,9 +223,9 @@ internal static class MeldSessionParser
 	private static bool TryParseEffect(JsonElement value, out RawEffect effect)
 	{
 		effect = default;
-		if (ReadString(value, "parent") is not { } parentLayerId ||
-			ReadString(value, "name") is not { } name ||
-			!TryReadBool(value, "enabled", out var enabled))
+		if (ReadString(value, "parent") is not { } parentLayerId
+			|| ReadString(value, "name") is not { } name
+			|| !TryReadBool(value, "enabled", out var enabled))
 		{
 			return false;
 		}
@@ -237,9 +237,9 @@ internal static class MeldSessionParser
 	private static bool TryParseTrack(JsonElement value, out RawTrack track)
 	{
 		track = default;
-		if (ReadString(value, "name") is not { } name ||
-			!TryReadBool(value, "muted", out var muted) ||
-			!TryReadBool(value, "monitoring", out var monitoring))
+		if (ReadString(value, "name") is not { } name
+			|| !TryReadBool(value, "muted", out var muted)
+			|| !TryReadBool(value, "monitoring", out var monitoring))
 		{
 			return false;
 		}
@@ -249,16 +249,18 @@ internal static class MeldSessionParser
 	}
 
 	private static string? ReadString(JsonElement element, string property)
-		=> element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+	{
+		return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
 			? value.GetString()
 			: null;
+	}
 
 	private static bool TryReadInt(JsonElement element, string property, out int value)
 	{
 		value = 0;
-		return element.TryGetProperty(property, out var candidate) &&
-			candidate.ValueKind == JsonValueKind.Number &&
-			candidate.TryGetInt32(out value);
+		return element.TryGetProperty(property, out var candidate)
+			&& candidate.ValueKind == JsonValueKind.Number
+			&& candidate.TryGetInt32(out value);
 	}
 
 	private static bool TryReadBool(JsonElement element, string property, out bool value)
@@ -278,10 +280,15 @@ internal static class MeldSessionParser
 		return candidate.ValueKind == JsonValueKind.False;
 	}
 
-	private static int HashIdName(string id, string name) => HashCode.Combine(id, name);
+	private static int HashIdName(string id, string name)
+	{
+		return HashCode.Combine(id, name);
+	}
 
-	private static int HashIdNameParent(string id, string name, string parentId) =>
-		HashCode.Combine(id, name, parentId);
+	private static int HashIdNameParent(string id, string name, string parentId)
+	{
+		return HashCode.Combine(id, name, parentId);
+	}
 
 	private readonly record struct RawScene(string Name, int Index, bool Current, bool Staged);
 

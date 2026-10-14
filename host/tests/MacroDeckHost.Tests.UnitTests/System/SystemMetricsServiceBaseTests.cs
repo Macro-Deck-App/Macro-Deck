@@ -108,7 +108,7 @@ public class SystemMetricsServiceBaseTests
 	{
 		var service = new CountingMetricsService { Snapshot = [new GpuSample("Test GPU", 33.0)] };
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await service.GetGpuUsageAsync(1), Is.Null);
 			Assert.That(await service.GetGpuNameAsync(1), Is.Null);
@@ -126,7 +126,7 @@ public class SystemMetricsServiceBaseTests
 		service.Snapshot = [new GpuSample(null, 20.0)];
 		clock.Advance(TimeSpan.FromSeconds(3));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(named, Is.EqualTo("Test GPU"));
 			Assert.That(await service.GetGpuNameAsync(0), Is.EqualTo("Test GPU"));
@@ -161,9 +161,17 @@ public class SystemMetricsServiceBaseTests
 	{
 		var clock = new TestClock();
 		var service = new CountingMetricsService(clock);
-		service.DiskReadings.Enqueue([new DiskReading("/", "Disk", "ext4", 100, 40, new DiskCounters(0, 0, TimeSpan.Zero, TimeSpan.Zero))]);
-		service.DiskReadings.Enqueue([new DiskReading("/", "Disk", "ext4", 100, 40,
-			new DiskCounters(4096, 2048, TimeSpan.FromMilliseconds(500), TimeSpan.Zero))]);
+		service.DiskReadings.Enqueue([
+			new DiskReading("/", "Disk", "ext4", 100, 40, new DiskCounters(0, 0, TimeSpan.Zero, TimeSpan.Zero))
+		]);
+		service.DiskReadings.Enqueue([
+			new DiskReading("/",
+				"Disk",
+				"ext4",
+				100,
+				40,
+				new DiskCounters(4096, 2048, TimeSpan.FromMilliseconds(500), TimeSpan.Zero))
+		]);
 
 		var first = await service.GetDisksAsync();
 		var cached = await service.GetDisksAsync();
@@ -194,9 +202,15 @@ public class SystemMetricsServiceBaseTests
 	{
 		private DateTimeOffset _now = DateTimeOffset.UnixEpoch;
 
-		public override DateTimeOffset GetUtcNow() => _now;
+		public override DateTimeOffset GetUtcNow()
+		{
+			return _now;
+		}
 
-		public void Advance(TimeSpan by) => _now += by;
+		public void Advance(TimeSpan by)
+		{
+			_now += by;
+		}
 	}
 
 	private sealed class CountingMetricsService : SystemMetricsServiceBase

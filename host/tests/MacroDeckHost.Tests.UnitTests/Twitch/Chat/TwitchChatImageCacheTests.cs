@@ -27,7 +27,7 @@ internal sealed class TwitchChatImageCacheTests
 		_store = new UiResourceStore();
 		_handler = new ImageHandler();
 		var resources = new BuiltInUiResources(TwitchIntegration.IntegrationId, _store, typeof(TwitchIntegration));
-		_cache = new TwitchChatImageCache(new HttpClient(_handler, disposeHandler: false), () => resources, _time, Logger.None);
+		_cache = new TwitchChatImageCache(new HttpClient(_handler, false), () => resources, _time, Logger.None);
 	}
 
 	[TearDown]
@@ -114,7 +114,7 @@ internal sealed class TwitchChatImageCacheTests
 	[TestCase(false)]
 	public async Task An_image_over_half_a_mebibyte_is_refused(bool declaresLength)
 	{
-		var oversized = new byte[(512 * 1024) + 1];
+		var oversized = new byte[512 * 1024 + 1];
 		_png.CopyTo(oversized, 0);
 		_handler.Respond = _ => Ok(oversized, declaresLength);
 

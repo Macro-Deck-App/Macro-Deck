@@ -27,7 +27,8 @@ public sealed class IconImportAppearanceClaims
 		if (!_claimedKeys.TryGetValue(parent.Id, out var keys))
 		{
 			keys = _cache.GetAppearances(parent.Id)
-				.Select(asset => asset.AppearanceTraits is { } existing ? IconAppearanceTraits.ToKey(existing) : string.Empty)
+				.Select(asset
+					=> asset.AppearanceTraits is { } existing ? IconAppearanceTraits.ToKey(existing) : string.Empty)
 				.ToHashSet(StringComparer.Ordinal);
 			_claimedKeys[parent.Id] = keys;
 		}
@@ -35,7 +36,9 @@ public sealed class IconImportAppearanceClaims
 		var key = IconAppearanceTraits.ToKey(traits);
 		if (keys.Contains(key))
 		{
-			return parent.ImportBatchId == _batchId ? IconImportAppearanceClaim.Refused : IconImportAppearanceClaim.Taken;
+			return parent.ImportBatchId == _batchId
+				? IconImportAppearanceClaim.Refused
+				: IconImportAppearanceClaim.Taken;
 		}
 
 		if (keys.Count >= IconAppearanceTraits.MaxAppearancesPerIcon)

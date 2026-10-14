@@ -47,8 +47,8 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 		var bounded = Math.Max(1, capacity);
 		Window window;
 
-		var widgetScope = scopeRefId is not null &&
-			_variables.FindByName(VariableScope.Widget, scopeRefId, variableName) is not null
+		var widgetScope = scopeRefId is not null
+			&& _variables.FindByName(VariableScope.Widget, scopeRefId, variableName) is not null
 				? scopeRefId
 				: null;
 		var key = widgetScope is null ? variableName : $"{widgetScope}/{variableName}";
@@ -109,7 +109,9 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 	}
 
 	private void StartTimer()
-		=> _timer ??= _timeProvider.CreateTimer(_ => Tick(), null, SampleInterval, SampleInterval);
+	{
+		_timer ??= _timeProvider.CreateTimer(_ => Tick(), null, SampleInterval, SampleInterval);
+	}
 
 	private void Tick()
 	{
@@ -169,7 +171,7 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 
 			for (var tick = from; tick <= missed; tick++)
 			{
-				Append(entry, standing, last + (SampleInterval * tick));
+				Append(entry, standing, last + SampleInterval * tick);
 			}
 		}
 
@@ -200,8 +202,8 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 			return false;
 		}
 
-		return double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out value) &&
-			double.IsFinite(value);
+		return double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out value)
+			&& double.IsFinite(value);
 	}
 
 	private sealed class Entry
@@ -266,6 +268,9 @@ public sealed class VariableHistory : IVariableHistory, IDisposable
 			_owner.Release(this);
 		}
 
-		public void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
+		public void RaiseChanged()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 	}
 }

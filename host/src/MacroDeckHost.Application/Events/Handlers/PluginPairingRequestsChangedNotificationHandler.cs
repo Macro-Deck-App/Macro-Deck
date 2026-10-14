@@ -15,7 +15,9 @@ public sealed class PluginPairingRequestsChangedNotificationHandler
 	}
 
 	public ValueTask Handle(PluginPairingRequestsChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new PluginPairingRequestsChangedEvent(),
 			cancellationToken));
+	}
 }

@@ -34,7 +34,8 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 	private readonly TimeProvider _time;
 	private readonly ILogger _logger;
 
-	public StreamWidgetsUiProvider(StreamPlatform platform,
+	public StreamWidgetsUiProvider(
+		StreamPlatform platform,
 		IStreamChatFeed feed,
 		IStreamChatImages? images,
 		IStreamStatsSource stats,
@@ -62,7 +63,7 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 		new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
 		new() { Kind = UiSurfaceKinds.Preview, SessionMode = UiSessionModes.Shared },
 		new() { Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
-		new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -154,7 +155,13 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 			: [];
 
 		var view = new UiView(surface,
-			StreamChatWidgetView.Build(_platform, state, cornerRadius, icon.State, events, backgroundColor, scale,
+			StreamChatWidgetView.Build(_platform,
+				state,
+				cornerRadius,
+				icon.State,
+				events,
+				backgroundColor,
+				scale,
 				messageColor));
 		session = new StreamChatWidgetSession(view, state, lines, _feed, accountId, snapshot.Account?.AccountId, icon);
 
@@ -199,12 +206,15 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 			icon);
 	}
 
-	private async Task<IVariableHistoryWindow?> OpenHistoryAsync(string variableName,
+	private async Task<IVariableHistoryWindow?> OpenHistoryAsync(
+		string variableName,
 		int capacity,
 		CancellationToken cancellationToken)
-		=> _context()?.Variables is { } variables
+	{
+		return _context()?.Variables is { } variables
 			? await variables.OpenHistoryAsync(variableName, capacity, cancellationToken).ConfigureAwait(false)
 			: null;
+	}
 
 	private StreamChatDialogSession CreateDialog(UiSurface surface)
 	{
@@ -239,7 +249,7 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 
 		var data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[DialogWidgetKey] = JsonSerializer.SerializeToElement(widgetId.ToString()),
+			[DialogWidgetKey] = JsonSerializer.SerializeToElement(widgetId.ToString())
 		};
 
 		if (request.AccountId is { Length: > 0 } accountId)
@@ -256,7 +266,7 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 		{
 			ViewId = _platform.DialogViewId,
 			Title = request.AccountLabel is { } label ? _platform.Chat.Title(label) : _platform.Chat.Name(),
-			Data = data,
+			Data = data
 		};
 
 		_ = ShowDialogAsync(request.Origin, modal);
@@ -286,7 +296,8 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 
 	// Re-read from the stored widget on every check: the dialog outlives the press that opened it, and the
 	// widget's settings may have changed since.
-	private async Task<StreamChatWidgetPermission> PermissionAsync(Guid? widgetId,
+	private async Task<StreamChatWidgetPermission> PermissionAsync(
+		Guid? widgetId,
 		string? accountId,
 		CancellationToken cancellationToken)
 	{
@@ -297,9 +308,9 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 
 		var widget = await widgets.GetWidgetDataAsync(id.ToString(), cancellationToken).ConfigureAwait(false);
 
-		if (widget is null ||
-			!string.Equals(widget.WidgetTypeId, _platform.ChatWidgetTypeId, StringComparison.Ordinal) ||
-			!StreamChatWidgetSettings.AllowsModeration(widget.Data))
+		if (widget is null
+			|| !string.Equals(widget.WidgetTypeId, _platform.ChatWidgetTypeId, StringComparison.Ordinal)
+			|| !StreamChatWidgetSettings.AllowsModeration(widget.Data))
 		{
 			return StreamChatWidgetPermission.TurnedOff;
 		}
@@ -313,7 +324,9 @@ internal sealed class StreamWidgetsUiProvider : IUiProvider
 	}
 
 	private static string? ReadString(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 }

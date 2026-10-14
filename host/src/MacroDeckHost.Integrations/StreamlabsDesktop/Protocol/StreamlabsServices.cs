@@ -89,5 +89,8 @@ internal static class StreamlabsServices
 		(Transitions, StudioModeChanged)
 	];
 
-	public static string SubscriptionId(string service, string observable) => $"{service}.{observable}";
+	public static string SubscriptionId(string service, string observable)
+	{
+		return $"{service}.{observable}";
+	}
 }

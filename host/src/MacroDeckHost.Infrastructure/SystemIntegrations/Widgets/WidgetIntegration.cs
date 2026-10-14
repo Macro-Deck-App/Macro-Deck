@@ -77,26 +77,32 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 		return Task.CompletedTask;
 	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	private WidgetAppearanceActionDefinition SetLabel()
-		=> new("set-label",
+	{
+		return new WidgetAppearanceActionDefinition("set-label",
 			AppStrings.Integrations.Widgets.Actions.SetLabelName(),
 			AppStrings.Integrations.Widgets.Actions.SetLabelDescription(),
 			WidgetAppearanceProperty.Label,
 			[
 				ActionParameter.MultilineText("label",
-					label: AppStrings.Integrations.Widgets.Actions.LabelLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.LabelDescription(),
-					placeholder: AppStrings.Integrations.Widgets.Actions.LabelPlaceholder())
+					AppStrings.Integrations.Widgets.Actions.LabelLabel(),
+					AppStrings.Integrations.Widgets.Actions.LabelDescription(),
+					AppStrings.Integrations.Widgets.Actions.LabelPlaceholder())
 			],
 			() => _widgets,
 			// Empty is meaningful here: a label is text, and clearing it is a thing to want. Every
 			// other property reads empty as "unchanged", because there is no useful empty color.
 			context => new WidgetAppearancePatch { Label = ReadText(context, "label") });
+	}
 
 	private WidgetAppearanceActionDefinition SetBackgroundColor()
-		=> new("set-background-color",
+	{
+		return new WidgetAppearanceActionDefinition("set-background-color",
 			AppStrings.Integrations.Widgets.Actions.SetBackgroundColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetBackgroundColorDescription(),
 			WidgetAppearanceProperty.BackgroundColor,
@@ -113,9 +119,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.BackgroundColor]
 				: []);
+	}
 
 	private WidgetAppearanceActionDefinition SetLabelColor()
-		=> new("set-label-color",
+	{
+		return new WidgetAppearanceActionDefinition("set-label-color",
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorDescription(),
 			WidgetAppearanceProperty.LabelColor,
@@ -132,9 +140,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.LabelColor]
 				: []);
+	}
 
 	private WidgetAppearanceActionDefinition SetAccentColor()
-		=> new("set-accent-color",
+	{
+		return new WidgetAppearanceActionDefinition("set-accent-color",
 			AppStrings.Integrations.Widgets.Actions.SetAccentColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetAccentColorDescription(),
 			WidgetAppearanceProperty.AccentColor,
@@ -151,9 +161,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.AccentColor]
 				: []);
+	}
 
 	private WidgetAppearanceActionDefinition SetIconColor()
-		=> new("set-icon-color",
+	{
+		return new WidgetAppearanceActionDefinition("set-icon-color",
 			AppStrings.Integrations.Widgets.Actions.SetIconColorName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconColorDescription(),
 			WidgetAppearanceProperty.IconColor,
@@ -170,9 +182,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.IconColor]
 				: []);
+	}
 
 	private WidgetAppearanceActionDefinition SetIconAppearance()
-		=> new("set-icon-appearance",
+	{
+		return new WidgetAppearanceActionDefinition("set-icon-appearance",
 			AppStrings.Integrations.Widgets.Actions.SetIconAppearanceName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconAppearanceDescription(),
 			WidgetAppearanceProperty.IconAppearance,
@@ -200,58 +214,64 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				? [WidgetAppearanceProperty.IconAppearance]
 				: [],
 			IconControlledByProvider);
+	}
 
 	private static ActionResult? IconControlledByProvider(IWidgetApi widgets, string widgetId)
-		=> widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { HasActiveIconProvider: true }
+	{
+		return widgets.GetWidgets().FirstOrDefault(w => w.Id == widgetId) is { HasActiveIconProvider: true }
 			? ActionResult.Failed(ActionErrorCodes.PermissionDenied,
 				AppStrings.Integrations.Widgets.Errors.IconControlledByProvider())
 			: null;
+	}
 
 	private WidgetAppearanceActionDefinition SetIcon()
-		=> new("set-icon",
+	{
+		return new WidgetAppearanceActionDefinition("set-icon",
 			AppStrings.Integrations.Widgets.Actions.SetIconName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconDescription(),
 			WidgetAppearanceProperty.Icon,
 			[
 				ActionParameter.Icon("iconId",
-					label: AppStrings.Integrations.Widgets.Actions.IconLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.IconDescription())
+					AppStrings.Integrations.Widgets.Actions.IconLabel(),
+					AppStrings.Integrations.Widgets.Actions.IconDescription())
 			],
 			() => _widgets,
 			context => new WidgetAppearancePatch { IconId = ReadText(context, "iconId") },
 			onApplyFailed: IconControlledByProvider);
+	}
 
 	private WidgetAppearanceActionDefinition SetIconDisplay()
-		=> new("set-icon-display",
+	{
+		return new WidgetAppearanceActionDefinition("set-icon-display",
 			AppStrings.Integrations.Widgets.Actions.SetIconDisplayName(),
 			AppStrings.Integrations.Widgets.Actions.SetIconDisplayDescription(),
 			WidgetAppearanceProperty.IconDisplay,
 			[
 				ActionParameter.Choice("iconFit",
 					_iconFits,
-					label: AppStrings.Integrations.Widgets.Actions.IconFitDisplayLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.IconFitDisplayDescription(),
-					defaultValue: WidgetActionParameters.Unchanged),
+					AppStrings.Integrations.Widgets.Actions.IconFitDisplayLabel(),
+					AppStrings.Integrations.Widgets.Actions.IconFitDisplayDescription(),
+					WidgetActionParameters.Unchanged),
 				UnfilledNumber("iconZoom",
 					AppStrings.Integrations.Widgets.Actions.IconZoomLabel(),
 					AppStrings.Integrations.Widgets.Actions.IconZoomDescription(),
-					min: 10,
-					max: 400),
+					10,
+					400),
 				UnfilledNumber("iconOffsetX",
 					AppStrings.Integrations.Widgets.Actions.IconOffsetXLabel(),
 					AppStrings.Integrations.Widgets.Actions.IconOffsetXDescription(),
-					min: -100,
-					max: 100),
+					-100,
+					100),
 				UnfilledNumber("iconOffsetY",
 					AppStrings.Integrations.Widgets.Actions.IconOffsetYLabel(),
 					AppStrings.Integrations.Widgets.Actions.IconOffsetYDescription(),
-					min: -100,
-					max: 100),
+					-100,
+					100),
 				UnfilledNumber("iconOpacity",
 					AppStrings.Integrations.Widgets.Actions.IconOpacityLabel(),
 					AppStrings.Integrations.Widgets.Actions.IconOpacityDescription(),
-					min: 0,
-					max: 100)
+					0,
+					100)
 			],
 			() => _widgets,
 			context => WidgetActionParameters.IsReset(context, "iconFit")
@@ -267,13 +287,16 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "iconFit")
 				? [WidgetAppearanceProperty.IconDisplay]
 				: []);
+	}
 
-	private static ActionParameter UnfilledNumber(string name,
+	private static ActionParameter UnfilledNumber(
+		string name,
 		LocalizedText label,
 		LocalizedText description,
 		double min,
 		double max)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = name,
 			Type = ActionParameterType.Number,
@@ -283,29 +306,31 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			Max = max,
 			DefaultValue = WidgetActionParameters.Unchanged
 		};
+	}
 
 	private WidgetAppearanceActionDefinition SetFont()
-		=> new("set-font",
+	{
+		return new WidgetAppearanceActionDefinition("set-font",
 			AppStrings.Integrations.Widgets.Actions.SetFontName(),
 			AppStrings.Integrations.Widgets.Actions.SetFontDescription(),
 			WidgetAppearanceProperty.Font,
 			[
 				ActionParameter.Autocomplete("fontFaceId",
-					label: AppStrings.Integrations.Widgets.Actions.FontLabel(),
+					AppStrings.Integrations.Widgets.Actions.FontLabel(),
 					optionsSourceId: WidgetOptionsSources.Fonts,
 					placeholder: AppStrings.Integrations.Widgets.Actions.Unchanged()),
 				ActionParameter.Number("fontSize",
-					label: AppStrings.Integrations.Widgets.Actions.FontSizeLabel(),
-					description: AppStrings.Integrations.Widgets.Actions.FontSizeDescription(),
+					AppStrings.Integrations.Widgets.Actions.FontSizeLabel(),
+					AppStrings.Integrations.Widgets.Actions.FontSizeDescription(),
 					// 0 is the historical, persisted Unchanged sentinel. The dedicated action UI
 					// deliberately only offers 1..100 as concrete values, but schemas must keep
 					// old/default flows valid.
-					min: 0,
-					max: 100,
+					0,
+					100,
 					defaultValue: 0),
 				ActionParameter.Choice("textAlign",
 					_textAlignments,
-					label: AppStrings.Integrations.Widgets.Actions.AlignmentLabel(),
+					AppStrings.Integrations.Widgets.Actions.AlignmentLabel(),
 					defaultValue: WidgetActionParameters.Unchanged),
 				ActionParameter.Choice("labelPosition",
 					[
@@ -321,7 +346,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 						new ActionParameterOption
 							{ Value = "bottom", Label = AppStrings.Integrations.Widgets.Actions.PositionBottom() }
 					],
-					label: AppStrings.Integrations.Widgets.Actions.PositionLabel(),
+					AppStrings.Integrations.Widgets.Actions.PositionLabel(),
 					defaultValue: WidgetActionParameters.Unchanged)
 			],
 			() => _widgets,
@@ -332,9 +357,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				TextAlign = WidgetActionParameters.ReadOptional(context, "textAlign"),
 				LabelPosition = WidgetActionParameters.ReadOptional(context, "labelPosition")
 			});
+	}
 
 	private WidgetAppearanceActionDefinition SetBorder()
-		=> new("set-border",
+	{
+		return new WidgetAppearanceActionDefinition("set-border",
 			AppStrings.Integrations.Widgets.Actions.SetBorderName(),
 			AppStrings.Integrations.Widgets.Actions.SetBorderDescription(),
 			WidgetAppearanceProperty.Border,
@@ -348,7 +375,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 						},
 						.. _borderStyles
 					],
-					label: AppStrings.Integrations.Widgets.Actions.StyleLabel(),
+					AppStrings.Integrations.Widgets.Actions.StyleLabel(),
 					defaultValue: WidgetActionParameters.Unchanged),
 				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel(),
 					AppStrings.Integrations.Widgets.Actions.BorderColorDescription())
@@ -364,9 +391,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.BorderColor]
 				: []);
+	}
 
 	private static ActionParameter AlphaColor(LocalizedText label, LocalizedText description = default)
-		=> new()
+	{
+		return new ActionParameter
 		{
 			Name = "color",
 			Type = ActionParameterType.Color,
@@ -375,7 +404,10 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			SupportsReset = true,
 			AllowAlpha = true
 		};
+	}
 
 	private static string? ReadText(ActionExecutionContext context, string name)
-		=> context.Parameters.TryGetValue(name, out var value) ? value.ToString() ?? string.Empty : null;
+	{
+		return context.Parameters.TryGetValue(name, out var value) ? value.ToString() ?? string.Empty : null;
+	}
 }

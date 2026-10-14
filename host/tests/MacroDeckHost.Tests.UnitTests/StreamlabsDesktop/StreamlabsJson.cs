@@ -73,29 +73,38 @@ internal static class StreamlabsJson
 	public static string StreamingModel(
 		string streaming = "offline",
 		string recording = "offline",
-		string replayBuffer = "offline") => $$"""
-											  {
-											  	"streamingStatus":"{{streaming}}",
-											  	"streamingStatusTime":"2026-01-01T10:00:00.000Z",
-											  	"recordingStatus":"{{recording}}",
-											  	"recordingStatusTime":"2026-01-01T10:00:00.000Z",
-											  	"replayBufferStatus":"{{replayBuffer}}",
-											  	"replayBufferStatusTime":"2026-01-01T10:00:00.000Z"
-											  }
-											  """;
+		string replayBuffer = "offline")
+	{
+		return $$"""
+				 {
+				 	"streamingStatus":"{{streaming}}",
+				 	"streamingStatusTime":"2026-01-01T10:00:00.000Z",
+				 	"recordingStatus":"{{recording}}",
+				 	"recordingStatusTime":"2026-01-01T10:00:00.000Z",
+				 	"replayBufferStatus":"{{replayBuffer}}",
+				 	"replayBufferStatusTime":"2026-01-01T10:00:00.000Z"
+				 }
+				 """;
+	}
 
-	public static string StudioMode(bool enabled) => $$"""{"studioMode":{{(enabled ? "true" : "false")}}}""";
+	public static string StudioMode(bool enabled)
+	{
+		return $$"""{"studioMode":{{(enabled ? "true" : "false")}}}""";
+	}
 
-	public static string AudioSource(bool muted = false, double deflection = 0.8) => $$"""
-		  {
-		  	"_type":"HELPER",
-		  	"resourceId":"AudioSource[\"{{MicSourceId}}\"]",
-		  	"sourceId":"{{MicSourceId}}",
-		  	"name":"{{MicSourceName}}",
-		  	"muted":{{(muted ? "true" : "false")}},
-		  	"fader":{"db":0,"deflection":{{deflection.ToString(CultureInfo.InvariantCulture)}},"mul":1}
-		  }
-		  """;
+	public static string AudioSource(bool muted = false, double deflection = 0.8)
+	{
+		return $$"""
+				 {
+				 	"_type":"HELPER",
+				 	"resourceId":"AudioSource[\"{{MicSourceId}}\"]",
+				 	"sourceId":"{{MicSourceId}}",
+				 	"name":"{{MicSourceName}}",
+				 	"muted":{{(muted ? "true" : "false")}},
+				 	"fader":{"db":0,"deflection":{{deflection.ToString(CultureInfo.InvariantCulture)}},"mul":1}
+				 }
+				 """;
+	}
 
 	public static FakeStreamlabsClient Seeded(
 		string streaming = "offline",

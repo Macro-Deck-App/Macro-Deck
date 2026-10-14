@@ -85,7 +85,9 @@ public static class BatteryWire
 			LevelPercent = dto.LevelPercent is >= 0 and <= 100 ? dto.LevelPercent : null,
 			ChargeState = ToChargeState(dto.ChargeState),
 			IsConnected = dto.IsConnected,
-			TimeRemaining = dto.TimeRemainingSeconds is >= 0 ? TimeSpan.FromSeconds(dto.TimeRemainingSeconds.Value) : null,
+			TimeRemaining = dto.TimeRemainingSeconds is >= 0
+				? TimeSpan.FromSeconds(dto.TimeRemainingSeconds.Value)
+				: null,
 			TimeToFull = dto.TimeToFullSeconds is >= 0 ? TimeSpan.FromSeconds(dto.TimeToFullSeconds.Value) : null,
 			Health = ToHealth(dto.Health),
 			UpdatedAt = dto.UpdatedAt
@@ -93,7 +95,8 @@ public static class BatteryWire
 	}
 
 	public static string ToWire(BatteryChargeState state)
-		=> state switch
+	{
+		return state switch
 		{
 			BatteryChargeState.Discharging => BatteryChargeStates.Discharging,
 			BatteryChargeState.Charging => BatteryChargeStates.Charging,
@@ -101,9 +104,11 @@ public static class BatteryWire
 			BatteryChargeState.NotCharging => BatteryChargeStates.NotCharging,
 			_ => BatteryChargeStates.Unknown
 		};
+	}
 
 	public static BatteryChargeState ToChargeState(string? value)
-		=> value switch
+	{
+		return value switch
 		{
 			BatteryChargeStates.Discharging => BatteryChargeState.Discharging,
 			BatteryChargeStates.Charging => BatteryChargeState.Charging,
@@ -111,9 +116,11 @@ public static class BatteryWire
 			BatteryChargeStates.NotCharging => BatteryChargeState.NotCharging,
 			_ => BatteryChargeState.Unknown
 		};
+	}
 
 	public static string ToWire(BatteryHealth health)
-		=> health switch
+	{
+		return health switch
 		{
 			BatteryHealth.Good => BatteryHealthStates.Good,
 			BatteryHealth.Overheat => BatteryHealthStates.Overheat,
@@ -123,9 +130,11 @@ public static class BatteryWire
 			BatteryHealth.Failure => BatteryHealthStates.Failure,
 			_ => BatteryHealthStates.Unknown
 		};
+	}
 
 	public static BatteryHealth ToHealth(string? value)
-		=> value switch
+	{
+		return value switch
 		{
 			BatteryHealthStates.Good => BatteryHealth.Good,
 			BatteryHealthStates.Overheat => BatteryHealth.Overheat,
@@ -135,8 +144,12 @@ public static class BatteryWire
 			BatteryHealthStates.Failure => BatteryHealth.Failure,
 			_ => BatteryHealth.Unknown
 		};
+	}
 
-	private static long? ToSeconds(TimeSpan? value) => value is { } time ? (long)time.TotalSeconds : null;
+	private static long? ToSeconds(TimeSpan? value)
+	{
+		return value is { } time ? (long)time.TotalSeconds : null;
+	}
 
 	private static TimeSpan? FromSeconds(long? seconds, string name)
 	{
@@ -147,7 +160,9 @@ public static class BatteryWire
 
 		if (seconds < 0 || seconds > (long)TimeSpan.MaxValue.TotalSeconds)
 		{
-			throw new ArgumentOutOfRangeException(name, seconds, "A battery time estimate is a non-negative number of seconds.");
+			throw new ArgumentOutOfRangeException(name,
+				seconds,
+				"A battery time estimate is a non-negative number of seconds.");
 		}
 
 		return TimeSpan.FromSeconds(seconds.Value);

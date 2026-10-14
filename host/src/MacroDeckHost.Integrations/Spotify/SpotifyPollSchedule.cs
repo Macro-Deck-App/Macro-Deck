@@ -26,8 +26,8 @@ internal static class SpotifyPollSchedule
 				PlaybackState: PlaybackState.Playing,
 				Position: { } position,
 				Duration: { } duration
-			} ||
-			duration <= position)
+			}
+			|| duration <= position)
 		{
 			return baseline;
 		}

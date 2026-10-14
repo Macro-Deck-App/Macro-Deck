@@ -59,11 +59,17 @@ public sealed class VideoStreamSessionDescription
 
 	/// <summary>An HLS stream: the URL of its playlist. Segments must stay on the playlist's origin.</summary>
 	/// <exception cref="ArgumentException">The URL breaks a bound documented on <see cref="Url" />.</exception>
-	public static VideoStreamSessionDescription Hls(string url) => FromUrl("hls", url);
+	public static VideoStreamSessionDescription Hls(string url)
+	{
+		return FromUrl("hls", url);
+	}
 
 	/// <summary>A Motion JPEG stream: the URL of a <c>multipart/x-mixed-replace</c> response.</summary>
 	/// <exception cref="ArgumentException">The URL breaks a bound documented on <see cref="Url" />.</exception>
-	public static VideoStreamSessionDescription Mjpeg(string url) => FromUrl("mjpeg", url);
+	public static VideoStreamSessionDescription Mjpeg(string url)
+	{
+		return FromUrl("mjpeg", url);
+	}
 
 	// Mirrors VideoStreamLimits and the structural check in MacroDeck.Plugin.Hosting; this project
 	// cannot reference either, and a test keeps them in step.
@@ -76,7 +82,7 @@ public sealed class VideoStreamSessionDescription
 
 		foreach (var c in transport)
 		{
-			if (c is not ((>= 'a' and <= 'z') or (>= '0' and <= '9') or '.' or '+' or '-'))
+			if (c is not (>= 'a' and <= 'z' or >= '0' and <= '9' or '.' or '+' or '-'))
 			{
 				return false;
 			}

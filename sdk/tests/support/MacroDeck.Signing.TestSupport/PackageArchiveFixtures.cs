@@ -19,7 +19,8 @@ public static class PackageArchiveFixtures
 	/// declaring exactly <paramref name="files" />, each backed by a real entry with the matching SHA-256
 	/// and size. <paramref name="extraManifestProperties" /> lets a caller splice in unknown top-level JSON
 	/// or (with an empty <paramref name="files" /> array) omit <c>files</c> entirely.</summary>
-	public static string CreatePluginArchive(string path,
+	public static string CreatePluginArchive(
+		string path,
 		string id,
 		string version,
 		IReadOnlyList<DeclaredFile> files,
@@ -48,11 +49,12 @@ public static class PackageArchiveFixtures
 		if (declareFiles)
 		{
 			manifest["files"] = new JsonArray(files.Select(file => (JsonNode)new JsonObject
-			{
-				["path"] = file.Path,
-				["sha256"] = "sha256:" + Sha256Hex(file.Content),
-				["size"] = Encoding.UTF8.GetByteCount(file.Content)
-			}).ToArray());
+				{
+					["path"] = file.Path,
+					["sha256"] = "sha256:" + Sha256Hex(file.Content),
+					["size"] = Encoding.UTF8.GetByteCount(file.Content)
+				})
+				.ToArray());
 		}
 
 		if (extraManifestProperties is not null)
@@ -82,11 +84,12 @@ public static class PackageArchiveFixtures
 			["id"] = id,
 			["name"] = name,
 			["files"] = new JsonArray(files.Select(file => (JsonNode)new JsonObject
-			{
-				["path"] = file.Path,
-				["sha256"] = "sha256:" + Sha256Hex(file.Content),
-				["size"] = Encoding.UTF8.GetByteCount(file.Content)
-			}).ToArray())
+				{
+					["path"] = file.Path,
+					["sha256"] = "sha256:" + Sha256Hex(file.Content),
+					["size"] = Encoding.UTF8.GetByteCount(file.Content)
+				})
+				.ToArray())
 		};
 
 		using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
@@ -101,7 +104,8 @@ public static class PackageArchiveFixtures
 		return path;
 	}
 
-	public static string CreatePortableArchive(string path,
+	public static string CreatePortableArchive(
+		string path,
 		string kind,
 		object formatVersion,
 		IReadOnlyList<DeclaredFile> files)
@@ -111,11 +115,12 @@ public static class PackageArchiveFixtures
 			["kind"] = kind,
 			["formatVersion"] = JsonValue.Create(formatVersion),
 			["files"] = new JsonArray(files.Select(file => (JsonNode)new JsonObject
-			{
-				["path"] = file.Path,
-				["sha256"] = "sha256:" + Sha256Hex(file.Content),
-				["size"] = Encoding.UTF8.GetByteCount(file.Content)
-			}).ToArray())
+				{
+					["path"] = file.Path,
+					["sha256"] = "sha256:" + Sha256Hex(file.Content),
+					["size"] = Encoding.UTF8.GetByteCount(file.Content)
+				})
+				.ToArray())
 		};
 
 		using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
@@ -164,16 +169,20 @@ public static class PackageArchiveFixtures
 		return reader.ReadToEnd();
 	}
 
-	public static void WriteEntryText(string archivePath, string entryName, string content) =>
+	public static void WriteEntryText(string archivePath, string entryName, string content)
+	{
 		ReplaceEntry(archivePath, entryName, content);
+	}
 
 	private static void WriteEntry(ZipArchive archive, string entryName, string content)
 	{
 		var entry = archive.CreateEntry(entryName, CompressionLevel.NoCompression);
-		using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+		using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));
 		writer.Write(content);
 	}
 
-	public static string Sha256Hex(string content) =>
-		Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+	public static string Sha256Hex(string content)
+	{
+		return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+	}
 }

@@ -26,7 +26,7 @@ internal sealed class RegistryManifestVerifierTests
 	{
 		if (Directory.Exists(_directory))
 		{
-			Directory.Delete(_directory, recursive: true);
+			Directory.Delete(_directory, true);
 		}
 	}
 
@@ -66,8 +66,8 @@ internal sealed class RegistryManifestVerifierTests
 	[Test]
 	public async Task A_registry_manifest_signed_by_a_registry_usage_certificate_verifies()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage]);
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage]);
 		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
 
 		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
@@ -82,8 +82,8 @@ internal sealed class RegistryManifestVerifierTests
 	[Test]
 	public async Task A_package_usage_certificate_is_refused_for_registry_verification()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "creator",
-			keyUsage: [SigningCertificateChain.PackageKeyUsage]);
+		var issued = TestPki.IssueCertificate("creator",
+			[SigningCertificateChain.PackageKeyUsage]);
 		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
 
 		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
@@ -102,8 +102,8 @@ internal sealed class RegistryManifestVerifierTests
 	[Test]
 	public async Task A_registry_usage_certificate_is_refused_for_package_signing()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage]);
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage]);
 
 		var result = SigningCertificateChain.Verify(issued.CertificateBytes,
 			issued.CertificateSignatureBytes,
@@ -120,12 +120,12 @@ internal sealed class RegistryManifestVerifierTests
 	[Test]
 	public async Task A_tampered_registry_manifest_fails_verification()
 	{
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage]);
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage]);
 		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
 
-		var original = File.ReadAllText(manifestPath);
-		File.WriteAllText(manifestPath, original.Replace("\"sequence\":1", "\"sequence\":2"));
+		var original = await File.ReadAllTextAsync(manifestPath);
+		await File.WriteAllTextAsync(manifestPath, original.Replace("\"sequence\":1", "\"sequence\":2"));
 
 		var result = await RegistryManifestVerifier.VerifyAsync(manifestPath,
 			signaturePath,
@@ -140,8 +140,8 @@ internal sealed class RegistryManifestVerifierTests
 	public async Task A_registry_manifest_signed_by_an_issuer_signed_registry_certificate_verifies()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage],
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage],
 			issuer: issuer);
 		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
 
@@ -166,8 +166,8 @@ internal sealed class RegistryManifestVerifierTests
 	public async Task An_issuer_signed_registry_certificate_without_its_issuer_is_refused_by_the_root_only_overload()
 	{
 		var issuer = TestPki.IssueIssuer();
-		var issued = TestPki.IssueCertificate(subjectKind: "service",
-			keyUsage: [SigningCertificateChain.RegistryKeyUsage],
+		var issued = TestPki.IssueCertificate("service",
+			[SigningCertificateChain.RegistryKeyUsage],
 			issuer: issuer);
 		var (manifestPath, signaturePath) = WriteSignedRegistry(issued);
 

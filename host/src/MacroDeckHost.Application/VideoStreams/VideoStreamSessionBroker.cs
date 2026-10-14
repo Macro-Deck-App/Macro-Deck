@@ -33,6 +33,7 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	private readonly Lock _gate = new();
 	private readonly ILogger _logger;
 	private readonly TimeSpan _minRetryDelay;
+
 	private readonly Channel<INotification> _outbox =
 		Channel.CreateUnbounded<INotification>(new UnboundedChannelOptions { SingleReader = true });
 
@@ -47,7 +48,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	private readonly TimeProvider _time;
 	private bool _disposed;
 
-	public VideoStreamSessionBroker(VideoStreamProviderRegistry registry,
+	public VideoStreamSessionBroker(
+		VideoStreamProviderRegistry registry,
 		IPluginSessionRegistry pluginSessions,
 		IPublisher publisher,
 		IVideoStreamRelay relay,
@@ -57,7 +59,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	{
 	}
 
-	internal VideoStreamSessionBroker(VideoStreamProviderRegistry registry,
+	internal VideoStreamSessionBroker(
+		VideoStreamProviderRegistry registry,
 		IPluginSessionRegistry pluginSessions,
 		IPublisher publisher,
 		IVideoStreamRelay relay,
@@ -77,25 +80,28 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		_ = Task.Run(PumpAsync);
 	}
 
-	public VideoStreamOpenTicket OpenSession(string connectionId,
+	public VideoStreamOpenTicket OpenSession(
+		string connectionId,
 		string providerId,
 		string streamId,
 		IReadOnlyList<string> acceptedTransports)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(connectionId);
 
-		if (acceptedTransports is not { Count: > 0 and <= MaxAcceptedTransports } ||
-			!acceptedTransports.All(VideoStreamLimits.IsValidTransport))
+		if (acceptedTransports is not { Count: > 0 and <= MaxAcceptedTransports }
+			|| !acceptedTransports.All(VideoStreamLimits.IsValidTransport))
 		{
 			throw Refuse(VideoStreamError.TransportNotAccepted, "At least one valid accepted transport is required.");
 		}
 
-		var playable = acceptedTransports.Where(transport => _relayedTransports.Contains(transport, StringComparer.Ordinal))
+		var playable = acceptedTransports
+			.Where(transport => _relayedTransports.Contains(transport, StringComparer.Ordinal))
 			.Distinct(StringComparer.Ordinal)
 			.ToList();
 		if (playable.Count == 0)
 		{
-			throw Refuse(VideoStreamError.TransportNotAccepted, "None of the accepted transports is one the host plays.");
+			throw Refuse(VideoStreamError.TransportNotAccepted,
+				"None of the accepted transports is one the host plays.");
 		}
 
 		if (!VideoStreamLimits.IsValidStreamId(streamId))
@@ -103,14 +109,14 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			throw Refuse(VideoStreamError.UnknownStream, "The stream id is not valid.");
 		}
 
-		if (!_registry.TryResolve(providerId, out var entry) ||
-			!_registry.TryGetEndpoint(entry.OwnerId, out var endpoint, out var pluginSessionId))
+		if (!_registry.TryResolve(providerId, out var entry)
+			|| !_registry.TryGetEndpoint(entry.OwnerId, out var endpoint, out var pluginSessionId))
 		{
 			throw Refuse(VideoStreamError.UnknownProvider, "No enabled video stream provider has this id.");
 		}
 
-		if (entry.Streams.Count > 0 &&
-			!entry.Streams.Any(stream => string.Equals(stream.Id, streamId, StringComparison.Ordinal)))
+		if (entry.Streams.Count > 0
+			&& !entry.Streams.Any(stream => string.Equals(stream.Id, streamId, StringComparison.Ordinal)))
 		{
 			throw Refuse(VideoStreamError.UnknownStream, "The provider offers no stream with this id.");
 		}
@@ -120,7 +126,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		{
 			if (_sessions.Values.Count(candidate => string.Equals(candidate.ConnectionId,
 					connectionId,
-					StringComparison.Ordinal)) >= MaxSessionsPerConnection)
+					StringComparison.Ordinal))
+				>= MaxSessionsPerConnection)
 			{
 				throw Refuse(VideoStreamError.SessionLimitReached, "This connection has too many video sessions open.");
 			}
@@ -187,8 +194,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		Session? send = null;
 		lock (_gate)
 		{
-			if (!_sessions.TryGetValue(sessionId, out var session) ||
-				!string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal))
+			if (!_sessions.TryGetValue(sessionId, out var session)
+				|| !string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -206,27 +213,33 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	}
 
 	public void CloseConnection(string connectionId, VideoStreamSessionReason reason)
-		=> CloseWhere(session => string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal),
+	{
+		CloseWhere(session => string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal),
 			reason,
-			notifyProvider: true);
+			true);
+	}
 
-	public void ApplyProviderUpdate(string ownerId,
+	public void ApplyProviderUpdate(
+		string ownerId,
 		string sessionId,
 		VideoStreamSessionState state,
 		VideoStreamSessionDescriptionDto? description,
 		VideoStreamSessionReason reason,
 		LocalizedText? message)
-		=> ApplyProviderOperation(ownerId, sessionId, new SessionUpdate(state, description, reason, message));
+	{
+		ApplyProviderOperation(ownerId, sessionId, new SessionUpdate(state, description, reason, message));
+	}
 
-	public bool ApplyProviderClose(string ownerId,
+	public bool ApplyProviderClose(
+		string ownerId,
 		string sessionId,
 		VideoStreamSessionReason reason,
 		LocalizedText? message)
 	{
 		lock (_gate)
 		{
-			if (!_sessions.TryGetValue(sessionId, out var session) ||
-				!string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal))
+			if (!_sessions.TryGetValue(sessionId, out var session)
+				|| !string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal))
 			{
 				return false;
 			}
@@ -237,18 +250,22 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	}
 
 	public void ClosePluginSession(string pluginSessionId, VideoStreamSessionReason reason)
-		=> CloseWhere(session => string.Equals(session.PluginSessionId, pluginSessionId, StringComparison.Ordinal),
+	{
+		CloseWhere(session => string.Equals(session.PluginSessionId, pluginSessionId, StringComparison.Ordinal),
 			reason,
-			notifyProvider: false);
+			false);
+	}
 
 	public void CloseOwner(string ownerId, VideoStreamSessionReason reason, bool notifyProvider)
-		=> CloseWhere(session => string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal),
+	{
+		CloseWhere(session => string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal),
 			reason,
 			notifyProvider);
+	}
 
 	public async Task ShutdownAsync(TimeSpan bound)
 	{
-		CloseWhere(_ => true, VideoStreamSessionReason.HostShutdown, notifyProvider: true);
+		CloseWhere(_ => true, VideoStreamSessionReason.HostShutdown, true);
 		try
 		{
 			await Task.WhenAll(_pendingCloses.Keys).WaitAsync(bound, _time).ConfigureAwait(false);
@@ -274,7 +291,7 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	internal void SweepLeases()
 	{
 		var now = _time.GetUtcNow();
-		CloseWhere(session => session.LeaseExpiresAt <= now, VideoStreamSessionReason.LeaseExpired, notifyProvider: true);
+		CloseWhere(session => session.LeaseExpiresAt <= now, VideoStreamSessionReason.LeaseExpired, true);
 	}
 
 	private void ApplyProviderOperation(string ownerId, string sessionId, SessionUpdate update)
@@ -282,10 +299,11 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		Session? send = null;
 		lock (_gate)
 		{
-			if (!_sessions.TryGetValue(sessionId, out var session) ||
-				!string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal))
+			if (!_sessions.TryGetValue(sessionId, out var session)
+				|| !string.Equals(session.OwnerId, ownerId, StringComparison.Ordinal))
 			{
-				throw Refuse(VideoStreamError.UnknownSession, "No video session with this id belongs to this provider.");
+				throw Refuse(VideoStreamError.UnknownSession,
+					"No video session with this id belongs to this provider.");
 			}
 
 			if (session.Phase == SessionPhase.Open)
@@ -302,7 +320,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			}
 			else
 			{
-				_logger.Warning("Video session {SessionId} buffered too many provider updates while opening", sessionId);
+				_logger.Warning("Video session {SessionId} buffered too many provider updates while opening",
+					sessionId);
 				if (FailLocked(session, VideoStreamError.Failed))
 				{
 					send = session;
@@ -320,8 +339,9 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	{
 		var published = session.Published;
 		var description = update.Description;
-		if (description is null && update.State != VideoStreamSessionState.Suspended &&
-			session.State == VideoStreamSessionState.Suspended)
+		if (description is null
+			&& update.State != VideoStreamSessionState.Suspended
+			&& session.State == VideoStreamSessionState.Suspended)
 		{
 			description = session.ProviderDescription;
 		}
@@ -350,7 +370,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	}
 
 	// The relay is armed here so it is live before anything is announced.
-	private bool TryPrepare(Session session,
+	private bool TryPrepare(
+		Session session,
 		VideoStreamSessionDescriptionDto? description,
 		out VideoStreamRelayDescription? published,
 		out VideoStreamError error)
@@ -371,10 +392,11 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			return false;
 		}
 
-		if (!_relayedTransports.Contains(description.Transport, StringComparer.Ordinal) ||
-			!session.AcceptedTransports.Contains(description.Transport, StringComparer.Ordinal))
+		if (!_relayedTransports.Contains(description.Transport, StringComparer.Ordinal)
+			|| !session.AcceptedTransports.Contains(description.Transport, StringComparer.Ordinal))
 		{
-			_logger.Warning("The provider of video session {SessionId} answered with transport {Transport}, which is not served",
+			_logger.Warning(
+				"The provider of video session {SessionId} answered with transport {Transport}, which is not served",
 				session.Id,
 				description.Transport);
 			error = VideoStreamError.TransportNotAccepted;
@@ -393,7 +415,9 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	}
 
 	private bool FailLocked(Session session, VideoStreamError error)
-		=> MarkClosed(session, VideoStreamSessionReason.Failed, null, error) && TakeCloseSend(session);
+	{
+		return MarkClosed(session, VideoStreamSessionReason.Failed, null, error) && TakeCloseSend(session);
+	}
 
 	private async Task RunOpenAsync(Session session)
 	{
@@ -548,7 +572,10 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			{
 				if (session.Phase == SessionPhase.Open)
 				{
-					if (TryPrepare(session, description ?? session.ProviderDescription, out var published, out var error))
+					if (TryPrepare(session,
+						description ?? session.ProviderDescription,
+						out var published,
+						out var error))
 					{
 						session.State = VideoStreamSessionState.Active;
 						session.Published = published;
@@ -594,10 +621,12 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			return;
 		}
 
-		if (failure.Failure is VideoStreamEndpointFailure.Skipped or VideoStreamEndpointFailure.RateLimited ||
-			failure.Code is VideoStreamErrorCode.Busy or VideoStreamErrorCode.CapacityReached)
+		if (failure.Failure is VideoStreamEndpointFailure.Skipped or VideoStreamEndpointFailure.RateLimited
+			|| failure.Code is VideoStreamErrorCode.Busy or VideoStreamErrorCode.CapacityReached)
 		{
-			_logger.Debug("A call for video session {SessionId} was not delivered: {Message}", session.Id, failure.Message);
+			_logger.Debug("A call for video session {SessionId} was not delivered: {Message}",
+				session.Id,
+				failure.Message);
 			return;
 		}
 
@@ -651,10 +680,10 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		lock (_gate)
 		{
 			foreach (var session in _sessions.Values.Where(candidate =>
-						string.Equals(candidate.OwnerId, change.OwnerId, StringComparison.Ordinal) &&
-						string.Equals(candidate.ProviderId, change.ProviderId, StringComparison.Ordinal) &&
-						!string.Equals(candidate.RegistrationId, change.RegistrationId, StringComparison.Ordinal))
-					.ToList())
+					string.Equals(candidate.OwnerId, change.OwnerId, StringComparison.Ordinal)
+					&& string.Equals(candidate.ProviderId, change.ProviderId, StringComparison.Ordinal)
+					&& !string.Equals(candidate.RegistrationId, change.RegistrationId, StringComparison.Ordinal))
+				.ToList())
 			{
 				// An opening session keeps its close owed, so an open that still succeeds is closed once.
 				session.CloseSent |= session.Phase == SessionPhase.Open;
@@ -680,13 +709,14 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		{
 			try
 			{
-				await session.Endpoint.CloseAsync(session.ProviderId, session.Id, session.CloseReason, CancellationToken.None)
+				await session.Endpoint
+					.CloseAsync(session.ProviderId, session.Id, session.CloseReason, CancellationToken.None)
 					.ConfigureAwait(false);
 				return;
 			}
 			catch (VideoStreamEndpointException exception) when (
-				(exception.Failure is VideoStreamEndpointFailure.RateLimited or VideoStreamEndpointFailure.TimedOut) &&
-				IsPluginSessionCurrent(session))
+				exception.Failure is VideoStreamEndpointFailure.RateLimited or VideoStreamEndpointFailure.TimedOut
+				&& IsPluginSessionCurrent(session))
 			{
 				if (attempt == MaxCloseAttempts)
 				{
@@ -719,14 +749,15 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			}
 		}
 
-		return session.PluginSessionId is { } pluginSessionId &&
-			_pluginSessions.Snapshot()
-				.Any(candidate => string.Equals(candidate.PluginId, session.OwnerId, StringComparison.Ordinal) &&
-					string.Equals(candidate.SessionId, pluginSessionId, StringComparison.Ordinal) &&
-					candidate.State == PluginSessionState.Connected);
+		return session.PluginSessionId is { } pluginSessionId
+			&& _pluginSessions.Snapshot()
+				.Any(candidate => string.Equals(candidate.PluginId, session.OwnerId, StringComparison.Ordinal)
+					&& string.Equals(candidate.SessionId, pluginSessionId, StringComparison.Ordinal)
+					&& candidate.State == PluginSessionState.Connected);
 	}
 
-	private bool MarkClosed(Session session,
+	private bool MarkClosed(
+		Session session,
 		VideoStreamSessionReason reason,
 		LocalizedText? message,
 		VideoStreamError? error)
@@ -766,9 +797,9 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 
 	private Session Owned(string connectionId, string sessionId)
 	{
-		if (sessionId is not null &&
-			_sessions.TryGetValue(sessionId, out var session) &&
-			string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal))
+		if (sessionId is not null
+			&& _sessions.TryGetValue(sessionId, out var session)
+			&& string.Equals(session.ConnectionId, connectionId, StringComparison.Ordinal))
 		{
 			return session;
 		}
@@ -800,7 +831,10 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 		}
 	}
 
-	private void Post(INotification notification) => _outbox.Writer.TryWrite(notification);
+	private void Post(INotification notification)
+	{
+		_outbox.Writer.TryWrite(notification);
+	}
 
 	private async Task PumpAsync()
 	{
@@ -824,7 +858,8 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 	}
 
 	private static VideoStreamError ErrorFor(VideoStreamEndpointException failure)
-		=> failure.Failure switch
+	{
+		return failure.Failure switch
 		{
 			VideoStreamEndpointFailure.Unavailable => VideoStreamError.ProviderUnavailable,
 			VideoStreamEndpointFailure.RateLimited => VideoStreamError.Busy,
@@ -832,8 +867,12 @@ public sealed class VideoStreamSessionBroker : IVideoStreamSessionBroker, IDispo
 			VideoStreamEndpointFailure.Skipped => VideoStreamError.UnknownSession,
 			_ => VideoStreamMapping.ToBrokerError(failure.Code)
 		};
+	}
 
-	private static VideoStreamBrokerException Refuse(VideoStreamError error, string message) => new(error, message);
+	private static VideoStreamBrokerException Refuse(VideoStreamError error, string message)
+	{
+		return new VideoStreamBrokerException(error, message);
+	}
 
 	private enum SessionPhase
 	{

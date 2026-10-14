@@ -35,17 +35,16 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Text(ParameterNameParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.ParameterLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.ParameterDescription(),
-			placeholder: "Strip[0].Gain",
+			AppStrings.Integrations.Voicemeeter.Actions.GetParameter.ParameterLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.GetParameter.ParameterDescription(),
+			"Strip[0].Gain",
 			required: true),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableLabel(),
-			description: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableDescription(),
+			AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.GetParameter.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true),
 		ActionParameter.Choice(TypeParameter,
-			options:
 			[
 				new ActionParameterOption
 				{
@@ -60,11 +59,14 @@ internal sealed class GetParameterActionDefinition : IActionDefinition
 					Value = TypeText, Label = AppStrings.Integrations.Voicemeeter.Actions.GetParameter.TypeText()
 				}
 			],
-			label: AppStrings.Integrations.Voicemeeter.Actions.GetParameter.TypeLabel(),
+			AppStrings.Integrations.Voicemeeter.Actions.GetParameter.TypeLabel(),
 			defaultValue: TypeNumber)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

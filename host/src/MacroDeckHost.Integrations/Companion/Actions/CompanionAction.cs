@@ -36,12 +36,17 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; }
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command, _capability);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command, _capability);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(_resolver.ConfigurationOptions());
+	{
+		return Task.FromResult(_resolver.ConfigurationOptions());
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -49,7 +54,8 @@ internal sealed class CompanionAction : IDynamicOptionsActionDefinition
 		private readonly Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> _command;
 		private readonly string? _capability;
 
-		public Executor(CompanionTargetResolver resolver,
+		public Executor(
+			CompanionTargetResolver resolver,
 			Func<IReadOnlyDictionary<string, object>, CompanionDeviceCommand?> command,
 			string? capability)
 		{

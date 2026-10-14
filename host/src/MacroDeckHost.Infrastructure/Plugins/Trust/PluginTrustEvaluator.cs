@@ -12,7 +12,8 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 	private readonly PluginTrustOptions _options;
 	private readonly ILogger _logger;
 
-	public PluginTrustEvaluator(IPluginManifestReader manifestReader,
+	public PluginTrustEvaluator(
+		IPluginManifestReader manifestReader,
 		IPluginRevocationSource revocationSource,
 		PluginTrustOptions options,
 		ILogger logger)
@@ -23,7 +24,8 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 		_logger = logger.ForContext<PluginTrustEvaluator>();
 	}
 
-	public Task<PluginTrustResult> EvaluateInstalledAsync(string versionDirectory,
+	public Task<PluginTrustResult> EvaluateInstalledAsync(
+		string versionDirectory,
 		PluginRevocationCheck revocationCheck,
 		CancellationToken cancellationToken = default)
 	{
@@ -39,7 +41,8 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 			cancellationToken);
 	}
 
-	private async Task<PluginTrustResult> EvaluateCoreAsync(string subject,
+	private async Task<PluginTrustResult> EvaluateCoreAsync(
+		string subject,
 		PluginRevocationCheck revocationCheck,
 		Func<CancellationToken, Task<PackageVerifyResult>> verify,
 		CancellationToken cancellationToken)
@@ -49,8 +52,8 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 		if (!verified.Success)
 		{
 			var verdict = verified.Error!.Value.ToVerdict();
-			PluginTrustLog.Evaluated(_logger, subject, verdict, certificateId: null);
-			return PluginTrustResult.Of(verdict, certificateId: null, verified.Message);
+			PluginTrustLog.Evaluated(_logger, subject, verdict, null);
+			return PluginTrustResult.Of(verdict, null, verified.Message);
 		}
 
 		var certificateId = verified.CertificateId!;
@@ -69,7 +72,8 @@ public sealed class PluginTrustEvaluator : IPluginTrustEvaluator
 		return result;
 	}
 
-	private async Task<PluginRevocationResult> CheckRevocation(string certificateId,
+	private async Task<PluginRevocationResult> CheckRevocation(
+		string certificateId,
 		string? issuerCertificateId,
 		CancellationToken cancellationToken)
 	{

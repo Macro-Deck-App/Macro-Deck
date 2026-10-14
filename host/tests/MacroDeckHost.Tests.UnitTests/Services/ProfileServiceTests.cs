@@ -31,7 +31,10 @@ public class ProfileServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_SeedsProfileWithOnePersistedStartFolder()

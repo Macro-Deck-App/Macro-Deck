@@ -16,7 +16,8 @@ public class ImportSingleIconFromPathRequestMessageHandler
 	private readonly IIconImportService _iconImportService;
 	private readonly IIconPackCache _iconPackCache;
 
-	public ImportSingleIconFromPathRequestMessageHandler(IAppIconExtractor appIconExtractor,
+	public ImportSingleIconFromPathRequestMessageHandler(
+		IAppIconExtractor appIconExtractor,
 		IIconImportService iconImportService,
 		IIconPackCache iconPackCache)
 	{
@@ -25,7 +26,8 @@ public class ImportSingleIconFromPathRequestMessageHandler
 		_iconPackCache = iconPackCache;
 	}
 
-	public async ValueTask<ImportSingleIconResponse> Handle(ImportSingleIconFromPathRequest request,
+	public async ValueTask<ImportSingleIconResponse> Handle(
+		ImportSingleIconFromPathRequest request,
 		CancellationToken cancellationToken)
 	{
 		if (string.IsNullOrWhiteSpace(request.Path))
@@ -52,7 +54,7 @@ public class ImportSingleIconFromPathRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = nameof(IconError.UnsupportedFormat),
-					Message = AppStrings.Errors.Icons.UnsupportedSource(name: Path.GetFileName(request.Path))
+					Message = AppStrings.Errors.Icons.UnsupportedSource(Path.GetFileName(request.Path))
 				}
 			};
 		}
@@ -72,7 +74,7 @@ public class ImportSingleIconFromPathRequestMessageHandler
 		}
 
 		var icon = extracted.Data!;
-		await using var content = new MemoryStream(icon.Content, writable: false);
+		await using var content = new MemoryStream(icon.Content, false);
 		var result = await _iconImportService.ImportSingle(packId,
 			new IconImportFile(icon.FileName, content),
 			cancellationToken);
@@ -81,7 +83,8 @@ public class ImportSingleIconFromPathRequestMessageHandler
 	}
 
 	private static ImportSingleIconResponse Invalid(LocalizedText message)
-		=> new()
+	{
+		return new ImportSingleIconResponse
 		{
 			Success = false,
 			Error = new TransportError
@@ -90,4 +93,5 @@ public class ImportSingleIconFromPathRequestMessageHandler
 				Message = message
 			}
 		};
+	}
 }

@@ -6,7 +6,8 @@ namespace MacroDeck.Plugin.Cli.Building;
 /// so nothing in a build recipe is ever evaluated as a command line.</summary>
 internal sealed class ProcessPluginBuildRunner : IPluginBuildRunner
 {
-	public async Task<PluginBuildRunResult> RunAsync(string executable,
+	public async Task<PluginBuildRunResult> RunAsync(
+		string executable,
 		IReadOnlyList<string> arguments,
 		string workingDirectory,
 		CancellationToken cancellationToken)

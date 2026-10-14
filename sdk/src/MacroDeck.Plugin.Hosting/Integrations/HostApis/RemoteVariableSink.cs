@@ -83,7 +83,7 @@ internal sealed class RemoteVariableSink(
 		{
 			await invoker.InvokeAsync(Protocol.Callbacks.HostApis.VariableValues,
 					HostOperations.VariableValues.Invalidate,
-					arguments: null,
+					null,
 					cancellationToken)
 				.ConfigureAwait(false);
 		}

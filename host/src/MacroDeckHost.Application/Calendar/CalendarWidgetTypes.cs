@@ -52,7 +52,9 @@ public static class CalendarWidgetTypes
 	public const string ShowDetailsActionId = "show-details";
 
 	public static bool IsCalendarWidget(string? widgetType)
-		=> widgetType == QualifiedId;
+	{
+		return widgetType == QualifiedId;
+	}
 }
 
 public static class CalendarOptionsSourceIds

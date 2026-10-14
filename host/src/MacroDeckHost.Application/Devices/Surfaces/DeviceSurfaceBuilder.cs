@@ -102,16 +102,16 @@ public sealed class DeviceSurfaceBuilder
 		string? currentFolderId,
 		CancellationToken cancellationToken)
 	{
-		if (ResolveProfileId(currentProfileId, device.StartupProfileId) is not { } profileId ||
-			ResolveProfile(profileId) is not { } profile ||
-			_profiles.GetFoldersForProfile(profileId) is not { Count: > 0 } folders)
+		if (ResolveProfileId(currentProfileId, device.StartupProfileId) is not { } profileId
+			|| ResolveProfile(profileId) is not { } profile
+			|| _profiles.GetFoldersForProfile(profileId) is not { Count: > 0 } folders)
 		{
 			return DeviceSurfaceProjection.Empty;
 		}
 
 		var folder = folders.FirstOrDefault(candidate =>
-				string.Equals(candidate.Id, currentFolderId, StringComparison.Ordinal)) ??
-			StartFolderResolver.SelectStartFolder(folders);
+				string.Equals(candidate.Id, currentFolderId, StringComparison.Ordinal))
+			?? StartFolderResolver.SelectStartFolder(folders);
 		if (folder is null)
 		{
 			return DeviceSurfaceProjection.Empty;
@@ -142,7 +142,8 @@ public sealed class DeviceSurfaceBuilder
 					folders,
 					profile.DefaultWidgetBorderRadius),
 				BackgroundColor = DeviceColor(SurfaceFolderChain.ResolveBackgroundColor(folder,
-					profile.DefaultBackgroundColor), null),
+						profile.DefaultBackgroundColor),
+					null),
 				// Echoed verbatim: the host never parses it and never fits the grid or the widget
 				// positions to the device's physical capabilities.
 				LayoutReference = device.LayoutReference
@@ -164,13 +165,13 @@ public sealed class DeviceSurfaceBuilder
 	private IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)
 	{
 		var triggerTypes = WidgetFlowsJson.TriggerTypes(widget.Data);
-		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type) ||
-			_defaultShortPress.RunsOnDevices(widget.Type) ||
-			triggerTypes.Any(type =>
-				string.Equals(type, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(type, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase) ||
-				string.Equals(type, WidgetTriggerTypes.TouchEnd, StringComparison.OrdinalIgnoreCase));
+		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type)
+			|| _defaultShortPress.RunsOnDevices(widget.Type)
+			|| triggerTypes.Any(type =>
+				string.Equals(type, WidgetTriggerTypes.ShortPress, StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(type, WidgetTriggerTypes.LongPress, StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(type, WidgetTriggerTypes.TouchStart, StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(type, WidgetTriggerTypes.TouchEnd, StringComparison.OrdinalIgnoreCase));
 
 		if (hasPressFlow)
 		{
@@ -181,25 +182,33 @@ public sealed class DeviceSurfaceBuilder
 			];
 		}
 
-		return !string.Equals(widget.Type, WidgetTypeIds.Slider, StringComparison.Ordinal) &&
-			WidgetTypeIds.BuiltIn.Contains(widget.Type, StringComparer.Ordinal) &&
-			WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress)
+		return !string.Equals(widget.Type, WidgetTypeIds.Slider, StringComparison.Ordinal)
+			&& WidgetTypeIds.BuiltIn.Contains(widget.Type, StringComparer.Ordinal)
+			&& WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress)
 				? [DeviceInteractionKind.Press, DeviceInteractionKind.Release]
 				: [];
 	}
 
 	private static string? ReadString(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private static int? ReadInt(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<int>(out var number) ? number : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<int>(out var number) ? number : null;
+	}
 
 	private static double? ReadDouble(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<double>(out var number) ? number : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<double>(out var number) ? number : null;
+	}
 
 	// Providers predate transparent widget backgrounds and may parse this as a colour, so it arrives as no colour.
 	private static string? DeviceBackground(string? value)
-		=> string.Equals(value?.Trim(), "transparent", StringComparison.OrdinalIgnoreCase) ? null : value;
+	{
+		return string.Equals(value?.Trim(), "transparent", StringComparison.OrdinalIgnoreCase) ? null : value;
+	}
 
 	// Providers predate colour references and alpha: a reference arrives resolved and a translucent colour
 	// as opaque #rrggbb, while every other value is passed exactly as stored, as it always was.
@@ -226,7 +235,9 @@ public sealed class DeviceSurfaceBuilder
 	}
 
 	private static string? Pick(JsonObject? state, JsonObject root, string key)
-		=> ReadString(state, key) is { Length: > 0 } value ? value : ReadString(root, key);
+	{
+		return ReadString(state, key) is { Length: > 0 } value ? value : ReadString(root, key);
+	}
 
 	/// <summary>
 	/// The same state-wins-else-root cascade <see cref="Pick" /> applies to a plain field, but reading the
@@ -242,7 +253,9 @@ public sealed class DeviceSurfaceBuilder
 	}
 
 	private static WidgetIconReference? ReadIconReference(JsonObject? appearance)
-		=> WidgetIconReference.Read(appearance?["icon"], ReadString(appearance, "iconId"));
+	{
+		return WidgetIconReference.Read(appearance?["icon"], ReadString(appearance, "iconId"));
+	}
 
 	private async Task<DeviceSurfaceWidget> BuildWidget(
 		Widget widget,
@@ -334,7 +347,8 @@ public sealed class DeviceSurfaceBuilder
 		};
 	}
 
-	private (string? IconId, string? Version) ResolveDeviceIcon(WidgetIconReference? reference,
+	private (string? IconId, string? Version) ResolveDeviceIcon(
+		WidgetIconReference? reference,
 		IconAppearanceContext context)
 	{
 		if (reference is not { } value)
@@ -374,11 +388,15 @@ public sealed class DeviceSurfaceBuilder
 	// A cross-profile navigation moves the session off the device's assigned profile, so the session's
 	// own profile wins while it still resolves; the assignment is only the starting point.
 	private string? ResolveProfileId(string? currentProfileId, string? startupProfileId)
-		=> currentProfileId is not null && ResolveProfile(currentProfileId) is not null
+	{
+		return currentProfileId is not null && ResolveProfile(currentProfileId) is not null
 			? currentProfileId
 			: startupProfileId;
+	}
 
 	private Ui.Transport.Messages.Profiles.Profile? ResolveProfile(string profileId)
-		=> _profiles.GetProfiles()
+	{
+		return _profiles.GetProfiles()
 			.FirstOrDefault(profile => string.Equals(profile.Id, profileId, StringComparison.Ordinal));
+	}
 }

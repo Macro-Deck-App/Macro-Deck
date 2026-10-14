@@ -29,7 +29,8 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 	// The providers are optional and defaulted rather than required: a test builds a registry with none of
 	// the built-in providers around at all, and every built-in type simply reports no configuration then -
 	// the answer that is literally true until the providers themselves grow a config surface.
-	public WidgetTypeRegistry(IPublisher publisher,
+	public WidgetTypeRegistry(
+		IPublisher publisher,
 		IEnumerable<IBuiltInWidgetUiProvider>? providers = null,
 		IIntegrationRegistry? integrations = null)
 	{
@@ -49,7 +50,7 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 		_builtIn =
 		[
 			.. BuiltInWidgetTypes.All(configurable)
-				.Select(descriptor => new WidgetTypeCatalogEntry(descriptor.Id, string.Empty, descriptor)),
+				.Select(descriptor => new WidgetTypeCatalogEntry(descriptor.Id, string.Empty, descriptor))
 		];
 
 		foreach (var entry in _builtIn)
@@ -62,10 +63,13 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 		=>
 		[
 			.. _builtIn,
-			.. _byQualifiedId.Values.OrderBy(candidate => candidate.WidgetTypeId, StringComparer.Ordinal),
+			.. _byQualifiedId.Values.OrderBy(candidate => candidate.WidgetTypeId, StringComparer.Ordinal)
 		];
 
-	public bool IsRegistered(string? id) => TryResolve(id, out _);
+	public bool IsRegistered(string? id)
+	{
+		return TryResolve(id, out _);
+	}
 
 	public string? Resolve(string? spelling)
 	{
@@ -127,7 +131,8 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 		ValidateDefaultData(widgetType);
 		ValidateDataSchema(widgetType);
 
-		if (widgetType.DefaultShortPressAction is { } defaultAction && string.IsNullOrWhiteSpace(defaultAction.ActionId))
+		if (widgetType.DefaultShortPressAction is { } defaultAction
+			&& string.IsNullOrWhiteSpace(defaultAction.ActionId))
 		{
 			throw new ArgumentException("The widget type's default short press action must name an action.",
 				nameof(widgetType));
@@ -239,5 +244,8 @@ public sealed class WidgetTypeRegistry : IWidgetTypeRegistry
 	/// editor asks for an <c>action-button</c> preview while the stored id reads <c>ActionButton</c> - and
 	/// a type that only answers to one spelling silently loses whichever half of the app uses the other.
 	/// </summary>
-	private static string Normalize(string spelling) => spelling.Replace("-", string.Empty, StringComparison.Ordinal);
+	private static string Normalize(string spelling)
+	{
+		return spelling.Replace("-", string.Empty, StringComparison.Ordinal);
+	}
 }

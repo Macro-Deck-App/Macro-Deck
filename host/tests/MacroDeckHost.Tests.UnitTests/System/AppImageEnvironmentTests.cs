@@ -7,9 +7,11 @@ public class AppImageEnvironmentTests
 	private const string AppDir = "/tmp/.mount_MacroDabc123";
 
 	private static Dictionary<string, string> Outside(params (string Name, string Value)[] variables)
-		=> AppImageEnvironment.Outside(
+	{
+		return AppImageEnvironment.Outside(
 			variables.ToDictionary(variable => variable.Name, variable => variable.Value),
 			[AppDir]);
+	}
 
 	[Test]
 	public void The_system_path_is_what_remains_of_the_launcher_path()
@@ -23,8 +25,7 @@ public class AppImageEnvironmentTests
 	[Test]
 	public void Variables_that_only_pointed_into_the_bundle_are_removed()
 	{
-		var outside = Outside(
-			("GTK_PATH", $"{AppDir}//usr/lib/gtk-3.0"),
+		var outside = Outside(("GTK_PATH", $"{AppDir}//usr/lib/gtk-3.0"),
 			("GDK_PIXBUF_MODULE_FILE", $"{AppDir}//usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"),
 			("PYTHONHOME", $"{AppDir}/usr/"),
 			("LD_LIBRARY_PATH", $"{AppDir}/usr/lib/:{AppDir}/usr/lib/x86_64-linux-gnu/:"),
@@ -36,13 +37,14 @@ public class AppImageEnvironmentTests
 	[Test]
 	public void The_users_own_entries_survive_in_order()
 	{
-		var outside = Outside(
-			("XDG_DATA_DIRS", $"{AppDir}/usr/share/:{AppDir}/usr/share:/usr/share:/home/u/.local/share/flatpak/exports/share:/usr/local/share"),
+		var outside = Outside(("XDG_DATA_DIRS",
+				$"{AppDir}/usr/share/:{AppDir}/usr/share:/usr/share:/home/u/.local/share/flatpak/exports/share:/usr/local/share"),
 			("QT_PLUGIN_PATH", $"{AppDir}/usr/lib/qt5/plugins/:/usr/lib/qt6/plugins"));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(outside["XDG_DATA_DIRS"], Is.EqualTo("/usr/share:/home/u/.local/share/flatpak/exports/share:/usr/local/share"));
+			Assert.That(outside["XDG_DATA_DIRS"],
+				Is.EqualTo("/usr/share:/home/u/.local/share/flatpak/exports/share:/usr/local/share"));
 			Assert.That(outside["QT_PLUGIN_PATH"], Is.EqualTo("/usr/lib/qt6/plugins"));
 		});
 	}
@@ -80,7 +82,8 @@ public class AppImageEnvironmentTests
 
 		var outside = Outside(variables);
 
-		Assert.That(outside, Is.EquivalentTo(variables.ToDictionary(variable => variable.Item1, variable => variable.Item2)));
+		Assert.That(outside,
+			Is.EquivalentTo(variables.ToDictionary(variable => variable.Item1, variable => variable.Item2)));
 	}
 
 	[Test]
@@ -96,8 +99,12 @@ public class AppImageEnvironmentTests
 	{
 		Assert.Multiple(() =>
 		{
-			Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com", new Dictionary<string, string> { ["PATH"] = "/usr/bin" }), Is.Null);
-			Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com", new Dictionary<string, string> { ["APPDIR"] = "relative/dir" }), Is.Null);
+			Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com",
+					new Dictionary<string, string> { ["PATH"] = "/usr/bin" }),
+				Is.Null);
+			Assert.That(AppImageEnvironment.TryCreateOpener("https://example.com",
+					new Dictionary<string, string> { ["APPDIR"] = "relative/dir" }),
+				Is.Null);
 		});
 	}
 }

@@ -28,7 +28,7 @@ internal sealed class AutomationActionDefinition : IDynamicOptionsActionDefiniti
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Automation.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Automation.EntityLabel(),
 			required: true),
 		ActionParameter.Choice(CommandParameterName,
 			[
@@ -50,17 +50,20 @@ internal sealed class AutomationActionDefinition : IDynamicOptionsActionDefiniti
 					Value = "toggle", Label = AppStrings.Integrations.HomeAssistant.Actions.Automation.CommandToggle()
 				}
 			],
-			label: AppStrings.Integrations.HomeAssistant.Actions.Automation.CommandLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Automation.CommandLabel(),
 			defaultValue: "trigger",
 			required: true),
 		ActionParameter.Toggle(SkipConditionParameterName,
-				label: AppStrings.Integrations.HomeAssistant.Actions.Automation.SkipConditionLabel(),
-				description: AppStrings.Integrations.HomeAssistant.Actions.Automation.SkipConditionDescription(),
-				defaultValue: true)
+				AppStrings.Integrations.HomeAssistant.Actions.Automation.SkipConditionLabel(),
+				AppStrings.Integrations.HomeAssistant.Actions.Automation.SkipConditionDescription(),
+				true)
 			.OnlyWhen(CommandParameterName, "trigger")
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	// An automation's state is whether it is enabled, which is what turn_on/turn_off change; the
 	// "trigger" command runs it without changing that, so the button still follows the enabled flag.
@@ -79,7 +82,9 @@ internal sealed class AutomationActionDefinition : IDynamicOptionsActionDefiniti
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, AutomationDomain));
+	{
+		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, AutomationDomain));
+	}
 
 	private sealed class Executor : IActionExecutor
 	{
@@ -112,7 +117,7 @@ internal sealed class AutomationActionDefinition : IDynamicOptionsActionDefiniti
 				{
 					["skip_condition"] = HomeAssistantActionValues.ReadBool(context.Parameters,
 						SkipConditionParameterName,
-						fallback: true)
+						true)
 				},
 				_ => null
 			};

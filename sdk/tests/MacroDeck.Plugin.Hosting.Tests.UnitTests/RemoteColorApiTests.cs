@@ -8,7 +8,6 @@ using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
-using MacroDeck.Sdk.Colors;
 
 namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 
@@ -95,7 +94,7 @@ public class RemoteColorApiTests
 		await WaitForAsync(() => received.Count == 1);
 
 		_revision = 0;
-		_state.RaiseConnected(resumed: false);
+		_state.RaiseConnected(false);
 		await WaitForAsync(() => _host.Tables.Count == 2);
 		Push((watchId, "#3366ff"));
 		Push((watchId, "#ff0000"));
@@ -148,7 +147,8 @@ public class RemoteColorApiTests
 		var first = _api.WatchAsync("#ffffff", (_, _) => Task.CompletedTask);
 		using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
-		Assert.That(async () => await _api.WatchAsync(Reference, (_, _) => Task.CompletedTask, null, cancellation.Token),
+		Assert.That(async ()
+				=> await _api.WatchAsync(Reference, (_, _) => Task.CompletedTask, null, cancellation.Token),
 			Throws.InstanceOf<OperationCanceledException>());
 		_host.Gate.SetResult();
 		await first;
@@ -221,7 +221,8 @@ public class RemoteColorApiTests
 	}
 
 	private void Push(params (string WatchId, string? Color)[] values)
-		=> _cache.Apply(new ProtocolEnvelope
+	{
+		_cache.Apply(new ProtocolEnvelope
 		{
 			Type = MessageTypes.HostState,
 			Id = Guid.NewGuid().ToString(),
@@ -231,22 +232,29 @@ public class RemoteColorApiTests
 					Data = JsonSerializer.SerializeToElement(new ColorWatchStateDto
 						{
 							Revision = ++_revision,
-							Values = [.. values.Select(value => new ColorWatchValueDto { WatchId = value.WatchId, Color = value.Color })]
+							Values =
+							[
+								.. values.Select(value => new ColorWatchValueDto
+									{ WatchId = value.WatchId, Color = value.Color })
+							]
 						},
 						PluginProtocolJson.Options)
 				},
 				PluginProtocolJson.Options)
 		});
+	}
 
 	private void Connect()
-		=> _state.ActiveConnection = new PluginSessionConnection(_socket,
+	{
+		_state.ActiveConnection = new PluginSessionConnection(_socket,
 			TestSession.Create(),
 			TestSession.Dispatcher(),
 			_state,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: null,
-			hostStateCache: null);
+			null,
+			null);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
@@ -276,7 +284,11 @@ public class RemoteColorApiTests
 
 		public string? Resolved { get; set; }
 
-		public async Task<JsonElement?> InvokeAsync(string api, string operation, object? arguments, CancellationToken cancellationToken)
+		public async Task<JsonElement?> InvokeAsync(
+			string api,
+			string operation,
+			object? arguments,
+			CancellationToken cancellationToken)
 		{
 			Assert.That(api, Is.EqualTo(HostApis.Colors));
 
@@ -299,16 +311,21 @@ public class RemoteColorApiTests
 			{
 				if (WatchFailures.TryDequeue(out var code))
 				{
-					throw HostInvocationException.From(new ProtocolError { Code = code, Message = code, Retryable = false });
+					throw HostInvocationException.From(new ProtocolError
+						{ Code = code, Message = code, Retryable = false });
 				}
 
 				_tables.Enqueue((ColorsWatchesArguments)arguments!);
 				return null;
 			}
 
-			return JsonSerializer.SerializeToElement(new ColorsResolveResult { Color = Resolved }, PluginProtocolJson.Options);
+			return JsonSerializer.SerializeToElement(new ColorsResolveResult { Color = Resolved },
+				PluginProtocolJson.Options);
 		}
 
-		public bool TryComplete(ProtocolEnvelope result) => false;
+		public bool TryComplete(ProtocolEnvelope result)
+		{
+			return false;
+		}
 	}
 }

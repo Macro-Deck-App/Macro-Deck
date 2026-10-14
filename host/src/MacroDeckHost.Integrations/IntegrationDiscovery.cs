@@ -24,9 +24,9 @@ public static class IntegrationDiscovery
 		try
 		{
 			var types = assembly.GetTypes()
-				.Where(t => t is { IsClass: true, IsAbstract: false } &&
-					t.GetCustomAttribute<MacroDeckIntegrationAttribute>() is not null &&
-					typeof(IIntegration).IsAssignableFrom(t));
+				.Where(t => t is { IsClass: true, IsAbstract: false }
+					&& t.GetCustomAttribute<MacroDeckIntegrationAttribute>() is not null
+					&& typeof(IIntegration).IsAssignableFrom(t));
 
 			foreach (var type in types)
 			{

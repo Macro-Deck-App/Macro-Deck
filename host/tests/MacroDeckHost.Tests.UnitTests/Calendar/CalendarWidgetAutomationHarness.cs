@@ -74,7 +74,7 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 		data["flows"] = triggers.Select(trigger => new
 		{
 			triggerType = trigger,
-			children = new object[] { new { type = "action" } },
+			children = new object[] { new { type = "action" } }
 		});
 
 		return JsonSerializer.Serialize(data);
@@ -108,10 +108,14 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 	}
 
 	public string? Variable(WidgetEntity widget, string name)
-		=> Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value;
+	{
+		return Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value;
+	}
 
 	public IReadOnlyList<string> VariableNames(WidgetEntity widget)
-		=> [.. Registry.GetByScope(VariableScope.Widget, widget.Id.ToString()).Select(variable => variable.Name)];
+	{
+		return [.. Registry.GetByScope(VariableScope.Widget, widget.Id.ToString()).Select(variable => variable.Name)];
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -145,7 +149,7 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = request.ExecutionId,
-				Status = FlowExecutionStatus.Succeeded,
+				Status = FlowExecutionStatus.Succeeded
 			});
 		}
 	}

@@ -24,7 +24,9 @@ public static class WidgetAppearanceJson
 		string type,
 		WidgetAppearancePatch patch,
 		IReadOnlyCollection<string> stateIds)
-		=> Apply(data, type, patch, stateIds, providerSupported: null);
+	{
+		return Apply(data, type, patch, stateIds, null);
+	}
 
 	public static bool Apply(
 		JsonObject data,
@@ -51,8 +53,13 @@ public static class WidgetAppearanceJson
 				WidgetTypeIds.ActionButton => ApplyToActionButton(data, patch, stateId),
 				WidgetTypeIds.Slider => ApplyToSlider(data, patch),
 				WidgetTypeIds.HistoryGraph => ApplyToHistoryGraph(data, patch),
-				WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges or WidgetTypeIds.Battery =>
+				WidgetTypeIds.Clock
+					or WidgetTypeIds.Weather
+					or WidgetTypeIds.MusicPlayer
+					or WidgetTypeIds.Countdown
+					or WidgetTypeIds.Stopwatch
+					or WidgetTypeIds.Gauges
+					or WidgetTypeIds.Battery =>
 					SetIfPresent(data, "backgroundColor", patch.BackgroundColor) | ApplyBorder(data, patch),
 				_ => ApplyBorder(data, patch)
 			};
@@ -66,7 +73,9 @@ public static class WidgetAppearanceJson
 		string type,
 		WidgetAppearanceProperty property,
 		string stateId)
-		=> ClearProperty(data, type, property, stateId, providerSupported: null);
+	{
+		return ClearProperty(data, type, property, stateId, null);
+	}
 
 	public static bool ClearProperty(
 		JsonObject data,
@@ -77,10 +86,10 @@ public static class WidgetAppearanceJson
 	{
 		if (providerSupported is not null)
 		{
-			return providerSupported.Contains(property) &&
-				(property == WidgetAppearanceProperty.AccentColor
+			return providerSupported.Contains(property)
+				&& (property == WidgetAppearanceProperty.AccentColor
 					? Remove(data, "accentColor")
-					: ClearOn(data, property, labelKey: "label"));
+					: ClearOn(data, property, "label"));
 		}
 
 		if (!SupportedProperties(type).Contains(property))
@@ -93,16 +102,20 @@ public static class WidgetAppearanceJson
 			(WidgetTypeIds.Slider, WidgetAppearanceProperty.AccentColor) => Remove(data, "color"),
 			(WidgetTypeIds.HistoryGraph, WidgetAppearanceProperty.AccentColor) => Remove(data, "accentColor"),
 			(WidgetTypeIds.ActionButton, _) => ClearOnActionButton(data, property, stateId),
-			(WidgetTypeIds.HistoryGraph, _) => ClearOn(data, property, labelKey: "title"),
-			_ => ClearOn(data, property, labelKey: "label")
+			(WidgetTypeIds.HistoryGraph, _) => ClearOn(data, property, "title"),
+			_ => ClearOn(data, property, "label")
 		};
 	}
 
 	/// <summary>True for any action button with two or more states, whatever their ids - an old plugin keeps the On/Off/Both capability it has today.</summary>
-	public static bool HasOnOffStates(JsonObject data, string type) => GetLiveStateIds(data, type).Count >= 2;
+	public static bool HasOnOffStates(JsonObject data, string type)
+	{
+		return GetLiveStateIds(data, type).Count >= 2;
+	}
 
 	public static IReadOnlyCollection<WidgetAppearanceProperty> SupportedProperties(string type)
-		=> type switch
+	{
+		return type switch
 		{
 			WidgetTypeIds.ActionButton =>
 			[
@@ -130,17 +143,24 @@ public static class WidgetAppearanceJson
 			],
 			WidgetTypeIds.HistoryGraph =>
 			[
-				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
+				WidgetAppearanceProperty.Label, WidgetAppearanceProperty.BackgroundColor,
+				WidgetAppearanceProperty.Border,
 				WidgetAppearanceProperty.BorderColor, WidgetAppearanceProperty.AccentColor
 			],
-			WidgetTypeIds.Clock or WidgetTypeIds.Weather or WidgetTypeIds.MusicPlayer or WidgetTypeIds.Countdown
-					or WidgetTypeIds.Stopwatch or WidgetTypeIds.Gauges or WidgetTypeIds.Battery =>
-			[
-				WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
-				WidgetAppearanceProperty.BorderColor
-			],
+			WidgetTypeIds.Clock
+				or WidgetTypeIds.Weather
+				or WidgetTypeIds.MusicPlayer
+				or WidgetTypeIds.Countdown
+				or WidgetTypeIds.Stopwatch
+				or WidgetTypeIds.Gauges
+				or WidgetTypeIds.Battery =>
+				[
+					WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Border,
+					WidgetAppearanceProperty.BorderColor
+				],
 			_ => [WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor]
 		};
+	}
 
 	/// <summary>
 	/// Expands a request's state ids (real ids, or the <see cref="WidgetStates" /> sentinels) against
@@ -224,7 +244,9 @@ public static class WidgetAppearanceJson
 	}
 
 	public static string? ReadLabel(JsonObject data, string type, string? stateId)
-		=> ReadLabel(data, type, stateId, providerSupported: null);
+	{
+		return ReadLabel(data, type, stateId, null);
+	}
 
 	public static string? ReadLabel(
 		JsonObject data,
@@ -243,9 +265,7 @@ public static class WidgetAppearanceJson
 		}
 
 		var model = ActionButtonStateModel.Read(data);
-		if (model.StateMode &&
-			stateId is not null &&
-			model.FindState(stateId)?.Appearance is { } appearance)
+		if (model.StateMode && stateId is not null && model.FindState(stateId)?.Appearance is { } appearance)
 		{
 			var stateLabel = ReadString(appearance, "label");
 			if (!string.IsNullOrEmpty(stateLabel))
@@ -290,7 +310,7 @@ public static class WidgetAppearanceJson
 	{
 		if (IsStateMode(data))
 		{
-			if (!TryGetState(data, stateId, create: true, out var stateObject))
+			if (!TryGetState(data, stateId, true, out var stateObject))
 			{
 				return false;
 			}
@@ -307,8 +327,10 @@ public static class WidgetAppearanceJson
 		var flatChanged = ApplyLabelProperties(data, patch);
 		flatChanged |= ApplyBorder(data, patch);
 
-		if (patch.IconId is not null || HasIconDisplay(patch) || patch.IconColor is not null ||
-			patch.IconAppearance is not null)
+		if (patch.IconId is not null
+			|| HasIconDisplay(patch)
+			|| patch.IconColor is not null
+			|| patch.IconAppearance is not null)
 		{
 			flatChanged |= HoistLegacyMomentaryIcon(data);
 		}
@@ -354,8 +376,8 @@ public static class WidgetAppearanceJson
 
 	private static bool SetIconAppearance(JsonObject target, string? appearance)
 	{
-		if (appearance is null ||
-			WidgetIconReference.Read(target["icon"], ReadString(target, "iconId")) is not { } current)
+		if (appearance is null
+			|| WidgetIconReference.Read(target["icon"], ReadString(target, "iconId")) is not { } current)
 		{
 			return false;
 		}
@@ -411,29 +433,32 @@ public static class WidgetAppearanceJson
 	{
 		if (IsStateMode(data))
 		{
-			if (!TryGetState(data, stateId, create: true, out var stateObject))
+			if (!TryGetState(data, stateId, true, out var stateObject))
 			{
 				return false;
 			}
 
-			return ClearOn(stateObject, property, labelKey: "label");
+			return ClearOn(stateObject, property, "label");
 		}
 
-		var changed = ClearOn(data, property, labelKey: "label");
+		var changed = ClearOn(data, property, "label");
 
-		if (property is WidgetAppearanceProperty.Icon or WidgetAppearanceProperty.IconDisplay
-				or WidgetAppearanceProperty.IconColor or WidgetAppearanceProperty.IconAppearance &&
-			data["states"] is JsonArray states &&
-			states.OfType<JsonObject>().FirstOrDefault()?["appearance"] is JsonObject firstAppearance)
+		if (property is WidgetAppearanceProperty.Icon
+				or WidgetAppearanceProperty.IconDisplay
+				or WidgetAppearanceProperty.IconColor
+				or WidgetAppearanceProperty.IconAppearance
+			&& data["states"] is JsonArray states
+			&& states.OfType<JsonObject>().FirstOrDefault()?["appearance"] is JsonObject firstAppearance)
 		{
-			changed |= ClearOn(firstAppearance, property, labelKey: "label");
+			changed |= ClearOn(firstAppearance, property, "label");
 		}
 
 		return changed;
 	}
 
 	private static bool ClearOn(JsonObject target, WidgetAppearanceProperty property, string labelKey)
-		=> property switch
+	{
+		return property switch
 		{
 			WidgetAppearanceProperty.Label => Remove(target, labelKey),
 			WidgetAppearanceProperty.BackgroundColor => Remove(target, "backgroundColor"),
@@ -451,6 +476,7 @@ public static class WidgetAppearanceJson
 			WidgetAppearanceProperty.BorderColor => target["border"] is JsonObject border && Remove(border, "color"),
 			_ => false
 		};
+	}
 
 	private static bool Remove(JsonObject target, params string[] keys)
 	{
@@ -524,10 +550,12 @@ public static class WidgetAppearanceJson
 	}
 
 	private static bool ApplyToHistoryGraph(JsonObject data, WidgetAppearancePatch patch)
-		=> SetIfPresent(data, "title", patch.Label) |
-			SetIfPresent(data, "backgroundColor", patch.BackgroundColor) |
-			SetIfPresent(data, "accentColor", patch.AccentColor) |
-			ApplyBorder(data, patch);
+	{
+		return SetIfPresent(data, "title", patch.Label)
+			| SetIfPresent(data, "backgroundColor", patch.BackgroundColor)
+			| SetIfPresent(data, "accentColor", patch.AccentColor)
+			| ApplyBorder(data, patch);
+	}
 
 	private static bool ApplyLabelProperties(JsonObject target, WidgetAppearancePatch patch)
 	{
@@ -579,11 +607,13 @@ public static class WidgetAppearanceJson
 	}
 
 	private static bool HasIconDisplay(WidgetAppearancePatch patch)
-		=> patch.IconFit is not null ||
-			patch.IconZoom is not null ||
-			patch.IconOffsetX is not null ||
-			patch.IconOffsetY is not null ||
-			patch.IconOpacity is not null;
+	{
+		return patch.IconFit is not null
+			|| patch.IconZoom is not null
+			|| patch.IconOffsetX is not null
+			|| patch.IconOffsetY is not null
+			|| patch.IconOpacity is not null;
+	}
 
 	private static bool TryGetState(JsonObject data, string stateId, bool create, out JsonObject stateObject)
 	{
@@ -601,10 +631,10 @@ public static class WidgetAppearanceJson
 
 		foreach (var node in states)
 		{
-			if (node is not JsonObject entry ||
-				entry["id"] is not JsonValue idValue ||
-				!idValue.TryGetValue<string>(out var id) ||
-				!string.Equals(id, stateId, StringComparison.Ordinal))
+			if (node is not JsonObject entry
+				|| entry["id"] is not JsonValue idValue
+				|| !idValue.TryGetValue<string>(out var id)
+				|| !string.Equals(id, stateId, StringComparison.Ordinal))
 			{
 				continue;
 			}
@@ -709,8 +739,12 @@ public static class WidgetAppearanceJson
 	}
 
 	private static string? ReadString(JsonObject data, string key)
-		=> data[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private static bool IsStateMode(JsonObject data)
-		=> data["stateMode"] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag;
+	{
+		return data["stateMode"] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag;
+	}
 }

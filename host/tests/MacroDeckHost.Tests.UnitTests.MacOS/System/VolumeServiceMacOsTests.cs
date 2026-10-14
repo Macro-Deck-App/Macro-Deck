@@ -9,7 +9,9 @@ public class VolumeServiceMacOsTests
 	public void Subscribing_to_and_unsubscribing_from_volume_changes_does_not_throw()
 	{
 		var service = VolumeServiceFactory.Create();
-		Action handler = () => { };
+		var handler = () =>
+		{
+		};
 
 		Assert.Multiple(() =>
 		{
@@ -26,7 +28,7 @@ public class VolumeServiceMacOsTests
 		var service = VolumeServiceFactory.Create();
 
 		var devices = await service.GetDevicesAsync();
-		TestContext.Out.WriteLine(string.Join(Environment.NewLine, devices));
+		await TestContext.Out.WriteLineAsync(string.Join(Environment.NewLine, devices));
 
 		foreach (var device in devices)
 		{
@@ -61,7 +63,7 @@ public class VolumeServiceMacOsTests
 		var service = VolumeServiceFactory.Create();
 		var target = new AudioTarget(AudioFlow.Output, "macro-deck-test:no-such-device");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await service.GetVolumeAsync(target), Is.Null);
 			Assert.That(await service.GetMuteAsync(target), Is.Null);

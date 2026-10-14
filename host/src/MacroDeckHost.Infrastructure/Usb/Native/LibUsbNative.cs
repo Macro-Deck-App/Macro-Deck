@@ -189,7 +189,8 @@ internal static class LibUsbNative
 	public static extern int GetStringDescriptorAscii(IntPtr handle, byte index, byte[] data, int length);
 
 	[DllImport(Library, EntryPoint = "libusb_control_transfer")]
-	public static extern int ControlTransfer(IntPtr handle,
+	public static extern int ControlTransfer(
+		IntPtr handle,
 		byte requestType,
 		byte request,
 		ushort value,
@@ -208,7 +209,8 @@ internal static class LibUsbNative
 	public static extern int ReleaseInterface(IntPtr handle, int interfaceNumber);
 
 	[DllImport(Library, EntryPoint = "libusb_bulk_transfer")]
-	public static extern int BulkTransfer(IntPtr handle,
+	public static extern int BulkTransfer(
+		IntPtr handle,
 		byte endpoint,
 		ref byte data,
 		int length,

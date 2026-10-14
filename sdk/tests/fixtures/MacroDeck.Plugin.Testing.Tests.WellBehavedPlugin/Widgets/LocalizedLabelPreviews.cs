@@ -8,7 +8,8 @@ internal static class LocalizedLabelPreviews
 {
 	[UiPreview("Localized label", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement LocalizedLabel()
-		=> new UiStack
+	{
+		return new UiStack
 		{
 			Key = "localized",
 			Justify = UiComponentJustify.Center,
@@ -28,4 +29,5 @@ internal static class LocalizedLabelPreviews
 				}
 			]
 		};
+	}
 }

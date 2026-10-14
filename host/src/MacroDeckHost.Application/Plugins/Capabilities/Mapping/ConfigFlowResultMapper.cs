@@ -6,16 +6,24 @@ namespace MacroDeckHost.Application.Plugins.Capabilities.Mapping;
 
 public static class ConfigFlowResultMapper
 {
-	public static ConfigFlowCopyValue ToDomain(ConfigFlowCopyValueDto dto) =>
-		new() { Label = dto.Label, Value = dto.Value };
+	public static ConfigFlowCopyValue ToDomain(ConfigFlowCopyValueDto dto)
+	{
+		return new ConfigFlowCopyValue { Label = dto.Label, Value = dto.Value };
+	}
 
 	public static ConfigFlowInstruction ToDomain(ConfigFlowInstructionDto dto)
-		=> new() { Text = dto.Text, Values = [.. dto.Values.Select(ToDomain)] };
+	{
+		return new ConfigFlowInstruction { Text = dto.Text, Values = [.. dto.Values.Select(ToDomain)] };
+	}
 
-	public static ConfigFlowLink ToDomain(ConfigFlowLinkDto dto) => new() { Label = dto.Label, Url = dto.Url };
+	public static ConfigFlowLink ToDomain(ConfigFlowLinkDto dto)
+	{
+		return new ConfigFlowLink { Label = dto.Label, Url = dto.Url };
+	}
 
 	public static ConfigFlowStep ToDomain(ConfigFlowStepDto dto)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = dto.StepId,
 			Title = dto.Title ?? default,
@@ -26,17 +34,22 @@ public static class ConfigFlowResultMapper
 			Fields = [.. dto.Fields.Select(ActionParameterMapper.ToDomain)],
 			AdvancedFields = [.. dto.AdvancedFields.Select(ActionParameterMapper.ToDomain)]
 		};
+	}
 
 	private static Dictionary<string, LocalizedText>? ToFieldErrors(
 		IReadOnlyDictionary<string, LocalizedText>? fieldErrors)
-		=> fieldErrors?.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+	{
+		return fieldErrors?.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+	}
 
-	public static ConfigFlowValue ToDomain(ConfigFlowValueDto dto) =>
-		dto.IsSecret ? ConfigFlowValue.Secret(dto.Value) : ConfigFlowValue.Plain(dto.Value);
+	public static ConfigFlowValue ToDomain(ConfigFlowValueDto dto)
+	{
+		return dto.IsSecret ? ConfigFlowValue.Secret(dto.Value) : ConfigFlowValue.Plain(dto.Value);
+	}
 
 	public static ConfigFlowResult ToDomain(ConfigFlowResultDto dto)
 	{
-		if (!Enum.TryParse<ConfigFlowResultKind>(dto.Kind, ignoreCase: false, out var kind))
+		if (!Enum.TryParse<ConfigFlowResultKind>(dto.Kind, false, out var kind))
 		{
 			throw new InvalidOperationException($"Unknown config flow result kind '{dto.Kind}'.");
 		}

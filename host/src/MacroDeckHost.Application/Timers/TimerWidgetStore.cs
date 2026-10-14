@@ -22,7 +22,10 @@ public sealed class TimerWidgetStore
 
 	public DateTimeOffset Now => _time.GetUtcNow();
 
-	public bool Contains(Guid widgetId) => _entries.ContainsKey(widgetId);
+	public bool Contains(Guid widgetId)
+	{
+		return _entries.ContainsKey(widgetId);
+	}
 
 	public IReadOnlyCollection<Guid> WidgetIds => [.. _entries.Keys];
 
@@ -159,13 +162,15 @@ public sealed class TimerWidgetStore
 
 		lock (entry.Gate)
 		{
-			if (entry.Config is not { Kind: TimerWidgetKind.Countdown, AsksForDuration: true } ||
-				entry.Phase != TimerWidgetPhase.Idle)
+			if (entry.Config is not { Kind: TimerWidgetKind.Countdown, AsksForDuration: true }
+				|| entry.Phase != TimerWidgetPhase.Idle)
 			{
 				return null;
 			}
 
-			var clamped = Math.Clamp(seconds, TimerWidgetConfig.MinDurationSeconds, TimerWidgetConfig.MaxDurationSeconds);
+			var clamped = Math.Clamp(seconds,
+				TimerWidgetConfig.MinDurationSeconds,
+				TimerWidgetConfig.MaxDurationSeconds);
 			entry.LastEnteredSeconds = clamped;
 			entry.DurationMs = clamped * 1000L;
 			entry.Start(_time.GetUtcNow());
@@ -217,7 +222,10 @@ public sealed class TimerWidgetStore
 		return transitions;
 	}
 
-	private static string? ApplyCountdownGesture(Entry entry, TimerGesture gesture, DateTimeOffset now,
+	private static string? ApplyCountdownGesture(
+		Entry entry,
+		TimerGesture gesture,
+		DateTimeOffset now,
 		out bool needsDuration)
 	{
 		needsDuration = false;
@@ -251,7 +259,10 @@ public sealed class TimerWidgetStore
 		}
 	}
 
-	private static string? ApplyStopwatchGesture(Entry entry, TimerGesture gesture, DateTimeOffset now,
+	private static string? ApplyStopwatchGesture(
+		Entry entry,
+		TimerGesture gesture,
+		DateTimeOffset now,
 		out bool needsDuration)
 	{
 		needsDuration = false;
@@ -277,9 +288,15 @@ public sealed class TimerWidgetStore
 		}
 	}
 
-	private long NextVersion() => Interlocked.Increment(ref _version);
+	private long NextVersion()
+	{
+		return Interlocked.Increment(ref _version);
+	}
 
-	private void RaiseChanged(Guid widgetId) => Changed?.Invoke(this, new TimerWidgetChangedEventArgs(widgetId));
+	private void RaiseChanged(Guid widgetId)
+	{
+		Changed?.Invoke(this, new TimerWidgetChangedEventArgs(widgetId));
+	}
 
 	private sealed class Entry
 	{
@@ -325,17 +342,21 @@ public sealed class TimerWidgetStore
 			ElapsedMs = ElapsedMs,
 			Anchor = Anchor,
 			LastEnteredSeconds = LastEnteredSeconds,
-			Version = Version,
+			Version = Version
 		};
 
 		// A gesture of unknown origin may be either path of another client's tap, so it is compared with the
 		// widget's last gesture whoever made it; two known clients never swallow each other's taps.
 		public bool IsRepeat(TimerGesture gesture, string? clientId, DateTimeOffset now)
 		{
-			bool Matches(TimerGesture last, DateTimeOffset at) => last == gesture && now - at < RepeatWindow;
+			bool Matches(TimerGesture last, DateTimeOffset at)
+			{
+				return last == gesture && now - at < RepeatWindow;
+			}
 
-			var repeat = (clientId is null || _lastGesture is { ClientId: null }) &&
-				_lastGesture is { } last && Matches(last.Gesture, last.At);
+			var repeat = (clientId is null || _lastGesture is { ClientId: null })
+				&& _lastGesture is { } last
+				&& Matches(last.Gesture, last.At);
 
 			foreach (var (stale, _) in _lastGestureByClient.Where(pair => now - pair.Value.At >= RepeatWindow).ToList())
 			{
@@ -402,8 +423,10 @@ public sealed class TimerWidgetStore
 		}
 
 		public long ShownSecond(DateTimeOffset now)
-			=> Config.Kind == TimerWidgetKind.Countdown
+		{
+			return Config.Kind == TimerWidgetKind.Countdown
 				? Snapshot.RemainingSecondsAt(now)
 				: Snapshot.ElapsedSecondsAt(now);
+		}
 	}
 }

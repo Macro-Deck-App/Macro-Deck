@@ -54,10 +54,15 @@ public class PluginCompatibilityService : IPluginCompatibilityService
 		return report;
 	}
 
-	public IReadOnlyList<PluginCompatibilitySnapshot> Snapshot() => [.. _byPluginId.Values];
+	public IReadOnlyList<PluginCompatibilitySnapshot> Snapshot()
+	{
+		return [.. _byPluginId.Values];
+	}
 
 	public PluginCompatibilitySnapshot? Find(string pluginId)
-		=> _byPluginId.TryGetValue(pluginId, out var snapshot) ? snapshot : null;
+	{
+		return _byPluginId.TryGetValue(pluginId, out var snapshot) ? snapshot : null;
+	}
 
 	public void Clear(string pluginId)
 	{

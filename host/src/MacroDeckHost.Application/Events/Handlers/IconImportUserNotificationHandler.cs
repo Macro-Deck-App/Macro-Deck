@@ -18,7 +18,8 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ILocalizationResolver _localization;
 
-	public IconImportUserNotificationHandler(IUserNotificationStore store,
+	public IconImportUserNotificationHandler(
+		IUserNotificationStore store,
 		IIconPackCache iconPackCache,
 		IServiceScopeFactory scopeFactory,
 		ILocalizationResolver localization)
@@ -38,7 +39,11 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 			or IconImportBatchState.Cancelled;
 
 		var dedupeKey = DedupeKey(batch);
-		var draft = await BuildDraft(batch, notification.Total, notification.Processed, notification.Failed, isTerminal);
+		var draft = await BuildDraft(batch,
+			notification.Total,
+			notification.Processed,
+			notification.Failed,
+			isTerminal);
 		if (draft is null)
 		{
 			if (isTerminal)
@@ -60,50 +65,52 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 	}
 
 	private static LocalizedText SkippedNote(IconImportBatchEntity batch)
-		=> batch.Skipped == 0
+	{
+		return batch.Skipped == 0
 			? AppStrings.Notifications.IconImport.NothingImportable()
-			: AppStrings.Notifications.IconImport.Skipped(count: batch.Skipped);
+			: AppStrings.Notifications.IconImport.Skipped(batch.Skipped);
+	}
 
-	private async Task<UserNotificationDraft?> BuildDraft(IconImportBatchEntity batch,
+	private async Task<UserNotificationDraft?> BuildDraft(
+		IconImportBatchEntity batch,
 		int? total,
 		int processed,
 		int failed,
 		bool isTerminal)
 	{
-		if (batch.State is IconImportBatchState.Cancelled ||
-			(batch.State is IconImportBatchState.Completed && batch.Error is null && processed > 0))
+		if (batch.State is IconImportBatchState.Cancelled
+			|| batch.State is IconImportBatchState.Completed && batch.Error is null && processed > 0)
 		{
 			return null;
 		}
 
 		var culture = await ActiveLocalization.Culture(_scopeFactory);
-		var pack = _iconPackCache.GetPackById(batch.PackId)?.Name ??
-			batch.SourceName ??
-			Resolve(AppStrings.Notifications.IconImport.DefaultPackName(), culture);
+		var pack = _iconPackCache.GetPackById(batch.PackId)?.Name
+			?? batch.SourceName ?? Resolve(AppStrings.Notifications.IconImport.DefaultPackName(), culture);
 
 		(UserNotificationSeverity Severity, LocalizedText Title, string? Message) content = batch.State switch
 		{
 			IconImportBatchState.Completed when batch.Error is null =>
 				(UserNotificationSeverity.Info,
-					AppStrings.Notifications.IconImport.NothingImported(pack: pack),
+					AppStrings.Notifications.IconImport.NothingImported(pack),
 					Resolve(SkippedNote(batch), culture)),
 			IconImportBatchState.Completed =>
 				(UserNotificationSeverity.Warning,
-					AppStrings.Notifications.IconImport.CompletedWithWarnings(count: processed, pack: pack),
+					AppStrings.Notifications.IconImport.CompletedWithWarnings(processed, pack),
 					batch.Error),
 			IconImportBatchState.CompletedWithErrors =>
 				(UserNotificationSeverity.Warning,
-					AppStrings.Notifications.IconImport.PartlyFailed(
-						imported: processed.ToString(CultureInfo.InvariantCulture),
-						failed: failed.ToString(CultureInfo.InvariantCulture),
-						pack: pack),
+					AppStrings.Notifications.IconImport.PartlyFailed(processed.ToString(CultureInfo.InvariantCulture),
+						failed.ToString(CultureInfo.InvariantCulture),
+						pack),
 					batch.Error),
 			IconImportBatchState.Failed =>
-				(UserNotificationSeverity.Error, AppStrings.Notifications.IconImport.Failed(pack: pack), batch.Error),
-			_ => (UserNotificationSeverity.Info, AppStrings.Notifications.IconImport.Importing(pack: pack), null)
+				(UserNotificationSeverity.Error, AppStrings.Notifications.IconImport.Failed(pack), batch.Error),
+			_ => (UserNotificationSeverity.Info, AppStrings.Notifications.IconImport.Importing(pack), null)
 		};
 
-		if (batch.Silent && content.Severity is not (UserNotificationSeverity.Warning or UserNotificationSeverity.Error))
+		if (batch.Silent
+			&& content.Severity is not (UserNotificationSeverity.Warning or UserNotificationSeverity.Error))
 		{
 			return null;
 		}
@@ -121,7 +128,13 @@ public sealed class IconImportUserNotificationHandler : INotificationHandler<Ico
 		};
 	}
 
-	private string Resolve(LocalizedText text, string? culture) => _localization.Resolve(text, culture) ?? string.Empty;
+	private string Resolve(LocalizedText text, string? culture)
+	{
+		return _localization.Resolve(text, culture) ?? string.Empty;
+	}
 
-	private static string DedupeKey(IconImportBatchEntity batch) => $"icon-import:{batch.Id}";
+	private static string DedupeKey(IconImportBatchEntity batch)
+	{
+		return $"icon-import:{batch.Id}";
+	}
 }

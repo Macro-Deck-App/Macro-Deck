@@ -31,9 +31,11 @@ public sealed class TimerWidgetVariableWriter
 	}
 
 	public static IReadOnlyList<string> NamesFor(TimerWidgetKind kind)
-		=> kind == TimerWidgetKind.Countdown
+	{
+		return kind == TimerWidgetKind.Countdown
 			? [CountdownRemainingSeconds, CountdownRunning, CountdownFinished]
 			: [StopwatchElapsedSeconds, StopwatchRunning];
+	}
 
 	public async Task WriteAsync(TimerWidgetSnapshot snapshot)
 	{
@@ -125,7 +127,10 @@ public sealed class TimerWidgetVariableWriter
 			.ConfigureAwait(false);
 	}
 
-	public void Forget(Guid widgetId) => _gates.TryRemove(widgetId, out _);
+	public void Forget(Guid widgetId)
+	{
+		_gates.TryRemove(widgetId, out _);
+	}
 
 	private static async Task RemoveNamesAsync(IVariableService variables, Guid widgetId, TimerWidgetKind kind)
 	{

@@ -11,7 +11,10 @@ public sealed class WidgetIconEvalChannel
 		SingleReader = true
 	});
 
-	public void Enqueue(Guid widgetId) => _channel.Writer.TryWrite(widgetId);
+	public void Enqueue(Guid widgetId)
+	{
+		_channel.Writer.TryWrite(widgetId);
+	}
 
 	public ChannelReader<Guid> Reader => _channel.Reader;
 }

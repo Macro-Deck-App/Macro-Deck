@@ -24,7 +24,9 @@ public abstract class DeviceSurfaceInvalidationHandler<TNotification>
 	}
 
 	public ValueTask Handle(TNotification notification, CancellationToken cancellationToken)
-		=> new(_surfaces.InvalidateAsync(cancellationToken));
+	{
+		return new ValueTask(_surfaces.InvalidateAsync(cancellationToken));
+	}
 }
 
 public sealed class WidgetCreatedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
@@ -110,7 +112,9 @@ public sealed class DeviceChangedDeviceSurfaceHandler : INotificationHandler<Dev
 	}
 
 	private static bool IsProviderDevice(DeviceEntity device)
-		=> device.IsProviderDevice && !string.IsNullOrEmpty(device.ProviderDeviceId);
+	{
+		return device.IsProviderDevice && !string.IsNullOrEmpty(device.ProviderDeviceId);
+	}
 }
 
 public sealed class DeviceUnregisteredDeviceSurfaceHandler : INotificationHandler<DeviceUnregisteredNotification>
@@ -123,7 +127,9 @@ public sealed class DeviceUnregisteredDeviceSurfaceHandler : INotificationHandle
 	}
 
 	public ValueTask Handle(DeviceUnregisteredNotification notification, CancellationToken cancellationToken)
-		=> new(_surfaces.CloseAsync(notification.DeviceId, "unregistered", cancellationToken));
+	{
+		return new ValueTask(_surfaces.CloseAsync(notification.DeviceId, "unregistered", cancellationToken));
+	}
 }
 
 public sealed class DeviceRemovedDeviceSurfaceHandler : INotificationHandler<DeviceRemovedNotification>
@@ -136,7 +142,9 @@ public sealed class DeviceRemovedDeviceSurfaceHandler : INotificationHandler<Dev
 	}
 
 	public ValueTask Handle(DeviceRemovedNotification notification, CancellationToken cancellationToken)
-		=> new(_surfaces.CloseAsync(notification.DeviceId, "removed", cancellationToken));
+	{
+		return new ValueTask(_surfaces.CloseAsync(notification.DeviceId, "removed", cancellationToken));
+	}
 }
 
 /// <summary>Going offline keeps the session and its place; it only stops the pushing.</summary>
@@ -150,5 +158,7 @@ public sealed class DevicePresenceChangedDeviceSurfaceHandler : INotificationHan
 	}
 
 	public ValueTask Handle(DevicePresenceChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_surfaces.SetPresenceAsync(notification.DeviceId, notification.Online, cancellationToken));
+	{
+		return new ValueTask(_surfaces.SetPresenceAsync(notification.DeviceId, notification.Online, cancellationToken));
+	}
 }

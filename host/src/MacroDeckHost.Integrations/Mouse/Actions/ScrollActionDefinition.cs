@@ -20,7 +20,6 @@ internal sealed class ScrollActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice("direction",
-			options:
 			[
 				new ActionParameterOption { Value = "up", Label = AppStrings.Integrations.Mouse.Actions.Scroll.Up() },
 				new ActionParameterOption
@@ -30,26 +29,29 @@ internal sealed class ScrollActionDefinition : IActionDefinition
 				new ActionParameterOption
 					{ Value = "right", Label = AppStrings.Integrations.Mouse.Actions.Scroll.Right() }
 			],
-			label: AppStrings.Integrations.Mouse.Actions.Scroll.DirectionLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Scroll.DirectionDescription(),
-			defaultValue: "down"),
+			AppStrings.Integrations.Mouse.Actions.Scroll.DirectionLabel(),
+			AppStrings.Integrations.Mouse.Actions.Scroll.DirectionDescription(),
+			"down"),
 		ActionParameter.Number("amount",
-			label: AppStrings.Integrations.Mouse.Actions.Scroll.NotchesLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Scroll.NotchesDescription(),
-			min: 1,
-			max: 1_000,
-			step: 1,
-			defaultValue: 3),
+			AppStrings.Integrations.Mouse.Actions.Scroll.NotchesLabel(),
+			AppStrings.Integrations.Mouse.Actions.Scroll.NotchesDescription(),
+			1,
+			1_000,
+			1,
+			3),
 		ActionParameter.Duration("stepDelay",
-			label: AppStrings.Integrations.Mouse.Actions.Scroll.StepDelayLabel(),
-			description: AppStrings.Integrations.Mouse.Actions.Scroll.StepDelayDescription(),
-			min: 0,
-			max: 1_000,
-			defaultMilliseconds: 0),
+			AppStrings.Integrations.Mouse.Actions.Scroll.StepDelayLabel(),
+			AppStrings.Integrations.Mouse.Actions.Scroll.StepDelayDescription(),
+			0,
+			1_000,
+			0),
 		.. MouseParameters.OptionalPosition
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_input);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_input);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

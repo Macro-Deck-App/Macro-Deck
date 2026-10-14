@@ -10,9 +10,14 @@ public enum PluginTrustGateAction
 public sealed record PluginTrustGateDecision(bool Permitted, PluginTrustGateAction Action, string? RefusalReason)
 {
 	public static PluginTrustGateDecision Permit(PluginTrustGateAction action = PluginTrustGateAction.None)
-		=> new(true, action, null);
+	{
+		return new PluginTrustGateDecision(true, action, null);
+	}
 
-	public static PluginTrustGateDecision Refuse(string reason) => new(false, PluginTrustGateAction.None, reason);
+	public static PluginTrustGateDecision Refuse(string reason)
+	{
+		return new PluginTrustGateDecision(false, PluginTrustGateAction.None, reason);
+	}
 }
 
 /// <summary>Decides whether an installed plugin version may launch, given the trust tier it was admitted
@@ -21,7 +26,8 @@ public sealed record PluginTrustGateDecision(bool Permitted, PluginTrustGateActi
 /// </summary>
 public static class PluginTrustGate
 {
-	public static PluginTrustGateDecision Evaluate(PluginTrustVerdict? admittedVerdict,
+	public static PluginTrustGateDecision Evaluate(
+		PluginTrustVerdict? admittedVerdict,
 		string? admittedCertificateId,
 		PluginTrustResult onDisk,
 		bool baselineExists)
@@ -33,15 +39,15 @@ public static class PluginTrustGate
 			if (baselineExists)
 			{
 				return PluginTrustGateDecision.Refuse(
-					"No trust record exists for this installed plugin, and the baseline has already been " +
-					"established; a missing record is anomalous, not grandfathered.");
+					"No trust record exists for this installed plugin, and the baseline has already been "
+					+ "established; a missing record is anomalous, not grandfathered.");
 			}
 
 			return onDisk.Verdict is PluginTrustVerdict.Trusted or PluginTrustVerdict.Unsigned
 				? PluginTrustGateDecision.Permit(PluginTrustGateAction.Backfill)
 				: PluginTrustGateDecision.Refuse(
-					$"The installed plugin has no trust record and does not verify as trusted or unsigned " +
-					$"({onDisk.Verdict}).");
+					$"The installed plugin has no trust record and does not verify as trusted or unsigned "
+					+ $"({onDisk.Verdict}).");
 		}
 
 		if (admittedVerdict == PluginTrustVerdict.Trusted)
@@ -55,8 +61,8 @@ public static class PluginTrustGate
 			return string.Equals(onDisk.CertificateId, admittedCertificateId, StringComparison.Ordinal)
 				? PluginTrustGateDecision.Permit()
 				: PluginTrustGateDecision.Refuse(
-					"The installed plugin still verifies as trusted, but its certificate id no longer " +
-					"matches the one it was admitted with.");
+					"The installed plugin still verifies as trusted, but its certificate id no longer "
+					+ "matches the one it was admitted with.");
 		}
 
 		return onDisk.Verdict switch

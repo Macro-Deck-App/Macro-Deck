@@ -20,7 +20,8 @@ internal sealed class CalendarCapabilityHandler(IEnumerable<IPluginIntegration> 
 	public string Kind => CapabilityKinds.Calendar;
 
 	public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
-		=> _providers.Count == 0
+	{
+		return _providers.Count == 0
 			? []
 			:
 			[
@@ -29,6 +30,7 @@ internal sealed class CalendarCapabilityHandler(IEnumerable<IPluginIntegration> 
 					Kind = CapabilityKinds.Calendar, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version
 				}
 			];
+	}
 
 	public Task<CapabilityInvocationResult> InvokeAsync(
 		CapabilityInvocation invocation,
@@ -60,19 +62,26 @@ internal sealed class CalendarCapabilityHandler(IEnumerable<IPluginIntegration> 
 	}
 
 	private CapabilityInvocationResult Describe()
-		=> CapabilityInvocationResult.Ok(new CalendarDescribePayload
+	{
+		return CapabilityInvocationResult.Ok(new CalendarDescribePayload
 		{
-			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name)) ??
-				metadata.Name,
+			ProviderName = _providers.Select(p => p.ProviderName).FirstOrDefault(name => !string.IsNullOrEmpty(name))
+				?? metadata.Name,
 			Accounts = BuildAccounts()
 		});
+	}
 
 	// An account id announced by two providers belongs to the first one, as FindProvider routes it and the
 	// host registry keeps it.
 	private IReadOnlyList<CalendarAccountDto> BuildAccounts()
-		=> [.. _providers.SelectMany(provider => provider.GetAccounts())
-			.DistinctBy(account => account.Id, StringComparer.Ordinal)
-			.Select(CalendarDescriptorMapper.ToDto)];
+	{
+		return
+		[
+			.. _providers.SelectMany(provider => provider.GetAccounts())
+				.DistinctBy(account => account.Id, StringComparer.Ordinal)
+				.Select(CalendarDescriptorMapper.ToDto)
+		];
+	}
 
 	private async Task<CapabilityInvocationResult> CalendarsAsync(
 		CapabilityInvocation invocation,
@@ -153,14 +162,20 @@ internal sealed class CalendarCapabilityHandler(IEnumerable<IPluginIntegration> 
 	}
 
 	private ICalendarProvider? FindProvider(string accountId)
-		=> _providers.FirstOrDefault(provider => provider.GetAccounts()
+	{
+		return _providers.FirstOrDefault(provider => provider.GetAccounts()
 			.Any(account => string.Equals(account.Id, accountId, StringComparison.Ordinal)));
+	}
 
 	private static CapabilityInvocationResult MissingArguments(string operation)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.InvalidPayload,
 			$"The {operation} operation requires arguments.");
+	}
 
 	private static CapabilityInvocationResult UnknownAccount(string accountId)
-		=> CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
+	{
+		return CapabilityInvocationResult.Failed(ProtocolErrorCodes.CapabilityUnavailable,
 			$"No calendar account '{accountId}' is currently available.");
+	}
 }

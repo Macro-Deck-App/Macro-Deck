@@ -42,14 +42,19 @@ internal static class GaugesWidgetConfigView
 
 		var flows = new UiState<JsonElement>(WidgetConfigJson.ReadFlows(data));
 
-		bool HasRoom() => gauges.Value.Count < GaugesWidgetData.MaxGauges;
+		bool HasRoom()
+		{
+			return gauges.Value.Count < GaugesWidgetData.MaxGauges;
+		}
 
 		string Selected()
-			=> gauges.Value.Any(gauge => IdOf(gauge) == selected.Value)
+		{
+			return gauges.Value.Any(gauge => IdOf(gauge) == selected.Value)
 				? selected.Value
 				: gauges.Value.Count > 0
 					? IdOf(gauges.Value[0])
 					: string.Empty;
+		}
 
 		void Append(JsonObject gauge)
 		{
@@ -92,7 +97,7 @@ internal static class GaugesWidgetConfigView
 						Key = "title",
 						Label = AppStrings.Widgets.Editor.Title(),
 						Binding = Bind.To(title),
-						LiteralOnly = true,
+						LiteralOnly = true
 					},
 					new UiChoiceInput
 					{
@@ -101,8 +106,8 @@ internal static class GaugesWidgetConfigView
 						Binding = Bind.To(style),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(GaugesWidgetData.StyleRing, AppStrings.Widgets.Gauges.StyleRing()),
-							UiOption.Of(GaugesWidgetData.StyleArc, AppStrings.Widgets.Gauges.StyleArc()),
-						]),
+							UiOption.Of(GaugesWidgetData.StyleArc, AppStrings.Widgets.Gauges.StyleArc())
+						])
 					},
 					new UiHeading { Key = "presets-heading", Text = AppStrings.Widgets.History.Presets() },
 					new UiWhen
@@ -123,15 +128,15 @@ internal static class GaugesWidgetConfigView
 									() => Append(Preset(RamVariable, "RAM", IncludedIconPack.MemoryStick))),
 								PresetButton("presetGpu",
 									AppStrings.Widgets.History.PresetGpu(),
-									() => Append(Preset(GpuVariable, "GPU", IncludedIconPack.Gpu))),
-							],
-						},
+									() => Append(Preset(GpuVariable, "GPU", IncludedIconPack.Gpu)))
+							]
+						}
 					},
 					new UiWhen
 					{
 						Key = "full-when",
 						Condition = () => !HasRoom(),
-						Content = () => new UiProse { Key = "full-hint", Text = AppStrings.Widgets.Gauges.FullHint() },
+						Content = () => new UiProse { Key = "full-hint", Text = AppStrings.Widgets.Gauges.FullHint() }
 					},
 					new UiHeading { Key = "gauges-heading", Text = AppStrings.Widgets.Gauges.ListHeading() },
 					new UiConfigStack
@@ -155,8 +160,8 @@ internal static class GaugesWidgetConfigView
 									Binding = Bind.Custom(Selected, value => selected.Value = value),
 									Options = UiValue.From(() => (IReadOnlyList<UiOption>)gauges.Value
 										.Select((gauge, index) => UiOption.Of(IdOf(gauge), LabelOf(gauge, index)))
-										.ToList()),
-								},
+										.ToList())
+								}
 							},
 							new UiWhen
 							{
@@ -167,8 +172,11 @@ internal static class GaugesWidgetConfigView
 									Key = "addGauge",
 									Label = AppStrings.Widgets.Gauges.AddGauge(),
 									Icon = "plus",
-									Events = [UiEventHandler.On(UiConfigEvents.Activate, () => Append(new JsonObject()))],
-								},
+									Events =
+									[
+										UiEventHandler.On(UiConfigEvents.Activate, () => Append(new JsonObject()))
+									]
+								}
 							},
 							new UiWhen
 							{
@@ -179,15 +187,16 @@ internal static class GaugesWidgetConfigView
 									Key = "deleteGauge",
 									Label = MacroDeckStrings.Common.Delete(),
 									Icon = "trash",
-									Events = [UiEventHandler.On(UiConfigEvents.Activate, RemoveSelected)],
-								},
-							},
-						],
+									Events = [UiEventHandler.On(UiConfigEvents.Activate, RemoveSelected)]
+								}
+							}
+						]
 					},
 					new UiArrayInput
 					{
 						Key = "gauges",
-						Binding = Bind.Custom(() => Serialize(gauges.Value), value => gauges.Value = Deserialize(value)),
+						Binding
+							= Bind.Custom(() => Serialize(gauges.Value), value => gauges.Value = Deserialize(value)),
 						Children =
 						[
 							new UiRepeat<JsonObject>
@@ -195,25 +204,30 @@ internal static class GaugesWidgetConfigView
 								Key = "gaugeItems",
 								Items = UiValue.From(() => (IReadOnlyList<JsonObject>)gauges.Value),
 								KeySelector = IdOf,
-								Template = (gauge, _) => Item(gauges, IdOf(gauge), () => Selected() == IdOf(gauge), findVariable),
-							},
-						],
+								Template = (gauge, _) => Item(gauges,
+									IdOf(gauge),
+									() => Selected() == IdOf(gauge),
+									findVariable)
+							}
+						]
 					},
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
-	private static UiObjectInput Item(UiState<List<JsonObject>> gauges,
+	private static UiObjectInput Item(
+		UiState<List<JsonObject>> gauges,
 		string id,
 		Func<bool> isSelected,
 		Func<string, VariableEntity?>? findVariable)
-		=> new()
+	{
+		return new UiObjectInput
 		{
 			Key = id,
 			Children =
@@ -222,180 +236,200 @@ internal static class GaugesWidgetConfigView
 				{
 					Key = $"selected-when-{id}",
 					Condition = isSelected,
-					Content = () => new UiFragment { Key = $"fields-{id}", Children = Fields(gauges, id, findVariable) },
-				},
-			],
+					Content = () => new UiFragment { Key = $"fields-{id}", Children = Fields(gauges, id, findVariable) }
+				}
+			]
 		};
+	}
 
-	private static UiElement[] Fields(UiState<List<JsonObject>> gauges,
+	private static UiElement[] Fields(
+		UiState<List<JsonObject>> gauges,
 		string id,
 		Func<string, VariableEntity?>? findVariable)
-		=>
-			[
-				new UiVariablePickerInput
+	{
+		return
+		[
+			new UiVariablePickerInput
+			{
+				Key = "variable",
+				Label = AppStrings.Widgets.Slider.ValueVariable(),
+				Placeholder = AppStrings.Widgets.History.ValueVariablePlaceholder(),
+				Binding = StringField(gauges, id, "variable"),
+				VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"])
+			},
+			new UiStringInput
+			{
+				Key = "name",
+				Label = AppStrings.Widgets.Gauges.Name(),
+				Placeholder = AppStrings.Widgets.Gauges.NamePlaceholder(),
+				Description = AppStrings.Widgets.Gauges.NameHint(),
+				Binding = StringField(gauges, id, "name")
+			},
+			new UiIconReferenceInput
+			{
+				Key = "icon",
+				Label = AppStrings.Widgets.Editor.Icon(),
+				Binding = IconField(gauges, id)
+			},
+			new UiColorInput
+			{
+				Key = "iconColor",
+				AllowVariables = true,
+				Label = AppStrings.Widgets.Editor.IconColor(),
+				Binding = StringField(gauges, id, "iconColor"),
+				SupportsReset = true,
+				DefaultValue = string.Empty
+			},
+			new UiNumberInput
+			{
+				Key = "min",
+				Label = AppStrings.Widgets.Slider.Minimum(),
+				Binding = NumberField(gauges, id, "min")
+			},
+			new UiNumberInput
+			{
+				Key = "max",
+				Label = AppStrings.Widgets.Slider.Maximum(),
+				Description = AppStrings.Widgets.Gauges.MaximumHint(),
+				Binding = NumberField(gauges, id, "max")
+			},
+			new UiColorInput
+			{
+				Key = "color",
+				AllowVariables = true,
+				Label = AppStrings.Widgets.Gauges.Color(),
+				Binding = StringField(gauges, id, "color"),
+				SupportsReset = true,
+				DefaultValue = string.Empty
+			},
+			new UiBooleanInput
+			{
+				Key = WidgetThresholds.EnabledKey,
+				Label = AppStrings.Widgets.Editor.ColorThresholds(),
+				Description = AppStrings.Widgets.Gauges.ColorThresholdsDescription(),
+				Binding = FlagField(gauges, id, WidgetThresholds.EnabledKey)
+			},
+			new UiWhen
+			{
+				Key = $"thresholds-when-{id}",
+				Condition = () => ThresholdsOn(gauges, id),
+				Content = () => new UiThresholdsInput
 				{
-					Key = "variable",
-					Label = AppStrings.Widgets.Slider.ValueVariable(),
-					Placeholder = AppStrings.Widgets.History.ValueVariablePlaceholder(),
-					Binding = StringField(gauges, id, "variable"),
-					VariableTypes = UiValue.Of<IReadOnlyList<string>>(["numeric"]),
-				},
-				new UiStringInput
-				{
-					Key = "name",
-					Label = AppStrings.Widgets.Gauges.Name(),
-					Placeholder = AppStrings.Widgets.Gauges.NamePlaceholder(),
-					Description = AppStrings.Widgets.Gauges.NameHint(),
-					Binding = StringField(gauges, id, "name"),
-				},
-				new UiIconReferenceInput
-				{
-					Key = "icon",
-					Label = AppStrings.Widgets.Editor.Icon(),
-					Binding = IconField(gauges, id),
-				},
-				new UiColorInput
-				{
-					Key = "iconColor",
+					Key = WidgetThresholds.ValueKey,
 					AllowVariables = true,
-					Label = AppStrings.Widgets.Editor.IconColor(),
-					Binding = StringField(gauges, id, "iconColor"),
-					SupportsReset = true,
-					DefaultValue = string.Empty,
-				},
-				new UiNumberInput
-				{
-					Key = "min",
-					Label = AppStrings.Widgets.Slider.Minimum(),
-					Binding = NumberField(gauges, id, "min"),
-				},
-				new UiNumberInput
-				{
-					Key = "max",
-					Label = AppStrings.Widgets.Slider.Maximum(),
-					Description = AppStrings.Widgets.Gauges.MaximumHint(),
-					Binding = NumberField(gauges, id, "max"),
-				},
-				new UiColorInput
-				{
-					Key = "color",
-					AllowVariables = true,
-					Label = AppStrings.Widgets.Gauges.Color(),
-					Binding = StringField(gauges, id, "color"),
-					SupportsReset = true,
-					DefaultValue = string.Empty,
-				},
-				new UiBooleanInput
-				{
-					Key = WidgetThresholds.EnabledKey,
 					Label = AppStrings.Widgets.Editor.ColorThresholds(),
-					Description = AppStrings.Widgets.Gauges.ColorThresholdsDescription(),
-					Binding = FlagField(gauges, id, WidgetThresholds.EnabledKey),
-				},
-				new UiWhen
-				{
-					Key = $"thresholds-when-{id}",
-					Condition = () => ThresholdsOn(gauges, id),
-					Content = () => new UiThresholdsInput
+					HideLabel = true,
+					Binding = ThresholdsField(gauges, id),
+					Min = UiValue.From(() => Scale(gauges, id, findVariable).Min),
+					Max = UiValue.From(() => Scale(gauges, id, findVariable).Max),
+					Unit = UiText.Optional(() => Picked(gauges, id, findVariable)?.Unit is { Length: > 0 } unit
+						? VariableValueFormatter.Format(0, null, unit, null).Unit
+						: UiText.None()),
+					DefaultValue = UiValue.From(() =>
 					{
-						Key = WidgetThresholds.ValueKey,
-						AllowVariables = true,
-						Label = AppStrings.Widgets.Editor.ColorThresholds(),
-						HideLabel = true,
-						Binding = ThresholdsField(gauges, id),
-						Min = UiValue.From(() => Scale(gauges, id, findVariable).Min),
-						Max = UiValue.From(() => Scale(gauges, id, findVariable).Max),
-						Unit = UiText.Optional(() => Picked(gauges, id, findVariable)?.Unit is { Length: > 0 } unit
-							? VariableValueFormatter.Format(0, null, unit, null).Unit
-							: UiText.None()),
-						DefaultValue = UiValue.From(() =>
-						{
-							var (min, max) = Scale(gauges, id, findVariable);
+						var (min, max) = Scale(gauges, id, findVariable);
 
-							return WidgetThresholds.Defaults(min, max);
-						}),
-						SupportsReset = true,
-					},
-				},
-				new UiWhen
+						return WidgetThresholds.Defaults(min, max);
+					}),
+					SupportsReset = true
+				}
+			},
+			new UiWhen
+			{
+				Key = $"warnWhen-when-{id}",
+				Condition = () => !ThresholdsOn(gauges, id),
+				Content = () => new UiChoiceInput
 				{
-					Key = $"warnWhen-when-{id}",
-					Condition = () => !ThresholdsOn(gauges, id),
-					Content = () => new UiChoiceInput
-					{
-						Key = "warnWhen",
-						Label = AppStrings.Widgets.Gauges.Warning(),
-						Description = AppStrings.Widgets.Gauges.WarningHint(),
-						Binding = StringField(gauges, id, "warnWhen", None),
-						Options = UiValue.Of<IReadOnlyList<UiOption>>([
-							UiOption.Of(None, AppStrings.Widgets.Gauges.WarningOff()),
-							UiOption.Of(GaugeConfig.WarnAbove, AppStrings.Widgets.Gauges.WarningAbove()),
-							UiOption.Of(GaugeConfig.WarnBelow, AppStrings.Widgets.Gauges.WarningBelow()),
-						]),
-					},
-				},
-				new UiWhen
+					Key = "warnWhen",
+					Label = AppStrings.Widgets.Gauges.Warning(),
+					Description = AppStrings.Widgets.Gauges.WarningHint(),
+					Binding = StringField(gauges, id, "warnWhen", None),
+					Options = UiValue.Of<IReadOnlyList<UiOption>>([
+						UiOption.Of(None, AppStrings.Widgets.Gauges.WarningOff()),
+						UiOption.Of(GaugeConfig.WarnAbove, AppStrings.Widgets.Gauges.WarningAbove()),
+						UiOption.Of(GaugeConfig.WarnBelow, AppStrings.Widgets.Gauges.WarningBelow())
+					])
+				}
+			},
+			new UiWhen
+			{
+				Key = $"warnAt-when-{id}",
+				Condition = () => !ThresholdsOn(gauges, id) && Find(gauges.Value, id)?["warnWhen"] is JsonValue,
+				Content = () => new UiNumberInput
 				{
-					Key = $"warnAt-when-{id}",
-					Condition = () => !ThresholdsOn(gauges, id) && Find(gauges.Value, id)?["warnWhen"] is JsonValue,
-					Content = () => new UiNumberInput
-					{
-						Key = "warnAt",
-						Label = AppStrings.Widgets.Gauges.Threshold(),
-						Binding = NumberField(gauges, id, "warnAt"),
-					},
-				},
-			];
+					Key = "warnAt",
+					Label = AppStrings.Widgets.Gauges.Threshold(),
+					Binding = NumberField(gauges, id, "warnAt")
+				}
+			}
+		];
+	}
 
 	private static LocalizedText LabelOf(JsonObject gauge, int index)
-		=> gauge["name"] is JsonValue name && name.TryGetValue<string>(out var text) && text.Length > 0
+	{
+		return gauge["name"] is JsonValue name && name.TryGetValue<string>(out var text) && text.Length > 0
 			? LocalizedText.FromLiteral(text)
 			: AppStrings.Widgets.Gauges.GaugeNumber(
-				number: LocalizedText.FromLiteral((index + 1).ToString(CultureInfo.InvariantCulture)));
+				LocalizedText.FromLiteral((index + 1).ToString(CultureInfo.InvariantCulture)));
+	}
 
 	private static UiConfigButton PresetButton(string key, LocalizedString label, Action apply)
-		=> new()
+	{
+		return new UiConfigButton
 		{
 			Key = key,
 			Label = label,
-			Events = [UiEventHandler.On(UiConfigEvents.Activate, apply)],
+			Events = [UiEventHandler.On(UiConfigEvents.Activate, apply)]
 		};
+	}
 
 	internal static JsonObject Preset(string variable, string name, string icon)
-		=> new()
+	{
+		return new JsonObject
 		{
 			["variable"] = variable,
 			["name"] = name,
 			["icon"] = WidgetIconReference.IconPack(IncludedIconPack.IconId(icon).ToString()).ToJson(),
-			["max"] = 100,
+			["max"] = 100
 		};
+	}
 
 	private static bool ThresholdsOn(UiState<List<JsonObject>> gauges, string id)
-		=> Find(gauges.Value, id)?[WidgetThresholds.EnabledKey] is JsonValue value &&
-			value.TryGetValue<bool>(out var enabled) &&
-			enabled;
+	{
+		return Find(gauges.Value, id)?[WidgetThresholds.EnabledKey] is JsonValue value
+			&& value.TryGetValue<bool>(out var enabled)
+			&& enabled;
+	}
 
-	private static VariableEntity? Picked(UiState<List<JsonObject>> gauges,
+	private static VariableEntity? Picked(
+		UiState<List<JsonObject>> gauges,
 		string id,
 		Func<string, VariableEntity?>? findVariable)
-		=> findVariable is not null &&
-			Find(gauges.Value, id)?["variable"] is JsonValue value &&
-			value.TryGetValue<string>(out var name) &&
-			name.Length > 0
+	{
+		return findVariable is not null
+			&& Find(gauges.Value, id)?["variable"] is JsonValue value
+			&& value.TryGetValue<string>(out var name)
+			&& name.Length > 0
 				? findVariable(name)
 				: null;
+	}
 
-	private static (double Min, double Max) Scale(UiState<List<JsonObject>> gauges,
+	private static (double Min, double Max) Scale(
+		UiState<List<JsonObject>> gauges,
 		string id,
 		Func<string, VariableEntity?>? findVariable)
-		=> Find(gauges.Value, id) is { } gauge
+	{
+		return Find(gauges.Value, id) is { } gauge
 			? GaugesViewStateResolver.Bounds(
 				GaugeConfig.Parse(JsonSerializer.Deserialize<JsonElement>(gauge.ToJsonString()), id),
 				Picked(gauges, id, findVariable))
 			: (0, 100);
+	}
 
 	private static UiBinding<bool> FlagField(UiState<List<JsonObject>> gauges, string id, string field)
-		=> Bind.Custom(() => Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag,
+	{
+		return Bind.Custom(()
+				=> Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<bool>(out var flag) && flag,
 			value => Mutate(gauges,
 				id,
 				gauge =>
@@ -409,12 +443,16 @@ internal static class GaugesWidgetConfigView
 						gauge.Remove(field);
 					}
 				}));
+	}
 
 	private static UiBinding<UiThresholds> ThresholdsField(UiState<List<JsonObject>> gauges, string id)
-		=> Bind.Custom(() => (Find(gauges.Value, id)?[WidgetThresholds.ValueKey] is JsonObject stored &&
-				UiThresholds.TryParse(JsonSerializer.Deserialize<JsonElement>(stored.ToJsonString()), out var parsed)
-					? parsed
-					: null)!,
+	{
+		return Bind.Custom(()
+				=> (Find(gauges.Value, id)?[WidgetThresholds.ValueKey] is JsonObject stored
+					&& UiThresholds.TryParse(JsonSerializer.Deserialize<JsonElement>(stored.ToJsonString()),
+						out var parsed)
+						? parsed
+						: null)!,
 			value => Mutate(gauges,
 				id,
 				gauge =>
@@ -428,16 +466,26 @@ internal static class GaugesWidgetConfigView
 						gauge[WidgetThresholds.ValueKey] = JsonNode.Parse(UiCanonicalJson.Serialize(value));
 					}
 				}));
+	}
 
-	private static string NewId() => Guid.NewGuid().ToString("N");
+	private static string NewId()
+	{
+		return Guid.NewGuid().ToString("N");
+	}
 
-	private static string IdOf(JsonObject gauge) => gauge["id"]?.GetValue<string>() ?? string.Empty;
+	private static string IdOf(JsonObject gauge)
+	{
+		return gauge["id"]?.GetValue<string>() ?? string.Empty;
+	}
 
 	private static JsonObject? Find(IReadOnlyList<JsonObject> gauges, string id)
-		=> gauges.FirstOrDefault(gauge => IdOf(gauge) == id);
+	{
+		return gauges.FirstOrDefault(gauge => IdOf(gauge) == id);
+	}
 
 	private static void Mutate(UiState<List<JsonObject>> gauges, string id, Action<JsonObject> mutate)
-		=> gauges.Value = gauges.Value
+	{
+		gauges.Value = gauges.Value
 			.Select(gauge =>
 			{
 				if (IdOf(gauge) != id)
@@ -451,14 +499,18 @@ internal static class GaugesWidgetConfigView
 				return copy;
 			})
 			.ToList();
+	}
 
-	private static UiBinding<string> StringField(UiState<List<JsonObject>> gauges,
+	private static UiBinding<string> StringField(
+		UiState<List<JsonObject>> gauges,
 		string id,
 		string field,
 		string? unset = null)
-		=> Bind.Custom(() => Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<string>(out var text)
-				? text
-				: unset ?? string.Empty,
+	{
+		return Bind.Custom(()
+				=> Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<string>(out var text)
+					? text
+					: unset ?? string.Empty,
 			value => Mutate(gauges,
 				id,
 				gauge =>
@@ -472,11 +524,14 @@ internal static class GaugesWidgetConfigView
 						gauge[field] = value;
 					}
 				}));
+	}
 
 	private static UiBinding<double> NumberField(UiState<List<JsonObject>> gauges, string id, string field)
-		=> Bind.Custom(() => Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<double>(out var number)
-				? number
-				: 0,
+	{
+		return Bind.Custom(()
+				=> Find(gauges.Value, id)?[field] is JsonValue value && value.TryGetValue<double>(out var number)
+					? number
+					: 0,
 			value => Mutate(gauges,
 				id,
 				gauge =>
@@ -486,9 +541,11 @@ internal static class GaugesWidgetConfigView
 						gauge[field] = value;
 					}
 				}));
+	}
 
 	private static UiBinding<UiIconReference> IconField(UiState<List<JsonObject>> gauges, string id)
-		=> Bind.Custom(() =>
+	{
+		return Bind.Custom(() =>
 			{
 				var reference = WidgetIconReference.Read(Find(gauges.Value, id)?["icon"], null);
 
@@ -507,12 +564,13 @@ internal static class GaugesWidgetConfigView
 						gauge["icon"] = new JsonObject { ["type"] = value.Type, ["reference"] = value.Reference };
 					}
 				}));
+	}
 
 	internal static List<JsonObject> ReadGauges(JsonElement data)
 	{
-		var stored = data.ValueKind == JsonValueKind.Object &&
-			data.TryGetProperty("gauges", out var gauges) &&
-			gauges.ValueKind == JsonValueKind.Array
+		var stored = data.ValueKind == JsonValueKind.Object
+			&& data.TryGetProperty("gauges", out var gauges)
+			&& gauges.ValueKind == JsonValueKind.Array
 				? gauges
 				: default;
 
@@ -539,12 +597,16 @@ internal static class GaugesWidgetConfigView
 	}
 
 	private static JsonElement Serialize(IReadOnlyList<JsonObject> gauges)
-		=> JsonSerializer.Deserialize<JsonElement>(new JsonArray([.. gauges.Select(gauge => gauge.DeepClone())])
+	{
+		return JsonSerializer.Deserialize<JsonElement>(new JsonArray([.. gauges.Select(gauge => gauge.DeepClone())])
 			.ToJsonString());
+	}
 
 	private static List<JsonObject> Deserialize(JsonElement value)
-		=> value.ValueKind == JsonValueKind.Array
+	{
+		return value.ValueKind == JsonValueKind.Array
 			? ReadGauges(JsonSerializer.Deserialize<JsonElement>(new JsonObject
 				{ ["gauges"] = JsonNode.Parse(value.GetRawText()) }.ToJsonString()))
 			: [];
+	}
 }

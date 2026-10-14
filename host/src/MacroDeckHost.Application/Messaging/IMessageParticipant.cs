@@ -15,5 +15,8 @@ public interface IMessageParticipant
 
 	Task HandleCommandAsync(MessageDelivery message, TimeSpan timeout, CancellationToken cancellationToken);
 
-	Task<JsonElement?> HandleRequestAsync(MessageDelivery message, TimeSpan timeout, CancellationToken cancellationToken);
+	Task<JsonElement?> HandleRequestAsync(
+		MessageDelivery message,
+		TimeSpan timeout,
+		CancellationToken cancellationToken);
 }

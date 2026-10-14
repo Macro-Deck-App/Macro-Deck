@@ -62,8 +62,10 @@ internal static class DeclaredPackageFiles
 
 	/// <summary>Strips an optional <c>sha256:</c> prefix, so a declared digest compares equal to a freshly
 	/// computed one regardless of which convention the manifest used.</summary>
-	public static string StripSha256Prefix(string value) =>
-		value.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) ? value[7..] : value;
+	public static string StripSha256Prefix(string value)
+	{
+		return value.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) ? value[7..] : value;
+	}
 
 	private static bool TryGetNonEmptyString(JsonObject entry, string property, out string value)
 	{

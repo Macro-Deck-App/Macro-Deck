@@ -3,7 +3,10 @@ namespace MacroDeck.Sdk.Companion;
 /// <summary>A command for a Companion device. Create one with the static members.</summary>
 public sealed record CompanionDeviceCommand
 {
-	private CompanionDeviceCommand(CompanionDeviceCommandKind kind, int? brightnessPercent = null, string? orientation = null)
+	private CompanionDeviceCommand(
+		CompanionDeviceCommandKind kind,
+		int? brightnessPercent = null,
+		string? orientation = null)
 	{
 		Kind = kind;
 		BrightnessPercent = brightnessPercent;
@@ -31,13 +34,14 @@ public sealed record CompanionDeviceCommand
 	{
 		ArgumentOutOfRangeException.ThrowIfNegative(percent);
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(percent, 100);
-		return new CompanionDeviceCommand(CompanionDeviceCommandKind.SetBrightness, brightnessPercent: percent);
+		return new CompanionDeviceCommand(CompanionDeviceCommandKind.SetBrightness, percent);
 	}
 
 	/// <exception cref="ArgumentException"><paramref name="orientation" /> is not one of <see cref="CompanionOrientations" />.</exception>
 	public static CompanionDeviceCommand SetOrientation(string orientation)
 	{
-		if (orientation is not (CompanionOrientations.Automatic or CompanionOrientations.Portrait
+		if (orientation is not (CompanionOrientations.Automatic
+			or CompanionOrientations.Portrait
 			or CompanionOrientations.Landscape))
 		{
 			throw new ArgumentException($"Unknown orientation '{orientation}'.", nameof(orientation));

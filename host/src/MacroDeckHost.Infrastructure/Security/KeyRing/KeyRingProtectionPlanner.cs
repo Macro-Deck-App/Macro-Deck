@@ -23,7 +23,8 @@ public sealed record KeyRingProtectionPlan(
 /// </summary>
 public static class KeyRingProtectionPlanner
 {
-	public static KeyRingProtectionPlan Resolve(string keysDirectory,
+	public static KeyRingProtectionPlan Resolve(
+		string keysDirectory,
 		IKekStore store,
 		KekStoreIdentity identity,
 		bool recoveryKeyExported,
@@ -40,7 +41,7 @@ public static class KeyRingProtectionPlanner
 			return Unprotected(store,
 				availability,
 				UnprotectedBecause(availability, recoveryKeyExported, portable),
-				migrationPending: openable && recoveryKeyExported && !portable && availability.Supported);
+				openable && recoveryKeyExported && !portable && availability.Supported);
 		}
 
 		var ringKekId = wrapped[0].KekId;
@@ -90,7 +91,8 @@ public static class KeyRingProtectionPlanner
 		}
 	}
 
-	private static KeyRingUnprotectedReason UnprotectedBecause(KekStoreAvailability availability,
+	private static KeyRingUnprotectedReason UnprotectedBecause(
+		KekStoreAvailability availability,
 		bool recoveryKeyExported,
 		bool portable)
 	{
@@ -107,11 +109,13 @@ public static class KeyRingProtectionPlanner
 		return recoveryKeyExported ? KeyRingUnprotectedReason.None : KeyRingUnprotectedReason.RecoveryKeyNotExported;
 	}
 
-	private static KeyRingProtectionPlan Unprotected(IKekStore store,
+	private static KeyRingProtectionPlan Unprotected(
+		IKekStore store,
 		KekStoreAvailability availability,
 		KeyRingUnprotectedReason reason,
 		bool migrationPending)
-		=> new(KeyRingProtectionMode.Unprotected,
+	{
+		return new KeyRingProtectionPlan(KeyRingProtectionMode.Unprotected,
 			KeyRingLockReason.None,
 			reason,
 			store.Backend,
@@ -120,12 +124,15 @@ public static class KeyRingProtectionPlanner
 			null,
 			null,
 			migrationPending);
+	}
 
-	private static KeyRingProtectionPlan Locked(IKekStore store,
+	private static KeyRingProtectionPlan Locked(
+		IKekStore store,
 		KekStoreAvailability availability,
 		KeyRingLockReason reason,
 		string? ringKekId)
-		=> new(KeyRingProtectionMode.Locked,
+	{
+		return new KeyRingProtectionPlan(KeyRingProtectionMode.Locked,
 			reason,
 			KeyRingUnprotectedReason.None,
 			store.Backend,
@@ -134,4 +141,5 @@ public static class KeyRingProtectionPlanner
 			null,
 			ringKekId,
 			false);
+	}
 }

@@ -60,23 +60,33 @@ public class FoldersController : ControllerBase
 	[HttpGet]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetFoldersResponse> GetAll([FromQuery] string? profileId, CancellationToken ct)
-		=> _getFolders.Handle(new GetFoldersRequest { ProfileId = profileId }, ct).AsTask();
+	{
+		return _getFolders.Handle(new GetFoldersRequest { ProfileId = profileId }, ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateFolderResponse> Create(CreateFolderRequest body, CancellationToken ct)
-		=> _createFolder.Handle(body, ct).AsTask();
+	{
+		return _createFolder.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut]
 	public Task<UpdateFolderResponse> Update(UpdateFolderRequest body, CancellationToken ct)
-		=> _updateFolder.Handle(body, ct).AsTask();
+	{
+		return _updateFolder.Handle(body, ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DeleteFolderResponse> Delete(string id, CancellationToken ct)
-		=> _deleteFolder.Handle(new DeleteFolderRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteFolder.Handle(new DeleteFolderRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/duplicate")]
 	public Task<DuplicateFolderResponse> Duplicate(string id, CancellationToken ct)
-		=> _duplicateFolder.Handle(new DuplicateFolderRequest { Id = id }, ct).AsTask();
+	{
+		return _duplicateFolder.Handle(new DuplicateFolderRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/move")]
 	public Task<MoveFolderResponse> Move(string id, MoveFolderRequest body, CancellationToken ct)
@@ -87,10 +97,13 @@ public class FoldersController : ControllerBase
 
 	[HttpGet("focus-rules")]
 	public Task<GetFolderFocusRulesResponse> GetFocusRules(CancellationToken ct)
-		=> _getFocusRules.Handle(new GetFolderFocusRulesRequest(), ct).AsTask();
+	{
+		return _getFocusRules.Handle(new GetFolderFocusRulesRequest(), ct).AsTask();
+	}
 
 	[HttpPut("{id}/focus-rules")]
-	public Task<SetFolderFocusRuleResponse> SetFocusRule(string id,
+	public Task<SetFolderFocusRuleResponse> SetFocusRule(
+		string id,
 		SetFolderFocusRuleRequest body,
 		CancellationToken ct)
 	{
@@ -100,7 +113,10 @@ public class FoldersController : ControllerBase
 
 	[HttpDelete("{id}/focus-rules/{ruleId}")]
 	public Task<DeleteFolderFocusRuleResponse> DeleteFocusRule(string id, string ruleId, CancellationToken ct)
-		=> _deleteFocusRule.Handle(new DeleteFolderFocusRuleRequest { FolderId = id, RuleId = ruleId }, ct).AsTask();
+	{
+		return _deleteFocusRule.Handle(new DeleteFolderFocusRuleRequest { FolderId = id, RuleId = ruleId }, ct)
+			.AsTask();
+	}
 
 	[HttpPost("{id}/export")]
 	public async Task<IActionResult> Export(string id, ExportFolderRequest body, CancellationToken ct)
@@ -127,7 +143,8 @@ public class FoldersController : ControllerBase
 
 	[HttpPost("import")]
 	[RequestSizeLimit(PortabilityHttp.MaxRequestBytes)]
-	public async Task<ImportFolderResponse> Import([FromForm] IFormFile? file,
+	public async Task<ImportFolderResponse> Import(
+		[FromForm] IFormFile? file,
 		[FromForm] string profileId,
 		[FromForm] string? parentFolderId,
 		[FromForm] string? password,
@@ -175,7 +192,8 @@ public class FoldersController : ControllerBase
 		return await Import(target.Data, bytes.Data!, body.Password, ct);
 	}
 
-	private async Task<ImportFolderResponse> Import(FolderImportTarget target,
+	private async Task<ImportFolderResponse> Import(
+		FolderImportTarget target,
 		byte[] archiveBytes,
 		string? password,
 		CancellationToken ct)
@@ -194,7 +212,8 @@ public class FoldersController : ControllerBase
 		};
 	}
 
-	private static Result<FolderImportTarget, Domain.Enums.PortabilityError> ResolveTarget(string profileId,
+	private static Result<FolderImportTarget, Domain.Enums.PortabilityError> ResolveTarget(
+		string profileId,
 		string? parentFolderId)
 	{
 		if (!Guid.TryParse(profileId, out var targetProfileId))
@@ -224,9 +243,11 @@ public class FoldersController : ControllerBase
 	private readonly record struct FolderImportTarget(Guid ProfileId, Guid? ParentFolderId);
 
 	private static ImportFolderResponse Fail(Domain.Enums.PortabilityError error, string? message)
-		=> new()
+	{
+		return new ImportFolderResponse
 		{
 			Success = false,
 			Error = PortabilityHttp.ToTransportError(error, message)
 		};
+	}
 }

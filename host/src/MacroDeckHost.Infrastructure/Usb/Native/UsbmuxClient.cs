@@ -31,7 +31,9 @@ internal static class UsbmuxProtocol
 	}
 
 	public static Dictionary<string, object> Listen()
-		=> Request("Listen");
+	{
+		return Request("Listen");
+	}
 
 	public static Dictionary<string, object> Connect(long deviceId, ushort port)
 	{
@@ -42,7 +44,10 @@ internal static class UsbmuxProtocol
 	}
 
 	// usbmuxd reads PortNumber as a network byte order 16 bit value stored in a host integer.
-	public static ushort NetworkOrder(ushort port) => BinaryPrimitives.ReverseEndianness(port);
+	public static ushort NetworkOrder(ushort port)
+	{
+		return BinaryPrimitives.ReverseEndianness(port);
+	}
 
 	public static UsbmuxDeviceEvent? ParseDeviceEvent(IReadOnlyDictionary<string, object> message)
 	{
@@ -60,18 +65,22 @@ internal static class UsbmuxProtocol
 	}
 
 	public static long? ResultNumber(IReadOnlyDictionary<string, object> message)
-		=> message.GetValueOrDefault("MessageType") as string == "Result"
+	{
+		return message.GetValueOrDefault("MessageType") as string == "Result"
 			? message.GetValueOrDefault("Number") as long?
 			: null;
+	}
 
 	private static Dictionary<string, object> Request(string messageType)
-		=> new(StringComparer.Ordinal)
+	{
+		return new Dictionary<string, object>(StringComparer.Ordinal)
 		{
 			["MessageType"] = messageType,
 			["ClientVersionString"] = ProgramName,
 			["ProgName"] = ProgramName,
 			["kLibUSBMuxVersion"] = 3L
 		};
+	}
 }
 
 internal sealed class UsbmuxClient
@@ -87,7 +96,8 @@ internal sealed class UsbmuxClient
 		? new IPEndPoint(IPAddress.Loopback, 27015)
 		: new UnixDomainSocketEndPoint("/var/run/usbmuxd");
 
-	public async Task ListenAsync(Action onListening,
+	public async Task ListenAsync(
+		Action onListening,
 		Action<UsbmuxDeviceEvent> onEvent,
 		CancellationToken cancellationToken)
 	{
@@ -147,7 +157,8 @@ internal sealed class UsbmuxClient
 		}
 	}
 
-	private static async Task SendAsync(Socket socket,
+	private static async Task SendAsync(
+		Socket socket,
 		uint tag,
 		IReadOnlyDictionary<string, object> plist,
 		CancellationToken cancellationToken)
@@ -160,7 +171,8 @@ internal sealed class UsbmuxClient
 		}
 	}
 
-	private static async Task<Dictionary<string, object>> ReceiveAsync(Socket socket,
+	private static async Task<Dictionary<string, object>> ReceiveAsync(
+		Socket socket,
 		CancellationToken cancellationToken)
 	{
 		var header = new byte[UsbmuxProtocol.HeaderLength];
@@ -176,7 +188,10 @@ internal sealed class UsbmuxClient
 		return UsbmuxPlist.Read(payload);
 	}
 
-	private static async Task ReceiveExactlyAsync(Socket socket, Memory<byte> buffer, CancellationToken cancellationToken)
+	private static async Task ReceiveExactlyAsync(
+		Socket socket,
+		Memory<byte> buffer,
+		CancellationToken cancellationToken)
 	{
 		while (!buffer.IsEmpty)
 		{

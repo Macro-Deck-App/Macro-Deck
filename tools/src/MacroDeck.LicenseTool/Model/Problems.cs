@@ -8,5 +8,8 @@ internal sealed class Problems
 
 	public bool Any => _messages.Count > 0;
 
-	public void Add(string message) => _messages.Add(message);
+	public void Add(string message)
+	{
+		_messages.Add(message);
+	}
 }

@@ -54,7 +54,10 @@ internal sealed class FakeSoundPadClient : ISoundPadClient
 		return Task.CompletedTask;
 	}
 
-	public void Disconnect() => IsConnected = false;
+	public void Disconnect()
+	{
+		IsConnected = false;
+	}
 
 	public void Dispose()
 	{
@@ -62,50 +65,111 @@ internal sealed class FakeSoundPadClient : ISoundPadClient
 		IsConnected = false;
 	}
 
-	public Task<string> GetVersionAsync() => Read("4.0.35");
+	public Task<string> GetVersionAsync()
+	{
+		return Read("4.0.35");
+	}
 
-	public Task<SoundPadPlayStatus> GetPlayStatusAsync() => Read(Status);
+	public Task<SoundPadPlayStatus> GetPlayStatusAsync()
+	{
+		return Read(Status);
+	}
 
-	public Task<long> GetPlaybackPositionAsync() => Read(PositionMs);
+	public Task<long> GetPlaybackPositionAsync()
+	{
+		return Read(PositionMs);
+	}
 
-	public Task<long> GetPlaybackDurationAsync() => Read(DurationMs);
+	public Task<long> GetPlaybackDurationAsync()
+	{
+		return Read(DurationMs);
+	}
 
-	public Task<long> GetRecordingPositionAsync() => Read(RecordingPositionMs);
+	public Task<long> GetRecordingPositionAsync()
+	{
+		return Read(RecordingPositionMs);
+	}
 
-	public Task<int> GetVolumeAsync() => Read(Volume);
+	public Task<int> GetVolumeAsync()
+	{
+		return Read(Volume);
+	}
 
 	public Task<bool> IsMutedAsync()
-		=> RejectsMuteQuery ? throw new SoundPadCommandException("R-501") : Read(Muted);
+	{
+		return RejectsMuteQuery ? throw new SoundPadCommandException("R-501") : Read(Muted);
+	}
 
-	public Task<IReadOnlyList<SoundPadSound>> GetSoundsAsync() => Read<IReadOnlyList<SoundPadSound>>(Sounds.ToList());
+	public Task<IReadOnlyList<SoundPadSound>> GetSoundsAsync()
+	{
+		return Read<IReadOnlyList<SoundPadSound>>(Sounds.ToList());
+	}
 
 	public Task<IReadOnlyList<SoundPadCategory>> GetCategoriesAsync()
-		=> Read<IReadOnlyList<SoundPadCategory>>(Categories.ToList());
+	{
+		return Read<IReadOnlyList<SoundPadCategory>>(Categories.ToList());
+	}
 
-	public Task PlaySoundAsync(int index) => Run($"play {index}");
+	public Task PlaySoundAsync(int index)
+	{
+		return Run($"play {index}");
+	}
 
 	public Task PlayRandomSoundAsync(int? categoryIndex, bool speakers, bool microphone)
-		=> Run($"random {categoryIndex?.ToString(CultureInfo.InvariantCulture) ?? "all"} speakers={speakers} microphone={microphone}");
+	{
+		return Run(
+			$"random {categoryIndex?.ToString(CultureInfo.InvariantCulture) ?? "all"} speakers={speakers} microphone={microphone}");
+	}
 
-	public Task PlayCurrentSoundAgainAsync() => Run("play again");
+	public Task PlayCurrentSoundAgainAsync()
+	{
+		return Run("play again");
+	}
 
-	public Task PlayNextSoundAsync() => Run("next");
+	public Task PlayNextSoundAsync()
+	{
+		return Run("next");
+	}
 
-	public Task PlayPreviousSoundAsync() => Run("previous");
+	public Task PlayPreviousSoundAsync()
+	{
+		return Run("previous");
+	}
 
-	public Task StopSoundAsync() => Run("stop");
+	public Task StopSoundAsync()
+	{
+		return Run("stop");
+	}
 
-	public Task TogglePauseAsync() => Run("toggle pause");
+	public Task TogglePauseAsync()
+	{
+		return Run("toggle pause");
+	}
 
-	public Task SeekAsync(long milliseconds) => Run($"seek {milliseconds}");
+	public Task SeekAsync(long milliseconds)
+	{
+		return Run($"seek {milliseconds}");
+	}
 
-	public Task SetVolumeAsync(int volume) => Run($"volume {volume}");
+	public Task SetVolumeAsync(int volume)
+	{
+		return Run($"volume {volume}");
+	}
 
-	public Task ToggleMuteAsync() => Run("toggle mute");
+	public Task ToggleMuteAsync()
+	{
+		return Run("toggle mute");
+	}
 
-	public Task StartRecordingAsync(SoundPadRecordingSource source) => Run($"record {source}");
+	public Task StartRecordingAsync(SoundPadRecordingSource source)
+	{
+		return Run($"record {source}");
+	}
 
-	public Task StopRecordingAsync() => Run("stop recording");
+	public Task StopRecordingAsync()
+	{
+		return Run("stop recording");
+	}
 
 	private Task<T> Read<T>(T value)
 	{

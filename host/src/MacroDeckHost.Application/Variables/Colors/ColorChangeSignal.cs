@@ -6,5 +6,8 @@ public sealed class ColorChangeSignal
 {
 	public event Action? Changed;
 
-	public void Raise() => Changed?.Invoke();
+	public void Raise()
+	{
+		Changed?.Invoke();
+	}
 }

@@ -3,7 +3,7 @@ using MacroDeck.Sdk.Widgets;
 namespace MacroDeck.Sdk.Tests.UnitTests.Widgets;
 
 [TestFixture]
-public class IWidgetApiTests
+public class WidgetApiTests
 {
 	/// <summary>
 	/// A default interface member does not dispatch off the concrete type, so the default has to be
@@ -25,11 +25,19 @@ public class IWidgetApiTests
 
 	private sealed class Minimal : IWidgetApi
 	{
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [];
+		}
 
-		public bool Exists(string widgetId) => false;
+		public bool Exists(string widgetId)
+		{
+			return false;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 }

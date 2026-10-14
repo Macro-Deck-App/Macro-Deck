@@ -20,7 +20,8 @@ public sealed class FileSystemIconStorage : IIconStorage
 		_logger = logger;
 	}
 
-	public async Task<SourceContentHash> StageOriginal(Guid batchId,
+	public async Task<SourceContentHash> StageOriginal(
+		Guid batchId,
 		Guid iconId,
 		string originalFileName,
 		Stream content,
@@ -34,7 +35,8 @@ public sealed class FileSystemIconStorage : IIconStorage
 		return SourceContentHash.FromComputed(await WriteAtomic(path, content, cancellationToken));
 	}
 
-	public async Task<string> StageArchive(Guid batchId,
+	public async Task<string> StageArchive(
+		Guid batchId,
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
@@ -92,7 +94,8 @@ public sealed class FileSystemIconStorage : IIconStorage
 		return Directory.EnumerateFiles(directory).Order().ToList();
 	}
 
-	public async Task WriteVariant(Guid packId,
+	public async Task WriteVariant(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		ReadOnlyMemory<byte> webpData,
@@ -104,10 +107,11 @@ public sealed class FileSystemIconStorage : IIconStorage
 		var path = Path.Combine(directory, variant + ".webp");
 		var tempPath = path + ".tmp";
 		await File.WriteAllBytesAsync(tempPath, webpData, cancellationToken);
-		File.Move(tempPath, path, overwrite: true);
+		File.Move(tempPath, path, true);
 	}
 
-	public async Task<string> WriteVariant(Guid packId,
+	public async Task<string> WriteVariant(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		Stream content,
@@ -118,7 +122,8 @@ public sealed class FileSystemIconStorage : IIconStorage
 		return await WriteAtomic(Path.Combine(directory, variant + ".webp"), content, cancellationToken);
 	}
 
-	public async Task<bool> WriteVariantIfIconExists(Guid packId,
+	public async Task<bool> WriteVariantIfIconExists(
+		Guid packId,
 		Guid iconId,
 		string variant,
 		ReadOnlyMemory<byte> webpData,
@@ -135,7 +140,7 @@ public sealed class FileSystemIconStorage : IIconStorage
 		try
 		{
 			await File.WriteAllBytesAsync(tempPath, webpData, cancellationToken);
-			File.Move(tempPath, path, overwrite: true);
+			File.Move(tempPath, path, true);
 			return true;
 		}
 		catch (DirectoryNotFoundException)
@@ -172,7 +177,11 @@ public sealed class FileSystemIconStorage : IIconStorage
 		}
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 		{
-			_logger.Debug(ex, "Could not delete variant {Variant} of icon {IconId} in pack {PackId}", variant, iconId, packId);
+			_logger.Debug(ex,
+				"Could not delete variant {Variant} of icon {IconId} in pack {PackId}",
+				variant,
+				iconId,
+				packId);
 		}
 	}
 
@@ -183,7 +192,7 @@ public sealed class FileSystemIconStorage : IIconStorage
 			var directory = IconDirectoryFor(packId, iconId);
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 		catch (Exception ex)
@@ -199,7 +208,7 @@ public sealed class FileSystemIconStorage : IIconStorage
 			var directory = StagingDirectoryFor(batchId);
 			if (Directory.Exists(directory))
 			{
-				Directory.Delete(directory, recursive: true);
+				Directory.Delete(directory, true);
 			}
 		}
 		catch (Exception ex)
@@ -227,10 +236,15 @@ public sealed class FileSystemIconStorage : IIconStorage
 		return batchIds;
 	}
 
-	private string StagingDirectoryFor(Guid batchId) => Path.Combine(_paths.IconStagingDirectory, batchId.ToString());
+	private string StagingDirectoryFor(Guid batchId)
+	{
+		return Path.Combine(_paths.IconStagingDirectory, batchId.ToString());
+	}
 
 	private string IconDirectoryFor(Guid packId, Guid iconId)
-		=> Path.Combine(_paths.IconPacksDirectory, packId.ToString(), IconsDirectoryName, iconId.ToString());
+	{
+		return Path.Combine(_paths.IconPacksDirectory, packId.ToString(), IconsDirectoryName, iconId.ToString());
+	}
 
 	private static async Task<string> WriteAtomic(string path, Stream content, CancellationToken cancellationToken)
 	{
@@ -254,12 +268,14 @@ public sealed class FileSystemIconStorage : IIconStorage
 			ArrayPool<byte>.Shared.Return(buffer);
 		}
 
-		File.Move(tempPath, path, overwrite: true);
+		File.Move(tempPath, path, true);
 		return hash.Finish();
 	}
 
 	private static FileStream OpenRead(string path)
-		=> new(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 81920, useAsync: true);
+	{
+		return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, true);
+	}
 
 	private static string SanitizeFileName(string name)
 	{

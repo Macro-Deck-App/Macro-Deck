@@ -36,7 +36,9 @@ public class ContractIsolationTests
 
 	[Test]
 	public void The_csproj_can_be_located_by_walking_up_from_the_test_output_directory()
-		=> Assert.DoesNotThrow(() => FindContractCsproj());
+	{
+		Assert.DoesNotThrow(() => FindContractCsproj());
+	}
 
 	/// <summary>Fails loudly rather than letting a missing file pass the isolation check vacuously.</summary>
 	private static string FindContractCsproj()
@@ -60,7 +62,7 @@ public class ContractIsolationTests
 		}
 
 		throw new FileNotFoundException(
-			"Could not locate MacroDeck.Plugin.Protocol.csproj by walking up from AppContext.BaseDirectory " +
-			$"('{AppContext.BaseDirectory}').");
+			"Could not locate MacroDeck.Plugin.Protocol.csproj by walking up from AppContext.BaseDirectory "
+			+ $"('{AppContext.BaseDirectory}').");
 	}
 }

@@ -43,6 +43,6 @@ public static class UiMacroDeckComponents
 	/// may meet - see the type's remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
-		DynamicText, ClockDial, ProgressBar, ProgressText, VideoStream,
+		DynamicText, ClockDial, ProgressBar, ProgressText, VideoStream
 	];
 }

@@ -137,10 +137,13 @@ public static class HostApis
 		Variables, UserVariables, Config, Deck, Scripts, Widgets, Notifications, ActionInteractions, Ui,
 		Devices, VariableValues, Layouts, FolderViews, WidgetTypes, EventBindings, ScreenSavers, Adb, Messaging,
 		IconPacks, VideoStreams, Colors, Batteries, Weather, Locale, Http, CompanionDevices, MusicPlayers,
-		DesktopNotifications,
+		DesktopNotifications
 	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 
-	public static bool IsKnown(string? api) => api is not null && _known.Contains(api);
+	public static bool IsKnown(string? api)
+	{
+		return api is not null && _known.Contains(api);
+	}
 }

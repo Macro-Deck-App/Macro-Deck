@@ -4,7 +4,10 @@ public sealed class NullAutostartRegistrar : IAutostartRegistrar
 {
 	public bool IsSupported => false;
 
-	public AutostartRegistration? Read() => null;
+	public AutostartRegistration? Read()
+	{
+		return null;
+	}
 
 	public void Write(AutostartRegistration registration)
 	{

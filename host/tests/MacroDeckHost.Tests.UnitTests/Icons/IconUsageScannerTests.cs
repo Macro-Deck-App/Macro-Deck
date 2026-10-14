@@ -19,7 +19,10 @@ internal sealed class IconUsageScannerTests
 		{
 			Name = "Home",
 			Order = 0,
-			Widgets = [new WidgetEntity { Data = $"{{\"icon\":{{\"type\":\"icon-pack\",\"reference\":\"{onButton}\"}}}}" }]
+			Widgets =
+			[
+				new WidgetEntity { Data = $"{{\"icon\":{{\"type\":\"icon-pack\",\"reference\":\"{onButton}\"}}}}" }
+			]
 		});
 		var automations = new StubAutomationCache();
 		automations.Add($"[{{\"action\":\"set-icon\",\"parameters\":{{\"icon\":\"{setByAutomation}\"}}}}]");
@@ -36,51 +39,112 @@ internal sealed class IconUsageScannerTests
 
 	private sealed class FolderCacheWith(params FolderEntity[] folders) : IFolderCache
 	{
-		public List<FolderEntity> GetAllFolders() => folders.ToList();
+		public List<FolderEntity> GetAllFolders()
+		{
+			return folders.ToList();
+		}
 
-		public Task InitializeCache() => throw new NotSupportedException();
+		public Task InitializeCache()
+		{
+			throw new NotSupportedException();
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => throw new NotSupportedException();
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdate(FolderEntity folder) => throw new NotSupportedException();
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => throw new NotSupportedException();
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId) => throw new NotSupportedException();
+		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void AddWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => throw new NotSupportedException();
+		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void UpdateWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void UpdateWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => throw new NotSupportedException();
+		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgetPositions(Guid folderId, IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidget(Guid folderId, Guid widgetId) => throw new NotSupportedException();
+		public void RemoveWidget(Guid folderId, Guid widgetId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds) => throw new NotSupportedException();
+		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class ScriptCacheWith(params ScriptEntity[] scripts) : IScriptCache
 	{
-		public List<ScriptEntity> GetAll() => scripts.ToList();
+		public List<ScriptEntity> GetAll()
+		{
+			return scripts.ToList();
+		}
 
-		public Task InitializeCache() => throw new NotSupportedException();
+		public Task InitializeCache()
+		{
+			throw new NotSupportedException();
+		}
 
-		public ScriptEntity? GetById(Guid id) => throw new NotSupportedException();
+		public ScriptEntity? GetById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdate(ScriptEntity script) => throw new NotSupportedException();
+		public Task AddOrUpdate(ScriptEntity script)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task Remove(Guid id) => throw new NotSupportedException();
+		public Task Remove(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

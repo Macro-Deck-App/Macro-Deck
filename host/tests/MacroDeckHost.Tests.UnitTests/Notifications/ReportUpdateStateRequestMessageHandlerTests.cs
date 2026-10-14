@@ -9,7 +9,11 @@ namespace MacroDeckHost.Tests.UnitTests.Notifications;
 public class ReportUpdateStateRequestMessageHandlerTests
 {
 	private static ReportUpdateStateRequestMessageHandler CreateHandler(IUserNotificationStore store)
-		=> new(store, TestLocalization.ScopeFactory, TestLocalization.Resolver);
+	{
+		return new ReportUpdateStateRequestMessageHandler(store,
+			TestLocalization.ScopeFactory,
+			TestLocalization.Resolver);
+	}
 
 	[Test]
 	public async Task Reporting_an_available_update_raises_one_entry_under_the_update_key()
@@ -390,8 +394,8 @@ public class ReportUpdateStateRequestMessageHandlerTests
 		var store = new UserNotificationStore();
 		var handler = CreateHandler(store);
 
-		await handler.Handle(
-			new ReportUpdateStateRequest { Version = "1.2.3", Phase = "failed", Failure = "install", Error = "reset" },
+		await handler.Handle(new ReportUpdateStateRequest
+				{ Version = "1.2.3", Phase = "failed", Failure = "install", Error = "reset" },
 			CancellationToken.None);
 
 		Assert.That(store.Snapshot().Single().Title,
@@ -436,11 +440,13 @@ public class ReportUpdateStateRequestMessageHandlerTests
 	}
 
 	private static ReportUpdateStateRequest CheckFailed(string? knownVersion = null)
-		=> new()
+	{
+		return new ReportUpdateStateRequest
 		{
 			Version = knownVersion,
 			Phase = "failed",
 			Failure = "check",
 			Error = "could not check for updates on any feed (https://updates.example/stable.json: connection refused)"
 		};
+	}
 }

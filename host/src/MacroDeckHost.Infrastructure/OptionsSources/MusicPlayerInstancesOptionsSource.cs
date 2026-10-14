@@ -37,8 +37,8 @@ public sealed class MusicPlayerInstancesOptionsSource : IHostOptionsSource
 		var qualifyWithProvider = instances
 				.Select(entry => entry.Provider)
 				.Distinct(StringComparer.Ordinal)
-				.Count() >
-			1;
+				.Count()
+			> 1;
 
 		var options = instances
 			.Select(entry => new ActionParameterOption
@@ -48,8 +48,9 @@ public sealed class MusicPlayerInstancesOptionsSource : IHostOptionsSource
 					? $"{entry.Provider} - {entry.Instance.DisplayName}"
 					: entry.Instance.DisplayName
 			})
-			.Where(option => filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
+			.Where(option
+				=> filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase))
 			.OrderBy(option => option.Label.Literal, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 

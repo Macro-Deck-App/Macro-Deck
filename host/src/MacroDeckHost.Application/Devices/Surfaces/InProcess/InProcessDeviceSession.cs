@@ -41,17 +41,21 @@ internal sealed class InProcessDeviceSession : IDeviceSession
 		int? size = null,
 		string? knownETag = null,
 		CancellationToken cancellationToken = default)
-		=> _service().GetIconAsync(_deviceId, iconId, size, knownETag, cancellationToken);
+	{
+		return _service().GetIconAsync(_deviceId, iconId, size, knownETag, cancellationToken);
+	}
 
 	public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(
 		string widgetId,
 		string? knownETag = null,
 		CancellationToken cancellationToken = default)
-		=> _service().GetWidgetIconAsync(_deviceId, widgetId, knownETag, cancellationToken);
+	{
+		return _service().GetWidgetIconAsync(_deviceId, widgetId, knownETag, cancellationToken);
+	}
 
 	public ValueTask DisposeAsync()
 	{
-		return new ValueTask(_service().CloseAsync(_deviceId, reason: null));
+		return new ValueTask(_service().CloseAsync(_deviceId, null));
 	}
 
 	public void Apply(DeviceSurface surface)

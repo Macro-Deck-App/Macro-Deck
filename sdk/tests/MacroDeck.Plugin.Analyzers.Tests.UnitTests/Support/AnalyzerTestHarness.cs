@@ -72,9 +72,9 @@ internal static class AnalyzerTestHarness
 
 		if (compileErrors.Count > 0)
 		{
-			Assert.Fail("Test source does not compile:" +
-				Environment.NewLine +
-				string.Join(Environment.NewLine, compileErrors));
+			Assert.Fail("Test source does not compile:"
+				+ Environment.NewLine
+				+ string.Join(Environment.NewLine, compileErrors));
 		}
 
 		// Only this one analyzer is registered, so GetAnalyzerDiagnosticsAsync already returns only its
@@ -107,7 +107,9 @@ internal static class AnalyzerTestHarness
 	/// <summary>The exact source text a diagnostic's location squiggles - what a reader would see
 	/// highlighted, and the most refactor-resistant way for a test to assert "the right location".</summary>
 	public static string GetSquiggleText(Diagnostic diagnostic, string source)
-		=> source.Substring(diagnostic.Location.SourceSpan.Start, diagnostic.Location.SourceSpan.Length);
+	{
+		return source.Substring(diagnostic.Location.SourceSpan.Start, diagnostic.Location.SourceSpan.Length);
+	}
 
 	/// <summary>The minimal <see cref="AdditionalText" /> implementation the real MSBuild/IDE hosts
 	/// provide, standing in for one here.</summary>
@@ -115,6 +117,9 @@ internal static class AnalyzerTestHarness
 	{
 		public override string Path { get; } = path;
 
-		public override SourceText GetText(CancellationToken cancellationToken = default) => SourceText.From(content);
+		public override SourceText GetText(CancellationToken cancellationToken = default)
+		{
+			return SourceText.From(content);
+		}
 	}
 }

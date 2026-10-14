@@ -20,7 +20,7 @@ public sealed class IntegrationUiPreviewSource : IUiPreviewSource
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
 	[
-		new() { Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive },
+		new() { Kind = UiSurfaceKinds.DeveloperPreview, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public IReadOnlyList<UiPreviewDescriptor> Previews =>
@@ -30,27 +30,27 @@ public sealed class IntegrationUiPreviewSource : IUiPreviewSource
 			Id = registration.Declaration.Id,
 			View = registration.Declaration.View,
 			Scenario = registration.Declaration.Scenario,
-			Profile = registration.Declaration.Profile,
-		}),
+			Profile = registration.Declaration.Profile
+		})
 	];
 
 	public IReadOnlyList<UiPreviewSkipped> Skipped =>
 	[
 		.. _scan.Value.Diagnostics.Select(diagnostic => new UiPreviewSkipped
 		{
-			Member = diagnostic.Member, Reason = diagnostic.Reason,
-		}),
+			Member = diagnostic.Member, Reason = diagnostic.Reason
+		})
 	];
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 
-		if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview ||
-			!request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var idElement) ||
-			idElement.ValueKind != JsonValueKind.String ||
-			idElement.GetString() is not { } previewId ||
-			_scan.Value.Registrations.FirstOrDefault(registration =>
+		if (request.Surface.Kind != UiSurfaceKinds.DeveloperPreview
+			|| !request.Surface.Attributes.TryGetValue(UiDeveloperPreviewSurfaceAttributes.PreviewId, out var idElement)
+			|| idElement.ValueKind != JsonValueKind.String
+			|| idElement.GetString() is not { } previewId
+			|| _scan.Value.Registrations.FirstOrDefault(registration =>
 				string.Equals(registration.Declaration.Id, previewId, StringComparison.Ordinal)) is not { } match)
 		{
 			return Task.FromResult<IUiSession?>(null);

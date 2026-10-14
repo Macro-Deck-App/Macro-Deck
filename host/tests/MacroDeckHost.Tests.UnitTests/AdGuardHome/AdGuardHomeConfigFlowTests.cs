@@ -70,7 +70,8 @@ internal sealed class AdGuardHomeConfigFlowTests
 		{
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
 			Assert.That(result.EntryTitle, Is.EqualTo("Home"));
-			Assert.That(result.Values!.ContainsKey(AdGuardHomeConfigKeys.Password), Is.False,
+			Assert.That(result.Values!.ContainsKey(AdGuardHomeConfigKeys.Password),
+				Is.False,
 				"the host already keeps the encrypted password");
 			Assert.That(_settings!.Username, Is.EqualTo("admin"));
 			Assert.That(_settings.Password, Is.EqualTo("secret"));
@@ -93,7 +94,7 @@ internal sealed class AdGuardHomeConfigFlowTests
 	[Test]
 	public async Task Reconfiguring_keeps_the_existing_name()
 	{
-		var result = await Submit(Input(name: null), new EntryContext("Office"));
+		var result = await Submit(Input(null), new EntryContext("Office"));
 
 		Assert.Multiple(() =>
 		{
@@ -103,25 +104,29 @@ internal sealed class AdGuardHomeConfigFlowTests
 	}
 
 	private Task<ConfigFlowResult> Submit(Dictionary<string, object?> input, IConfigFlowContext? context = null)
-		=> new AdGuardHomeConfigFlow(settings =>
+	{
+		return new AdGuardHomeConfigFlow(settings =>
 			{
 				_settings = settings;
 				return _client;
 			})
 			.SubmitAsync("connection", input, context ?? new EntryContext(null), CancellationToken.None);
+	}
 
 	private static Dictionary<string, object?> Input(
 		string? name = "Home",
 		string url = "192.168.1.2:3000",
 		string user = "admin",
 		string password = "secret")
-		=> new()
+	{
+		return new Dictionary<string, object?>
 		{
 			[AdGuardHomeConfigKeys.Name] = name,
 			[AdGuardHomeConfigKeys.BaseUrl] = url,
 			[AdGuardHomeConfigKeys.Username] = user,
-			[AdGuardHomeConfigKeys.Password] = password,
+			[AdGuardHomeConfigKeys.Password] = password
 		};
+	}
 
 	private sealed class EntryContext(string? entryTitle) : IConfigFlowEntryContext
 	{

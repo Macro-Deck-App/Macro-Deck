@@ -11,7 +11,10 @@ namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 [TestFixture]
 internal sealed class RemoteUiSessionPointerMoveTests
 {
-	private static UiSessionEventCommand Command(string name) => new() { NodeId = "pad", Name = name };
+	private static UiSessionEventCommand Command(string name)
+	{
+		return new UiSessionEventCommand { NodeId = "pad", Name = name };
+	}
 
 	[TestCase(ProtocolErrorCodes.RateLimited)]
 	[TestCase(ProtocolErrorCodes.Timeout)]
@@ -36,17 +39,26 @@ internal sealed class RemoteUiSessionPointerMoveTests
 
 	private sealed class FailingInvoker(string code) : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw RemoteCapabilityException.CreateRetryable(code, code);
+		{
+			throw RemoteCapabilityException.CreateRetryable(code, code);
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => false;
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			return false;
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

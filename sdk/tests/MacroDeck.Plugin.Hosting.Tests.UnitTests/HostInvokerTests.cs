@@ -34,7 +34,7 @@ public class HostInvokerTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
 			hostInvoker,
-			hostStateCache: null);
+			null);
 
 		state.ActiveConnection = connection;
 
@@ -50,7 +50,9 @@ public class HostInvokerTests
 	}
 
 	private static async Task<ProtocolEnvelope> AwaitHandshakeAsync(FakePluginSocket socket)
-		=> await socket.NextAsync(MessageTypes.SessionHello);
+	{
+		return await socket.NextAsync(MessageTypes.SessionHello);
+	}
 
 	[Test]
 	public async Task A_successful_round_trip_returns_the_result_payload()

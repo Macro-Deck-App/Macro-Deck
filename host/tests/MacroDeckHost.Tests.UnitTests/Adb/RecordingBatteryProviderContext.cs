@@ -31,10 +31,14 @@ internal sealed class RecordingBatteryProviderContext : IBatteryProviderContext
 	}
 
 	public BatteryDevice? Latest(string id)
-		=> Publishes.SelectMany(batch => batch).LastOrDefault(device => device.Id == id);
+	{
+		return Publishes.SelectMany(batch => batch).LastOrDefault(device => device.Id == id);
+	}
 
 	public Task PublishAsync(BatteryDevice device, CancellationToken cancellationToken = default)
-		=> PublishAsync([device], cancellationToken);
+	{
+		return PublishAsync([device], cancellationToken);
+	}
 
 	public Task PublishAsync(IReadOnlyList<BatteryDevice> devices, CancellationToken cancellationToken = default)
 	{

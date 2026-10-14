@@ -24,10 +24,14 @@ public class RunDeveloperModeTests
 	}
 
 	[TearDown]
-	public void TearDown() => File.Delete(_target);
+	public void TearDown()
+	{
+		File.Delete(_target);
+	}
 
 	private static StubProbe Probe(bool? developerModeEnabled, bool answers = true)
-		=> new(answers
+	{
+		return new StubProbe(answers
 			? new PluginPairingDescriptor
 			{
 				Supported = true,
@@ -36,11 +40,12 @@ public class RunDeveloperModeTests
 				DeveloperModeEnabled = developerModeEnabled
 			}
 			: null);
+	}
 
 	[Test]
 	public async Task Developer_mode_off_is_reported_instead_of_promising_a_pairing_prompt()
 	{
-		var (_, error, _) = await CliRunner.Run(Probe(developerModeEnabled: false),
+		var (_, error, _) = await CliRunner.Run(Probe(false),
 			"run",
 			"--executable",
 			_target,
@@ -57,7 +62,7 @@ public class RunDeveloperModeTests
 	[Test]
 	public async Task Developer_mode_on_promises_no_prompt_the_host_would_refuse()
 	{
-		var (_, error, _) = await CliRunner.Run(Probe(developerModeEnabled: true),
+		var (_, error, _) = await CliRunner.Run(Probe(true),
 			"run",
 			"--executable",
 			_target,
@@ -76,13 +81,13 @@ public class RunDeveloperModeTests
 	{
 		// Unreachable, or too old to report the flag. Neither is evidence that Developer Mode is off, so
 		// run must say exactly what it said before the probe existed rather than guess.
-		var (_, unreportedError, _) = await CliRunner.Run(Probe(developerModeEnabled: null),
+		var (_, unreportedError, _) = await CliRunner.Run(Probe(null),
 			"run",
 			"--executable",
 			_target,
 			"--host-url",
 			"http://127.0.0.1:1");
-		var (_, unreachableError, _) = await CliRunner.Run(Probe(developerModeEnabled: null, answers: false),
+		var (_, unreachableError, _) = await CliRunner.Run(Probe(null, false),
 			"run",
 			"--executable",
 			_target,
@@ -102,9 +107,14 @@ public class RunDeveloperModeTests
 	{
 		private readonly PluginPairingDescriptor? _descriptor;
 
-		public StubProbe(PluginPairingDescriptor? descriptor) => _descriptor = descriptor;
+		public StubProbe(PluginPairingDescriptor? descriptor)
+		{
+			_descriptor = descriptor;
+		}
 
 		public Task<PluginPairingDescriptor?> ProbeAsync(string hostUrl, CancellationToken cancellationToken)
-			=> Task.FromResult(_descriptor);
+		{
+			return Task.FromResult(_descriptor);
+		}
 	}
 }

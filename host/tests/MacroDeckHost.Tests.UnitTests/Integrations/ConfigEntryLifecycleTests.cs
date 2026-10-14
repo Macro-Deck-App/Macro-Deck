@@ -49,14 +49,17 @@ internal sealed class ConfigEntryLifecycleTests
 	}
 
 	private Task<IntegrationConfigMutationOutcome> CompleteAsync(Guid entryId, string title)
-		=> _coordinator.CompleteAsync(IntegrationId,
+	{
+		return _coordinator.CompleteAsync(IntegrationId,
 			entryId,
 			title,
 			new Dictionary<string, JsonElement> { ["url"] = JsonSerializer.SerializeToElement("http://nas") },
 			CancellationToken.None);
+	}
 
 	private void AddVariable(string name, string owner, string definitionId)
-		=> _variables.Upsert(new VariableEntity
+	{
+		_variables.Upsert(new VariableEntity
 		{
 			Id = Guid.NewGuid(),
 			Name = name,
@@ -66,6 +69,7 @@ internal sealed class ConfigEntryLifecycleTests
 			OwnerIntegrationId = owner,
 			DefinitionId = definitionId
 		});
+	}
 
 	[Test]
 	public async Task A_completed_entry_is_stored_as_the_integration_prepared_it_and_synchronized()
@@ -130,7 +134,10 @@ internal sealed class ConfigEntryLifecycleTests
 	public async Task The_integration_reports_each_entrys_status_and_usability()
 	{
 		await CompleteAsync(Guid.NewGuid(), "Home");
-		_store.Entries.Add(new ConfigEntryRecord(Guid.NewGuid(), IntegrationId, "Legacy", DateTime.UtcNow,
+		_store.Entries.Add(new ConfigEntryRecord(Guid.NewGuid(),
+			IntegrationId,
+			"Legacy",
+			DateTime.UtcNow,
 			new Dictionary<string, JsonElement>()));
 
 		var described = await _coordinator.DescribeAsync(IntegrationId, CancellationToken.None);
@@ -148,7 +155,10 @@ internal sealed class ConfigEntryLifecycleTests
 	{
 		foreach (var title in new[] { "Alpha", "Beta", "Gamma" })
 		{
-			_store.Entries.Add(new ConfigEntryRecord(Guid.NewGuid(), IntegrationId, title, DateTime.UtcNow,
+			_store.Entries.Add(new ConfigEntryRecord(Guid.NewGuid(),
+				IntegrationId,
+				title,
+				DateTime.UtcNow,
 				new Dictionary<string, JsonElement>()));
 		}
 
@@ -200,12 +210,13 @@ internal sealed class ConfigEntryLifecycleTests
 		{
 			Assert.That(outcome.Success, Is.True);
 			Assert.That(_store.Entries.Single().Values["key"].GetString(), Is.EqualTo("home_3"));
-			Assert.That(_integration.Rejections, Is.EqualTo(new[]
-			{
-				Array.Empty<string>(),
-				["server_home_status"],
-				["server_home_status", "server_home_2_status"]
-			}));
+			Assert.That(_integration.Rejections,
+				Is.EqualTo(new[]
+				{
+					Array.Empty<string>(),
+					["server_home_status"],
+					["server_home_status", "server_home_2_status"]
+				}));
 		});
 	}
 
@@ -277,7 +288,9 @@ internal sealed class ConfigEntryLifecycleTests
 	private sealed class FixedVariableApis(IVariableApi variables) : IIntegrationVariableApiFactory
 	{
 		public IVariableApi Create(string integrationId, IServiceProvider scopedServices)
-			=> integrationId == IntegrationId ? variables : throw new InvalidOperationException(integrationId);
+		{
+			return integrationId == IntegrationId ? variables : throw new InvalidOperationException(integrationId);
+		}
 	}
 
 	private sealed class ServersIntegration : IIntegration, IConfigEntryLifecycle
@@ -306,11 +319,18 @@ internal sealed class ConfigEntryLifecycleTests
 
 		public List<Guid> Released { get; } = [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+		public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+			ConfigEntryPreparation preparation,
 			CancellationToken cancellationToken = default)
 		{
 			if (string.IsNullOrWhiteSpace(preparation.Title))
@@ -332,10 +352,10 @@ internal sealed class ConfigEntryLifecycleTests
 			};
 
 			return Task.FromResult(ConfigEntryPreparationResult.Accept(values,
-				[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]) with
-			{
-				RetryOnConflict = RetriesOnConflict
-			});
+					[VariableDefinition.Eager($"server_{key}_status", VariableType.Text)]) with
+				{
+					RetryOnConflict = RetriesOnConflict
+				});
 		}
 
 		public TaskCompletionSource? Stall { get; set; }
@@ -344,7 +364,8 @@ internal sealed class ConfigEntryLifecycleTests
 
 		private int _waiting;
 
-		public async Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+		public async Task<ConfigEntryStatus> GetEntryStatusAsync(
+			StoredConfigEntry entry,
 			CancellationToken cancellationToken = default)
 		{
 			await StallAsync();
@@ -353,7 +374,9 @@ internal sealed class ConfigEntryLifecycleTests
 				: ConfigEntryStatus.NeedsReconfiguration;
 		}
 
-		public async Task<bool> IsEntryUsableAsync(StoredConfigEntry entry, CancellationToken cancellationToken = default)
+		public async Task<bool> IsEntryUsableAsync(
+			StoredConfigEntry entry,
+			CancellationToken cancellationToken = default)
 		{
 			await StallAsync();
 			return entry.Values.ContainsKey("key");
@@ -374,14 +397,16 @@ internal sealed class ConfigEntryLifecycleTests
 			return Task.FromResult(AppliesChanges);
 		}
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			CancellationToken cancellationToken = default)
 		{
 			Synchronized.Add(entries);
 			return Task.CompletedTask;
 		}
 
-		public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+		public Task SynchronizeEntriesAsync(
+			IReadOnlyList<StoredConfigEntry> entries,
 			IVariableApi variables,
 			CancellationToken cancellationToken)
 		{
@@ -407,7 +432,9 @@ internal sealed class ConfigEntryLifecycleTests
 		}
 
 		public Task ShutdownAsync(string integrationId, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class MemoryConfigStore : IIntegrationConfigStore
@@ -415,18 +442,25 @@ internal sealed class ConfigEntryLifecycleTests
 		public List<ConfigEntryRecord> Entries { get; } = [];
 
 		public Task<IReadOnlyList<ConfigEntrySummary>> List(string integrationId)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySummary>>(Entries
 				.Where(entry => entry.IntegrationId == integrationId)
 				.Select(entry => new ConfigEntrySummary(entry.Id, entry.IntegrationId, entry.Title, entry.CreatedAt))
 				.ToList());
+		}
 
 		public Task<ConfigEntryRecord?> Find(Guid entryId)
-			=> Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		{
+			return Task.FromResult(Entries.FirstOrDefault(entry => entry.Id == entryId));
+		}
 
 		public Task<Guid> Create(string integrationId, string title, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<bool> Create(Guid entryId,
+		public Task<bool> Create(
+			Guid entryId,
 			string integrationId,
 			string title,
 			IReadOnlyDictionary<string, JsonElement> values)
@@ -436,7 +470,9 @@ internal sealed class ConfigEntryLifecycleTests
 		}
 
 		public Task<bool> UpdateValues(Guid entryId, IReadOnlyDictionary<string, JsonElement> values)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<bool> Replace(Guid entryId, string title, IReadOnlyDictionary<string, JsonElement> values)
 		{

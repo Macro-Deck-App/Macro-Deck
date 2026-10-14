@@ -90,7 +90,7 @@ public class IconPackCacheTests
 	public async Task GetDefaultPack_FindsTheDefault()
 	{
 		await _harness.CreatePack("Custom");
-		var defaultPack = await _harness.CreatePack("Imported Icons", isDefault: true);
+		var defaultPack = await _harness.CreatePack("Imported Icons", true);
 
 		Assert.That(_harness.Cache.GetDefaultPack()?.Id, Is.EqualTo(defaultPack.Id));
 	}
@@ -145,7 +145,7 @@ public class IconPackCacheTests
 	public async Task FindByMasterContentHash_MatchesTheStoredMasterBytes()
 	{
 		var pack = await _harness.CreatePack();
-		var icon = await _harness.AddReadyIcon(pack.Id, "logo", [4, 5, 6], source: [9, 9]);
+		var icon = await _harness.AddReadyIcon(pack.Id, "logo", [4, 5, 6], [9, 9]);
 
 		Assert.That(_harness.Cache.FindByMasterContentHash(MasterContentHash.Compute([4, 5, 6]))?.Id,
 			Is.EqualTo(icon.Id));
@@ -277,13 +277,15 @@ public class IconPackCacheTests
 	}
 
 	private static IconEntity CreateIcon(Guid packId, string name)
-		=> new()
+	{
+		return new IconEntity
 		{
 			Id = Guid.CreateVersion7(),
 			PackId = packId,
 			Name = name,
 			CreatedAt = DateTime.UtcNow
 		};
+	}
 
 	private sealed class IconTestHarnessSecondCache : IDisposable
 	{

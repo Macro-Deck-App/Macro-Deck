@@ -4,8 +4,10 @@ namespace MacroDeckHost.Application.Actions;
 
 public static class WidgetFlowsJson
 {
-	public static string ToSource(string? flowsJson) =>
-		JsonSerializer.Serialize(new FlowsEnvelope(flowsJson ?? string.Empty));
+	public static string ToSource(string? flowsJson)
+	{
+		return JsonSerializer.Serialize(new FlowsEnvelope(flowsJson ?? string.Empty));
+	}
 
 	public static bool TryExtract(string? widgetData, out string flowsJson)
 	{
@@ -18,8 +20,8 @@ public static class WidgetFlowsJson
 		try
 		{
 			using var document = JsonDocument.Parse(widgetData);
-			if (document.RootElement.ValueKind != JsonValueKind.Object ||
-				!TryGetProperty(document.RootElement, "flows", out var flows))
+			if (document.RootElement.ValueKind != JsonValueKind.Object
+				|| !TryGetProperty(document.RootElement, "flows", out var flows))
 			{
 				return false;
 			}
@@ -58,15 +60,17 @@ public static class WidgetFlowsJson
 	}
 
 	public static bool HasRunnableFlow(JsonElement flows, string triggerType)
-		=> flows.ValueKind == JsonValueKind.Array &&
-			flows.EnumerateArray()
-				.Any(flow => flow.ValueKind == JsonValueKind.Object &&
-					TryGetProperty(flow, "triggerType", out var type) &&
-					type.ValueKind == JsonValueKind.String &&
-					string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase) &&
-					TryGetProperty(flow, "children", out var children) &&
-					children.ValueKind == JsonValueKind.Array &&
-					children.EnumerateArray().Any(IsEnabledBlock));
+	{
+		return flows.ValueKind == JsonValueKind.Array
+			&& flows.EnumerateArray()
+				.Any(flow => flow.ValueKind == JsonValueKind.Object
+					&& TryGetProperty(flow, "triggerType", out var type)
+					&& type.ValueKind == JsonValueKind.String
+					&& string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase)
+					&& TryGetProperty(flow, "children", out var children)
+					&& children.ValueKind == JsonValueKind.Array
+					&& children.EnumerateArray().Any(IsEnabledBlock));
+	}
 
 	public static bool SelectedFlowIsRunnable(string? widgetData, string triggerType)
 	{
@@ -85,14 +89,14 @@ public static class WidgetFlowsJson
 
 			foreach (var flow in document.RootElement.EnumerateArray())
 			{
-				if (flow.ValueKind == JsonValueKind.Object &&
-					TryGetProperty(flow, "triggerType", out var type) &&
-					type.ValueKind == JsonValueKind.String &&
-					string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase))
+				if (flow.ValueKind == JsonValueKind.Object
+					&& TryGetProperty(flow, "triggerType", out var type)
+					&& type.ValueKind == JsonValueKind.String
+					&& string.Equals(type.GetString(), triggerType, StringComparison.OrdinalIgnoreCase))
 				{
-					return TryGetProperty(flow, "children", out var children) &&
-						children.ValueKind == JsonValueKind.Array &&
-						children.EnumerateArray().Any(IsEnabledBlock);
+					return TryGetProperty(flow, "children", out var children)
+						&& children.ValueKind == JsonValueKind.Array
+						&& children.EnumerateArray().Any(IsEnabledBlock);
 				}
 			}
 
@@ -105,8 +109,10 @@ public static class WidgetFlowsJson
 	}
 
 	private static bool IsEnabledBlock(JsonElement block)
-		=> block.ValueKind == JsonValueKind.Object &&
-			!(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
+	{
+		return block.ValueKind == JsonValueKind.Object
+			&& !(block.TryGetProperty("disabled", out var disabled) && disabled.ValueKind == JsonValueKind.True);
+	}
 
 	/// <summary>The distinct trigger types the widget has a flow for, in the order they are stored.</summary>
 	public static IReadOnlyList<string> TriggerTypes(string? widgetData)
@@ -127,9 +133,9 @@ public static class WidgetFlowsJson
 			var types = new List<string>();
 			foreach (var flow in document.RootElement.EnumerateArray())
 			{
-				if (flow.ValueKind != JsonValueKind.Object ||
-					!TryGetProperty(flow, "triggerType", out var triggerType) ||
-					triggerType.ValueKind != JsonValueKind.String)
+				if (flow.ValueKind != JsonValueKind.Object
+					|| !TryGetProperty(flow, "triggerType", out var triggerType)
+					|| triggerType.ValueKind != JsonValueKind.String)
 				{
 					continue;
 				}

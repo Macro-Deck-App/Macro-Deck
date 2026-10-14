@@ -22,7 +22,10 @@ public sealed class CountdownDurationDrafts
 {
 	private readonly ConcurrentDictionary<Guid, int> _seconds = new();
 
-	internal void Begin(Guid draftId, int seconds) => _seconds[draftId] = seconds;
+	internal void Begin(Guid draftId, int seconds)
+	{
+		_seconds[draftId] = seconds;
+	}
 
 	internal void Set(Guid draftId, int seconds)
 	{
@@ -32,9 +35,15 @@ public sealed class CountdownDurationDrafts
 		}
 	}
 
-	internal int? Get(Guid draftId) => _seconds.TryGetValue(draftId, out var seconds) ? seconds : null;
+	internal int? Get(Guid draftId)
+	{
+		return _seconds.TryGetValue(draftId, out var seconds) ? seconds : null;
+	}
 
-	internal void End(Guid draftId) => _seconds.TryRemove(draftId, out _);
+	internal void End(Guid draftId)
+	{
+		_seconds.TryRemove(draftId, out _);
+	}
 }
 
 public sealed class CountdownDurationPrompt : ICountdownDurationPrompt
@@ -55,7 +64,8 @@ public sealed class CountdownDurationPrompt : ICountdownDurationPrompt
 		_drafts = drafts;
 	}
 
-	public async Task<int?> AskAsync(Guid widgetId,
+	public async Task<int?> AskAsync(
+		Guid widgetId,
 		string originClientId,
 		int? initialSeconds,
 		CancellationToken cancellationToken)
@@ -72,8 +82,8 @@ public sealed class CountdownDurationPrompt : ICountdownDurationPrompt
 				Data = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 				{
 					[WidgetIdKey] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-					[DraftIdKey] = JsonSerializer.SerializeToElement(draftId.ToString()),
-				},
+					[DraftIdKey] = JsonSerializer.SerializeToElement(draftId.ToString())
+				}
 			};
 
 			var result = await _interactions.ForIntegration(CountdownWidgetUiProvider.OwnerId)
@@ -95,10 +105,12 @@ public sealed class CountdownDurationPrompt : ICountdownDurationPrompt
 			return _drafts.Get(draftId) is > 0 and var seconds ? seconds : null;
 		}
 
-		if (answer?.StartsWith(PresetAnswerPrefix, StringComparison.Ordinal) == true &&
-			int.TryParse(answer.AsSpan(PresetAnswerPrefix.Length), NumberStyles.None, CultureInfo.InvariantCulture,
-				out var preset) &&
-			PresetSeconds.Contains(preset))
+		if (answer?.StartsWith(PresetAnswerPrefix, StringComparison.Ordinal) == true
+			&& int.TryParse(answer.AsSpan(PresetAnswerPrefix.Length),
+				NumberStyles.None,
+				CultureInfo.InvariantCulture,
+				out var preset)
+			&& PresetSeconds.Contains(preset))
 		{
 			return preset;
 		}
@@ -119,7 +131,8 @@ internal sealed class CountdownDurationDialogSession : IUiSession
 	private readonly Lock _sync = new();
 	private bool _disposed;
 
-	private CountdownDurationDialogSession(UiSurface surface,
+	private CountdownDurationDialogSession(
+		UiSurface surface,
 		Guid widgetId,
 		Guid draftId,
 		TimerWidgetStore store,
@@ -146,15 +159,21 @@ internal sealed class CountdownDurationDialogSession : IUiSession
 	{
 		var data = surface.Attributes.TryGetValue(UiDialogSurfaceAttributes.Data, out var element) ? element : default;
 
-		return Guid.TryParse(WidgetConfigJson.ReadString(data, CountdownDurationPrompt.WidgetIdKey), out var widgetId) &&
-			Guid.TryParse(WidgetConfigJson.ReadString(data, CountdownDurationPrompt.DraftIdKey), out var draftId)
+		return Guid.TryParse(WidgetConfigJson.ReadString(data, CountdownDurationPrompt.WidgetIdKey), out var widgetId)
+			&& Guid.TryParse(WidgetConfigJson.ReadString(data, CountdownDurationPrompt.DraftIdKey), out var draftId)
 				? new CountdownDurationDialogSession(surface, widgetId, draftId, store, drafts)
 				: null;
 	}
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
 	public void Dispatch(UiEvent uiEvent)
 	{
@@ -201,9 +220,15 @@ internal sealed class CountdownDurationDialogSession : IUiSession
 		_drafts.Set(_draftId, total);
 	}
 
-	private static int Wrap(int value, int modulo) => ((value % modulo) + modulo) % modulo;
+	private static int Wrap(int value, int modulo)
+	{
+		return (value % modulo + modulo) % modulo;
+	}
 
-	private bool IsBusy() => _store.Get(_widgetId) is { Phase: not TimerWidgetPhase.Idle };
+	private bool IsBusy()
+	{
+		return _store.Get(_widgetId) is { Phase: not TimerWidgetPhase.Idle };
+	}
 
 	private void OnTimerChanged(object? sender, TimerWidgetChangedEventArgs args)
 	{
@@ -232,7 +257,7 @@ internal enum CountdownDurationUnit
 {
 	Hours,
 	Minutes,
-	Seconds,
+	Seconds
 }
 
 internal static class CountdownDurationDialogView
@@ -240,12 +265,14 @@ internal static class CountdownDurationDialogView
 	private static readonly UiSize _gap = UiSize.FromBasis(0.03);
 	private static readonly UiSize _textSize = UiSize.FromBasis(0.045);
 	private static readonly UiSize _buttonHeight = UiSize.FromBasis(0.11);
-	private const string _outlineColor = "#8a8a8a";
+	private const string OutlineColor = "#8a8a8a";
 
-	public static UiElement Build(UiState<int> seconds,
+	public static UiElement Build(
+		UiState<int> seconds,
 		UiState<bool> alreadyRunning,
 		Action<CountdownDurationUnit, int> step)
-		=> new UiStack
+	{
+		return new UiStack
 		{
 			Key = "countdownDuration",
 			Direction = UiComponentDirections.Vertical,
@@ -264,20 +291,22 @@ internal static class CountdownDurationDialogView
 						Size = _textSize,
 						Role = UiComponentTextRoles.Secondary,
 						Wrap = true,
-						MaxLines = 3,
-					},
+						MaxLines = 3
+					}
 				},
 				new UiWhen
 				{
 					Key = "pickerGate",
 					Condition = () => !alreadyRunning.Value,
-					Content = () => Picker(seconds, step),
-				},
-			],
+					Content = () => Picker(seconds, step)
+				}
+			]
 		};
+	}
 
 	private static UiStack Picker(UiState<int> seconds, Action<CountdownDurationUnit, int> step)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = "picker",
 			Direction = UiComponentDirections.Vertical,
@@ -299,9 +328,9 @@ internal static class CountdownDurationDialogView
 							Size = UiSize.FromBasis(0.11),
 							MinSize = UiSize.FromBasis(0.07),
 							Weight = UiComponentTextWeights.Bold,
-							Align = UiComponentAlignments.Center,
-						},
-					],
+							Align = UiComponentAlignments.Center
+						}
+					]
 				},
 				new UiStack
 				{
@@ -313,8 +342,8 @@ internal static class CountdownDurationDialogView
 					[
 						Stepper(CountdownDurationUnit.Hours, AppStrings.Widgets.Countdown.Dialog.Hours(), step),
 						Stepper(CountdownDurationUnit.Minutes, AppStrings.Widgets.Countdown.Dialog.Minutes(), step),
-						Stepper(CountdownDurationUnit.Seconds, AppStrings.Widgets.Clock.Seconds(), step),
-					],
+						Stepper(CountdownDurationUnit.Seconds, AppStrings.Widgets.Clock.Seconds(), step)
+					]
 				},
 				PresetRow("presetsShort", CountdownDurationPrompt.PresetSeconds.Take(3)),
 				PresetRow("presetsLong", CountdownDurationPrompt.PresetSeconds.Skip(3)),
@@ -328,15 +357,22 @@ internal static class CountdownDurationDialogView
 						MainSize = _buttonHeight,
 						Justify = UiComponentJustify.Center,
 						Align = UiComponentAlignments.Center,
-						Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Press,
+								() =>
+								{
+								})
+						],
 						Answer = UiValue.Optional(() => seconds.Value > 0
 							? UiValue.Of(CountdownDurationPrompt.StartAnswer)
 							: UiValue.None<string>()),
-						Children = [Label("startLabel", AppStrings.Widgets.Countdown.Dialog.Start())],
-					},
-				},
-			],
+						Children = [Label("startLabel", AppStrings.Widgets.Countdown.Dialog.Start())]
+					}
+				}
+			]
 		};
+	}
 
 	private static UiStack Stepper(CountdownDurationUnit unit, UiText label, Action<CountdownDurationUnit, int> step)
 	{
@@ -358,74 +394,90 @@ internal static class CountdownDurationDialogView
 					Fill = true,
 					Justify = UiComponentJustify.Center,
 					Align = UiComponentAlignments.Stretch,
-					Children = [Label(key + "Label", label)],
+					Children = [Label(key + "Label", label)]
 				},
-				StepButton(key + "Down", UiIcons.Minus, () => step(unit, -1)),
-			],
+				StepButton(key + "Down", UiIcons.Minus, () => step(unit, -1))
+			]
 		};
 	}
 
 	private static UiStack PresetRow(string key, IEnumerable<int> seconds)
-		=> new()
+	{
+		return new UiStack
 		{
 			Key = key,
 			Direction = UiComponentDirections.Horizontal,
 			MainSize = _buttonHeight,
 			Gap = _gap,
-			Children = [.. seconds.Select(Preset)],
+			Children = [.. seconds.Select(Preset)]
 		};
+	}
 
 	private static UiModifier StepButton(string key, string icon, Action press)
-		=> Outlined(key, new UiStack
-		{
-			Key = key + "Face",
-			MainSize = _buttonHeight,
-			Justify = UiComponentJustify.Center,
-			Align = UiComponentAlignments.Stretch,
-			Events = [UiEventHandler.On(UiComponentEvents.Press, press)],
-			Children = [new UiIcon { Key = "icon", Fill = true, Icon = icon, Size = UiSize.FromBasis(0.045) }],
-		});
+	{
+		return Outlined(key,
+			new UiStack
+			{
+				Key = key + "Face",
+				MainSize = _buttonHeight,
+				Justify = UiComponentJustify.Center,
+				Align = UiComponentAlignments.Stretch,
+				Events = [UiEventHandler.On(UiComponentEvents.Press, press)],
+				Children = [new UiIcon { Key = "icon", Fill = true, Icon = icon, Size = UiSize.FromBasis(0.045) }]
+			});
+	}
 
 	private static UiModifier Preset(int seconds)
 	{
 		var key = "preset" + seconds.ToString(CultureInfo.InvariantCulture);
 
-		return Outlined(key, new UiStack
-		{
-			Key = key + "Face",
-			Fill = true,
-			Justify = UiComponentJustify.Center,
-			Align = UiComponentAlignments.Stretch,
-			Answer = CountdownDurationPrompt.PresetAnswerPrefix + seconds.ToString(CultureInfo.InvariantCulture),
-			Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
-			Children =
-			[
-				Label("label",
-					seconds >= 3600
-						? AppStrings.Widgets.Countdown.Dialog.PresetHours(seconds / 3600)
-						: AppStrings.Widgets.Countdown.Dialog.PresetMinutes(seconds / 60)),
-			],
-		});
+		return Outlined(key,
+			new UiStack
+			{
+				Key = key + "Face",
+				Fill = true,
+				Justify = UiComponentJustify.Center,
+				Align = UiComponentAlignments.Stretch,
+				Answer = CountdownDurationPrompt.PresetAnswerPrefix + seconds.ToString(CultureInfo.InvariantCulture),
+				Events =
+				[
+					UiEventHandler.On(UiComponentEvents.Press,
+						() =>
+						{
+						})
+				],
+				Children =
+				[
+					Label("label",
+						seconds >= 3600
+							? AppStrings.Widgets.Countdown.Dialog.PresetHours(seconds / 3600)
+							: AppStrings.Widgets.Countdown.Dialog.PresetMinutes(seconds / 60))
+				]
+			});
 	}
 
 	private static UiModifier Outlined(string key, UiElement face)
-		=> new()
+	{
+		return new UiModifier
 		{
 			Key = key,
 			Radius = UiSize.FromBasis(0.02),
 			BorderWidth = UiSize.FromBasis(0.004),
-			BorderColor = _outlineColor,
-			Child = face,
+			BorderColor = OutlineColor,
+			Child = face
 		};
+	}
 
 	private static UiTextRun Label(string key, UiText text)
-		=> new()
+	{
+		return new UiTextRun
 		{
 			Key = key,
 			Text = text,
 			Size = _textSize,
 			Weight = UiComponentTextWeights.Medium,
 			Align = UiComponentAlignments.Center,
-			MaxLines = 1,
+			MaxLines = 1
 		};
+	}
 }

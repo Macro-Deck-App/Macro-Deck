@@ -8,7 +8,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// A18 - health, ready, info and diagnostics reflect real state; readiness is not liveness.
 /// </summary>
 [TestFixture]
-public class A18_HealthDiagnosticsTests
+public class A18HealthDiagnosticsTests
 {
 	[Test]
 	public async Task Health_ready_info_and_diagnostics_reflect_real_state()

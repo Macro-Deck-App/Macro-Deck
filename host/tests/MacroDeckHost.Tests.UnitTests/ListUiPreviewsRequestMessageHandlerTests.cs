@@ -16,23 +16,34 @@ public class ListUiPreviewsRequestMessageHandlerTests
 
 		public IReadOnlyList<UiPreviewSkipped> Skipped { get; init; } = [];
 
-		public Task<MacroDeck.Sdk.Ui.IUiSession?> CreateSessionAsync(MacroDeck.Sdk.Ui.UiSessionRequest request,
+		public Task<MacroDeck.Sdk.Ui.IUiSession?> CreateSessionAsync(
+			MacroDeck.Sdk.Ui.UiSessionRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<MacroDeck.Sdk.Ui.IUiSession?>(null);
+		{
+			return Task.FromResult<MacroDeck.Sdk.Ui.IUiSession?>(null);
+		}
 	}
 
 	private sealed class InMemorySnapshotStore : IRemotePluginSnapshotStore
 	{
 		private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
-		public void Set(RemotePluginCapabilitySnapshot snapshot) => _byPluginId[snapshot.PluginId] = snapshot;
+		public void Set(RemotePluginCapabilitySnapshot snapshot)
+		{
+			_byPluginId[snapshot.PluginId] = snapshot;
+		}
 
 		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-			=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+		{
+			return _byPluginId.TryGetValue(pluginId, out var snapshot)
 				? snapshot
 				: RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+		public bool Has(string pluginId)
+		{
+			return _byPluginId.ContainsKey(pluginId);
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 		{
@@ -49,9 +60,9 @@ public class ListUiPreviewsRequestMessageHandlerTests
 			Previews =
 			[
 				new UiPreviewDescriptor
-					{ Id = "app:Clock.Default", View = "Clock", Scenario = "Default", Profile = "widget" },
+					{ Id = "app:Clock.Default", View = "Clock", Scenario = "Default", Profile = "widget" }
 			],
-			Skipped = [new UiPreviewSkipped { Member = "App.Bad.Method", Reason = "A preview method must be static." }],
+			Skipped = [new UiPreviewSkipped { Member = "App.Bad.Method", Reason = "A preview method must be static." }]
 		};
 
 		var registry = new FakeIntegrationRegistry();
@@ -63,8 +74,8 @@ public class ListUiPreviewsRequestMessageHandlerTests
 			UiPreviews =
 			[
 				new RemoteUiPreviewDescriptor
-					{ Id = "plugin:Clock.Default", View = "Clock", Scenario = "Default", Profile = "widget" },
-			],
+					{ Id = "plugin:Clock.Default", View = "Clock", Scenario = "Default", Profile = "widget" }
+			]
 		});
 
 		var handler = new ListUiPreviewsRequestMessageHandler([firstParty], registry, snapshots);

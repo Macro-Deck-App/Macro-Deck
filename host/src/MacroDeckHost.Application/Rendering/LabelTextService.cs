@@ -54,7 +54,8 @@ public sealed class LabelTextService : ILabelTextService
 		return string.IsNullOrEmpty(resolved) ? null : resolved;
 	}
 
-	public async Task<string?> ResolvePreview(LabelImagePreviewRequest request,
+	public async Task<string?> ResolvePreview(
+		LabelImagePreviewRequest request,
 		CancellationToken cancellationToken = default)
 	{
 		await _readiness.WhenReady.WaitAsync(cancellationToken);
@@ -66,7 +67,9 @@ public sealed class LabelTextService : ILabelTextService
 	}
 
 	private static string? ReadString(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+	}
 
 	private WidgetEntity? FindWidget(Guid widgetId)
 	{

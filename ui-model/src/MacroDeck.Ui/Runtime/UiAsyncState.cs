@@ -59,9 +59,11 @@ public sealed class UiAsyncState<T>
 		ArgumentNullException.ThrowIfNull(load);
 
 		_load = load;
-		_value = new UiState<T>(initialValue);
+		_value = new UiState<T>(initialValue)
+		{
+			ViewAttached = OnViewAttached
+		};
 
-		_value.ViewAttached = OnViewAttached;
 		_isLoading.ViewAttached = OnViewAttached;
 		_error.ViewAttached = OnViewAttached;
 	}
@@ -79,7 +81,10 @@ public sealed class UiAsyncState<T>
 
 	/// <summary>Reads the current value without recording a dependency - see
 	/// <see cref="UiState{T}.Peek" />.</summary>
-	public T Peek() => _value.Peek();
+	public T Peek()
+	{
+		return _value.Peek();
+	}
 
 	/// <summary>
 	/// Starts a load, cancelling the one in flight. Returns as soon as the work is started: the caller is a
@@ -152,7 +157,7 @@ public sealed class UiAsyncState<T>
 		}
 		catch (OperationCanceledException)
 		{
-			Settle(source, fault: null);
+			Settle(source, null);
 		}
 #pragma warning disable CA1031 // Any loader fault becomes Error by contract - see this type's remarks.
 		catch (Exception exception)
@@ -286,13 +291,19 @@ public sealed class UiAsyncState<T>
 		// second one that superseded it in turn, and the source it hands to RunAsync would then already be gone.
 		private int _users = 1;
 
-		internal UiLoad() => Token = _source.Token;
+		internal UiLoad()
+		{
+			Token = _source.Token;
+		}
 
 		/// <summary>The token this load's work observes.</summary>
 		internal CancellationToken Token { get; }
 
 		/// <summary>Drops the runner's reference; the last one out disposes.</summary>
-		public void Dispose() => Release();
+		public void Dispose()
+		{
+			Release();
+		}
 
 		/// <summary>Cancels this load, unless it has already ended - in which case there is nothing to cancel
 		/// and nothing to keep alive.</summary>
@@ -346,7 +357,10 @@ public sealed class UiAsyncState<T>
 	{
 		private List<IDisposable>? _scopes;
 
-		internal UiCompositeScope(List<IDisposable> scopes) => _scopes = scopes;
+		internal UiCompositeScope(List<IDisposable> scopes)
+		{
+			_scopes = scopes;
+		}
 
 		public void Dispose()
 		{

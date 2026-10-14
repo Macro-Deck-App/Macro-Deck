@@ -14,12 +14,11 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 
 	public int Deletes { get; private set; }
 
-	public Func<IReadOnlyCollection<string>, StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>> ClaimResult
-	{
-		get;
-		set;
-	} = ids => StorePlatformResult.Ok<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(
-		ids.ToDictionary(id => id, _ => StoreEntitlementClaimStatus.Claimed));
+	public
+		Func<IReadOnlyCollection<string>, StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>>
+		ClaimResult { get; set; } = ids
+		=> StorePlatformResult.Ok<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>(
+			ids.ToDictionary(id => id, _ => StoreEntitlementClaimStatus.Claimed));
 
 	public StoreEntitlementStatus Entitlement { get; set; } = StoreEntitlementStatus.Entitled;
 
@@ -48,8 +47,9 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		RatingRequests.Enqueue(packageIds.ToList());
 		return Task.FromResult(RatingsFailure != StorePlatformFailure.None
 			? StorePlatformResult.Fail<IReadOnlyDictionary<string, StorePlatformRating>>(RatingsFailure)
-			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformRating>>(
-				Ratings.Where(pair => packageIds.Contains(pair.Key)).ToDictionary()));
+			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformRating>>(Ratings
+				.Where(pair => packageIds.Contains(pair.Key))
+				.ToDictionary()));
 	}
 
 	public ConcurrentQueue<IReadOnlyList<string>> InstallRequests { get; } = new();
@@ -65,35 +65,43 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		InstallRequests.Enqueue(packageIds.ToList());
 		return Task.FromResult(InstallsFailure != StorePlatformFailure.None
 			? StorePlatformResult.Fail<IReadOnlyDictionary<string, StorePlatformInstalls>>(InstallsFailure)
-			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformInstalls>>(
-				Installs.Where(pair => packageIds.Contains(pair.Key))
-					.ToDictionary(pair => pair.Key, pair => new StorePlatformInstalls(pair.Value))));
+			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StorePlatformInstalls>>(Installs
+				.Where(pair => packageIds.Contains(pair.Key))
+				.ToDictionary(pair => pair.Key, pair => new StorePlatformInstalls(pair.Value))));
 	}
 
-	public Task<StorePlatformResult<StorePlatformRating>> GetRating(string packageId,
-		CancellationToken cancellationToken = default) =>
-		Task.FromResult(Ratings.TryGetValue(packageId, out var rating)
+	public Task<StorePlatformResult<StorePlatformRating>> GetRating(
+		string packageId,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(Ratings.TryGetValue(packageId, out var rating)
 			? StorePlatformResult.Ok(rating)
 			: StorePlatformResult.Fail<StorePlatformRating>(StorePlatformFailure.Unavailable));
+	}
 
-	public Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(string packageId,
+	public Task<StorePlatformResult<StorePlatformReviewPage>> GetReviews(
+		string packageId,
 		int page,
 		int pageSize,
 		StorePlatformReviewSort sort,
 		int? rating,
-		CancellationToken cancellationToken = default) =>
-		Task.FromResult(ReviewPage is { } reviews
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(ReviewPage is { } reviews
 			? StorePlatformResult.Ok(reviews)
 			: StorePlatformResult.Fail<StorePlatformReviewPage>(StorePlatformFailure.Unavailable));
+	}
 
-	public Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(string packageId,
+	public Task<StorePlatformResult<StorePlatformOwnReview>> GetOwnReview(
+		string packageId,
 		CancellationToken cancellationToken = default)
 	{
 		GetOwnReviewCalls++;
 		return Task.FromResult(StorePlatformResult.Ok(OwnReviews.GetValueOrDefault(packageId) ?? OwnReview));
 	}
 
-	public Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(string packageId,
+	public Task<StorePlatformResult<StorePlatformOwnReview>> PutOwnReview(
+		string packageId,
 		int rating,
 		string? title,
 		string? body,
@@ -105,7 +113,9 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 			: StorePlatformResult.Ok(Own(packageId, rating, title, body)));
 	}
 
-	public Task<StorePlatformResult<bool>> DeleteOwnReview(string packageId, CancellationToken cancellationToken = default)
+	public Task<StorePlatformResult<bool>> DeleteOwnReview(
+		string packageId,
+		CancellationToken cancellationToken = default)
 	{
 		Deletes++;
 		return Task.FromResult(DeleteResults.Count > 0 ? DeleteResults.Dequeue() : StorePlatformResult.Ok(true));
@@ -115,7 +125,8 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 
 	public StorePlatformResult<bool> ReportResult { get; set; } = StorePlatformResult.Ok(true);
 
-	public Task<StorePlatformResult<bool>> ReportPackage(string packageId,
+	public Task<StorePlatformResult<bool>> ReportPackage(
+		string packageId,
 		string category,
 		string? detail,
 		CancellationToken cancellationToken = default)
@@ -124,7 +135,8 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 		return Task.FromResult(ReportResult);
 	}
 
-	public Task<StorePlatformResult<bool>> ReportReview(string packageId,
+	public Task<StorePlatformResult<bool>> ReportReview(
+		string packageId,
 		Guid reviewId,
 		string category,
 		string? detail,
@@ -136,11 +148,13 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 
 	public Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementStatus>>> GetEntitlements(
 		IReadOnlyCollection<string> packageIds,
-		CancellationToken cancellationToken = default) =>
-		Task.FromResult(EntitlementFailure != StorePlatformFailure.None
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(EntitlementFailure != StorePlatformFailure.None
 			? StorePlatformResult.Fail<IReadOnlyDictionary<string, StoreEntitlementStatus>>(EntitlementFailure)
 			: StorePlatformResult.Ok<IReadOnlyDictionary<string, StoreEntitlementStatus>>(
 				packageIds.ToDictionary(id => id, _ => Entitlement)));
+	}
 
 	public Task<StorePlatformResult<IReadOnlyDictionary<string, StoreEntitlementClaimStatus>>> ClaimEntitlements(
 		IReadOnlyCollection<string> packageIds,
@@ -158,29 +172,46 @@ internal sealed class FakeStorePlatformClient : IStorePlatformClient
 
 	public List<(string PackageId, Guid BuildId)> TestBuildDownloadRequests { get; } = [];
 
-	public Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(CancellationToken cancellationToken = default) =>
-		Task.FromResult(TestsFailure != StorePlatformFailure.None
+	public Task<StorePlatformResult<IReadOnlyList<StorePlatformTest>>> GetTests(
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(TestsFailure != StorePlatformFailure.None
 			? StorePlatformResult.Fail<IReadOnlyList<StorePlatformTest>>(TestsFailure)
 			: StorePlatformResult.Ok<IReadOnlyList<StorePlatformTest>>(Tests.ToList()));
+	}
 
-	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(string packageId,
+	public Task<StorePlatformResult<StorePlatformTestBuildDownload>> GetTestBuildDownload(
+		string packageId,
 		Guid buildId,
 		CancellationToken cancellationToken = default)
 	{
 		TestBuildDownloadRequests.Add((packageId, buildId));
-		return Task.FromResult(TestBuildDownload ??
-			StorePlatformResult.Fail<StorePlatformTestBuildDownload>(StorePlatformFailure.NotFound));
+		return Task.FromResult(TestBuildDownload
+			?? StorePlatformResult.Fail<StorePlatformTestBuildDownload>(StorePlatformFailure.NotFound));
 	}
 
 	public StorePlatformResult<string> CreatorGuidelines { get; set; } =
 		StorePlatformResult.Fail<string>(StorePlatformFailure.Unavailable);
 
-	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default) =>
-		Task.FromResult(CreatorGuidelines);
+	public Task<StorePlatformResult<string>> GetCreatorGuidelines(CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(CreatorGuidelines);
+	}
 
-	public static StorePlatformOwnReview Own(string packageId, int rating, string? title, string? body) =>
-		new(Guid.NewGuid(), packageId, rating, title, body, "Visible", false, DateTimeOffset.UnixEpoch,
-			DateTimeOffset.UnixEpoch, false, null);
+	public static StorePlatformOwnReview Own(string packageId, int rating, string? title, string? body)
+	{
+		return new StorePlatformOwnReview(Guid.NewGuid(),
+			packageId,
+			rating,
+			title,
+			body,
+			"Visible",
+			false,
+			DateTimeOffset.UnixEpoch,
+			DateTimeOffset.UnixEpoch,
+			false,
+			null);
+	}
 }
 
 internal sealed class FakeStoreOfficialPackages : IStoreOfficialPackages
@@ -191,11 +222,23 @@ internal sealed class FakeStoreOfficialPackages : IStoreOfficialPackages
 
 	public List<string> Installed { get; set; } = [];
 
-	public string? ResolveListed(StoreExtensionKind kind, string id) => Listed.Contains(id) ? id : null;
+	public string? ResolveListed(StoreExtensionKind kind, string id)
+	{
+		return Listed.Contains(id) ? id : null;
+	}
 
-	public IReadOnlyList<string> ListedPackageIds(IEnumerable<string> ids) => ids.Where(Listed.Contains).ToList();
+	public IReadOnlyList<string> ListedPackageIds(IEnumerable<string> ids)
+	{
+		return ids.Where(Listed.Contains).ToList();
+	}
 
-	public bool IsInstalled(string packageId) => Installed.Contains(packageId, StringComparer.OrdinalIgnoreCase);
+	public bool IsInstalled(string packageId)
+	{
+		return Installed.Contains(packageId, StringComparer.OrdinalIgnoreCase);
+	}
 
-	public IReadOnlyList<string> InstalledPackageIds() => Installed.ToList();
+	public IReadOnlyList<string> InstalledPackageIds()
+	{
+		return Installed.ToList();
+	}
 }

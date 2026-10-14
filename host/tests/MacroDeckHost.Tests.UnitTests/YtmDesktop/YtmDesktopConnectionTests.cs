@@ -416,7 +416,9 @@ internal sealed class YtmDesktopConnectionTests
 	}
 
 	private static Task WaitForSeededSessionAsync(YtmDesktopConnection connection)
-		=> WaitForAsync(() => connection.Snapshot.Player.IsConnected);
+	{
+		return WaitForAsync(() => connection.Snapshot.Player.IsConnected);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{

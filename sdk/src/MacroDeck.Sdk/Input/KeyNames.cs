@@ -68,12 +68,15 @@ public static class KeyNames
 	/// The one name the combo editor stores for a key: <c>A</c> to <c>Z</c>, <c>0</c> to <c>9</c> for the digit row,
 	/// and the <see cref="KeyCode" /> name for every other key. <see cref="KeyCode.None" /> returns an empty string.
 	/// </summary>
-	public static string ToName(KeyCode key) => key switch
+	public static string ToName(KeyCode key)
 	{
-		KeyCode.None => string.Empty,
-		>= KeyCode.D0 and <= KeyCode.D9 => (key - KeyCode.D0).ToString(CultureInfo.InvariantCulture),
-		_ => key.ToString()
-	};
+		return key switch
+		{
+			KeyCode.None => string.Empty,
+			>= KeyCode.D0 and <= KeyCode.D9 => (key - KeyCode.D0).ToString(CultureInfo.InvariantCulture),
+			_ => key.ToString()
+		};
+	}
 
 	/// <summary>
 	/// Reports the modifier a modifier key stands for, such as <see cref="KeyCode.LeftControl" /> for
@@ -114,7 +117,12 @@ public static class KeyNames
 		return names;
 	}
 
-	private static void AddModifierName(List<string> names, KeyModifier held, KeyModifier left, KeyModifier right, string name)
+	private static void AddModifierName(
+		List<string> names,
+		KeyModifier held,
+		KeyModifier left,
+		KeyModifier right,
+		string name)
 	{
 		if (held.HasFlag(left))
 		{

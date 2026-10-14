@@ -33,7 +33,9 @@ public sealed class VariableValueChangedEventTriggerHandler
 	}
 
 	private static object? ActionConditionValue(VariableEntity variable)
-		=> ActionConditionEvaluator.ConvertVariableValue(variable);
+	{
+		return ActionConditionEvaluator.ConvertVariableValue(variable);
+	}
 }
 
 public sealed class IntegrationStateChangedEventTriggerHandler
@@ -190,11 +192,13 @@ public sealed class ProfileDeletedEventTriggerHandler : INotificationHandler<Pro
 internal static class ProfileEventTriggerPayload
 {
 	public static EventOccurrence Occurrence(string profileId, string profileName, string change)
-		=> new(EventIds.Qualify(EventIds.ProfileChanged),
+	{
+		return new EventOccurrence(EventIds.Qualify(EventIds.ProfileChanged),
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				["profileId"] = profileId,
 				["profileName"] = profileName,
 				["change"] = change
 			});
+	}
 }

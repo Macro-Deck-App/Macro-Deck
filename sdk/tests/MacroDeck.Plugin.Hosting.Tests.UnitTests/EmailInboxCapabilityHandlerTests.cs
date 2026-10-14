@@ -24,10 +24,16 @@ public class EmailInboxCapabilityHandlerTests
 	private static ServiceProvider _services = null!;
 
 	[OneTimeSetUp]
-	public static void OneTimeSetUp() => _services = new ServiceCollection().BuildServiceProvider();
+	public static void OneTimeSetUp()
+	{
+		_services = new ServiceCollection().BuildServiceProvider();
+	}
 
 	[OneTimeTearDown]
-	public static void OneTimeTearDown() => _services.Dispose();
+	public static void OneTimeTearDown()
+	{
+		_services.Dispose();
+	}
 
 	[Test]
 	public void A_provider_declares_exactly_one_provider_local_id_and_no_provider_declares_nothing()
@@ -87,26 +93,31 @@ public class EmailInboxCapabilityHandlerTests
 	[Test]
 	public async Task A_snapshot_passes_the_query_on_and_answers_status_counts_and_the_newest_messages_first()
 	{
-		var provider = new TestEmailInboxIntegration("IMAP", "work");
-		provider.Snapshots["work"] = new EmailInboxSnapshot
+		var provider = new TestEmailInboxIntegration("IMAP", "work")
 		{
-			Status = EmailInboxStatus.Error,
-			StatusMessage = "Sign-in failed.",
-			UnreadCount = 2,
-			TotalCount = 40,
-			SyncedAt = _now,
-			Messages =
-			[
-				Message("older", _now.AddHours(-2)),
-				Message("newest", _now.AddMinutes(-1)) with
+			Snapshots =
+			{
+				["work"] = new EmailInboxSnapshot
 				{
-					SenderName = "Bob",
-					SenderAddress = "bob@example.com",
-					Subject = new string('s', ProtocolLimits.MaxEmailSubjectLength + 10),
-					Preview = new string('p', ProtocolLimits.MaxEmailPreviewLength + 10),
-					IsRead = true
+					Status = EmailInboxStatus.Error,
+					StatusMessage = "Sign-in failed.",
+					UnreadCount = 2,
+					TotalCount = 40,
+					SyncedAt = _now,
+					Messages =
+					[
+						Message("older", _now.AddHours(-2)),
+						Message("newest", _now.AddMinutes(-1)) with
+						{
+							SenderName = "Bob",
+							SenderAddress = "bob@example.com",
+							Subject = new string('s', ProtocolLimits.MaxEmailSubjectLength + 10),
+							Preview = new string('p', ProtocolLimits.MaxEmailPreviewLength + 10),
+							IsRead = true
+						}
+					]
 				}
-			]
+			}
 		};
 		using var handler = Handler(provider);
 
@@ -137,10 +148,15 @@ public class EmailInboxCapabilityHandlerTests
 	[Test]
 	public async Task A_snapshot_never_carries_more_messages_than_were_asked_for()
 	{
-		var provider = new TestEmailInboxIntegration("IMAP", "work");
-		provider.Snapshots["work"] = Snapshot([
-			.. Enumerable.Range(0, 8).Select(index => Message($"m{index}", _now.AddMinutes(-index)))
-		]);
+		var provider = new TestEmailInboxIntegration("IMAP", "work")
+		{
+			Snapshots =
+			{
+				["work"] = Snapshot([
+					.. Enumerable.Range(0, 8).Select(index => Message($"m{index}", _now.AddMinutes(-index)))
+				])
+			}
+		};
 		using var handler = Handler(provider);
 
 		var result = await InvokeAsync<EmailInboxSnapshotResult>(handler,
@@ -153,17 +169,22 @@ public class EmailInboxCapabilityHandlerTests
 	[Test]
 	public async Task A_snapshot_over_the_byte_budget_keeps_the_newest_messages_and_says_it_was_truncated()
 	{
-		var provider = new TestEmailInboxIntegration("IMAP", "work");
-		provider.Snapshots["work"] = Snapshot([
-			.. Enumerable.Range(0, ProtocolLimits.MaxEmailMessages)
-				.Select(index => Message($"m{index:D2}", _now.AddMinutes(-index)) with
-				{
-					SenderName = new string('漢', 1000),
-					SenderAddress = new string('漢', 1000),
-					Subject = new string('漢', 1000),
-					Preview = new string('漢', 1000)
-				})
-		]);
+		var provider = new TestEmailInboxIntegration("IMAP", "work")
+		{
+			Snapshots =
+			{
+				["work"] = Snapshot([
+					.. Enumerable.Range(0, ProtocolLimits.MaxEmailMessages)
+						.Select(index => Message($"m{index:D2}", _now.AddMinutes(-index)) with
+						{
+							SenderName = new string('漢', 1000),
+							SenderAddress = new string('漢', 1000),
+							Subject = new string('漢', 1000),
+							Preview = new string('漢', 1000)
+						})
+				])
+			}
+		};
 		using var handler = Handler(provider);
 
 		var raw = await InvokeRawAsync(handler,
@@ -183,7 +204,8 @@ public class EmailInboxCapabilityHandlerTests
 	}
 
 	[Test]
-	public async Task An_unknown_inbox_is_unavailable_missing_arguments_are_invalid_and_an_unknown_operation_is_unsupported()
+	public async Task
+		An_unknown_inbox_is_unavailable_missing_arguments_are_invalid_and_an_unknown_operation_is_unsupported()
 	{
 		using var handler = Handler(new TestEmailInboxIntegration("IMAP", "work"));
 
@@ -239,7 +261,8 @@ public class EmailInboxCapabilityHandlerTests
 		time.Advance(TimeSpan.FromMilliseconds(250));
 
 		Assert.That(notifier.Updates,
-			Is.EqualTo(new (string, string?)[] { (CapabilityKinds.EmailInbox, null), (CapabilityKinds.EmailInbox, null) }));
+			Is.EqualTo(new (string, string?)[]
+				{ (CapabilityKinds.EmailInbox, null), (CapabilityKinds.EmailInbox, null) }));
 	}
 
 	[Test]
@@ -262,19 +285,26 @@ public class EmailInboxCapabilityHandlerTests
 	}
 
 	private static EmailInboxCapabilityHandler Handler(params TestEmailInboxIntegration[] providers)
-		=> Handler(new RecordingCatalogNotifier(), new ManualTimeProvider(_now), providers);
+	{
+		return Handler(new RecordingCatalogNotifier(), new ManualTimeProvider(_now), providers);
+	}
 
 	private static EmailInboxCapabilityHandler Handler(
 		IPluginCatalogNotifier notifier,
 		TimeProvider time,
 		params TestEmailInboxIntegration[] providers)
-		=> new(providers, TestMetadata.Default, notifier, time);
+	{
+		return new EmailInboxCapabilityHandler(providers, TestMetadata.Default, notifier, time);
+	}
 
 	private static EmailMessage Message(string id, DateTimeOffset receivedAt)
-		=> new() { Id = id, Subject = id, ReceivedAt = receivedAt };
+	{
+		return new EmailMessage { Id = id, Subject = id, ReceivedAt = receivedAt };
+	}
 
 	private static EmailInboxSnapshot Snapshot(IReadOnlyList<EmailMessage> messages)
-		=> new()
+	{
+		return new EmailInboxSnapshot
 		{
 			Status = EmailInboxStatus.Connected,
 			UnreadCount = 0,
@@ -282,9 +312,11 @@ public class EmailInboxCapabilityHandlerTests
 			SyncedAt = _now,
 			Messages = messages
 		};
+	}
 
 	private static CapabilityInvocation Invocation(string operation, object? arguments = null)
-		=> new()
+	{
+		return new CapabilityInvocation
 		{
 			Kind = CapabilityKinds.EmailInbox,
 			LocalId = ProviderCapabilityId.LocalId,
@@ -295,6 +327,7 @@ public class EmailInboxCapabilityHandlerTests
 			CorrelationId = "correlation",
 			Services = _services
 		};
+	}
 
 	private static async Task<JsonElement> InvokeRawAsync(
 		EmailInboxCapabilityHandler handler,
@@ -311,7 +344,9 @@ public class EmailInboxCapabilityHandlerTests
 		EmailInboxCapabilityHandler handler,
 		string operation,
 		object? arguments = null)
-		=> (await InvokeRawAsync(handler, operation, arguments)).Deserialize<T>(PluginProtocolJson.Options)!;
+	{
+		return (await InvokeRawAsync(handler, operation, arguments)).Deserialize<T>(PluginProtocolJson.Options)!;
+	}
 
 	private sealed class RecordingCatalogNotifier : IPluginCatalogNotifier
 	{

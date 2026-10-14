@@ -9,17 +9,27 @@ internal sealed class NullSystemMetricsService : ISystemMetricsService
 	public int GpuCount => 0;
 
 	public Task<double?> GetCpuUsageAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<double?>(null);
+	{
+		return Task.FromResult<double?>(null);
+	}
 
 	public Task<MemoryInfo?> GetMemoryAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<MemoryInfo?>(null);
+	{
+		return Task.FromResult<MemoryInfo?>(null);
+	}
 
 	public Task<double?> GetGpuUsageAsync(int gpuIndex, CancellationToken cancellationToken = default)
-		=> Task.FromResult<double?>(null);
+	{
+		return Task.FromResult<double?>(null);
+	}
 
 	public Task<string?> GetGpuNameAsync(int gpuIndex, CancellationToken cancellationToken = default)
-		=> Task.FromResult<string?>(null);
+	{
+		return Task.FromResult<string?>(null);
+	}
 
 	public Task<IReadOnlyList<DiskSample>> GetDisksAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult<IReadOnlyList<DiskSample>>([]);
+	{
+		return Task.FromResult<IReadOnlyList<DiskSample>>([]);
+	}
 }

@@ -15,7 +15,10 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 {
 	private readonly Lock _gate = new();
 	private readonly Dictionary<string, FakeUiResource> _resources = new(StringComparer.Ordinal);
-	private readonly Dictionary<(string Key, string Name), FakeUiResource> _pluginIcons = new(PluginIconComparer.Instance);
+
+	private readonly Dictionary<(string Key, string Name), FakeUiResource> _pluginIcons
+		= new(PluginIconComparer.Instance);
+
 	private readonly Dictionary<Guid, FakeUiResource> _icons = new();
 	private readonly Dictionary<(string InstanceId, string ArtworkId), FakeMusicPlayerArtwork> _artworks = new();
 
@@ -38,7 +41,8 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 	}
 
 	/// <inheritdoc />
-	public Task<UiResource> RegisterAsync(string name,
+	public Task<UiResource> RegisterAsync(
+		string name,
 		ReadOnlyMemory<byte> content,
 		string mediaType,
 		CancellationToken cancellationToken = default)
@@ -61,8 +65,9 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		lock (_gate)
 		{
 			var replaced = _resources.GetValueOrDefault(name);
-			var totalBytes = _resources.Values.Sum(resource => resource.Content.Length) -
-				(replaced?.Content.Length ?? 0) + content.Length;
+			var totalBytes = _resources.Values.Sum(resource => resource.Content.Length)
+				- (replaced?.Content.Length ?? 0)
+				+ content.Length;
 			var count = _resources.Count - (replaced is null ? 0 : 1) + 1;
 
 			if (totalBytes > MaxTotalBytes || count > MaxCount)
@@ -77,7 +82,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 				ResourceId = "plugin-test." + name,
 				ContentHash = AssetContentHash.Compute(bytes),
 				MediaType = mediaType.ToLowerInvariant(),
-				ByteLength = bytes.Length,
+				ByteLength = bytes.Length
 			};
 
 			_resources[name] = new FakeUiResource(handle, bytes);
@@ -109,7 +114,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 			ResourceId = $"app.macro-deck.plugin-icon.test.{key}.{name}",
 			ContentHash = AssetContentHash.Compute(bytes),
 			MediaType = mediaType.ToLowerInvariant(),
-			ByteLength = bytes.Length,
+			ByteLength = bytes.Length
 		};
 
 		lock (_gate)
@@ -155,7 +160,7 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 			ResourceId = $"app.macro-deck.plugin-icon.{iconId:D}",
 			ContentHash = AssetContentHash.Compute(bytes),
 			MediaType = mediaType.ToLowerInvariant(),
-			ByteLength = bytes.Length,
+			ByteLength = bytes.Length
 		};
 
 		lock (_gate)
@@ -204,7 +209,8 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 	/// for any other pair. Artwork of a media type Macro Deck does not accept, or larger than one resource may
 	/// be, throws <see cref="UiResourceErrorCode.Failed" />, and the registration counts against the quota like
 	/// <see cref="RegisterAsync" />.</remarks>
-	public async Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public async Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		CancellationToken cancellationToken = default)
@@ -238,7 +244,8 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 	/// <inheritdoc />
 	/// <remarks>Registers the seeded bytes whatever <paramref name="maxSize" /> asks for, as Macro Deck does
 	/// for a cover too small to have smaller copies.</remarks>
-	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(string name,
+	public Task<UiResource?> RegisterMusicPlayerArtworkAsync(
+		string name,
 		string instanceId,
 		string artworkId,
 		int maxSize,
@@ -277,11 +284,16 @@ public sealed class FakeUiResourceRegistry : IUiResourceRegistry
 		public static readonly PluginIconComparer Instance = new();
 
 		public bool Equals((string Key, string Name) x, (string Key, string Name) y)
-			=> string.Equals(x.Key, y.Key, StringComparison.Ordinal) &&
-				string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
+		{
+			return string.Equals(x.Key, y.Key, StringComparison.Ordinal)
+				&& string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
+		}
 
 		public int GetHashCode((string Key, string Name) obj)
-			=> HashCode.Combine(StringComparer.Ordinal.GetHashCode(obj.Key), StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name));
+		{
+			return HashCode.Combine(StringComparer.Ordinal.GetHashCode(obj.Key),
+				StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name));
+		}
 	}
 }
 

@@ -24,8 +24,13 @@ internal static class TestTimerCoordinators
 
 	private sealed class NoPrompt : ICountdownDurationPrompt
 	{
-		public Task<int?> AskAsync(Guid widgetId, string originClientId, int? initialSeconds,
+		public Task<int?> AskAsync(
+			Guid widgetId,
+			string originClientId,
+			int? initialSeconds,
 			CancellationToken cancellationToken)
-			=> Task.FromResult<int?>(null);
+		{
+			return Task.FromResult<int?>(null);
+		}
 	}
 }

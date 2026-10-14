@@ -34,7 +34,10 @@ public class TemplateVariableTests
 	}
 
 	[TearDown]
-	public void TearDown() => _templates.Dispose();
+	public void TearDown()
+	{
+		_templates.Dispose();
+	}
 
 	[Test]
 	public async Task A_template_variable_combines_static_text_variables_and_filters()
@@ -158,7 +161,9 @@ public class TemplateVariableTests
 	public async Task A_color_template_stores_the_canonical_color_and_follows_its_source()
 	{
 		var primary = await Plain("primary", VariableType.Color, "#FF0000");
-		var created = await Template("primary_dark", VariableType.Color, "{{ vars.primary | color | color_darken: 50 }}");
+		var created = await Template("primary_dark",
+			VariableType.Color,
+			"{{ vars.primary | color | color_darken: 50 }}");
 
 		var first = Value(created.Data!);
 		await _service.SetValue(primary.Id, "rgb(0, 0, 255)");
@@ -574,7 +579,12 @@ public class TemplateVariableTests
 			null,
 			null,
 			"doubled");
-		var cyclic = _templates.Preview("{{ vars.reader }}", VariableType.Text, null, VariableScope.Global, null, null,
+		var cyclic = _templates.Preview("{{ vars.reader }}",
+			VariableType.Text,
+			null,
+			VariableScope.Global,
+			null,
+			null,
 			"planned");
 		var invalid = _templates.Preview("{{ vars.count }} items",
 			VariableType.Numeric,
@@ -646,19 +656,28 @@ public class TemplateVariableTests
 		return created;
 	}
 
-	private static VariableEntity Stored(string name, VariableType type, string value, string? template = null) => new()
+	private static VariableEntity Stored(string name, VariableType type, string value, string? template = null)
 	{
-		Id = Guid.CreateVersion7(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value,
-		TemplateSource = template is null ? null : new VariableTemplateSource(template)
-	};
+		return new VariableEntity
+		{
+			Id = Guid.CreateVersion7(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value,
+			TemplateSource = template is null ? null : new VariableTemplateSource(template)
+		};
+	}
 
-	private string Value(VariableEntity variable) => _registry.GetById(variable.Id)!.Value;
+	private string Value(VariableEntity variable)
+	{
+		return _registry.GetById(variable.Id)!.Value;
+	}
 
 	private int UpdatesOf(VariableEntity variable)
-		=> _mediator.Published.OfType<VariableUpdatedNotification>().Count(update => update.Variable.Id == variable.Id);
+	{
+		return _mediator.Published.OfType<VariableUpdatedNotification>()
+			.Count(update => update.Variable.Id == variable.Id);
+	}
 }

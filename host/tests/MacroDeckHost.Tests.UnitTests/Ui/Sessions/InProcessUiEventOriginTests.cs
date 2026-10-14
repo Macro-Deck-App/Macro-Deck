@@ -53,7 +53,8 @@ internal sealed class InProcessUiEventOriginTests : UiSessionFixture
 		Assert.That(ticket.Accepted, Is.True);
 		Attach(ticket.SessionId, Connection);
 
-		Broker.SendEvent(new UiSendEventRequest { SessionId = ticket.SessionId, NodeId = "root", Name = UiComponentEvents.Press },
+		Broker.SendEvent(new UiSendEventRequest
+				{ SessionId = ticket.SessionId, NodeId = "root", Name = UiComponentEvents.Press },
 			Connection,
 			ClientId);
 		await WaitForAsync(() => _session.Origin is not null, "The press never reached the session.");
@@ -61,8 +62,14 @@ internal sealed class InProcessUiEventOriginTests : UiSessionFixture
 	}
 
 	private IReadOnlyList<ActionExecutionStatusEvent> FailuresShownToTheClient()
-		=> [.. Transport.InGroup(UiClientGroups.For(ClientId)).Select(recorded => recorded.Message)
-			.OfType<ActionExecutionStatusEvent>()];
+	{
+		return
+		[
+			.. Transport.InGroup(UiClientGroups.For(ClientId))
+				.Select(recorded => recorded.Message)
+				.OfType<ActionExecutionStatusEvent>()
+		];
+	}
 
 	[Test]
 	public async Task A_failure_reported_after_the_handler_returned_reaches_the_pressing_client()
@@ -132,12 +139,20 @@ internal sealed class InProcessUiEventOriginTests : UiSessionFixture
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces =>
 			[new() { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared }];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(session);
+		{
+			return Task.FromResult<IUiSession?>(session);
+		}
 	}
 
 	private sealed class OriginSession : IUiSession
@@ -158,21 +173,33 @@ internal sealed class InProcessUiEventOriginTests : UiSessionFixture
 			remove { }
 		}
 
-		public UiTree BuildTree() => new()
+		public UiTree BuildTree()
 		{
-			Revision = 1,
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
-			Root = new UiNode { Id = "root", Type = UiComponents.Stack }
-		};
+			return new UiTree
+			{
+				Revision = 1,
+				Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared },
+				Root = new UiNode { Id = "root", Type = UiComponents.Stack }
+			};
+		}
 
-		public IReadOnlyList<UiPatch> DrainPatches() => [];
+		public IReadOnlyList<UiPatch> DrainPatches()
+		{
+			return [];
+		}
 
 		public void Dispatch(UiEvent uiEvent)
 		{
 		}
 
-		public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin) => _origin = origin;
+		public void Dispatch(UiEvent uiEvent, IUiEventOrigin origin)
+		{
+			_origin = origin;
+		}
 
-		public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+		public ValueTask DisposeAsync()
+		{
+			return ValueTask.CompletedTask;
+		}
 	}
 }

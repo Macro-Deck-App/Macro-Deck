@@ -11,7 +11,10 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 
 	private readonly Func<DelegateRemoteManager?> _manager;
 
-	public RunRemoteScriptActionDefinition(Func<DelegateRemoteManager?> manager) => _manager = manager;
+	public RunRemoteScriptActionDefinition(Func<DelegateRemoteManager?> manager)
+	{
+		_manager = manager;
+	}
 
 	public string Id => "run-remote-script";
 
@@ -24,20 +27,23 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.DynamicChoice("instance",
-			label: AppStrings.Integrations.Delegation.Actions.InstanceLabel(),
-			description: AppStrings.Integrations.Delegation.Actions.InstanceDescription(),
+			AppStrings.Integrations.Delegation.Actions.InstanceLabel(),
+			AppStrings.Integrations.Delegation.Actions.InstanceDescription(),
 			placeholder: AppStrings.Integrations.Delegation.Actions.InstancePlaceholder()),
 		ActionParameter.DynamicChoice("scriptId",
-			label: AppStrings.Integrations.Delegation.Actions.ScriptLabel(),
-			description: AppStrings.Integrations.Delegation.Actions.ScriptDescription(),
+			AppStrings.Integrations.Delegation.Actions.ScriptLabel(),
+			AppStrings.Integrations.Delegation.Actions.ScriptDescription(),
 			required: true),
 		ActionParameter.Duration("timeout",
-			label: AppStrings.Integrations.Delegation.Actions.TimeoutLabel(),
-			description: AppStrings.Integrations.Delegation.Actions.TimeoutDescription(),
+			AppStrings.Integrations.Delegation.Actions.TimeoutLabel(),
+			AppStrings.Integrations.Delegation.Actions.TimeoutDescription(),
 			defaultMilliseconds: DefaultTimeoutMilliseconds)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_manager);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_manager);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -96,7 +102,10 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 	{
 		private readonly Func<DelegateRemoteManager?> _manager;
 
-		public Executor(Func<DelegateRemoteManager?> manager) => _manager = manager;
+		public Executor(Func<DelegateRemoteManager?> manager)
+		{
+			_manager = manager;
+		}
 
 		public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 		{
@@ -148,8 +157,10 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 		}
 
 		private static double ReadTimeoutMilliseconds(ActionExecutionContext context)
-			=> context.Parameters.TryGetValue("timeout", out var value) && value is not null
+		{
+			return context.Parameters.TryGetValue("timeout", out var value) && value is not null
 				? Convert.ToDouble(value, CultureInfo.InvariantCulture)
 				: DefaultTimeoutMilliseconds;
+		}
 	}
 }

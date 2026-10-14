@@ -9,22 +9,34 @@ internal abstract record HttpAuth
 
 internal sealed record HttpAuthNone : HttpAuth
 {
-	public override string ToString() => "None";
+	public override string ToString()
+	{
+		return "None";
+	}
 }
 
 internal sealed record HttpAuthBasic(string Username, string Secret) : HttpAuth
 {
-	public override string ToString() => "Basic";
+	public override string ToString()
+	{
+		return "Basic";
+	}
 }
 
 internal sealed record HttpAuthBearer(string Token) : HttpAuth
 {
-	public override string ToString() => "Bearer";
+	public override string ToString()
+	{
+		return "Bearer";
+	}
 }
 
 internal sealed record HttpAuthHeader(string HeaderName, string Value) : HttpAuth
 {
-	public override string ToString() => $"Header({HeaderName})";
+	public override string ToString()
+	{
+		return $"Header({HeaderName})";
+	}
 }
 
 internal abstract record HttpBody
@@ -34,23 +46,34 @@ internal abstract record HttpBody
 
 internal sealed record HttpBodyNone : HttpBody
 {
-	public override string ToString() => "None";
+	public override string ToString()
+	{
+		return "None";
+	}
 }
 
 internal sealed record HttpBodyJson(string Json, string? ContentType) : HttpBody
 {
-	public override string ToString() => "Json";
+	public override string ToString()
+	{
+		return "Json";
+	}
 }
 
 internal sealed record HttpBodyText(string Text, string? ContentType) : HttpBody
 {
-	public override string ToString() => "Text";
+	public override string ToString()
+	{
+		return "Text";
+	}
 }
 
 internal sealed record HttpBodyForm(IReadOnlyDictionary<string, string> Fields, string? ContentType) : HttpBody
 {
 	public override string ToString()
-		=> string.Create(CultureInfo.InvariantCulture, $"Form({Fields.Count} field(s))");
+	{
+		return string.Create(CultureInfo.InvariantCulture, $"Form({Fields.Count} field(s))");
+	}
 }
 
 internal sealed record HttpBodyMultipart(
@@ -59,7 +82,9 @@ internal sealed record HttpBodyMultipart(
 	string FileFieldName) : HttpBody
 {
 	public override string ToString()
-		=> string.Create(CultureInfo.InvariantCulture, $"Multipart({Fields.Count} field(s) + file)");
+	{
+		return string.Create(CultureInfo.InvariantCulture, $"Multipart({Fields.Count} field(s) + file)");
+	}
 }
 
 internal sealed record HttpRequestSpec(
@@ -74,9 +99,11 @@ internal sealed record HttpRequestSpec(
 	long MaxResponseBytes)
 {
 	public override string ToString()
-		=> string.Create(CultureInfo.InvariantCulture,
-			$"HttpRequestSpec {{ Method = {Method}, Uri = {Uri.Scheme}://{Uri.Host}{Uri.AbsolutePath}, " +
-			$"Headers = {Headers.Count} header(s), Auth = {Auth}, Body = {Body}, Timeout = {Timeout}, " +
-			$"FollowRedirects = {FollowRedirects}, ValidateTls = {ValidateTls}, " +
-			$"MaxResponseBytes = {MaxResponseBytes} }}");
+	{
+		return string.Create(CultureInfo.InvariantCulture,
+			$"HttpRequestSpec {{ Method = {Method}, Uri = {Uri.Scheme}://{Uri.Host}{Uri.AbsolutePath}, "
+			+ $"Headers = {Headers.Count} header(s), Auth = {Auth}, Body = {Body}, Timeout = {Timeout}, "
+			+ $"FollowRedirects = {FollowRedirects}, ValidateTls = {ValidateTls}, "
+			+ $"MaxResponseBytes = {MaxResponseBytes} }}");
+	}
 }

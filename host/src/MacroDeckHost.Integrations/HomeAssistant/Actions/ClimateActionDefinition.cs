@@ -30,27 +30,30 @@ internal sealed class ClimateActionDefinition : IDynamicOptionsActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Autocomplete(EntityParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Climate.EntityLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.EntityLabel(),
 			required: true),
 		ActionParameter.Number(TemperatureParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Climate.TemperatureLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.Climate.TemperatureDescription(),
-			min: -50,
-			max: 100,
-			step: 0.5),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.TemperatureLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.TemperatureDescription(),
+			-50,
+			100,
+			0.5),
 		ActionParameter.DynamicChoice(HvacModeParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Climate.ModeLabel(),
-			description: AppStrings.Integrations.HomeAssistant.Actions.Climate.ModeDescription(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.ModeLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.ModeDescription(),
 			placeholder: AppStrings.Integrations.HomeAssistant.Actions.Climate.LeaveUnchanged()),
 		ActionParameter.DynamicChoice(FanModeParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Climate.FanModeLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.FanModeLabel(),
 			placeholder: AppStrings.Integrations.HomeAssistant.Actions.Climate.LeaveUnchanged()),
 		ActionParameter.DynamicChoice(PresetModeParameterName,
-			label: AppStrings.Integrations.HomeAssistant.Actions.Climate.PresetLabel(),
+			AppStrings.Integrations.HomeAssistant.Actions.Climate.PresetLabel(),
 			placeholder: AppStrings.Integrations.HomeAssistant.Actions.Climate.LeaveUnchanged())
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,

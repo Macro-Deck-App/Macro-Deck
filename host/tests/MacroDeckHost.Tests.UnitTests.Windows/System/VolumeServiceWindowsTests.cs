@@ -37,7 +37,9 @@ public class VolumeServiceWindowsTests
 	public void Subscribing_to_and_unsubscribing_from_volume_changes_does_not_throw()
 	{
 		var service = VolumeServiceFactory.Create();
-		Action handler = () => { };
+		var handler = () =>
+		{
+		};
 
 		Assert.Multiple(() =>
 		{
@@ -53,7 +55,7 @@ public class VolumeServiceWindowsTests
 		var service = VolumeServiceFactory.Create();
 
 		var devices = await service.GetDevicesAsync();
-		TestContext.Out.WriteLine(FormattableString.Invariant($"{devices.Count} active endpoint(s)."));
+		await TestContext.Out.WriteLineAsync(FormattableString.Invariant($"{devices.Count} active endpoint(s)."));
 
 		foreach (var device in devices)
 		{
@@ -74,7 +76,7 @@ public class VolumeServiceWindowsTests
 		var service = VolumeServiceFactory.Create();
 		var target = new AudioTarget(AudioFlow.Output, "{0.0.0.00000000}.{00000000-0000-0000-0000-000000000000}");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await service.GetVolumeAsync(target), Is.Null);
 			Assert.That(await service.SetVolumeAsync(target, 0.5f), Is.False);
@@ -100,7 +102,8 @@ public class VolumeServiceWindowsTests
 		try
 		{
 			await service.GetVolumeAsync(AudioTarget.DefaultInput);
-			await service.SetVolumeAsync(AudioTarget.DefaultOutput, original > 0.5f ? original - 0.01f : original + 0.01f);
+			await service.SetVolumeAsync(AudioTarget.DefaultOutput,
+				original > 0.5f ? original - 0.01f : original + 0.01f);
 
 			Assert.That(async () => await changed.Task.WaitAsync(TimeSpan.FromSeconds(5)), Throws.Nothing);
 		}

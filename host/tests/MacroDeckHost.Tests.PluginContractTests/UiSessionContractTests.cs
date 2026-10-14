@@ -22,37 +22,40 @@ internal sealed class UiSessionContractTests : UiContractFixture
 	// Verbatim. Every character is load-bearing - see the assertions, each of which names the transform
 	// it would catch.
 	private const string AdversarialPatch =
-		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":" +
-		"{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\"," +
-		"\"n\":100000000000000000000000000000000000001}}],  " +
-		"\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
+		"{\"operations\":[{\"op\":\"set-properties\",\"nodeId\":\"field.apiKey\",\"properties\":"
+		+ "{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\","
+		+ "\"n\":100000000000000000000000000000000000001}}],  "
+		+ "\"toRevision\":2,\"fromRevision\":1,\"x-vendor\":{\"keep\":true}}";
 
 	// Same construction as the patch, on a tree: "root" declared before "surface" against the model's
 	// own property order, two spaces before it, unsorted and duplicated property keys, an escaped
 	// non-ASCII string, a fallback subtree and an unmapped member on the root node.
 	private const string AdversarialTree =
-		"{\"revision\":1,  \"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":" +
-		"{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\"," +
-		"\"n\":100000000000000000000000000000000000001}," +
-		"\"children\":[],\"fallback\":{\"id\":\"fb\",\"type\":\"text\",\"properties\":{},\"children\":[]}," +
-		"\"x-vendor\":{\"keep\":true}}," +
-		"\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}}}";
+		"{\"revision\":1,  \"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":"
+		+ "{\"z\":1.0,\"a\":\"caf\\u00e9 a<b\",\"a\":\"shadowed\","
+		+ "\"n\":100000000000000000000000000000000000001},"
+		+ "\"children\":[],\"fallback\":{\"id\":\"fb\",\"type\":\"text\",\"properties\":{},\"children\":[]},"
+		+ "\"x-vendor\":{\"keep\":true}},"
+		+ "\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}}}";
 
 	private const string PlainTree =
-		"{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}}," +
-		"\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
+		"{\"revision\":1,\"surface\":{\"kind\":\"config\",\"sessionMode\":\"exclusive\",\"attributes\":{}},"
+		+ "\"root\":{\"id\":\"root\",\"type\":\"panel\",\"properties\":{},\"children\":[]}}";
 
 	private TestUiCapabilityHandler _handler = null!;
 
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.Ui,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
-	private async Task<string> ConnectAndOpenAsync(string treeJson,
+	private async Task<string> ConnectAndOpenAsync(
+		string treeJson,
 		IReadOnlyDictionary<string, JsonElement>? attributes = null)
 	{
 		_handler = new TestUiCapabilityHandler
@@ -195,15 +198,17 @@ internal sealed class UiSessionContractTests : UiContractFixture
 	}
 
 	private IReadOnlyList<JsonElement> SessionOpenInvocations()
-		=>
+	{
+		return
 		[
 			.. Link.SentByHost
 				.Where(envelope =>
 					string.Equals(envelope.Type, MessageTypes.CapabilityInvoke, StringComparison.Ordinal))
 				.Select(envelope =>
 					envelope.Payload!.Value.Deserialize<CapabilityInvokePayload>(PluginProtocolJson.Options)!)
-				.Where(payload => string.Equals(payload.Kind, CapabilityKinds.Ui, StringComparison.Ordinal) &&
-					string.Equals(payload.Operation, CapabilityOperations.Ui.SessionOpen, StringComparison.Ordinal))
+				.Where(payload => string.Equals(payload.Kind, CapabilityKinds.Ui, StringComparison.Ordinal)
+					&& string.Equals(payload.Operation, CapabilityOperations.Ui.SessionOpen, StringComparison.Ordinal))
 				.Select(payload => payload.Arguments!.Value)
 		];
+	}
 }

@@ -15,7 +15,10 @@ namespace MacroDeck.Plugin.Hosting.Capabilities.Actions;
 /// </summary>
 internal static class ActionParameterMapper
 {
-	public static ActionParameterDto ToDto(ActionParameter parameter) => ToDto(parameter, depth: 0);
+	public static ActionParameterDto ToDto(ActionParameter parameter)
+	{
+		return ToDto(parameter, 0);
+	}
 
 	private static ActionParameterDto ToDto(ActionParameter parameter, int depth)
 	{
@@ -63,8 +66,13 @@ internal static class ActionParameterMapper
 	}
 
 	private static ActionParameterOptionDto ToDto(ActionParameterOption option)
-		=> new() { Value = option.Value, Label = PluginText.ToWireOrNull(option.Label), Metadata = option.Metadata };
+	{
+		return new ActionParameterOptionDto
+			{ Value = option.Value, Label = PluginText.ToWireOrNull(option.Label), Metadata = option.Metadata };
+	}
 
 	private static JsonElement? ToElement(object? value)
-		=> value is null ? null : JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	{
+		return value is null ? null : JsonSerializer.SerializeToElement(value, PluginProtocolJson.Options);
+	}
 }

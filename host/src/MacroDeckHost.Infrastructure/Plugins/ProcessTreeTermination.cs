@@ -13,7 +13,7 @@ internal static class ProcessTreeTermination
 			if (!process.HasExited)
 			{
 				PluginInfrastructureLog.KillingProcessTree(logger, processId);
-				process.Kill(entireProcessTree: true);
+				process.Kill(true);
 			}
 		}
 		catch (InvalidOperationException)
@@ -27,7 +27,7 @@ internal static class ProcessTreeTermination
 			{
 				if (!process.HasExited)
 				{
-					process.Kill(entireProcessTree: false);
+					process.Kill(false);
 				}
 			}
 			catch (InvalidOperationException)

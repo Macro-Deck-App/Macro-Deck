@@ -23,10 +23,10 @@ internal sealed class PluginManifestBlockValidationTests
 
 	private PluginManifestReadResult Read(string? extraBlocks, string? entrypoints = null)
 	{
-		var entrypointBlock = entrypoints ??
-			"""
-			"entrypoints": { "linux-x64": { "executable": "TestPlugin" } }
-			""";
+		var entrypointBlock = entrypoints
+			?? """
+			   "entrypoints": { "linux-x64": { "executable": "TestPlugin" } }
+			   """;
 
 		var extras = extraBlocks is null ? string.Empty : "," + extraBlocks;
 
@@ -40,7 +40,7 @@ internal sealed class PluginManifestBlockValidationTests
 					 }
 					 """;
 
-		return _reader.ReadFromJson(json, versionDirectory: null, PluginId, "1.0.0");
+		return _reader.ReadFromJson(json, null, PluginId, "1.0.0");
 	}
 
 	private void AssertRejected(string? extraBlocks, PluginManifestError expected, string? entrypoints = null)
@@ -257,12 +257,14 @@ internal sealed class PluginManifestBlockValidationTests
 		{
 			Assert.That(Read("""
 							 "permissions": [ "  " ]
-							 """).Error,
+							 """)
+					.Error,
 				Is.EqualTo(PluginManifestError.InvalidPermission));
 
 			Assert.That(Read("""
 							 "permissions": [ "host:deck", "host:deck" ]
-							 """).Error,
+							 """)
+					.Error,
 				Is.EqualTo(PluginManifestError.InvalidPermission));
 		});
 	}
@@ -295,12 +297,14 @@ internal sealed class PluginManifestBlockValidationTests
 		{
 			Assert.That(Read("""
 							 "languages": [ "  " ]
-							 """).Error,
+							 """)
+					.Error,
 				Is.EqualTo(PluginManifestError.InvalidLanguage));
 
 			Assert.That(Read("""
 							 "languages": [ "de", "DE" ]
-							 """).Error,
+							 """)
+					.Error,
 				Is.EqualTo(PluginManifestError.InvalidLanguage));
 		});
 	}
@@ -480,7 +484,8 @@ internal sealed class PluginManifestBlockValidationTests
 	{
 		var manifest = Read("""
 							"additionalLinks": [ { "type": "wiki", "url": "https://example.com/wiki" } ]
-							""").Manifest!;
+							""")
+			.Manifest!;
 
 		var json = JsonSerializer.Serialize(manifest, PluginManifestJson.Options);
 		using var document = JsonDocument.Parse(json);

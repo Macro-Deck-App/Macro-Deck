@@ -48,9 +48,13 @@ public static class PluginArtifactDigest
 		foreach (var (rid, entrypoint) in manifest.Entrypoints.OrderBy(pair => pair.Key, StringComparer.Ordinal))
 		{
 			var runtime = entrypoint.Runtime;
-			builder.Append("e\t").Append(rid).Append('\t')
-				.Append(runtime?.Kind ?? PluginEntrypointRuntimeKind.SelfContained).Append('\t')
-				.Append(runtime?.DotnetVersion ?? string.Empty).Append('\t')
+			builder.Append("e\t")
+				.Append(rid)
+				.Append('\t')
+				.Append(runtime?.Kind ?? PluginEntrypointRuntimeKind.SelfContained)
+				.Append('\t')
+				.Append(runtime?.DotnetVersion ?? string.Empty)
+				.Append('\t')
 				.Append(entrypoint.Executable);
 
 			foreach (var argument in entrypoint.Arguments ?? [])
@@ -68,9 +72,13 @@ public static class PluginArtifactDigest
 
 		foreach (var file in (manifest.Files ?? []).OrderBy(entry => entry.Path, StringComparer.Ordinal))
 		{
-			builder.Append("f\t").Append(file.Path).Append('\t')
-				.Append(file.Sha256).Append('\t')
-				.Append(file.Size).Append('\n');
+			builder.Append("f\t")
+				.Append(file.Path)
+				.Append('\t')
+				.Append(file.Sha256)
+				.Append('\t')
+				.Append(file.Size)
+				.Append('\n');
 		}
 
 		return Encoding.UTF8.GetBytes(builder.ToString());

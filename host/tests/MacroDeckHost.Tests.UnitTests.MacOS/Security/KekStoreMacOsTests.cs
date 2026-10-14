@@ -23,7 +23,10 @@ public class KekStoreMacOsTests
 	}
 
 	[TearDown]
-	public void TearDown() => _store.Delete(_identity);
+	public void TearDown()
+	{
+		_store.Delete(_identity);
+	}
 
 	[Test]
 	public void The_factory_returns_the_keychain_store_on_this_platform()

@@ -8,15 +8,18 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class ActionConditionEvaluatorExpressionTests
 {
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static (ActionConditionEvaluator Evaluator, VariableContext Context) Build(params VariableEntity[] vars)
 	{
@@ -112,9 +115,9 @@ public class ActionConditionEvaluatorExpressionTests
 	public void And_is_true_only_when_all_leaves_true()
 	{
 		const string expr =
-			"{\"kind\":\"and\",\"id\":\"g\",\"operands\":[" +
-			"{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true}," +
-			"{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"cpu\"},\"operator\":\"<\",\"right\":90}]}";
+			"{\"kind\":\"and\",\"id\":\"g\",\"operands\":["
+			+ "{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true},"
+			+ "{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"cpu\"},\"operator\":\"<\",\"right\":90}]}";
 
 		Assert.Multiple(() =>
 		{
@@ -133,9 +136,9 @@ public class ActionConditionEvaluatorExpressionTests
 	public void Or_is_true_when_any_leaf_true()
 	{
 		const string expr =
-			"{\"kind\":\"or\",\"id\":\"g\",\"operands\":[" +
-			"{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true}," +
-			"{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"recording\"},\"operator\":\"==\",\"right\":true}]}";
+			"{\"kind\":\"or\",\"id\":\"g\",\"operands\":["
+			+ "{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true},"
+			+ "{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"recording\"},\"operator\":\"==\",\"right\":true}]}";
 
 		Assert.That(Evaluate(expr,
 				Var("streaming", VariableType.Boolean, "false"),
@@ -177,9 +180,9 @@ public class ActionConditionEvaluatorExpressionTests
 	public void Leaves_are_reported_and_short_circuited_operands_get_null_result()
 	{
 		const string expr =
-			"{\"kind\":\"and\",\"id\":\"g\",\"operands\":[" +
-			"{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true}," +
-			"{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}]}";
+			"{\"kind\":\"and\",\"id\":\"g\",\"operands\":["
+			+ "{\"kind\":\"compare\",\"id\":\"a\",\"left\":{\"$var\":\"streaming\"},\"operator\":\"==\",\"right\":true},"
+			+ "{\"kind\":\"compare\",\"id\":\"b\",\"left\":{\"$var\":\"cpu\"},\"operator\":\">=\",\"right\":80}]}";
 
 		var (evaluator, context) = Build(Var("streaming", VariableType.Boolean, "false"),
 			Var("cpu", VariableType.Numeric, "85"));
@@ -199,9 +202,9 @@ public class ActionConditionEvaluatorExpressionTests
 	// A7 - a state operator leaf inside a nested expression: no right side is resolved for it (RightDisplay
 	// stays empty), and its verdict still participates in short-circuiting the sibling leaf normally.
 	private const string StateAndEqualityExpression =
-		"{\"kind\":\"and\",\"id\":\"root\",\"operands\":[" +
-		"{\"kind\":\"compare\",\"id\":\"c1\",\"left\":{\"$var\":\"artist\"},\"operator\":\"isNotEmpty\",\"right\":\"\"}," +
-		"{\"kind\":\"compare\",\"id\":\"c2\",\"left\":{\"$var\":\"track\"},\"operator\":\"==\",\"right\":\"Creep\"}]}";
+		"{\"kind\":\"and\",\"id\":\"root\",\"operands\":["
+		+ "{\"kind\":\"compare\",\"id\":\"c1\",\"left\":{\"$var\":\"artist\"},\"operator\":\"isNotEmpty\",\"right\":\"\"},"
+		+ "{\"kind\":\"compare\",\"id\":\"c2\",\"left\":{\"$var\":\"track\"},\"operator\":\"==\",\"right\":\"Creep\"}]}";
 
 	[Test]
 	public void A_state_operator_leaf_reports_no_right_display_and_the_aggregate_is_true()

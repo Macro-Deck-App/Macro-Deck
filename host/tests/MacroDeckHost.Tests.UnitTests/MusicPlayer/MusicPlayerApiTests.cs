@@ -4,8 +4,6 @@ using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
-using MacroDeck.Sdk.MusicPlayer;
-using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.MusicPlayer;
@@ -33,7 +31,9 @@ internal sealed class MusicPlayerApiTests
 		var registry = new Registry();
 		registry.Instances.Add(Descriptor("spotify::alice", "Spotify (alice)"));
 		registry.Instances.Add(Descriptor("net.example.jukebox::default", "Jukebox"));
-		using var api = new InProcessMusicPlayerApi(registry, new FixedColor(), new MusicPlayerStateNotifier(),
+		using var api = new InProcessMusicPlayerApi(registry,
+			new FixedColor(),
+			new MusicPlayerStateNotifier(),
 			Serilog.Core.Logger.None);
 
 		Assert.That(api.Instances.Select(instance => (instance.Id, instance.ProviderId, instance.DisplayName)),
@@ -146,20 +146,25 @@ internal sealed class MusicPlayerApiTests
 	}
 
 	private static Task<HostCallbackResult> AlbumColorAsync(IMusicPlayerAlbumColor? albumColor, string instanceId)
-		=> Router(albumColor).RouteAsync(PluginId,
-			"session-1",
-			Guid.CreateVersion7().ToString(),
-			new HostInvokePayload
-			{
-				Api = HostApis.MusicPlayers,
-				Operation = HostOperations.MusicPlayers.AlbumColor,
-				Arguments = JsonSerializer.SerializeToElement(new MusicPlayerAlbumColorArguments { InstanceId = instanceId },
-					PluginProtocolJson.Options)
-			},
-			CancellationToken.None);
+	{
+		return Router(albumColor)
+			.RouteAsync(PluginId,
+				"session-1",
+				Guid.CreateVersion7().ToString(),
+				new HostInvokePayload
+				{
+					Api = HostApis.MusicPlayers,
+					Operation = HostOperations.MusicPlayers.AlbumColor,
+					Arguments = JsonSerializer.SerializeToElement(
+						new MusicPlayerAlbumColorArguments { InstanceId = instanceId },
+						PluginProtocolJson.Options)
+				},
+				CancellationToken.None);
+	}
 
 	private static PluginCallbackRouter Router(IMusicPlayerAlbumColor? albumColor)
-		=> new(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
+	{
+		return new PluginCallbackRouter(new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None),
 			null!,
 			new ServiceCollection().BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
 			null!,
@@ -177,20 +182,29 @@ internal sealed class MusicPlayerApiTests
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			null!,
-			new HostCallbackThrottle(TimeProvider.System, capacity: 1000, refillPerSecond: 1000),
+			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
 			new FakeHostLockState(),
 			Serilog.Core.Logger.None,
 			albumColor: albumColor);
+	}
 
-	private static async Task<(HostStatePusher Pusher, FakePluginConnection Connection)> PusherAsync(Registry registry,
+	private static async Task<(HostStatePusher Pusher, FakePluginConnection Connection)> PusherAsync(
+		Registry registry,
 		MusicPlayerStateNotifier notifier)
 	{
 		var sessions = new PluginSessionRegistry(TimeProvider.System, Serilog.Core.Logger.None);
 		var connection = new FakePluginConnection();
-		var pusher = new HostStatePusher(sessions, new FakeDeckNavigator(), new FakeScriptApi(), new FakeWidgetApi(),
-			new StubEventBindingTracker(), new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
-			new FakeAdbManager(), new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled), Serilog.Core.Logger.None,
-			musicPlayers: registry, musicPlayerNotifier: notifier);
+		var pusher = new HostStatePusher(sessions,
+			new FakeDeckNavigator(),
+			new FakeScriptApi(),
+			new FakeWidgetApi(),
+			new StubEventBindingTracker(),
+			new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None),
+			new FakeAdbManager(),
+			new FixedAdbAccessPolicy(PluginAdbAccess.NotEnabled),
+			Serilog.Core.Logger.None,
+			musicPlayers: registry,
+			musicPlayerNotifier: notifier);
 
 		await sessions.Create(new PluginSessionRecord
 		{
@@ -225,8 +239,13 @@ internal sealed class MusicPlayerApiTests
 	}
 
 	private static MusicPlayerInstanceDescriptor Descriptor(string instanceId, string displayName)
-		=> new(instanceId, instanceId[..instanceId.IndexOf("::", StringComparison.Ordinal)], "Provider", displayName,
+	{
+		return new MusicPlayerInstanceDescriptor(instanceId,
+			instanceId[..instanceId.IndexOf("::", StringComparison.Ordinal)],
+			"Provider",
+			displayName,
 			false);
+	}
 
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
@@ -243,11 +262,20 @@ internal sealed class MusicPlayerApiTests
 	{
 		public List<MusicPlayerInstanceDescriptor> Instances { get; } = [];
 
-		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances() => [.. Instances];
+		public IReadOnlyList<MusicPlayerInstanceDescriptor> GetInstances()
+		{
+			return [.. Instances];
+		}
 
-		public IMusicPlayer? GetPlayer(string instanceId) => null;
+		public IMusicPlayer? GetPlayer(string instanceId)
+		{
+			return null;
+		}
 
-		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options) => null;
+		public IMusicPlayer? GetPlayerWithOptions(string instanceId, IReadOnlyDictionary<string, object> options)
+		{
+			return null;
+		}
 
 		public IMusicPlayer? DefaultPlayer => null;
 	}
@@ -257,6 +285,8 @@ internal sealed class MusicPlayerApiTests
 		public Dictionary<string, string> Colors { get; } = new(StringComparer.Ordinal);
 
 		public Task<string?> GetAsync(string instanceId, CancellationToken cancellationToken = default)
-			=> Task.FromResult(Colors.GetValueOrDefault(instanceId));
+		{
+			return Task.FromResult(Colors.GetValueOrDefault(instanceId));
+		}
 	}
 }

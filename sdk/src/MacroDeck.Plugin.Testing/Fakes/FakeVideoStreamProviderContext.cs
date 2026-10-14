@@ -156,7 +156,8 @@ public sealed class FakeVideoStreamProviderContext : IVideoStreamProviderContext
 	public Task NotifyStreamsChangedAsync(string providerId, CancellationToken cancellationToken = default)
 	{
 		ArgumentException.ThrowIfNullOrEmpty(providerId);
-		Record(new VideoStreamProviderCall { Kind = VideoStreamProviderCallKind.StreamsChanged, ProviderId = providerId });
+		Record(new VideoStreamProviderCall
+			{ Kind = VideoStreamProviderCallKind.StreamsChanged, ProviderId = providerId });
 		return Task.CompletedTask;
 	}
 
@@ -198,7 +199,9 @@ public sealed class FakeVideoStreamProviderContext : IVideoStreamProviderContext
 	}
 
 	internal void RecordProvidersChanged()
-		=> Record(new VideoStreamProviderCall { Kind = VideoStreamProviderCallKind.ProvidersChanged });
+	{
+		Record(new VideoStreamProviderCall { Kind = VideoStreamProviderCallKind.ProvidersChanged });
+	}
 
 	private void Record(VideoStreamProviderCall call)
 	{

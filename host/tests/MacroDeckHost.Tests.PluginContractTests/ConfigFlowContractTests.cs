@@ -18,12 +18,14 @@ namespace MacroDeckHost.Tests.PluginContractTests;
 internal sealed class ConfigFlowContractTests : CapabilityContractFixture
 {
 	private static DeclaredCapability Provider()
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = CapabilityKinds.ConfigFlow,
 			LocalId = ProviderCapabilityId.LocalId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public async Task Declare_registers_an_adapter_that_passes_the_capability_validator()
@@ -47,7 +49,7 @@ internal sealed class ConfigFlowContractTests : CapabilityContractFixture
 	{
 		var integration = await ConnectAsync([
 				new ConfigFlowCapabilityHandler([
-						new TestConfigFlowIntegration(() => new TestConfigFlow(), allowsMultipleConfigurations: false)
+						new TestConfigFlowIntegration(() => new TestConfigFlow(), false)
 					],
 					new PluginConfigFlowSessions(TimeProvider.System))
 			],
@@ -81,17 +83,17 @@ internal sealed class ConfigFlowContractTests : CapabilityContractFixture
 	{
 		var pluginFlow = new TestConfigFlow
 		{
-			ResultToReturn = ConfigFlowResult.Step(new ConfigFlowStep { StepId = "one", Fields = [] })
-		};
-		pluginFlow.SubmitOverride = (stepId, input, _, _) => stepId switch
-		{
-			"one" => Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep { StepId = "two", Fields = [] })),
-			"two" => Task.FromResult(ConfigFlowResult.Complete("Prod",
-				new Dictionary<string, ConfigFlowValue>
-				{
-					["token"] = ConfigFlowValue.Secret("abc")
-				})),
-			_ => throw new InvalidOperationException()
+			ResultToReturn = ConfigFlowResult.Step(new ConfigFlowStep { StepId = "one", Fields = [] }),
+			SubmitOverride = (stepId, input, _, _) => stepId switch
+			{
+				"one" => Task.FromResult(ConfigFlowResult.Step(new ConfigFlowStep { StepId = "two", Fields = [] })),
+				"two" => Task.FromResult(ConfigFlowResult.Complete("Prod",
+					new Dictionary<string, ConfigFlowValue>
+					{
+						["token"] = ConfigFlowValue.Secret("abc")
+					})),
+				_ => throw new InvalidOperationException()
+			}
 		};
 
 		var createCount = 0;
@@ -288,7 +290,8 @@ internal sealed class ConfigFlowContractTests : CapabilityContractFixture
 		Assert.That(exception!.Code, Is.EqualTo(ProtocolErrorCodes.Timeout));
 	}
 
-	private static async Task<ConfigFlowResult> NeverReplies(IConfigFlowContext context,
+	private static async Task<ConfigFlowResult> NeverReplies(
+		IConfigFlowContext context,
 		CancellationToken cancellationToken)
 	{
 		await Task.Delay(Timeout.Infinite, cancellationToken);

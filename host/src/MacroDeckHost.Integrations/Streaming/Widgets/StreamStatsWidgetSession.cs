@@ -7,7 +7,8 @@ using MacroDeck.Ui.Runtime;
 
 namespace MacroDeckHost.Integrations.Streaming.Widgets;
 
-internal delegate Task<IVariableHistoryWindow?> StreamStatsHistoryOpener(string variableName,
+internal delegate Task<IVariableHistoryWindow?> StreamStatsHistoryOpener(
+	string variableName,
 	int capacity,
 	CancellationToken cancellationToken);
 
@@ -73,7 +74,7 @@ internal sealed class StreamStatsWidgetSession : IUiSession
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
 
-		Refresh(rebind: true);
+		Refresh(true);
 		_timer = time.CreateTimer(_ => OnTick(), null, RefreshInterval, RefreshInterval);
 	}
 
@@ -81,11 +82,20 @@ internal sealed class StreamStatsWidgetSession : IUiSession
 
 	public event EventHandler<UiSessionFaultedEventArgs>? Faulted;
 
-	public UiTree BuildTree() => _view.Tree;
+	public UiTree BuildTree()
+	{
+		return _view.Tree;
+	}
 
-	public IReadOnlyList<UiPatch> DrainPatches() => _view.DrainPatches();
+	public IReadOnlyList<UiPatch> DrainPatches()
+	{
+		return _view.DrainPatches();
+	}
 
-	public void Dispatch(UiEvent uiEvent) => _view.Dispatch(uiEvent);
+	public void Dispatch(UiEvent uiEvent)
+	{
+		_view.Dispatch(uiEvent);
+	}
 
 	public async ValueTask DisposeAsync()
 	{
@@ -111,19 +121,25 @@ internal sealed class StreamStatsWidgetSession : IUiSession
 
 	internal void OnTick()
 	{
-		_icon?.ResolveIfPending(() => Refresh(rebind: false));
-		Refresh(rebind: false);
+		_icon?.ResolveIfPending(() => Refresh(false));
+		Refresh(false);
 	}
 
-	private void OnAccountsChanged(object? sender, EventArgs args) => Refresh(rebind: true);
+	private void OnAccountsChanged(object? sender, EventArgs args)
+	{
+		Refresh(true);
+	}
 
-	private void OnSampled(object? sender, EventArgs args) => Refresh(rebind: false);
+	private void OnSampled(object? sender, EventArgs args)
+	{
+		Refresh(false);
+	}
 
 	private void OnThumbnailChanged(object? sender, string accountId)
 	{
 		if (string.Equals(_account?.AccountId, accountId, StringComparison.Ordinal))
 		{
-			Refresh(rebind: false);
+			Refresh(false);
 		}
 	}
 
@@ -235,6 +251,6 @@ internal sealed class StreamStatsWidgetSession : IUiSession
 			return;
 		}
 
-		Refresh(rebind: false);
+		Refresh(false);
 	}
 }

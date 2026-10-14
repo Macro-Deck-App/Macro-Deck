@@ -28,7 +28,7 @@ public class PluginBuildReporterTests
 		foreach (var reason in Enum.GetValues<PluginBuildFailureReason>())
 		{
 			var error = new StringWriter();
-			var console = new CliConsole(Verbosity.Normal, noColor: true, new StringWriter(), error);
+			var console = new CliConsole(Verbosity.Normal, true, new StringWriter(), error);
 
 			var exitCode = await PluginBuildReporter.ReportAsync(console,
 				PluginBuildResult.Fail(reason, $"Something went wrong building for {reason}."));
@@ -48,7 +48,7 @@ public class PluginBuildReporterTests
 	public async Task A_failing_build_tools_output_is_surfaced_below_the_error_line()
 	{
 		var error = new StringWriter();
-		var console = new CliConsole(Verbosity.Normal, noColor: true, new StringWriter(), error);
+		var console = new CliConsole(Verbosity.Normal, true, new StringWriter(), error);
 
 		// A developer cannot act on "the build failed"; the tool's own text is the actionable part.
 		await PluginBuildReporter.ReportAsync(console,

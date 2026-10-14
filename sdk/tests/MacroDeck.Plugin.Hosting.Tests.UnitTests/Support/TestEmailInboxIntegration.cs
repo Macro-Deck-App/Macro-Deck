@@ -9,9 +9,15 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 {
 	public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	public string ProviderName { get; } = providerName;
 
@@ -26,7 +32,10 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 
 	public bool HasChangedSubscribers => Changed is not null;
 
-	public IReadOnlyList<EmailInbox> GetInboxes() => Inboxes;
+	public IReadOnlyList<EmailInbox> GetInboxes()
+	{
+		return Inboxes;
+	}
 
 	public Task<EmailInboxSnapshot> GetSnapshotAsync(
 		string inboxId,
@@ -37,5 +46,8 @@ internal sealed class TestEmailInboxIntegration(string providerName, params stri
 		return Task.FromResult(Snapshots[inboxId]);
 	}
 
-	public void RaiseChanged(string? inboxId) => Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	public void RaiseChanged(string? inboxId)
+	{
+		Changed?.Invoke(this, new EmailInboxChangedEventArgs(inboxId));
+	}
 }

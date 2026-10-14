@@ -48,7 +48,8 @@ public sealed partial class AdGuardHomeIntegration
 	{
 	}
 
-	internal AdGuardHomeIntegration(Func<AdGuardHomeConnectionSettings, IAdGuardHomeClient> clientFactory,
+	internal AdGuardHomeIntegration(
+		Func<AdGuardHomeConnectionSettings, IAdGuardHomeClient> clientFactory,
 		TimeProvider time)
 	{
 		_clientFactory = clientFactory;
@@ -90,12 +91,20 @@ public sealed partial class AdGuardHomeIntegration
 
 	internal IAdGuardHomeInstances Instances => _hub;
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new AdGuardHomeConfigFlow(_clientFactory);
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new AdGuardHomeConfigFlow(_clientFactory);
+	}
 
 	public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-		=> _ui.CreateSessionAsync(request, cancellationToken);
+	{
+		return _ui.CreateSessionAsync(request, cancellationToken);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -120,7 +129,10 @@ public sealed partial class AdGuardHomeIntegration
 		return context.RegisterWidgetTypeAsync(WidgetType(), cancellationToken);
 	}
 
-	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes() => [WidgetType()];
+	public IReadOnlyList<WidgetTypeDescriptor> GetWidgetTypes()
+	{
+		return [WidgetType()];
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -130,7 +142,8 @@ public sealed partial class AdGuardHomeIntegration
 		}
 
 		var snapshot = _instances.Select(instance => instance.Snapshot)
-			.FirstOrDefault(candidate => string.Equals(candidate.VariableKey, split.VariableKey, StringComparison.Ordinal));
+			.FirstOrDefault(candidate
+				=> string.Equals(candidate.VariableKey, split.VariableKey, StringComparison.Ordinal));
 		return ValueTask.FromResult(AdGuardHomeVariables.Read(snapshot, split.Name));
 	}
 
@@ -155,17 +168,19 @@ public sealed partial class AdGuardHomeIntegration
 				continue;
 			}
 
-			var storedKey = await context.Config.GetStringAsync(entry.Id, AdGuardHomeConfigKeys.VariableKey,
+			var storedKey = await context.Config.GetStringAsync(entry.Id,
+				AdGuardHomeConfigKeys.VariableKey,
 				cancellationToken);
 			var key = storedKey is { Length: > 0 } && usedKeys.Add(storedKey)
 				? storedKey
 				: UniqueKey(entry.Title, usedKeys);
 			var entryId = entry.Id.ToString("D");
 
-			var unchanged = previous.FirstOrDefault(candidate => candidate.Snapshot.EntryId == entryId &&
-				candidate.Snapshot.Title == entry.Title &&
-				candidate.Snapshot.VariableKey == key &&
-				candidate.Settings == settings);
+			var unchanged = previous.FirstOrDefault(candidate
+				=> candidate.Snapshot.EntryId == entryId
+				&& candidate.Snapshot.Title == entry.Title
+				&& candidate.Snapshot.VariableKey == key
+				&& candidate.Settings == settings);
 			if (unchanged is not null)
 			{
 				instances.Add(unchanged);
@@ -253,10 +268,10 @@ public sealed partial class AdGuardHomeIntegration
 
 		try
 		{
-			await instance.PollAsync(includeStatistics: false, cancellationToken);
+			await instance.PollAsync(false, cancellationToken);
 		}
-		catch (Exception exception) when (exception is ObjectDisposedException ||
-			(exception is OperationCanceledException && !cancellationToken.IsCancellationRequested))
+		catch (Exception exception) when (exception is ObjectDisposedException
+			|| exception is OperationCanceledException && !cancellationToken.IsCancellationRequested)
 		{
 			// A reload replaced the instance while the command ran; the command itself still succeeded.
 		}
@@ -265,15 +280,17 @@ public sealed partial class AdGuardHomeIntegration
 	}
 
 	internal static WidgetTypeDescriptor WidgetType()
-		=> new(AdGuardHomeWidgetType.LocalId,
+	{
+		return new WidgetTypeDescriptor(AdGuardHomeWidgetType.LocalId,
 			Strings.Widget.Name(),
 			Strings.Widget.Description(),
-			DefaultData: DefaultWidgetData,
-			DataSchema: WidgetDataSchema,
-			HasConfiguration: true)
+			DefaultWidgetData,
+			WidgetDataSchema,
+			true)
 		{
 			AppearanceProperties = [WidgetAppearanceProperty.BackgroundColor]
 		};
+	}
 
 	private static string DefaultWidgetData
 		=> JsonSerializer.Serialize(new Dictionary<string, object>
@@ -284,7 +301,7 @@ public sealed partial class AdGuardHomeIntegration
 			[AdGuardHomeWidgetType.StatisticsKey] = AdGuardHomeWidgetType.DefaultStatistics,
 			[AdGuardHomeWidgetType.DurationsKey] = AdGuardHomeWidgetType.DefaultDurations,
 			[AdGuardHomeWidgetType.ShowVersionKey] = true,
-			[AdGuardHomeWidgetType.ShowStatusKey] = true,
+			[AdGuardHomeWidgetType.ShowStatusKey] = true
 		});
 
 	private static string WidgetDataSchema
@@ -309,8 +326,8 @@ public sealed partial class AdGuardHomeIntegration
 				[AdGuardHomeWidgetType.BackgroundColorKey] = new
 				{
 					type = _nullableString, description = "#rrggbb or transparent"
-				},
-			},
+				}
+			}
 		});
 
 	private void Publish(AdGuardHomeInstance source, AdGuardHomeSnapshot snapshot)
@@ -365,7 +382,8 @@ public sealed partial class AdGuardHomeIntegration
 
 		var username = await config.GetStringAsync(entryId, AdGuardHomeConfigKeys.Username, cancellationToken);
 		var password = await config.GetSecretAsync(entryId, AdGuardHomeConfigKeys.Password, cancellationToken);
-		var acceptUntrusted = await config.GetStringAsync(entryId, AdGuardHomeConfigKeys.AcceptUntrustedCertificate,
+		var acceptUntrusted = await config.GetStringAsync(entryId,
+			AdGuardHomeConfigKeys.AcceptUntrustedCertificate,
 			cancellationToken);
 
 		return new AdGuardHomeConnectionSettings(controlUrl,

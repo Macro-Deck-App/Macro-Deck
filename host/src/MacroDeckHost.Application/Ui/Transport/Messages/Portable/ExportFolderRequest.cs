@@ -7,5 +7,7 @@ public sealed class ExportFolderRequest : ExportArchiveRequest
 	public bool IncludeSubfolders { get; set; }
 
 	public override PortableExportOptions ToOptions()
-		=> base.ToOptions() with { IncludeSubfolders = IncludeSubfolders };
+	{
+		return base.ToOptions() with { IncludeSubfolders = IncludeSubfolders };
+	}
 }

@@ -35,7 +35,7 @@ public class SdkUsageManifestGeneratorTests
 							  }
 							  """;
 
-		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", referenceSdk: true);
+		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", true);
 
 		Assert.That(generated, Is.Not.Null);
 		Assert.Multiple(() =>
@@ -65,7 +65,7 @@ public class SdkUsageManifestGeneratorTests
 							  }
 							  """;
 
-		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", referenceSdk: true);
+		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", true);
 
 		Assert.That(generated, Is.Not.Null);
 
@@ -91,7 +91,7 @@ public class SdkUsageManifestGeneratorTests
 							  }
 							  """;
 
-		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", referenceSdk: false);
+		var generated = GeneratorTestHarness.RunAndGetGeneratedSource(source, "PluginUnderTest", false);
 
 		Assert.That(generated, Is.Null);
 	}

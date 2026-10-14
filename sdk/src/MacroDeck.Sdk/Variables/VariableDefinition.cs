@@ -220,7 +220,8 @@ public sealed record VariableDefinition
 		VariableType type,
 		int? decimalPlaces = null,
 		TimeSpan? refreshInterval = null)
-		=> new()
+	{
+		return new VariableDefinition
 		{
 			Name = name,
 			Type = type,
@@ -228,10 +229,13 @@ public sealed record VariableDefinition
 			DecimalPlaces = decimalPlaces,
 			RefreshInterval = refreshInterval
 		};
+	}
 
 	/// <summary>An on-demand catalog resource, addressed by its provider-local resource id.</summary>
 	public static VariableDefinition OnDemand(string id, VariableType type)
-		=> new() { Id = id, Type = type, Materialization = VariableMaterialization.OnDemand };
+	{
+		return new VariableDefinition { Id = id, Type = type, Materialization = VariableMaterialization.OnDemand };
+	}
 }
 
 /// <summary>

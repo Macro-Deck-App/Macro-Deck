@@ -95,7 +95,9 @@ public interface IVariableProvider
 		string localId,
 		object? value,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableWriteResult.NotWritable());
+	{
+		return ValueTask.FromResult(VariableWriteResult.NotWritable());
+	}
 
 	/// <summary>
 	/// Whether this provider offers a browsable catalog of on-demand resources beyond
@@ -170,7 +172,9 @@ public interface IVariableProvider
 	ValueTask<VariableCatalogPage> DiscoverAsync(
 		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(VariableCatalogPage.Empty);
+	{
+		return ValueTask.FromResult(VariableCatalogPage.Empty);
+	}
 
 	/// <summary>
 	/// Resolves a single local id that may never have come out of <see cref="DiscoverAsync"/> - a user
@@ -197,8 +201,10 @@ public interface IVariableProvider
 	ValueTask<VariableDefinition?> ResolveAsync(
 		string localId,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(Variables.FirstOrDefault(v =>
+	{
+		return ValueTask.FromResult(Variables.FirstOrDefault(v =>
 			string.Equals(v.ResolvedId, localId, StringComparison.Ordinal)));
+	}
 
 	/// <summary>
 	/// Declares the complete set of catalog resources the host currently cares about, replacing whatever
@@ -220,7 +226,9 @@ public interface IVariableProvider
 	ValueTask<IReadOnlyList<VariableValue>> SubscribeAsync(
 		IReadOnlyCollection<string> localIds,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
+	{
+		return ValueTask.FromResult<IReadOnlyList<VariableValue>>([]);
+	}
 
 	/// <summary>
 	/// Called once, before the first <see cref="SubscribeAsync"/>, handing the provider the sink its
@@ -229,5 +237,7 @@ public interface IVariableProvider
 	/// so a provider that only answers reads implements nothing.
 	/// </summary>
 	Task OnAttachedAsync(IVariableSink sink, CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 }

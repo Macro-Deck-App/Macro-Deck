@@ -20,7 +20,7 @@ internal sealed record AdGuardHomeViewState
 	public static readonly AdGuardHomeViewState NotConfigured = new()
 	{
 		Available = false,
-		Message = Strings.NotConfigured(),
+		Message = Strings.NotConfigured()
 	};
 
 	public string Title { get; init; } = "AdGuard Home";
@@ -41,21 +41,29 @@ internal sealed record AdGuardHomeViewState
 
 	public bool HasFailure => !Failure.IsEmpty;
 
-	public string Value(string statistic) => Values.TryGetValue(statistic, out var value) ? value : "-";
+	public string Value(string statistic)
+	{
+		return Values.TryGetValue(statistic, out var value) ? value : "-";
+	}
 
 	public bool Equals(AdGuardHomeViewState? other)
-		=> other is not null &&
-			Title == other.Title &&
-			Available == other.Available &&
-			Connecting == other.Connecting &&
-			Protection == other.Protection &&
-			Version == other.Version &&
-			Message.Equals(other.Message) &&
-			Failure.Equals(other.Failure) &&
-			Values.Count == other.Values.Count &&
-			Values.All(pair => other.Values.TryGetValue(pair.Key, out var value) && value == pair.Value);
+	{
+		return other is not null
+			&& Title == other.Title
+			&& Available == other.Available
+			&& Connecting == other.Connecting
+			&& Protection == other.Protection
+			&& Version == other.Version
+			&& Message.Equals(other.Message)
+			&& Failure.Equals(other.Failure)
+			&& Values.Count == other.Values.Count
+			&& Values.All(pair => other.Values.TryGetValue(pair.Key, out var value) && value == pair.Value);
+	}
 
-	public override int GetHashCode() => HashCode.Combine(Title, Available, Protection, Version);
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Title, Available, Protection, Version);
+	}
 }
 
 internal static class AdGuardHomeViewStateResolver
@@ -78,7 +86,7 @@ internal static class AdGuardHomeViewStateResolver
 			return new AdGuardHomeViewState
 			{
 				Title = options.DisplayName ?? "AdGuard Home",
-				Message = Strings.InstanceNotFound(),
+				Message = Strings.InstanceNotFound()
 			};
 		}
 
@@ -106,8 +114,8 @@ internal static class AdGuardHomeViewStateResolver
 					AdGuardHomeConnection.Timeout => Strings.Timeout(),
 					AdGuardHomeConnection.Incompatible => Strings.Incompatible(),
 					AdGuardHomeConnection.Redirected => Strings.Redirected(),
-					_ => Strings.Offline(),
-				},
+					_ => Strings.Offline()
+				}
 			};
 		}
 
@@ -116,7 +124,7 @@ internal static class AdGuardHomeViewStateResolver
 			true => AdGuardHomeProtection.Enabled,
 			false when snapshot.DisabledUntil is { } until && until > now => AdGuardHomeProtection.Paused,
 			false => AdGuardHomeProtection.Disabled,
-			_ => AdGuardHomeProtection.Unknown,
+			_ => AdGuardHomeProtection.Unknown
 		};
 
 		return new AdGuardHomeViewState
@@ -127,11 +135,13 @@ internal static class AdGuardHomeViewStateResolver
 			Version = snapshot.Version,
 			Message = StatusLine(snapshot, protection, now),
 			Failure = failure,
-			Values = Values(snapshot.Statistics),
+			Values = Values(snapshot.Statistics)
 		};
 	}
 
-	internal static LocalizedText StatusLine(AdGuardHomeSnapshot snapshot, AdGuardHomeProtection protection,
+	internal static LocalizedText StatusLine(
+		AdGuardHomeSnapshot snapshot,
+		AdGuardHomeProtection protection,
 		DateTimeOffset now)
 	{
 		if (snapshot.DnsRunning is false)
@@ -143,7 +153,7 @@ internal static class AdGuardHomeViewStateResolver
 		{
 			AdGuardHomeProtection.Enabled => Strings.ProtectionEnabled(),
 			AdGuardHomeProtection.Paused when snapshot.DisabledUntil is { } until => Remaining(until - now),
-			_ => Strings.ProtectionDisabled(),
+			_ => Strings.ProtectionDisabled()
 		};
 	}
 
@@ -151,8 +161,8 @@ internal static class AdGuardHomeViewStateResolver
 	{
 		var minutes = (int)Math.Ceiling(Math.Max(remaining.TotalMinutes, 0));
 		return minutes <= 60
-			? Strings.ResumesInMinutes(count: Math.Max(minutes, 1))
-			: Strings.ResumesInHours(count: (int)Math.Ceiling(remaining.TotalHours));
+			? Strings.ResumesInMinutes(Math.Max(minutes, 1))
+			: Strings.ResumesInHours((int)Math.Ceiling(remaining.TotalHours));
 	}
 
 	internal static IReadOnlyDictionary<string, string> Values(AdGuardHomeStatistics? stats)
@@ -172,17 +182,20 @@ internal static class AdGuardHomeViewStateResolver
 				stats.AverageProcessingMilliseconds.ToString("0.#", CultureInfo.CurrentCulture) + " ms",
 			[AdGuardHomeWidgetType.SafeBrowsingStatistic] = Count(stats.SafeBrowsing),
 			[AdGuardHomeWidgetType.ParentalStatistic] = Count(stats.Parental),
-			[AdGuardHomeWidgetType.SafeSearchStatistic] = Count(stats.SafeSearch),
+			[AdGuardHomeWidgetType.SafeSearchStatistic] = Count(stats.SafeSearch)
 		};
 	}
 
 	internal static string Count(long value)
-		=> value switch
+	{
+		return value switch
 		{
-			>= 1_000_000 => (value / 1_000_000d).ToString(value >= 100_000_000 ? "0" : "0.#", CultureInfo.CurrentCulture) +
-				"M",
+			>= 1_000_000 => (value / 1_000_000d).ToString(value >= 100_000_000 ? "0" : "0.#",
+					CultureInfo.CurrentCulture)
+				+ "M",
 			>= 100_000 => Math.Floor(value / 1_000d).ToString("0", CultureInfo.CurrentCulture) + "K",
 			>= 10_000 => (Math.Floor(value / 100d) / 10).ToString("0.#", CultureInfo.CurrentCulture) + "K",
-			_ => value.ToString("N0", CultureInfo.CurrentCulture),
+			_ => value.ToString("N0", CultureInfo.CurrentCulture)
 		};
+	}
 }

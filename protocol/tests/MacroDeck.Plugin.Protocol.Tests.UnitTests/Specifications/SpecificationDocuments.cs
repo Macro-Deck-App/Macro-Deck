@@ -19,7 +19,8 @@ internal static class SpecificationDocuments
 	public static IReadOnlyDictionary<string, object?> AsyncApi => _asyncApi.Value;
 
 	/// <summary>Reads a nested mapping, e.g. <c>Map(doc, "components", "messages")</c>.</summary>
-	public static IReadOnlyDictionary<string, object?> Map(IReadOnlyDictionary<string, object?> document,
+	public static IReadOnlyDictionary<string, object?> Map(
+		IReadOnlyDictionary<string, object?> document,
 		params string[] path)
 	{
 		var current = document;
@@ -47,7 +48,10 @@ internal static class SpecificationDocuments
 
 	// YamlDotNet's default deserializer types every scalar as string, so a numeric anchor arrives as
 	// "262144" and would never compare equal to an int constant.
-	public static long AsLong(object? node) => Convert.ToInt64(node, CultureInfo.InvariantCulture);
+	public static long AsLong(object? node)
+	{
+		return Convert.ToInt64(node, CultureInfo.InvariantCulture);
+	}
 
 	private static IReadOnlyDictionary<string, object?> Load(string fileName)
 	{

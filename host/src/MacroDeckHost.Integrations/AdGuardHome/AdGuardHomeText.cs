@@ -6,7 +6,8 @@ namespace MacroDeckHost.Integrations.AdGuardHome;
 internal static class AdGuardHomeText
 {
 	public static LocalizedText ConnectionError(AdGuardHomeConnection failure)
-		=> failure switch
+	{
+		return failure switch
 		{
 			AdGuardHomeConnection.Unauthorized => Errors.Unauthorized(),
 			AdGuardHomeConnection.Timeout => Errors.Timeout(),
@@ -14,4 +15,5 @@ internal static class AdGuardHomeText
 			AdGuardHomeConnection.Redirected => Errors.Redirected(),
 			_ => Errors.Unreachable()
 		};
+	}
 }

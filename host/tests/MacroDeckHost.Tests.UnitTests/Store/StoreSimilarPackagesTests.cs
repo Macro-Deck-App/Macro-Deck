@@ -32,18 +32,22 @@ internal sealed class StoreSimilarPackagesTests
 		_similar = new StoreSimilarPackages(new StoreCatalogQueryService(_catalog,
 				new PluginInstallationCatalog(_paths, Serilog.Core.Logger.None),
 				_installations,
-				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None), new InstalledPluginSigners()),
+				new JsonStoreTestInstallationStore(_paths, Serilog.Core.Logger.None),
+				new InstalledPluginSigners()),
 			_installs);
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public async Task A_shared_tag_outranks_the_same_publisher_and_kind_even_with_more_installs()
 	{
 		Seed(Entry("origin", tags: ["obs", "streaming"], publisher: "Acme"),
-			Entry("tagged-icons", StoreExtensionKind.IconPack, tags: ["streaming"], publisher: "Other"),
+			Entry("tagged-icons", StoreExtensionKind.IconPack, ["streaming"], "Other"),
 			Entry("same-publisher", tags: ["music"], publisher: "Acme"));
 		_installs.Counts["same-publisher"] = 10_000;
 
@@ -72,9 +76,9 @@ internal sealed class StoreSimilarPackagesTests
 	public async Task Unrelated_installed_unsupported_and_the_package_itself_are_never_recommended()
 	{
 		Seed(Entry("origin", tags: ["obs"]),
-			Entry("unrelated-icons", StoreExtensionKind.IconPack, tags: ["weather"]),
+			Entry("unrelated-icons", StoreExtensionKind.IconPack, ["weather"]),
 			Entry("unsupported", tags: ["obs"]) with { SupportedRids = _unsupportedRids },
-			Entry("installed-icons", StoreExtensionKind.IconPack, tags: ["obs"]),
+			Entry("installed-icons", StoreExtensionKind.IconPack, ["obs"]),
 			Entry("fine", tags: ["obs"]));
 		_installations.Save(new StoreInstallationRecord
 		{
@@ -118,7 +122,7 @@ internal sealed class StoreSimilarPackagesTests
 		Seed([Entry("origin"), .. Enumerable.Range(0, 20).Select(index => Entry($"pkg{index:D2}"))]);
 
 		var defaultList = await Similar("origin");
-		var largest = await _similar.Find(StoreExtensionKind.Plugin, "origin", take: 500);
+		var largest = await _similar.Find(StoreExtensionKind.Plugin, "origin", 500);
 
 		Assert.Multiple(() =>
 		{
@@ -148,14 +152,18 @@ internal sealed class StoreSimilarPackagesTests
 		return result.Data!.Select(item => item.Entry.Id).ToList();
 	}
 
-	private void Seed(params StoreCatalogEntry[] entries) =>
+	private void Seed(params StoreCatalogEntry[] entries)
+	{
 		_catalog.Swap(new StoreCatalogSnapshot { Sequence = 1, Entries = entries.ToList() });
+	}
 
-	private static StoreCatalogEntry Entry(string id,
+	private static StoreCatalogEntry Entry(
+		string id,
 		StoreExtensionKind kind = StoreExtensionKind.Plugin,
 		string[]? tags = null,
-		string? publisher = null) =>
-		new()
+		string? publisher = null)
+	{
+		return new StoreCatalogEntry
 		{
 			Kind = kind,
 			Id = id,
@@ -171,4 +179,5 @@ internal sealed class StoreSimilarPackagesTests
 				Size = 16
 			}
 		};
+	}
 }

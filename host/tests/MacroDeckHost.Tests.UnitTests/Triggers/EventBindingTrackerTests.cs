@@ -22,10 +22,14 @@ public class EventBindingTrackerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _tracker.Dispose();
+	public void TearDown()
+	{
+		_tracker.Dispose();
+	}
 
 	internal static string Flows(string providerId, string eventId, params object[] parameters)
-		=> JsonSerializer.Serialize(new[]
+	{
+		return JsonSerializer.Serialize(new[]
 		{
 			new
 			{
@@ -35,14 +39,17 @@ public class EventBindingTrackerTests
 				children = Array.Empty<object>()
 			}
 		});
+	}
 
 	internal static object Combo(string key)
-		=> new { name = "combo", value = new { modifiers = new[] { "Ctrl", "Shift" }, key }, @operator = "==" };
+	{
+		return new { name = "combo", value = new { modifiers = new[] { "Ctrl", "Shift" }, key }, @operator = "==" };
+	}
 
 	[Test]
 	public async Task A_bound_combo_reaches_its_provider_as_the_structured_value_the_user_authored()
 	{
-		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.hotkeys", "hotkey-pressed", Combo("F3")), enabled: true);
+		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.hotkeys", "hotkey-pressed", Combo("F3")), true);
 		await _tracker.FlushAsync();
 
 		var (providerId, bindings) = _delivered.Single();
@@ -62,7 +69,7 @@ public class EventBindingTrackerTests
 	[Test]
 	public async Task A_provider_never_sees_another_providers_triggers()
 	{
-		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.other", "scene-changed", Combo("F4")), enabled: true);
+		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.other", "scene-changed", Combo("F4")), true);
 		await _tracker.FlushAsync();
 
 		Assert.Multiple(() =>
@@ -77,7 +84,7 @@ public class EventBindingTrackerTests
 	{
 		_index.ReindexAutomation(Guid.NewGuid(),
 			Flows("com.hotkeys", "hotkey-pressed", new { name = "combo", @operator = "isNotEmpty" }),
-			enabled: true);
+			true);
 		await _tracker.FlushAsync();
 
 		var combo = _delivered.Single().Bindings.Single().Parameters["combo"];
@@ -94,11 +101,11 @@ public class EventBindingTrackerTests
 	{
 		var automationId = Guid.NewGuid();
 		var flows = Flows("com.hotkeys", "hotkey-pressed", Combo("F3"));
-		_index.ReindexAutomation(automationId, flows, enabled: true);
+		_index.ReindexAutomation(automationId, flows, true);
 		await _tracker.FlushAsync();
 		_delivered.Clear();
 
-		_index.ReindexAutomation(automationId, flows, enabled: true);
+		_index.ReindexAutomation(automationId, flows, true);
 		await _tracker.FlushAsync();
 
 		Assert.That(_delivered, Is.Empty);
@@ -109,10 +116,10 @@ public class EventBindingTrackerTests
 	{
 		var automationId = Guid.NewGuid();
 		var flows = Flows("com.hotkeys", "hotkey-pressed", Combo("F3"));
-		_index.ReindexAutomation(automationId, flows, enabled: true);
+		_index.ReindexAutomation(automationId, flows, true);
 		await _tracker.FlushAsync();
 
-		_index.ReindexAutomation(automationId, flows, enabled: false);
+		_index.ReindexAutomation(automationId, flows, false);
 		await _tracker.FlushAsync();
 
 		Assert.Multiple(() =>
@@ -135,7 +142,7 @@ public class EventBindingTrackerTests
 			return Task.CompletedTask;
 		});
 
-		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.hotkeys", "hotkey-pressed", Combo("F3")), enabled: true);
+		_index.ReindexAutomation(Guid.NewGuid(), Flows("com.hotkeys", "hotkey-pressed", Combo("F3")), true);
 		await tracker.FlushAsync();
 
 		Assert.That(reached, Is.EqualTo(new[] { "com.hotkeys" }));

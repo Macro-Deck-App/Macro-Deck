@@ -23,18 +23,24 @@ namespace MacroDeck.Sdk.ConfigFlow;
 public interface IConfigEntryLifecycle
 {
 	/// <summary>Checks and adjusts an entry about to be stored. The default stores it unchanged.</summary>
-	Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
-		=> Task.FromResult(ConfigEntryPreparationResult.Accept());
+	{
+		return Task.FromResult(ConfigEntryPreparationResult.Accept());
+	}
 
 	/// <summary>The status Macro Deck shows for a stored entry. The default is
 	/// <see cref="ConfigEntryStatus.Ready" /> for a usable entry and
 	/// <see cref="ConfigEntryStatus.NeedsReconfiguration" /> otherwise.</summary>
-	async Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	async Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
-		=> await IsEntryUsableAsync(entry, cancellationToken).ConfigureAwait(false)
+	{
+		return await IsEntryUsableAsync(entry, cancellationToken).ConfigureAwait(false)
 			? ConfigEntryStatus.Ready
 			: ConfigEntryStatus.NeedsReconfiguration;
+	}
 
 	/// <summary>
 	/// Whether a stored entry can be used as it is. An integration that requires configuration is turned
@@ -42,7 +48,9 @@ public interface IConfigEntryLifecycle
 	/// <see cref="PrepareEntryAsync" />. The default is <c>true</c>.
 	/// </summary>
 	Task<bool> IsEntryUsableAsync(StoredConfigEntry entry, CancellationToken cancellationToken = default)
-		=> Task.FromResult(true);
+	{
+		return Task.FromResult(true);
+	}
 
 	/// <summary>
 	/// Applies a stored change without being initialized again. Return <c>true</c> when the integration
@@ -50,13 +58,19 @@ public interface IConfigEntryLifecycle
 	/// initialize it again, as it does for an integration without this interface. A throw counts as
 	/// <c>false</c>.
 	/// </summary>
-	Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default) => Task.FromResult(false);
+	Task<bool> ReloadEntriesAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(false);
+	}
 
 	/// <summary>Called with every stored entry after each change, for example to create the variables of a
 	/// new entry and delete those of a removed one. The default does nothing.</summary>
-	Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
-		=> Task.CompletedTask;
+	{
+		return Task.CompletedTask;
+	}
 
 	/// <summary>
 	/// Called with every stored entry after each change, like the overload without
@@ -66,13 +80,19 @@ public interface IConfigEntryLifecycle
 	/// </summary>
 	/// <remarks>A Macro Deck that predates this overload calls the one without
 	/// <paramref name="variables" /> instead.</remarks>
-	Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		IVariableApi variables,
 		CancellationToken cancellationToken)
-		=> SynchronizeEntriesAsync(entries, cancellationToken);
+	{
+		return SynchronizeEntriesAsync(entries, cancellationToken);
+	}
 
 	/// <summary>Called once the change a preparation was for has ended, stored or not, so the integration
 	/// can let go of anything it held for it. Macro Deck releases the variable names it reserved for the
 	/// preparation itself. The default does nothing.</summary>
-	Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+	Task ReleasePreparationAsync(Guid entryId, CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
 }

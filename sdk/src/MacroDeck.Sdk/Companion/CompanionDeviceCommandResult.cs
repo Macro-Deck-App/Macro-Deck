@@ -28,7 +28,11 @@ public sealed record CompanionDeviceCommandResult
 
 	public static CompanionDeviceCommandResult Done { get; } = new(CompanionDeviceCommandOutcome.Done, null);
 
-	public static CompanionDeviceCommandResult Unconfirmed { get; } = new(CompanionDeviceCommandOutcome.Unconfirmed, null);
+	public static CompanionDeviceCommandResult Unconfirmed { get; }
+		= new(CompanionDeviceCommandOutcome.Unconfirmed, null);
 
-	public static CompanionDeviceCommandResult Failed(CompanionDeviceFailure failure) => new(CompanionDeviceCommandOutcome.Failed, failure);
+	public static CompanionDeviceCommandResult Failed(CompanionDeviceFailure failure)
+	{
+		return new CompanionDeviceCommandResult(CompanionDeviceCommandOutcome.Failed, failure);
+	}
 }

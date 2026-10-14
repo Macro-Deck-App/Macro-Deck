@@ -53,26 +53,34 @@ internal sealed record HomeAssistantControl(string Domain, string Leaf, string S
 	public bool ZeroWhenOff { get; init; }
 
 	public double? Value(HomeAssistantEntityState state)
-		=> Source switch
+	{
+		return Source switch
 		{
 			HomeAssistantControlSource.State => Parse(state.State),
 			HomeAssistantControlSource.BrightnessPercent => BrightnessPercent(state),
 			_ => Attribute(state, Leaf) ?? (ZeroWhenOff && IsOff(state) ? 0 : null)
 		};
+	}
 
 	public bool IsOffered(HomeAssistantEntityState state)
-		=> Source switch
+	{
+		return Source switch
 		{
 			HomeAssistantControlSource.State => true,
-			HomeAssistantControlSource.BrightnessPercent => HasAttribute(state, BrightnessAttribute) || IsDimmable(state),
+			HomeAssistantControlSource.BrightnessPercent => HasAttribute(state, BrightnessAttribute)
+				|| IsDimmable(state),
 			_ => HasAttribute(state, Leaf)
 		};
+	}
 
 	public VariableReading Reading(HomeAssistantEntityState state, object? value)
-		=> VariableReading.Of(Source == HomeAssistantControlSource.BrightnessPercent ? Value(state) : value ?? Value(state),
+	{
+		return VariableReading.Of(
+			Source == HomeAssistantControlSource.BrightnessPercent ? Value(state) : value ?? Value(state),
 			Attribute(state, MinAttribute) ?? Min,
 			Attribute(state, MaxAttribute) ?? Max,
 			Attribute(state, StepAttribute) is { } step and > 0 ? step : Step);
+	}
 
 	public HomeAssistantServiceRequest Request(HomeAssistantEntityState state, double value)
 	{
@@ -110,30 +118,40 @@ internal sealed record HomeAssistantControl(string Domain, string Leaf, string S
 	}
 
 	private static bool IsOff(HomeAssistantEntityState state)
-		=> string.Equals(state.State, "off", StringComparison.Ordinal);
+	{
+		return string.Equals(state.State, "off", StringComparison.Ordinal);
+	}
 
 	private static bool IsDimmable(HomeAssistantEntityState state)
-		=> state.ReadStringList("supported_color_modes")
+	{
+		return state.ReadStringList("supported_color_modes")
 			.Any(mode => mode is not ("onoff" or "unknown"));
+	}
 
 	private static bool HasAttribute(HomeAssistantEntityState state, string name)
-		=> state.Attributes.ValueKind == JsonValueKind.Object && state.Attributes.TryGetProperty(name, out _);
+	{
+		return state.Attributes.ValueKind == JsonValueKind.Object && state.Attributes.TryGetProperty(name, out _);
+	}
 
 	private static double? Attribute(HomeAssistantEntityState state, string? name)
-		=> name is not null &&
-			state.Attributes.ValueKind == JsonValueKind.Object &&
-			state.Attributes.TryGetProperty(name, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var number) &&
-			double.IsFinite(number)
+	{
+		return name is not null
+			&& state.Attributes.ValueKind == JsonValueKind.Object
+			&& state.Attributes.TryGetProperty(name, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 
 	private static double? Parse(string text)
-		=> double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) &&
-			double.IsFinite(number)
+	{
+		return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)
+			&& double.IsFinite(number)
 				? number
 				: null;
+	}
 }
 
 internal static class HomeAssistantControls
@@ -197,12 +215,14 @@ internal static class HomeAssistantControls
 		var domain = HomeAssistantEntityState.DomainOf(entityId);
 
 		return Array.Find(_all,
-			control => string.Equals(control.Domain, domain, StringComparison.Ordinal) &&
-				string.Equals(control.Leaf, leaf, StringComparison.Ordinal));
+			control => string.Equals(control.Domain, domain, StringComparison.Ordinal)
+				&& string.Equals(control.Leaf, leaf, StringComparison.Ordinal));
 	}
 
 	public static IEnumerable<HomeAssistantControl> For(string domain)
-		=> _all.Where(control => string.Equals(control.Domain, domain, StringComparison.Ordinal));
+	{
+		return _all.Where(control => string.Equals(control.Domain, domain, StringComparison.Ordinal));
+	}
 
 	public static bool TryReadNumber(object? value, out double number)
 	{
@@ -222,7 +242,8 @@ internal static class HomeAssistantControls
 	}
 
 	private static HomeAssistantControl Position(string domain, string leaf, string service, string field)
-		=> new(domain, leaf, service, field)
+	{
+		return new HomeAssistantControl(domain, leaf, service, field)
 		{
 			Number = HomeAssistantControlNumber.Rounded,
 			Min = 0,
@@ -232,17 +253,21 @@ internal static class HomeAssistantControls
 			SemanticKind = VariableSemanticKinds.Percentage,
 			DecimalPlaces = 0
 		};
+	}
 
 	private static HomeAssistantControl Temperature(string domain)
-		=> new(domain, "temperature", "set_temperature", "temperature")
+	{
+		return new HomeAssistantControl(domain, "temperature", "set_temperature", "temperature")
 		{
 			MinAttribute = "min_temp",
 			MaxAttribute = "max_temp",
 			StepAttribute = "target_temp_step"
 		};
+	}
 
 	private static HomeAssistantControl Humidity(string domain)
-		=> new(domain, "humidity", "set_humidity", "humidity")
+	{
+		return new HomeAssistantControl(domain, "humidity", "set_humidity", "humidity")
 		{
 			Number = HomeAssistantControlNumber.Rounded,
 			Min = 0,
@@ -254,13 +279,16 @@ internal static class HomeAssistantControls
 			SemanticKind = VariableSemanticKinds.Percentage,
 			DecimalPlaces = 0
 		};
+	}
 
 	private static HomeAssistantControl Number(string domain)
-		=> new(domain, "state", "set_value", "value")
+	{
+		return new HomeAssistantControl(domain, "state", "set_value", "value")
 		{
 			Source = HomeAssistantControlSource.State,
 			MinAttribute = "min",
 			MaxAttribute = "max",
 			StepAttribute = "step"
 		};
+	}
 }

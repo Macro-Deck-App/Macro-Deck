@@ -19,7 +19,8 @@ public class KeyRingController : ControllerBase
 	private readonly IUiTransportMessageHandler<GetKeyRingProtectionRequest, GetKeyRingProtectionResponse>
 		_protection;
 
-	public KeyRingController(IUiTransportMessageHandler<GetKeyRingStatusRequest, GetKeyRingStatusResponse> status,
+	public KeyRingController(
+		IUiTransportMessageHandler<GetKeyRingStatusRequest, GetKeyRingStatusResponse> status,
 		IUiTransportMessageHandler<UnlockKeyRingRequest, UnlockKeyRingResponse> unlock,
 		IUiTransportMessageHandler<GetKeyRingProtectionRequest, GetKeyRingProtectionResponse> protection)
 	{
@@ -35,7 +36,9 @@ public class KeyRingController : ControllerBase
 	[HttpGet("status")]
 	[AllowAnonymous]
 	public async Task<GetKeyRingStatusResponse> Status(CancellationToken ct)
-		=> await _status.Handle(new GetKeyRingStatusRequest(), ct);
+	{
+		return await _status.Handle(new GetKeyRingStatusRequest(), ct);
+	}
 
 	/// <summary>
 	/// Takes a recovery key in the clear, so it is loopback-only and answers 404 elsewhere - the same
@@ -61,5 +64,7 @@ public class KeyRingController : ControllerBase
 	/// </summary>
 	[HttpGet("protection")]
 	public async Task<GetKeyRingProtectionResponse> Protection(CancellationToken ct)
-		=> await _protection.Handle(new GetKeyRingProtectionRequest(), ct);
+	{
+		return await _protection.Handle(new GetKeyRingProtectionRequest(), ct);
+	}
 }

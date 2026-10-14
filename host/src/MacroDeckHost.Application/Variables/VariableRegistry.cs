@@ -35,12 +35,20 @@ public sealed class VariableRegistry
 		string DefinitionId,
 		VariableType Type);
 
-	public void Upsert(VariableEntity variable) => Upsert(variable, _ => true);
+	public void Upsert(VariableEntity variable)
+	{
+		Upsert(variable, _ => true);
+	}
 
-	public void Upsert(VariableEntity variable, bool available) => Upsert(variable, _ => available);
+	public void Upsert(VariableEntity variable, bool available)
+	{
+		Upsert(variable, _ => available);
+	}
 
 	public void UpsertKeepingAvailability(VariableEntity variable)
-		=> Upsert(variable, previous => previous?.ProviderAvailable ?? true);
+	{
+		Upsert(variable, previous => previous?.ProviderAvailable ?? true);
+	}
 
 	private void Upsert(VariableEntity variable, Func<Entry?, bool> availability)
 	{
@@ -86,7 +94,8 @@ public sealed class VariableRegistry
 				return false;
 			}
 
-			_byId[variable.Id] = new Entry { Variable = variable, Freshness = freshness, ProviderAvailable = available };
+			_byId[variable.Id] = new Entry
+				{ Variable = variable, Freshness = freshness, ProviderAvailable = available };
 			_byKey[key] = variable.Id;
 			if (DefinitionKeyOf(variable) is { } createdDefinitionKey)
 			{
@@ -136,9 +145,9 @@ public sealed class VariableRegistry
 			return true;
 		}
 
-		if (_byKey.TryGetValue(key, out var existingId) &&
-			(!_byId.TryGetValue(existingId, out var existing) ||
-				!Matches(existing.Variable, integrationId, variable.DefinitionId, variable.Type)))
+		if (_byKey.TryGetValue(key, out var existingId)
+			&& (!_byId.TryGetValue(existingId, out var existing)
+				|| !Matches(existing.Variable, integrationId, variable.DefinitionId, variable.Type)))
 		{
 			return true;
 		}
@@ -146,10 +155,10 @@ public sealed class VariableRegistry
 		return QualifiedId.TryCreate(integrationId,
 				variable.DefinitionId,
 				LocalIdKind.Resource,
-				out var qualified) &&
-			_byDefinition.TryGetValue(qualified.ToString(), out var definitionId) &&
-			(!_byId.TryGetValue(definitionId, out var definition) ||
-				!Matches(definition.Variable, integrationId, variable.DefinitionId, variable.Type));
+				out var qualified)
+			&& _byDefinition.TryGetValue(qualified.ToString(), out var definitionId)
+			&& (!_byId.TryGetValue(definitionId, out var definition)
+				|| !Matches(definition.Variable, integrationId, variable.DefinitionId, variable.Type));
 	}
 
 	internal void ReleaseIntegrationVariableReservation(Guid token)
@@ -187,8 +196,8 @@ public sealed class VariableRegistry
 			}
 
 			var target = (entry.Variable.Scope, entry.Variable.ScopeRefId, name);
-			if ((_byKey.TryGetValue(target, out var occupied) && occupied != id) ||
-				!ReservationAllows(target, entry.Variable))
+			if (_byKey.TryGetValue(target, out var occupied) && occupied != id
+				|| !ReservationAllows(target, entry.Variable))
 			{
 				return false;
 			}
@@ -283,47 +292,60 @@ public sealed class VariableRegistry
 	}
 
 	private static bool IsFresh(Entry entry)
-		=> entry.ProviderAvailable &&
-			(entry.Freshness is null || DateTime.UtcNow - entry.Variable.UpdatedAt <= entry.Freshness);
+	{
+		return entry.ProviderAvailable
+			&& (entry.Freshness is null || DateTime.UtcNow - entry.Variable.UpdatedAt <= entry.Freshness);
+	}
 
-	private static (VariableScope, string?, string) KeyOf(VariableEntity v) => (v.Scope, v.ScopeRefId, v.Name);
+	private static (VariableScope, string?, string) KeyOf(VariableEntity v)
+	{
+		return (v.Scope, v.ScopeRefId, v.Name);
+	}
 
 	private bool ReservationAllows(
 		(VariableScope Scope, string? ScopeRefId, string Name) key,
 		VariableEntity variable)
-		=> !_reservations.TryGetValue(key, out var reservation) ||
-			Matches(variable,
+	{
+		return !_reservations.TryGetValue(key, out var reservation)
+			|| Matches(variable,
 				reservation.IntegrationId,
 				reservation.DefinitionId,
 				reservation.Type);
+	}
 
 	private static bool Matches(
 		VariableEntity variable,
 		string integrationId,
 		string definitionId,
 		VariableType type)
-		=> variable.Classification == VariableClassification.Integration &&
-			string.Equals(variable.OwnerIntegrationId, integrationId, StringComparison.Ordinal) &&
-			variable.Scope == VariableScope.Global &&
-			variable.ScopeRefId is null &&
-			variable.Type == type &&
-			string.Equals(variable.DefinitionId, definitionId, StringComparison.Ordinal);
+	{
+		return variable.Classification == VariableClassification.Integration
+			&& string.Equals(variable.OwnerIntegrationId, integrationId, StringComparison.Ordinal)
+			&& variable.Scope == VariableScope.Global
+			&& variable.ScopeRefId is null
+			&& variable.Type == type
+			&& string.Equals(variable.DefinitionId, definitionId, StringComparison.Ordinal);
+	}
 
 	// LocalIdKind.Resource, not Declared: an on-demand definition id is a resource id
 	// (entity/light.living_room/brightness). Declared ids are a strict subset, so every id that indexed
 	// before indexes identically.
 	private static string? DefinitionKeyOf(VariableEntity v)
-		=> v.OwnerIntegrationId is not null &&
-			v.DefinitionId is not null &&
-			QualifiedId.TryCreate(v.OwnerIntegrationId, v.DefinitionId, LocalIdKind.Resource, out var id)
+	{
+		return v.OwnerIntegrationId is not null
+			&& v.DefinitionId is not null
+			&& QualifiedId.TryCreate(v.OwnerIntegrationId, v.DefinitionId, LocalIdKind.Resource, out var id)
 				? id.ToString()
 				: null;
+	}
 
 	private static TimeSpan? FreshnessFor(VariableEntity variable)
-		=> variable.Classification == VariableClassification.Integration &&
-			variable.UpdateMode == VariableUpdateMode.Polled
+	{
+		return variable.Classification == VariableClassification.Integration
+			&& variable.UpdateMode == VariableUpdateMode.Polled
 				? IntegrationFreshness
 				: null;
+	}
 
 	private void RemoveDefinitionKey(VariableEntity v)
 	{

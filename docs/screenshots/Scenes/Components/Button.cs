@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
@@ -16,11 +18,17 @@ internal static partial class Scenes
 				Background = "#c62f2f",
 				Source = Svg("mic-off", MicOff),
 				Fit = UiComponentImageFits.Cover,
-				Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
+				Events =
+				[
+					UiEventHandler.On(UiComponentEvents.Press,
+						() =>
+						{
+						})
+				],
 				Children =
 				[
 					new UiTextRun { Key = "label", Text = "Mute", Size = 0.14, Align = UiComponentAlignments.Center }
-				],
+				]
 			});
 
 		yield return Tile("button-artwork",
@@ -32,7 +40,13 @@ internal static partial class Scenes
 				Zoom = 1.2,
 				BorderStyle = UiComponentBorderStyles.Static,
 				BorderColor = "#ff3b30",
-				Events = [UiEventHandler.On(UiComponentEvents.Press, () => { })],
+				Events =
+				[
+					UiEventHandler.On(UiComponentEvents.Press,
+						() =>
+						{
+						})
+				]
 			});
 	}
 }

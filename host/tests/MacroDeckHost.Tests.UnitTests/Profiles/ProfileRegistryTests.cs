@@ -70,10 +70,10 @@ public class ProfileRegistryTests
 	{
 		var alpha = Guid.NewGuid();
 		var beta = Guid.NewGuid();
-		var store = new InMemoryProfileStore(
-			new ProfileFile { Id = beta, Name = "beta", Order = 3 },
+		var store = new InMemoryProfileStore(new ProfileFile { Id = beta, Name = "beta", Order = 3 },
 			new ProfileFile { Id = alpha, Name = "Alpha", Order = 3 });
-		var registry = await BuildRegistry(store, new FakeProfileProviderIntegration("spotify", CarThing(out _, out _)));
+		var registry
+			= await BuildRegistry(store, new FakeProfileProviderIntegration("spotify", CarThing(out _, out _)));
 
 		var profiles = registry.GetProfiles();
 
@@ -90,7 +90,7 @@ public class ProfileRegistryTests
 		await cache.InitializeCache();
 		var registry = new ProfileRegistry(cache,
 			new FolderCache(cache),
-			new ConfigurableIntegrationRegistry([integration], disabled: ["spotify"]),
+			new ConfigurableIntegrationRegistry([integration], ["spotify"]),
 			new WidgetTypeRegistry(new RecordingMediator()),
 			TestDeviceLayoutConstraintTracker.Build(),
 			new LoggerConfiguration().CreateLogger(),

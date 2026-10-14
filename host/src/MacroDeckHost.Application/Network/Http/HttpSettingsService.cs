@@ -59,5 +59,7 @@ public sealed class HttpSettingsService : IHttpSettingsService
 	}
 
 	private static HttpSettings Build(string? custom)
-		=> new(custom, custom ?? HttpUserAgent.Default, HttpUserAgent.Default);
+	{
+		return new HttpSettings(custom, custom ?? HttpUserAgent.Default, HttpUserAgent.Default);
+	}
 }

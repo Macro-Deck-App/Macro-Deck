@@ -14,10 +14,12 @@ public sealed class StoreUpdatesUiNotificationHandler : INotificationHandler<Sto
 	}
 
 	public ValueTask Handle(StoreUpdatesChangedNotification notification, CancellationToken cancellationToken)
-		=> new(_uiTransport.SendToGroup(UiAdminGroups.Admin,
+	{
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin,
 			new StoreUpdatesChangedEvent
 			{
 				Updates = notification.Updates.Select(StoreAvailableUpdateBodyFactory.Create).ToList()
 			},
 			cancellationToken));
+	}
 }

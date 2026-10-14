@@ -1,7 +1,7 @@
 using MacroDeckHost.Application.Adb;
 using MacroDeckHost.Application.Configuration;
-using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Infrastructure.Lifecycle;

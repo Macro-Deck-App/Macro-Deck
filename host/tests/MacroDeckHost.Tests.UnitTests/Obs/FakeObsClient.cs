@@ -109,27 +109,49 @@ internal sealed class FakeObsClient : IObsClient
 	public Dictionary<string, int> Reads { get; } = new(StringComparer.Ordinal);
 
 	public void RaiseInputSettingsChanged(string inputName, params string[] keys)
-		=> InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(inputName, keys));
+	{
+		InputSettingsChanged?.Invoke(this, new ObsInputSettingsChange(inputName, keys));
+	}
 
 	public void RaiseSourceFilterChanged(string sourceName, string filterName)
-		=> SourceFilterChanged?.Invoke(this, new ObsFilterChange(sourceName, filterName));
+	{
+		SourceFilterChanged?.Invoke(this, new ObsFilterChange(sourceName, filterName));
+	}
 
 	public void RaiseInputActiveChanged(string inputName, bool active)
-		=> InputActiveChanged?.Invoke(this, new ObsInputFlagChange(inputName, active));
+	{
+		InputActiveChanged?.Invoke(this, new ObsInputFlagChange(inputName, active));
+	}
 
 	public void RaiseInputShowingChanged(string inputName, bool showing)
-		=> InputShowingChanged?.Invoke(this, new ObsInputFlagChange(inputName, showing));
+	{
+		InputShowingChanged?.Invoke(this, new ObsInputFlagChange(inputName, showing));
+	}
 
-	public void RaiseCustomEvent(string json) => CustomEventReceived?.Invoke(this, json);
+	public void RaiseCustomEvent(string json)
+	{
+		CustomEventReceived?.Invoke(this, json);
+	}
 
 	public void RaiseInputMuteChanged(string inputName, bool muted)
-		=> InputMuteChanged?.Invoke(this, new ObsInputMuteChange(inputName, muted));
+	{
+		InputMuteChanged?.Invoke(this, new ObsInputMuteChange(inputName, muted));
+	}
 
-	public void RaiseReplayBufferSaved(string path) => ReplayBufferSaved?.Invoke(this, path);
+	public void RaiseReplayBufferSaved(string path)
+	{
+		ReplayBufferSaved?.Invoke(this, path);
+	}
 
-	public void RaiseRecordFileChanged(string path) => RecordFileChanged?.Invoke(this, path);
+	public void RaiseRecordFileChanged(string path)
+	{
+		RecordFileChanged?.Invoke(this, path);
+	}
 
-	public void RaiseScreenshotSaved(string path) => ScreenshotSaved?.Invoke(this, path);
+	public void RaiseScreenshotSaved(string path)
+	{
+		ScreenshotSaved?.Invoke(this, path);
+	}
 
 	public void Connect(string url, string? password)
 	{
@@ -161,31 +183,65 @@ internal sealed class FakeObsClient : IObsClient
 		return QueryStatusHandler?.Invoke() ?? Status;
 	}
 
-	public IReadOnlyList<string> GetSceneNames() => SceneNames;
+	public IReadOnlyList<string> GetSceneNames()
+	{
+		return SceneNames;
+	}
 
 	public IReadOnlyList<string> GetSceneItemNames(string sceneName)
-		=> Groups.ContainsKey(sceneName) ? [] : SceneItems.GetValueOrDefault(sceneName, []);
+	{
+		return Groups.ContainsKey(sceneName) ? [] : SceneItems.GetValueOrDefault(sceneName, []);
+	}
 
-	public IReadOnlyList<string> GetGroupNames() => Groups.Keys.ToList();
+	public IReadOnlyList<string> GetGroupNames()
+	{
+		return Groups.Keys.ToList();
+	}
 
-	public IReadOnlyList<string> GetGroupItemNames(string groupName) => Groups.GetValueOrDefault(groupName, []);
+	public IReadOnlyList<string> GetGroupItemNames(string groupName)
+	{
+		return Groups.GetValueOrDefault(groupName, []);
+	}
 
-	public IReadOnlyList<string> GetInputNames() => InputNames;
+	public IReadOnlyList<string> GetInputNames()
+	{
+		return InputNames;
+	}
 
-	public IReadOnlyList<string> GetSourceNames() => SourceNames;
+	public IReadOnlyList<string> GetSourceNames()
+	{
+		return SourceNames;
+	}
 
 	public IReadOnlyList<string> GetSourceFilterNames(string sourceName)
-		=> SourceFilters.GetValueOrDefault(sourceName, []);
+	{
+		return SourceFilters.GetValueOrDefault(sourceName, []);
+	}
 
-	public void SetCurrentScene(string sceneName) => Calls.Add($"SetCurrentScene:{sceneName}");
+	public void SetCurrentScene(string sceneName)
+	{
+		Calls.Add($"SetCurrentScene:{sceneName}");
+	}
 
-	public void SetPreviewScene(string sceneName) => Calls.Add($"SetPreviewScene:{sceneName}");
+	public void SetPreviewScene(string sceneName)
+	{
+		Calls.Add($"SetPreviewScene:{sceneName}");
+	}
 
-	public IReadOnlyList<string> GetProfileNames() => ProfileNames;
+	public IReadOnlyList<string> GetProfileNames()
+	{
+		return ProfileNames;
+	}
 
-	public void SetCurrentProfile(string profileName) => Calls.Add($"SetCurrentProfile:{profileName}");
+	public void SetCurrentProfile(string profileName)
+	{
+		Calls.Add($"SetCurrentProfile:{profileName}");
+	}
 
-	public IReadOnlyList<string> GetSceneCollectionNames() => SceneCollectionNames;
+	public IReadOnlyList<string> GetSceneCollectionNames()
+	{
+		return SceneCollectionNames;
+	}
 
 	public void SetCurrentSceneCollection(string sceneCollectionName)
 	{
@@ -193,33 +249,75 @@ internal sealed class FakeObsClient : IObsClient
 		ThrowRequestFailure();
 	}
 
-	public void StartRecord() => Calls.Add("StartRecord");
+	public void StartRecord()
+	{
+		Calls.Add("StartRecord");
+	}
 
-	public void StopRecord() => Calls.Add("StopRecord");
+	public void StopRecord()
+	{
+		Calls.Add("StopRecord");
+	}
 
-	public void ToggleRecord() => Calls.Add("ToggleRecord");
+	public void ToggleRecord()
+	{
+		Calls.Add("ToggleRecord");
+	}
 
-	public void ToggleRecordPause() => Calls.Add("ToggleRecordPause");
+	public void ToggleRecordPause()
+	{
+		Calls.Add("ToggleRecordPause");
+	}
 
-	public void StartStream() => Calls.Add("StartStream");
+	public void StartStream()
+	{
+		Calls.Add("StartStream");
+	}
 
-	public void StopStream() => Calls.Add("StopStream");
+	public void StopStream()
+	{
+		Calls.Add("StopStream");
+	}
 
-	public void ToggleStream() => Calls.Add("ToggleStream");
+	public void ToggleStream()
+	{
+		Calls.Add("ToggleStream");
+	}
 
-	public void StartVirtualCam() => Calls.Add("StartVirtualCam");
+	public void StartVirtualCam()
+	{
+		Calls.Add("StartVirtualCam");
+	}
 
-	public void StopVirtualCam() => Calls.Add("StopVirtualCam");
+	public void StopVirtualCam()
+	{
+		Calls.Add("StopVirtualCam");
+	}
 
-	public void ToggleVirtualCam() => Calls.Add("ToggleVirtualCam");
+	public void ToggleVirtualCam()
+	{
+		Calls.Add("ToggleVirtualCam");
+	}
 
-	public void StartReplayBuffer() => Calls.Add("StartReplayBuffer");
+	public void StartReplayBuffer()
+	{
+		Calls.Add("StartReplayBuffer");
+	}
 
-	public void StopReplayBuffer() => Calls.Add("StopReplayBuffer");
+	public void StopReplayBuffer()
+	{
+		Calls.Add("StopReplayBuffer");
+	}
 
-	public void ToggleReplayBuffer() => Calls.Add("ToggleReplayBuffer");
+	public void ToggleReplayBuffer()
+	{
+		Calls.Add("ToggleReplayBuffer");
+	}
 
-	public void SaveReplayBuffer() => Calls.Add("SaveReplayBuffer");
+	public void SaveReplayBuffer()
+	{
+		Calls.Add("SaveReplayBuffer");
+	}
 
 	public void SplitRecordFile()
 	{
@@ -266,14 +364,24 @@ internal sealed class FakeObsClient : IObsClient
 	}
 
 	public void SetSourceVisible(string sceneName, string sourceName, bool visible)
-		=> Calls.Add($"SetSourceVisible:{sceneName}:{sourceName}:{visible}");
+	{
+		Calls.Add($"SetSourceVisible:{sceneName}:{sourceName}:{visible}");
+	}
 
 	public void ToggleSourceVisible(string sceneName, string sourceName)
-		=> Calls.Add($"ToggleSourceVisible:{sceneName}:{sourceName}");
+	{
+		Calls.Add($"ToggleSourceVisible:{sceneName}:{sourceName}");
+	}
 
-	public void SetInputMute(string inputName, bool muted) => Calls.Add($"SetInputMute:{inputName}:{muted}");
+	public void SetInputMute(string inputName, bool muted)
+	{
+		Calls.Add($"SetInputMute:{inputName}:{muted}");
+	}
 
-	public void ToggleInputMute(string inputName) => Calls.Add($"ToggleInputMute:{inputName}");
+	public void ToggleInputMute(string inputName)
+	{
+		Calls.Add($"ToggleInputMute:{inputName}");
+	}
 
 	public float GetInputVolume(string inputName)
 	{
@@ -340,7 +448,10 @@ internal sealed class FakeObsClient : IObsClient
 		return OutputStates.GetValueOrDefault(outputName, false);
 	}
 
-	public void SetStudioMode(bool enabled) => Calls.Add($"SetStudioMode:{enabled}");
+	public void SetStudioMode(bool enabled)
+	{
+		Calls.Add($"SetStudioMode:{enabled}");
+	}
 
 	public string GetInputAudioMonitorType(string inputName)
 	{
@@ -399,15 +510,30 @@ internal sealed class FakeObsClient : IObsClient
 		ThrowRequestFailure();
 	}
 
-	public void RaiseConnected() => Connected?.Invoke(this, EventArgs.Empty);
+	public void RaiseConnected()
+	{
+		Connected?.Invoke(this, EventArgs.Empty);
+	}
 
-	public void RaiseDisconnected(string? reason) => Disconnected?.Invoke(this, reason);
+	public void RaiseDisconnected(string? reason)
+	{
+		Disconnected?.Invoke(this, reason);
+	}
 
-	public void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
+	public void RaiseStateChanged()
+	{
+		StateChanged?.Invoke(this, EventArgs.Empty);
+	}
 
-	private void CountRead(string key) => Reads[key] = Reads.GetValueOrDefault(key) + 1;
+	private void CountRead(string key)
+	{
+		Reads[key] = Reads.GetValueOrDefault(key) + 1;
+	}
 
-	private static string FilterKey(string sourceName, string filterName) => $"{sourceName}::{filterName}";
+	private static string FilterKey(string sourceName, string filterName)
+	{
+		return $"{sourceName}::{filterName}";
+	}
 
 	private void EnsureOutput(string outputName)
 	{

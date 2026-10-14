@@ -107,7 +107,10 @@ internal sealed class ConfigUiCompatibilityContractTests : Harness.CapabilityCon
 	{
 		public string Kind => kind;
 
-		public IReadOnlyList<DeclaredCapability> DeclareCapabilities() => [];
+		public IReadOnlyList<DeclaredCapability> DeclareCapabilities()
+		{
+			return [];
+		}
 
 		public Task<CapabilityInvocationResult> InvokeAsync(
 			CapabilityInvocation invocation,

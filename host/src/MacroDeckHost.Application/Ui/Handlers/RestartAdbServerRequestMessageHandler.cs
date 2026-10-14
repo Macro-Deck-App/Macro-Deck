@@ -13,7 +13,8 @@ public class RestartAdbServerRequestMessageHandler
 	private readonly IAdbManager _adbManager;
 	private readonly IHostListenerState _listenerState;
 
-	public RestartAdbServerRequestMessageHandler(IAppPreferenceService preferences,
+	public RestartAdbServerRequestMessageHandler(
+		IAppPreferenceService preferences,
 		IAdbManager adbManager,
 		IHostListenerState listenerState)
 	{
@@ -22,7 +23,8 @@ public class RestartAdbServerRequestMessageHandler
 		_listenerState = listenerState;
 	}
 
-	public async ValueTask<RestartAdbServerResponse> Handle(RestartAdbServerRequest request,
+	public async ValueTask<RestartAdbServerResponse> Handle(
+		RestartAdbServerRequest request,
 		CancellationToken cancellationToken)
 	{
 		var result = await _adbManager.RestartServerAsync(cancellationToken);

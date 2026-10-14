@@ -21,7 +21,10 @@ internal sealed class ReportHonestyTests
 	private ConformanceReport Report => _report ?? throw new InvalidOperationException("The suite has not run yet.");
 
 	[OneTimeSetUp]
-	public async Task RunSuiteAsync() => _report = await SharedInProcessConformanceRun.GetReportAsync();
+	public async Task RunSuiteAsync()
+	{
+		_report = await SharedInProcessConformanceRun.GetReportAsync();
+	}
 
 	[Test]
 	public void ResultsHasExactlyOneEntryPerCheckNoneDropped()
@@ -84,8 +87,8 @@ internal sealed class ReportHonestyTests
 	public void ARequiredFailureAndOnlyARequiredFailureBlocksConformant()
 	{
 		var anyRequiredFailure = Report.Results
-			.Any(result => result.Requirement == ConformanceRequirement.Required &&
-				result.Result.Outcome == ConformanceOutcome.Failed);
+			.Any(result => result.Requirement == ConformanceRequirement.Required
+				&& result.Result.Outcome == ConformanceOutcome.Failed);
 
 		Assert.That(Report.Conformant, Is.EqualTo(!anyRequiredFailure));
 	}
@@ -108,7 +111,9 @@ internal sealed class ReportHonestyTests
 		Assert.That(ConformanceReportWriter.ToMarkdown(failing), Does.Contain("FAIL"));
 
 		using var document = JsonDocument.Parse(ConformanceReportWriter.ToJson(failing));
-		var outcome = document.RootElement.GetProperty("results")[0].GetProperty("result").GetProperty("outcome")
+		var outcome = document.RootElement.GetProperty("results")[0]
+			.GetProperty("result")
+			.GetProperty("outcome")
 			.GetString();
 		Assert.That(outcome, Is.EqualTo("failed"));
 	}

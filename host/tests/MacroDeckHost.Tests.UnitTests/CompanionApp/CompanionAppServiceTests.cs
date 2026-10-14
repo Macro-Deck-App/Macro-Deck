@@ -437,7 +437,8 @@ public class CompanionAppServiceTests
 
 		await fixture.Service.RunDueWorkAsync(CancellationToken.None);
 
-		Assert.That(Fixture.Only(await fixture.StatusAsync()).State, Is.EqualTo(CompanionAppDeviceStates.NotAuthorized));
+		Assert.That(Fixture.Only(await fixture.StatusAsync()).State,
+			Is.EqualTo(CompanionAppDeviceStates.NotAuthorized));
 	}
 
 	private sealed class Fixture : IDisposable
@@ -476,18 +477,33 @@ public class CompanionAppServiceTests
 			=> Harness.Transport.GroupMessages.Count(message => message.Message is CompanionAppChangedEvent);
 
 		public static AdbDevice ReadyDevice()
-			=> new(Serial, AdbDeviceState.Device, "Pixel_8", "Google", null, "1", null, DateTimeOffset.UnixEpoch);
+		{
+			return new AdbDevice(Serial,
+				AdbDeviceState.Device,
+				"Pixel_8",
+				"Google",
+				null,
+				"1",
+				null,
+				DateTimeOffset.UnixEpoch);
+		}
 
-		public Task<CompanionAppStatus> StatusAsync() => Service.GetStatusAsync(CancellationToken.None);
+		public Task<CompanionAppStatus> StatusAsync()
+		{
+			return Service.GetStatusAsync(CancellationToken.None);
+		}
 
-		public static CompanionAppDevice Only(CompanionAppStatus status) => status.Devices.Single();
+		public static CompanionAppDevice Only(CompanionAppStatus status)
+		{
+			return status.Devices.Single();
+		}
 
 		public void Dispose()
 		{
 			Service.Dispose();
 			if (Directory.Exists(Paths.BaseDirectory))
 			{
-				Directory.Delete(Paths.BaseDirectory, recursive: true);
+				Directory.Delete(Paths.BaseDirectory, true);
 			}
 		}
 	}
@@ -504,22 +520,32 @@ public class CompanionAppServiceTests
 		public AdbFailureCode? PackageFailure { get; set; }
 
 		public Result<string, AdbFailureCode> Answer(AdbQueryCommand command)
-			=> command switch
+		{
+			return command switch
 			{
-				AdbSdkLevelCommand when SdkFailure is { } failure => Result.Fail<string, AdbFailureCode>(failure, "timed out"),
-				AdbPackageInfoCommand when PackageFailure is { } failure => Result.Fail<string, AdbFailureCode>(failure, "timed out"),
+				AdbSdkLevelCommand when SdkFailure is { } failure => Result.Fail<string, AdbFailureCode>(failure,
+					"timed out"),
+				AdbPackageInfoCommand when PackageFailure is { } failure => Result.Fail<string, AdbFailureCode>(failure,
+					"timed out"),
 				AdbSdkLevelCommand when SdkOutput is { } output => Ok(output),
 				AdbSdkLevelCommand when SdkLevel is { } level => Ok($"{level}\n"),
-				AdbSdkLevelCommand => Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed, "getprop: not found"),
+				AdbSdkLevelCommand => Result.Fail<string, AdbFailureCode>(AdbFailureCode.CommandFailed,
+					"getprop: not found"),
 				AdbPackageInfoCommand when PackageOutput is { } output => Ok(output),
 				AdbPackageInfoCommand when InstalledVersionCode is { } code =>
-					Ok(CompanionPackageInfoParserTests.Installed(code, code == 9 ? "26.1.0" : $"26.0.{code}", Installer)),
+					Ok(CompanionPackageInfoParserTests.Installed(code,
+						code == 9 ? "26.1.0" : $"26.0.{code}",
+						Installer)),
 				AdbPackageInfoCommand => Ok("Unable to find package: app.macrodeck.companion\n"),
 				AdbPackageRunningCommand => Ok(Running + "\n"),
 				_ => Ok(string.Empty)
 			};
+		}
 
-		private static Result<string, AdbFailureCode> Ok(string output) => Result.Ok<string, AdbFailureCode>(output);
+		private static Result<string, AdbFailureCode> Ok(string output)
+		{
+			return Result.Ok<string, AdbFailureCode>(output);
+		}
 	}
 
 	internal sealed class RecordingOperations : IAdbDeviceOperations
@@ -528,7 +554,10 @@ public class CompanionAppServiceTests
 		public List<(string Serial, string Path)> Installed { get; } = [];
 		public Result<AdbFailureCode> Result { get; set; } = Domain.Common.Result.Ok<AdbFailureCode>();
 
-		public Task<Result<AdbFailureCode>> InstallApkAsync(string serial, string apkPath, CancellationToken cancellationToken)
+		public Task<Result<AdbFailureCode>> InstallApkAsync(
+			string serial,
+			string apkPath,
+			CancellationToken cancellationToken)
 		{
 			Installed.Add((serial, apkPath));
 			if (Result.Success)
@@ -540,31 +569,64 @@ public class CompanionAppServiceTests
 			return Task.FromResult(Result);
 		}
 
-		public Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(string serial, string command, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<AdbShellOutput, AdbFailureCode>> RunShellAsync(
+			string serial,
+			string command,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(string serial, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<AdbBatteryReading, AdbFailureCode>> GetBatteryAsync(
+			string serial,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AdbFailureCode>> PushFileAsync(string serial, string localPath, string remotePath, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<AdbFailureCode>> PushFileAsync(
+			string serial,
+			string localPath,
+			string remotePath,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AdbFailureCode>> PullFileAsync(string serial, string remotePath, string localPath, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<AdbFailureCode>> PullFileAsync(
+			string serial,
+			string remotePath,
+			string localPath,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<AdbFailureCode>> UninstallPackageAsync(string serial, string packageName, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<AdbFailureCode>> UninstallPackageAsync(
+			string serial,
+			string packageName,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(string serial, string packageName, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		public Task<Result<bool, AdbFailureCode>> IsPackageInstalledAsync(
+			string serial,
+			string packageName,
+			CancellationToken cancellationToken)
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<string, AdbFailureCode>> ConnectAsync(string address, CancellationToken cancellationToken)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	internal sealed class ScriptedReleases : ICompanionAppReleaseClient
 	{
-		private static readonly byte[] Apk = [1, 2, 3, 4];
+		private static readonly byte[] _apk = [1, 2, 3, 4];
 
 		public CompanionApkDownloadOutcome Outcome { get; set; } = CompanionApkDownloadOutcome.Downloaded;
 		public int ManifestReads { get; private set; }
@@ -581,17 +643,18 @@ public class CompanionAppServiceTests
 			return Task.FromResult<CompanionAppRelease?>(new CompanionAppRelease("26.1.0",
 				9,
 				new Uri("https://packages.macro-deck.app/companion/android/26.1.0/macro-deck-companion-26.1.0.apk"),
-				Convert.ToHexStringLower(SHA256.HashData(Apk)),
+				Convert.ToHexStringLower(SHA256.HashData(_apk)),
 				null));
 		}
 
-		public async Task<CompanionApkDownloadOutcome> DownloadAsync(CompanionAppRelease release,
+		public async Task<CompanionApkDownloadOutcome> DownloadAsync(
+			CompanionAppRelease release,
 			string destinationPath,
 			CancellationToken cancellationToken)
 		{
 			if (Outcome == CompanionApkDownloadOutcome.Downloaded)
 			{
-				await File.WriteAllBytesAsync(destinationPath, Apk, cancellationToken);
+				await File.WriteAllBytesAsync(destinationPath, _apk, cancellationToken);
 			}
 
 			return Outcome;
@@ -603,9 +666,11 @@ public class CompanionAppServiceTests
 		public ConcurrentDictionary<string, string> Values { get; } = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
+		{
+			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }
 				: null);
+		}
 
 		public Task SetValue(string key, string value)
 		{

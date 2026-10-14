@@ -14,13 +14,18 @@ internal sealed class PluginPermissionDeclarations(
 {
 	private readonly ConcurrentDictionary<string, bool> _declaresByManifest = new(StringComparer.Ordinal);
 
-	public bool IsGrantable(string pluginId) => IsSelfRegistered(pluginId) || Declares(pluginId);
+	public bool IsGrantable(string pluginId)
+	{
+		return IsSelfRegistered(pluginId) || Declares(pluginId);
+	}
 
 	private bool IsSelfRegistered(string pluginId)
-		=> sessionRegistry.Snapshot()
-			.Any(session => session.PluginId == pluginId &&
-				session.State == PluginSessionState.Connected &&
-				session.Origin == PluginSessionOrigin.SelfRegistered);
+	{
+		return sessionRegistry.Snapshot()
+			.Any(session => session.PluginId == pluginId
+				&& session.State == PluginSessionState.Connected
+				&& session.Origin == PluginSessionOrigin.SelfRegistered);
+	}
 
 	private bool Declares(string pluginId)
 	{

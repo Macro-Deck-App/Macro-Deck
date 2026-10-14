@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
@@ -12,7 +14,7 @@ internal static partial class Scenes
 			new("t1", "So What", "Miles Davis - Kind of Blue", "#2b6cee", "#1b2a4a"),
 			new("t2", "Take Five", "The Dave Brubeck Quartet - Time Out", "#ff9500", "#8a2be2"),
 			new("t3", "Naima", "John Coltrane - Giant Steps", "#34c759", "#0b3d2e"),
-			new("t4", "Cantaloupe Island", "Herbie Hancock - Empyrean Isles", "#ff2d55", "#4a1030"),
+			new("t4", "Cantaloupe Island", "Herbie Hancock - Empyrean Isles", "#ff2d55", "#4a1030")
 		];
 
 		yield return Dialog("list",
@@ -27,7 +29,13 @@ internal static partial class Scenes
 						Key = "results",
 						Fill = true,
 						Gap = UiSize.FromBasis(0.015),
-						Events = [UiEventHandler.On(UiComponentEvents.Reveal, () => { })],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Reveal,
+								() =>
+								{
+								})
+						],
 						Children =
 						[
 							new UiRepeat<CatalogItem>
@@ -36,11 +44,11 @@ internal static partial class Scenes
 								Items = UiValue.Of(items),
 								KeySelector = item => item.Id,
 								Template
-									= (item, _) => TrackRow(item.Id, item.Title, item.Subtitle, item.From, item.To),
-							},
-						],
-					},
-				],
+									= (item, _) => TrackRow(item.Id, item.Title, item.Subtitle, item.From, item.To)
+							}
+						]
+					}
+				]
 			},
 			600,
 			330);

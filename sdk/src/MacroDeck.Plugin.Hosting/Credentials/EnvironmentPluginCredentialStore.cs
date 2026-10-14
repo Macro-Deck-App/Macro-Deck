@@ -31,7 +31,9 @@ internal sealed class EnvironmentPluginCredentialStore(IOptions<PluginHostOption
 	}
 
 	public Task SaveAsync(PluginCredentials credentials, CancellationToken cancellationToken = default)
-		=> throw new NotSupportedException(
-			"A managed plugin does not register itself, so it has no credentials to persist. " +
-			"The host issues them and passes them in the environment.");
+	{
+		throw new NotSupportedException(
+			"A managed plugin does not register itself, so it has no credentials to persist. "
+			+ "The host issues them and passes them in the environment.");
+	}
 }

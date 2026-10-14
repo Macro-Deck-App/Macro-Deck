@@ -13,8 +13,12 @@ public sealed record CapabilityNegotiationResult
 	public string? RejectionReason { get; init; }
 
 	public static CapabilityNegotiationResult Accept(string kind, int negotiatedVersion)
-		=> new() { Kind = kind, Accepted = true, NegotiatedVersion = negotiatedVersion };
+	{
+		return new CapabilityNegotiationResult { Kind = kind, Accepted = true, NegotiatedVersion = negotiatedVersion };
+	}
 
 	public static CapabilityNegotiationResult Reject(string kind, string reason)
-		=> new() { Kind = kind, Accepted = false, RejectionReason = reason };
+	{
+		return new CapabilityNegotiationResult { Kind = kind, Accepted = false, RejectionReason = reason };
+	}
 }

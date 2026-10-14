@@ -15,7 +15,8 @@ public sealed class NetworkRestartNotifier : INetworkRestartNotifier
 	private readonly IUserNotificationStore _notifications;
 	private readonly ILocalizationResolver _localization;
 
-	public NetworkRestartNotifier(IAppPreferenceService preferences,
+	public NetworkRestartNotifier(
+		IAppPreferenceService preferences,
 		IApplicationRestartService restart,
 		IUserNotificationStore notifications,
 		ILocalizationResolver localization)
@@ -45,8 +46,8 @@ public sealed class NetworkRestartNotifier : INetworkRestartNotifier
 		{
 			Severity = UserNotificationSeverity.Info,
 			Kind = UserNotificationKind.General,
-			Title = _localization.Resolve(AppStrings.Notifications.RestartToApplyNetwork(), culture) ??
-				"Restart to apply the new network settings",
+			Title = _localization.Resolve(AppStrings.Notifications.RestartToApplyNetwork(), culture)
+				?? "Restart to apply the new network settings",
 			Message = _localization.Resolve(availability.Supported
 					? AppStrings.Notifications.NetworkSettingsPendingRestart()
 					: AppStrings.Notifications.NetworkSettingsPendingManualRestart(),

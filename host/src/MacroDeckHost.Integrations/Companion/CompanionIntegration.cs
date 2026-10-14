@@ -84,9 +84,15 @@ public sealed partial class CompanionIntegration
 
 	internal IReadOnlyList<CompanionRuntime> Runtimes => RuntimeSnapshot();
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new CompanionConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new CompanionConfigFlow();
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -142,7 +148,10 @@ public sealed partial class CompanionIntegration
 			slot));
 	}
 
-	internal bool IsConnected(Guid entryId) => Volatile.Read(ref _devices)?.FindDevice(entryId) is not null;
+	internal bool IsConnected(Guid entryId)
+	{
+		return Volatile.Read(ref _devices)?.FindDevice(entryId) is not null;
+	}
 
 	internal async Task ReloadConfigurationsAsync(CancellationToken cancellationToken = default)
 	{
@@ -163,8 +172,8 @@ public sealed partial class CompanionIntegration
 				var identityJson = await context.Config.GetStringAsync(entry.Id,
 					CompanionConfigurationMetadata.VariableIdentityKey,
 					cancellationToken);
-				if (string.Equals(schema, CompanionConfigurationMetadata.SchemaVersion, StringComparison.Ordinal) &&
-					ConfigurationIdentityJson.TryParse(identityJson, out var identity))
+				if (string.Equals(schema, CompanionConfigurationMetadata.SchemaVersion, StringComparison.Ordinal)
+					&& ConfigurationIdentityJson.TryParse(identityJson, out var identity))
 				{
 					runtimes.Add(new CompanionRuntime(entry.Id, entry.Title, identity));
 				}
@@ -231,9 +240,15 @@ public sealed partial class CompanionIntegration
 			});
 	}
 
-	private void OnDeviceChanged(object? sender, CompanionDeviceEventArgs e) => _ = _variables?.RequestRefreshAsync();
+	private void OnDeviceChanged(object? sender, CompanionDeviceEventArgs e)
+	{
+		_ = _variables?.RequestRefreshAsync();
+	}
 
-	private CompanionRuntime[] RuntimeSnapshot() => Volatile.Read(ref _runtimes);
+	private CompanionRuntime[] RuntimeSnapshot()
+	{
+		return Volatile.Read(ref _runtimes);
+	}
 
 	private static byte[] LoadIcon()
 	{

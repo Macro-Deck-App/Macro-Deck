@@ -24,15 +24,20 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 	private const string ExecuteWebhookActionId = "execute-webhook";
 
 	public Task<ActionMigrationResult?> MigrateActionAsync(ForeignAction action, CancellationToken cancellationToken)
-		=> Task.FromResult(Migrate(action));
+	{
+		return Task.FromResult(Migrate(action));
+	}
 
 	public Task<IReadOnlyList<MigratedConfiguration>> MigrateConfigurationAsync(
 		ForeignPluginSettings settings,
 		CancellationToken cancellationToken)
-		=> Task.FromResult(MigrateConfiguration(settings));
+	{
+		return Task.FromResult(MigrateConfiguration(settings));
+	}
 
 	private static ActionMigrationResult? Migrate(ForeignAction action)
-		=> action.TypeName switch
+	{
+		return action.TypeName switch
 		{
 			"RecklessBoon.MacroDeck.Discord.Actions.SetMuteOnAction" =>
 				VoiceState(action, MuteActionId, "Mute", DiscordActionParameters.StateOn),
@@ -55,6 +60,7 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 			"RecklessBoon.MacroDeck.Discord.Actions.ExecuteWebhookAction" => MigrateWebhook(action),
 			_ => null
 		};
+	}
 
 	private static IReadOnlyList<MigratedConfiguration> MigrateConfiguration(ForeignPluginSettings settings)
 	{
@@ -95,10 +101,12 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 		string actionId,
 		string fallbackLabel,
 		string state)
-		=> new(DiscordIntegration.IntegrationId,
+	{
+		return new ActionMigrationResult(DiscordIntegration.IntegrationId,
 			actionId,
 			action.DisplayName ?? fallbackLabel,
 			Parameters((DiscordActionParameters.StateParameter, JsonString(state))));
+	}
 
 	private static ActionMigrationResult? MigrateRichPresence(ForeignAction action)
 	{
@@ -167,7 +175,7 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 			AddEmbedParameters(embeds[0], parameters, warnings);
 			if (embeds.Count > 1)
 			{
-				warnings.Add(AppStrings.Migration.Warning.Discord.EmbedsDropped(count: embeds.Count - 1));
+				warnings.Add(AppStrings.Migration.Warning.Discord.EmbedsDropped(embeds.Count - 1));
 			}
 		}
 
@@ -206,9 +214,9 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 			warnings.Add(AppStrings.Migration.Warning.Discord.EmbedAuthorDropped());
 		}
 
-		if (embed.TryGetProperty("Fields", out var fields) &&
-			fields.ValueKind == JsonValueKind.Array &&
-			fields.GetArrayLength() > 0)
+		if (embed.TryGetProperty("Fields", out var fields)
+			&& fields.ValueKind == JsonValueKind.Array
+			&& fields.GetArrayLength() > 0)
 		{
 			warnings.Add(AppStrings.Migration.Warning.Discord.EmbedFieldsDropped());
 		}
@@ -270,9 +278,9 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 	private static bool TryGetInt(JsonElement obj, string property, out int value)
 	{
 		value = 0;
-		return obj.TryGetProperty(property, out var element) &&
-			element.ValueKind == JsonValueKind.Number &&
-			element.TryGetInt32(out value);
+		return obj.TryGetProperty(property, out var element)
+			&& element.ValueKind == JsonValueKind.Number
+			&& element.TryGetInt32(out value);
 	}
 
 	private static void AddIfPresent(
@@ -303,12 +311,16 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 	}
 
 	private static bool HasNonNullProperty(JsonElement obj, string property)
-		=> obj.TryGetProperty(property, out var value) && value.ValueKind != JsonValueKind.Null;
+	{
+		return obj.TryGetProperty(property, out var value) && value.ValueKind != JsonValueKind.Null;
+	}
 
 	private static string? ReadNestedString(JsonElement obj, string property, string nested)
-		=> obj.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.Object
+	{
+		return obj.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.Object
 			? ReadString(value, nested)
 			: null;
+	}
 
 	private static string? ReadString(JsonElement obj, string property)
 	{
@@ -340,8 +352,13 @@ internal sealed class DiscordMacroDeck2Migration : IIntegrationMigration
 		}
 	}
 
-	private static JsonElement JsonString(string value) => JsonSerializer.SerializeToElement(value);
+	private static JsonElement JsonString(string value)
+	{
+		return JsonSerializer.SerializeToElement(value);
+	}
 
 	private static Dictionary<string, JsonElement> Parameters(params (string Name, JsonElement Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

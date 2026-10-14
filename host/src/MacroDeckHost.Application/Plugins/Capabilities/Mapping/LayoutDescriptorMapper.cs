@@ -18,7 +18,8 @@ public static class LayoutDescriptorMapper
 	}
 
 	private static LayoutRegion ToRegion(LayoutRegionDto dto)
-		=> new()
+	{
+		return new LayoutRegion
 		{
 			Id = dto.Id,
 			Kind = dto.Kind,
@@ -28,9 +29,11 @@ public static class LayoutDescriptorMapper
 			Visuals = ToVisuals(dto.Visuals),
 			Extra = dto.Extra
 		};
+	}
 
 	private static LayoutGrid? ToGrid(LayoutGridDto? dto)
-		=> dto is null
+	{
+		return dto is null
 			? null
 			: new LayoutGrid
 			{
@@ -44,9 +47,11 @@ public static class LayoutDescriptorMapper
 				SupportsRuntimeResize = dto.SupportsRuntimeResize,
 				KeySize = dto.KeySize is null ? null : new LayoutKeySize(dto.KeySize.Width, dto.KeySize.Height)
 			};
+	}
 
 	private static LayoutVisualCapabilities? ToVisuals(LayoutVisualCapabilitiesDto? dto)
-		=> dto is null
+	{
+		return dto is null
 			? null
 			: new LayoutVisualCapabilities
 			{
@@ -61,7 +66,10 @@ public static class LayoutDescriptorMapper
 				CustomFolderViews = dto.CustomFolderViews,
 				MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 			};
+	}
 
 	private static LayoutCapabilities? ToCapabilities(LayoutCapabilitiesDto? dto)
-		=> dto is null ? null : new LayoutCapabilities { Visuals = ToVisuals(dto.Visuals), Extra = dto.Extra };
+	{
+		return dto is null ? null : new LayoutCapabilities { Visuals = ToVisuals(dto.Visuals), Extra = dto.Extra };
+	}
 }

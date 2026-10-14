@@ -22,9 +22,12 @@ internal static class BatteryWidgetConfigView
 		var config = BatteryWidgetData.Parse(data);
 		var mode = new UiState<string>(config.Mode);
 
-		var device = new UiState<BatteryDeviceReference?>(config.Device is { } stored ? Refresh(stored, batteries) : null);
-		var selection = new UiState<IReadOnlyList<BatteryDeviceReference>>(
-			[.. config.Selection.Select(reference => Refresh(reference, batteries))]);
+		var device = new UiState<BatteryDeviceReference?>(config.Device is { } stored
+			? Refresh(stored, batteries)
+			: null);
+		var selection = new UiState<IReadOnlyList<BatteryDeviceReference>>([
+			.. config.Selection.Select(reference => Refresh(reference, batteries))
+		]);
 
 		var style = new UiState<string>(config.Style);
 		var showPercentage = new UiState<bool>(config.ShowPercentage);
@@ -71,26 +74,27 @@ internal static class BatteryWidgetConfigView
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(BatteryWidgetData.ModeOne, AppStrings.Widgets.Battery.DevicesOne()),
 							UiOption.Of(BatteryWidgetData.ModeAll, AppStrings.Widgets.Battery.DevicesAll()),
-							UiOption.Of(BatteryWidgetData.ModeSelection, AppStrings.Widgets.Battery.DevicesSelection()),
-						]),
+							UiOption.Of(BatteryWidgetData.ModeSelection, AppStrings.Widgets.Battery.DevicesSelection())
+						])
 					},
 					new UiWhen
 					{
 						Key = "device-when",
 						Condition = () => mode.Value == BatteryWidgetData.ModeOne,
-						Content = () => DevicePicker(batteries, device, deviceOptions, hasDevices),
+						Content = () => DevicePicker(batteries, device, deviceOptions, hasDevices)
 					},
 					new UiWhen
 					{
 						Key = "selection-when",
 						Condition = () => mode.Value == BatteryWidgetData.ModeSelection,
-						Content = () => SelectionPicker(batteries, selection, hasDevices),
+						Content = () => SelectionPicker(batteries, selection, hasDevices)
 					},
 					new UiWhen
 					{
 						Key = "no-devices-when",
 						Condition = () => !hasDevices && mode.Value == BatteryWidgetData.ModeAll,
-						Content = () => new UiProse { Key = "no-devices", Text = AppStrings.Widgets.Battery.NoDevicesHint() },
+						Content = () => new UiProse
+							{ Key = "no-devices", Text = AppStrings.Widgets.Battery.NoDevicesHint() }
 					},
 					new UiHeading { Key = "style-heading", Text = AppStrings.Widgets.Editor.Style() },
 					new UiChoiceInput
@@ -102,27 +106,27 @@ internal static class BatteryWidgetConfigView
 						Binding = Bind.To(style),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(BatteryWidgetData.StyleRing, AppStrings.Widgets.Gauges.StyleRing()),
-							UiOption.Of(BatteryWidgetData.StyleBar, AppStrings.Widgets.Battery.StyleBar()),
-						]),
+							UiOption.Of(BatteryWidgetData.StyleBar, AppStrings.Widgets.Battery.StyleBar())
+						])
 					},
 					new UiHeading { Key = "display-heading", Text = AppStrings.Widgets.Editor.Display() },
 					new UiBooleanInput
 					{
 						Key = BatteryWidgetData.ShowPercentageKey,
 						Label = AppStrings.Widgets.Battery.ShowPercentage(),
-						Binding = Bind.To(showPercentage),
+						Binding = Bind.To(showPercentage)
 					},
 					new UiBooleanInput
 					{
 						Key = BatteryWidgetData.ShowNameKey,
 						Label = AppStrings.Widgets.Battery.ShowName(),
-						Binding = Bind.To(showName),
+						Binding = Bind.To(showName)
 					},
 					new UiBooleanInput
 					{
 						Key = BatteryWidgetData.ShowChargingBadgeKey,
 						Label = AppStrings.Widgets.Battery.ShowChargingBadge(),
-						Binding = Bind.To(showChargingBadge),
+						Binding = Bind.To(showChargingBadge)
 					},
 					new UiHeading { Key = "color-heading", Text = AppStrings.Widgets.Battery.ColorMode() },
 					new UiChoiceInput
@@ -134,8 +138,8 @@ internal static class BatteryWidgetConfigView
 						Binding = Bind.To(colorMode),
 						Options = UiValue.Of<IReadOnlyList<UiOption>>([
 							UiOption.Of(BatteryWidgetData.ColorByLevel, AppStrings.Widgets.Battery.ColorByLevel()),
-							UiOption.Of(BatteryWidgetData.ColorSingle, AppStrings.Widgets.Battery.ColorSingle()),
-						]),
+							UiOption.Of(BatteryWidgetData.ColorSingle, AppStrings.Widgets.Battery.ColorSingle())
+						])
 					},
 					new UiWhen
 					{
@@ -157,17 +161,17 @@ internal static class BatteryWidgetConfigView
 									Step = 1d,
 									Unit = UiText.Of("%"),
 									DefaultValue = BatteryViewStateResolver.DefaultThresholds,
-									SupportsReset = true,
+									SupportsReset = true
 								},
 								new UiBooleanInput
 								{
 									Key = BatteryWidgetData.ChargingColorKey,
 									Label = AppStrings.Widgets.Battery.ChargingColor(),
 									Description = AppStrings.Widgets.Battery.ChargingColorHint(),
-									Binding = Bind.To(chargingColor),
-								},
-							],
-						},
+									Binding = Bind.To(chargingColor)
+								}
+							]
+						}
 					},
 					new UiWhen
 					{
@@ -180,20 +184,21 @@ internal static class BatteryWidgetConfigView
 							Label = AppStrings.Widgets.Battery.CustomColor(),
 							Binding = Bind.To(color),
 							SupportsReset = true,
-							DefaultValue = string.Empty,
-						},
+							DefaultValue = string.Empty
+						}
 					},
 					new UiHeading { Key = "appearance-heading", Text = AppStrings.Widgets.Editor.Appearance() },
 					WidgetConfigFragments.Background(backgroundColor),
 					new UiHeading { Key = "border-heading", Text = AppStrings.Widgets.Editor.Border() },
-					WidgetConfigFragments.Border(borderStyle, borderColor, labelled: false),
-				],
+					WidgetConfigFragments.Border(borderStyle, borderColor, false)
+				]
 			},
-			Editor = WidgetConfigFragments.FlowsEditor(flows),
+			Editor = WidgetConfigFragments.FlowsEditor(flows)
 		};
 	}
 
-	private static UiObjectInput DevicePicker(IBatteryApi batteries,
+	private static UiObjectInput DevicePicker(
+		IBatteryApi batteries,
 		UiState<BatteryDeviceReference?> device,
 		UiOptionsState options,
 		bool hasDevices)
@@ -208,7 +213,7 @@ internal static class BatteryWidgetConfigView
 					device.Value = string.IsNullOrEmpty(value) ? null : Pick(batteries, value, device.Peek());
 					options.Reload();
 				}),
-			OptionsState = options,
+			OptionsState = options
 		};
 
 		return new UiObjectInput
@@ -216,11 +221,12 @@ internal static class BatteryWidgetConfigView
 			Key = BatteryWidgetData.DeviceKey,
 			Binding = Bind.Custom(() => device.Value is { } picked ? ToElement(picked.ToJson()) : _null,
 				value => device.Value = BatteryDeviceReference.Read(value)),
-			Children = [hasDevices ? picker : picker with { Description = AppStrings.Widgets.Battery.NoDevicesHint() }],
+			Children = [hasDevices ? picker : picker with { Description = AppStrings.Widgets.Battery.NoDevicesHint() }]
 		};
 	}
 
-	private static UiObjectInput SelectionPicker(IBatteryApi batteries,
+	private static UiObjectInput SelectionPicker(
+		IBatteryApi batteries,
 		UiState<IReadOnlyList<BatteryDeviceReference>> selection,
 		bool hasDevices)
 	{
@@ -232,9 +238,9 @@ internal static class BatteryWidgetConfigView
 				ids => selection.Value =
 				[
 					.. (ids ?? []).Distinct(StringComparer.Ordinal)
-						.Select(id => Pick(batteries, id, selection.Peek().FirstOrDefault(reference => reference.Id == id))),
+					.Select(id => Pick(batteries, id, selection.Peek().FirstOrDefault(reference => reference.Id == id)))
 				]),
-			Options = UiValue.From(() => (IReadOnlyList<UiOption>)DeviceOptions(batteries, selection.Value)),
+			Options = UiValue.From(() => (IReadOnlyList<UiOption>)DeviceOptions(batteries, selection.Value))
 		};
 
 		return new UiObjectInput
@@ -242,13 +248,16 @@ internal static class BatteryWidgetConfigView
 			Key = BatteryWidgetData.SelectionKey,
 			Binding = Bind.Custom(() => ToElement(new JsonObject
 				{
-					[BatteryWidgetData.SelectionDevicesKey] = new JsonArray([.. selection.Value.Select(reference => (JsonNode)reference.ToJson())]),
+					[BatteryWidgetData.SelectionDevicesKey] = new JsonArray([
+						.. selection.Value.Select(reference => (JsonNode)reference.ToJson())
+					])
 				}),
 				value => selection.Value = BatteryWidgetData.ReadSelection(ToElement(new JsonObject
 				{
-					[BatteryWidgetData.SelectionKey] = JsonNode.Parse(value.ValueKind == JsonValueKind.Undefined ? "null" : value.GetRawText()),
+					[BatteryWidgetData.SelectionKey]
+						= JsonNode.Parse(value.ValueKind == JsonValueKind.Undefined ? "null" : value.GetRawText())
 				}))),
-			Children = [hasDevices ? picker : picker with { Description = AppStrings.Widgets.Battery.NoDevicesHint() }],
+			Children = [hasDevices ? picker : picker with { Description = AppStrings.Widgets.Battery.NoDevicesHint() }]
 		};
 	}
 
@@ -260,8 +269,8 @@ internal static class BatteryWidgetConfigView
 			{
 				Value = device.Id,
 				Label = device.ProviderName is { Length: > 0 } provider
-					? AppStrings.Widgets.Battery.DeviceOption(device: device.Name, provider: provider)
-					: LocalizedText.FromLiteral(device.Name),
+					? AppStrings.Widgets.Battery.DeviceOption(device.Name, provider)
+					: LocalizedText.FromLiteral(device.Name)
 			})
 			.ToList();
 
@@ -275,7 +284,7 @@ internal static class BatteryWidgetConfigView
 			options.Add(new UiOption
 			{
 				Value = reference.Id,
-				Label = AppStrings.Widgets.Battery.DeviceUnavailable(device: reference.Name ?? reference.Id),
+				Label = AppStrings.Widgets.Battery.DeviceUnavailable(reference.Name ?? reference.Id)
 			});
 		}
 
@@ -283,14 +292,21 @@ internal static class BatteryWidgetConfigView
 	}
 
 	private static BatteryDeviceReference Refresh(BatteryDeviceReference stored, IBatteryApi batteries)
-		=> batteries.Find(stored.Id) is { } device ? BatteryDeviceReference.Of(device) : stored;
+	{
+		return batteries.Find(stored.Id) is { } device ? BatteryDeviceReference.Of(device) : stored;
+	}
 
 	private static BatteryDeviceReference Pick(IBatteryApi batteries, string id, BatteryDeviceReference? previous)
-		=> batteries.Find(id) is { } device
+	{
+		return batteries.Find(id) is { } device
 			? BatteryDeviceReference.Of(device)
 			: previous is not null && previous.Id == id
 				? previous
 				: new BatteryDeviceReference(id, null, BatteryDeviceKinds.Other);
+	}
 
-	private static JsonElement ToElement(JsonNode node) => JsonSerializer.Deserialize<JsonElement>(node.ToJsonString());
+	private static JsonElement ToElement(JsonNode node)
+	{
+		return JsonSerializer.Deserialize<JsonElement>(node.ToJsonString());
+	}
 }

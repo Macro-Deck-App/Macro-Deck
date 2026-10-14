@@ -23,7 +23,8 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 	private readonly IStoreInstallationStore _installations;
 	private readonly StoreRegistryOptions _options;
 
-	public StoreOfficialPackages(IStoreCatalog catalog,
+	public StoreOfficialPackages(
+		IStoreCatalog catalog,
 		IStoreCatalogQueryService catalogQuery,
 		IStoreInstallationStore installations,
 		StoreRegistryOptions options)
@@ -34,7 +35,8 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 		_options = options;
 	}
 
-	public bool CatalogLoaded => _catalog.Snapshot is { } snapshot && (snapshot.Entries.Count > 0 || snapshot.Sequence > 0);
+	public bool CatalogLoaded
+		=> _catalog.Snapshot is { } snapshot && (snapshot.Entries.Count > 0 || snapshot.Sequence > 0);
 
 	public string? ResolveListed(StoreExtensionKind kind, string id)
 	{
@@ -62,8 +64,10 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 			.ToList();
 	}
 
-	public bool IsInstalled(string packageId) =>
-		InstalledPackageIds().Contains(packageId, StringComparer.OrdinalIgnoreCase);
+	public bool IsInstalled(string packageId)
+	{
+		return InstalledPackageIds().Contains(packageId, StringComparer.OrdinalIgnoreCase);
+	}
 
 	// A plugin counts only while the official catalog lists it installed; its store record can outlive a
 	// plugin removed outside the store. Icon packs and templates also count from their record once unlisted.
@@ -77,15 +81,16 @@ public sealed class StoreOfficialPackages : IStoreOfficialPackages
 		var ids = new List<string>();
 		foreach (var item in _catalogQuery.Installed().Where(item => item.Withdrawal is null))
 		{
-			if (item.Entry.Kind is StoreExtensionKind.Plugin ||
-				StoreRegistryOptions.IsOfficial(_installations.Find(item.Entry.Kind, item.Entry.Id)?.Origin))
+			if (item.Entry.Kind is StoreExtensionKind.Plugin
+				|| StoreRegistryOptions.IsOfficial(_installations.Find(item.Entry.Kind, item.Entry.Id)?.Origin))
 			{
 				ids.Add(item.Entry.Id);
 			}
 		}
 
 		ids.AddRange(_installations.LoadAll()
-			.Where(record => record.Kind is not StoreExtensionKind.Plugin && StoreRegistryOptions.IsOfficial(record.Origin))
+			.Where(record
+				=> record.Kind is not StoreExtensionKind.Plugin && StoreRegistryOptions.IsOfficial(record.Origin))
 			.Select(record => record.PackageId));
 
 		return ids.Distinct(StringComparer.OrdinalIgnoreCase).ToList();

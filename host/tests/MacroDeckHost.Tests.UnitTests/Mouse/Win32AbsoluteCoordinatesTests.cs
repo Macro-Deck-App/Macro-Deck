@@ -5,7 +5,9 @@ namespace MacroDeckHost.Tests.UnitTests.Mouse;
 public class Win32AbsoluteCoordinatesTests
 {
 	private static int RoundTrip(int offset, int extent)
-		=> (int)(((long)Win32AbsoluteCoordinates.Normalize(offset, extent) * extent) >> 16);
+	{
+		return (int)((long)Win32AbsoluteCoordinates.Normalize(offset, extent) * extent >> 16);
+	}
 
 	[TestCase(1920)]
 	[TestCase(1080)]

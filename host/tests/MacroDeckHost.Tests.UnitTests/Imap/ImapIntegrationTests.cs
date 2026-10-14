@@ -36,10 +36,12 @@ internal sealed class ImapIntegrationTests
 	[Test]
 	public async Task A_connected_inbox_reports_whole_inbox_counts_and_its_newest_messages_first()
 	{
-		_server.Seed(60, seen: uid => uid is not (1 or 59));
+		_server.Seed(60, uid => uid is not (1 or 59));
 		var inboxId = await StartWithOneAccountAsync();
 
-		var latest = await _integration.GetSnapshotAsync(inboxId, new EmailMessageQuery { MaxMessages = 3 }, default);
+		var latest = await _integration.GetSnapshotAsync(inboxId,
+			new EmailMessageQuery { MaxMessages = 3 },
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -57,13 +59,15 @@ internal sealed class ImapIntegrationTests
 	[Test]
 	public async Task Unread_only_finds_unread_mail_older_than_the_newest_fifty()
 	{
-		_server.Seed(60, seen: uid => uid != 3);
+		_server.Seed(60, uid => uid != 3);
 		var inboxId = await StartWithOneAccountAsync();
 
-		var newest = await _integration.GetSnapshotAsync(inboxId, new EmailMessageQuery { MaxMessages = 50 }, default);
+		var newest = await _integration.GetSnapshotAsync(inboxId,
+			new EmailMessageQuery { MaxMessages = 50 },
+			CancellationToken.None);
 		var unread = await _integration.GetSnapshotAsync(inboxId,
 			new EmailMessageQuery { MaxMessages = 10, UnreadOnly = true },
-			default);
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -80,13 +84,13 @@ internal sealed class ImapIntegrationTests
 		_server.Seed(2);
 		var inboxId = await StartWithOneAccountAsync();
 		var query = new EmailMessageQuery { MaxMessages = 5 };
-		await _integration.GetSnapshotAsync(inboxId, query, default);
+		await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 		_changes.Clear();
 
 		_server.Deliver("Invoice");
 
 		await WaitUntilAsync(() => _changes.Contains(inboxId), "the inbox reported a change");
-		var after = await _integration.GetSnapshotAsync(inboxId, query, default);
+		var after = await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(after.Messages[0].Subject, Is.EqualTo("Invoice"));
@@ -98,16 +102,17 @@ internal sealed class ImapIntegrationTests
 	[Test]
 	public async Task A_message_marked_read_elsewhere_raises_changed_and_reads_as_read()
 	{
-		_server.Seed(3, seen: uid => uid != 3);
+		_server.Seed(3, uid => uid != 3);
 		var inboxId = await StartWithOneAccountAsync();
 		var query = new EmailMessageQuery { MaxMessages = 5 };
-		Assert.That((await _integration.GetSnapshotAsync(inboxId, query, default)).UnreadCount, Is.EqualTo(1));
+		Assert.That((await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None)).UnreadCount,
+			Is.EqualTo(1));
 		_changes.Clear();
 
 		_server.MarkSeen(3);
 
 		await WaitUntilAsync(() => _changes.Contains(inboxId), "the inbox reported a change");
-		var after = await _integration.GetSnapshotAsync(inboxId, query, default);
+		var after = await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(after.UnreadCount, Is.Zero);
@@ -118,20 +123,24 @@ internal sealed class ImapIntegrationTests
 	[Test]
 	public async Task A_lost_connection_serves_the_last_snapshot_as_disconnected_and_reconnects()
 	{
-		_server.Seed(4, seen: uid => uid != 4);
+		_server.Seed(4, uid => uid != 4);
 		var inboxId = await StartWithOneAccountAsync();
 		var query = new EmailMessageQuery { MaxMessages = 5 };
-		var before = await _integration.GetSnapshotAsync(inboxId, query, default);
+		var before = await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 
 		_server.DropConnection();
-		await WaitUntilAsync(() => _integration.GetSnapshotAsync(inboxId, query, default).Result.Status ==
-			EmailInboxStatus.Disconnected, "the inbox reads as disconnected");
-		var during = await _integration.GetSnapshotAsync(inboxId, query, default);
+		await WaitUntilAsync(()
+				=> _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None).Result.Status
+				== EmailInboxStatus.Disconnected,
+			"the inbox reads as disconnected");
+		var during = await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 		await WaitUntilAsync(() => _server.SessionsCreated >= 3, "it kept trying to reconnect");
 
 		_server.Unreachable = false;
-		await WaitUntilAsync(() => _integration.GetSnapshotAsync(inboxId, query, default).Result.Status ==
-			EmailInboxStatus.Connected, "the inbox reconnected");
+		await WaitUntilAsync(()
+				=> _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None).Result.Status
+				== EmailInboxStatus.Connected,
+			"the inbox reconnected");
 
 		Assert.Multiple(() =>
 		{
@@ -148,17 +157,19 @@ internal sealed class ImapIntegrationTests
 		_server.Seed(2);
 		var inboxId = await StartWithOneAccountAsync();
 		var query = new EmailMessageQuery { MaxMessages = 5 };
-		await _integration.GetSnapshotAsync(inboxId, query, default);
+		await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 
 		_server.RejectSignIn = true;
 		_server.DropConnection();
 		_server.Unreachable = false;
-		await WaitUntilAsync(() => _integration.GetSnapshotAsync(inboxId, query, default).Result.Status ==
-			EmailInboxStatus.Error, "the inbox reads as failed");
+		await WaitUntilAsync(()
+				=> _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None).Result.Status
+				== EmailInboxStatus.Error,
+			"the inbox reads as failed");
 		var attempts = _server.SessionsCreated;
 		await Task.Delay(Fast.BackoffCap * 3);
 
-		var snapshot = await _integration.GetSnapshotAsync(inboxId, query, default);
+		var snapshot = await _integration.GetSnapshotAsync(inboxId, query, CancellationToken.None);
 		var issues = await _integration.GetIssuesAsync();
 		Assert.Multiple(() =>
 		{
@@ -256,7 +267,7 @@ internal sealed class ImapIntegrationTests
 		await StartWithOneAccountAsync();
 
 		Assert.ThrowsAsync<InvalidOperationException>(() =>
-			_integration.GetSnapshotAsync("i0000000000000000", new EmailMessageQuery(), default));
+			_integration.GetSnapshotAsync("i0000000000000000", new EmailMessageQuery(), CancellationToken.None));
 	}
 
 	private void SetFailure(ImapFailure failure, bool on)
@@ -272,7 +283,8 @@ internal sealed class ImapIntegrationTests
 	}
 
 	private static StoredConfigEntry Entry(Guid entryId)
-		=> new()
+	{
+		return new StoredConfigEntry
 		{
 			Id = entryId,
 			Title = "Work",
@@ -284,6 +296,7 @@ internal sealed class ImapIntegrationTests
 				[ImapConfigKeys.Folder] = JsonSerializer.SerializeToElement("INBOX")
 			}
 		};
+	}
 
 	private async Task<string> StartWithOneAccountAsync()
 	{

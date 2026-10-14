@@ -44,7 +44,7 @@ internal sealed class ValveKeyValues
 		}
 
 		var reader = new Reader(text.TrimStart('﻿'));
-		return reader.ReadBlock(0, topLevel: true) is { } children
+		return reader.ReadBlock(0, true) is { } children
 			? new ValveKeyValues(null, children)
 			: null;
 	}
@@ -87,7 +87,7 @@ internal sealed class ValveKeyValues
 						children[token.Text!] = new ValveKeyValues(next.Text, _noChildren);
 						break;
 					case TokenKind.Open:
-						if (ReadBlock(depth + 1, topLevel: false) is not { } nested)
+						if (ReadBlock(depth + 1, false) is not { } nested)
 						{
 							return null;
 						}
@@ -182,9 +182,9 @@ internal sealed class ValveKeyValues
 		private Token ReadBare()
 		{
 			var start = _position;
-			while (_position < text.Length &&
-				!char.IsWhiteSpace(text[_position]) &&
-				text[_position] is not ('{' or '}' or '"'))
+			while (_position < text.Length
+				&& !char.IsWhiteSpace(text[_position])
+				&& text[_position] is not ('{' or '}' or '"'))
 			{
 				_position++;
 			}

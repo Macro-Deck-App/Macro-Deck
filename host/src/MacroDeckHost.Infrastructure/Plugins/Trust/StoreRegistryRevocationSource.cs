@@ -12,7 +12,8 @@ public sealed class StoreRegistryRevocationSource : IPluginRevocationSource
 		_catalog = catalog;
 	}
 
-	public Task<PluginRevocationResult> CheckAsync(string certificateId,
+	public Task<PluginRevocationResult> CheckAsync(
+		string certificateId,
 		string? issuerCertificateId,
 		CancellationToken cancellationToken = default)
 	{

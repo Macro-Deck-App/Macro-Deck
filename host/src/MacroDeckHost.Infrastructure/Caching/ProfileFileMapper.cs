@@ -7,7 +7,8 @@ namespace MacroDeckHost.Infrastructure.Caching;
 internal static class ProfileFileMapper
 {
 	public static ProfileFile ToFile(ProfileEntity profile, IEnumerable<FolderEntity> folders)
-		=> new()
+	{
+		return new ProfileFile
 		{
 			Id = profile.Id,
 			Name = profile.Name,
@@ -26,9 +27,11 @@ internal static class ProfileFileMapper
 				.Select(ToFolderFile)
 				.ToList()
 		};
+	}
 
 	public static ProfileEntity ToProfileEntity(ProfileFile file)
-		=> new()
+	{
+		return new ProfileEntity
 		{
 			Id = file.Id,
 			Name = file.Name,
@@ -42,12 +45,16 @@ internal static class ProfileFileMapper
 			DefaultEmptyCellStyle = EmptyCellStyleText.Parse(file.DefaultEmptyCellStyle),
 			DefaultWidgetShadows = file.DefaultWidgetShadows
 		};
+	}
 
 	public static IEnumerable<FolderEntity> ToFolderEntities(ProfileFile file)
-		=> file.Folders.Select(folder => ToFolderEntity(folder, file.Id));
+	{
+		return file.Folders.Select(folder => ToFolderEntity(folder, file.Id));
+	}
 
 	public static ProfileFolder ToFolderFile(FolderEntity folder)
-		=> new()
+	{
+		return new ProfileFolder
 		{
 			Id = folder.Id,
 			Name = folder.Name,
@@ -68,9 +75,11 @@ internal static class ProfileFileMapper
 				.ToList(),
 			FocusRules = folder.FocusRules.Count > 0 ? folder.FocusRules.Select(ToFocusRuleFile).ToList() : null
 		};
+	}
 
 	private static ProfileFolderFocusRule ToFocusRuleFile(FolderFocusRule rule)
-		=> new()
+	{
+		return new ProfileFolderFocusRule
 		{
 			Id = rule.Id,
 			Enabled = rule.Enabled,
@@ -79,9 +88,11 @@ internal static class ProfileFileMapper
 			DeviceId = rule.DeviceId,
 			ReturnOnFocusLoss = rule.ReturnOnFocusLoss
 		};
+	}
 
 	private static ProfileWidget ToWidgetFile(WidgetEntity widget)
-		=> new()
+	{
+		return new ProfileWidget
 		{
 			Id = widget.Id,
 			Type = widget.Type,
@@ -93,9 +104,11 @@ internal static class ProfileFileMapper
 			IsPinned = widget.IsPinned,
 			PinScope = widget.PinScope
 		};
+	}
 
 	private static FolderEntity ToFolderEntity(ProfileFolder folder, Guid profileId)
-		=> new()
+	{
+		return new FolderEntity
 		{
 			Id = folder.Id,
 			ProfileId = profileId,
@@ -117,9 +130,11 @@ internal static class ProfileFileMapper
 				.ToList(),
 			FocusRules = folder.FocusRules?.Select(ToFocusRuleEntity).ToList() ?? []
 		};
+	}
 
 	private static FolderFocusRule ToFocusRuleEntity(ProfileFolderFocusRule rule)
-		=> new()
+	{
+		return new FolderFocusRule
 		{
 			Id = rule.Id,
 			Enabled = rule.Enabled,
@@ -128,9 +143,11 @@ internal static class ProfileFileMapper
 			DeviceId = rule.DeviceId,
 			ReturnOnFocusLoss = rule.ReturnOnFocusLoss
 		};
+	}
 
 	private static WidgetEntity ToWidgetEntity(ProfileWidget widget, Guid folderId)
-		=> new()
+	{
+		return new WidgetEntity
 		{
 			Id = widget.Id,
 			FolderId = folderId,
@@ -143,4 +160,5 @@ internal static class ProfileFileMapper
 			IsPinned = widget.IsPinned,
 			PinScope = widget.PinScope
 		};
+	}
 }

@@ -32,7 +32,7 @@ public class IntegrationContextDesktopNotificationsCompatibilityTests
 		Assert.Multiple(() =>
 		{
 			Assert.ThrowsAsync<OperationCanceledException>(() =>
-				desktop.ShowAsync("Hello", "World", new CancellationToken(canceled: true)));
+				desktop.ShowAsync("Hello", "World", new CancellationToken(true)));
 			Assert.ThrowsAsync<ArgumentNullException>(() => desktop.ShowAsync(null!, "World"));
 		});
 	}

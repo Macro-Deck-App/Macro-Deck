@@ -18,7 +18,7 @@ namespace MacroDeckHost.Infrastructure.Icons;
 /// </summary>
 internal static class AnimatedGifTranscode
 {
-	private static readonly byte[] LoopBlockStart =
+	private static readonly byte[] _loopBlockStart =
 	[
 		0x21, 0xFF, 0x0B, (byte)'N', (byte)'E', (byte)'T', (byte)'S', (byte)'C', (byte)'A', (byte)'P', (byte)'E',
 		(byte)'2', (byte)'.', (byte)'0', 0x03, 0x01
@@ -60,7 +60,7 @@ internal static class AnimatedGifTranscode
 			return 1;
 		}
 
-		var repeats = gif[at] | (gif[at + 1] << 8);
+		var repeats = gif[at] | gif[at + 1] << 8;
 		return repeats == 0 ? (ushort)0 : (ushort)Math.Min(repeats + 1, ushort.MaxValue);
 	}
 
@@ -95,18 +95,18 @@ internal static class AnimatedGifTranscode
 
 	private static int FindLoopCount(ReadOnlySpan<byte> gif)
 	{
-		var start = gif.IndexOf(LoopBlockStart);
+		var start = gif.IndexOf(_loopBlockStart);
 		if (start < 0)
 		{
 			return -1;
 		}
 
-		var count = start + LoopBlockStart.Length;
+		var count = start + _loopBlockStart.Length;
 		return count + 2 < gif.Length && gif[count + 2] == 0 ? count : -1;
 	}
 
 	// The GIF quantizer keeps only an all-zero pixel transparent: a transparent pixel that still carries
-	// a colour, or a partly transparent one, is written opaque.
+	// a color, or a partly transparent one, is written opaque.
 	private static void SnapToSingleBitAlpha(ImageFrame<Rgba32> frame)
 	{
 		frame.ProcessPixelRows(accessor =>
@@ -115,7 +115,14 @@ internal static class AnimatedGifTranscode
 			{
 				foreach (ref var pixel in accessor.GetRowSpan(y))
 				{
-					pixel = pixel.A >= 128 ? pixel with { A = byte.MaxValue } : default;
+					if (pixel.A >= 128)
+					{
+						pixel.A = byte.MaxValue;
+					}
+					else
+					{
+						pixel = default;
+					}
 				}
 			}
 		});

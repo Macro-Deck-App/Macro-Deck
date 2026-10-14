@@ -45,7 +45,8 @@ public class EmailEventProviderTests
 	public async Task Inbox_sender_and_subject_filters_select_matching_mail()
 	{
 		var provider = new EmailEventProvider(new RecordingBus());
-		var received = provider.EventDefinitions.Single(definition => definition.Id == EmailEventProvider.ReceivedEventId);
+		var received
+			= provider.EventDefinitions.Single(definition => definition.Id == EmailEventProvider.ReceivedEventId);
 		var mail = new EmailReceived(_work, Message("m1", 5, sender: "Alice", subject: "Invoice 42"));
 
 		var results = new[]
@@ -87,7 +88,8 @@ public class EmailEventProviderTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(bus.Published.Select(occurrence => occurrence.EventId),
-				Is.EqualTo(new[] { "email::unread-count-changed", "email::inbox-disconnected", "email::inbox-connected" }));
+				Is.EqualTo(new[]
+					{ "email::unread-count-changed", "email::inbox-disconnected", "email::inbox-connected" }));
 			Assert.That(bus.Published.All(occurrence => Equals(occurrence.Parameters["inbox"], "app.imap::home")),
 				Is.True);
 			Assert.That(bus.Published[0].Parameters["unreadCount"], Is.EqualTo(3d));
@@ -119,7 +121,8 @@ public class EmailEventProviderTests
 		var context = await new VariableTemplateRenderer(new VariableRegistry())
 			.CreateContextAsync(VariableScope.Global, null);
 
-		return new EventSubscriptionMatcher(new ActionConditionEvaluator(new VariableTemplateRenderer(new VariableRegistry())))
+		return new EventSubscriptionMatcher(
+				new ActionConditionEvaluator(new VariableTemplateRenderer(new VariableRegistry())))
 			.Matches(subscription, descriptor, context.WithEvent(EmailEventProvider.Occurrence(change).Payload));
 	}
 
@@ -131,6 +134,9 @@ public class EmailEventProviderTests
 
 		public ChannelReader<EventOccurrence> Reader => _channel.Reader;
 
-		public void Publish(EventOccurrence occurrence) => Published.Add(occurrence);
+		public void Publish(EventOccurrence occurrence)
+		{
+			Published.Add(occurrence);
+		}
 	}
 }

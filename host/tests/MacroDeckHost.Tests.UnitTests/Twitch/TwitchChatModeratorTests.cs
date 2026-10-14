@@ -3,7 +3,6 @@ using MacroDeckHost.Integrations.Streaming;
 using MacroDeckHost.Integrations.Twitch;
 using MacroDeckHost.Integrations.Twitch.Auth;
 using MacroDeckHost.Integrations.Twitch.Protocol;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using TwitchLib.Api.Core.Exceptions;
 
@@ -54,13 +53,14 @@ internal sealed class TwitchChatModeratorTests
 			await Moderate("222", ChatModerationRequest.Delete("m-1")),
 			await Moderate("222", ChatModerationRequest.Timeout("chatter", 600)),
 			await Moderate("222", ChatModerationRequest.Ban("chatter")),
-			await Moderate("222", ChatModerationRequest.Unban("chatter")),
+			await Moderate("222", ChatModerationRequest.Unban("chatter"))
 		};
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(results, Is.All.EqualTo(ChatModerationResult.Succeeded));
-			Assert.That(_second.Calls, Is.EqualTo(new[] { "deleteChat:m-1", "ban:chatter|600|", "ban:chatter||", "unban:chatter" }));
+			Assert.That(_second.Calls,
+				Is.EqualTo(new[] { "deleteChat:m-1", "ban:chatter|600|", "ban:chatter||", "unban:chatter" }));
 			Assert.That(_first.Calls, Is.Empty);
 		});
 	}
@@ -130,10 +130,13 @@ internal sealed class TwitchChatModeratorTests
 	}
 
 	private Task<ChatModerationResult> Moderate(string accountId, ChatModerationRequest request)
-		=> _integration.Moderator.ModerateAsync(accountId, request, CancellationToken.None);
+	{
+		return _integration.Moderator.ModerateAsync(accountId, request, CancellationToken.None);
+	}
 
 	private void AddAccount(string userId, string login)
-		=> _config.AddEntry($"Twitch ({login})",
+	{
+		_config.AddEntry($"Twitch ({login})",
 			new Dictionary<string, string?>(StringComparer.Ordinal)
 			{
 				[TwitchConfigKeys.ClientId] = "client-id",
@@ -150,4 +153,5 @@ internal sealed class TwitchChatModeratorTests
 				[TwitchConfigKeys.AccessToken] = "access",
 				[TwitchConfigKeys.RefreshToken] = "refresh"
 			});
+	}
 }

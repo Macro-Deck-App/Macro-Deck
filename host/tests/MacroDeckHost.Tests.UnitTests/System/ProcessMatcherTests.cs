@@ -7,11 +7,15 @@ public class ProcessMatcherTests
 {
 	[Test]
 	public void Find_returns_empty_for_blank_path()
-		=> Assert.That(ProcessMatcher.Find("   "), Is.Empty);
+	{
+		Assert.That(ProcessMatcher.Find("   "), Is.Empty);
+	}
 
 	[Test]
 	public void IsRunning_returns_false_for_unknown_path()
-		=> Assert.That(ProcessMatcher.IsRunning("/path/that/does/not/exist/xyz123.bin"), Is.False);
+	{
+		Assert.That(ProcessMatcher.IsRunning("/path/that/does/not/exist/xyz123.bin"), Is.False);
+	}
 
 	[Test]
 	public void Find_locates_the_current_process_by_its_executable_path()

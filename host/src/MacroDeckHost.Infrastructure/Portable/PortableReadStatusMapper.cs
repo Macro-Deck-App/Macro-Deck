@@ -5,7 +5,8 @@ namespace MacroDeckHost.Infrastructure.Portable;
 internal static class PortableReadStatusMapper
 {
 	public static PortabilityError? ToError(PortableReadStatus status)
-		=> status switch
+	{
+		return status switch
 		{
 			PortableReadStatus.Success => null,
 			PortableReadStatus.PasswordRequired => PortabilityError.PasswordRequired,
@@ -13,4 +14,5 @@ internal static class PortableReadStatusMapper
 			PortableReadStatus.UnsupportedVersion => PortabilityError.UnsupportedVersion,
 			_ => PortabilityError.InvalidArchive
 		};
+	}
 }

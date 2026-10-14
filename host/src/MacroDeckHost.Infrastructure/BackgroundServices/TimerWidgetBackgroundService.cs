@@ -47,7 +47,8 @@ public sealed class TimerWidgetBackgroundService : HostReadyBackgroundService
 				catch (Exception exception)
 #pragma warning restore CA1031
 				{
-					_logger.Warning(exception, "Failed to apply a timer tick for widget {WidgetId}",
+					_logger.Warning(exception,
+						"Failed to apply a timer tick for widget {WidgetId}",
 						transition.Snapshot.WidgetId);
 				}
 			}

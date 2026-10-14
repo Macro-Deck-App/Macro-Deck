@@ -58,11 +58,11 @@ internal sealed class ActionParameterVisibilityTests
 	{
 		var parameter = ActionParameter
 			.Choice("mode",
-				options: [new ActionParameterOption { Value = "a" }],
-				label: "Mode",
-				description: "Pick one",
-				defaultValue: "a",
-				required: true)
+				[new ActionParameterOption { Value = "a" }],
+				"Mode",
+				"Pick one",
+				"a",
+				true)
 			.OnlyWhen("other", "x");
 
 		Assert.Multiple(() =>

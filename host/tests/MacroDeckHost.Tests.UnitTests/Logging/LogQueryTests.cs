@@ -101,7 +101,8 @@ public class LogQueryTests
 		string message = "message",
 		DateTimeOffset? timestamp = null,
 		string? category = null)
-		=> new()
+	{
+		return new LogEntry
 		{
 			Id = LogEntryId.Create(LogFileKind.Host, "20260101", 0),
 			Timestamp = timestamp ?? _noon,
@@ -111,11 +112,17 @@ public class LogQueryTests
 			Category = category,
 			Message = message
 		};
+	}
 
-	private static LogEntry BuildHostEntry() => FormatAndParseHostEntry(null, "host message");
+	private static LogEntry BuildHostEntry()
+	{
+		return FormatAndParseHostEntry(null, "host message");
+	}
 
-	private static LogEntry BuildIntegrationEntry(string pluginId) =>
-		FormatAndParseHostEntry(pluginId, "plugin message");
+	private static LogEntry BuildIntegrationEntry(string pluginId)
+	{
+		return FormatAndParseHostEntry(pluginId, "plugin message");
+	}
 
 	private static LogEntry FormatAndParseHostEntry(string? integrationId, string message)
 	{
@@ -186,6 +193,9 @@ public class LogQueryTests
 
 		public LogEvent Single => _events.Single();
 
-		public void Emit(LogEvent logEvent) => _events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			_events.Add(logEvent);
+		}
 	}
 }

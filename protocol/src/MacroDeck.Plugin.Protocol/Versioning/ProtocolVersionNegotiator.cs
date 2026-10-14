@@ -11,7 +11,7 @@ public static class ProtocolVersionNegotiator
 		var hostRange = new ProtocolVersionRange
 		{
 			Minimum = ProtocolVersions.Minimum,
-			Maximum = ProtocolVersions.Current,
+			Maximum = ProtocolVersions.Current
 		};
 
 		var negotiated = Math.Min(clientRange.Maximum, ProtocolVersions.Current);

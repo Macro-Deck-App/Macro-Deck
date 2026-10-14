@@ -37,39 +37,44 @@ public class WidgetIconServiceTests
 	private static readonly string[] _onlyEtagOne = ["etag-1"];
 	private static readonly byte[] _newTrackBytes = [9, 9, 9, 9];
 
-	private static WidgetEntity Button(Guid id, string? data) => new()
+	private static WidgetEntity Button(Guid id, string? data)
 	{
-		Id = id,
-		FolderId = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = id,
+			FolderId = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			Data = data
+		};
+	}
 
 	private static string TwoStateFlowsWithBlock(string blockId, string integrationId, string actionId)
-		=> "[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"" +
-			blockId +
-			"\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"" +
-			integrationId +
-			"\",\"actionId\":\"" +
-			actionId +
-			"\",\"parameters\":[]}]}]";
+	{
+		return "[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\""
+			+ blockId
+			+ "\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\""
+			+ integrationId
+			+ "\",\"actionId\":\""
+			+ actionId
+			+ "\",\"parameters\":[]}]}]";
+	}
 
 	// Acceptance Group D, scenario 15 (the central counterexample): one provided icon covers every state,
 	// and the per-state configuration survives untouched.
 	[Test]
 	public async Task ActiveProvider_OverridesBothStates_WhileStoredPerStateIconsSurviveUntouched()
 	{
-		var data = "{\"stateMode\":true,\"states\":[" +
-			"{\"id\":\"on\",\"label\":\"On\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconA +
-			"\"}}}," +
-			"{\"id\":\"off\",\"label\":\"Off\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconB +
-			"\"}}}]," +
-			"\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"}," +
-			"\"flows\":" +
-			TwoStateFlowsWithBlock("blk-1", "spotify", "current-track") +
-			"}";
+		var data = "{\"stateMode\":true,\"states\":["
+			+ "{\"id\":\"on\",\"label\":\"On\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconA
+			+ "\"}}},"
+			+ "{\"id\":\"off\",\"label\":\"Off\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconB
+			+ "\"}}}],"
+			+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"},"
+			+ "\"flows\":"
+			+ TwoStateFlowsWithBlock("blk-1", "spotify", "current-track")
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var action = new FakeIconProviderAction
 			{ Id = "current-track", SnapshotToReturn = ReferenceSnapshot("v1", IconC) };
@@ -111,16 +116,16 @@ public class WidgetIconServiceTests
 	public async Task ReassigningTheProvider_MakesOnlyTheNewBlocksActionAuthoritative()
 	{
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"track-one\",\"parameters\":[]}," +
-			"{\"id\":\"blk-2\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"track-two\",\"parameters\":[]}]}]";
-		var data = "{\"stateMode\":false,\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconA +
-			"\"}," +
-			"\"iconProvider\":{\"blockId\":\"blk-2\",\"integrationId\":\"spotify\",\"actionId\":\"track-two\"}," +
-			"\"flows\":" +
-			flows +
-			"}";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"blk-1\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"track-one\",\"parameters\":[]},"
+			+ "{\"id\":\"blk-2\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"track-two\",\"parameters\":[]}]}]";
+		var data = "{\"stateMode\":false,\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconA
+			+ "\"},"
+			+ "\"iconProvider\":{\"blockId\":\"blk-2\",\"integrationId\":\"spotify\",\"actionId\":\"track-two\"},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var actionOne = new FakeIconProviderAction
 			{ Id = "track-one", SnapshotToReturn = ReferenceSnapshot("v1", IconB) };
@@ -150,17 +155,17 @@ public class WidgetIconServiceTests
 	{
 		// blk-1 (the icon provider) is gone from flows; blk-2 (the state provider) is still present.
 		const string flowsWithOnlyBlk2 =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[" +
-			"{\"id\":\"blk-2\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\",\"parameters\":[]}]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":["
+			+ "{\"id\":\"blk-2\",\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\",\"parameters\":[]}]}]";
 		var data
-			= "{\"stateMode\":true,\"states\":[{\"id\":\"on\",\"label\":\"On\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconA +
-			"\"}}}]," +
-			"\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"}," +
-			"\"stateProvider\":{\"blockId\":\"blk-2\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\",\"states\":[{\"id\":\"on\",\"label\":\"On\"}]}," +
-			"\"flows\":" +
-			flowsWithOnlyBlk2 +
-			"}";
+			= "{\"stateMode\":true,\"states\":[{\"id\":\"on\",\"label\":\"On\",\"appearance\":{\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconA
+			+ "\"}}}],"
+			+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"},"
+			+ "\"stateProvider\":{\"blockId\":\"blk-2\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\",\"states\":[{\"id\":\"on\",\"label\":\"On\"}]},"
+			+ "\"flows\":"
+			+ flowsWithOnlyBlk2
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var iconAction = new FakeIconProviderAction
 			{ Id = "current-track", SnapshotToReturn = ReferenceSnapshot("v1", IconC) };
@@ -197,10 +202,10 @@ public class WidgetIconServiceTests
 	[Test]
 	public async Task ASliderWithAHandInjectedIconProvider_NeverBecomesProviderControlled()
 	{
-		var data = "{\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconA +
-			"\"}," +
-			"\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"}}";
+		var data = "{\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconA
+			+ "\"},"
+			+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"}}";
 		var widget = new WidgetEntity { Id = Guid.NewGuid(), Type = WidgetTypeIds.Slider, Data = data };
 		var action = new FakeIconProviderAction
 			{ Id = "current-track", SnapshotToReturn = ReferenceSnapshot("v1", IconC) };
@@ -270,17 +275,17 @@ public class WidgetIconServiceTests
 	public async Task StateAndIconProviders_OnOneInstance_MoveIndependently()
 	{
 		const string flows =
-			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\"," +
-			"\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\"," +
-			"\"parameters\":[]}]}]";
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\",\"type\":\"action\","
+			+ "\"blockType\":\"integration.provide\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\","
+			+ "\"parameters\":[]}]}]";
 		var data
-			= "{\"stateMode\":true,\"states\":[{\"id\":\"playing\",\"label\":\"Playing\"},{\"id\":\"paused\",\"label\":\"Paused\"}]," +
-			"\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\"," +
-			"\"states\":[{\"id\":\"playing\",\"label\":\"Playing\"},{\"id\":\"paused\",\"label\":\"Paused\"}]}," +
-			"\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\"}," +
-			"\"flows\":" +
-			flows +
-			"}";
+			= "{\"stateMode\":true,\"states\":[{\"id\":\"playing\",\"label\":\"Playing\"},{\"id\":\"paused\",\"label\":\"Paused\"}],"
+			+ "\"stateProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\","
+			+ "\"states\":[{\"id\":\"playing\",\"label\":\"Playing\"},{\"id\":\"paused\",\"label\":\"Paused\"}]},"
+			+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"now-playing\"},"
+			+ "\"flows\":"
+			+ flows
+			+ "}";
 		var widget = Button(Guid.NewGuid(), data);
 		var action = new FakeStateAndIconProviderAction
 		{
@@ -393,8 +398,8 @@ public class WidgetIconServiceTests
 			= new WidgetIconResources(new WidgetIconSourceRegistry([]),
 				new UiResourceStore(),
 				Serilog.Log.Logger,
-				new MacroDeckHost.Tests.UnitTests.Devices.Surfaces.StubIconPackCache());
-		var fixture = new Fixture(widget, iconResources: noSources);
+				new Devices.Surfaces.StubIconPackCache());
+		var fixture = new Fixture(widget, noSources);
 		fixture.Integrations.Add(new FakeIntegration { Id = "spotify", Actions = [action] });
 
 		var result = await fixture.Service.Resolve(widget.Id);
@@ -425,24 +430,32 @@ public class WidgetIconServiceTests
 
 	private static WidgetEntity SinglePlayerWidget(out FakeIconProviderAction action)
 	{
-		var data = "{\"stateMode\":false,\"icon\":{\"type\":\"icon-pack\",\"reference\":\"" +
-			IconA +
-			"\"}," +
-			"\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"}," +
-			"\"flows\":" +
-			TwoStateFlowsWithBlock("blk-1", "spotify", "current-track") +
-			"}";
+		var data = "{\"stateMode\":false,\"icon\":{\"type\":\"icon-pack\",\"reference\":\""
+			+ IconA
+			+ "\"},"
+			+ "\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"spotify\",\"actionId\":\"current-track\"},"
+			+ "\"flows\":"
+			+ TwoStateFlowsWithBlock("blk-1", "spotify", "current-track")
+			+ "}";
 		action = new FakeIconProviderAction { Id = "current-track" };
 		return Button(Guid.NewGuid(), data);
 	}
 
 	private static ActionIconSnapshot ReferenceSnapshot(string version, string iconPackReference)
-		=> new() { Version = version, Reference = ActionIconReference.IconPack(iconPackReference) };
+	{
+		return new ActionIconSnapshot
+			{ Version = version, Reference = ActionIconReference.IconPack(iconPackReference) };
+	}
 
 	private static ActionIconSnapshot BytesSnapshot(string version)
-		=> new() { Version = version, MediaType = "image/png" };
+	{
+		return new ActionIconSnapshot { Version = version, MediaType = "image/png" };
+	}
 
-	private static UiResource Resource(string id) => new() { ResourceId = id };
+	private static UiResource Resource(string id)
+	{
+		return new UiResource { ResourceId = id };
+	}
 
 	private sealed class Fixture
 	{
@@ -487,18 +500,45 @@ public class WidgetIconServiceTests
 			_folder = new FolderEntity { Name = "f", Order = 0, Widgets = widgets.ToList() };
 		}
 
-		public List<FolderEntity> GetAllFolders() => [_folder];
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
 
-		public Task InitializeCache() => Task.CompletedTask;
-		public FolderEntity? GetFolderById(Guid id) => _folder;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return _folder;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -535,19 +575,27 @@ public class WidgetIconServiceTests
 
 	private sealed class FakeWidgetIconResources : IWidgetIconResources
 	{
-		public Task<MacroDeck.Ui.Model.Resources.UiResource?> ResolveAsync(WidgetIconReference? reference,
-			MacroDeckHost.Application.Widgets.WidgetIconLimit limit,
+		public Task<UiResource?> ResolveAsync(
+			WidgetIconReference? reference,
+			WidgetIconLimit limit,
 			CancellationToken cancellationToken)
-			=> ResolveAsync(reference, cancellationToken);
+		{
+			return ResolveAsync(reference, cancellationToken);
+		}
 
 		private readonly Dictionary<WidgetIconReference, UiResource> _byReference = new();
 
-		public void Register(WidgetIconReference reference, UiResource resource) => _byReference[reference] = resource;
+		public void Register(WidgetIconReference reference, UiResource resource)
+		{
+			_byReference[reference] = resource;
+		}
 
 		public Task<UiResource?> ResolveAsync(WidgetIconReference? reference, CancellationToken cancellationToken)
-			=> Task.FromResult(reference is { } value && _byReference.TryGetValue(value, out var resource)
+		{
+			return Task.FromResult(reference is { } value && _byReference.TryGetValue(value, out var resource)
 				? resource
 				: null);
+		}
 
 		public void Evict(Guid iconId)
 		{
@@ -556,39 +604,58 @@ public class WidgetIconServiceTests
 
 	private sealed class EmptySnapshotStore : IRemotePluginSnapshotStore
 	{
-		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId) =>
-			RemotePluginCapabilitySnapshot.Empty(pluginId);
+		public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
+		{
+			return RemotePluginCapabilitySnapshot.Empty(pluginId);
+		}
 
-		public bool Has(string pluginId) => false;
+		public bool Has(string pluginId)
+		{
+			return false;
+		}
 
 		public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class UnusedInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("No test in this file resolves through the remote registry.");
+		{
+			throw new NotSupportedException("No test in this file resolves through the remote registry.");
+		}
 
 		public bool TryComplete(string pluginId, MacroDeck.Plugin.Protocol.Envelope.ProtocolEnvelope result)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, MacroDeck.Plugin.Protocol.Errors.ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 
 	private sealed class EmptyAssetCache : IPluginAssetCache
 	{
 		public void Write(string contentHash, string mimeType, byte[] bytes)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public bool TryRead(string contentHash, out byte[] bytes, out string mimeType)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	/// <summary>A configured icon-provider action instance. Mirrors <c>FakeStateProviderAction</c>'s own
@@ -634,13 +701,19 @@ public class WidgetIconServiceTests
 			return Task.FromResult<ActionIconContent?>(content);
 		}
 
-		public IActionExecutor CreateExecutor() => new Executor(this);
+		public IActionExecutor CreateExecutor()
+		{
+			return new Executor(this);
+		}
 
 		private sealed class Executor : IActionExecutor
 		{
 			private readonly FakeIconProviderAction _owner;
 
-			public Executor(FakeIconProviderAction owner) => _owner = owner;
+			public Executor(FakeIconProviderAction owner)
+			{
+				_owner = owner;
+			}
 
 			public Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
 			{
@@ -671,12 +744,16 @@ public class WidgetIconServiceTests
 		public Task<ActionStateSnapshot?> GetActionStateAsync(
 			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(StateSnapshotToReturn);
+		{
+			return Task.FromResult(StateSnapshotToReturn);
+		}
 
 		public Task<ActionIconSnapshot?> GetActionIconAsync(
 			IReadOnlyDictionary<string, object?> parameters,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(IconSnapshotToReturn);
+		{
+			return Task.FromResult(IconSnapshotToReturn);
+		}
 
 		public Task<ActionIconContent?> GetActionIconContentAsync(
 			IReadOnlyDictionary<string, object?> parameters,
@@ -688,6 +765,9 @@ public class WidgetIconServiceTests
 			return Task.FromResult<ActionIconContent?>(new ActionIconContent([5, 6, 7, 8], "image/png"));
 		}
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException("Not executed by these tests.");
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException("Not executed by these tests.");
+		}
 	}
 }

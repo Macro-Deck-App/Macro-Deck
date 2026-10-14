@@ -9,7 +9,9 @@ internal static class NativeUsbDeviceKeys
 	public const string Prefix = "usb:";
 
 	public static string For(string? serial, string fallback)
-		=> Prefix + (Sanitize(serial) ?? Sanitize(fallback) ?? "unknown");
+	{
+		return Prefix + (Sanitize(serial) ?? Sanitize(fallback) ?? "unknown");
+	}
 
 	private static string? Sanitize(string? value)
 	{

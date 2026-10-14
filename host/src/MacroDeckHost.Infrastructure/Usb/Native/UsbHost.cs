@@ -5,7 +5,10 @@ namespace MacroDeckHost.Infrastructure.Usb.Native;
 
 internal readonly record struct UsbPlugKey(byte Bus, string PortPath)
 {
-	public override string ToString() => $"{Bus}-{PortPath}";
+	public override string ToString()
+	{
+		return $"{Bus}-{PortPath}";
+	}
 }
 
 internal sealed record UsbDeviceInfo(UsbPlugKey Plug, ushort VendorId, ushort ProductId, byte DeviceClass, int Index);
@@ -79,7 +82,8 @@ internal static class AccessoryProtocol
 	public const byte VendorIn = 0xC0;
 	public const byte VendorOut = 0x40;
 
-	public static readonly IReadOnlySet<ushort> AccessoryProductIds = new HashSet<ushort> { 0x2D00, 0x2D01, 0x2D04, 0x2D05 };
+	public static readonly IReadOnlySet<ushort> AccessoryProductIds = new HashSet<ushort>
+		{ 0x2D00, 0x2D01, 0x2D04, 0x2D05 };
 
 	public const int MaxDescriptionLength = 64;
 
@@ -88,15 +92,18 @@ internal static class AccessoryProtocol
 
 	private const string FallbackDescription = "Macro Deck";
 
-	public static IReadOnlyList<string> IdentificationStrings(string? hostName) =>
-	[
-		"Macro Deck",
-		"Macro Deck Companion",
-		Description(hostName),
-		"1",
-		"https://macro-deck.app",
-		""
-	];
+	public static IReadOnlyList<string> IdentificationStrings(string? hostName)
+	{
+		return
+		[
+			"Macro Deck",
+			"Macro Deck Companion",
+			Description(hostName),
+			"1",
+			"https://macro-deck.app",
+			""
+		];
+	}
 
 	private static string Description(string? hostName)
 	{
@@ -126,5 +133,7 @@ internal static class AccessoryProtocol
 	}
 
 	public static bool IsAccessory(ushort vendorId, ushort productId)
-		=> vendorId == GoogleVendorId && AccessoryProductIds.Contains(productId);
+	{
+		return vendorId == GoogleVendorId && AccessoryProductIds.Contains(productId);
+	}
 }

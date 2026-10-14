@@ -60,10 +60,15 @@ public sealed class MicrosoftCalendarIntegration
 
 	public string IconMimeType => "image/svg+xml";
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
 	public IConfigFlow CreateConfigFlow()
-		=> new MicrosoftCalendarConfigFlow(_oauthClientFactory(), _graph, _accounts.SelectionOf, _time);
+	{
+		return new MicrosoftCalendarConfigFlow(_oauthClientFactory(), _graph, _accounts.SelectionOf, _time);
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -78,7 +83,10 @@ public sealed class MicrosoftCalendarIntegration
 		await _accounts.StopAsync();
 	}
 
-	public IReadOnlyList<CalendarAccount> GetAccounts() => _accounts.CalendarAccounts;
+	public IReadOnlyList<CalendarAccount> GetAccounts()
+	{
+		return _accounts.CalendarAccounts;
+	}
 
 	public async Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(
 		string accountId,
@@ -171,19 +179,29 @@ public sealed class MicrosoftCalendarIntegration
 	}
 
 	public Task<IReadOnlyList<IntegrationIssue>> GetIssuesAsync(CancellationToken cancellationToken = default)
-		=> Task.FromResult(_accounts.Issues());
+	{
+		return Task.FromResult(_accounts.Issues());
+	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId.StartsWith(MicrosoftCalendarAccountManager.SignInIssuePrefix, StringComparison.Ordinal)
-			? IssueResolution.Ok(AppStrings.Integrations.MicrosoftCalendar.Issues.ReconnectResolution(),
-				IssueResolutionFollowUp.StartConfigFlow)
-			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	{
+		return Task.FromResult(
+			issueId.StartsWith(MicrosoftCalendarAccountManager.SignInIssuePrefix, StringComparison.Ordinal)
+				? IssueResolution.Ok(AppStrings.Integrations.MicrosoftCalendar.Issues.ReconnectResolution(),
+					IssueResolutionFollowUp.StartConfigFlow)
+				: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
-	public void Dispose() => _graph.Dispose();
+	public void Dispose()
+	{
+		_graph.Dispose();
+	}
 
 	private MicrosoftCalendarAccount RequireAccount(string accountId)
-		=> _accounts.Resolve(accountId) ??
-			throw new InvalidOperationException($"Outlook Calendar has no account '{accountId}'.");
+	{
+		return _accounts.Resolve(accountId)
+			?? throw new InvalidOperationException($"Outlook Calendar has no account '{accountId}'.");
+	}
 
 	private async Task<IReadOnlyList<CalendarInfo>> CalendarsOfAsync(
 		MicrosoftCalendarAccount account,

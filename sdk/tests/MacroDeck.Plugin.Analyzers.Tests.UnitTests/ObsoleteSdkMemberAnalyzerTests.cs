@@ -34,7 +34,7 @@ public class ObsoleteSdkMemberAnalyzerTests
 	{
 		var diagnostics = await AnalyzerTestHarness.GetDiagnosticsAsync(Source,
 			new ObsoleteSdkMemberAnalyzer(),
-			assemblyName: AnalyzerTestHarness.SdkAssemblyName);
+			AnalyzerTestHarness.SdkAssemblyName);
 
 		Assert.That(diagnostics, Has.One.Items);
 		Assert.That(diagnostics[0].Id, Is.EqualTo("MDP5001"));
@@ -85,7 +85,7 @@ public class ObsoleteSdkMemberAnalyzerTests
 
 		var diagnostics = await AnalyzerTestHarness.GetDiagnosticsAsync(source,
 			new ObsoleteSdkMemberAnalyzer(),
-			assemblyName: AnalyzerTestHarness.SdkAssemblyName);
+			AnalyzerTestHarness.SdkAssemblyName);
 
 		Assert.That(diagnostics, Is.Empty);
 	}

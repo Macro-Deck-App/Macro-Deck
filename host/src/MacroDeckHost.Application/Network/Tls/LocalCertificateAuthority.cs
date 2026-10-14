@@ -25,14 +25,14 @@ public static class LocalCertificateAuthority
 			HashAlgorithmName.SHA256,
 			RSASignaturePadding.Pkcs1);
 
-		request.CertificateExtensions.Add(new X509BasicConstraintsExtension(certificateAuthority: true,
-			hasPathLengthConstraint: true,
-			pathLengthConstraint: 0,
-			critical: true));
+		request.CertificateExtensions.Add(new X509BasicConstraintsExtension(true,
+			true,
+			0,
+			true));
 		request.CertificateExtensions.Add(new X509KeyUsageExtension(
 			X509KeyUsageFlags.KeyCertSign | X509KeyUsageFlags.CrlSign,
-			critical: true));
-		request.CertificateExtensions.Add(new X509SubjectKeyIdentifierExtension(request.PublicKey, critical: false));
+			true));
+		request.CertificateExtensions.Add(new X509SubjectKeyIdentifierExtension(request.PublicKey, false));
 
 		// Deliberately no extended key usage on the root. An EKU here switches chain building into
 		// EKU-nesting mode, which is well defined on Windows but inconsistent for a manually installed
@@ -43,7 +43,8 @@ public static class LocalCertificateAuthority
 		return new GeneratedCertificate(certificate.ExportCertificatePem(), rsa.ExportPkcs8PrivateKeyPem());
 	}
 
-	public static GeneratedCertificate IssueHostCertificate(GeneratedCertificate authority,
+	public static GeneratedCertificate IssueHostCertificate(
+		GeneratedCertificate authority,
 		IReadOnlyList<IPAddress> addresses,
 		IReadOnlyList<string> hostNames,
 		DateTimeOffset now)
@@ -58,20 +59,20 @@ public static class LocalCertificateAuthority
 			HashAlgorithmName.SHA256,
 			RSASignaturePadding.Pkcs1);
 
-		request.CertificateExtensions.Add(new X509BasicConstraintsExtension(certificateAuthority: false,
-			hasPathLengthConstraint: false,
-			pathLengthConstraint: 0,
-			critical: true));
+		request.CertificateExtensions.Add(new X509BasicConstraintsExtension(false,
+			false,
+			0,
+			true));
 		request.CertificateExtensions.Add(new X509KeyUsageExtension(
 			X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.KeyEncipherment,
-			critical: true));
+			true));
 		request.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension([new Oid(ServerAuthenticationOid)],
-			critical: false));
-		request.CertificateExtensions.Add(new X509SubjectKeyIdentifierExtension(request.PublicKey, critical: false));
+			false));
+		request.CertificateExtensions.Add(new X509SubjectKeyIdentifierExtension(request.PublicKey, false));
 		request.CertificateExtensions.Add(X509AuthorityKeyIdentifierExtension.CreateFromCertificate(
 			authorityCertificate,
-			includeKeyIdentifier: true,
-			includeIssuerAndSerial: false));
+			true,
+			false));
 		request.CertificateExtensions.Add(BuildSubjectAlternativeNames(addresses, hostNames));
 
 		var notAfter = now.Add(HostCertificateLifetime);
@@ -104,17 +105,18 @@ public static class LocalCertificateAuthority
 		// reading as "not ours". Without it the bootstrap planner would treat it as a legacy self-signed
 		// certificate and mint a second authority, silently invalidating the trust every paired device
 		// already granted.
-		chain.ChainPolicy.VerificationFlags = X509VerificationFlags.IgnoreNotTimeValid |
-			X509VerificationFlags.IgnoreCtlNotTimeValid;
+		chain.ChainPolicy.VerificationFlags
+			= X509VerificationFlags.IgnoreNotTimeValid | X509VerificationFlags.IgnoreCtlNotTimeValid;
 
-		return chain.Build(certificate) &&
-			chain.ChainElements.Count > 0 &&
-			string.Equals(chain.ChainElements[^1].Certificate.Thumbprint,
+		return chain.Build(certificate)
+			&& chain.ChainElements.Count > 0
+			&& string.Equals(chain.ChainElements[^1].Certificate.Thumbprint,
 				authority.Thumbprint,
 				StringComparison.OrdinalIgnoreCase);
 	}
 
-	public static IReadOnlyList<IPAddress> FindUncoveredAddresses(X509Certificate2 certificate,
+	public static IReadOnlyList<IPAddress> FindUncoveredAddresses(
+		X509Certificate2 certificate,
 		IReadOnlyList<IPAddress> addresses)
 	{
 		var covered = ReadSubjectAlternativeIpAddresses(certificate);
@@ -182,7 +184,8 @@ public static class LocalCertificateAuthority
 		return builder.Build();
 	}
 
-	private static X509Extension BuildSubjectAlternativeNames(IReadOnlyList<IPAddress> addresses,
+	private static X509Extension BuildSubjectAlternativeNames(
+		IReadOnlyList<IPAddress> addresses,
 		IReadOnlyList<string> hostNames)
 	{
 		var builder = new SubjectAlternativeNameBuilder();
@@ -214,7 +217,8 @@ public static class LocalCertificateAuthority
 		}
 	}
 
-	private static void AddIpAddress(SubjectAlternativeNameBuilder builder,
+	private static void AddIpAddress(
+		SubjectAlternativeNameBuilder builder,
 		HashSet<IPAddress> seen,
 		IPAddress address)
 	{

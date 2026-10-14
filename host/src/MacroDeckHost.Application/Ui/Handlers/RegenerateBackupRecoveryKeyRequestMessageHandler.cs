@@ -11,7 +11,9 @@ public sealed class RegenerateBackupRecoveryKeyRequestMessageHandler
 	private readonly IBackupRecoveryKeyService _recoveryKeyService;
 
 	public RegenerateBackupRecoveryKeyRequestMessageHandler(IBackupRecoveryKeyService recoveryKeyService)
-		=> _recoveryKeyService = recoveryKeyService;
+	{
+		_recoveryKeyService = recoveryKeyService;
+	}
 
 	public async ValueTask<BackupRecoveryKeyResponse> Handle(
 		RegenerateBackupRecoveryKeyRequest request,
@@ -20,8 +22,8 @@ public sealed class RegenerateBackupRecoveryKeyRequestMessageHandler
 		if (!request.Confirm || !request.AcknowledgeExistingBackupsBecomeUnreadable)
 		{
 			return BackupDtoMapper.ToRecoveryKeyFailure(BackupError.ValidationError,
-				"Regenerating the recovery key needs both confirmations, because every existing backup " +
-				"then opens only with the key that was exported before.");
+				"Regenerating the recovery key needs both confirmations, because every existing backup "
+				+ "then opens only with the key that was exported before.");
 		}
 
 		var regenerated = await _recoveryKeyService.Regenerate(cancellationToken);

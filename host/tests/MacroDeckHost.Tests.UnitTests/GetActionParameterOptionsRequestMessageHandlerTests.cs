@@ -39,7 +39,10 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 
 		public DynamicOptionsContext? LastContext { get; private set; }
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 			DynamicOptionsContext context,
@@ -63,12 +66,17 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 
 		public IReadOnlyList<ActionParameter> Parameters { get; } = [ActionParameter.DynamicChoice("device")];
 
-		public IActionExecutor CreateExecutor() => throw new NotSupportedException();
+		public IActionExecutor CreateExecutor()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 			DynamicOptionsContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult { Options = [], Error = "Choose an instance first" });
+		{
+			return Task.FromResult(new DynamicOptionsResult { Options = [], Error = "Choose an instance first" });
+		}
 	}
 
 	private sealed class ErroringEventProvider : IHostEventProvider, IDynamicEventOptionsProvider
@@ -91,7 +99,9 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 		public Task<DynamicOptionsResult> GetEventOptionsAsync(
 			EventOptionsContext context,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult { Options = [], Error = "Choose an instance first" });
+		{
+			return Task.FromResult(new DynamicOptionsResult { Options = [], Error = "Choose an instance first" });
+		}
 	}
 
 	private sealed class TestOptionsSource : IHostOptionsSource
@@ -99,10 +109,12 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 		public string Id => "test.source";
 
 		public Task<DynamicOptionsResult> GetOptionsAsync(string? filter, CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult
+		{
+			return Task.FromResult(new DynamicOptionsResult
 			{
 				Options = [new ActionParameterOption { Value = $"host:{filter}" }]
 			});
+		}
 	}
 
 	private sealed class WidgetLikeOptionsSource : IHostOptionsSource
@@ -110,7 +122,8 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 		public string Id => "macrodeck.widgets";
 
 		public Task<DynamicOptionsResult> GetOptionsAsync(string? filter, CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult
+		{
+			return Task.FromResult(new DynamicOptionsResult
 			{
 				Options =
 				[
@@ -128,6 +141,7 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 					}
 				]
 			});
+		}
 	}
 
 	/// <summary>Mirrors ADB's device list, which offers an empty "Default device" as its "any" pick.</summary>
@@ -136,7 +150,8 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 		public string Id => AdbOptionsSourceIds.Devices;
 
 		public Task<DynamicOptionsResult> GetOptionsAsync(string? filter, CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult
+		{
+			return Task.FromResult(new DynamicOptionsResult
 			{
 				Options =
 				[
@@ -144,6 +159,7 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 					new ActionParameterOption { Value = "serial-1", Label = "Pixel" }
 				]
 			});
+		}
 	}
 
 	private sealed class DeviceLikeOptionsSource : IHostOptionsSource
@@ -151,7 +167,8 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 		public string Id => DeckOptionsSourceIds.Devices;
 
 		public Task<DynamicOptionsResult> GetOptionsAsync(string? filter, CancellationToken cancellationToken)
-			=> Task.FromResult(new DynamicOptionsResult
+		{
+			return Task.FromResult(new DynamicOptionsResult
 			{
 				Options =
 				[
@@ -159,6 +176,7 @@ public class GetActionParameterOptionsRequestMessageHandlerTests
 					new ActionParameterOption { Value = "22222222-2222-2222-2222-222222222222", Label = "Studio PC" }
 				]
 			});
+		}
 	}
 
 	/// <summary>

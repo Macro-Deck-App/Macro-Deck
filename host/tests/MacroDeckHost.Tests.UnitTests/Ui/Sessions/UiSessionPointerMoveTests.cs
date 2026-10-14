@@ -14,13 +14,15 @@ internal sealed class UiSessionPointerMoveTests : UiSessionFixture
 
 	private static readonly string[] _newestInProcessMoves = ["press", "a2", "up", "a3", "x2", "b2"];
 
-	private void Send(string sessionId,
+	private void Send(
+		string sessionId,
 		string connectionId,
 		string nodeId,
 		string name,
 		string tag,
 		string? clientId = null)
-		=> Broker.SendEvent(new UiSendEventRequest
+	{
+		Broker.SendEvent(new UiSendEventRequest
 			{
 				SessionId = sessionId,
 				NodeId = nodeId,
@@ -29,11 +31,17 @@ internal sealed class UiSessionPointerMoveTests : UiSessionFixture
 			},
 			connectionId,
 			clientId);
+	}
 
 	private static string Tag(UiSessionEventCommand command)
-		=> Encoding.UTF8.GetString(command.Data.Utf8.Span).Split('"')[3];
+	{
+		return Encoding.UTF8.GetString(command.Data.Utf8.Span).Split('"')[3];
+	}
 
-	private static string Tag(UiEvent uiEvent) => uiEvent.Data!.Value.GetProperty("tag").GetString()!;
+	private static string Tag(UiEvent uiEvent)
+	{
+		return uiEvent.Data!.Value.GetProperty("tag").GetString()!;
+	}
 
 	private async Task<(StubUiSessionProvider Provider, string SessionId)> OpenSharedAsync()
 	{
@@ -83,7 +91,8 @@ internal sealed class UiSessionPointerMoveTests : UiSessionFixture
 		for (var step = 0; step < 20; step++)
 		{
 			Send(sessionId, "c1", "pad", UiComponentEvents.PointerMove, "m" + step);
-			await WaitForAsync(() => provider.Events.Count == step + 1, "A move the provider could keep up with was dropped.");
+			await WaitForAsync(() => provider.Events.Count == step + 1,
+				"A move the provider could keep up with was dropped.");
 		}
 
 		Assert.That(provider.Events.Select(Tag), Is.EqualTo(Enumerable.Range(0, 20).Select(step => "m" + step)));

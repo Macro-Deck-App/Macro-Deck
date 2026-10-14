@@ -1,3 +1,4 @@
+using MacroDeck.Sdk.FolderViews;
 using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
@@ -48,12 +49,15 @@ public class FolderServiceFolderViewTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task AFolderCreatedWithoutAView_IsTheWidgetGrid()
 	{
-		var created = await _service.Create(_profileId, "Deck", parentId: null);
+		var created = await _service.Create(_profileId, "Deck", null);
 
 		Assert.That(created.Success, Is.True);
 		Assert.That(BuiltInFolderViews.IsWidgetGrid(created.Data!.ViewId), Is.True);
@@ -64,7 +68,7 @@ public class FolderServiceFolderViewTests
 	{
 		var created = await _service.Create(_profileId,
 			"Living Room",
-			parentId: null,
+			null,
 			_folderViewId,
 			"""{"areaId":"living-room"}""");
 
@@ -76,7 +80,7 @@ public class FolderServiceFolderViewTests
 	[Test]
 	public async Task CreatingWithAViewNothingProvides_IsRejected()
 	{
-		var created = await _service.Create(_profileId, "Living Room", parentId: null, "com.example.gone::view");
+		var created = await _service.Create(_profileId, "Living Room", null, "com.example.gone::view");
 
 		Assert.That(created.Success, Is.False);
 		Assert.That(created.Error, Is.EqualTo(FolderError.UnknownFolderView));
@@ -131,7 +135,7 @@ public class FolderServiceFolderViewTests
 		var folder = await CreateWithView();
 		await _folderViews.UnregisterAll("com.example.home");
 
-		var renamed = await Update(folder.Id, name: "Renamed");
+		var renamed = await Update(folder.Id, "Renamed");
 
 		Assert.That(renamed.Success, Is.True);
 		Assert.That(renamed.Data!.Name, Is.EqualTo("Renamed"));
@@ -169,7 +173,7 @@ public class FolderServiceFolderViewTests
 	[Test]
 	public async Task AFolderStoredWithoutAView_RoundTripsAsTheWidgetGrid()
 	{
-		var created = await _service.Create(_profileId, "Deck", parentId: null);
+		var created = await _service.Create(_profileId, "Deck", null);
 
 		var file = ProfileFileMapper.ToFolderFile(created.Data!);
 		Assert.That(file.ViewId, Is.Null, "an absent view must not be written out as a literal id");
@@ -188,27 +192,31 @@ public class FolderServiceFolderViewTests
 		var folder = await CreateWithView();
 
 		var reloaded = ProfileFileMapper.ToFolderEntities(new Application.Persistence.Profiles.ProfileFile
-		{
-			Id = _profileId, Folders = [ProfileFileMapper.ToFolderFile(folder)]
-		}).Single();
+			{
+				Id = _profileId, Folders = [ProfileFileMapper.ToFolderFile(folder)]
+			})
+			.Single();
 
 		Assert.That(reloaded.ViewId, Is.EqualTo(_folderViewId));
 		Assert.That(reloaded.ViewConfiguration, Is.EqualTo("""{"areaId":"living-room"}"""));
 	}
 
 	private async Task<FolderEntity> CreateWithView()
-		=> (await _service.Create(_profileId,
+	{
+		return (await _service.Create(_profileId,
 			"Living Room",
-			parentId: null,
+			null,
 			_folderViewId,
 			"""{"areaId":"living-room"}""")).Data!;
+	}
 
 	private Task<Domain.Common.Result<FolderEntity, FolderError>> Update(
 		Guid id,
 		string? name = null,
 		string? folderViewId = null,
 		string? folderViewConfiguration = null)
-		=> _service.Update(id,
+	{
+		return _service.Update(id,
 			name,
 			null,
 			null,
@@ -220,7 +228,10 @@ public class FolderServiceFolderViewTests
 			null,
 			folderViewId,
 			folderViewConfiguration);
+	}
 
-	private static MacroDeck.Sdk.FolderViews.FolderViewDescriptor Descriptor(string id)
-		=> new(id, MacroDeck.Localization.LocalizedText.FromLiteral("Mixer"));
+	private static FolderViewDescriptor Descriptor(string id)
+	{
+		return new FolderViewDescriptor(id, MacroDeck.Localization.LocalizedText.FromLiteral("Mixer"));
+	}
 }

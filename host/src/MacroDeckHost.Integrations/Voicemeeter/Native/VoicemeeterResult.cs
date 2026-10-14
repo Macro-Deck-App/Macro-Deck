@@ -20,5 +20,7 @@ internal enum VoicemeeterResult
 internal static class VoicemeeterResultExtensions
 {
 	public static bool IsOk(this VoicemeeterResult result)
-		=> result is VoicemeeterResult.Ok or VoicemeeterResult.OkNotLaunched;
+	{
+		return result is VoicemeeterResult.Ok or VoicemeeterResult.OkNotLaunched;
+	}
 }

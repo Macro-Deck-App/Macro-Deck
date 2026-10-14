@@ -68,7 +68,7 @@ internal sealed class HistoryGraphViewStateResolver
 			Digits = Digits(variable),
 			Subtitle = ResolveSubtitle(),
 			Points = Normalize(samples),
-			Color = ThresholdColor(variable),
+			Color = ThresholdColor(variable)
 		};
 	}
 
@@ -82,10 +82,10 @@ internal sealed class HistoryGraphViewStateResolver
 
 	private string? ThresholdColor(VariableEntity? variable)
 	{
-		if (!_config.ThresholdsEnabled ||
-			variable is null ||
-			!double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
-			!double.IsFinite(value))
+		if (!_config.ThresholdsEnabled
+			|| variable is null
+			|| !double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			|| !double.IsFinite(value))
 		{
 			return null;
 		}
@@ -95,7 +95,10 @@ internal sealed class HistoryGraphViewStateResolver
 		return WidgetThresholds.Effective(_config.Thresholds, min, max).ColorAt(value);
 	}
 
-	private static double? Finite(double? value) => value is { } finite && double.IsFinite(finite) ? finite : null;
+	private static double? Finite(double? value)
+	{
+		return value is { } finite && double.IsFinite(finite) ? finite : null;
+	}
 
 	/// <summary>
 	/// The window mapped onto the chart's plot band. A configured bound pins that end of the scale so two
@@ -178,9 +181,9 @@ internal sealed class HistoryGraphViewStateResolver
 	/// semantic kind says they should.</summary>
 	private static (string Value, LocalizedText Unit) FormatValue(VariableEntity? variable)
 	{
-		if (variable is null ||
-			!double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
-			!double.IsFinite(value))
+		if (variable is null
+			|| !double.TryParse(variable.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+			|| !double.IsFinite(value))
 		{
 			return (Unavailable, default);
 		}
@@ -202,8 +205,8 @@ internal sealed class HistoryGraphViewStateResolver
 	/// </summary>
 	private double Digits(VariableEntity? variable)
 	{
-		var configured = Math.Max(Reserve(Bound(_config.MaxValue), variable, reserveSign: false),
-			Reserve(Bound(_config.MinValue), variable, reserveSign: true));
+		var configured = Math.Max(Reserve(Bound(_config.MaxValue), variable, false),
+			Reserve(Bound(_config.MinValue), variable, true));
 
 		return Math.Min(MaxDigits, Math.Max(configured, _widestSeen));
 	}
@@ -220,14 +223,16 @@ internal sealed class HistoryGraphViewStateResolver
 			.ToString("F0", CultureInfo.InvariantCulture)
 			.Length;
 
-		return integerDigits +
-			(decimals > 0 ? decimals + SeparatorWidth : 0) +
-			(reserveSign && value < 0 ? SeparatorWidth : 0);
+		return integerDigits
+			+ (decimals > 0 ? decimals + SeparatorWidth : 0)
+			+ (reserveSign && value < 0 ? SeparatorWidth : 0);
 	}
 
 	// Zero reads as auto because the editor's number field has no unset state to store.
 	private static double? Bound(double? value)
-		=> value is { } bound && double.IsFinite(bound) && bound != 0 ? bound : null;
+	{
+		return value is { } bound && double.IsFinite(bound) && bound != 0 ? bound : null;
+	}
 
 	private VariableEntity? Resolve(string? name)
 	{
@@ -241,8 +246,8 @@ internal sealed class HistoryGraphViewStateResolver
 			? _variables.FindByName(_window.ScopeRefId is null ? VariableScope.Global : VariableScope.Widget,
 				_window.ScopeRefId,
 				name)
-			: (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name)) ??
-			_variables.FindByName(VariableScope.Global, null, name);
+			: (_scopeRefId is null ? null : _variables.FindByName(VariableScope.Widget, _scopeRefId, name))
+			?? _variables.FindByName(VariableScope.Global, null, name);
 
 		return variable is not null && _variables.IsAvailable(variable.Id) ? variable : null;
 	}

@@ -112,5 +112,7 @@ internal sealed class FakeTwitchOAuthClient : ITwitchOAuthClient
 	}
 
 	public static TwitchTokens Tokens(string access, string refresh, TimeSpan validFor)
-		=> new(access, refresh, DateTimeOffset.UtcNow + validFor, TwitchScopes.All);
+	{
+		return new TwitchTokens(access, refresh, DateTimeOffset.UtcNow + validFor, TwitchScopes.All);
+	}
 }

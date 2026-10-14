@@ -84,14 +84,16 @@ public sealed class ApplicationPathResolver : IApplicationPathResolver
 	}
 
 	private static ResolvedApplication Application(string path)
-		=> new(path, Path.GetFileNameWithoutExtension(path));
+	{
+		return new ResolvedApplication(path, Path.GetFileNameWithoutExtension(path));
+	}
 
 	private static string FollowLink(string path)
 	{
 		try
 		{
 			FileSystemInfo info = Directory.Exists(path) ? new DirectoryInfo(path) : new FileInfo(path);
-			return info.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? path;
+			return info.ResolveLinkTarget(true)?.FullName ?? path;
 		}
 		catch (Exception exception) when (exception is IOException
 			or UnauthorizedAccessException

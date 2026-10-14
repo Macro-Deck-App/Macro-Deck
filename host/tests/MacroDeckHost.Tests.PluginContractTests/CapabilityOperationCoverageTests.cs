@@ -81,10 +81,10 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 		await ConnectAsync([new IconsCapabilityHandler(new IconAssetSource(bytes, "image/png"))],
 			[
 				new DeclaredCapability
-					{ Kind = CapabilityKinds.Icons, LocalId = IconsCapabilityHandler.LocalId, VersionRange = Version }
+					{ Kind = CapabilityKinds.Icons, LocalId = IconsCapabilityHandler.LocalId, VersionRange = _version }
 			],
 			[CapabilityKinds.Icons],
-			beforeRegister: () => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
+			() => UploadAssetAsync(AssetKinds.Icon, "image/png", bytes));
 
 		await AssertNoneUnsupportedAsync(CapabilityKinds.Icons, IconsCapabilityHandler.LocalId);
 	}
@@ -176,9 +176,15 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 	{
 		public IReadOnlyList<MacroDeck.Sdk.Actions.IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	[Test]
@@ -223,9 +229,15 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 	{
 		public IReadOnlyList<MacroDeck.Sdk.Actions.IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(MacroDeck.Sdk.IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	[Test]
@@ -251,16 +263,25 @@ internal sealed class CapabilityOperationCoverageTests : CapabilityContractFixtu
 		await AssertNoneUnsupportedAsync(CapabilityKinds.Ui, ProviderCapabilityId.LocalId);
 	}
 
-	private static readonly CapabilityVersionRange Version = new() { Minimum = 1, Maximum = 1 };
+	private static readonly CapabilityVersionRange _version = new() { Minimum = 1, Maximum = 1 };
 
-	private static DeclaredCapability Provider(string kind) => new()
-		{ Kind = kind, LocalId = ProviderCapabilityId.LocalId, VersionRange = Version };
+	private static DeclaredCapability Provider(string kind)
+	{
+		return new DeclaredCapability
+			{ Kind = kind, LocalId = ProviderCapabilityId.LocalId, VersionRange = _version };
+	}
 
-	private static DeclaredCapability Action(string id) => new()
-		{ Kind = CapabilityKinds.Actions, LocalId = id, VersionRange = Version };
+	private static DeclaredCapability Action(string id)
+	{
+		return new DeclaredCapability
+			{ Kind = CapabilityKinds.Actions, LocalId = id, VersionRange = _version };
+	}
 
-	private static DeclaredCapability Variable(string id) => new()
-		{ Kind = CapabilityKinds.Variables, LocalId = id, VersionRange = Version };
+	private static DeclaredCapability Variable(string id)
+	{
+		return new DeclaredCapability
+			{ Kind = CapabilityKinds.Variables, LocalId = id, VersionRange = _version };
+	}
 
 	private async Task AssertNoneUnsupportedAsync(string kind, string localId)
 	{

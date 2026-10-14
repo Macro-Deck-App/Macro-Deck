@@ -155,7 +155,13 @@ internal sealed class ObsStateTests
 		});
 	}
 
-	private static ObsStatus Streaming(long bytesSent) => new() { IsStreaming = true, StreamBytes = bytesSent };
+	private static ObsStatus Streaming(long bytesSent)
+	{
+		return new ObsStatus { IsStreaming = true, StreamBytes = bytesSent };
+	}
 
-	private static ObsStatus Recording(long bytes) => new() { IsRecording = true, RecordBytes = bytes };
+	private static ObsStatus Recording(long bytes)
+	{
+		return new ObsStatus { IsRecording = true, RecordBytes = bytes };
+	}
 }

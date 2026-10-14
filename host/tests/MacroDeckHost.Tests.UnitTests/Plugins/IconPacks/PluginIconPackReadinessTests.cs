@@ -65,8 +65,12 @@ internal sealed class PluginIconPackReadinessTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(first.Status, Is.EqualTo(PluginIconPackSyncStatus.Skipped));
-			Assert.That(second.Status, Is.EqualTo(PluginIconPackSyncStatus.Skipped), "the bound is spent once, not per call");
-			Assert.That(host.PluginPack(PluginId, "logos"), Is.Not.Null, "the skipped sync runs when readiness arrives");
+			Assert.That(second.Status,
+				Is.EqualTo(PluginIconPackSyncStatus.Skipped),
+				"the bound is spent once, not per call");
+			Assert.That(host.PluginPack(PluginId, "logos"),
+				Is.Not.Null,
+				"the skipped sync runs when readiness arrives");
 		});
 	}
 }

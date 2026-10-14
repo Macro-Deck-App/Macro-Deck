@@ -13,17 +13,23 @@ public class AdbTunnelCoordinatorTests
 	private TestPaths _paths = null!;
 
 	[SetUp]
-	public void SetUp() => _paths = new TestPaths();
+	public void SetUp()
+	{
+		_paths = new TestPaths();
+	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	// --- Security: the host-side port is always the public port, never the loopback port. -------------
 
 	[Test]
 	public async Task Security_first_candidate_uses_the_public_port_and_never_the_loopback_port()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 
 		var results = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 
@@ -40,7 +46,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task Security_falling_through_to_the_second_candidate_still_uses_the_public_port_never_loopback()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		var firstCandidate = AdbUsbTunnelPorts.DeviceSideCandidates[0];
 		var secondCandidate = AdbUsbTunnelPorts.DeviceSideCandidates[1];
 		runner.When(argv => IsNoRebindCreate(argv, firstCandidate),
@@ -61,7 +67,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task Security_adopting_an_existing_mapping_still_uses_the_public_port_never_loopback()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		var candidate = AdbUsbTunnelPorts.DeviceSideCandidates[1];
 		runner.When(argv => argv.Contains("--list"),
 			ListResult($"{Serial} tcp:{candidate} tcp:8193\n"));
@@ -121,7 +127,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task An_exact_existing_mapping_is_adopted_without_any_reverse_create_call()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		runner.When(argv => argv.Contains("--list"), ListResult($"{Serial} tcp:8194 tcp:8193\n"));
 
 		var results = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
@@ -137,7 +143,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task A_recorded_stale_mapping_is_removed_before_a_new_one_is_created()
 	{
-		var (coordinator, runner, marker) = Create(publicPort: 8193);
+		var (coordinator, runner, marker) = Create(8193);
 		marker.Write(
 			new AdbOwnershipState(1234, false, [new AdbOwnedTunnel(Serial, 8193, 8192)], DateTimeOffset.UtcNow));
 		runner.When(argv => argv.Contains("--list"), ListResult(string.Empty));
@@ -162,7 +168,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task No_stale_removal_call_happens_when_nothing_is_recorded_for_the_serial()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		runner.When(argv => argv.Contains("--list"), ListResult(string.Empty));
 
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
@@ -173,7 +179,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task Every_create_call_includes_no_rebind()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		runner.When(argv => argv.Contains("--list"), ListResult(string.Empty));
 
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
@@ -187,7 +193,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task Candidates_are_walked_in_AdbUsbTunnelPorts_order()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		runner.When(argv => argv.Contains("--list"), ListResult(string.Empty));
 		var firstTwo = AdbUsbTunnelPorts.DeviceSideCandidates.Take(2).ToArray();
 		foreach (var candidate in firstTwo)
@@ -213,7 +219,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task An_unauthorized_device_gets_no_tunnel_and_no_adb_calls()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		var device = AuthorizedDevice() with { State = AdbDeviceState.Unauthorized };
 
 		var results = await coordinator.ReconcileAsync([device], CancellationToken.None);
@@ -228,7 +234,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task An_offline_device_gets_no_tunnel_and_no_adb_calls()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		var device = AuthorizedDevice() with { State = AdbDeviceState.Offline };
 
 		var results = await coordinator.ReconcileAsync([device], CancellationToken.None);
@@ -243,7 +249,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task When_every_candidate_fails_the_tunnel_is_reported_unestablished_with_a_message()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193);
+		var (coordinator, runner, _) = Create(8193);
 		runner.When(argv => argv.Contains("--list"), ListResult(string.Empty));
 		foreach (var candidate in AdbUsbTunnelPorts.DeviceSideCandidates)
 		{
@@ -270,7 +276,7 @@ public class AdbTunnelCoordinatorTests
 		// A reverse mapping lives in the device's own adb transport and dies with it, so re-listing it
 		// every few seconds only ever talks to the device for nothing. A Car Thing answered that with a
 		// protocol fault and dropped off the bus, rebooted, and was polled again three seconds later.
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 		var afterFirstPass = runner.Invocations.Count;
 
@@ -287,7 +293,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task A_settled_device_still_reports_its_tunnel_on_later_passes()
 	{
-		var (coordinator, _, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, _, _) = Create(8193, 51234);
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 
 		var results = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
@@ -301,7 +307,7 @@ public class AdbTunnelCoordinatorTests
 	public async Task A_device_that_reconnects_gets_its_tunnel_established_again()
 	{
 		// Unplugging ends the transport the mapping lived in, so the next session needs a real pass.
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 		var afterFirstPass = runner.Invocations.Count;
 
@@ -346,7 +352,7 @@ public class AdbTunnelCoordinatorTests
 	{
 		// Retrying a failing device every few seconds is what turns one bad interaction into a loop it
 		// never escapes.
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		runner.DefaultResult = new AdbProcessResult(true, 1, string.Empty, "error: protocol fault", false);
 
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
@@ -361,7 +367,7 @@ public class AdbTunnelCoordinatorTests
 	[Test]
 	public async Task A_device_that_starts_working_again_is_picked_up()
 	{
-		var (coordinator, runner, _) = Create(publicPort: 8193, loopbackPort: 51234);
+		var (coordinator, runner, _) = Create(8193, 51234);
 		runner.DefaultResult = new AdbProcessResult(true, 1, string.Empty, "error: protocol fault", false);
 		await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 
@@ -380,7 +386,7 @@ public class AdbTunnelCoordinatorTests
 	public async Task A_device_a_usb_link_without_debugging_owns_gets_no_reverse_tunnel_until_the_link_ends()
 	{
 		var native = new NativeSerials();
-		var (coordinator, runner, _) = Create(publicPort: 8193, nativeUsb: native);
+		var (coordinator, runner, _) = Create(8193, nativeUsb: native);
 		var first = await coordinator.ReconcileAsync([AuthorizedDevice()], CancellationToken.None);
 
 		native.Serials.Add(Serial);
@@ -398,7 +404,8 @@ public class AdbTunnelCoordinatorTests
 			Assert.That(whileNative.ContainsKey(Serial), Is.False);
 			Assert.That(callsWhileNative, Is.Zero);
 			Assert.That(afterwards[Serial].Established, Is.True);
-			Assert.That(runner.Invocations.Count - calls, Is.GreaterThan(0),
+			Assert.That(runner.Invocations.Count - calls,
+				Is.GreaterThan(0),
 				"the established tunnel from before the switch must not be trusted after it");
 		});
 	}
@@ -407,7 +414,10 @@ public class AdbTunnelCoordinatorTests
 	{
 		public HashSet<string> Serials { get; } = [];
 
-		public bool IsNative(string serial) => Serials.Contains(serial);
+		public bool IsNative(string serial)
+		{
+			return Serials.Contains(serial);
+		}
 	}
 
 	private (AdbTunnelCoordinator Coordinator, FakeAdbProcessRunner Runner, AdbOwnershipMarker Marker) Create(
@@ -428,10 +438,24 @@ public class AdbTunnelCoordinatorTests
 	}
 
 	private static AdbDevice AuthorizedDevice(string serial = Serial)
-		=> new(serial, AdbDeviceState.Device, "Pixel", "Google", "product", "1", null, DateTimeOffset.UtcNow);
+	{
+		return new AdbDevice(serial,
+			AdbDeviceState.Device,
+			"Pixel",
+			"Google",
+			"product",
+			"1",
+			null,
+			DateTimeOffset.UtcNow);
+	}
 
-	private static AdbProcessResult ListResult(string output) => new(true, 0, output, string.Empty, false);
+	private static AdbProcessResult ListResult(string output)
+	{
+		return new AdbProcessResult(true, 0, output, string.Empty, false);
+	}
 
 	private static bool IsNoRebindCreate(IReadOnlyList<string> argv, int devicePort)
-		=> argv.Count == 6 && argv[2] == "reverse" && argv[3] == "--no-rebind" && argv[4] == "tcp:" + devicePort;
+	{
+		return argv.Count == 6 && argv[2] == "reverse" && argv[3] == "--no-rebind" && argv[4] == "tcp:" + devicePort;
+	}
 }

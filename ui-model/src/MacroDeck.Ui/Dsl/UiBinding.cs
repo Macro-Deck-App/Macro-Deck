@@ -14,7 +14,10 @@ public readonly record struct UiBinding<T>
 		_set = set;
 	}
 
-	internal static UiBinding<T> Create(UiValue<T> value, Action<T>? set) => new(value, set);
+	internal static UiBinding<T> Create(UiValue<T> value, Action<T>? set)
+	{
+		return new UiBinding<T>(value, set);
+	}
 
 	internal UiValue<T> Value => _value;
 
@@ -43,7 +46,10 @@ public static class Bind
 	}
 
 	/// <summary>Creates a binding that rejects writes.</summary>
-	public static UiBinding<T> ReadOnly<T>(UiValue<T> value) => UiBinding<T>.Create(value, null);
+	public static UiBinding<T> ReadOnly<T>(UiValue<T> value)
+	{
+		return UiBinding<T>.Create(value, null);
+	}
 
 	/// <summary>Creates a binding backed by custom read and write callbacks.</summary>
 	public static UiBinding<T> Custom<T>(Func<T> get, Action<T> set)

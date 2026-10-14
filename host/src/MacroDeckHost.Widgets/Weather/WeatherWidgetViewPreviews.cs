@@ -9,17 +9,29 @@ namespace MacroDeckHost.Widgets.Weather;
 internal static class WeatherWidgetViewPreviews
 {
 	[UiPreview("Clear day", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement ClearDay() => Build(WeatherPreviewSamples.ClearDay());
+	public static UiElement ClearDay()
+	{
+		return Build(WeatherPreviewSamples.ClearDay());
+	}
 
 	[UiPreview("Rain", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Rain() => Build(WeatherPreviewSamples.Rain());
+	public static UiElement Rain()
+	{
+		return Build(WeatherPreviewSamples.Rain());
+	}
 
 	[UiPreview("Compact", Profile = UiPreviewProfiles.Widget)]
 	public static UiElement Compact()
-		=> Build(WeatherPreviewSamples.ClearDay(), new WeatherWidgetData { Style = WeatherWidgetData.StyleCompact });
+	{
+		return Build(WeatherPreviewSamples.ClearDay(),
+			new WeatherWidgetData { Style = WeatherWidgetData.StyleCompact });
+	}
 
 	[UiPreview("Unavailable", Profile = UiPreviewProfiles.Widget)]
-	public static UiElement Unavailable() => Build(WeatherStatePayload.Unavailable(locationName: "Home"));
+	public static UiElement Unavailable()
+	{
+		return Build(WeatherStatePayload.Unavailable(locationName: "Home"));
+	}
 
 	private static UiElement Build(WeatherStatePayload payload, WeatherWidgetData? config = null)
 	{

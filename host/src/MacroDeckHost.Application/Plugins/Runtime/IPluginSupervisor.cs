@@ -25,10 +25,15 @@ public enum PluginSupervisorError
 
 public sealed record PluginSupervisorResult(bool Success, PluginSupervisorError? Error = null, string? Message = null)
 {
-	public static PluginSupervisorResult Ok() => new(true);
+	public static PluginSupervisorResult Ok()
+	{
+		return new PluginSupervisorResult(true);
+	}
 
 	public static PluginSupervisorResult Fail(PluginSupervisorError error, string? message = null)
-		=> new(false, error, message);
+	{
+		return new PluginSupervisorResult(false, error, message);
+	}
 }
 
 public interface IPluginSupervisor
@@ -39,9 +44,10 @@ public interface IPluginSupervisor
 
 	[SuppressMessage("Naming",
 		"CA1716:Identifiers should not match keywords",
-		Justification = "'Stop' mirrors the REST verb and the state machine's own vocabulary; renaming it " +
-			"for VB/other-language interop would be less readable than the interface it implements.")]
-	Task<PluginSupervisorResult> Stop(string pluginId,
+		Justification = "'Stop' mirrors the REST verb and the state machine's own vocabulary; renaming it "
+			+ "for VB/other-language interop would be less readable than the interface it implements.")]
+	Task<PluginSupervisorResult> Stop(
+		string pluginId,
 		PluginStopReason reason,
 		CancellationToken cancellationToken = default);
 

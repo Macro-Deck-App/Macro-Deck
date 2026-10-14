@@ -66,8 +66,7 @@ internal static class DiscordStateMapper
 			ServerDeafened = false
 		};
 
-		if (!data.TryGetProperty("voice_states", out var voiceStates) ||
-			voiceStates.ValueKind != JsonValueKind.Array)
+		if (!data.TryGetProperty("voice_states", out var voiceStates) || voiceStates.ValueKind != JsonValueKind.Array)
 		{
 			return updated;
 		}
@@ -96,9 +95,9 @@ internal static class DiscordStateMapper
 
 	public static (string? Id, string? Name) ReadUser(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty("user", out var user) ||
-			user.ValueKind != JsonValueKind.Object)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty("user", out var user)
+			|| user.ValueKind != JsonValueKind.Object)
 		{
 			return (null, null);
 		}
@@ -109,9 +108,9 @@ internal static class DiscordStateMapper
 
 	public static IReadOnlyList<string> ReadScopes(JsonElement data)
 	{
-		if (data.ValueKind != JsonValueKind.Object ||
-			!data.TryGetProperty("scopes", out var scopes) ||
-			scopes.ValueKind != JsonValueKind.Array)
+		if (data.ValueKind != JsonValueKind.Object
+			|| !data.TryGetProperty("scopes", out var scopes)
+			|| scopes.ValueKind != JsonValueKind.Array)
 		{
 			return [];
 		}
@@ -125,46 +124,54 @@ internal static class DiscordStateMapper
 	}
 
 	internal static bool? ReadBool(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind is JsonValueKind.True or JsonValueKind.False
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind is JsonValueKind.True or JsonValueKind.False
 				? value.GetBoolean()
 				: null;
+	}
 
 	internal static int? ReadInt(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetInt32(out var parsed)
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetInt32(out var parsed)
 				? parsed
 				: null;
+	}
 
 	internal static string? ReadString(JsonElement element, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.String
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.String
 				? value.GetString()
 				: null;
+	}
 
 	internal static string? ReadString(JsonElement element, string objectProperty, string property)
-		=> element.ValueKind == JsonValueKind.Object &&
-			element.TryGetProperty(objectProperty, out var nested) &&
-			nested.ValueKind == JsonValueKind.Object
+	{
+		return element.ValueKind == JsonValueKind.Object
+			&& element.TryGetProperty(objectProperty, out var nested)
+			&& nested.ValueKind == JsonValueKind.Object
 				? ReadString(nested, property)
 				: null;
+	}
 
 	internal static double? ReadNestedDouble(JsonElement element, string objectProperty, string property)
 	{
-		if (element.ValueKind != JsonValueKind.Object ||
-			!element.TryGetProperty(objectProperty, out var nested) ||
-			nested.ValueKind != JsonValueKind.Object)
+		if (element.ValueKind != JsonValueKind.Object
+			|| !element.TryGetProperty(objectProperty, out var nested)
+			|| nested.ValueKind != JsonValueKind.Object)
 		{
 			return null;
 		}
 
-		return nested.TryGetProperty(property, out var value) &&
-			value.ValueKind == JsonValueKind.Number &&
-			value.TryGetDouble(out var parsed)
+		return nested.TryGetProperty(property, out var value)
+			&& value.ValueKind == JsonValueKind.Number
+			&& value.TryGetDouble(out var parsed)
 				? parsed
 				: null;
 	}

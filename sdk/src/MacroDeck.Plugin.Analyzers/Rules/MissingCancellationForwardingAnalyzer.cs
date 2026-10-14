@@ -32,7 +32,7 @@ public sealed class MissingCancellationForwardingAnalyzer : DiagnosticAnalyzer
 			var actionExecutionContextType
 				= compilation.GetTypeByMetadataName(WellKnownTypeNames.ActionExecutionContext);
 
-			if (cancellationTokenType is null || (handlerType is null && executorType is null))
+			if (cancellationTokenType is null || handlerType is null && executorType is null)
 			{
 				return;
 			}
@@ -66,9 +66,9 @@ public sealed class MissingCancellationForwardingAnalyzer : DiagnosticAnalyzer
 
 						foreach (var argument in invocation.Arguments)
 						{
-							if (argument.Parameter is not { } parameter ||
-								!SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationTokenType) ||
-								!IsNoCancellation(argument, cancellationTokenType))
+							if (argument.Parameter is not { } parameter
+								|| !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationTokenType)
+								|| !IsNoCancellation(argument, cancellationTokenType))
 							{
 								continue;
 							}
@@ -125,8 +125,9 @@ public sealed class MissingCancellationForwardingAnalyzer : DiagnosticAnalyzer
 		INamedTypeSymbol cancellationTokenType,
 		INamedTypeSymbol? actionExecutionContextType)
 	{
-		if (invokeAsyncInterfaceMethod is not null &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType.FindImplementation(invokeAsyncInterfaceMethod),
+		if (invokeAsyncInterfaceMethod is not null
+			&& SymbolEqualityComparer.Default.Equals(
+				method.ContainingType.FindImplementation(invokeAsyncInterfaceMethod),
 				method))
 		{
 			var tokenParameter = method.Parameters.FirstOrDefault(parameter
@@ -135,9 +136,10 @@ public sealed class MissingCancellationForwardingAnalyzer : DiagnosticAnalyzer
 			return tokenParameter?.Name;
 		}
 
-		if (executeAsyncInterfaceMethod is not null &&
-			actionExecutionContextType is not null &&
-			SymbolEqualityComparer.Default.Equals(method.ContainingType.FindImplementation(executeAsyncInterfaceMethod),
+		if (executeAsyncInterfaceMethod is not null
+			&& actionExecutionContextType is not null
+			&& SymbolEqualityComparer.Default.Equals(
+				method.ContainingType.FindImplementation(executeAsyncInterfaceMethod),
 				method))
 		{
 			var contextParameter = method.Parameters.FirstOrDefault(parameter

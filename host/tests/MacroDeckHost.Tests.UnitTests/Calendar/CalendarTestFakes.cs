@@ -64,9 +64,15 @@ internal sealed class FakeCalendarIntegration : IIntegration, ICalendarProvider
 		return this;
 	}
 
-	public void ClearEvents(string accountId) => _events[accountId].Clear();
+	public void ClearEvents(string accountId)
+	{
+		_events[accountId].Clear();
+	}
 
-	public IReadOnlyList<CalendarAccount> GetAccounts() => Accounts;
+	public IReadOnlyList<CalendarAccount> GetAccounts()
+	{
+		return Accounts;
+	}
 
 	public Task<IReadOnlyList<CalendarInfo>> GetCalendarsAsync(string accountId, CancellationToken cancellationToken)
 	{
@@ -104,9 +110,15 @@ internal sealed class FakeCalendarIntegration : IIntegration, ICalendarProvider
 		return Task.FromResult(Details.GetValueOrDefault(eventId));
 	}
 
-	public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+	public Task InitializeAsync(IIntegrationContext context)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
 	private void ThrowIfFailing(string accountId)
 	{
@@ -151,7 +163,8 @@ internal static class CalendarTesting
 		string calendarId = "main",
 		string? title = null,
 		string? meetingUrl = null)
-		=> new()
+	{
+		return new CalendarEvent
 		{
 			Id = id,
 			CalendarId = calendarId,
@@ -160,15 +173,23 @@ internal static class CalendarTesting
 			End = start + duration,
 			MeetingUrl = meetingUrl
 		};
+	}
 
 	public static CalendarEventCache Cache(
 		FakeTimeProvider time,
 		TimeZoneInfo? timeZone = null,
 		params IIntegration[] integrations)
-		=> new(Registry(integrations), time, Logger(), timeZone ?? TimeZoneInfo.Utc);
+	{
+		return new CalendarEventCache(Registry(integrations), time, Logger(), timeZone ?? TimeZoneInfo.Utc);
+	}
 
 	public static CalendarRegistry Registry(params IIntegration[] integrations)
-		=> new(new ConfigurableIntegrationRegistry(integrations), Logger());
+	{
+		return new CalendarRegistry(new ConfigurableIntegrationRegistry(integrations), Logger());
+	}
 
-	public static ILogger Logger() => new LoggerConfiguration().CreateLogger();
+	public static ILogger Logger()
+	{
+		return new LoggerConfiguration().CreateLogger();
+	}
 }

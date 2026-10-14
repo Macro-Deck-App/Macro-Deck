@@ -18,23 +18,23 @@ internal static class StreamerbotEventDefinitions
 			ConfigurationParameters =
 			[
 				ActionParameter.DynamicChoice("source",
-					label: AppStrings.Integrations.Streamerbot.Events.SourceLabel(),
-					description: AppStrings.Integrations.Streamerbot.Events.SourceDescription(),
+					AppStrings.Integrations.Streamerbot.Events.SourceLabel(),
+					AppStrings.Integrations.Streamerbot.Events.SourceDescription(),
 					placeholder: AppStrings.Integrations.Streamerbot.Events.AnySourcePlaceholder()),
 				ActionParameter.DynamicChoice("type",
-					label: AppStrings.Integrations.Streamerbot.Events.EventTypeLabel(),
-					description: AppStrings.Integrations.Streamerbot.Events.EventTypeDescription(),
+					AppStrings.Integrations.Streamerbot.Events.EventTypeLabel(),
+					AppStrings.Integrations.Streamerbot.Events.EventTypeDescription(),
 					placeholder: AppStrings.Integrations.Streamerbot.Events.AnyEventPlaceholder())
 			],
 			PayloadParameters =
 			[
 				ActionParameter.DynamicChoice("source",
-					label: AppStrings.Integrations.Streamerbot.Events.SourceLabel()),
+					AppStrings.Integrations.Streamerbot.Events.SourceLabel()),
 				ActionParameter.DynamicChoice("type",
-					label: AppStrings.Integrations.Streamerbot.Events.EventTypeLabel()),
-				ActionParameter.Text("user", label: AppStrings.Integrations.Streamerbot.Events.UserLabel()),
-				ActionParameter.Text("message", label: AppStrings.Integrations.Streamerbot.Events.MessageLabel()),
-				ActionParameter.Text("data", label: AppStrings.Integrations.Streamerbot.Events.RawDataLabel())
+					AppStrings.Integrations.Streamerbot.Events.EventTypeLabel()),
+				ActionParameter.Text("user", AppStrings.Integrations.Streamerbot.Events.UserLabel()),
+				ActionParameter.Text("message", AppStrings.Integrations.Streamerbot.Events.MessageLabel()),
+				ActionParameter.Text("data", AppStrings.Integrations.Streamerbot.Events.RawDataLabel())
 			]
 		},
 		new()

@@ -46,7 +46,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 
 	private readonly List<MouseButton> _heldButtons = [];
 
-	private CGPoint _lastLocation;
+	private CgPoint _lastLocation;
 
 	private bool _hasLastLocation;
 
@@ -62,7 +62,10 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 
 	public bool HasPermission => MacOsAccessibility.IsTrusted();
 
-	public void RequestPermission() => MacOsAccessibility.RequestTrust();
+	public void RequestPermission()
+	{
+		MacOsAccessibility.RequestTrust();
+	}
 
 	public bool TryGetPosition(out MousePoint position)
 	{
@@ -112,7 +115,10 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		return true;
 	}
 
-	public void MoveTo(MousePoint position) => PostMove(ToGlobalPoint(position, GetDesktopScale()));
+	public void MoveTo(MousePoint position)
+	{
+		PostMove(ToGlobalPoint(position, GetDesktopScale()));
+	}
 
 	public void ButtonDown(MouseButton button, MousePoint? position)
 	{
@@ -126,7 +132,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 			PostMove(location);
 		}
 
-		PostButton(DownType(button), button, location, clickState: 1);
+		PostButton(DownType(button), button, location, 1);
 		HoldButton(button);
 	}
 
@@ -135,7 +141,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		_heldButtons.Remove(button);
 
 		var location = TryGetCursorLocation(out var current) ? current : _lastLocation;
-		PostButton(UpType(button), button, location, clickState: 1);
+		PostButton(UpType(button), button, location, 1);
 
 		if (_heldButtons.Count == 0)
 		{
@@ -164,7 +170,9 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 	}
 
 	public void DragTo(MouseButton button, MousePoint position)
-		=> PostMotion(DraggedType(button), ToGlobalPoint(position, GetDesktopScale()), ButtonIndex(button));
+	{
+		PostMotion(DraggedType(button), ToGlobalPoint(position, GetDesktopScale()), ButtonIndex(button));
+	}
 
 	public void Scroll(ScrollAxis axis, int notches)
 	{
@@ -192,11 +200,15 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		}
 	}
 
-	private static CGPoint ToGlobalPoint(MousePoint position, double scale)
-		=> new() { x = position.X / scale, y = position.Y / scale };
+	private static CgPoint ToGlobalPoint(MousePoint position, double scale)
+	{
+		return new CgPoint { x = position.X / scale, y = position.Y / scale };
+	}
 
-	private static MousePoint ToDesktopPixels(CGPoint location, double scale)
-		=> new((int)Math.Round(location.x * scale), (int)Math.Round(location.y * scale));
+	private static MousePoint ToDesktopPixels(CgPoint location, double scale)
+	{
+		return new MousePoint((int)Math.Round(location.x * scale), (int)Math.Round(location.y * scale));
+	}
 
 	private static double GetDesktopScale()
 	{
@@ -229,7 +241,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		return CGGetActiveDisplayList(count, displays, out _) == ErrorSuccess ? displays : [];
 	}
 
-	private static bool TryResolveLocation(MousePoint? position, out CGPoint location)
+	private static bool TryResolveLocation(MousePoint? position, out CgPoint location)
 	{
 		if (position is { } point)
 		{
@@ -240,7 +252,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		return TryGetCursorLocation(out location);
 	}
 
-	private static bool TryGetCursorLocation(out CGPoint location)
+	private static bool TryGetCursorLocation(out CgPoint location)
 	{
 		var handle = CGEventCreate(IntPtr.Zero);
 		if (handle == IntPtr.Zero)
@@ -260,7 +272,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		}
 	}
 
-	private void PostMove(CGPoint location)
+	private void PostMove(CgPoint location)
 	{
 		if (LastHeldButton() is { } button)
 		{
@@ -271,7 +283,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		PostMotion(EventMouseMoved, location, MouseButtonLeft);
 	}
 
-	private void PostMotion(uint eventType, CGPoint location, uint button)
+	private void PostMotion(uint eventType, CgPoint location, uint button)
 	{
 		var (deltaX, deltaY) = DeltaTo(location);
 
@@ -295,7 +307,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		}
 	}
 
-	private void PostButton(uint eventType, MouseButton button, CGPoint location, int clickState)
+	private void PostButton(uint eventType, MouseButton button, CgPoint location, int clickState)
 	{
 		var index = ButtonIndex(button);
 		var handle = CGEventCreateMouseEvent(IntPtr.Zero, eventType, location, index);
@@ -320,7 +332,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		}
 	}
 
-	private (long X, long Y) DeltaTo(CGPoint location)
+	private (long X, long Y) DeltaTo(CgPoint location)
 	{
 		if (!_hasLastLocation)
 		{
@@ -335,7 +347,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		return ((long)Math.Round(location.x - _lastLocation.x), (long)Math.Round(location.y - _lastLocation.y));
 	}
 
-	private void RememberLocation(CGPoint location)
+	private void RememberLocation(CgPoint location)
 	{
 		_lastLocation = location;
 		_hasLastLocation = true;
@@ -347,37 +359,52 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		_heldButtons.Add(button);
 	}
 
-	private MouseButton? LastHeldButton() => _heldButtons.Count > 0 ? _heldButtons[^1] : null;
-
-	private static uint ButtonIndex(MouseButton button) => button switch
+	private MouseButton? LastHeldButton()
 	{
-		MouseButton.Right => MouseButtonRight,
-		MouseButton.Middle => MouseButtonCenter,
-		MouseButton.Back => MouseButtonBack,
-		MouseButton.Forward => MouseButtonForward,
-		_ => MouseButtonLeft
-	};
+		return _heldButtons.Count > 0 ? _heldButtons[^1] : null;
+	}
 
-	private static uint DownType(MouseButton button) => button switch
+	private static uint ButtonIndex(MouseButton button)
 	{
-		MouseButton.Left => EventLeftMouseDown,
-		MouseButton.Right => EventRightMouseDown,
-		_ => EventOtherMouseDown
-	};
+		return button switch
+		{
+			MouseButton.Right => MouseButtonRight,
+			MouseButton.Middle => MouseButtonCenter,
+			MouseButton.Back => MouseButtonBack,
+			MouseButton.Forward => MouseButtonForward,
+			_ => MouseButtonLeft
+		};
+	}
 
-	private static uint UpType(MouseButton button) => button switch
+	private static uint DownType(MouseButton button)
 	{
-		MouseButton.Left => EventLeftMouseUp,
-		MouseButton.Right => EventRightMouseUp,
-		_ => EventOtherMouseUp
-	};
+		return button switch
+		{
+			MouseButton.Left => EventLeftMouseDown,
+			MouseButton.Right => EventRightMouseDown,
+			_ => EventOtherMouseDown
+		};
+	}
 
-	private static uint DraggedType(MouseButton button) => button switch
+	private static uint UpType(MouseButton button)
 	{
-		MouseButton.Left => EventLeftMouseDragged,
-		MouseButton.Right => EventRightMouseDragged,
-		_ => EventOtherMouseDragged
-	};
+		return button switch
+		{
+			MouseButton.Left => EventLeftMouseUp,
+			MouseButton.Right => EventRightMouseUp,
+			_ => EventOtherMouseUp
+		};
+	}
+
+	private static uint DraggedType(MouseButton button)
+	{
+		return button switch
+		{
+			MouseButton.Left => EventLeftMouseDragged,
+			MouseButton.Right => EventRightMouseDragged,
+			_ => EventOtherMouseDragged
+		};
+	}
 
 	[DllImport(ApplicationServices)]
 	private static extern IntPtr CGEventCreate(IntPtr source);
@@ -386,7 +413,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 	private static extern IntPtr CGEventCreateMouseEvent(
 		IntPtr source,
 		uint mouseType,
-		CGPoint mouseCursorPosition,
+		CgPoint mouseCursorPosition,
 		uint mouseButton);
 
 	[DllImport(ApplicationServices)]
@@ -399,7 +426,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 		int wheel3);
 
 	[DllImport(ApplicationServices)]
-	private static extern CGPoint CGEventGetLocation(IntPtr handle);
+	private static extern CgPoint CGEventGetLocation(IntPtr handle);
 
 	[DllImport(ApplicationServices)]
 	private static extern void CGEventSetIntegerValueField(IntPtr handle, uint field, long value);
@@ -411,7 +438,7 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 	private static extern uint CGMainDisplayID();
 
 	[DllImport(ApplicationServices)]
-	private static extern CGRect CGDisplayBounds(uint display);
+	private static extern CgRect CGDisplayBounds(uint display);
 
 	[DllImport(ApplicationServices)]
 	private static extern int CGGetActiveDisplayList(
@@ -435,23 +462,23 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 	private static extern void CFRelease(IntPtr handle);
 
 	[StructLayout(LayoutKind.Sequential)]
-	private struct CGPoint
+	private struct CgPoint
 	{
 		public double x;
 		public double y;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	private struct CGSize
+	private struct CgSize
 	{
 		public double width;
 		public double height;
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	private struct CGRect
+	private struct CgRect
 	{
-		public CGPoint origin;
-		public CGSize size;
+		public CgPoint origin;
+		public CgSize size;
 	}
 }

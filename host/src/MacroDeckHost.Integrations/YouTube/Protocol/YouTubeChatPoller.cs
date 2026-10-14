@@ -107,8 +107,8 @@ internal sealed class YouTubeChatPoller : IDisposable
 			End();
 			return TimeSpan.Zero;
 		}
-		catch (Exception ex) when (ex is YouTubeOAuthRejectedException ||
-			(ex is YouTubeApiException { IsUnauthorized: true }))
+		catch (Exception ex) when (ex is YouTubeOAuthRejectedException
+			|| ex is YouTubeApiException { IsUnauthorized: true })
 		{
 			_authorizationLost();
 			End();

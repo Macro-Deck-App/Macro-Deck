@@ -28,7 +28,10 @@ internal sealed class GetJsonValueActionTests
 	}
 
 	[TearDown]
-	public void TearDown() => _targets.Dispose();
+	public void TearDown()
+	{
+		_targets.Dispose();
+	}
 
 	[Test]
 	public async Task The_happy_path_writes_the_target_variable_with_the_right_type()
@@ -39,7 +42,7 @@ internal sealed class GetJsonValueActionTests
 			("path", "$.name"),
 			("variable", "target")));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
 			Assert.That(await _targets.ValueOf("target"), Is.EqualTo("Ada"));
@@ -55,7 +58,7 @@ internal sealed class GetJsonValueActionTests
 			("path", "$.missing"),
 			("variable", "target")));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo(ActionErrorCodes.NotFound));
@@ -138,16 +141,22 @@ internal sealed class GetJsonValueActionTests
 	}
 
 	private Task<ActionResult> Execute(Dictionary<string, object> parameters)
-		=> _executor.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	{
+		return _executor.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+	}
 
 	private static HttpSendOutcome Succeeded(int statusCode, string body)
-		=> HttpSendOutcome.Succeeded(new HttpResponseSnapshot(statusCode,
+	{
+		return HttpSendOutcome.Succeeded(new HttpResponseSnapshot(statusCode,
 			new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
 			body,
 			false,
 			"application/json",
 			5));
+	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
-		=> values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
+	}
 }

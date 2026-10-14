@@ -72,32 +72,43 @@ public sealed class ProtocolMessageLog
 
 	/// <summary>Messages of a given <see cref="MacroDeck.Plugin.Protocol.Envelope.MessageTypes" /> value, in arrival order.</summary>
 	public IReadOnlyList<RecordedProtocolMessage> OfType(string type)
-		=> [.. All.Where(message => string.Equals(message.Envelope.Type, type, StringComparison.Ordinal))];
+	{
+		return [.. All.Where(message => string.Equals(message.Envelope.Type, type, StringComparison.Ordinal))];
+	}
 
 	/// <summary>Messages whose <c>correlationId</c> equals <paramref name="correlationId" />, in arrival order.</summary>
 	public IReadOnlyList<RecordedProtocolMessage> WithCorrelationId(string correlationId)
-		=>
+	{
+		return
 		[
 			.. All.Where(message =>
 				string.Equals(message.Envelope.CorrelationId, correlationId, StringComparison.Ordinal))
 		];
+	}
 
 	internal void Record(ProtocolMessageDirection direction, ProtocolEnvelope envelope)
-		=> _messages.Enqueue(new RecordedProtocolMessage
+	{
+		_messages.Enqueue(new RecordedProtocolMessage
 		{
 			Direction = direction,
 			Envelope = envelope,
 			RecordedAt = DateTimeOffset.UtcNow,
 			Sequence = NextSequence()
 		});
+	}
 
 	internal void RecordClose(int closeCode)
-		=> _closes.Enqueue(new RecordedProtocolClose
+	{
+		_closes.Enqueue(new RecordedProtocolClose
 		{
 			CloseCode = closeCode,
 			RecordedAt = DateTimeOffset.UtcNow,
 			Sequence = NextSequence()
 		});
+	}
 
-	private long NextSequence() => Interlocked.Increment(ref _sequence);
+	private long NextSequence()
+	{
+		return Interlocked.Increment(ref _sequence);
+	}
 }

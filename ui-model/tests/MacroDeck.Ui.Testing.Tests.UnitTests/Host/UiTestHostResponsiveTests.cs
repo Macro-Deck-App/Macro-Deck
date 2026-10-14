@@ -1,5 +1,4 @@
 using MacroDeck.Ui.Components;
-using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Surfaces;
 
 namespace MacroDeck.Ui.Testing.Tests.UnitTests.Host;
@@ -10,17 +9,21 @@ public class UiTestHostResponsiveTests
 	private static readonly string[] _compactOnly = ["weather.compact"];
 
 	private static UiTestHost RenderWeather()
-		=> UiTestHost.Render(new UiResponsive
+	{
+		return UiTestHost.Render(new UiResponsive
 			{
 				Key = "weather",
 				Default = new UiTextRun { Key = "compact", Text = "21°" },
 				Variants =
 				[
-					new UiResponsiveVariant { MinWidth = 1.5, Content = new UiTextRun { Key = "wide", Text = "21° Sunny" } },
-					new UiResponsiveVariant { MaxAspect = 0.67, Content = new UiTextRun { Key = "tall", Text = "21° tall" } },
-				],
+					new UiResponsiveVariant
+						{ MinWidth = 1.5, Content = new UiTextRun { Key = "wide", Text = "21° Sunny" } },
+					new UiResponsiveVariant
+						{ MaxAspect = 0.67, Content = new UiTextRun { Key = "tall", Text = "21° tall" } }
+				]
 			},
 			new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared });
+	}
 
 	[Test]
 	public void Without_a_box_queries_see_only_the_default_layout_and_never_its_fallback_copy()

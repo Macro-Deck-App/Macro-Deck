@@ -3,7 +3,7 @@ using MacroDeck.Sdk.Variables;
 namespace MacroDeck.Sdk.Tests.UnitTests.Variables;
 
 [TestFixture]
-public class IVariableProviderTests
+public class VariableProviderTests
 {
 	/// <summary>
 	/// A default interface member does not dispatch off the concrete type - reading
@@ -106,7 +106,7 @@ public class IVariableProviderTests
 		var cpu = VariableDefinition.Eager("cpu", VariableType.Numeric);
 		IVariableProvider provider = new Plain([cpu]);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await provider.ResolveAsync(cpu.ResolvedId!), Is.EqualTo(cpu));
 			Assert.That(await provider.ResolveAsync("not-a-variable"), Is.Null);
@@ -133,12 +133,17 @@ public class IVariableProviderTests
 
 	private sealed class Plain : IVariableProvider
 	{
-		public Plain(IReadOnlyList<VariableDefinition> provided) => Variables = provided;
+		public Plain(IReadOnlyList<VariableDefinition> provided)
+		{
+			Variables = provided;
+		}
 
 		public IReadOnlyList<VariableDefinition> Variables { get; }
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 	}
 
 	private sealed class Overriding : IVariableProvider
@@ -156,6 +161,8 @@ public class IVariableProviderTests
 		public IReadOnlyList<VariableDefinition> DeclaredVariables => _declared;
 
 		public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(VariableReading.Unavailable);
+		{
+			return ValueTask.FromResult(VariableReading.Unavailable);
+		}
 	}
 }

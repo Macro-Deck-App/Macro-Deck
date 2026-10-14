@@ -27,8 +27,8 @@ internal sealed class QWebChannelClientTests
 	{
 		_pair = await WebSocketPair.CreateAsync();
 		_client = new QWebChannelClient((_, _) => Task.FromResult(_pair.Client),
-			initTimeout: TimeSpan.FromMilliseconds(500),
-			invokeTimeout: TimeSpan.FromMilliseconds(500));
+			TimeSpan.FromMilliseconds(500),
+			TimeSpan.FromMilliseconds(500));
 	}
 
 	[TearDown]

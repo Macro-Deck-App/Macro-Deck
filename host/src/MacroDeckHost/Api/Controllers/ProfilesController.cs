@@ -48,25 +48,37 @@ public class ProfilesController : ControllerBase
 	[HttpGet]
 	[Authorize(Policy = AuthPolicies.ClientAccess)]
 	public Task<GetProfilesResponse> GetAll(CancellationToken ct)
-		=> _getProfiles.Handle(new GetProfilesRequest(), ct).AsTask();
+	{
+		return _getProfiles.Handle(new GetProfilesRequest(), ct).AsTask();
+	}
 
 	[HttpPost]
 	public Task<CreateProfileResponse> Create(CreateProfileRequest body, CancellationToken ct)
-		=> _createProfile.Handle(body, ct).AsTask();
+	{
+		return _createProfile.Handle(body, ct).AsTask();
+	}
 
 	[HttpPut]
 	public Task<UpdateProfileResponse> Update(UpdateProfileRequest body, CancellationToken ct)
-		=> _updateProfile.Handle(body, ct).AsTask();
+	{
+		return _updateProfile.Handle(body, ct).AsTask();
+	}
 
 	[HttpDelete("{id}")]
 	public Task<DeleteProfileResponse> Delete(string id, CancellationToken ct)
-		=> _deleteProfile.Handle(new DeleteProfileRequest { Id = id }, ct).AsTask();
+	{
+		return _deleteProfile.Handle(new DeleteProfileRequest { Id = id }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/duplicate")]
-	public Task<DuplicateProfileResponse> Duplicate(string id,
-		[FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] DuplicateProfileRequest? body,
+	public Task<DuplicateProfileResponse> Duplicate(
+		string id,
+		[FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
+		DuplicateProfileRequest? body,
 		CancellationToken ct)
-		=> _duplicateProfile.Handle(new DuplicateProfileRequest { Id = id, Name = body?.Name }, ct).AsTask();
+	{
+		return _duplicateProfile.Handle(new DuplicateProfileRequest { Id = id, Name = body?.Name }, ct).AsTask();
+	}
 
 	[HttpPost("{id}/move")]
 	public Task<MoveProfileResponse> Move(string id, MoveProfileRequest body, CancellationToken ct)
@@ -100,7 +112,8 @@ public class ProfilesController : ControllerBase
 
 	[HttpPost("import")]
 	[RequestSizeLimit(PortabilityHttp.MaxRequestBytes)]
-	public async Task<ImportProfileResponse> Import([FromForm] IFormFile? file,
+	public async Task<ImportProfileResponse> Import(
+		[FromForm] IFormFile? file,
 		[FromForm] string? password,
 		CancellationToken ct)
 	{
@@ -150,9 +163,11 @@ public class ProfilesController : ControllerBase
 	}
 
 	private static ImportProfileResponse Fail(Domain.Enums.PortabilityError error, string? message)
-		=> new()
+	{
+		return new ImportProfileResponse
 		{
 			Success = false,
 			Error = PortabilityHttp.ToTransportError(error, message)
 		};
+	}
 }

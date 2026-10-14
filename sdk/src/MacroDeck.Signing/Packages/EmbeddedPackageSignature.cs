@@ -13,7 +13,10 @@ internal readonly record struct EmbeddedPackageSignature(
 {
 	/// <summary>True when <paramref name="manifest"/> carries a <c>signature</c> object at all, regardless
 	/// of whether its shape is valid - the caller distinguishes "missing" from "malformed".</summary>
-	public static bool IsPresent(JsonObject manifest) => manifest["signature"] is not null;
+	public static bool IsPresent(JsonObject manifest)
+	{
+		return manifest["signature"] is not null;
+	}
 
 	public static bool TryParse(JsonObject manifest, out EmbeddedPackageSignature signature)
 	{
@@ -24,30 +27,30 @@ internal readonly record struct EmbeddedPackageSignature(
 			return false;
 		}
 
-		if (node["algorithm"] is not JsonValue algorithmValue ||
-			!algorithmValue.TryGetValue<string>(out var algorithm) ||
-			algorithm.Length == 0)
+		if (node["algorithm"] is not JsonValue algorithmValue
+			|| !algorithmValue.TryGetValue<string>(out var algorithm)
+			|| algorithm.Length == 0)
 		{
 			return false;
 		}
 
-		if (node["keyId"] is not JsonValue keyIdValue ||
-			!keyIdValue.TryGetValue<string>(out var keyId) ||
-			keyId.Length == 0)
+		if (node["keyId"] is not JsonValue keyIdValue
+			|| !keyIdValue.TryGetValue<string>(out var keyId)
+			|| keyId.Length == 0)
 		{
 			return false;
 		}
 
-		if (node["value"] is not JsonValue valueValue ||
-			!valueValue.TryGetValue<string>(out var value) ||
-			value.Length == 0)
+		if (node["value"] is not JsonValue valueValue
+			|| !valueValue.TryGetValue<string>(out var value)
+			|| value.Length == 0)
 		{
 			return false;
 		}
 
-		if (node["signedAt"] is not JsonValue signedAtValue ||
-			!signedAtValue.TryGetValue<string>(out var signedAtText) ||
-			!DateTimeOffset.TryParse(signedAtText,
+		if (node["signedAt"] is not JsonValue signedAtValue
+			|| !signedAtValue.TryGetValue<string>(out var signedAtText)
+			|| !DateTimeOffset.TryParse(signedAtText,
 				CultureInfo.InvariantCulture,
 				DateTimeStyles.RoundtripKind,
 				out var signedAt))

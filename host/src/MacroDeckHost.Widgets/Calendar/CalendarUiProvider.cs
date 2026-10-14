@@ -66,7 +66,7 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 		new()
 			{ Kind = UiSurfaceKinds.Config, SessionMode = UiSessionModes.Exclusive },
 		new()
-			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive },
+			{ Kind = UiSurfaceKinds.Dialog, SessionMode = UiSessionModes.Exclusive }
 	];
 
 	public async Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
@@ -86,7 +86,7 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 			{
 				DialogViewId => await CreateDialogAsync(surface).ConfigureAwait(false),
 				AgendaDialogViewId => await CreateAgendaDialogAsync(surface).ConfigureAwait(false),
-				_ => null,
+				_ => null
 			};
 		}
 
@@ -100,8 +100,8 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 			return null;
 		}
 
-		var data = surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var element) &&
-			element.ValueKind == JsonValueKind.Object
+		var data = surface.Attributes.TryGetValue(UiWidgetSurfaceAttributes.Data, out var element)
+			&& element.ValueKind == JsonValueKind.Object
 				? element
 				: default;
 
@@ -121,10 +121,12 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 	}
 
 	private WidgetConfigSession? CreateConfig(UiSurface surface)
-		=> WidgetConfigSurfaces.IsFor(surface, CalendarWidgetTypes.QualifiedId)
+	{
+		return WidgetConfigSurfaces.IsFor(surface, CalendarWidgetTypes.QualifiedId)
 			? new WidgetConfigSession(new UiView(surface,
 				CalendarWidgetConfigViews.Build(WidgetConfigSurfaces.Data(surface), _cache)))
 			: null;
+	}
 
 	private async Task<IUiSession> CreateWidgetAsync<TSettings, TState>(
 		UiSurface surface,
@@ -189,7 +191,10 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 	}
 
 	private async Task<CalendarFormat> FormatAsync()
-		=> new(await TimeFormatResolver.ResolveAsync(_scopeFactory).ConfigureAwait(false), _cache.TimeZone);
+	{
+		return new CalendarFormat(await TimeFormatResolver.ResolveAsync(_scopeFactory).ConfigureAwait(false),
+			_cache.TimeZone);
+	}
 
 	private async Task<CalendarFormat?> TryFormatAsync()
 	{
@@ -207,7 +212,9 @@ public sealed class CalendarUiProvider : IBuiltInIntegrationUiProvider
 	}
 
 	private static string? ReadString(UiSurface surface, string name)
-		=> surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
+	{
+		return surface.Attributes.TryGetValue(name, out var element) && element.ValueKind == JsonValueKind.String
 			? element.GetString()
 			: null;
+	}
 }

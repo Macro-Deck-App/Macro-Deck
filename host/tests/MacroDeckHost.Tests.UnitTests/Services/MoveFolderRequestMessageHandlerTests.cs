@@ -40,13 +40,16 @@ public class MoveFolderRequestMessageHandlerTests
 		_profileId = Guid.NewGuid();
 		await _cache.AddOrUpdate(new ProfileEntity { Id = _profileId, Name = "P" });
 
-		_root = await AddFolder("Root", null, 0, isDefault: true);
+		_root = await AddFolder("Root", null, 0, true);
 		_sibling = await AddFolder("Sibling", null, 1);
 		_child = await AddFolder("Child", _root.Id, 0);
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task InvalidFolderGuid_ReturnsValidationError()

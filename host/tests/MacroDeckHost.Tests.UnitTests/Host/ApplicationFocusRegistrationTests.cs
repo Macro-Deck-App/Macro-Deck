@@ -35,8 +35,8 @@ internal sealed class ApplicationFocusRegistrationTests
 		new Startup().ConfigureServices(services);
 
 		var hostedServiceDescriptors = services.Where(d =>
-			d.ServiceType == typeof(IHostedService) &&
-			d.ImplementationType == typeof(ApplicationFocusBackgroundService));
+			d.ServiceType == typeof(IHostedService)
+			&& d.ImplementationType == typeof(ApplicationFocusBackgroundService));
 
 		Assert.That(hostedServiceDescriptors, Has.Exactly(1).Items);
 	}

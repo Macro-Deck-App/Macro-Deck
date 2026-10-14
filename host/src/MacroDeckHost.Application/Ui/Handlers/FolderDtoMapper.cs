@@ -61,7 +61,8 @@ public static class FolderDtoMapper
 	}
 
 	public static Widget MapWidgetToDto(WidgetEntity entity)
-		=> new()
+	{
+		return new Widget
 		{
 			Id = entity.Id.ToString(),
 			Type = entity.Type,
@@ -73,4 +74,5 @@ public static class FolderDtoMapper
 			IsPinned = entity.IsPinned,
 			PinScope = entity.PinScope
 		};
+	}
 }

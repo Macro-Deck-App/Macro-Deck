@@ -94,22 +94,31 @@ internal sealed class SpotifyThrottledHttpClientLoggingTests
 	}
 
 	private SpotifyThrottledHttpClient Client(Func<IRequest, IResponse> handler, SpotifyRequestLimiter? limiter = null)
-		=> new(new StubSpotifyHttpClient { Handler = handler },
-			limiter ?? new SpotifyRequestLimiter(ceilingPerSecond: 1000, burst: 100),
+	{
+		return new SpotifyThrottledHttpClient(new StubSpotifyHttpClient { Handler = handler },
+			limiter ?? new SpotifyRequestLimiter(1000, 100),
 			new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Sink(_sink).CreateLogger());
+	}
 
 	private static string Rendered(LogEvent logEvent)
-		=> $"{logEvent.RenderMessage(CultureInfo.InvariantCulture)} {string.Join(' ', logEvent.Properties)}";
+	{
+		return $"{logEvent.RenderMessage(CultureInfo.InvariantCulture)} {string.Join(' ', logEvent.Properties)}";
+	}
 
 	private static Response Status(HttpStatusCode statusCode)
-		=> new(new Dictionary<string, string>()) { StatusCode = statusCode, ContentType = "application/json" };
+	{
+		return new Response(new Dictionary<string, string>())
+			{ StatusCode = statusCode, ContentType = "application/json" };
+	}
 
 	private static Response RateLimited(string retryAfter)
-		=> new(new Dictionary<string, string> { ["Retry-After"] = retryAfter })
+	{
+		return new Response(new Dictionary<string, string> { ["Retry-After"] = retryAfter })
 		{
 			StatusCode = (HttpStatusCode)429,
 			ContentType = "application/json"
 		};
+	}
 
 	private sealed class StubRequest : IRequest
 	{
@@ -130,6 +139,9 @@ internal sealed class SpotifyThrottledHttpClientLoggingTests
 	{
 		public List<LogEvent> Events { get; } = [];
 
-		public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+		public void Emit(LogEvent logEvent)
+		{
+			Events.Add(logEvent);
+		}
 	}
 }

@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using System.Text.Json;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
@@ -19,7 +21,14 @@ foreach (var scene in Scenes.All())
 	File.WriteAllText(Path.Combine(outDir, scene.Name + ".json"), json);
 }
 
-internal sealed record Scene(string Name, int Width, int Height, int Radius, int Basis, UiElement Root, double Scale = 1);
+internal sealed record Scene(
+	string Name,
+	int Width,
+	int Height,
+	int Radius,
+	int Basis,
+	UiElement Root,
+	double Scale = 1);
 
 internal static partial class Scenes
 {
@@ -35,24 +44,28 @@ internal static partial class Scenes
 	public static UiSize TilePadding => UiSize.Of(UiLength.Capped(SafeArea / UiLength.Cell, SafeArea));
 
 	public static Scene Tile(string name, UiElement root, int columns = 1, int rows = 1)
-		=> new(name,
+	{
+		return new Scene(name,
 			CellPx * columns,
 			CellPx * rows,
 			(int)(CornerRadius * Scale),
 			Math.Min(columns, rows) * CellPx,
 			root);
+	}
 
 	public static Scene DeckTile(string name, UiElement root, int columns = 1, int rows = 1)
 	{
 		const int spacing = 12;
 		var width = (int)((columns * UiLength.Cell + (columns - 1) * spacing) * Scale);
 		var height = (int)((rows * UiLength.Cell + (rows - 1) * spacing) * Scale);
-		return new(name, width, height, (int)(CornerRadius * Scale), Math.Min(width, height), root, Scale);
+		return new Scene(name, width, height, (int)(CornerRadius * Scale), Math.Min(width, height), root, Scale);
 	}
 
 	// A dialog's lengths follow the box Macro Deck hands it, which is larger than the part a scene shows.
 	public static Scene Dialog(string name, UiElement root, int width, int height, int basis = 600)
-		=> new(name, width, height, 24, basis, root);
+	{
+		return new Scene(name, width, height, 24, basis, root);
+	}
 
 	public static UiResource Icon(string name, string color = "#ffffff")
 	{
@@ -68,17 +81,23 @@ internal static partial class Scenes
 	}
 
 	public static UiResource Cover(string id, string from, string to)
-		=> Svg(id,
+	{
+		return Svg(id,
 			$"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{from}"/><stop offset="1" stop-color="{to}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="50" r="22" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#ffffff" fill-opacity="0.5"/></svg>""");
+	}
 
-	public static IEnumerable<Scene> All() =>
-	[
-		.. TextScenes(), .. TextFieldScenes(), .. ImageScenes(), .. ButtonScenes(), .. SliderScenes(),
-		.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ModifierScenes(),
-		.. ResponsiveScenes(),
-		.. ChartScenes(),
-		.. TimeScenes(), .. ProgressScenes(), .. VideoStreamScenes(), .. ShapeScenes(), .. IconScenes(), .. GridScenes(),
-		.. GaugeScenes(), .. ToggleScenes(), .. SegmentedScenes(), .. DialScenes(), .. ViewScenes(),
-		.. ConceptScenes(),
-	];
+	public static IEnumerable<Scene> All()
+	{
+		return
+		[
+			.. TextScenes(), .. TextFieldScenes(), .. ImageScenes(), .. ButtonScenes(), .. SliderScenes(),
+			.. RangeBarScenes(), .. StackScenes(), .. ListScenes(), .. TransformScenes(), .. ModifierScenes(),
+			.. ResponsiveScenes(),
+			.. ChartScenes(),
+			.. TimeScenes(), .. ProgressScenes(), .. VideoStreamScenes(), .. ShapeScenes(), .. IconScenes(),
+			.. GridScenes(),
+			.. GaugeScenes(), .. ToggleScenes(), .. SegmentedScenes(), .. DialScenes(), .. ViewScenes(),
+			.. ConceptScenes()
+		];
+	}
 }

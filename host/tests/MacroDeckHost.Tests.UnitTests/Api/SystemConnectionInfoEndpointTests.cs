@@ -39,7 +39,7 @@ public class SystemConnectionInfoEndpointTests
 		Environment.SetEnvironmentVariable("MACRODECK_DATA_DIR", _previousDataDir);
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -187,7 +187,8 @@ public class SystemConnectionInfoEndpointTests
 		return endpoints;
 	}
 
-	private static async Task<IHost> StartHost(PublicEndpointSet publicEndpoints,
+	private static async Task<IHost> StartHost(
+		PublicEndpointSet publicEndpoints,
 		IHostIdentityKeyProvider? identity = null)
 	{
 		var listenerState = new FakeHostListenerState { PublicEndpoints = publicEndpoints };
@@ -227,7 +228,8 @@ public class SystemConnectionInfoEndpointTests
 	private sealed class LoopbackStartupFilter : IStartupFilter
 	{
 		public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-			=> app =>
+		{
+			return app =>
 			{
 				app.Use(async (context, nextMiddleware) =>
 				{
@@ -238,6 +240,7 @@ public class SystemConnectionInfoEndpointTests
 				});
 				next(app);
 			};
+		}
 	}
 
 	private sealed class FixedIdentity : IHostIdentityKeyProvider
@@ -245,18 +248,26 @@ public class SystemConnectionInfoEndpointTests
 		public byte[] Point { get; } = [0x04, .. RandomNumberGenerator.GetBytes(64)];
 
 		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-			=> ValueTask.FromResult(Point);
+		{
+			return ValueTask.FromResult(Point);
+		}
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class UnavailableIdentity : IHostIdentityKeyProvider
 	{
 		public ValueTask<byte[]> GetPublicKey(CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		{
+			return ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		}
 
 		public ValueTask<byte[]> Sign(byte[] message, CancellationToken cancellationToken = default)
-			=> ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		{
+			return ValueTask.FromException<byte[]>(new HostIdentityUnavailableException("unreadable"));
+		}
 	}
 }

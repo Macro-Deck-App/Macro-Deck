@@ -24,7 +24,8 @@ public sealed class PluginAssetDiskCache : IPluginAssetCache
 	private readonly Dictionary<string, LinkedListNode<string>> _lruNodes = new(StringComparer.Ordinal);
 	private long _memoryBytes;
 
-	public PluginAssetDiskCache(IMacroDeckPaths paths,
+	public PluginAssetDiskCache(
+		IMacroDeckPaths paths,
 		ILogger logger,
 		long maxMemoryBytes = DefaultMaxMemoryBytes,
 		long maxDiskBytes = DefaultMaxDiskBytes)
@@ -58,11 +59,11 @@ public sealed class PluginAssetDiskCache : IPluginAssetCache
 
 			var tempData = dataPath + ".tmp";
 			File.WriteAllBytes(tempData, bytes);
-			File.Move(tempData, dataPath, overwrite: true);
+			File.Move(tempData, dataPath, true);
 
 			var tempMeta = metaPath + ".tmp";
 			File.WriteAllText(tempMeta, mimeType);
-			File.Move(tempMeta, metaPath, overwrite: true);
+			File.Move(tempMeta, metaPath, true);
 
 			PruneDiskIfNeeded();
 		}

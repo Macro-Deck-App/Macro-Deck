@@ -15,7 +15,8 @@ public sealed class PublicTlsBootstrapper
 	private readonly ILogger _logger;
 	private readonly IPublicTlsCertificateHolder? _certificateHolder;
 
-	public PublicTlsBootstrapper(IPublicTlsCertificateStore store,
+	public PublicTlsBootstrapper(
+		IPublicTlsCertificateStore store,
 		ILocalAddressProvider addressProvider,
 		IHostNameProvider hostNameProvider,
 		ILogger logger,
@@ -35,13 +36,13 @@ public sealed class PublicTlsBootstrapper
 			var state = BuildState(keyRingLocked);
 			var action = PublicTlsBootstrapPlanner.Decide(state, now);
 
-			if (action == PublicTlsBootstrapAction.None &&
-				state is { Authority: not null, AuthorityKeyUsable: false, KeyRingLocked: false })
+			if (action == PublicTlsBootstrapAction.None
+				&& state is { Authority: not null, AuthorityKeyUsable: false, KeyRingLocked: false })
 			{
-				_logger.Warning("The local certificate authority exists but its private key could not be " +
-					"opened, so the host certificate was left untouched. Devices that already trust this " +
-					"installation keep working; restore a backup or regenerate the authority to issue new " +
-					"certificates.");
+				_logger.Warning("The local certificate authority exists but its private key could not be "
+					+ "opened, so the host certificate was left untouched. Devices that already trust this "
+					+ "installation keep working; restore a backup or regenerate the authority to issue new "
+					+ "certificates.");
 			}
 
 			return Execute(action, now);
@@ -62,7 +63,7 @@ public sealed class PublicTlsBootstrapper
 	{
 		if (_store.LoadAuthority().Material is not { } authority)
 		{
-			return Run(keyRingLocked: false, now);
+			return Run(false, now);
 		}
 
 		IssueHostCertificate(authority, now);
@@ -157,8 +158,7 @@ public sealed class PublicTlsBootstrapper
 
 		// Swapping the live certificate is what keeps a renewal - after a DHCP change, or before expiry -
 		// from needing a restart. Absent during startup, where the listener has not been built yet.
-		if (_certificateHolder is not null &&
-			_store.LoadServerCertificate() is { Certificate: { } certificate })
+		if (_certificateHolder is not null && _store.LoadServerCertificate() is { Certificate: { } certificate })
 		{
 			_certificateHolder.Replace(certificate);
 		}

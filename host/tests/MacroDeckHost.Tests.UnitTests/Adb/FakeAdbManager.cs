@@ -36,7 +36,10 @@ internal sealed class FakeAdbManager : IAdbManager
 
 	public event EventHandler? SnapshotChanged;
 
-	public void RaiseSnapshotChanged() => SnapshotChanged?.Invoke(this, EventArgs.Empty);
+	public void RaiseSnapshotChanged()
+	{
+		SnapshotChanged?.Invoke(this, EventArgs.Empty);
+	}
 
 	public AdbDevice? ResolveDevice(string? serialOrDefault)
 	{
@@ -63,7 +66,8 @@ internal sealed class FakeAdbManager : IAdbManager
 		return Task.FromResult(QueryResultFor?.Invoke(command) ?? Result.Ok<string, AdbFailureCode>(string.Empty));
 	}
 
-	public Task<Result<byte[], AdbFailureCode>> CaptureScreenshotAsync(string? serialOrDefault,
+	public Task<Result<byte[], AdbFailureCode>> CaptureScreenshotAsync(
+		string? serialOrDefault,
 		CancellationToken cancellationToken)
 	{
 		CaptureScreenshotSerials.Add(serialOrDefault);
@@ -90,11 +94,20 @@ internal sealed class FakeAdbManager : IAdbManager
 		return Task.FromResult(RestartServerResult);
 	}
 
-	public Task RefreshNowAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+	public Task RefreshNowAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 
-	public Task ShutdownAsync() => Task.CompletedTask;
+	public Task ShutdownAsync()
+	{
+		return Task.CompletedTask;
+	}
 
-	public void RaiseDeviceChanged(AdbDeviceChange change) => DeviceChanged?.Invoke(this, change);
+	public void RaiseDeviceChanged(AdbDeviceChange change)
+	{
+		DeviceChanged?.Invoke(this, change);
+	}
 
 	private void ApplyNextSnapshot()
 	{

@@ -11,16 +11,21 @@ internal static class CalendarDescriptorMapper
 	private const int ResultFramingBytes = 64;
 
 	public static CalendarAccountDto ToDto(CalendarAccount account)
-		=> new() { Id = account.Id, DisplayName = Clip(account.DisplayName, ProtocolLimits.MaxCalendarTitleLength) };
+	{
+		return new CalendarAccountDto
+			{ Id = account.Id, DisplayName = Clip(account.DisplayName, ProtocolLimits.MaxCalendarTitleLength) };
+	}
 
 	public static CalendarInfoDto ToDto(CalendarInfo calendar)
-		=> new()
+	{
+		return new CalendarInfoDto
 		{
 			Id = calendar.Id,
 			Name = Clip(calendar.Name, ProtocolLimits.MaxCalendarTitleLength),
 			Color = calendar.Color,
 			IsPrimary = calendar.IsPrimary
 		};
+	}
 
 	public static CalendarEventsResult ToEventsResult(IEnumerable<CalendarEvent> events)
 	{
@@ -76,7 +81,8 @@ internal static class CalendarDescriptorMapper
 	}
 
 	private static CalendarEventSummaryDto ToSummary(CalendarEvent calendarEvent)
-		=> new()
+	{
+		return new CalendarEventSummaryDto
 		{
 			Id = calendarEvent.Id,
 			CalendarId = calendarEvent.CalendarId,
@@ -87,9 +93,11 @@ internal static class CalendarDescriptorMapper
 			Location = ClipOptional(calendarEvent.Location, ProtocolLimits.MaxCalendarLocationLength),
 			MeetingUrl = MeetingUrl(calendarEvent.MeetingUrl)
 		};
+	}
 
 	private static CalendarParticipantDto ToDto(CalendarParticipant participant)
-		=> new()
+	{
+		return new CalendarParticipantDto
 		{
 			Name = ClipOptional(participant.Name, ProtocolLimits.MaxCalendarTitleLength),
 			Email = ClipOptional(participant.Email, ProtocolLimits.MaxCalendarTitleLength),
@@ -98,14 +106,22 @@ internal static class CalendarDescriptorMapper
 				? participant.Response.ToString()
 				: nameof(CalendarResponseStatus.Unknown)
 		};
+	}
 
 	private static string? MeetingUrl(string? url)
-		=> url is { Length: > 0 and <= ProtocolLimits.MaxCalendarMeetingUrlLength } ? url : null;
+	{
+		return url is { Length: > 0 and <= ProtocolLimits.MaxCalendarMeetingUrlLength } ? url : null;
+	}
 
 	private static int SerializedSize<T>(T value)
-		=> JsonSerializer.SerializeToUtf8Bytes(value, PluginProtocolJson.Options).Length;
+	{
+		return JsonSerializer.SerializeToUtf8Bytes(value, PluginProtocolJson.Options).Length;
+	}
 
-	private static string? ClipOptional(string? text, int maxLength) => text is null ? null : Clip(text, maxLength);
+	private static string? ClipOptional(string? text, int maxLength)
+	{
+		return text is null ? null : Clip(text, maxLength);
+	}
 
 	private static string Clip(string text, int maxLength)
 	{

@@ -137,8 +137,8 @@ public sealed class WidgetDataSchemaProvider : IWidgetDataSchemaProvider
 
 	private static string ReadEmbeddedResource(Assembly assembly, string logicalName)
 	{
-		using var stream = assembly.GetManifestResourceStream(logicalName) ??
-			throw new InvalidOperationException($"'{assembly.FullName}' does not embed '{logicalName}'.");
+		using var stream = assembly.GetManifestResourceStream(logicalName)
+			?? throw new InvalidOperationException($"'{assembly.FullName}' does not embed '{logicalName}'.");
 
 		using var reader = new StreamReader(stream);
 		return reader.ReadToEnd();

@@ -10,12 +10,13 @@ namespace MacroDeckHost.Tests.UnitTests.Announcements;
 [TestFixture]
 internal sealed class PlatformAnnouncementClientTests
 {
-	private static readonly StorePlatformOptions Options = new() { BaseUrl = new Uri("https://platform.test/") };
+	private static readonly StorePlatformOptions _options = new() { BaseUrl = new Uri("https://platform.test/") };
 
 	[Test]
 	public async Task The_latest_announcement_is_read_anonymously_from_the_public_endpoint()
 	{
-		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK, """
+		var handler = new ScriptedHandler(_ => Json(HttpStatusCode.OK,
+			"""
 			{
 			  "number": 4,
 			  "title": "Macro Deck 3 is here",
@@ -26,19 +27,21 @@ internal sealed class PlatformAnnouncementClientTests
 			"""));
 		using var client = Client(handler);
 
-		var result = await client.GetLatest(default);
+		var result = await client.GetLatest(CancellationToken.None);
 
 		var request = handler.Requests.Single();
 		Assert.Multiple(() =>
 		{
 			Assert.That(request.Method, Is.EqualTo(HttpMethod.Get));
-			Assert.That(request.RequestUri, Is.EqualTo(new Uri("https://platform.test/api/v1/public/announcements/latest")));
+			Assert.That(request.RequestUri,
+				Is.EqualTo(new Uri("https://platform.test/api/v1/public/announcements/latest")));
 			Assert.That(request.Headers.Authorization, Is.Null);
-			Assert.That(result, Is.EqualTo(new AnnouncementFetch.Published(new Announcement(4,
-				"Macro Deck 3 is here",
-				"## What's new",
-				new DateTimeOffset(2026, 9, 28, 15, 58, 49, 672, TimeSpan.Zero),
-				new DateTimeOffset(2026, 9, 28, 16, 8, 13, 377, TimeSpan.Zero)))));
+			Assert.That(result,
+				Is.EqualTo(new AnnouncementFetch.Published(new Announcement(4,
+					"Macro Deck 3 is here",
+					"## What's new",
+					new DateTimeOffset(2026, 9, 28, 15, 58, 49, 672, TimeSpan.Zero),
+					new DateTimeOffset(2026, 9, 28, 16, 8, 13, 377, TimeSpan.Zero)))));
 		});
 	}
 
@@ -47,7 +50,7 @@ internal sealed class PlatformAnnouncementClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
 
-		Assert.That(await client.GetLatest(default), Is.InstanceOf<AnnouncementFetch.NonePublished>());
+		Assert.That(await client.GetLatest(CancellationToken.None), Is.InstanceOf<AnnouncementFetch.NonePublished>());
 	}
 
 	[TestCase(HttpStatusCode.InternalServerError)]
@@ -57,7 +60,7 @@ internal sealed class PlatformAnnouncementClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => new HttpResponseMessage(status)));
 
-		Assert.That(await client.GetLatest(default), Is.InstanceOf<AnnouncementFetch.Failed>());
+		Assert.That(await client.GetLatest(CancellationToken.None), Is.InstanceOf<AnnouncementFetch.Failed>());
 	}
 
 	[TestCase("not json")]
@@ -67,7 +70,7 @@ internal sealed class PlatformAnnouncementClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => Json(HttpStatusCode.OK, body)));
 
-		Assert.That(await client.GetLatest(default), Is.InstanceOf<AnnouncementFetch.Failed>());
+		Assert.That(await client.GetLatest(CancellationToken.None), Is.InstanceOf<AnnouncementFetch.Failed>());
 	}
 
 	[Test]
@@ -77,7 +80,7 @@ internal sealed class PlatformAnnouncementClientTests
 		using var client = Client(new ScriptedHandler(_ => Json(HttpStatusCode.OK,
 			$$"""{ "number": 3, "title": "t", "content": "{{content}}", "publishedAt": "2026-09-28T15:58:49Z" }""")));
 
-		Assert.That(await client.GetLatest(default), Is.InstanceOf<AnnouncementFetch.Failed>());
+		Assert.That(await client.GetLatest(CancellationToken.None), Is.InstanceOf<AnnouncementFetch.Failed>());
 	}
 
 	[Test]
@@ -85,20 +88,25 @@ internal sealed class PlatformAnnouncementClientTests
 	{
 		using var client = Client(new ScriptedHandler(_ => throw new HttpRequestException("offline")));
 
-		Assert.That(await client.GetLatest(default), Is.InstanceOf<AnnouncementFetch.Failed>());
+		Assert.That(await client.GetLatest(CancellationToken.None), Is.InstanceOf<AnnouncementFetch.Failed>());
 	}
 
 	private static PlatformAnnouncementClient Client(ScriptedHandler handler)
-		=> new(handler, Options, new LoggerConfiguration().CreateLogger());
+	{
+		return new PlatformAnnouncementClient(handler, _options, new LoggerConfiguration().CreateLogger());
+	}
 
 	private static HttpResponseMessage Json(HttpStatusCode status, string body)
-		=> new(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	{
+		return new HttpResponseMessage(status) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+	}
 
 	private sealed class ScriptedHandler(Func<HttpRequestMessage, HttpResponseMessage> answer) : HttpMessageHandler
 	{
 		public List<HttpRequestMessage> Requests { get; } = [];
 
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
 		{
 			Requests.Add(request);

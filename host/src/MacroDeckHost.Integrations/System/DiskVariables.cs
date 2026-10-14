@@ -22,25 +22,57 @@ internal static class DiskVariables
 	public static IEnumerable<VariableDefinition> Declare(int index)
 	{
 		var label = index.ToString(CultureInfo.InvariantCulture);
-		yield return Text(index, "name", DiskStrings.DiskNameIndexed(index: label));
-		yield return Text(index, "mount_point", DiskStrings.DiskMountPointIndexed(index: label));
-		yield return Text(index, "file_system", DiskStrings.DiskFileSystemIndexed(index: label));
-		yield return Number(index, "total_bytes", DiskStrings.DiskTotalIndexed(index: label), VariableSemanticKinds.Bytes, "B",
+		yield return Text(index, "name", DiskStrings.DiskNameIndexed(label));
+		yield return Text(index, "mount_point", DiskStrings.DiskMountPointIndexed(label));
+		yield return Text(index, "file_system", DiskStrings.DiskFileSystemIndexed(label));
+		yield return Number(index,
+			"total_bytes",
+			DiskStrings.DiskTotalIndexed(label),
+			VariableSemanticKinds.Bytes,
+			"B",
 			_capacityRefreshInterval);
-		yield return Number(index, "used_bytes", DiskStrings.DiskUsedIndexed(index: label), VariableSemanticKinds.Bytes, "B",
+		yield return Number(index,
+			"used_bytes",
+			DiskStrings.DiskUsedIndexed(label),
+			VariableSemanticKinds.Bytes,
+			"B",
 			_capacityRefreshInterval);
-		yield return Number(index, "free_bytes", DiskStrings.DiskFreeIndexed(index: label), VariableSemanticKinds.Bytes, "B",
+		yield return Number(index,
+			"free_bytes",
+			DiskStrings.DiskFreeIndexed(label),
+			VariableSemanticKinds.Bytes,
+			"B",
 			_capacityRefreshInterval);
-		yield return Number(index, "usage_percent", DiskStrings.DiskUsageIndexed(index: label),
-			VariableSemanticKinds.Percentage, "%", _capacityRefreshInterval);
-		yield return Number(index, "read_bytes_per_second", DiskStrings.DiskReadSpeedIndexed(index: label),
-			VariableSemanticKinds.BytesPerSecond, "B/s", _activityRefreshInterval);
-		yield return Number(index, "write_bytes_per_second", DiskStrings.DiskWriteSpeedIndexed(index: label),
-			VariableSemanticKinds.BytesPerSecond, "B/s", _activityRefreshInterval);
-		yield return Number(index, "read_usage_percent", DiskStrings.DiskReadActivityIndexed(index: label),
-			VariableSemanticKinds.Percentage, "%", _activityRefreshInterval);
-		yield return Number(index, "write_usage_percent", DiskStrings.DiskWriteActivityIndexed(index: label),
-			VariableSemanticKinds.Percentage, "%", _activityRefreshInterval);
+		yield return Number(index,
+			"usage_percent",
+			DiskStrings.DiskUsageIndexed(label),
+			VariableSemanticKinds.Percentage,
+			"%",
+			_capacityRefreshInterval);
+		yield return Number(index,
+			"read_bytes_per_second",
+			DiskStrings.DiskReadSpeedIndexed(label),
+			VariableSemanticKinds.BytesPerSecond,
+			"B/s",
+			_activityRefreshInterval);
+		yield return Number(index,
+			"write_bytes_per_second",
+			DiskStrings.DiskWriteSpeedIndexed(label),
+			VariableSemanticKinds.BytesPerSecond,
+			"B/s",
+			_activityRefreshInterval);
+		yield return Number(index,
+			"read_usage_percent",
+			DiskStrings.DiskReadActivityIndexed(label),
+			VariableSemanticKinds.Percentage,
+			"%",
+			_activityRefreshInterval);
+		yield return Number(index,
+			"write_usage_percent",
+			DiskStrings.DiskWriteActivityIndexed(label),
+			VariableSemanticKinds.Percentage,
+			"%",
+			_activityRefreshInterval);
 	}
 
 	public static bool TryParseId(string localId, out int index, out string statistic)
@@ -54,8 +86,8 @@ internal static class DiskVariables
 
 		var rest = localId[IdPrefix.Length..];
 		var separator = rest.IndexOf('-');
-		if (separator <= 0 ||
-			!int.TryParse(rest[..separator], NumberStyles.None, CultureInfo.InvariantCulture, out index))
+		if (separator <= 0
+			|| !int.TryParse(rest[..separator], NumberStyles.None, CultureInfo.InvariantCulture, out index))
 		{
 			return false;
 		}
@@ -64,23 +96,26 @@ internal static class DiskVariables
 		return statistic.Length > 0;
 	}
 
-	public static object? Read(DiskSample disk, string statistic) => statistic switch
+	public static object? Read(DiskSample disk, string statistic)
 	{
-		"name" => disk.Name,
-		"mount-point" => disk.MountPoint,
-		"file-system" => disk.FileSystem,
-		"total-bytes" => disk.TotalBytes,
-		"used-bytes" => disk.UsedBytes,
-		"free-bytes" => disk.FreeBytes,
-		"usage-percent" => disk is { TotalBytes: > 0, UsedBytes: { } used }
-			? (int)Math.Round(used * 100.0 / disk.TotalBytes.Value)
-			: null,
-		"read-bytes-per-second" => Rate(disk.Activity?.ReadBytesPerSecond),
-		"write-bytes-per-second" => Rate(disk.Activity?.WriteBytesPerSecond),
-		"read-usage-percent" => Percent(disk.Activity?.ReadActivePercent),
-		"write-usage-percent" => Percent(disk.Activity?.WriteActivePercent),
-		_ => null
-	};
+		return statistic switch
+		{
+			"name" => disk.Name,
+			"mount-point" => disk.MountPoint,
+			"file-system" => disk.FileSystem,
+			"total-bytes" => disk.TotalBytes,
+			"used-bytes" => disk.UsedBytes,
+			"free-bytes" => disk.FreeBytes,
+			"usage-percent" => disk is { TotalBytes: > 0, UsedBytes: { } used }
+				? (int)Math.Round(used * 100.0 / disk.TotalBytes.Value)
+				: null,
+			"read-bytes-per-second" => Rate(disk.Activity?.ReadBytesPerSecond),
+			"write-bytes-per-second" => Rate(disk.Activity?.WriteBytesPerSecond),
+			"read-usage-percent" => Percent(disk.Activity?.ReadActivePercent),
+			"write-usage-percent" => Percent(disk.Activity?.WriteActivePercent),
+			_ => null
+		};
+	}
 
 	// A disk keeps its slot while present, a new disk takes the lowest free one, and a slot never
 	// shrinks away: its variables stay declared and read as unavailable while it is empty.
@@ -88,12 +123,14 @@ internal static class DiskVariables
 	{
 		var present = mountPoints
 			.Distinct(StringComparer.Ordinal)
-			.OrderBy(mountPoint => string.Equals(mountPoint, _systemMountPoint, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+			.OrderBy(mountPoint
+				=> string.Equals(mountPoint, _systemMountPoint, StringComparison.OrdinalIgnoreCase) ? 0 : 1)
 			.ThenBy(mountPoint => mountPoint, StringComparer.OrdinalIgnoreCase)
 			.ToList();
 		var presentSet = present.ToHashSet(StringComparer.Ordinal);
 
-		var slots = current.Select(mountPoint => mountPoint is not null && presentSet.Contains(mountPoint) ? mountPoint : null)
+		var slots = current
+			.Select(mountPoint => mountPoint is not null && presentSet.Contains(mountPoint) ? mountPoint : null)
 			.ToList();
 		foreach (var mountPoint in present.Where(mountPoint => !slots.Contains(mountPoint)))
 		{
@@ -112,18 +149,25 @@ internal static class DiskVariables
 	}
 
 	private static long? Rate(double? bytesPerSecond)
-		=> bytesPerSecond is { } rate ? (long)Math.Round(rate) : null;
+	{
+		return bytesPerSecond is { } rate ? (long)Math.Round(rate) : null;
+	}
 
 	private static int? Percent(double? percent)
-		=> percent is { } value ? (int)Math.Round(value) : null;
+	{
+		return percent is { } value ? (int)Math.Round(value) : null;
+	}
 
 	private static VariableDefinition Text(int index, string statistic, LocalizedText displayName)
-		=> VariableDefinition.Eager($"system_disk_{index}_{statistic}", VariableType.Text,
+	{
+		return VariableDefinition.Eager($"system_disk_{index}_{statistic}",
+				VariableType.Text,
 				refreshInterval: _capacityRefreshInterval)
 			with
 			{
 				DisplayName = displayName
 			};
+	}
 
 	private static VariableDefinition Number(
 		int index,
@@ -132,11 +176,13 @@ internal static class DiskVariables
 		string semanticKind,
 		string unit,
 		TimeSpan refreshInterval)
-		=> VariableDefinition.Eager($"system_disk_{index}_{statistic}", VariableType.Numeric, 0, refreshInterval)
+	{
+		return VariableDefinition.Eager($"system_disk_{index}_{statistic}", VariableType.Numeric, 0, refreshInterval)
 			with
 			{
 				DisplayName = displayName,
 				Unit = unit,
 				SemanticKind = semanticKind
 			};
+	}
 }

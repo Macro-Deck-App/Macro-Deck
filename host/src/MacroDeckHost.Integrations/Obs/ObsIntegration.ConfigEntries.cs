@@ -7,7 +7,8 @@ namespace MacroDeckHost.Integrations.Obs;
 
 public sealed partial class ObsIntegration
 {
-	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(ConfigEntryPreparation preparation,
+	public Task<ConfigEntryPreparationResult> PrepareEntryAsync(
+		ConfigEntryPreparation preparation,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(preparation);
@@ -26,7 +27,8 @@ public sealed partial class ObsIntegration
 			[ObsConfigKeys.ConfigurationName] = JsonSerializer.SerializeToElement(preparation.Title),
 			[ObsConfigurationMetadata.VariableIdentityKey] = JsonSerializer.SerializeToElement(
 				ConfigurationIdentityJson.Serialize(new ConfigurationIdentity(preparation.Title, key))),
-			[ObsConfigurationMetadata.SchemaKey] = JsonSerializer.SerializeToElement(ObsConfigurationMetadata.SchemaVersion)
+			[ObsConfigurationMetadata.SchemaKey]
+				= JsonSerializer.SerializeToElement(ObsConfigurationMetadata.SchemaVersion)
 		};
 
 		return Task.FromResult(ConfigEntryPreparationResult.Accept(values,
@@ -36,7 +38,8 @@ public sealed partial class ObsIntegration
 			});
 	}
 
-	public async Task<ConfigEntryStatus> GetEntryStatusAsync(StoredConfigEntry entry,
+	public async Task<ConfigEntryStatus> GetEntryStatusAsync(
+		StoredConfigEntry entry,
 		CancellationToken cancellationToken = default)
 	{
 		ArgumentNullException.ThrowIfNull(entry);
@@ -76,13 +79,17 @@ public sealed partial class ObsIntegration
 		return true;
 	}
 
-	public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		CancellationToken cancellationToken = default)
-		=> _context is { } context
+	{
+		return _context is { } context
 			? SynchronizeEntriesAsync(entries, context.Variables, cancellationToken)
 			: Task.CompletedTask;
+	}
 
-	public Task SynchronizeEntriesAsync(IReadOnlyList<StoredConfigEntry> entries,
+	public Task SynchronizeEntriesAsync(
+		IReadOnlyList<StoredConfigEntry> entries,
 		IVariableApi variables,
 		CancellationToken cancellationToken)
 	{
@@ -97,11 +104,15 @@ public sealed partial class ObsIntegration
 	}
 
 	private static bool IsUsable(StoredConfigEntry entry)
-		=> ConfigurationIdentityPreparation.HasSchema(entry,
+	{
+		return ConfigurationIdentityPreparation.HasSchema(entry,
 				ObsConfigurationMetadata.SchemaKey,
-				ObsConfigurationMetadata.SchemaVersion) &&
-			ReadIdentity(entry) is not null;
+				ObsConfigurationMetadata.SchemaVersion)
+			&& ReadIdentity(entry) is not null;
+	}
 
 	private static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry)
-		=> ConfigurationIdentityPreparation.ReadIdentity(entry, ObsConfigurationMetadata.VariableIdentityKey);
+	{
+		return ConfigurationIdentityPreparation.ReadIdentity(entry, ObsConfigurationMetadata.VariableIdentityKey);
+	}
 }

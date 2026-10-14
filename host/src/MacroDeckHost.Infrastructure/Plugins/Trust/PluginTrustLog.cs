@@ -20,5 +20,7 @@ internal static class PluginTrustLog
 	}
 
 	public static void RevocationCheckFailed(ILogger logger, string certificateId, Exception exception)
-		=> logger.Warning(exception, "Revocation check for certificate '{CertificateId}' failed.", certificateId);
+	{
+		logger.Warning(exception, "Revocation check for certificate '{CertificateId}' failed.", certificateId);
+	}
 }

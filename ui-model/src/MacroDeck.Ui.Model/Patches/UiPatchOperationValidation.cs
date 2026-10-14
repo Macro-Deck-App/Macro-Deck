@@ -62,7 +62,7 @@ public static class UiPatchOperationValidation
 			UiPatchOperations.InsertNode => ValidateInsertNode(operation),
 			UiPatchOperations.ReplaceNode => ValidateReplaceNode(operation),
 			UiPatchOperations.MoveNode => ValidateMoveNode(operation),
-			_ => UiPatchOutcome.Accept(),
+			_ => UiPatchOutcome.Accept()
 		};
 	}
 
@@ -85,9 +85,11 @@ public static class UiPatchOperationValidation
 	}
 
 	private static UiPatchOutcome ValidateSetProperties(UiPatchOperation operation)
-		=> operation.Properties is null && operation.RemovedProperties is null
+	{
+		return operation.Properties is null && operation.RemovedProperties is null
 			? UiPatchOutcome.Reject("set-properties requires at least one of Properties or RemovedProperties.")
 			: UiPatchOutcome.Accept();
+	}
 
 	private static UiPatchOutcome ValidateInsertNode(UiPatchOperation operation)
 	{
@@ -107,12 +109,16 @@ public static class UiPatchOperationValidation
 	}
 
 	private static UiPatchOutcome ValidateReplaceNode(UiPatchOperation operation)
-		=> operation.Node is null
+	{
+		return operation.Node is null
 			? UiPatchOutcome.Reject("replace-node requires Node.")
 			: UiPatchOutcome.Accept();
+	}
 
 	private static UiPatchOutcome ValidateMoveNode(UiPatchOperation operation)
-		=> operation.ParentId is null
+	{
+		return operation.ParentId is null
 			? UiPatchOutcome.Reject("move-node requires ParentId.")
 			: UiPatchOutcome.Accept();
+	}
 }

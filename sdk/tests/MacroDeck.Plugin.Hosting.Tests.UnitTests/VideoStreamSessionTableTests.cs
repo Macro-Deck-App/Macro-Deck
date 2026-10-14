@@ -17,7 +17,7 @@ public class VideoStreamSessionTableTests
 	public void SetUp()
 	{
 		_time = new ManualTimeProvider(DateTimeOffset.UnixEpoch);
-		_table = new VideoStreamSessionTable<VideoStreamSessionReason, object>(_time, _tombstoneLifetime, maxTombstones: 4);
+		_table = new VideoStreamSessionTable<VideoStreamSessionReason, object>(_time, _tombstoneLifetime, 4);
 	}
 
 	[Test]

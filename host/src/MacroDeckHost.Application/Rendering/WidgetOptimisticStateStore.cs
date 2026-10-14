@@ -68,7 +68,9 @@ public sealed class WidgetOptimisticStateStore
 	}
 
 	public WidgetOptimisticState? Get(WidgetOptimisticStateIdentity identity)
-		=> Read(identity).State;
+	{
+		return Read(identity).State;
+	}
 
 	public WidgetOptimisticStateSnapshot Read(WidgetOptimisticStateIdentity identity)
 	{
@@ -103,7 +105,9 @@ public sealed class WidgetOptimisticStateStore
 	}
 
 	public WidgetOptimisticStateVersion Observe(WidgetOptimisticStateIdentity identity)
-		=> Read(identity).Version;
+	{
+		return Read(identity).Version;
+	}
 
 	public bool IsCurrent(WidgetOptimisticStateVersion version)
 	{
@@ -120,9 +124,9 @@ public sealed class WidgetOptimisticStateStore
 	{
 		lock (_gate)
 		{
-			if (_entries.TryGetValue(identity, out var entry) &&
-				entry.Generation == generation &&
-				entry.ExpectedStateId == activeStateId)
+			if (_entries.TryGetValue(identity, out var entry)
+				&& entry.Generation == generation
+				&& entry.ExpectedStateId == activeStateId)
 			{
 				_entries.Remove(identity);
 				Touch(identity);
@@ -191,10 +195,10 @@ public sealed class WidgetOptimisticStateStore
 		var expired = false;
 		lock (_gate)
 		{
-			if (_entries.TryGetValue(identity, out var entry) &&
-				entry.Generation == generation &&
-				entry.ExpiresAt == expiresAt &&
-				entry.ExpiresAt <= _timeProvider.GetUtcNow())
+			if (_entries.TryGetValue(identity, out var entry)
+				&& entry.Generation == generation
+				&& entry.ExpiresAt == expiresAt
+				&& entry.ExpiresAt <= _timeProvider.GetUtcNow())
 			{
 				_entries.Remove(identity);
 				Touch(identity);
@@ -209,13 +213,17 @@ public sealed class WidgetOptimisticStateStore
 	}
 
 	private void Touch(WidgetOptimisticStateIdentity identity)
-		=> _revisions[identity] = ++_nextRevision;
+	{
+		_revisions[identity] = ++_nextRevision;
+	}
 
 	private WidgetOptimisticStateSnapshot Snapshot(WidgetOptimisticStateIdentity identity, Entry? entry)
-		=> new(entry is null
+	{
+		return new WidgetOptimisticStateSnapshot(entry is null
 				? null
 				: new WidgetOptimisticState(entry.ExpectedStateId, entry.ExpiresAt, entry.Generation),
 			new WidgetOptimisticStateVersion(identity, _revisions.GetValueOrDefault(identity)));
+	}
 
 	private sealed record Entry(string ExpectedStateId, DateTimeOffset ExpiresAt, long Generation);
 }

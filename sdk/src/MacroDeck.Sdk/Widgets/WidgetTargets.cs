@@ -14,5 +14,7 @@ public static class WidgetTargets
 	public const string Self = "$self";
 
 	public static bool IsSelf(string? value)
-		=> string.Equals(value?.Trim(), Self, StringComparison.OrdinalIgnoreCase);
+	{
+		return string.Equals(value?.Trim(), Self, StringComparison.OrdinalIgnoreCase);
+	}
 }

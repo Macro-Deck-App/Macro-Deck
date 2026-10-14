@@ -124,7 +124,7 @@ internal sealed class MeldEventEmitterTests
 		_emitter.Observe(Connected(OneSceneOneTrack));
 		_publisher.Published.Clear();
 
-		_emitter.Observe(Connected(OneSceneOneTrack, isStreaming: true, isRecording: true));
+		_emitter.Observe(Connected(OneSceneOneTrack, true, true));
 
 		Assert.That(_publisher.Published.Select(p => p.EventId),
 			Is.EquivalentTo(new[] { MeldEventIds.StreamingStarted, MeldEventIds.RecordingStarted }));

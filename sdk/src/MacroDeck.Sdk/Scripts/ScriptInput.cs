@@ -56,7 +56,7 @@ internal sealed class ScriptInputTypeConverter : JsonConverter<ScriptInputType>
 		}
 
 		var name = reader.GetString();
-		return Enum.TryParse<ScriptInputType>(name, ignoreCase: true, out var type)
+		return Enum.TryParse<ScriptInputType>(name, true, out var type)
 			? type
 			: throw new JsonException($"'{name}' is not a script input type.");
 	}

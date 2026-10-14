@@ -76,7 +76,7 @@ public class ScriptInputReadOnlyTests
 		await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, Supplied(("scene", "Live")));
 
 		var outcome = _executor.Results.Single();
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(outcome.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(TestLocalization.Resolve(outcome.ErrorMessage), Does.Contain("scene"));
@@ -106,7 +106,7 @@ public class ScriptInputReadOnlyTests
 
 		await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, Supplied(("scene", "Live")));
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_executor.Results[0].Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(_executor.Results[1].Status, Is.EqualTo(ActionResultStatus.Succeeded));
@@ -125,13 +125,13 @@ public class ScriptInputReadOnlyTests
 			DomainVariableType.Text,
 			"Starting Soon",
 			null);
-		var script = await Store(Input("scene", defaultValue: "Intermission"));
+		var script = await Store(Input("scene", "Intermission"));
 		_executor.Writes = [("scene", "Live")];
 		_store.Reset();
 
 		await _runner.RunAsync(script.Id, null, CancellationToken.None);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(_executor.Results.Single().Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(_store.SaveCount, Is.Zero);
@@ -154,7 +154,7 @@ public class ScriptInputReadOnlyTests
 		await _runner.RunAsync(script.Id, null, CancellationToken.None, 0, Supplied(("scene", "Live")));
 		var afterTheRun = await _writer.ApplyAsync("scene", null, UserVariableOperation.Set, "Live");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(afterTheRun.Status, Is.EqualTo(UserVariableWriteStatus.Applied));
 			Assert.That(await ValueOf("scene"), Is.EqualTo("Live"));
@@ -162,13 +162,19 @@ public class ScriptInputReadOnlyTests
 	}
 
 	private static ScriptInput Input(string name, string? defaultValue = null)
-		=> new() { Name = name, Type = ScriptInputType.Text, DefaultValue = defaultValue };
+	{
+		return new ScriptInput { Name = name, Type = ScriptInputType.Text, DefaultValue = defaultValue };
+	}
 
 	private static Dictionary<string, object?> Supplied(params (string Name, object? Value)[] values)
-		=> values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	}
 
 	private async Task<string> ValueOf(string name)
-		=> (await _variables.Resolve(name, VariableScope.Global, null))!.Value;
+	{
+		return (await _variables.Resolve(name, VariableScope.Global, null))!.Value;
+	}
 
 	private async Task<ScriptEntity> Store(params ScriptInput[] inputs)
 	{
@@ -189,7 +195,10 @@ public class ScriptInputReadOnlyTests
 	{
 		private readonly IUserVariableApi _variables;
 
-		public SetVariableFlowExecutor(IUserVariableApi variables) => _variables = variables;
+		public SetVariableFlowExecutor(IUserVariableApi variables)
+		{
+			_variables = variables;
+		}
 
 		public IReadOnlyList<(string Name, string Value)> Writes { get; set; } = [];
 
@@ -227,20 +236,37 @@ public class ScriptInputReadOnlyTests
 	{
 		public int SaveCount { get; private set; }
 
-		public void Reset() => SaveCount = 0;
+		public void Reset()
+		{
+			SaveCount = 0;
+		}
 
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
-		public void Save(IEnumerable<VariableEntity> userVariables) => SaveCount++;
+		public void Save(IEnumerable<VariableEntity> userVariables)
+		{
+			SaveCount++;
+		}
 	}
 
 	private sealed class NoWidgets : IWidgetAppearanceService
 	{
-		public IReadOnlyList<WidgetTargetInfo> GetWidgets() => [];
+		public IReadOnlyList<WidgetTargetInfo> GetWidgets()
+		{
+			return [];
+		}
 
-		public bool Exists(string widgetId) => false;
+		public bool Exists(string widgetId)
+		{
+			return false;
+		}
 
 		public Task<bool> ApplyAsync(WidgetAppearanceRequest request, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 	}
 }

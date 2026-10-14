@@ -16,7 +16,9 @@ namespace MacroDeck.Plugin.Testing.Tests.ConformanceTests;
 internal sealed class MisbehavingExecutableSuiteTests : ConformanceFixture
 {
 	protected override Task<ConformanceSubject> CreateSubjectAsync()
-		=> Task.FromResult(
+	{
+		return Task.FromResult(
 			ConformanceSubject.Executable(
 				PluginLaunchSpec.ForExecutable(PluginLocator.FindMisbehavingPluginExecutable())));
+	}
 }

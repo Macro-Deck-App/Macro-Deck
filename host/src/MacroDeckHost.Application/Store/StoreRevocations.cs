@@ -9,8 +9,8 @@ public static class StoreRevocations
 		ArgumentNullException.ThrowIfNull(snapshot);
 
 		return snapshot.RevokedKeyIds.Any(keyId =>
-			string.Equals(keyId, certificateId, StringComparison.OrdinalIgnoreCase) ||
-			(issuerCertificateId is not null &&
-				string.Equals(keyId, issuerCertificateId, StringComparison.OrdinalIgnoreCase)));
+			string.Equals(keyId, certificateId, StringComparison.OrdinalIgnoreCase)
+			|| issuerCertificateId is not null
+			&& string.Equals(keyId, issuerCertificateId, StringComparison.OrdinalIgnoreCase));
 	}
 }

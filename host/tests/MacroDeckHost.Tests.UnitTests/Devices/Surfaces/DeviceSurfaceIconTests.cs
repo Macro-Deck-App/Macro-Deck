@@ -30,14 +30,17 @@ internal sealed class DeviceSurfaceIconTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task An_icon_is_delivered_with_its_bytes_content_type_and_etag()
 	{
 		_icons.Set("etag-1", "image/webp", _bytes);
 
-		var icon = await _fixture.Service.GetIconAsync(_deviceId, _icons.IconId.ToString(), size: 72);
+		var icon = await _fixture.Service.GetIconAsync(_deviceId, _icons.IconId.ToString(), 72);
 
 		Assert.Multiple(() =>
 		{
@@ -57,8 +60,8 @@ internal sealed class DeviceSurfaceIconTests
 
 		var icon = await _fixture.Service.GetIconAsync(_deviceId,
 			_icons.IconId.ToString(),
-			size: 72,
-			knownETag: "etag-1");
+			72,
+			"etag-1");
 
 		Assert.Multiple(() =>
 		{
@@ -75,8 +78,8 @@ internal sealed class DeviceSurfaceIconTests
 
 		var icon = await _fixture.Service.GetIconAsync(_deviceId,
 			_icons.IconId.ToString(),
-			size: 72,
-			knownETag: "etag-1");
+			72,
+			"etag-1");
 
 		Assert.Multiple(() =>
 		{
@@ -107,7 +110,7 @@ internal sealed class DeviceSurfaceIconTests
 		_icons.Set("etag-1", "image/webp", new byte[ProtocolLimits.MaxAssetBytes + 1]);
 
 		var exception = Assert.ThrowsAsync<DeviceSessionException>(async ()
-			=> await _fixture.Service.GetIconAsync(_deviceId, _icons.IconId.ToString(), size: 512));
+			=> await _fixture.Service.GetIconAsync(_deviceId, _icons.IconId.ToString(), 512));
 
 		Assert.Multiple(() =>
 		{
@@ -149,7 +152,8 @@ internal sealed class DeviceSurfaceIconTests
 			_content = content;
 		}
 
-		public Task<Result<IconImageResult, IconError>> GetImage(Guid iconId,
+		public Task<Result<IconImageResult, IconError>> GetImage(
+			Guid iconId,
 			int? size,
 			bool acceptWebp,
 			bool staticFrame,
@@ -167,11 +171,18 @@ internal sealed class DeviceSurfaceIconTests
 		}
 
 		public Task<Result<IconEntity, IconError>> Rename(Guid iconId, string name)
-			=> throw new NotSupportedException();
-
-		public Task<Result<IconError>> Delete(Guid iconId) => throw new NotSupportedException();
-
-		public Task<Result<int, IconError>> DeleteMany(IReadOnlyList<Guid> iconIds) =>
+		{
 			throw new NotSupportedException();
+		}
+
+		public Task<Result<IconError>> Delete(Guid iconId)
+		{
+			throw new NotSupportedException();
+		}
+
+		public Task<Result<int, IconError>> DeleteMany(IReadOnlyList<Guid> iconIds)
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

@@ -48,11 +48,14 @@ internal sealed class ObsVariableRefreshRequestTests
 	public async Task The_status_poll_timer_does_not_ask_for_an_eager_refresh()
 	{
 		var calls = 0;
-		var fake = new FakeObsClient { IsConnected = true, Status = new ObsStatus { CurrentScene = "Live" } };
-		fake.QueryStatusHandler = () =>
+		var fake = new FakeObsClient
 		{
-			Interlocked.Increment(ref calls);
-			return new ObsStatus { CurrentScene = "Live" };
+			IsConnected = true, Status = new ObsStatus { CurrentScene = "Live" },
+			QueryStatusHandler = () =>
+			{
+				Interlocked.Increment(ref calls);
+				return new ObsStatus { CurrentScene = "Live" };
+			}
 		};
 
 		var signal = new VariableRefreshSignal();
@@ -66,8 +69,8 @@ internal sealed class ObsVariableRefreshRequestTests
 
 		Assert.That(signal.DrainEagerRefreshRequested(ObsIntegration.IntegrationId),
 			Is.False,
-			"the status timer would lift variables that change continuously, such as cpu_usage, above their " +
-			"declared refresh interval");
+			"the status timer would lift variables that change continuously, such as cpu_usage, above their "
+			+ "declared refresh interval");
 	}
 
 	private static async Task WaitForQueryStatusCalls(Func<int> calls, int target)
@@ -113,10 +116,13 @@ internal sealed class ObsVariableRefreshRequestTests
 
 		public Task<IReadOnlyList<ConfigEntrySnapshot>> GetEntriesAsync(
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "mdfi")]);
+		{
+			return Task.FromResult<IReadOnlyList<ConfigEntrySnapshot>>([new ConfigEntrySnapshot(_entryId, "mdfi")]);
+		}
 
 		public Task<string?> GetStringAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(key switch
+		{
+			return Task.FromResult<string?>(key switch
 			{
 				ObsConfigurationMetadata.SchemaKey => ObsConfigurationMetadata.SchemaVersion,
 				ObsConfigurationMetadata.VariableIdentityKey =>
@@ -125,14 +131,21 @@ internal sealed class ObsVariableRefreshRequestTests
 				"port" => "4455",
 				_ => null
 			});
+		}
 
 		public Task<string?> GetSecretAsync(Guid entryId, string key, CancellationToken cancellationToken = default)
-			=> Task.FromResult<string?>(null);
+		{
+			return Task.FromResult<string?>(null);
+		}
 
 		public Task SetStringAsync(Guid entryId, string key, string? value, CancellationToken ct = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SetSecretAsync(Guid entryId, string key, string value, CancellationToken ct = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

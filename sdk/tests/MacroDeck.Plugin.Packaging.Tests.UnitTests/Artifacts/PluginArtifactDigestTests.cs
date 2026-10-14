@@ -143,12 +143,12 @@ internal sealed class PluginArtifactDigestTests
 	{
 		var manifest = Deserialize(OrderedJson);
 		var expected =
-			"macro-deck-plugin/1\n" +
-			"com.suchbyte.test-plugin\n" +
-			"1.0.0\n" +
-			"e\tosx-arm64\tSelfContained\t\tTest\n" +
-			"f\ta.dll\tsha256:aa00000000000000000000000000000000000000000000000000000000000000\t1\n" +
-			"f\tb.dll\tsha256:bb00000000000000000000000000000000000000000000000000000000000000\t2\n";
+			"macro-deck-plugin/1\n"
+			+ "com.suchbyte.test-plugin\n"
+			+ "1.0.0\n"
+			+ "e\tosx-arm64\tSelfContained\t\tTest\n"
+			+ "f\ta.dll\tsha256:aa00000000000000000000000000000000000000000000000000000000000000\t1\n"
+			+ "f\tb.dll\tsha256:bb00000000000000000000000000000000000000000000000000000000000000\t2\n";
 
 		Assert.That(Encoding.UTF8.GetString(PluginArtifactDigest.Compute(manifest)),
 			Is.EqualTo(expected));

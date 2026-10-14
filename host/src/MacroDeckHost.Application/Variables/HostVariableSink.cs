@@ -48,5 +48,7 @@ public sealed class HostVariableSink : IVariableSink
 	}
 
 	internal static VariableBounds BoundsOf(VariableReading reading)
-		=> new(reading.Min, reading.Max, reading.Step);
+	{
+		return new VariableBounds(reading.Min, reading.Max, reading.Step);
+	}
 }

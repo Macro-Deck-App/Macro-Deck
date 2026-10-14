@@ -13,7 +13,9 @@ public class DeviceLayoutConstraintResolverTests
 {
 	[Test]
 	public void NoClaimingDevices_ProducesNoConstraint()
-		=> Assert.That(DeviceLayoutConstraintResolver.Resolve([]), Is.Null);
+	{
+		Assert.That(DeviceLayoutConstraintResolver.Resolve([]), Is.Null);
+	}
 
 	[Test]
 	public void OneFixedDevice_LocksToItsRowsAndColumns()
@@ -79,7 +81,7 @@ public class DeviceLayoutConstraintResolverTests
 	public void SingleConfigurableDevice_ContributesBoundsOnly_AndNeverLocksAFreeAxis()
 	{
 		var device = Device("Client",
-			ConfigurableGrid(rows: 3, columns: 5, minRows: 1, maxRows: 8, minColumns: 1, maxColumns: 12));
+			ConfigurableGrid(3, 5, 1, 8, 1, 12));
 
 		var constraint = DeviceLayoutConstraintResolver.Resolve([device]);
 
@@ -98,9 +100,9 @@ public class DeviceLayoutConstraintResolverTests
 	public void TwoConfigurableDevicesWithDifferentBounds_ProduceNoConstraint_RatherThanTheFirstOnes()
 	{
 		var narrow = Device("Client A",
-			ConfigurableGrid(rows: 3, columns: 5, minRows: 1, maxRows: 4, minColumns: 1, maxColumns: 6));
+			ConfigurableGrid(3, 5, 1, 4, 1, 6));
 		var wide = Device("Client B",
-			ConfigurableGrid(rows: 3, columns: 5, minRows: 1, maxRows: 8, minColumns: 1, maxColumns: 12));
+			ConfigurableGrid(3, 5, 1, 8, 1, 12));
 
 		Assert.Multiple(() =>
 		{
@@ -113,9 +115,9 @@ public class DeviceLayoutConstraintResolverTests
 	public void TwoConfigurableDevicesWithIdenticalBounds_StillContributeThem()
 	{
 		var first = Device("Client A",
-			ConfigurableGrid(rows: 3, columns: 5, minRows: 1, maxRows: 8, minColumns: 1, maxColumns: 12));
+			ConfigurableGrid(3, 5, 1, 8, 1, 12));
 		var second = Device("Client B",
-			ConfigurableGrid(rows: 3, columns: 5, minRows: 1, maxRows: 8, minColumns: 1, maxColumns: 12));
+			ConfigurableGrid(3, 5, 1, 8, 1, 12));
 
 		var constraint = DeviceLayoutConstraintResolver.Resolve([first, second]);
 
@@ -215,7 +217,7 @@ public class DeviceLayoutConstraintResolverTests
 	[Test]
 	public void ACorruptSnapshot_IsTreatedAsAbsent_NeverAsAFault()
 	{
-		var device = Device("Deck A", layoutSnapshot: "{ not json");
+		var device = Device("Deck A", "{ not json");
 
 		Assert.That(DeviceLayoutConstraintResolver.Resolve([device]), Is.Null);
 	}
@@ -228,7 +230,7 @@ public class DeviceLayoutConstraintResolverTests
 			[
 				new LayoutRegion { Id = "pedals", Kind = LayoutRegionKinds.Pedal, Count = 3 }
 			]);
-		var device = Device("Pedals", layoutSnapshot: LayoutSnapshotSerializer.Serialize(layout));
+		var device = Device("Pedals", LayoutSnapshotSerializer.Serialize(layout));
 
 		Assert.That(DeviceLayoutConstraintResolver.Resolve([device]), Is.Null);
 	}
@@ -244,7 +246,7 @@ public class DeviceLayoutConstraintResolverTests
 				new LayoutRegion
 					{ Id = "right", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = 3, Columns = 3 } }
 			]);
-		var device = Device("Dual", layoutSnapshot: LayoutSnapshotSerializer.Serialize(layout));
+		var device = Device("Dual", LayoutSnapshotSerializer.Serialize(layout));
 
 		Assert.That(DeviceLayoutConstraintResolver.Resolve([device]), Is.Null);
 	}
@@ -256,9 +258,9 @@ public class DeviceLayoutConstraintResolverTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(constraint.AllowsEdit(candidateRows: 5, candidateColumns: 3), Is.True);
-			Assert.That(constraint.AllowsEdit(candidateRows: 4, candidateColumns: null), Is.False);
-			Assert.That(constraint.AllowsEdit(candidateRows: null, candidateColumns: null), Is.True);
+			Assert.That(constraint.AllowsEdit(5, 3), Is.True);
+			Assert.That(constraint.AllowsEdit(4, null), Is.False);
+			Assert.That(constraint.AllowsEdit(null, null), Is.True);
 		});
 	}
 
@@ -269,10 +271,10 @@ public class DeviceLayoutConstraintResolverTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(constraint.ExceedsLockedLayout(currentRows: 5, currentColumns: 5), Is.True);
+			Assert.That(constraint.ExceedsLockedLayout(5, 5), Is.True);
 			// An edit that does not touch rows/columns must still be allowed even though the profile
 			// already sits outside the lock (issue #384: nothing is silently resized or blocked on load).
-			Assert.That(constraint.AllowsEdit(candidateRows: null, candidateColumns: null), Is.True);
+			Assert.That(constraint.AllowsEdit(null, null), Is.True);
 		});
 	}
 
@@ -284,16 +286,19 @@ public class DeviceLayoutConstraintResolverTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(constraint.ExceedsLockedLayout(currentRows: 100, currentColumns: 100), Is.False);
-			Assert.That(constraint.AllowsEdit(candidateRows: 1, candidateColumns: 1), Is.True);
+			Assert.That(constraint.ExceedsLockedLayout(100, 100), Is.False);
+			Assert.That(constraint.AllowsEdit(1, 1), Is.True);
 		});
 	}
 
 	private static DeviceEntity Device(string name, LayoutDescriptor layout)
-		=> Device(name, LayoutSnapshotSerializer.Serialize(layout));
+	{
+		return Device(name, LayoutSnapshotSerializer.Serialize(layout));
+	}
 
 	private static DeviceEntity Device(string name, string? layoutSnapshot)
-		=> new()
+	{
+		return new DeviceEntity
 		{
 			Id = Guid.NewGuid(),
 			SecretHash = string.Empty,
@@ -305,9 +310,11 @@ public class DeviceLayoutConstraintResolverTests
 			CreatedAt = DateTime.UtcNow,
 			LastSeenAt = DateTime.UtcNow
 		};
+	}
 
 	private static LayoutDescriptor FixedGrid(int rows, int columns)
-		=> new("fixed",
+	{
+		return new LayoutDescriptor("fixed",
 			"Fixed Grid",
 			[
 				new LayoutRegion
@@ -315,6 +322,7 @@ public class DeviceLayoutConstraintResolverTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
 
 	private static LayoutDescriptor ConfigurableGrid(
 		int rows,
@@ -323,7 +331,8 @@ public class DeviceLayoutConstraintResolverTests
 		int maxRows,
 		int minColumns,
 		int maxColumns)
-		=> new("configurable",
+	{
+		return new LayoutDescriptor("configurable",
 			"Configurable Grid",
 			[
 				new LayoutRegion
@@ -342,4 +351,5 @@ public class DeviceLayoutConstraintResolverTests
 					}
 				}
 			]);
+	}
 }

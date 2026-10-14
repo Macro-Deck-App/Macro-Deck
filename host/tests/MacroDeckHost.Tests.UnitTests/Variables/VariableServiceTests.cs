@@ -118,7 +118,7 @@ public class VariableServiceTests
 
 		await _service.UpdateUserVariable(create.Data!.Id, "new_name", null);
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _service.Resolve("old_name", VariableScope.Global, null), Is.Null);
 			Assert.That((await _service.Resolve("new_name", VariableScope.Global, null))?.Id,
@@ -180,7 +180,7 @@ public class VariableServiceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That((_service.GetByScope(VariableScope.Widget, "w1").Result), Is.Empty);
+			Assert.That(_service.GetByScope(VariableScope.Widget, "w1").Result, Is.Empty);
 			Assert.That(Count<VariableDeletedNotification>(), Is.EqualTo(1));
 		});
 	}
@@ -236,7 +236,8 @@ public class VariableServiceTests
 	}
 
 	private Task<Result<VariableEntity, VariableError>> Register(VariableDeclaration declaration)
-		=> _service.CreateIntegrationVariable("int1",
+	{
+		return _service.CreateIntegrationVariable("int1",
 			"gain",
 			VariableScope.Global,
 			null,
@@ -245,6 +246,7 @@ public class VariableServiceTests
 			0,
 			"gain",
 			declaration);
+	}
 
 	private async Task<Guid> CreateIntegrationVariable()
 	{
@@ -258,11 +260,17 @@ public class VariableServiceTests
 		return result.Data!.Id;
 	}
 
-	private int Count<T>() => _mediator.Published.OfType<T>().Count();
+	private int Count<T>()
+	{
+		return _mediator.Published.OfType<T>().Count();
+	}
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -273,8 +281,14 @@ public class VariableServiceTests
 	{
 		public int SaveCallCount { get; private set; }
 
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
-		public void Save(IEnumerable<VariableEntity> userVariables) => SaveCallCount++;
+		public void Save(IEnumerable<VariableEntity> userVariables)
+		{
+			SaveCallCount++;
+		}
 	}
 }

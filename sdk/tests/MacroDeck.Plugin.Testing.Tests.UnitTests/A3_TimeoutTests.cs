@@ -12,7 +12,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// the test host abandoning the call and synthesising a local timeout while the handler keeps running.
 /// </summary>
 [TestFixture]
-public class A3_TimeoutTests
+public class A3TimeoutTests
 {
 	[Test]
 	public async Task A_short_deadline_times_out_and_the_handler_observes_cancellation()

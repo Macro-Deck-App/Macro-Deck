@@ -2,9 +2,15 @@ namespace MacroDeckHost.Integrations.Keyboard.Native;
 
 public sealed class KeyboardLayoutService : IKeyboardLayoutService
 {
-	public bool TryResolveKey(string name, out KeyCode key) => KeyNames.TryParse(name, out key);
+	public bool TryResolveKey(string name, out KeyCode key)
+	{
+		return KeyNames.TryParse(name, out key);
+	}
 
-	public bool TryResolveModifier(string name, out KeyModifier modifier) => KeyNames.TryParseModifier(name, out modifier);
+	public bool TryResolveModifier(string name, out KeyModifier modifier)
+	{
+		return KeyNames.TryParseModifier(name, out modifier);
+	}
 
 	public KeyModifier ResolveModifiers(IEnumerable<string> names)
 	{

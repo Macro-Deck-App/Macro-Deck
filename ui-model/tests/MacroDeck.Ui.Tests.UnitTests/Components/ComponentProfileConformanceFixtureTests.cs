@@ -22,8 +22,7 @@ public class ComponentProfileConformanceFixtureTests
 	{
 		var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
 
-		while (directory is not null &&
-			!Directory.Exists(Path.Combine(directory.FullName, "ui-model", "fixtures")))
+		while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "ui-model", "fixtures")))
 		{
 			directory = directory.Parent;
 		}
@@ -68,11 +67,13 @@ public class ComponentProfileConformanceFixtureTests
 	private static readonly string[] _transformKeys = ["rotation", "originX", "originY", "zoom", "offsetX", "offsetY"];
 
 	// Stated once so the assertion that uses it fits a line.
-	private const string _playingProgressJson =
+	private const string PlayingProgressJson =
 		"""{"$progress":{"positionMs":42000,"durationMs":215000,"anchor":"2026-08-25T12:00:00.000Z"}}""";
 
 	private static string ReadTree(string fileName = "conformance-tree.json")
-		=> File.ReadAllText(Path.Combine(FixtureDirectory(), fileName)).Trim();
+	{
+		return File.ReadAllText(Path.Combine(FixtureDirectory(), fileName)).Trim();
+	}
 
 	[TestCaseSource(nameof(FixtureTrees))]
 	public void The_fixture_is_already_in_canonical_form(string fileName)
@@ -137,7 +138,8 @@ public class ComponentProfileConformanceFixtureTests
 	[Test]
 	public void The_first_fit_fixture_carries_its_layouts_in_order_and_the_last_one_again_as_the_fallback()
 	{
-		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-first-fit-tree.json"), UiCanonicalJson.Options)!;
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-first-fit-tree.json"),
+			UiCanonicalJson.Options)!;
 		var node = Walk(tree.Root).Single(candidate => candidate.Type == UiComponents.FirstFit);
 
 		Assert.Multiple(() =>
@@ -153,7 +155,8 @@ public class ComponentProfileConformanceFixtureTests
 	[Test]
 	public void The_responsive_fixture_chooses_the_layout_its_layout_file_names_for_every_box()
 	{
-		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-responsive-tree.json"), UiCanonicalJson.Options)!;
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-responsive-tree.json"),
+			UiCanonicalJson.Options)!;
 		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
 		using var layout = JsonDocument.Parse(File.ReadAllText(Path.Combine(FixtureDirectory(),
 			"conformance-responsive-layout.json")));
@@ -163,12 +166,14 @@ public class ComponentProfileConformanceFixtureTests
 			foreach (var @case in layout.RootElement.GetProperty("cases").EnumerateArray())
 			{
 				var tile = @case.GetProperty("tile");
-				double? width = tile.ValueKind == JsonValueKind.Object && tile.GetProperty("width").ValueKind == JsonValueKind.Number
-					? tile.GetProperty("width").GetDouble() / UiLength.Cell
-					: null;
-				double? height = tile.ValueKind == JsonValueKind.Object && tile.GetProperty("height").ValueKind == JsonValueKind.Number
-					? tile.GetProperty("height").GetDouble() / UiLength.Cell
-					: null;
+				double? width = tile.ValueKind == JsonValueKind.Object
+					&& tile.GetProperty("width").ValueKind == JsonValueKind.Number
+						? tile.GetProperty("width").GetDouble() / UiLength.Cell
+						: null;
+				double? height = tile.ValueKind == JsonValueKind.Object
+					&& tile.GetProperty("height").ValueKind == JsonValueKind.Number
+						? tile.GetProperty("height").GetDouble() / UiLength.Cell
+						: null;
 
 				foreach (var expected in @case.GetProperty("chosen").EnumerateObject())
 				{
@@ -189,7 +194,8 @@ public class ComponentProfileConformanceFixtureTests
 					var columns = span.GetProperty("width").GetDouble();
 					var rows = span.GetProperty("height").GetDouble();
 
-					Assert.That((columns * UiLength.Cell + (columns - 1) * spacing, rows * UiLength.Cell + (rows - 1) * spacing),
+					Assert.That((columns * UiLength.Cell + (columns - 1) * spacing,
+							rows * UiLength.Cell + (rows - 1) * spacing),
 						Is.EqualTo((tile.GetProperty("width").GetDouble(), tile.GetProperty("height").GetDouble())),
 						$"{@case.GetProperty("name").GetString()}: a tile's box is its span in cells plus the spacing between them");
 				}
@@ -490,7 +496,7 @@ public class ComponentProfileConformanceFixtureTests
 			// Absent means normal speed - the case whose display changes every second, so it costs no
 			// key - and a halted medium writes 0. A fixture with only one of them passes a reader that
 			// ignores rate entirely, leaving a paused track counting up or a playing one frozen.
-			Assert.That(playingBar.Properties["value"].GetRawText(), Is.EqualTo(_playingProgressJson));
+			Assert.That(playingBar.Properties["value"].GetRawText(), Is.EqualTo(PlayingProgressJson));
 			Assert.That(pausedBar.Properties["value"].GetProperty("$progress").GetProperty("rate").GetDouble(),
 				Is.Zero);
 
@@ -551,24 +557,30 @@ public class ComponentProfileConformanceFixtureTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(feed.Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.ClipStart));
-			Assert.That(feed.RequiredComponentVersion, Is.EqualTo(2),
+			Assert.That(feed.RequiredComponentVersion,
+				Is.EqualTo(2),
 				"a version 1 reader ignores overflow, so the clipping stack has to ask for version 2");
 			Assert.That(feed.Fallback?.Type, Is.EqualTo(UiComponents.Stack));
 			Assert.That(feed.Fallback!.Properties.ContainsKey("overflow"), Is.False);
-			Assert.That(nodes["conformance.feed.first"].Properties["fill"].GetBoolean(), Is.True,
+			Assert.That(nodes["conformance.feed.first"].Properties["fill"].GetBoolean(),
+				Is.True,
 				"a fill child inside a clipping stack is the case a reader that shares the box would get wrong");
-			Assert.That(nodes["conformance.shrinking"].Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.Shrink));
-			Assert.That(UiComponentOverflows.WellKnown, Does.Not.Contain(nodes["conformance.unknown"].Properties["overflow"].GetString()),
+			Assert.That(nodes["conformance.shrinking"].Properties["overflow"].GetString(),
+				Is.EqualTo(UiComponentOverflows.Shrink));
+			Assert.That(UiComponentOverflows.WellKnown,
+				Does.Not.Contain(nodes["conformance.unknown"].Properties["overflow"].GetString()),
 				"an unknown overflow value is what a reader has to treat as shrink");
 
-			Assert.That(last.Properties["text"].GetString(), Is.EqualTo("ada: hi Kappa !"),
+			Assert.That(last.Properties["text"].GetString(),
+				Is.EqualTo("ada: hi Kappa !"),
 				"text stays the plain equivalent a reader without spans draws");
 			Assert.That(spans.Select(span => span.TryGetProperty("image", out _)),
 				Is.EqualTo(_chatSpanIsImage).AsCollection);
 			Assert.That(spans[2].GetProperty("alt").GetString(), Is.EqualTo("Kappa"));
 			Assert.That(spans[3].TryGetProperty("alt", out _), Is.False, "a decorative image carries no alt at all");
 			Assert.That(spans[0].GetProperty("color").GetString(), Is.EqualTo("#9146ff"));
-			Assert.That(spans[4].GetProperty("color").GetString(), Is.EqualTo("red"),
+			Assert.That(spans[4].GetProperty("color").GetString(),
+				Is.EqualTo("red"),
 				"a colour that is not #rrggbb is the case a reader has to ignore");
 		});
 	}
@@ -576,20 +588,24 @@ public class ComponentProfileConformanceFixtureTests
 	[Test]
 	public void The_text_fit_fixture_pins_the_text_a_browser_squeezes_cuts_off_or_clamps()
 	{
-		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-text-fit-tree.json"), UiCanonicalJson.Options)!;
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-text-fit-tree.json"),
+			UiCanonicalJson.Options)!;
 		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(nodes["fit.row.title"].Properties["fill"].GetBoolean(), Is.True);
-			Assert.That(nodes["fit.row.count"].Properties.ContainsKey("mainSize"), Is.False,
+			Assert.That(nodes["fit.row.count"].Properties.ContainsKey("mainSize"),
+				Is.False,
 				"a count without mainSize beside a fill title is the row the browser shrinks");
-			Assert.That(nodes["fit.digits.value"].Properties["digits"].GetDouble() % 1, Is.Not.Zero,
+			Assert.That(nodes["fit.digits.value"].Properties["digits"].GetDouble() % 1,
+				Is.Not.Zero,
 				"a reservation that is not a whole number is what a reader rounding to digits gets wrong");
 			Assert.That(nodes["fit.min"].Properties.ContainsKey("minSize"), Is.True);
 			Assert.That(nodes["fit.single"].Properties["maxLines"].GetInt32(), Is.EqualTo(1));
 			Assert.That(nodes["fit.clamp"].Properties["maxLines"].GetInt32(), Is.EqualTo(2));
-			Assert.That(nodes["fit.ticker"].Properties["overflow"].GetString(), Is.EqualTo(UiComponentOverflows.ClipStart));
+			Assert.That(nodes["fit.ticker"].Properties["overflow"].GetString(),
+				Is.EqualTo(UiComponentOverflows.ClipStart));
 			Assert.That(nodes["fit.ticker"].RequiredComponentVersion, Is.EqualTo(2));
 			Assert.That(nodes["fit.column"].Properties["fill"].GetBoolean(), Is.True);
 			Assert.That(nodes["fit.column"].Children, Has.Count.EqualTo(4));
@@ -599,13 +615,15 @@ public class ComponentProfileConformanceFixtureTests
 	[Test]
 	public void The_todo_header_fixture_keeps_the_count_without_a_main_size_beside_a_fill_title()
 	{
-		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-todo-header-tree.json"), UiCanonicalJson.Options)!;
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-todo-header-tree.json"),
+			UiCanonicalJson.Options)!;
 		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(nodes["todo.header.title"].Properties["fill"].GetBoolean(), Is.True);
-			Assert.That(nodes["todo.header.count"].Properties.ContainsKey("mainSize"), Is.False,
+			Assert.That(nodes["todo.header.count"].Properties.ContainsKey("mainSize"),
+				Is.False,
 				"giving the count a mainSize is the fix, and the fixture pins the header before it");
 			Assert.That(nodes["todo.header.count"].Properties["text"].GetString(), Is.EqualTo("128"));
 		});
@@ -614,7 +632,8 @@ public class ComponentProfileConformanceFixtureTests
 	[Test]
 	public void The_anchored_list_fixture_pins_the_anchor_its_version_three_fallback_and_the_lists_that_ignore_it()
 	{
-		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-anchored-list-tree.json"), UiCanonicalJson.Options)!;
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-anchored-list-tree.json"),
+			UiCanonicalJson.Options)!;
 		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
 
 		var feed = nodes["conformance.feed"];
@@ -626,16 +645,21 @@ public class ComponentProfileConformanceFixtureTests
 		{
 			Assert.That(feed.Type, Is.EqualTo(UiComponents.List));
 			Assert.That(feed.Properties["anchor"].GetString(), Is.EqualTo(UiComponentListAnchors.End));
-			Assert.That(feed.RequiredComponentVersion, Is.EqualTo(3),
+			Assert.That(feed.RequiredComponentVersion,
+				Is.EqualTo(3),
 				"a version 2 reader ignores anchor, so the following list has to ask for version 3");
 			Assert.That(feed.Fallback.Type, Is.EqualTo(UiComponents.List));
 			Assert.That(feed.Fallback.Properties.ContainsKey("anchor"), Is.False);
-			Assert.That(fallbackOrder, Is.EqualTo(drawnOrder).AsCollection,
+			Assert.That(fallbackOrder,
+				Is.EqualTo(drawnOrder).AsCollection,
 				"the fallback puts the newest row first, where a reader that does not follow the end shows it");
-			Assert.That(nodes["conformance.start"].Properties["anchor"].GetString(), Is.EqualTo(UiComponentListAnchors.Start));
-			Assert.That(UiComponentListAnchors.WellKnown, Does.Not.Contain(nodes["conformance.unknown"].Properties["anchor"].GetString()),
+			Assert.That(nodes["conformance.start"].Properties["anchor"].GetString(),
+				Is.EqualTo(UiComponentListAnchors.Start));
+			Assert.That(UiComponentListAnchors.WellKnown,
+				Does.Not.Contain(nodes["conformance.unknown"].Properties["anchor"].GetString()),
 				"an unknown anchor is what a reader has to treat as start");
-			Assert.That(nodes["conformance.sideways"].Properties["direction"].GetString(), Is.EqualTo(UiComponentDirections.Horizontal),
+			Assert.That(nodes["conformance.sideways"].Properties["direction"].GetString(),
+				Is.EqualTo(UiComponentDirections.Horizontal),
 				"a horizontal list is the case a reader has to leave alone even with anchor end");
 		});
 	}

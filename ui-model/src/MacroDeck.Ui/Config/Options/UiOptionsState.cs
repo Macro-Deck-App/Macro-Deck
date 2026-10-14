@@ -112,5 +112,8 @@ public sealed class UiOptionsState
 
 	/// <summary>Starts a load for the current <see cref="Query" />, cancelling the one in flight so a stale
 	/// response cannot overwrite a newer one.</summary>
-	public void Reload() => _state.Reload();
+	public void Reload()
+	{
+		_state.Reload();
+	}
 }

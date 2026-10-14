@@ -29,13 +29,16 @@ internal sealed class BatteryRegistryTests
 	}
 
 	[TearDown]
-	public void TearDown() => _registry.Dispose();
+	public void TearDown()
+	{
+		_registry.Dispose();
+	}
 
 	[Test]
 	public async Task A_published_device_is_listed_under_its_owner_and_can_be_found_by_its_qualified_id()
 	{
 		_registry.SetProviderName(Owner, "Example");
-		_registry.Publish(Owner, "session-1", [Device("phone", level: 42)]);
+		_registry.Publish(Owner, "session-1", [Device("phone", 42)]);
 		await WaitForChangeAsync();
 
 		var device = _registry.Devices.Single();
@@ -53,8 +56,8 @@ internal sealed class BatteryRegistryTests
 	[Test]
 	public void Publishing_the_same_id_again_updates_the_device_instead_of_adding_one()
 	{
-		_registry.Publish(Owner, null, [Device("phone", level: 42)]);
-		_registry.Publish(Owner, null, [Device("phone", level: 43)]);
+		_registry.Publish(Owner, null, [Device("phone", 42)]);
+		_registry.Publish(Owner, null, [Device("phone", 43)]);
 
 		Assert.That(_registry.Devices.Select(device => device.LevelPercent), Is.EqualTo(new int?[] { 43 }));
 	}
@@ -62,12 +65,12 @@ internal sealed class BatteryRegistryTests
 	[Test]
 	public void A_batch_with_a_duplicate_id_is_refused_as_a_whole()
 	{
-		_registry.Publish(Owner, null, [Device("phone", level: 10)]);
+		_registry.Publish(Owner, null, [Device("phone", 10)]);
 
 		Assert.Multiple(() =>
 		{
 			Assert.Throws<ArgumentException>(() =>
-				_registry.Publish(Owner, null, [Device("phone", level: 99), Device("tablet"), Device("tablet")]));
+				_registry.Publish(Owner, null, [Device("phone", 99), Device("tablet"), Device("tablet")]));
 			Assert.That(_registry.Devices.Select(device => (device.LocalId, device.LevelPercent)),
 				Is.EqualTo(new[] { ("phone", (int?)10) }));
 		});
@@ -82,7 +85,7 @@ internal sealed class BatteryRegistryTests
 		{
 			Assert.That(_registry.Devices, Has.Count.EqualTo(64));
 			Assert.Throws<InvalidOperationException>(() =>
-				_registry.Publish(Owner, null, [Device("d0", level: 1), Device("d64")]));
+				_registry.Publish(Owner, null, [Device("d0", 1), Device("d64")]));
 			Assert.That(_registry.Find($"{Owner}:d0")!.LevelPercent, Is.Null);
 			Assert.That(_registry.Find($"{Owner}:d64"), Is.Null);
 		});
@@ -118,7 +121,7 @@ internal sealed class BatteryRegistryTests
 		_registry.Publish(Owner, "session-1", [Device("phone"), Device("watch")]);
 		await WaitForChangeAsync();
 
-		_registry.Sync(Owner, "session-1", [Device("watch", level: 80), Device("buds")]);
+		_registry.Sync(Owner, "session-1", [Device("watch", 80), Device("buds")]);
 		var change = await WaitForChangeAsync(args => args.RemovedIds.Count > 0);
 
 		Assert.Multiple(() =>
@@ -173,8 +176,8 @@ internal sealed class BatteryRegistryTests
 	[Test]
 	public void A_late_end_of_an_old_session_keeps_what_the_new_session_republished()
 	{
-		_registry.Publish(Owner, "old", [Device("phone", level: 10)]);
-		_registry.Sync(Owner, "new", [Device("phone", level: 11)]);
+		_registry.Publish(Owner, "old", [Device("phone", 10)]);
+		_registry.Sync(Owner, "new", [Device("phone", 11)]);
 
 		_registry.RemoveSession(Owner, "old");
 
@@ -256,5 +259,7 @@ internal sealed class BatteryRegistryTests
 	}
 
 	private static BatteryDevice Device(string id, int? level = null)
-		=> new() { Id = id, Name = id, Kind = BatteryDeviceKinds.Phone, LevelPercent = level };
+	{
+		return new BatteryDevice { Id = id, Name = id, Kind = BatteryDeviceKinds.Phone, LevelPercent = level };
+	}
 }

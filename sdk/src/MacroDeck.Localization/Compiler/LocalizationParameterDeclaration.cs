@@ -3,7 +3,8 @@ namespace MacroDeck.Localization.Compiler;
 /// <summary>A parameter type declared in a resource comment.</summary>
 internal sealed class LocalizationParameterDeclaration
 {
-	public LocalizationParameterDeclaration(string name,
+	public LocalizationParameterDeclaration(
+		string name,
 		string declaredType,
 		bool isKnownType,
 		LocalizationParameterType type)
@@ -86,11 +87,15 @@ internal static class LocalizationParameterDeclarations
 	}
 
 	private static bool IsMarker(string name)
-		=> string.Equals(name, RemovedMarker, StringComparison.Ordinal) ||
-			string.Equals(name, LocalizationPluralForms.Marker, StringComparison.Ordinal);
+	{
+		return string.Equals(name, RemovedMarker, StringComparison.Ordinal)
+			|| string.Equals(name, LocalizationPluralForms.Marker, StringComparison.Ordinal);
+	}
 
 	private static bool IsBareMarker(string body)
-		=> string.Equals(body.Trim(), LocalizationPluralForms.Marker, StringComparison.Ordinal);
+	{
+		return string.Equals(body.Trim(), LocalizationPluralForms.Marker, StringComparison.Ordinal);
+	}
 
 	private static List<LocalizationParameterDeclaration> ParseAll(string? comment)
 	{

@@ -55,9 +55,10 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 	[Test]
 	public async Task A_built_in_integration_owns_the_entries_even_when_a_plugin_registered_first()
 	{
-		var access = new SwitchableAccess(allowed: true);
+		var access = new SwitchableAccess(true);
 		var harness = new CompanionHarness(register: false, pluginAccess: access);
-		await harness.Registry.RegisterAsync(new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
+		await harness.Registry.RegisterAsync(
+			new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
 			IntegrationOrigin.Plugin);
 		await harness.Registry.RegisterAsync(harness.Integration);
 		var device = harness.AddDevice("Phone");
@@ -71,9 +72,10 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 	[Test]
 	public async Task A_plugin_that_registers_before_the_built_ins_never_gets_entries_once_Companion_registers()
 	{
-		var access = new SwitchableAccess(allowed: true);
+		var access = new SwitchableAccess(true);
 		var harness = new CompanionHarness(register: false, pluginAccess: access, builtInsRegistered: false);
-		await harness.Registry.RegisterAsync(new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
+		await harness.Registry.RegisterAsync(
+			new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
 			IntegrationOrigin.Plugin);
 		var device = harness.AddDevice("Phone");
 
@@ -94,9 +96,10 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 	[Test]
 	public async Task A_switched_off_built_in_owner_leaves_devices_without_entries_even_when_a_plugin_asks_for_them()
 	{
-		var access = new SwitchableAccess(allowed: true);
-		var harness = new CompanionHarness(storedOff: true, pluginAccess: access);
-		await harness.Registry.RegisterAsync(new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
+		var access = new SwitchableAccess(true);
+		var harness = new CompanionHarness(true, pluginAccess: access);
+		await harness.Registry.RegisterAsync(
+			new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
 			IntegrationOrigin.Plugin);
 		var device = harness.AddDevice("Phone");
 
@@ -108,9 +111,10 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 	[Test]
 	public async Task A_plugin_owner_gets_entries_only_once_it_may_use_Companion_devices()
 	{
-		var access = new SwitchableAccess(allowed: false);
+		var access = new SwitchableAccess(false);
 		var harness = new CompanionHarness(register: false, pluginAccess: access);
-		await harness.Registry.RegisterAsync(new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
+		await harness.Registry.RegisterAsync(
+			new RemoteShapedIntegration(PluginId, CapabilityKinds.CompanionDeviceEntries),
 			IntegrationOrigin.Plugin);
 		var device = harness.AddDevice("Phone");
 
@@ -130,7 +134,7 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 	[Test]
 	public async Task A_plugin_that_did_not_declare_device_entries_is_unaffected()
 	{
-		var access = new SwitchableAccess(allowed: true);
+		var access = new SwitchableAccess(true);
 		var harness = new CompanionHarness(register: false, pluginAccess: access);
 		await harness.Registry.RegisterAsync(new RemoteShapedIntegration(PluginId, CapabilityKinds.Actions),
 			IntegrationOrigin.Plugin);
@@ -204,16 +208,28 @@ internal sealed class CompanionDeviceEntriesOwnerTests
 			Changed?.Invoke();
 		}
 
-		public Task<PluginCompanionDeviceAccess> EvaluateAsync(string pluginId,
+		public Task<PluginCompanionDeviceAccess> EvaluateAsync(
+			string pluginId,
 			CancellationToken cancellationToken = default)
-			=> Task.FromResult(_allowed ? PluginCompanionDeviceAccess.Available : PluginCompanionDeviceAccess.NotAllowed);
+		{
+			return Task.FromResult(_allowed
+				? PluginCompanionDeviceAccess.Available
+				: PluginCompanionDeviceAccess.NotAllowed);
+		}
 
-		public bool CanBeGranted(string pluginId) => true;
+		public bool CanBeGranted(string pluginId)
+		{
+			return true;
+		}
 
 		public Task<bool> GetAllowPluginsAsync(CancellationToken cancellationToken = default)
-			=> Task.FromResult(_allowed);
+		{
+			return Task.FromResult(_allowed);
+		}
 
 		public Task SetAllowPluginsAsync(bool allow, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

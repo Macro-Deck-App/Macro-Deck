@@ -104,7 +104,8 @@ internal abstract class UiSessionFixture
 
 	/// <summary>Registers an in-process integration that serves UI trees. Nothing else changes: the same
 	/// broker, resolver and transport serve it through the same session API a plugin is served through.</summary>
-	protected StubUiSession AddInProcessProvider(Func<UiTree> tree,
+	protected StubUiSession AddInProcessProvider(
+		Func<UiTree> tree,
 		string providerId = ProviderId,
 		ManualResetEventSlim? hold = null)
 	{
@@ -114,25 +115,34 @@ internal abstract class UiSessionFixture
 	}
 
 	protected static UiTree TreeAt(int revision, string sessionMode = UiSessionModes.Exclusive)
-		=> new()
+	{
+		return new UiTree
 		{
 			Revision = revision,
 			Surface = Surface(sessionMode),
 			Root = new UiNode { Id = "root", Type = "panel" }
 		};
+	}
 
-	protected static UiSurface Surface(string sessionMode = UiSessionModes.Exclusive,
+	protected static UiSurface Surface(
+		string sessionMode = UiSessionModes.Exclusive,
 		string kind = UiSurfaceKinds.Config)
-		=> new() { Kind = kind, SessionMode = sessionMode };
+	{
+		return new UiSurface { Kind = kind, SessionMode = sessionMode };
+	}
 
 	/// <summary>Opens a session and waits for the provider's first tree, so a test that is not about the
 	/// open handshake starts from a session a client can meaningfully attach to.</summary>
-	protected Task<string> OpenAsync(StubUiSessionProvider provider,
+	protected Task<string> OpenAsync(
+		StubUiSessionProvider provider,
 		string sessionMode = UiSessionModes.Exclusive,
 		string principal = DeviceA)
-		=> OpenAsync(provider.ProviderId, sessionMode, principal);
+	{
+		return OpenAsync(provider.ProviderId, sessionMode, principal);
+	}
 
-	protected async Task<string> OpenAsync(string providerId,
+	protected async Task<string> OpenAsync(
+		string providerId,
 		string sessionMode = UiSessionModes.Exclusive,
 		string principal = DeviceA)
 	{
@@ -142,7 +152,9 @@ internal abstract class UiSessionFixture
 	}
 
 	protected UiAttachSessionResponse Attach(string sessionId, string connectionId, string principal = DeviceA)
-		=> Broker.Attach(sessionId, connectionId, principal);
+	{
+		return Broker.Attach(sessionId, connectionId, principal);
+	}
 
 	/// <summary>Registers a live plugin session for a provider id, so a UI session opened afterwards is
 	/// bound to it the way a plugin-served session is.</summary>
@@ -185,30 +197,68 @@ internal abstract class UiSessionFixture
 
 	/// <summary>Waits out the window in which a message could still arrive, for an assertion whose point
 	/// is that none does.</summary>
-	protected static Task SettleAsync() => Task.Delay(_settle);
+	protected static Task SettleAsync()
+	{
+		return Task.Delay(_settle);
+	}
 
 	protected Task WaitForMessagesAsync(string connectionId, int count, string failureMessage)
-		=> WaitForAsync(() => Transport.For(connectionId).Count >= count, failureMessage);
+	{
+		return WaitForAsync(() => Transport.For(connectionId).Count >= count, failureMessage);
+	}
 
 	protected IReadOnlyList<object> MessagesFor(string connectionId)
-		=> [.. Transport.For(connectionId).Select(recorded => recorded.Message)];
+	{
+		return [.. Transport.For(connectionId).Select(recorded => recorded.Message)];
+	}
 
 	protected IReadOnlyList<T> MessagesFor<T>(string connectionId)
 		where T : class
-		=> [.. Transport.For(connectionId).Select(recorded => recorded.Message).OfType<T>()];
+	{
+		return [.. Transport.For(connectionId).Select(recorded => recorded.Message).OfType<T>()];
+	}
 
 	protected sealed class EmptyFolderCache : IFolderCache
 	{
-		public List<FolderEntity> GetAllFolders() => [];
-		public FolderEntity? GetFolderById(Guid id) => null;
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [];
+		}
+
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return null;
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{

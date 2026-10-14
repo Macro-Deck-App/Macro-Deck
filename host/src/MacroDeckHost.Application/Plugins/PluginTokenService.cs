@@ -191,14 +191,17 @@ public class PluginTokenService : IPluginTokenService
 		return PluginAccessTokenDeleteResult.Deleted;
 	}
 
-	private static PluginAccessToken ToDto(PluginAccessTokenEntity entity) => new()
+	private static PluginAccessToken ToDto(PluginAccessTokenEntity entity)
 	{
-		Id = entity.Id,
-		Name = entity.Name,
-		Scopes = entity.Scopes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
-		ExpiresAt = entity.ExpiresAt,
-		LastUsedAt = entity.LastUsedAt,
-		RevokedAt = entity.RevokedAt,
-		CreatedAt = entity.CreatedAt
-	};
+		return new PluginAccessToken
+		{
+			Id = entity.Id,
+			Name = entity.Name,
+			Scopes = entity.Scopes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+			ExpiresAt = entity.ExpiresAt,
+			LastUsedAt = entity.LastUsedAt,
+			RevokedAt = entity.RevokedAt,
+			CreatedAt = entity.CreatedAt
+		};
+	}
 }

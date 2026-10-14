@@ -34,9 +34,9 @@ public static class IconPackDigest
 				"The icon pack manifest has no non-empty 'id'.");
 		}
 
-		if (manifest["name"] is not JsonValue nameValue ||
-			!nameValue.TryGetValue<string>(out var name) ||
-			name.Length == 0)
+		if (manifest["name"] is not JsonValue nameValue
+			|| !nameValue.TryGetValue<string>(out var name)
+			|| name.Length == 0)
 		{
 			return PackageDigestResult.Fail(SigningError.ManifestMalformed,
 				"The icon pack manifest has no non-empty 'name'.");
@@ -46,8 +46,8 @@ public static class IconPackDigest
 			? authorText
 			: string.Empty;
 
-		var version = manifest["version"] is JsonValue versionValue &&
-			versionValue.TryGetValue<string>(out var versionText)
+		var version = manifest["version"] is JsonValue versionValue
+			&& versionValue.TryGetValue<string>(out var versionText)
 				? versionText
 				: string.Empty;
 
@@ -65,9 +65,13 @@ public static class IconPackDigest
 
 		foreach (var file in files.OrderBy(entry => entry.Path, StringComparer.Ordinal))
 		{
-			builder.Append("f\t").Append(file.Path).Append('\t')
-				.Append(file.Sha256).Append('\t')
-				.Append(file.Size).Append('\n');
+			builder.Append("f\t")
+				.Append(file.Path)
+				.Append('\t')
+				.Append(file.Sha256)
+				.Append('\t')
+				.Append(file.Size)
+				.Append('\n');
 		}
 
 		return PackageDigestResult.Ok(Encoding.UTF8.GetBytes(builder.ToString()));

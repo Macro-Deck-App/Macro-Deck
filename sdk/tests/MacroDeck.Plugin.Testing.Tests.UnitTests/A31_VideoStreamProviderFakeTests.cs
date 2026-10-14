@@ -15,7 +15,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// host does.
 /// </summary>
 [TestFixture]
-public class A31_VideoStreamProviderFakeTests
+public class A31VideoStreamProviderFakeTests
 {
 	[Test]
 	public async Task Registering_a_provider_id_twice_is_rejected()
@@ -29,8 +29,10 @@ public class A31_VideoStreamProviderFakeTests
 
 	[Test]
 	public void An_id_that_is_not_a_resource_local_id_is_rejected()
-		=> Assert.That(() => new FakeVideoStreamProviderContext().RegisterProviderAsync(new Camera("front door")),
+	{
+		Assert.That(() => new FakeVideoStreamProviderContext().RegisterProviderAsync(new Camera("front door")),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public async Task A_seventeenth_provider_is_rejected()
@@ -70,7 +72,9 @@ public class A31_VideoStreamProviderFakeTests
 
 		await context.RegisterProviderAsync(new Camera("cam"));
 		await context.NotifyStreamsChangedAsync("cam");
-		await context.UpdateSessionAsync("s1", VideoStreamSessionState.Reconnecting, reason: VideoStreamSessionReason.SourceLost);
+		await context.UpdateSessionAsync("s1",
+			VideoStreamSessionState.Reconnecting,
+			reason: VideoStreamSessionReason.SourceLost);
 		await context.CloseSessionAsync("s1");
 		await context.UnregisterProviderAsync("cam");
 
@@ -104,8 +108,10 @@ public class A31_VideoStreamProviderFakeTests
 		while (described?.Providers.Count != 1 && DateTime.UtcNow < deadline)
 		{
 			await Task.Delay(20);
-			described = (await session.VideoStreamProvider.DescribeAsync()).DataAs<VideoStreamProviderDescribePayload>();
+			described = (await session.VideoStreamProvider.DescribeAsync())
+				.DataAs<VideoStreamProviderDescribePayload>();
 		}
+
 		var streams = (await session.VideoStreamProvider.GetStreamsAsync("cam"))
 			.DataAs<VideoStreamProviderStreamsResult>();
 		var opened = (await session.VideoStreamProvider.OpenSessionAsync("s1", "cam", "main", ["mjpeg", "hls"]))
@@ -135,12 +141,18 @@ public class A31_VideoStreamProviderFakeTests
 		public IReadOnlyList<(string, VideoStreamSessionReason)> Closes => [.. _closes];
 
 		public Task<IReadOnlyList<VideoStreamDescriptor>> GetStreamsAsync(CancellationToken cancellationToken)
-			=> Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>(
-				[new VideoStreamDescriptor("main", LocalizedText.FromLiteral("Main"))]);
+		{
+			return Task.FromResult<IReadOnlyList<VideoStreamDescriptor>>([
+				new VideoStreamDescriptor("main", LocalizedText.FromLiteral("Main"))
+			]);
+		}
 
-		public Task<VideoStreamSessionDescription> OpenAsync(VideoStreamOpenRequest request,
+		public Task<VideoStreamSessionDescription> OpenAsync(
+			VideoStreamOpenRequest request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
+		{
+			return Task.FromResult(VideoStreamSessionDescription.Hls("http://camera.local/main.m3u8"));
+		}
 
 		public Task CloseAsync(string sessionId, VideoStreamSessionReason reason, CancellationToken cancellationToken)
 		{
@@ -153,11 +165,19 @@ public class A31_VideoStreamProviderFakeTests
 	{
 		public IReadOnlyList<IActionDefinition> Actions => [];
 
-		public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task InitializeAsync(IVideoStreamProviderContext context, CancellationToken cancellationToken = default)
-			=> context.RegisterProviderAsync(camera, cancellationToken);
+		{
+			return context.RegisterProviderAsync(camera, cancellationToken);
+		}
 	}
 }

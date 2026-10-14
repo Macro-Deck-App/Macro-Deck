@@ -17,45 +17,48 @@ namespace MacroDeck.Plugin.Cli;
 /// </summary>
 internal static class PluginInstallErrorExitCode
 {
-	public static int For(PluginInstallError error) => error switch
+	public static int For(PluginInstallError error)
 	{
-		// The artifact path could not be opened at all - the CI-usability distinction the exit code table
-		// exists for.
-		PluginInstallError.ArtifactNotFound => ExitCode.InputUnreadable,
-		PluginInstallError.InvalidArchive => ExitCode.InputUnreadable,
+		return error switch
+		{
+			// The artifact path could not be opened at all - the CI-usability distinction the exit code table
+			// exists for.
+			PluginInstallError.ArtifactNotFound => ExitCode.InputUnreadable,
+			PluginInstallError.InvalidArchive => ExitCode.InputUnreadable,
 
-		// Every one of these is a real, readable artifact whose content is what is wrong - the subject,
-		// not the tool's ability to read it.
-		PluginInstallError.ArtifactTooLarge => ExitCode.SubjectInvalid,
-		PluginInstallError.UnsafeEntry => ExitCode.SubjectInvalid,
-		PluginInstallError.ArtifactLimitExceeded => ExitCode.SubjectInvalid,
-		PluginInstallError.ManifestMissing => ExitCode.SubjectInvalid,
-		PluginInstallError.ManifestInvalid => ExitCode.SubjectInvalid,
-		PluginInstallError.IdMismatch => ExitCode.SubjectInvalid,
-		PluginInstallError.Incompatible => ExitCode.SubjectInvalid,
-		PluginInstallError.HashMismatch => ExitCode.SubjectInvalid,
-		PluginInstallError.SignatureInvalid => ExitCode.SubjectInvalid,
+			// Every one of these is a real, readable artifact whose content is what is wrong - the subject,
+			// not the tool's ability to read it.
+			PluginInstallError.ArtifactTooLarge => ExitCode.SubjectInvalid,
+			PluginInstallError.UnsafeEntry => ExitCode.SubjectInvalid,
+			PluginInstallError.ArtifactLimitExceeded => ExitCode.SubjectInvalid,
+			PluginInstallError.ManifestMissing => ExitCode.SubjectInvalid,
+			PluginInstallError.ManifestInvalid => ExitCode.SubjectInvalid,
+			PluginInstallError.IdMismatch => ExitCode.SubjectInvalid,
+			PluginInstallError.Incompatible => ExitCode.SubjectInvalid,
+			PluginInstallError.HashMismatch => ExitCode.SubjectInvalid,
+			PluginInstallError.SignatureInvalid => ExitCode.SubjectInvalid,
 
-		PluginInstallError.Cancelled => ExitCode.Cancelled,
+			PluginInstallError.Cancelled => ExitCode.Cancelled,
 
-		// Install-lifecycle-only outcomes: nothing the CLI itself calls (it never installs, activates or
-		// uninstalls anything) can produce these. Mapped to InternalError so a future codepath that
-		// somehow does surface one is loud about it rather than quietly reported as an ordinary
-		// validation failure.
-		PluginInstallError.AlreadyInstalled => ExitCode.InternalError,
-		PluginInstallError.StagingFailed => ExitCode.InternalError,
-		PluginInstallError.ActivationFailed => ExitCode.InternalError,
-		PluginInstallError.HealthValidationFailed => ExitCode.InternalError,
-		PluginInstallError.DependencyInUse => ExitCode.InternalError,
-		PluginInstallError.NotInstalled => ExitCode.InternalError,
-		PluginInstallError.Failed => ExitCode.InternalError,
-		PluginInstallError.SignatureUntrusted => ExitCode.InternalError,
-		PluginInstallError.SignatureRevoked => ExitCode.InternalError,
-		PluginInstallError.SignatureUnverifiable => ExitCode.InternalError,
-		PluginInstallError.UnsignedNotPermitted => ExitCode.InternalError,
-		PluginInstallError.TrustDowngrade => ExitCode.InternalError,
+			// Install-lifecycle-only outcomes: nothing the CLI itself calls (it never installs, activates or
+			// uninstalls anything) can produce these. Mapped to InternalError so a future codepath that
+			// somehow does surface one is loud about it rather than quietly reported as an ordinary
+			// validation failure.
+			PluginInstallError.AlreadyInstalled => ExitCode.InternalError,
+			PluginInstallError.StagingFailed => ExitCode.InternalError,
+			PluginInstallError.ActivationFailed => ExitCode.InternalError,
+			PluginInstallError.HealthValidationFailed => ExitCode.InternalError,
+			PluginInstallError.DependencyInUse => ExitCode.InternalError,
+			PluginInstallError.NotInstalled => ExitCode.InternalError,
+			PluginInstallError.Failed => ExitCode.InternalError,
+			PluginInstallError.SignatureUntrusted => ExitCode.InternalError,
+			PluginInstallError.SignatureRevoked => ExitCode.InternalError,
+			PluginInstallError.SignatureUnverifiable => ExitCode.InternalError,
+			PluginInstallError.UnsignedNotPermitted => ExitCode.InternalError,
+			PluginInstallError.TrustDowngrade => ExitCode.InternalError,
 
-		// Never a named member in practice - see this type's own remarks.
-		_ => ExitCode.InternalError
-	};
+			// Never a named member in practice - see this type's own remarks.
+			_ => ExitCode.InternalError
+		};
+	}
 }

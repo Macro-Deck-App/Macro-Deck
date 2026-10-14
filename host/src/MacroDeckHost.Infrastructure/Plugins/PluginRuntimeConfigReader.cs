@@ -24,9 +24,9 @@ public static class PluginRuntimeConfigReader
 
 	private static List<DotnetFrameworkRequirement>? Parse(JsonElement root)
 	{
-		if (root.ValueKind != JsonValueKind.Object ||
-			!root.TryGetProperty("runtimeOptions", out var options) ||
-			options.ValueKind != JsonValueKind.Object)
+		if (root.ValueKind != JsonValueKind.Object
+			|| !root.TryGetProperty("runtimeOptions", out var options)
+			|| options.ValueKind != JsonValueKind.Object)
 		{
 			return null;
 		}
@@ -55,13 +55,13 @@ public static class PluginRuntimeConfigReader
 
 	private static DotnetFrameworkRequirement? ReadFramework(JsonElement element, DotnetRollForward inherited)
 	{
-		if (element.ValueKind != JsonValueKind.Object ||
-			!element.TryGetProperty("name", out var name) ||
-			name.ValueKind != JsonValueKind.String ||
-			string.IsNullOrWhiteSpace(name.GetString()) ||
-			!element.TryGetProperty("version", out var version) ||
-			version.ValueKind != JsonValueKind.String ||
-			DotnetMuxerLocator.ParseVersion(version.GetString()!) is not { } parsed)
+		if (element.ValueKind != JsonValueKind.Object
+			|| !element.TryGetProperty("name", out var name)
+			|| name.ValueKind != JsonValueKind.String
+			|| string.IsNullOrWhiteSpace(name.GetString())
+			|| !element.TryGetProperty("version", out var version)
+			|| version.ValueKind != JsonValueKind.String
+			|| DotnetMuxerLocator.ParseVersion(version.GetString()!) is not { } parsed)
 		{
 			return null;
 		}
@@ -76,9 +76,9 @@ public static class PluginRuntimeConfigReader
 
 	private static DotnetRollForward? ReadRollForward(JsonElement element)
 	{
-		return element.TryGetProperty("rollForward", out var value) &&
-			value.ValueKind == JsonValueKind.String &&
-			Enum.TryParse<DotnetRollForward>(value.GetString(), ignoreCase: true, out var parsed)
+		return element.TryGetProperty("rollForward", out var value)
+			&& value.ValueKind == JsonValueKind.String
+			&& Enum.TryParse<DotnetRollForward>(value.GetString(), true, out var parsed)
 				? parsed
 				: null;
 	}

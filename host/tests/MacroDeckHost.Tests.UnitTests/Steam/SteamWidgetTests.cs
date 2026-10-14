@@ -32,7 +32,10 @@ internal sealed class SteamWidgetTests
 	}
 
 	[TearDown]
-	public void TearDown() => _artwork.Dispose();
+	public void TearDown()
+	{
+		_artwork.Dispose();
+	}
 
 	[Test]
 	public async Task Currently_playing_shows_the_game_and_how_long_it_has_been_running()
@@ -162,7 +165,8 @@ internal sealed class SteamWidgetTests
 			Accounts = [new SteamAccountSnapshot("e1", "Main", "main") { Web = web }]
 		};
 
-		await using var session = await OpenAsync(SteamWidgetType.CurrentlyPlayingQualifiedId, new { account = accountId });
+		await using var session
+			= await OpenAsync(SteamWidgetType.CurrentlyPlayingQualifiedId, new { account = accountId });
 
 		Assert.That(CalendarTree.Texts(session.BuildTree().Root), Does.Contain("This account is not available"));
 	}
@@ -170,8 +174,7 @@ internal sealed class SteamWidgetTests
 	[Test]
 	public async Task The_launcher_shows_the_most_recently_played_games_first_up_to_the_configured_count()
 	{
-		_source.Snapshot = Library(
-			new SteamGame(1, "Oldest", DateTimeOffset.FromUnixTimeSeconds(100)),
+		_source.Snapshot = Library(new SteamGame(1, "Oldest", DateTimeOffset.FromUnixTimeSeconds(100)),
 			new SteamGame(2, "Newest", DateTimeOffset.FromUnixTimeSeconds(300)),
 			new SteamGame(3, "Middle", DateTimeOffset.FromUnixTimeSeconds(200)),
 			new SteamGame(4, "Never played", null));
@@ -186,7 +189,8 @@ internal sealed class SteamWidgetTests
 	[Test]
 	public async Task The_launcher_can_show_one_chosen_game()
 	{
-		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", null), new SteamGame(220, "Half-Life 2", null));
+		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", null),
+			new SteamGame(220, "Half-Life 2", null));
 
 		await using var session = await OpenAsync(SteamWidgetType.GameLauncherQualifiedId,
 			new { source = "game", game = "220" });
@@ -235,8 +239,9 @@ internal sealed class SteamWidgetTests
 
 		CalendarTree.Press(session, Tiles(session).First());
 
-		await CalendarTree.WaitForAsync(
-			() => CalendarTree.Texts(session.BuildTree().Root).Any(text => text.Contains("could not be opened", StringComparison.Ordinal)),
+		await CalendarTree.WaitForAsync(()
+				=> CalendarTree.Texts(session.BuildTree().Root)
+					.Any(text => text.Contains("could not be opened", StringComparison.Ordinal)),
 			"the failure was not shown");
 	}
 
@@ -273,21 +278,25 @@ internal sealed class SteamWidgetTests
 		_source.Snapshot = Library(new SteamGame(730, "Counter-Strike 2", null));
 
 		await using var session = SteamWidgetSessions.Create(new UiSessionRequest
-		{
-			Surface = new UiSurface
 			{
-				Kind = UiSurfaceKinds.Config,
-				SessionMode = UiSessionModes.Exclusive,
-				Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+				Surface = new UiSurface
 				{
-					[UiConfigSurfaceAttributes.EntryPoint] =
-						JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
-					[UiConfigSurfaceAttributes.WidgetType] =
-						JsonSerializer.SerializeToElement(SteamWidgetType.GameLauncherQualifiedId),
+					Kind = UiSurfaceKinds.Config,
+					SessionMode = UiSessionModes.Exclusive,
+					Attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+					{
+						[UiConfigSurfaceAttributes.EntryPoint] =
+							JsonSerializer.SerializeToElement(UiConfigEntryPoints.WidgetConfig),
+						[UiConfigSurfaceAttributes.WidgetType] =
+							JsonSerializer.SerializeToElement(SteamWidgetType.GameLauncherQualifiedId)
+					}
 				},
+				UiModelVersion = 1
 			},
-			UiModelVersion = 1,
-		}, _source, _artwork, null, _time)!;
+			_source,
+			_artwork,
+			null,
+			_time)!;
 
 		Assert.That(JsonSerializer.Serialize(session.BuildTree().Root), Does.Contain("Counter-Strike 2"));
 	}
@@ -305,38 +314,58 @@ internal sealed class SteamWidgetTests
 	}
 
 	private static SteamSnapshot Playing(int appId, string name, DateTimeOffset since)
-		=> new() { SteamFound = true, CurrentGame = new SteamCurrentGame(appId, name, since) };
+	{
+		return new SteamSnapshot { SteamFound = true, CurrentGame = new SteamCurrentGame(appId, name, since) };
+	}
 
-	private static SteamSnapshot Library(params SteamGame[] games) => new() { SteamFound = true, Games = games };
+	private static SteamSnapshot Library(params SteamGame[] games)
+	{
+		return new SteamSnapshot { SteamFound = true, Games = games };
+	}
 
 	private static List<UiNode> Tiles(IUiSession session)
-		=> [.. CalendarTree.Flatten(session.BuildTree().Root)
-			.Where(node => CalendarTree.IsPressable(node) &&
-				node.Id.Split('.')[^1].StartsWith("game-", StringComparison.Ordinal))];
+	{
+		return
+		[
+			.. CalendarTree.Flatten(session.BuildTree().Root)
+				.Where(node => CalendarTree.IsPressable(node)
+					&& node.Id.Split('.')[^1].StartsWith("game-", StringComparison.Ordinal))
+		];
+	}
 
 	private static List<UiNode> WideTiles(IUiSession session)
-		=> [.. Tiles(session).Where(node => node.Id.Contains(".wide", StringComparison.Ordinal))];
+	{
+		return [.. Tiles(session).Where(node => node.Id.Contains(".wide", StringComparison.Ordinal))];
+	}
 
 	private Task<IUiSession> OpenAsync(string widgetType, object data)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
 			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widgetType),
-			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data),
+			[UiWidgetSurfaceAttributes.Data] = JsonSerializer.SerializeToElement(data)
 		};
 
 		return Task.FromResult(SteamWidgetSessions.Create(new UiSessionRequest
-		{
-			Surface = new UiSurface { Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
-			UiModelVersion = 1,
-		}, _source, _artwork, null, _time)!);
+			{
+				Surface = new UiSurface
+					{ Kind = UiSurfaceKinds.Widget, SessionMode = UiSessionModes.Shared, Attributes = attributes },
+				UiModelVersion = 1
+			},
+			_source,
+			_artwork,
+			null,
+			_time)!);
 	}
 
 	private sealed class NotFoundHandler : HttpMessageHandler
 	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+		protected override Task<HttpResponseMessage> SendAsync(
+			HttpRequestMessage request,
 			CancellationToken cancellationToken)
-			=> Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+		{
+			return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+		}
 	}
 
 
@@ -352,7 +381,10 @@ internal sealed class SteamWidgetTests
 
 		public List<SteamCommand> Commands { get; } = [];
 
-		public void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
+		public void RaiseChanged()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
 
 		public Task<SteamCommandOutcome> ExecuteAsync(SteamCommand command, CancellationToken cancellationToken)
 		{
@@ -390,9 +422,15 @@ internal sealed class SteamWidgetTests
 		}
 
 		public Task<bool> ShowModalAsync(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(false);
+		{
+			return Task.FromResult(false);
+		}
 
-		public Task<ModalResult<T>> ShowModalAsync<T>(ModalDefinition modal, CancellationToken cancellationToken = default)
-			=> Task.FromResult(ModalResult.FromCancellation<T>());
+		public Task<ModalResult<T>> ShowModalAsync<T>(
+			ModalDefinition modal,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(ModalResult.FromCancellation<T>());
+		}
 	}
 }

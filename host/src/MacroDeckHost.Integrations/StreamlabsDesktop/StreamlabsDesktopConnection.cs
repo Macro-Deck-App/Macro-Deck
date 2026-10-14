@@ -80,12 +80,20 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		_pump = Task.Run(() => PumpAsync(_cts.Token), CancellationToken.None);
 	}
 
-	public Task<IReadOnlyList<string>> GetSceneNamesAsync() => _catalog.GetSceneNamesAsync();
+	public Task<IReadOnlyList<string>> GetSceneNamesAsync()
+	{
+		return _catalog.GetSceneNamesAsync();
+	}
 
 	public Task<IReadOnlyList<string>> GetSceneItemNamesAsync(string sceneName)
-		=> _catalog.GetSceneItemNamesAsync(sceneName);
+	{
+		return _catalog.GetSceneItemNamesAsync(sceneName);
+	}
 
-	public Task<IReadOnlyList<string>> GetAudioSourceNamesAsync() => _catalog.GetAudioSourceNamesAsync();
+	public Task<IReadOnlyList<string>> GetAudioSourceNamesAsync()
+	{
+		return _catalog.GetAudioSourceNamesAsync();
+	}
 
 	public async Task<StreamlabsCommandResult> SetSceneAsync(string sceneName)
 	{
@@ -105,9 +113,15 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 			.ConfigureAwait(false);
 	}
 
-	public Task<StreamlabsCommandResult> StartStreamingAsync() => SetStreamingAsync(live: true);
+	public Task<StreamlabsCommandResult> StartStreamingAsync()
+	{
+		return SetStreamingAsync(true);
+	}
 
-	public Task<StreamlabsCommandResult> StopStreamingAsync() => SetStreamingAsync(live: false);
+	public Task<StreamlabsCommandResult> StopStreamingAsync()
+	{
+		return SetStreamingAsync(false);
+	}
 
 	public async Task<StreamlabsCommandResult> ToggleStreamingAsync()
 	{
@@ -131,9 +145,15 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		}
 	}
 
-	public Task<StreamlabsCommandResult> StartRecordingAsync() => SetRecordingAsync(recording: true);
+	public Task<StreamlabsCommandResult> StartRecordingAsync()
+	{
+		return SetRecordingAsync(true);
+	}
 
-	public Task<StreamlabsCommandResult> StopRecordingAsync() => SetRecordingAsync(recording: false);
+	public Task<StreamlabsCommandResult> StopRecordingAsync()
+	{
+		return SetRecordingAsync(false);
+	}
 
 	public async Task<StreamlabsCommandResult> ToggleRecordingAsync()
 	{
@@ -158,10 +178,14 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 	}
 
 	public Task<StreamlabsCommandResult> StartReplayBufferAsync()
-		=> InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.StartReplayBuffer);
+	{
+		return InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.StartReplayBuffer);
+	}
 
 	public Task<StreamlabsCommandResult> StopReplayBufferAsync()
-		=> InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.StopReplayBuffer);
+	{
+		return InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.StopReplayBuffer);
+	}
 
 	public async Task<StreamlabsCommandResult> ToggleReplayBufferAsync()
 	{
@@ -188,16 +212,25 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 	}
 
 	public Task<StreamlabsCommandResult> SaveReplayAsync()
-		=> InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.SaveReplay);
+	{
+		return InvokeAsync(StreamlabsServices.Streaming, StreamlabsServices.SaveReplay);
+	}
 
 	public Task<StreamlabsCommandResult> SetStudioModeAsync(bool enabled)
-		=> InvokeAsync(StreamlabsServices.Transitions,
+	{
+		return InvokeAsync(StreamlabsServices.Transitions,
 			enabled ? StreamlabsServices.EnableStudioMode : StreamlabsServices.DisableStudioMode);
+	}
 
-	public Task<StreamlabsCommandResult> ToggleStudioModeAsync() => SetStudioModeAsync(!State.StudioModeActive);
+	public Task<StreamlabsCommandResult> ToggleStudioModeAsync()
+	{
+		return SetStudioModeAsync(!State.StudioModeActive);
+	}
 
 	public Task<StreamlabsCommandResult> ExecuteStudioModeTransitionAsync()
-		=> InvokeAsync(StreamlabsServices.Transitions, StreamlabsServices.ExecuteStudioModeTransition);
+	{
+		return InvokeAsync(StreamlabsServices.Transitions, StreamlabsServices.ExecuteStudioModeTransition);
+	}
 
 	public async Task<StreamlabsCommandResult> SetSceneItemVisibleAsync(
 		string sceneName,
@@ -380,18 +413,27 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		_cts.Dispose();
 	}
 
-	private static double ToDeflection(double percent) => Math.Clamp(percent, 0d, 100d) / 100d;
+	private static double ToDeflection(double percent)
+	{
+		return Math.Clamp(percent, 0d, 100d) / 100d;
+	}
 
 	private static StreamlabsCommandResult NoSuchSource(string sceneName, string sourceName)
-		=> StreamlabsCommandResult.NotFound(string.Create(CultureInfo.InvariantCulture,
+	{
+		return StreamlabsCommandResult.NotFound(string.Create(CultureInfo.InvariantCulture,
 			$"Scene '{sceneName}' has no source called '{sourceName}'."));
+	}
 
 	private static StreamlabsCommandResult NoSuchAudioSource(string sourceName)
-		=> StreamlabsCommandResult.NotFound(string.Create(CultureInfo.InvariantCulture,
+	{
+		return StreamlabsCommandResult.NotFound(string.Create(CultureInfo.InvariantCulture,
 			$"Streamlabs Desktop has no audio source called '{sourceName}'."));
+	}
 
 	private async Task<StreamlabsAudioSource?> ResolveAudioAsync(string sourceName)
-		=> _client is null ? null : await _catalog.ResolveAudioSourceAsync(sourceName).ConfigureAwait(false);
+	{
+		return _client is null ? null : await _catalog.ResolveAudioSourceAsync(sourceName).ConfigureAwait(false);
+	}
 
 	private async Task<StreamlabsAudioSource?> ReadAudioModelAsync(StreamlabsAudioSource source)
 	{
@@ -601,8 +643,15 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		var client = _clientFactory();
 		var closed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		void OnDisconnected(object? sender, string? reason) => closed.TrySetResult(true);
-		void OnEvent(object? sender, StreamlabsEvent push) => HandlePush(push);
+		void OnDisconnected(object? sender, string? reason)
+		{
+			closed.TrySetResult(true);
+		}
+
+		void OnEvent(object? sender, StreamlabsEvent push)
+		{
+			HandlePush(push);
+		}
 
 		client.Disconnected += OnDisconnected;
 		client.EventReceived += OnEvent;
@@ -915,8 +964,8 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 
 	private void OnSourceUpdated(JsonElement data)
 	{
-		var sourceId = StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(data, "sourceId")) ??
-			StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(data, "id"));
+		var sourceId = StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(data, "sourceId"))
+			?? StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(data, "id"));
 		if (sourceId is null)
 		{
 			return;
@@ -1065,7 +1114,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		lock (_intentGate)
 		{
 			var isLive = status is StreamlabsStreamingState.Live or StreamlabsStreamingState.Reconnecting;
-			if (_streamingIntent.Target is { } target && (target is StreamlabsStreamingState.Live) == isLive)
+			if (_streamingIntent.Target is { } target && target is StreamlabsStreamingState.Live == isLive)
 			{
 				_streamingIntent = default;
 			}
@@ -1077,8 +1126,7 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 		lock (_intentGate)
 		{
 			var isRecording = status is StreamlabsRecordingState.Recording;
-			if (_recordingIntent.Target is { } target &&
-				(target is StreamlabsRecordingState.Recording) == isRecording)
+			if (_recordingIntent.Target is { } target && target is StreamlabsRecordingState.Recording == isRecording)
 			{
 				_recordingIntent = default;
 			}
@@ -1103,6 +1151,9 @@ internal sealed class StreamlabsDesktopConnection : IDisposable
 	{
 		public T? Target => Value is { } value && DateTimeOffset.UtcNow < Expires ? value : null;
 
-		public static Intent<T> For(T value, TimeSpan window) => new(value, DateTimeOffset.UtcNow + window);
+		public static Intent<T> For(T value, TimeSpan window)
+		{
+			return new Intent<T>(value, DateTimeOffset.UtcNow + window);
+		}
 	}
 }

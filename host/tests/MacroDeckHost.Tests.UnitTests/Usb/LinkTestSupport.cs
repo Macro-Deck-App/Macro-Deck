@@ -51,11 +51,20 @@ internal sealed class FakeLinkCarrier : ILinkCarrier
 		}
 	}
 
-	public void Send(params LinkFrame[] frames) => SendRaw(frames.SelectMany(frame => frame.Encode()).ToArray());
+	public void Send(params LinkFrame[] frames)
+	{
+		SendRaw(frames.SelectMany(frame => frame.Encode()).ToArray());
+	}
 
-	public void SendRaw(byte[] bytes) => _toHost.Writer.TryWrite(bytes);
+	public void SendRaw(byte[] bytes)
+	{
+		_toHost.Writer.TryWrite(bytes);
+	}
 
-	public void Lose() => _toHost.Writer.TryComplete(new LinkLostException("The test dropped the carrier."));
+	public void Lose()
+	{
+		_toHost.Writer.TryComplete(new LinkLostException("The test dropped the carrier."));
+	}
 
 	public async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
 	{
@@ -105,17 +114,20 @@ internal sealed class FakeLinkCarrier : ILinkCarrier
 	{
 		LinkFrame? found = null;
 		await Eventually.True(() =>
-		{
-			found = Written.Skip(after).Where(match).Cast<LinkFrame?>().FirstOrDefault();
-			return found is not null;
-		}, "the host wrote the expected frame");
+			{
+				found = Written.Skip(after).Where(match).Cast<LinkFrame?>().FirstOrDefault();
+				return found is not null;
+			},
+			"the host wrote the expected frame");
 		return found!.Value;
 	}
 
 	public byte[] DataOn(ushort stream)
-		=> Written.Where(frame => frame.Type == LinkFrameType.Data && frame.Stream == stream)
+	{
+		return Written.Where(frame => frame.Type == LinkFrameType.Data && frame.Stream == stream)
 			.SelectMany(frame => frame.Payload.ToArray())
 			.ToArray();
+	}
 }
 
 internal sealed class LoopbackTestDialer : ILinkStreamDialer, IDisposable
@@ -162,7 +174,9 @@ internal sealed class LoopbackTestDialer : ILinkStreamDialer, IDisposable
 		try
 		{
 			var client = new TcpClient { NoDelay = true };
-			await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)_listener.LocalEndpoint).Port, cancellationToken);
+			await client.ConnectAsync(IPAddress.Loopback,
+				((IPEndPoint)_listener.LocalEndpoint).Port,
+				cancellationToken);
 			var server = await AcceptPeerOfAsync(client, cancellationToken);
 			lock (_clients)
 			{
@@ -196,7 +210,9 @@ internal sealed class LoopbackTestDialer : ILinkStreamDialer, IDisposable
 	}
 
 	public async Task<NetworkStream> AcceptedAsync()
-		=> await _accepted.Reader.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(10));
+	{
+		return await _accepted.Reader.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(10));
+	}
 
 	public void Dispose()
 	{

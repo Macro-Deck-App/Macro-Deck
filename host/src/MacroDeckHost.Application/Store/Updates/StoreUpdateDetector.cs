@@ -14,7 +14,8 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 	private readonly IStoreWithdrawalState _withdrawals;
 	private readonly StoreRegistryOptions _options;
 
-	public StoreUpdateDetector(IStoreCatalog catalog,
+	public StoreUpdateDetector(
+		IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
 		IStoreInstallationStore installations,
 		IStoreUpdateState state,
@@ -45,7 +46,7 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 
 			if (snapshot.FindRemoval(entry.Id, installedVersion) is { } removal)
 			{
-				withdrawals.Add(Withdrawal(entry.Kind, entry.Id, entry.Name, installedVersion, removal, listed: true));
+				withdrawals.Add(Withdrawal(entry.Kind, entry.Id, entry.Name, installedVersion, removal, true));
 			}
 
 			if (snapshot.FindWithdrawal(entry) is not null)
@@ -56,9 +57,9 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 			// An unparseable version on either side is never reported as an update: offering one that
 			// cannot be compared would be a guess, and starting an install off that guess is worse than
 			// staying quiet about it.
-			if (!SemanticVersion.TryParse(installedVersion, out var installed) ||
-				!SemanticVersion.TryParse(entry.LatestVersion, out var latest) ||
-				latest.CompareTo(installed) <= 0)
+			if (!SemanticVersion.TryParse(installedVersion, out var installed)
+				|| !SemanticVersion.TryParse(entry.LatestVersion, out var latest)
+				|| latest.CompareTo(installed) <= 0)
 			{
 				continue;
 			}
@@ -84,15 +85,17 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 		return updates;
 	}
 
-	private IEnumerable<StoreInstalledWithdrawal> UnlistedWithdrawals(StoreCatalogSnapshot snapshot,
+	private IEnumerable<StoreInstalledWithdrawal> UnlistedWithdrawals(
+		StoreCatalogSnapshot snapshot,
 		IReadOnlyList<InstalledPlugin> plugins)
 	{
 		foreach (var record in _installations.LoadAll())
 		{
-			if (record.Kind is not (StoreExtensionKind.Plugin or StoreExtensionKind.IconPack) ||
-				!SameOrigin(record.Origin) ||
-				snapshot.Entries.Any(entry =>
-					entry.Kind == record.Kind && string.Equals(entry.Id, record.PackageId, StringComparison.OrdinalIgnoreCase)))
+			if (record.Kind is not (StoreExtensionKind.Plugin or StoreExtensionKind.IconPack)
+				|| !SameOrigin(record.Origin)
+				|| snapshot.Entries.Any(entry =>
+					entry.Kind == record.Kind
+					&& string.Equals(entry.Id, record.PackageId, StringComparison.OrdinalIgnoreCase)))
 			{
 				continue;
 			}
@@ -107,30 +110,36 @@ public sealed class StoreUpdateDetector : IStoreUpdateDetector
 					record.DisplayName ?? record.PackageId,
 					installedVersion,
 					removal,
-					listed: false);
+					false);
 			}
 		}
 	}
 
-	private bool SameOrigin(string origin) =>
-		Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
-		string.Equals(uri.GetLeftPart(UriPartial.Path), _options.Origin, StringComparison.OrdinalIgnoreCase);
+	private bool SameOrigin(string origin)
+	{
+		return Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+			&& string.Equals(uri.GetLeftPart(UriPartial.Path), _options.Origin, StringComparison.OrdinalIgnoreCase);
+	}
 
-	private static StoreInstalledWithdrawal Withdrawal(StoreExtensionKind kind,
+	private static StoreInstalledWithdrawal Withdrawal(
+		StoreExtensionKind kind,
 		string packageId,
 		string name,
 		string installedVersion,
 		StoreRemovedPackage removal,
-		bool listed) => new()
+		bool listed)
 	{
-		Kind = kind,
-		PackageId = packageId,
-		Name = name,
-		InstalledVersion = installedVersion,
-		Reason = removal.Reason,
-		Replacement = removal.Replacement,
-		Listed = listed
-	};
+		return new StoreInstalledWithdrawal
+		{
+			Kind = kind,
+			PackageId = packageId,
+			Name = name,
+			InstalledVersion = installedVersion,
+			Reason = removal.Reason,
+			Replacement = removal.Replacement,
+			Listed = listed
+		};
+	}
 
 	private string? InstalledVersion(IReadOnlyList<InstalledPlugin> plugins, StoreExtensionKind kind, string id)
 	{

@@ -32,34 +32,76 @@ internal static class SteamVariables
 	private static readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(3);
 
 	public static IReadOnlyList<string> Names { get; } =
-		[
-			IsPlaying, CurrentGameName, CurrentGameId, CurrentGamePlaytimeSeconds, GamesInstalled, FriendsOnline, FriendsInGame,
-			GamesOwned, TotalPlaytimeHours, RecentPlaytimeHours
-		];
+	[
+		IsPlaying, CurrentGameName, CurrentGameId, CurrentGamePlaytimeSeconds, GamesInstalled, FriendsOnline,
+		FriendsInGame,
+		GamesOwned, TotalPlaytimeHours, RecentPlaytimeHours
+	];
 
-	public static string NameOf(string variableKey, string name) => $"{Prefix}{variableKey}_{name}";
+	public static string NameOf(string variableKey, string name)
+	{
+		return $"{Prefix}{variableKey}_{name}";
+	}
 
 	public static IReadOnlyList<VariableDefinition> Declare(string variableKey, VariableConfiguration? configuration)
-		=>
+	{
+		return
 		[
 			Define(variableKey, IsPlaying, VariableType.Boolean, Strings.IsPlaying(), configuration),
 			Define(variableKey, CurrentGameName, VariableType.Text, Strings.CurrentGameName(), configuration),
-			Define(variableKey, CurrentGameId, VariableType.Numeric, Strings.CurrentGameId(), configuration,
-				decimalPlaces: 0),
-			Define(variableKey, CurrentGamePlaytimeSeconds, VariableType.Numeric, Strings.CurrentGamePlaytimeSeconds(),
-				configuration, decimalPlaces: 0, unit: "s"),
-			Define(variableKey, GamesInstalled, VariableType.Numeric, Strings.GamesInstalled(), configuration,
-				decimalPlaces: 0),
-			Define(variableKey, FriendsOnline, VariableType.Numeric, Strings.FriendsOnline(), configuration,
-				decimalPlaces: 0),
-			Define(variableKey, FriendsInGame, VariableType.Numeric, Strings.FriendsInGame(), configuration,
-				decimalPlaces: 0),
-			Define(variableKey, GamesOwned, VariableType.Numeric, Strings.GamesOwned(), configuration, decimalPlaces: 0),
-			Define(variableKey, TotalPlaytimeHours, VariableType.Numeric, Strings.TotalPlaytimeHours(), configuration,
-				decimalPlaces: 1, unit: "h"),
-			Define(variableKey, RecentPlaytimeHours, VariableType.Numeric, Strings.RecentPlaytimeHours(), configuration,
-				decimalPlaces: 1, unit: "h")
+			Define(variableKey,
+				CurrentGameId,
+				VariableType.Numeric,
+				Strings.CurrentGameId(),
+				configuration,
+				0),
+			Define(variableKey,
+				CurrentGamePlaytimeSeconds,
+				VariableType.Numeric,
+				Strings.CurrentGamePlaytimeSeconds(),
+				configuration,
+				0,
+				"s"),
+			Define(variableKey,
+				GamesInstalled,
+				VariableType.Numeric,
+				Strings.GamesInstalled(),
+				configuration,
+				0),
+			Define(variableKey,
+				FriendsOnline,
+				VariableType.Numeric,
+				Strings.FriendsOnline(),
+				configuration,
+				0),
+			Define(variableKey,
+				FriendsInGame,
+				VariableType.Numeric,
+				Strings.FriendsInGame(),
+				configuration,
+				0),
+			Define(variableKey,
+				GamesOwned,
+				VariableType.Numeric,
+				Strings.GamesOwned(),
+				configuration,
+				0),
+			Define(variableKey,
+				TotalPlaytimeHours,
+				VariableType.Numeric,
+				Strings.TotalPlaytimeHours(),
+				configuration,
+				1,
+				"h"),
+			Define(variableKey,
+				RecentPlaytimeHours,
+				VariableType.Numeric,
+				Strings.RecentPlaytimeHours(),
+				configuration,
+				1,
+				"h")
 		];
+	}
 
 	public static VariableReading Read(string localId, SteamSnapshot snapshot, DateTimeOffset now)
 	{
@@ -138,7 +180,11 @@ internal static class SteamVariables
 		return builder.ToString().Trim('_');
 	}
 
-	private static VariableReading Read(string name, SteamAccountSnapshot account, SteamSnapshot snapshot, DateTimeOffset now)
+	private static VariableReading Read(
+		string name,
+		SteamAccountSnapshot account,
+		SteamSnapshot snapshot,
+		DateTimeOffset now)
 	{
 		var game = account.CurrentGame;
 
@@ -150,7 +196,9 @@ internal static class SteamVariables
 			CurrentGamePlaytimeSeconds => VariableReading.Of(game is null
 				? 0L
 				: Math.Max(0L, (long)(now - game.StartedAt).TotalSeconds)),
-			GamesInstalled => snapshot.SteamFound ? VariableReading.Of(snapshot.Games.Count) : VariableReading.Unavailable,
+			GamesInstalled => snapshot.SteamFound
+				? VariableReading.Of(snapshot.Games.Count)
+				: VariableReading.Unavailable,
 			FriendsOnline => Friends(account, candidate => candidate.FriendsOnline),
 			FriendsInGame => Friends(account, candidate => candidate.FriendsInGame),
 			GamesOwned => Owned(account, games => games.Count),
@@ -161,16 +209,25 @@ internal static class SteamVariables
 	}
 
 	private static VariableReading Friends(SteamAccountSnapshot account, Func<SteamAccountSnapshot, int> select)
-		=> account is { Web: SteamWebState.Connected, Friends: SteamFriendsState.Available }
+	{
+		return account is { Web: SteamWebState.Connected, Friends: SteamFriendsState.Available }
 			? VariableReading.Of(select(account))
 			: VariableReading.Unavailable;
+	}
 
-	private static VariableReading Owned(SteamAccountSnapshot account, Func<IReadOnlyList<SteamOwnedGame>, double> select)
-		=> account is { Web: SteamWebState.Connected, Owned: SteamOwnedState.Available }
+	private static VariableReading Owned(
+		SteamAccountSnapshot account,
+		Func<IReadOnlyList<SteamOwnedGame>, double> select)
+	{
+		return account is { Web: SteamWebState.Connected, Owned: SteamOwnedState.Available }
 			? VariableReading.Of(select(account.OwnedGames))
 			: VariableReading.Unavailable;
+	}
 
-	internal static double Hours(long minutes) => Math.Round(minutes / 60d, 1, MidpointRounding.AwayFromZero);
+	internal static double Hours(long minutes)
+	{
+		return Math.Round(minutes / 60d, 1, MidpointRounding.AwayFromZero);
+	}
 
 	private static VariableDefinition Define(
 		string variableKey,
@@ -180,11 +237,13 @@ internal static class SteamVariables
 		VariableConfiguration? configuration,
 		int? decimalPlaces = null,
 		string? unit = null)
-		=> VariableDefinition.Eager(NameOf(variableKey, name), type, decimalPlaces, _refreshInterval)
+	{
+		return VariableDefinition.Eager(NameOf(variableKey, name), type, decimalPlaces, _refreshInterval)
 			with
 			{
 				DisplayName = displayName,
 				Configuration = configuration,
 				Unit = unit
 			};
+	}
 }

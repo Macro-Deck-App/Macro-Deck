@@ -15,77 +15,80 @@ internal static class CompanionActions
 	private const string Portrait = CompanionOrientations.Portrait;
 	private const string Landscape = CompanionOrientations.Landscape;
 
-	public static IReadOnlyList<IActionDefinition> Create(CompanionTargetResolver resolver,
+	public static IReadOnlyList<IActionDefinition> Create(
+		CompanionTargetResolver resolver,
 		Func<IVariableApi?> variables,
-		Func<IUserVariableApi?> userVariables) =>
-	[
-		new CompanionAction("set-brightness",
-			AppStrings.Integrations.Companion.Actions.SetBrightness.Name(),
-			AppStrings.Integrations.Companion.Actions.SetBrightness.Description(),
-			[
-				ActionParameter.Slider(BrightnessParameter,
-					min: 0,
-					max: 100,
-					label: AppStrings.Integrations.Companion.Variables.ScreenBrightnessPercent(),
-					step: 1,
-					defaultValue: 100)
-			],
-			resolver,
-			parameters => ReadPercent(parameters.GetValueOrDefault(BrightnessParameter)) is { } percent
-				? CompanionDeviceCommand.SetBrightness(percent)
-				: null),
-		new CompanionAction("set-orientation",
-			AppStrings.Integrations.Companion.Actions.SetOrientation.Name(),
-			AppStrings.Integrations.Companion.Actions.SetOrientation.Description(),
-			[
-				ActionParameter.Choice(OrientationParameter,
-					options:
-					[
-						new ActionParameterOption
-							{ Value = Automatic, Label = AppStrings.Integrations.Companion.Options.Automatic() },
-						new ActionParameterOption
-							{ Value = Portrait, Label = AppStrings.Integrations.Companion.Options.Portrait() },
-						new ActionParameterOption
-							{ Value = Landscape, Label = AppStrings.Integrations.Companion.Options.Landscape() }
-					],
-					label: AppStrings.Integrations.Companion.Variables.Orientation(),
-					defaultValue: Automatic)
-			],
-			resolver,
-			parameters =>
-				parameters.GetValueOrDefault(OrientationParameter) is string orientation
-					and (Automatic or Portrait or Landscape)
-					? CompanionDeviceCommand.SetOrientation(orientation)
+		Func<IUserVariableApi?> userVariables)
+	{
+		return
+		[
+			new CompanionAction("set-brightness",
+				AppStrings.Integrations.Companion.Actions.SetBrightness.Name(),
+				AppStrings.Integrations.Companion.Actions.SetBrightness.Description(),
+				[
+					ActionParameter.Slider(BrightnessParameter,
+						0,
+						100,
+						AppStrings.Integrations.Companion.Variables.ScreenBrightnessPercent(),
+						step: 1,
+						defaultValue: 100)
+				],
+				resolver,
+				parameters => ReadPercent(parameters.GetValueOrDefault(BrightnessParameter)) is { } percent
+					? CompanionDeviceCommand.SetBrightness(percent)
 					: null),
-		new CompanionAction("vibrate",
-			AppStrings.Integrations.Companion.Actions.Vibrate.Name(),
-			AppStrings.Integrations.Companion.Actions.Vibrate.Description(),
-			[],
-			resolver,
-			_ => CompanionDeviceCommand.Vibrate),
-		new CompanionAction("screen-on",
-			AppStrings.Integrations.Companion.Actions.ScreenOn.Name(),
-			AppStrings.Integrations.Companion.Actions.ScreenOn.Description(),
-			[],
-			resolver,
-			_ => CompanionDeviceCommand.ScreenOn,
-			CompanionCapabilities.ScreenOn),
-		new CompanionAction("screen-off",
-			AppStrings.Integrations.Companion.Actions.ScreenOff.Name(),
-			AppStrings.Integrations.Companion.Actions.ScreenOff.Description(),
-			[],
-			resolver,
-			_ => CompanionDeviceCommand.ScreenOff,
-			CompanionCapabilities.ScreenOff),
-		new CompanionAction("focus-host",
-			AppStrings.Integrations.Companion.Actions.FocusHost.Name(),
-			AppStrings.Integrations.Companion.Actions.FocusHost.Description(),
-			[],
-			resolver,
-			_ => CompanionDeviceCommand.Focus,
-			CompanionCapabilities.Focus),
-		new TakeScreenshotAction(resolver, variables, userVariables)
-	];
+			new CompanionAction("set-orientation",
+				AppStrings.Integrations.Companion.Actions.SetOrientation.Name(),
+				AppStrings.Integrations.Companion.Actions.SetOrientation.Description(),
+				[
+					ActionParameter.Choice(OrientationParameter,
+						[
+							new ActionParameterOption
+								{ Value = Automatic, Label = AppStrings.Integrations.Companion.Options.Automatic() },
+							new ActionParameterOption
+								{ Value = Portrait, Label = AppStrings.Integrations.Companion.Options.Portrait() },
+							new ActionParameterOption
+								{ Value = Landscape, Label = AppStrings.Integrations.Companion.Options.Landscape() }
+						],
+						AppStrings.Integrations.Companion.Variables.Orientation(),
+						defaultValue: Automatic)
+				],
+				resolver,
+				parameters =>
+					parameters.GetValueOrDefault(OrientationParameter) is string orientation
+						and (Automatic or Portrait or Landscape)
+						? CompanionDeviceCommand.SetOrientation(orientation)
+						: null),
+			new CompanionAction("vibrate",
+				AppStrings.Integrations.Companion.Actions.Vibrate.Name(),
+				AppStrings.Integrations.Companion.Actions.Vibrate.Description(),
+				[],
+				resolver,
+				_ => CompanionDeviceCommand.Vibrate),
+			new CompanionAction("screen-on",
+				AppStrings.Integrations.Companion.Actions.ScreenOn.Name(),
+				AppStrings.Integrations.Companion.Actions.ScreenOn.Description(),
+				[],
+				resolver,
+				_ => CompanionDeviceCommand.ScreenOn,
+				CompanionCapabilities.ScreenOn),
+			new CompanionAction("screen-off",
+				AppStrings.Integrations.Companion.Actions.ScreenOff.Name(),
+				AppStrings.Integrations.Companion.Actions.ScreenOff.Description(),
+				[],
+				resolver,
+				_ => CompanionDeviceCommand.ScreenOff,
+				CompanionCapabilities.ScreenOff),
+			new CompanionAction("focus-host",
+				AppStrings.Integrations.Companion.Actions.FocusHost.Name(),
+				AppStrings.Integrations.Companion.Actions.FocusHost.Description(),
+				[],
+				resolver,
+				_ => CompanionDeviceCommand.Focus,
+				CompanionCapabilities.Focus),
+			new TakeScreenshotAction(resolver, variables, userVariables)
+		];
+	}
 
 	private static int? ReadPercent(object? raw)
 	{

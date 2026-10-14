@@ -6,13 +6,18 @@ namespace MacroDeckHost.Integrations;
 
 internal static class ConfigurationIdentityPreparation
 {
-	public static string? ChooseKey(ConfigEntryPreparation preparation,
+	public static string? ChooseKey(
+		ConfigEntryPreparation preparation,
 		Func<StoredConfigEntry, ConfigurationIdentity?> readIdentity,
 		Func<string, IReadOnlyList<VariableDefinition>> declare,
 		Func<int>? suffixFactory)
 	{
 		var rejected = preparation.RejectedVariableNames.ToHashSet(StringComparer.Ordinal);
-		bool IsRejected(string key) => declare(key).Any(variable => variable.Name is { } name && rejected.Contains(name));
+
+		bool IsRejected(string key)
+		{
+			return declare(key).Any(variable => variable.Name is { } name && rejected.Contains(name));
+		}
 
 		var current = preparation.Existing is null ? null : readIdentity(preparation.Existing)?.Key;
 		if (current is not null && !preparation.TitleChanged)
@@ -48,16 +53,21 @@ internal static class ConfigurationIdentityPreparation
 	}
 
 	public static ConfigurationIdentity? ReadIdentity(StoredConfigEntry entry, string identityKey)
-		=> entry.Values.TryGetValue(identityKey, out var identity) &&
-			ConfigurationIdentityJson.TryParse(ReadString(identity), out var parsed)
+	{
+		return entry.Values.TryGetValue(identityKey, out var identity)
+			&& ConfigurationIdentityJson.TryParse(ReadString(identity), out var parsed)
 				? parsed
 				: null;
+	}
 
 	public static bool HasSchema(StoredConfigEntry entry, string schemaKey, string schemaVersion)
-		=> entry.Values.TryGetValue(schemaKey, out var schema) &&
-			string.Equals(ReadString(schema), schemaVersion, StringComparison.Ordinal);
+	{
+		return entry.Values.TryGetValue(schemaKey, out var schema)
+			&& string.Equals(ReadString(schema), schemaVersion, StringComparison.Ordinal);
+	}
 
-	public static async Task SynchronizeAsync(IVariableApi variables,
+	public static async Task SynchronizeAsync(
+		IVariableApi variables,
 		IReadOnlyList<(StoredConfigEntry Entry, ConfigurationIdentity Identity)> usable,
 		Func<string?, Guid?> entryIdOf,
 		Func<string, Guid, string, IReadOnlyList<VariableDefinition>> declare,
@@ -84,5 +94,7 @@ internal static class ConfigurationIdentityPreparation
 	}
 
 	private static string? ReadString(JsonElement element)
-		=> element.ValueKind == JsonValueKind.String ? element.GetString() : element.GetRawText();
+	{
+		return element.ValueKind == JsonValueKind.String ? element.GetString() : element.GetRawText();
+	}
 }

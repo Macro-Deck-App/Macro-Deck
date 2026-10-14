@@ -23,7 +23,7 @@ namespace MacroDeck.Plugin.Analyzers.Rules;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class RemovedLocalizationKeyAnalyzer : DiagnosticAnalyzer
 {
-	private const string _attributeMetadataName =
+	private const string AttributeMetadataName =
 		"MacroDeck.Localization.MacroDeckLocalizationRemovedAttribute";
 
 	/// <inheritdoc />
@@ -44,7 +44,7 @@ public sealed class RemovedLocalizationKeyAnalyzer : DiagnosticAnalyzer
 
 		context.RegisterCompilationStartAction(start =>
 		{
-			var marker = start.Compilation.GetTypeByMetadataName(_attributeMetadataName);
+			var marker = start.Compilation.GetTypeByMetadataName(AttributeMetadataName);
 
 			if (marker is null)
 			{
@@ -83,9 +83,9 @@ public sealed class RemovedLocalizationKeyAnalyzer : DiagnosticAnalyzer
 				continue;
 			}
 
-			return attribute.ConstructorArguments.Length > 0 &&
-				attribute.ConstructorArguments[0].Value is string guidance &&
-				guidance.Length > 0
+			return attribute.ConstructorArguments.Length > 0
+				&& attribute.ConstructorArguments[0].Value is string guidance
+				&& guidance.Length > 0
 					? guidance
 					: "Use a current key instead.";
 		}

@@ -21,7 +21,10 @@ public class JsonProfileStoreTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
 	[Test]
 	public void Save_ThenLoadAll_RoundTripsProfileWithFoldersAndWidgets()

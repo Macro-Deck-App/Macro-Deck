@@ -25,7 +25,8 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly ConcurrentDictionary<(Guid IconId, string Variant), Refusal> _refusals = new();
 
-	public ImageSharpIconVariantDeriver(IIconStorage storage,
+	public ImageSharpIconVariantDeriver(
+		IIconStorage storage,
 		IIconPackCache iconPackCache,
 		TimeProvider timeProvider,
 		ILogger logger)
@@ -33,7 +34,8 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 	{
 	}
 
-	internal ImageSharpIconVariantDeriver(IIconStorage storage,
+	internal ImageSharpIconVariantDeriver(
+		IIconStorage storage,
 		IIconPackCache iconPackCache,
 		TimeProvider timeProvider,
 		ILogger logger,
@@ -46,7 +48,8 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 		_maxDecodedPixels = maxDecodedPixels;
 	}
 
-	public async Task<DerivedVariant> GetOrCreate(IconEntity icon,
+	public async Task<DerivedVariant> GetOrCreate(
+		IconEntity icon,
 		string masterContentHash,
 		int size,
 		CancellationToken cancellationToken)
@@ -71,7 +74,7 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 		var (master, tooLarge) = await ReadMaster(icon, cancellationToken);
 		if (tooLarge)
 		{
-			return Refuse(key, DerivedVariant.NotApplicable, retryAfter: null);
+			return Refuse(key, DerivedVariant.NotApplicable, null);
 		}
 
 		if (master is null)
@@ -96,7 +99,8 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 	}
 
 	// Runs without the request's token: an aborted prefetch would otherwise throw away a finished encode.
-	private async Task<DerivedVariant> Derive(IconEntity icon,
+	private async Task<DerivedVariant> Derive(
+		IconEntity icon,
 		string masterContentHash,
 		int size,
 		string variant,
@@ -111,11 +115,16 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 			var frames = Math.Max(1, info.FrameMetadataCollection.Count);
 			if (Math.Max(info.Width, info.Height) <= size || framePixels * frames > _maxDecodedPixels)
 			{
-				return Refuse(key, DerivedVariant.NotApplicable, retryAfter: null);
+				return Refuse(key, DerivedVariant.NotApplicable, null);
 			}
 
-			using var image = Image.Load(new DecoderOptions { Configuration = ImageSharpDecoding.Configuration, MaxFrames = (uint)(_maxDecodedPixels / framePixels) }, master);
-			var encoder = IconWebpEncoding.For(isAnimated: image.Frames.Count > 1);
+			using var image = Image.Load(new DecoderOptions
+				{
+					Configuration = ImageSharpDecoding.Configuration,
+					MaxFrames = (uint)(_maxDecodedPixels / framePixels)
+				},
+				master);
+			var encoder = IconWebpEncoding.For(image.Frames.Count > 1);
 			image.Mutate(ctx => ctx.Resize(new ResizeOptions { Mode = ResizeMode.Max, Size = new Size(size, size) }));
 			var bytes = await IconWebpEncoding.EncodeToBytes(image, encoder, CancellationToken.None);
 
@@ -158,9 +167,11 @@ public sealed class ImageSharpIconVariantDeriver : IIconVariantDeriver, IDisposa
 	}
 
 	private DerivedVariant? Open(IconEntity icon, string variant)
-		=> _storage.OpenVariant(icon.PackId, icon.Id, variant) is { } stream
+	{
+		return _storage.OpenVariant(icon.PackId, icon.Id, variant) is { } stream
 			? new DerivedVariant(DerivedVariantOutcome.Derived, variant, stream)
 			: null;
+	}
 
 	private bool MasterExists(IconEntity icon)
 	{

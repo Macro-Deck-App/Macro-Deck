@@ -5,8 +5,8 @@ namespace MacroDeckHost.Tests.UnitTests.ThirdParty;
 
 public class ThirdPartyNoticesDocumentTests
 {
-	private static readonly string SectionRule = new('=', 80);
-	private static readonly string TextRule = new('-', 80);
+	private static readonly string _sectionRule = new('=', 80);
+	private static readonly string _textRule = new('-', 80);
 
 	[Test]
 	public void The_notices_shipped_with_the_host_parse_into_a_consistent_document()
@@ -22,8 +22,9 @@ public class ThirdPartyNoticesDocumentTests
 				Is.EquivalentTo(new[] { "nuget", "npm", "cargo", "asset" }));
 			Assert.That(referenced, Is.SubsetOf(textIds));
 			Assert.That(textIds, Is.SubsetOf(referenced));
-			Assert.That(document.Components, Has.All.Matches<ThirdPartyComponent>(component =>
-				component.Licenses.Count > 0 && component.TextIds.Count > 0));
+			Assert.That(document.Components,
+				Has.All.Matches<ThirdPartyComponent>(component =>
+					component.Licenses.Count > 0 && component.TextIds.Count > 0));
 			Assert.That(document.Texts, Has.All.Matches<ThirdPartyText>(text => text.Content.Length > 0));
 		});
 	}
@@ -34,7 +35,9 @@ public class ThirdPartyNoticesDocumentTests
 		var text = string.Join('\n',
 			"THIRD-PARTY SOFTWARE NOTICES AND INFORMATION",
 			"",
-			SectionRule, "Rust crates (Macro Deck desktop application)", SectionRule,
+			_sectionRule,
+			"Rust crates (Macro Deck desktop application)",
+			_sectionRule,
 			"",
 			"dual",
 			"  License: MIT",
@@ -44,16 +47,18 @@ public class ThirdPartyNoticesDocumentTests
 			"  Note: Vendored: part one.",
 			"  Texts: [1], [2]",
 			"",
-			SectionRule, "License and notice texts", SectionRule,
+			_sectionRule,
+			"License and notice texts",
+			_sectionRule,
 			"",
 			"[1] dual",
-			TextRule,
+			_textRule,
 			"First text",
 			"[2] looks like a header but has no rule",
-			SectionRule,
+			_sectionRule,
 			"",
 			"[2] dual",
-			TextRule,
+			_textRule,
 			"Second text",
 			"");
 
@@ -72,7 +77,7 @@ public class ThirdPartyNoticesDocumentTests
 			Assert.That(component.Note, Is.EqualTo("Vendored: part one."));
 			Assert.That(component.TextIds, Is.EqualTo(new[] { 1, 2 }));
 			Assert.That(document.Texts[0].Content,
-				Is.EqualTo($"First text\n[2] looks like a header but has no rule\n{SectionRule}"));
+				Is.EqualTo($"First text\n[2] looks like a header but has no rule\n{_sectionRule}"));
 			Assert.That(document.Texts[1].Content, Is.EqualTo("Second text"));
 		});
 	}

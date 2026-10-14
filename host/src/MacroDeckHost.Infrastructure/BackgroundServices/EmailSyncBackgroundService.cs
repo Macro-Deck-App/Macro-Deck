@@ -97,8 +97,8 @@ public sealed class EmailSyncBackgroundService : HostReadyBackgroundService
 	{
 		_registry.ReconcileSubscriptions();
 
-		if (_registry.IsEmailIntegration(e.IntegrationId) ||
-			_cache.Snapshot.Inboxes.Any(state => state.Inbox.IntegrationId == e.IntegrationId))
+		if (_registry.IsEmailIntegration(e.IntegrationId)
+			|| _cache.Snapshot.Inboxes.Any(state => state.Inbox.IntegrationId == e.IntegrationId))
 		{
 			_signal.Request(e.IntegrationId, null);
 		}

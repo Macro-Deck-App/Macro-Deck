@@ -32,13 +32,19 @@ public sealed class CalendarRegistry : ICalendarRegistry
 	}
 
 	public IReadOnlyList<CalendarAccountDescriptor> GetAccounts()
-		=> [.. Enumerate().Select(entry => entry.Account)];
+	{
+		return [.. Enumerate().Select(entry => entry.Account)];
+	}
 
 	public ResolvedCalendarAccount? Resolve(string accountId)
-		=> Enumerate().FirstOrDefault(entry => entry.Account.AccountId == accountId);
+	{
+		return Enumerate().FirstOrDefault(entry => entry.Account.AccountId == accountId);
+	}
 
 	public bool IsCalendarIntegration(string integrationId)
-		=> Enumerate().Any(entry => entry.Account.IntegrationId == integrationId);
+	{
+		return Enumerate().Any(entry => entry.Account.IntegrationId == integrationId);
+	}
 
 	private IEnumerable<ResolvedCalendarAccount> Enumerate()
 	{
@@ -54,8 +60,8 @@ public sealed class CalendarRegistry : ICalendarRegistry
 			{
 				if (!QualifiedId.TryCreate(integration.Id, account.Id, out var id))
 				{
-					_logger.Warning("Integration {IntegrationId} announced an invalid calendar account id {LocalId}; " +
-						"skipping it",
+					_logger.Warning("Integration {IntegrationId} announced an invalid calendar account id {LocalId}; "
+						+ "skipping it",
 						integration.Id,
 						account.Id);
 					continue;
@@ -64,8 +70,8 @@ public sealed class CalendarRegistry : ICalendarRegistry
 				var accountId = id.ToString();
 				if (!seen.Add(accountId))
 				{
-					_logger.Warning("Integration {IntegrationId} announced calendar account {LocalId} more than once; " +
-						"skipping the duplicate",
+					_logger.Warning("Integration {IntegrationId} announced calendar account {LocalId} more than once; "
+						+ "skipping the duplicate",
 						integration.Id,
 						account.Id);
 					continue;
@@ -82,6 +88,9 @@ public sealed class CalendarRegistry : ICalendarRegistry
 		}
 	}
 
-	private IEnumerable<IIntegration> EnabledProviders() => _integrations.Integrations
-		.Where(integration => integration is ICalendarProvider && _integrations.IsEnabled(integration.Id));
+	private IEnumerable<IIntegration> EnabledProviders()
+	{
+		return _integrations.Integrations
+			.Where(integration => integration is ICalendarProvider && _integrations.IsEnabled(integration.Id));
+	}
 }

@@ -76,7 +76,9 @@ public class WidgetUiProviderRegistryEvictionTests
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; }
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(null);
+		{
+			return Task.FromResult<IUiSession?>(null);
+		}
 	}
 
 	private sealed class SingleWidgetFolderCache : IFolderCache
@@ -94,44 +96,88 @@ public class WidgetUiProviderRegistryEvictionTests
 			}
 		}
 
-		public Task InitializeCache() => throw new NotSupportedException();
+		public Task InitializeCache()
+		{
+			throw new NotSupportedException();
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => throw new NotSupportedException();
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			throw new NotSupportedException();
+		}
 
 		public List<FolderEntity> GetAllFolders()
-			=>
+		{
+			return
 			[
-				new()
+				new FolderEntity
 					{ Id = Guid.NewGuid(), Name = "Folder", Order = 0, Widgets = _widgets }
 			];
+		}
 
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => throw new NotSupportedException();
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdate(FolderEntity folder) => throw new NotSupportedException();
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => throw new NotSupportedException();
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId) => throw new NotSupportedException();
+		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void AddWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets) => throw new NotSupportedException();
+		public void AddWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void UpdateWidget(Guid folderId, WidgetEntity widget) => throw new NotSupportedException();
+		public void UpdateWidget(Guid folderId, WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgets(Guid folderId, IReadOnlyList<WidgetEntity> widgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public void UpdateWidgetPositions(Guid folderId, IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidget(Guid folderId, Guid widgetId) => throw new NotSupportedException();
+		public void RemoveWidget(Guid folderId, Guid widgetId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds) => throw new NotSupportedException();
+		public void RemoveWidgets(Guid folderId, IReadOnlyList<Guid> widgetIds)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void ReplaceWidgets(Guid folderId, IReadOnlyList<Guid> removeIds, IReadOnlyList<WidgetEntity> addWidgets)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 }

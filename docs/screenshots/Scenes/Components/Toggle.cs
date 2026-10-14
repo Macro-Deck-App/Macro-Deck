@@ -1,3 +1,5 @@
+// ReSharper disable CheckNamespace
+
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Dsl;
 
@@ -19,9 +21,15 @@ internal static partial class Scenes
 						On = true,
 						LevelColor = "#34c759",
 						Size = 0.3,
-						Events = [UiEventHandler.On(UiComponentEvents.Change, () => { })],
-					},
-				],
+						Events =
+						[
+							UiEventHandler.On(UiComponentEvents.Change,
+								() =>
+								{
+								})
+						]
+					}
+				]
 			});
 	}
 }

@@ -95,7 +95,13 @@ internal sealed class PinScopeFixture : IDisposable
 		return widget;
 	}
 
-	public FolderEntity Reload(FolderEntity folder) => Cache.GetFolderById(folder.Id)!;
+	public FolderEntity Reload(FolderEntity folder)
+	{
+		return Cache.GetFolderById(folder.Id)!;
+	}
 
-	public void Dispose() => Cache.Dispose();
+	public void Dispose()
+	{
+		Cache.Dispose();
+	}
 }

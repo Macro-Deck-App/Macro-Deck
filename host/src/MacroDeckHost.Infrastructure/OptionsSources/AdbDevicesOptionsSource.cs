@@ -35,8 +35,8 @@ public sealed class AdbDevicesOptionsSource : IHostOptionsSource
 				Label = $"{device.Model ?? device.Serial} ({device.Serial})"
 			})
 			.Where(option =>
-				filter is null ||
-				(option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase)));
+				filter is null
+				|| (option.Label.Literal ?? string.Empty).Contains(filter, StringComparison.OrdinalIgnoreCase)));
 
 		return Task.FromResult(new DynamicOptionsResult
 		{

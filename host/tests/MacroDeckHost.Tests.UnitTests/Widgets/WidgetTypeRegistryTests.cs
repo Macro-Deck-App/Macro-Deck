@@ -162,9 +162,11 @@ public class WidgetTypeRegistryTests
 
 	[Test]
 	public void A_type_with_configuration_and_no_schema_is_refused()
-		=> Assert.That(() => _registry.Register("com.example.gauges",
+	{
+		Assert.That(() => _registry.Register("com.example.gauges",
 				new WidgetTypeDescriptor("gauge", LocalizedText.FromLiteral("Gauge"), HasConfiguration: true)),
 			Throws.ArgumentException);
+	}
 
 	[Test]
 	public async Task A_type_with_configuration_and_a_schema_is_accepted()
@@ -202,7 +204,9 @@ public class WidgetTypeRegistryTests
 
 	[Test]
 	public void With_no_providers_around_every_built_in_type_reports_no_config_surface()
-		=> Assert.That(_registry.All.Select(entry => entry.Descriptor.HasConfiguration), Is.All.False);
+	{
+		Assert.That(_registry.All.Select(entry => entry.Descriptor.HasConfiguration), Is.All.False);
+	}
 
 	[Test]
 	public void A_built_in_type_whose_provider_declares_a_config_surface_reports_HasConfiguration()
@@ -228,7 +232,9 @@ public class WidgetTypeRegistryTests
 	}
 
 	private static WidgetTypeDescriptor Descriptor(WidgetTypeRegistry registry, string id)
-		=> registry.All.Single(entry => entry.WidgetTypeId == id).Descriptor;
+	{
+		return registry.All.Single(entry => entry.WidgetTypeId == id).Descriptor;
+	}
 
 	private sealed class StubWidgetUiProvider : IBuiltInWidgetUiProvider
 	{
@@ -243,6 +249,8 @@ public class WidgetTypeRegistryTests
 		public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; }
 
 		public Task<IUiSession?> CreateSessionAsync(UiSessionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult<IUiSession?>(null);
+		{
+			return Task.FromResult<IUiSession?>(null);
+		}
 	}
 }

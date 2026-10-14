@@ -68,7 +68,7 @@ public class ConnectCredentialIsolationTests
 
 		if (Directory.Exists(_dataDir))
 		{
-			Directory.Delete(_dataDir, recursive: true);
+			Directory.Delete(_dataDir, true);
 		}
 	}
 
@@ -83,7 +83,7 @@ public class ConnectCredentialIsolationTests
 
 		await _store.Clear();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _store.Load(), Is.Null);
 			Assert.That(FilesContaining(marker), Is.Empty);
@@ -102,7 +102,7 @@ public class ConnectCredentialIsolationTests
 				.SetValue(AppPreferenceService.ConnectCredentialIssuerKey, storedIssuer);
 		}
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(await _store.Load(), Is.Null);
 			Assert.That(ConnectSecretRows(), Is.Zero, "the old refresh token was kept");
@@ -138,11 +138,11 @@ public class ConnectCredentialIsolationTests
 		await new BackupArchiveReader().DecryptPayload(archive, recoveryKey, payload);
 
 		var hits = new List<string>();
-		using (var inner = ZipFile.OpenRead(payload))
+		using (var inner = await ZipFile.OpenReadAsync(payload))
 		{
 			foreach (var entry in inner.Entries)
 			{
-				using var stream = entry.Open();
+				using var stream = await entry.OpenAsync();
 				using var buffer = new MemoryStream();
 				await stream.CopyToAsync(buffer);
 
@@ -200,18 +200,25 @@ public class ConnectCredentialIsolationTests
 	}
 
 	private static bool ContainsMarker(byte[] content, string marker)
-		=> Contains(content, Encoding.UTF8.GetBytes(marker)) ||
-			Contains(content, Encoding.Unicode.GetBytes(marker)) ||
-			Contains(content, Encoding.UTF8.GetBytes(Convert.ToBase64String(Encoding.UTF8.GetBytes(marker))));
+	{
+		return Contains(content, Encoding.UTF8.GetBytes(marker))
+			|| Contains(content, Encoding.Unicode.GetBytes(marker))
+			|| Contains(content, Encoding.UTF8.GetBytes(Convert.ToBase64String(Encoding.UTF8.GetBytes(marker))));
+	}
 
 	private static bool Contains(byte[] haystack, byte[] needle)
-		=> haystack.AsSpan().IndexOf(needle) >= 0;
+	{
+		return haystack.AsSpan().IndexOf(needle) >= 0;
+	}
 
 	private static string Marker()
-		=> Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+	{
+		return Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+	}
 
 	private static BackupArchiveManifest Manifest()
-		=> new()
+	{
+		return new BackupArchiveManifest
 		{
 			BackupId = Guid.NewGuid(),
 			MacroDeckVersion = "3.0.0",
@@ -221,6 +228,7 @@ public class ConnectCredentialIsolationTests
 			HostPlatform = "test",
 			Components = [.. BackupComponentGroups.AllIds]
 		};
+	}
 
 	private List<string> FilesContaining(string marker)
 	{

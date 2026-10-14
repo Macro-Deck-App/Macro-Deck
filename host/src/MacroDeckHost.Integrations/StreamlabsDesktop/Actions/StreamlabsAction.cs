@@ -30,10 +30,16 @@ internal class StreamlabsAction : IActionDefinition
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } = [];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _command);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _command);
+	}
 
 	/// <summary>The connection this action runs against, or null when Streamlabs Desktop is not set up.</summary>
-	protected StreamlabsDesktopConnection? Connection() => _resolver();
+	protected StreamlabsDesktopConnection? Connection()
+	{
+		return _resolver();
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

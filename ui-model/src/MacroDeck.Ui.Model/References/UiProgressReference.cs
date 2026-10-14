@@ -61,9 +61,13 @@ public sealed record UiProgressReference
 	/// <summary>A position advancing at normal speed from <paramref name="positionMs" /> at
 	/// <paramref name="anchor" />.</summary>
 	public static UiProgressReference Advancing(long positionMs, DateTimeOffset anchor, long? durationMs = null)
-		=> new() { PositionMs = positionMs, Anchor = anchor, DurationMs = durationMs };
+	{
+		return new UiProgressReference { PositionMs = positionMs, Anchor = anchor, DurationMs = durationMs };
+	}
 
 	/// <summary>A position that is not advancing at all - <see cref="Rate" /> written as <c>0</c>.</summary>
 	public static UiProgressReference Halted(long positionMs, DateTimeOffset anchor, long? durationMs = null)
-		=> new() { PositionMs = positionMs, Anchor = anchor, DurationMs = durationMs, Rate = 0 };
+	{
+		return new UiProgressReference { PositionMs = positionMs, Anchor = anchor, DurationMs = durationMs, Rate = 0 };
+	}
 }

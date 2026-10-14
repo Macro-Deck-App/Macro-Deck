@@ -10,11 +10,15 @@ public sealed class MessageChannelException : Exception
 		Topic = topic;
 	}
 
-	public MessageChannelException(MessageChannelErrorCode errorCode,
+	public MessageChannelException(
+		MessageChannelErrorCode errorCode,
 		string? topic,
 		string message,
 		string? handlerOwner)
-		: this(errorCode, topic, message) => HandlerOwner = handlerOwner;
+		: this(errorCode, topic, message)
+	{
+		HandlerOwner = handlerOwner;
+	}
 
 	public MessageChannelException()
 	{

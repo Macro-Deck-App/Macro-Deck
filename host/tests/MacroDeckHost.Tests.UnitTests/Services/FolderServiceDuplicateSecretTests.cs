@@ -63,7 +63,10 @@ public class FolderServiceDuplicateSecretTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Duplicate_ClonesWidgetSecretsSoTheCopyDoesNotShareThem()
@@ -84,7 +87,9 @@ public class FolderServiceDuplicateSecretTests
 	}
 
 	private static Guid SingleSecretId(string data)
-		=> Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+	{
+		return Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 			.Select(m => Guid.Parse(m.Value))
 			.Single();
+	}
 }

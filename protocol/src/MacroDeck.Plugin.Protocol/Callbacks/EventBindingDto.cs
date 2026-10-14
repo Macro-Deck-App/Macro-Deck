@@ -16,13 +16,15 @@ public sealed record EventBindingDto
 		= new Dictionary<string, EventBindingValueDto>(StringComparer.Ordinal);
 
 	public EventBinding ToBinding()
-		=> new()
+	{
+		return new EventBinding
 		{
 			EventId = EventId,
 			Parameters = Parameters.ToDictionary(pair => pair.Key,
 				pair => new EventBindingValue(pair.Value.Value, pair.Value.Operator),
 				StringComparer.Ordinal)
 		};
+	}
 }
 
 /// <summary>Mirrors the SDK's <c>EventBindingValue</c>. <see cref="Value" /> is absent for a state operator.</summary>

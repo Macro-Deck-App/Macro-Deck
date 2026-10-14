@@ -4,19 +4,27 @@ public static class Result
 {
 	public static Result<TError> Ok<TError>()
 		where TError : struct, Enum
-		=> new(true, null, null);
+	{
+		return new Result<TError>(true, null, null);
+	}
 
 	public static Result<TError> Fail<TError>(TError error, string? message = null)
 		where TError : struct, Enum
-		=> new(false, error, message);
+	{
+		return new Result<TError>(false, error, message);
+	}
 
 	public static Result<TData, TError> Ok<TData, TError>(TData data)
 		where TError : struct, Enum
-		=> new(true, data, null, null);
+	{
+		return new Result<TData, TError>(true, data, null, null);
+	}
 
 	public static Result<TData, TError> Fail<TData, TError>(TError error, string? message = null)
 		where TError : struct, Enum
-		=> new(false, default, error, message);
+	{
+		return new Result<TData, TError>(false, default, error, message);
+	}
 }
 
 public class Result<TError>

@@ -15,7 +15,8 @@ public sealed class VideoStreamProviderHost
 	private readonly VideoStreamProviderRegistry _registry;
 	private readonly TimeProvider _timeProvider;
 
-	public VideoStreamProviderHost(VideoStreamProviderRegistry registry,
+	public VideoStreamProviderHost(
+		VideoStreamProviderRegistry registry,
 		IVideoStreamSessionBroker broker,
 		TimeProvider timeProvider,
 		ILogger logger)

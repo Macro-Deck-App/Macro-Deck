@@ -46,22 +46,25 @@ internal sealed class RemotePluginDescriptorLocalizationTests
 		return new LocalizationResolver(registry);
 	}
 
-	private static ActionDescriptorDto Descriptor() => new()
+	private static ActionDescriptorDto Descriptor()
 	{
-		LocalId = "play",
-		Name = new LocalizedString(_playKey),
-		Description = "Starts playback",
-		Parameters =
-		[
-			new ActionParameterDto
-			{
-				Name = "device",
-				Type = "String",
-				Label = new LocalizedString(new LocalizationKey(LocalizationScope.ForPlugin(PluginId),
-					"Parameters.Device"))
-			}
-		]
-	};
+		return new ActionDescriptorDto
+		{
+			LocalId = "play",
+			Name = new LocalizedString(_playKey),
+			Description = "Starts playback",
+			Parameters =
+			[
+				new ActionParameterDto
+				{
+					Name = "device",
+					Type = "String",
+					Label = new LocalizedString(new LocalizationKey(LocalizationScope.ForPlugin(PluginId),
+						"Parameters.Device"))
+				}
+			]
+		};
+	}
 
 	[Test]
 	public void An_action_name_reaches_the_reader_in_the_readers_language()
@@ -117,17 +120,26 @@ internal sealed class RemotePluginDescriptorLocalizationTests
 
 	private sealed class ThrowingCapabilityInvoker : IPluginCapabilityInvoker
 	{
-		public Task<JsonElement?> InvokeAsync(string pluginId,
+		public Task<JsonElement?> InvokeAsync(
+			string pluginId,
 			CapabilityInvokeRequest request,
 			CancellationToken cancellationToken)
-			=> throw new NotSupportedException("These tests never invoke the plugin.");
+		{
+			throw new NotSupportedException("These tests never invoke the plugin.");
+		}
 
-		public bool TryComplete(string pluginId, ProtocolEnvelope result) => throw new NotSupportedException();
+		public bool TryComplete(string pluginId, ProtocolEnvelope result)
+		{
+			throw new NotSupportedException();
+		}
 
 		public void AbortAll(string pluginId, ProtocolError reason)
 		{
 		}
 
-		public bool IsLiveActionExecute(string pluginId, string correlationId) => false;
+		public bool IsLiveActionExecute(string pluginId, string correlationId)
+		{
+			return false;
+		}
 	}
 }

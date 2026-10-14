@@ -37,19 +37,22 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 	[
 		ObsTargetResolver.Parameter(),
 		ActionParameter.DynamicChoice(SourceParameter,
-			label: AppStrings.Integrations.Obs.Params.Source(),
+			AppStrings.Integrations.Obs.Params.Source(),
 			required: true),
 		ActionParameter.DynamicChoice(FilterParameter,
-			label: AppStrings.Integrations.Obs.Params.Filter(),
+			AppStrings.Integrations.Obs.Params.Filter(),
 			required: true),
 		ActionParameter.Autocomplete(VariableParameter,
-			label: AppStrings.Integrations.Obs.Params.SaveToVariable(),
-			description: AppStrings.Integrations.Obs.Actions.GetFilterState.VariableDescription(),
+			AppStrings.Integrations.Obs.Params.SaveToVariable(),
+			AppStrings.Integrations.Obs.Actions.GetFilterState.VariableDescription(),
 			optionsSourceId: HostOptionsSources.UserVariables,
 			required: true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver, _variables);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver, _variables);
+	}
 
 	public async Task<DynamicOptionsResult> GetDynamicOptionsAsync(
 		DynamicOptionsContext context,
@@ -65,9 +68,9 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 
 		if (connection is not null)
 		{
-			if (context.ParameterName == FilterParameter &&
-				context.CurrentParameters.GetValueOrDefault(SourceParameter) is string source &&
-				!string.IsNullOrWhiteSpace(source))
+			if (context.ParameterName == FilterParameter
+				&& context.CurrentParameters.GetValueOrDefault(SourceParameter) is string source
+				&& !string.IsNullOrWhiteSpace(source))
 			{
 				values = await connection.GetSourceFilterNamesAsync(source);
 			}
@@ -105,18 +108,18 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 				return error;
 			}
 
-			if (context.Parameters.GetValueOrDefault(SourceParameter) is not string source ||
-				string.IsNullOrWhiteSpace(source) ||
-				context.Parameters.GetValueOrDefault(FilterParameter) is not string filter ||
-				string.IsNullOrWhiteSpace(filter))
+			if (context.Parameters.GetValueOrDefault(SourceParameter) is not string source
+				|| string.IsNullOrWhiteSpace(source)
+				|| context.Parameters.GetValueOrDefault(FilterParameter) is not string filter
+				|| string.IsNullOrWhiteSpace(filter))
 			{
 				_logger.Warning("OBS get-filter action skipped: source or filter not selected");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
 					AppStrings.Integrations.Obs.Errors.NoSourceOrFilterSelected());
 			}
 
-			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable ||
-				string.IsNullOrWhiteSpace(variable))
+			if (context.Parameters.GetValueOrDefault(VariableParameter) is not string variable
+				|| string.IsNullOrWhiteSpace(variable))
 			{
 				_logger.Warning("OBS get-filter action skipped: no target variable");
 				return ActionResult.Failed(ActionErrorCodes.InvalidParameter,
@@ -130,7 +133,7 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 					source,
 					filter);
 				return ActionResult.Failed(ActionErrorCodes.NotFound,
-					AppStrings.Integrations.Obs.Errors.FilterNotFound(filter: filter, source: source));
+					AppStrings.Integrations.Obs.Errors.FilterNotFound(filter, source));
 			}
 
 			var written = await ObsVariableWriter.WriteAsync(_variables,
@@ -142,7 +145,7 @@ internal sealed class GetSourceFilterStateActionDefinition : IDynamicOptionsActi
 			return written
 				? ActionResult.Success()
 				: ActionResult.Failed(ActionErrorCodes.ProviderError,
-					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable: variable));
+					AppStrings.Integrations.Obs.Errors.VariableWriteFailed(variable));
 		}
 	}
 }

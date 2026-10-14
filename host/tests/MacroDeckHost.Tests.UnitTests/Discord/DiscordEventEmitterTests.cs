@@ -46,7 +46,7 @@ internal sealed class DiscordEventEmitterTests
 	[Test]
 	public void The_first_snapshot_reports_the_connection_but_not_the_state_it_found()
 	{
-		_emitter.Observe(Connected(selfMuted: true, selfDeafened: true, channelId: "1", channelName: "General"));
+		_emitter.Observe(Connected(true, true, channelId: "1", channelName: "General"));
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_connectedOnly));
 	}
@@ -56,7 +56,7 @@ internal sealed class DiscordEventEmitterTests
 	{
 		Seed(Connected());
 
-		_emitter.Observe(Connected(selfMuted: true));
+		_emitter.Observe(Connected(true));
 		_emitter.Observe(Connected());
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_muteThenUnmute));
@@ -87,7 +87,7 @@ internal sealed class DiscordEventEmitterTests
 	{
 		Seed(Connected(selfDeafened: true));
 
-		_emitter.Observe(Connected(selfMuted: true, selfDeafened: true));
+		_emitter.Observe(Connected(true, true));
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_mutedOnly));
 	}
@@ -95,9 +95,9 @@ internal sealed class DiscordEventEmitterTests
 	[Test]
 	public void Undeafening_while_still_self_muted_does_not_report_the_microphone_live()
 	{
-		Seed(Connected(selfMuted: true, selfDeafened: true));
+		Seed(Connected(true, true));
 
-		_emitter.Observe(Connected(selfMuted: true));
+		_emitter.Observe(Connected(true));
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_undeafenedOnly));
 	}
@@ -193,7 +193,7 @@ internal sealed class DiscordEventEmitterTests
 	[Test]
 	public void Losing_the_connection_reports_a_disconnect()
 	{
-		Seed(Connected(selfMuted: true, channelId: "1"));
+		Seed(Connected(true, channelId: "1"));
 
 		_emitter.Observe(DiscordState.Disconnected);
 
@@ -208,7 +208,7 @@ internal sealed class DiscordEventEmitterTests
 		_emitter.Reset();
 		_publisher.Published.Clear();
 
-		_emitter.Observe(Connected(selfMuted: true, selfDeafened: true, channelId: "1", channelName: "General"));
+		_emitter.Observe(Connected(true, true, channelId: "1", channelName: "General"));
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_connectedOnly));
 	}
@@ -237,8 +237,8 @@ internal sealed class DiscordEventEmitterTests
 	[Test]
 	public void Speaking_is_published_directly_with_the_speaker()
 	{
-		_emitter.PublishSpeaking("42", isSelf: true, speaking: true);
-		_emitter.PublishSpeaking("43", isSelf: false, speaking: false);
+		_emitter.PublishSpeaking("42", true, true);
+		_emitter.PublishSpeaking("43", false, false);
 
 		Assert.That(_publisher.Ids, Is.EqualTo(_speakingStartThenStop));
 		Assert.Multiple(() =>
@@ -285,18 +285,21 @@ internal sealed class DiscordEventEmitterTests
 		bool serverDeafened = false,
 		string? channelId = null,
 		string? channelName = null,
-		string? guildName = null) => new()
+		string? guildName = null)
 	{
-		IsConnected = true,
-		UserId = "me",
-		SelfMuted = selfMuted,
-		SelfDeafened = selfDeafened,
-		ServerMuted = serverMuted,
-		ServerDeafened = serverDeafened,
-		VoiceChannelId = channelId,
-		VoiceChannelName = channelName,
-		VoiceGuildName = guildName
-	};
+		return new DiscordState
+		{
+			IsConnected = true,
+			UserId = "me",
+			SelfMuted = selfMuted,
+			SelfDeafened = selfDeafened,
+			ServerMuted = serverMuted,
+			ServerDeafened = serverDeafened,
+			VoiceChannelId = channelId,
+			VoiceChannelName = channelName,
+			VoiceGuildName = guildName
+		};
+	}
 
 	private void Seed(DiscordState state)
 	{
@@ -311,6 +314,8 @@ internal sealed class DiscordEventEmitterTests
 		public IEnumerable<string> Ids => Published.Select(p => p.EventId);
 
 		public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
-			=> Published.Add((eventId, parameters));
+		{
+			Published.Add((eventId, parameters));
+		}
 	}
 }

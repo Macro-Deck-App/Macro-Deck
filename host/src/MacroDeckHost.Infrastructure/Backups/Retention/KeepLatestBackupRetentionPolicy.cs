@@ -12,11 +12,13 @@ public sealed class KeepLatestBackupRetentionPolicy : IBackupRetentionPolicy
 	public IReadOnlyList<BackupDescriptor> SelectForDeletion(
 		IReadOnlyList<BackupDescriptor> backups,
 		BackupRetentionSettings settings)
-		=>
+	{
+		return
 		[
 			.. backups
 				.Where(backup => !BackupRetentionRules.IsExempt(backup))
 				.OrderByDescending(backup => backup.CreatedAt)
 				.Skip(Math.Max(settings.KeepLatest, 0))
 		];
+	}
 }

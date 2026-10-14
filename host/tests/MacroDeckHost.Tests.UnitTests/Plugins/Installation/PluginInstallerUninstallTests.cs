@@ -103,9 +103,13 @@ internal sealed class PluginInstallerUninstallTests
 	}
 
 	[TearDown]
-	public void TearDown() => _paths.Cleanup();
+	public void TearDown()
+	{
+		_paths.Cleanup();
+	}
 
-	private string BuildArtifact(string version = "1.0.0",
+	private string BuildArtifact(
+		string version = "1.0.0",
 		string? extraManifestBlocks = null,
 		string fileName = "plugin.macroDeckPlugin",
 		string pluginId = PluginId)
@@ -208,7 +212,9 @@ internal sealed class PluginInstallerUninstallTests
 	// --- uninstalling what is already half gone ---------------------------------------------------
 
 	private DateTime? RevokedAtOf(string pluginId)
-		=> _registrations.Registrations.Single(registration => registration.PluginId == pluginId).RevokedAt;
+	{
+		return _registrations.Registrations.Single(registration => registration.PluginId == pluginId).RevokedAt;
+	}
 
 	[Test]
 	public async Task Uninstalling_a_plugin_whose_folder_was_deleted_behind_the_hosts_back_retires_its_host_state()
@@ -217,7 +223,7 @@ internal sealed class PluginInstallerUninstallTests
 		SeedRegistration(token.Id);
 		await Install(BuildArtifact(), new PluginInstallRequest { StartAfterActivation = false });
 		await _supervisor.Start(PluginId);
-		Directory.Delete(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId), recursive: true);
+		Directory.Delete(PluginInstallPaths.PluginDirectory(_paths.PluginsDirectory, PluginId), true);
 
 		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest());
 
@@ -238,7 +244,7 @@ internal sealed class PluginInstallerUninstallTests
 
 		// What a host killed mid-uninstall leaves behind: the versions are gone, everything the host
 		// tracks about the plugin is not.
-		Directory.Delete(PluginInstallPaths.VersionsDirectory(_paths.PluginsDirectory, PluginId), recursive: true);
+		Directory.Delete(PluginInstallPaths.VersionsDirectory(_paths.PluginsDirectory, PluginId), true);
 
 		var result = await _installer.Uninstall(PluginId, new PluginUninstallRequest());
 
@@ -359,26 +365,32 @@ internal sealed class PluginInstallerUninstallTests
 
 	// --- the host state a removed plugin must not keep --------------------------------------------
 
-	private void RecordCompatibility(string pluginId) => _compatibility.Record(new PluginCompatibilityEvaluation
+	private void RecordCompatibility(string pluginId)
 	{
-		PluginId = pluginId,
-		DisplayName = pluginId,
-		NegotiatedProtocolVersion = 1
-	});
+		_compatibility.Record(new PluginCompatibilityEvaluation
+		{
+			PluginId = pluginId,
+			DisplayName = pluginId,
+			NegotiatedProtocolVersion = 1
+		});
+	}
 
-	private Task CreateSession(string pluginId) => _sessionRegistry.Create(new PluginSessionRecord
+	private Task CreateSession(string pluginId)
 	{
-		SessionId = $"session-{pluginId}",
-		PluginId = pluginId,
-		DisplayName = pluginId,
-		AccessTokenId = Guid.NewGuid(),
-		Origin = PluginSessionOrigin.SelfRegistered,
-		NegotiatedVersion = 1,
-		Capabilities = new Dictionary<string, CapabilityNegotiationResult>(),
-		DeclaredCapabilities = [],
-		State = PluginSessionState.Connected,
-		CreatedAt = TimeProvider.System.GetUtcNow()
-	});
+		return _sessionRegistry.Create(new PluginSessionRecord
+		{
+			SessionId = $"session-{pluginId}",
+			PluginId = pluginId,
+			DisplayName = pluginId,
+			AccessTokenId = Guid.NewGuid(),
+			Origin = PluginSessionOrigin.SelfRegistered,
+			NegotiatedVersion = 1,
+			Capabilities = new Dictionary<string, CapabilityNegotiationResult>(),
+			DeclaredCapabilities = [],
+			State = PluginSessionState.Connected,
+			CreatedAt = TimeProvider.System.GetUtcNow()
+		});
+	}
 
 	[Test]
 	public async Task Uninstalling_forgets_only_that_plugins_compatibility_verdict()
@@ -485,6 +497,8 @@ internal sealed class PluginInstallerUninstallTests
 	private sealed class NoHttpClientFactory : IHttpClientFactory
 	{
 		public HttpClient CreateClient(string name)
-			=> throw new InvalidOperationException("A unit test must not reach the network.");
+		{
+			throw new InvalidOperationException("A unit test must not reach the network.");
+		}
 	}
 }

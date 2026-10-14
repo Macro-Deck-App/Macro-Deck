@@ -26,8 +26,10 @@ public class AssetContentHashTests
 	[TestCase("md5:d41d8cd98f00b204e9800998ecf8427e")]
 	// Upper-case hex, and one character short/long of the required 64.
 	[TestCase("SHA256:0000000000000000000000000000000000000000000000000000000000000000")]
-	public void A_malformed_hash_is_rejected(string? candidate) =>
+	public void A_malformed_hash_is_rejected(string? candidate)
+	{
 		Assert.That(AssetContentHash.IsValid(candidate), Is.False);
+	}
 
 	[Test]
 	public void A_hash_with_uppercase_hex_is_rejected()

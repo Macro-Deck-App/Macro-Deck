@@ -5,9 +5,12 @@ namespace MacroDeckHost.Integrations.Http.Actions;
 
 internal static class HttpActions
 {
-	public static IReadOnlyList<IActionDefinition> Create(IHttpRequestClient client, HttpVariableAccessor variables) =>
-	[
-		new SendRequestActionDefinition(client, variables),
-		new GetJsonValueActionDefinition(client, variables)
-	];
+	public static IReadOnlyList<IActionDefinition> Create(IHttpRequestClient client, HttpVariableAccessor variables)
+	{
+		return
+		[
+			new SendRequestActionDefinition(client, variables),
+			new GetJsonValueActionDefinition(client, variables)
+		];
+	}
 }

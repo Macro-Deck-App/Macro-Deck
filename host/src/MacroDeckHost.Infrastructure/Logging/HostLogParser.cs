@@ -21,9 +21,9 @@ public static partial class HostLogParser
 	public static bool TryParseFileStamp(string fileName, out string stamp)
 	{
 		stamp = string.Empty;
-		if (string.IsNullOrEmpty(fileName) ||
-			!fileName.StartsWith(FilePrefix, StringComparison.Ordinal) ||
-			!fileName.EndsWith(FileSuffix, StringComparison.Ordinal))
+		if (string.IsNullOrEmpty(fileName)
+			|| !fileName.StartsWith(FilePrefix, StringComparison.Ordinal)
+			|| !fileName.EndsWith(FileSuffix, StringComparison.Ordinal))
 		{
 			return false;
 		}
@@ -43,7 +43,10 @@ public static partial class HostLogParser
 		return true;
 	}
 
-	public static string FileName(string stamp) => $"{FilePrefix}{stamp}{FileSuffix}";
+	public static string FileName(string stamp)
+	{
+		return $"{FilePrefix}{stamp}{FileSuffix}";
+	}
 
 	public static string SearchPattern => $"{FilePrefix}*{FileSuffix}";
 
@@ -56,8 +59,8 @@ public static partial class HostLogParser
 		}
 
 		var match = HeaderPattern().Match(line);
-		if (!match.Success ||
-			!DateTimeOffset.TryParseExact(match.Groups["timestamp"].Value,
+		if (!match.Success
+			|| !DateTimeOffset.TryParseExact(match.Groups["timestamp"].Value,
 				"yyyy-MM-dd HH:mm:ss.fff zzz",
 				CultureInfo.InvariantCulture,
 				DateTimeStyles.None,

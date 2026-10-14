@@ -25,12 +25,13 @@ public sealed class FakeConnectionStartupFilter : IStartupFilter
 	public const string RemoteIpHeader = "X-Test-Remote-Ip";
 
 	public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-		=> app =>
+	{
+		return app =>
 		{
 			app.Use(async (context, nextMiddleware) =>
 			{
-				var shape = context.Request.Headers.TryGetValue(ShapeHeader, out var value) &&
-					Enum.TryParse<FakeConnectionShape>(value, out var parsed)
+				var shape = context.Request.Headers.TryGetValue(ShapeHeader, out var value)
+					&& Enum.TryParse<FakeConnectionShape>(value, out var parsed)
 						? parsed
 						: FakeConnectionShape.PublicLan;
 
@@ -79,4 +80,5 @@ public sealed class FakeConnectionStartupFilter : IStartupFilter
 			});
 			next(app);
 		};
+	}
 }

@@ -60,14 +60,19 @@ public class HostLivenessHostedServiceTests
 		return builder;
 	}
 
-	private static PluginHostBuilder SelfRegisteringBuilder() => MacroDeckPlugin.CreatePlugin();
+	private static PluginHostBuilder SelfRegisteringBuilder()
+	{
+		return MacroDeckPlugin.CreatePlugin();
+	}
 
 	private Task UntilStoppedAsync()
-		=> Wait.UntilAsync(() =>
+	{
+		return Wait.UntilAsync(() =>
 		{
 			_time.Advance(_pollInterval);
 			return _lifetime.ApplicationStopping.IsCancellationRequested;
 		});
+	}
 
 	private async Task AssertNeverStopsAsync()
 	{
@@ -99,10 +104,15 @@ public class HostLivenessHostedServiceTests
 		return process.Id.ToString(CultureInfo.InvariantCulture);
 	}
 
-	private static string CurrentProcessId() => Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
+	private static string CurrentProcessId()
+	{
+		return Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
+	}
 
-	private static string CurrentProcessStartedAt() =>
-		Process.GetCurrentProcess().StartTime.ToUniversalTime().ToString("O");
+	private static string CurrentProcessStartedAt()
+	{
+		return Process.GetCurrentProcess().StartTime.ToUniversalTime().ToString("O");
+	}
 
 	[Test]
 	public async Task A_managed_plugin_stops_once_the_watched_host_process_is_gone()

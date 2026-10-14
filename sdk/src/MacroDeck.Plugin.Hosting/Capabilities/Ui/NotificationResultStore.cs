@@ -23,7 +23,7 @@ internal sealed class NotificationResultStore
 		}
 		else
 		{
-			_ = completion.Task.ContinueWith(_ => _pending.TryRemove(notificationId, out TaskCompletionSource<NotificationResult>? removed),
+			_ = completion.Task.ContinueWith(_ => _pending.TryRemove(notificationId, out var removed),
 				CancellationToken.None,
 				TaskContinuationOptions.ExecuteSynchronously,
 				TaskScheduler.Default);
@@ -59,24 +59,31 @@ internal sealed class NotificationResultStore
 	}
 
 	private static NotificationResult Map(UiNotificationResultArguments result)
-		=> new()
+	{
+		return new NotificationResult
 		{
 			CloseReason = ParseReason(result.CloseReason),
 			ActionId = result.ActionId,
 			ClientId = result.ClientId,
 			Values = result.Values ?? new Dictionary<string, System.Text.Json.JsonElement>()
 		};
+	}
 
-	private static NotificationCloseReason ParseReason(string? reason) => reason switch
+	private static NotificationCloseReason ParseReason(string? reason)
 	{
-		NotificationsWire.CloseReason.Action => NotificationCloseReason.Action,
-		NotificationsWire.CloseReason.Timeout => NotificationCloseReason.Timeout,
-		NotificationsWire.CloseReason.Programmatic => NotificationCloseReason.Programmatic,
-		NotificationsWire.CloseReason.OwnerGone => NotificationCloseReason.OwnerGone,
-		NotificationsWire.CloseReason.HostUnavailable => NotificationCloseReason.HostUnavailable,
-		_ => NotificationCloseReason.Dismissed
-	};
+		return reason switch
+		{
+			NotificationsWire.CloseReason.Action => NotificationCloseReason.Action,
+			NotificationsWire.CloseReason.Timeout => NotificationCloseReason.Timeout,
+			NotificationsWire.CloseReason.Programmatic => NotificationCloseReason.Programmatic,
+			NotificationsWire.CloseReason.OwnerGone => NotificationCloseReason.OwnerGone,
+			NotificationsWire.CloseReason.HostUnavailable => NotificationCloseReason.HostUnavailable,
+			_ => NotificationCloseReason.Dismissed
+		};
+	}
 
 	private static TaskCompletionSource<NotificationResult> NewCompletion()
-		=> new(TaskCreationOptions.RunContinuationsAsynchronously);
+	{
+		return new TaskCompletionSource<NotificationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+	}
 }

@@ -29,16 +29,16 @@ public class RawIntegrationRegistrationAnalyzerTests
 	[Test]
 	public async Task Fires_when_an_integration_is_registered_with_raw_AddSingleton()
 	{
-		var source = IntegrationDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(IServiceCollection services)
-				{
-					services.AddSingleton<MyIntegration>();
-				}
-			}
-			""";
+		var source = IntegrationDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(IServiceCollection services)
+			  	{
+			  		services.AddSingleton<MyIntegration>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new RawIntegrationRegistrationAnalyzer());
@@ -55,16 +55,16 @@ public class RawIntegrationRegistrationAnalyzerTests
 		// AddMacroDeckIntegration<T>() is internal to MacroDeck.Plugin.Hosting since #560, so a plugin
 		// project - and this test snippet, compiled the same way one is - registers through the public
 		// door, PluginHostBuilder.RegisterIntegration<T>(), instead.
-		var source = IntegrationDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(PluginHostBuilder builder)
-				{
-					builder.RegisterIntegration<MyIntegration>();
-				}
-			}
-			""";
+		var source = IntegrationDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(PluginHostBuilder builder)
+			  	{
+			  		builder.RegisterIntegration<MyIntegration>();
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new RawIntegrationRegistrationAnalyzer());
@@ -79,16 +79,16 @@ public class RawIntegrationRegistrationAnalyzerTests
 		// (services.AddSingleton<IPluginIntegration>(factory)) - one type argument that *is*
 		// IPluginIntegration, not a type that implements it. The rule must not flag the SDK's own
 		// correct registration path.
-		var source = IntegrationDeclaration +
-			"""
-			internal static class Registration
-			{
-				public static void Configure(IServiceCollection services)
-				{
-					services.AddSingleton<IPluginIntegration>(provider => new MyIntegration());
-				}
-			}
-			""";
+		var source = IntegrationDeclaration
+			+ """
+			  internal static class Registration
+			  {
+			  	public static void Configure(IServiceCollection services)
+			  	{
+			  		services.AddSingleton<IPluginIntegration>(provider => new MyIntegration());
+			  	}
+			  }
+			  """;
 
 		var diagnostics
 			= await AnalyzerTestHarness.GetDiagnosticsAsync(source, new RawIntegrationRegistrationAnalyzer());

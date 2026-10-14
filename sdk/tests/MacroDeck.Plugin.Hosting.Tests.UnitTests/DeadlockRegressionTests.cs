@@ -56,7 +56,7 @@ public class DeadlockRegressionTests
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
 			hostInvoker,
-			hostStateCache: null);
+			null);
 
 		// Normally set by PluginConnectionHostedService once the handshake completes; set directly
 		// here since this test drives the connection without that service.

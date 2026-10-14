@@ -35,7 +35,6 @@ internal sealed class SetRichPresenceActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Choice(TypeParameter,
-			options:
 			[
 				new ActionParameterOption
 					{ Value = "0", Label = AppStrings.Integrations.Discord.Actions.SetRichPresence.PlayingOption() },
@@ -50,34 +49,37 @@ internal sealed class SetRichPresenceActionDefinition : IActionDefinition
 					Value = "5", Label = AppStrings.Integrations.Discord.Actions.SetRichPresence.CompetingInOption()
 				}
 			],
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.ActivityTypeLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.ActivityTypeLabel(),
 			defaultValue: "0"),
 		ActionParameter.Text(DetailsParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.DetailsLabel(),
-			description: AppStrings.Integrations.Discord.Actions.SetRichPresence.DetailsDescription(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.DetailsLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.DetailsDescription(),
 			maxLength: 128),
 		ActionParameter.Text(StateParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.StateLabel(),
-			description: AppStrings.Integrations.Discord.Actions.SetRichPresence.StateDescription(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.StateLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.StateDescription(),
 			maxLength: 128),
 		ActionParameter.Text(LargeImageParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeImageLabel(),
-			description: AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeImageDescription()),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeImageLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeImageDescription()),
 		ActionParameter.Text(LargeTextParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeTextLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.LargeTextLabel(),
 			maxLength: 128),
 		ActionParameter.Text(SmallImageParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.SmallImageLabel()),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.SmallImageLabel()),
 		ActionParameter.Text(SmallTextParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.SmallTextLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.SmallTextLabel(),
 			maxLength: 128),
 		ActionParameter.Toggle(ElapsedParameter,
-			label: AppStrings.Integrations.Discord.Actions.SetRichPresence.ShowElapsedLabel(),
-			description: AppStrings.Integrations.Discord.Actions.SetRichPresence.ShowElapsedDescription(),
-			defaultValue: true)
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.ShowElapsedLabel(),
+			AppStrings.Integrations.Discord.Actions.SetRichPresence.ShowElapsedDescription(),
+			true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_resolver);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_resolver);
+	}
 
 	internal static DiscordActivity? BuildActivity(
 		IReadOnlyDictionary<string, object> parameters,

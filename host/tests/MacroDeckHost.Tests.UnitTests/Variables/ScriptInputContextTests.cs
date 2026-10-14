@@ -9,25 +9,31 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class ScriptInputContextTests
 {
-	private static VariableEntity Var(string name, VariableType type, string value) => new()
+	private static VariableEntity Var(string name, VariableType type, string value)
 	{
-		Id = Guid.NewGuid(),
-		Name = name,
-		Scope = VariableScope.Global,
-		Type = type,
-		Classification = VariableClassification.User,
-		Value = value
-	};
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = type,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
 
 	private static ScriptInput Declare(
 		string name,
 		ScriptInputType type = ScriptInputType.Text,
-		string? defaultValue = null) => new()
+		string? defaultValue = null)
 	{
-		Name = name,
-		Type = type,
-		DefaultValue = defaultValue
-	};
+		return new ScriptInput
+		{
+			Name = name,
+			Type = type,
+			DefaultValue = defaultValue
+		};
+	}
 
 	private static (ActionConditionEvaluator Evaluator, VariableContext Context) Build(
 		IReadOnlyList<ScriptInput> declarations,
@@ -56,7 +62,9 @@ public class ScriptInputContextTests
 	}
 
 	private static Dictionary<string, object?> Supplied(params (string Name, object? Value)[] values)
-		=> values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	{
+		return values.ToDictionary(pair => pair.Name, pair => pair.Value, StringComparer.Ordinal);
+	}
 
 	[Test]
 	public void Input_resolves_in_a_liquid_template()

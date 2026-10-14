@@ -35,49 +35,69 @@ internal sealed class EmailInboxWidgetHarness : IDisposable
 
 	public EmailInboxUiProvider Provider { get; }
 
-	public Task SyncAsync() => World.SyncAllAsync();
+	public Task SyncAsync()
+	{
+		return World.SyncAllAsync();
+	}
 
 	public static EmailInboxUiProvider CreateProvider(EmailWorld world)
-		=> new(world.Cache,
+	{
+		return new EmailInboxUiProvider(world.Cache,
 			new UiResourceStore(),
 			world.Time,
 			CalendarWidgetHarness.ScopeFactory(),
 			TestLocalization.SampleText,
 			Logger.None,
 			TimeZoneInfo.Utc);
+	}
 
-	public static async Task<IUiSession> OpenWidgetAsync(EmailInboxUiProvider provider, object data, bool sample = false)
-		=> (await provider.CreateSessionAsync(
-			new UiSessionRequest
+	public static async Task<IUiSession> OpenWidgetAsync(
+		EmailInboxUiProvider provider,
+		object data,
+		bool sample = false)
+	{
+		return (await provider.CreateSessionAsync(new UiSessionRequest
 			{
 				Surface = CalendarWidgetHarness.WidgetSurface(EmailWidgetTypes.QualifiedId, data, sample),
-				UiModelVersion = 1,
+				UiModelVersion = 1
 			},
 			CancellationToken.None))!;
+	}
 
-	public Task<IUiSession> OpenWidgetAsync(object data, bool sample = false) => OpenWidgetAsync(Provider, data, sample);
+	public Task<IUiSession> OpenWidgetAsync(object data, bool sample = false)
+	{
+		return OpenWidgetAsync(Provider, data, sample);
+	}
 
 	public async Task<IUiSession> OpenConfigAsync(object data)
-		=> (await Provider.CreateSessionAsync(
-			new UiSessionRequest
+	{
+		return (await Provider.CreateSessionAsync(new UiSessionRequest
 			{
 				Surface = CalendarWidgetHarness.ConfigSurface(EmailWidgetTypes.QualifiedId, data),
-				UiModelVersion = 1,
+				UiModelVersion = 1
 			},
 			CancellationToken.None))!;
+	}
 
-	public void Dispose() => World.Dispose();
+	public void Dispose()
+	{
+		World.Dispose();
+	}
 }
 
 internal static class EmailInboxTree
 {
 	public static UiNode Layout(IUiSession session, string layout)
-		=> CalendarTree.Get(CalendarTree.Get(session.BuildTree().Root, "layout"), layout);
+	{
+		return CalendarTree.Get(CalendarTree.Get(session.BuildTree().Root, "layout"), layout);
+	}
 
 	public const double AllRoom = 100;
 
 	public static List<UiNode> Rows(UiNode root, double heightCells = AllRoom)
-		=> [.. Drawn(root, heightCells).Where(node => node.Id.EndsWith(".row", StringComparison.Ordinal))];
+	{
+		return [.. Drawn(root, heightCells).Where(node => node.Id.EndsWith(".row", StringComparison.Ordinal))];
+	}
 
 	public static IEnumerable<UiNode> Drawn(UiNode node, double heightCells)
 	{
@@ -89,7 +109,7 @@ internal static class EmailInboxTree
 				node.Children[UiResponsiveSelection.SelectChild(node.Properties[UiComponentProperties.Variants],
 					node.Children.Count,
 					AllRoom,
-					heightCells)],
+					heightCells)]
 			]
 			: node.Children;
 
@@ -100,5 +120,7 @@ internal static class EmailInboxTree
 	}
 
 	public static string? Text(UiNode row, string key)
-		=> CalendarTree.Find(row, key) is { } node ? CalendarTree.Text(node) : null;
+	{
+		return CalendarTree.Find(row, key) is { } node ? CalendarTree.Text(node) : null;
+	}
 }

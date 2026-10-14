@@ -10,7 +10,8 @@ public sealed record IconPackReplaceOutcome(IconPackEntity Pack, bool IconsChang
 
 public interface IIconPackRestoreService
 {
-	Task<Result<IconPackEntity, IconError>> RestoreAsNewPack(string fileName,
+	Task<Result<IconPackEntity, IconError>> RestoreAsNewPack(
+		string fileName,
 		Stream content,
 		CancellationToken cancellationToken,
 		IconPackSourceStamp? stamp = null);
@@ -19,19 +20,22 @@ public interface IIconPackRestoreService
 	/// pack id and the ids of icons the new version still carries, so buttons referencing them keep
 	/// resolving. An icon the new version dropped is retained rather than deleted, because a button may
 	/// still reference it.</summary>
-	Task<Result<IconPackEntity, IconError>> UpgradePack(Guid packId,
+	Task<Result<IconPackEntity, IconError>> UpgradePack(
+		Guid packId,
 		string fileName,
 		Stream content,
 		CancellationToken cancellationToken);
 
-	Task<Result<IconPackReplaceOutcome, IconError>> ReplaceFromSource(Guid packId,
+	Task<Result<IconPackReplaceOutcome, IconError>> ReplaceFromSource(
+		Guid packId,
 		string fileName,
 		Stream content,
 		IconPackSourceStamp stamp,
 		IReadOnlySet<Guid> iconsInUse,
 		CancellationToken cancellationToken);
 
-	Task<Result<IReadOnlyList<IconEntity>, IconError>> MergeIntoPack(Guid packId,
+	Task<Result<IReadOnlyList<IconEntity>, IconError>> MergeIntoPack(
+		Guid packId,
 		Guid importBatchId,
 		string fileName,
 		Stream content,

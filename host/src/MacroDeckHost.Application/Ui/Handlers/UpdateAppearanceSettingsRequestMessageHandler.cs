@@ -16,7 +16,8 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 	private readonly IFontCatalog _fonts;
 	private readonly IColorReferenceResolver _colors;
 
-	public UpdateAppearanceSettingsRequestMessageHandler(IAppPreferenceService service,
+	public UpdateAppearanceSettingsRequestMessageHandler(
+		IAppPreferenceService service,
 		IMediator mediator,
 		IFontCatalog fonts,
 		IColorReferenceResolver colors)
@@ -33,17 +34,19 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 	{
 		var current = await _service.GetAppearance();
 		var accent = current.AccentColorSource is { } stored
-			? ColorSource.Incoming(request.AccentColorSource, request.AccentColor, stored, _colors,
-				resolved => RgbaColor.Parse(resolved)?.ToOpaqueString() ?? AppPreferenceService.DefaultAccentColor) ??
-			stored
+			? ColorSource.Incoming(request.AccentColorSource,
+				request.AccentColor,
+				stored,
+				_colors,
+				resolved => RgbaColor.Parse(resolved)?.ToOpaqueString() ?? AppPreferenceService.DefaultAccentColor)
+			?? stored
 			: request.AccentColorSource ?? request.AccentColor;
 
 		var settings = await _service.SetAppearance(request.ThemeMode,
 			accent,
 			NormalizeFontFamily(request.FontFamily));
 
-		await _mediator.Publish(
-			new AppearanceChangedNotification(settings.ThemeMode,
+		await _mediator.Publish(new AppearanceChangedNotification(settings.ThemeMode,
 				settings.AccentColor,
 				settings.FontFamily,
 				settings.AccentColorSource),
@@ -67,8 +70,8 @@ public class UpdateAppearanceSettingsRequestMessageHandler
 		}
 
 		return _fonts.GetFaces()
-			.Any(face => face is { RemoteRenderable: true, UserImported: false } &&
-				string.Equals(face.Family, family, StringComparison.Ordinal))
+			.Any(face => face is { RemoteRenderable: true, UserImported: false }
+				&& string.Equals(face.Family, family, StringComparison.Ordinal))
 			? family
 			: string.Empty;
 	}

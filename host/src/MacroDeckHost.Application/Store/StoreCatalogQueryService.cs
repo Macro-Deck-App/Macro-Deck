@@ -16,7 +16,8 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 	private readonly IStoreTestInstallationStore _testInstallations;
 	private readonly IInstalledPluginSigners _signers;
 
-	public StoreCatalogQueryService(IStoreCatalog catalog,
+	public StoreCatalogQueryService(
+		IStoreCatalog catalog,
 		IPluginInstallationCatalog plugins,
 		IStoreInstallationStore installations,
 		IStoreTestInstallationStore testInstallations,
@@ -98,24 +99,27 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 
 	// Every ordering ends in the same total-order tiebreak: entries that tie on the requested key must
 	// still fall in a fixed order, or paging repeats one row on the next page and drops another.
-	private static IEnumerable<StoreCatalogEntry> Order(List<StoreCatalogEntry> matches,
+	private static IEnumerable<StoreCatalogEntry> Order(
+		List<StoreCatalogEntry> matches,
 		StoreCatalogSection section,
 		string? term,
-		Dictionary<string, int>? featured) =>
-		(section switch
-		{
-			StoreCatalogSection.Newest => matches.OrderByDescending(entry => entry.CreatedAt),
-			StoreCatalogSection.RecentlyUpdated => matches.OrderByDescending(entry => entry.UpdatedAt),
-			StoreCatalogSection.Featured =>
-				matches.OrderBy(entry => featured![FeaturedKey(entry.Kind, entry.Id)]),
-			StoreCatalogSection.Name => matches.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
-			_ => term is null
-				? matches.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-				: matches.OrderBy(entry => Rank(entry, term))
-		})
-		.ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-		.ThenBy(entry => entry.Kind)
-		.ThenBy(entry => entry.Id, StringComparer.Ordinal);
+		Dictionary<string, int>? featured)
+	{
+		return (section switch
+			{
+				StoreCatalogSection.Newest => matches.OrderByDescending(entry => entry.CreatedAt),
+				StoreCatalogSection.RecentlyUpdated => matches.OrderByDescending(entry => entry.UpdatedAt),
+				StoreCatalogSection.Featured =>
+					matches.OrderBy(entry => featured![FeaturedKey(entry.Kind, entry.Id)]),
+				StoreCatalogSection.Name => matches.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
+				_ => term is null
+					? matches.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+					: matches.OrderBy(entry => Rank(entry, term))
+			})
+			.ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+			.ThenBy(entry => entry.Kind)
+			.ThenBy(entry => entry.Id, StringComparer.Ordinal);
+	}
 
 	private static Dictionary<string, int> FeaturedPositions(StoreCatalogSnapshot snapshot)
 	{
@@ -129,7 +133,10 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 		return positions;
 	}
 
-	private static string FeaturedKey(StoreExtensionKind kind, string id) => $"{kind}:{id}";
+	private static string FeaturedKey(StoreExtensionKind kind, string id)
+	{
+		return $"{kind}:{id}";
+	}
 
 	public Result<StoreCatalogItem, StoreCatalogError> Find(StoreExtensionKind kind, string id)
 	{
@@ -142,7 +149,7 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 		var entry = snapshot.Entries
 			.FirstOrDefault(candidate =>
 				candidate.Kind == kind && string.Equals(candidate.Id, id, StringComparison.OrdinalIgnoreCase));
-		if (entry is null || (snapshot.FindWithdrawal(entry) is not null && InstalledVersion(entry) is null))
+		if (entry is null || snapshot.FindWithdrawal(entry) is not null && InstalledVersion(entry) is null)
 		{
 			return Result.Fail<StoreCatalogItem, StoreCatalogError>(StoreCatalogError.NotFound);
 		}
@@ -159,7 +166,8 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			.ToList();
 	}
 
-	public IReadOnlyList<StoreCategoryCount> Categories(IReadOnlyCollection<StoreExtensionKind>? kinds,
+	public IReadOnlyList<StoreCategoryCount> Categories(
+		IReadOnlyCollection<StoreExtensionKind>? kinds,
 		bool supportedOnly = false)
 	{
 		var snapshot = _catalog.Snapshot;
@@ -177,10 +185,12 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			.ToList();
 	}
 
-	private static IEnumerable<StoreCatalogEntry> Browsable(StoreCatalogSnapshot snapshot) =>
-		snapshot.RemovedPackages.Count == 0
+	private static IEnumerable<StoreCatalogEntry> Browsable(StoreCatalogSnapshot snapshot)
+	{
+		return snapshot.RemovedPackages.Count == 0
 			? snapshot.Entries
 			: snapshot.Entries.Where(entry => snapshot.FindWithdrawal(entry) is null);
+	}
 
 	private StoreCatalogItem Describe(StoreCatalogSnapshot snapshot, StoreCatalogEntry entry)
 	{
@@ -206,7 +216,8 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			InstalledTestBuild = InstalledTestBuild(entry, installedVersion),
 			UnsupportedReason = unsupportedReason,
 			Withdrawal = withdrawal,
-			InstalledVersionRemoval = installedVersion is null ? null : snapshot.FindRemoval(entry.Id, installedVersion),
+			InstalledVersionRemoval
+				= installedVersion is null ? null : snapshot.FindRemoval(entry.Id, installedVersion),
 			WithdrawnVersions = snapshot.HasRemoval(entry.Id)
 				? entry.History
 					.Select(release => release.Version)
@@ -224,14 +235,16 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 			return false;
 		}
 
-		return _signers.Read(active) is { } signers &&
-			StoreRevocations.IsRevoked(snapshot, signers.CertificateId, signers.IssuerCertificateId);
+		return _signers.Read(active) is { } signers
+			&& StoreRevocations.IsRevoked(snapshot, signers.CertificateId, signers.IssuerCertificateId);
 	}
 
-	private InstalledPluginVersion? ActivePluginVersion(StoreCatalogEntry entry) =>
-		_plugins.Discover()
+	private InstalledPluginVersion? ActivePluginVersion(StoreCatalogEntry entry)
+	{
+		return _plugins.Discover()
 			.FirstOrDefault(plugin => string.Equals(plugin.PluginId, entry.Id, StringComparison.OrdinalIgnoreCase))
 			?.ActiveVersion;
+	}
 
 	private string? InstalledTestBuild(StoreCatalogEntry entry, string? installedVersion)
 	{
@@ -271,20 +284,26 @@ public sealed class StoreCatalogQueryService : IStoreCatalogQueryService
 
 	// An unparseable version on either side is never reported as an update: offering one that cannot be
 	// compared would be a guess, and the install button is destructive enough to warrant staying quiet.
-	private static bool HasUpdate(string installed, string latest) =>
-		SemanticVersion.TryParse(installed, out var installedVersion) &&
-		SemanticVersion.TryParse(latest, out var latestVersion) &&
-		latestVersion > installedVersion;
+	private static bool HasUpdate(string installed, string latest)
+	{
+		return SemanticVersion.TryParse(installed, out var installedVersion)
+			&& SemanticVersion.TryParse(latest, out var latestVersion)
+			&& latestVersion > installedVersion;
+	}
 
-	private static bool Matches(StoreCatalogEntry entry, string term) =>
-		Contains(entry.Name, term) ||
-		Contains(entry.Id, term) ||
-		Contains(entry.Description, term) ||
-		Contains(entry.Publisher, term) ||
-		entry.Tags.Any(tag => Contains(tag, term));
+	private static bool Matches(StoreCatalogEntry entry, string term)
+	{
+		return Contains(entry.Name, term)
+			|| Contains(entry.Id, term)
+			|| Contains(entry.Description, term)
+			|| Contains(entry.Publisher, term)
+			|| entry.Tags.Any(tag => Contains(tag, term));
+	}
 
-	private static bool Contains(string? value, string term) =>
-		value is not null && value.Contains(term, StringComparison.OrdinalIgnoreCase);
+	private static bool Contains(string? value, string term)
+	{
+		return value is not null && value.Contains(term, StringComparison.OrdinalIgnoreCase);
+	}
 
 	private static int Rank(StoreCatalogEntry entry, string term)
 	{

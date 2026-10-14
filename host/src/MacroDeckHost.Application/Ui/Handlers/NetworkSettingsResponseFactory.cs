@@ -7,7 +7,8 @@ namespace MacroDeckHost.Application.Ui.Handlers;
 
 internal static class NetworkSettingsResponseFactory
 {
-	public static UpdateNetworkSettingsResponse Create(NetworkSettings settings,
+	public static UpdateNetworkSettingsResponse Create(
+		NetworkSettings settings,
 		RestartAvailability restart,
 		bool success,
 		string? error)

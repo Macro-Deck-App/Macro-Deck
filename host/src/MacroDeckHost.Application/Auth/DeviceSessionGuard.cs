@@ -23,11 +23,19 @@ public sealed class DeviceSessionGuard
 	}
 
 	public void Track(Guid deviceId, DateTime? revokedAt = null)
-		=> _revokedAt[deviceId] = revokedAt ?? _never;
+	{
+		_revokedAt[deviceId] = revokedAt ?? _never;
+	}
 
-	public void Revoke(Guid deviceId, DateTime revokedAt) => _revokedAt[deviceId] = revokedAt;
+	public void Revoke(Guid deviceId, DateTime revokedAt)
+	{
+		_revokedAt[deviceId] = revokedAt;
+	}
 
-	public void Forget(Guid deviceId) => _revokedAt.TryRemove(deviceId, out _);
+	public void Forget(Guid deviceId)
+	{
+		_revokedAt.TryRemove(deviceId, out _);
+	}
 
 	// Same one-second problem AccessTokenCutoff has: a token minted in the very second a device was
 	// signed out would be refused for its whole life, so its iat is pushed past the revocation.
@@ -67,7 +75,7 @@ public sealed class DeviceSessionGuard
 
 		// A revoked device plus a token the host cannot date is refused: failing open here would let a
 		// token without a readable iat outlive the sign-out it was issued before.
-		return !AccessTokenIssuedAt.TryRead(principal, out var issuedAt) ||
-			issuedAt <= AccessTokenIssuedAt.UnixSeconds(revokedAt);
+		return !AccessTokenIssuedAt.TryRead(principal, out var issuedAt)
+			|| issuedAt <= AccessTokenIssuedAt.UnixSeconds(revokedAt);
 	}
 }

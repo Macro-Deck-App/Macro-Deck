@@ -41,7 +41,8 @@ public sealed class PluginInstallationCatalog : IPluginInstallationCatalog
 
 	public bool TryResolveActive(string pluginId, out InstalledPluginVersion? version)
 	{
-		version = Discover().FirstOrDefault(p => string.Equals(p.PluginId, pluginId, StringComparison.Ordinal))
+		version = Discover()
+			.FirstOrDefault(p => string.Equals(p.PluginId, pluginId, StringComparison.Ordinal))
 			?.ActiveVersion;
 		return version is not null;
 	}
@@ -139,11 +140,12 @@ public sealed class PluginInstallationCatalog : IPluginInstallationCatalog
 		return result;
 	}
 
-	private InstalledPluginVersion? TryReadActiveVersion(string pluginDirectory,
+	private InstalledPluginVersion? TryReadActiveVersion(
+		string pluginDirectory,
 		IReadOnlyList<InstalledPluginVersion> versions)
 	{
 		var currentPath = Path.Combine(pluginDirectory, "current.json");
-		var current = _currentVersionFiles.Read<CurrentJson>(currentPath, repair: false);
+		var current = _currentVersionFiles.Read<CurrentJson>(currentPath, false);
 		if (current?.Version is not { } activeVersion)
 		{
 			return null;

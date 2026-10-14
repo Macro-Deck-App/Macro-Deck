@@ -11,7 +11,9 @@ namespace MacroDeck.Sdk.Identity;
 public sealed record CapabilityIdConflict(string OwnerId, string CapabilityType, string LocalId, string Reason)
 {
 	public override string ToString()
-		=> string.IsNullOrEmpty(OwnerId)
+	{
+		return string.IsNullOrEmpty(OwnerId)
 			? $"{CapabilityType} '{LocalId}': {Reason}"
 			: $"{CapabilityType} '{LocalId}' declared by '{OwnerId}': {Reason}";
+	}
 }

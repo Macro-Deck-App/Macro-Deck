@@ -24,18 +24,22 @@ public class NativeUsbDeviceDto
 
 	public bool KnownToAdb { get; set; }
 
-	public static NativeUsbDeviceDto From(NativeUsbDevice device) => new()
+	public static NativeUsbDeviceDto From(NativeUsbDevice device)
 	{
-		Id = device.Id,
-		Platform = device.Platform.ToString(),
-		Serial = device.Serial,
-		Manufacturer = device.Manufacturer,
-		Product = device.Product,
-		State = device.State.ToString(),
-		Picked = device.Picked,
-		Remembered = device.Remembered,
-		KnownToAdb = device.KnownToAdb,
-		CanConnect = device.State is NativeUsbDeviceState.Available or NativeUsbDeviceState.ServedByAdb or
-			NativeUsbDeviceState.Stopped
-	};
+		return new NativeUsbDeviceDto
+		{
+			Id = device.Id,
+			Platform = device.Platform.ToString(),
+			Serial = device.Serial,
+			Manufacturer = device.Manufacturer,
+			Product = device.Product,
+			State = device.State.ToString(),
+			Picked = device.Picked,
+			Remembered = device.Remembered,
+			KnownToAdb = device.KnownToAdb,
+			CanConnect = device.State is NativeUsbDeviceState.Available
+				or NativeUsbDeviceState.ServedByAdb
+				or NativeUsbDeviceState.Stopped
+		};
+	}
 }

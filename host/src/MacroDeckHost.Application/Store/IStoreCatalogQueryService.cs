@@ -11,5 +11,7 @@ public interface IStoreCatalogQueryService
 
 	IReadOnlyList<StoreCatalogItem> Installed();
 
-	IReadOnlyList<StoreCategoryCount> Categories(IReadOnlyCollection<StoreExtensionKind>? kinds, bool supportedOnly = false);
+	IReadOnlyList<StoreCategoryCount> Categories(
+		IReadOnlyCollection<StoreExtensionKind>? kinds,
+		bool supportedOnly = false);
 }

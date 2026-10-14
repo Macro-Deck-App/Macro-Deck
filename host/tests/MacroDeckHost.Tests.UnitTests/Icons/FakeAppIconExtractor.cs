@@ -20,7 +20,10 @@ internal sealed class FakeAppIconExtractor : IAppIconExtractor
 	public Result<ExtractedAppIcon, IconError> Result { get; set; } =
 		Domain.Common.Result.Fail<ExtractedAppIcon, IconError>(IconError.UnsupportedFormat);
 
-	public bool CanExtract(string path) => IconImportFiles.IsIconDropSource(path);
+	public bool CanExtract(string path)
+	{
+		return IconImportFiles.IsIconDropSource(path);
+	}
 
 	public Task<Result<ExtractedAppIcon, IconError>> Extract(string path, CancellationToken cancellationToken)
 	{
@@ -29,14 +32,17 @@ internal sealed class FakeAppIconExtractor : IAppIconExtractor
 	}
 
 	public bool CanExtractContent(string fileName)
-		=> _containerExtensions.Contains(Path.GetExtension(fileName));
+	{
+		return _containerExtensions.Contains(Path.GetExtension(fileName));
+	}
 
 	// Forces ExtractFromContent to read the incoming stream to the end and echo those bytes back,
 	// rather than a canned Results entry - used by the test that guards against the caller accidentally
 	// touching Length/Position/Seek on a forward-only multipart section.
 	public bool EchoContent { get; set; }
 
-	public async Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(string fileName,
+	public async Task<Result<ExtractedAppIcon, IconError>> ExtractFromContent(
+		string fileName,
 		Stream content,
 		CancellationToken cancellationToken)
 	{

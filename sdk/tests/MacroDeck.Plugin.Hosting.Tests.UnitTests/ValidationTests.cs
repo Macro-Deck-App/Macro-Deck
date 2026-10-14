@@ -10,12 +10,14 @@ namespace MacroDeck.Plugin.Hosting.Tests.UnitTests;
 public class ValidationTests
 {
 	private static DeclaredCapability Capability(string localId, string kind = CapabilityKinds.Actions)
-		=> new()
+	{
+		return new DeclaredCapability
 		{
 			Kind = kind,
 			LocalId = localId,
 			VersionRange = new CapabilityVersionRange { Minimum = 1, Maximum = 1 }
 		};
+	}
 
 	[Test]
 	public void A_well_formed_catalogue_has_no_conflicts()

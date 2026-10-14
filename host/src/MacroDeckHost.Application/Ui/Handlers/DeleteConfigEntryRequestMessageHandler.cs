@@ -27,7 +27,7 @@ public class DeleteConfigEntryRequestMessageHandler
 				Error = new TransportError
 				{
 					Code = "INVALID_ID",
-					Message = AppStrings.Errors.Config.InvalidEntryId(id: request.EntryId)
+					Message = AppStrings.Errors.Config.InvalidEntryId(request.EntryId)
 				}
 			};
 		}

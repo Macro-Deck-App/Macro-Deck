@@ -25,14 +25,14 @@ public static partial class StoreCategories
 		var seen = new HashSet<string>(StringComparer.Ordinal);
 		foreach (var entry in array.EnumerateArray())
 		{
-			if (entry.ValueKind != JsonValueKind.Object ||
-				!entry.TryGetProperty("id", out var idElement) ||
-				idElement.ValueKind != JsonValueKind.String ||
-				idElement.GetString() is not { } id ||
-				!StoreTags.IsValid(id) ||
-				!entry.TryGetProperty("names", out var namesElement) ||
-				ReadNames(namesElement) is not { } names ||
-				!seen.Add(id))
+			if (entry.ValueKind != JsonValueKind.Object
+				|| !entry.TryGetProperty("id", out var idElement)
+				|| idElement.ValueKind != JsonValueKind.String
+				|| idElement.GetString() is not { } id
+				|| !StoreTags.IsValid(id)
+				|| !entry.TryGetProperty("names", out var namesElement)
+				|| ReadNames(namesElement) is not { } names
+				|| !seen.Add(id))
 			{
 				continue;
 			}
@@ -54,9 +54,7 @@ public static partial class StoreCategories
 		foreach (var property in value.EnumerateObject())
 		{
 			var name = property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString()?.Trim() : null;
-			if (!LanguagePattern().IsMatch(property.Name) ||
-				string.IsNullOrEmpty(name) ||
-				name.Length > MaxNameLength)
+			if (!LanguagePattern().IsMatch(property.Name) || string.IsNullOrEmpty(name) || name.Length > MaxNameLength)
 			{
 				continue;
 			}

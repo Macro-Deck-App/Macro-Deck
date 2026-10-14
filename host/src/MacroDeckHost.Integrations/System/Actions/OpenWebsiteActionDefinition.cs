@@ -21,14 +21,17 @@ internal sealed class OpenWebsiteActionDefinition : IActionDefinition
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
 		ActionParameter.Url("url",
-			label: AppStrings.Integrations.System.Actions.OpenWebsite.UrlLabel(),
-			description: AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
-			placeholder: "https://example.com",
-			required: true,
-			autoPrefixHttps: true)
+			AppStrings.Integrations.System.Actions.OpenWebsite.UrlLabel(),
+			AppStrings.Integrations.System.Actions.SupportsVariablesHint(),
+			"https://example.com",
+			true,
+			true)
 	];
 
-	public IActionExecutor CreateExecutor() => new Executor(_applications);
+	public IActionExecutor CreateExecutor()
+	{
+		return new Executor(_applications);
+	}
 
 	private sealed class Executor : IActionExecutor
 	{

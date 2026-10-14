@@ -16,7 +16,10 @@ public class CapabilityDispatcherTests
 	private readonly List<ProtocolEnvelope> _replies = [];
 
 	[SetUp]
-	public void SetUp() => _replies.Clear();
+	public void SetUp()
+	{
+		_replies.Clear();
+	}
 
 	private ValueTask Reply(ProtocolEnvelope envelope, CancellationToken cancellationToken)
 	{
@@ -31,7 +34,8 @@ public class CapabilityDispatcherTests
 		string? idempotencyKey = null,
 		int? deadlineMs = null,
 		object? arguments = null)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.CapabilityInvoke,
 			Id = Guid.CreateVersion7().ToString(),
@@ -47,6 +51,7 @@ public class CapabilityDispatcherTests
 					: JsonSerializer.SerializeToElement(arguments, PluginProtocolJson.Options)
 			})
 		};
+	}
 
 	private ProtocolEnvelope Single()
 	{
@@ -75,7 +80,7 @@ public class CapabilityDispatcherTests
 	{
 		using var dispatcher = TestSession.Dispatcher(new TestCapabilityHandler("actions"));
 
-		await dispatcher.DispatchAsync(Invoke(kind: "weather"), Reply, CancellationToken.None);
+		await dispatcher.DispatchAsync(Invoke("weather"), Reply, CancellationToken.None);
 
 		Assert.That(Single().Error!.Code, Is.EqualTo(ProtocolErrorCodes.CapabilityUnsupported));
 	}
@@ -208,12 +213,14 @@ public class CapabilityDispatcherTests
 	}
 
 	private static ProtocolEnvelope CancelFor(ProtocolEnvelope invoke)
-		=> new()
+	{
+		return new ProtocolEnvelope
 		{
 			Type = MessageTypes.CapabilityCancel,
 			Id = Guid.CreateVersion7().ToString(),
 			CorrelationId = invoke.Id
 		};
+	}
 
 	private void AssertExactlyOneCancelledResult(ProtocolEnvelope? fromCancel)
 	{
@@ -466,7 +473,7 @@ public class CapabilityDispatcherTests
 		var handler = new TestCapabilityHandler(CapabilityKinds.Weather) { LocalIds = ["berlin"] };
 		using var dispatcher = TestSession.Dispatcher(handler);
 
-		await dispatcher.DispatchAsync(Invoke(kind: CapabilityKinds.Weather, localId: "berlin", operation: "read"),
+		await dispatcher.DispatchAsync(Invoke(CapabilityKinds.Weather, "berlin", "read"),
 			Reply,
 			CancellationToken.None);
 

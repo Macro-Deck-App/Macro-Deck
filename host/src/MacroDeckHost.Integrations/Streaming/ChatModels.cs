@@ -12,7 +12,10 @@ public static class StreamChatWidgetType
 
 	public const string BackgroundColorKey = "backgroundColor";
 
-	public static string QualifiedId(string ownerId) => ownerId + "::" + LocalId;
+	public static string QualifiedId(string ownerId)
+	{
+		return ownerId + "::" + LocalId;
+	}
 }
 
 public sealed record ChatAccount(string AccountId, string Label);

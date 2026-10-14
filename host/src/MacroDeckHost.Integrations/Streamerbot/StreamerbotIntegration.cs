@@ -99,9 +99,15 @@ public sealed class StreamerbotIntegration
 			}
 	];
 
-	public byte[] GetIcon() => _icon;
+	public byte[] GetIcon()
+	{
+		return _icon;
+	}
 
-	public IConfigFlow CreateConfigFlow() => new StreamerbotConfigFlow();
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new StreamerbotConfigFlow();
+	}
 
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
@@ -187,9 +193,11 @@ public sealed class StreamerbotIntegration
 	}
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
-		=> Task.FromResult(issueId == AuthenticationIssueId
+	{
+		return Task.FromResult(issueId == AuthenticationIssueId
 			? IssueResolution.Ok(followUp: IssueResolutionFollowUp.StartConfigFlow)
 			: IssueResolution.Failed(AppStrings.Integrations.Issues.UnknownIssue()));
+	}
 
 	private static List<string> EventTypes(StreamerbotCatalog catalog, string? source)
 	{
@@ -225,8 +233,8 @@ public sealed class StreamerbotIntegration
 		var endpoint = await context.Config.GetStringAsync(entry.Id, StreamerbotConfigKeys.Endpoint);
 		var password = await context.Config.GetSecretAsync(entry.Id, StreamerbotConfigKeys.Password);
 
-		if (string.IsNullOrEmpty(host) ||
-			!int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port))
+		if (string.IsNullOrEmpty(host)
+			|| !int.TryParse(portRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var port))
 		{
 			_logger.Warning("Streamer.bot config entry {EntryId} is incomplete; skipping", entry.Id);
 			return;

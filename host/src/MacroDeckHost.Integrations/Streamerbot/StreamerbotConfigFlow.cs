@@ -67,8 +67,7 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 		if (port is null or < 1 or > 65535)
 		{
 			fieldErrors[StreamerbotConfigKeys.Port]
-				= AppStrings.Integrations.Streamerbot.Config.EnterValidPortError(
-					defaultPort: StreamerbotEndpoint.DefaultPort);
+				= AppStrings.Integrations.Streamerbot.Config.EnterValidPortError(StreamerbotEndpoint.DefaultPort);
 		}
 
 		if (fieldErrors.Count > 0)
@@ -160,13 +159,13 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 		catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
 			return (null,
-				AppStrings.Integrations.Streamerbot.Config.ConnectTimedOutError(uri: uri.ToString()));
+				AppStrings.Integrations.Streamerbot.Config.ConnectTimedOutError(uri.ToString()));
 		}
 		catch (Exception ex)
 		{
 			_logger.Warning(ex, "Streamer.bot connection test failed for {Uri}", uri);
 			return (null,
-				AppStrings.Integrations.Streamerbot.Config.ConnectFailedError(uri: uri.ToString()));
+				AppStrings.Integrations.Streamerbot.Config.ConnectFailedError(uri.ToString()));
 		}
 		finally
 		{
@@ -175,7 +174,8 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 	}
 
 	private static int? ParsePort(object? value)
-		=> value switch
+	{
+		return value switch
 		{
 			null => StreamerbotEndpoint.DefaultPort,
 			int i => i,
@@ -185,9 +185,11 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 			string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
 			_ => null
 		};
+	}
 
 	private static ConfigFlowStep ConnectionStep()
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = ConnectionStepId,
 			Title = AppStrings.Integrations.Streamerbot.Config.ConnectTitle(),
@@ -210,24 +212,25 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 			Fields =
 			[
 				ActionParameter.Text(StreamerbotConfigKeys.Host,
-					label: AppStrings.Integrations.Streamerbot.Config.AddressLabel(),
+					AppStrings.Integrations.Streamerbot.Config.AddressLabel(),
 					placeholder: StreamerbotEndpoint.DefaultHost,
 					defaultValue: StreamerbotEndpoint.DefaultHost,
 					required: true),
 				ActionParameter.Number(StreamerbotConfigKeys.Port,
-					label: AppStrings.Integrations.Streamerbot.Config.PortLabel(),
+					AppStrings.Integrations.Streamerbot.Config.PortLabel(),
 					min: 1,
 					max: 65535,
 					defaultValue: StreamerbotEndpoint.DefaultPort,
 					required: true),
 				ActionParameter.Text(StreamerbotConfigKeys.Endpoint,
-					label: AppStrings.Integrations.Streamerbot.Config.EndpointLabel(),
-					description: AppStrings.Integrations.Streamerbot.Config.EndpointDescription(),
-					placeholder: StreamerbotEndpoint.DefaultEndpoint,
-					defaultValue: StreamerbotEndpoint.DefaultEndpoint),
+					AppStrings.Integrations.Streamerbot.Config.EndpointLabel(),
+					AppStrings.Integrations.Streamerbot.Config.EndpointDescription(),
+					StreamerbotEndpoint.DefaultEndpoint,
+					StreamerbotEndpoint.DefaultEndpoint),
 				ActionParameter.Secret(StreamerbotConfigKeys.Password,
-					label: AppStrings.Integrations.Streamerbot.Config.PasswordLabel(),
-					description: AppStrings.Integrations.Streamerbot.Config.PasswordDescription())
+					AppStrings.Integrations.Streamerbot.Config.PasswordLabel(),
+					AppStrings.Integrations.Streamerbot.Config.PasswordDescription())
 			]
 		};
+	}
 }

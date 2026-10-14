@@ -19,7 +19,10 @@ internal sealed class FakeMouseInputProvider : IMouseInputProvider
 
 	public MouseRect? DesktopBounds { get; set; } = new(0, 0, 1920, 1080);
 
-	public void RequestPermission() => Calls.Add("request-permission");
+	public void RequestPermission()
+	{
+		Calls.Add("request-permission");
+	}
 
 	public bool TryGetPosition(out MousePoint position)
 	{
@@ -49,7 +52,10 @@ internal sealed class FakeMouseInputProvider : IMouseInputProvider
 		Calls.Add($"down({button}{At(position)})");
 	}
 
-	public void ButtonUp(MouseButton button) => Calls.Add($"up({button})");
+	public void ButtonUp(MouseButton button)
+	{
+		Calls.Add($"up({button})");
+	}
 
 	public void Click(MouseButton button, int clickCount, MousePoint? position)
 	{
@@ -68,10 +74,17 @@ internal sealed class FakeMouseInputProvider : IMouseInputProvider
 	}
 
 	public void Scroll(ScrollAxis axis, int notches)
-		=> Calls.Add($"scroll({axis},{notches.ToString(CultureInfo.InvariantCulture)})");
+	{
+		Calls.Add($"scroll({axis},{notches.ToString(CultureInfo.InvariantCulture)})");
+	}
 
 	private static string Format(MousePoint point)
-		=> $"{point.X.ToString(CultureInfo.InvariantCulture)},{point.Y.ToString(CultureInfo.InvariantCulture)}";
+	{
+		return $"{point.X.ToString(CultureInfo.InvariantCulture)},{point.Y.ToString(CultureInfo.InvariantCulture)}";
+	}
 
-	private static string At(MousePoint? position) => position is { } point ? $"@{Format(point)}" : string.Empty;
+	private static string At(MousePoint? position)
+	{
+		return position is { } point ? $"@{Format(point)}" : string.Empty;
+	}
 }

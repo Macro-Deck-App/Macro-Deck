@@ -22,11 +22,20 @@ internal static partial class AudioDeviceVariables
 
 	private static readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(2);
 
-	public static string FlowName(AudioFlow flow) => flow == AudioFlow.Output ? OutputFlow : InputFlow;
+	public static string FlowName(AudioFlow flow)
+	{
+		return flow == AudioFlow.Output ? OutputFlow : InputFlow;
+	}
 
-	public static string VolumeId(KnownAudioDevice device) => $"{IdPrefix(device)}-volume-percent";
+	public static string VolumeId(KnownAudioDevice device)
+	{
+		return $"{IdPrefix(device)}-volume-percent";
+	}
 
-	public static string MutedId(KnownAudioDevice device) => $"{IdPrefix(device)}-muted";
+	public static string MutedId(KnownAudioDevice device)
+	{
+		return $"{IdPrefix(device)}-muted";
+	}
 
 	public static IEnumerable<VariableDefinition> Declare(KnownAudioDevice device)
 	{
@@ -39,8 +48,8 @@ internal static partial class AudioDeviceVariables
 			{
 				Id = VolumeId(device),
 				DisplayName = output
-					? AppStrings.Integrations.System.Variables.DeviceOutputVolume(device: device.Name)
-					: AppStrings.Integrations.System.Variables.DeviceInputVolume(device: device.Name),
+					? AppStrings.Integrations.System.Variables.DeviceOutputVolume(device.Name)
+					: AppStrings.Integrations.System.Variables.DeviceInputVolume(device.Name),
 				Unit = "%",
 				SemanticKind = VariableSemanticKinds.Percentage,
 				Write = new VariableWriteCapability()
@@ -52,8 +61,8 @@ internal static partial class AudioDeviceVariables
 			{
 				Id = MutedId(device),
 				DisplayName = output
-					? AppStrings.Integrations.System.Variables.DeviceOutputMuted(device: device.Name)
-					: AppStrings.Integrations.System.Variables.DeviceInputMuted(device: device.Name),
+					? AppStrings.Integrations.System.Variables.DeviceOutputMuted(device.Name)
+					: AppStrings.Integrations.System.Variables.DeviceInputMuted(device.Name),
 				Write = new VariableWriteCapability()
 			};
 	}
@@ -72,12 +81,13 @@ internal static partial class AudioDeviceVariables
 		var valid = new List<KnownAudioDevice>();
 		foreach (var device in stored)
 		{
-			if (device.Flow is not (OutputFlow or InputFlow) ||
-				string.IsNullOrEmpty(device.DeviceId) ||
-				!KeyRegex().IsMatch(device.Key ?? string.Empty) ||
-				!SlugRegex().IsMatch(device.Slug ?? string.Empty) ||
-				valid.Any(other => other.Flow == device.Flow &&
-					(other.DeviceId == device.DeviceId || other.Key == device.Key || other.Slug == device.Slug)))
+			if (device.Flow is not (OutputFlow or InputFlow)
+				|| string.IsNullOrEmpty(device.DeviceId)
+				|| !KeyRegex().IsMatch(device.Key ?? string.Empty)
+				|| !SlugRegex().IsMatch(device.Slug ?? string.Empty)
+				|| valid.Any(other
+					=> other.Flow == device.Flow
+					&& (other.DeviceId == device.DeviceId || other.Key == device.Key || other.Slug == device.Slug)))
 			{
 				continue;
 			}
@@ -146,9 +156,14 @@ internal static partial class AudioDeviceVariables
 	}
 
 	private static string Truncate(string slug, int length)
-		=> slug.Length <= length ? slug : slug[..length].TrimEnd('_');
+	{
+		return slug.Length <= length ? slug : slug[..length].TrimEnd('_');
+	}
 
-	public static string ShortId(string deviceId) => Hash(deviceId)[..6];
+	public static string ShortId(string deviceId)
+	{
+		return Hash(deviceId)[..6];
+	}
 
 	private static string UniqueKey(IReadOnlyList<KnownAudioDevice> known, string flow, string deviceId)
 	{
@@ -174,7 +189,9 @@ internal static partial class AudioDeviceVariables
 	}
 
 	private static string IdPrefix(KnownAudioDevice device)
-		=> $"system-audio-{(device.Flow == OutputFlow ? "out" : "in")}-{device.Key}";
+	{
+		return $"system-audio-{(device.Flow == OutputFlow ? "out" : "in")}-{device.Key}";
+	}
 
 	[GeneratedRegex(@"\Asystem-audio-(out|in)-([0-9a-f]{8})-(volume-percent|muted)\z")]
 	private static partial Regex IdRegex();

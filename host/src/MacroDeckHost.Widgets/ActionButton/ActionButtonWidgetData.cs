@@ -45,18 +45,24 @@ public sealed record ActionButtonIconDisplay
 			Zoom = Clamp(ReadDouble(display, "zoom"), 100, 10, 400),
 			OffsetX = Clamp(ReadDouble(display, "offsetX"), 0, -100, 100),
 			OffsetY = Clamp(ReadDouble(display, "offsetY"), 0, -100, 100),
-			Opacity = Clamp(ReadDouble(display, "opacity"), 100, 0, 100),
+			Opacity = Clamp(ReadDouble(display, "opacity"), 100, 0, 100)
 		};
 	}
 
 	private static double Clamp(double? value, double fallback, double min, double max)
-		=> value is { } v && double.IsFinite(v) ? Math.Clamp(v, min, max) : fallback;
+	{
+		return value is { } v && double.IsFinite(v) ? Math.Clamp(v, min, max) : fallback;
+	}
 
 	private static double? ReadDouble(JsonObject data, string key)
-		=> data[key] is JsonValue value && value.TryGetValue<double>(out var d) ? d : null;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<double>(out var d) ? d : null;
+	}
 
 	private static string? ReadString(JsonObject data, string key)
-		=> data[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	}
 }
 
 /// <summary>One state's or the root's icon: the typed reference and its own non-cascading framing. Never
@@ -95,7 +101,9 @@ public sealed record ActionButtonBorder(string Style, string? Color)
 	}
 
 	private static string? ReadString(JsonObject data, string key)
-		=> data[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	{
+		return data[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	}
 }
 
 /// <summary>One state's or the whole button's resolved appearance, with every field-level cascade
@@ -154,7 +162,7 @@ internal static class ActionButtonFlowTriggers
 		{
 			JsonValue value when value.TryGetValue<string>(out var text) => text,
 			JsonArray array => array.ToJsonString(),
-			_ => null,
+			_ => null
 		};
 
 		if (string.IsNullOrWhiteSpace(flowsJson))
@@ -174,9 +182,9 @@ internal static class ActionButtonFlowTriggers
 
 			foreach (var flow in document.RootElement.EnumerateArray())
 			{
-				if (flow.ValueKind == JsonValueKind.Object &&
-					flow.TryGetProperty("triggerType", out var triggerType) &&
-					triggerType.ValueKind == JsonValueKind.String)
+				if (flow.ValueKind == JsonValueKind.Object
+					&& flow.TryGetProperty("triggerType", out var triggerType)
+					&& triggerType.ValueKind == JsonValueKind.String)
 				{
 					var value = triggerType.GetString();
 					if (!string.IsNullOrEmpty(value))
@@ -208,7 +216,10 @@ public sealed class ActionButtonWidgetData
 
 	private readonly ActionButtonStateModel _model;
 
-	private ActionButtonWidgetData(ActionButtonStateModel model, IReadOnlySet<string> triggerTypes, bool hasDoublePressFlow)
+	private ActionButtonWidgetData(
+		ActionButtonStateModel model,
+		IReadOnlySet<string> triggerTypes,
+		bool hasDoublePressFlow)
 	{
 		_model = model;
 		TriggerTypes = triggerTypes;
@@ -239,11 +250,11 @@ public sealed class ActionButtonWidgetData
 	/// condition <c>WidgetTriggerService</c> enforces before writing, restated here as a pure read so the
 	/// declared event set never depends on a live resolution.</summary>
 	public bool CanAdvanceState
-		=> StateMode &&
-			_model.CycleStatesOnPress &&
-			_model.StateProvider is null &&
-			_model.StateMapping is null &&
-			States.Count > 0;
+		=> StateMode
+			&& _model.CycleStatesOnPress
+			&& _model.StateProvider is null
+			&& _model.StateMapping is null
+			&& States.Count > 0;
 
 	public static ActionButtonWidgetData Parse(JsonElement data)
 	{
@@ -254,8 +265,8 @@ public sealed class ActionButtonWidgetData
 		var model = ActionButtonStateModel.Read(root);
 		var triggerTypes = ActionButtonFlowTriggers.ReadTriggerTypes(model.Data);
 
-		var hasDoublePressFlow = data.ValueKind == JsonValueKind.Object &&
-			WidgetFlowsJson.HasRunnableFlow(data.GetRawText(), WidgetTriggerTypes.DoublePress);
+		var hasDoublePressFlow = data.ValueKind == JsonValueKind.Object
+			&& WidgetFlowsJson.HasRunnableFlow(data.GetRawText(), WidgetTriggerTypes.DoublePress);
 
 		return new ActionButtonWidgetData(model, triggerTypes, hasDoublePressFlow);
 	}
@@ -309,31 +320,34 @@ public sealed class ActionButtonWidgetData
 		// Whole-object fallback, matching `state?.border ?? data.border`: a state that carries its own
 		// border object (even one whose style is explicitly "off") never falls back to root, and one
 		// that carries none does.
-		var borderNode = (appearance?["border"] as JsonObject) ?? (root["border"] as JsonObject);
+		var borderNode = appearance?["border"] as JsonObject ?? root["border"] as JsonObject;
 
 		return new ActionButtonResolvedAppearance
 		{
 			Label = ReadString(appearance, "label") ?? ReadString(root, "label"),
-			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(appearance, "backgroundColor")) ??
-				WidgetColor.NormalizeBackground(ReadString(root, "backgroundColor")),
-			LabelColor = WidgetColor.Normalize(ReadString(appearance, "labelColor")) ??
-				WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
-			LabelBoxColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxColor")) ??
-				WidgetColor.Normalize(ReadString(root, "labelBoxColor")),
+			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(appearance, "backgroundColor"))
+				?? WidgetColor.NormalizeBackground(ReadString(root, "backgroundColor")),
+			LabelColor = WidgetColor.Normalize(ReadString(appearance, "labelColor"))
+				?? WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
+			LabelBoxColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxColor"))
+				?? WidgetColor.Normalize(ReadString(root, "labelBoxColor")),
 			LabelShadow = ReadBool(appearance, "labelShadow") ?? ReadBool(root, "labelShadow") ?? true,
-			LabelOutlineColor = WidgetColor.Normalize(ReadString(appearance, "labelOutlineColor")) ??
-				WidgetColor.Normalize(ReadString(root, "labelOutlineColor")),
-			LabelOutlineWidth = LabelStrokeWidth(ReadDouble(appearance, "labelOutlineWidth") ??
-				ReadDouble(root, "labelOutlineWidth"), MaxLabelOutlineWidth),
-			LabelBoxBorderColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxBorderColor")) ??
-				WidgetColor.Normalize(ReadString(root, "labelBoxBorderColor")),
-			LabelBoxBorderWidth = LabelStrokeWidth(ReadDouble(appearance, "labelBoxBorderWidth") ??
-				ReadDouble(root, "labelBoxBorderWidth"), MaxLabelBoxBorderWidth),
+			LabelOutlineColor = WidgetColor.Normalize(ReadString(appearance, "labelOutlineColor"))
+				?? WidgetColor.Normalize(ReadString(root, "labelOutlineColor")),
+			LabelOutlineWidth
+				= LabelStrokeWidth(ReadDouble(appearance, "labelOutlineWidth") ?? ReadDouble(root, "labelOutlineWidth"),
+					MaxLabelOutlineWidth),
+			LabelBoxBorderColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxBorderColor"))
+				?? WidgetColor.Normalize(ReadString(root, "labelBoxBorderColor")),
+			LabelBoxBorderWidth
+				= LabelStrokeWidth(ReadDouble(appearance, "labelBoxBorderWidth")
+					?? ReadDouble(root, "labelBoxBorderWidth"),
+					MaxLabelBoxBorderWidth),
 			FontFace = Trimmed(ReadString(appearance, "fontFaceId")) ?? Trimmed(ReadString(root, "fontFaceId")),
 			TextAlign = ReadString(appearance, "textAlign") ?? ReadString(root, "textAlign") ?? "center",
 			LabelPosition = ReadString(appearance, "labelPosition") ?? ReadString(root, "labelPosition") ?? "center",
 			FontSizePercent = ReadDouble(appearance, "fontSize") ?? ReadDouble(root, "fontSize") ?? 14,
-			Border = ActionButtonBorder.Resolve(borderNode),
+			Border = ActionButtonBorder.Resolve(borderNode)
 		};
 	}
 
@@ -406,24 +420,37 @@ public sealed class ActionButtonWidgetData
 	}
 
 	private static WidgetIconReference? ReadIcon(JsonObject? appearance)
-		=> WidgetIconReference.Read(appearance?["icon"], Trimmed(ReadString(appearance, "iconId")));
+	{
+		return WidgetIconReference.Read(appearance?["icon"], Trimmed(ReadString(appearance, "iconId")));
+	}
 
 	/// <summary>The legacy <c>imageUrl</c>/<c>imageId</c> field, only meaningful when
 	/// <see cref="StateMode" /> is off and drawn only as a last resort when no icon resolves - see
 	/// <see cref="ActionButtonImageResource" /> for how a data URI becomes a resource.</summary>
 	public string? ImageUrl => StateMode ? null : Trimmed(ReadString(_model.Data, "imageUrl"));
 
-	private static string? Trimmed(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	private static string? Trimmed(string? value)
+	{
+		return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+	}
 
 	private static double LabelStrokeWidth(double? value, double max)
-		=> value is { } v && double.IsFinite(v) ? Math.Clamp(v, 0, max) : DefaultLabelStrokeWidth;
+	{
+		return value is { } v && double.IsFinite(v) ? Math.Clamp(v, 0, max) : DefaultLabelStrokeWidth;
+	}
 
 	private static bool? ReadBool(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<bool>(out var b) ? b : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<bool>(out var b) ? b : null;
+	}
 
 	private static string? ReadString(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<string>(out var s) ? s : null;
+	}
 
 	private static double? ReadDouble(JsonObject? data, string key)
-		=> data?[key] is JsonValue value && value.TryGetValue<double>(out var d) ? d : null;
+	{
+		return data?[key] is JsonValue value && value.TryGetValue<double>(out var d) ? d : null;
+	}
 }

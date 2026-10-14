@@ -21,26 +21,32 @@ public class ProtocolBackpressureTests
 		MessageTypes.ProtocolError,
 		MessageTypes.HostInvoke,
 		MessageTypes.HostResult,
-		MessageTypes.HostCancel,
+		MessageTypes.HostCancel
 	];
 
 	private static readonly string[] _replyTypes =
 	[
 		MessageTypes.CapabilityResult, MessageTypes.CapabilityDeclareAck, MessageTypes.AssetAck,
-		MessageTypes.HostAssetAck,
+		MessageTypes.HostAssetAck
 	];
 
 	[Test]
 	public void The_exempt_set_is_exactly_the_documented_fourteen_types()
-		=> Assert.That(_expectedExemptTypes, Has.Length.EqualTo(14));
+	{
+		Assert.That(_expectedExemptTypes, Has.Length.EqualTo(14));
+	}
 
 	[TestCaseSource(nameof(_expectedExemptTypes))]
 	public void Every_documented_type_is_exempt_while_paused(string type)
-		=> Assert.That(ProtocolBackpressure.IsExemptWhilePaused(type), Is.True);
+	{
+		Assert.That(ProtocolBackpressure.IsExemptWhilePaused(type), Is.True);
+	}
 
 	[TestCaseSource(nameof(_replyTypes))]
 	public void Every_reply_type_is_exempt_while_paused_because_replies_drain_rather_than_grow_the_queue(string type)
-		=> Assert.That(ProtocolBackpressure.IsExemptWhilePaused(type), Is.True);
+	{
+		Assert.That(ProtocolBackpressure.IsExemptWhilePaused(type), Is.True);
+	}
 
 	[Test]
 	public void Every_non_exempt_known_type_is_blocked_while_paused()
@@ -60,5 +66,7 @@ public class ProtocolBackpressureTests
 
 	[Test]
 	public void An_unknown_type_is_not_exempt()
-		=> Assert.That(ProtocolBackpressure.IsExemptWhilePaused("not.a.real.type"), Is.False);
+	{
+		Assert.That(ProtocolBackpressure.IsExemptWhilePaused("not.a.real.type"), Is.False);
+	}
 }

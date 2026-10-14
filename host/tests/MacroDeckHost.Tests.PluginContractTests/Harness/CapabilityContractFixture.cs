@@ -145,7 +145,7 @@ internal abstract class CapabilityContractFixture
 		}
 
 		_invoker.Dispose();
-		_dispatcher?.Dispose();
+		_dispatcher.Dispose();
 	}
 
 	protected InMemoryPluginLink Link => _link;
@@ -160,7 +160,10 @@ internal abstract class CapabilityContractFixture
 	/// own <c>hostInvoker</c> parameter in <see cref="ConnectAsync" />, which is what completes a pending
 	/// call once the host's <c>host.result</c> comes back - without that wiring the call hangs until its
 	/// own protocol timeout, since nothing ever calls <see cref="IHostInvoker.TryComplete" /> on it.</summary>
-	protected IHostInvoker CreatePluginHostInvoker() => _pluginHostInvoker;
+	protected IHostInvoker CreatePluginHostInvoker()
+	{
+		return _pluginHostInvoker;
+	}
 
 	/// <summary>Set before <see cref="ConnectAsync" /> to route the plugin's <c>host.invoke</c> calls into
 	/// a real host callback router, so a contract test can exercise both directions of an exchange.</summary>
@@ -233,22 +236,22 @@ internal abstract class CapabilityContractFixture
 			_pluginHostInvoker,
 			_assetUploader);
 
-		var session = PluginTestSession.Create(_sessionId, negotiatedVersion: 1, Time.GetUtcNow());
+		var session = PluginTestSession.Create(_sessionId, 1, Time.GetUtcNow());
 		_connection = new PluginSessionConnection(_link,
 			session,
 			_dispatcher,
 			_pluginConnectionState,
 			TimeProvider.System,
 			Serilog.Core.Logger.None,
-			hostInvoker: _pluginHostInvoker,
-			hostStateCache: null,
+			_pluginHostInvoker,
+			null,
 			_assetUploader,
 			_pluginHostAssets);
 
 		_pluginConnectionState.ActiveConnection = _connection;
 
-		_connectionRun = _connection.RunAsync(resumeSessionId: null,
-			instanceId: "contract-fixture",
+		_connectionRun = _connection.RunAsync(null,
+			"contract-fixture",
 			CancellationToken.None);
 
 		await WaitForAsync(() => _pluginConnectionState.IsReady);
@@ -288,51 +291,71 @@ internal abstract class CapabilityContractFixture
 		return ConnectAsync(handlers, declared, accepted, duringRegister: duringRegister);
 	}
 
-	protected Task<JsonElement?> InvokeRawAsync(string kind,
+	protected Task<JsonElement?> InvokeRawAsync(
+		string kind,
 		string localId,
 		string operation,
 		object? arguments = null,
 		CancellationToken cancellationToken = default)
-		=> Invoker.InvokeAsync(PluginId,
+	{
+		return Invoker.InvokeAsync(PluginId,
 			new CapabilityInvokeRequest
 				{ Kind = kind, LocalId = localId, Operation = operation, Arguments = arguments },
 			cancellationToken);
+	}
 
-	protected Task<string> UploadAssetAsync(string kind,
+	protected Task<string> UploadAssetAsync(
+		string kind,
 		string mimeType,
 		byte[] data,
 		CancellationToken cancellationToken = default)
-		=> _assetUploader.UploadAsync(kind, mimeType, data, cancellationToken);
+	{
+		return _assetUploader.UploadAsync(kind, mimeType, data, cancellationToken);
+	}
 
-	protected Task SendStateUpdateFromPluginAsync(string kind,
+	protected Task SendStateUpdateFromPluginAsync(
+		string kind,
 		string? localId = null,
 		CancellationToken cancellationToken = default)
-		=> _connection!.SendAsync(new ProtocolEnvelope
-			{
-				Type = MessageTypes.StateUpdate,
-				Id = Guid.CreateVersion7().ToString(),
-				Payload = JsonSerializer.SerializeToElement(new StateUpdatePayload { Kind = kind, LocalId = localId },
-					PluginProtocolJson.Options)
-			},
-			cancellationToken).AsTask();
+	{
+		return _connection!.SendAsync(new ProtocolEnvelope
+				{
+					Type = MessageTypes.StateUpdate,
+					Id = Guid.CreateVersion7().ToString(),
+					Payload = JsonSerializer.SerializeToElement(
+						new StateUpdatePayload { Kind = kind, LocalId = localId },
+						PluginProtocolJson.Options)
+				},
+				cancellationToken)
+			.AsTask();
+	}
 
-	protected Task SendLogPublishFromPluginAsync(IReadOnlyList<LogEventDto> events,
+	protected Task SendLogPublishFromPluginAsync(
+		IReadOnlyList<LogEventDto> events,
 		int? dropped = null,
 		CancellationToken cancellationToken = default)
-		=> _connection!.SendAsync(new ProtocolEnvelope
-			{
-				Type = MessageTypes.LogPublish,
-				Id = Guid.CreateVersion7().ToString(),
-				Payload = JsonSerializer.SerializeToElement(
-					new LogPublishPayload { Events = events, Dropped = dropped },
-					PluginProtocolJson.Options)
-			},
-			cancellationToken).AsTask();
+	{
+		return _connection!.SendAsync(new ProtocolEnvelope
+				{
+					Type = MessageTypes.LogPublish,
+					Id = Guid.CreateVersion7().ToString(),
+					Payload = JsonSerializer.SerializeToElement(
+						new LogPublishPayload { Events = events, Dropped = dropped },
+						PluginProtocolJson.Options)
+				},
+				cancellationToken)
+			.AsTask();
+	}
 
-	protected void Disconnect() => SessionRegistry.Detach(_sessionId, Time.GetUtcNow());
+	protected void Disconnect()
+	{
+		SessionRegistry.Detach(_sessionId, Time.GetUtcNow());
+	}
 
 	private static Task WaitForAsync(Func<bool> condition, TimeSpan? timeout = null)
-		=> WaitForAsync(condition, "The plugin session never became ready.", timeout);
+	{
+		return WaitForAsync(condition, "The plugin session never became ready.", timeout);
+	}
 
 	protected static async Task WaitForAsync(Func<bool> condition, string failureMessage, TimeSpan? timeout = null)
 	{
@@ -357,11 +380,16 @@ internal sealed class InMemorySnapshotStore : IRemotePluginSnapshotStore
 	private readonly Dictionary<string, RemotePluginCapabilitySnapshot> _byPluginId = new(StringComparer.Ordinal);
 
 	public RemotePluginCapabilitySnapshot GetSnapshot(string pluginId)
-		=> _byPluginId.TryGetValue(pluginId, out var snapshot)
+	{
+		return _byPluginId.TryGetValue(pluginId, out var snapshot)
 			? snapshot
 			: RemotePluginCapabilitySnapshot.Empty(pluginId);
+	}
 
-	public bool Has(string pluginId) => _byPluginId.ContainsKey(pluginId);
+	public bool Has(string pluginId)
+	{
+		return _byPluginId.ContainsKey(pluginId);
+	}
 
 	public Task SaveAsync(RemotePluginCapabilitySnapshot snapshot, CancellationToken cancellationToken = default)
 	{

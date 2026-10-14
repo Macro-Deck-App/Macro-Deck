@@ -23,7 +23,7 @@ public class
 		CancellationToken cancellationToken)
 	{
 		var result = await _profileService.Create(request.Name,
-			layoutType: null,
+			null,
 			request.DefaultRows,
 			request.DefaultColumns,
 			request.DefaultBackgroundColor,

@@ -14,13 +14,19 @@ public sealed record VariableValue
 
 	/// <summary>Convenience for the common case: a bare value with no bounds.</summary>
 	public static VariableValue Of(string id, object? value)
-		=> new() { Id = id, Reading = VariableReading.Of(value) };
+	{
+		return new VariableValue { Id = id, Reading = VariableReading.Of(value) };
+	}
 
 	/// <summary>Tags an already-built reading with its id.</summary>
 	public static VariableValue Of(string id, VariableReading reading)
-		=> new() { Id = id, Reading = reading };
+	{
+		return new VariableValue { Id = id, Reading = reading };
+	}
 
 	/// <summary>Convenience for the variable-is-gone case.</summary>
 	public static VariableValue Unavailable(string id)
-		=> new() { Id = id, Reading = VariableReading.Unavailable };
+	{
+		return new VariableValue { Id = id, Reading = VariableReading.Unavailable };
+	}
 }

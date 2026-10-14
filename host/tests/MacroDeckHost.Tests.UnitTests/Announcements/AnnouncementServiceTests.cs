@@ -11,7 +11,7 @@ namespace MacroDeckHost.Tests.UnitTests.Announcements;
 [TestFixture]
 internal sealed class AnnouncementServiceTests
 {
-	private static readonly DateTimeOffset Now = new(2026, 9, 28, 12, 0, 0, TimeSpan.Zero);
+	private static readonly DateTimeOffset _now = new(2026, 9, 28, 12, 0, 0, TimeSpan.Zero);
 
 	private ScriptedClient _client = null!;
 	private MemoryPreferences _preferences = null!;
@@ -30,7 +30,7 @@ internal sealed class AnnouncementServiceTests
 			.BuildServiceProvider();
 		_announcements = new AnnouncementService(_client,
 			_services.GetRequiredService<IServiceScopeFactory>(),
-			new ManualTimeProvider { Now = Now });
+			new ManualTimeProvider { Now = _now });
 		_announcements.Changed += () => _changes++;
 	}
 
@@ -44,9 +44,9 @@ internal sealed class AnnouncementServiceTests
 	[Test]
 	public async Task A_first_start_shows_an_announcement_published_within_fourteen_days()
 	{
-		_client.Next = Published(4, Now.AddDays(-13));
+		_client.Next = Published(4, _now.AddDays(-13));
 
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -59,13 +59,13 @@ internal sealed class AnnouncementServiceTests
 	[Test]
 	public async Task A_first_start_that_decided_to_show_an_announcement_still_shows_it_on_the_next_start()
 	{
-		_client.Next = Published(4, Now.AddDays(-13));
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now.AddDays(-13));
+		await _announcements.Refresh(CancellationToken.None);
 
 		using var restarted = new AnnouncementService(_client,
 			_services.GetRequiredService<IServiceScopeFactory>(),
-			new ManualTimeProvider { Now = Now.AddDays(30) });
-		await restarted.Refresh(default);
+			new ManualTimeProvider { Now = _now.AddDays(30) });
+		await restarted.Refresh(CancellationToken.None);
 
 		Assert.That(restarted.Pending?.Number, Is.EqualTo(4));
 	}
@@ -74,10 +74,10 @@ internal sealed class AnnouncementServiceTests
 	public async Task An_installation_that_has_checked_before_shows_an_announcement_of_any_age()
 	{
 		_client.Next = new AnnouncementFetch.NonePublished();
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 
-		_client.Next = Published(1, Now.AddDays(-15));
-		await _announcements.Refresh(default);
+		_client.Next = Published(1, _now.AddDays(-15));
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.That(_announcements.Pending?.Number, Is.EqualTo(1));
 	}
@@ -85,9 +85,9 @@ internal sealed class AnnouncementServiceTests
 	[Test]
 	public async Task A_first_start_stores_an_old_announcement_without_showing_it()
 	{
-		_client.Next = Published(4, Now.AddDays(-15));
+		_client.Next = Published(4, _now.AddDays(-15));
 
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -96,8 +96,8 @@ internal sealed class AnnouncementServiceTests
 			Assert.That(_changes, Is.Zero);
 		});
 
-		_client.Next = Published(5, Now.AddDays(-30));
-		await _announcements.Refresh(default);
+		_client.Next = Published(5, _now.AddDays(-30));
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.That(_announcements.Pending?.Number, Is.EqualTo(5), "a newer number is news even when it is old");
 	}
@@ -106,9 +106,9 @@ internal sealed class AnnouncementServiceTests
 	public async Task A_higher_number_is_shown_even_after_a_gap()
 	{
 		LastSeen = "3";
-		_client.Next = Published(7, Now.AddDays(-100));
+		_client.Next = Published(7, _now.AddDays(-100));
 
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.That(_announcements.Pending?.Number, Is.EqualTo(7));
 	}
@@ -116,12 +116,12 @@ internal sealed class AnnouncementServiceTests
 	[Test]
 	public async Task A_seen_announcement_is_never_shown_again_even_after_an_edit()
 	{
-		_client.Next = Published(4, Now.AddDays(-1));
-		await _announcements.Refresh(default);
-		await _announcements.MarkSeen(4, default);
+		_client.Next = Published(4, _now.AddDays(-1));
+		await _announcements.Refresh(CancellationToken.None);
+		await _announcements.MarkSeen(4, CancellationToken.None);
 
-		_client.Next = Published(4, Now.AddDays(-1), "Edited", Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now.AddDays(-1), "Edited", _now);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -134,17 +134,17 @@ internal sealed class AnnouncementServiceTests
 	public async Task An_edit_of_the_pending_announcement_updates_its_text_and_keeps_its_number()
 	{
 		LastSeen = "3";
-		_client.Next = Published(4, Now.AddDays(-1));
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now.AddDays(-1));
+		await _announcements.Refresh(CancellationToken.None);
 
-		_client.Next = Published(4, Now.AddDays(-1), "Edited", Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now.AddDays(-1), "Edited", _now);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(_announcements.Pending?.Number, Is.EqualTo(4));
 			Assert.That(_announcements.Pending?.Content, Is.EqualTo("Edited"));
-			Assert.That(_announcements.Pending?.UpdatedAt, Is.EqualTo(Now));
+			Assert.That(_announcements.Pending?.UpdatedAt, Is.EqualTo(_now));
 			Assert.That(_changes, Is.EqualTo(2));
 		});
 	}
@@ -153,21 +153,21 @@ internal sealed class AnnouncementServiceTests
 	public async Task A_withdrawn_announcement_is_no_longer_pending_and_the_stored_number_stays()
 	{
 		LastSeen = "5";
-		_client.Next = Published(7, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(7, _now);
+		await _announcements.Refresh(CancellationToken.None);
 
 		_client.Next = new AnnouncementFetch.NonePublished();
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 		Assert.That(_announcements.Pending, Is.Null);
 
-		_client.Next = Published(7, Now);
-		await _announcements.Refresh(default);
-		_client.Next = Published(6, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(7, _now);
+		await _announcements.Refresh(CancellationToken.None);
+		_client.Next = Published(6, _now);
+		await _announcements.Refresh(CancellationToken.None);
 		Assert.That(_announcements.Pending?.Number, Is.EqualTo(6), "the older one is still unseen");
 
-		_client.Next = Published(4, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now);
+		await _announcements.Refresh(CancellationToken.None);
 		Assert.Multiple(() =>
 		{
 			Assert.That(_announcements.Pending, Is.Null);
@@ -179,11 +179,11 @@ internal sealed class AnnouncementServiceTests
 	public async Task A_failed_check_changes_nothing()
 	{
 		LastSeen = "3";
-		_client.Next = Published(4, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now);
+		await _announcements.Refresh(CancellationToken.None);
 
 		_client.Next = new AnnouncementFetch.Failed();
-		await _announcements.Refresh(default);
+		await _announcements.Refresh(CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -196,11 +196,11 @@ internal sealed class AnnouncementServiceTests
 	public async Task Marking_seen_never_lowers_the_stored_number()
 	{
 		LastSeen = "3";
-		_client.Next = Published(9, Now);
-		await _announcements.Refresh(default);
-		await _announcements.MarkSeen(9, default);
+		_client.Next = Published(9, _now);
+		await _announcements.Refresh(CancellationToken.None);
+		await _announcements.MarkSeen(9, CancellationToken.None);
 
-		await _announcements.MarkSeen(4, default);
+		await _announcements.MarkSeen(4, CancellationToken.None);
 
 		Assert.That(LastSeen, Is.EqualTo("9"));
 	}
@@ -209,10 +209,10 @@ internal sealed class AnnouncementServiceTests
 	public async Task Marking_a_number_the_host_never_fetched_as_seen_is_ignored()
 	{
 		LastSeen = "3";
-		_client.Next = Published(4, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(4, _now);
+		await _announcements.Refresh(CancellationToken.None);
 
-		await _announcements.MarkSeen(int.MaxValue, default);
+		await _announcements.MarkSeen(int.MaxValue, CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -225,10 +225,11 @@ internal sealed class AnnouncementServiceTests
 	public async Task Concurrent_seen_marks_keep_the_highest_number()
 	{
 		LastSeen = "1";
-		_client.Next = Published(5, Now);
-		await _announcements.Refresh(default);
+		_client.Next = Published(5, _now);
+		await _announcements.Refresh(CancellationToken.None);
 
-		await Task.WhenAll(Enumerable.Range(1, 5).Select(number => Task.Run(() => _announcements.MarkSeen(number, default))));
+		await Task.WhenAll(Enumerable.Range(1, 5)
+			.Select(number => Task.Run(() => _announcements.MarkSeen(number, CancellationToken.None))));
 
 		Assert.Multiple(() =>
 		{
@@ -243,21 +244,27 @@ internal sealed class AnnouncementServiceTests
 		set => _preferences.Values[AppPreferenceService.AnnouncementLastSeenNumberKey] = value!;
 	}
 
-	private static AnnouncementFetch.Published Published(int number,
+	private static AnnouncementFetch.Published Published(
+		int number,
 		DateTimeOffset publishedAt,
 		string content = "Body",
 		DateTimeOffset? updatedAt = null)
-		=> new AnnouncementFetch.Published(new Announcement(number,
+	{
+		return new AnnouncementFetch.Published(new Announcement(number,
 			$"Announcement {number}",
 			content,
 			publishedAt,
 			updatedAt ?? publishedAt));
+	}
 
 	private sealed class ScriptedClient : IPlatformAnnouncementClient
 	{
 		public AnnouncementFetch Next { get; set; } = new AnnouncementFetch.NonePublished();
 
-		public Task<AnnouncementFetch> GetLatest(CancellationToken cancellationToken) => Task.FromResult(Next);
+		public Task<AnnouncementFetch> GetLatest(CancellationToken cancellationToken)
+		{
+			return Task.FromResult(Next);
+		}
 	}
 
 	private sealed class MemoryPreferences : IAppPreferenceRepository
@@ -265,9 +272,11 @@ internal sealed class AnnouncementServiceTests
 		public ConcurrentDictionary<string, string> Values { get; } = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
+		{
+			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }
 				: null);
+		}
 
 		public Task SetValue(string key, string value)
 		{

@@ -54,8 +54,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		ArgumentNullException.ThrowIfNull(device);
 
 		var localId = Require(device.Id, "The device id must not be empty.");
-		var name = DeviceService.Sanitize(device.Name) ??
-			throw new ArgumentException("The device name must not be empty.", nameof(device));
+		var name = DeviceService.Sanitize(device.Name)
+			?? throw new ArgumentException("The device name must not be empty.", nameof(device));
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
@@ -110,8 +110,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		ArgumentNullException.ThrowIfNull(device);
 
 		var localId = Require(device.Id, "The device id must not be empty.");
-		var name = DeviceService.Sanitize(device.Name) ??
-			throw new ArgumentException("The device name must not be empty.", nameof(device));
+		var name = DeviceService.Sanitize(device.Name)
+			?? throw new ArgumentException("The device name must not be empty.", nameof(device));
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
@@ -186,7 +186,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		var wasOnline = _presence.Forget(existing.Id);
 
 		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope, existing.Id, online: false, wasOnline, cancellationToken);
+		await PublishPresence(scope, existing.Id, false, wasOnline, cancellationToken);
 		await PublishUnregistered(scope, existing.Id, cancellationToken);
 	}
 
@@ -201,7 +201,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		{
 			var wasOnline = _presence.Forget(device.Id);
 			await Publish(scope, device.Id, cancellationToken);
-			await PublishPresence(scope, device.Id, online: false, wasOnline, cancellationToken);
+			await PublishPresence(scope, device.Id, false, wasOnline, cancellationToken);
 			await PublishUnregistered(scope, device.Id, cancellationToken);
 		}
 	}
@@ -223,13 +223,13 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		// misses (the provider is down) must not erase what was last resolved for it.
 		if (!string.Equals(entity.LayoutReference, device.LayoutReference, StringComparison.Ordinal))
 		{
-			entity.LayoutSnapshot = device.LayoutReference is not null &&
-				_layoutRegistry.TryResolve(device.LayoutReference, out var layout)
+			entity.LayoutSnapshot = device.LayoutReference is not null
+				&& _layoutRegistry.TryResolve(device.LayoutReference, out var layout)
 					? LayoutSnapshotSerializer.Serialize(layout)
 					: null;
 		}
-		else if (device.LayoutReference is not null &&
-			_layoutRegistry.TryResolve(device.LayoutReference, out var refreshedLayout))
+		else if (device.LayoutReference is not null
+			&& _layoutRegistry.TryResolve(device.LayoutReference, out var refreshedLayout))
 		{
 			entity.LayoutSnapshot = LayoutSnapshotSerializer.Serialize(refreshedLayout);
 		}
@@ -240,7 +240,10 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		entity.LastSeenAt = now;
 	}
 
-	private bool IsDisabled(string providerId) => _integrations?.IsExplicitlyDisabled(providerId) == true;
+	private bool IsDisabled(string providerId)
+	{
+		return _integrations?.IsExplicitlyDisabled(providerId) == true;
+	}
 
 	private static string? Serialize(DeviceDescriptor device)
 	{
@@ -258,8 +261,11 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 	}
 
 	private static Task Publish(AsyncServiceScope scope, Guid deviceId, CancellationToken cancellationToken)
-		=> scope.ServiceProvider.GetRequiredService<IMediator>()
-			.Publish(new DeviceChangedNotification(deviceId), cancellationToken).AsTask();
+	{
+		return scope.ServiceProvider.GetRequiredService<IMediator>()
+			.Publish(new DeviceChangedNotification(deviceId), cancellationToken)
+			.AsTask();
+	}
 
 	// Presence for a provider device flips here and nowhere else: the background service derives it from
 	// WebSocket connection counts, which a provider device never has, so without this a provider device
@@ -270,20 +276,28 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		bool online,
 		bool changed,
 		CancellationToken cancellationToken)
-		=> changed
+	{
+		return changed
 			? scope.ServiceProvider.GetRequiredService<IMediator>()
-				.Publish(new DevicePresenceChangedNotification(deviceId, online), cancellationToken).AsTask()
+				.Publish(new DevicePresenceChangedNotification(deviceId, online), cancellationToken)
+				.AsTask()
 			: Task.CompletedTask;
+	}
 
 	private static Task PublishUnregistered(
 		AsyncServiceScope scope,
 		Guid deviceId,
 		CancellationToken cancellationToken)
-		=> scope.ServiceProvider.GetRequiredService<IMediator>()
-			.Publish(new DeviceUnregisteredNotification(deviceId), cancellationToken).AsTask();
+	{
+		return scope.ServiceProvider.GetRequiredService<IMediator>()
+			.Publish(new DeviceUnregisteredNotification(deviceId), cancellationToken)
+			.AsTask();
+	}
 
 	private static string Require(string? value, string message)
-		=> string.IsNullOrWhiteSpace(value) ? throw new ArgumentException(message) : value;
+	{
+		return string.IsNullOrWhiteSpace(value) ? throw new ArgumentException(message) : value;
+	}
 
 	private sealed record StoredDeviceCapabilities(
 		DeviceCapabilities Capabilities,

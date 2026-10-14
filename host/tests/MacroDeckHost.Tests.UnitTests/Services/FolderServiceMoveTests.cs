@@ -41,14 +41,17 @@ public class FolderServiceMoveTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Move_ReorderSiblingBefore_RenumbersDestinationDensely()
 	{
-		var a = await AddRoot("A", order: 0, isDefault: true);
-		var b = await AddRoot("B", order: 1);
-		var c = await AddRoot("C", order: 2);
+		var a = await AddRoot("A", 0, isDefault: true);
+		var b = await AddRoot("B", 1);
+		var c = await AddRoot("C", 2);
 
 		var result = await _service.Move(b.Id, a.Id, FolderMovePosition.Before);
 
@@ -65,9 +68,9 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_ReorderSiblingAfter_RenumbersDestinationDensely()
 	{
-		var a = await AddRoot("A", order: 0, isDefault: true);
-		var b = await AddRoot("B", order: 1);
-		var c = await AddRoot("C", order: 2);
+		var a = await AddRoot("A", 0, isDefault: true);
+		var b = await AddRoot("B", 1);
+		var c = await AddRoot("C", 2);
 
 		var result = await _service.Move(c.Id, a.Id, FolderMovePosition.After);
 
@@ -83,11 +86,11 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_Inside_ReparentsAndCompactsTheVacatedSourceGap()
 	{
-		var root = await AddRoot("Root", order: 0, isDefault: true);
-		var target = await AddRoot("Target", order: 1);
-		var c1 = await AddFolder("C1", root.Id, order: 0);
-		var c2 = await AddFolder("C2", root.Id, order: 1);
-		var c3 = await AddFolder("C3", root.Id, order: 2);
+		var root = await AddRoot("Root", 0, isDefault: true);
+		var target = await AddRoot("Target", 1);
+		var c1 = await AddFolder("C1", root.Id, 0);
+		var c2 = await AddFolder("C2", root.Id, 1);
+		var c3 = await AddFolder("C3", root.Id, 2);
 
 		var result = await _service.Move(c2.Id, target.Id, FolderMovePosition.Inside);
 
@@ -104,9 +107,9 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_ToRoot_ReparentsAndRenumbersBothGroups()
 	{
-		var rootA = await AddRoot("RootA", order: 0, isDefault: true);
-		var rootB = await AddRoot("RootB", order: 1);
-		var nested = await AddFolder("Nested", rootB.Id, order: 0);
+		var rootA = await AddRoot("RootA", 0, isDefault: true);
+		var rootB = await AddRoot("RootB", 1);
+		var nested = await AddFolder("Nested", rootB.Id, 0);
 
 		var result = await _service.Move(nested.Id, rootA.Id, FolderMovePosition.After);
 
@@ -123,8 +126,8 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_TargetIsSelf_RejectsAndPersistsNothing()
 	{
-		var a = await AddRoot("A", order: 0, isDefault: true);
-		await AddRoot("B", order: 1);
+		var a = await AddRoot("A", 0, isDefault: true);
+		await AddRoot("B", 1);
 		var savesBefore = _store.SaveCount;
 
 		var result = await _service.Move(a.Id, a.Id, FolderMovePosition.After);
@@ -140,8 +143,8 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_TargetIsDescendant_RejectsAndPersistsNothing()
 	{
-		var root = await AddRoot("Root", order: 0, isDefault: true);
-		var child = await AddFolder("Child", root.Id, order: 0);
+		var root = await AddRoot("Root", 0, isDefault: true);
+		var child = await AddFolder("Child", root.Id, 0);
 		var savesBefore = _store.SaveCount;
 
 		var result = await _service.Move(root.Id, child.Id, FolderMovePosition.Inside);
@@ -158,7 +161,7 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_TargetInDifferentProfile_RejectsAndPersistsNothing()
 	{
-		var folder = await AddRoot("A", order: 0, isDefault: true);
+		var folder = await AddRoot("A", 0, isDefault: true);
 
 		var otherProfileId = Guid.NewGuid();
 		await _cache.AddOrUpdate(new ProfileEntity { Id = otherProfileId, Name = "Other" });
@@ -189,9 +192,9 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_MultiSiblingReorder_IncrementsSaveCountByOneForTheWholeBatch()
 	{
-		var a = await AddRoot("A", order: 0, isDefault: true);
-		await AddRoot("B", order: 1);
-		var c = await AddRoot("C", order: 2);
+		var a = await AddRoot("A", 0, isDefault: true);
+		await AddRoot("B", 1);
+		var c = await AddRoot("C", 2);
 		var savesBefore = _store.SaveCount;
 
 		var result = await _service.Move(c.Id, a.Id, FolderMovePosition.After);
@@ -204,12 +207,12 @@ public class FolderServiceMoveTests
 	public async Task Move_ReplacementStart_IsSelectedAndShippedInTheSameBatch()
 	{
 		var replacement = await AddRoot("Replacement",
-			order: 0,
-			createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+			0,
+			new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 		var start = await AddRoot("Start",
-			order: 1,
-			createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
-		var holder = await AddFolder("Holder", replacement.Id, order: 0);
+			1,
+			new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+		var holder = await AddFolder("Holder", replacement.Id, 0);
 		await SetStart(start);
 
 		var result = await _service.Move(start.Id, holder.Id, FolderMovePosition.Inside);
@@ -228,7 +231,7 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_OnlyRootStartFolder_RejectsMoveInsideAnotherFolder()
 	{
-		var start = await AddRoot("Start", order: 0, isDefault: true);
+		var start = await AddRoot("Start", 0, isDefault: true);
 		var target = new FolderEntity
 		{
 			Id = Guid.NewGuid(),
@@ -259,15 +262,15 @@ public class FolderServiceMoveTests
 	public async Task Move_StartMarkerFlipWithUnchangedOrder_StillReachesTheNotificationAndDisk()
 	{
 		var replacement = await AddRoot("R",
-			order: 0,
-			createdAt: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+			0,
+			new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
 		var middle = await AddRoot("M",
-			order: 1,
-			createdAt: new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
+			1,
+			new DateTime(2025, 2, 1, 0, 0, 0, DateTimeKind.Utc));
 		var start = await AddRoot("S",
-			order: 2,
-			createdAt: new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc));
-		var holder = await AddFolder("Holder", replacement.Id, order: 0);
+			2,
+			new DateTime(2025, 3, 1, 0, 0, 0, DateTimeKind.Utc));
+		var holder = await AddFolder("Holder", replacement.Id, 0);
 		await SetStart(start);
 		_mediator.Published.Clear();
 
@@ -294,9 +297,9 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_OrderSurvivesAFreshProfileCacheReinitOverTheSameStore()
 	{
-		var a = await AddRoot("A", order: 0, isDefault: true);
-		var b = await AddRoot("B", order: 1);
-		var c = await AddRoot("C", order: 2);
+		var a = await AddRoot("A", 0, isDefault: true);
+		var b = await AddRoot("B", 1);
+		var c = await AddRoot("C", 2);
 
 		await _service.Move(c.Id, a.Id, FolderMovePosition.After);
 		_cache.Dispose();
@@ -319,10 +322,10 @@ public class FolderServiceMoveTests
 	[Test]
 	public async Task Move_LegacyProfileWithoutCreatedAt_SelectsSameReplacementRootAfterRenumbering()
 	{
-		var start = await AddFolder("Start", null, order: 5, createdAt: DateTime.MinValue);
-		var r1 = await AddFolder("R1", null, order: 3, createdAt: DateTime.MinValue);
-		var r2 = await AddFolder("R2", null, order: 1, createdAt: DateTime.MinValue);
-		var holder = await AddFolder("Holder", r1.Id, order: 0);
+		var start = await AddFolder("Start", null, 5, DateTime.MinValue);
+		var r1 = await AddFolder("R1", null, 3, DateTime.MinValue);
+		var r2 = await AddFolder("R2", null, 1, DateTime.MinValue);
+		var holder = await AddFolder("Holder", r1.Id, 0);
 		await SetStart(start);
 
 		var result = await _service.Move(start.Id, holder.Id, FolderMovePosition.Inside);
@@ -339,16 +342,22 @@ public class FolderServiceMoveTests
 		});
 	}
 
-	private async Task<FolderEntity> AddRoot(string name,
+	private async Task<FolderEntity> AddRoot(
+		string name,
 		int order,
 		DateTime? createdAt = null,
 		bool isDefault = false)
-		=> await AddFolder(name, null, order, createdAt, isDefault);
+	{
+		return await AddFolder(name, null, order, createdAt, isDefault);
+	}
 
 	private Task<Domain.Common.Result<FolderEntity, FolderError>> SetStart(FolderEntity folder)
-		=> _service.Update(folder.Id, null, null, null, null, null, null, null, null, true);
+	{
+		return _service.Update(folder.Id, null, null, null, null, null, null, null, null, true);
+	}
 
-	private async Task<FolderEntity> AddFolder(string name,
+	private async Task<FolderEntity> AddFolder(
+		string name,
 		Guid? parentId,
 		int order,
 		DateTime? createdAt = null,

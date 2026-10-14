@@ -55,7 +55,8 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 		IReadOnlyDictionary<string, object?> input,
 		IConfigFlowContext context,
 		CancellationToken cancellationToken)
-		=> stepId switch
+	{
+		return stepId switch
 		{
 			AppStepId => SubmitApp(input, context),
 			AuthorizeStepId => await SubmitAuthorizeAsync(context, cancellationToken),
@@ -63,14 +64,17 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 			_ => ConfigFlowResult.Error(AppStep(context.OAuth.RedirectUri),
 				AppStrings.Integrations.Spotify.Config.UnknownStep())
 		};
+	}
 
 	private ConfigFlowResult SubmitApp(IReadOnlyDictionary<string, object?> input, IConfigFlowContext context)
 	{
 		_signedIn = null;
-		_clientId = MicrosoftOAuth.EffectiveClientId(input.GetValueOrDefault(MicrosoftCalendarConfigKeys.ClientId) as string);
+		_clientId = MicrosoftOAuth.EffectiveClientId(
+			input.GetValueOrDefault(MicrosoftCalendarConfigKeys.ClientId) as string);
 		_tenant = MicrosoftOAuth.NormalizeTenant(input.GetValueOrDefault(MicrosoftCalendarConfigKeys.Tenant) as string);
 		_requestedSelection
-			= MicrosoftCalendarAccountManager.ParseCalendarIds(input.GetValueOrDefault(MicrosoftCalendarConfigKeys.CalendarIds));
+			= MicrosoftCalendarAccountManager.ParseCalendarIds(
+				input.GetValueOrDefault(MicrosoftCalendarConfigKeys.CalendarIds));
 
 		var fieldErrors = new Dictionary<string, LocalizedText>();
 		if (!Guid.TryParse(_clientId, out _))
@@ -91,8 +95,11 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 		}
 
 		_codeVerifier = MicrosoftOAuth.CreateCodeVerifier();
-		return ConfigFlowResult.External(
-			MicrosoftOAuth.AuthorizeUrl(_clientId, _tenant, context.OAuth.RedirectUri, context.OAuth.State, _codeVerifier),
+		return ConfigFlowResult.External(MicrosoftOAuth.AuthorizeUrl(_clientId,
+				_tenant,
+				context.OAuth.RedirectUri,
+				context.OAuth.State,
+				_codeVerifier),
 			AuthorizeStepId);
 	}
 
@@ -119,14 +126,15 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 		catch (MicrosoftOAuthRejectedException ex)
 		{
 			_logger.Warning("Microsoft token exchange was refused ({Reason})", ex.Message);
-			return Failed(context, ex.ErrorCodes switch
-			{
-				var codes when codes.Contains(PublicClientRequiredError)
-					=> AppStrings.Integrations.MicrosoftCalendar.Config.PublicClientRequired(),
-				var codes when codes.Contains(ConsentRequiredError)
-					=> AppStrings.Integrations.MicrosoftCalendar.Config.ConsentRequired(),
-				_ => AppStrings.Integrations.MicrosoftCalendar.Config.TokenExchangeFailed()
-			});
+			return Failed(context,
+				ex.ErrorCodes switch
+				{
+					var codes when codes.Contains(PublicClientRequiredError)
+						=> AppStrings.Integrations.MicrosoftCalendar.Config.PublicClientRequired(),
+					var codes when codes.Contains(ConsentRequiredError)
+						=> AppStrings.Integrations.MicrosoftCalendar.Config.ConsentRequired(),
+					_ => AppStrings.Integrations.MicrosoftCalendar.Config.TokenExchangeFailed()
+				});
 		}
 		catch (MicrosoftOAuthTransientException ex)
 		{
@@ -161,8 +169,11 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 		{
 			calendars = await _graph.GetCalendarsAsync(tokens, null, cancellationToken);
 		}
-		catch (Exception ex) when (ex is HttpRequestException or TimeoutException or JsonException
-			or MicrosoftOAuthRejectedException or MicrosoftOAuthTransientException)
+		catch (Exception ex) when (ex is HttpRequestException
+			or TimeoutException
+			or JsonException
+			or MicrosoftOAuthRejectedException
+			or MicrosoftOAuthTransientException)
 		{
 			_logger.Warning("Could not list the Microsoft account's calendars during setup ({Failure})",
 				ex.GetType().Name);
@@ -223,7 +234,8 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 		};
 
 		var title = identity.Email ?? identity.Name;
-		return ConfigFlowResult.Complete(string.IsNullOrWhiteSpace(title) ? MicrosoftCalendarIntegration.BrandName : title,
+		return ConfigFlowResult.Complete(
+			string.IsNullOrWhiteSpace(title) ? MicrosoftCalendarIntegration.BrandName : title,
 			values);
 	}
 
@@ -240,10 +252,13 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 	}
 
 	private static ConfigFlowResult Failed(IConfigFlowContext context, LocalizedText message)
-		=> ConfigFlowResult.Error(AppStep(context.OAuth.RedirectUri), message);
+	{
+		return ConfigFlowResult.Error(AppStep(context.OAuth.RedirectUri), message);
+	}
 
 	private static ConfigFlowStep CalendarsStep(SignedIn signedIn, IReadOnlyList<string> selection)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = CalendarsStepId,
 			Title = AppStrings.Integrations.MicrosoftCalendar.Config.CalendarsTitle(),
@@ -261,27 +276,33 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 				}
 			]
 		};
+	}
 
 	private static ActionParameterOption OptionFor(MicrosoftCalendarSummary calendar, MicrosoftIdentity account)
-		=> new()
+	{
+		return new ActionParameterOption
 		{
 			Value = calendar.Id,
 			Label = IsShared(calendar, account) && calendar.OwnerName is { Length: > 0 } owner
-				? AppStrings.Integrations.MicrosoftCalendar.Config.SharedCalendarName(calendar: calendar.Name,
-					owner: owner)
+				? AppStrings.Integrations.MicrosoftCalendar.Config.SharedCalendarName(calendar.Name,
+					owner)
 				: calendar.Name
 		};
+	}
 
 	// A personal account signed in with another provider's address owns its calendars under an
 	// outlook alias, so the owner's name has to differ too.
 	private static bool IsShared(MicrosoftCalendarSummary calendar, MicrosoftIdentity account)
-		=> calendar.OwnerAddress is { Length: > 0 } ownerAddress &&
-			account.Email is { Length: > 0 } email &&
-			!string.Equals(ownerAddress, email, StringComparison.OrdinalIgnoreCase) &&
-			!string.Equals(calendar.OwnerName, account.Name, StringComparison.OrdinalIgnoreCase);
+	{
+		return calendar.OwnerAddress is { Length: > 0 } ownerAddress
+			&& account.Email is { Length: > 0 } email
+			&& !string.Equals(ownerAddress, email, StringComparison.OrdinalIgnoreCase)
+			&& !string.Equals(calendar.OwnerName, account.Name, StringComparison.OrdinalIgnoreCase);
+	}
 
 	internal static ConfigFlowStep AppStep(string redirectUri)
-		=> new()
+	{
+		return new ConfigFlowStep
 		{
 			StepId = AppStepId,
 			Title = AppStrings.Integrations.MicrosoftCalendar.Config.ConnectTitle(),
@@ -295,15 +316,16 @@ internal sealed class MicrosoftCalendarConfigFlow : IConfigFlow
 			AdvancedFields =
 			[
 				ActionParameter.Text(MicrosoftCalendarConfigKeys.ClientId,
-					label: AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdLabel(),
-					description: AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdDescription(redirectUri: redirectUri),
-					placeholder: AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder()),
+					AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdLabel(),
+					AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdDescription(redirectUri),
+					AppStrings.Integrations.MicrosoftCalendar.Config.ClientIdPlaceholder()),
 				ActionParameter.Text(MicrosoftCalendarConfigKeys.Tenant,
-					label: AppStrings.Integrations.MicrosoftCalendar.Config.TenantLabel(),
-					description: AppStrings.Integrations.MicrosoftCalendar.Config.TenantDescription(),
-					placeholder: MicrosoftOAuth.DefaultTenant)
+					AppStrings.Integrations.MicrosoftCalendar.Config.TenantLabel(),
+					AppStrings.Integrations.MicrosoftCalendar.Config.TenantDescription(),
+					MicrosoftOAuth.DefaultTenant)
 			]
 		};
+	}
 
 	private sealed record SignedIn(
 		MicrosoftTokenResponse Token,

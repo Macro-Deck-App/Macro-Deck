@@ -14,7 +14,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 
 	private const string BroadcastParts = "id,snippet,contentDetails,status";
 
-	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), disposeHandler: true);
+	private static readonly HttpClient _shared = CreateClient(IntegrationHttp.CreateHandler(), true);
 
 	private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
 	{
@@ -49,7 +49,7 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		YouTubeQuotaBudget budget,
 		ILogger logger)
 	{
-		_http = CreateClient(handler, disposeHandler: false);
+		_http = CreateClient(handler, false);
 		_ownsClient = true;
 		_accessToken = accessToken;
 		_forceRefresh = forceRefresh;
@@ -70,15 +70,15 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 		return
 		[
 			.. (response.Items ?? [])
-				.Where(item => !string.IsNullOrEmpty(item.Id))
-				.Select(item => new YouTubeBroadcast(item.Id!,
-					item.Snippet?.Title ?? string.Empty,
-					NullIfEmpty(item.Snippet?.LiveChatId),
-					ParseTime(item.Snippet?.ActualStartTime),
-					ParseTime(item.Snippet?.ScheduledStartTime),
-					item.Status?.LifeCycleStatus ?? string.Empty,
-					item.ContentDetails?.EnableAutoStart ?? false,
-					item.ContentDetails?.MonitorStream?.EnableMonitorStream ?? false))
+			.Where(item => !string.IsNullOrEmpty(item.Id))
+			.Select(item => new YouTubeBroadcast(item.Id!,
+				item.Snippet?.Title ?? string.Empty,
+				NullIfEmpty(item.Snippet?.LiveChatId),
+				ParseTime(item.Snippet?.ActualStartTime),
+				ParseTime(item.Snippet?.ScheduledStartTime),
+				item.Status?.LifeCycleStatus ?? string.Empty,
+				item.ContentDetails?.EnableAutoStart ?? false,
+				item.ContentDetails?.MonitorStream?.EnableMonitorStream ?? false))
 		];
 	}
 
@@ -170,11 +170,13 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 	}
 
 	public Task DeleteChatMessageAsync(string messageId, CancellationToken cancellationToken)
-		=> SendAsync(HttpMethod.Delete,
+	{
+		return SendAsync(HttpMethod.Delete,
 			$"liveChat/messages?id={Escape(messageId)}",
 			null,
 			YouTubeQuotaCosts.Write,
 			cancellationToken);
+	}
 
 	public async Task<string> InsertBanAsync(
 		string liveChatId,
@@ -197,11 +199,13 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 	}
 
 	public Task DeleteBanAsync(string banId, CancellationToken cancellationToken)
-		=> SendAsync(HttpMethod.Delete,
+	{
+		return SendAsync(HttpMethod.Delete,
 			$"liveChat/bans?id={Escape(banId)}",
 			null,
 			YouTubeQuotaCosts.Write,
 			cancellationToken);
+	}
 
 	public Task UpdateVideoSnippetAsync(
 		string videoId,
@@ -235,11 +239,13 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 	}
 
 	public Task InsertCuepointAsync(string broadcastId, int durationSeconds, CancellationToken cancellationToken)
-		=> SendAsync(HttpMethod.Post,
+	{
+		return SendAsync(HttpMethod.Post,
 			$"liveBroadcasts/cuepoint?id={Escape(broadcastId)}",
 			new YouTubeCuepointWire("cueTypeAd", durationSeconds),
 			YouTubeQuotaCosts.Write,
 			cancellationToken);
+	}
 
 	public void Dispose()
 	{
@@ -251,7 +257,9 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 
 	private Task<T> GetAsync<T>(string relativeUrl, int cost, CancellationToken cancellationToken)
 		where T : class
-		=> SendForJsonAsync<T>(HttpMethod.Get, relativeUrl, null, cost, cancellationToken);
+	{
+		return SendForJsonAsync<T>(HttpMethod.Get, relativeUrl, null, cost, cancellationToken);
+	}
 
 	private async Task<T> SendForJsonAsync<T>(
 		HttpMethod method,
@@ -446,17 +454,27 @@ internal sealed class YouTubeApiClient : IYouTubeApiClient, IDisposable
 	}
 
 	private static DateTimeOffset? ParseTime(string? value)
-		=> DateTimeOffset.TryParse(value,
+	{
+		return DateTimeOffset.TryParse(value,
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
 			out var parsed)
 			? parsed
 			: null;
+	}
 
-	private static string? NullIfEmpty(string? value) => string.IsNullOrEmpty(value) ? null : value;
+	private static string? NullIfEmpty(string? value)
+	{
+		return string.IsNullOrEmpty(value) ? null : value;
+	}
 
-	private static string Escape(string value) => Uri.EscapeDataString(value);
+	private static string Escape(string value)
+	{
+		return Uri.EscapeDataString(value);
+	}
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
-		=> new(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+	}
 }

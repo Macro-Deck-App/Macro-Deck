@@ -77,8 +77,8 @@ public class WidgetStateVariablesAndPushTests
 			FolderId = Guid.NewGuid(),
 			Type = WidgetTypeIds.ActionButton,
 			Data
-				= "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}]," +
-				"\"activeStateId\":\"on\"}"
+				= "{\"stateMode\":true,\"states\":[{\"id\":\"off\",\"label\":\"Off\"},{\"id\":\"on\",\"label\":\"On\"}],"
+				+ "\"activeStateId\":\"on\"}"
 		};
 		var folderCache = new SingleWidgetFolderCache(widget);
 		await using var harness = new VariableServiceHarness();
@@ -137,17 +137,17 @@ public class WidgetStateVariablesAndPushTests
 		var plainTransition = new WidgetStateReconciliation("on",
 			"On",
 			[new WidgetStateOption("off", "Off"), new WidgetStateOption("on", "On")],
-			Changed: true,
-			Transitioned: true,
-			SetChanged: false);
+			true,
+			true,
+			false);
 		await publisher.PublishIfChanged(widgetId, plainTransition);
 
 		var setChange = new WidgetStateReconciliation("live",
 			"Live",
 			[new WidgetStateOption("live", "Live"), new WidgetStateOption("offline", "Offline")],
-			Changed: true,
-			Transitioned: true,
-			SetChanged: true);
+			true,
+			true,
+			true);
 		await publisher.PublishIfChanged(widgetId, setChange);
 
 		Assert.Multiple(() =>
@@ -174,9 +174,9 @@ public class WidgetStateVariablesAndPushTests
 		var result = new WidgetStateReconciliation("on",
 			"On",
 			[new WidgetStateOption("off", "Off"), new WidgetStateOption("on", "On")],
-			Changed: true,
-			Transitioned: true,
-			SetChanged: true);
+			true,
+			true,
+			true);
 
 		await publisher.PublishIfChanged(widgetId, result);
 
@@ -210,9 +210,9 @@ public class WidgetStateVariablesAndPushTests
 		var unchanged = new WidgetStateReconciliation("on",
 			"On",
 			[new WidgetStateOption("off", "Off"), new WidgetStateOption("on", "On")],
-			Changed: false,
-			Transitioned: false,
-			SetChanged: false);
+			false,
+			false,
+			false);
 
 		await publisher.PublishIfChanged(widgetId, unchanged);
 
@@ -275,7 +275,10 @@ public class WidgetStateVariablesAndPushTests
 
 	private sealed class NullUserVariableStore : IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> userVariables)
 		{
@@ -285,49 +288,72 @@ public class WidgetStateVariablesAndPushTests
 	private sealed class NoOpFlowExecutor : IFlowExecutor
 	{
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
-			=> Task.FromResult(new FlowExecutionResult
+		{
+			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(), Status = FlowExecutionStatus.Succeeded, MatchedFlows = 0
 			});
+		}
 	}
 
 	private sealed class NotSupportedWidgetService : IWidgetService
 	{
-		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget) => throw new NotSupportedException();
+		public Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> Create(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> Create(
+			Guid folderId,
 			WidgetEntity widget,
 			Guid? sourceWidgetId = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> UpdatePositions(
 			Guid folderId,
 			IReadOnlyList<WidgetPlacement> placements)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId) => throw new NotSupportedException();
+		public Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<WidgetEntity, WidgetError>> SetPinned(Guid folderId,
+		public Task<Result<WidgetEntity, WidgetError>> SetPinned(
+			Guid folderId,
 			Guid widgetId,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
-		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(Guid folderId,
+		public Task<Result<List<WidgetEntity>, WidgetError>> CreateMany(
+			Guid folderId,
 			IReadOnlyList<WidgetEntity> widgets,
 			IReadOnlyList<Guid>? replaceIds = null,
 			IReadOnlyList<Guid?>? sourceWidgetIds = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task<Result<List<WidgetEntity>, WidgetError>> SetPinnedMany(
 			Guid folderId,
 			IReadOnlyList<Guid> widgetIds,
 			bool pinned,
 			PinScope? scope = null)
-			=> throw new NotSupportedException();
+		{
+			throw new NotSupportedException();
+		}
 	}
 
 	private sealed class SingleWidgetFolderCache : IFolderCache
@@ -335,19 +361,49 @@ public class WidgetStateVariablesAndPushTests
 		private readonly FolderEntity _folder;
 
 		public SingleWidgetFolderCache(WidgetEntity widget)
-			=> _folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		{
+			_folder = new FolderEntity { Id = widget.FolderId, Name = "f", Order = 0, Widgets = [widget] };
+		}
 
-		public FolderEntity? GetFolderById(Guid id) => id == _folder.Id ? _folder : null;
-		public List<FolderEntity> GetAllFolders() => [_folder];
-		public Task InitializeCache() => Task.CompletedTask;
-		public List<FolderEntity> GetFoldersByParentId(Guid? parentId) => [_folder];
-		public List<FolderEntity> GetFoldersByProfileId(Guid profileId) => [_folder];
-		public Task AddOrUpdate(FolderEntity folder) => Task.CompletedTask;
+		public FolderEntity? GetFolderById(Guid id)
+		{
+			return id == _folder.Id ? _folder : null;
+		}
 
-		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders) => Task.CompletedTask;
+		public List<FolderEntity> GetAllFolders()
+		{
+			return [_folder];
+		}
+
+		public Task InitializeCache()
+		{
+			return Task.CompletedTask;
+		}
+
+		public List<FolderEntity> GetFoldersByParentId(Guid? parentId)
+		{
+			return [_folder];
+		}
+
+		public List<FolderEntity> GetFoldersByProfileId(Guid profileId)
+		{
+			return [_folder];
+		}
+
+		public Task AddOrUpdate(FolderEntity folder)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task AddOrUpdateRange(IReadOnlyCollection<FolderEntity> folders)
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<FolderSubtreeRemoval> RemoveSubtree(Guid rootId)
-			=> Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		{
+			return Task.FromResult(new FolderSubtreeRemoval(false, [], []));
+		}
 
 		public void AddWidget(Guid folderId, WidgetEntity widget)
 		{
@@ -388,17 +444,25 @@ public class WidgetStateVariablesAndPushTests
 
 		public Task SendToConnection<T>(string connectionId, T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task AddToGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task RemoveFromGroup(string connectionId, string group, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task Send<T>(T message, CancellationToken cancellationToken = default)
 			where T : class
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task SendToGroup<T>(string group, T message, CancellationToken cancellationToken = default)
 			where T : class

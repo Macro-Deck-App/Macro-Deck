@@ -16,5 +16,8 @@ public sealed class PluginDesktopNotificationAccessPolicy(
 	private readonly PluginPermissionDeclarations _declarations =
 		new(PluginPermissions.HostDesktopNotifications, sessionRegistry, installationCatalog, manifestReader);
 
-	public bool IsAllowed(string pluginId) => _declarations.IsGrantable(pluginId);
+	public bool IsAllowed(string pluginId)
+	{
+		return _declarations.IsGrantable(pluginId);
+	}
 }

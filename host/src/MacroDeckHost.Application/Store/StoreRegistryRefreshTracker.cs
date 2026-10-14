@@ -67,7 +67,7 @@ public sealed class StoreRegistryRefreshTracker : IStoreRegistryRefreshTracker
 			{
 				Entries =
 				[
-					..run.Entries,
+					.. run.Entries,
 					new StoreRegistryRefreshLogEntry
 					{
 						At = _timeProvider.GetUtcNow(),
@@ -100,7 +100,8 @@ public sealed class StoreRegistryRefreshTracker : IStoreRegistryRefreshTracker
 		}
 	}
 
-	public void Finish(StoreRegistryRefreshRunState state,
+	public void Finish(
+		StoreRegistryRefreshRunState state,
 		RegistryRefreshError? failure,
 		string? detail,
 		StoreRegistryStatus status)
@@ -135,7 +136,7 @@ public sealed class StoreRegistryRefreshTracker : IStoreRegistryRefreshTracker
 				State = state,
 				FinishedAt = now,
 				Status = status,
-				Entries = closing is null ? run.Entries : [..run.Entries, closing]
+				Entries = closing is null ? run.Entries : [.. run.Entries, closing]
 			});
 		}
 	}

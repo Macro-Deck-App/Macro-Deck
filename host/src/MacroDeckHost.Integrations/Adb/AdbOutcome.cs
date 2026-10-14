@@ -8,5 +8,8 @@ internal sealed record AdbOutcome(AndroidDeviceErrorCode? Failure, string? Messa
 
 	public bool Success => Failure is null;
 
-	public static AdbOutcome Fail(AndroidDeviceErrorCode code, string? message = null) => new(code, message);
+	public static AdbOutcome Fail(AndroidDeviceErrorCode code, string? message = null)
+	{
+		return new AdbOutcome(code, message);
+	}
 }

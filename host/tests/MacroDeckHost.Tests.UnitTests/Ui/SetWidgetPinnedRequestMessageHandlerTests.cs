@@ -19,7 +19,10 @@ public class SetWidgetPinnedRequestMessageHandlerTests
 	}
 
 	[TearDown]
-	public void TearDown() => _fixture.Dispose();
+	public void TearDown()
+	{
+		_fixture.Dispose();
+	}
 
 	[Test]
 	public async Task AbsentScope_OnAFreshPinRequest_ResolvesToProfileNotSubtree()

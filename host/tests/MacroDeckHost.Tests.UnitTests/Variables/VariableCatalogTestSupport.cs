@@ -49,9 +49,15 @@ internal sealed class FakeVariableProviderIntegration : IIntegration, IVariableP
 	/// result exercise the host's read-fallback.</summary>
 	public Func<IReadOnlyCollection<string>, IReadOnlyList<VariableValue>>? SubscribeResponder { get; set; }
 
-	public void AddDefinition(VariableDefinition definition) => _definitions[definition.Id!] = definition;
+	public void AddDefinition(VariableDefinition definition)
+	{
+		_definitions[definition.Id!] = definition;
+	}
 
-	public void SetValue(string id, object? value) => _values[id] = value;
+	public void SetValue(string id, object? value)
+	{
+		_values[id] = value;
+	}
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
@@ -65,12 +71,17 @@ internal sealed class FakeVariableProviderIntegration : IIntegration, IVariableP
 		return Task.CompletedTask;
 	}
 
-	public ValueTask<VariableCatalogPage> DiscoverAsync(VariableCatalogQuery query,
+	public ValueTask<VariableCatalogPage> DiscoverAsync(
+		VariableCatalogQuery query,
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(new VariableCatalogPage { Items = _definitions.Values.ToList() });
+	{
+		return ValueTask.FromResult(new VariableCatalogPage { Items = _definitions.Values.ToList() });
+	}
 
 	public ValueTask<VariableDefinition?> ResolveAsync(string localId, CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(_definitions.GetValueOrDefault(localId));
+	{
+		return ValueTask.FromResult(_definitions.GetValueOrDefault(localId));
+	}
 
 	public ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -143,7 +154,10 @@ internal sealed class InMemoryVariableBindingStore : IVariableBindingStore
 
 internal sealed class NullUserVariableStore : IUserVariableStore
 {
-	public IReadOnlyList<VariableEntity> Load() => [];
+	public IReadOnlyList<VariableEntity> Load()
+	{
+		return [];
+	}
 
 	public void Save(IEnumerable<VariableEntity> userVariables)
 	{
@@ -182,5 +196,7 @@ internal sealed class InMemorySharedVariableStore : ISharedVariableStore
 	}
 
 	public static SharedVariables For(VariableRegistry registry, InMemorySharedVariableStore? store = null)
-		=> new(registry, store ?? new InMemorySharedVariableStore(), Serilog.Log.Logger);
+	{
+		return new SharedVariables(registry, store ?? new InMemorySharedVariableStore(), Serilog.Log.Logger);
+	}
 }

@@ -70,22 +70,40 @@ internal static class StreamlabsRpcFrames
 		return Encoding.UTF8.GetString(buffer.WrittenSpan);
 	}
 
-	public static string Auth(long id, string token) => Request(id, AuthResource, AuthMethod, [token]);
+	public static string Auth(long id, string token)
+	{
+		return Request(id, AuthResource, AuthMethod, [token]);
+	}
 
 	public static string Subscribe(long id, string service, string observable)
-		=> Request(id, service, observable);
+	{
+		return Request(id, service, observable);
+	}
 
 	public static string Unsubscribe(long id, string subscriptionResourceId)
-		=> Request(id, subscriptionResourceId, UnsubscribeMethod);
+	{
+		return Request(id, subscriptionResourceId, UnsubscribeMethod);
+	}
 
-	public static string SceneResource(string sceneId) => $"Scene[{Quote(sceneId)}]";
+	public static string SceneResource(string sceneId)
+	{
+		return $"Scene[{Quote(sceneId)}]";
+	}
 
 	public static string SceneItemResource(string sceneId, string sceneItemId, string sourceId)
-		=> $"SceneItem[{Quote(sceneId)},{Quote(sceneItemId)},{Quote(sourceId)}]";
+	{
+		return $"SceneItem[{Quote(sceneId)},{Quote(sceneItemId)},{Quote(sourceId)}]";
+	}
 
-	public static string AudioSourceResource(string sourceId) => $"AudioSource[{Quote(sourceId)}]";
+	public static string AudioSourceResource(string sourceId)
+	{
+		return $"AudioSource[{Quote(sourceId)}]";
+	}
 
-	public static string SourceResource(string sourceId) => $"Source[{Quote(sourceId)}]";
+	public static string SourceResource(string sourceId)
+	{
+		return $"Source[{Quote(sourceId)}]";
+	}
 
 	public static bool TryParse(string text, out StreamlabsFrame frame)
 	{
@@ -115,13 +133,12 @@ internal static class StreamlabsRpcFrames
 			{
 				frame = new StreamlabsFrame(StreamlabsFrameKind.Error,
 					id,
-					ResourceId: null,
-					Emitter: null,
-					Data: default,
-					IsRejected: true,
-					ErrorCode: (int)(StreamlabsModelReader.ReadNumber(StreamlabsModelReader.Property(error, "code")) ??
-						0d),
-					ErrorMessage: StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(error, "message")));
+					null,
+					null,
+					default,
+					true,
+					(int)(StreamlabsModelReader.ReadNumber(StreamlabsModelReader.Property(error, "code")) ?? 0d),
+					StreamlabsModelReader.ReadString(StreamlabsModelReader.Property(error, "message")));
 				return true;
 			}
 
@@ -142,10 +159,10 @@ internal static class StreamlabsRpcFrames
 						id,
 						resourceId,
 						emitter,
-						Data: default,
-						IsRejected: false,
-						ErrorCode: 0,
-						ErrorMessage: null);
+						default,
+						false,
+						0,
+						null);
 					return true;
 
 				case "EVENT":
@@ -155,8 +172,8 @@ internal static class StreamlabsRpcFrames
 						emitter,
 						StreamlabsModelReader.Property(result, "data").Clone(),
 						StreamlabsModelReader.Property(result, "isRejected").ValueKind == JsonValueKind.True,
-						ErrorCode: 0,
-						ErrorMessage: null);
+						0,
+						null);
 					return true;
 
 				default:
@@ -165,9 +182,9 @@ internal static class StreamlabsRpcFrames
 						resourceId,
 						emitter,
 						result.Clone(),
-						IsRejected: false,
-						ErrorCode: 0,
-						ErrorMessage: null);
+						false,
+						0,
+						null);
 					return true;
 			}
 		}
@@ -201,17 +218,22 @@ internal static class StreamlabsRpcFrames
 		}
 	}
 
-	private static long? ReadId(JsonElement value) => value.ValueKind switch
+	private static long? ReadId(JsonElement value)
 	{
-		JsonValueKind.Number when value.TryGetInt64(out var number) => number,
-		JsonValueKind.String when long.TryParse(value.GetString(),
-			NumberStyles.Integer,
-			CultureInfo.InvariantCulture,
-			out var parsed) => parsed,
-		_ => null
-	};
+		return value.ValueKind switch
+		{
+			JsonValueKind.Number when value.TryGetInt64(out var number) => number,
+			JsonValueKind.String when long.TryParse(value.GetString(),
+				NumberStyles.Integer,
+				CultureInfo.InvariantCulture,
+				out var parsed) => parsed,
+			_ => null
+		};
+	}
 
 	private static string Quote(string value)
-		=>
+	{
+		return
 			$"\"{value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
+	}
 }

@@ -40,7 +40,7 @@ public sealed class IconReferenceRewriter(
 				folderCache.UpdateWidgets(folder.Id, changedWidgets);
 				foreach (var widget in changedWidgets)
 				{
-					await mediator.Publish(new WidgetUpdatedNotification(widget, DataChanged: true), cancellationToken);
+					await mediator.Publish(new WidgetUpdatedNotification(widget, true), cancellationToken);
 				}
 
 				rewritten += changedWidgets.Count;

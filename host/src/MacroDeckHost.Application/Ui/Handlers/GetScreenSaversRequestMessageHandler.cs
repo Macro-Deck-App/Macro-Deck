@@ -17,8 +17,10 @@ public sealed class GetScreenSaversRequestMessageHandler
 	public ValueTask<GetScreenSaversResponse> Handle(
 		GetScreenSaversRequest request,
 		CancellationToken cancellationToken)
-		=> ValueTask.FromResult(new GetScreenSaversResponse
+	{
+		return ValueTask.FromResult(new GetScreenSaversResponse
 		{
 			ScreenSavers = ScreenSaverDtoMapper.MapToDto(_registry.GetAll())
 		});
+	}
 }

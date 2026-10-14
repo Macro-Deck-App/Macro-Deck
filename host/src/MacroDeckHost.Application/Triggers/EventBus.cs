@@ -74,8 +74,8 @@ public sealed class EventBus : IEventBus
 		if (shouldLog)
 		{
 			_logger.Warning(
-				"Event queue is full; dropped an occurrence of {EventId} ({DroppedTotal} dropped in total). " +
-				"A triggered flow is taking longer than events are arriving",
+				"Event queue is full; dropped an occurrence of {EventId} ({DroppedTotal} dropped in total). "
+				+ "A triggered flow is taking longer than events are arriving",
 				eventId,
 				total);
 		}

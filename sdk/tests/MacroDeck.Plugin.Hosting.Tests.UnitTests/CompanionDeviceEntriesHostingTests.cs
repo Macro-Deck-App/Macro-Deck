@@ -51,14 +51,19 @@ public class CompanionDeviceEntriesHostingTests
 	}
 
 	private static IReadOnlyList<DeclaredCapability> Declared(PluginApplication application)
-		=>
+	{
+		return
 		[
 			.. application.Services.GetServices<ICapabilityHandler>()
 				.SelectMany(handler => handler.DeclareCapabilities())
 		];
+	}
 
-	private static Task<CapabilityInvocationResult> InvokeAsync(CompanionDeviceEntriesCapabilityHandler handler, string operation)
-		=> handler.InvokeAsync(new CapabilityInvocation
+	private static Task<CapabilityInvocationResult> InvokeAsync(
+		CompanionDeviceEntriesCapabilityHandler handler,
+		string operation)
+	{
+		return handler.InvokeAsync(new CapabilityInvocation
 			{
 				Kind = CapabilityKinds.CompanionDeviceEntries,
 				LocalId = ProviderCapabilityId.LocalId,
@@ -67,4 +72,5 @@ public class CompanionDeviceEntriesHostingTests
 				Services = new ServiceCollection().BuildServiceProvider()
 			},
 			CancellationToken.None);
+	}
 }

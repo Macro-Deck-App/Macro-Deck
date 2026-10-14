@@ -32,10 +32,15 @@ public class ColorPaletteServiceTests
 	}
 
 	[TearDown]
-	public void TearDown() => _services.Dispose();
+	public void TearDown()
+	{
+		_services.Dispose();
+	}
 
 	private ColorPaletteService CreateService()
-		=> new(_services.GetRequiredService<IServiceScopeFactory>(), _publisher);
+	{
+		return new ColorPaletteService(_services.GetRequiredService<IServiceScopeFactory>(), _publisher);
+	}
 
 	[Test]
 	public async Task A_fresh_palette_offers_the_default_colours()
@@ -91,7 +96,7 @@ public class ColorPaletteServiceTests
 
 		var restored = await palette.RestoreDefaults();
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(restored, Is.EqualTo(ColorPaletteService.DefaultColors));
 			Assert.That(await palette.GetColors(), Is.EqualTo(ColorPaletteService.DefaultColors));
@@ -228,9 +233,11 @@ public class ColorPaletteServiceTests
 		public ConcurrentDictionary<string, string> Values { get; } = new();
 
 		public Task<AppPreferenceEntity?> GetByKey(string key)
-			=> Task.FromResult(Values.TryGetValue(key, out var value)
+		{
+			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }
 				: null);
+		}
 
 		public Task SetValue(string key, string value)
 		{

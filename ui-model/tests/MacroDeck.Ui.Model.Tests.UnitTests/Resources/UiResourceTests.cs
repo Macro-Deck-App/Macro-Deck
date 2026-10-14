@@ -20,7 +20,7 @@ public class UiResourceTests
 	{
 		var resource = new UiResource
 		{
-			ResourceId = "icon-1", ContentHash = "sha256:0a1b", MediaType = "image/png", ByteLength = 2048,
+			ResourceId = "icon-1", ContentHash = "sha256:0a1b", MediaType = "image/png", ByteLength = 2048
 		};
 
 		Assert.That(UiCanonicalJson.Serialize(resource),

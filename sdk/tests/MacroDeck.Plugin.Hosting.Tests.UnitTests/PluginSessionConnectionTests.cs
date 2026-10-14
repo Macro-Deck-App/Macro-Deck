@@ -33,20 +33,24 @@ public class PluginSessionConnectionTests
 	}
 
 	private PluginSessionConnection Connection(PluginSession? session = null, TimeProvider? time = null)
-		=> new(_socket,
+	{
+		return new PluginSessionConnection(_socket,
 			session ?? TestSession.Create(),
 			_dispatcher,
 			new PluginConnectionState(),
 			time ?? TimeProvider.System,
 			Serilog.Core.Logger.None);
+	}
 
 	private void Welcome(bool resumed = false)
-		=> _socket.Push(new ProtocolEnvelope
+	{
+		_socket.Push(new ProtocolEnvelope
 		{
 			Type = MessageTypes.SessionWelcome,
 			Id = "welcome",
 			Payload = FakePluginSocket.Payload(new SessionWelcomePayload { SessionId = "session-1", Resumed = resumed })
 		});
+	}
 
 	[Test]
 	public async Task The_handshake_asserts_the_negotiated_version_and_session()
@@ -75,7 +79,7 @@ public class PluginSessionConnectionTests
 	public async Task A_resume_attempt_names_the_session_it_is_resuming()
 	{
 		var connection = Connection();
-		Welcome(resumed: true);
+		Welcome(true);
 
 		var run = connection.RunAsync("session-1", "instance-1", CancellationToken.None);
 		var hello = await _socket.NextAsync(MessageTypes.SessionHello);
@@ -469,17 +473,20 @@ public class PluginSessionConnectionTests
 		});
 	}
 
-	private static ProtocolEnvelope Invoke(string id) => new()
+	private static ProtocolEnvelope Invoke(string id)
 	{
-		Type = MessageTypes.CapabilityInvoke,
-		Id = id,
-		Payload = FakePluginSocket.Payload(new CapabilityInvokePayload
+		return new ProtocolEnvelope
 		{
-			Kind = "actions",
-			LocalId = "one",
-			Operation = "execute"
-		})
-	};
+			Type = MessageTypes.CapabilityInvoke,
+			Id = id,
+			Payload = FakePluginSocket.Payload(new CapabilityInvokePayload
+			{
+				Kind = "actions",
+				LocalId = "one",
+				Operation = "execute"
+			})
+		};
+	}
 
 	private static void InterlockedMax(ref int target, int candidate)
 	{

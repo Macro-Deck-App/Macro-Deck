@@ -8,7 +8,6 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Plugins;
-using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Domain.Entities;
@@ -46,7 +45,10 @@ public class PluginColorWatchesTests
 	}
 
 	[TearDown]
-	public void TearDown() => _watches.Dispose();
+	public void TearDown()
+	{
+		_watches.Dispose();
+	}
 
 	[Test]
 	public void A_value_resolves_globally_or_in_a_widgets_scope()
@@ -172,9 +174,11 @@ public class PluginColorWatchesTests
 
 	[Test]
 	public void More_watches_than_the_limit_are_refused()
-		=> Assert.That(_watches.TrySetWatches(PluginId,
+	{
+		Assert.That(_watches.TrySetWatches(PluginId,
 				[.. Enumerable.Range(0, ProtocolLimits.MaxColorWatches + 1).Select(i => Watch($"w{i}", "#000000"))]),
 			Is.False);
+	}
 
 	[Test]
 	public async Task The_table_is_dropped_only_when_the_plugins_last_session_ends()
@@ -216,7 +220,8 @@ public class PluginColorWatchesTests
 			VariableType.Color,
 			"#3366ff",
 			null);
-		var widget = new WidgetEntity { Id = Guid.NewGuid(), Type = WidgetTypeIds.Clock, Data = $$"""{"backgroundColor":"{{Reference}}"}""" };
+		var widget = new WidgetEntity
+			{ Id = Guid.NewGuid(), Type = WidgetTypeIds.Clock, Data = $$"""{"backgroundColor":"{{Reference}}"}""" };
 		_folders.AddWidget(widget);
 		var index = new WidgetVariableIndex(_folders);
 		index.Rebuild();
@@ -234,7 +239,7 @@ public class PluginColorWatchesTests
 
 		await service.ReportIntegrationVariableValue("com.example.provider", created.Data!.Id, "#ff0000");
 
-		Assert.Multiple(async () =>
+		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That((await NextPushAsync(1)).Values.Single().Color, Is.EqualTo("#ff0000"));
 			Assert.That(broker.InvalidatedWidgets, Does.Contain(widget.Id));
@@ -247,11 +252,12 @@ public class PluginColorWatchesTests
 		var primary = Add("primary", VariableType.Color, "#3366ff");
 		var api = new InProcessColorApi(_watches, Serilog.Core.Logger.None);
 		var received = new ConcurrentQueue<string?>();
-		await api.WatchAsync(Reference, (color, _) =>
-		{
-			received.Enqueue(color);
-			return Task.CompletedTask;
-		});
+		await api.WatchAsync(Reference,
+			(color, _) =>
+			{
+				received.Enqueue(color);
+				return Task.CompletedTask;
+			});
 		await WaitForAsync(() => received.Count == 1);
 
 		_signal.Raise();
@@ -269,12 +275,14 @@ public class PluginColorWatchesTests
 	}
 
 	private PluginColorWatches Create(TimeSpan window)
-		=> new(new ColorReferenceResolver(_variables),
+	{
+		return new PluginColorWatches(new ColorReferenceResolver(_variables),
 			_folders,
 			_sessions,
 			_signal,
 			Serilog.Core.Logger.None,
 			coalescingWindow: window);
+	}
 
 	private async Task<RecordingConnection> ConnectAsync(string sessionId)
 	{
@@ -312,7 +320,9 @@ public class PluginColorWatchesTests
 	}
 
 	private static ColorWatchDto Watch(string id, string value, string? widgetId = null)
-		=> new() { WatchId = id, Value = value, WidgetId = widgetId };
+	{
+		return new ColorWatchDto { WatchId = id, Value = value, WidgetId = widgetId };
+	}
 
 	private async Task<ColorWatchStateDto> NextPushAsync(int index)
 	{
@@ -352,12 +362,17 @@ public class PluginColorWatchesTests
 		}
 
 		public Task Close(int closeCode, string reason, CancellationToken cancellationToken = default)
-			=> Task.CompletedTask;
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class NullStore : MacroDeckHost.Application.Persistence.IUserVariableStore
 	{
-		public IReadOnlyList<VariableEntity> Load() => [];
+		public IReadOnlyList<VariableEntity> Load()
+		{
+			return [];
+		}
 
 		public void Save(IEnumerable<VariableEntity> variables)
 		{

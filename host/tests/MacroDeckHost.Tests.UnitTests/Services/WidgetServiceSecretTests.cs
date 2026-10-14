@@ -45,7 +45,10 @@ public class WidgetServiceSecretTests
 	}
 
 	[TearDown]
-	public void TearDown() => _cache.Dispose();
+	public void TearDown()
+	{
+		_cache.Dispose();
+	}
 
 	[Test]
 	public async Task Create_ClonesReferencedSecretsSoTheNewWidgetOwnsItsOwn()
@@ -90,19 +93,24 @@ public class WidgetServiceSecretTests
 		});
 	}
 
-	private static WidgetEntity Widget(int x, int y, string data) => new()
+	private static WidgetEntity Widget(int x, int y, string data)
 	{
-		Id = Guid.NewGuid(),
-		Type = WidgetTypeIds.ActionButton,
-		PositionX = x,
-		PositionY = y,
-		Width = 1,
-		Height = 1,
-		Data = data
-	};
+		return new WidgetEntity
+		{
+			Id = Guid.NewGuid(),
+			Type = WidgetTypeIds.ActionButton,
+			PositionX = x,
+			PositionY = y,
+			Width = 1,
+			Height = 1,
+			Data = data
+		};
+	}
 
 	private static Guid SingleSecretId(string data)
-		=> Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+	{
+		return Regex.Matches(data, "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 			.Select(m => Guid.Parse(m.Value))
 			.Single();
+	}
 }

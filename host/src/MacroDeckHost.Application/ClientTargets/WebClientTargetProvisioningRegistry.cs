@@ -18,5 +18,7 @@ public sealed class WebClientTargetProvisioningRegistry
 	public IReadOnlyCollection<string> TargetIds => (IReadOnlyCollection<string>)_provisioners.Keys;
 
 	public IWebClientTargetProvisioner? Resolve(string targetId)
-		=> _provisioners.TryGetValue(targetId, out var provisioner) ? provisioner : null;
+	{
+		return _provisioners.TryGetValue(targetId, out var provisioner) ? provisioner : null;
+	}
 }

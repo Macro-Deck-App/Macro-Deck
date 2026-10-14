@@ -13,7 +13,7 @@ namespace MacroDeck.Plugin.Testing.Tests.UnitTests;
 /// plugin's image code behaves the same against them as against a real host.
 /// </summary>
 [TestFixture]
-public class A30_UiResourceFakeTests
+public class A30UiResourceFakeTests
 {
 	private static readonly byte[] _first = [1, 2, 3];
 	private static readonly byte[] _second = [4, 5, 6, 7];
@@ -42,7 +42,8 @@ public class A30_UiResourceFakeTests
 		var registry = new FakeUiResourceRegistry { MaxTotalBytes = 5 };
 		await registry.RegisterAsync("photo", _first, "image/png");
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("other", _second, "image/png"));
+		var exception
+			= Assert.ThrowsAsync<UiResourceException>(() => registry.RegisterAsync("other", _second, "image/png"));
 
 		Assert.Multiple(() =>
 		{
@@ -259,8 +260,8 @@ public class A30_UiResourceFakeTests
 		var registry = new FakeUiResourceRegistry { MaxCount = 0 };
 		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", _first, "image/png");
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.That(exception!.ErrorCode, Is.EqualTo(UiResourceErrorCode.QuotaExceeded));
 	}
@@ -273,8 +274,8 @@ public class A30_UiResourceFakeTests
 		var registry = new FakeUiResourceRegistry();
 		registry.AddMusicPlayerArtwork("net.example.jukebox::default", "cover-1", new byte[length], mediaType);
 
-		var exception = Assert.ThrowsAsync<UiResourceException>(
-			() => registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
+		var exception = Assert.ThrowsAsync<UiResourceException>(()
+			=> registry.RegisterMusicPlayerArtworkAsync("cover", "net.example.jukebox::default", "cover-1"));
 
 		Assert.Multiple(() =>
 		{
@@ -318,7 +319,10 @@ public class A30_UiResourceFakeTests
 			}
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class IconByIdIntegration : IPluginIntegration
@@ -341,7 +345,10 @@ public class A30_UiResourceFakeTests
 			}
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class PluginIconIntegration : IPluginIntegration
@@ -364,7 +371,10 @@ public class A30_UiResourceFakeTests
 			}
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private sealed class ImageIntegration : IPluginIntegration
@@ -388,6 +398,9 @@ public class A30_UiResourceFakeTests
 			}
 		}
 
-		public Task ShutdownAsync() => Task.CompletedTask;
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
 	}
 }

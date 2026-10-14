@@ -13,7 +13,9 @@ internal sealed class WindowsApplicationService(ILogger logger) : ApplicationSer
 	private const int MinimumVerifyMs = 100;
 
 	protected override void StartProcess(string path, string? arguments, string? workingDirectory, bool runAsAdmin)
-		=> WindowsApplicationLauncher.Start(path, arguments, workingDirectory, runAsAdmin, Process.Start);
+	{
+		WindowsApplicationLauncher.Start(path, arguments, workingDirectory, runAsAdmin, Process.Start);
+	}
 
 	public override void OpenFolder(string path)
 	{
