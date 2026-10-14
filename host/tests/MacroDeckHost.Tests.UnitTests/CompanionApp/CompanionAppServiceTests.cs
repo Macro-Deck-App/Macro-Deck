@@ -661,11 +661,11 @@ public class CompanionAppServiceTests
 		}
 	}
 
-	internal sealed class MemoryPreferences : IAppPreferenceRepository
+	internal class MemoryPreferences : IAppPreferenceRepository
 	{
 		public ConcurrentDictionary<string, string> Values { get; } = new();
 
-		public Task<AppPreferenceEntity?> GetByKey(string key)
+		public virtual Task<AppPreferenceEntity?> GetByKey(string key)
 		{
 			return Task.FromResult(Values.TryGetValue(key, out var value)
 				? new AppPreferenceEntity { Key = key, Value = value }

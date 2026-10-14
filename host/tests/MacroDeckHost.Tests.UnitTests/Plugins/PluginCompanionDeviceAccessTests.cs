@@ -12,6 +12,7 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Notifications;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.Adb;
@@ -90,6 +91,28 @@ public class PluginCompanionDeviceAccessTests
 		world.Preferences.Values[PluginCompanionDeviceAccessPolicy.AllowPluginsKey] = "true";
 
 		Assert.That(await world.Policy.GetAllowPluginsAsync(), Is.True);
+	}
+
+	[Test]
+	public async Task A_read_in_flight_when_the_host_shuts_down_still_completes()
+	{
+		var preferences = new GatedPreferences();
+		preferences.Values[PluginCompanionDeviceAccessPolicy.AllowPluginsKey] = "true";
+		var services = new ServiceCollection();
+		services.AddSingleton<IAppPreferenceRepository>(preferences);
+		services.AddSingleton<IPluginSessionRegistry>(new PluginSessionRegistry(TimeProvider.System,
+			Serilog.Core.Logger.None));
+		services.AddSingleton<IPluginInstallationCatalog>(new SingleInstalledPlugin([]));
+		services.AddSingleton<IPluginManifestReader>(new FixedManifestReader([]));
+		services.AddSingleton<IPluginCompanionDeviceAccessPolicy, PluginCompanionDeviceAccessPolicy>();
+		var host = services.BuildServiceProvider();
+
+		var read = host.GetRequiredService<IPluginCompanionDeviceAccessPolicy>().GetAllowPluginsAsync();
+		await preferences.Entered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		await host.DisposeAsync();
+		preferences.Open();
+
+		Assert.That(await read.WaitAsync(TimeSpan.FromSeconds(10)), Is.True);
 	}
 
 	[Test]
@@ -359,6 +382,25 @@ public class PluginCompanionDeviceAccessTests
 				CreatedAt = TimeProvider.System.GetUtcNow()
 			});
 			Sessions.TryAttach("session-1", new FakePluginConnection(), null);
+		}
+	}
+
+	private sealed class GatedPreferences : CompanionAppServiceTests.MemoryPreferences
+	{
+		private readonly TaskCompletionSource _open = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public TaskCompletionSource Entered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public void Open()
+		{
+			_open.TrySetResult();
+		}
+
+		public override async Task<AppPreferenceEntity?> GetByKey(string key)
+		{
+			Entered.TrySetResult();
+			await _open.Task;
+			return await base.GetByKey(key);
 		}
 	}
 
