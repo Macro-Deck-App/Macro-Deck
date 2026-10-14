@@ -288,6 +288,6 @@ internal sealed class GoogleOAuthClient : IGoogleOAuthClient, IDisposable
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
 	{
-		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(15) };
+		return IntegrationHttp.CreateClient(handler, disposeHandler, TimeSpan.FromSeconds(15));
 	}
 }

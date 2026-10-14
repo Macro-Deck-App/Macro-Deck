@@ -41,6 +41,11 @@ internal static class IntegrationHttp
 		return client;
 	}
 
+	internal static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler, TimeSpan timeout)
+	{
+		return new HttpClient(handler, disposeHandler) { Timeout = timeout };
+	}
+
 	internal static ClientWebSocket CreateWebSocket(IHostHttp? source = null)
 	{
 		var socket = new ClientWebSocket();

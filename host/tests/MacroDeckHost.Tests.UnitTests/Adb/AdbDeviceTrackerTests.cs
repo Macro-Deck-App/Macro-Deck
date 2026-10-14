@@ -22,7 +22,7 @@ internal sealed class AdbDeviceTrackerTests
 	[TearDown]
 	public void TearDown()
 	{
-		_tracker.Dispose();
+		_tracker?.Dispose();
 	}
 
 	private void Track()

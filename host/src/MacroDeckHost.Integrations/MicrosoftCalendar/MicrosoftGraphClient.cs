@@ -486,7 +486,7 @@ internal sealed partial class MicrosoftGraphClient : IDisposable
 
 	private static HttpClient CreateClient(HttpMessageHandler handler, bool disposeHandler)
 	{
-		return new HttpClient(handler, disposeHandler) { Timeout = TimeSpan.FromSeconds(20) };
+		return IntegrationHttp.CreateClient(handler, disposeHandler, TimeSpan.FromSeconds(20));
 	}
 
 	[GeneratedRegex("^#[0-9A-Fa-f]{6}$")]

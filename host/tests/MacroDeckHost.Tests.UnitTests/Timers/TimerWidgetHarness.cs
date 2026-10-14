@@ -125,7 +125,7 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 
 	public string? Variable(WidgetEntity widget, string name)
 	{
-		return Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value.ToLowerInvariant();
+		return Registry.FindByName(VariableScope.Widget, widget.Id.ToString(), name)?.Value?.ToLowerInvariant();
 	}
 
 	public TimerWidgetPhase? Phase(WidgetEntity widget)
@@ -150,10 +150,10 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 			CancellationToken cancellationToken)
 		{
 			var variables = harness.Registry.GetByScope(VariableScope.Widget, widget.Id.ToString())
-				.ToDictionary(variable => variable.Name, variable => variable.Value.ToLowerInvariant());
+				.ToDictionary(variable => variable.Name, variable => variable.Value?.ToLowerInvariant());
 			lock (Calls)
 			{
-				Calls.Add(new TriggerCall(widget.Id, triggerType, originClientId, originDeviceId, variables!));
+				Calls.Add(new TriggerCall(widget.Id, triggerType, originClientId, originDeviceId, variables));
 			}
 
 			return Task.FromResult(new ActionExecutionDispatch(Guid.NewGuid(), null));
@@ -177,7 +177,7 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 		{
 			var widgetId = request.OwnerWidgetId ?? Guid.Empty;
 			var variables = harness.Registry.GetByScope(VariableScope.Widget, widgetId.ToString())
-				.ToDictionary(variable => variable.Name, variable => variable.Value.ToLowerInvariant());
+				.ToDictionary(variable => variable.Name, variable => variable.Value?.ToLowerInvariant());
 			lock (Calls)
 			{
 				Requests.Add(request);
@@ -185,7 +185,7 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 					request.Trigger.Value,
 					request.OriginClientId,
 					request.OriginDeviceId,
-					variables!));
+					variables));
 			}
 
 			return Task.FromResult(new FlowExecutionResult

@@ -121,7 +121,7 @@ public abstract record UiInput<T> : UiElement, IUiInputElement
 
 	private UiValidationOutcome Validate()
 	{
-		var visible = !VisibleWhen.TryEvaluate(out var visibleWhen) || visibleWhen.IsSatisfied();
+		var visible = !VisibleWhen.TryEvaluate(out var visibleWhen) || visibleWhen is null || visibleWhen.IsSatisfied();
 
 		return new UiValidation
 		{

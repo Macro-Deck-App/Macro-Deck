@@ -173,7 +173,7 @@ public class UserFontLibraryTests
 
 	private void CreateLibrary()
 	{
-		_library.Dispose();
+		_library?.Dispose();
 		_catalog = new SkiaFontCatalog([],
 			() => _systemFaces,
 			_paths.FontsDirectory);

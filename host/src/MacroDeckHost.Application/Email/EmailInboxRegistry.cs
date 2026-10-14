@@ -87,7 +87,7 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 
 				var provider = (IEmailInboxProvider)integration;
 				EventHandler<EmailInboxChangedEventArgs> handler
-					= (_, args) => _signal.Request(integrationId, args.InboxId);
+					= (_, args) => _signal.Request(integrationId, args?.InboxId);
 				provider.Changed += handler;
 				_subscriptions[integrationId] = new Subscription(provider, handler);
 			}
@@ -131,9 +131,9 @@ public sealed class EmailInboxRegistry : IEmailInboxRegistry, IDisposable
 
 			foreach (var inbox in inboxes)
 			{
-				if (!QualifiedId.TryCreate(integration.Id, inbox.Id, out var id))
+				if (inbox is null || !QualifiedId.TryCreate(integration.Id, inbox.Id, out var id))
 				{
-					WarnInvalidOnce(integration.Id, inbox.Id);
+					WarnInvalidOnce(integration.Id, inbox?.Id ?? string.Empty);
 					continue;
 				}
 

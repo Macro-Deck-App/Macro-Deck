@@ -51,7 +51,7 @@ public class ProfileServiceMoveTests
 	[TearDown]
 	public void TearDown()
 	{
-		_cache.Dispose();
+		_cache?.Dispose();
 	}
 
 	[Test]

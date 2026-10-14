@@ -236,8 +236,8 @@ internal sealed partial class CompanionLicenseServiceTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(afterTest.IsTest, Is.False);
-			Assert.That(afterTest.LicenseId, Is.EqualTo("license-real"));
+			Assert.That(afterTest?.IsTest, Is.False);
+			Assert.That(afterTest?.LicenseId, Is.EqualTo("license-real"));
 		});
 	}
 

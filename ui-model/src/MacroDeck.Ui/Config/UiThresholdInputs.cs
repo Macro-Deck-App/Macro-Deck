@@ -148,7 +148,7 @@ public sealed partial record UiThresholds
 		{
 			var band = bands[i];
 
-			if (string.IsNullOrEmpty(band.Id) || !ids.Add(band.Id))
+			if (band is null || string.IsNullOrEmpty(band.Id) || !ids.Add(band.Id))
 			{
 				return $"Band {i} needs a non-empty id that no other band uses.";
 			}

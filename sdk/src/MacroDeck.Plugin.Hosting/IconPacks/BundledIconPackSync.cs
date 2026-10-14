@@ -273,12 +273,12 @@ internal sealed class BundledIconPackSync : IHostedService, IDisposable
 		var entries = new List<DeclaredEntry>();
 		foreach (var entry in manifest.BundledIconPacks ?? [])
 		{
-			if (string.IsNullOrWhiteSpace(entry.Key)
+			if (string.IsNullOrWhiteSpace(entry?.Key)
 				|| entry.Path is not { } path
 				|| !PluginManifestFileReader.IsSafeRelativeIconPath(path))
 			{
 				_logger.BundledIconPackSyncSkipped(
-					$"the manifest declares a bundled icon pack without a key or with an unsafe path '{entry.Path}'.");
+					$"the manifest declares a bundled icon pack without a key or with an unsafe path '{entry?.Path}'.");
 				return null;
 			}
 

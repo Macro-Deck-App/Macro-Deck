@@ -119,7 +119,7 @@ public sealed class MusicPlayerRegistry : IMusicPlayerRegistry
 		}
 
 		var skipped = instance.Options.Where(option => !supported.Contains(option))
-			.Select(option => option.Name)
+			.Select(option => option?.Name ?? string.Empty)
 			.ToList();
 
 		if (_reportedSkippedOptions.TryAdd($"{instanceId}\n{string.Join('\n', skipped)}", 0))

@@ -145,7 +145,7 @@ internal abstract class CapabilityContractFixture
 		}
 
 		_invoker.Dispose();
-		_dispatcher.Dispose();
+		_dispatcher?.Dispose();
 	}
 
 	protected InMemoryPluginLink Link => _link;

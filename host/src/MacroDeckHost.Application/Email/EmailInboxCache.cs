@@ -254,13 +254,13 @@ public sealed class EmailInboxCache : IEmailInboxCache, IDisposable
 		return
 		[
 			.. (messages ?? [])
-			.Where(message => !string.IsNullOrEmpty(message.Id))
+			.Where(message => message is not null && !string.IsNullOrEmpty(message.Id))
 			.DistinctBy(message => message.Id, StringComparer.Ordinal)
 			.Select(message => message with
 			{
 				SenderName = EmailText.ClipOptional(message.SenderName, ProtocolLimits.MaxEmailSenderLength),
 				SenderAddress = EmailText.ClipOptional(message.SenderAddress, ProtocolLimits.MaxEmailSenderLength),
-				Subject = EmailText.Clip(message.Subject.Trim(), ProtocolLimits.MaxEmailSubjectLength),
+				Subject = EmailText.Clip(message.Subject?.Trim(), ProtocolLimits.MaxEmailSubjectLength),
 				Preview = EmailText.ClipOptional(message.Preview, ProtocolLimits.MaxEmailPreviewLength)
 			})
 			.OrderByDescending(message => message.ReceivedAt)

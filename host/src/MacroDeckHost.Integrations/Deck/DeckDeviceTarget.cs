@@ -27,7 +27,7 @@ internal static class DeckDeviceTarget
 		failure = null;
 		originClientId = context.OriginClientId;
 
-		var raw = context.Parameters.TryGetValue(ParameterName, out var value) ? value.ToString() : null;
+		var raw = context.Parameters.TryGetValue(ParameterName, out var value) ? value?.ToString() : null;
 		if (string.IsNullOrWhiteSpace(raw))
 		{
 			return true;

@@ -170,7 +170,7 @@ internal sealed class EmailInboxCapabilityHandler : ICapabilityHandler, IDisposa
 
 	private void OnProviderChanged(object? sender, EmailInboxChangedEventArgs e)
 	{
-		var inboxId = e.InboxId;
+		var inboxId = e?.InboxId;
 
 		lock (_gate)
 		{

@@ -264,7 +264,7 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 			CalendarName = calendar?.Name
 				?? CalendarText.Clip(calendarEvent.CalendarId, ProtocolLimits.MaxCalendarTitleLength),
 			CalendarColor = calendar?.Color,
-			Title = CalendarText.Clip(calendarEvent.Title.Trim(), ProtocolLimits.MaxCalendarTitleLength),
+			Title = CalendarText.Clip(calendarEvent.Title?.Trim(), ProtocolLimits.MaxCalendarTitleLength),
 			Start = start,
 			End = end,
 			IsAllDay = calendarEvent.IsAllDay,
