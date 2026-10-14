@@ -58,6 +58,13 @@ public static partial class ActionButtonStateJson
 			NormalizeStatesArray(data);
 		}
 
+		// Safe to drop: while a provider is set the manual mapping is kept in manualStateBackup
+		// and this copy is never read.
+		if (data["stateProvider"] is JsonObject)
+		{
+			data.Remove("stateMapping");
+		}
+
 		PruneDegenerateMapping(data);
 		ActionButtonIconJson.Normalize(data);
 

@@ -422,6 +422,39 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
+	public void Removing_a_state_provider_brings_back_the_manual_mapping_rules()
+	{
+		var host = Render(new
+		{
+			stateMode = true,
+			states = new object[] { new { id = "muted", label = "Muted" }, new { id = "unmuted", label = "Unmuted" } },
+			stateProvider = new { blockId = "b1", integrationId = "int", actionId = "act", actionLabel = "Mute" },
+			flows = FlowWith("b1"),
+			manualStateBackup = new
+			{
+				states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } },
+				stateMapping = new
+				{
+					rules = new object[] { new { id = "r1", stateId = "on", when = new { } } },
+					fallbackStateId = "off",
+				},
+				activeStateId = "off",
+			},
+		});
+
+		host.ById("root.properties.stateProviderStatus.removeStateProvider").Activate();
+
+		var mapping = host.ById("stateMapping").Property(UiConfigProperties.Value)!.Value;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(mapping.GetProperty("rules").EnumerateArray().Select(r => r.GetProperty("stateId").GetString()),
+				Is.EqualTo(new[] { "on" }));
+			Assert.That(mapping.GetProperty("fallbackStateId").GetString(), Is.EqualTo("off"));
+		});
+	}
+
+	[Test]
 	public void A_state_with_no_border_of_its_own_shows_the_off_style_rather_than_nothing()
 	{
 		// An enumerated control whose value matches no option renders with nothing selected, which reads

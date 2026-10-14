@@ -78,6 +78,45 @@ public class ActionButtonStateJsonTests
 		Assert.That(JsonNode.DeepEquals(data["stateMapping"], expectedMapping), Is.True);
 	}
 
+	[TestCase("off")]
+	[TestCase("muted")]
+	public void Normalize_DropsATopLevelMappingWhileAProviderOwnsTheStates_AndKeepsTheStashedOne(string fallback)
+	{
+		var data = (JsonObject)JsonNode.Parse($$$"""
+												{
+												  "stateMode": true,
+												  "states": [{"id":"muted","label":"Muted"},{"id":"unmuted","label":"Unmuted"}],
+												  "activeStateId": "muted",
+												  "stateMapping": {
+												    "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
+												    "fallbackStateId": "{{{fallback}}}"
+												  },
+												  "stateProvider": {"blockId":"b1","integrationId":"app.macro-deck.system","actionId":"mute-volume"},
+												  "manualStateBackup": {
+												    "states": [{"id":"on","label":"On"},{"id":"off","label":"Off"}],
+												    "stateMapping": {
+												      "rules": [{"id":"r1","stateId":"on","when":{"kind":"compare","left":{"$var":"cpu"},"operator":">=","right":90}}],
+												      "fallbackStateId": "off"
+												    },
+												    "activeStateId": "on"
+												  }
+												}
+												""")!;
+		var expectedBackup = data["manualStateBackup"]!.DeepClone();
+
+		ActionButtonStateJson.Normalize(data);
+		var once = data.DeepClone();
+		ActionButtonStateJson.Normalize(data);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data.ContainsKey("stateMapping"), Is.False);
+			Assert.That(JsonNode.DeepEquals(data["manualStateBackup"], expectedBackup), Is.True);
+			Assert.That(ActionButtonStateJson.HasResolvableFallback(data), Is.True);
+			Assert.That(JsonNode.DeepEquals(data, once), Is.True);
+		});
+	}
+
 	// A stateMapping of a shape other than an object (here a string) is left alone so the existing schema
 	// validation keeps rejecting it as malformed - PruneDegenerateMapping must not silently "fix" it.
 	[Test]
